@@ -3,7 +3,7 @@ import sys
 from lxml import etree
 from optparse import OptionParser
 import psycopg2
-import os.path
+import os.path, os
 from PyQt4 import QtGui, QtCore, uic
 Qt = QtCore.Qt
 
@@ -31,7 +31,7 @@ class XMLStruct(Struct):
                 key = child.tag
                 if text: text = text.strip()
                 setattr(self, key, text)
-                print self.__name__, key, text
+                # print self.__name__, key, text
     
 class Project(object):
     def load(self, filename):
@@ -44,12 +44,95 @@ class Project(object):
         self.root = self.tree.getroot()
         self.dbserver = XMLStruct(one(self.root.xpath("database-server")))
         self.dbauth = XMLStruct(one(self.root.xpath("database-credentials")))
-        self.dbname = XMLStruct(one(self.root.xpath("database-name")))
+        self.dbname = one(self.root.xpath("database-name/text()"))
         self.apppath = one(self.root.xpath("application-path/text()"))
-    
-    def run(self):
-        pass
+        self.tmpdir = filedir("../tempdata")
+    def dir(self, *x):
+        return os.path.join(self.tmpdir,*x)    
         
+    def run(self):
+        # Preparar temporal
+        if not os.path.exists(self.dir("cache")):
+            os.makedirs(self.dir("cache"))
+        # Conectar:
+        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
+                        self.dbname, self.dbserver.host, self.dbserver.port, 
+                        self.dbauth.username, self.dbauth.password
+                    )
+        self.conn = psycopg2.connect(conninfostr)
+        self.cur = self.conn.cursor()
+        # Obtener modulos activos
+        self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = TRUE """)
+        self.modules = {}
+        for idarea, idmodulo, descripcion, icono in self.cur:
+            self.modules[idmodulo] = Module(self, idarea, idmodulo, descripcion, icono)
+            
+        # Descargar proyecto . . . 
+        self.cur.execute(""" SELECT idmodulo, nombre, sha::varchar(16) FROM flfiles ORDER BY idmodulo, nombre """)
+        f1 = open(self.dir("project.txt"),"w")
+        self.files = {}
+        for idmodulo, nombre, sha in self.cur:
+            if idmodulo not in self.modules: continue # I
+            fileobj = File(self, idmodulo, nombre, sha)
+            if nombre in self.files: print "WARN: file %s already loaded, overwritting..." % filename
+            self.files[nombre] = fileobj
+            self.modules[idmodulo].add_project_file(fileobj)
+            f1.write(fileobj.filekey+"\n")
+            if os.path.exists(self.dir("cache",fileobj.filekey)): continue
+            self.cur.execute(""" SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha::varchar(16) = %s""", [idmodulo, nombre, sha] )
+            for (contenido,) in self.cur:
+                f1 = open(self.dir("cache",fileobj.filekey),"w")
+                f1.write(contenido)
+
+  
+class Module(object):                
+    def __init__(self, project, areaid, name, description, icon):
+        self.prj = project
+        self.areaid = areaid
+        self.name = name
+        self.description = description.decode("UTF-8")
+        self.icon = icon
+        self.files = {}
+        self.loaded = False
+        
+    def add_project_file(self, fileobj):
+        self.files[fileobj.filename] = fileobj
+        
+    def load(self):
+        print "Loading module %s . . . " % self.name
+        actions_xml_path = self.files["%s.xml" % self.name].path()
+        self.actions = ModuleActions(self, actions_xml_path)
+        self.actions.load()
+        
+    def run(self):
+        if self.loaded == False: self.load()
+        print "Running module %s . . . " % self.name
+        
+class File(object):
+    def __init__(self, project, module, filename, sha):
+        self.prj = project
+        self.module = module
+        self.filename = filename
+        self.sha = sha
+        self.filekey = "%s.%s.%s" % (module, filename, sha)
+        
+    def path(self):
+        return self.prj.dir("cache",self.filekey)
+        
+class ModuleActions(object):
+    def __init__(self, module, path):
+        self.mod = module
+        self.prj = module.prj
+        self.path = path
+        
+    def load(self):
+        self.parser = etree.XMLParser(
+                        ns_clean=True,
+                        encoding="ISO-8859-15",
+                        remove_blank_text=True,
+                        )
+        self.tree = etree.parse(self.path, self.parser)
+        self.root = self.tree.getroot()
             
 def main():
     
@@ -61,8 +144,8 @@ def main():
                       help="don't print status messages to stdout")
 
     (options, args) = parser.parse_args()    
+    app = QtGui.QApplication(sys.argv)
     if not options.project:
-        app = QtGui.QApplication(sys.argv)
         w = DlgConnect()
         w.load()
         w.show()
@@ -77,4 +160,15 @@ def main():
         project = Project()
         project.load(prjpath)
         project.run()
-
+        w = QtGui.QWidget()
+        w.layout = QtGui.QVBoxLayout()
+        label = QtGui.QLabel(u"Escoja un módulo:")
+        w.layout.addWidget(label)
+        for module in project.modules.values():
+            button = QtGui.QCommandLinkButton(module.description,module.name)
+            button.clicked.connect(module.run)
+            w.layout.addWidget(button)
+        
+        w.setLayout(w.layout)
+        w.show()
+        sys.exit(app.exec_())
