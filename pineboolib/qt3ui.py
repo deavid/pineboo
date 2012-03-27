@@ -50,14 +50,19 @@ def loadProperty(xml):
 def u(x):
     if type(x) is unicode: return x
     if type(x) is str: return x.decode("UTF-8","replace")
-    return str(x)
+    return unicode(str(x))
     
 
 def _loadVariant(variant):
     text = variant.text or ""
     text = text.strip()
     if variant.tag == "cstring": return text
+    if variant.tag == "iconset": return text
     if variant.tag == "string": return u(text)
+    if variant.tag == "bool": 
+        if text.lower()[0] == "t": return True
+        if text.lower()[0] == "f": return False
+        return None
     if variant.tag == "rect": 
         k = {}
         for c in variant:

@@ -94,10 +94,12 @@ class Project(object):
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey+"\n")
             if os.path.exists(self.dir("cache",fileobj.filekey)): continue
-            self.cur.execute(""" SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha::varchar(16) = %s""", [idmodulo, nombre, sha] )
-            for (contenido,) in self.cur:
-                f1 = open(self.dir("cache",fileobj.filekey),"w")
-                f1.write(contenido)
+            cur2 = self.conn.cursor()
+            cur2.execute(""" SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha::varchar(16) = %s""", [idmodulo, nombre, sha] )
+            for (contenido,) in cur2:
+                f2 = open(self.dir("cache",fileobj.filekey),"w")
+                # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
+                f2.write(contenido.decode("UTF-8").encode("ISO-8859-15"))
 
   
 class Module(object):                
@@ -121,6 +123,8 @@ class Module(object):
         self.mainform = MainForm(self, self.path("%s.ui" % self.name))
         self.mainform.load()
         
+        self.loaded = True
+        
     def path(self, filename):
         if filename not in self.files: return None
         return self.files[filename].path()
@@ -128,6 +132,18 @@ class Module(object):
     def run(self):
         if self.loaded == False: self.load()
         print "Running module %s . . . " % self.name
+        self.widget = QtGui.QWidget()
+        w = self.widget
+        w.layout = QtGui.QVBoxLayout()
+        label = QtGui.QLabel(u"Módulo %s\nEscoja una acción:" % self.description)
+        w.layout.addWidget(label)
+        for key, action in self.mainform.actions.items():
+            button = QtGui.QCommandLinkButton(action.text)
+            # button.clicked.connect(action.run)
+            w.layout.addWidget(button)
+        w.setLayout(w.layout)
+        w.show()
+            
         
 class File(object):
     def __init__(self, project, module, filename, sha):
@@ -154,6 +170,13 @@ class ModuleActions(object):
                         )
         self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
+        self.tree = etree.parse(self.path, self.parser)
+        self.root = self.tree.getroot()
+        self.actions = {}
+        for xmlaction in self.root:
+            action =  XMLStruct(xmlaction)
+            self.actions[action.name] = action
+            #print action
 
         
 class MainForm(object):
@@ -165,14 +188,15 @@ class MainForm(object):
     def load(self):
         self.parser = etree.XMLParser(
                         ns_clean=True,
-                        encoding="UTF-8",
+                        encoding="UTF8",
                         remove_blank_text=True,
                         )
         self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
+        self.actions = {}
         for xmlaction in self.root.xpath("actions//action"):
             action =  XMLStruct(xmlaction)
-            print action
+            self.actions[action.name] = action
         #self.ui = WMainForm()
         #self.ui.load(self.path)
         #self.ui.show()
