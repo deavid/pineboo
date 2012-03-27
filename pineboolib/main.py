@@ -5,6 +5,7 @@ from optparse import OptionParser
 import psycopg2
 import os.path, os
 from PyQt4 import QtGui, QtCore, uic
+from pineboolib import qt3ui
 Qt = QtCore.Qt
 
 def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
@@ -12,6 +13,10 @@ def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file_
 class DlgConnect(QtGui.QWidget):
     def load(self):
         self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
+
+class WMainForm(QtGui.QMainWindow):
+    def load(self,path):
+        self.ui = qt3ui.loadUi(path, self)
 
 def one(x, default = None):
     try:
@@ -24,14 +29,24 @@ class Struct(object):
 
 class XMLStruct(Struct):
     def __init__(self, xmlobj):
+        self._attrs = []
         if xmlobj is not None:
             self.__name__ = xmlobj.tag
             for child in xmlobj:
-                text = child.text
-                key = child.tag
+                if child.tag == "property":
+                    key, text = qt3ui.loadProperty(child)
+                else:
+                    text = child.text
+                    key = child.tag
                 if text: text = text.strip()
                 setattr(self, key, text)
+                self._attrs.append(key)
                 # print self.__name__, key, text
+    def __str__(self):
+        attrs = [ "%s=%s" % (k,repr(getattr(self,k))) for k in self._attrs ] 
+        txtattrs = " ".join(attrs)
+        return "<%s.%s %s>" % (self.__class__.__name__, self.__name__, txtattrs)
+        
     
 class Project(object):
     def load(self, filename):
@@ -100,9 +115,15 @@ class Module(object):
         
     def load(self):
         print "Loading module %s . . . " % self.name
-        actions_xml_path = self.files["%s.xml" % self.name].path()
-        self.actions = ModuleActions(self, actions_xml_path)
+        self.actions = ModuleActions(self, self.path("%s.xml" % self.name))
         self.actions.load()
+        
+        self.mainform = MainForm(self, self.path("%s.ui" % self.name))
+        self.mainform.load()
+        
+    def path(self, filename):
+        if filename not in self.files: return None
+        return self.files[filename].path()
         
     def run(self):
         if self.loaded == False: self.load()
@@ -133,6 +154,28 @@ class ModuleActions(object):
                         )
         self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
+
+        
+class MainForm(object):
+    def __init__(self, module, path):
+        self.mod = module
+        self.prj = module.prj
+        self.path = path
+        
+    def load(self):
+        self.parser = etree.XMLParser(
+                        ns_clean=True,
+                        encoding="UTF-8",
+                        remove_blank_text=True,
+                        )
+        self.tree = etree.parse(self.path, self.parser)
+        self.root = self.tree.getroot()
+        for xmlaction in self.root.xpath("actions//action"):
+            action =  XMLStruct(xmlaction)
+            print action
+        #self.ui = WMainForm()
+        #self.ui.load(self.path)
+        #self.ui.show()
             
 def main():
     
