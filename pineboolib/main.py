@@ -66,6 +66,13 @@ class Project(object):
         self.dbname = one(self.root.xpath("database-name/text()"))
         self.apppath = one(self.root.xpath("application-path/text()"))
         self.tmpdir = filedir("../tempdata")
+        
+        self.actions = {}
+        
+    def path(self, filename):
+        if filename not in self.files: return None
+        return self.files[filename].path()
+
     def dir(self, *x):
         return os.path.join(self.tmpdir,*x)    
         
@@ -104,6 +111,13 @@ class Project(object):
                 f2 = open(self.dir("cache",fileobj.filekey),"w")
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
                 f2.write(contenido.decode("UTF-8").encode("ISO-8859-15"))
+        
+        # Cargar el núcleo común del proyecto
+        idmodulo = 'sys'
+        for root, dirs, files in os.walk(filedir("..","share","eneboo")):
+            for nombre in files:
+                fileobj = File(self, idmodulo, nombre, basedir = root)
+                self.files[nombre] = fileobj
 
   
 class Module(object):                
@@ -115,6 +129,7 @@ class Module(object):
         self.icon = icon
         self.files = {}
         self.loaded = False
+        self.path = self.prj.path
         
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
@@ -128,11 +143,7 @@ class Module(object):
         self.mainform.load()
         
         self.loaded = True
-        
-    def path(self, filename):
-        if filename not in self.files: return None
-        return self.files[filename].path()
-        
+    
     def run(self):
         if self.loaded == False: self.load()
         print "Running module %s . . . " % self.name
@@ -150,15 +161,24 @@ class Module(object):
             
         
 class File(object):
-    def __init__(self, project, module, filename, sha):
+    def __init__(self, project, module, filename, sha = None, basedir = None):
         self.prj = project
         self.module = module
         self.filename = filename
         self.sha = sha
-        self.filekey = "%s.%s.%s" % (module, filename, sha)
+        if self.sha:
+            self.filekey = "%s.%s.%s" % (module, filename, sha)
+        else:
+            self.filekey = filename
+        self.basedir = basedir
         
     def path(self):
-        return self.prj.dir("cache",self.filekey)
+        if self.basedir:
+            # Probablemente porque es local . . .
+            return self.prj.dir(self.basedir,self.filename)
+        else:
+            # Probablemente es remoto (DB) y es una caché . . .
+            return self.prj.dir("cache",self.filekey)
         
 class ModuleActions(object):
     def __init__(self, module, path):
@@ -176,17 +196,16 @@ class ModuleActions(object):
         self.root = self.tree.getroot()
         self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
-        self.actions = {}
         for xmlaction in self.root:
             action =  XMLAction(xmlaction)
             action.mod = self
             action.prj = self.prj
-            self.actions[action.name] = action
+            self.prj.actions[action.name] = action
             #print action
-    def __getitem__(self, k): return self.actions[k]
+    def __getitem__(self, k): return self.prj.actions[k]
     def __setitem__(self, k, v): 
         raise NotImplementedError, "Actions are not writable!"
-        self.actions[k] = v
+        self.prj.actions[k] = v
 
         
 class MainForm(object):
@@ -225,7 +244,10 @@ class XMLAction(XMLStruct):
     def openDefaultForm(self):
         print "Opening default form for Action", self.name
         print self
-        
+        form_path = self.prj.path(self.form+".ui")
+        self.widget = QtGui.QWidget()
+        qt3ui.loadUi(form_path, self.widget)
+        self.widget.show()
             
 def main():
     
