@@ -109,7 +109,18 @@ def u(x):
     if type(x) is unicode: return x
     if type(x) is str: return x.decode("UTF-8","replace")
     return unicode(str(x))
-    
+
+def b(x):
+    x = x.lower()
+    if x[0] == "t": return True
+    if x[0] == "f": return False
+    if x[0] == "1": return True
+    if x[0] == "0": return False
+    if x == "on": return True
+    if x == "off": return False
+    print "Bool?:", repr(x)
+    return None
+        
 
 def _loadVariant(variant):
     text = variant.text or ""
@@ -122,10 +133,7 @@ def _loadVariant(variant):
     if variant.tag == "number": 
         if text.find('.') >= 0: return float(text)
         return int(text)
-    if variant.tag == "bool": 
-        if text.lower()[0] == "t": return True
-        if text.lower()[0] == "f": return False
-        return None
+    if variant.tag == "bool": return b(text)
     if variant.tag == "rect": 
         k = {}
         for c in variant:
@@ -147,6 +155,18 @@ def _loadVariant(variant):
             value = int(c.text.strip())
             if c.tag == "width": p.setWidth(value)
             if c.tag == "height": p.setHeight(value)
+        return p
+    if variant.tag == "font": 
+        p = QtGui.QFont()
+        for c in variant:
+            value = c.text.strip()
+            bv = b(value)
+            try:
+                if c.tag == "bold": p.setBold(bv)
+                elif c.tag == "italic": p.setItalic(bv)
+                else: print "unknown font style type" ,repr(c.tag)
+            except Exception, e:
+                print e
         return p
     if variant.tag == "enum": 
         v = None

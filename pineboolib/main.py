@@ -243,11 +243,43 @@ class XMLMainFormAction(XMLStruct):
 class XMLAction(XMLStruct):
     def openDefaultForm(self):
         print "Opening default form for Action", self.name
-        print self
-        form_path = self.prj.path(self.form+".ui")
+        self.mainform = FLMainForm(self)
+        self.mainform.load()
+        self.mainform.show()
+        
+class FLForm(QtGui.QWidget):
+    def __init__(self, action):
+        QtGui.QWidget.__init__(self)
+        self.action = action
+        self.prj = action.prj
+        self.mod = action.mod
+        self.layout = QtGui.QVBoxLayout()
+        self.layout.setMargin(2)
+        self.layout.setSpacing(2)
+        self.setLayout(self.layout)
         self.widget = QtGui.QWidget()
+        self.layout.addWidget(self.widget)
+        self.bottomToolbar = QtGui.QFrame()
+        self.bottomToolbar.setMaximumHeight(64)
+        self.bottomToolbar.setMinimumHeight(16)
+        self.bottomToolbar.layout = QtGui.QHBoxLayout()
+        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
+        self.bottomToolbar.layout.setMargin(0)
+        self.bottomToolbar.layout.setSpacing(0)
+        self.bottomToolbar.layout.addStretch()
+        self.toolButtonClose = QtGui.QToolButton()
+        self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
+        self.toolButtonClose.clicked.connect(self.close)
+        self.bottomToolbar.layout.addWidget(self.toolButtonClose)
+        self.layout.addWidget(self.bottomToolbar)
+        self.setWindowTitle(action.alias)
+        
+class FLMainForm(FLForm):
+    def load(self):
+        form_path = self.prj.path(self.action.form+".ui")
         qt3ui.loadUi(form_path, self.widget)
-        self.widget.show()
+        
+    
             
 def main():
     
