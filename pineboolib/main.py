@@ -6,6 +6,7 @@ import psycopg2
 import os.path, os
 from PyQt4 import QtGui, QtCore, uic
 from pineboolib import qt3ui
+import re
 Qt = QtCore.Qt
 
 def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
@@ -37,6 +38,9 @@ class XMLStruct(Struct):
                     key, text = qt3ui.loadProperty(child)
                 else:
                     text = child.text
+                    if text.find("QT_TRANSLATE") != -1:
+                        match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
+                        if match: text = match.group(1)
                     key = child.tag
                 if text: text = text.strip()
                 setattr(self, key, text)
@@ -139,7 +143,7 @@ class Module(object):
         w.layout.addWidget(label)
         for key, action in self.mainform.actions.items():
             button = QtGui.QCommandLinkButton(action.text)
-            # button.clicked.connect(action.run)
+            button.clicked.connect(action.run)
             w.layout.addWidget(button)
         w.setLayout(w.layout)
         w.show()
@@ -174,9 +178,15 @@ class ModuleActions(object):
         self.root = self.tree.getroot()
         self.actions = {}
         for xmlaction in self.root:
-            action =  XMLStruct(xmlaction)
+            action =  XMLAction(xmlaction)
+            action.mod = self
+            action.prj = self.prj
             self.actions[action.name] = action
             #print action
+    def __getitem__(self, k): return self.actions[k]
+    def __setitem__(self, k, v): 
+        raise NotImplementedError, "Actions are not writable!"
+        self.actions[k] = v
 
         
 class MainForm(object):
@@ -195,11 +205,27 @@ class MainForm(object):
         self.root = self.tree.getroot()
         self.actions = {}
         for xmlaction in self.root.xpath("actions//action"):
-            action =  XMLStruct(xmlaction)
+            action =  XMLMainFormAction(xmlaction)
+            action.mainform = self
+            action.mod = self.mod
+            action.prj = self.prj
             self.actions[action.name] = action
         #self.ui = WMainForm()
         #self.ui.load(self.path)
         #self.ui.show()
+
+class XMLMainFormAction(XMLStruct):
+    def run(self):
+        # Se asume conectada a "OpenDefaultForm()".
+        print "Running MainFormAction:", self.name, self.text
+        action = self.mod.actions[self.name]
+        action.openDefaultForm()
+        
+class XMLAction(XMLStruct):
+    def openDefaultForm(self):
+        print "Opening default form for Action", self.name
+        print self
+        
             
 def main():
     
