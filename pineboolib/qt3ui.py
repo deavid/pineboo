@@ -22,14 +22,14 @@ def loadUi(path, widget):
     for xmlwidget in root.xpath("widget"):
         loadWidget(xmlwidget,widget)
 
-def createWidget(classname):
+def createWidget(classname,parent = None):
     cls =  getattr(flcontrols, classname, None) or getattr(QtGui, classname, None)
     if cls is None: 
         print "WARN: Class name not found in QtGui:" , classname
-        w = QtGui.QWidget()
+        w = QtGui.QWidget(parent)
         w.setStyleSheet("* { background-color: #fa3; } ")
         return w
-    return cls()
+    return cls(parent)
     
 def loadWidget(xml, widget = None):
     translate_properties = {
@@ -38,6 +38,7 @@ def loadWidget(xml, widget = None):
         "icon" : "windowIcon",
         "iconSet" : "icon",
         "accel" : "shortcut",
+        "layoutMargin" : "contentsMargins",
     }
     if widget is None: 
         raise ValueError
@@ -46,21 +47,34 @@ def loadWidget(xml, widget = None):
         pname = xmlprop.get("name")
         if pname in translate_properties: pname = translate_properties[pname]
         setpname = "set" + pname[0].upper() + pname[1:]
-        set_fn = getattr(widget, setpname, None)
+        if pname == "layoutSpacing":
+            set_fn = widget.layout.setSpacing
+        else:
+            set_fn = getattr(widget, setpname, None)
         if set_fn is None: 
             print "Missing property", pname, " for ", widget.__class__.__name__
             return
         #print "Found property", pname 
-        value = loadVariant(xmlprop)
+        if pname == "contentsMargins" or pname == "layoutSpacing":
+            try:
+                value = int(xmlprop.get("stdset"))
+            except Exception,e: value = 0
+            if pname == "contentsMargins":
+                value = QtCore.QMargins(value, value, value, value)
+        else:
+            value = loadVariant(xmlprop)
+
         try: set_fn(value)
-        except Exception, e: print e, repr(value)
+        except Exception, e: 
+            print e, repr(value)
+            print etree.tostring(xmlprop)
 
     def process_layout_box(xmllayout, widget = widget):
         for c in xmllayout:
             if c.tag == "property":
                 process_property(c,widget.layout)
             elif c.tag == "widget":
-                new_widget = createWidget(c.get("class"))
+                new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c,new_widget)
                 new_widget.show()
                 widget.layout.addWidget(new_widget)
@@ -70,10 +84,10 @@ def loadWidget(xml, widget = None):
                 print "Unknown layout xml tag", repr(c.tag)
         
         widget.setLayout(widget.layout)
-    
+    properties = []
     for c in xml:
         if c.tag == "property":
-            process_property(c)
+            properties.append(c)
             continue
         if c.tag == "vbox":
             widget.layout = QtGui.QVBoxLayout()
@@ -84,6 +98,8 @@ def loadWidget(xml, widget = None):
             process_layout_box(c)
             continue
         print "Unknown widget xml tag", repr(c.tag)
+    for c in properties:
+        process_property(c)
     
 def loadIcon(xml):
     global ICONS

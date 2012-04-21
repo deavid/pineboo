@@ -1,15 +1,19 @@
 # encoding: UTF-8
-import sys
+import sys, imp
 from lxml import etree
 from optparse import OptionParser
 import psycopg2
 import os.path, os
 from PyQt4 import QtGui, QtCore, uic
 from pineboolib import qt3ui
-import re
+import re,subprocess
+import qsatype
 Qt = QtCore.Qt
 
 def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
+
+THIS_DIR = filedir()
+if THIS_DIR not in sys.path: sys.path.append(THIS_DIR)
 
 class DlgConnect(QtGui.QWidget):
     def load(self):
@@ -202,6 +206,8 @@ class ModuleActions(object):
             action.prj = self.prj
             self.prj.actions[action.name] = action
             #print action
+    
+    def __contains__(self, k): return k in self.prj.actions
     def __getitem__(self, k): return self.prj.actions[k]
     def __setitem__(self, k, v): 
         raise NotImplementedError, "Actions are not writable!"
@@ -257,8 +263,8 @@ class FLForm(QtGui.QWidget):
         self.layout.setMargin(2)
         self.layout.setSpacing(2)
         self.setLayout(self.layout)
-        self.widget = QtGui.QWidget()
-        self.layout.addWidget(self.widget)
+        # self.widget = QtGui.QWidget()
+        # self.layout.addWidget(self.widget)
         self.bottomToolbar = QtGui.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
@@ -276,8 +282,36 @@ class FLForm(QtGui.QWidget):
         
 class FLMainForm(FLForm):
     def load(self):
+        self.script = None
+        self.iface = None
+        try: script = self.action.scriptform or None
+        except AttributeError: script = None
+        if script: 
+            self.load_script(script)
+        else:
+            self.widget = QtGui.QWidget()
+
+        self.layout.insertWidget(0,self.widget)
         form_path = self.prj.path(self.action.form+".ui")
         qt3ui.loadUi(form_path, self.widget)
+        
+        if self.iface:
+            self.iface.init() 
+    
+    def load_script(self,scriptname):
+        # Intentar convertirlo a Python primero con flscriptparser2
+        script_path = self.prj.path(scriptname+".qs")
+        if not os.path.isfile(script_path): raise IOError
+        python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
+        if not os.path.isfile(python_script_path):
+            print "Convirtiendo a Python . . ."
+            ret = subprocess.call(["flscriptparser2", "--full",script_path])
+        if not os.path.isfile(python_script_path):
+            raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
+
+        self.script = imp.load_source(scriptname,python_script_path)
+        self.widget = self.script.form
+        self.iface = self.widget.iface
         
     
             
@@ -289,6 +323,8 @@ def main():
     parser.add_option("-q", "--quiet",
                       action="store_false", dest="verbose", default=True,
                       help="don't print status messages to stdout")
+    parser.add_option("-a", "--action", dest="action",
+                      help="load action", metavar="ACTION")
 
     (options, args) = parser.parse_args()    
     app = QtGui.QApplication(sys.argv)
@@ -303,19 +339,30 @@ def main():
         prjpath = filedir("../projects", options.project)
         if not os.path.isfile(prjpath):
             raise ValueError("el proyecto %s no existe." % options.project)
-            
+        
         project = Project()
         project.load(prjpath)
         project.run()
-        w = QtGui.QWidget()
-        w.layout = QtGui.QVBoxLayout()
-        label = QtGui.QLabel(u"Escoja un módulo:")
-        w.layout.addWidget(label)
-        for module in project.modules.values():
-            button = QtGui.QCommandLinkButton(module.description,module.name)
-            button.clicked.connect(module.run)
-            w.layout.addWidget(button)
         
-        w.setLayout(w.layout)
-        w.show()
-        sys.exit(app.exec_())
+        if options.action:
+            objaction = None
+            for k,module in project.modules.items():
+                module.load()
+                if options.action in module.actions:
+                    objaction = module.actions[options.action]
+            if objaction is None: raise ValueError, "Action name %s not found" % options.action        
+            objaction.openDefaultForm()
+            sys.exit(app.exec_())
+        else:
+            w = QtGui.QWidget()
+            w.layout = QtGui.QVBoxLayout()
+            label = QtGui.QLabel(u"Escoja un módulo:")
+            w.layout.addWidget(label)
+            for module in project.modules.values():
+                button = QtGui.QCommandLinkButton(module.description,module.name)
+                button.clicked.connect(module.run)
+                w.layout.addWidget(button)
+        
+            w.setLayout(w.layout)
+            w.show()
+            sys.exit(app.exec_())
