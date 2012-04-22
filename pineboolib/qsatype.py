@@ -1,21 +1,22 @@
 # encoding: UTF-8
 import os
 from PyQt4 import QtCore,QtGui
+import qsaglobals 
+from flcontrols import FLTable, FLTableDB, FLSqlCursor, FLUtil
 
 def Object(): return {}
 
 def Array(): return []
 
-class FLSqlCursor(object):
-    def __init__(self, actionname):
-        print "New Cursor:", actionname
-    
 
+        
 
 class FormDBWidget(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self,action, project):
         super(FormDBWidget, self).__init__()
-        self.cursor = None
+        self._action = action
+        self._cursor = FLSqlCursor(action.name)
+        self._prj = project
         self._class_init()
         
     def _class_init(self):
@@ -25,4 +26,4 @@ class FormDBWidget(QtGui.QWidget):
         return self.findChild(QtGui.QWidget, childName)
     
     def cursor(self):
-        return self.cursor
+        return self._cursor

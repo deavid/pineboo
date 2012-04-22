@@ -6,8 +6,11 @@ import psycopg2
 import os.path, os
 from PyQt4 import QtGui, QtCore, uic
 from pineboolib import qt3ui
+from pineboolib.dbschema.schemaupdater import parseTable
 import re,subprocess
 import qsatype
+import pineboolib
+
 Qt = QtCore.Qt
 
 def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
@@ -72,7 +75,9 @@ class Project(object):
         self.tmpdir = filedir("../tempdata")
         
         self.actions = {}
-        
+        self.tables = {}
+        pineboolib.project = self
+                
     def path(self, filename):
         if filename not in self.files: return None
         return self.files[filename].path()
@@ -132,6 +137,7 @@ class Module(object):
         self.description = description.decode("UTF-8")
         self.icon = icon
         self.files = {}
+        self.tables = {}
         self.loaded = False
         self.path = self.prj.path
         
@@ -145,6 +151,17 @@ class Module(object):
         
         self.mainform = MainForm(self, self.path("%s.ui" % self.name))
         self.mainform.load()
+        
+        # TODO: Load Main Script:
+        self.mainscript = None
+        # /-----------------------
+        
+        for tablefile in filter(lambda x: x.endswith(".mtd"), self.files):
+            name, ext = os.path.splitext(tablefile)
+            contenido = unicode(open(self.path(tablefile)).read(),"ISO-8859-15")
+            tableObj = parseTable(name, contenido)
+            self.tables[name] = tableObj
+            self.prj.tables[name] = tableObj
         
         self.loaded = True
     
@@ -303,13 +320,14 @@ class FLMainForm(FLForm):
         script_path = self.prj.path(scriptname+".qs")
         if not os.path.isfile(script_path): raise IOError
         python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
-        if not os.path.isfile(python_script_path):
+        if not os.path.isfile(python_script_path) or True:
             print "Convirtiendo a Python . . ."
             ret = subprocess.call(["flscriptparser2", "--full",script_path])
         if not os.path.isfile(python_script_path):
             raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
 
         self.script = imp.load_source(scriptname,python_script_path)
+        self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj)
         self.widget = self.script.form
         self.iface = self.widget.iface
         
