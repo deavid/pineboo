@@ -35,6 +35,7 @@ def getTableObj(tree,root):
     for xmlfield in table.xmlroot.xpath("field"):
         field = Struct()
         field.name = xmlfield.xpath("name/text()")[0]
+        field.alias = xmlfield.xpath("alias/text()")[0]
         build_field_type(field, xmlfield)
         field.pk = text2bool(one(xmlfield.xpath("pk/text()"),"false"))
         field.default = one(xmlfield.xpath("default/text()"),None)

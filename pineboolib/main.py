@@ -7,6 +7,7 @@ import os.path, os
 from PyQt4 import QtGui, QtCore, uic
 from pineboolib import qt3ui
 from pineboolib.dbschema.schemaupdater import parseTable
+from pineboolib.qsaglobals import aqtt
 import re,subprocess
 import qsatype
 import pineboolib
@@ -14,9 +15,6 @@ import pineboolib
 Qt = QtCore.Qt
 
 def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
-
-THIS_DIR = filedir()
-if THIS_DIR not in sys.path: sys.path.append(THIS_DIR)
 
 class DlgConnect(QtGui.QWidget):
     def load(self):
@@ -44,10 +42,7 @@ class XMLStruct(Struct):
                 if child.tag == "property":
                     key, text = qt3ui.loadProperty(child)
                 else:
-                    text = child.text
-                    if text.find("QT_TRANSLATE") != -1:
-                        match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
-                        if match: text = match.group(1)
+                    text = aqtt(child.text)
                     key = child.tag
                 if text: text = text.strip()
                 setattr(self, key, text)
@@ -106,6 +101,7 @@ class Project(object):
         self.cur.execute(""" SELECT idmodulo, nombre, sha::varchar(16) FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"),"w")
         self.files = {}
+        if not os.path.exists(self.dir("cache")): raise AssertionError
         for idmodulo, nombre, sha in self.cur:
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
@@ -114,6 +110,9 @@ class Project(object):
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey+"\n")
             if os.path.exists(self.dir("cache",fileobj.filekey)): continue
+            fileobjdir = os.path.dirname(self.dir("cache",fileobj.filekey))
+            if not os.path.exists(fileobjdir):
+                os.makedirs(fileobjdir)
             cur2 = self.conn.cursor()
             cur2.execute(""" SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha::varchar(16) = %s""", [idmodulo, nombre, sha] )
             for (contenido,) in cur2:
@@ -187,8 +186,9 @@ class File(object):
         self.module = module
         self.filename = filename
         self.sha = sha
+        self.name, self.ext = os.path.splitext(filename)
         if self.sha:
-            self.filekey = "%s.%s.%s" % (module, filename, sha)
+            self.filekey = "%s/file%s/%s/%s%s" % (module, self.ext, self.name, sha,self.ext)
         else:
             self.filekey = filename
         self.basedir = basedir
@@ -199,7 +199,7 @@ class File(object):
             return self.prj.dir(self.basedir,self.filename)
         else:
             # Probablemente es remoto (DB) y es una caché . . .
-            return self.prj.dir("cache",self.filekey)
+            return self.prj.dir("cache",*(self.filekey.split("/")))
         
 class ModuleActions(object):
     def __init__(self, module, path):
@@ -327,6 +327,7 @@ class FLMainForm(FLForm):
             raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
 
         self.script = imp.load_source(scriptname,python_script_path)
+        #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
         self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj)
         self.widget = self.script.form
         self.iface = self.widget.iface

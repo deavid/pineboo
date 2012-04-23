@@ -2,6 +2,14 @@
 from PyQt4 import QtCore,QtGui
 import re
 
+def auto_qt_translate_text(text):
+    if text.find("QT_TRANSLATE") != -1:
+        match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
+        if match: text = match.group(1)
+    return text
+
+
+aqtt = auto_qt_translate_text
 
 def connect(sender, signal, receiver, slot):
     print "Connect::", sender, signal, receiver, slot
@@ -54,3 +62,13 @@ class MessageBox(QMessageBox):
 
     @classmethod
     def critical(cls, *args): return cls.msgbox("critical",*args)
+
+
+class Input(object):
+    @classmethod
+    def getText(cls, question, txt, title):
+        print unicode(title).encode("UTF8")
+        print "-------------"
+        ret = raw_input(u"%s: " % unicode(question).encode("UTF8"))
+        return ret
+

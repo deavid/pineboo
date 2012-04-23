@@ -2,14 +2,23 @@
 import os
 from PyQt4 import QtCore,QtGui
 import qsaglobals 
+import flcontrols
 from flcontrols import FLTable, FLTableDB, FLSqlCursor, FLUtil
 
 def Object(): return {}
 
 def Array(): return []
 
+def Boolean(): return False
 
-        
+
+def FLSqlCursor(action=None):
+    if action is None: return None
+    return flcontrols.FLSqlCursor(action)       
+     
+def FLTableDB(*args):     
+    if not args: return None
+    return flcontrols.FLTableDB(*args)
 
 class FormDBWidget(QtGui.QWidget):
     def __init__(self,action, project):
