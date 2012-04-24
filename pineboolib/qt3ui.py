@@ -93,7 +93,7 @@ def loadWidget(xml, widget = None):
             widget.layout = QtGui.QVBoxLayout()
             process_layout_box(c)
             continue
-        if c.tag == "hbox":
+        if c.tag == "hbox" or c.tag == "grid":
             widget.layout = QtGui.QHBoxLayout()
             process_layout_box(c)
             continue

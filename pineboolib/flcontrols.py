@@ -6,7 +6,9 @@ from pineboolib.qsaglobals import aqtt
 
 Qt = QtCore.Qt
 
-
+class QLayoutWidget(QtGui.QWidget):
+    pass
+    
 class ProjectClass(object):
     def __init__(self):
         self._prj = pineboolib.project
@@ -111,7 +113,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         col = index.column()
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             try:
-                return self.data[row][col]
+                val = self.data[row][col]
+                if isinstance(val, str): val = unicode(val,"UTF-8")
+                return val 
             except Exception,e:
                 print row,col,e
                 return "-InvalidData-"
@@ -127,19 +131,30 @@ class FLTableDB(QtGui.QTableView):
         self._h_header.setDefaultSectionSize(70)
         self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self._parent = parent
+        while True:
+            parent_cursor = getattr(self._parent,"_cursor", None)
+            if parent_cursor: break
+            new_parent = self._parent.parentWidget()
+            if new_parent is None: break
+            self._parent = new_parent
+            print self._parent
+            
         self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.setAlternatingRowColors(True)
-        parent_cursor = getattr(parent,"_cursor", None)
+        
         if action_or_cursor is None and parent_cursor:
             action_or_cursor = parent_cursor
         if isinstance(action_or_cursor,FLSqlCursor): 
             self._cursor = action_or_cursor
-        else:
+        elif isinstance(action_or_cursor,basestring): 
             self._cursor = FLSqlCursor(action_or_cursor)
-        self.setModel(self._cursor._model)
-        self.setSelectionModel(self._cursor.selection())
+        else:
+            self._cursor = None
+        if self._cursor:
+            self.setModel(self._cursor._model)
+            self.setSelectionModel(self._cursor.selection())
         
     def cursor(self): return self._cursor
     

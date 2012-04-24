@@ -44,7 +44,7 @@ class XMLStruct(Struct):
                 else:
                     text = aqtt(child.text)
                     key = child.tag
-                if text: text = text.strip()
+                if isinstance(text, basestring): text = text.strip()
                 setattr(self, key, text)
                 self._attrs.append(key)
                 # print self.__name__, key, text
@@ -221,7 +221,9 @@ class ModuleActions(object):
             action =  XMLAction(xmlaction)
             action.mod = self
             action.prj = self.prj
-            self.prj.actions[action.name] = action
+            try: name = action.name
+            except AttributeError: name = "unnamed"
+            self.prj.actions[name] = action
             #print action
     
     def __contains__(self, k): return k in self.prj.actions
@@ -238,12 +240,22 @@ class MainForm(object):
         self.path = path
         
     def load(self):
-        self.parser = etree.XMLParser(
-                        ns_clean=True,
-                        encoding="UTF8",
-                        remove_blank_text=True,
-                        )
-        self.tree = etree.parse(self.path, self.parser)
+        try:
+            self.parser = etree.XMLParser(
+                            ns_clean=True,
+                            encoding="UTF8",
+                            remove_blank_text=True,
+                            )
+            self.tree = etree.parse(self.path, self.parser)
+        except etree.XMLSyntaxError:
+            print "Error cargando modulo", self.path
+            self.parser = etree.XMLParser(
+                            ns_clean=True,
+                            encoding="ISO-8859-15",
+                            recover = True,
+                            remove_blank_text=True,
+                            )
+            self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
         self.actions = {}
         for xmlaction in self.root.xpath("actions//action"):

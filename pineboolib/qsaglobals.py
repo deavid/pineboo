@@ -3,9 +3,10 @@ from PyQt4 import QtCore,QtGui
 import re
 
 def auto_qt_translate_text(text):
-    if text.find("QT_TRANSLATE") != -1:
-        match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
-        if match: text = match.group(1)
+    if isinstance(text,basestring):
+        if text.find("QT_TRANSLATE") != -1:
+            match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
+            if match: text = match.group(1)
     return text
 
 
@@ -13,6 +14,8 @@ aqtt = auto_qt_translate_text
 
 def connect(sender, signal, receiver, slot):
     print "Connect::", sender, signal, receiver, slot
+    if sender is None:
+        return False
     m = re.search("^(\w+).(\w+)(\(.*\))?", slot)
     if m:
         remote_obj = getattr(receiver, m.group(1))
