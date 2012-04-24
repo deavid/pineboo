@@ -1,6 +1,11 @@
 # encoding: UTF-8
 from PyQt4 import QtCore,QtGui
 import re
+import flcontrols
+
+def parseFloat(x): return float(x)
+
+util = flcontrols.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
 def auto_qt_translate_text(text):
     if isinstance(text,basestring):
@@ -69,9 +74,10 @@ class MessageBox(QMessageBox):
 
 class Input(object):
     @classmethod
-    def getText(cls, question, txt, title):
-        print unicode(title).encode("UTF8")
-        print "-------------"
-        ret = raw_input(u"%s: " % unicode(question).encode("UTF8"))
-        return ret
+    def getText(cls, question, prevtxt, title):
+        text, ok = QtGui.QInputDialog.getText(None, title,
+                question, QtGui.QLineEdit.Normal, prevtxt)
+        if not ok: return None
+        return text
+                                              
 

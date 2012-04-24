@@ -319,7 +319,7 @@ class FLMainForm(FLForm):
             self.load_script(script)
         else:
             self.widget = QtGui.QWidget()
-
+        self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
         form_path = self.prj.path(self.action.form+".ui")
         qt3ui.loadUi(form_path, self.widget)

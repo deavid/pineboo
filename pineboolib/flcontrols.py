@@ -2,9 +2,9 @@
 import pineboolib
 
 from PyQt4 import QtGui, QtCore, uic
-from pineboolib.qsaglobals import aqtt
 
 Qt = QtCore.Qt
+
 
 class QLayoutWidget(QtGui.QWidget):
     pass
@@ -14,6 +14,10 @@ class ProjectClass(object):
         self._prj = pineboolib.project
 
 class FLSqlCursor(ProjectClass):
+    Insert = 0
+    Edit = 1
+    Delete = 2
+    Browse = 3
     def __init__(self, actionname=None):
         super(FLSqlCursor,self).__init__()
         self._valid = False
@@ -35,6 +39,9 @@ class FLSqlCursor(ProjectClass):
     
     def selection(self): return self._selection
         
+    def select(self, where_filter = None):
+        return True
+        
     def isValid(self):
         return self._valid
     
@@ -44,13 +51,48 @@ class FLSqlCursor(ProjectClass):
     
     def transaction(self, block = False):
         return True
+        
     def commit(self):
         return True
+        
     def rollback(self):
         return True
+    
+    def size(self):
+        return self._model.rowCount()
+
+    def next(self):
+        topLeft = self._model.index(self._current_row+1,0)
+        bottomRight = self._model.index(self._current_row+1,self._model.cols)
+        new_selection = QtGui.QItemSelection(topLeft, bottomRight)
+        self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
+        if self._current_row < self._model.rows: return True
+        else: return False
+    
+    def setModeAccess(self, modeAccess):
+        return True
+    
+    def refreshBuffer(self):
+        return True
+        
+class ProgressDialog(QtGui.QWidget):
+    def setup(self, title, steps):
+        self.title = title
+        self.step = 0
+        self.steps = steps
+        self.setWindowTitle("%s - %d/%d" % (self.title,self.step,self.steps))
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        
+    def setProgress(self, step):
+        self.step = step
+        self.setWindowTitle("%s - %d/%d" % (self.title,self.step,self.steps))
+        if step > 0: self.show()
+        self.update()
+        QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
         
 
 class FLUtil(ProjectClass):
+    progress_dialog_stack = []
     def translate(self, group, string):
         return QtCore.QString(string)
         
@@ -61,6 +103,25 @@ class FLUtil(ProjectClass):
         for ret, in cur:
             return ret
             
+    def createProgressDialog(self, title, steps):
+        pd_widget = ProgressDialog()
+        pd_widget.setup(title, steps)
+        self.__class__.progress_dialog_stack.append(pd_widget)
+        
+    def setProgress(self, step_number):
+        pd_widget = self.__class__.progress_dialog_stack[-1]
+        pd_widget.setProgress(step_number)
+
+    def destroyProgressDialog(self):
+        pd_widget = self.__class__.progress_dialog_stack[-1]
+        del self.__class__.progress_dialog_stack[-1]
+        pd_widget.hide()
+        pd_widget.close()
+        
+        
+
+        
+        
             
 
 class CursorTableModel(QtCore.QAbstractTableModel):
@@ -68,6 +129,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     cols = 5
     def __init__(self, action,project, *args):
         super(CursorTableModel,self).__init__(*args)
+        from pineboolib.qsaglobals import aqtt
+
         self._action = action
         self._prj = project
         if action:
@@ -159,6 +222,29 @@ class FLTableDB(QtGui.QTableView):
     def cursor(self): return self._cursor
     
     def putFirstCol(self, fN): return True
+    
+    def refresh(self):
+        return True
+    
+    @QtCore.pyqtSlot()
+    def insertRecord(self):
+        print "Insert record, please!"
+    
+    @QtCore.pyqtSlot()
+    def editRecord(self):
+        print "Edit your record!"
+    
+    @QtCore.pyqtSlot()
+    def deleteRecord(self):
+        print "Drop the row!"
+    
+    @QtCore.pyqtSlot()
+    def browseRecord(self):
+        print "Inspect, inspect!"
+    
+    @QtCore.pyqtSlot()
+    def copyRecord(self):
+        print "Clone your clone"
     
 class FLTable(QtGui.QTableWidget):
     pass

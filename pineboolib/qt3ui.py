@@ -22,6 +22,19 @@ def loadUi(path, widget):
     for xmlwidget in root.xpath("widget"):
         loadWidget(xmlwidget,widget)
 
+    for xmlconnection in root.xpath("connections/connection"):
+        sender_name = xmlconnection.xpath("sender/text()")[0]
+        signal_name = xmlconnection.xpath("signal/text()")[0]
+        receiv_name = xmlconnection.xpath("receiver/text()")[0]
+        slot_name = xmlconnection.xpath("slot/text()")[0]
+        sender = widget.findChild(QtGui.QWidget, sender_name)
+        receiver = widget.findChild(QtGui.QWidget, receiv_name)
+        try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
+        except Exception, e: 
+            print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name)
+            print "Error:", e.__class__.__name__, e
+
+
 def createWidget(classname,parent = None):
     cls =  getattr(flcontrols, classname, None) or getattr(QtGui, classname, None)
     if cls is None: 
