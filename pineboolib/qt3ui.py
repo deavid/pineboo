@@ -28,7 +28,10 @@ def loadUi(path, widget):
         receiv_name = xmlconnection.xpath("receiver/text()")[0]
         slot_name = xmlconnection.xpath("slot/text()")[0]
         sender = widget.findChild(QtGui.QWidget, sender_name)
+        if sender is None: print "Connection sender not found:", sender_name
         receiver = widget.findChild(QtGui.QWidget, receiv_name)
+        if receiver is None: print "Connection receiver not found:", receiv_name
+        if sender is None or receiver is None: continue
         try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
         except Exception, e: 
             print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name)

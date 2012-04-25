@@ -245,7 +245,8 @@ class ModuleActions(object):
         action.prj = self.prj
         action.name = self.mod.name
         action.alias = self.mod.name
-        action.form = self.mod.name
+        #action.form = self.mod.name
+        action.form = None
         action.table = None
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
@@ -333,7 +334,10 @@ class XMLAction(XMLStruct):
         self.mainform_widget.show()
         
 class FLForm(QtGui.QWidget):
+    known_instances = {}
     def __init__(self, action, load=False):
+        assert((self.__class__,action) not in self.known_instances)
+        self.known_instances[(self.__class__,action)] = self
         QtGui.QWidget.__init__(self)
         self.action = action
         self.prj = action.prj
@@ -380,8 +384,9 @@ class FLMainForm(FLForm):
             self.widget = QtGui.QWidget()
         self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
-        form_path = self.prj.path(self.action.form+".ui")
-        qt3ui.loadUi(form_path, self.widget)
+        if self.action.form:
+            form_path = self.prj.path(self.action.form+".ui")
+            qt3ui.loadUi(form_path, self.widget)
         
         self.loaded = True
     
@@ -395,7 +400,7 @@ class FLMainForm(FLForm):
         script_path = self.prj.path(scriptname+".qs")
         if not os.path.isfile(script_path): raise IOError
         python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
-        if not os.path.isfile(python_script_path) or True:
+        if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             print "Convirtiendo a Python . . ."
             ret = subprocess.call(["flscriptparser2", "--full",script_path])
         if not os.path.isfile(python_script_path):
@@ -419,9 +424,15 @@ def main():
                       help="don't print status messages to stdout")
     parser.add_option("-a", "--action", dest="action",
                       help="load action", metavar="ACTION")
+    parser.add_option("--no-python-cache", 
+                      action="store_true",dest="no_python_cache", default=False,
+                      help="Always translate QS to Python")
 
     (options, args) = parser.parse_args()    
     app = QtGui.QApplication(sys.argv)
+
+    pineboolib.no_python_cache = options.no_python_cache
+
     if not options.project:
         w = DlgConnect()
         w.load()

@@ -2,6 +2,7 @@
 from PyQt4 import QtCore,QtGui
 import re
 import flcontrols
+import pineboolib
 
 def parseFloat(x): return float(x)
 
@@ -9,8 +10,15 @@ util = flcontrols.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
 def ustr(t):
     if isinstance(t, unicode): return t
+    if isinstance(t, QtCore.QString): return unicode(t)
     if isinstance(t, str): return unicode(t,"UTF-8")
-    return str(t)
+    try:
+        return str(t)
+    except Exception, e:
+        print "ERROR Coercing to string:", repr(t)
+        print "ERROR", e.__class__.__name__, str(e)
+        return None
+    
     
 
 def auto_qt_translate_text(text):
@@ -25,7 +33,9 @@ class SysType(object):
         self._name_user = "database_user"
         
     def nameUser(self): return self._name_user
-
+    def isLoadedModule(self, modulename):
+        prj = pineboolib.project
+        return modulename in prj.modules
 sys = SysType()
    
 aqtt = auto_qt_translate_text

@@ -5,11 +5,12 @@ import qsaglobals
 import flcontrols
 from flcontrols import FLTable, FLTableDB, FLSqlCursor, FLUtil
 
-def Object(): return {}
+def Object(x={}): return dict(x)
 
-def Array(): return []
+Array = Object
+#def Array(x=[]): return list(x)
 
-def Boolean(): return False
+def Boolean(x=False): return bool(x)
 
 def FLSqlQuery(*args):
     #if not args: return None
