@@ -5,6 +5,13 @@ from PyQt4 import QtGui, QtCore, uic
 
 Qt = QtCore.Qt
 
+def NotImplementedWarn(fn):
+    def newfn(*args,**kwargs):
+        ret = fn(*args,**kwargs)
+        x_args = [ repr(a) for a in args] + [ "%s=%s" % (k,repr(v)) for k,v in kwargs.items()]
+        print "WARN: Function not yet implemented: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret))
+        return ret
+    return newfn
 
 class QLayoutWidget(QtGui.QWidget):
     pass
@@ -12,6 +19,12 @@ class QLayoutWidget(QtGui.QWidget):
 class ProjectClass(object):
     def __init__(self):
         self._prj = pineboolib.project
+
+class QCheckBox(QtGui.QCheckBox):
+    def checked(self): return self.isChecked()
+
+class FLSqlQuery(ProjectClass):
+    pass
 
 class FLSqlCursor(ProjectClass):
     Insert = 0
@@ -24,6 +37,13 @@ class FLSqlCursor(ProjectClass):
         if actionname is None: raise AssertionError
         self.setAction(actionname)
         
+    @NotImplementedWarn    
+    def mainFilter(self):
+        return ""
+
+    @NotImplementedWarn    
+    def setMainFilter(self, newFilter):
+        return True
         
     def setAction(self, actionname):
         self._action = self._prj.actions[actionname]
@@ -35,40 +55,60 @@ class FLSqlCursor(ProjectClass):
         self._chk_integrity = True
         self._commit_actions = True
     
+    def action(self):
+        return self._action.name
+    
+    @NotImplementedWarn    
     def setActivatedCheckIntegrity(self, state):
         self._chk_integrity = bool(state)
         return True
         
+    @NotImplementedWarn    
     def setActivatedCommitActions(self, state):
         self._commit_actions = bool(state)
         return True
         
     def selection_currentRowChanged(self, current, previous):
-        assert( previous.row() == self._current_row )
         self._current_row = current.row()
         print "cursor:%s , row:%d" %(self._action.table, self._current_row )
     
     def selection(self): return self._selection
         
+    @NotImplementedWarn    
     def select(self, where_filter = None):
         return True
         
     def isValid(self):
         return self._valid
     
+    def isNull(self,fieldname):
+        return self._model.value(self._current_row, fieldname) is None
+
+    @NotImplementedWarn    
+    def setNull(self,fieldname):
+        return True
+    
     def valueBuffer(self, fieldname):
         if self._current_row < 0 or self._current_row > self._model.rows: return None
         return self._model.value(self._current_row, fieldname)
+
+    @NotImplementedWarn    
+    def setValueBuffer(self, fieldname, newvalue):
+        return True
     
+    @NotImplementedWarn    
     def transaction(self, block = False):
         return True
         
+    @NotImplementedWarn    
     def commit(self):
         return True
         
+    @NotImplementedWarn    
     def rollback(self):
         return True
         
+    @NotImplementedWarn    
     def refresh(self):
         return True
     
@@ -80,6 +120,7 @@ class FLSqlCursor(ProjectClass):
         bottomRight = self._model.index(row,self._model.cols)
         new_selection = QtGui.QItemSelection(topLeft, bottomRight)
         self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
+        self._current_row = row
         if row < self._model.rows and row >= 0: return True
         else: return False
 
@@ -94,10 +135,16 @@ class FLSqlCursor(ProjectClass):
     
     def last(self): return self.move(self._model.rows-1)
     
+    @NotImplementedWarn    
     def setModeAccess(self, modeAccess):
         return True
     
+    @NotImplementedWarn    
     def refreshBuffer(self):
+        return True
+        
+    @NotImplementedWarn    
+    def commitBuffer(self):
         return True
     
     @QtCore.pyqtSlot()
@@ -163,6 +210,11 @@ class FLUtil(ProjectClass):
         pd_widget.hide()
         pd_widget.close()
         
+    def nombreCampos(self, tablename):
+        prj = pineboolib.project
+        table = prj.tables[tablename]
+        campos = [ field.name for field in table.fields ]
+        return [len(campos)]+campos
         
 
         
@@ -266,8 +318,10 @@ class FLTableDB(QtGui.QTableView):
         
     def cursor(self): return self._cursor
     
+    @NotImplementedWarn    
     def putFirstCol(self, fN): return True
     
+    @NotImplementedWarn    
     def refresh(self):
         return True
     

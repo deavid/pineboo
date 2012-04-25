@@ -82,17 +82,27 @@ def loadWidget(xml, widget = None):
             print e, repr(value)
             print etree.tostring(xmlprop)
 
-    def process_layout_box(xmllayout, widget = widget):
+    def process_layout_box(xmllayout, widget = widget, mode = "box"):
         for c in xmllayout:
+            try:
+                row = int(c.get("row"))
+                col = int(c.get("column"))
+            except Exception: row = col = None
             if c.tag == "property":
                 process_property(c,widget.layout)
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c,new_widget)
                 new_widget.show()
-                widget.layout.addWidget(new_widget)
+                if mode == "box":
+                    widget.layout.addWidget(new_widget)
+                elif mode == "grid":
+                    widget.layout.addWidget(new_widget, row, col)
             elif c.tag == "spacer":
-                widget.layout.addStretch()
+                if mode == "box":
+                    widget.layout.addStretch()
+                elif mode == "grid":
+                    widget.layout.addStretch(row,col)
             else:
                 print "Unknown layout xml tag", repr(c.tag)
         
@@ -106,9 +116,13 @@ def loadWidget(xml, widget = None):
             widget.layout = QtGui.QVBoxLayout()
             process_layout_box(c)
             continue
-        if c.tag == "hbox" or c.tag == "grid":
+        if c.tag == "hbox":
             widget.layout = QtGui.QHBoxLayout()
             process_layout_box(c)
+            continue
+        if c.tag == "grid":
+            widget.layout = QtGui.QGridLayout()
+            process_layout_box(c,mode = "grid")
             continue
         print "Unknown widget xml tag", repr(c.tag)
     for c in properties:

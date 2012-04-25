@@ -58,8 +58,8 @@ class MessageBox(QMessageBox):
         elif typename == "critical":
             icon = QMessageBox.Critical
             title = "Critical"
-        title = unicode(title,"UTF-8")
-        text = unicode(text,"UTF-8")
+        #title = unicode(title,"UTF-8")
+        #text = unicode(text,"UTF-8")
         msg = QMessageBox(icon, title, text)
         msg.addButton(button0)
         if button1: msg.addButton(button1)
