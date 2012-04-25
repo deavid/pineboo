@@ -14,7 +14,14 @@ def auto_qt_translate_text(text):
             if match: text = match.group(1)
     return text
 
+class SysType(object):
+    def __init__(self):
+        self._name_user = "database_user"
+        
+    def nameUser(self): return self._name_user
 
+sys = SysType()
+   
 aqtt = auto_qt_translate_text
 
 def connect(sender, signal, receiver, slot):

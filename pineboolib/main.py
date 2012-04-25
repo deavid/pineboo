@@ -145,11 +145,15 @@ class Module(object):
         
     def load(self):
         print "Loading module %s . . . " % self.name
-        self.actions = ModuleActions(self, self.path("%s.xml" % self.name))
-        self.actions.load()
-        
-        self.mainform = MainForm(self, self.path("%s.ui" % self.name))
-        self.mainform.load()
+        try:
+            self.actions = ModuleActions(self, self.path("%s.xml" % self.name))
+            self.actions.load()
+            
+            self.mainform = MainForm(self, self.path("%s.ui" % self.name))
+            self.mainform.load()
+        except Exception,e:
+            print "ERROR al cargar modulo:", e
+            return False
         
         # TODO: Load Main Script:
         self.mainscript = None
@@ -163,6 +167,7 @@ class Module(object):
             self.prj.tables[name] = tableObj
         
         self.loaded = True
+        return True
     
     def run(self):
         if self.loaded == False: self.load()
@@ -206,15 +211,14 @@ class ModuleActions(object):
         self.mod = module
         self.prj = module.prj
         self.path = path
-        
+        assert(path)
     def load(self):
         self.parser = etree.XMLParser(
                         ns_clean=True,
                         encoding="ISO-8859-15",
                         remove_blank_text=True,
                         )
-        self.tree = etree.parse(self.path, self.parser)
-        self.root = self.tree.getroot()
+
         self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
         for xmlaction in self.root:
@@ -238,6 +242,7 @@ class MainForm(object):
         self.mod = module
         self.prj = module.prj
         self.path = path
+        assert(path)
         
     def load(self):
         try:
@@ -378,7 +383,7 @@ def main():
         if options.action:
             objaction = None
             for k,module in project.modules.items():
-                module.load()
+                if not module.load(): continue
                 if options.action in module.actions:
                     objaction = module.actions[options.action]
             if objaction is None: raise ValueError, "Action name %s not found" % options.action        
@@ -394,6 +399,10 @@ def main():
                 button.clicked.connect(module.run)
                 w.layout.addWidget(button)
         
+            del button
             w.setLayout(w.layout)
             w.show()
-            sys.exit(app.exec_())
+            ret = app.exec_()
+            del w
+            del project
+            sys.exit(ret)

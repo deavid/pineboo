@@ -22,15 +22,26 @@ class FLSqlCursor(ProjectClass):
         super(FLSqlCursor,self).__init__()
         self._valid = False
         if actionname is None: raise AssertionError
+        self.setAction(actionname)
         
+        
+    def setAction(self, actionname):
         self._action = self._prj.actions[actionname]
-        print "New Cursor:", actionname,self._action.table
-            
         self._model = CursorTableModel(self._action, self._prj)
         self._valid = True
         self._selection = QtGui.QItemSelectionModel(self._model)
         self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
         self._current_row = self._selection.currentIndex().row()
+        self._chk_integrity = True
+        self._commit_actions = True
+    
+    def setActivatedCheckIntegrity(self, state):
+        self._chk_integrity = bool(state)
+        return True
+        
+    def setActivatedCommitActions(self, state):
+        self._commit_actions = bool(state)
+        return True
         
     def selection_currentRowChanged(self, current, previous):
         assert( previous.row() == self._current_row )
@@ -57,24 +68,58 @@ class FLSqlCursor(ProjectClass):
         
     def rollback(self):
         return True
+        
+    def refresh(self):
+        return True
     
     def size(self):
         return self._model.rowCount()
 
-    def next(self):
-        topLeft = self._model.index(self._current_row+1,0)
-        bottomRight = self._model.index(self._current_row+1,self._model.cols)
+    def move(self, row):
+        topLeft = self._model.index(row,0)
+        bottomRight = self._model.index(row,self._model.cols)
         new_selection = QtGui.QItemSelection(topLeft, bottomRight)
         self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
-        if self._current_row < self._model.rows: return True
+        if row < self._model.rows and row >= 0: return True
         else: return False
+
+    def moveby(self, pos):
+        return self.move(pos+self._current_row)
+
+    def first(self): return self.move(0)
+    
+    def prev(self): return self.moveby(-1)
+    
+    def next(self): return self.moveby(1)
+    
+    def last(self): return self.move(self._model.rows-1)
     
     def setModeAccess(self, modeAccess):
         return True
     
     def refreshBuffer(self):
         return True
-        
+    
+    @QtCore.pyqtSlot()
+    def insertRecord(self):
+        print "Insert record, please!", self._action.name
+    
+    @QtCore.pyqtSlot()
+    def editRecord(self):
+        print "Edit your record!", self._action.name
+    
+    @QtCore.pyqtSlot()
+    def deleteRecord(self):
+        print "Drop the row!", self._action.name
+    
+    @QtCore.pyqtSlot()
+    def browseRecord(self):
+        print "Inspect, inspect!", self._action.name
+    
+    @QtCore.pyqtSlot()
+    def copyRecord(self):
+        print "Clone your clone", self._action.name
+                
 class ProgressDialog(QtGui.QWidget):
     def setup(self, title, steps):
         self.title = title
@@ -228,23 +273,23 @@ class FLTableDB(QtGui.QTableView):
     
     @QtCore.pyqtSlot()
     def insertRecord(self):
-        print "Insert record, please!"
+        self._cursor.insertRecord()
     
     @QtCore.pyqtSlot()
     def editRecord(self):
-        print "Edit your record!"
+        self._cursor.editRecord()
     
     @QtCore.pyqtSlot()
     def deleteRecord(self):
-        print "Drop the row!"
+        self._cursor.deleteRecord()
     
     @QtCore.pyqtSlot()
     def browseRecord(self):
-        print "Inspect, inspect!"
+        self._cursor.browseRecord()
     
     @QtCore.pyqtSlot()
     def copyRecord(self):
-        print "Clone your clone"
+        self._cursor.copyRecord()
     
 class FLTable(QtGui.QTableWidget):
     pass
