@@ -24,12 +24,39 @@ class QCheckBox(QtGui.QCheckBox):
     def checked(self): return self.isChecked()
 
 class FLSqlQuery(ProjectClass):
-    pass
+    @NotImplementedWarn    
+    def setTablesList(self, tablelist):
+        return True
+
+    @NotImplementedWarn    
+    def setSelect(self, select):
+        return True
+
+    @NotImplementedWarn    
+    def setFrom(self, from_):
+        return True
+
+    @NotImplementedWarn    
+    def setWhere(self, where):
+        return True
+    
+    @NotImplementedWarn    
+    def exec_(self):
+        return True
+
+    @NotImplementedWarn    
+    def next(self):
+        return False
+        
+    @NotImplementedWarn    
+    def size(self):
+        return 0
+        
 
 class FLSqlCursor(ProjectClass):
     Insert = 0
     Edit = 1
-    Delete = 2
+    Del = 2
     Browse = 3
     def __init__(self, actionname=None):
         super(FLSqlCursor,self).__init__()
@@ -47,11 +74,12 @@ class FLSqlCursor(ProjectClass):
         
     def setAction(self, actionname):
         self._action = self._prj.actions[actionname]
-        self._model = CursorTableModel(self._action, self._prj)
+        if self._action.table:
+            self._model = CursorTableModel(self._action, self._prj)
+            self._selection = QtGui.QItemSelectionModel(self._model)
+            self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
+            self._current_row = self._selection.currentIndex().row()
         self._valid = True
-        self._selection = QtGui.QItemSelectionModel(self._model)
-        self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
-        self._current_row = self._selection.currentIndex().row()
         self._chk_integrity = True
         self._commit_actions = True
     
@@ -230,8 +258,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self._action = action
         self._prj = project
-        if action:
+        if action and action.table:
             self._table = project.tables[action.table]
+        else:
+            raise AssertionError
         cur = self._prj.conn.cursor()
         self.sql_fields = []
         self.field_aliases = []

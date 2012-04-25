@@ -9,7 +9,7 @@ from pineboolib import qt3ui
 from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.qsaglobals import aqtt
 import re,subprocess
-import qsatype
+import qsatype, qsaglobals
 import pineboolib
 
 Qt = QtCore.Qt
@@ -205,6 +205,25 @@ class File(object):
         else:
             # Probablemente es remoto (DB) y es una caché . . .
             return self.prj.dir("cache",*(self.filekey.split("/")))
+
+class DelayedObjectProxyLoader(object):
+    def __init__(self, obj, *args, **kwargs):
+        self._obj = obj
+        self._args = args
+        self._kwargs = kwargs
+        self.loaded_obj = None
+    
+    def __load(self):
+        if not self.loaded_obj: 
+            self.loaded_obj = self._obj(*self._args,**self._kwargs)
+        return self.loaded_obj
+        
+    def __getattr__(self, name):
+        try:
+            return object.__getattr__(self,name)
+        except AttributeError:
+            obj = self.__load()
+            return getattr(obj,name)
         
 class ModuleActions(object):
     def __init__(self, module, path):
@@ -221,6 +240,16 @@ class ModuleActions(object):
 
         self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
+        action = XMLAction(None)
+        action.mod = self
+        action.prj = self.prj
+        action.name = self.mod.name
+        action.alias = self.mod.name
+        action.form = self.mod.name
+        action.table = None
+        action.scriptform = self.mod.name
+        self.prj.actions[action.name] = action
+        setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load))
         for xmlaction in self.root:
             action =  XMLAction(xmlaction)
             action.mod = self
@@ -281,14 +310,30 @@ class XMLMainFormAction(XMLStruct):
         action.openDefaultForm()
         
 class XMLAction(XMLStruct):
+    def __init__(self, *args, **kwargs):
+        super(XMLAction,self).__init__(*args, **kwargs)
+        self.form = getattr(self, "form", None)
+        self.script = getattr(self, "script", None)
+        self.mainform = getattr(self, "mainform", None)
+        self.mainscript = getattr(self, "mainscript", None)
+        self._loaded = False
+    
+    def load(self):
+        if self._loaded: return self.mainform_widget
+        print "Loading action %s . . . " % (self.name)
+        self.mainform_widget = FLMainForm(self, load = True)
+        self._loaded = True
+        print "End of action load %s (iface:%s ; widget:%s)" % (self.name, repr(self.mainform_widget.iface),repr(self.mainform_widget.widget))
+        return self.mainform_widget
+        
     def openDefaultForm(self):
         print "Opening default form for Action", self.name
-        self.mainform = FLMainForm(self)
-        self.mainform.load()
-        self.mainform.show()
+        self.load()
+        self.mainform_widget.init()
+        self.mainform_widget.show()
         
 class FLForm(QtGui.QWidget):
-    def __init__(self, action):
+    def __init__(self, action, load=False):
         QtGui.QWidget.__init__(self)
         self.action = action
         self.prj = action.prj
@@ -313,9 +358,17 @@ class FLForm(QtGui.QWidget):
         self.bottomToolbar.layout.addWidget(self.toolButtonClose)
         self.layout.addWidget(self.bottomToolbar)
         self.setWindowTitle(action.alias)
+        self.loaded = False
+        if load: self.load()
+    
+    def load(self):
+        if self.loaded: return
         
 class FLMainForm(FLForm):
+    iface = None
     def load(self):
+        if self.loaded: return
+        print "Loading form %s . . . " % self.action.form
         self.script = None
         self.iface = None
         try: script = self.action.scriptform or None
@@ -323,16 +376,21 @@ class FLMainForm(FLForm):
         if script: 
             self.load_script(script)
         else:
+            print "WARN: Ingored script for form %s." % self.action.form
             self.widget = QtGui.QWidget()
         self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
         form_path = self.prj.path(self.action.form+".ui")
         qt3ui.loadUi(form_path, self.widget)
         
+        self.loaded = True
+    
+    def init(self):
         if self.iface:
             self.iface.init() 
     
     def load_script(self,scriptname):
+        print "Loading script %s . . . " % scriptname
         # Intentar convertirlo a Python primero con flscriptparser2
         script_path = self.prj.path(scriptname+".qs")
         if not os.path.isfile(script_path): raise IOError

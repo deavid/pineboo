@@ -19,7 +19,12 @@ def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
     root = tree.getroot()
     
     objname = root.xpath("name")[0]
-    if objname.text != nombre: 
+    query = root.xpath("query")
+    if query:
+        if query[-1].text != nombre:
+            print "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (objname.text,nombre)
+            query[-1].text = nombre
+    elif objname.text != nombre: 
         print "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (objname.text,nombre)
         objname.text = nombre
     return getTableObj(tree,root)
@@ -28,7 +33,13 @@ def getTableObj(tree,root):
     table = Struct()
     table.xmltree = tree
     table.xmlroot = root
-    table.name = table.xmlroot.xpath("name/text()")[0]
+    query_name = one(table.xmlroot.xpath("query/text()"),None)
+    name = table.xmlroot.xpath("name/text()")[0]
+    if query_name:
+        table.name = query_name
+        table.query_table = name
+    else:
+        table.name = name
     table.fields = []
     table.pk = []
     table.fields_idx = {}

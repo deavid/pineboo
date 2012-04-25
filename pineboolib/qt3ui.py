@@ -99,10 +99,17 @@ def loadWidget(xml, widget = None):
                 elif mode == "grid":
                     widget.layout.addWidget(new_widget, row, col)
             elif c.tag == "spacer":
+                properties = {}
+                for p in c.xpath("property"):
+                    k,v = loadProperty(p)
+                    properties[k] = v
                 if mode == "box":
                     widget.layout.addStretch()
                 elif mode == "grid":
-                    widget.layout.addStretch(row,col)
+                    if properties["orientation"] == "Horizontal":
+                        widget.layout.columnStretch(col)
+                    else:
+                        widget.layout.rowStretch(row)
             else:
                 print "Unknown layout xml tag", repr(c.tag)
         

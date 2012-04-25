@@ -11,6 +11,9 @@ def Array(): return []
 
 def Boolean(): return False
 
+def FLSqlQuery(*args):
+    #if not args: return None
+    return flcontrols.FLSqlQuery(*args)
 
 def FLSqlCursor(action=None):
     if action is None: return None

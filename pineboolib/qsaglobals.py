@@ -7,6 +7,12 @@ def parseFloat(x): return float(x)
 
 util = flcontrols.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
+def ustr(t):
+    if isinstance(t, unicode): return t
+    if isinstance(t, str): return unicode(t,"UTF-8")
+    return str(t)
+    
+
 def auto_qt_translate_text(text):
     if isinstance(text,basestring):
         if text.find("QT_TRANSLATE") != -1:
