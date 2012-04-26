@@ -7,8 +7,9 @@ from flcontrols import FLTable, FLTableDB, FLSqlCursor, FLUtil
 
 def Object(x={}): return dict(x)
 
-Array = Object
-#def Array(x=[]): return list(x)
+def Array(x=None): 
+    if x is None: return {}
+    else: return list(x)
 
 def Boolean(x=False): return bool(x)
 

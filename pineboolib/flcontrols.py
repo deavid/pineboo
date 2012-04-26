@@ -24,12 +24,10 @@ class ProjectClass(QtCore.QObject):
 class QCheckBox(QtGui.QCheckBox):
     @QtCore.pyqtProperty(int)
     def checked(self): 
-        print "Get Checked!"
         return self.isChecked()
 
     @checked.setter
     def checked(self, v): 
-        print "SET Checked!"
         self.setCheckState(v)
     
     
@@ -37,6 +35,10 @@ class QCheckBox(QtGui.QCheckBox):
 class QComboBox(QtGui.QComboBox):
     @property
     def currentItem(self): return self.currentIndex
+
+class QButtonGroup(QtGui.QFrame):
+    @property
+    def selectedId(self): return 0
         
     
 
@@ -331,7 +333,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
         newrows = cur.rowcount
         self.beginInsertRows(parent, 0, newrows - 1)
-        #print "QUERY:", sql
+        print "QUERY:", sql
         self.rows = newrows
         self.data = []
         for row in cur:
@@ -409,11 +411,18 @@ class FLTableDB(QtGui.QTableView):
         if self._cursor:
             self.setModel(self._cursor._model)
             self.setSelectionModel(self._cursor.selection())
+        self.tableRecords = self # control de tabla interno
+        self.sort = []
+    
         
+    
     def cursor(self): 
         assert(self._cursor)
         return self._cursor
     
+    def obj(self): 
+        return self
+
     @NotImplementedWarn    
     def putFirstCol(self, fN): return True
     
