@@ -1,0 +1,18 @@
+Copyright © 2012 David Martínez Martí
+
+This software is distributed under the MIT License. As a whole, other conditions
+may apply too since there are many other libraries required that have other
+terms like PyQt4. Even if such conditions apply, the files distributed here may
+be used, distributed and modified as documentation under the MIT license.
+
+If anyone later modifies the software to remove certain libraries, the terms
+of those libraries will no longer apply to any part of this software. 
+
+At the time of this writting this software is using PyQt4, which is distributed 
+with a GPL License. So, if you convey this work you should meet the license 
+terms of GPL as well. 
+
+The LICENSE.mit should be included with this software and holds the MIT license.
+
+Copyright and license notices are not required to appear in any part of the 
+graphical interface of the software. Those are completely optional. 

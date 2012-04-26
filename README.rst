@@ -134,3 +134,54 @@ es más conveniente cambiar el PATH de windows.
 Por otra parte todos los paquetes necesarios tienen que ser instalados uno a uno
 en windows. Mira el listado de dependencias.
 
+Cosas que se pueden probar en Pineboo
+----------------------------------------
+La opción --help ofrece un listado de opciones, algunas pueden ser interesantes.
+
+Por ejemplo, para facilitar las pruebas existe el switch -a que ejecuta directamente
+una acción determinada. (Abre el formulario master de esa acción)
+
+Otra opción interesante es --no-python-cache que fuerza a regenerar los ficheros
+de python transformados aunque ya existan. Útil si estamos jugando con flscriptparser.
+
+Se puede probar a abrir el master de artículos y pulsar el botón de copiar artículo.
+No copia el artículo pero sí pregunta la nueva referencia y hace el bucle de copia.
+
+Si el master de artículos (u otro master) tiene checkboxes u otro método de filtrado
+rápido, también funcionarán y la tabla se verá correctamente filtrada.
+
+Si el master realiza comprobaciones sobre la fila seleccionada, también funcionan. 
+Por ejemplo al albaranar un pedido puede advertirnos de que ya está servido.
+
+Hay que tener en cuenta que la API de FLSqlCursor está implementada parcialmente.
+La mayoría de señales no se envían aún y muchas de las funciones aún no tienen
+implementación.
+
+FLTableDB tiene una implementación mínima. Sólo se enlaza con el cursor por defecto
+y poco más. Esto es suficiente para ejecutar muchos de los ejemplos.
+
+El resto de objetos de Eneboo no existen o tienen una implementación "hueca", es 
+decir, los métodos llegan a existir, pero no hacen nada.
+
+Los formularios con convertidos al vuelo, y aún requiere este proceso de muchos
+retoques. Las características más usadas funcionan, pero la gran mayoría de cosas
+que se pueden hacer en un formulario de Eneboo aún no son intepretadas correctamente.
+No obstante, debería ser suficiente para ejecutar muchos de los formularios master
+que existen.
+
+Para ejecutar los scripts se usan tres capas de compatibilidad: flcontrols, qsaglobals
+y qsatypes. En algunos casos no está aún claro cómo debería comportarse por ejemplo
+un Array. 
+
+Los ficheros son convertidos a python y guardados junto al fichero QS de cache.
+Por ejemplo, las conversiones de masterarticulos.qs se pueden ver en la ruta
+`tempdata/cache/flfactalma/file.qs/masterarticulos/`.
+
+Cosas que realizar a medio plazo
+----------------------------------------
+ - Más API's de Eneboo clonadas
+ - Diálogo de conectar que funcione
+ - Establecer conexión manual desde consola usando formato URI
+ - Apertura de formularios de registro (Browse)
+ - Creación de switch "--read-only-mode", donde los commitBuffer y commit sean inocuos.
+ 
