@@ -452,7 +452,11 @@ def main():
         if options.action:
             objaction = None
             for k,module in project.modules.items():
-                if not module.load(): continue
+                try:
+                    if not module.load(): continue
+                except Exception,e:
+                    print "ERROR:", e.__class__.__name__, str(e)
+                    continue
                 if options.action in module.actions:
                     objaction = module.actions[options.action]
             if objaction is None: raise ValueError, "Action name %s not found" % options.action        

@@ -134,6 +134,13 @@ def loadWidget(xml, widget = None):
             widget.layout = QtGui.QGridLayout()
             process_layout_box(c,mode = "grid")
             continue
+        if c.tag == "item":
+            prop1 = {}
+            for p in c.xpath("property"):
+                k,v = loadProperty(p)
+                prop1[k] = v
+            widget.addItem(prop1["text"])
+            continue
         print "Unknown widget xml tag", repr(c.tag)
     for c in properties:
         process_property(c)

@@ -8,7 +8,10 @@ def parseFloat(x): return float(x)
 
 util = flcontrols.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
-def ustr(t):
+def ustr(*t1):
+    return "".join([ ustr1(t) for t in t1 ])
+    
+def ustr1(t):
     if isinstance(t, unicode): return t
     if isinstance(t, QtCore.QString): return unicode(t)
     if isinstance(t, str): return unicode(t,"UTF-8")
@@ -19,7 +22,9 @@ def ustr(t):
         print "ERROR", e.__class__.__name__, str(e)
         return None
     
-    
+def debug(txt):
+    print "DEBUG:", ustr(txt)
+        
 
 def auto_qt_translate_text(text):
     if isinstance(text,basestring):
@@ -41,8 +46,9 @@ sys = SysType()
 aqtt = auto_qt_translate_text
 
 def connect(sender, signal, receiver, slot):
-    print "Connect::", sender, signal, receiver, slot
+    # print "Connect::", sender, signal, receiver, slot
     if sender is None:
+        print "Connect::", sender, signal, receiver, slot
         return False
     m = re.search("^(\w+).(\w+)(\(.*\))?", slot)
     if m:
@@ -50,9 +56,14 @@ def connect(sender, signal, receiver, slot):
         if remote_obj is None: raise AttribueError, "Object %s not found on %s" % (remote_obj, str(receiver))
         remote_fn = getattr(remote_obj, m.group(2))
         if remote_fn is None: raise AttribueError, "Object %s not found on %s" % (remote_fn, remote_obj)
-        sender.connect(sender, QtCore.SIGNAL(signal), remote_fn)
+        try:
+            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), remote_fn)
+        except RuntimeError, e:
+            print "ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn
+            print "ERROR %s : %s" % (e.__class__.__name__, str(e))
+            return False
     else:
-        sender.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))
+        QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))
     return True
 
 QMessageBox = QtGui.QMessageBox

@@ -16,12 +16,19 @@ def NotImplementedWarn(fn):
 class QLayoutWidget(QtGui.QWidget):
     pass
     
-class ProjectClass(object):
+class ProjectClass(QtCore.QObject):
     def __init__(self):
+        super(ProjectClass, self).__init__()
         self._prj = pineboolib.project
 
 class QCheckBox(QtGui.QCheckBox):
     def checked(self): return self.isChecked()
+
+class QComboBox(QtGui.QComboBox):
+    @property
+    def currentItem(self): return self.currentIndex
+        
+    
 
 class FLSqlQuery(ProjectClass):
     @NotImplementedWarn    
@@ -58,12 +65,15 @@ class FLSqlCursor(ProjectClass):
     Edit = 1
     Del = 2
     Browse = 3
+    
+    _current_changed = QtCore.pyqtSignal(int, name='currentChanged')
+    
     def __init__(self, actionname=None):
         super(FLSqlCursor,self).__init__()
         self._valid = False
         if actionname is None: raise AssertionError
         self.setAction(actionname)
-        
+    
     @NotImplementedWarn    
     def mainFilter(self):
         return ""
@@ -73,7 +83,12 @@ class FLSqlCursor(ProjectClass):
         return True
         
     def setAction(self, actionname):
-        self._action = self._prj.actions[actionname]
+        try:
+            self._action = self._prj.actions[actionname]
+        except KeyError, e:
+            print "Accion no encontrada:", actionname
+            self._action = self._prj.actions["articulos"]
+            
         if self._action.table:
             self._model = CursorTableModel(self._action, self._prj)
             self._selection = QtGui.QItemSelectionModel(self._model)
@@ -98,6 +113,7 @@ class FLSqlCursor(ProjectClass):
         
     def selection_currentRowChanged(self, current, previous):
         self._current_row = current.row()
+        self._current_changed.emit(current.row())
         print "cursor:%s , row:%d" %(self._action.table, self._current_row )
     
     def selection(self): return self._selection
@@ -145,10 +161,11 @@ class FLSqlCursor(ProjectClass):
 
     def move(self, row):
         topLeft = self._model.index(row,0)
-        bottomRight = self._model.index(row,self._model.cols)
+        bottomRight = self._model.index(row,self._model.cols-1)
         new_selection = QtGui.QItemSelection(topLeft, bottomRight)
         self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
         self._current_row = row
+        self._current_changed.emit(row)
         if row < self._model.rows and row >= 0: return True
         else: return False
 
@@ -247,6 +264,7 @@ class FLUtil(ProjectClass):
 
         
         
+from qsaglobals import ustr
             
 
 class CursorTableModel(QtCore.QAbstractTableModel):
@@ -304,8 +322,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             try:
                 val = self.data[row][col]
-                if isinstance(val, str): val = unicode(val,"UTF-8")
-                return val 
+                return ustr(val)
             except Exception,e:
                 print row,col,e
                 return "-InvalidData-"
@@ -346,7 +363,9 @@ class FLTableDB(QtGui.QTableView):
             self.setModel(self._cursor._model)
             self.setSelectionModel(self._cursor.selection())
         
-    def cursor(self): return self._cursor
+    def cursor(self): 
+        assert(self._cursor)
+        return self._cursor
     
     @NotImplementedWarn    
     def putFirstCol(self, fN): return True
