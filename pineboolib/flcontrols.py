@@ -22,7 +22,17 @@ class ProjectClass(QtCore.QObject):
         self._prj = pineboolib.project
 
 class QCheckBox(QtGui.QCheckBox):
-    def checked(self): return self.isChecked()
+    @QtCore.pyqtProperty(int)
+    def checked(self): 
+        print "Get Checked!"
+        return self.isChecked()
+
+    @checked.setter
+    def checked(self, v): 
+        print "SET Checked!"
+        self.setCheckState(v)
+    
+    
 
 class QComboBox(QtGui.QComboBox):
     @property
@@ -74,13 +84,12 @@ class FLSqlCursor(ProjectClass):
         if actionname is None: raise AssertionError
         self.setAction(actionname)
     
-    @NotImplementedWarn    
     def mainFilter(self):
-        return ""
-
-    @NotImplementedWarn    
+        return self._model.where_filters.get("main-filter", "")
+        
     def setMainFilter(self, newFilter):
-        return True
+        print "New main filter:", newFilter
+        self._model.where_filters["main-filter"] = newFilter
         
     def setAction(self, actionname):
         try:
@@ -112,14 +121,17 @@ class FLSqlCursor(ProjectClass):
         return True
         
     def selection_currentRowChanged(self, current, previous):
+        if self._current_row == current.row(): return False
         self._current_row = current.row()
-        self._current_changed.emit(current.row())
+        self._current_changed.emit(self.at())
         print "cursor:%s , row:%d" %(self._action.table, self._current_row )
     
     def selection(self): return self._selection
         
-    @NotImplementedWarn    
-    def select(self, where_filter = None):
+    def select(self, where_filter = ""):
+        print "Select filter:", where_filter
+        self._model.where_filters["select"] = where_filter
+        self._model.refresh()
         return True
         
     def isValid(self):
@@ -152,20 +164,28 @@ class FLSqlCursor(ProjectClass):
     def rollback(self):
         return True
         
-    @NotImplementedWarn    
     def refresh(self):
-        return True
+        self._model.refresh()
     
     def size(self):
         return self._model.rowCount()
 
+    def at(self):
+        row = self._current_row
+        if row < 0: return -1
+        if row >= self._model.rows: return -2
+        return row
+
     def move(self, row):
+        if row < 0: row = -1
+        if row >= self._model.rows: row = self._model.rows
+        if self._current_row == row: return False
         topLeft = self._model.index(row,0)
         bottomRight = self._model.index(row,self._model.cols-1)
         new_selection = QtGui.QItemSelection(topLeft, bottomRight)
         self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
         self._current_row = row
-        self._current_changed.emit(row)
+        self._current_changed.emit(self.at())
         if row < self._model.rows and row >= 0: return True
         else: return False
 
@@ -280,34 +300,61 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self._table = project.tables[action.table]
         else:
             raise AssertionError
-        cur = self._prj.conn.cursor()
         self.sql_fields = []
         self.field_aliases = []
         for field in self._table.fields:
             self.sql_fields.append(field.name)
             self.field_aliases.append(aqtt(field.alias))
             
-        cur.execute("""SELECT %s FROM %s """ % (", ".join(self.sql_fields),self._table.name))
-
-        self.modules = {}
+        self.data = []
         self.cols = len(self.sql_fields)
-        self.rows = cur.rowcount
+        self.rows = 0
+        self.where_filters = {}
+        self.refresh()
+            
+    def refresh(self):
+        parent = QtCore.QModelIndex()
+        oldrows = self.rows
+        self.beginRemoveRows(parent, 0, oldrows )
+        where_filter = ""
+        for k, wfilter in sorted(self.where_filters.items()):
+            if wfilter is None: continue
+            wfilter = wfilter.strip()
+            if not wfilter: continue
+            where_filter += " AND " + wfilter
+        cur = self._prj.conn.cursor()
+        sql = """SELECT %s FROM %s WHERE 1=1 %s""" % (", ".join(self.sql_fields),self._table.name, where_filter)
+        cur.execute(sql)
+        self.rows = 0
+        self.endRemoveRows()
+        if oldrows > 0:
+            self.rowsRemoved.emit(parent, 0, oldrows - 1)
+        newrows = cur.rowcount
+        self.beginInsertRows(parent, 0, newrows - 1)
+        #print "QUERY:", sql
+        self.rows = newrows
         self.data = []
         for row in cur:
             self.data.append(row)
+        self.endInsertRows()
+        topLeft = self.index(0,0)
+        bottomRight = self.index(self.rows-1,self.cols-1)
+        self.dataChanged.emit(topLeft,bottomRight)
+        print "rows:", self.rows
         
     def value(self, row, fieldname):
+        if row < 0 or row >= self.rows: return None
         col = self.sql_fields.index(fieldname)
         return self.data[row][col]
         
     def columnCount(self, parent = None):
         if parent is None: parent = QtCore.QModelIndex()
-        if parent.isValid(): raise AssertionError, "Valid parent passed to columnCount"
+        if parent.isValid(): return 0
         return self.cols
     
     def rowCount(self, parent = None):
         if parent is None: parent = QtCore.QModelIndex()
-        if parent.isValid(): raise AssertionError, "Valid parent passed to rowCount"
+        if parent.isValid(): return 0
         return self.rows
 
     def headerData(self, section, orientation, role):
@@ -370,9 +417,8 @@ class FLTableDB(QtGui.QTableView):
     @NotImplementedWarn    
     def putFirstCol(self, fN): return True
     
-    @NotImplementedWarn    
     def refresh(self):
-        return True
+        self._cursor.refresh()
     
     @QtCore.pyqtSlot()
     def insertRecord(self):
