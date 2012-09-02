@@ -11,14 +11,11 @@ from pineboolib.qsaglobals import aqtt
 import re,subprocess
 import qsatype, qsaglobals
 import pineboolib
+import DlgConnect
 
 Qt = QtCore.Qt
 
 def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
-
-class DlgConnect(QtGui.QWidget):
-    def load(self):
-        self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
 
 class WMainForm(QtGui.QMainWindow):
     def load(self,path):
@@ -434,10 +431,16 @@ def main():
     pineboolib.no_python_cache = options.no_python_cache
 
     if not options.project:
-        w = DlgConnect()
+        w = DlgConnect.DlgConnect()
         w.load()
         w.show()
-        sys.exit(app.exec_())
+        ret = app.exec_()
+        if (w.close()):
+            prjpath = w.ruta
+             
+        
+                
+        
     else:
         if not options.project.endswith(".xml"): 
             options.project += ".xml"
@@ -445,11 +448,12 @@ def main():
         if not os.path.isfile(prjpath):
             raise ValueError("el proyecto %s no existe." % options.project)
         
-        project = Project()
-        project.load(prjpath)
-        project.run()
         
-        if options.action:
+    project = Project()
+    project.load(prjpath)
+    project.run()
+        
+    if options.action:
             objaction = None
             for k,module in project.modules.items():
                 try:
@@ -462,7 +466,7 @@ def main():
             if objaction is None: raise ValueError, "Action name %s not found" % options.action        
             objaction.openDefaultForm()
             sys.exit(app.exec_())
-        else:
+    else:
             w = QtGui.QWidget()
             w.layout = QtGui.QVBoxLayout()
             label = QtGui.QLabel(u"Escoja un módulo:")
