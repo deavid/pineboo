@@ -102,7 +102,7 @@ class Project(object):
         for idmodulo, nombre, sha in self.cur:
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
-            if nombre in self.files: print "WARN: file %s already loaded, overwritting..." % filename
+            if nombre in self.files: print "WARN: file %s already loaded, overwritting..." % nombre
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey+"\n")
@@ -437,6 +437,8 @@ def main():
         ret = app.exec_()
         if (w.close()):
             prjpath = w.ruta
+        if not prjpath:
+            sys.exit(ret)
              
         
                 
