@@ -19,6 +19,7 @@ class DlgConnect(QtGui.QWidget):
             DlgConnect.ruta += ".xml"        
         if not os.path.isfile(DlgConnect.ruta):
             QtGui.QMessageBox.information(self, "AVISO","El proyecto \n" + DlgConnect.ruta +" no existe") 
+            DlgConnect.ruta = None
         else:        
             self.close()       
         
