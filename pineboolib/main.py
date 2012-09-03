@@ -11,7 +11,7 @@ from pineboolib.qsaglobals import aqtt
 import re,subprocess
 import qsatype, qsaglobals
 import pineboolib
-import DlgConnect
+import DlgConnect, mainForm
 
 Qt = QtCore.Qt
 
@@ -469,17 +469,10 @@ def main():
             objaction.openDefaultForm()
             sys.exit(app.exec_())
     else:
-            w = QtGui.QWidget()
-            w.layout = QtGui.QVBoxLayout()
-            label = QtGui.QLabel(u"Escoja un módulo:")
-            w.layout.addWidget(label)
+            w = mainForm.MainForm()
+            w.load()
             for module in project.modules.values():
-                button = QtGui.QCommandLinkButton(module.description,module.name)
-                button.clicked.connect(module.run)
-                w.layout.addWidget(button)
-        
-            del button
-            w.setLayout(w.layout)
+                w.addArea(module.areaid)
             w.show()
             ret = app.exec_()
             del w
