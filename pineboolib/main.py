@@ -166,7 +166,7 @@ class Module(object):
         self.loaded = True
         return True
     
-    def run(self):
+    def run(self,vBLayout):
         if self.loaded == False: self.load()
         print "Running module %s . . . " % self.name
         self.widget = QtGui.QWidget()
@@ -177,9 +177,9 @@ class Module(object):
         for key, action in self.mainform.actions.items():
             button = QtGui.QCommandLinkButton(action.text)
             button.clicked.connect(action.run)
-            w.layout.addWidget(button)
-        w.setLayout(w.layout)
-        w.show()
+            vBLayout.addWidget(button)
+        #w.setLayout(w.layout)
+        #w.show()
             
         
 class File(object):
@@ -472,7 +472,7 @@ def main():
             w = mainForm.MainForm()
             w.load()
             for module in project.modules.values():
-                w.addArea(module.areaid)
+                w.addModuleInTab(module)
             w.show()
             ret = app.exec_()
             del w
