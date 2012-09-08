@@ -230,8 +230,8 @@ def _loadVariant(variant):
         return p
     if variant.tag == "enum": 
         v = None
-        libs = [Qt,QtGui.QFrame]
-        for lib in [Qt,QtGui.QFrame]:
+        libs = [Qt,QtGui.QFrame,QtGui.QSizePolicy]
+        for lib in libs:
             v = getattr(lib,text,None)
             if v is not None: return v
         
