@@ -93,6 +93,7 @@ class Project(object):
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in self.cur:
             self.modules[idmodulo] = Module(self, idarea, idmodulo, descripcion, icono)
+        self.modules["sys"] = Module(self,"sys","sys","Administración",None)#Añadimos módulo sistema(falta icono)
             
         # Descargar proyecto . . . 
         self.cur.execute(""" SELECT idmodulo, nombre, sha::varchar(16) FROM flfiles ORDER BY idmodulo, nombre """)
@@ -141,17 +142,16 @@ class Module(object):
         self.files[fileobj.filename] = fileobj
         
     def load(self):
-        print "Loading module %s . . . " % self.name
+        print "Loading module %s . . . " % self.name  
         try:
             self.actions = ModuleActions(self, self.path("%s.xml" % self.name))
             self.actions.load()
-            
             self.mainform = MainForm(self, self.path("%s.ui" % self.name))
             self.mainform.load()
         except Exception,e:
             print "ERROR al cargar modulo:", e
             return False
-        
+            
         # TODO: Load Main Script:
         self.mainscript = None
         # /-----------------------
@@ -350,11 +350,11 @@ class FLForm(QtGui.QWidget):
         self.bottomToolbar.layout.setMargin(0)
         self.bottomToolbar.layout.setSpacing(0)
         self.bottomToolbar.layout.addStretch()
-        #self.toolButtonClose = QtGui.QToolButton()
-        #self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
-        #self.toolButtonClose.clicked.connect(self.close)
-        #self.bottomToolbar.layout.addWidget(self.toolButtonClose)
-        #self.layout.addWidget(self.bottomToolbar)
+        self.toolButtonClose = QtGui.QToolButton()
+        self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
+        self.toolButtonClose.clicked.connect(self.close)
+        self.bottomToolbar.layout.addWidget(self.toolButtonClose)
+        self.layout.addWidget(self.bottomToolbar)
         self.setWindowTitle(action.alias)
         self.loaded = False
         if load: self.load()

@@ -19,11 +19,11 @@ class MainForm(QtGui.QWidget):
     tab = 0
     
     def closeFormTab(self, numero):
-        print"Cerrando pestaña número %d " % numero
+        #print"Cerrando pestaña número %d " % numero
         self.formTab.removeTab(numero)
         
     def addFormTab(self, widget):
-        print"Añadiendo Form a pestaña"      
+        #print"Añadiendo Form a pestaña"      
         self.formTab.addTab( widget, widget.windowTitle() )
         self.formTab.setCurrentWidget (widget)
         
@@ -34,7 +34,7 @@ class MainForm(QtGui.QWidget):
 
         
     def addModuleInTab(self, module):
-        print "Procesando %s " % module.name
+        #print "Procesando %s " % module.name
         #button = QtGui.QCommandLinkButton(module.description)
         #button.setText(module.description)
         #button.clicked.connect(module.run)
@@ -48,11 +48,11 @@ class MainForm(QtGui.QWidget):
             for i in range(self.tab):
                 if self.areas[i] == module.areaid:
                     moduleToolBox = self.toolBoxs[i]
-                    print"Cargando en pestaña %d" % i
+                    #print"Cargando en pestaña %d" % i
                     moduleToolBox.addItem(vBLayout, module.description)
                     
         else:
-            print "Nueva Pestaña"
+            #print "Nueva Pestaña"
             vl.layout = QtGui.QVBoxLayout() #layout de la pestaña
             moduleToolBox = QtGui.QToolBox(self)#toolbox de cada módulo            
             moduleToolBox.addItem(vBLayout, module.description)
@@ -64,7 +64,6 @@ class MainForm(QtGui.QWidget):
             vl.layout.addWidget(moduleToolBox)
             self.addAreaTab(vl, module)
             
+        module.run(vBLayout.layout)
 
-        module.run(vBLayout.layout)            
-                
                     
