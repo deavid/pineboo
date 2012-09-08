@@ -169,11 +169,6 @@ class Module(object):
     def run(self,vBLayout):
         if self.loaded == False: self.load()
         print "Running module %s . . . " % self.name
-        self.widget = QtGui.QWidget()
-        w = self.widget
-        w.layout = QtGui.QVBoxLayout()
-        label = QtGui.QLabel(u"Módulo %s\nEscoja una acción:" % self.description)
-        w.layout.addWidget(label)
         for key, action in self.mainform.actions.items():
             button = QtGui.QCommandLinkButton(action.text)
             button.clicked.connect(action.run)
@@ -327,8 +322,10 @@ class XMLAction(XMLStruct):
     def openDefaultForm(self):
         print "Opening default form for Action", self.name
         self.load()
+        w = mainForm.mainWindow
         self.mainform_widget.init()
-        self.mainform_widget.show()
+        w.addFormTab(self.mainform_widget)
+        #self.mainform_widget.show()
         
 class FLForm(QtGui.QWidget):
     known_instances = {}
@@ -353,11 +350,11 @@ class FLForm(QtGui.QWidget):
         self.bottomToolbar.layout.setMargin(0)
         self.bottomToolbar.layout.setSpacing(0)
         self.bottomToolbar.layout.addStretch()
-        self.toolButtonClose = QtGui.QToolButton()
-        self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
-        self.toolButtonClose.clicked.connect(self.close)
-        self.bottomToolbar.layout.addWidget(self.toolButtonClose)
-        self.layout.addWidget(self.bottomToolbar)
+        #self.toolButtonClose = QtGui.QToolButton()
+        #self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
+        #self.toolButtonClose.clicked.connect(self.close)
+        #self.bottomToolbar.layout.addWidget(self.toolButtonClose)
+        #self.layout.addWidget(self.bottomToolbar)
         self.setWindowTitle(action.alias)
         self.loaded = False
         if load: self.load()
@@ -470,6 +467,7 @@ def main():
             sys.exit(app.exec_())
     else:
             w = mainForm.MainForm()
+            mainForm.mainWindow = w
             w.load()
             for module in project.modules.values():
                 w.addModuleInTab(module)

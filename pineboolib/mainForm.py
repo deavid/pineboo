@@ -1,20 +1,36 @@
 # encoding: UTF-8
-from PyQt4 import QtGui, uic
+from PyQt4 import QtGui, QtCore, uic
 import main
 
+mainWindow = QtGui.QWidget
 
 class MainForm(QtGui.QWidget):
     def load(self):
         self.ui = uic.loadUi(main.filedir('forms/mainform.ui'), self)
         self.areasTab = self.ui.areasTab  
         self.areasTab.removeTab(0) #Borramos tab de ejemplo.
-        
+        self.formTab = self.ui.formTab
+        self.formTab.setTabsClosable(True)
+        self.connect(self.formTab, QtCore.SIGNAL('tabCloseRequested(int)'), self.closeFormTab)
+        self.formTab.removeTab(0)
+            
     areas = []
     toolBoxs = []
     tab = 0
+    
+    def closeFormTab(self, numero):
+        print"Cerrando pestaña número %d " % numero
+        self.formTab.removeTab(numero)
+        
+    def addFormTab(self, widget):
+        print"Añadiendo Form a pestaña"      
+        self.formTab.addTab( widget, widget.windowTitle() )
+        self.formTab.setCurrentWidget (widget)
+        
+        
 
     def addAreaTab(self, widget, module ):
-        self.areasTab.addTab( widget, module.areaid)    
+        self.areasTab.addTab( widget, module.areaid)  
 
         
     def addModuleInTab(self, module):
