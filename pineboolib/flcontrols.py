@@ -452,3 +452,30 @@ class FLTableDB(QtGui.QTableView):
 class FLTable(QtGui.QTableWidget):
     pass
     
+class FLFormSearchDB( QtGui.QWidget ):
+    _accepted = None
+    _cursor = None
+    
+    def __init__(self,cursor):
+        self._accepted = False
+    
+    def setCursor(self):
+        print"Definiendo cursor"
+    
+    def setMainWidget(self):
+        print"Creamos la ventana"
+    
+    def exec_(self, valor):
+        print"Ejecutamos la ventana y esperamos respuesta, introducimos desde y hasta en cursor"
+        return valor
+    
+    def setFilter(self):
+        print"configuramos Filtro"
+    
+    def accepted(self):
+        return self._accepted
+    
+    def cursor(self):
+        return self._cursor
+    
+    

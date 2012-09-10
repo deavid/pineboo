@@ -41,3 +41,6 @@ class FormDBWidget(QtGui.QWidget):
     
     def cursor(self):
         return self._cursor
+
+def FLFormSearchDB(name):
+    return flcontrols.FLFormSearchDB(name)
