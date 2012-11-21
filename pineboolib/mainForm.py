@@ -1,6 +1,6 @@
 # encoding: UTF-8
 from PyQt4 import QtGui, QtCore, uic
-import main
+import main,traceback
 
 mainWindow = QtGui.QWidget
 
@@ -63,7 +63,12 @@ class MainForm(QtGui.QWidget):
             vl.setLayout(vl.layout)
             vl.layout.addWidget(moduleToolBox)
             self.addAreaTab(vl, module)
+        try:
+            module.run(vBLayout.layout)
+        except Exception:
+            print "ERRROR al procesar modulo %s:" % module.name
+            print traceback.format_exc()
+            print "---"
             
-        module.run(vBLayout.layout)
 
                     
