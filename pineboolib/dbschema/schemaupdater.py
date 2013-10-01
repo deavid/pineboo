@@ -15,7 +15,12 @@ def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
                     recover=False,
                     remove_blank_text=remove_blank_text,
                     )
-    tree = etree.parse(file_alike, parser)
+    try:
+        tree = etree.parse(file_alike, parser)
+    except Exception, e:
+        print "Error al procesar tabla:", nombre
+        print "ERROR:" , e
+        return None
     root = tree.getroot()
     
     objname = root.xpath("name")[0]

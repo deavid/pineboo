@@ -12,6 +12,7 @@ import re,subprocess
 import qsatype, qsaglobals
 import pineboolib
 import DlgConnect, mainForm
+import traceback
 
 Qt = QtCore.Qt
 
@@ -87,6 +88,11 @@ class Project(object):
                         self.dbauth.username, self.dbauth.password
                     )
         self.conn = psycopg2.connect(conninfostr)
+        try:
+            self.conn.set_client_encoding("UTF8")
+        except Exception:
+            print traceback.format_exc()
+        
         self.cur = self.conn.cursor()
         # Obtener modulos activos
         self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = TRUE """)
@@ -116,7 +122,14 @@ class Project(object):
             for (contenido,) in cur2:
                 f2 = open(self.dir("cache",fileobj.filekey),"w")
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
-                f2.write(contenido.decode("UTF-8").encode("ISO-8859-15"))
+                txt = ""
+                try:
+                    txt = contenido.decode("UTF-8").encode("ISO-8859-15")
+                except Exception, e:
+                    print "Error al decodificar" ,idmodulo, nombre
+                    txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
+                
+                f2.write(txt)
         
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
@@ -142,7 +155,7 @@ class Module(object):
         self.files[fileobj.filename] = fileobj
         
     def load(self):
-        print "Loading module %s . . . " % self.name  
+        #print "Loading module %s . . . " % self.name  
         try:
             self.actions = ModuleActions(self, self.path("%s.xml" % self.name))
             self.actions.load()
@@ -160,6 +173,9 @@ class Module(object):
             name, ext = os.path.splitext(tablefile)
             contenido = unicode(open(self.path(tablefile)).read(),"ISO-8859-15")
             tableObj = parseTable(name, contenido)
+            if tableObj is None: 
+                print "No se pudo procesar. Se ignora tabla %s/%s " % (self.name , name)
+                continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
         
@@ -168,7 +184,7 @@ class Module(object):
     
     def run(self,vBLayout):
         if self.loaded == False: self.load()
-        print "Running module %s . . . " % self.name
+        #print "Running module %s . . . " % self.name
         for key, action in self.mainform.actions.items():
             button = QtGui.QCommandLinkButton(action.text)
             button.clicked.connect(action.run)
