@@ -49,17 +49,20 @@ def getTableObj(tree,root):
     table.pk = []
     table.fields_idx = {}
     for xmlfield in table.xmlroot.xpath("field"):
-        field = Struct()
-        field.name = xmlfield.xpath("name/text()")[0]
-        field.alias = xmlfield.xpath("alias/text()")[0]
-        build_field_type(field, xmlfield)
-        field.pk = text2bool(one(xmlfield.xpath("pk/text()"),"false"))
-        field.default = one(xmlfield.xpath("default/text()"),None)
-        if field.pk: table.pk.append(field.name)
-        if field.name in table.fields_idx: raise ValueError("La tabla %s tiene el campo %s repetido" % (table.name,field.name))
-        field.number = len(table.fields)
-        table.fields_idx[field.name] = field.number
-        table.fields.append(field)
+        try:
+            field = Struct()
+            field.name = xmlfield.xpath("name/text()")[0]
+            field.alias = xmlfield.xpath("alias/text()")[0]
+            build_field_type(field, xmlfield)
+            field.pk = text2bool(one(xmlfield.xpath("pk/text()"),"false"))
+            field.default = one(xmlfield.xpath("default/text()"),None)
+            if field.pk: table.pk.append(field.name)
+            if field.name in table.fields_idx: raise ValueError("La tabla %s tiene el campo %s repetido" % (table.name,field.name))
+            field.number = len(table.fields)
+            table.fields_idx[field.name] = field.number
+            table.fields.append(field)
+        except Exception,e:
+            print "ERROR:", e
     return table
 
 def text2bool(text):

@@ -72,7 +72,9 @@ class Project(object):
         pineboolib.project = self
                 
     def path(self, filename):
-        if filename not in self.files: return None
+        if filename not in self.files:
+            print "WARN: Fichero %r no encontrado en el proyecto." % filename 
+            return None
         return self.files[filename].path()
 
     def dir(self, *x):
@@ -156,13 +158,23 @@ class Module(object):
         
     def load(self):
         #print "Loading module %s . . . " % self.name  
+        pathxml = self.path("%s.xml" % self.name)
+        pathui = self.path("%s.ui" % self.name)
+        if pathxml is None:
+            print "ERROR: modulo %r: fichero XML no existe" % (self.name)
+            return False
+        if pathui is None:
+            print "ERROR: modulo %r: fichero UI no existe" % (self.name)
+            return False
+        
         try:
-            self.actions = ModuleActions(self, self.path("%s.xml" % self.name))
+            self.actions = ModuleActions(self, pathxml)
             self.actions.load()
-            self.mainform = MainForm(self, self.path("%s.ui" % self.name))
+            self.mainform = MainForm(self, pathui)
             self.mainform.load()
         except Exception,e:
-            print "ERROR al cargar modulo:", e
+            print "ERROR al cargar modulo %r:" % self.name, e
+            print traceback.format_exc(),"---"
             return False
             
         # TODO: Load Main Script:
@@ -184,8 +196,13 @@ class Module(object):
     
     def run(self,vBLayout):
         if self.loaded == False: self.load()
+        if self.loaded == False: 
+            print "WARN: Ignorando modulo %r por fallo al cargar" % (self.name)
+            return False
         #print "Running module %s . . . " % self.name
-        for key, action in self.mainform.actions.items():
+        for key in self.mainform.toolbar:
+            action = self.mainform.actions[key]
+            
             button = QtGui.QCommandLinkButton(action.text)
             button.clicked.connect(action.run)
             vBLayout.addWidget(button)
@@ -307,6 +324,10 @@ class MainForm(object):
             action.mod = self.mod
             action.prj = self.prj
             self.actions[action.name] = action
+
+        self.toolbar = []
+        for toolbar_action in self.root.xpath("toolbars//action"):
+            self.toolbar.append( toolbar_action.get("name") )
         #self.ui = WMainForm()
         #self.ui.load(self.path)
         #self.ui.show()
@@ -346,7 +367,10 @@ class XMLAction(XMLStruct):
 class FLForm(QtGui.QWidget):
     known_instances = {}
     def __init__(self, action, load=False):
-        assert((self.__class__,action) not in self.known_instances)
+        try:
+            assert((self.__class__,action) not in self.known_instances)
+        except AssertionError:
+            print "WARN: Clase %r ya estaba instanciada, reescribiendo!. Puede que se estén perdiendo datos!" % ((self.__class__,action),)
         self.known_instances[(self.__class__,action)] = self
         QtGui.QWidget.__init__(self)
         self.action = action
@@ -387,11 +411,7 @@ class FLMainForm(FLForm):
         self.iface = None
         try: script = self.action.scriptform or None
         except AttributeError: script = None
-        if script: 
-            self.load_script(script)
-        else:
-            print "WARN: Ingored script for form %s." % self.action.form
-            self.widget = QtGui.QWidget()
+        self.load_script(script)
         self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
         if self.action.form:
@@ -405,19 +425,23 @@ class FLMainForm(FLForm):
             self.iface.init() 
     
     def load_script(self,scriptname):
-        print "Loading script %s . . . " % scriptname
-        # Intentar convertirlo a Python primero con flscriptparser2
-        script_path = self.prj.path(scriptname+".qs")
-        if not os.path.isfile(script_path): raise IOError
-        python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
-        if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-            print "Convirtiendo a Python . . ."
-            ret = subprocess.call(["flscriptparser2", "--full",script_path])
-        if not os.path.isfile(python_script_path):
-            raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
-
-        self.script = imp.load_source(scriptname,python_script_path)
-        #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+        python_script_path = None
+        if scriptname:
+            print "Loading script %s . . . " % scriptname
+            # Intentar convertirlo a Python primero con flscriptparser2
+            script_path = self.prj.path(scriptname+".qs")
+            if not os.path.isfile(script_path): raise IOError
+            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
+            if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
+                print "Convirtiendo a Python . . ."
+                ret = subprocess.call(["flscriptparser2", "--full",script_path])
+            if not os.path.isfile(python_script_path):
+                raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
+            self.script = imp.load_source(scriptname,python_script_path)
+            #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+        else:
+            import emptyscript
+            self.script = emptyscript
         self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj)
         self.widget = self.script.form
         self.iface = self.widget.iface

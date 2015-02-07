@@ -66,9 +66,8 @@ class MainForm(QtGui.QWidget):
         try:
             module.run(vBLayout.layout)
         except Exception:
-            print "ERRROR al procesar modulo %s:" % module.name
-            print traceback.format_exc()
-            print "---"
+            print "ERROR al procesar modulo %s:" % module.name
+            print traceback.format_exc(),"---"
             
 
                     
