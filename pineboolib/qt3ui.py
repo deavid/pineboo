@@ -16,6 +16,13 @@ def loadUi(path, widget):
     tree = etree.parse(path, parser)
     root = tree.getroot()
     ICONS = {}
+    formname = widget._action.form # TODO: MAL! el nombre del formulario es segun el UI
+    # TODO: cuando conectamos en UI un control a una función QS usamos de 
+    # receptor el formulario padre, por lo que la conexión recibirá el nombre del form padre.
+    # TODO: Aunque es poco usual, es posible realizar una conexión a un slot que propiamente 
+    # pertenece al formulario padre, por lo que ambos sistemas deben convivir, dar preferencia
+    # al slot QS y si no existe intentar buscarlo en el UI.
+    
     for xmlimage in root.xpath("images/image"):
         loadIcon(xmlimage)
         
@@ -29,6 +36,8 @@ def loadUi(path, widget):
         slot_name = xmlconnection.xpath("slot/text()")[0]
         sender = widget.findChild(QtGui.QWidget, sender_name)
         if sender is None: print "Connection sender not found:", sender_name
+        if receiv_name == formname:
+            print "Conectando de UI a QS: (%r.%r -> %r.%r)" % (sender_name, signal_name, receiv_name, slot_name)
         receiver = widget.findChild(QtGui.QWidget, receiv_name)
         if receiver is None: print "Connection receiver not found:", receiv_name
         if sender is None or receiver is None: continue
