@@ -2,3 +2,7 @@
 *~
 tempdata/*
 projects/*
+share/eneboo/scripts/*.py
+share/eneboo/scripts/*.qs.xml
+
+
