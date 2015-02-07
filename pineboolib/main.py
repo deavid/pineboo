@@ -275,7 +275,10 @@ class ModuleActions(object):
         action.table = None
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
-        setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load))
+        if hasattr(qsaglobals,action.name):
+            print "INFO: No se sobreescribie variable de entorno", action.name
+        else:    
+            setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load))
         for xmlaction in self.root:
             action =  XMLAction(xmlaction)
             action.mod = self
@@ -422,7 +425,11 @@ class FLMainForm(FLForm):
     
     def init(self):
         if self.iface:
-            self.iface.init() 
+            try:
+                self.iface.init() 
+            except Exception,e:
+                print "ERROR al inicializar script de la accion %r:" % self.action.name, e
+                print traceback.format_exc(),"---"
     
     def load_script(self,scriptname):
         python_script_path = None
@@ -437,8 +444,16 @@ class FLMainForm(FLForm):
                 ret = subprocess.call(["flscriptparser2", "--full",script_path])
             if not os.path.isfile(python_script_path):
                 raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
-            self.script = imp.load_source(scriptname,python_script_path)
-            #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+            try:
+                self.script = imp.load_source(scriptname,python_script_path)
+                #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+            except Exception,e:
+                import emptyscript
+                self.script = emptyscript
+                print "ERROR al cargar script QS para la accion %r:" % self.action.name, e
+                print traceback.format_exc(),"---"
+                
+            
         else:
             import emptyscript
             self.script = emptyscript

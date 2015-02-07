@@ -196,7 +196,8 @@ class AQGlobalFunctions {
   
   static function mapConnect(obj, signal, functionName) {
     const c = count_ % 100;
-    var sigMap = mappers_[c] = new AQSignalMapper(obj);
+    var sigMap = new AQSignalMapper(obj);
+    mappers_[c] = sigMap;
     var killMapper = function() {
       mappers_[c] = undefined;
     }
