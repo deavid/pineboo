@@ -41,6 +41,9 @@ class MainForm(QtGui.QWidget):
         vl = QtGui.QWidget()
         vBLayout = QtGui.QWidget()
         vBLayout.layout = QtGui.QVBoxLayout() #layout de cada módulo.
+        vBLayout.layout.setSpacing(0)
+        vBLayout.layout.setContentsMargins(1,2,2,0)
+        
         vBLayout.setLayout(vBLayout.layout)
         #Creamos pestañas de areas y un vBLayout por cada módulo. Despues ahí metemos los actions de cada módulo
         if self.areas.count(module.areaid):

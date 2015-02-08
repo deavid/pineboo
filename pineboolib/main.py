@@ -200,6 +200,8 @@ class Module(object):
             print "WARN: Ignorando modulo %r por fallo al cargar" % (self.name)
             return False
         #print "Running module %s . . . " % self.name
+        vBLayout.setSpacing(0)
+        vBLayout.setContentsMargins(1,5,5,0)
         for key in self.mainform.toolbar:
             action = self.mainform.actions[key]
             
