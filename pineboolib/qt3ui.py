@@ -16,12 +16,6 @@ def loadUi(path, widget):
     tree = etree.parse(path, parser)
     root = tree.getroot()
     ICONS = {}
-    formname = widget._action.form # TODO: MAL! el nombre del formulario es segun el UI
-    # TODO: cuando conectamos en UI un control a una función QS usamos de 
-    # receptor el formulario padre, por lo que la conexión recibirá el nombre del form padre.
-    # TODO: Aunque es poco usual, es posible realizar una conexión a un slot que propiamente 
-    # pertenece al formulario padre, por lo que ambos sistemas deben convivir, dar preferencia
-    # al slot QS y si no existe intentar buscarlo en el UI.
     
     for xmlimage in root.xpath("images/image"):
         loadIcon(xmlimage)
@@ -29,16 +23,31 @@ def loadUi(path, widget):
     for xmlwidget in root.xpath("widget"):
         loadWidget(xmlwidget,widget)
 
+    formname = widget.objectName() # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     for xmlconnection in root.xpath("connections/connection"):
         sender_name = xmlconnection.xpath("sender/text()")[0]
         signal_name = xmlconnection.xpath("signal/text()")[0]
         receiv_name = xmlconnection.xpath("receiver/text()")[0]
         slot_name = xmlconnection.xpath("slot/text()")[0]
-        sender = widget.findChild(QtGui.QWidget, sender_name)
+        if sender_name == formname:
+            sender = widget
+        else:
+            sender = widget.findChild(QtGui.QWidget, sender_name)
+        receiver = None
         if sender is None: print "Connection sender not found:", sender_name
         if receiv_name == formname:
-            print "Conectando de UI a QS: (%r.%r -> %r.%r)" % (sender_name, signal_name, receiv_name, slot_name)
-        receiver = widget.findChild(QtGui.QWidget, receiv_name)
+            receiver = widget
+            fn_name = slot_name.rstrip("()")
+            print "Conectando de UI a QS: (%r.%r -> %r.%r)" % (sender_name, signal_name, receiv_name, fn_name)
+            #print dir(widget.iface)
+            if hasattr(widget.iface, fn_name):
+                try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), getattr(widget.iface, fn_name))
+                except Exception, e: 
+                    print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name), get_attr(widget.iface, fn_name)
+                    print "Error:", e.__class__.__name__, e
+                continue
+
+        if receiver is None: receiver = widget.findChild(QtGui.QWidget, receiv_name)
         if receiver is None: print "Connection receiver not found:", receiv_name
         if sender is None or receiver is None: continue
         try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))

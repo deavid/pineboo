@@ -43,6 +43,16 @@ class QButtonGroup(QtGui.QFrame):
     
 
 class FLSqlQuery(ProjectClass):
+    def __init__(self, name = None, conn = None):
+        super(FLSqlQuery,self).__init__()
+    
+        if name:
+            # Cargar plantilla de query desde .qry
+            print "FIXME: Cargar plantilla de query %r (.qry)" % name
+        if conn:
+            # Asociar a otra conexión de base de datos
+            print "FIXME: Asociar a otra conexión %r " % conn
+            
     @NotImplementedWarn    
     def setTablesList(self, tablelist):
         return True
@@ -70,6 +80,15 @@ class FLSqlQuery(ProjectClass):
     @NotImplementedWarn    
     def size(self):
         return 0
+        
+    @NotImplementedWarn    
+    def valueParam(self, name):
+        return ""
+        
+    @NotImplementedWarn    
+    def setValueParam(self, name, value):
+        return None
+        
         
 
 class FLSqlCursor(ProjectClass):
@@ -457,25 +476,197 @@ class FLFormSearchDB( QtGui.QWidget ):
     _cursor = None
     
     def __init__(self,cursor):
+        super(FLFormSearchDB,self).__init__()
         self._accepted = False
+        self._cursor = FLSqlCursor(cursor)
     
+    @NotImplementedWarn    
     def setCursor(self):
         print"Definiendo cursor"
     
+    @NotImplementedWarn    
     def setMainWidget(self):
         print"Creamos la ventana"
     
+    @NotImplementedWarn    
     def exec_(self, valor):
         print"Ejecutamos la ventana y esperamos respuesta, introducimos desde y hasta en cursor"
         return valor
     
+    @NotImplementedWarn    
     def setFilter(self):
         print"configuramos Filtro"
     
+    @NotImplementedWarn    
     def accepted(self):
         return self._accepted
     
+    @NotImplementedWarn    
     def cursor(self):
         return self._cursor
     
+
+class FLReportViewer(ProjectClass):
+    Append = 0x01
+    Display = 0x02
+    PageBreak = 0x04
     
+    _requestUpdateReport = QtCore.pyqtSignal(int, name='requestUpdateReport')
+    
+    def __init__(self, *args):
+        super(FLReportViewer,self).__init__()
+        #  FLReportViewerInterface() : QObject(0), obj_(0) {
+        #  FLReportViewerInterface(FLReportViewer *obj) : QObject(obj), obj_(0) {
+        #  FLReportViewerInterface(QWidget *w, bool) : QObject(w) {
+        #  FLReportViewerInterface(FLReportEngine *r) : QObject(0) {
+        self.connects();
+
+    def connects(self):
+        pass
+
+    @NotImplementedWarn    
+    def renderReport(self, initRow = 0, initCol = 0, append = False, displayReport = True):
+        return True
+    
+    @NotImplementedWarn    
+    def renderReport2(self, initRow = 0, initCol = 0, flags = Display):
+        return True
+
+    @NotImplementedWarn    
+    def setReportData(self, query):
+        return None
+
+    @NotImplementedWarn    
+    def setReportData(self, xmlDoc):
+        return True
+
+    @NotImplementedWarn    
+    def setReportTemplate(self,  t, style = None):
+        return True
+
+    @NotImplementedWarn    
+    def reportData(self):
+        return None
+
+    @NotImplementedWarn    
+    def reportTemplate(self):
+        return None
+    
+    @NotImplementedWarn    
+    def exec_(self):
+        return
+
+    @NotImplementedWarn    
+    def show(self):
+        return
+
+    @NotImplementedWarn    
+    def csvData(self):
+        return None
+
+    @NotImplementedWarn    
+    def printReport(): return
+
+    @NotImplementedWarn    
+    def printReportToPS(outPsFile): return
+
+    @NotImplementedWarn    
+    def printReportToPDF(outPdfFile): return
+
+    @NotImplementedWarn    
+    def setNumCopies(numCopies): return
+
+    @NotImplementedWarn    
+    def setPrintToPos(ptp): return
+
+    @NotImplementedWarn    
+    def setPrinterName(pName): return
+
+    @NotImplementedWarn    
+    def reportPrinted(): return True
+
+    @NotImplementedWarn    
+    def reparent(parentFrame): return
+
+    @NotImplementedWarn    
+    def slotFirstPage(): return
+
+    @NotImplementedWarn    
+    def slotLastPage(): return 
+
+    @NotImplementedWarn    
+    def slotNextPage(): return
+
+    @NotImplementedWarn    
+    def slotPrevPage(): return
+
+    @NotImplementedWarn    
+    def slotZoomUp(): return
+
+    @NotImplementedWarn    
+    def slotZoomDown(): return
+
+    @NotImplementedWarn    
+    def exportFileCSVData(): return
+
+    @NotImplementedWarn    
+    def exportToPDF(): return
+
+    @NotImplementedWarn    
+    def sendEMailPDF(): return
+
+    @NotImplementedWarn    
+    def saveSVGStyle(): return
+
+    @NotImplementedWarn    
+    def saveSimpleSVGStyle(): return
+
+    @NotImplementedWarn    
+    def loadSVGStyle(): return
+
+    @NotImplementedWarn    
+    def setAutoClose(b): return
+
+    @NotImplementedWarn    
+    def setResolution(dpi): return
+
+    @NotImplementedWarn    
+    def setPixel(relDpi): return
+
+    @NotImplementedWarn    
+    def setDefaults(): return
+
+    @NotImplementedWarn    
+    def updateReport(): return
+
+    @NotImplementedWarn    
+    def updateDisplay(): return
+
+"""
+  void setStyleName(const QString &style) {
+  MReportViewer *rptViewer() {
+  void setReportEngine(FLReportEngine *r) {
+  void rptViewerEmbedInParent(QWidget *parentFrame) {
+  void setReportPages(FLReportPages *pgs) {
+  FLPicture *getCurrentPage() {
+  FLPicture *getFirstPage() {
+  FLPicture *getPreviousPage() {
+  FLPicture *getNextPage() {
+  FLPicture *getLastPage() {
+  FLPicture *getPageAt(uint i) {
+  void clearPages() {
+  void appendPage() {
+  int getCurrentIndex() {
+  void setCurrentPage(int idx) {
+  void setPageSize(int s) {
+  void setPageOrientation(int o) {
+  void setPageDimensions(QSize dim) {
+  int pageSize() {
+  int pageOrientation() {
+  QSize pageDimensions() {
+  int pageCount() {
+  QObject *child(const QString &objName) {
+  void disableSlotsPrintExports(bool disablePrints = true, bool disableExports = true) {
+  void setName(const QString &n) {
+  FLReportViewer *obj() {
+"""

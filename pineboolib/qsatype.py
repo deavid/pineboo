@@ -3,7 +3,7 @@ import os
 from PyQt4 import QtCore,QtGui
 import qsaglobals 
 import flcontrols
-from flcontrols import FLTable, FLTableDB, FLSqlCursor, FLUtil
+from flcontrols import FLTable, FLTableDB, FLSqlCursor, FLUtil, FLReportViewer
 
 def Object(x={}): return dict(x)
 
