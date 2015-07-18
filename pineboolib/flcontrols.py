@@ -387,11 +387,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def columnCount(self, parent = None):
         if parent is None: parent = QtCore.QModelIndex()
         if parent.isValid(): return 0
+        #print "colcount", self.cols
         return self.cols
 
     def rowCount(self, parent = None):
         if parent is None: parent = QtCore.QModelIndex()
         if parent.isValid(): return 0
+        #print "rowcount", self.rows
         return self.rows
 
     def headerData(self, section, orientation, role):
@@ -406,6 +408,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
             try:
                 val = self._data[row][col]
+                ret = ustr(val)
+                #print " data -> ", row, col, ret
                 return ustr(val)
             except Exception,e:
                 print "CursorTableModel.data:", row,col,e
@@ -422,7 +426,6 @@ class FLTableDB(QtGui.QTableView):
         self._v_header.setDefaultSectionSize(18)
         self._h_header = self.horizontalHeader()
         self._h_header.setDefaultSectionSize(70)
-        self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
         self._parent = parent
         while True:
             parent_cursor = getattr(self._parent,"_cursor", None)
@@ -446,12 +449,19 @@ class FLTableDB(QtGui.QTableView):
         else:
             self._cursor = None
         if self._cursor:
+            self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
             self.setModel(self._cursor._model)
             self.setSelectionModel(self._cursor.selection())
         self.tableRecords = self # control de tabla interno
         self.sort = []
+        q = QtCore.QTimer()
+        q.singleShot(100, self.loaded)
 
-
+    def loaded(self):
+        # Es necesario pasar a modo interactivo lo antes posible
+        # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
+        print "FLTableDB: setting columns in interactive mode"
+        self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
 
     def cursor(self):
         assert(self._cursor)
@@ -464,7 +474,8 @@ class FLTableDB(QtGui.QTableView):
     def putFirstCol(self, fN): return True
 
     def refresh(self):
-        self._cursor.refresh()
+        print "FLTableDB: refresh()"
+        #self._cursor.refresh()
 
     @QtCore.pyqtSlot()
     def insertRecord(self):
