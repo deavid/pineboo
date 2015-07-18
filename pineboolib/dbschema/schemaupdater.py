@@ -1,9 +1,14 @@
 # encoding: UTF-8
-from StringIO import StringIO
+from __future__ import print_function
+from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
+from io import StringIO
 from lxml import etree
 from pineboolib.dbschema import db_postgresql as pginspect
 
-class Struct:
+class Struct(object):
     pass
 
 def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
@@ -17,9 +22,9 @@ def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
                     )
     try:
         tree = etree.parse(file_alike, parser)
-    except Exception, e:
-        print "Error al procesar tabla:", nombre
-        print "ERROR:" , e
+    except Exception as e:
+        print("Error al procesar tabla:", nombre)
+        print("ERROR:" , e)
         return None
     root = tree.getroot()
 
@@ -27,10 +32,10 @@ def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
     query = root.xpath("query")
     if query:
         if query[-1].text != nombre:
-            print "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (objname.text,nombre)
+            print("WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (objname.text,nombre))
             query[-1].text = nombre
     elif objname.text != nombre:
-        print "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (objname.text,nombre)
+        print("WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (objname.text,nombre))
         objname.text = nombre
     return getTableObj(tree,root)
 
@@ -61,8 +66,8 @@ def getTableObj(tree,root):
             field.number = len(table.fields)
             table.fields_idx[field.name] = field.number
             table.fields.append(field)
-        except Exception,e:
-            print "ERROR:", e
+        except Exception as e:
+            print("ERROR:", e)
     return table
 
 def text2bool(text):
@@ -91,22 +96,22 @@ def update_table(conn, table):
     cur = conn.cursor()
     dbfields = {}
     otable = pginspect.get_relname_oid(conn, table.name)
-    print "Table:", otable.namespace, otable.name
+    print("Table:", otable.namespace, otable.name)
     for ocol in pginspect.get_table_columns(conn, otable):
         dbfields[ocol.name] = ocol
 
     for field in table.fields:
         ocol = dbfields.get(field.name,None)
-        print "Field:", field.name, "|", field.sql_type, "|", field.sql_nullable, "|", field.default
+        print("Field:", field.name, "|", field.sql_type, "|", field.sql_nullable, "|", field.default)
         if ocol is None:
             # TODO: Agregar el campo
             try:
                 cur.execute("""ALTER TABLE "%s" ADD COLUMN "%s" %s """ % (otable.name, field.name, field.sql_definition))
-            except Exception, e:
-                print "ALTER TABLE ERROR::" , e
+            except Exception as e:
+                print("ALTER TABLE ERROR::" , e)
             continue
-        print "Column:", ocol.name, "|", ocol.format_type, "|", ocol.sql_nullable, "|", ocol.format_extra
-    print
+        print("Column:", ocol.name, "|", ocol.format_type, "|", ocol.sql_nullable, "|", ocol.format_extra)
+    print()
 
 
 

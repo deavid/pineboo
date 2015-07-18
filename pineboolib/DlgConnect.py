@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import str
 # encoding: UTF-8
 import os
 from PyQt4 import QtGui, QtCore, uic
@@ -29,4 +31,4 @@ class DlgConnect(QtGui.QWidget):
     def findPathProject(self):
         filename = QtGui.QFileDialog.getExistingDirectory(self,"Seleccione Directorio")
         if filename:
-            DlgConnect.leFolder.setText(unicode(filename))
+            DlgConnect.leFolder.setText(str(filename))

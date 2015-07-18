@@ -1,5 +1,9 @@
 # encoding: UTF-8
-class Struct:
+
+from __future__ import unicode_literals
+from builtins import object
+
+class Struct(object):
     pass
 
 def get_oids(conn):
@@ -40,16 +44,16 @@ def get_relname_oid(conn, relname):
         obj.namespace = namespace
         obj.name = relname
         return obj
-        
+
 def get_oid_info(conn, obj):
     """
-        Obtiene información acerca del OID especificado. 
+        Obtiene información acerca del OID especificado.
         (probablemente para saber si es tabla, índice, etc)
     """
     cur = conn.cursor()
     cur.execute("""
-        SELECT relchecks, relkind, relhasindex, relhasrules, 
-                reltriggers <> 0 as relhastriggers, 
+        SELECT relchecks, relkind, relhasindex, relhasrules,
+                reltriggers <> 0 as relhastriggers,
                 relhasoids, '' as reserved, reltablespace
         FROM pg_catalog.pg_class WHERE oid = %s
         """, [obj.oid])
@@ -63,7 +67,7 @@ def get_oid_info(conn, obj):
         obj.reserved = reserved
         obj.reltablespace = reltablespace
         return obj
-        
+
 
 def get_table_columns(conn,obj):
     """
@@ -73,7 +77,7 @@ def get_table_columns(conn,obj):
     cur.execute("""
         SELECT a.attname,
           pg_catalog.format_type(a.atttypid, a.atttypmod),
-          (SELECT substring(pg_catalog.pg_get_expr(d.adbin, d.adrelid) for 128) 
+          (SELECT substring(pg_catalog.pg_get_expr(d.adbin, d.adrelid) for 128)
            FROM pg_catalog.pg_attrdef d
            WHERE d.adrelid = a.attrelid AND d.adnum = a.attnum AND a.atthasdef) as format_extra,
           a.attnotnull, a.attnum
@@ -103,8 +107,8 @@ def get_index_columns(conn,obj):
         WHERE a.attrelid = %s AND a.attnum > 0 AND NOT a.attisdropped
         ORDER BY a.attnum
         """, [obj.oid])
-    return [ name for (name,)  in cur ] 
-        
+    return [ name for (name,)  in cur ]
+
 def get_table_indexes(conn,obj):
     """
         Obtiene los indices de una tabla
@@ -116,7 +120,7 @@ def get_table_indexes(conn,obj):
         WHERE c.oid = %s AND c.oid = i.indrelid AND i.indexrelid = c2.oid
         ORDER BY i.indisprimary DESC, i.indisunique DESC, c2.relname
         """, [obj.oid])
-        
+
     for oid, name, isprimary, isunique, isclustered, isvalid, sql_definition, tablespace_oid in cur:
         index = Struct()
         index.oid = oid

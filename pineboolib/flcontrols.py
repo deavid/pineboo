@@ -1,4 +1,7 @@
 # encoding: UTF-8
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 import traceback
 import pineboolib
 #from pineboolib.qsaglobals import ustr
@@ -9,14 +12,14 @@ Qt = QtCore.Qt
 # TODO: separar en otro fichero de utilidades
 
 def ustr1(t):
-    if isinstance(t, unicode): return t
-    if isinstance(t, QtCore.QString): return unicode(t)
-    if isinstance(t, str): return unicode(t,"UTF-8")
+    if isinstance(t, str): return t
+    #if isinstance(t, QtCore.QString): return str(t)
+    #if isinstance(t, str): return str(t,"UTF-8")
     try:
         return str(t)
-    except Exception, e:
-        print "ERROR Coercing to string:", repr(t)
-        print "ERROR", e.__class__.__name__, str(e)
+    except Exception as e:
+        print("ERROR Coercing to string:", repr(t))
+        print("ERROR", e.__class__.__name__, str(e))
         return None
 
 def ustr(*t1):
@@ -25,8 +28,8 @@ def ustr(*t1):
 def NotImplementedWarn(fn):
     def newfn(*args,**kwargs):
         ret = fn(*args,**kwargs)
-        x_args = [ repr(a) for a in args] + [ "%s=%s" % (k,repr(v)) for k,v in kwargs.items()]
-        print "WARN: Function not yet implemented: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret))
+        x_args = [ repr(a) for a in args] + [ "%s=%s" % (k,repr(v)) for k,v in list(kwargs.items())]
+        print("WARN: Function not yet implemented: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
         return ret
     return newfn
 
@@ -65,10 +68,10 @@ class FLSqlQuery(ProjectClass):
 
         if name:
             # Cargar plantilla de query desde .qry
-            print "FIXME: Cargar plantilla de query %r (.qry)" % name
+            print("FIXME: Cargar plantilla de query %r (.qry)" % name)
         if conn:
             # Asociar a otra conexión de base de datos
-            print "FIXME: Asociar a otra conexión %r " % conn
+            print("FIXME: Asociar a otra conexión %r " % conn)
 
     @NotImplementedWarn
     def setTablesList(self, tablelist):
@@ -126,14 +129,14 @@ class FLSqlCursor(ProjectClass):
         return self._model.where_filters.get("main-filter", "")
 
     def setMainFilter(self, newFilter):
-        print "New main filter:", newFilter
+        print("New main filter:", newFilter)
         self._model.where_filters["main-filter"] = newFilter
 
     def setAction(self, actionname):
         try:
             self._action = self._prj.actions[actionname]
-        except KeyError, e:
-            print "Accion no encontrada:", actionname
+        except KeyError as e:
+            print("Accion no encontrada:", actionname)
             self._action = self._prj.actions["articulos"]
 
         if self._action.table:
@@ -162,12 +165,12 @@ class FLSqlCursor(ProjectClass):
         if self._current_row == current.row(): return False
         self._current_row = current.row()
         self._current_changed.emit(self.at())
-        print "cursor:%s , row:%d" %(self._action.table, self._current_row )
+        print("cursor:%s , row:%d" %(self._action.table, self._current_row ))
 
     def selection(self): return self._selection
 
     def select(self, where_filter = ""):
-        print "Select filter:", where_filter
+        print("Select filter:", where_filter)
         self._model.where_filters["select"] = where_filter
         self._model.refresh()
         return True
@@ -234,7 +237,7 @@ class FLSqlCursor(ProjectClass):
 
     def prev(self): return self.moveby(-1)
 
-    def next(self): return self.moveby(1)
+    def __next__(self): return self.moveby(1)
 
     def last(self): return self.move(self._model.rows-1)
 
@@ -252,23 +255,23 @@ class FLSqlCursor(ProjectClass):
 
     @QtCore.pyqtSlot()
     def insertRecord(self):
-        print "Insert record, please!", self._action.name
+        print("Insert record, please!", self._action.name)
 
     @QtCore.pyqtSlot()
     def editRecord(self):
-        print "Edit your record!", self._action.name
+        print("Edit your record!", self._action.name)
 
     @QtCore.pyqtSlot()
     def deleteRecord(self):
-        print "Drop the row!", self._action.name
+        print("Drop the row!", self._action.name)
 
     @QtCore.pyqtSlot()
     def browseRecord(self):
-        print "Inspect, inspect!", self._action.name
+        print("Inspect, inspect!", self._action.name)
 
     @QtCore.pyqtSlot()
     def copyRecord(self):
-        print "Clone your clone", self._action.name
+        print("Clone your clone", self._action.name)
 
 class ProgressDialog(QtGui.QWidget):
     def setup(self, title, steps):
@@ -368,7 +371,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
         newrows = cur.rowcount
         self.beginInsertRows(parent, 0, newrows - 1)
-        print "QUERY:", sql
+        print("QUERY:", sql)
         self.rows = newrows
         self._data = []
         for row in cur:
@@ -377,7 +380,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         topLeft = self.index(0,0)
         bottomRight = self.index(self.rows-1,self.cols-1)
         self.dataChanged.emit(topLeft,bottomRight)
-        print "rows:", self.rows
+        print("rows:", self.rows)
 
     def value(self, row, fieldname):
         if row < 0 or row >= self.rows: return None
@@ -411,9 +414,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 ret = ustr(val)
                 #print " data -> ", row, col, ret
                 return ustr(val)
-            except Exception,e:
-                print "CursorTableModel.data:", row,col,e
-                print traceback.format_exc()
+            except Exception as e:
+                print("CursorTableModel.data:", row,col,e)
+                print(traceback.format_exc())
                 raise
 
         return None
@@ -433,7 +436,7 @@ class FLTableDB(QtGui.QTableView):
             new_parent = self._parent.parentWidget()
             if new_parent is None: break
             self._parent = new_parent
-            print self._parent
+            print(self._parent)
 
         self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
@@ -444,7 +447,7 @@ class FLTableDB(QtGui.QTableView):
             action_or_cursor = parent_cursor
         if isinstance(action_or_cursor,FLSqlCursor):
             self._cursor = action_or_cursor
-        elif isinstance(action_or_cursor,basestring):
+        elif isinstance(action_or_cursor,str):
             self._cursor = FLSqlCursor(action_or_cursor)
         else:
             self._cursor = None
@@ -460,7 +463,7 @@ class FLTableDB(QtGui.QTableView):
     def loaded(self):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
-        print "FLTableDB: setting columns in interactive mode"
+        print("FLTableDB: setting columns in interactive mode")
         self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
 
     def cursor(self):
@@ -474,7 +477,7 @@ class FLTableDB(QtGui.QTableView):
     def putFirstCol(self, fN): return True
 
     def refresh(self):
-        print "FLTableDB: refresh()"
+        print("FLTableDB: refresh()")
         #self._cursor.refresh()
 
     @QtCore.pyqtSlot()
@@ -511,20 +514,20 @@ class FLFormSearchDB( QtGui.QWidget ):
 
     @NotImplementedWarn
     def setCursor(self):
-        print"Definiendo cursor"
+        print("Definiendo cursor")
 
     @NotImplementedWarn
     def setMainWidget(self):
-        print"Creamos la ventana"
+        print("Creamos la ventana")
 
     @NotImplementedWarn
     def exec_(self, valor):
-        print"Ejecutamos la ventana y esperamos respuesta, introducimos desde y hasta en cursor"
+        print("Ejecutamos la ventana y esperamos respuesta, introducimos desde y hasta en cursor")
         return valor
 
     @NotImplementedWarn
     def setFilter(self):
-        print"configuramos Filtro"
+        print("configuramos Filtro")
 
     @NotImplementedWarn
     def accepted(self):

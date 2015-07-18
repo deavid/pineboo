@@ -1,4 +1,8 @@
 # encoding: UTF-8
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 import sys, imp
 from optparse import OptionParser
 import os.path, os
@@ -8,20 +12,28 @@ import traceback
 try:
     from lxml import etree
 except ImportError:
-    print traceback.format_exc()
-    print "HINT: Instale el paquete python-lxml e intente de nuevo"
-
+    print(traceback.format_exc())
+    print()
+    print("HINT: Instale el paquete python3-lxml e intente de nuevo")
+    print()
+    sys.exit(32)
 try:
     import psycopg2
 except ImportError:
-    print traceback.format_exc()
-    print "HINT: Instale el paquete python-psycopg2 e intente de nuevo"
+    print(traceback.format_exc())
+    print()
+    print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
+    print()
+    sys.exit(32)
 
 try:
     from PyQt4 import QtGui, QtCore, uic
 except ImportError:
-    print traceback.format_exc()
-    print "HINT: Instale el paquete python-pyqt4 e intente de nuevo"
+    print(traceback.format_exc())
+    print()
+    print("HINT: Instale el paquete python3-pyqt4 e intente de nuevo")
+    print()
+    sys.exit(32)
 
 import pineboolib
 from pineboolib import qt3ui
@@ -61,7 +73,7 @@ class XMLStruct(Struct):
                 else:
                     text = aqtt(child.text)
                     key = child.tag
-                if isinstance(text, basestring): text = text.strip()
+                if isinstance(text, str): text = text.strip()
                 setattr(self, key, text)
                 self._attrs.append(key)
                 # print self.__name__, key, text
@@ -104,7 +116,7 @@ class Project(object):
 
     def path(self, filename):
         if filename not in self.files:
-            print "WARN: Fichero %r no encontrado en el proyecto." % filename
+            print("WARN: Fichero %r no encontrado en el proyecto." % filename)
             return None
         return self.files[filename].path()
 
@@ -125,7 +137,7 @@ class Project(object):
         try:
             self.conn.set_client_encoding("UTF8")
         except Exception:
-            print traceback.format_exc()
+            print(traceback.format_exc())
 
         self.cur = self.conn.cursor()
         # Obtener modulos activos
@@ -143,7 +155,7 @@ class Project(object):
         for idmodulo, nombre, sha in self.cur:
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
-            if nombre in self.files: print "WARN: file %s already loaded, overwritting..." % nombre
+            if nombre in self.files: print("WARN: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey+"\n")
@@ -154,14 +166,16 @@ class Project(object):
             cur2 = self.conn.cursor()
             cur2.execute(""" SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha::varchar(16) = %s""", [idmodulo, nombre, sha] )
             for (contenido,) in cur2:
-                f2 = open(self.dir("cache",fileobj.filekey),"w")
+                f2 = open(self.dir("cache",fileobj.filekey),"wb")
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
                 txt = ""
                 try:
-                    txt = contenido.decode("UTF-8").encode("ISO-8859-15")
-                except Exception, e:
-                    print "Error al decodificar" ,idmodulo, nombre
-                    txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
+                    #txt = contenido.decode("UTF-8").encode("ISO-8859-15")
+                    txt = contenido.encode("ISO-8859-15")
+                except Exception as e:
+                    print("Error al decodificar" ,idmodulo, nombre)
+                    #txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
+                    txt = contenido.encode("ISO-8859-15","replace")
 
                 f2.write(txt)
 
@@ -178,7 +192,7 @@ class Module(object):
         self.prj = project
         self.areaid = areaid
         self.name = name
-        self.description = description.decode("UTF-8")
+        self.description = description # En python2 era .decode(UTF-8)
         self.icon = icon
         self.files = {}
         self.tables = {}
@@ -193,10 +207,10 @@ class Module(object):
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
-            print "ERROR: modulo %r: fichero XML no existe" % (self.name)
+            print("ERROR: modulo %r: fichero XML no existe" % (self.name))
             return False
         if pathui is None:
-            print "ERROR: modulo %r: fichero UI no existe" % (self.name)
+            print("ERROR: modulo %r: fichero UI no existe" % (self.name))
             return False
 
         try:
@@ -204,9 +218,9 @@ class Module(object):
             self.actions.load()
             self.mainform = MainForm(self, pathui)
             self.mainform.load()
-        except Exception,e:
-            print "ERROR al cargar modulo %r:" % self.name, e
-            print traceback.format_exc(),"---"
+        except Exception as e:
+            print("ERROR al cargar modulo %r:" % self.name, e)
+            print(traceback.format_exc(),"---")
             return False
 
         # TODO: Load Main Script:
@@ -216,10 +230,14 @@ class Module(object):
         for tablefile in self.files:
             if not tablefile.endswith(".mtd"): continue
             name, ext = os.path.splitext(tablefile)
-            contenido = unicode(open(self.path(tablefile)).read(),"ISO-8859-15")
+            try:
+                contenido = str(open(self.path(tablefile),"rb").read(),"ISO-8859-15")
+            except UnicodeDecodeError as e:
+                print ("Error al leer el fichero", tablefile, e)
+                continue
             tableObj = parseTable(name, contenido)
             if tableObj is None:
-                print "No se pudo procesar. Se ignora tabla %s/%s " % (self.name , name)
+                print("No se pudo procesar. Se ignora tabla %s/%s " % (self.name , name))
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
@@ -230,7 +248,7 @@ class Module(object):
     def run(self,vBLayout):
         if self.loaded == False: self.load()
         if self.loaded == False:
-            print "WARN: Ignorando modulo %r por fallo al cargar" % (self.name)
+            print("WARN: Ignorando modulo %r por fallo al cargar" % (self.name))
             return False
         #print "Running module %s . . . " % self.name
         vBLayout.setSpacing(0)
@@ -308,7 +326,7 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals,action.name):
-            print "INFO: No se sobreescribie variable de entorno", action.name
+            print("INFO: No se sobreescribie variable de entorno", action.name)
         else:
             setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load))
         for xmlaction in self.root:
@@ -343,7 +361,7 @@ class MainForm(object):
                             )
             self.tree = etree.parse(self.path, self.parser)
         except etree.XMLSyntaxError:
-            print "Error cargando modulo", self.path
+            print("Error cargando modulo", self.path)
             self.parser = etree.XMLParser(
                             ns_clean=True,
                             encoding="ISO-8859-15",
@@ -372,7 +390,7 @@ class XMLMainFormAction(XMLStruct):
     text = ""
     def run(self):
         # Se asume conectada a "OpenDefaultForm()".
-        print "Running MainFormAction:", self.name, self.text
+        print("Running MainFormAction:", self.name, self.text)
         action = self.mod.actions[self.name]
         action.openDefaultForm()
 
@@ -388,14 +406,14 @@ class XMLAction(XMLStruct):
 
     def load(self):
         if self._loaded: return self.mainform_widget
-        print "Loading action %s . . . " % (self.name)
+        print("Loading action %s . . . " % (self.name))
         self.mainform_widget = FLMainForm(self, load = True)
         self._loaded = True
-        print "End of action load %s (iface:%s ; widget:%s)" % (self.name, repr(self.mainform_widget.iface),repr(self.mainform_widget.widget))
+        print("End of action load %s (iface:%s ; widget:%s)" % (self.name, repr(self.mainform_widget.iface),repr(self.mainform_widget.widget)))
         return self.mainform_widget
 
     def openDefaultForm(self):
-        print "Opening default form for Action", self.name
+        print("Opening default form for Action", self.name)
         self.load()
         from pineboolib import mainForm # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
         w = mainForm.mainWindow
@@ -409,7 +427,7 @@ class FLForm(QtGui.QWidget):
         try:
             assert((self.__class__,action) not in self.known_instances)
         except AssertionError:
-            print "WARN: Clase %r ya estaba instanciada, reescribiendo!. Puede que se estén perdiendo datos!" % ((self.__class__,action),)
+            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. Puede que se estén perdiendo datos!" % ((self.__class__,action),))
         self.known_instances[(self.__class__,action)] = self
         QtGui.QWidget.__init__(self)
         self.action = action
@@ -445,7 +463,7 @@ class FLMainForm(FLForm):
     iface = None
     def load(self):
         if self.loaded: return
-        print "Loading form %s . . . " % self.action.form
+        print("Loading form %s . . . " % self.action.form)
         self.script = None
         self.iface = None
         try: script = self.action.scriptform or None
@@ -463,30 +481,30 @@ class FLMainForm(FLForm):
         if self.iface:
             try:
                 self.iface.init()
-            except Exception,e:
-                print "ERROR al inicializar script de la accion %r:" % self.action.name, e
-                print traceback.format_exc(),"---"
+            except Exception as e:
+                print("ERROR al inicializar script de la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
 
     def load_script(self,scriptname):
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
         if scriptname:
-            print "Loading script %s . . . " % scriptname
+            print("Loading script %s . . . " % scriptname)
             # Intentar convertirlo a Python primero con flscriptparser2
             script_path = self.prj.path(scriptname+".qs")
             if not os.path.isfile(script_path): raise IOError
             python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-                print "Convirtiendo a Python . . ."
+                print("Convirtiendo a Python . . .")
                 ret = subprocess.call(["flscriptparser2", "--full",script_path])
             if not os.path.isfile(python_script_path):
                 raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             try:
                 self.script = imp.load_source(scriptname,python_script_path)
                 #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
-            except Exception,e:
-                print "ERROR al cargar script QS para la accion %r:" % self.action.name, e
-                print traceback.format_exc(),"---"
+            except Exception as e:
+                print("ERROR al cargar script QS para la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
 
 
         self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj)
@@ -542,11 +560,11 @@ def main():
 
     if options.action:
         objaction = None
-        for k,module in project.modules.items():
+        for k,module in list(project.modules.items()):
             try:
                 if not module.load(): continue
-            except Exception,e:
-                print "ERROR:", e.__class__.__name__, str(e)
+            except Exception as e:
+                print("ERROR:", e.__class__.__name__, str(e))
                 continue
             if options.action in module.actions:
                 objaction = module.actions[options.action]
@@ -556,7 +574,7 @@ def main():
     else:
         w = mainForm.mainWindow
         w.load()
-        for module in project.modules.values():
+        for module in list(project.modules.values()):
             w.addModuleInTab(module)
         w.show()
         ret = app.exec_()

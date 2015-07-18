@@ -1,4 +1,8 @@
 # encoding: UTF-8
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
+from builtins import object
 import re
 from PyQt4 import QtCore, QtGui
 
@@ -15,22 +19,24 @@ def ustr(*t1):
     return "".join([ ustr1(t) for t in t1 ])
 
 def ustr1(t):
-    if isinstance(t, unicode): return t
-    if isinstance(t, QtCore.QString): return unicode(t)
-    if isinstance(t, str): return unicode(t,"UTF-8")
+    if isinstance(t, str): return t
+    #if isinstance(t, QtCore.QString): return str(t)
+    if isinstance(t, str): return str(t,"UTF-8")
     try:
         return str(t)
-    except Exception, e:
-        print "ERROR Coercing to string:", repr(t)
-        print "ERROR", e.__class__.__name__, str(e)
+    except Exception as e:
+        print("ERROR Coercing to string:", repr(t))
+        print("ERROR", e.__class__.__name__, str(e))
         return None
 
 def debug(txt):
-    print "DEBUG:", ustr(txt)
+    print("DEBUG:", ustr(txt))
 
 
 def auto_qt_translate_text(text):
-    if isinstance(text,basestring):
+    if not isinstance(text,str): text=str(text)
+
+    if isinstance(text,str):
         if text.find("QT_TRANSLATE") != -1:
             match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
             if match: text = match.group(1)
@@ -51,7 +57,7 @@ aqtt = auto_qt_translate_text
 def connect(sender, signal, receiver, slot):
     # print "Connect::", sender, signal, receiver, slot
     if sender is None:
-        print "Connect::", sender, signal, receiver, slot
+        print("Connect::", sender, signal, receiver, slot)
         return False
     m = re.search(r"^(\w+).(\w+)(\(.*\))?", slot)
     if m:
@@ -61,9 +67,9 @@ def connect(sender, signal, receiver, slot):
         if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
             QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), remote_fn)
-        except RuntimeError, e:
-            print "ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn
-            print "ERROR %s : %s" % (e.__class__.__name__, str(e))
+        except RuntimeError as e:
+            print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
+            print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
             return False
     else:
         QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))

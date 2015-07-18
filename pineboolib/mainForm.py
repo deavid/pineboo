@@ -1,4 +1,7 @@
 # encoding: UTF-8
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import range
 import traceback
 import os.path
 
@@ -76,8 +79,8 @@ class MainForm(QtGui.QWidget):
         try:
             module.run(vBLayout.layout)
         except Exception:
-            print "ERROR al procesar modulo %s:" % module.name
-            print traceback.format_exc(), "---"
+            print("ERROR al procesar modulo %s:" % module.name)
+            print(traceback.format_exc(), "---")
 
 mainWindow = MainForm()
 

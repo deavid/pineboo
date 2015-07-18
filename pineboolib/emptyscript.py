@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+from builtins import object
 # encoding: UTF-8
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *

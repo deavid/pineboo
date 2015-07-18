@@ -1,4 +1,7 @@
 # encoding: UTF-8
+from __future__ import print_function
+from __future__ import unicode_literals
+from builtins import str
 from binascii import unhexlify
 
 from lxml import etree
@@ -42,32 +45,32 @@ def loadUi(path, widget):
         else:
             sender = widget.findChild(QtGui.QWidget, sender_name)
         receiver = None
-        if sender is None: print "Connection sender not found:", sender_name
+        if sender is None: print("Connection sender not found:", sender_name)
         if receiv_name == formname:
             receiver = widget
             fn_name = slot_name.rstrip("()")
-            print "Conectando de UI a QS: (%r.%r -> %r.%r)" % (sender_name, signal_name, receiv_name, fn_name)
+            print("Conectando de UI a QS: (%r.%r -> %r.%r)" % (sender_name, signal_name, receiv_name, fn_name))
             #print dir(widget.iface)
             if hasattr(widget.iface, fn_name):
                 try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), getattr(widget.iface, fn_name))
-                except Exception, e:
-                    print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name), getattr(widget.iface, fn_name)
-                    print "Error:", e.__class__.__name__, e
+                except Exception as e:
+                    print("Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name), getattr(widget.iface, fn_name))
+                    print("Error:", e.__class__.__name__, e)
                 continue
 
         if receiver is None: receiver = widget.findChild(QtGui.QWidget, receiv_name)
-        if receiver is None: print "Connection receiver not found:", receiv_name
+        if receiver is None: print("Connection receiver not found:", receiv_name)
         if sender is None or receiver is None: continue
         try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
-        except Exception, e:
-            print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name)
-            print "Error:", e.__class__.__name__, e
+        except Exception as e:
+            print("Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
+            print("Error:", e.__class__.__name__, e)
 
 
 def createWidget(classname,parent = None):
     cls =  getattr(flcontrols, classname, None) or getattr(QtGui, classname, None)
     if cls is None:
-        print "WARN: Class name not found in QtGui:" , classname
+        print("WARN: Class name not found in QtGui:" , classname)
         w = QtGui.QWidget(parent)
         w.setStyleSheet("* { background-color: #fa3; } ")
         return w
@@ -94,22 +97,22 @@ def loadWidget(xml, widget = None):
         else:
             set_fn = getattr(widget, setpname, None)
         if set_fn is None:
-            print "Missing property", pname, " for ", widget.__class__.__name__
+            print("Missing property", pname, " for ", widget.__class__.__name__)
             return
         #print "Found property", pname
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
                 value = int(xmlprop.get("stdset"))
-            except Exception,e: value = 0
+            except Exception as e: value = 0
             if pname == "contentsMargins":
                 value = QtCore.QMargins(value, value, value, value)
         else:
             value = loadVariant(xmlprop)
 
         try: set_fn(value)
-        except Exception, e:
-            print e, repr(value)
-            print etree.tostring(xmlprop)
+        except Exception as e:
+            print(e, repr(value))
+            print(etree.tostring(xmlprop))
 
     def process_layout_box(xmllayout, widget = widget, mode = "box"):
         for c in xmllayout:
@@ -140,7 +143,7 @@ def loadWidget(xml, widget = None):
                     else:
                         widget.layout.rowStretch(row)
             else:
-                print "Unknown layout xml tag", repr(c.tag)
+                print("Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
     properties = []
@@ -167,7 +170,7 @@ def loadWidget(xml, widget = None):
                 prop1[k] = v
             widget.addItem(prop1["text"])
             continue
-        print "Unknown widget xml tag", repr(c.tag)
+        print("Unknown widget xml tag", repr(c.tag))
     for c in properties:
         process_property(c)
 
@@ -192,9 +195,9 @@ def loadProperty(xml):
         return (xml.get("name"), _loadVariant(variant))
 
 def u(x):
-    if type(x) is unicode: return x
+    if type(x) is str: return x
     if type(x) is str: return x.decode("UTF-8","replace")
-    return unicode(str(x))
+    return str(str(x))
 
 def b(x):
     x = x.lower()
@@ -204,7 +207,7 @@ def b(x):
     if x[0] == "0": return False
     if x == "on": return True
     if x == "off": return False
-    print "Bool?:", repr(x)
+    print("Bool?:", repr(x))
     return None
 
 
@@ -250,9 +253,9 @@ def _loadVariant(variant):
             try:
                 if c.tag == "bold": p.setBold(bv)
                 elif c.tag == "italic": p.setItalic(bv)
-                else: print "unknown font style type" ,repr(c.tag)
-            except Exception, e:
-                print e
+                else: print("unknown font style type" ,repr(c.tag))
+            except Exception as e:
+                print(e)
         return p
     if variant.tag == "enum":
         v = None
@@ -262,6 +265,6 @@ def _loadVariant(variant):
             if v is not None: return v
 
 
-    print "Unknown variant:", etree.tostring(variant)
+    print("Unknown variant:", etree.tostring(variant))
 
 
