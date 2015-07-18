@@ -1,8 +1,13 @@
 # encoding: UTF-8
 from __future__ import print_function
 from __future__ import unicode_literals
-from future import standard_library
-standard_library.install_aliases()
+try:
+    from future import standard_library
+    standard_library.install_aliases()
+except ImportError:
+    print "Error al importar la libreria python future. http://python-future.org/"
+    print "Esta librería sirve para que python2 se comporte más parecido a python3."
+    print "Puede que el programa funcione correctamente sin ella."
 from builtins import object
 from io import StringIO
 from lxml import etree
