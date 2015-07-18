@@ -37,7 +37,8 @@ def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file_
 
 class WMainForm(QtGui.QMainWindow):
     def load(self,path):
-        self.ui = qt3ui.loadUi(path, self)
+        # self.ui = loadUi?? <-- borrame 
+        qt3ui.loadUi(path, self)
 
 def one(x, default = None):
     try:
@@ -68,6 +69,18 @@ class XMLStruct(Struct):
         txtattrs = " ".join(attrs)
         return "<%s.%s %s>" % (self.__class__.__name__, self.__name__, txtattrs)
         
+    def _v(self, k, default=None):
+        return getattr(self, k, default)
+
+class DBServer(XMLStruct):
+    host = "127.0.0.1"
+    port = "5432"
+    
+class DBAuth(XMLStruct):
+    username = "postgres"
+    password = "passwd"
+    
+        
     
 class Project(object):
     def load(self, filename):
@@ -78,8 +91,8 @@ class Project(object):
                         )
         self.tree = etree.parse(filename, self.parser)
         self.root = self.tree.getroot()
-        self.dbserver = XMLStruct(one(self.root.xpath("database-server")))
-        self.dbauth = XMLStruct(one(self.root.xpath("database-credentials")))
+        self.dbserver = DBServer(one(self.root.xpath("database-server")))
+        self.dbauth = DBAuth(one(self.root.xpath("database-credentials")))
         self.dbname = one(self.root.xpath("database-name/text()"))
         self.apppath = one(self.root.xpath("application-path/text()"))
         self.tmpdir = filedir("../tempdata")
@@ -262,12 +275,9 @@ class DelayedObjectProxyLoader(object):
             self.loaded_obj = self._obj(*self._args,**self._kwargs)
         return self.loaded_obj
         
-    def __getattr__(self, name):
-        try:
-            return object.__getattr__(self,name)
-        except AttributeError:
-            obj = self.__load()
-            return getattr(obj,name)
+    def __getattr__(self, name): # Solo se lanza si no existe la propiedad.
+        obj = self.__load()
+        return getattr(obj,name)
         
 class ModuleActions(object):
     def __init__(self, module, path):
@@ -355,6 +365,8 @@ class MainForm(object):
         #self.ui.show()
 
 class XMLMainFormAction(XMLStruct):
+    name = "unnamed"
+    text = ""
     def run(self):
         # Se asume conectada a "OpenDefaultForm()".
         print "Running MainFormAction:", self.name, self.text
@@ -364,10 +376,11 @@ class XMLMainFormAction(XMLStruct):
 class XMLAction(XMLStruct):
     def __init__(self, *args, **kwargs):
         super(XMLAction,self).__init__(*args, **kwargs)
-        self.form = getattr(self, "form", None)
-        self.script = getattr(self, "script", None)
-        self.mainform = getattr(self, "mainform", None)
-        self.mainscript = getattr(self, "mainscript", None)
+        self.form = self._v("form")
+        self.script = self._v("script")
+        self.mainform = self._v("mainform")
+        self.mainscript = self._v("mainscript")
+        self.mainform_widget = None
         self._loaded = False
     
     def load(self):
@@ -540,8 +553,7 @@ def main():
             objaction.openDefaultForm()
             sys.exit(app.exec_())
     else:
-            w = mainForm.MainForm()
-            mainForm.mainWindow = w
+            w = mainForm.mainWindow
             w.load()
             for module in project.modules.values():
                 w.addModuleInTab(module)

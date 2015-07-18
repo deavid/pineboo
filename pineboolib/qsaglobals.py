@@ -53,9 +53,9 @@ def connect(sender, signal, receiver, slot):
     m = re.search("^(\w+).(\w+)(\(.*\))?", slot)
     if m:
         remote_obj = getattr(receiver, m.group(1))
-        if remote_obj is None: raise AttribueError, "Object %s not found on %s" % (remote_obj, str(receiver))
+        if remote_obj is None: raise AttributeError, "Object %s not found on %s" % (remote_obj, str(receiver))
         remote_fn = getattr(remote_obj, m.group(2))
-        if remote_fn is None: raise AttribueError, "Object %s not found on %s" % (remote_fn, remote_obj)
+        if remote_fn is None: raise AttributeError, "Object %s not found on %s" % (remote_fn, remote_obj)
         try:
             QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), remote_fn)
         except RuntimeError, e:

@@ -134,6 +134,7 @@ def get_table_parents(conn,obj):
     """
         Obtiene las tablas padres de una tabla (tablas de las que hereda una tabla)
     """
+    cur = conn.cursor()
     cur.execute("""
         SELECT c.oid::pg_catalog.regclass, c.relname, n.nspname
         FROM pg_catalog.pg_class c

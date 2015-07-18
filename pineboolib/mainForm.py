@@ -2,8 +2,6 @@
 from PyQt4 import QtGui, QtCore, uic
 import main,traceback
 
-mainWindow = QtGui.QWidget
-
 class MainForm(QtGui.QWidget):
     def load(self):
         self.ui = uic.loadUi(main.filedir('forms/mainform.ui'), self)
@@ -72,5 +70,6 @@ class MainForm(QtGui.QWidget):
             print "ERROR al procesar modulo %s:" % module.name
             print traceback.format_exc(),"---"
             
+mainWindow = MainForm()
 
                     

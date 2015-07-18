@@ -43,7 +43,7 @@ def loadUi(path, widget):
             if hasattr(widget.iface, fn_name):
                 try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), getattr(widget.iface, fn_name))
                 except Exception, e: 
-                    print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name), get_attr(widget.iface, fn_name)
+                    print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name), getattr(widget.iface, fn_name)
                     print "Error:", e.__class__.__name__, e
                 continue
 

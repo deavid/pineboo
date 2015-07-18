@@ -327,7 +327,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.sql_fields.append(field.name)
             self.field_aliases.append(aqtt(field.alias))
             
-        self.data = []
+        self._data = []
         self.cols = len(self.sql_fields)
         self.rows = 0
         self.where_filters = {}
@@ -354,9 +354,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(parent, 0, newrows - 1)
         print "QUERY:", sql
         self.rows = newrows
-        self.data = []
+        self._data = []
         for row in cur:
-            self.data.append(row)
+            self._data.append(row)
         self.endInsertRows()
         topLeft = self.index(0,0)
         bottomRight = self.index(self.rows-1,self.cols-1)
@@ -366,7 +366,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def value(self, row, fieldname):
         if row < 0 or row >= self.rows: return None
         col = self.sql_fields.index(fieldname)
-        return self.data[row][col]
+        return self._data[row][col]
         
     def columnCount(self, parent = None):
         if parent is None: parent = QtCore.QModelIndex()
@@ -533,12 +533,8 @@ class FLReportViewer(ProjectClass):
         return True
 
     @NotImplementedWarn    
-    def setReportData(self, query):
+    def setReportData(self, xmlDoc_Or_Query):
         return None
-
-    @NotImplementedWarn    
-    def setReportData(self, xmlDoc):
-        return True
 
     @NotImplementedWarn    
     def setReportTemplate(self,  t, style = None):
@@ -565,82 +561,82 @@ class FLReportViewer(ProjectClass):
         return None
 
     @NotImplementedWarn    
-    def printReport(): return
+    def printReport(self): return None
 
     @NotImplementedWarn    
-    def printReportToPS(outPsFile): return
+    def printReportToPS(self,outPsFile): return None
 
     @NotImplementedWarn    
-    def printReportToPDF(outPdfFile): return
+    def printReportToPDF(self,outPdfFile): return None
 
     @NotImplementedWarn    
-    def setNumCopies(numCopies): return
+    def setNumCopies(self,numCopies): return None
 
     @NotImplementedWarn    
-    def setPrintToPos(ptp): return
+    def setPrintToPos(self,ptp): return None
 
     @NotImplementedWarn    
-    def setPrinterName(pName): return
+    def setPrinterName(self,pName): return None
 
     @NotImplementedWarn    
-    def reportPrinted(): return True
+    def reportPrinted(self): return True
 
     @NotImplementedWarn    
-    def reparent(parentFrame): return
+    def reparent(self,parentFrame): return None
 
     @NotImplementedWarn    
-    def slotFirstPage(): return
+    def slotFirstPage(self): return None
 
     @NotImplementedWarn    
-    def slotLastPage(): return 
+    def slotLastPage(self): return None
 
     @NotImplementedWarn    
-    def slotNextPage(): return
+    def slotNextPage(self): return None
 
     @NotImplementedWarn    
-    def slotPrevPage(): return
+    def slotPrevPage(self): return None
 
     @NotImplementedWarn    
-    def slotZoomUp(): return
+    def slotZoomUp(self): return None
 
     @NotImplementedWarn    
-    def slotZoomDown(): return
+    def slotZoomDown(self): return None
 
     @NotImplementedWarn    
-    def exportFileCSVData(): return
+    def exportFileCSVData(self): return None
 
     @NotImplementedWarn    
-    def exportToPDF(): return
+    def exportToPDF(self): return None
 
     @NotImplementedWarn    
-    def sendEMailPDF(): return
+    def sendEMailPDF(self): return None
 
     @NotImplementedWarn    
-    def saveSVGStyle(): return
+    def saveSVGStyle(self): return None
 
     @NotImplementedWarn    
-    def saveSimpleSVGStyle(): return
+    def saveSimpleSVGStyle(self): return None
 
     @NotImplementedWarn    
-    def loadSVGStyle(): return
+    def loadSVGStyle(self): return None
 
     @NotImplementedWarn    
-    def setAutoClose(b): return
+    def setAutoClose(self,b): return None
 
     @NotImplementedWarn    
-    def setResolution(dpi): return
+    def setResolution(self,dpi): return None
 
     @NotImplementedWarn    
-    def setPixel(relDpi): return
+    def setPixel(self,relDpi): return None
 
     @NotImplementedWarn    
-    def setDefaults(): return
+    def setDefaults(self): return None
 
     @NotImplementedWarn    
-    def updateReport(): return
+    def updateReport(self): return None
 
     @NotImplementedWarn    
-    def updateDisplay(): return
+    def updateDisplay(self): return None
 
 """
   void setStyleName(const QString &style) {
