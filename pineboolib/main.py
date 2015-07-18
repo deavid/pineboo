@@ -1,18 +1,35 @@
 # encoding: UTF-8
 import sys, imp
-from lxml import etree
 from optparse import OptionParser
-import psycopg2
 import os.path, os
-from PyQt4 import QtGui, QtCore, uic
+import re,subprocess
+import traceback
+
+try:
+    from lxml import etree
+except ImportError:
+    print traceback.format_exc()
+    print "HINT: Instale el paquete python-lxml e intente de nuevo"
+
+try:
+    import psycopg2
+except ImportError:
+    print traceback.format_exc()
+    print "HINT: Instale el paquete python-psycopg2 e intente de nuevo"
+
+try:
+    from PyQt4 import QtGui, QtCore, uic
+except ImportError:
+    print traceback.format_exc()
+    print "HINT: Instale el paquete python-pyqt4 e intente de nuevo"
+
 from pineboolib import qt3ui
 from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.qsaglobals import aqtt
-import re,subprocess
+
 import qsatype, qsaglobals
 import pineboolib
 import DlgConnect, mainForm
-import traceback
 
 Qt = QtCore.Qt
 
