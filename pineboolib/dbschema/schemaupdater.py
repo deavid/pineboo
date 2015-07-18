@@ -1,7 +1,7 @@
 # encoding: UTF-8
 from StringIO import StringIO
 from lxml import etree
-import db_postgresql as pginspect
+from pineboolib.dbschema import db_postgresql as pginspect
 
 class Struct:
     pass
@@ -22,18 +22,18 @@ def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
         print "ERROR:" , e
         return None
     root = tree.getroot()
-    
+
     objname = root.xpath("name")[0]
     query = root.xpath("query")
     if query:
         if query[-1].text != nombre:
             print "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (objname.text,nombre)
             query[-1].text = nombre
-    elif objname.text != nombre: 
+    elif objname.text != nombre:
         print "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (objname.text,nombre)
         objname.text = nombre
     return getTableObj(tree,root)
-    
+
 def getTableObj(tree,root):
     table = Struct()
     table.xmltree = tree
@@ -69,13 +69,13 @@ def text2bool(text):
     text = text.strip().lower()
     if text.startswith("t"): return True
     if text.startswith("f"): return False
-    
+
     if text.startswith("y"): return True
     if text.startswith("n"): return False
 
     if text.startswith("1"): return True
     if text.startswith("0"): return False
-    
+
     if text == "on": return True
     if text == "off": return False
 
@@ -85,7 +85,7 @@ def text2bool(text):
 def one(listobj, default = None):
     try: return listobj[0]
     except IndexError: return default
-    
+
 
 def update_table(conn, table):
     cur = conn.cursor()
@@ -94,7 +94,7 @@ def update_table(conn, table):
     print "Table:", otable.namespace, otable.name
     for ocol in pginspect.get_table_columns(conn, otable):
         dbfields[ocol.name] = ocol
-        
+
     for field in table.fields:
         ocol = dbfields.get(field.name,None)
         print "Field:", field.name, "|", field.sql_type, "|", field.sql_nullable, "|", field.default
@@ -107,23 +107,23 @@ def update_table(conn, table):
             continue
         print "Column:", ocol.name, "|", ocol.format_type, "|", ocol.sql_nullable, "|", ocol.format_extra
     print
-    
-    
-    
-    
+
+
+
+
 def create_table(conn, table):
     cur = conn.cursor()
-    field_sql_list = [ "%s %s" % (field.name,field.sql_definition) 
+    field_sql_list = [ "%s %s" % (field.name,field.sql_definition)
                         for field in table.fields ]
     if table.pk:
         field_sql_list.append("PRIMARY KEY (" + ", ".join(table.pk) + ")")
-    
+
     cur.execute("""
     CREATE TABLE %s (
         %s
     )
     """ % (table.name, ",\n".join(field_sql_list)))
-    
+
 
 def build_field_type(field, xmlfield):
     typetr={

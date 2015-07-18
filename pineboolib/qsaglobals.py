@@ -1,16 +1,19 @@
 # encoding: UTF-8
-from PyQt4 import QtCore,QtGui
 import re
-import flcontrols
+from PyQt4 import QtCore, QtGui
+
 import pineboolib
+from pineboolib import flcontrols
+
 
 def parseFloat(x): return float(x)
 
 util = flcontrols.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
+# TODO: separar en otro fichero de utilidades
 def ustr(*t1):
     return "".join([ ustr1(t) for t in t1 ])
-    
+
 def ustr1(t):
     if isinstance(t, unicode): return t
     if isinstance(t, QtCore.QString): return unicode(t)
@@ -21,10 +24,10 @@ def ustr1(t):
         print "ERROR Coercing to string:", repr(t)
         print "ERROR", e.__class__.__name__, str(e)
         return None
-    
+
 def debug(txt):
     print "DEBUG:", ustr(txt)
-        
+
 
 def auto_qt_translate_text(text):
     if isinstance(text,basestring):
@@ -36,13 +39,13 @@ def auto_qt_translate_text(text):
 class SysType(object):
     def __init__(self):
         self._name_user = "database_user"
-        
+
     def nameUser(self): return self._name_user
     def isLoadedModule(self, modulename):
         prj = pineboolib.project
         return modulename in prj.modules
 sys = SysType()
-   
+
 aqtt = auto_qt_translate_text
 
 def connect(sender, signal, receiver, slot):
@@ -50,12 +53,12 @@ def connect(sender, signal, receiver, slot):
     if sender is None:
         print "Connect::", sender, signal, receiver, slot
         return False
-    m = re.search("^(\w+).(\w+)(\(.*\))?", slot)
+    m = re.search(r"^(\w+).(\w+)(\(.*\))?", slot)
     if m:
         remote_obj = getattr(receiver, m.group(1))
-        if remote_obj is None: raise AttributeError, "Object %s not found on %s" % (remote_obj, str(receiver))
+        if remote_obj is None: raise AttributeError("Object %s not found on %s" % (remote_obj, str(receiver)))
         remote_fn = getattr(remote_obj, m.group(2))
-        if remote_fn is None: raise AttributeError, "Object %s not found on %s" % (remote_fn, remote_obj)
+        if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
             QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), remote_fn)
         except RuntimeError, e:
@@ -80,7 +83,7 @@ class MessageBox(QMessageBox):
             icon = QMessageBox.Information
             title = "Information"
         elif typename == "warning":
-            icon = QMessageBox.Warning	
+            icon = QMessageBox.Warning
             title = "Warning"
         elif typename == "critical":
             icon = QMessageBox.Critical
@@ -113,5 +116,5 @@ class Input(object):
                 question, QtGui.QLineEdit.Normal, prevtxt)
         if not ok: return None
         return text
-                                              
+
 

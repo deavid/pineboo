@@ -1,10 +1,18 @@
 # encoding: UTF-8
+from binascii import unhexlify
+
 from lxml import etree
 from PyQt4 import QtGui, QtCore, uic
-import flcontrols
-from binascii import unhexlify
+
+from pineboolib import flcontrols
+
 Qt = QtCore.Qt
 ICONS = {}
+
+# TODO: Refactorizar este fichero como una clase. ICONS es la lista de iconos
+#      para un solo formulario. Debe existir una clase LoadUI y que ICONS sea
+#      una variable de ésta. Para cada nuevo formulario se debería instanciar
+#      una nueva clase.
 
 def loadUi(path, widget):
     global ICONS
@@ -16,10 +24,10 @@ def loadUi(path, widget):
     tree = etree.parse(path, parser)
     root = tree.getroot()
     ICONS = {}
-    
+
     for xmlimage in root.xpath("images/image"):
         loadIcon(xmlimage)
-        
+
     for xmlwidget in root.xpath("widget"):
         loadWidget(xmlwidget,widget)
 
@@ -42,7 +50,7 @@ def loadUi(path, widget):
             #print dir(widget.iface)
             if hasattr(widget.iface, fn_name):
                 try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), getattr(widget.iface, fn_name))
-                except Exception, e: 
+                except Exception, e:
                     print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name), getattr(widget.iface, fn_name)
                     print "Error:", e.__class__.__name__, e
                 continue
@@ -51,20 +59,20 @@ def loadUi(path, widget):
         if receiver is None: print "Connection receiver not found:", receiv_name
         if sender is None or receiver is None: continue
         try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
-        except Exception, e: 
+        except Exception, e:
             print "Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name)
             print "Error:", e.__class__.__name__, e
 
 
 def createWidget(classname,parent = None):
     cls =  getattr(flcontrols, classname, None) or getattr(QtGui, classname, None)
-    if cls is None: 
+    if cls is None:
         print "WARN: Class name not found in QtGui:" , classname
         w = QtGui.QWidget(parent)
         w.setStyleSheet("* { background-color: #fa3; } ")
         return w
     return cls(parent)
-    
+
 def loadWidget(xml, widget = None):
     translate_properties = {
         "caption" : "windowTitle",
@@ -74,9 +82,9 @@ def loadWidget(xml, widget = None):
         "accel" : "shortcut",
         "layoutMargin" : "contentsMargins",
     }
-    if widget is None: 
+    if widget is None:
         raise ValueError
-        
+
     def process_property(xmlprop, widget = widget):
         pname = xmlprop.get("name")
         if pname in translate_properties: pname = translate_properties[pname]
@@ -85,10 +93,10 @@ def loadWidget(xml, widget = None):
             set_fn = widget.layout.setSpacing
         else:
             set_fn = getattr(widget, setpname, None)
-        if set_fn is None: 
+        if set_fn is None:
             print "Missing property", pname, " for ", widget.__class__.__name__
             return
-        #print "Found property", pname 
+        #print "Found property", pname
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
                 value = int(xmlprop.get("stdset"))
@@ -99,7 +107,7 @@ def loadWidget(xml, widget = None):
             value = loadVariant(xmlprop)
 
         try: set_fn(value)
-        except Exception, e: 
+        except Exception, e:
             print e, repr(value)
             print etree.tostring(xmlprop)
 
@@ -133,7 +141,7 @@ def loadWidget(xml, widget = None):
                         widget.layout.rowStretch(row)
             else:
                 print "Unknown layout xml tag", repr(c.tag)
-        
+
         widget.setLayout(widget.layout)
     properties = []
     for c in xml:
@@ -162,7 +170,7 @@ def loadWidget(xml, widget = None):
         print "Unknown widget xml tag", repr(c.tag)
     for c in properties:
         process_property(c)
-    
+
 def loadIcon(xml):
     global ICONS
     name = xml.get("name")
@@ -173,7 +181,7 @@ def loadIcon(xml):
     pixmap.loadFromData(data, img_format)
     icon = QtGui.QIcon(pixmap)
     ICONS[name] = icon
-    
+
 
 def loadVariant(xml):
     for variant in xml:
@@ -198,27 +206,27 @@ def b(x):
     if x == "off": return False
     print "Bool?:", repr(x)
     return None
-        
+
 
 def _loadVariant(variant):
     text = variant.text or ""
     text = text.strip()
     if variant.tag == "cstring": return text
-    if variant.tag == "iconset": 
+    if variant.tag == "iconset":
         global ICONS
         return ICONS.get(text,text)
     if variant.tag == "string": return u(text)
-    if variant.tag == "number": 
+    if variant.tag == "number":
         if text.find('.') >= 0: return float(text)
         return int(text)
     if variant.tag == "bool": return b(text)
-    if variant.tag == "rect": 
+    if variant.tag == "rect":
         k = {}
         for c in variant:
             k[c.tag] = int(c.text.strip())
         return QtCore.QRect(k['x'],k['y'],k['width'],k['height'])
-        
-    if variant.tag == "sizepolicy": 
+
+    if variant.tag == "sizepolicy":
         p = QtGui.QSizePolicy()
         for c in variant:
             value = int(c.text.strip())
@@ -227,14 +235,14 @@ def _loadVariant(variant):
             if c.tag == "horstretch": p.setHorizontalStretch(value)
             if c.tag == "verstretch": p.setVerticalStretch(value)
         return p
-    if variant.tag == "size": 
+    if variant.tag == "size":
         p = QtCore.QSize()
         for c in variant:
             value = int(c.text.strip())
             if c.tag == "width": p.setWidth(value)
             if c.tag == "height": p.setHeight(value)
         return p
-    if variant.tag == "font": 
+    if variant.tag == "font":
         p = QtGui.QFont()
         for c in variant:
             value = c.text.strip()
@@ -246,14 +254,14 @@ def _loadVariant(variant):
             except Exception, e:
                 print e
         return p
-    if variant.tag == "enum": 
+    if variant.tag == "enum":
         v = None
         libs = [Qt,QtGui.QFrame,QtGui.QSizePolicy]
         for lib in libs:
             v = getattr(lib,text,None)
             if v is not None: return v
-        
-        
+
+
     print "Unknown variant:", etree.tostring(variant)
-        
-    
+
+
