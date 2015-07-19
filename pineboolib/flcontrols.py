@@ -466,7 +466,7 @@ class FLTableDB(QtGui.QTableView):
             self.setSelectionModel(self._cursor.selection())
         self.tableRecords = self # control de tabla interno
         self.sort = []
-        q = QtCore.QTimer()
+        q = QtCore.QTimer(self)
         q.singleShot(100, self.loaded)
 
     def loaded(self):
