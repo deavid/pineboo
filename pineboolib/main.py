@@ -354,7 +354,7 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals,action.name):
-            print("INFO: No se sobreescribie variable de entorno", action.name)
+            print("INFO: No se sobreescribe variable de entorno", action.name)
         else:
             setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load))
         for xmlaction in self.root:
@@ -389,14 +389,19 @@ class MainForm(object):
                             )
             self.tree = etree.parse(self.path, self.parser)
         except etree.XMLSyntaxError:
-            print("Error cargando modulo", self.path)
-            self.parser = etree.XMLParser(
-                            ns_clean=True,
-                            encoding="ISO-8859-15",
-                            recover = True,
-                            remove_blank_text=True,
-                            )
-            self.tree = etree.parse(self.path, self.parser)
+            try:
+                self.parser = etree.XMLParser(
+                                ns_clean=True,
+                                encoding="ISO-8859-15",
+                                recover = True,
+                                remove_blank_text=True,
+                                )
+                self.tree = etree.parse(self.path, self.parser)
+                print(traceback.format_exc())
+                print("Formulario %r se cargó con codificación ISO (UTF8 falló)" % self.path)
+            except etree.XMLSyntaxError as e:
+                print("Error cargando UI después de intentar con UTF8 y ISO", self.path, e)
+
         self.root = self.tree.getroot()
         self.actions = {}
         for xmlaction in self.root.xpath("actions//action"):
@@ -624,9 +629,10 @@ def main():
 
 
 
-
+    print("Iniciando proyecto ...")
     project.run()
 
+    print("Creando interfaz ...")
     if options.action:
         objaction = None
         for k,module in list(project.modules.items()):
@@ -643,8 +649,10 @@ def main():
     else:
         w = mainForm.mainWindow
         w.load()
+        print("Módulos y pestañas ...")
         for module in list(project.modules.values()):
             w.addModuleInTab(module)
+        print("Abriendo interfaz ...")
         w.show()
         ret = app.exec_()
         del w

@@ -44,7 +44,7 @@ class MainForm(QtGui.QWidget):
 
 
     def addModuleInTab(self, module):
-        #print "Procesando %s " % module.name
+        print("- Procesando %s " % module.name)
         #button = QtGui.QCommandLinkButton(module.description)
         #button.setText(module.description)
         #button.clicked.connect(module.run)

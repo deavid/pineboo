@@ -9,6 +9,8 @@ except ImportError:
     print("Esta librería sirve para que python2 se comporte más parecido a python3.")
     print("Puede que el programa funcione correctamente sin ella.")
 from builtins import object
+import traceback
+
 from io import StringIO
 from lxml import etree
 from pineboolib.dbschema import db_postgresql as pginspect
@@ -29,7 +31,7 @@ def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
         tree = etree.parse(file_alike, parser)
     except Exception as e:
         print("Error al procesar tabla:", nombre)
-        print("ERROR:" , e)
+        print(traceback.format_exc())
         return None
     root = tree.getroot()
 
@@ -62,7 +64,7 @@ def getTableObj(tree,root):
         try:
             field = Struct()
             field.name = xmlfield.xpath("name/text()")[0]
-            field.alias = xmlfield.xpath("alias/text()")[0]
+            field.alias = one(xmlfield.xpath("alias/text()"))
             build_field_type(field, xmlfield)
             field.pk = text2bool(one(xmlfield.xpath("pk/text()"),"false"))
             field.default = one(xmlfield.xpath("default/text()"),None)
@@ -72,7 +74,8 @@ def getTableObj(tree,root):
             table.fields_idx[field.name] = field.number
             table.fields.append(field)
         except Exception as e:
-            print("ERROR:", e)
+            print("ERROR: procesando tabla %r:" % table.name,  e)
+            print(traceback.format_exc())
     return table
 
 def text2bool(text):
