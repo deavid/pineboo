@@ -20,10 +20,10 @@ ICONS = {}
 def loadUi(path, widget):
     global ICONS
     parser = etree.XMLParser(
-                    ns_clean=True,
-                    encoding="UTF-8",
-                    remove_blank_text=True,
-                    )
+        ns_clean=True,
+        encoding="UTF-8",
+        remove_blank_text=True,
+        )
     tree = etree.parse(path, parser)
     root = tree.getroot()
     ICONS = {}
@@ -32,7 +32,7 @@ def loadUi(path, widget):
         loadIcon(xmlimage)
 
     for xmlwidget in root.xpath("widget"):
-        loadWidget(xmlwidget,widget)
+        loadWidget(xmlwidget, widget)
 
     formname = widget.objectName() # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     for xmlconnection in root.xpath("connections/connection"):
@@ -54,7 +54,10 @@ def loadUi(path, widget):
             if hasattr(widget.iface, fn_name):
                 try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), getattr(widget.iface, fn_name))
                 except Exception as e:
-                    print("Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name), getattr(widget.iface, fn_name))
+                    print("Error connecting:",
+                          sender, QtCore.SIGNAL(signal_name),
+                          receiver, QtCore.SLOT(slot_name),
+                          getattr(widget.iface, fn_name))
                     print("Error:", e.__class__.__name__, e)
                 continue
 
@@ -67,16 +70,16 @@ def loadUi(path, widget):
             print("Error:", e.__class__.__name__, e)
 
 
-def createWidget(classname,parent = None):
-    cls =  getattr(flcontrols, classname, None) or getattr(QtGui, classname, None)
+def createWidget(classname, parent=None):
+    cls = getattr(flcontrols, classname, None) or getattr(QtGui, classname, None)
     if cls is None:
-        print("WARN: Class name not found in QtGui:" , classname)
-        w = QtGui.QWidget(parent)
-        w.setStyleSheet("* { background-color: #fa3; } ")
-        return w
+        print("WARN: Class name not found in QtGui:", classname)
+        widgt = QtGui.QWidget(parent)
+        widgt.setStyleSheet("* { background-color: #fa3; } ")
+        return widgt
     return cls(parent)
 
-def loadWidget(xml, widget = None):
+def loadWidget(xml, widget=None):
     translate_properties = {
         "caption" : "windowTitle",
         "name" : "objectName",
@@ -88,7 +91,7 @@ def loadWidget(xml, widget = None):
     if widget is None:
         raise ValueError
 
-    def process_property(xmlprop, widget = widget):
+    def process_property(xmlprop, widget=widget):
         pname = xmlprop.get("name")
         if pname in translate_properties: pname = translate_properties[pname]
         setpname = "set" + pname[0].upper() + pname[1:]
@@ -114,17 +117,17 @@ def loadWidget(xml, widget = None):
             print(e, repr(value))
             print(etree.tostring(xmlprop))
 
-    def process_layout_box(xmllayout, widget = widget, mode = "box"):
+    def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:
             try:
                 row = int(c.get("row"))
                 col = int(c.get("column"))
             except Exception: row = col = None
             if c.tag == "property":
-                process_property(c,widget.layout)
+                process_property(c, widget.layout)
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
-                loadWidget(c,new_widget)
+                loadWidget(c, new_widget)
                 new_widget.show()
                 if mode == "box":
                     widget.layout.addWidget(new_widget)
@@ -133,7 +136,7 @@ def loadWidget(xml, widget = None):
             elif c.tag == "spacer":
                 properties = {}
                 for p in c.xpath("property"):
-                    k,v = loadProperty(p)
+                    k, v = loadProperty(p)
                     properties[k] = v
                 if mode == "box":
                     widget.layout.addStretch()
@@ -161,12 +164,12 @@ def loadWidget(xml, widget = None):
             continue
         if c.tag == "grid":
             widget.layout = QtGui.QGridLayout()
-            process_layout_box(c,mode = "grid")
+            process_layout_box(c, mode="grid")
             continue
         if c.tag == "item":
             prop1 = {}
             for p in c.xpath("property"):
-                k,v = loadProperty(p)
+                k, v = loadProperty(p)
                 prop1[k] = v
             widget.addItem(prop1["text"])
             continue
@@ -195,9 +198,8 @@ def loadProperty(xml):
         return (xml.get("name"), _loadVariant(variant))
 
 def u(x):
-    if type(x) is str: return x
-    if type(x) is str: return x.decode("UTF-8","replace")
-    return str(str(x))
+    if isinstance(x,str): return x
+    return str(x)
 
 def b(x):
     x = x.lower()
@@ -217,7 +219,7 @@ def _loadVariant(variant):
     if variant.tag == "cstring": return text
     if variant.tag == "iconset":
         global ICONS
-        return ICONS.get(text,text)
+        return ICONS.get(text, text)
     if variant.tag == "string": return u(text)
     if variant.tag == "number":
         if text.find('.') >= 0: return float(text)
@@ -227,7 +229,7 @@ def _loadVariant(variant):
         k = {}
         for c in variant:
             k[c.tag] = int(c.text.strip())
-        return QtCore.QRect(k['x'],k['y'],k['width'],k['height'])
+        return QtCore.QRect(k['x'], k['y'], k['width'], k['height'])
 
     if variant.tag == "sizepolicy":
         p = QtGui.QSizePolicy()
@@ -253,15 +255,15 @@ def _loadVariant(variant):
             try:
                 if c.tag == "bold": p.setBold(bv)
                 elif c.tag == "italic": p.setItalic(bv)
-                else: print("unknown font style type" ,repr(c.tag))
+                else: print("unknown font style type", repr(c.tag))
             except Exception as e:
                 print(e)
         return p
     if variant.tag == "enum":
         v = None
-        libs = [Qt,QtGui.QFrame,QtGui.QSizePolicy]
+        libs = [Qt, QtGui.QFrame, QtGui.QSizePolicy]
         for lib in libs:
-            v = getattr(lib,text,None)
+            v = getattr(lib, text, None)
             if v is not None: return v
 
 

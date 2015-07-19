@@ -7,9 +7,7 @@ import os.path
 
 from PyQt4 import QtGui, QtCore, uic
 
-# TODO: Mover a un fichero de utilidades
-def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
-
+from pineboolib.utils import filedir
 
 class MainForm(QtGui.QWidget):
     areas = []

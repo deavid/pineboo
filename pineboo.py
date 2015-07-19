@@ -102,7 +102,7 @@ def main():
     parser.add_option("-a", "--action", dest="action",
                       help="load action", metavar="ACTION")
     parser.add_option("--no-python-cache",
-                      action="store_true",dest="no_python_cache", default=False,
+                      action="store_true", dest="no_python_cache", default=False,
                       help="Always translate QS to Python")
 
     (options, args) = parser.parse_args()
@@ -110,7 +110,8 @@ def main():
 
     pineboolib.no_python_cache = options.no_python_cache
 
-    from pineboolib import mainForm # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
+    # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
+    from pineboolib import mainForm
 
     project = pineboolib.main.Project()
 
@@ -129,7 +130,7 @@ def main():
         connection_window.load()
         connection_window.show()
         ret = app.exec_()
-        if (connection_window.close()):
+        if connection_window.close():
             prjpath = connection_window.ruta
         if not prjpath:
             sys.exit(ret)
@@ -143,11 +144,11 @@ def main():
     print("Creando interfaz ...")
     if options.action:
         objaction = None
-        for k,module in list(project.modules.items()):
+        for k, module in list(project.modules.items()):
             try:
                 if not module.load(): continue
             except Exception as err:
-                print("ERROR:", err.__class__.__name__, str(e))
+                print("ERROR:", err.__class__.__name__, str(err))
                 continue
             if options.action in module.actions:
                 objaction = module.actions[options.action]

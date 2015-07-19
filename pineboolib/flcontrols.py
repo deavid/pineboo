@@ -124,6 +124,9 @@ class FLSqlCursor(ProjectClass):
         self._valid = False
         if actionname is None: raise AssertionError
         self.setAction(actionname)
+        self._commit_actions = True
+        self._current_row = -1
+        self._chk_integrity = True
 
     def mainFilter(self):
         return self._model.where_filters.get("main-filter", "")
@@ -135,7 +138,7 @@ class FLSqlCursor(ProjectClass):
     def setAction(self, actionname):
         try:
             self._action = self._prj.actions[actionname]
-        except KeyError as e:
+        except KeyError:
             print("Accion no encontrada:", actionname)
             self._action = self._prj.actions["articulos"]
 
@@ -274,6 +277,12 @@ class FLSqlCursor(ProjectClass):
         print("Clone your clone", self._action.name)
 
 class ProgressDialog(QtGui.QWidget):
+    def __init__(self, *args, **kwargs):
+        super(ProgressDialog,self).__init__(*args, **kwargs)
+        self.title = "Untitled"
+        self.step = 0
+        self.steps = 100
+
     def setup(self, title, steps):
         self.title = title
         self.step = 0
@@ -413,7 +422,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 val = self._data[row][col]
                 ret = ustr(val)
                 #print " data -> ", row, col, ret
-                return ustr(val)
+                return ret
             except Exception as e:
                 print("CursorTableModel.data:", row,col,e)
                 print(traceback.format_exc())
@@ -467,7 +476,7 @@ class FLTableDB(QtGui.QTableView):
         self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
 
     def cursor(self):
-        assert(self._cursor)
+        assert self._cursor
         return self._cursor
 
     def obj(self):

@@ -64,16 +64,19 @@ class Project(object):
         self.dbname = None
         self.apppath = None
         self.tmpdir = None
+        self.parser = None
 
         self.actions = {}
         self.tables = {}
+        self.files = {}
+        self.cur = None
 
     def load_db(self, dbname, host, port, user, passwd):
         self.dbserver = DBServer()
         self.dbserver.host = host
         self.dbserver.port = port
         self.dbauth = DBAuth()
-        self.dbauth.user = user
+        self.dbauth.username = user
         self.dbauth.password = passwd
         self.dbname = dbname
         self.apppath = filedir("..")
@@ -152,7 +155,9 @@ class Project(object):
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
             cur2 = self.conn.cursor()
-            cur2.execute(""" SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha::varchar(16) = %s""", [idmodulo, nombre, sha] )
+            cur2.execute("SELECT contenido FROM flfiles "
+                    + "WHERE idmodulo = %s AND nombre = %s "
+                    + "        AND sha::varchar(16) = %s", [idmodulo, nombre, sha] )
             for (contenido,) in cur2:
                 f2 = open(self.dir("cache",fileobj.filekey),"wb")
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
@@ -160,7 +165,7 @@ class Project(object):
                 try:
                     #txt = contenido.decode("UTF-8").encode("ISO-8859-15")
                     txt = contenido.encode("ISO-8859-15")
-                except Exception as e:
+                except Exception:
                     print("Error al decodificar" ,idmodulo, nombre)
                     #txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
                     txt = contenido.encode("ISO-8859-15","replace")
@@ -293,7 +298,7 @@ class ModuleActions(object):
         self.mod = module
         self.prj = module.prj
         self.path = path
-        assert(path)
+        assert path
     def load(self):
         self.parser = etree.XMLParser(
                         ns_clean=True,
@@ -338,7 +343,7 @@ class MainForm(object):
         self.mod = module
         self.prj = module.prj
         self.path = path
-        assert(path)
+        assert path
 
     def load(self):
         try:
@@ -402,13 +407,20 @@ class XMLAction(XMLStruct):
         print("Loading action %s . . . " % (self.name))
         self.mainform_widget = FLMainForm(self, load = True)
         self._loaded = True
-        print("End of action load %s (iface:%s ; widget:%s)" % (self.name, repr(self.mainform_widget.iface),repr(self.mainform_widget.widget)))
+        print("End of action load %s (iface:%s ; widget:%s)"
+              % (self.name,
+                repr(self.mainform_widget.iface),
+                repr(self.mainform_widget.widget)
+                )
+            )
         return self.mainform_widget
 
     def openDefaultForm(self):
         print("Opening default form for Action", self.name)
         self.load()
-        from pineboolib import mainForm # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
+        # Es necesario importarlo a esta altura, QApplication tiene que ser
+        # ... construido antes que cualquier widget
+        from pineboolib import mainForm
         w = mainForm.mainWindow
         self.mainform_widget.init()
         w.addFormTab(self.mainform_widget)
@@ -418,9 +430,10 @@ class FLForm(QtGui.QWidget):
     known_instances = {}
     def __init__(self, action, load=False):
         try:
-            assert((self.__class__,action) not in self.known_instances)
+            assert (self.__class__,action) not in self.known_instances
         except AssertionError:
-            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. Puede que se estén perdiendo datos!" % ((self.__class__,action),))
+            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__,action),)
+                + "Puede que se estén perdiendo datos!" )
         self.known_instances[(self.__class__,action)] = self
         QtGui.QWidget.__init__(self)
         self.action = action
