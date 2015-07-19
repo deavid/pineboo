@@ -7,32 +7,9 @@ import sys, imp
 import os.path, os
 import re,subprocess
 import traceback
-
-try:
-    from lxml import etree
-except ImportError:
-    print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-lxml e intente de nuevo")
-    print()
-    sys.exit(32)
-try:
-    import psycopg2
-except ImportError:
-    print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
-    print()
-    sys.exit(32)
-
-try:
-    from PyQt4 import QtGui, QtCore, uic
-except ImportError:
-    print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-pyqt4 e intente de nuevo")
-    print()
-    sys.exit(32)
+from lxml import etree
+import psycopg2
+from PyQt4 import QtGui, QtCore, uic
 
 import pineboolib
 from pineboolib import qt3ui
@@ -42,24 +19,8 @@ import pineboolib.emptyscript
 
 from pineboolib import qsatype, qsaglobals, DlgConnect
 
+from pineboolib.utils import filedir, one, Struct
 Qt = QtCore.Qt
-
-# TODO: Mover a un fichero de utilidades
-def filedir(*path): return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
-
-class WMainForm(QtGui.QMainWindow):
-    def load(self,path):
-        # self.ui = loadUi?? <-- borrame
-        qt3ui.loadUi(path, self)
-
-def one(x, default = None):
-    try:
-        return x[0]
-    except IndexError:
-        return default
-
-class Struct(object):
-    "Dummy"
 
 class XMLStruct(Struct):
     def __init__(self, xmlobj=None):

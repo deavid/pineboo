@@ -1,7 +1,15 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import sys, re
+"""
+    Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
+    pineboolib.main(); para ello acepta los parámetros necesarios de consola
+    y configura el programa adecuadamente.
+"""
+import sys, re, traceback, os
 from optparse import OptionParser
+from pineboolib.utils import filedir
+import pineboolib.DlgConnect
+
 
 try:
     from lxml import etree
@@ -36,6 +44,11 @@ import pineboolib.main
 
 
 def translate_connstring(connstring):
+    """
+        Acepta un parámetro "connstring" que tenga la forma user@host/dbname
+        y devuelve todos los parámetros por separado. Tiene en cuenta los
+        valores por defecto y las diferentes formas de abreviar que existen.
+    """
     user = "postgres"
     passwd = "passwd"
     host = "127.0.0.1"
@@ -58,21 +71,25 @@ def translate_connstring(connstring):
 
     if user_pass:
         if len(user_pass) == 1: user = user_pass[0]
-        elif len(user_pass) == 2: user, passwd = user_pass
+        elif len(user_pass) == 2: user, passwd = user_pass[0], user_pass[1]
         else: raise ValueError("La cadena de usuario tiene dos veces dos puntos.")
 
     if host_port:
         if len(host_port) == 1: host = host_port[0]
-        elif len(host_port) == 2: host, port = host_port
+        elif len(host_port) == 2: host, port = host_port[0], host_port[1]
         else: raise ValueError("La cadena de host tiene dos veces dos puntos.")
     if not re.match(r"\w+", user): raise ValueError("Usuario no valido")
     if not re.match(r"\w+", dbname): raise ValueError("base de datos no valida")
     if not re.match(r"\d+", port): raise ValueError("puerto no valido")
 
-    return user, password, host, port, dbname
+    return user, passwd, host, port, dbname
 
 
 def main():
+    """
+        Programa principal. Gestión de las opciones y la ayuda, así como inicializar
+        todos los objetos.
+    """
     # TODO: Refactorizar función en otras más pequeñas
     parser = OptionParser()
     parser.add_option("-l", "--load", dest="project",
@@ -108,12 +125,12 @@ def main():
         user, passwd, host, port, dbname = translate_connstring(options.connection)
         project.load_db(dbname, host, port, user, passwd)
     else:
-        w = DlgConnect.DlgConnect()
-        w.load()
-        w.show()
+        connection_window = pineboolib.DlgConnect.DlgConnect()
+        connection_window.load()
+        connection_window.show()
         ret = app.exec_()
-        if (w.close()):
-            prjpath = w.ruta
+        if (connection_window.close()):
+            prjpath = connection_window.ruta
         if not prjpath:
             sys.exit(ret)
 
@@ -129,8 +146,8 @@ def main():
         for k,module in list(project.modules.items()):
             try:
                 if not module.load(): continue
-            except Exception as e:
-                print("ERROR:", e.__class__.__name__, str(e))
+            except Exception as err:
+                print("ERROR:", err.__class__.__name__, str(e))
                 continue
             if options.action in module.actions:
                 objaction = module.actions[options.action]
@@ -138,15 +155,15 @@ def main():
         objaction.openDefaultForm()
         sys.exit(app.exec_())
     else:
-        w = mainForm.mainWindow
-        w.load()
+        main_window = mainForm.mainWindow
+        main_window.load()
         print("Módulos y pestañas ...")
         for module in list(project.modules.values()):
-            w.addModuleInTab(module)
+            main_window.addModuleInTab(module)
         print("Abriendo interfaz ...")
-        w.show()
+        main_window.show()
         ret = app.exec_()
-        del w
+        del main_window
         del project
         sys.exit(ret)
 
