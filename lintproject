@@ -1,0 +1,9 @@
+#!/bin/sh
+if [ "$1" != "" ]; then
+    /usr/local/bin/pylint --help-msg=$1 2>/dev/null
+    exit 0;
+fi
+/usr/local/bin/pylint -j3 -f colorized --confidence=HIGH \
+    -r no pineboo.py \
+    $(for m in $(cat pylint.ignore); do echo "-d $m"; done) \
+    pineboolib 2>/dev/null
