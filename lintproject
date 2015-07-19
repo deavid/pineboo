@@ -3,7 +3,9 @@ if [ "$1" != "" ]; then
     /usr/local/bin/pylint --help-msg=$1 2>/dev/null
     exit 0;
 fi
-/usr/local/bin/pylint -j3 -f colorized --confidence=HIGH \
-    -r no pineboo.py \
+/usr/local/bin/pylint -f colorized --ignored-modules='lxm*' \
+    --ignored-modules='*etree*' \
+    --ignored-modules='PyQt4*' --max-line-length=120 --max-branches=32 --max-locals=32 --max-statements=80 \
     $(for m in $(cat pylint.ignore); do echo "-d $m"; done) \
-    pineboolib 2>/dev/null
+    -r no \
+    pineboo.py pineboolib 2>/dev/null
