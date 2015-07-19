@@ -502,7 +502,10 @@ class FLMainForm(FLForm):
             python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
                 print("Convirtiendo a Python . . .")
-                ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                from pineboolib.flparser import postparse
+                postparse.pythonify(script_path)
+
             if not os.path.isfile(python_script_path):
                 raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             try:

@@ -69,7 +69,7 @@ Cosas que hay que hacer ahora
 - Agregar una opción "-c" para indicar la conexión por consola. (* hecho)
 - Erradicar el uso de ficheros xml para proyecto, dejar la opción, pero como
   obsoleta
-- Crear un fichero de utilidades y mover algunas funciones
+- Crear un fichero de utilidades y mover algunas funciones (* hecho)
 - Refactorizar algunas funciones que se han vuelto un poco grandes
 - Cargar al inicio los ficheros principales de cada módulo
 
