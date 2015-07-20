@@ -9,6 +9,8 @@ import sys, re, traceback, os
 from optparse import OptionParser
 from pineboolib.utils import filedir
 import pineboolib.DlgConnect
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
 try:
@@ -153,6 +155,17 @@ def main():
             if options.action in module.actions:
                 objaction = module.actions[options.action]
         if objaction is None: raise ValueError("Action name %s not found" % options.action)
+
+        main_window = mainForm.mainWindow
+        main_window.load()
+        print("Módulos y pestañas ...")
+        for k,area in sorted(project.areas.items()):
+            main_window.addAreaTab(area)
+        for k,module in sorted(project.modules.items()):
+            main_window.addModuleInTab(module)
+        print("Abriendo interfaz ...")
+        main_window.show()
+
         objaction.openDefaultForm()
         sys.exit(app.exec_())
     else:
