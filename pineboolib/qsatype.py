@@ -49,3 +49,6 @@ class FormDBWidget(QtGui.QWidget):
 
 def FLFormSearchDB(name):
     return flcontrols.FLFormSearchDB(name)
+
+class QLineEdit(QtGui.QLineEdit):
+    pass
