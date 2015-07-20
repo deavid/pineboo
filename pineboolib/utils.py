@@ -16,3 +16,25 @@ class Struct(object):
         for k,v in kwargs.items():
             setattr(self, k, v)
 
+
+class DefFun:
+    def __init__(self, parent, funname, realfun = None):
+        self.parent = parent
+        self.funname = funname
+        self.realfun = None
+    def __str__(self):
+        if self.realfun:
+            print("%r: Redirigiendo Propiedad a función %r" % (self.parent.__class__, self.funname))
+            return self.realfun()
+        print("WARN: %r: Propiedad no implementada %r" % (self.parent.__class__, self.funname))
+        return 0
+
+    def __call__(self, *args):
+
+        if self.realfun:
+            print("%r: Redirigiendo Llamada a función %r %r" % (self.parent.__class__, self.funname, args))
+            return self.realfun(*args)
+
+        print("WARN: %r: Método no implementado %r %r" % (self.parent.__class__, self.funname, args))
+        return None
+

@@ -7,6 +7,7 @@ import pineboolib
 #from pineboolib.qsaglobals import ustr
 
 from PyQt4 import QtGui, QtCore # , uic
+from pineboolib.utils import DefFun
 
 Qt = QtCore.Qt
 # TODO: separar en otro fichero de utilidades
@@ -42,6 +43,8 @@ class ProjectClass(QtCore.QObject):
         self._prj = pineboolib.project
 
 class QCheckBox(QtGui.QCheckBox):
+    def __getattr__(self, name): return DefFun(self, name)
+
     @QtCore.pyqtProperty(int)
     def checked(self):
         return self.isChecked()
@@ -53,10 +56,12 @@ class QCheckBox(QtGui.QCheckBox):
 
 
 class QComboBox(QtGui.QComboBox):
+    def __getattr__(self, name): return DefFun(self, name)
     @property
     def currentItem(self): return self.currentIndex
 
 class QButtonGroup(QtGui.QFrame):
+    def __getattr__(self, name): return DefFun(self, name)
     @property
     def selectedId(self): return 0
 
@@ -73,6 +78,7 @@ class FLSqlQuery(ProjectClass):
             # Asociar a otra conexión de base de datos
             print("FIXME: Asociar a otra conexión %r " % conn)
 
+    def __getattr__(self, name): return DefFun(self, name)
     @NotImplementedWarn
     def setTablesList(self, tablelist):
         return True
@@ -127,6 +133,8 @@ class FLSqlCursor(ProjectClass):
         self._commit_actions = True
         self._current_row = -1
         self._chk_integrity = True
+
+    def __getattr__(self, name): return DefFun(self, name)
 
     def mainFilter(self):
         return self._model.where_filters.get("main-filter", "")
@@ -282,6 +290,7 @@ class ProgressDialog(QtGui.QWidget):
         self.title = "Untitled"
         self.step = 0
         self.steps = 100
+    def __getattr__(self, name): return DefFun(self, name)
 
     def setup(self, title, steps):
         self.title = title
@@ -300,6 +309,8 @@ class ProgressDialog(QtGui.QWidget):
 
 class FLUtil(ProjectClass):
     progress_dialog_stack = []
+    def __getattr__(self, name): return DefFun(self, name)
+
     def translate(self, group, string):
         return QtCore.QString(string)
 
@@ -372,6 +383,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if not wfilter: continue
             where_filter += " AND " + wfilter
         cur = self._prj.conn.cursor()
+        # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         sql = """SELECT %s FROM %s WHERE 1=1 %s""" % (", ".join(self.sql_fields),self._table.name, where_filter)
         cur.execute(sql)
         self.rows = 0
@@ -433,6 +445,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
 class FLTableDB(QtGui.QTableView):
     def __init__(self, parent = None, action_or_cursor = None, *args):
+        # TODO: Falta el lineeditsearch y el combo, que los QS lo piden
         super(FLTableDB,self).__init__(parent,*args)
         self._v_header = self.verticalHeader()
         self._v_header.setDefaultSectionSize(18)
@@ -468,6 +481,8 @@ class FLTableDB(QtGui.QTableView):
         self.sort = []
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(100, self.loaded)
+
+    def __getattr__(self, name): return DefFun(self, name)
 
     def loaded(self):
         # Es necesario pasar a modo interactivo lo antes posible
@@ -512,7 +527,7 @@ class FLTableDB(QtGui.QTableView):
         self._cursor.copyRecord()
 
 class FLTable(QtGui.QTableWidget):
-    pass
+    def __getattr__(self, name): return DefFun(self, name)
 
 class FLFormSearchDB( QtGui.QWidget ):
     _accepted = None
@@ -522,6 +537,8 @@ class FLFormSearchDB( QtGui.QWidget ):
         super(FLFormSearchDB,self).__init__()
         self._accepted = False
         self._cursor = FLSqlCursor(cursor)
+
+    def __getattr__(self, name): return DefFun(self, name)
 
     @NotImplementedWarn
     def setCursor(self):
@@ -563,6 +580,8 @@ class FLReportViewer(ProjectClass):
         #  FLReportViewerInterface(QWidget *w, bool) : QObject(w) {
         #  FLReportViewerInterface(FLReportEngine *r) : QObject(0) {
         self.connects()
+
+    def __getattr__(self, name): return DefFun(self, name)
 
     def connects(self):
         pass
