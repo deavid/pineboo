@@ -42,7 +42,12 @@ class FormDBWidget(QtGui.QWidget):
         pass
 
     def child(self, childName):
-        return self.findChild(QtGui.QWidget, childName)
+        ret = self.findChild(QtGui.QWidget, childName)
+        if ret is None:
+            print("WARN: No se encontró el control %r" % childName)
+        #else:
+        #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
+        return ret
 
     def cursor(self):
         return self._cursor

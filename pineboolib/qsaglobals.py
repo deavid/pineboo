@@ -57,10 +57,18 @@ aqtt = auto_qt_translate_text
 def connect(sender, signal, receiver, slot):
     # print "Connect::", sender, signal, receiver, slot
     if sender is None:
-        print("Connect::", sender, signal, receiver, slot)
+        print("Connect Error::", sender, signal, receiver, slot)
         return False
-    m = re.search(r"^(\w+).(\w+)(\(.*\))?", slot)
-    if m:
+    m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
+    remote_fn = getattr(receiver, slot, None)
+    if remote_fn:
+        try:
+            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), remote_fn)
+        except RuntimeError as e:
+            print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
+            print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
+            return False
+    elif m:
         remote_obj = getattr(receiver, m.group(1), None)
         if remote_obj is None: raise AttributeError("Object %s not found on %s" % (remote_obj, str(receiver)))
         remote_fn = getattr(remote_obj, m.group(2), None)
@@ -71,6 +79,7 @@ def connect(sender, signal, receiver, slot):
             print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
             print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
             return False
+
     else:
         QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))
     return True
