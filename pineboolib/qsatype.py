@@ -51,4 +51,21 @@ def FLFormSearchDB(name):
     return flcontrols.FLFormSearchDB(name)
 
 class QLineEdit(QtGui.QLineEdit):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(QLineEdit, self).__init__(*args,**kwargs)
+        class TextEmul:
+            def __init__(self, parent):
+                self.parent = parent
+            def __call__(self):
+                return self.parent.text()
+            def __str__(self):
+                return self.parent.text()
+
+        self.text = TextEmul(self)
+
+    def __getattr__(self, name):
+        print("QLineEdit: Emulando método %r" % name)
+        return self.defaultFunction
+
+    def defaultFunction(self, *args, **kwargs):
+        print("QLineEdit: llamada a método no implementado", args,kwargs)
