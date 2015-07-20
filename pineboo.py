@@ -159,7 +159,9 @@ def main():
         main_window = mainForm.mainWindow
         main_window.load()
         print("Módulos y pestañas ...")
-        for module in list(project.modules.values()):
+        for k,area in sorted(project.areas.items()):
+            main_window.addAreaTab(area)
+        for k,module in sorted(project.modules.items()):
             main_window.addModuleInTab(module)
         print("Abriendo interfaz ...")
         main_window.show()

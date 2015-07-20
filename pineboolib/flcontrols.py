@@ -466,14 +466,16 @@ class FLTableDB(QtGui.QTableView):
             self.setSelectionModel(self._cursor.selection())
         self.tableRecords = self # control de tabla interno
         self.sort = []
-        q = QtCore.QTimer(self)
-        q.singleShot(100, self.loaded)
+        self.timer_1 = QtCore.QTimer(self)
+        self.timer_1.singleShot(100, self.loaded)
 
     def loaded(self):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         print("FLTableDB: setting columns in interactive mode")
         self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
+        self.timer_1.deleteLater()
+        self.timer_1 = None
 
     def cursor(self):
         assert self._cursor

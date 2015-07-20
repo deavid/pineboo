@@ -131,6 +131,11 @@ class Project(object):
             print(traceback.format_exc())
 
         self.cur = self.conn.cursor()
+        self.areas = {}
+        self.cur.execute(""" SELECT idarea, descripcion FROM flareas WHERE bloqueo = TRUE """)
+        for idarea, descripcion in self.cur:
+            self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
+
         # Obtener modulos activos
         self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = TRUE """)
         self.modules = {}
