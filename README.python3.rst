@@ -63,14 +63,18 @@ Siempre se podrá migrar más tarde.
 Cosas que hay que hacer ahora
 ---------------------------------
 
-- Integrar la parte de flscriptparser que usamos dentro de pineboo.
-- Modificar el parseador para que escriba código Python3
-- Modificar el diálogo de conexión para que funcione
+- Integrar la parte de flscriptparser que usamos dentro de pineboo. (* hecho)
+- Modificar el parseador para que escriba código Python3 (* hecho)
 - Agregar una opción "-c" para indicar la conexión por consola. (* hecho)
+- Crear un fichero de utilidades y mover algunas funciones (* hecho)
+- Modificar el diálogo de conexión para que funcione
 - Erradicar el uso de ficheros xml para proyecto, dejar la opción, pero como
   obsoleta
-- Crear un fichero de utilidades y mover algunas funciones (* hecho)
 - Refactorizar algunas funciones que se han vuelto un poco grandes
 - Cargar al inicio los ficheros principales de cada módulo
+- flparser no reconoce valores de array ni objetos insertados in-line
+- flparser no reconoce funciones anónimas (lambdas)
+- los cursores deberían realizar las consultas con cursores de servidor por defecto
+
 
 
