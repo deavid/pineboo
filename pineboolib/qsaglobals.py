@@ -1,7 +1,6 @@
 # encoding: UTF-8
 from __future__ import print_function
 from __future__ import unicode_literals
-from builtins import str
 from builtins import object
 import re
 from PyQt4 import QtCore, QtGui
@@ -132,4 +131,20 @@ class Input(object):
         if not ok: return None
         return text
 
+# -------------------------- FORBIDDEN FRUIT ----------------------------------
+# Esto de aquí es debido a que en Python3 decidieron que era mejor abandonar
+# QString en favor de los strings de python3. Por lo tanto ahora el código QS
+# llama a funciones de str en lugar de QString, y obviamente algunas no existen
 
+# forbidden fruit tiene otra licencia (gplv3) y lo he incluído dentro del código
+# por simplicidad de la instalación; pero sigue siendo gplv3, por lo que si
+# alguien quiere hacer algo que en MIT se puede y en GPLv3 no, tendría que sacar
+# ese código de allí. (como mínimo; no sé hasta donde llegaría legalmente)
+
+# Para terminar, esto es una guarrada, pero es lo que hay. Si lo ves aquí, te
+# gusta y lo quieres usar en tu proyecto, no, no es una bunea idea. Yo no tuve
+# más opción. (Es más, si consigo parchear el python para que no imprima "left"
+# quitaré esta librería demoníaca)
+
+from forbiddenfruit import curse
+curse(str, "left", lambda self, n: self[:n])

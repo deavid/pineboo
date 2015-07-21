@@ -317,7 +317,8 @@ class FLUtil(ProjectClass):
     def sqlSelect(self, table, fieldname, where):
         if where: where = "AND " + where
         cur = pineboolib.project.conn.cursor()
-        cur.execute("""SELECT %s FROM %s WHERE 1=1 %s""" % (fieldname, table, where))
+
+        cur.execute("""SELECT %s FROM %s WHERE 1=1 %s LIMIT 1""" % (fieldname, table, where))
         for ret, in cur:
             return ret
 
@@ -342,7 +343,12 @@ class FLUtil(ProjectClass):
         campos = [ field.name for field in table.fields ]
         return [len(campos)]+campos
 
-
+    def addMonths(self, fecha, offset):
+        if isinstance(fecha, str):
+            fecha = QtCore.QDate.fromString(fecha)
+        if not isinstance(fecha, QtCore.QDate):
+            print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(fecha))
+        return fecha.addMonths(offset)
 
 
 
@@ -384,7 +390,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             where_filter += " AND " + wfilter
         cur = self._prj.conn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
-        sql = """SELECT %s FROM %s WHERE 1=1 %s""" % (", ".join(self.sql_fields),self._table.name, where_filter)
+        # FIXME: Agregado limit de 5000 registros para evitar atascar pineboo
+        # TODO: Convertir esto a un cursor de servidor
+        sql = """SELECT %s FROM %s WHERE 1=1 %s LIMIT 5000""" % (", ".join(self.sql_fields),self._table.name, where_filter)
         cur.execute(sql)
         self.rows = 0
         self.endRemoveRows()
@@ -728,3 +736,27 @@ class FLReportViewer(ProjectClass):
   void setName(const QString &n) {
   FLReportViewer *obj() {
 """
+
+
+class QLineEdit(QtGui.QLineEdit):
+    def __init__(self, *args, **kwargs):
+        super(QLineEdit, self).__init__(*args,**kwargs)
+        class TextEmul:
+            def __init__(self, parent, f):
+                self.parent = parent
+                self.f = f
+            def __call__(self):
+                return self.f()
+            def __str__(self):
+                return self.f()
+            def __getattr__(self, name):
+                return getattr(self.f(),name)
+
+        self.text = TextEmul(self, super(QLineEdit,self).text)
+
+    def __getattr__(self, name):
+        print("QLineEdit: Emulando método %r" % name)
+        return self.defaultFunction
+
+    def defaultFunction(self, *args, **kwargs):
+        print("QLineEdit: llamada a método no implementado", args,kwargs)
