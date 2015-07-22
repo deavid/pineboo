@@ -76,6 +76,6 @@ Cosas que hay que hacer ahora
 - flparser no reconoce funciones anónimas (lambdas)
 - flparser no reconoce el operador ternario ( x ? y : z ; y if x else z )
 - los cursores deberían realizar las consultas con cursores de servidor por defecto
-
+- Falta que la aplicación trabaje con los modos de registro. De momento solo usa los master/search
 
 
