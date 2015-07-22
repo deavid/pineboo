@@ -5,6 +5,7 @@ from builtins import object
 import re
 from PyQt4 import QtCore, QtGui
 
+import traceback
 import pineboolib
 from pineboolib import flcontrols
 
@@ -131,6 +132,56 @@ class Input(object):
         if not ok: return None
         return text
 
+
+def qsa_length(obj):
+    lfn = getattr(obj, "length", None)
+    if lfn: return lfn()
+    return len(lfn)
+
+def qsa_text(obj):
+    try:
+        return obj.text()
+    except Exception:
+        return obj.text
+
+class qsa:
+    parent = None
+    loaded = False
+    def __init__(self, parent):
+        if isinstance(parent,str): parent = QtCore.QString(parent)
+        self.parent = parent
+        self.loaded = True
+
+
+    def __getattr__(self, k):
+        if not self.loaded: return super(qsa, self).__getattr__(k)
+        try:
+            f = getattr(self.parent,k)
+            if callable(f): return f()
+            else: return f
+        except Exception:
+            if k == 'length': return len(self.parent)
+            print("FATAL: qsa: error al intentar emular getattr de %r.%r" % (self.parent, k))
+            print(traceback.format_exc(4))
+
+    def __setattr__(self, k,v):
+        if not self.loaded: return super(qsa, self).__setattr__(k,v)
+        try:
+            f = getattr(self.parent,k)
+            if callable(f): return f(v)
+            else: return setattr(self.parent,k,v)
+        except Exception:
+            try:
+                k = 'set' + k[0].upper() + k[1:]
+                f = getattr(self.parent,k)
+                if callable(f): return f(v)
+                else: return setattr(self.parent,k,v)
+            except Exception:
+                print("FATAL: qsa: error al intentar emular setattr de %r.%r = %r" % (self.parent, k , v))
+                print(traceback.format_exc(4))
+
+
+
 # -------------------------- FORBIDDEN FRUIT ----------------------------------
 # Esto de aquí es debido a que en Python3 decidieron que era mejor abandonar
 # QString en favor de los strings de python3. Por lo tanto ahora el código QS
@@ -146,5 +197,5 @@ class Input(object):
 # más opción. (Es más, si consigo parchear el python para que no imprima "left"
 # quitaré esta librería demoníaca)
 
-from forbiddenfruit import curse
-curse(str, "left", lambda self, n: self[:n])
+#from forbiddenfruit import curse
+#curse(str, "left", lambda self, n: self[:n])

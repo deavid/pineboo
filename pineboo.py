@@ -7,8 +7,6 @@
 """
 import sys, re, traceback, os
 from optparse import OptionParser
-from pineboolib.utils import filedir
-import pineboolib.DlgConnect
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -31,6 +29,9 @@ except ImportError:
     sys.exit(32)
 
 try:
+    import sip
+    sip.setapi('QString', 1)
+
     from PyQt4 import QtGui, QtCore, uic
 except ImportError:
     print(traceback.format_exc())
@@ -39,6 +40,9 @@ except ImportError:
     print()
     sys.exit(32)
 
+
+from pineboolib.utils import filedir
+import pineboolib.DlgConnect
 
 import pineboolib
 import pineboolib.main

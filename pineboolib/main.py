@@ -9,6 +9,10 @@ import re,subprocess
 import traceback
 from lxml import etree
 import psycopg2
+
+import sip
+sip.setapi('QString', 1)
+
 from PyQt4 import QtGui, QtCore, uic
 
 import pineboolib

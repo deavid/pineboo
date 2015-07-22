@@ -3,10 +3,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
 import traceback
-import pineboolib
-#from pineboolib.qsaglobals import ustr
+import sip
+sip.setapi('QString', 1)
 
 from PyQt4 import QtGui, QtCore # , uic
+
+import pineboolib
+#from pineboolib.qsaglobals import ustr
 from pineboolib.utils import DefFun
 
 Qt = QtCore.Qt
@@ -344,7 +347,7 @@ class FLUtil(ProjectClass):
         return [len(campos)]+campos
 
     def addMonths(self, fecha, offset):
-        if isinstance(fecha, str):
+        if isinstance(fecha, str) or isinstance(fecha, QtCore.QString):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(fecha))
@@ -755,8 +758,21 @@ class QLineEdit(QtGui.QLineEdit):
         self.text = TextEmul(self, super(QLineEdit,self).text)
 
     def __getattr__(self, name):
-        print("QLineEdit: Emulando método %r" % name)
+        print("flcontrols.QLineEdit: Emulando método %r" % name)
         return self.defaultFunction
 
     def defaultFunction(self, *args, **kwargs):
-        print("QLineEdit: llamada a método no implementado", args,kwargs)
+        print("flcontrols.QLineEdit: llamada a método no implementado", args,kwargs)
+
+class QPushButton(QtGui.QPushButton):
+    @property
+    def pixmap(self):
+        return self.icon()
+
+    @pixmap.setter
+    def pixmap(self, value):
+        return self.setIcon(value)
+
+    def setPixmap(self, value):
+        return self.setIcon(value)
+

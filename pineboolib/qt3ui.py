@@ -100,7 +100,7 @@ def loadWidget(xml, widget=None):
         else:
             set_fn = getattr(widget, setpname, None)
         if set_fn is None:
-            print("Missing property", pname, " for ", widget.__class__.__name__)
+            print("qt3ui: Missing property", pname, " for %r" % widget.__class__)
             return
         #print "Found property", pname
         if pname == "contentsMargins" or pname == "layoutSpacing":
@@ -146,7 +146,7 @@ def loadWidget(xml, widget=None):
                     else:
                         widget.layout.rowStretch(row)
             else:
-                print("Unknown layout xml tag", repr(c.tag))
+                print("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
     properties = []
@@ -173,7 +173,7 @@ def loadWidget(xml, widget=None):
                 prop1[k] = v
             widget.addItem(prop1["text"])
             continue
-        print("Unknown widget xml tag", repr(c.tag))
+        print("qt3ui: Unknown widget xml tag", repr(c.tag))
     for c in properties:
         process_property(c)
 
@@ -267,6 +267,6 @@ def _loadVariant(variant):
             if v is not None: return v
 
 
-    print("Unknown variant:", etree.tostring(variant))
+    print("qt3ui: Unknown variant:", etree.tostring(variant))
 
 
