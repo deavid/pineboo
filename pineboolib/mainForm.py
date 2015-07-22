@@ -32,9 +32,17 @@ class MainForm(QtGui.QWidget):
         #print"Cerrando pestaña número %d " % numero
         self.formTab.removeTab(numero)
 
-    def addFormTab(self, widget):
+    def addFormTab(self, action):
+        widget = action.mainform_widget
         #print"Añadiendo Form a pestaña"
-        self.formTab.addTab(widget, widget.windowTitle())
+        icon = None
+        try:
+            icon = action.mod.mod.mainform.actions[action.name].icon
+            self.formTab.addTab(widget, icon, widget.windowTitle())
+        except Exception as e:
+            print("ERROR: addFormTab: No pude localizar icono para %r. Error: %s" % (action.name, e))
+            self.formTab.addTab(widget, widget.windowTitle())
+
         self.formTab.setCurrentWidget(widget)
 
 

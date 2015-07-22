@@ -445,7 +445,7 @@ class XMLAction(XMLStruct):
         from pineboolib import mainForm
         w = mainForm.mainWindow
         self.mainform_widget.init()
-        w.addFormTab(self.mainform_widget)
+        w.addFormTab(self)
         #self.mainform_widget.show()
 
 class FLForm(QtGui.QWidget):
