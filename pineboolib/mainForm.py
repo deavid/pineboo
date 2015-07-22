@@ -27,6 +27,16 @@ class MainForm(QtGui.QWidget):
         self.formTab.setTabsClosable(True)
         self.connect(self.formTab, QtCore.SIGNAL('tabCloseRequested(int)'), self.closeFormTab)
         self.formTab.removeTab(0)
+        app_icon = QtGui.QIcon()
+        app_icon.addFile(filedir('icons/pineboo-logo-16.png'), QtCore.QSize(16,16))
+        app_icon.addFile(filedir('icons/pineboo-logo-24.png'), QtCore.QSize(24,24))
+        app_icon.addFile(filedir('icons/pineboo-logo-32.png'), QtCore.QSize(32,32))
+        app_icon.addFile(filedir('icons/pineboo-logo-48.png'), QtCore.QSize(48,48))
+        app_icon.addFile(filedir('icons/pineboo-logo-64.png'), QtCore.QSize(64,64))
+        app_icon.addFile(filedir('icons/pineboo-logo-128.png'), QtCore.QSize(128,128))
+        app_icon.addFile(filedir('icons/pineboo-logo-256.png'), QtCore.QSize(256,256))
+        self.setWindowIcon(app_icon)
+        self.setWindowTitle("Pineboo")
 
     def closeFormTab(self, numero):
         #print"Cerrando pestaña número %d " % numero
