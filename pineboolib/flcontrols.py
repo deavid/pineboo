@@ -63,6 +63,8 @@ class QComboBox(QtGui.QComboBox):
     @property
     def currentItem(self): return self.currentIndex
 
+    def setCurrentItem(self, i): return self.setCurrentIndex(i)
+
 class QButtonGroup(QtGui.QFrame):
     def __getattr__(self, name): return DefFun(self, name)
     @property

@@ -4,8 +4,10 @@ from __future__ import unicode_literals
 from builtins import range
 import traceback
 import os.path
+from binascii import unhexlify
 
 from PyQt4 import QtGui, QtCore, uic
+Qt = QtCore.Qt
 
 from pineboolib.utils import filedir, Struct
 
@@ -20,7 +22,7 @@ class MainForm(QtGui.QWidget):
     def load(self):
         self.ui = uic.loadUi(filedir('forms/mainform.ui'), self)
         self.areasTab = self.ui.areasTab
-        self.areasTab.removeTab(0) #Borramos tab de ejemplo.
+        self.areasTab.removeItem(0) #Borramos tab de ejemplo.
         self.formTab = self.ui.formTab
         self.formTab.setTabsClosable(True)
         self.connect(self.formTab, QtCore.SIGNAL('tabCloseRequested(int)'), self.closeFormTab)
@@ -48,7 +50,7 @@ class MainForm(QtGui.QWidget):
         self.tab = self.tab + 1
         vl.setLayout(vl.layout)
         vl.layout.addWidget(moduleToolBox)
-        self.areasTab.addTab(vl, area.descripcion)
+        self.areasTab.addItem(vl, area.descripcion)
 
 
     def addModuleInTab(self, module):
@@ -62,18 +64,38 @@ class MainForm(QtGui.QWidget):
 
         vBLayout = QtGui.QWidget()
         vBLayout.layout = QtGui.QVBoxLayout() #layout de cada módulo.
-        vBLayout.layout.setSpacing(0)
-        vBLayout.layout.setContentsMargins(1, 2, 2, 0)
+        vBLayout.layout.setSpacing(1)
+        vBLayout.layout.setContentsMargins(1, 1, 1, 1)
 
         vBLayout.setLayout(vBLayout.layout)
 
         moduleToolBox.addItem(vBLayout, module.description)
 
         try:
-            module.run(vBLayout.layout)
+            self.moduleLoad(vBLayout.layout,module)
         except Exception:
             print("ERROR al procesar modulo %s:" % module.name)
             print(traceback.format_exc(), "---")
+
+    def moduleLoad(self, vBLayout, module):
+        if module.loaded == False: module.load()
+        if module.loaded == False:
+            print("WARN: Ignorando modulo %r por fallo al cargar" % (module.name))
+            return False
+        #print "Running module %s . . . " % self.name
+        vBLayout.setSpacing(1)
+        vBLayout.setContentsMargins(1,1,1,1)
+        for key in module.mainform.toolbar:
+            action = module.mainform.actions[key]
+
+            button = QtGui.QToolButton()
+            button.setText(action.text)
+            button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+            button.setAutoRaise(True)
+            if action.icon: button.setIcon(action.icon)
+            button.clicked.connect(action.run)
+            vBLayout.addWidget(button)
+
 
 mainWindow = MainForm()
 

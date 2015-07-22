@@ -9,6 +9,7 @@ import re,subprocess
 import traceback
 from lxml import etree
 import psycopg2
+from binascii import unhexlify
 
 import sip
 sip.setapi('QString', 1)
@@ -247,22 +248,6 @@ class Module(object):
         self.loaded = True
         return True
 
-    def run(self,vBLayout):
-        if self.loaded == False: self.load()
-        if self.loaded == False:
-            print("WARN: Ignorando modulo %r por fallo al cargar" % (self.name))
-            return False
-        #print "Running module %s . . . " % self.name
-        vBLayout.setSpacing(0)
-        vBLayout.setContentsMargins(1,5,5,0)
-        for key in self.mainform.toolbar:
-            action = self.mainform.actions[key]
-
-            button = QtGui.QCommandLinkButton(action.text)
-            button.clicked.connect(action.run)
-            vBLayout.addWidget(button)
-        #w.setLayout(w.layout)
-        #w.show()
 
 
 class File(object):
@@ -378,11 +363,36 @@ class MainForm(object):
 
         self.root = self.tree.getroot()
         self.actions = {}
+        self.pixmaps = {}
+        for image in self.root.xpath("images/image[@name]"):
+            name = image.get("name")
+            xmldata = image.xpath("data")[0]
+            img_format = xmldata.get("format")
+            data = unhexlify(xmldata.text.strip())
+            pixmap = QtGui.QPixmap()
+            pixmap.loadFromData(data, img_format)
+            icon = QtGui.QIcon(pixmap)
+            self.pixmaps[name] = icon
+
+
         for xmlaction in self.root.xpath("actions//action"):
             action =  XMLMainFormAction(xmlaction)
             action.mainform = self
             action.mod = self.mod
             action.prj = self.prj
+            iconSet = getattr(action, "iconSet", None)
+            action.icon = None
+            if iconSet:
+                try:
+                    action.icon = self.pixmaps[iconSet]
+                except Exception as e:
+                    print("main.Mainform: Error al intentar decodificar icono de accion. No existe.")
+                    print(e)
+            else:
+                action.iconSet = None
+            #if iconSet:
+            #    for images in self.root.xpath("images/image[@name='%s']" % iconSet):
+            #        print("*****", iconSet, images)
             self.actions[action.name] = action
 
         self.toolbar = []
@@ -395,6 +405,9 @@ class MainForm(object):
 class XMLMainFormAction(XMLStruct):
     name = "unnamed"
     text = ""
+    mainform = None
+    mod = None
+    prj = None
     def run(self):
         # Se asume conectada a "OpenDefaultForm()".
         print("Running MainFormAction:", self.name, self.text)

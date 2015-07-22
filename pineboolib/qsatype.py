@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui
 
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
-from pineboolib.flcontrols import FLTable, FLUtil, FLReportViewer
+from pineboolib.flcontrols import FLTable, FLUtil, FLReportViewer, QLineEdit
 
 def Object(x=None):
     if x is None: x = {}

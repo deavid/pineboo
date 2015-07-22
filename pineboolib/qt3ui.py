@@ -149,6 +149,9 @@ def loadWidget(xml, widget=None):
                 print("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
+        widget.layout.setSpacing(1)
+        widget.layout.setContentsMargins(1,1,1,1)
+
     properties = []
     for c in xml:
         if c.tag == "property":
