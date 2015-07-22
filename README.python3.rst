@@ -72,8 +72,9 @@ Cosas que hay que hacer ahora
   obsoleta
 - Refactorizar algunas funciones que se han vuelto un poco grandes
 - Cargar al inicio los ficheros principales de cada módulo
-- flparser no reconoce valores de array ni objetos insertados in-line
+- flparser no reconoce valores de array ni objetos insertados in-line (x = []; y = {})
 - flparser no reconoce funciones anónimas (lambdas)
+- flparser no reconoce el operador ternario ( x ? y : z ; y if x else z )
 - los cursores deberían realizar las consultas con cursores de servidor por defecto
 
 
