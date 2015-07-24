@@ -32,8 +32,8 @@ def FLTableDB(*args):
     return flcontrols.FLTableDB(*args)
 
 class FormDBWidget(QtGui.QWidget):
-    def __init__(self, action, project):
-        super(FormDBWidget, self).__init__()
+    def __init__(self, action, project, parent = None):
+        super(FormDBWidget, self).__init__(parent)
         self._action = action
         self._cursor = FLSqlCursor(action.name)
         self._prj = project

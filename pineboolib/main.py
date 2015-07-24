@@ -427,7 +427,9 @@ class XMLAction(XMLStruct):
     def load(self):
         if self._loaded: return self.mainform_widget
         print("Loading action %s . . . " % (self.name))
-        self.mainform_widget = FLMainForm(self, load = True)
+        from pineboolib import mainForm
+        w = mainForm.mainWindow
+        self.mainform_widget = FLMainForm(w,self, load = True)
         self._loaded = True
         print("End of action load %s (iface:%s ; widget:%s)"
               % (self.name,
@@ -450,14 +452,14 @@ class XMLAction(XMLStruct):
 
 class FLForm(QtGui.QWidget):
     known_instances = {}
-    def __init__(self, action, load=False):
+    def __init__(self, parent, action, load=False):
         try:
             assert (self.__class__,action) not in self.known_instances
         except AssertionError:
             print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__,action),)
                 + "Puede que se estén perdiendo datos!" )
         self.known_instances[(self.__class__,action)] = self
-        QtGui.QWidget.__init__(self)
+        QtGui.QWidget.__init__(self, parent)
         self.action = action
         self.prj = action.prj
         self.mod = action.mod
@@ -537,7 +539,6 @@ class FLMainForm(FLForm):
                 print("ERROR al cargar script QS para la accion %r:" % self.action.name, e)
                 print(traceback.format_exc(),"---")
 
-
-        self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj)
+        self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
         self.widget = self.script.form
         self.iface = self.widget.iface

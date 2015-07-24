@@ -5,7 +5,7 @@
     pineboolib.main(); para ello acepta los parámetros necesarios de consola
     y configura el programa adecuadamente.
 """
-import sys, re, traceback, os
+import sys, re, traceback, os, gc
 from optparse import OptionParser
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -171,7 +171,7 @@ def main():
         main_window.show()
 
         objaction.openDefaultForm()
-        sys.exit(app.exec_())
+        return app.exec_()
     else:
         main_window = mainForm.mainWindow
         main_window.load()
@@ -185,6 +185,12 @@ def main():
         ret = app.exec_()
         del main_window
         del project
-        sys.exit(ret)
+        return ret
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    ret = main()
+    gc.collect()
+    print("Closing Pineboo...")
+    if ret: sys.exit(ret)
+    else: sys.exit(0)
+

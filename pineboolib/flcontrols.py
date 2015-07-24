@@ -458,6 +458,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
 class FLTableDB(QtGui.QTableView):
     def __init__(self, parent = None, action_or_cursor = None, *args):
+        print("FLTableDB:", parent, action_or_cursor , args)
         # TODO: Falta el lineeditsearch y el combo, que los QS lo piden
         super(FLTableDB,self).__init__(parent,*args)
         self._v_header = self.verticalHeader()
@@ -502,8 +503,6 @@ class FLTableDB(QtGui.QTableView):
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         print("FLTableDB: setting columns in interactive mode")
         self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
-        self.timer_1.deleteLater()
-        self.timer_1 = None
 
     def cursor(self):
         assert self._cursor
@@ -515,9 +514,19 @@ class FLTableDB(QtGui.QTableView):
     @NotImplementedWarn
     def putFirstCol(self, fN): return True
 
+    @QtCore.pyqtSlot()
+    def close(self):
+        print("FLTableDB: close()")
+
+    @QtCore.pyqtSlot()
     def refresh(self):
-        print("FLTableDB: refresh()")
+        print("FLTableDB: refresh()", self.parent().parent().parent())
         #self._cursor.refresh()
+
+    @QtCore.pyqtSlot()
+    def show(self):
+        print("FLTableDB: show event")
+        super(FLTableDB, self).show()
 
     @QtCore.pyqtSlot()
     def insertRecord(self):
@@ -538,6 +547,7 @@ class FLTableDB(QtGui.QTableView):
     @QtCore.pyqtSlot()
     def copyRecord(self):
         self._cursor.copyRecord()
+
 
 class FLTable(QtGui.QTableWidget):
     def __getattr__(self, name): return DefFun(self, name)
