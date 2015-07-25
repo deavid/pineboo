@@ -76,11 +76,13 @@ def translate_connstring(connstring):
     else: raise ValueError("String de conexión erróneo.")
 
     if user_pass:
+        user_pass = user_pass.split(":")
         if len(user_pass) == 1: user = user_pass[0]
         elif len(user_pass) == 2: user, passwd = user_pass[0], user_pass[1]
         else: raise ValueError("La cadena de usuario tiene dos veces dos puntos.")
 
     if host_port:
+        host_port = host_port.split(":")
         if len(host_port) == 1: host = host_port[0]
         elif len(host_port) == 2: host, port = host_port[0], host_port[1]
         else: raise ValueError("La cadena de host tiene dos veces dos puntos.")
