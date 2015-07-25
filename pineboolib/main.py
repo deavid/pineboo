@@ -394,7 +394,15 @@ class MainForm(object):
             #    for images in self.root.xpath("images/image[@name='%s']" % iconSet):
             #        print("*****", iconSet, images)
             self.actions[action.name] = action
-
+        
+            #Asignamos slot a action
+            for slots in self.root.xpath("connections//connection"):
+                slot = XMLStruct(slots)
+                if slot._v("sender") == action.name:
+                    action.slot = slot._v("slot")
+                    action.slot = action.slot.replace('(','')
+                    action.slot = action.slot.replace(')','')
+                
         self.toolbar = []
         for toolbar_action in self.root.xpath("toolbars//action"):
             self.toolbar.append( toolbar_action.get("name") )
@@ -408,11 +416,11 @@ class XMLMainFormAction(XMLStruct):
     mainform = None
     mod = None
     prj = None
+    slot = None
     def run(self):
-        # Se asume conectada a "OpenDefaultForm()".
-        print("Running MainFormAction:", self.name, self.text)
+        print("Running MainFormAction:", self.name, self.text, self.slot)
         action = self.mod.actions[self.name]
-        action.openDefaultForm()
+        getattr(action, self.slot, "unknowSlot")()
 
 class XMLAction(XMLStruct):
     def __init__(self, *args, **kwargs):
@@ -449,7 +457,15 @@ class XMLAction(XMLStruct):
         self.mainform_widget.init()
         w.addFormTab(self)
         #self.mainform_widget.show()
-
+        
+    def execDefaultScript(self):
+        print("Executing default script for Action", self.name)
+        self.load()
+                
+    def unknowSlot(self):
+        print("Executing unknow script for Action", self.name)
+        #Aquí debería arramcar el script
+                
 class FLForm(QtGui.QWidget):
     known_instances = {}
     def __init__(self, parent, action, load=False):
