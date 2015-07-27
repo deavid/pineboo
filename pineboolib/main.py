@@ -3,9 +3,11 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
 from builtins import object
-import sys, imp
-import os.path, os
-import re,subprocess
+import sys
+import imp
+#import os.path
+import os
+#import re,subprocess
 import traceback
 from lxml import etree
 import psycopg2
@@ -15,6 +17,8 @@ import sip
 sip.setapi('QString', 1)
 
 from PyQt4 import QtGui, QtCore, uic
+if __name__ == "__main__":
+    sys.path.append('..')
 
 import pineboolib
 from pineboolib import qt3ui

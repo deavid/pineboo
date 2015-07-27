@@ -173,7 +173,9 @@ def main():
         main_window.show()
 
         objaction.openDefaultForm()
-        return app.exec_()
+        ret = app.exec_()
+        mainForm.mainWindow = None
+        return ret
     else:
         main_window = mainForm.mainWindow
         main_window.load()
@@ -185,6 +187,7 @@ def main():
         print("Abriendo interfaz ...")
         main_window.show()
         ret = app.exec_()
+        mainForm.mainWindow = None
         del main_window
         del project
         return ret
