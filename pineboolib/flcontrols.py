@@ -275,7 +275,9 @@ class FLSqlCursor(ProjectClass):
 
     @QtCore.pyqtSlot()
     def editRecord(self):
-        print("Edit your record!", self._action.name)
+        print("BEGIN: Edit your record!", self._action.name)
+        self._action.openDefaultFormRecord()
+        print("END: Edit your record!", self._action.name)
 
     @QtCore.pyqtSlot()
     def deleteRecord(self):
