@@ -9,6 +9,7 @@ import traceback
 import pineboolib
 from pineboolib import flcontrols
 
+from pineboolib.utils import aqtt, auto_qt_translate_text
 
 def parseFloat(x): return float(x)
 
@@ -33,14 +34,6 @@ def debug(txt):
     print("DEBUG:", ustr(txt))
 
 
-def auto_qt_translate_text(text):
-    if not isinstance(text,str): text=str(text)
-
-    if isinstance(text,str):
-        if text.find("QT_TRANSLATE") != -1:
-            match = re.search(r"""QT_TRANSLATE\w*\(.+,["'](.+)["']\)""", text)
-            if match: text = match.group(1)
-    return text
 
 class SysType(object):
     def __init__(self):
@@ -52,7 +45,6 @@ class SysType(object):
         return modulename in prj.modules
 sys = SysType()
 
-aqtt = auto_qt_translate_text
 
 def connect(sender, signal, receiver, slot):
     # print "Connect::", sender, signal, receiver, slot

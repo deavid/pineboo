@@ -28,31 +28,9 @@ import pineboolib.emptyscript
 
 from pineboolib import qsatype, qsaglobals, DlgConnect
 
-from pineboolib.utils import filedir, one, Struct
+from pineboolib.utils import filedir, one, Struct, XMLStruct
 Qt = QtCore.Qt
 
-class XMLStruct(Struct):
-    def __init__(self, xmlobj=None):
-        self._attrs = []
-        if xmlobj is not None:
-            self.__name__ = xmlobj.tag
-            for child in xmlobj:
-                if child.tag == "property":
-                    key, text = qt3ui.loadProperty(child)
-                else:
-                    text = aqtt(child.text)
-                    key = child.tag
-                if isinstance(text, str): text = text.strip()
-                setattr(self, key, text)
-                self._attrs.append(key)
-                # print self.__name__, key, text
-    def __str__(self):
-        attrs = [ "%s=%s" % (k,repr(getattr(self,k))) for k in self._attrs ]
-        txtattrs = " ".join(attrs)
-        return "<%s.%s %s>" % (self.__class__.__name__, self.__name__, txtattrs)
-
-    def _v(self, k, default=None):
-        return getattr(self, k, default)
 
 class DBServer(XMLStruct):
     host = "127.0.0.1"
@@ -398,7 +376,7 @@ class MainForm(object):
             #    for images in self.root.xpath("images/image[@name='%s']" % iconSet):
             #        print("*****", iconSet, images)
             self.actions[action.name] = action
-        
+
             #Asignamos slot a action
             for slots in self.root.xpath("connections//connection"):
                 slot = XMLStruct(slots)
@@ -406,7 +384,7 @@ class MainForm(object):
                     action.slot = slot._v("slot")
                     action.slot = action.slot.replace('(','')
                     action.slot = action.slot.replace(')','')
-                
+
         self.toolbar = []
         for toolbar_action in self.root.xpath("toolbars//action"):
             self.toolbar.append( toolbar_action.get("name") )
@@ -461,15 +439,15 @@ class XMLAction(XMLStruct):
         self.mainform_widget.init()
         w.addFormTab(self)
         #self.mainform_widget.show()
-        
+
     def execDefaultScript(self):
         print("Executing default script for Action", self.name)
         self.load()
-                
+
     def unknowSlot(self):
         print("Executing unknow script for Action", self.name)
         #Aquí debería arramcar el script
-                
+
 class FLForm(QtGui.QWidget):
     known_instances = {}
     def __init__(self, parent, action, load=False):
