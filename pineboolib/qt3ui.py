@@ -152,22 +152,36 @@ def loadWidget(xml, widget=None):
         widget.layout.setSpacing(1)
         widget.layout.setContentsMargins(1,1,1,1)
 
+    layouts_pending_process = []
     properties = []
     for c in xml:
         if c.tag == "property":
             properties.append(c)
             continue
         if c.tag == "vbox":
+            # TODO: layout se solapa con el layout de FormInternalObj
+            if isinstance(getattr(widget,"layout", None),QtGui.QLayout):
+                print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
+                continue
             widget.layout = QtGui.QVBoxLayout()
-            process_layout_box(c)
+            layouts_pending_process += [(c,"box")]
+            #process_layout_box(c, mode="box")
             continue
         if c.tag == "hbox":
+            if isinstance(getattr(widget,"layout", None),QtGui.QLayout):
+                print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
+                continue
             widget.layout = QtGui.QHBoxLayout()
-            process_layout_box(c)
+            layouts_pending_process += [(c,"box")]
+            #process_layout_box(c, mode="box")
             continue
         if c.tag == "grid":
+            if isinstance(getattr(widget,"layout", None),QtGui.QLayout):
+                print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
+                continue
             widget.layout = QtGui.QGridLayout()
-            process_layout_box(c, mode="grid")
+            layouts_pending_process += [(c,"grid")]
+            #process_layout_box(c, mode="grid")
             continue
         if c.tag == "item":
             prop1 = {}
@@ -176,9 +190,34 @@ def loadWidget(xml, widget=None):
                 prop1[k] = v
             widget.addItem(prop1["text"])
             continue
-        print("qt3ui: Unknown widget xml tag", repr(c.tag))
+        if c.tag == "attribute":
+            k = c.get("name")
+            v = loadVariant(c)
+            attrs = getattr(widget, "_attrs", None)
+            if attrs is not None:
+                attrs[k] = v
+                #print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
+            else:
+                print("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
+        if c.tag == "widget":
+            # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
+            # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
+            new_widget = createWidget(c.get("class"), parent=None)
+            new_widget._attrs = {}
+            new_widget.show()
+            loadWidget(c, new_widget)
+            title = new_widget._attrs.get("title","UnnamedTab")
+            if isinstance(widget, QtGui.QTabWidget):
+                widget.addTab(new_widget,title)
+            else:
+                print("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
+            continue
+
+        print("qt3ui: Unknown widget xml tag", widget.__class__, repr(c.tag))
     for c in properties:
         process_property(c)
+    for c,m in layouts_pending_process:
+        process_layout_box(c,mode=m)
 
 def loadIcon(xml):
     global ICONS

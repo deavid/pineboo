@@ -463,6 +463,8 @@ class FLTableDB(QtGui.QTableView):
         print("FLTableDB:", parent, action_or_cursor , args)
         # TODO: Falta el lineeditsearch y el combo, que los QS lo piden
         super(FLTableDB,self).__init__(parent,*args)
+        # TODO: LA inicialización final hay que hacerla más tarde, en el primer
+        # show(), porque sino obligas a tenerlo todo preparado en el constructor.
         self._v_header = self.verticalHeader()
         self._v_header.setDefaultSectionSize(18)
         self._h_header = self.horizontalHeader()
@@ -790,3 +792,25 @@ class QPushButton(QtGui.QPushButton):
     def setPixmap(self, value):
         return self.setIcon(value)
 
+    def getToggleButton(self):
+        return self.isCheckable()
+    def setToggleButton(self, v):
+        return self.setCheckable(v)
+
+    toggleButton = property(getToggleButton,setToggleButton)
+
+
+class FLFieldDB(QtGui.QLineEdit):
+    _fieldName = "undefined"
+    @property
+    def fieldName(self):
+        return self._fieldName
+
+    @fieldName.setter
+    def fieldName(self, fN):
+        self._fieldName = fN
+        self.setText(fN)
+
+    def setFieldName(self, fN):
+        self._fieldName = fN
+        self.setText(fN)
