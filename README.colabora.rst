@@ -32,6 +32,7 @@ A grosso modo, el proceso de carga es el que sigue:
 
 De forma más reciente, se soporta también la llamada a la acción EditRecord que
 hace algo parecido a lo anterior: (este proceso está bastante inacabado)
+
 - Se convierte el QS a PY
 - Se crea el formulario pestaña leyendo Qt3 y generando controles Qt4
 - Importamos dinámicamente el PY y ejecutamos el init.
@@ -108,11 +109,11 @@ todo en la realidad.
 
 Todo esto de la API se divide en unos pocos ficheros:
 
-- flcontrols. Aquí pondremos todo lo que sean controles visuales de Qt, especialmente
+- *flcontrols*. Aquí pondremos todo lo que sean controles visuales de Qt, especialmente
 si queremos que qt3ui, al traducir el formulario, encuentre dónde está el control.
-- qsaglobals. Este fichero es para las funciones y clases que sí están disponibles
+- *qsaglobals*. Este fichero es para las funciones y clases que sí están disponibles
 globalmente en qsa, pero no lo están en Python. Por ejemplo "parseFloat" está aquí.
-- qsatype. Es muy similar a qsaglobals, pero aquí dejo principalmente los constructores
+- *qsatype*. Es muy similar a qsaglobals, pero aquí dejo principalmente los constructores
 de algunas clases. Hay también constructores de controles, para que cuando desde
 QS se cree un control nuevo, podamos tener mayor control sobre lo que hará el programa.
 
@@ -138,8 +139,42 @@ Cómo funciona la conversión a Python
 --------------------------------------
 
 La conversión de ficheros de QS a Python se hace en dos pasos, primero de QS a
-XML y luego de XML a Python. El primer paso (qs->xml) como parsear, generación
-árbol AST, simplificar el árbol y guardar a XML.
+XML y luego de XML a Python. Lo tenéis todo en la carpeta flparser.
+
+El primer paso convierte el fichero QS en un XML. Consiste internamente en:
+
+- *parsear*. Usamos para esto python-ply, lee el código, separa las distintas
+  palabras claves, números, textos (esto se conoce como lexer y está en flex.py).
+  Después procesamos el resultado siguiendo unos patrones. (flscriptparse.py)
+  En estos patrones no se han configurado tal y como especifica el
+  estándar Ecmascript, sino de un modo más comprensivo y similar a como nosotros
+  programamos. El resultado es que el parser entiende mejor el sentido del programa,
+  pero por contra, no parsea todos los programas que se pueden hacer en QSA.
+  Hay algunos patrones de programación que no va a reconocer, pero por lo general
+  suelen ser dañinos y deberíamos cambiarlos.
+- *generación árbol AST*. AST significa "Abstract Syntax Tree" y básicamente es
+  una representación de nodos donde está la información recolectada por el parser.
+  Aunque el parser se intenta que sea más listo con los patrones que lee, las
+  estructuras generadas en este paso siguen siendo demasiado complejas y liadas
+  como para que otro programa "entienda" qué está haciendo. (flscriptparse.py)
+- *simplificar el árbol*. Dado que el AST es aún demasiado complicado, lo que
+  hacemos es aplicar unas conversiones. Cuando se detectan ciertos patrones
+  repetitivos, se resumen en un solo nodo. (postparse.py)
+- *guardar a XML*. El resultado, lo guardamos en un fichero XML. El objetivo es
+  principalmente, permitir la depuración "a mano". Si algo va mal, el XML es el
+  punto intermedio que nos permite saber en qué parte del programa tenemos que
+  modificar. Una cosa que falta a futuro, es eliminar este paso intermedio
+  (ahorrariamos CPU de grabar y leer XML, que no es poco) y dejarlo como opción
+  para depurar. (postparse.py)
+
+El segundo paso lee el XML y lo convierte en un fichero Python. Este es mucho
+más sencillo que el anterior. Lo que hacemos es convertir cada nodo del xml
+en un patrón de programación de Python. Cuando algo no se reconoce, hay que
+agregar un nuevo patrón de programación. Algunos son más complicados o confictivos
+que otros. Todo esto está controlado en el fichero pytnyzer.py.
+
+
+
 
 Cómo funciona la conversión de Qt3 a Qt4
 ------------------------------------------
