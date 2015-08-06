@@ -110,12 +110,12 @@ todo en la realidad.
 Todo esto de la API se divide en unos pocos ficheros:
 
 - *flcontrols*. Aquí pondremos todo lo que sean controles visuales de Qt, especialmente
-si queremos que qt3ui, al traducir el formulario, encuentre dónde está el control.
+   si queremos que qt3ui, al traducir el formulario, encuentre dónde está el control.
 - *qsaglobals*. Este fichero es para las funciones y clases que sí están disponibles
-globalmente en qsa, pero no lo están en Python. Por ejemplo "parseFloat" está aquí.
+   globalmente en qsa, pero no lo están en Python. Por ejemplo "parseFloat" está aquí.
 - *qsatype*. Es muy similar a qsaglobals, pero aquí dejo principalmente los constructores
-de algunas clases. Hay también constructores de controles, para que cuando desde
-QS se cree un control nuevo, podamos tener mayor control sobre lo que hará el programa.
+   de algunas clases. Hay también constructores de controles, para que cuando desde
+   QS se cree un control nuevo, podamos tener mayor control sobre lo que hará el programa.
 
 Para colaborar, lo normal es intentar ejecutar un programa completo, ir probando
 y viendo en la consola todos los mensajes que se reportan; localizar qué parte
@@ -179,3 +179,24 @@ que otros. Todo esto está controlado en el fichero pytnyzer.py.
 Cómo funciona la conversión de Qt3 a Qt4
 ------------------------------------------
 
+Todo empieza con la función loadUi de qt3ui.py. En ella leemos a mano el fichero,
+y identificamos las conexiones a realizar, las imágenes y "el widget".
+
+El widget, que sería alo como el widget raíz, es donde empieza lo complicado.
+Dentro del widget se define todo el formulario en forma de layouts y más widgets.
+
+La función "loadWidget" se encarga de este dilema recursivo. Tienen toda la
+lógica necesaria y se llama a sí misma. La clave reside en el "for c in xml",
+el cual procesa todas las ordenes del ui para este widget. Según el tipo de
+etiqueta realizamos una u otra acción. Cuando encontramos otro widget, lo creamos
+usando la función "createWidget" que nos busca y nos crea la clase adecuada.
+A partir de aquí se llama a sí mismo para completar la carga del widget de forma
+recursiva.
+
+Lo más curioso de esta función es que traduce unas propiedades por otras
+(translate_properties) y para asignarlas, busca una función setXyz para una
+propiedad xyz.
+
+De momento lo que más faena da son los FLTableDB dentro de pestañas (QTabWidget).
+Dado que este control se inicializa en su construcción, por el modo en que se
+construye en este caso, queda mal inicializado.
