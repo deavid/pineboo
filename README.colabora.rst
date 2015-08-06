@@ -1,0 +1,146 @@
+Cómo colaborar en Pineboo
+=====================================
+
+Primero de todo, hemos de entender cómo funciona internamente Pineboo. Además,
+habremos de familiarizarnos con Python3, especialmente hay algunas técnicas más
+avanzadas que se usan para "hacer creer" al código QS que lo que hay detrás es
+un motor QSA Qt3.
+
+
+Cómo funciona Pineboo por dentro
+---------------------------------
+
+Pineboo está programado como una librería, por lo que todo el código está dentro
+de la carpeta pineboolib. Los ficheros exteriores únicamente sirven como
+lanzadores. El programa principal es main.py. En él se desarrolla prácticamente
+todo lo que hace Pineboo, hasta el punto que deberíamos intentar separarlo en
+partes más pequeñas según qué funcionalidad cubren. Pero ahora mismo main.py
+está controlando prácticamente todo lo que hace pineboo.
+
+A grosso modo, el proceso de carga es el que sigue:
+
+- Conexión a la base de datos
+- Descarga de ficheros flfiles a carpeta de caché (tempdata/cache)
+- Interpretado de los ficheros XML y UI de acciones
+- Creación del formulario y rellenado con sus modulos y acciones.
+- Al hacer clic en una acción (o si pasamos el switch -a) se dispara la carga
+  de la misma, con su formulario.
+- Si el fichero .py no existe, vamos al QS, lo convertirmos en XML y después a PY
+- Se importa dinámicamente el fichero py
+- Se crea el widget de la pestaña leyendo Qt3 y generando controles Qt4
+- Se ejecuta el init de la acción
+
+De forma más reciente, se soporta también la llamada a la acción EditRecord que
+hace algo parecido a lo anterior: (este proceso está bastante inacabado)
+- Se convierte el QS a PY
+- Se crea el formulario pestaña leyendo Qt3 y generando controles Qt4
+- Importamos dinámicamente el PY y ejecutamos el init.
+
+Aspectos interesantes en los procesos de pineboo
+---------------------------------------------------
+
+La descarga de ficheros de base de datos a la caché, tiene una "heurística" para
+detectar la codificación correcta. No es infalible, pero parece que funciona bien.
+
+Los ficheros de la caché se guardan en carpetas con el nombre del fichero, y el
+fichero realmente tiene de nombre el hash. Esto está así a propósito. De este
+modo mezclo las cachés de distintos programas. Si dos programas comparten un
+fichero, este no se convierte dos veces. Si un fichero se modifica, cambia de
+nombre. Esto me simplifica bastante la vida.
+
+La lectura de los XML y los UI se hace a través de python-lxml, que tendréis que
+aprender si queréis modificar o mejorar el código, aunque no creo que haga falta
+mucha colaboración en este punto concreto. Se guardan en una serie de clases,
+que la verdad, podrían estar mejor organizadas, ya que todas están en main.py y
+por otra parte hay cosas que están desperdigadas en otras clases cuando podríamos
+unificarlas por simplicidad. Hay clases diferentes para acciones según si venía
+del xml o del ui.
+
+Respecto al formulario principal de la aplicación, José Antonio Fernández ya lo
+mejoró bastante, y viendo cómo está ahora mismo yo, en mi opinión, focalizaría
+los esfuerzos en otro área.
+
+La conversión de QS a Python tiene bastante miga, en principio no espero
+colaboración en este área por su complejidad, pero también es la que más
+acabada tenemos. Sí agradecería colaboración detectando errores traduciendo de
+QS a Python; por ejemplo si un código de QS parece que vaya a hacer otra cosa
+en Python, o no se convierte del todo, u otro error. Obviamente para que
+convierta, tiene que parsear bien, y es mucho más sensible que Eneboo a ciertas
+formas de trabajo.
+
+La importación dinámica de python, bueno, en principio se supone que sólo se
+pueden importar ficheros de código si se conoce previamente su nombre, pero
+usando (hackeando) el código del importador, es posible decirle que importe el
+que quieras. No es muy complicado, funciona, y creo que está terminado. La
+ventaja de importar dentro es que Python compila a bytecode el código fuente,
+por lo que acelera su ejecución y además se cachea en disco para que la próxima
+vez la importación sea casi instantánea.
+
+Sobre la conversión de Qt3 a Qt4, lo que se hace a groso modo es leer el XML del
+fichero UI (formato Qt3) y empezamos a seguir sus instrucciones para crear un
+formulario con la misma "receta". El problema es que los "ingredientes" no son
+los mismos en Qt4, por lo que hay que ir traduciendo nombres de propiedad o
+controles al vuelo. Lo más importante aquí es que un control lo busca primero
+en "flcontrols.py" y después lo busca en Qt4. Eso quiere decir que si defines
+en flcontrols un control que sí existe en Qt4, fuerzas al UI a cargar este
+control en lugar del que viene por defecto, eso nos permite cambiarle las
+propiedades o ampliarlas.
+
+Sobre la ejecución del código de la acción, actualmente solo lanzamos el init.
+Hay que tener en cuenta que al principio del py traducido hay unos cuantos imports
+que facilitan emular Qt3+QSA.
+
+Dónde hay que colaborar en Pineboo
+---------------------------------------
+
+La parte donde más trabajo tenemos que poner todos es en la API de los ficheros
+QS y en los controles FL*.
+
+Por mucho que ya traducimos a Python, ahora ese código empieza a buscar funciones
+en FLUtil que no existen, los controles FLTableDB le falta casi toda la funcionalidad,
+las FLSqlQuery no están ni implementadas, etc, etc.
+
+Muchas de esas cosas están en Qt4 mejor resueltas que en Qt3, por lo que a veces
+con sencillos "wrappers" que emulen el comportamiento antiguo haría que todo
+empezase a funcionar. Pero hay mucho curro de ir función por función y enlazándola
+donde le toca. Además hay que probar mucho código, para ir viendo cómo funciona
+todo en la realidad.
+
+Todo esto de la API se divide en unos pocos ficheros:
+
+- flcontrols. Aquí pondremos todo lo que sean controles visuales de Qt, especialmente
+si queremos que qt3ui, al traducir el formulario, encuentre dónde está el control.
+- qsaglobals. Este fichero es para las funciones y clases que sí están disponibles
+globalmente en qsa, pero no lo están en Python. Por ejemplo "parseFloat" está aquí.
+- qsatype. Es muy similar a qsaglobals, pero aquí dejo principalmente los constructores
+de algunas clases. Hay también constructores de controles, para que cuando desde
+QS se cree un control nuevo, podamos tener mayor control sobre lo que hará el programa.
+
+Para colaborar, lo normal es intentar ejecutar un programa completo, ir probando
+y viendo en la consola todos los mensajes que se reportan; localizar qué parte
+del código qs no se está lanzando y decidir qué nuevas API implementar.
+
+Una vez implementemos lo nuevo, debemos comprobar que se ejecuta correctamente,
+al menos lo que nosotros hemos programado.
+
+Muchas de las clases y funciones tienen triquiñuelas para evitar que de error
+cuando el QS haga algo para lo que no está programado. El primero que hice es
+el decorador "NotImplementedWarn", y más adelante hice el "DefFun". El primero
+hay que ponerlo función a función. El segundo solo una vez por clase. La funcionalidad
+de ambos es que cuando se llame a algo inexistente, lo informe por la consola,
+pero que emule el método devolviendo un valor por defecto, permitiendo que el
+código se ejecute más allá del error.
+
+
+
+
+Cómo funciona la conversión a Python
+--------------------------------------
+
+La conversión de ficheros de QS a Python se hace en dos pasos, primero de QS a
+XML y luego de XML a Python. El primer paso (qs->xml) como parsear, generación
+árbol AST, simplificar el árbol y guardar a XML.
+
+Cómo funciona la conversión de Qt3 a Qt4
+------------------------------------------
+
