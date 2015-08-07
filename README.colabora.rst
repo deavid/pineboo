@@ -14,8 +14,8 @@ Pineboo está programado como una librería, por lo que todo el código está de
 de la carpeta pineboolib. Los ficheros exteriores únicamente sirven como
 lanzadores. El programa principal es main.py. En él se desarrolla prácticamente
 todo lo que hace Pineboo, hasta el punto que deberíamos intentar separarlo en
-partes más pequeñas según qué funcionalidad cubren. Pero ahora mismo main.py
-está controlando prácticamente todo lo que hace pineboo.
+partes más pequeñas según qué funcionalidad cubren. Ahora mismo main.py
+controla casi todo lo que hace pineboo.
 
 A grosso modo, el proceso de carga es el que sigue:
 
@@ -56,6 +56,10 @@ que la verdad, podrían estar mejor organizadas, ya que todas están en main.py 
 por otra parte hay cosas que están desperdigadas en otras clases cuando podríamos
 unificarlas por simplicidad. Hay clases diferentes para acciones según si venía
 del xml o del ui.
+
+Estoy usando XMLStruct para mapear lo que se ve en los ficheros XML a propiedades
+de la clase. De este modo es mucho más fácil leer los ficheros. El problema es
+que en el código es un poco más complicado de seguir.
 
 Respecto al formulario principal de la aplicación, José Antonio Fernández ya lo
 mejoró bastante, y viendo cómo está ahora mismo yo, en mi opinión, focalizaría
@@ -109,13 +113,16 @@ todo en la realidad.
 
 Todo esto de la API se divide en unos pocos ficheros:
 
-- *flcontrols*. Aquí pondremos todo lo que sean controles visuales de Qt, especialmente
-   si queremos que qt3ui, al traducir el formulario, encuentre dónde está el control.
-- *qsaglobals*. Este fichero es para las funciones y clases que sí están disponibles
-   globalmente en qsa, pero no lo están en Python. Por ejemplo "parseFloat" está aquí.
-- *qsatype*. Es muy similar a qsaglobals, pero aquí dejo principalmente los constructores
-   de algunas clases. Hay también constructores de controles, para que cuando desde
-   QS se cree un control nuevo, podamos tener mayor control sobre lo que hará el programa.
+- **flcontrols.**
+  Aquí pondremos todo lo que sean controles visuales de Qt, especialmente
+  si queremos que qt3ui, al traducir el formulario, encuentre dónde está el control.
+- **qsaglobals.**
+  Este fichero es para las funciones y clases que sí están disponibles
+  globalmente en qsa, pero no lo están en Python. Por ejemplo "parseFloat" está aquí.
+- **qsatype.**
+  Es muy similar a qsaglobals, pero aquí dejo principalmente los constructores
+  de algunas clases. Hay también constructores de controles, para que cuando desde
+  QS se cree un control nuevo, podamos tener mayor control sobre lo que hará el programa.
 
 Para colaborar, lo normal es intentar ejecutar un programa completo, ir probando
 y viendo en la consola todos los mensajes que se reportan; localizar qué parte
@@ -143,7 +150,8 @@ XML y luego de XML a Python. Lo tenéis todo en la carpeta flparser.
 
 El primer paso convierte el fichero QS en un XML. Consiste internamente en:
 
-- *parsear*. Usamos para esto python-ply, lee el código, separa las distintas
+- **parsear.**
+  Usamos para esto python-ply, lee el código, separa las distintas
   palabras claves, números, textos (esto se conoce como lexer y está en flex.py).
   Después procesamos el resultado siguiendo unos patrones. (flscriptparse.py)
   En estos patrones no se han configurado tal y como especifica el
@@ -152,15 +160,18 @@ El primer paso convierte el fichero QS en un XML. Consiste internamente en:
   pero por contra, no parsea todos los programas que se pueden hacer en QSA.
   Hay algunos patrones de programación que no va a reconocer, pero por lo general
   suelen ser dañinos y deberíamos cambiarlos.
-- *generación árbol AST*. AST significa "Abstract Syntax Tree" y básicamente es
+- **generación árbol AST.**
+  AST significa "Abstract Syntax Tree" y básicamente es
   una representación de nodos donde está la información recolectada por el parser.
   Aunque el parser se intenta que sea más listo con los patrones que lee, las
   estructuras generadas en este paso siguen siendo demasiado complejas y liadas
   como para que otro programa "entienda" qué está haciendo. (flscriptparse.py)
-- *simplificar el árbol*. Dado que el AST es aún demasiado complicado, lo que
+- **simplificar el árbol.**
+  Dado que el AST es aún demasiado complicado, lo que
   hacemos es aplicar unas conversiones. Cuando se detectan ciertos patrones
   repetitivos, se resumen en un solo nodo. (postparse.py)
-- *guardar a XML*. El resultado, lo guardamos en un fichero XML. El objetivo es
+- **guardar a XML.**
+  El resultado, lo guardamos en un fichero XML. El objetivo es
   principalmente, permitir la depuración "a mano". Si algo va mal, el XML es el
   punto intermedio que nos permite saber en qué parte del programa tenemos que
   modificar. Una cosa que falta a futuro, es eliminar este paso intermedio
@@ -173,8 +184,22 @@ en un patrón de programación de Python. Cuando algo no se reconoce, hay que
 agregar un nuevo patrón de programación. Algunos son más complicados o confictivos
 que otros. Todo esto está controlado en el fichero pytnyzer.py.
 
+En este último paso, me encargo de modificar lo que se escribe a Python. Por
+ejemplo se introducen una serie de encabezados al inicio del fichero. También
+detecto ciertas llamadas/patrones y reemplazo por otro contenido.
 
+Un ejemplo de esto es la clase "qsa", que cuando el parser detecta llamadas a
+propiedades conflictivas (por ejemplo antes era posible hacer child("x").text = "1"
+y ahora hay que hacer un setText("1")) consigue detectar más o menos el tipo de
+llamada que pretende y lanzar en su lugar la correcta. De ese modo el código
+qsa sigue funcionando. Este problema lo hemos tenido ya en Eneboo al mejorar
+su parseador (cuando lo hizo infoSial en AbanQ), y también ocurre de forma
+mucho más grave cuando intentas lanzar en Qt4 el QtScript, ya que ocurre
+exactamente lo mismo, lo que antes eran propiedades ahora son funciones.
 
+Por eso, cuando veáis el código Python, algunas partes las veréis cambiadas.
+Al principio tendremos que depurar cuidadosamente para estar seguros de
+que estamos ejecutando lo mismo que antes.
 
 Cómo funciona la conversión de Qt3 a Qt4
 ------------------------------------------
