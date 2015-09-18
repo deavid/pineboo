@@ -523,7 +523,7 @@ class FLTableDB(QtGui.QTableView):
     def obj(self):
         return self
 
-    @NotImplementedWarn
+    @WorkingOnThis
     def putFirstCol(self, fN): return True
 
     @QtCore.pyqtSlot()
