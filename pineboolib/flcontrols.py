@@ -817,8 +817,25 @@ class QPushButton(QtGui.QPushButton):
     toggleButton = property(getToggleButton,setToggleButton)
 
 
-class FLFieldDB(QtGui.QLineEdit):
+class FLFieldDB(QtGui.QWidget):
     _fieldName = "undefined"
+    _label = None
+    _lineEdit = None 
+    _layout = None
+    
+
+    def __init__(self, parent, *args):
+        super(FLFieldDB,self).__init__(parent,*args)
+        #TODO: Detectar el tipo de campo y añadir los controles adecuados, Por defecto todos son campos de texto
+        self._lineEdit = QtGui.QLineEdit()
+        self._layout = QtGui.QHBoxLayout()
+        self._label = QtGui.QLabel()
+        self._layout.addWidget(self._label)
+        self._layout.addWidget(self._lineEdit)
+        self.setLayout(self._layout)
+    
+    def __getattr__(self, name): return DefFun(self, name)
+            
     @property
     def fieldName(self):
         return self._fieldName
@@ -826,8 +843,11 @@ class FLFieldDB(QtGui.QLineEdit):
     @fieldName.setter
     def fieldName(self, fN):
         self._fieldName = fN
-        self.setText(fN)
+        self._label.setText(self._fieldName)
+        
 
     def setFieldName(self, fN):
         self._fieldName = fN
-        self.setText(fN)
+        self._label.setText(self._fieldName)
+       
+    
