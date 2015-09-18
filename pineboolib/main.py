@@ -166,11 +166,11 @@ class Project(object):
 
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
-        for root, dirs, files in os.walk(filedir("..","share","eneboo")):
+        for root, dirs, files in os.walk(filedir("..","share","pineboo")):
             for nombre in files:
                 fileobj = File(self, idmodulo, nombre, basedir = root)
                 self.files[nombre] = fileobj
-
+                self.modules[idmodulo].add_project_file(fileobj)
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):

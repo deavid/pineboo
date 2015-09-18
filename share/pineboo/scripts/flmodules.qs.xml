@@ -1,0 +1,2868 @@
+<Source>
+  <DeclarationBlock mode="VAR">
+    <Variable name="util">
+      <Value>
+        <New>
+          <FunctionCall name="FLUtil"/>
+        </New>
+      </Value>
+    </Variable>
+  </DeclarationBlock>
+  <Function name="init">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="botonCargar">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="botonCargar"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="botonExportar">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="botonExportar"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Identifier name="botonCargar"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="clicked()"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="botonCargar_clicked"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Identifier name="botonExportar"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="clicked()"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="botonExportar_clicked"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Expression>
+            <Member>
+              <Identifier name="cursor"/>
+              <FunctionCall name="modeAccess"/>
+            </Member>
+            <Compare type="EQ"/>
+            <Member>
+              <Identifier name="cursor"/>
+              <Identifier name="Browse"/>
+            </Member>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="botonCargar"/>
+              <FunctionCall name="setEnabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="botonExportar"/>
+              <FunctionCall name="setEnabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="cargarFicheroEnBD">
+    <Arguments>
+      <Variable name="nombre"/>
+      <Variable name="contenido"/>
+      <Variable name="log"/>
+      <Variable name="directorio"/>
+    </Arguments>
+    <Source>
+      <If>
+        <Condition>
+          <Expression>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="util"/>
+                <FunctionCall name="isFLDefFile">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="contenido"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+            <Compare type="LAND"/>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="nombre"/>
+                <FunctionCall name="endsWith">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value=".qs"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+            <Compare type="LAND"/>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="nombre"/>
+                <FunctionCall name="endsWith">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value=".ar"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN"/>
+        </Source>
+      </If>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursorFicheros">
+          <Value>
+            <New>
+              <FunctionCall name="FLSqlCursor">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="flfiles"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <Member>
+          <Identifier name="cursorFicheros"/>
+          <FunctionCall name="select">
+            <CallArguments>
+              <Expression>
+                <Constant delim="&quot;" type="String" value="nombre = '"/>
+                <OpMath type="PLUS"/>
+                <Identifier name="nombre"/>
+                <OpMath type="PLUS"/>
+                <Constant delim="&quot;" type="String" value="'"/>
+              </Expression>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="cursorFicheros"/>
+                <FunctionCall name="first"/>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="nombre"/>
+                  <FunctionCall name="endsWith">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value=".ar"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <FunctionCall name="cargarAr">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="nombre"/>
+                          </Value>
+                          <Value>
+                            <Identifier name="contenido"/>
+                          </Value>
+                          <Value>
+                            <Identifier name="log"/>
+                          </Value>
+                          <Value>
+                            <Identifier name="directorio"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionFlow type="RETURN"/>
+                </Source>
+              </If>
+            </Source>
+          </If>
+          <InstructionCall>
+            <Member>
+              <Identifier name="log"/>
+              <FunctionCall name="append">
+                <CallArguments>
+                  <Expression>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="- Cargando :: "/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                    <OpMath type="PLUS"/>
+                    <Identifier name="nombre"/>
+                  </Expression>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursorFicheros"/>
+              <FunctionCall name="setModeAccess">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="cursorFicheros"/>
+                      <Identifier name="Insert"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursorFicheros"/>
+              <FunctionCall name="refreshBuffer"/>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursorFicheros"/>
+              <FunctionCall name="setValueBuffer">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="nombre"/>
+                  </Value>
+                  <Value>
+                    <Identifier name="nombre"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursorFicheros"/>
+              <FunctionCall name="setValueBuffer">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="idmodulo"/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="cursor"/>
+                      <FunctionCall name="valueBuffer">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="idmodulo"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursorFicheros"/>
+              <FunctionCall name="setValueBuffer">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="sha"/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="sha1">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="contenido"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursorFicheros"/>
+              <FunctionCall name="setValueBuffer">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="contenido"/>
+                  </Value>
+                  <Value>
+                    <Identifier name="contenido"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursorFicheros"/>
+              <FunctionCall name="commitBuffer"/>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="cargarAr">
+    <Arguments>
+      <Variable name="nombre"/>
+      <Variable name="contenido"/>
+      <Variable name="log"/>
+      <Variable name="directorio"/>
+    </Arguments>
+    <Source>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="sys"/>
+                <FunctionCall name="isLoadedModule">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="eneboodev"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="false"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <If>
+        <Condition>
+          <Expression>
+            <Member>
+              <Identifier name="util"/>
+              <FunctionCall name="readSettingEntry">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="scripts/sys/conversionAr"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+            <Compare type="NE"/>
+            <Constant delim="&quot;" type="String" value="true"/>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="false"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <InstructionCall>
+        <Member>
+          <Identifier name="log"/>
+          <FunctionCall name="append">
+            <CallArguments>
+              <Value>
+                <Member>
+                  <Identifier name="util"/>
+                  <FunctionCall name="translate">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="scripts"/>
+                      </Value>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="Convirtiendo %0 a kut"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                  <FunctionCall name="arg">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="nombre"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <InstructionUpdate>
+        <Identifier name="contenido"/>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="sys"/>
+            <FunctionCall name="toUnicode">
+              <CallArguments>
+                <Value>
+                  <Identifier name="contenido"/>
+                </Value>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="UTF-8"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionUpdate>
+        <Identifier name="contenido"/>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="eneboodev"/>
+            <Identifier name="iface"/>
+            <FunctionCall name="pub_ar2kut">
+              <CallArguments>
+                <Value>
+                  <Identifier name="contenido"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionUpdate>
+        <Identifier name="nombre"/>
+        <OpUpdate type="EQUALS"/>
+        <Expression>
+          <Member>
+            <Identifier name="nombre"/>
+            <FunctionCall name="toString"/>
+            <FunctionCall name="left">
+              <CallArguments>
+                <Expression>
+                  <Member>
+                    <Identifier name="nombre"/>
+                    <Identifier name="length"/>
+                  </Member>
+                  <OpMath type="MINUS"/>
+                  <Constant type="Number" value="3"/>
+                </Expression>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+          <OpMath type="PLUS"/>
+          <Constant delim="&quot;" type="String" value=".kut"/>
+        </Expression>
+      </InstructionUpdate>
+      <If>
+        <Condition>
+          <Value>
+            <Identifier name="contenido"/>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionUpdate>
+            <Identifier name="localEnc"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Member>
+                <Identifier name="util"/>
+                <FunctionCall name="readSettingEntry">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="scripts/sys/conversionArENC"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionUpdate>
+          <If>
+            <Condition>
+              <Value>
+                <OpUnary type="LNOT">
+                  <Identifier name="localEnc"/>
+                </OpUnary>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="localEnc"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="ISO-8859-15"/>
+                </Value>
+              </InstructionUpdate>
+            </Source>
+          </If>
+          <InstructionUpdate>
+            <Identifier name="contenido"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Member>
+                <Identifier name="sys"/>
+                <FunctionCall name="fromUnicode">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="contenido"/>
+                    </Value>
+                    <Value>
+                      <Identifier name="localEnc"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionUpdate>
+          <InstructionCall>
+            <FunctionCall name="cargarFicheroEnBD">
+              <CallArguments>
+                <Value>
+                  <Identifier name="nombre"/>
+                </Value>
+                <Value>
+                  <Identifier name="contenido"/>
+                </Value>
+                <Value>
+                  <Identifier name="log"/>
+                </Value>
+                <Value>
+                  <Identifier name="directorio"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="log"/>
+              <FunctionCall name="append">
+                <CallArguments>
+                  <Expression>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Volcando a disco "/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                    <OpMath type="PLUS"/>
+                    <Identifier name="nombre"/>
+                  </Expression>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="File"/>
+              <FunctionCall name="write">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="Dir"/>
+                      <FunctionCall name="cleanDirPath">
+                        <CallArguments>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/"/>
+                            <OpMath type="PLUS"/>
+                            <Identifier name="nombre"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Identifier name="contenido"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Identifier name="true"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="cargarFicheros">
+    <Arguments>
+      <Variable name="directorio"/>
+      <Variable name="extension"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="dir">
+          <Value>
+            <New>
+              <FunctionCall name="Dir">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="directorio"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="ficheros">
+          <Value>
+            <Member>
+              <Identifier name="dir"/>
+              <FunctionCall name="entryList">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="extension"/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="Dir"/>
+                      <Identifier name="Files"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="log">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="log"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <For>
+        <ForInitialize>
+          <Variable name="i">
+            <Value>
+              <Constant type="Number" value="0"/>
+            </Value>
+          </Variable>
+        </ForInitialize>
+        <ForCompare>
+          <Expression>
+            <Identifier name="i"/>
+            <Compare type="LT"/>
+            <Member>
+              <Identifier name="ficheros"/>
+              <Identifier name="length"/>
+            </Member>
+          </Expression>
+        </ForCompare>
+        <ForIncrement>
+          <InlineUpdate type="PLUSPLUS" mode="update-read">
+            <Identifier name="i"/>
+          </InlineUpdate>
+        </ForIncrement>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="cargarFicheroEnBD">
+              <CallArguments>
+                <Value>
+                  <ArrayMember>
+                    <Identifier name="ficheros"/>
+                    <Value>
+                      <Identifier name="i"/>
+                    </Value>
+                  </ArrayMember>
+                </Value>
+                <Value>
+                  <Member>
+                    <Identifier name="File"/>
+                    <FunctionCall name="read">
+                      <CallArguments>
+                        <Value>
+                          <Member>
+                            <Identifier name="Dir"/>
+                            <FunctionCall name="cleanDirPath">
+                              <CallArguments>
+                                <Expression>
+                                  <Identifier name="directorio"/>
+                                  <OpMath type="PLUS"/>
+                                  <Constant delim="&quot;" type="String" value="/"/>
+                                  <OpMath type="PLUS"/>
+                                  <ArrayMember>
+                                    <Identifier name="ficheros"/>
+                                    <Value>
+                                      <Identifier name="i"/>
+                                    </Value>
+                                  </ArrayMember>
+                                </Expression>
+                              </CallArguments>
+                            </FunctionCall>
+                          </Member>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+                <Value>
+                  <Identifier name="log"/>
+                </Value>
+                <Value>
+                  <Identifier name="directorio"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="sys"/>
+              <FunctionCall name="processEvents"/>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </For>
+    </Source>
+  </Function>
+  <Function name="botonCargar_clicked">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="directorio">
+          <Value>
+            <Member>
+              <Identifier name="FileDialog"/>
+              <FunctionCall name="getExistingDirectory">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value=""/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Elegir Directorio"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <FunctionCall name="cargarDeDisco">
+          <CallArguments>
+            <Value>
+              <Identifier name="directorio"/>
+            </Value>
+            <Value>
+              <Identifier name="true"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="botonExportar_clicked">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="directorio">
+          <Value>
+            <Member>
+              <Identifier name="FileDialog"/>
+              <FunctionCall name="getExistingDirectory">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value=""/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Elegir Directorio"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <FunctionCall name="exportarADisco">
+          <CallArguments>
+            <Value>
+              <Identifier name="directorio"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="aceptarLicenciaDelModulo">
+    <Arguments>
+      <Variable name="directorio"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="licencia">
+          <Value>
+            <Member>
+              <Identifier name="Dir"/>
+              <FunctionCall name="cleanDirPath">
+                <CallArguments>
+                  <Expression>
+                    <Identifier name="directorio"/>
+                    <OpMath type="PLUS"/>
+                    <Constant delim="&quot;" type="String" value="/COPYING"/>
+                  </Expression>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="File"/>
+                <FunctionCall name="exists">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="licencia"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="MessageBox"/>
+              <FunctionCall name="critical">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Expression>
+                            <Constant delim="&quot;" type="String" value="El fichero "/>
+                            <OpMath type="PLUS"/>
+                            <Identifier name="licencia"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value=" con la licencia del m&#243;dulo no existe.\nEste fichero debe existir para poder aceptar la licencia que contiene."/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="Ok"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="false"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <DeclarationBlock mode="VAR">
+        <Variable name="licencia">
+          <Value>
+            <Member>
+              <Identifier name="File"/>
+              <FunctionCall name="read">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="licencia"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="dialog">
+          <Value>
+            <New>
+              <Identifier name="Dialog"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="dialog"/>
+          <Identifier name="width"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Constant type="Number" value="600"/>
+        </Value>
+      </InstructionUpdate>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="dialog"/>
+          <Identifier name="caption"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="util"/>
+            <FunctionCall name="translate">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="scripts"/>
+                </Value>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="Acuerdo de Licencia."/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <Member>
+          <Identifier name="dialog"/>
+          <FunctionCall name="newTab">
+            <CallArguments>
+              <Value>
+                <Member>
+                  <Identifier name="util"/>
+                  <FunctionCall name="translate">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="scripts"/>
+                      </Value>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="Acuerdo de Licencia."/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="texto">
+          <Value>
+            <New>
+              <Identifier name="TextEdit"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="texto"/>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Identifier name="licencia"/>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <Member>
+          <Identifier name="dialog"/>
+          <FunctionCall name="add">
+            <CallArguments>
+              <Value>
+                <Identifier name="texto"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="dialog"/>
+          <Identifier name="okButtonText"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="util"/>
+            <FunctionCall name="translate">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="scripts"/>
+                </Value>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="S&#237;, acepto este acuerdo de licencia."/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="dialog"/>
+          <Identifier name="cancelButtonText"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="util"/>
+            <FunctionCall name="translate">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="scripts"/>
+                </Value>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="No, no acepto este acuerdo de licencia."/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <If>
+        <Condition>
+          <Value>
+            <Member>
+              <Identifier name="dialog"/>
+              <FunctionCall name="exec"/>
+            </Member>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="true"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="cargarDeDisco">
+    <Arguments>
+      <Variable name="directorio"/>
+      <Variable name="comprobarLicencia"/>
+    </Arguments>
+    <Source>
+      <If>
+        <Condition>
+          <Value>
+            <Identifier name="directorio"/>
+          </Value>
+        </Condition>
+        <Source>
+          <If>
+            <Condition>
+              <Value>
+                <Identifier name="comprobarLicencia"/>
+              </Value>
+            </Condition>
+            <Source>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <FunctionCall name="aceptarLicenciaDelModulo">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="directorio"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <FunctionCall name="critical">
+                        <CallArguments>
+                          <Value>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="Imposible cargar el m&#243;dulo.\nLicencia del m&#243;dulo no aceptada."/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                          </Value>
+                          <Value>
+                            <Member>
+                              <Identifier name="MessageBox"/>
+                              <Identifier name="Ok"/>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionFlow type="RETURN"/>
+                </Source>
+              </If>
+            </Source>
+          </If>
+          <InstructionCall>
+            <Member>
+              <Identifier name="sys"/>
+              <FunctionCall name="cleanupMetaData"/>
+            </Member>
+          </InstructionCall>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="cursor"/>
+                  <FunctionCall name="commitBuffer"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="child">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="idMod"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                  <FunctionCall name="setDisabled">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="true"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <DeclarationBlock mode="VAR">
+                <Variable name="log">
+                  <Value>
+                    <Member>
+                      <Identifier name="this"/>
+                      <FunctionCall name="child">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="log"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="log"/>
+                  <Identifier name="text"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Constant delim="&quot;" type="String" value=""/>
+                </Value>
+              </InstructionUpdate>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="sys"/>
+                  <FunctionCall name="processEvents"/>
+                </Member>
+              </InstructionCall>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="setDisabled">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="true"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.xml"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/forms/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.ui"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/tables/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.mtd"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/scripts/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.qs"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/queries/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.qry"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/reports/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.kut"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/reports/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.ar"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="cargarFicheros">
+                  <CallArguments>
+                    <Expression>
+                      <Identifier name="directorio"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/translations/"/>
+                    </Expression>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="*.ts"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="setDisabled">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="false"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="log"/>
+                  <FunctionCall name="append">
+                    <CallArguments>
+                      <Value>
+                        <Member>
+                          <Identifier name="util"/>
+                          <FunctionCall name="translate">
+                            <CallArguments>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="scripts"/>
+                              </Value>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="* Carga finalizada."/>
+                              </Value>
+                            </CallArguments>
+                          </FunctionCall>
+                        </Member>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="child">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="lineas"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                  <FunctionCall name="refresh"/>
+                </Member>
+              </InstructionCall>
+            </Source>
+          </If>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="tipoDeFichero">
+    <Arguments>
+      <Variable name="nombre"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="posPunto">
+          <Value>
+            <Member>
+              <Identifier name="nombre"/>
+              <FunctionCall name="lastIndexOf">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="."/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Member>
+            <Identifier name="nombre"/>
+            <FunctionCall name="right">
+              <CallArguments>
+                <Expression>
+                  <Member>
+                    <Identifier name="nombre"/>
+                    <Identifier name="length"/>
+                  </Member>
+                  <OpMath type="MINUS"/>
+                  <Identifier name="posPunto"/>
+                </Expression>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="exportarADisco">
+    <Arguments>
+      <Variable name="directorio"/>
+    </Arguments>
+    <Source>
+      <If>
+        <Condition>
+          <Value>
+            <Identifier name="directorio"/>
+          </Value>
+        </Condition>
+        <Source>
+          <DeclarationBlock mode="VAR">
+            <Variable name="curFiles">
+              <Value>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="child">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="lineas"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                  <FunctionCall name="cursor"/>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="cursorModules">
+              <Value>
+                <New>
+                  <FunctionCall name="FLSqlCursor">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="flmodules"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="cursorAreas">
+              <Value>
+                <New>
+                  <FunctionCall name="FLSqlCursor">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="flareas"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Expression>
+                <Member>
+                  <Identifier name="curFiles"/>
+                  <FunctionCall name="size"/>
+                </Member>
+                <Compare type="NE"/>
+                <Constant type="Number" value="0"/>
+              </Expression>
+            </Condition>
+            <Source>
+              <DeclarationBlock mode="VAR">
+                <Variable name="dir">
+                  <Value>
+                    <New>
+                      <FunctionCall name="Dir"/>
+                    </New>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <DeclarationBlock mode="VAR">
+                <Variable name="idModulo">
+                  <Value>
+                    <Member>
+                      <Identifier name="this"/>
+                      <FunctionCall name="cursor"/>
+                      <FunctionCall name="valueBuffer">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="idmodulo"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <DeclarationBlock mode="VAR">
+                <Variable name="log">
+                  <Value>
+                    <Member>
+                      <Identifier name="this"/>
+                      <FunctionCall name="child">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="log"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="log"/>
+                  <Identifier name="text"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Constant delim="&quot;" type="String" value=""/>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Identifier name="directorio"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="Dir"/>
+                    <FunctionCall name="cleanDirPath">
+                      <CallArguments>
+                        <Expression>
+                          <Identifier name="directorio"/>
+                          <OpMath type="PLUS"/>
+                          <Constant delim="&quot;" type="String" value="/"/>
+                          <OpMath type="PLUS"/>
+                          <Identifier name="idModulo"/>
+                        </Expression>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Member>
+                        <Identifier name="dir"/>
+                        <FunctionCall name="fileExists">
+                          <CallArguments>
+                            <Value>
+                              <Identifier name="directorio"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="dir"/>
+                      <FunctionCall name="mkdir">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="directorio"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Member>
+                        <Identifier name="dir"/>
+                        <FunctionCall name="fileExists">
+                          <CallArguments>
+                            <Expression>
+                              <Identifier name="directorio"/>
+                              <OpMath type="PLUS"/>
+                              <Constant delim="&quot;" type="String" value="/forms"/>
+                            </Expression>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="dir"/>
+                      <FunctionCall name="mkdir">
+                        <CallArguments>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/forms"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Member>
+                        <Identifier name="dir"/>
+                        <FunctionCall name="fileExists">
+                          <CallArguments>
+                            <Expression>
+                              <Identifier name="directorio"/>
+                              <OpMath type="PLUS"/>
+                              <Constant delim="&quot;" type="String" value="/scripts"/>
+                            </Expression>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="dir"/>
+                      <FunctionCall name="mkdir">
+                        <CallArguments>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/scripts"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Member>
+                        <Identifier name="dir"/>
+                        <FunctionCall name="fileExists">
+                          <CallArguments>
+                            <Expression>
+                              <Identifier name="directorio"/>
+                              <OpMath type="PLUS"/>
+                              <Constant delim="&quot;" type="String" value="/queries"/>
+                            </Expression>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="dir"/>
+                      <FunctionCall name="mkdir">
+                        <CallArguments>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/queries"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Member>
+                        <Identifier name="dir"/>
+                        <FunctionCall name="fileExists">
+                          <CallArguments>
+                            <Expression>
+                              <Identifier name="directorio"/>
+                              <OpMath type="PLUS"/>
+                              <Constant delim="&quot;" type="String" value="/tables"/>
+                            </Expression>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="dir"/>
+                      <FunctionCall name="mkdir">
+                        <CallArguments>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/tables"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Member>
+                        <Identifier name="dir"/>
+                        <FunctionCall name="fileExists">
+                          <CallArguments>
+                            <Expression>
+                              <Identifier name="directorio"/>
+                              <OpMath type="PLUS"/>
+                              <Constant delim="&quot;" type="String" value="/reports"/>
+                            </Expression>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="dir"/>
+                      <FunctionCall name="mkdir">
+                        <CallArguments>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/reports"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Member>
+                        <Identifier name="dir"/>
+                        <FunctionCall name="fileExists">
+                          <CallArguments>
+                            <Expression>
+                              <Identifier name="directorio"/>
+                              <OpMath type="PLUS"/>
+                              <Constant delim="&quot;" type="String" value="/translations"/>
+                            </Expression>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="dir"/>
+                      <FunctionCall name="mkdir">
+                        <CallArguments>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/translations"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="curFiles"/>
+                  <FunctionCall name="first"/>
+                </Member>
+              </InstructionCall>
+              <DeclarationBlock mode="VAR">
+                <Variable name="file"/>
+                <Variable name="tipo"/>
+              </DeclarationBlock>
+              <DeclarationBlock mode="VAR">
+                <Variable name="contenido" type="String"/>
+              </DeclarationBlock>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="setDisabled">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="true"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <DoWhile>
+                <Source>
+                  <InstructionUpdate>
+                    <Identifier name="file"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Value>
+                      <Member>
+                        <Identifier name="curFiles"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="nombre"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </Value>
+                  </InstructionUpdate>
+                  <InstructionUpdate>
+                    <Identifier name="tipo"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Value>
+                      <FunctionCall name="tipoDeFichero">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="file"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Value>
+                  </InstructionUpdate>
+                  <InstructionUpdate>
+                    <Identifier name="contenido"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Value>
+                      <Member>
+                        <Identifier name="curFiles"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="contenido"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </Value>
+                  </InstructionUpdate>
+                  <If>
+                    <Condition>
+                      <Value>
+                        <OpUnary type="LNOT">
+                          <Member>
+                            <Identifier name="contenido"/>
+                            <FunctionCall name="isEmpty"/>
+                          </Member>
+                        </OpUnary>
+                      </Value>
+                    </Condition>
+                    <Source>
+                      <Switch>
+                        <Condition>
+                          <Value>
+                            <Identifier name="tipo"/>
+                          </Value>
+                        </Condition>
+                        <Case>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=".xml"/>
+                          </Value>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="sys"/>
+                                <FunctionCall name="write">
+                                  <CallArguments>
+                                    <Value>
+                                      <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                                    </Value>
+                                    <Expression>
+                                      <Identifier name="directorio"/>
+                                      <OpMath type="PLUS"/>
+                                      <Constant delim="&quot;" type="String" value="/"/>
+                                      <OpMath type="PLUS"/>
+                                      <Identifier name="file"/>
+                                    </Expression>
+                                    <Value>
+                                      <Identifier name="contenido"/>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionFlow type="BREAK"/>
+                          </Source>
+                        </Case>
+                        <Case>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=".ui"/>
+                          </Value>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="sys"/>
+                                <FunctionCall name="write">
+                                  <CallArguments>
+                                    <Value>
+                                      <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                                    </Value>
+                                    <Expression>
+                                      <Identifier name="directorio"/>
+                                      <OpMath type="PLUS"/>
+                                      <Constant delim="&quot;" type="String" value="/forms/"/>
+                                      <OpMath type="PLUS"/>
+                                      <Identifier name="file"/>
+                                    </Expression>
+                                    <Value>
+                                      <Identifier name="contenido"/>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionFlow type="BREAK"/>
+                          </Source>
+                        </Case>
+                        <Case>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=".qs"/>
+                          </Value>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="sys"/>
+                                <FunctionCall name="write">
+                                  <CallArguments>
+                                    <Value>
+                                      <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                                    </Value>
+                                    <Expression>
+                                      <Identifier name="directorio"/>
+                                      <OpMath type="PLUS"/>
+                                      <Constant delim="&quot;" type="String" value="/scripts/"/>
+                                      <OpMath type="PLUS"/>
+                                      <Identifier name="file"/>
+                                    </Expression>
+                                    <Value>
+                                      <Identifier name="contenido"/>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionFlow type="BREAK"/>
+                          </Source>
+                        </Case>
+                        <Case>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=".qry"/>
+                          </Value>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="sys"/>
+                                <FunctionCall name="write">
+                                  <CallArguments>
+                                    <Value>
+                                      <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                                    </Value>
+                                    <Expression>
+                                      <Identifier name="directorio"/>
+                                      <OpMath type="PLUS"/>
+                                      <Constant delim="&quot;" type="String" value="/queries/"/>
+                                      <OpMath type="PLUS"/>
+                                      <Identifier name="file"/>
+                                    </Expression>
+                                    <Value>
+                                      <Identifier name="contenido"/>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionFlow type="BREAK"/>
+                          </Source>
+                        </Case>
+                        <Case>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=".mtd"/>
+                          </Value>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="sys"/>
+                                <FunctionCall name="write">
+                                  <CallArguments>
+                                    <Value>
+                                      <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                                    </Value>
+                                    <Expression>
+                                      <Identifier name="directorio"/>
+                                      <OpMath type="PLUS"/>
+                                      <Constant delim="&quot;" type="String" value="/tables/"/>
+                                      <OpMath type="PLUS"/>
+                                      <Identifier name="file"/>
+                                    </Expression>
+                                    <Value>
+                                      <Identifier name="contenido"/>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionFlow type="BREAK"/>
+                          </Source>
+                        </Case>
+                        <Case>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=".kut"/>
+                          </Value>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="sys"/>
+                                <FunctionCall name="write">
+                                  <CallArguments>
+                                    <Value>
+                                      <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                                    </Value>
+                                    <Expression>
+                                      <Identifier name="directorio"/>
+                                      <OpMath type="PLUS"/>
+                                      <Constant delim="&quot;" type="String" value="/reports/"/>
+                                      <OpMath type="PLUS"/>
+                                      <Identifier name="file"/>
+                                    </Expression>
+                                    <Value>
+                                      <Identifier name="contenido"/>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionFlow type="BREAK"/>
+                          </Source>
+                        </Case>
+                        <Case>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=".ts"/>
+                          </Value>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="sys"/>
+                                <FunctionCall name="write">
+                                  <CallArguments>
+                                    <Value>
+                                      <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                                    </Value>
+                                    <Expression>
+                                      <Identifier name="directorio"/>
+                                      <OpMath type="PLUS"/>
+                                      <Constant delim="&quot;" type="String" value="/translations/"/>
+                                      <OpMath type="PLUS"/>
+                                      <Identifier name="file"/>
+                                    </Expression>
+                                    <Value>
+                                      <Identifier name="contenido"/>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                            <InstructionFlow type="BREAK"/>
+                          </Source>
+                        </Case>
+                        <CaseDefault>
+                          <Source>
+                            <InstructionCall>
+                              <Member>
+                                <Identifier name="log"/>
+                                <FunctionCall name="append">
+                                  <CallArguments>
+                                    <Value>
+                                      <Member>
+                                        <Identifier name="util"/>
+                                        <FunctionCall name="translate">
+                                          <CallArguments>
+                                            <Value>
+                                              <Constant delim="&quot;" type="String" value="scripts"/>
+                                            </Value>
+                                            <Expression>
+                                              <Constant delim="&quot;" type="String" value="* Omitiendo "/>
+                                              <OpMath type="PLUS"/>
+                                              <Identifier name="file"/>
+                                              <OpMath type="PLUS"/>
+                                              <Constant delim="&quot;" type="String" value="."/>
+                                            </Expression>
+                                          </CallArguments>
+                                        </FunctionCall>
+                                      </Member>
+                                    </Value>
+                                  </CallArguments>
+                                </FunctionCall>
+                              </Member>
+                            </InstructionCall>
+                          </Source>
+                        </CaseDefault>
+                      </Switch>
+                    </Source>
+                  </If>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="sys"/>
+                      <FunctionCall name="processEvents"/>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+                <Condition>
+                  <Value>
+                    <Member>
+                      <Identifier name="curFiles"/>
+                      <FunctionCall name="next"/>
+                    </Member>
+                  </Value>
+                </Condition>
+              </DoWhile>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="cursorModules"/>
+                  <FunctionCall name="select">
+                    <CallArguments>
+                      <Expression>
+                        <Constant delim="&quot;" type="String" value="idmodulo = '"/>
+                        <OpMath type="PLUS"/>
+                        <Identifier name="idModulo"/>
+                        <OpMath type="PLUS"/>
+                        <Constant delim="&quot;" type="String" value="'"/>
+                      </Expression>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <If>
+                <Condition>
+                  <Value>
+                    <Member>
+                      <Identifier name="cursorModules"/>
+                      <FunctionCall name="first"/>
+                    </Member>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="cursorAreas"/>
+                      <FunctionCall name="select">
+                        <CallArguments>
+                          <Expression>
+                            <Constant delim="&quot;" type="String" value="idarea = '"/>
+                            <OpMath type="PLUS"/>
+                            <Member>
+                              <Identifier name="cursorModules"/>
+                              <FunctionCall name="valueBuffer">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="idarea"/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="'"/>
+                          </Expression>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="cursorAreas"/>
+                      <FunctionCall name="first"/>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionUpdate>
+                    <Identifier name="areaName"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Value>
+                      <Member>
+                        <Identifier name="cursorAreas"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="descripcion"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </Value>
+                  </InstructionUpdate>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="sys"/>
+                      <FunctionCall name="write">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                          </Value>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/"/>
+                            <OpMath type="PLUS"/>
+                            <Member>
+                              <Identifier name="cursorModules"/>
+                              <FunctionCall name="valueBuffer">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="idmodulo"/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value=".xpm"/>
+                          </Expression>
+                          <Value>
+                            <Member>
+                              <Identifier name="cursorModules"/>
+                              <FunctionCall name="valueBuffer">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="icono"/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="log"/>
+                      <FunctionCall name="append">
+                        <CallArguments>
+                          <Value>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Expression>
+                                    <Constant delim="&quot;" type="String" value="* Exportando "/>
+                                    <OpMath type="PLUS"/>
+                                    <Member>
+                                      <Identifier name="cursorModules"/>
+                                      <FunctionCall name="valueBuffer">
+                                        <CallArguments>
+                                          <Value>
+                                            <Constant delim="&quot;" type="String" value="idmodulo"/>
+                                          </Value>
+                                        </CallArguments>
+                                      </FunctionCall>
+                                    </Member>
+                                    <OpMath type="PLUS"/>
+                                    <Constant delim="&quot;" type="String" value=".xpm ."/>
+                                  </Expression>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionUpdate>
+                    <Identifier name="contenido"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Expression>
+                      <Constant delim="'" type="String" value="&lt;!DOCTYPE MODULE&gt;\n&lt;MODULE&gt;\n&lt;name&gt;"/>
+                      <OpMath type="PLUS"/>
+                      <Member>
+                        <Identifier name="cursorModules"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="idmodulo"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value="&lt;/name&gt;\n&lt;alias&gt;QT_TRANSLATE_NOOP(&quot;FLWidgetApplication&quot;,&quot;"/>
+                      <OpMath type="PLUS"/>
+                      <Member>
+                        <Identifier name="cursorModules"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="descripcion"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value="&quot;)&lt;/alias&gt;\n&lt;area&gt;"/>
+                      <OpMath type="PLUS"/>
+                      <Member>
+                        <Identifier name="cursorModules"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="idarea"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value="&lt;/area&gt;\n&lt;areaname&gt;QT_TRANSLATE_NOOP(&quot;FLWidgetApplication&quot;,&quot;"/>
+                      <OpMath type="PLUS"/>
+                      <Identifier name="areaName"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value="&quot;)&lt;/areaname&gt;\n&lt;version&gt;"/>
+                      <OpMath type="PLUS"/>
+                      <Member>
+                        <Identifier name="cursorModules"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="version"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value="&lt;/version&gt;\n&lt;icon&gt;"/>
+                      <OpMath type="PLUS"/>
+                      <Member>
+                        <Identifier name="cursorModules"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="idmodulo"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value=".xpm&lt;/icon&gt;\n&lt;flversion&gt;"/>
+                      <OpMath type="PLUS"/>
+                      <Member>
+                        <Identifier name="cursorModules"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="version"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value="&lt;/flversion&gt;\n&lt;description&gt;"/>
+                      <OpMath type="PLUS"/>
+                      <Member>
+                        <Identifier name="cursorModules"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="idmodulo"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="'" type="String" value="&lt;/description&gt;\n&lt;/MODULE&gt;"/>
+                    </Expression>
+                  </InstructionUpdate>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="sys"/>
+                      <FunctionCall name="write">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="ISO-8859-1"/>
+                          </Value>
+                          <Expression>
+                            <Identifier name="directorio"/>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value="/"/>
+                            <OpMath type="PLUS"/>
+                            <Member>
+                              <Identifier name="cursorModules"/>
+                              <FunctionCall name="valueBuffer">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="idmodulo"/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                            <OpMath type="PLUS"/>
+                            <Constant delim="&quot;" type="String" value=".mod"/>
+                          </Expression>
+                          <Value>
+                            <Identifier name="contenido"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="log"/>
+                      <FunctionCall name="append">
+                        <CallArguments>
+                          <Value>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Expression>
+                                    <Constant delim="&quot;" type="String" value="* Generando "/>
+                                    <OpMath type="PLUS"/>
+                                    <Member>
+                                      <Identifier name="cursorModules"/>
+                                      <FunctionCall name="valueBuffer">
+                                        <CallArguments>
+                                          <Value>
+                                            <Constant delim="&quot;" type="String" value="idmodulo"/>
+                                          </Value>
+                                        </CallArguments>
+                                      </FunctionCall>
+                                    </Member>
+                                    <OpMath type="PLUS"/>
+                                    <Constant delim="&quot;" type="String" value=".mod ."/>
+                                  </Expression>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="setDisabled">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="false"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="log"/>
+                  <FunctionCall name="append">
+                    <CallArguments>
+                      <Value>
+                        <Member>
+                          <Identifier name="util"/>
+                          <FunctionCall name="translate">
+                            <CallArguments>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="scripts"/>
+                              </Value>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="* Exportaci&#243;n finalizada."/>
+                              </Value>
+                            </CallArguments>
+                          </FunctionCall>
+                        </Member>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+            </Source>
+          </If>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+</Source>
