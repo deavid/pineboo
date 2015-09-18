@@ -446,7 +446,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def headerData(self, section, orientation, role):
         if orientation == QtCore.Qt.Horizontal:
             if role == QtCore.Qt.DisplayRole:
-                return " %s " % self.field_aliases[section]
+                return "%s" % self.field_aliases[section]
         return QtCore.QAbstractTableModel.headerData(self, section, orientation, role)
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
@@ -523,8 +523,17 @@ class FLTableDB(QtGui.QTableView):
     def obj(self):
         return self
 
-    @WorkingOnThis
-    def putFirstCol(self, fN): return True
+    def putFirstCol(self, fN):
+        oldPos= None
+        for column in range(self._cursor._model.columnCount()):
+            if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
+                oldPos = column
+                break
+        if not oldPos:
+            return False
+        else:            
+            self._h_header.swapSections(oldPos, 0)
+            return True
 
     @QtCore.pyqtSlot()
     def close(self):
