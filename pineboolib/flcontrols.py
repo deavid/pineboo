@@ -446,7 +446,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def headerData(self, section, orientation, role):
         if orientation == QtCore.Qt.Horizontal:
             if role == QtCore.Qt.DisplayRole:
-                return " %s " % self.field_aliases[section]
+                return "%s" % self.field_aliases[section]
         return QtCore.QAbstractTableModel.headerData(self, section, orientation, role)
 
     def data(self, index, role = QtCore.Qt.DisplayRole):
@@ -523,8 +523,17 @@ class FLTableDB(QtGui.QTableView):
     def obj(self):
         return self
 
-    @WorkingOnThis
-    def putFirstCol(self, fN): return True
+    def putFirstCol(self, fN):
+        oldPos= None
+        for column in range(self._cursor._model.columnCount()):
+            if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
+                oldPos = column
+                break
+        if not oldPos:
+            return False
+        else:            
+            self._h_header.swapSections(oldPos, 0)
+            return True
 
     @QtCore.pyqtSlot()
     def close(self):
@@ -808,8 +817,25 @@ class QPushButton(QtGui.QPushButton):
     toggleButton = property(getToggleButton,setToggleButton)
 
 
-class FLFieldDB(QtGui.QLineEdit):
+class FLFieldDB(QtGui.QWidget):
     _fieldName = "undefined"
+    _label = None
+    _lineEdit = None 
+    _layout = None
+    
+
+    def __init__(self, parent, *args):
+        super(FLFieldDB,self).__init__(parent,*args)
+        #TODO: Detectar el tipo de campo y añadir los controles adecuados, Por defecto todos son campos de texto
+        self._lineEdit = QtGui.QLineEdit()
+        self._layout = QtGui.QHBoxLayout()
+        self._label = QtGui.QLabel()
+        self._layout.addWidget(self._label)
+        self._layout.addWidget(self._lineEdit)
+        self.setLayout(self._layout)
+    
+    def __getattr__(self, name): return DefFun(self, name)
+            
     @property
     def fieldName(self):
         return self._fieldName
@@ -817,8 +843,11 @@ class FLFieldDB(QtGui.QLineEdit):
     @fieldName.setter
     def fieldName(self, fN):
         self._fieldName = fN
-        self.setText(fN)
+        self._label.setText(self._fieldName)
+        
 
     def setFieldName(self, fN):
         self._fieldName = fN
-        self.setText(fN)
+        self._label.setText(self._fieldName)
+       
+    
