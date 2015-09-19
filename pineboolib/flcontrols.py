@@ -384,8 +384,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.sql_fields = []
         self.field_aliases = []
         for field in self._table.fields:
-            self.sql_fields.append(field.name)
-            self.field_aliases.append(aqtt(field.alias))
+            if field.visible_grid:
+                self.sql_fields.append(field.name)
+                self.field_aliases.append(aqtt(field.alias))
 
         self._data = []
         self.cols = len(self.sql_fields)

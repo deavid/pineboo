@@ -306,8 +306,8 @@ def _loadVariant(variant):
         libs = [Qt, QtGui.QFrame, QtGui.QSizePolicy]
         for lib in libs:
             v = getattr(lib, text, None)
-            if v is not None: return v
-
+            if v is not None: return v            
+        if text == "GroupBoxPanel": return QtGui.QFrame.StyledPanel
 
     print("qt3ui: Unknown variant:", etree.tostring(variant))
 

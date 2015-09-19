@@ -68,6 +68,7 @@ def getTableObj(tree,root):
             build_field_type(field, xmlfield)
             field.pk = text2bool(one(xmlfield.xpath("pk/text()"),"false"))
             field.default = one(xmlfield.xpath("default/text()"),None)
+            field.visible_grid = text2bool(one(xmlfield.xpath("visiblegrid/text()"),"true"))
             if field.pk: table.pk.append(field.name)
             if field.name in table.fields_idx: raise ValueError("La tabla %s tiene el campo %s repetido" % (table.name,field.name))
             field.number = len(table.fields)
