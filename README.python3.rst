@@ -60,6 +60,7 @@ Y por otra parte Qt5 aún está empezando y tiene mucho margen para crecer.
 Siempre se podrá migrar más tarde.
 
 
+
 Cosas que hay que hacer ahora
 ---------------------------------
 
