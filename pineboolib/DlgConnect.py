@@ -8,6 +8,11 @@ from pineboolib.utils import filedir
 
 class DlgConnect(QtGui.QWidget):
     ruta = ""
+    username = ""
+    password = ""
+    hostname = ""
+    portnumber = ""
+    database = ""
     ui = None
 
     def load(self):
@@ -16,12 +21,25 @@ class DlgConnect(QtGui.QWidget):
         self.connect(self.ui.pbnSearchFolder, QtCore.SIGNAL("clicked()"), self.findPathProject)
         DlgConnect.leFolder = self.ui.leFolder
         DlgConnect.leName = self.ui.leName
+        DlgConnect.leUserName = self.ui.leUserName
+        DlgConnect.lePassword = self.ui.lePassword
+        DlgConnect.leHostName = self.ui.leHostName
+        DlgConnect.lePort = self.ui.lePort
+        DlgConnect.leDBName = self.ui.leDBName
 
     def conectar(self):
         DlgConnect.ruta = filedir(str(DlgConnect.leFolder.text()), str(DlgConnect.leName.text()))
-        if not DlgConnect.ruta.endswith(".xml"):
+        DlgConnect.username = DlgConnect.leUserName.text()
+        DlgConnect.password = DlgConnect.lePassword.text()
+        DlgConnect.hostname = DlgConnect.leHostName.text()
+        DlgConnect.portnumber = DlgConnect.lePort.text()
+        DlgConnect.database = DlgConnect.leDBName.text()
+
+        if not DlgConnect.leName.text():
+            DlgConnect.ruta = ""
+        elif not DlgConnect.ruta.endswith(".xml"):
             DlgConnect.ruta += ".xml"
-        if not os.path.isfile(DlgConnect.ruta):
+        if not os.path.isfile(DlgConnect.ruta) and DlgConnect.leName.text():
             QtGui.QMessageBox.information(self, "AVISO", "El proyecto \n" + DlgConnect.ruta +" no existe")
             DlgConnect.ruta = None
         else:
