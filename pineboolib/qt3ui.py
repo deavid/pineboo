@@ -199,6 +199,7 @@ def loadWidget(xml, widget=None):
                 #print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
             else:
                 print("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
+            continue
         if c.tag == "widget":
             # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
             # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
