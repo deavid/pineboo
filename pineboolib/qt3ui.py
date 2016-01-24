@@ -298,6 +298,7 @@ def _loadVariant(variant):
             try:
                 if c.tag == "bold": p.setBold(bv)
                 elif c.tag == "italic": p.setItalic(bv)
+                elif c.tag == "family": p.setFamily(value)
                 else: print("unknown font style type", repr(c.tag))
             except Exception as e:
                 print(e)
