@@ -851,4 +851,6 @@ class FLFieldDB(QtGui.QWidget):
         self._fieldName = fN
         self._label.setText(self._fieldName)
        
-    
+    @QtCore.pyqtSlot()
+    def searchValue(self):
+        print("FLFieldDB: searchValue()")
