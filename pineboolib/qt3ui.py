@@ -199,6 +199,7 @@ def loadWidget(xml, widget=None):
                 #print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
             else:
                 print("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
+            continue
         if c.tag == "widget":
             # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
             # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
@@ -297,6 +298,7 @@ def _loadVariant(variant):
             try:
                 if c.tag == "bold": p.setBold(bv)
                 elif c.tag == "italic": p.setItalic(bv)
+                elif c.tag == "family": p.setFamily(value)
                 else: print("unknown font style type", repr(c.tag))
             except Exception as e:
                 print(e)

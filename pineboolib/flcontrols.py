@@ -798,6 +798,17 @@ class QLineEdit(QtGui.QLineEdit):
     def defaultFunction(self, *args, **kwargs):
         print("flcontrols.QLineEdit: llamada a método no implementado", args,kwargs)
 
+class QListView(QtGui.QListView):
+    def __init__(self, *args, **kwargs):
+        super(QListView, self).__init__(*args, **kwargs)
+
+    def __getattr__(self, name):
+        print("flcontrols.QListView: Emulando método %r" % name)
+        return self.defaultFunction
+
+    def defaultFunction(self, *args, **kwargs):
+        print("flcontrols.QListView: llamada a método no implementado", args,kwargs)
+
 class QPushButton(QtGui.QPushButton):
     @property
     def pixmap(self):
@@ -851,4 +862,6 @@ class FLFieldDB(QtGui.QWidget):
         self._fieldName = fN
         self._label.setText(self._fieldName)
        
-    
+    @QtCore.pyqtSlot()
+    def searchValue(self):
+        print("FLFieldDB: searchValue()")
