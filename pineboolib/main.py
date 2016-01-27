@@ -470,7 +470,8 @@ class XMLAction(XMLStruct):
 
     def execDefaultScript(self):
         print("Executing default script for Action", self.name)
-        self.load()
+        s = self.load()
+        s.iface.main()
 
     def unknowSlot(self):
         print("Executing unknow script for Action", self.name)
