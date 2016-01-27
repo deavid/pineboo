@@ -25,6 +25,7 @@ class MainForm(QtGui.QWidget):
         self.areasTab.removeItem(0) #Borramos tab de ejemplo.
         self.formTab = self.ui.formTab
         self.formTab.setTabsClosable(True)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.connect(self.formTab, QtCore.SIGNAL('tabCloseRequested(int)'), self.closeFormTab)
         self.formTab.removeTab(0)
         app_icon = QtGui.QIcon()
@@ -37,6 +38,7 @@ class MainForm(QtGui.QWidget):
         app_icon.addFile(filedir('icons/pineboo-logo-256.png'), QtCore.QSize(256,256))
         self.setWindowIcon(app_icon)
         self.setWindowTitle("Pineboo")
+
 
     def closeFormTab(self, numero):
         #print"Cerrando pestaña número %d " % numero
