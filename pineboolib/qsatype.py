@@ -58,3 +58,6 @@ def FLFormSearchDB(name):
 
 class Date(QtCore.QDate):
     pass
+
+class Dialog(QtGui.QDialog):
+    pass
