@@ -13,6 +13,8 @@ from lxml import etree
 import psycopg2
 from binascii import unhexlify
 
+import zlib
+
 import sip
 sip.setapi('QString', 1)
 
@@ -351,6 +353,9 @@ class MainForm(object):
             xmldata = image.xpath("data")[0]
             img_format = xmldata.get("format")
             data = unhexlify(xmldata.text.strip())
+            if img_format == "XPM.GZ":
+                data = zlib.decompress(data,15)
+                img_format = "XPM"
             pixmap = QtGui.QPixmap()
             pixmap.loadFromData(data, img_format)
             icon = QtGui.QIcon(pixmap)
@@ -465,7 +470,8 @@ class XMLAction(XMLStruct):
 
     def execDefaultScript(self):
         print("Executing default script for Action", self.name)
-        self.load()
+        s = self.load()
+        s.iface.main()
 
     def unknowSlot(self):
         print("Executing unknow script for Action", self.name)
