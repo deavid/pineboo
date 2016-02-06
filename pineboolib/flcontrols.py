@@ -906,3 +906,7 @@ class FLFieldDB(QtGui.QWidget):
     @QtCore.pyqtSlot()
     def searchValue(self):
         print("FLFieldDB: searchValue()")
+
+    def setShowAlias(self, show):
+        if not show:
+            self._label.setText("")
