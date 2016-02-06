@@ -303,6 +303,16 @@ def _loadVariant(variant):
             except Exception as e:
                 print(e)
         return p
+
+    if variant.tag =="set":
+        v = None
+        text = variant.text
+        libs = [QtCore.Qt]
+        if text=="WordBreak|AlignVCenter": text="AlignVCenter"
+        for lib in libs:
+            v = getattr(lib,text,None)
+        if v is not None: return v
+    
     if variant.tag == "enum":
         v = None
         libs = [Qt, QtGui.QFrame, QtGui.QSizePolicy]
