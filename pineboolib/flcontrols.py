@@ -467,17 +467,39 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return None
 
 
-class FLTableDB(QtGui.QTableView):
+class FLTableDB(QtGui.QWidget):
+    _tableView = None
+    _vlayout = None
+    _lineEdit = None
+    _combo = None
+
     def __init__(self, parent = None, action_or_cursor = None, *args):
         print("FLTableDB:", parent, action_or_cursor , args)
         # TODO: Falta el lineeditsearch y el combo, que los QS lo piden
         super(FLTableDB,self).__init__(parent,*args)
         # TODO: LA inicialización final hay que hacerla más tarde, en el primer
         # show(), porque sino obligas a tenerlo todo preparado en el constructor.
-        self._v_header = self.verticalHeader()
-        self._v_header.setDefaultSectionSize(18)
-        self._h_header = self.horizontalHeader()
-        self._h_header.setDefaultSectionSize(70)
+        self._tableView = QtGui.QTableView()
+        self._lineEdit = QtGui.QLineEdit()
+        _label1 = QtGui.QLabel()
+        _label2 = QtGui.QLabel()
+        self._combo = QtGui.QComboBox()
+        _label1.setText("Buscar")
+        _label2.setText("en")
+        self._combo = QtGui.QComboBox()
+        self._vlayout = QtGui.QVBoxLayout()
+        _hlayout =  QtGui.QHBoxLayout()
+        self._tableView._v_header = self._tableView.verticalHeader()
+        self._tableView._v_header.setDefaultSectionSize(18)
+        self._tableView._h_header = self._tableView.horizontalHeader()
+        self._tableView._h_header.setDefaultSectionSize(70)
+        _hlayout.addWidget(_label1)
+        _hlayout.addWidget(self._lineEdit)
+        _hlayout.addWidget(_label2)
+        _hlayout.addWidget(self._combo)
+        self._vlayout.addLayout(_hlayout)
+        self._vlayout.addWidget(self._tableView)
+        self.setLayout(self._vlayout)
         self._parent = parent
         while True:
             parent_cursor = getattr(self._parent,"_cursor", None)
@@ -487,10 +509,10 @@ class FLTableDB(QtGui.QTableView):
             self._parent = new_parent
             print(self._parent)
 
-        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
-        self.setAlternatingRowColors(True)
+        self._tableView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self._tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self._tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self._tableView.setAlternatingRowColors(True)
 
         if action_or_cursor is None and parent_cursor:
             action_or_cursor = parent_cursor
@@ -501,9 +523,9 @@ class FLTableDB(QtGui.QTableView):
         else:
             self._cursor = None
         if self._cursor:
-            self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
-            self.setModel(self._cursor._model)
-            self.setSelectionModel(self._cursor.selection())
+            self._tableView._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
+            self._tableView.setModel(self._cursor._model)
+            self._tableView.setSelectionModel(self._cursor.selection())
         self.tableRecords = self # control de tabla interno
         self.sort = []
         self.timer_1 = QtCore.QTimer(self)
@@ -515,7 +537,7 @@ class FLTableDB(QtGui.QTableView):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         print("FLTableDB: setting columns in interactive mode")
-        self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
+        self._tableView._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
 
     def cursor(self):
         assert self._cursor
@@ -533,7 +555,7 @@ class FLTableDB(QtGui.QTableView):
         if not oldPos:
             return False
         else:            
-            self._h_header.swapSections(oldPos, 0)
+            self._tableView._h_header.swapSections(oldPos, 0)
             return True
 
     @QtCore.pyqtSlot()
