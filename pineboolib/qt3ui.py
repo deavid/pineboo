@@ -9,6 +9,8 @@ from PyQt4 import QtGui, QtCore, uic
 
 from pineboolib import flcontrols
 
+import zlib
+
 Qt = QtCore.Qt
 ICONS = {}
 
@@ -227,6 +229,9 @@ def loadIcon(xml):
     img_format = xmldata.get("format")
     data = unhexlify(xmldata.text.strip())
     pixmap = QtGui.QPixmap()
+    if img_format == "XPM.GZ":
+        data = zlib.decompress(data,15)
+        img_format = "XPM"
     pixmap.loadFromData(data, img_format)
     icon = QtGui.QIcon(pixmap)
     ICONS[name] = icon
