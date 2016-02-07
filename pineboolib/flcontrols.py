@@ -531,9 +531,10 @@ class FLTableDB(QtGui.QWidget):
         self.tableRecords = self # control de tabla interno
 
         #Carga de comboBoxs y connects .- posiblemente a mejorar
-        for column in range(self._cursor._model.columnCount()):
-            self._comboBox_1.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-            self._comboBox_2.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+        if self._cursor:
+            for column in range(self._cursor._model.columnCount()):
+                self._comboBox_1.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                self._comboBox_2.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
         self._comboBox_1.addItem("*")
         self._comboBox_1.currentIndexChanged.connect(self.comboBox_putFirstCol)
         self._comboBox_2.currentIndexChanged.connect(self.comboBox_putSecondCol)        
@@ -567,6 +568,7 @@ class FLTableDB(QtGui.QWidget):
         _oldPos= None
         #print("Colocando Primera colunma ", fN)      
         for column in range(self._cursor._model.columnCount()):
+            #FIXME: Se hace sobre la extructura de la BD, no sobre las cabeceras de Table
             if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
                 #print("Posicion actual de %r --> %r" % (fN,column))
                 _oldPos = column
@@ -581,6 +583,7 @@ class FLTableDB(QtGui.QWidget):
     def putSecondCol(self, fN):
         _oldPos= None
         for column in range(self._cursor._model.columnCount()):
+            #FIXME: Se hace sobre la extructura de la BD, no sobre las cabeceras de Table
             if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
                 _oldPos = column
                 break
