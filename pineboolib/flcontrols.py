@@ -471,7 +471,8 @@ class FLTableDB(QtGui.QWidget):
     _tableView = None
     _vlayout = None
     _lineEdit = None
-    _combo = None
+    _comboBox_1 = None
+    _comboBox_2 = None
 
     def __init__(self, parent = None, action_or_cursor = None, *args):
         print("FLTableDB:", parent, action_or_cursor , args)
@@ -483,10 +484,10 @@ class FLTableDB(QtGui.QWidget):
         self._lineEdit = QtGui.QLineEdit()
         _label1 = QtGui.QLabel()
         _label2 = QtGui.QLabel()
-        self._combo = QtGui.QComboBox()
+        self._comboBox_1 = QtGui.QComboBox()
+        self._comboBox_2 = QtGui.QComboBox()
         _label1.setText("Buscar")
         _label2.setText("en")
-        self._combo = QtGui.QComboBox()
         self._vlayout = QtGui.QVBoxLayout()
         _hlayout =  QtGui.QHBoxLayout()
         self._tableView._v_header = self._tableView.verticalHeader()
@@ -496,7 +497,8 @@ class FLTableDB(QtGui.QWidget):
         _hlayout.addWidget(_label1)
         _hlayout.addWidget(self._lineEdit)
         _hlayout.addWidget(_label2)
-        _hlayout.addWidget(self._combo)
+        _hlayout.addWidget(self._comboBox_1)
+        _hlayout.addWidget(self._comboBox_2)
         self._vlayout.addLayout(_hlayout)
         self._vlayout.addWidget(self._tableView)
         self.setLayout(self._vlayout)
@@ -527,6 +529,15 @@ class FLTableDB(QtGui.QWidget):
             self._tableView.setModel(self._cursor._model)
             self._tableView.setSelectionModel(self._cursor.selection())
         self.tableRecords = self # control de tabla interno
+
+        #Carga de comboBoxs y connects .- posiblemente a mejorar
+        for column in range(self._cursor._model.columnCount()):
+            self._comboBox_1.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+            self._comboBox_2.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+        self._comboBox_1.addItem("*")
+        self._comboBox_1.currentIndexChanged.connect(self.comboBox_putFirstCol)
+        self._comboBox_2.currentIndexChanged.connect(self.comboBox_putSecondCol)        
+
         self.sort = []
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(100, self.loaded)
@@ -546,16 +557,37 @@ class FLTableDB(QtGui.QWidget):
     def obj(self):
         return self
 
+    def comboBox_putFirstCol(self):
+        self.putFirstCol(str(self._comboBox_1.currentText()))
+
+    def comboBox_putSecondCol(self):
+        self.putSecondCol(str(self._comboBox_2.currentText()))
+
     def putFirstCol(self, fN):
-        oldPos= None
+        _oldPos= None
+        #print("Colocando Primera colunma ", fN)      
         for column in range(self._cursor._model.columnCount()):
             if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
-                oldPos = column
+                #print("Posicion actual de %r --> %r" % (fN,column))
+                _oldPos = column
                 break
-        if not oldPos:
+
+        if not _oldPos:
             return False
-        else:            
-            self._tableView._h_header.swapSections(oldPos, 0)
+        else:         
+            self._tableView._h_header.swapSections(_oldPos, 0)
+            return True
+
+    def putSecondCol(self, fN):
+        _oldPos= None
+        for column in range(self._cursor._model.columnCount()):
+            if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
+                _oldPos = column
+                break
+        if not _oldPos:
+            return False
+        else:           
+            self._tableView._h_header.swapSections(_oldPos, 1)
             return True
 
     @QtCore.pyqtSlot()
