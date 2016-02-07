@@ -536,6 +536,9 @@ class FLTableDB(QtGui.QWidget):
                 self._comboBox_1.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
                 self._comboBox_2.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
         self._comboBox_1.addItem("*")
+        self._comboBox_2.addItem("*")
+        self._comboBox_1.setCurrentIndex(0)
+        self._comboBox_2.setCurrentIndex(1)
         self._comboBox_1.currentIndexChanged.connect(self.comboBox_putFirstCol)
         self._comboBox_2.currentIndexChanged.connect(self.comboBox_putSecondCol)        
 
@@ -566,32 +569,37 @@ class FLTableDB(QtGui.QWidget):
 
     def putFirstCol(self, fN):
         _oldPos= None
-        #print("Colocando Primera colunma ", fN)      
+        _oldFirst = self._tableView._h_header.logicalIndex(0)    
         for column in range(self._cursor._model.columnCount()):
-            #FIXME: Se hace sobre la extructura de la BD, no sobre las cabeceras de Table
             if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
-                #print("Posicion actual de %r --> %r" % (fN,column))
-                _oldPos = column
+                _oldPos = self._tableView._h_header.visualIndex(column) 
+                if not self._comboBox_1.currentText() == fN:
+                    self._comboBox_1.setCurrentIndex(column)
+                    return False
                 break
 
-        if not _oldPos:
+        if not _oldPos or fN == "*":
             return False
         else:         
             self._tableView._h_header.swapSections(_oldPos, 0)
+            self._comboBox_2.setCurrentIndex(_oldFirst)
             return True
 
     def putSecondCol(self, fN):
         _oldPos= None
+        _oldSecond = self._tableView._h_header.logicalIndex(1)
         for column in range(self._cursor._model.columnCount()):
-            #FIXME: Se hace sobre la extructura de la BD, no sobre las cabeceras de Table
             if self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == fN.lower():
-                _oldPos = column
+                _oldPos = self._tableView._h_header.visualIndex(column)
                 break
-        if not _oldPos:
+
+        if not _oldPos or fN == "*":
             return False
-        else:           
+        if not self._comboBox_1.currentText() == fN:           
             self._tableView._h_header.swapSections(_oldPos, 1)
-            return True
+        else:
+            self._comboBox_1.setCurrentIndex(_oldSecond)
+        return True
 
     @QtCore.pyqtSlot()
     def close(self):
@@ -940,6 +948,8 @@ class FLFieldDB(QtGui.QWidget):
         self._lineEdit = QtGui.QLineEdit()
         self._layout = QtGui.QHBoxLayout()
         self._label = QtGui.QLabel()
+        spacer = QtGui.QSpacerItem(40,0,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Expanding)
+        self._layout.addItem(spacer)
         self._layout.addWidget(self._label)
         self._layout.addWidget(self._lineEdit)
         self.setLayout(self._layout)
