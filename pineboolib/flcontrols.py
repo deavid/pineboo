@@ -78,55 +78,196 @@ class QButtonGroup(QtGui.QFrame):
     @property
     def selectedId(self): return 0
 
-
-
 class FLSqlQuery(ProjectClass):
-    def __init__(self, name = None, conn = None):
-        super(FLSqlQuery,self).__init__()
+    """
+    Implementacion de FlSqlquery de Abanq para compatibilidad con python
+    """
+    def __init__(self):
+        self._sSELECT=""
+        self._columns=[]
+        self._sWHERE=""
+        self._sFROM=""
+        self._sORDER=""
+        self.__tables=[]
+        self._sTablas=""
+        self._cursor=None
+        self._datos=None
+        self._posicion=None
+        self._row=None
 
-        if name:
-            # Cargar plantilla de query desde .qry
-            print("FIXME: Cargar plantilla de query %r (.qry)" % name)
-        if conn:
-            # Asociar a otra conexión de base de datos
-            print("FIXME: Asociar a otra conexión %r " % conn)
+       #Establecimiento de valores
+    def setSelect(self,sSELECT):
+        self._sSELECT=sSELECT
+        self._columns=[]
+        for scolumna in self._sSELECT.split(","):
+            self._columns.append(scolumna.strip().upper())
 
-    def __getattr__(self, name): return DefFun(self, name)
-    @NotImplementedWarn
-    def setTablesList(self, tablelist):
-        return True
+    def select(self):
+        return self._sSELECT
 
-    @NotImplementedWarn
-    def setSelect(self, select):
-        return True
+    def setFrom(self,sFROM):
+        self._sFROM=sFROM
 
-    @NotImplementedWarn
-    def setFrom(self, from_):
-        return True
+    def From(self):
+        return self._sFROM
 
-    @NotImplementedWarn
-    def setWhere(self, where):
-        return True
+    def setWhere(self,swhere):
+        self._sWHERE=swhere
 
-    @NotImplementedWarn
-    def exec_(self):
-        return True
+    def where(self):
+        return self._sWHERE
 
-    @NotImplementedWarn
-    def next(self):
-        return False
+    def setOrderBy(self,orderBy):
+        self._sORDER=orderBy
 
-    @NotImplementedWarn
+    def orderBy(self):
+        return self._sORDER
+
+    def setTablesList(self,tablas):
+        self._sTablas=tablas
+        self._tables=[]
+        for stable in self._sTablas.split(","):
+            self._tables.append(stable.strip().upper())
+
+    def sql(self):
+        sSQL= "SELECT " + self._sSELECT
+        if self._sFROM : 
+            sSQL=sSQL + " FROM " +self._sFROM
+        if self._sWHERE : 
+            sSQL=sSQL + " WHERE " +self._sWHERE
+        if self._sORDER : 
+            sSQL=sSQL + " ORDER BY " +self._sORDER
+        return sSQL
+
+
+    def setForwardOnly(self,valor):
+        #De principio nada
+        pass
+    #ejecucion de consulta y scroll
+    def exec(self,connection=None):
+        try:
+            micursor=self.__damecursor(connection)
+            micursor.execute(self.sql())
+            self._cursor=micursor
+        except:
+            return False
+        else:
+            return True 
+
+    def exec_(self,connection=None):
+        return self.exec(connection)
+
+    def first(self):
+        self._posicion=0
+        if self._datos:
+            self._row==self._datos[0]
+            return True 
+        else:
+            try:
+                self._row=self._cursor.fetchone()
+                if self._row==None:
+                    return False
+                else:
+                    return  True
+            except:
+                return False 
+        
+    def next(self):        
+        if self._posicion is None:
+            self._posicion=0            
+        else:
+            self._posicion+=1
+        if self._datos:
+            if self._posicion>=len(self._datos):
+                return False
+            self._row=self._datos[self._posicion]
+            return True 
+        else:
+            try:
+                self._row=self._cursor.fetchone()
+                if self._row==None:
+                    return False
+                else:
+                    return  True
+            except:
+                return False 
+    
+    def last(self):
+        __cargarDatos
+        if self._datos:
+            self._posicion=len(self._datos)-1
+            self._row==self._datos[self._posicion]
+        else:
+            return False
+
+    def prev(self):
+        self._posicion-=1
+        if self._datos:
+            if self._posicion<0:
+                return False
+            self._row==self._datos[self._posicion]
+            return True 
+        else:
+            return False 
+
+
     def size(self):
-        return 0
+        self.__cargarDatos()
+        if self._datos:
+            return len(self._datos)
+        else:
+            return 0
+    #acceso valores
+    def value(self,sCampo):
+        i=self.__damePosDeCadena(sCampo)
+        return self._row[i]
 
-    @NotImplementedWarn
-    def valueParam(self, name):
-        return ""
+    def isNull(self,sCampo):
+        i=self.__damePosDeCadena(sCampo)
+        return (self._row[i]==None)
 
-    @NotImplementedWarn
-    def setValueParam(self, name, value):
-        return None
+
+
+    #PRIVADAS
+    def __del__(self):
+        try:                        
+            del self._datos
+            self._cursor.close()
+            del self._cursor
+        except:
+            pass
+    
+    def __cargarDatos(self):
+        if self._datos:
+            pass
+        else:
+            self._datos=self._cursor.fetchall()
+
+
+    @classmethod
+    def __damecursor(cls,miconnection=None):
+        if miconnection:
+            return connections[miconnection].cursor()
+        else:
+            return dameConexionDef().cursor()
+    def __damePosDeCadena(self,sCampo):
+        if isinstance(sCampo, int):
+            return sCampo
+        else:
+            try:
+                return self._columns.index(sCampo.strip().upper())
+            except:
+                try:
+                    sAux=sCampo.split(".")[-1]
+                except:
+                    sAux=sCampo
+                i=0                
+                for x in self._cursor.description:
+                    if x.name==sAux: 
+                        return i
+                    i+=1
+                raise NameError("Error columna " +sCampo)
+
 
 
 class FLSqlCursor(ProjectClass):
@@ -361,7 +502,7 @@ class FLSqlCursor(ProjectClass):
         self._mode = modeAccess
         return True
 
-    def modeAccess(self, modeAccess):
+    def modeAccess(self):
         return self._mode
 
     def refreshBuffer(self):
@@ -402,26 +543,49 @@ class FLSqlCursor(ProjectClass):
 
     @QtCore.pyqtSlot()
     def insertRecord(self):
-        print("Insert record, please!", self._action.name)
+        print("Insert a row ", self._action.name)
+        self._mode = self.Insert
+        self._action.openDefaultFormRecord()
 
     @QtCore.pyqtSlot()
     def editRecord(self):
-        print("BEGIN: Edit your record!", self._action.name)
+        print("Edit the row!", self._action.name)
+        self._mode = self.Insert
         self._action.openDefaultFormRecord()
-        print("END: Edit your record!", self._action.name)
+
 
     @QtCore.pyqtSlot()
     def deleteRecord(self):
+        self._mode = self.Delete
         print("Drop the row!", self._action.name)
+        self._action.openDefaultFormRecord()
 
     @QtCore.pyqtSlot()
     def browseRecord(self):
         print("Inspect, inspect!", self._action.name)
+        self._action.openDefaultFormRecord()
 
     @QtCore.pyqtSlot()
     def copyRecord(self):
         print("Clone your clone", self._action.name)
 
+    def fieldDisabled(fN):
+        if self._mode == self.Insert or self._mode == self.Edit:
+            return True
+        else:
+            return False
+    """
+  if (d->modeAccess_ == INSERT || d->modeAccess_ == EDIT) {
+    if (d->cursorRelation_ && d->relation_) {
+      if (!d->cursorRelation_->metadata())
+        return false;
+      return (d->relation_->field().lower() == fN.lower());
+    } else
+      return false;
+  } else
+    return false;
+}
+    """
 #PRIVADOS
 
     def __bufferChanged(self,fieldname):
@@ -780,7 +944,7 @@ class FLTableDB(QtGui.QWidget):
     @QtCore.pyqtSlot()
     def refresh(self):
         print("FLTableDB: refresh()", self.parent().parent().parent())
-        #self._cursor.refresh()
+        self._cursor.refresh()
 
     @QtCore.pyqtSlot()
     def show(self):
@@ -1116,6 +1280,7 @@ class FLFieldDB(QtGui.QWidget):
 
     def __init__(self, parent, *args):
         super(FLFieldDB,self).__init__(parent,*args)
+        print("FLFieldDB:", parent, args)
         #TODO: Detectar el tipo de campo y añadir los controles adecuados, Por defecto todos son campos de texto
         self._lineEdit = QtGui.QLineEdit()
         self._layout = QtGui.QHBoxLayout()
