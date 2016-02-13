@@ -141,11 +141,12 @@ class FLSqlCursor(ProjectClass):
     def __init__(self, actionname=None):
         super(FLSqlCursor,self).__init__()
         self._valid = False
+        self._mode = self.Browse #Browse
         if actionname is None: raise AssertionError
         self.setAction(actionname)
-        self._commit_actions = True
-        self._current_row = -1
-        self._chk_integrity = True
+        self._activatedCommitActions = True
+        self._currentregister = -1 #current register
+        self._activatedCheckIntegrity = True
         self._micounterTran = 0
 
     def __getattr__(self, name): return DefFun(self, name)
@@ -168,29 +169,28 @@ class FLSqlCursor(ProjectClass):
             self._model = CursorTableModel(self._action, self._prj)
             self._selection = QtGui.QItemSelectionModel(self._model)
             self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
-            self._current_row = self._selection.currentIndex().row()
+            self._currentregister = self._selection.currentIndex().row()
         self._valid = True
-        self._chk_integrity = True
-        self._commit_actions = True
+        self._activatedCheckIntegrity = True
+        self._activatedCommitActions = True
 
     def action(self):
         return self._action.name
 
     @NotImplementedWarn
     def setActivatedCheckIntegrity(self, state):
-        self._chk_integrity = bool(state)
+        self._activatedCheckIntegrity = bool(state)
         return True
 
-    @NotImplementedWarn
     def setActivatedCommitActions(self, state):
-        self._commit_actions = bool(state)
+        self._activatedCommitActions = bool(state)
         return True
 
     def selection_currentRowChanged(self, current, previous):
-        if self._current_row == current.row(): return False
-        self._current_row = current.row()
+        if self._currentregister == current.row(): return False
+        self._currentregister = current.row()
         self._current_changed.emit(self.at())
-        print("cursor:%s , row:%d" %(self._action.table, self._current_row ))
+        print("cursor:%s , row:%d" %(self._action.table, self._currentregister ))
 
     def selection(self): return self._selection
 
@@ -204,21 +204,43 @@ class FLSqlCursor(ProjectClass):
         return self._valid
 
     def isNull(self,fieldname):
-        return self._model.value(self._current_row, fieldname) is None
+        return self.valueBuffer(fieldname) is None
+
+    def isCopyNull(self,fieldname):
+        return self.valueBufferCopy(fieldname) is None
 
     @NotImplementedWarn
     def setNull(self,fieldname):
-        return True
+        if not self.valueBufferCopy(fieldname) is None:
+            self.setValueBuffer(fieldname, None)
+        self.__bufferChanged(fieldname)
 
     def valueBuffer(self, fieldname):
-        if self._current_row < 0 or self._current_row > self._model.rows: return None
-        return self._model.value(self._current_row, fieldname)
+        if self._currentregister < 0 or self._currentregister > self._model.rows: return None
+        return self._model.value(_currentregister, fieldname)
+
+    @NotImplementedWarn 
+    def valueBufferCopy(self,fieldname):
+        return self._model.value(self._currentregister, fieldname)
 
     @NotImplementedWarn
     def setValueBuffer(self, fieldname, newvalue):
-        return True
+        if not fieldname == self._model.pK():
+            value = self._model.value(self._currentregister, fieldname)
+            if self._model.fieldType(fieldname) == "bool":
+                if value:
+                    valor = True
+                else:
+                    valor = False
+            #if self._model.relation(fieldname): #FIXME: RELATION
+                #parent = f.related.parent_model._meta.model_name
+                #model, a, b, c = self._obtenermodelo(parent)
+                #newvalue = model(newvalue)
+            if not newvalue == self.valueBufferCopy(fieldname):
+                self._model.setValue(fieldname,newvalue)
+            self.__bufferChanged(fieldname)
 
-    @WorkingOnThis
+    @NotImplementedWarn
     def transaction(self,lock = False):
         try:
             if lock:
@@ -232,7 +254,7 @@ class FLSqlCursor(ProjectClass):
         else:
             return True
 
-    @WorkingOnThis
+    @NotImplementedWarn
     def commit(self):
         try:            
             self._micounterTran-=1
@@ -240,20 +262,62 @@ class FLSqlCursor(ProjectClass):
         except:
             return False
         else:
-            return True 
+            return True
 
-    @WorkingOnThis
+    @NotImplementedWarn
+    def commitBuffer(self): #FIXME REVISAR
+        return True
+    """        
+        if self.__beforeCommit():
+            if self._mode == self.Edit: #Edit
+                try:
+                    anterior=model_to_dict(self._currentregister)
+                    for k,v in self._update.items():
+                        setattr(self._currentregister,k,v)
+                        self._currentregister.save(force_update=True)
+                        Forzamos que el valor del buffer sea el anterior para que sea accesible por ValueBufferCopy
+                        self._currentregister=anterior
+                        self.__afterCommit()
+                        return True 
+                except Exception as exc:
+                    milog.error("Error al actualizar en %s ",self._stabla)
+                    milog.debug("Error al actualizar en %s %s",self._stabla,exc.__str__())
+                    return False                   
+            elif self._mode == self.Del: #Del
+                try:
+                    self._currentregister.delete()
+                    self._currentregister=None                
+                except Exception as exc:
+                    milog.error("Error al borrar en %s ",self._stabla)
+                    milog.debug("Error al borrar en %s %s",self._stabla,exc.__str__())
+                    return False                   
+                return True 
+            elif self._mode == self.Insert: #Insert
+                try:
+                    print(self._update)
+                    nuevo=self._model.objects.create(**self._update)                      
+                    self._currentregister=nuevo      
+                    self.__afterCommit()         
+                    return True
+                except Exception as exc:
+                    milog.error("Error al insertar en %s ",self._stabla)
+                    milog.debug("Error al insertar en %s %s",self._stabla,exc.__str__())
+                return False                   
+            else:
+                return True 
+    """
+    @NotImplementedWarn
     def rollback(self):
         try:           
             self._micounterTran-=1
-                sql = 'rollback to savepoint s' + str(self._micounterTran)
-                self._model._cursor.execute(sql)
+            sql = 'rollback to savepoint s' + str(self._micounterTran)
+            self._model._cursor.execute(sql)
         except:
             return False
         else:
             return True
 
-    @WorkingOnThis
+    @NotImplementedWarn
     def transactionLevel(self):            
         return self._micounterTran  
 
@@ -264,7 +328,7 @@ class FLSqlCursor(ProjectClass):
         return self._model.rowCount()
 
     def at(self):
-        row = self._current_row
+        row = self._currentregister
         if row < 0: return -1
         if row >= self._model.rows: return -2
         return row
@@ -272,18 +336,18 @@ class FLSqlCursor(ProjectClass):
     def move(self, row):
         if row < 0: row = -1
         if row >= self._model.rows: row = self._model.rows
-        if self._current_row == row: return False
+        if self._currentregister == row: return False
         topLeft = self._model.index(row,0)
         bottomRight = self._model.index(row,self._model.cols-1)
         new_selection = QtGui.QItemSelection(topLeft, bottomRight)
         self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
-        self._current_row = row
+        self._currentregister = row
         self._current_changed.emit(self.at())
         if row < self._model.rows and row >= 0: return True
         else: return False
 
     def moveby(self, pos):
-        return self.move(pos+self._current_row)
+        return self.move(pos+self._currentregister)
 
     def first(self): return self.move(0)
 
@@ -293,13 +357,44 @@ class FLSqlCursor(ProjectClass):
 
     def last(self): return self.move(self._model.rows-1)
 
-    @NotImplementedWarn
     def setModeAccess(self, modeAccess):
+        self._mode = modeAccess
         return True
 
-    @NotImplementedWarn
+    def modeAccess(self, modeAccess):
+        return self._mode
+
     def refreshBuffer(self):
-        return True
+        self._update=dict() #cambiar
+        if self.modeAccess() == self.Insert:
+            if self._model.fieldType(self._model.pK()) == "serial":
+                q = FLSqlQuery()
+                q.setSelect(u"nextval('" + self._model._table + "_" + self._model._pk + "_seq')")
+                q.setFrom("")
+                q.setWhere("")
+                if not q.exec():
+                    print("not exec sequence")
+                    return None
+                if q.first():
+                    val = q.value(0)
+                    #self._update[pk] = val FIXME : Actualizar el registro con una consulta sql?
+                else:
+                    return None
+
+    def table(self):
+        return self._model._table
+
+    def cursorRelation(self):
+        return None
+
+    def action(self):
+        return self._model._action
+
+    def primaryKey(self):
+        return self._model.pK()
+
+    def size(self):
+        return len(self._model._table.fields)
 
     @NotImplementedWarn
     def commitBuffer(self):
@@ -326,6 +421,40 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def copyRecord(self):
         print("Clone your clone", self._action.name)
+
+#PRIVADOS
+
+    def __bufferChanged(self,fieldname):
+        if self._bufferChanged==None:
+            return True
+        else:
+            if self._bufferChanged(fieldname):
+                return True 
+            else:
+                return False
+
+    def __beforeCommit(self):
+        if not self._activatedCommitActions:
+            return True
+        if self._beforeCommit==None:
+            return True
+        else:
+            if self._beforeCommit(self):
+                return True 
+            else:
+                return False
+
+    def __afterCommit(self):
+        if not self._activatedCommitActions:
+            return True
+        if self._afterCommit==None:
+            return True
+        else:
+            if self._afterCommit(self):
+                return True 
+            else:
+                return False
+
 
 class ProgressDialog(QtGui.QWidget):
     def __init__(self, *args, **kwargs):
@@ -413,10 +542,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             raise AssertionError
         self.sql_fields = []
         self.field_aliases = []
+        self.field_type = []
         for field in self._table.fields:
             if field.visible_grid:
                 self.sql_fields.append(field.name)
                 self.field_aliases.append(aqtt(field.alias))
+            self.field_type.append(field.mtd_type)    
+            if field.pk: self._pk = field.name
 
         self._data = []
         self.cols = len(self.sql_fields)
@@ -461,6 +593,16 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if row < 0 or row >= self.rows: return None
         col = self.sql_fields.index(fieldname)
         return self._data[row][col]
+
+    @NotImplementedWarn
+    def setValue(self,fieldname, value):
+        return True
+
+    def pK(self): #devuelve el nombre del campo pk
+        return self._pk
+
+    def fieldType(self, fieldName): # devuelve el tipo de campo
+        return self.field_type[self.sql_fields.index(fieldname)]
 
     def columnCount(self, parent = None):
         if parent is None: parent = QtCore.QModelIndex()
