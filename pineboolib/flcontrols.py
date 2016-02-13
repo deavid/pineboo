@@ -937,6 +937,24 @@ class FLTableDB(QtGui.QWidget):
             self._comboBox_1.setCurrentIndex(_oldSecond)
         return True
 
+    @NotImplementedWarn
+    def setTableName(self, tableName):
+        self._tableName = tableName
+        #self._cursor = FLSqlCursor()
+        return True
+
+    @NotImplementedWarn
+    def setForeignField(self, foreingField):
+        self._foreingField = foreingField
+        #self._cursor = FLSqlCursor(action_or_cursor)
+        return True
+
+    @NotImplementedWarn
+    def setFieldRelation(self, fieldRelation):
+        self._fieldRelation = fieldRelation
+        #self._cursor = FLSqlCursor(action_or_cursor)
+        return True
+
     @QtCore.pyqtSlot()
     def close(self):
         print("FLTableDB: close()")
@@ -1280,7 +1298,6 @@ class FLFieldDB(QtGui.QWidget):
 
     def __init__(self, parent, *args):
         super(FLFieldDB,self).__init__(parent,*args)
-        print("FLFieldDB:", parent, args)
         #TODO: Detectar el tipo de campo y añadir los controles adecuados, Por defecto todos son campos de texto
         self._lineEdit = QtGui.QLineEdit()
         self._layout = QtGui.QHBoxLayout()
@@ -1310,7 +1327,37 @@ class FLFieldDB(QtGui.QWidget):
     @QtCore.pyqtSlot()
     def searchValue(self):
         print("FLFieldDB: searchValue()")
+        return None
+
+    @QtCore.pyqtSlot()
+    def setMapValue(self):
+        print("FLFieldDB: setMapValue()")
+        return None        
 
     def setShowAlias(self, show):
         if not show:
             self._label.setText("")
+
+    @NotImplementedWarn
+    def setTableName(self, tableName):
+        return True
+
+    @NotImplementedWarn
+    def setFilter(self, newFilter):
+        return True
+
+    @NotImplementedWarn
+    def setFieldAlias(self, tableName):
+        return True
+
+    @NotImplementedWarn
+    def setForeignField(self, foreingField):
+        return True
+
+    @NotImplementedWarn
+    def setFieldRelation(self, fieldRelation):
+        return True
+
+    @NotImplementedWarn
+    def setFilter(self, newFilter):
+        return True
