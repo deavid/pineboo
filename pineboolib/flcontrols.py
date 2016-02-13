@@ -129,12 +129,12 @@ class FLSqlQuery(ProjectClass):
         return None
 
 
-
 class FLSqlCursor(ProjectClass):
     Insert = 0
     Edit = 1
     Del = 2
     Browse = 3
+    _micounterTran = None
 
     _current_changed = QtCore.pyqtSignal(int, name='currentChanged')
 
@@ -146,6 +146,7 @@ class FLSqlCursor(ProjectClass):
         self._commit_actions = True
         self._current_row = -1
         self._chk_integrity = True
+        self._micounterTran = 0
 
     def __getattr__(self, name): return DefFun(self, name)
 
@@ -217,17 +218,44 @@ class FLSqlCursor(ProjectClass):
     def setValueBuffer(self, fieldname, newvalue):
         return True
 
-    @NotImplementedWarn
-    def transaction(self, block = False):
-        return True
+    @WorkingOnThis
+    def transaction(self,lock = False):
+        try:
+            if lock:
+                pass
+            else:
+                sql = 'savepoint s' + str(self._micounterTran)
+                self._model._cursor.execute(sql)
+                self._micounterTran+=1
+        except:
+            return False
+        else:
+            return True
 
-    @NotImplementedWarn
+    @WorkingOnThis
     def commit(self):
-        return True
+        try:            
+            self._micounterTran-=1
+            self._model._cursor.execute('COMMIT')           
+        except:
+            return False
+        else:
+            return True 
 
-    @NotImplementedWarn
+    @WorkingOnThis
     def rollback(self):
-        return True
+        try:           
+            self._micounterTran-=1
+                sql = 'rollback to savepoint s' + str(self._micounterTran)
+                self._model._cursor.execute(sql)
+        except:
+            return False
+        else:
+            return True
+
+    @WorkingOnThis
+    def transactionLevel(self):            
+        return self._micounterTran  
 
     def refresh(self):
         self._model.refresh()
@@ -371,6 +399,8 @@ class FLUtil(ProjectClass):
 class CursorTableModel(QtCore.QAbstractTableModel):
     rows = 15
     cols = 5
+    _cursor = None
+
     def __init__(self, action,project, *args):
         super(CursorTableModel,self).__init__(*args)
         from pineboolib.qsaglobals import aqtt
@@ -404,22 +434,22 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             wfilter = wfilter.strip()
             if not wfilter: continue
             where_filter += " AND " + wfilter
-        cur = self._prj.conn.cursor()
+        self._cursor = self._prj.conn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # FIXME: Agregado limit de 5000 registros para evitar atascar pineboo
         # TODO: Convertir esto a un cursor de servidor
         sql = """SELECT %s FROM %s WHERE 1=1 %s LIMIT 5000""" % (", ".join(self.sql_fields),self._table.name, where_filter)
-        cur.execute(sql)
+        self._cursor.execute(sql)
         self.rows = 0
         self.endRemoveRows()
         if oldrows > 0:
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
-        newrows = cur.rowcount
+        newrows = self._cursor.rowcount
         self.beginInsertRows(parent, 0, newrows - 1)
         print("QUERY:", sql)
         self.rows = newrows
         self._data = []
-        for row in cur:
+        for row in self._cursor:
             self._data.append(row)
         self.endInsertRows()
         topLeft = self.index(0,0)
