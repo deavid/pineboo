@@ -8,8 +8,8 @@ from PyQt4 import QtCore, QtGui
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
 from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy import FLSqlQuery
+from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
+from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 
 def Object(x=None):
     if x is None: x = {}
@@ -23,11 +23,11 @@ def Boolean(x=False): return bool(x)
 
 def FLSqlQuery(*args):
     #if not args: return None
-    return flcontrols.FLSqlQuery(*args)
+    return FLSqlQuery_Legacy.FLSqlQuery(*args)
 
 def FLSqlCursor(action=None):
     if action is None: return None
-    return flcontrols.FLSqlCursor(action)
+    return FLSqlCursor_Legacy.FLSqlCursor(action)
 
 def FLTableDB(*args):
     if not args: return None

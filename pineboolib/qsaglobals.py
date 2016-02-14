@@ -9,13 +9,13 @@ import traceback
 import pineboolib
 from pineboolib import flcontrols
 
-from pineboolib.fllegacy import FLUtil
+from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 
 from pineboolib.utils import aqtt, auto_qt_translate_text
 
 def parseFloat(x): return float(x)
 
-util = FLUtil.FLUtil() # <- para cuando QS erróneo usa util sin definirla
+util = FLUtil_Legacy.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
 # TODO: separar en otro fichero de utilidades
 def ustr(*t1):
