@@ -4,13 +4,72 @@ from PyQt4 import QtCore,QtGui
 from pineboolib import decorators
 
 class FLFieldDB(QtGui.QWidget):
-    _fieldName = "undefined"
-    _label = None
-    _lineEdit = None 
-    _layout = None
-    _tableName = None
-    _fieldAlias = None
     
+    editor_ = None #Editor para el contenido del campo que representa el componente
+    fieldName_ = None #Nombre del campo de la tabla al que esta asociado este componente
+    tableName_ = None #Nombre de la tabla fóranea
+    actionName_ = None #Nombre de la accion
+    foreignField_ = None #Nombre del campo foráneo
+    fieldRelation_ = None #Nombre del campo de la relación
+    filter_ = None #Nombre del campo de la relación
+    cursor_ = None #Cursor con los datos de la tabla origen para el componente
+    cursorAux = None #  Cursor auxiliar de uso interno para almacenar los registros de la tabla relacionada con la de origen
+    cursorInit = None #Indica que si ya se ha inicializado el cursor
+    cursorAuxInit = None #Indica que si ya se ha inicializado el cursor auxiliar
+    topWidget_ = None #Ventana superior
+    showed = None #Indica que el componete ya ha sido mostrado una vez
+    cursorBackup_ = None #Backup del cursor por defecto para acceder al modo tabla externa
+    showAlias_ = None #Variable que almacena el estado de la propiead showAlias
+    """
+    Seleccionador de fechas.
+    """
+    datePopup_ = None
+    dateFrame_ = None
+    datePickerOn_ = None
+
+    accel_ = None #Aceleradores de combinaciones de teclas
+    keepDisabled_ = None #Indica que el componente permanezca deshabilitado evitando que vuelva a habilitarse en sucesivos refrescos. Ver FLFieldDB::refresh().
+    editorImg_ = None #Editor para imagenes
+    pbAux_ = None #Boton auxiliar multifunción
+    pbAux2_ = None #Boton auxiliar multifunción
+    pbAux3_ = None #Boton auxiliar multifunción
+    pbAux4_ = None #Boton auxiliar multifunción
+    fieldAlias_ = None #Almacena el alias del campo que será mostrado en el formulario
+    showEditor_ = None #Almacena el valor de la propiedad showEditor
+    partDecimal_= None #Valor de cifras decimales en caso de ser distinto del definido en los metadatos del campo
+
+    """
+    Tamaños maximo y minimos iniciales
+    """
+    initMaxSize_ = None
+    initMinSize_ = None
+
+    """
+    Para asistente de completado automático.
+    """
+    autoComPopup_= None
+    autoComFrame_= None
+    autoComFieldName_= None
+    autoComFieldRelation_ = None
+    autoCompMode_ = None
+    timerAutoComp_ = None
+
+    """
+    Auxiliares para poder repetir llamada a setMapValue y refrescar filtros
+    """
+    fieldMapValue_ = None
+    mapValue_ = None
+
+    maxPixImages_ = None #Tamaño máximo de las imágenes en los campos pixmaps (en píxeles) @author Silix
+    notNullColor_ = None #Color de los campos obligatorios @author Aulla
+    initNotNullColor_ = False #Colorear campos obligatorios @author Aulla
+  
+  
+  
+  /**
+  El formato del texto
+  */
+  Qt::TextFormat textFormat_;
 
     def __init__(self, parent, *args):
         super(FLFieldDB,self).__init__(parent,*args)
@@ -558,56 +617,61 @@ class FLFieldDB(QtGui.QWidget):
     @decorators.NotImplementedWarn
     def searchPixmap(self):
 
-  /**
+    """
   Carga una imagen en el campo de tipo pixmap
   @param filename: Ruta al fichero que contiene la imagen
-  */
-  void setPixmap(const QString &filename);
+    """
+    @decorators.NotImplementedWarn
+    def setPixmap(self, filename):
 
-  /**
+    """
   Carga una imagen en el campo de tipo pixmap con el ancho y alto preferido
 
   @param pixmap: pixmap a cargar en el campo
   @param w: ancho preferido de la imagen
   @param h: alto preferido de la imagen
   @author Silix
-  */
-  void setPixmapFromPixmap(const QPixmap &pixmap, const int w = 0, const int h = 0);
+    """
+    @decorators.NotImplementedWarn
+    def setPixmapFromPixmap(self, pixmap, w = 0, h = 0):
 
-  /**
+    """
   Carga una imagen desde el portapapeles en el campo de tipo pixmap
   @author Silix
-  */
-  void setPixmapFromClipboard();
+    """
+    @decorators.NotImplementedWarn
+    def setPixmapFromClipboard(self):
 
-  /**
+    """
   Guarda imagen de campos tipo Pixmap en una ruta determinada.
 
   @param filename: Ruta al fichero donde se guardará la imagen
   @param fmt Indica el formato con el que guardar la imagen
   @author Silix
-  */
-  void savePixmap(const QString &filename, const char *format);
+    """
+    @decorators.NotImplementedWarn
+    def savePixmap( filename, format):
 
-  /**
+    """
   Devueve el objeto imagen asociado al campo
 
   @return imagen asociada al campo
   @author Silix
-  */
-  QPixmap pixmap();
+    """
+    @decorators.NotImplementedWarn
+    def pixmap(self):
 
-  /**
+    """
   Emite la señal de foco perdido
-  */
-  void emitLostFocus();
+    """
+    def emitLostFocus(self):
 
-  /**
+    """
   Establece que el control no está mostrado
-  */
-  void setNoShowed();
+    """
+    def setNoShowed(self):
 
-  /**
+    """
   Establece el valor de este campo según el resultado de la consulta
   cuya claúsula 'where' es;  nombre campo del objeto que envía la señal igual
   al valor que se indica como parámetro.
@@ -616,442 +680,227 @@ class FLFieldDB(QtGui.QWidget):
   la señal FLFieldDB::textChanged(cons QString&) a este slot.
 
   @param v Valor
-  */
-  void setMapValue(const QString &v);
+    """
+    @decorators.NotImplementedWarn
+    def setMapValue(self, v):
 
-  /**
+
+    """
   Emite la señal de keyF2Pressed.
 
   La señal key_F2_Pressed del editor (sólo si el editor es FLLineEdit)
   está conectada a este slot.
-  */
-  void emitKeyF2Pressed();
+   """
+    @decorators.NotImplementedWarn
+    def emitKeyF2Pressed(self):
 
-  /**
+    """
   Emite la señal de labelClicked. Se usa en los campos M1 para editar el formulario de edición del valor seleccionado.
-  */
-  void emitLabelClicked();
+    """
+    @decorators.NotImplementedWarn
+    def emitLabelClicked(self):
 
-  /**
+    """
   Emite la señal de textChanged.
 
   La señal textChanged del editor (sólo si el editor es FLLineEdit)
   está conectada a este slot.
-  */
-  void emitTextChanged(const QString &t);
+    """
+    @decorators.NotImplementedWarn
+    def emitTextChanged(self, t):
 
-  /**
+    """
   Emite la señal activatedAccel( int )
-  */
-  void emitActivatedAccel(int id);
+    """
+    @decorators.NotImplementedWarn
+    def emitActivatedAccel(self, identifier):
 
-  /**
+    """
   Redefinida por conveniencia
-  */
-  virtual void setEnabled(bool);
+    """
+    @decorators.NotImplementedWarn
+    def setEnabled(self , enable):
 
-protected:
+    #protected:
 
-  /**
+    """
   Filtro de eventos
-  */
-  bool eventFilter(QObject *obj, QEvent *ev);
+    """
+    @decorators.NotImplementedWarn
+    def eventFilter(self, obj, ev):
 
-  /**
+    """
   Captura evento mostrar
-  */
-  void showEvent(QShowEvent *e);
+    """
+    @decorators.NotImplementedWarn
+    def showEvent(self, e):
 
-private:
+    #private:
 
-  /**
+    """
   Redefinida por conveniencia
-  */
-  void showWidget();
+    """
+    @decorators.NotImplementedWarn
+    def showWidget(self):
 
-  /**
+    """
   Inicializa un editor falso y no funcional.
 
   Esto se utiliza cuando se está editando el formulario con el diseñador y no
   se puede mostrar el editor real por no tener conexión a la base de datos.
   Crea una previsualización muy esquemática del editor, pero suficiente para
   ver la posisicón y el tamaño aproximado que tendrá el editor real.
-  */
-  void initFakeEditor();
+    """
+    @decorators.NotImplementedWarn
+    def initFakeEditor(self):
 
-  /**
+    """
   Auxiliar para refrescar filtros utilizando fieldMapValue_ y mapValue_
-  */
-  void setMapValue();
+    """
+    @decorators.NotImplementedWarn
+    def setMapValue(self):
 
-  /**
-  Editor para el contenido del campo que representa el componente
-  */
-  QWidget *editor_;
+ 
 
-  /**
-  Nombre del campo de la tabla al que esta asociado este componente
-  */
-  QString fieldName_;
-
-  /**
-  Nombre de la tabla fóranea
-  */
-  QString tableName_;
-
-  /**
-  Nombre de la accion
-  */
-  QString actionName_;
-
-  /**
-  Nombre del campo foráneo
-  */
-  QString foreignField_;
-
-  /**
-  Nombre del campo de la relación
-  */
-  QString fieldRelation_;
-
-  /**
-  Nombre del campo de la relación
-  */
-  QString filter_;
-
-  /**
-  Cursor con los datos de la tabla origen para el componente
-  */
-  FLSqlCursor *cursor_;
-
-  /**
-  Cursor auxiliar de uso interno para almacenar los registros de la tabla
-  relacionada con la de origen
-  */
-  FLSqlCursor *cursorAux;
-
-  /**
-  Indica que si ya se ha inicializado el cursor
-  */
-  bool cursorInit;
-
-  /**
-  Indica que si ya se ha inicializado el cursor auxiliar
-  */
-  bool cursorAuxInit;
-
-  /**
-  Ventana superior
-  */
-  QWidget *topWidget_;
-
-  /**
-  Indica que el componete ya ha sido mostrado una vez
-  */
-  bool showed;
-
-  /**
-  Backup del cursor por defecto para acceder al modo tabla externa
-  */
-  FLSqlCursor *cursorBackup_;
-
-  /**
-  Variable que almacena el estado de la propiead showAlias.
-  */
-  bool showAlias_;
-
-  /**
-  Seleccionador de fechas.
-  */
-  VDatePopup *datePopup_;
-  QVBox *dateFrame_;
-  bool datePickerOn_;
-
-  /**
-  Aceleradores de combinaciones de teclas
-  */
-  QAccel *accel_;
-
-  /**
-  Indica que el componente permanezca deshabilitado evitando que vuelva a
-  habilitarse en sucesivos refrescos. Ver FLFieldDB::refresh().
-  */
-  bool keepDisabled_;
-
-  /**
-  Editor para imagenes
-  */
-  FLPixmapView *editorImg_;
-
-  /**
-  Boton auxiliar multifunción
-  */
-  QPushButton *pbAux_;
-
-  /**
-  Boton auxiliar multifunción
-  */
-  QPushButton *pbAux2_;
-
-  /**
-  Boton auxiliar multifunción
-  */
-  QPushButton *pbAux3_;
-
-  /**
-  Boton auxiliar multifunción
-  @author Silix
-  */
-  QPushButton *pbAux4_;
-
-  /**
-  Almacena el alias del campo que será mostrado en el formulario
-  */
-  QString fieldAlias_;
-
-  /**
-  Almacena el valor de la propiedad showEditor.
-
-  Esta propiedad indica que se muestre o no el editor de contenido del campo
-  */
-  bool showEditor_;
-
-  /**
-  Valor de cifras decimales en caso de ser distinto del definido en los metadatos del campo
-  */
-  int partDecimal_;
-
-  /**
-  Tamaños maximo y minimos iniciales
-  */
-  QSize initMaxSize_;
-  QSize initMinSize_;
-
-  /**
-  Para asistente de completado automático.
-  */
-  FLDataTable *autoComPopup_;
-  QVBox *autoComFrame_;
-  QString autoComFieldName_;
-  QString autoComFieldRelation_;
-  AutoCompMode autoCompMode_;
-  QTimer *timerAutoComp_;
-
-  /**
-  Auxiliares para poder repetir llamada a setMapValue y refrescar filtros
-  */
-  FLFieldDB *fieldMapValue_;
-  QString mapValue_;
-
-  /**
-  Tamaño máximo de las imágenes en los campos pixmaps (en píxeles)
-  @author Silix
-  */
-  int maxPixImages_;
-
-
-   /**
-  Color de los campos obligatorios
-  @author Aulla
-  */
-  QColor notNullColor()
-  	{
-     if (!initNotNullColor_)
-     		{
-     	  	initNotNullColor_ = true;	
-  	  	notNullColor_ = FLSettings::readEntry("ebcomportamiento/colorObligatorio","");
-  		if (notNullColor_ == "")
-  			notNullColor_ = QColor(255, 233, 173);
+    """
+    Color de los campos obligatorios
+    @author Aulla
+    """
+    @decorators.NotImplementedWarn
+    def notNullColor(self):
+        if not self.initNotNullColor_:
+            self.initNotNullColor_ = True	
+  	self.notNullColor_ = FLSettings.readEntry("ebcomportamiento/colorObligatorio","")
+        if self.notNullColor_ == "":
+            self.notNullColor_ = QColor(255, 233, 173)
+        return self.notNullColor_
   	
-  		}
-    return notNullColor_;
-  	}
-  	
-  	
-  QColor notNullColor_;
-  bool initNotNullColor_;
-  
-  
-  
-  /**
-  El formato del texto
-  */
-  Qt::TextFormat textFormat_;
 
-signals:
+    #signals
+    @decorators.NotImplementedWarn
+    def lostFocus(self): #Señal de foco perdido
+    @decorators.NotImplementedWarn
+    def keyF2Pressed(self): #Señal emitida si se pulsa la tecla F2 en el editor
+    @decorators.NotImplementedWarn
+    def labelClicked(self): #Señal emitida si se hace click en el label de un campo M1
+    @decorators.NotImplementedWarn
+    def textChanged(self, QString): #Señal emitida si se cambia el texto en el editor, sólo si es del tipo FLLineEdit
+    @decorators.NotImplementedWarn
+    def activatedAccel(self, int): #Cuando se pulsa una combinación de teclas de aceleración se emite esta señal indicando el identificador de la combinación de teclas pulsada
+    @decorators.NotImplementedWarn
+    def keyF4Pressed(self): #Señal emitida si se pulsa la tecla F4 en el editor
+    @decorators.NotImplementedWarn
+    def keyReturnPressed(self): #Señal emitida si se pulsa la tecla Return
 
-  /**
-  Señal de foco perdido
-  */
-  void lostFocus();
+class FLPixmapView(QScrollView, QFilePreview):
 
-  /**
-  Señal emitida si se pulsa la tecla F2 en el editor
-  */
-  void keyF2Pressed();
-
-  /**
-  Señal emitida si se hace click en el label de un campo M1
-  */
-  void labelClicked();
-
-  /**
-  Señal emitida si se cambia el texto en el editor, sólo si es del tipo FLLineEdit
-  */
-  void textChanged(const QString &);
-
-  /**
-  Cuando se pulsa una combinación de teclas de aceleración se emite esta señal indicando el identificador
-  de la combinación de teclas pulsada
-  */
-  void activatedAccel(int);
-
-  /**
-  Señal emitida si se pulsa la tecla F4 en el editor
-  */
-  void keyF4Pressed();
-
-  /**
-  Señal emitida si se pulsa la tecla Return
-  */
-  void keyReturnPressed();
-};
-
-class FLPixmapView: public QScrollView, public QFilePreview
-{
-public:
+    pixmap_ = None
+    pixmapView_ = None
+    path_ = None
+    autoScaled_ = None
 
   FLPixmapView(QWidget *parent = 0);
-  void setPixmap(const QPixmap &pix);
-  void drawContents(QPainter *p, int, int, int, int);
-  void previewUrl(const QUrl &u);
-  void clear();
-  QPixmap pixmap();
-  void setAutoScaled(const bool autoScaled);
+    @decorators.NotImplementedWarn
+    def setPixmap(self, pix):
+    @decorators.NotImplementedWarn
+    def drawContents(self, p, int, int, int, int):
+    @decorators.NotImplementedWarn
+    def previewUrl(self, u):
+    @decorators.NotImplementedWarn
+    def clear(self):
+    @decorators.NotImplementedWarn
+    def pixmap(self):
+    @decorators.NotImplementedWarn
+    def setAutoScaled(self, autoScaled):
 
-private:
 
-  QPixmap pixmap_;
-  QPixmap pixmapView_;
-  QString path_;
-  bool autoScaled_;
-};
+class FLLineEdit(QLineEdit):
 
-class FLLineEdit: public QLineEdit
-{
-  Q_OBJECT
+    #FLLineEdit(QWidget *parent, const char *name = 0);
 
-public:
+    
+    type_ = None
+    partDecimal = None
+    autoSelect = None
 
-  FLLineEdit(QWidget *parent, const char *name = 0);
+    @decorators.NotImplementedWarn
+    def text(self):
+    
+    #public slots:
+    @decorators.NotImplementedWarn
+    def setText(const QString &):
 
-  QString text() const;
+    #protected:
+    @decorators.NotImplementedWarn
+    def focusOutEvent(self, f):
+    @decorators.NotImplementedWarn
+    def focusInEvent(self, f):
 
-  int type;
-  int partDecimal;
-  bool autoSelect;
 
-public slots:
-  virtual void setText(const QString &);
-
-protected:
-
-  void focusOutEvent(QFocusEvent *f);
-  void focusInEvent(QFocusEvent *f);
-};
-
-// Uso interno
 class FLDoubleValidator: public QDoubleValidator
-{
-public:
 
-  FLDoubleValidator(QObject *parent, const char *name = 0);
-  FLDoubleValidator(double bottom, double top, int decimals,
-                    QObject *parent, const char *name = 0);
-  QValidator::State validate(QString &input, int &) const;
-};
+    #FLDoubleValidator(QObject *parent, const char *name = 0);
+    #FLDoubleValidator(double bottom, double top, int decimals, QObject *parent, const char *name = 0);
+    #QValidator::State validate(QString &input, int &) const;
 
-// Uso interno
 class FLIntValidator: public QIntValidator
-{
-public:
 
-  FLIntValidator(QObject *parent, const char *name = 0);
-  FLIntValidator(int minimum, int maximum,
-                 QObject *parent, const char *name = 0);
-  QValidator::State validate(QString &input, int &) const;
-};
+    #FLIntValidator(QObject *parent, const char *name = 0);
+    #FLIntValidator(int minimum, int maximum, QObject *parent, const char *name = 0);
+    #QValidator::State validate(QString &input, int &) const;
 
-// Uso interno
-class FLUIntValidator: public QIntValidator
-{
-public:
 
-  FLUIntValidator(QObject *parent, const char *name = 0);
-  FLUIntValidator(int minimum, int maximum,
-                  QObject *parent, const char *name = 0);
-  QValidator::State validate(QString &input, int &) const;
-};
+class FLUIntValidator(QIntValidator):
 
-// Uso interno
-class FLSpinBox: public QSpinBox
-{
-public:
+    #FLUIntValidator(QObject *parent, const char *name = 0);
+    #FLUIntValidator(int minimum, int maximum, QObject *parent, const char *name = 0);
+    #validate(QString &input, int &) const;
 
-  FLSpinBox(QWidget *parent = 0, const char *name = 0) :
-    QSpinBox(parent, name) {
-    editor()->setAlignment(Qt::AlignRight);
-  }
-};
 
-// Uso interno
-class FLDateEdit: public QDateEdit
-{
-public:
+class FLSpinBox(QSpinBox):
 
-  FLDateEdit(QWidget *parent = 0, const char *name = 0) : QDateEdit(parent, name) {}
+    #FLSpinBox(QWidget *parent = 0, const char *name = 0) : QSpinBox(parent, name) {
+    	#editor()setAlignment(Qt::AlignRight); }
+    
 
-protected:
 
-  void fix();
-};
+class FLDateEdit(QDateEdit):
+    
+    #FLDateEdit(QWidget *parent = 0, const char *name = 0) : QDateEdit(parent, name) {}
+    def fix(self):
 
-// Uso interno
-class AQTextEditBar : public QWidget
-{
-  Q_OBJECT
+class AQTextEditBar(QWidget):
 
-public:
+    layout_ = None
+    lb_ = None
+    pbBold_ = None
+    pbItal_ = None
+    pbUnde_ = None
+    pbColor_ = None
+    comboFont_ = None
+    comboSize_ = None
+    ted_ = None
 
-  AQTextEditBar(QWidget *parent = 0, const char *name = 0, QLabel *lb = 0);
+    #AQTextEditBar(QWidget *parent = 0, const char *name = 0, QLabel *lb = 0);
+    @decorators.NotImplementedWarn
+    def doConnections(self, e):
 
-  void doConnections(QTextEdit *e);
+    #private slots:
 
-private slots:
+    @decorators.NotImplementedWarn
+    def textBold(self):
+    @decorators.NotImplementedWarn
+    def textItalic(self):
+    @decorators.NotImplementedWarn
+    def textUnderline(self):
+    @decorators.NotImplementedWarn
+    def textColor(self):
+    @decorators.NotImplementedWarn
+    def textFamily(self,f):
+    @decorators.NotImplementedWarn
+    def textSize(self, p):
+    @decorators.NotImplementedWarn
+    def fontChanged(self, f):
+    @decorators.NotImplementedWarn
+    def colorChanged(self, c):
 
-  void textBold();
-  void textItalic();
-  void textUnderline();
-  void textColor();
-  void textFamily(const QString &f);
-  void textSize(const QString &p);
-
-  void fontChanged(const QFont &f);
-  void colorChanged(const QColor &c);
-
-private:
-
-  QHBoxLayout *layout_;
-
-  QLabel *lb_;
-
-  QPushButton *pbBold_;
-  QPushButton *pbItal_;
-  QPushButton *pbUnde_;
-  QPushButton *pbColor_;
-  QComboBox *comboFont_;
-  QComboBox *comboSize_;
-
-  QTextEdit *ted_;
-};
-    """
