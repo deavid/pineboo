@@ -11,6 +11,7 @@ from PyQt4 import QtGui, QtCore # , uic
 import pineboolib
 #from pineboolib.qsaglobals import ustr
 from pineboolib.utils import DefFun, filedir
+from pineboolib import decorators
 
 Qt = QtCore.Qt
 # TODO: separar en otro fichero de utilidades
@@ -28,22 +29,6 @@ def ustr1(t):
 
 def ustr(*t1):
     return "".join([ ustr1(t) for t in t1 ])
-
-def NotImplementedWarn(fn):
-    def newfn(*args,**kwargs):
-        ret = fn(*args,**kwargs)
-        x_args = [ repr(a) for a in args] + [ "%s=%s" % (k,repr(v)) for k,v in list(kwargs.items())]
-        print("WARN: Function not yet implemented: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
-        return ret
-    return newfn
-
-def WorkingOnThis(fn):
-    def newfn(*args,**kwargs):
-        ret = fn(*args,**kwargs)
-        x_args = [ repr(a) for a in args] + [ "%s=%s" % (k,repr(v)) for k,v in list(kwargs.items())]
-        print("WARN: A developer is working on this function : %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
-        return ret
-    return newfn
 
 class QLayoutWidget(QtGui.QWidget):
     pass
@@ -127,7 +112,7 @@ class FLSqlCursor(ProjectClass):
     def action(self):
         return self._action.name
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setActivatedCheckIntegrity(self, state):
         self._activatedCheckIntegrity = bool(state)
         return True
@@ -159,7 +144,7 @@ class FLSqlCursor(ProjectClass):
     def isCopyNull(self,fieldname):
         return self.valueBufferCopy(fieldname) is None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setNull(self,fieldname):
         if not self.valueBufferCopy(fieldname) is None:
             self.setValueBuffer(fieldname, None)
@@ -169,11 +154,11 @@ class FLSqlCursor(ProjectClass):
         if self._currentregister < 0 or self._currentregister > self._model.rows: return None
         return self._model.value(_currentregister, fieldname)
 
-    @NotImplementedWarn 
+    @decorators.NotImplementedWarn 
     def valueBufferCopy(self,fieldname):
         return self._model.value(self._currentregister, fieldname)
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setValueBuffer(self, fieldname, newvalue):
         if not fieldname == self._model.pK():
             value = self._model.value(self._currentregister, fieldname)
@@ -190,7 +175,7 @@ class FLSqlCursor(ProjectClass):
                 self._model.setValue(fieldname,newvalue)
             self.__bufferChanged(fieldname)
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def transaction(self,lock = False):
         try:
             if lock:
@@ -204,7 +189,7 @@ class FLSqlCursor(ProjectClass):
         else:
             return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def commit(self):
         try:            
             self._micounterTran-=1
@@ -214,7 +199,7 @@ class FLSqlCursor(ProjectClass):
         else:
             return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def commitBuffer(self): #FIXME REVISAR
         return True
     """        
@@ -256,7 +241,7 @@ class FLSqlCursor(ProjectClass):
             else:
                 return True 
     """
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def rollback(self):
         try:           
             self._micounterTran-=1
@@ -267,7 +252,7 @@ class FLSqlCursor(ProjectClass):
         else:
             return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def transactionLevel(self):            
         return self._micounterTran  
 
@@ -346,7 +331,7 @@ class FLSqlCursor(ProjectClass):
     def size(self):
         return len(self._model._table.fields)
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def commitBuffer(self):
         return True
 
@@ -523,7 +508,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         col = self.sql_fields.index(fieldname)
         return self._data[row][col]
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setValue(self,fieldname, value):
         return True
 
@@ -702,19 +687,19 @@ class FLTableDB(QtGui.QWidget):
             self._comboBox_1.setCurrentIndex(_oldSecond)
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setTableName(self, tableName):
         self._tableName = tableName
         #self._cursor = FLSqlCursor()
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setForeignField(self, foreingField):
         self._foreingField = foreingField
         #self._cursor = FLSqlCursor(action_or_cursor)
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setFieldRelation(self, fieldRelation):
         self._fieldRelation = fieldRelation
         #self._cursor = FLSqlCursor(action_or_cursor)
@@ -808,30 +793,30 @@ class FLFormSearchDB( QtGui.QWidget ):
 
     def __getattr__(self, name): return DefFun(self, name)
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setCursor(self):
         print("Definiendo cursor")
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setMainWidget(self):
 
         print("Creamos la ventana")
         
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def exec_(self, valor):
         print("Ejecutamos la ventana y esperamos respuesta, introducimos desde y hasta en cursor")
         return valor
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setFilter(self):
         print("configuramos Filtro")
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def accepted(self):
         return self._accepted
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def cursor(self):
         return self._cursor
 
@@ -856,118 +841,118 @@ class FLReportViewer(ProjectClass):
     def connects(self):
         pass
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def renderReport(self, initRow = 0, initCol = 0, append = False, displayReport = True):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def renderReport2(self, initRow = 0, initCol = 0, flags = Display):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setReportData(self, xmlDoc_Or_Query):
         return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setReportTemplate(self,  t, style = None):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def reportData(self):
         return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def reportTemplate(self):
         return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def exec_(self):
         return
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def show(self):
         return
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def csvData(self):
         return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def printReport(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def printReportToPS(self,outPsFile): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def printReportToPDF(self,outPdfFile): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setNumCopies(self,numCopies): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setPrintToPos(self,ptp): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setPrinterName(self,pName): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def reportPrinted(self): return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def reparent(self,parentFrame): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def slotFirstPage(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def slotLastPage(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def slotNextPage(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def slotPrevPage(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def slotZoomUp(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def slotZoomDown(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def exportFileCSVData(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def exportToPDF(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def sendEMailPDF(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def saveSVGStyle(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def saveSimpleSVGStyle(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def loadSVGStyle(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setAutoClose(self,b): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setResolution(self,dpi): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setPixel(self,relDpi): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setDefaults(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def updateReport(self): return None
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def updateDisplay(self): return None
 
 """
@@ -1103,26 +1088,26 @@ class FLFieldDB(QtGui.QWidget):
         if not show:
             self._label.setText("")
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setTableName(self, tableName):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setFilter(self, newFilter):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setFieldAlias(self, tableName):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setForeignField(self, foreingField):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setFieldRelation(self, fieldRelation):
         return True
 
-    @NotImplementedWarn
+    @decorators.NotImplementedWarn
     def setFilter(self, newFilter):
         return True

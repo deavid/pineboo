@@ -1,5 +1,6 @@
 # encoding: UTF-8
 from pineboolib.flcontrols import ProjectClass
+from pineboolib import decorators
 
 class FLSqlQuery(ProjectClass):
     """
