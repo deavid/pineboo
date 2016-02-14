@@ -2,7 +2,9 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 
-from PyQt4 import QtCore
+from PyQt4 import QtCore,QtGui
+
+from pineboolib.CursorTableModel import CursorTableModel
 
 class FLSqlCursor(ProjectClass):
     Insert = 0
