@@ -20,6 +20,7 @@ class FLFieldDB(QtGui.QWidget):
     showed = None #Indica que el componete ya ha sido mostrado una vez
     cursorBackup_ = None #Backup del cursor por defecto para acceder al modo tabla externa
     showAlias_ = None #Variable que almacena el estado de la propiead showAlias
+    textFormat_ = None #El formato del texto
     """
     Seleccionador de fechas.
     """
@@ -63,13 +64,9 @@ class FLFieldDB(QtGui.QWidget):
     maxPixImages_ = None #Tamaño máximo de las imágenes en los campos pixmaps (en píxeles) @author Silix
     notNullColor_ = None #Color de los campos obligatorios @author Aulla
     initNotNullColor_ = False #Colorear campos obligatorios @author Aulla
+
   
-  
-  
-  /**
-  El formato del texto
-  */
-  Qt::TextFormat textFormat_;
+
 
     def __init__(self, parent, *args):
         super(FLFieldDB,self).__init__(parent,*args)
