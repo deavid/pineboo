@@ -2,7 +2,8 @@
 from PyQt4 import QtCore,QtGui
 
 from pineboolib import decorators
-from pineboolib.fllegacy import FLSqlCursor
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.utils import DefFun
 
 class FLTableDB(QtGui.QWidget):
     _tableView = None

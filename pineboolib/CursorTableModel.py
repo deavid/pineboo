@@ -1,6 +1,7 @@
 # encoding: UTF-8
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
+from pineboolib.qsaglobals import ustr
 
 from PyQt4 import QtCore
 
