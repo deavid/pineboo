@@ -9,6 +9,7 @@ from pineboolib import qsaglobals
 from pineboolib import flcontrols
 from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
 from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy import FLSqlQuery
 
 def Object(x=None):
     if x is None: x = {}
