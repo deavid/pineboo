@@ -26,7 +26,7 @@ import pineboolib
 from pineboolib import qt3ui
 from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.qsaglobals import aqtt
-from pineboolib.flcontrols import FLForm
+from pineboolib.FLForm import FLForm
 import pineboolib.emptyscript
 
 from pineboolib import qsatype, qsaglobals, DlgConnect
