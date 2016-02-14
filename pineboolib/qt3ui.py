@@ -9,6 +9,7 @@ from PyQt4 import QtGui, QtCore, uic
 
 from pineboolib import flcontrols
 from pineboolib.fllegacy import FLTableDB
+#from pineboolib.fllegacy import FLFieldDB
 
 import zlib
 
@@ -74,7 +75,7 @@ def loadUi(path, widget):
 
 
 def createWidget(classname, parent=None):
-    cls = getattr(flcontrols, classname, None) or getattr(QtGui, classname, None) or getattr(FLTableDB, classname, None)
+    cls = getattr(flcontrols, classname, None) or getattr(QtGui, classname, None) or getattr(FLTableDB, classname, None) #or getattr(FLFieldDB, classname, None)
     if cls is None:
         print("WARN: Class name not found in QtGui:", classname)
         widgt = QtGui.QWidget(parent)

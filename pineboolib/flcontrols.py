@@ -347,12 +347,13 @@ class QPushButton(QtGui.QPushButton):
 
     toggleButton = property(getToggleButton,setToggleButton)
 
-
 class FLFieldDB(QtGui.QWidget):
     _fieldName = "undefined"
     _label = None
     _lineEdit = None 
     _layout = None
+    _tableName = None
+    _fieldAlias = None
     
 
     def __init__(self, parent, *args):
@@ -374,14 +375,14 @@ class FLFieldDB(QtGui.QWidget):
         return self._fieldName
 
     @fieldName.setter
-    def fieldName(self, fN):
-        self._fieldName = fN
-        self._label.setText(self._fieldName)
+    def fieldName(self):
+        return self._fieldName
         
 
     def setFieldName(self, fN):
         self._fieldName = fN
-        self._label.setText(self._fieldName)
+        self._fieldAlias = fN
+        self._label.setText(self._fieldAlias)
        
     @QtCore.pyqtSlot()
     def searchValue(self):
@@ -394,29 +395,39 @@ class FLFieldDB(QtGui.QWidget):
         return None        
 
     def setShowAlias(self, show):
-        if not show:
+        self._showAlias = bool(show)
+        if not self._showAlias:
             self._label.setText("")
 
-    @decorators.NotImplementedWarn
+    
     def setTableName(self, tableName):
+        self._tableName = tableName
         return True
 
     @decorators.NotImplementedWarn
     def setFilter(self, newFilter):
         return True
 
-    @decorators.NotImplementedWarn
-    def setFieldAlias(self, tableName):
+    
+    def setFieldAlias(self, fieldAlias):
+        self._fieldAlias = fieldAlias
         return True
 
-    @decorators.NotImplementedWarn
+
     def setForeignField(self, foreingField):
+        self._foreingField = foreingField
         return True
 
-    @decorators.NotImplementedWarn
     def setFieldRelation(self, fieldRelation):
+        self._fieldRelation = fieldRelation
         return True
 
-    @decorators.NotImplementedWarn
+
     def setFilter(self, newFilter):
+        self._filter = newFilter
+        return True
+
+    def setShowEditor(self, show):
+        self._showEditor = bool(show)
+        self._lineEdit.setReadOnly(self._showEditor)
         return True
