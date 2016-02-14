@@ -10,6 +10,7 @@ from pineboolib import flcontrols
 from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
+from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 
 def Object(x=None):
     if x is None: x = {}
@@ -31,7 +32,7 @@ def FLSqlCursor(action=None):
 
 def FLTableDB(*args):
     if not args: return None
-    return flcontrols.FLTableDB(*args)
+    return FLTableDB_Legacy.FLTableDB(*args)
 
 class FormDBWidget(QtGui.QWidget):
     def __init__(self, action, project, parent = None):
