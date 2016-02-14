@@ -139,23 +139,138 @@ class FLTableDB(QtGui.QWidget):
             self._comboBox_1.setCurrentIndex(_oldSecond)
         return True
 
-    @decorators.NotImplementedWarn
+
     def setTableName(self, tableName):
         self._tableName = tableName
-        #self._cursor = FLSqlCursor()
+        self.initCursor()
         return True
 
-    @decorators.NotImplementedWarn
+
     def setForeignField(self, foreingField):
         self._foreingField = foreingField
-        #self._cursor = FLSqlCursor(action_or_cursor)
+        self.initCursor()
         return True
 
-    @decorators.NotImplementedWarn
+
     def setFieldRelation(self, fieldRelation):
         self._fieldRelation = fieldRelation
-        #self._cursor = FLSqlCursor(action_or_cursor)
+        self.initCursor()
         return True
+
+
+
+
+
+
+
+    @decorators.NotImplementedWarn
+    def initCursor(self):
+        # si no existe crea la tabla
+        if not self._cursor: return False
+        if not self._cursor._model: return False
+
+        self._tMD = 0
+
+        if not self._sortField: self._tMD = self._cursor._model.name()
+        if self._tMD:
+            sortField_ = self._tMD.value(self._cursor._currentregister, self._tMD.primaryKey())
+        ownTMD = False
+        if not self._tableName:
+            #if not cursor_->db()->manager()->existsTable(tableName_)) {
+            ownTMD = True
+            #tMD = cursor_->db()->manager()->createTable(tableName_);
+        else:
+            ownTMD = True
+            self._tMD = self._cursor._model._table.name
+
+        if not tMD:
+            return
+
+        if not self._foreignField or not self._fieldRelation:
+            if not self._cursor._model:
+                if ownTMD and self._tMD and not self._tMD.inCache():
+                    self._tMD = None
+        
+            return
+
+            if not self._cursor._model.name() == _self.tableName:
+                ctxt = self._cursor.context();
+                self._cursor = FLSqlCursor(self._tableName)
+                if self._cursor:
+                    self._cursor.setContext(ctxt)
+                    cursorAux = 0
+        
+                if ownTMD and self._tMD and not self._tMD.inCache():
+                    self._tMD = None
+        
+                return
+        
+        else:
+            cursorTopWidget = topWidget._cursor() # ::qt_cast<FLFormDB *>(topWidget)->cursor()
+            if cursorTopWidget and not cursorTopWidget._model.name() == self._tableName:
+                self._cursor = cursorTopWidget
+    
+  
+
+        if not self._tableName or not self._foreignField or not self._fieldRelation or cursorAux:
+            if ownTMD and self._tMD and not self._tMD.inCache():
+                tMD = None
+    
+            return
+  
+        cursorAux = self._cursor
+        curName = self._cursor._model.name()
+        rMD = self._cursor._model.relation(self._foreignField,self._fieldRelation,self._tableName)
+        testM1 = self._tMD.relation(self._fieldRelation, self._foreignField, curName)
+        checkIntegrity = bool("False")
+
+        if not rMD:
+            if testM1:
+                checkIntegrity = (testM1.cardinality() == FLRelationMetaData.RELATION_M1)
+            fMD = FLTableMetaData(self._cursor._model.field(self._foreignField)) #Existe field???
+            if (fMD):
+                tmdAux = self._cursor._model(self._tableName);
+                if not tmdAux or tmdAux.isQuery():
+                    checkIntegrity = False
+                if tmdAux and not tmdAux.inCache(): # mirar inCache()
+                    tmdAux = None
+                rMD = FLRelationMetaData(self._tableName,self._fieldRelation, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
+                fMD.addRelationMD(rMD)
+                print("FLTableDB : La relación entre la tabla del formulario %r y esta tabla %r de este campo no existe, pero sin embargo se han indicado los campos de relación( %r, %r )" % (curName, self._tableName, self._fieldRelation, self._foreignField))
+                print("FLTableDB : Creando automáticamente %r.%r --1M--> %r.%r" %  (curName, self._foreignField, self._tableName, self._fieldRelation))
+
+    
+            else:
+                print("FLTableDB : El campo ( %r ) indicado en la propiedad foreignField no se encuentra en la tabla ( %r )" % (self._foreignField, curName))
+        rMD = testM1
+        if not rMD:
+            fMD = FLFieldMetaData(tMD.field(self._fieldRelation))
+            if (fMD):
+                rMD = FLRelationMetaData(curName,self._foreignField, FLRelationMetaData.RELATION_1M, False, False, False)
+                fMD.addRelationMD(rMD)
+                print("FLTableDB : Creando automáticamente %r.%r --1M--> %r.%r" % (self._tableName, self._fieldRelation, curName, self._foreignField))
+            else:
+                print("FLTableDB : El campo ( %r ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %r )" % (self._fieldRelation, self._tableName))
+
+        self._cursor = FLSqlCursor(self._tableName, true, self._cursor.db().connectionName(), cursorAux, rMD, self);
+        if not self._cursor:
+            self._cursor = cursorAux
+            cursorAux = 0
+        else:
+            self._cursor.setContext(cursorAux.context())
+        if showed:
+            self.disconnect(cursorAux, QtCore.SIGNAL('newBuffer()'), self.refresh())
+            self.connect(cursorAux,QtCore.SIGNAL('newBuffer()'), self.refresh())
+  
+
+        if cursorAux and topWidget.isA("FLFormSearchDB"):
+            topWidget.setCaption(self._cursor._model.alias())
+            topWidget.setCursor(self._cursor) #::qt_cast<FLFormSearchDB *>(topWidget)->setCursor(cursor_);
+  
+
+        if ownTMD and tMD and not tMD.inCache():
+            tMD = None
+
 
     @QtCore.pyqtSlot()
     def close(self):
