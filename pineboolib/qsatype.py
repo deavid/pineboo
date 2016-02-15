@@ -11,6 +11,7 @@ from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
+from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 
 def Object(x=None):
     if x is None: x = {}
@@ -25,6 +26,9 @@ def Boolean(x=False): return bool(x)
 def FLSqlQuery(*args):
     #if not args: return None
     return FLSqlQuery_Legacy.FLSqlQuery(*args)
+
+def FLUtil(*args):
+    return FLUtil_Legacy.FLUtil(*args)
 
 def FLSqlCursor(action=None):
     if action is None: return None

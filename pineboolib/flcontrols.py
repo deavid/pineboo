@@ -91,45 +91,6 @@ class ProgressDialog(QtGui.QWidget):
 class FLTable(QtGui.QTableWidget):
     def __getattr__(self, name): return DefFun(self, name)
 
-class FLForm(QtGui.QWidget):
-    known_instances = {}
-    def __init__(self, parent, action, load=False):
-        try:
-            assert (self.__class__,action) not in self.known_instances
-        except AssertionError:
-            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__,action),)
-                + "Puede que se estén perdiendo datos!" )
-        self.known_instances[(self.__class__,action)] = self
-        QtGui.QWidget.__init__(self, parent)
-        self.action = action
-        self.prj = action.prj
-        self.mod = action.mod
-        self.layout = QtGui.QVBoxLayout()
-        self.layout.setMargin(2)
-        self.layout.setSpacing(2)
-        self.setLayout(self.layout)
-        # self.widget = QtGui.QWidget()
-        # self.layout.addWidget(self.widget)
-        self.bottomToolbar = QtGui.QFrame()
-        self.bottomToolbar.setMaximumHeight(64)
-        self.bottomToolbar.setMinimumHeight(16)
-        self.bottomToolbar.layout = QtGui.QHBoxLayout()
-        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setMargin(0)
-        self.bottomToolbar.layout.setSpacing(0)
-        self.bottomToolbar.layout.addStretch()
-        self.toolButtonClose = QtGui.QToolButton()
-        self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
-        self.toolButtonClose.clicked.connect(self.close)
-        self.bottomToolbar.layout.addWidget(self.toolButtonClose)
-        self.layout.addWidget(self.bottomToolbar)
-        self.setWindowTitle(action.alias)
-        self.loaded = False
-        if load: self.load()
-
-    def load(self):
-        if self.loaded: return
-
 class FLFormSearchDB( QtGui.QWidget ):
     _accepted = None
     _cursor = None
@@ -386,12 +347,13 @@ class QPushButton(QtGui.QPushButton):
 
     toggleButton = property(getToggleButton,setToggleButton)
 
-
 class FLFieldDB(QtGui.QWidget):
     _fieldName = "undefined"
     _label = None
     _lineEdit = None 
     _layout = None
+    _tableName = None
+    _fieldAlias = None
     
 
     def __init__(self, parent, *args):
@@ -413,14 +375,14 @@ class FLFieldDB(QtGui.QWidget):
         return self._fieldName
 
     @fieldName.setter
-    def fieldName(self, fN):
-        self._fieldName = fN
-        self._label.setText(self._fieldName)
+    def fieldName(self):
+        return self._fieldName
         
 
     def setFieldName(self, fN):
         self._fieldName = fN
-        self._label.setText(self._fieldName)
+        self._fieldAlias = fN
+        self._label.setText(self._fieldAlias)
        
     @QtCore.pyqtSlot()
     def searchValue(self):
@@ -433,29 +395,39 @@ class FLFieldDB(QtGui.QWidget):
         return None        
 
     def setShowAlias(self, show):
-        if not show:
+        self._showAlias = bool(show)
+        if not self._showAlias:
             self._label.setText("")
 
-    @decorators.NotImplementedWarn
+    
     def setTableName(self, tableName):
+        self._tableName = tableName
         return True
 
     @decorators.NotImplementedWarn
     def setFilter(self, newFilter):
         return True
 
-    @decorators.NotImplementedWarn
-    def setFieldAlias(self, tableName):
+    
+    def setFieldAlias(self, fieldAlias):
+        self._fieldAlias = fieldAlias
         return True
 
-    @decorators.NotImplementedWarn
+
     def setForeignField(self, foreingField):
+        self._foreingField = foreingField
         return True
 
-    @decorators.NotImplementedWarn
     def setFieldRelation(self, fieldRelation):
+        self._fieldRelation = fieldRelation
         return True
 
-    @decorators.NotImplementedWarn
+
     def setFilter(self, newFilter):
+        self._filter = newFilter
+        return True
+
+    def setShowEditor(self, show):
+        self._showEditor = bool(show)
+        self._lineEdit.setReadOnly(self._showEditor)
         return True
