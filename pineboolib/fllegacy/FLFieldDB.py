@@ -1553,68 +1553,62 @@ class FLFieldDB(QtGui.QWidget):
   @param t Cadena de texto para actualizar el campo
     """
     @decorators.NotImplementedWarn
-    def updateValue(self, t):
+    def updateValue(self,QtCore.QString t):
+        if not swelf.cursor_:
+            return
+        
+        tMD = FLTableMetaData(tMD = self.cursor_.metadata())
+        if not tMD:
+            return
+        field = FLFieldMetaData(tMD.field(self.fieldName_))
+        if not field:
+            return
+        
+        ol = bool(field.hasOptionsList())
+        tAux = t
+        
+        if ol and self.editor_:
+            tAux = field.optionsList()[self.editor_.currentItem()]
+        
+        if not self.cursor_.bufferIsNull(self.fieldName_):
+            if tAux == self.cursor_.valueBuffer(self.fieldName_.toString()):
+                return
+        elif tAux.isEmpty():
+            return
+        
+        s = tAux
+        if field.type() == QtCore.QVariant.String and not ol:
+            if s.startsWith(" "):
+                #disconnect(cursor_, SIGNAL(bufferChanged(const QString &)), this, SLOT(refreshQuick(const QString &)));#FIXME
+                self.cursor_.setValueBuffer(self.fieldName_, s.remove(0,1))
+                #connect(cursor_, SIGNAL(bufferChanged(const QString &)), this, SLOT(refreshQuick(const QString &))); #FIXME
+                return
+            s.remove("\\")
+            s.replace("'","\'")
+        
+        if self.editor_ and (field.tpye() == QtCore.QVariant.Double or field.type() == QtCore.QVariant.Int or Field.type == QtCore.QVariant.UInt):
+            s = self.editor_.text()
+        
+        if s.isEmpty():
+            self.cursor_.setValueBuffer(self.fieldName_,QtCore.QVariant())
+        else:
+            self.cursor_.setValueBuffer(self.fieldName_, s)
+        
+        if self.isVisible() and self.hasFocus() and field.type() == QtCore.QVariant.String and field.length() == s.length():
+            self.focusNextPrevChild(True)
+            
+                
+                
+        
+        
 
     """
-    {
-  if (!cursor_)
-    return;
-
-  FLTableMetaData *tMD = cursor_->metadata();
-  if (!tMD)
-    return;
-  FLFieldMetaData *field = tMD->field(fieldName_);
-  if (!field)
-    return;
-
-  bool ol = field->hasOptionsList();
-  QString tAux(t);
-
-  if (ol && editor_)
-    tAux = field->optionsList()[::qt_cast<QComboBox *>(editor_)->currentItem()];
-
-  if (!cursor_->bufferIsNull(fieldName_)) {
-    if (tAux == cursor_->valueBuffer(fieldName_).toString()) {
-      return;
-    }
-  } else if (tAux.isEmpty())
-    return;
-
-  QString s(tAux);
-  if (field->type() == QVariant::String && !ol) {
-    if (s.startsWith(" ")) {
-      disconnect(cursor_, SIGNAL(bufferChanged(const QString &)), this,
-                 SLOT(refreshQuick(const QString &)));
-      cursor_->setValueBuffer(fieldName_, s.remove(0, 1));
-      connect(cursor_, SIGNAL(bufferChanged(const QString &)), this,
-              SLOT(refreshQuick(const QString &)));
-      return;
-    }
-    s.remove("\\");
-    s.replace("'", "\'");
-  }
-
-  if (editor_ && (field->type() == QVariant::Double ||
-                  field->type() == QVariant::Int ||
-                  field->type() == QVariant::UInt)) {
-    s = ::qt_cast<FLLineEdit *>(editor_)->text();
-  }
-
-  if (s.isEmpty())
-    cursor_->setValueBuffer(fieldName_, QVariant());
-  else
-    cursor_->setValueBuffer(fieldName_, s);
-
-  if (isVisible() && hasFocus() && field->type() == QVariant::String &&
-      field->length() == s.length())
-    focusNextPrevChild(true);
-}
   Actualiza el valor del campo con una fecha.
 
   @param d Fecha para actualizar el campo
     """
     @decorators.NotImplementedWarn
-    def updateValue(self, d):
+    def updateValue(self,QtCore.QDate d):
         if not self.cursor_:
             return 
         isNull = bool( not d.isValid() or d.isNull())
