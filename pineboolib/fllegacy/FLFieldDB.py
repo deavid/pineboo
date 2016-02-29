@@ -13,6 +13,7 @@ from builtins import False
 from pineboolib.flcontrols import QComboBox
 from pineboolib.flparser.qsatype import FLSqlCursor
 from distlib.compat import IDENTIFIER
+from PIL.EpsImagePlugin import field
 
 class FLFieldDB(QtGui.QWidget):
     
@@ -1554,7 +1555,7 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def updateValue(self,QtCore.QString t):
-        if not swelf.cursor_:
+        if not self.cursor_:
             return
         
         tMD = FLTableMetaData(tMD = self.cursor_.metadata())
@@ -1663,229 +1664,206 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def updateValue(self):
+        if not self.cursor_:
+            return
+        ted = QtGui.QTextedit(self.editor_)
+        
+        if not ted:
+            return
+        
+        t = QtCore.QString(ted.text())
+        if not self.cursor_.bufferIsNull(self.fieldName_):
+            if (t == self.cursor_.valueBuffer(self.fieldName_).toString()):
+                return
+        elif t.isEmpty():
+            return
+        t.remove("\\")
+        t.replace("'","\'")
+        if t.isEmpty():
+            self.cursor_.setValueBuffer(self.fieldName_, QtCore.QVariant())
+        else:
+            self.cursor_.setValueBuffer(self.fieldName_, t) 
+        
+        
 
     """
-    {
-  if (!cursor_)
-    return;
-  QTextEdit *ted = ::qt_cast<QTextEdit *>(editor_);
-  if (!ted)
-    return;
-  QString t(ted->text());
-  if (!cursor_->bufferIsNull(fieldName_)) {
-    if (t == cursor_->valueBuffer(fieldName_).toString())
-      return;
-  } else if (t.isEmpty())
-    return;
-  t.remove("\\");
-  t.replace("'", "\'");
-  if (t.isEmpty())
-    cursor_->setValueBuffer(fieldName_, QVariant());
-  else
-    cursor_->setValueBuffer(fieldName_, t);
-}
   Muestra/Oculta el seleccionador de fechas.
     """
     @decorators.NotImplementedWarn
     def toggleDatePicker(self):
-
+    if not self.dateFrame_:
+        self.dateFrame_ = QtGui.QVBox(self, "dateFrame",QtGui.Qt.Wtype_Popup )
+        self.dateFrame_.setFrameStyle(QtGui.QFrame.PopupPanel | QtGui.QFrame.Raised)
+        self.dateFrame_.setfixedSize(200, 200)
+        self.dateFrame_.setLineWidth(3)
+        self.dateFrame.hide()
+        if not self.datePopup_:
+            self.datePopup_ = QtGui.VDatePopup(self.dateFrame_, Qtcore.QDate.currentDate())
+            #connect(datePopup_, SIGNAL(dateSelected(const QDate &)), ::qt_cast<FLDateEdit *>(editor_),SLOT(setDate(const QDate &))); #FIXME
+    
+    if not self.datePickerOn_:
+        tmpPoint = self.mapToGlobal(self.pbAux_.geometry().bottonRight())
+        self.dateFrame_.setGeometry(tmpPoint.x() - 207, tmpPoint.y(), 200, 200)
+        date = QtCore.QDate(self.editor_.date())
+        if date.isValid():
+            self.datePopup_.setDate(date)
+        else:
+            self.datePopup_.setDate(QtCore.QDate.currentDate())
+        
+        self.datePickerOn_ = True
+        self.dateFrame_.show()
+    
+    if not self.dateFrame_.isVisible():
+        self.datePickerOn_ = False
+            
+        
     """
-    {
-  if (!dateFrame_) {
-    dateFrame_ = new QVBox(this, "dateFrame", WType_Popup);
-    dateFrame_->setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
-    dateFrame_->setFixedSize(200, 200);
-    dateFrame_->setLineWidth(3);
-    dateFrame_->hide();
-    if (!datePopup_) {
-      datePopup_ = new VDatePopup(dateFrame_, QDate::currentDate());
-      connect(datePopup_, SIGNAL(dateSelected(const QDate &)), ::qt_cast<FLDateEdit *>(editor_),
-              SLOT(setDate(const QDate &)));
-    }
-  }
-
-  if (!datePickerOn_) {
-    QPoint tmpPoint = mapToGlobal(pbAux_->geometry().bottomRight());
-    dateFrame_->setGeometry(tmpPoint.x() - 207, tmpPoint.y(), 200, 200);
-    QDate date = ::qt_cast<FLDateEdit *>(editor_)->date();
-    if (date.isValid()) {
-      datePopup_->setDate(date);
-    } else {
-      datePopup_->setDate(QDate::currentDate());
-    }
-    datePickerOn_ = true;
-    dateFrame_->show();
-  }
-
-  if (!dateFrame_->isVisible())
-    datePickerOn_ = false;
-}
   Borra imagen en campos tipo Pixmap.
     """
     @decorators.NotImplementedWarn
     def clearPixmap(self):
+        if not self.editorImg_:
+            self.editorImg_.clear()
+            self.cursor_.setValueBuffer(self.fieldName_, QtCore.QVariant())
 
     """
-    {
-  if (editorImg_) {
-    editorImg_->clear();
-    cursor_->setValueBuffer(fieldName_, QVariant());
-  }
-}
   Guarda imagen en campos tipo Pixmap.
 
   @param fmt Indica el formato con el que guardar la imagen
     """
     @decorators.NotImplementedWarn
     self savePixmap(self, f):
-
+    if self.editorImg_:
+        fmtl = QtCore.QStrList(Qtgui.QImage.outputFormats())
+        fmt = fmt.at(f)
+        ext = QtCore.QString(fmt).lower()
+        filename = "imagen." + ext
+        savefilename = QtGui.QFileDialog::getSaveFileName(filename.lower(), "*." + ext, self,filename, tr("Guardar imagen como"))
+        if not savefilename.isEmpty():
+            pix = QtGui.QPixmap
+            #QApplication.setOverrideCursor(waitCursor) #FIXME
+            pix.loadFromDate(self.value().toCString())
+            if not pix.isNull():
+                if not pix.save(savefilename, fmt):
+                    QtGui.QMessageBox.warning(self, tr("Error"), tr("Error guardando fichero"))
+            
+            #QApplication.restoreOverrideCursor() #FIXME
+                    
+        
     """
-{
-  if (editorImg_) {
-    QStrList fmtl = QImage::outputFormats();
-    const char *fmt = fmtl.at(f);
-    QString ext = QString(fmt).lower();
-    QString filename = "imagen." + ext;
-    QString savefilename = QFileDialog::getSaveFileName(filename.lower(), "*." + ext, this,
-                                                        filename, tr("Guardar imagen como"));
-    if (!savefilename.isEmpty()) {
-      QPixmap pix;
-      QApplication::setOverrideCursor(waitCursor);
-      pix.loadFromData(value().toCString());
-      if (!pix.isNull())
-        if (!pix.save(savefilename, fmt))
-          QMessageBox::warning(this, tr("Error"), tr("Error guardando fichero"));
-      QApplication::restoreOverrideCursor();
-    }
-  }
-}
   Muestra/Oculta el asistente de completado automático.
     """
     @decorators.NotImplementedWarn
     self toggleAutoCompletion(self):
-
+    #if self.autoCompMode_ == NeverAuto:  #FIXME (de donde sale esto)
+    #    return
+    
+    if not self.autoComFrame_ and self.cursor_:
+        self.autoComFrame_ = QtGui.QVBox(self, "autoComFrame",QtGui.Qt.Wtype_Popup )
+        self.autoComFrame_.setFrameStyle(QtGui.QFrame.PopupPanel | QtGui.QFrame.Raised)
+        self.autoComFrame_.setLineWidth(1)
+        self.autoComFrame_.hide()
+        
+        if not self.autoComPopup_:
+            tMD = FLTableMetaData(self.cursor_.metadata())
+            field = FLFieldMetaData(tMD ? tMD.field(self.fieldName) : 0)
+            
+        if field:
+            self.autoComPopup_ = FLDataTable(self.autoComFrame_, "autoComPopup", True)
+            cur = None
+            
+            if not field.relationM1():
+                if not self.fieldRelation_.isEmpty() and not self.foreignField_.isEmpty():
+                    self.autoComFieldName_ = self.foreignField_
+                    
+                    fRel = FLFieldMetaData(tMD ? tMD.field(self.fieldRelation_) : 0)
+                    if not fRel:
+                        return
+                    
+                    self.autoComFieldRelation_ = fRel.relationM1().foreignField()
+                    cur = FLSqlCursor(fRel.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), 0, 0,self.autoComFrame_)
+                    tMD = cur.metadata()
+                    field = tMD ? tMD.field(self.autoComFieldName_) : field
+                
+                else:
+                    self.autoComFieldName_ = self.fieldName_
+                    self.autoComFieldRelation_ = QtCore.QString.NULL
+                    cur = FLSqlCursor(tMD.name(), False, self.cursor_.db().connectionName(), 0,0, self.autoComFrame_)
+            
+            else:
+                self.autoComFieldName_ = self.fieldName_
+                self.autoComFieldRelation_ = QtCore.QString.NULL
+                cur = FLSqlCursor(field.relationM1().foreignFieldTable(), False, self.cursor_.db().connectionName(), 0,0, self.autoComFrame_)
+                tMD = cur.metadata()
+                field = tMD ? tMd.field(self.autoComFieldName_) : field
+            
+            cur.append(QsqlFieldInfo(self.autoComFieldName_, self.FLFieldMetaData.flDecodeType(field.type()), -1, field.length(), -1))
+            fieldsNames = QtCore.QStirngList.split(",", tMD.fieldNames())
+            for i in range(fieldNames.length):
+                if not cur.QsqlCursor.field(i):
+                    field = tMd.field(it)
+                    if field:
+                        cur.append(QSqlFieldInfo(field.name(), FLFieldMetaData.flDecodeType(field.type()), -1, field.length(), -1 , QtCore.QVariant(), 0, True))
+            
+            
+            if not self.autoComFieldRelation_.isEmpty() and self.topWidget_:
+                l = QtCore.QObjectList(self.topWidget_.queryList("FLFieldDB"))
+                itf = QtCore.QObjectListIt(l)
+                fdb = 0
+                while not (fdb =(itf.current)) == 0:
+                    ++itf
+                    if fdb.fieldName() == self.autoComFieldRelation_:
+                        break
+                
+                delete l
+                
+                if fdb and not fdb.filter().isEmpty():
+                    cur.setMainFilter(fdb.filter())
+            
+            self.autoComPopup_.setFLsqlCurosr(cur)
+            self.autoComPopup_.setTopMargin(0)
+            self.autoComPopup_.setLeftMargin(0)
+            self.autoComPopup_.horizontalHeader().hide()
+            self.autoComPopup_.verticalHeader().hide()
+            
+            #connect(cur, SIGNAL(newBuffer()), this, SLOT(autoCompletionUpdateValue())); #FIXME
+            #connect(autoComPopup_, SIGNAL(recordChoosed()), this, SLOT(autoCompletionUpdateValue())); #FIXME
+    
+    if self.autoComPopup_:
+        cur = FLSqlCursor(self.autoComPopup_.curosr())
+        tMD = FLTableMetaData(cur.metadata())
+        field = tMD ? tMD.field(self.autoComFieldName_) : 0
+        
+        if field:
+            filter = QtCore.QString(self.cursor_.db().manager().formatAssignValueLike(field, value(), True))
+            cur.setFilter(filter)
+            self.autoComPopup_.setFilter(filter)
+            #autoComPopup_->setSort(QStringList() << autoComFieldName_ + " ASC"); #FIXME
+            self.autoComPopup_.QDataTable.refresh()
+        
+        if not self.autoComFrame_.isVisible() and cur.size() > 1:
+            tmpPoint = None
+            if self.showAlias:
+                tmpPoint = self.mapToGlobal(self.textLabelDB.geometry().bottomLeft())
+            elif self.pushButtonDB and self.pushButtonDB.isShown():
+                tmpPoint = self.mapToGlobal(self.pushButton.geometry().bottomLeft())
+            else:
+                tmpPoint = self.mapToGlobal(self.pushButton.geometry().bottomLeft())
+            
+            frameWidth = self.width()
+            if (frameWidth < self.autoComPopup_.width()):
+                frameWidth = self.autoComPopup_.width()
+            if (frameWidth < self.autoComFrame_.width()):
+                frameWidth = self.autoComFrame_.width()
+            self.autoComFrame_.setGeometry(tmpPoint.x(), tmpPoint.y(), frameWidth, 300)
+            self.autoComFrame_.show()
+            self.autoComFrame_.setFocus()
+        elif self.autoComFrame_.isvisible() and cur.size() == 1:
+            self.autoComFrame_.hide()
+        
+        cur.first()
+               
     """
-{
-  if (autoCompMode_ == NeverAuto)
-    return;
-
-  if (!autoComFrame_ && cursor_) {
-    autoComFrame_ = new QVBox(this, "autoComFrame", WType_Popup);
-    autoComFrame_->setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
-    autoComFrame_->setLineWidth(1);
-    autoComFrame_->hide();
-
-    if (!autoComPopup_) {
-      FLTableMetaData *tMD = cursor_->metadata();
-      FLFieldMetaData *field = tMD ? tMD->field(fieldName_) : 0;
-
-      if (field) {
-        autoComPopup_ = new FLDataTable(autoComFrame_, "autoComPopup", true);
-        FLSqlCursor *cur;
-
-        if (!field->relationM1()) {
-          if (!fieldRelation_.isEmpty() && !foreignField_.isEmpty()) {
-            autoComFieldName_ = foreignField_;
-
-            FLFieldMetaData *fRel = tMD ? tMD->field(fieldRelation_) : 0;
-            if (!fRel) {
-              return;
-            }
-            autoComFieldRelation_ = fRel->relationM1()->foreignField();
-            cur = new FLSqlCursor(fRel->relationM1()->foreignTable(), false,
-                                  cursor_->db()->connectionName(), 0, 0, autoComFrame_);
-            tMD = cur->metadata();
-            field = tMD ? tMD->field(autoComFieldName_) : field;
-          } else {
-            autoComFieldName_ = fieldName_;
-            autoComFieldRelation_ = QString::null;
-            cur = new FLSqlCursor(tMD->name(), false, cursor_->db()->connectionName(), 0, 0,
-                                  autoComFrame_);
-          }
-        } else {
-          autoComFieldName_ = field->relationM1()->foreignField();
-          autoComFieldRelation_ = QString::null;
-          cur = new FLSqlCursor(field->relationM1()->foreignTable(), false,
-                                cursor_->db()->connectionName(), 0, 0, autoComFrame_);
-          tMD = cur->metadata();
-          field = tMD ? tMD->field(autoComFieldName_) : field;
-        }
-
-        cur->append(QSqlFieldInfo(autoComFieldName_, FLFieldMetaData::flDecodeType(field->type()),
-                                  -1, field->length(), -1));
-
-        QStringList fieldsNames = QStringList::split(',', tMD->fieldsNames());
-        for (QStringList::Iterator it = fieldsNames.begin(); it != fieldsNames.end(); ++it) {
-          if (!cur->QSqlCursor::field((*it))) {
-            field = tMD->field(*it);
-            if (field)
-              cur->append(QSqlFieldInfo(field->name(),
-                                        FLFieldMetaData::flDecodeType(field->type()), -1,
-                                        field->length(), -1, QVariant(), 0, true));
-          }
-        }
-
-        if (!autoComFieldRelation_.isEmpty() && topWidget_) {
-          QObjectList *l = static_cast<QObject *>(topWidget_)->queryList("FLFieldDB");
-          QObjectListIt itf(*l);
-          FLFieldDB *fdb = 0;
-          while ((fdb = static_cast<FLFieldDB *>(itf.current())) != 0) {
-            ++itf;
-            if (fdb->fieldName() == autoComFieldRelation_)
-              break;
-          }
-          delete l;
-
-          if (fdb && !fdb->filter().isEmpty())
-            cur->setMainFilter(fdb->filter());
-        }
-        autoComPopup_->setFLSqlCursor(cur);
-        autoComPopup_->setTopMargin(0);
-        autoComPopup_->setLeftMargin(0);
-        autoComPopup_->horizontalHeader()->hide();
-        autoComPopup_->verticalHeader()->hide();
-
-        connect(cur, SIGNAL(newBuffer()), this, SLOT(autoCompletionUpdateValue()));
-        connect(autoComPopup_, SIGNAL(recordChoosed()), this, SLOT(autoCompletionUpdateValue()));
-      }
-    }
-  }
-
-  if (autoComPopup_) {
-    FLSqlCursor *cur = autoComPopup_->cursor();
-    FLTableMetaData *tMD = cur->metadata();
-    FLFieldMetaData *field = tMD ? tMD->field(autoComFieldName_) : 0;
-
-    if (field) {
-      QString filter(cursor_->db()->manager()->formatAssignValueLike(field, value(), true));
-      cur->setFilter(filter);
-      autoComPopup_->setFilter(filter);
-      autoComPopup_->setSort(QStringList() << autoComFieldName_ + " ASC");
-      autoComPopup_->QDataTable::refresh();
-    }
-
-    if (!autoComFrame_->isVisible() && cur->size() > 1) {
-      QPoint tmpPoint;
-      if (showAlias_)
-        tmpPoint = mapToGlobal(textLabelDB->geometry().bottomLeft());
-      else if (pushButtonDB && pushButtonDB->isShown())
-        tmpPoint = mapToGlobal(pushButtonDB->geometry().bottomLeft());
-      else
-        tmpPoint = mapToGlobal(editor_->geometry().bottomLeft());
-      int frameWidth = width();
-      if (frameWidth < autoComPopup_->width())
-        frameWidth = autoComPopup_->width();
-      if (frameWidth < autoComFrame_->width())
-        frameWidth = autoComFrame_->width();
-      autoComFrame_->setGeometry(tmpPoint.x(), tmpPoint.y(), frameWidth, 300);
-      autoComFrame_->show();
-      autoComFrame_->setFocus();
-    } else if (autoComFrame_->isVisible() && cur->size() == 1)
-      autoComFrame_->hide();
-
-    cur->first();
-  }
-}
   Actualiza el valor del campo a partir del contenido que
   ofrece el asistente de completado automático.
     """
@@ -2133,41 +2111,38 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def searchPixmap(self):
-"""
-{
-  if (!cursor_ || !editorImg_)
-    return;
-
-  if (fieldName_.isEmpty())
-    return;
-  FLTableMetaData *tMD = cursor_->metadata();
-  if (!tMD)
-    return;
-  FLFieldMetaData *field = tMD->field(fieldName_);
-  if (!field)
-    return;
-
-  if (field->type() == QVariant::Pixmap) {
-    QFileDialog *fd = new QFileDialog(this, 0, true);
-    FLPixmapView *p = new FLPixmapView(fd);
-
-    p->setAutoScaled(true);
-    fd->setContentsPreviewEnabled(TRUE);
-    fd->setContentsPreview(p, p);
-    fd->setPreviewMode(QFileDialog::Contents);
-    fd->setCaption(tr("Elegir archivo"));
-    fd->setFilter("*");
-
-    QString filename;
-    if (fd->exec() == QDialog::Accepted)
-      filename = fd->selectedFile();
-    if (filename.isEmpty())
-      return;
-    setPixmap(filename);
-  }
-}
-"""
-
+        if not self.cursor_ or self.editorImg_:
+            return
+        
+        if self.fieldName_.isEmpty():
+            return
+        tMD = FLTableMetaData(self.cursor_.metadata())
+        if not tMD:
+            return
+        
+        field = FLFieldMetaDAta(tMD.field(self.fieldName_))
+        if not field:
+            return
+        
+        if field.type() == QtCore.QVariant.Pixmap:
+            fd = QtGui.QFileDialog(self,0,True)
+            p = FLPixmapView(fd)
+            
+            p.setAutoScaled(True)
+            fd.setContentsPreviewEnabled(True)
+            fd.setContentsPreview(p, p)
+            fd.setPreviewMode(QtGui.QFileDialog.Contents)
+            fd.setCaption(tr("Elegir archivo"))
+            fd.setFilter("*")
+            
+            filename = None
+            if (fd.exec() == QtGui.QDialog.Accepted):
+                filename = fd.selectedFile()
+            
+            if filename.isEmpty():
+                return
+            self.setPixmap(filename)
+    
 
     """
   Carga una imagen en el campo de tipo pixmap
@@ -2343,21 +2318,16 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def savePixmap( filename, format):
-"""
-{
-  if (editorImg_) {
-    if (!filename.isEmpty()) {
-      QPixmap pix;
-      QApplication::setOverrideCursor(waitCursor);
-      pix.loadFromData(value().toCString());
-      if (!pix.isNull())
-        if (!pix.save(filename, format))
-          QMessageBox::warning(this, tr("Error"), tr("Error guardando fichero"));
-      QApplication::restoreOverrideCursor();
-    }
-  }
-}
-"""
+        if self.editorImg_:
+            if not filename.isEmpty():
+                pix = QTGui.QPixmap
+                #QApplication::setOverrideCursor(waitCursor); #FIXME
+                pix.loadFromData(self.value().toCString())
+                if not pix.isNull():
+                    if not pix.save(filename, format):
+                        QtGui.QMessageBox.warning(self, tr("Error"), tr("Error guardando fichero"))
+                
+                #QApplication::restoreOverrideCursor(); #FIXME
     """
   Devueve el objeto imagen asociado al campo
 
@@ -2366,19 +2336,15 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def pixmap(self):
-"""
-{
-  QPixmap pix;
-  pix.loadFromData(value().toCString());
-  return pix;
-}
-"""
-
+        pix = QtGui.QPixmap
+        pix.loadFromData(self.value().toCString())
+        return pix
     """
   Emite la señal de foco perdido
     """
     @decorators.NotImplementedWarn
     def emitLostFocus(self):
+        emit lostFocus()
 
     """
   Establece que el control no está mostrado
