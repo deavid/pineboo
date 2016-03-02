@@ -21,6 +21,9 @@ Prácticamente lo mismo que antes, pero los paquetes se llaman python3-xyz.
 - lxml
 - ply
 
+	$ sudo apt-get install python3-lxml python3-psycopg2 python3-ply python3-pip
+
+
 Adicionalmente, hacemos uso de un paquete llamado "future", que es el que me
 ha ayudado a hacer la transformación con una herramienta llamada futurize.
 
@@ -31,10 +34,6 @@ Esto hace que algunos ficheros requieran de esta librería con Python3, pero cre
 que es una dependencia que se puede eliminar en el futuro (cuando casi nadie use
 python2). De todos modos para Python3 creo que no hace casi nada.
 
-Esta dependencia, al menos en ubuntu 14.04 necesita de "pip" para instalarse.
-No está disponible para apt-get.
-
-   $ sudo apt-get install pip3
    $ sudo pip3 install future
 
 Por otra parte he usado pylint para parsear el código... mientras era python2.
