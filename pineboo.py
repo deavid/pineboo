@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
+# -*# -*- coding: utf-8 -*-
 """
     Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
     pineboolib.main(); para ello acepta los parámetros necesarios de consola
