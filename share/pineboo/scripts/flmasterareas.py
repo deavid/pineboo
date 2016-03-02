@@ -1,4 +1,5 @@
-# encoding: UTF-8
+# -*- coding: utf-8 -*-
+
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
 import traceback
