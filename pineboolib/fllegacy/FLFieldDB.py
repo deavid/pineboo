@@ -10,7 +10,7 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from asyncio.windows_events import NULL
 from pineboolib.fllegacy.FLRelatiomMetaData import FLRelationMetaData
-from builtins import False
+from builtins import false
 from pineboolib.flcontrols import QComboBox, FLFormSearchDB
 from pineboolib.flparser.qsatype import FLSqlCursor
 from distlib.compat import IDENTIFIER
@@ -1090,7 +1090,7 @@ class FLFieldDB(QtGui.QWidget):
             if not self.cursor_.metadata():
                 return
             
-            if self.tableName_.isEmpty() or self.foreignField_.isEmpty() || self.fieldRelation_.isEmpty():
+            if self.tableName_.isEmpty() or self.foreignField_.isEmpty() or self.fieldRelation_.isEmpty():
                 if not self.foreignField_.isEmpty() and not self.fieldRelation_.isEmpty():
                     if self.showed:
                         #disconnect(cursor_, SIGNAL(bufferChanged(const QString &)), this,SLOT(refresh(const QString &)));#FIXME
@@ -1149,7 +1149,7 @@ class FLFieldDB(QtGui.QWidget):
                 #connect(cursor_, SIGNAL(bufferChanged(const QString &)), this, SLOT(refreshQuick(const QString &)));#FIXME
                 self.cursorAux = 0
                 if tMD and not tMD.inCache():
-                    delete tMD
+                    del tMD
                 return
             else:
                 if self.showed:
@@ -1168,7 +1168,7 @@ class FLFieldDB(QtGui.QWidget):
             self.cursor_.append(self.cursor_.db.db.recordInfo(self.tableName_).find(self.fieldName_))
             self.cursor_.append(self.cursor_.db.db.recordInfo(self.tableName_).find(self.fieldRelation_))
             if tMD and not tMD.inCache():
-                delete tMD
+                del tMD
     
             
                 
@@ -1187,11 +1187,11 @@ class FLFieldDB(QtGui.QWidget):
             return
         
         if self.editor_:
-            delete self.editor_
+            del self.editor_
             self.editor_ = 0
             
         if self.editorImg_:
-            delete self.editorImg_
+            del self.editorImg_
             self.editorImg_ = 0
         
         tMD = FLTableMetaData(self.cursor_.metadata())
@@ -1233,7 +1233,7 @@ class FLFieldDB(QtGui.QWidget):
                 self.pushButtonDB.setDisabled(True)
             
             if tmd and not tmd.inCache():
-                    delete tmd
+                    del tmd
             
         self.initMaxSize_ = self.maximumSize() 
         self.initMinSize_ = self.minimumSize()
@@ -1816,7 +1816,7 @@ class FLFieldDB(QtGui.QWidget):
                     if fdb.fieldName() == self.autoComFieldRelation_:
                         break
                 
-                delete l
+                del l
                 
                 if fdb and not fdb.filter().isEmpty():
                     cur.setMainFilter(fdb.filter())
@@ -2041,7 +2041,7 @@ class FLFieldDB(QtGui.QWidget):
         
         lObjs = f.queryList("FLTableDB")
         obj = lObjs.first()
-        delete lObjs
+        del lObjs
         objTdb = object
         if fMD and objTdb:
             objTdb.setTableName(field.relationM1().foreignTable())
