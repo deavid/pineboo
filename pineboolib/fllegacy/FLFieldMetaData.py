@@ -1,4 +1,3 @@
-/***************************************************************************
 # encoding: UTF-8
 
 from PyQt4 import QtCore
@@ -128,7 +127,7 @@ class FLFieldMetaData()
         return self._isUnique    
 
     def addRelationMD(self, relationMD):
-        isRelM1 =  (relationMD.cardinality() == FLRelationMetaData.RELATION_M1)
+        isRelM1 = (relationMD.cardinality() == FLRelationMetaData.RELATION_M1)
         if (isRelM1 and self._relationM1):
             print("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
             return 
@@ -227,7 +226,7 @@ class FLFieldMetaData()
             od._relationM1.ref()
             self._relationM1 = od._relationM1
         self.clearRelationList()
-        if (od._relationList):
+        if od._relationList:
             r = FLRelationMetaData()
             it = od._relationList
             while ((r = it.current()) != 0): # FIXME: MIRAR
