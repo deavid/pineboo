@@ -10,7 +10,7 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from asyncio.windows_events import NULL
 from pineboolib.fllegacy.FLRelatiomMetaData import FLRelationMetaData
 from builtins import False
-from pineboolib.flcontrols import QComboBox
+from pineboolib.flcontrols import QComboBox, FLFormSearchDB
 from pineboolib.flparser.qsatype import FLSqlCursor
 from distlib.compat import IDENTIFIER
 from PIL.EpsImagePlugin import field
@@ -1869,59 +1869,53 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     self autoCompletionUpdateValue(self):
-    """
-    {
-  if (!autoComPopup_ || !autoComFrame_)
-    return;
-
-  FLSqlCursor *cur = autoComPopup_->cursor();
-  if (!cur || !cur->isValid())
-    return;
-
-  if (::qt_cast<FLDataTable *>(sender())) {
-    setValue(cur->valueBuffer(autoComFieldName_));
-    autoComFrame_->hide();
-#ifdef Q_OS_WIN32
-    if (editor_)
-      editor_->releaseKeyboard();
-    if (autoComPopup_)
-      autoComPopup_->releaseKeyboard();
-#endif
-  } else if (::qt_cast<QTextEdit *>(editor_)) {
-    setValue(cur->valueBuffer(autoComFieldName_));
-  } else {
-    FLLineEdit *ed = ::qt_cast<FLLineEdit *>(editor_);
-    if (autoComFrame_->isVisible() && !ed->hasFocus()) {
-      if (!autoComPopup_->hasFocus()) {
-        QString cval(cur->valueBuffer(autoComFieldName_).toString());
-        QString val(ed->text());
-        ed->autoSelect = false;
-        ed->setText(cval);
-        ed->QLineEdit::setFocus();
-        ed->setCursorPosition(cval.length());
-        ed->cursorBackward(true, cval.length() - val.length());
-#ifdef Q_OS_WIN32
-        ed->grabKeyboard();
-#endif
-      } else {
-        setValue(cur->valueBuffer(autoComFieldName_));
-      }
-    } else if (!autoComFrame_->isVisible()) {
-      QString cval(cur->valueBuffer(autoComFieldName_).toString());
-      QString val(ed->text());
-      ed->autoSelect = false;
-      ed->setText(cval);
-      ed->QLineEdit::setFocus();
-      ed->setCursorPosition(cval.length());
-      ed->cursorBackward(true, cval.length() - val.length());
-    }
-  }
-  if (!autoComFieldRelation_.isEmpty() && !autoComFrame_->isVisible()) {
-    cursor_->setValueBuffer(fieldRelation_, cur->valueBuffer(autoComFieldRelation_));
-  }
-}
-"""
-
+    if not self.autoComPopup_ or not self.autoComframe_:
+        return
+    
+    cur = FLSqlCursor(self.autoComPopup_.cursor())
+    
+    if not cur or not cur.isValid():
+        return
+    
+    if self.sender():#(::qt_cast<FLDataTable *>(sender())) {:
+        self.setValue(cur.valueBuffer(self.autoComFieldName_))
+        self.autoComFrame_.hide()
+        ##ifdef Q_OS_WIN32
+        #if (editor_)
+        #  editor_->releaseKeyboard();
+        #if (autoComPopup_)
+        #  autoComPopup_->releaseKeyboard();
+        #endif
+    elif self.editor_:
+        self.setValue(cur.valueBuffer(self.autoComFieldName_)) 
+    else:
+        ed = FLLineEdit(self.editor_)
+        if self.autoComFrame_.isVisible() and not ed.hasFocus():
+            if not self.autoComPopup_.hasFocus():
+                cval = QtCore.QString(cur.valueBuffer(self.autoComFieldName_).toString())
+                val = QtCore.QString(ed.text())
+                ed.autoSelect = False
+                ed.setText(cval)
+                ed.QtGui.QLineEdit.setFocus()
+                ed.setCursorPosition(cval.length())
+                ed.cursorBackward(True, cval.length() - val.length())
+                #ifdef Q_OS_WIN32
+                #ed->grabKeyboard();
+                #endif
+            else:
+                self.setValue(cur.valueBuffer(self.autoComFieldName_))
+        
+        elif not self.autoComFrame_.isvisible():
+            cval = QtCore.QString(cur.valueBuffer(self.autoComFieldName_).toString())
+            val = QtCore.QString(ed.text())
+            ed.autoSelect = False
+            ed.setText(cval)
+            ed.QtGui.QlineEdit.setFocus()
+            ed.setCursorPosition(cval.length())
+            ed.cursorBackward(True, cval.length() - val.length())
+    
+    if not self.autoComFieldRelation_.isEmpty() and not self.autoComFrame_.isVisible():
+        self.cursor_.setValueBuffer(self.fieldRelation_, cur.valueBuffer(self.autoComFieldRelation_))
 
     #public slots:
 
@@ -1930,179 +1924,152 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def openFormRecordRelation(self):
-"""
-{
-  if (!cursor_)
-    return;
-
-  if (fieldName_.isEmpty())
-    return;
-  FLTableMetaData *tMD = cursor_->metadata();
-  if (!tMD)
-    return;
-
-  FLFieldMetaData *field = tMD->field(fieldName_);
-  if (!field)
-    return;
-
-  if (!field->relationM1()) {
-#ifdef FL_DEBUG
-    qWarning("FLFieldDB : " + tr("El campo de búsqueda debe tener una relación M1"));
-#endif
-    return;
-  }
-
-  FLSqlCursor *c = 0;
-  FLFieldMetaData *fMD = field->associatedField();
-  FLAction *a = 0;
-
-  QVariant v(cursor_->valueBuffer(field->name()));
-  if (v.toString().isEmpty() || (fMD && cursor_->bufferIsNull(fMD->name()))) {
-    QMessageBox::warning(qApp->focusWidget(), tr("Aviso"),
-                         tr("Debe indicar un valor para %1").arg(field->alias()), QMessageBox::Ok,
-                         0, 0);
-    return;
-  }
-  FLManager *mng = cursor_->db()->manager();
-  c = new FLSqlCursor(field->relationM1()->foreignTable(), true, cursor_->db()->connectionName());
-  c->select(mng->formatAssignValue(field->relationM1()->foreignField(), field,
-                                   v, true));
-  if (c->size() <= 0)
-    return;
-  c->next();
-
-  if (actionName_.isEmpty())
-    a = mng->action(field->relationM1()->foreignTable());
-  else
-    a = mng->action(actionName_);
-
-  c->setAction(a);
-
-  int modeAccess = cursor_->modeAccess();
-  if (modeAccess == FLSqlCursor::INSERT || modeAccess == FLSqlCursor::DEL)
-    modeAccess = FLSqlCursor::EDIT;
-  c->openFormInMode(modeAccess, false);
-}
-"""
-
+        if not self.cursor_:
+            return
+        
+        if self.fieldName_.isEmpty():
+            return
+        
+        tMD = FLTableMetaData(self.cursor_.metadata())
+        if not tMD:
+            return
+        
+        field = FLFieldMetaData(tMD.field(self.fieldName_))
+        if not field:
+            return
+        
+        if not field.relationM1():
+            print("FLFieldDB : %s" % tr("El campo de búsqueda debe tener una relación M1"))
+            return
+        
+        c = FLSqlCursor(0)
+        fMD = FLFieldMetaData(field.associatedField())
+        a = FLAction(0)
+        
+        v = QtCore.QVariant(self.cursor_.valueBuffer(field.name()))
+        if v.toString().isEmpty() or ( fMD and self.cursor_.bufferIsNull(fMD.name())):
+            #QMessageBox::warning(qApp->focusWidget(), tr("Aviso"), tr("Debe indicar un valor para %1").arg(field->alias()), QMessageBox::Ok, 0, 0); #FIXME
+            return
+        
+        mng = FLManager(self.cursor_.db().manager())
+        c = FLSqlCursor(field.relationM1().foreignTable(), True, self.cursor_.db().connectionName())
+        c.select(mng.formatAssignValue(self.fieldRelationM1().foreignField(), field, v, True))
+        if c.sixe() <= 0:
+            return
+        
+        c.next()
+        if self.actionName_.isEmpty():
+            a = mng.action(field.relationM1().foreignTable())
+        else:
+            a = mng.action(self.actionName_)
+        
+        c.setAction(a)
+        
+        modeAccess = self.curosr_.modeAccess()
+        if modeAccess == FLSqlCursor.INSERT or modeAccess == FLSqlCursor.DEL:
+            modeAccess = FLSqlCursor.EDIT 
+            c.openFormInMode(modeAccess, False)
     """
   Abre un dialogo para buscar en la tabla relacionada
     """
     @decorators.NotImplementedWarn
     def searchValue(self):
-"""
-{
-  if (!cursor_)
-    return;
-
-  if (fieldName_.isEmpty())
-    return;
-  FLTableMetaData *tMD = cursor_->metadata();
-  if (!tMD)
-    return;
-  FLFieldMetaData *field = tMD->field(fieldName_);
-  if (!field)
-    return;
-
-  if (!field->relationM1()) {
-#ifdef FL_DEBUG
-    qWarning("FLFieldDB : " + tr("El campo de búsqueda debe tener una relación M1"));
-#endif
-    return;
-  }
-
-  FLFormSearchDB *f = 0;
-  FLSqlCursor *c = 0;
-  FLFieldMetaData *fMD = field->associatedField();
-  FLAction *a = 0;
-
-  if (fMD) {
-    if (!fMD->relationM1()) {
-#ifdef FL_DEBUG
-      qWarning("FLFieldDB : " + tr("El campo asociado debe tener una relación M1"));
-#endif
-      return;
-    }
-
-    QVariant v(cursor_->valueBuffer(fMD->name()));
-    if (v.toString().isEmpty() || cursor_->bufferIsNull(fMD->name())) {
-      QMessageBox::warning(qApp->focusWidget(), tr("Aviso"),
-                           tr("Debe indicar un valor para %1").arg(fMD->alias()), QMessageBox::Ok,
-                           0, 0);
-      return;
-    }
-    FLManager *mng = cursor_->db()->manager();
-    c = new FLSqlCursor(fMD->relationM1()->foreignTable(), true, cursor_->db()->connectionName());
-    c->select(mng->formatAssignValue(fMD->relationM1()->foreignField(), fMD,
-                                     v, true));
-    if (c->size() > 0)
-      c->next();
-
-    if (actionName_.isEmpty())
-      a = mng->action(field->relationM1()->foreignTable());
-    else {
-      a = mng->action(actionName_);
-      a->setTable(field->relationM1()->foreignTable());
-    }
-
-    f = new FLFormSearchDB(c, a->name(), topWidget_);
-  } else {
-    FLManager *mng = cursor_->db()->manager();
-    if (actionName_.isEmpty()) {
-      a = mng->action(field->relationM1()->foreignTable());
-      if (!a)
-        return;
-    } else {
-      a = mng->action(actionName_);
-      if (!a)
-        return;
-      a->setTable(field->relationM1()->foreignTable());
-    }
-
-    c = new FLSqlCursor(a->table(), true, cursor_->db()->connectionName());
-    f = new FLFormSearchDB(c, a->name(), topWidget_);
-  }
-
-  f->setMainWidget();
-
-  QObjectList *lObjs = f->queryList("FLTableDB");
-  QObject *obj = lObjs->first();
-  delete lObjs;
-  FLTableDB *objTdb = ::qt_cast<FLTableDB *>(obj);
-  if (fMD && objTdb) {
-    objTdb->setTableName(field->relationM1()->foreignTable());
-    objTdb->setFieldRelation(field->associatedFieldFilterTo());
-    objTdb->setForeignField(fMD->relationM1()->foreignField());
-    if (fMD->relationM1()->foreignTable() == tMD->name())
-      objTdb->setReadOnly(true);
-  }
-
-  f->setFilter(filter_);
-
-  if (f->mainWidget()) {
-    if (objTdb) {
-      QVariant curValue(value());
-      if (field->type() == QVariant::String && !curValue.toString().isEmpty()) {
-        objTdb->setInitSearch(curValue.toString());
-        objTdb->putFirstCol(field->relationM1()->foreignField());
-      }
-      QTimer::singleShot(0, objTdb->lineEditSearch, SLOT(setFocus()));
-    }
-    QVariant v(f->exec(field->relationM1()->foreignField()));
-    if (v.isValid() && !v.isNull()) {
-      setValue(QVariant());
-      setValue(v);
-    }
-  }
-
-  f->close();
-
-  if (c) {
-    disconnect(c, 0, 0, 0);
-    c->deleteLater();
-  }
-}
-"""
+        if not self.cursor_:
+            return
+        
+        if not self.fieldName_.isEmpty():
+            return
+        
+        tMD = FLTableMetaData(self.cursor_.metadata())
+        if not tMD:
+            return
+        
+        field = FLFieldMetaData(tMD.field(self.fieldName_))
+        if not field:
+            return
+        
+        if not field.relationM1():
+            print("FLFieldDB : %s" % tr("El campo de búsqueda debe tener una relación M1"))
+            return
+        
+        f = FLFormSearchDB(0)
+        c = FLSqlCursor(0)
+        fMD = FLFieldMetaData(field.associatedField())
+        a = FLAction(0)
+        
+        if fMD:
+            if not fMD.relationM1():
+                print("FLFieldDB : %s" % tr("El campo asociado debe tener una relación M1"))
+                return
+            
+            v = QtCore.QVariant(self.cursor_.valueBuffer(fMD.name()))
+            if v.toString().isEmpty() or self.cursor_.bufferIsNull(fMD.name()):
+                #QMessageBox::warning(qApp->focusWidget(), tr("Aviso"),tr("Debe indicar un valor para %1").arg(fMD->alias()), QMessageBox::Ok, 0, 0); #FIXME
+                return
+            
+            mng = FLManager(self.cursor_.db().manager())
+            c = FLSqlCursor(fMD.relationM1().foreignTable(), True, self.cursor_.db().connectionName())
+            c.select(mng.formatAssignValue(self.fieldRelationM1().foreignField(), fMD, v, True))
+        if c.sixe() > 0:
+            c.next()
+            
+        if self.actionName_.isEmpty():
+            a = mng.action(field.relationM1().foreignTable())
+        else:
+            a = mng.action(self.actionName_)
+            a.setTable(field.relationM1().foreignTable())
+        
+        f = FLFormSearchDB(c, a.name(), self.topWidget_)
+    
+    else:
+        mng = FLManager(self.cursor_.db().manager())
+        if self.actionName_.isEmpty():
+            a = mng.action(field.relationM1().foreignTable())
+            if not a:
+                return
+            else:
+                a = mng.action(self.actionName_)
+                if not a:
+                    return
+                a.setTable(field.relationM1().foreignTable())
+            
+            c = FLSqlCursor(a.table(), True, self.cursor_.db().connectionName())
+            f = FLFormSearchDB(c, a.name(), self.topWidget_)
+        
+        f.setMainWidget()
+        
+        lObjs = f.queryList("FLTableDB")
+        obj = lObjs.first()
+        delete lObjs
+        objTdb = object
+        if fMD and objTdb:
+            objTdb.setTableName(field.relationM1().foreignTable())
+            objTdb.setFieldRelation(field.associatedFieldFilterTo())
+            objTdb.setForeignField(fMD.relationM1().foreignField())
+            if fMD.relationM1().foreignTable() == tMD.name():
+                objTdb.setReadOnly(True)
+            
+        
+        f.setFilter(self.filter_)
+        
+        if f.mainWidget():
+            if objTdb:
+                curValue = QtCore.QVariant(self.value())
+                if field.type() == QtCore.QVariant.String and not curValue.toString().isEmpty():
+                    objTdb.setInitSearch(curValue.toString())
+                    objTdb.putFisrtCol(field.relationM1().foreignField())
+                QtCore.Qtimer.singleShot(0, objTdb.lineEditSearch, SLOT(setFocus()))
+            
+            v = QtCore.QVariant(f.exec(field.relationM1().foreignField()))
+            if v.isValid() and not v.isNull():
+                self.setValue(QtCore.QVariant())
+                self.setValue(v)
+        
+        f.close()
+        if c:
+            disconnect(c ,0,0,0)
+            c.deleteLater()
+    
 
     """
   Abre un dialogo para buscar un fichero de imagen.
@@ -2150,57 +2117,49 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def setPixmap(self, filename):
-"""
-{
-  QImage img(filename);
-
-  if (img.isNull())
-    return;
-
-  QApplication::setOverrideCursor(waitCursor);
-
-  QPixmap pix;
-  QCString s;
-  QBuffer buffer(s);
-
-  // Silix
-  if (img.width() <= maxPixImages_ && img.height() <= maxPixImages_)
-    pix.convertFromImage(img);
-  else {
-    int newWidth, newHeight;
-    if (img.width() < img.height()) {
-      newHeight = maxPixImages_;
-      newWidth = qRound(newHeight * img.width() / img.height());
-    } else {
-      newWidth = maxPixImages_;
-      newHeight = qRound(newWidth * img.height() / img.width());
-    }
-    pix.convertFromImage(img.scale(newWidth, newHeight, QImage::ScaleMin));
-  }
-
-  QApplication::restoreOverrideCursor();
-
-  if (pix.isNull())
-    return;
-
-  editorImg_->setPixmap(pix);
-
-  QApplication::setOverrideCursor(waitCursor);
-
-  buffer.open(IO_WriteOnly);
-  pix.save(&buffer, "XPM");
-
-  QApplication::restoreOverrideCursor();
-
-  if (s.isEmpty())
-    return;
-
-  if (!QPixmapCache::find(s.left(100)))
-    QPixmapCache::insert(s.left(100), pix);
-
-  updateValue(QString(s));
-}
-"""
+        img = QtGui.QImage(filename)
+        
+        if img.isNull():
+            return
+        
+        #QApplication::setOverrideCursor(waitCursor); #FIXME
+        pix = QtGui.QPixmap()
+        s = QCString()
+        buffer = QtCore.QBuffer(s)
+        
+        if img.width() <= self.maxPixImages_ and img.height() <= self.maxPixImages_:
+            pix.convertFromImage(img)
+        else:
+            newWidth = 0
+            newHeight = 0
+            if img.width() < img.height():
+                newHeight = self.maxPixImages_
+                newWigth = qRound(newWidth * img.width() / img.heigth())
+            else:
+                newWidth = self.mapPixImages_
+                newHeight = qRound(newWidth * img.height() / img.width())
+            pix.convertFromImage(img.scale(newWidth, newHeight, QtGui.QImage.ScaleMin))
+        
+        #QApplication::restoreOverrideCursor(); #FIXME
+        
+        if pix.isNull():
+            return
+        
+        self.editorImg_.setPixmap(pix)
+        
+        #QApplication::setOverrideCursor(waitCursor); #FIXME
+        buffer.open(IO_WriteOnly)
+        pix.save(buffer,"XPM")
+        
+        #QApplication::restoreOverrideCursor(); #FIXME
+        
+        if s.isEmpty():
+            return
+        
+        if not QtGui.QPixmapCache.find(s.left(100)):
+            QtGui.QPixmapCache.insert(s.left(100), pix)
+            
+        self.updateValue(QtCore.QString(s))
 
     """
   Carga una imagen en el campo de tipo pixmap con el ancho y alto preferido
@@ -2212,102 +2171,90 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def setPixmapFromPixmap(self, pixmap, w = 0, h = 0):
-"""
-{
-  if (pixmap.isNull())
-    return;
+        if pixmap.isNull():
+            return
+        
+        #QApplication::setOverrideCursor(waitCursor); #FIXME
+        pix = None
+        s = None
+        buffer = QtCore.QBuffer(s)
+        
+        img = QtCore.QImage(pixmap.convertToImage())
+        if not w == 0 and not h == 0:
+            pix.convertFromImage(img.scale(w, h, QtCore.QImage.ScaleMin))
+        else:
+            pix.convertFromImage(img)
+        
+        # QApplication::restoreOverrideCursor(); #FIXME
+        if pix.isNull():
+            return
+        
+        self.editorImg_.setPixmap(pix)
+        
+        #QApplication::setOverrideCursor(waitCursor); #FIXME
+        
+        buffer.open(IO_WriteOnly)
+        pix.save(buffer,"XPM")
+        
+        #QApplication::restoreOverrideCursor(); #FIXME
+        
+        if s.isEmpty():
+            return
+        
+        if not QtCore.QPixmapCache.find(s.left(100)):
+            QtCore.QPixmapCache.insert(s.left(100), pix)
+        
+        self.updateValue(QtCore.QString(s))
 
-  QApplication::setOverrideCursor(waitCursor);
-
-  QPixmap pix;
-  QCString s;
-  QBuffer buffer(s);
-
-  QImage img = pixmap.convertToImage();
-  if (w != 0 && h != 0)
-    pix.convertFromImage(img.scale(w, h, QImage::ScaleMin));
-  else
-    pix.convertFromImage(img);
-
-  QApplication::restoreOverrideCursor();
-
-  if (pix.isNull())
-    return;
-
-  editorImg_->setPixmap(pix);
-
-  QApplication::setOverrideCursor(waitCursor);
-
-  buffer.open(IO_WriteOnly);
-  pix.save(&buffer, "XPM");
-
-  QApplication::restoreOverrideCursor();
-
-  if (s.isEmpty())
-    return;
-
-  if (!QPixmapCache::find(s.left(100)))
-    QPixmapCache::insert(s.left(100), pix);
-
-  updateValue(QString(s));
-}
-"""
     """
   Carga una imagen desde el portapapeles en el campo de tipo pixmap
   @author Silix
     """
     @decorators.NotImplementedWarn
     def setPixmapFromClipboard(self):
-"""
-{
-  QImage img = QApplication::clipboard()->image();
-  if (img.isNull())
-    return;
-
-  QApplication::setOverrideCursor(waitCursor);
-
-  QPixmap pix;
-  QCString s;
-  QBuffer buffer(s);
-
-  // Silix
-  if (img.width() <= maxPixImages_ && img.height() <= maxPixImages_)
-    pix.convertFromImage(img);
-  else {
-    int newWidth, newHeight;
-    if (img.width() < img.height()) {
-      newHeight = maxPixImages_;
-      newWidth = qRound(newHeight * img.width() / img.height());
-    } else {
-      newWidth = maxPixImages_;
-      newHeight = qRound(newWidth * img.height() / img.width());
-    }
-    pix.convertFromImage(img.scale(newWidth, newHeight, QImage::ScaleMin));
-  }
-
-  QApplication::restoreOverrideCursor();
-
-  if (pix.isNull())
-    return;
-
-  editorImg_->setPixmap(pix);
-
-  QApplication::setOverrideCursor(waitCursor);
-
-  buffer.open(IO_WriteOnly);
-  pix.save(&buffer, "XPM");
-
-  QApplication::restoreOverrideCursor();
-
-  if (s.isEmpty())
-    return;
-
-  if (!QPixmapCache::find(s.left(100)))
-    QPixmapCache::insert(s.left(100), pix);
-
-  updateValue(QString(s));
-}
-"""
+        #img = QtCore.QImage(QApplication.clipboard().image()) #FIXME
+        if img.isNull():
+            return
+        #QApplication::setOverrideCursor(waitCursor); #FIXME
+        pix = None
+        s = None
+        buffer = QtCore.QBuffer(s)
+        
+        if img.width() <= self.maxPixImages_ and img.height() <= self.maxPixImages_:
+            pix.convertFromImage(img)
+        else:
+            newWidth = 0
+            newHeight = 0
+            if img.width() < img.height():
+                newHeight = self.maxPixImages_
+                newWidth = qRound(newHeight * img.width() / img.height())
+            else:
+                newWidth = self.maxPixImages_
+                newHeight = qRound(newWidth * img.height() / img.width())
+            
+            pix.convertFromImage(img.scale(newWidth, newHeight, QtCore.QImage.ScaleMin))
+        
+        #QApplication::restoreOverrideCursor(); # FIXME
+        
+        if pix.isNull():
+            return
+        
+        self.editorImg_.setPixmap(pix)
+        
+        #QApplication::setOverrideCursor(waitCursor); #FIXME
+        buffer.open(IO_WriteOnly)
+        pix.save(buffer,"XPM")
+        
+        #QApplication::restoreOverrideCursor(); #FIXME
+        
+        if s.isEmpty():
+            return
+        
+        if not QtCore.QPixmapCache.find(s.left(100)):
+            QtCore.QPixmapCache.insert(s.left(100), pix)
+        
+        self.updateValue(QtCore.QString(s))
+        
 
     """
   Guarda imagen de campos tipo Pixmap en una ruta determinada.
@@ -2367,6 +2314,9 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def setMapValue(self, v):
+        self.fieldMapValue_ = self.sender()
+        self.mapValue_ = v 
+        self.setMapValue()
 
 
     """
@@ -2377,12 +2327,14 @@ class FLFieldDB(QtGui.QWidget):
    """
     @decorators.NotImplementedWarn
     def emitKeyF2Pressed(self):
+        self.keyF2Pressed.emit()
 
     """
   Emite la señal de labelClicked. Se usa en los campos M1 para editar el formulario de edición del valor seleccionado.
     """
     @decorators.NotImplementedWarn
     def emitLabelClicked(self):
+        self.labelClicked.emit()
 
     """
   Emite la señal de textChanged.
@@ -2392,18 +2344,155 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def emitTextChanged(self, t):
+        self.textChanged.emit(t)
 
     """
   Emite la señal activatedAccel( int )
     """
     @decorators.NotImplementedWarn
     def emitActivatedAccel(self, identifier):
+        if self.editor_ and self.editor_.hasFocus:
+            self.activatedAccel.emit()
+        
 
     """
   Redefinida por conveniencia
     """
     @decorators.NotImplementedWarn
     def setEnabled(self , enable):
+        """
+{
+  if (enable)
+    clearWState(WState_ForceDisabled);
+  else
+    setWState(WState_ForceDisabled);
+
+  if (!isTopLevel() && parentWidget() &&
+      !parentWidget()->isEnabled() && enable)
+    return; // nothing we can do
+
+  if (enable) {
+    if (testWState(WState_Disabled)) {
+      clearWState(WState_Disabled);
+      enabledChange(!enable);
+      if (children()) {
+        QObjectListIt it(*children());
+        QWidget *w;
+        while ((w = (QWidget *)it.current()) != 0) {
+          ++it;
+          if (w->isWidgetType() &&
+              !w->testWState(WState_ForceDisabled)) {
+            QLineEdit *le = ::qt_cast<QLineEdit *>(w);
+            if (le) {
+              bool allowNull = true;
+              FLTableMetaData *tMD = cursor_->metadata();
+              if (tMD) {
+                FLFieldMetaData *field = tMD->field(fieldName_);
+                if (field && !field->allowNull())
+                  allowNull = false;
+              }
+//               QColor cFg = qApp->palette().color(QPalette::Active, QColorGroup::Text);
+              QColor cBg;
+              if (allowNull)
+                cBg = qApp->palette().color(QPalette::Active, QColorGroup::Base);
+              else
+                cBg = notNullColor();
+
+              le->setDisabled(false);
+              le->setReadOnly(false);
+              le->setCursor(QCursor::ibeamCursor);
+//               le->setPaletteForegroundColor(cFg);
+              le->setPaletteBackgroundColor(cBg);
+              le->setFocusPolicy(QWidget::StrongFocus);
+              continue;
+            }
+
+            QTextEdit *te = ::qt_cast<QTextEdit *>(w);
+            if (te) {
+//               QColor cFg = qApp->palette().color(QPalette::Active, QColorGroup::Text);
+              QColor cBg = qApp->palette().color(QPalette::Active, QColorGroup::Base);
+
+              te->setDisabled(false);
+              te->setReadOnly(false);
+              te->viewport()->setCursor(QCursor::ibeamCursor);
+//               te->setPaletteForegroundColor(cFg);
+              te->setPaletteBackgroundColor(cBg);
+              te->setFocusPolicy(QWidget::WheelFocus);
+              continue;
+            }
+
+            w->setEnabled(true);
+          }
+        }
+      }
+    }
+  } else {
+    if (!testWState(WState_Disabled)) {
+      if (focusWidget() == this) {
+        bool parentIsEnabled = (!parentWidget() || parentWidget()->isEnabled());
+        if (!parentIsEnabled || !focusNextPrevChild(TRUE))
+          clearFocus();
+      }
+      setWState(WState_Disabled);
+      enabledChange(!enable);
+
+      if (children()) {
+        QObjectListIt it(*children());
+        QWidget *w;
+        while ((w = (QWidget *)it.current()) != 0) {
+          ++it;
+          if (w->isWidgetType() && w->isEnabled()) {
+            QLineEdit *le = ::qt_cast<QLineEdit *>(w);
+            if (le) {
+//               QColor cFg = qApp->palette().color(QPalette::Disabled, QColorGroup::Text);
+              QColor cBg = qApp->palette().color(QPalette::Disabled, QColorGroup::Background);
+
+              le->setDisabled(false);
+              le->setReadOnly(true);
+              le->setCursor(QCursor::ibeamCursor);
+//               le->setPaletteForegroundColor(cFg);
+              le->setPaletteBackgroundColor(cBg);
+              le->setFocusPolicy(QWidget::NoFocus);
+              continue;
+            }
+
+            QTextEdit *te = ::qt_cast<QTextEdit *>(w);
+            if (te) {
+//               QColor cFg = qApp->palette().color(QPalette::Disabled, QColorGroup::Text);
+              QColor cBg = qApp->palette().color(QPalette::Disabled, QColorGroup::Background);
+
+              te->setDisabled(false);
+              te->setReadOnly(true);
+              te->viewport()->setCursor(QCursor::ibeamCursor);
+//               te->setPaletteForegroundColor(cFg);
+              te->setPaletteBackgroundColor(cBg);
+              te->setFocusPolicy(QWidget::NoFocus);
+              continue;
+            }
+
+            if (w == textLabelDB && pushButtonDB) {
+              w->setDisabled(false);
+              continue;
+            }
+
+            w->setEnabled(false);
+            w->clearWState(WState_ForceDisabled);
+          }
+        }
+      }
+    }
+  }
+#if defined(Q_WS_X11)
+  if (testWState(WState_OwnCursor)) {
+    // enforce the windows behavior of clearing the cursor on
+    // disabled widgets
+    extern void qt_x11_enforce_cursor(QWidget * w);   // defined in qwidget_x11.cpp
+    qt_x11_enforce_cursor(this);
+  }
+#endif
+}
+"""
+        
 
     #protected:
 
@@ -2412,12 +2501,111 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def eventFilter(self, obj, ev):
+"""
+{
+  if (ev->type() == QEvent::KeyPress) {
+    QKeyEvent *k = static_cast<QKeyEvent *>(ev);
+
+    bool timerActive = false;
+    if (autoComFrame_ && autoComFrame_->isVisible()) {
+      if (k->key() == Key_Down && autoComPopup_) {
+        autoComPopup_->setQuickFocus();
+#ifdef Q_OS_WIN32
+        autoComPopup_->grabKeyboard();
+#endif
+        return true;
+      }
+
+#ifdef Q_OS_WIN32
+      if (editor_)
+        editor_->releaseKeyboard();
+      if (autoComPopup_)
+        autoComPopup_->releaseKeyboard();
+#endif
+      autoComFrame_->hide();
+      if (::qt_cast<QLineEdit *>(editor_) && k->key() == Key_BackSpace) {
+        ::qt_cast<QLineEdit *>(editor_)->backspace();
+      }
+      if (!timerAutoComp_) {
+        timerAutoComp_ = new QTimer(this, QObject::name());
+        connect(timerAutoComp_, SIGNAL(timeout()), SLOT(toggleAutoCompletion()));
+      } else
+        timerAutoComp_->stop();
+      if (k->key() != Key_Enter && k->key() != Key_Return) {
+        timerActive = true;
+        timerAutoComp_->start(500, true);
+      } else {
+        QTimer::singleShot(0, this, SLOT(autoCompletionUpdateValue()));
+        return true;
+      }
+    }
+
+    if (!timerActive && autoCompMode_ == AlwaysAuto &&
+        (!autoComFrame_ || !autoComFrame_->isVisible())) {
+      if (k->key() == Key_BackSpace || k->key() == Key_Delete ||
+          (k->key() >= Key_Space && k->key() <= Key_ydiaeresis)) {
+        if (!timerAutoComp_) {
+          timerAutoComp_ = new QTimer(this, QObject::name());
+          connect(timerAutoComp_, SIGNAL(timeout()), SLOT(toggleAutoCompletion()));
+        } else
+          timerAutoComp_->stop();
+        if (k->key() != Key_Enter && k->key() != Key_Return) {
+          timerAutoComp_->start(500, true);
+        } else {
+          QTimer::singleShot(0, this, SLOT(autoCompletionUpdateValue()));
+          return true;
+        }
+      }
+    }
+
+    if (::qt_cast<FLLineEdit *>(obj)) {
+      if (k->key() == Key_F4) {
+        emit keyF4Pressed();
+        return true;
+      }
+    } else if (::qt_cast<QTextEdit *>(obj)) {
+      if (k->key() == Key_F4) {
+        emit keyF4Pressed();
+        return true;
+      }
+      return false;
+    }
+
+    if (k->key() == Key_Enter || k->key() == Key_Return) {
+      focusNextPrevChild(true);
+      emit keyReturnPressed();
+      return true;
+    }
+    if (k->key() == Key_Up) {
+      focusNextPrevChild(false);
+      return true;
+    }
+    if (k->key() == Key_Down) {
+      focusNextPrevChild(true);
+      return true;
+    }
+    if (k->key() == Key_F2) {
+      emit keyF2Pressed();
+      return true;
+    }
+
+    return false;
+  } else if (ev->type() == QEvent::MouseButtonRelease && obj == textLabelDB
+             && ((QMouseEvent *) ev)->button() == Qt::LeftButton) {
+    emit labelClicked();
+  } else {
+    return false;
+  }
+}
+"""
 
     """
   Captura evento mostrar
     """
     @decorators.NotImplementedWarn
     def showEvent(self, e):
+        self.showWidget()
+        QtGui.QWidget.showEvent(e)
 
     #private:
 
@@ -2426,6 +2614,51 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def showWidget(self):
+    """
+    {
+  if (!showed) {
+    if (topWidget_) {
+      refresh();
+      if (cursorAux && cursor_ && cursor_->bufferIsNull(fieldName_)) {
+        if (!cursorAux->bufferIsNull(foreignField_)) {
+          FLManager *mng = cursor_->db()->manager();
+          FLTableMetaData *tMD = mng->metadata(tableName_);
+          if (tMD) {
+            QVariant v(cursorAux->valueBuffer(foreignField_));
+
+            FLSqlQuery q(0, cursor_->db()->connectionName());
+            q.setForwardOnly(true);
+            q.setTablesList(tableName_);
+            q.setSelect(fieldName_);
+            q.setFrom(tableName_);
+
+            QString where(mng->formatAssignValue(tMD->field(fieldRelation_), v, true));
+            QString filterAc(cursorAux->filterAssoc(foreignField_, tMD));
+
+            if (!filterAc.isEmpty()) {
+              if (where.isEmpty())
+                where = filterAc;
+              else
+                where += QString::fromLatin1(" AND ") + filterAc;
+            }
+
+            if (filter_.isEmpty())
+              q.setWhere(where);
+            else
+              q.setWhere(filter_ + QString::fromLatin1(" AND ") + where);
+            if (q.exec() && q.next())
+              setValue(q.value(0));
+            if (!tMD->inCache())
+              delete tMD;
+          }
+        }
+      }
+    } else
+      initFakeEditor();
+    showed = true;
+  }
+}
+"""
 
     """
   Inicializa un editor falso y no funcional.
@@ -2437,12 +2670,244 @@ class FLFieldDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def initFakeEditor(self):
+"""
+{
+  bool hasPushButtonDB = (tableName_.isEmpty() && foreignField_.isEmpty()
+                          && fieldRelation_.isEmpty());
+  fieldAlias_ = (fieldName_.isEmpty() ? tr("Error: fieldName vacio") : fieldName_);
 
+  if (!editor_) {
+    editor_ = new QLineEdit(this);
+    editor_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+    textLabelDB->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+    FLWidgetFieldDBLayout->addWidget(editor_);
+    editor_->setFocusPolicy(QWidget::StrongFocus);
+    setFocusProxy(editor_);
+    setTabOrder(pushButtonDB, editor_);
+    editor_->show();
+  }
+
+  textLabelDB->setText(fieldAlias_);
+  if (showAlias_)
+    textLabelDB->show();
+  else
+    textLabelDB->hide();
+
+  if (hasPushButtonDB) {
+    pushButtonDB->setFocusPolicy(QWidget::NoFocus);
+    pushButtonDB->show();
+  } else
+    pushButtonDB->hide();
+
+  QString prty;
+  if (!tableName_.isEmpty())
+    prty += "tN:" + tableName_ + ",";
+  if (!foreignField_.isEmpty())
+    prty += "fF:" + foreignField_ + ",";
+  if (!fieldRelation_.isEmpty())
+    prty += "fR:" + fieldRelation_ + ",";
+  if (!actionName_.isEmpty())
+    prty += "aN:" + actionName_ + ",";
+  if (!prty.isEmpty()) {
+    ::qt_cast<QLineEdit *>(editor_)->setText(prty);
+    ::qt_cast<QLineEdit *>(editor_)->home(false);
+  }
+
+  if (maximumSize().width() < 80)
+    setShowEditor(false);
+  else
+    setShowEditor(showEditor_);
+}
+
+void FLFieldDB::setEnabled(bool enable)
+{
+  if (enable)
+    clearWState(WState_ForceDisabled);
+  else
+    setWState(WState_ForceDisabled);
+
+  if (!isTopLevel() && parentWidget() &&
+      !parentWidget()->isEnabled() && enable)
+    return; // nothing we can do
+
+  if (enable) {
+    if (testWState(WState_Disabled)) {
+      clearWState(WState_Disabled);
+      enabledChange(!enable);
+      if (children()) {
+        QObjectListIt it(*children());
+        QWidget *w;
+        while ((w = (QWidget *)it.current()) != 0) {
+          ++it;
+          if (w->isWidgetType() &&
+              !w->testWState(WState_ForceDisabled)) {
+            QLineEdit *le = ::qt_cast<QLineEdit *>(w);
+            if (le) {
+              bool allowNull = true;
+              FLTableMetaData *tMD = cursor_->metadata();
+              if (tMD) {
+                FLFieldMetaData *field = tMD->field(fieldName_);
+                if (field && !field->allowNull())
+                  allowNull = false;
+              }
+//               QColor cFg = qApp->palette().color(QPalette::Active, QColorGroup::Text);
+              QColor cBg;
+              if (allowNull)
+                cBg = qApp->palette().color(QPalette::Active, QColorGroup::Base);
+              else
+                cBg = notNullColor();
+
+              le->setDisabled(false);
+              le->setReadOnly(false);
+              le->setCursor(QCursor::ibeamCursor);
+//               le->setPaletteForegroundColor(cFg);
+              le->setPaletteBackgroundColor(cBg);
+              le->setFocusPolicy(QWidget::StrongFocus);
+              continue;
+            }
+
+            QTextEdit *te = ::qt_cast<QTextEdit *>(w);
+            if (te) {
+//               QColor cFg = qApp->palette().color(QPalette::Active, QColorGroup::Text);
+              QColor cBg = qApp->palette().color(QPalette::Active, QColorGroup::Base);
+
+              te->setDisabled(false);
+              te->setReadOnly(false);
+              te->viewport()->setCursor(QCursor::ibeamCursor);
+//               te->setPaletteForegroundColor(cFg);
+              te->setPaletteBackgroundColor(cBg);
+              te->setFocusPolicy(QWidget::WheelFocus);
+              continue;
+            }
+
+            w->setEnabled(true);
+          }
+        }
+      }
+    }
+  } else {
+    if (!testWState(WState_Disabled)) {
+      if (focusWidget() == this) {
+        bool parentIsEnabled = (!parentWidget() || parentWidget()->isEnabled());
+        if (!parentIsEnabled || !focusNextPrevChild(TRUE))
+          clearFocus();
+      }
+      setWState(WState_Disabled);
+      enabledChange(!enable);
+
+      if (children()) {
+        QObjectListIt it(*children());
+        QWidget *w;
+        while ((w = (QWidget *)it.current()) != 0) {
+          ++it;
+          if (w->isWidgetType() && w->isEnabled()) {
+            QLineEdit *le = ::qt_cast<QLineEdit *>(w);
+            if (le) {
+//               QColor cFg = qApp->palette().color(QPalette::Disabled, QColorGroup::Text);
+              QColor cBg = qApp->palette().color(QPalette::Disabled, QColorGroup::Background);
+
+              le->setDisabled(false);
+              le->setReadOnly(true);
+              le->setCursor(QCursor::ibeamCursor);
+//               le->setPaletteForegroundColor(cFg);
+              le->setPaletteBackgroundColor(cBg);
+              le->setFocusPolicy(QWidget::NoFocus);
+              continue;
+            }
+
+            QTextEdit *te = ::qt_cast<QTextEdit *>(w);
+            if (te) {
+//               QColor cFg = qApp->palette().color(QPalette::Disabled, QColorGroup::Text);
+              QColor cBg = qApp->palette().color(QPalette::Disabled, QColorGroup::Background);
+
+              te->setDisabled(false);
+              te->setReadOnly(true);
+              te->viewport()->setCursor(QCursor::ibeamCursor);
+//               te->setPaletteForegroundColor(cFg);
+              te->setPaletteBackgroundColor(cBg);
+              te->setFocusPolicy(QWidget::NoFocus);
+              continue;
+            }
+
+            if (w == textLabelDB && pushButtonDB) {
+              w->setDisabled(false);
+              continue;
+            }
+
+            w->setEnabled(false);
+            w->clearWState(WState_ForceDisabled);
+          }
+        }
+      }
+    }
+  }
+#if defined(Q_WS_X11)
+  if (testWState(WState_OwnCursor)) {
+    // enforce the windows behavior of clearing the cursor on
+    // disabled widgets
+    extern void qt_x11_enforce_cursor(QWidget * w);   // defined in qwidget_x11.cpp
+    qt_x11_enforce_cursor(this);
+  }
+#endif
+}
+"""
     """
   Auxiliar para refrescar filtros utilizando fieldMapValue_ y mapValue_
     """
     @decorators.NotImplementedWarn
     def setMapValue(self):
+    """
+    {
+  if (!fieldMapValue_ || !cursor_)
+    return;
+  FLTableMetaData *tMD = cursor_->metadata();
+  if (!tMD)
+    return;
+
+  QString fSN = fieldMapValue_->fieldName();
+  FLFieldMetaData *field = tMD->field(fieldName_);
+  FLFieldMetaData *fieldSender = tMD->field(fSN);
+
+  if (!field || !fieldSender)
+    return;
+
+  if (field->relationM1()) {
+    if (field->relationM1()->foreignTable() != tMD->name()) {
+      FLManager *mng = cursor_->db()->manager();
+      QString rt(field->relationM1()->foreignTable());
+      QString fF(fieldMapValue_->foreignField());
+      FLSqlQuery q(0, cursor_->db()->connectionName());
+      q.setForwardOnly(true);
+      q.setTablesList(rt);
+      q.setSelect(field->relationM1()->foreignField() + "," + fF);
+      q.setFrom(rt);
+
+      QString where(mng->formatAssignValue(fF, fieldSender, mapValue_, true));
+      FLTableMetaData *assocTmd = mng->metadata(rt);
+      QString filterAc(cursor_->filterAssoc(fF, assocTmd));
+      if (assocTmd && !assocTmd->inCache())
+        delete assocTmd;
+
+      if (!filterAc.isEmpty()) {
+        if (where.isEmpty())
+          where = filterAc;
+        else
+          where += QString::fromLatin1(" AND ") + filterAc;
+      }
+
+      if (filter_.isEmpty())
+        q.setWhere(where);
+      else
+        q.setWhere(filter_ + QString::fromLatin1(" AND ") + where);
+
+      if (q.exec() && q.next()) {
+        setValue(QVariant());
+        setValue(q.value(0));
+      }
+    }
+  }
+}
+"""
 
  
 
@@ -2462,19 +2927,19 @@ class FLFieldDB(QtGui.QWidget):
 
     #signals
     @decorators.NotImplementedWarn
-    def lostFocus(self): #Señal de foco perdido
+    lostFocus = Signal() #Señal de foco perdido
     @decorators.NotImplementedWarn
-    def keyF2Pressed(self): #Señal emitida si se pulsa la tecla F2 en el editor
+    keyF2Pressed = Signal() #Señal emitida si se pulsa la tecla F2 en el editor
     @decorators.NotImplementedWarn
-    def labelClicked(self): #Señal emitida si se hace click en el label de un campo M1
+    labelClicked  = Signal() #Señal emitida si se hace click en el label de un campo M1
     @decorators.NotImplementedWarn
-    def textChanged(self, QString): #Señal emitida si se cambia el texto en el editor, sólo si es del tipo FLLineEdit
+    textChanged = Signal() #Señal emitida si se cambia el texto en el editor, sólo si es del tipo FLLineEdit
     @decorators.NotImplementedWarn
-    def activatedAccel(self, int): #Cuando se pulsa una combinación de teclas de aceleración se emite esta señal indicando el identificador de la combinación de teclas pulsada
+    activatedAccel = Signal() #Cuando se pulsa una combinación de teclas de aceleración se emite esta señal indicando el identificador de la combinación de teclas pulsada
     @decorators.NotImplementedWarn
-    def keyF4Pressed(self): #Señal emitida si se pulsa la tecla F4 en el editor
+    keyF4Pressed = Signal() #Señal emitida si se pulsa la tecla F4 en el editor
     @decorators.NotImplementedWarn
-    def keyReturnPressed(self): #Señal emitida si se pulsa la tecla Return
+    keyReturnPressed = Signal() #Señal emitida si se pulsa la tecla Return
 
 class FLPixmapView(QScrollView, QFilePreview):
 
