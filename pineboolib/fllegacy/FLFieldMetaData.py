@@ -1,8 +1,14 @@
-/***************************************************************************
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore
 
+from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
+from pineboolib import decorators
+
+
+
+class FLFieldMetaData():
     """
   @param n Nombre del campo
   @param a Alias del campo, utilizado en etiquetas de los formularios
@@ -28,13 +34,12 @@ from PyQt4 import QtCore
   @param iCK Indica si es clave compuesta
     """  
 
-class FLFieldMetaData()
-
     Serial = 100
     Unlock = 200
     Check = 300
+    count_ = 0
 
-    def __init__(self, n, a, aN, isPrimaryKey, t, l=0, c=False, v=True, ed=False, pI=4, pD=0, iNX=False, uNI=False,coun=False,defValue=None,oT=False, rX=None, vG=True,gen=True,iCK=False):
+    def __init__(self, n, a, aN, isPrimaryKey, t, l=0, c=False, v=True, ed=False, pI=4, pD=0, iNX=False, uNI=False,count=False,defValue=None,oT=False, rX=None, vG=True,gen=True,iCK=False):
         #FLFieldMetaData(const FLFieldMetaData *other);
         self._fieldName = n
         self._alias = a
@@ -56,79 +61,108 @@ class FLFieldMetaData()
         self._visibleGrid = vG
         self._generated = bool(gen)
         self._isCompoundKey = bool(iCK)
+        ++self.count_
+    
+    def __del__(self):
+        --self.count_
+        
+        
 
-
+    @decorators.BetaImplementation
     def name(self):
         return self._fieldName
 
+    @decorators.BetaImplementation
     def setName(self, n):
         self._fieldName = n
 
+    @decorators.BetaImplementation
     def alias(self):
         return self._alias
 
+    @decorators.BetaImplementation
     def allowNull(self):
         return self._allowNull
 
+    @decorators.BetaImplementation
     def isPrimaryKey(self):
         return self.__isPrimaryKey
 
+    @decorators.BetaImplementation
     def isCompoundKey(self):
         return self._isCompoundKey
     
+    @decorators.BetaImplementation
     def setIsPrimaryKey(self, b):
         self.__isPrimaryKey = bool(b)
-
+    
+    @decorators.BetaImplementation
     def type(self):
         return self._type
-
+    
+    @decorators.BetaImplementation
     def length(self):
         return self._length
 
+    @decorators.BetaImplementation
     def calculated(self):
         return self._calculated
 
+    @decorators.BetaImplementation
     def setCalculated(self, c):
         self._calculated = bool(c)
 
+    @decorators.BetaImplementation
     def editable(self):
         return self._editable
 
+    @decorators.BetaImplementation
     def setEditable(self, e):
         self._editable = e
 
+    @decorators.BetaImplementation
     def visible(self):
-        retrun self._visible
+        return self._visible
 
+    @decorators.BetaImplementation
     def setVisible(self, v):
         self._visible = bool(v)
 
+    @decorators.BetaImplementation
     def setVisibleGrid(self, vG):
         self._visibleGrid = bool(vG)
 
+    @decorators.BetaImplementation
     def visibleGrid(self):
         return self._visibleGrid
 
+    @decorators.BetaImplementation
     def genetated(self):
         return self._generated
 
+    @decorators.BetaImplementation
     def partInteger(self):
         return self._partInteger
 
+    @decorators.BetaImplementation
     def partDecimal(self):
         return self._partDecimal
 
+    @decorators.BetaImplementation
     def isCounter(self):
         return self._contador
 
+    @decorators.BetaImplementation
     def isIndex(self):
         return self._isIndex
 
+    @decorators.BetaImplementation
     def isUnique(self):
         return self._isUnique    
 
+    @decorators.BetaImplementation
     def addRelationMD(self, relationMD):
-        isRelM1 =  (relationMD.cardinality() == FLRelationMetaData.RELATION_M1)
+        isRelM1 = (relationMD.cardinality() == FLRelationMetaData.RELATION_M1)
         if (isRelM1 and self._relationM1):
             print("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
             return 
@@ -141,8 +175,22 @@ class FLFieldMetaData()
         self._relationList.append(relationMD)
         
 
-    def relationList(self):
-        #completar ....
+    def clearRelationList(self):
+        if not self._relationList:
+            return
+        
+        r = FLRelationMetaData()
+        it = FLRelationMetaData(self._relationList)
+        while not it.current() == 0:
+            r = it.current()
+            ++it
+            self._relationList.remove(r)
+            if r.deref():
+                del r 
+        
+        del self._relationList
+        self._relationList = 0
+        
 
     def relationM1(self):
         return self._relationM1 #FLRelationMetaData
@@ -175,7 +223,22 @@ class FLFieldMetaData()
         return self._optionsList
 
     def setOptionsList(self, ol):
-        self._optionsList = ol
+        self._optionsList.clear()
+        olTranslated = QtCore.QString(ol)
+        if ol.contains("QT_TRANSLATE_NOOP"):
+            components =  QtCore.QStringList(olTranslated.split(","))
+            component = QtCore.QString("")
+            olTranslated = ""
+            for i in range(len(components)):
+                component = component.mid(30, component.length() - 32)
+                if i > 0:
+                    olTranslated += ","
+                olTranslated += component
+            
+        
+        self._optionsList = olTranslated.split(",")
+        self._hasOptionsList = not self.optionsList_.empty()
+        
 
     def isCheck(self):
         #completar
@@ -203,31 +266,35 @@ class FLFieldMetaData()
         return self._mTD
 
     def flDecodeType(self, fltype): #revisar
-        QVariant.Type type;
-        if fltype == QVariant.Int: type = QVariant.Int
-        if fltype == FLFieldMetaData.Serial or fltype == QVariant.UInt: type = QVariant.UInt
-        if fltype == QVariant.Bool or fltype == FLFieldMetaData.Unlock: type = QVariant.Bool
-        if fltype == QVariant.Double: type = QVariant.Double
-        if fltype == QVariant.Time: type = QVariant.Time
-        if fltype == QVariant.Date: type = QVariant.Date
-        if fltype == QVariant.String or fltype == QVariant.Pixmap or fltype == QVariant.StringList: type = QVariant.String
-        if fltype == QVariant.ByteArray: type = QVariant.ByteArray
+        QtCore.QVariant.Type type;
+        if fltype == QtCore.QVariant.Int: type = QtCore.QVariant.Int
+        if fltype == FLFieldMetaData.Serial or fltype == QtCore.QVariant.UInt: type = QtCore.QVariant.UInt
+        if fltype == QtCore.QVariant.Bool or fltype == FLFieldMetaData.Unlock: type = QtCore.QVariant.Bool
+        if fltype == QtCore.QVariant.Double: type = QtCore.QVariant.Double
+        if fltype == QtCore.QVariant.Time: type = QtCore.QVariant.Time
+        if fltype == QtCore.QVariant.Date: type = QtCore.QVariant.Date
+        if fltype == QtCore.QVariant.String or fltype == QtCore.QVariant.Pixmap or fltype == QtCore.QVariant.StringList: type = QtCore.QVariant.String
+        if fltype == QtCore.QVariant.ByteArray: type = QtCore.QVariant.ByteArray
         return type        
-  
+    
+    @decorators.BetaImplementation
     def searchOptions(self):
         return self._searchOptions
-
+    
+    @decorators.BetaImplementation
     def setSearchOptions(self, ol):
-        self._searchOptions = QStringList::split(',', ol)
-        
-    def copy(other):
+        self._searchOptions.clear()
+        self._searchOptions = QtCore.QStringList::split(',', ol)
+    
+    @decorators.BetaImplementation    
+    def copy(self, other):
         if other == self: return
         od = FLFieldMetaDataPrivate(other.d)
         if od._relationM1: 
             od._relationM1.ref()
             self._relationM1 = od._relationM1
         self.clearRelationList()
-        if (od._relationList):
+        if od._relationList:
             r = FLRelationMetaData()
             it = od._relationList
             while ((r = it.current()) != 0): # FIXME: MIRAR
