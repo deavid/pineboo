@@ -25,6 +25,7 @@ class FLCompoundkey():
     """
     fieldList_ = []
     
+    @decorators.BetaImplementation
     def __init__(self, other = None):
         self.fieldList_ = FLFieldMetaDataList.FLFieldMetaDataList
         if other:
@@ -33,7 +34,7 @@ class FLCompoundkey():
     
     
     
-    
+    @decorators.BetaImplementation    
     def __del__(self):
         self.fieldList_ = None
 
@@ -43,7 +44,7 @@ class FLCompoundkey():
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
     @decorators.BetaImplementation
-    def addFieldMD(self, *f):
+    def addFieldMD(self, f):
         x = FLFieldMetaData(f.name().lower(), f)
         x.attr = len(self.fieldList_) + 1
         self.fieldList_.append(x)
@@ -74,7 +75,7 @@ class FLCompoundkey():
 
 
     @decorators.BetaImplementation
-    def copy(self, *other):
+    def copy(self, other):
         if self == other:
             return
         self.fieldList_ = other.fieldList_
