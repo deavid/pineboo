@@ -5,7 +5,7 @@
 
 class FLFieldMetaDataList():
     """
-    Tipo de datos lista de campos
+    Lista de campos
     """
     #typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
-    FLFieldMetaDataList = []
+    FLFieldMetaDataList = {}
