@@ -134,6 +134,26 @@ es más conveniente cambiar el PATH de windows.
 Por otra parte todos los paquetes necesarios tienen que ser instalados uno a uno
 en windows. Mira el listado de dependencias.
 
+Pineboo y Eclipse
+---------------------
+Para integrar Pineboo con eclipse. Despues de instalar Eclipse añade los repositorios de PyDev  y Egit
+
+PyDev
+Help > install New Software > Add Repository
+  http://pydev.org/updates
+
+Egit
+Help > install New Software > Add Repository
+  http://download.eclipse.org/egit/updates
+
+Ahora que tienes los compementos instalados, Create un fork de https://github.com/deavid/pineboo 
+Despues importa ese repositorio Git.
+
+Import > Git > Project from Git > Clone URI 
+
+https://github.com/AquiTuUsuario/pineboo 
+
+
 Cosas que se pueden probar en Pineboo
 ----------------------------------------
 La opción --help ofrece un listado de opciones, algunas pueden ser interesantes.

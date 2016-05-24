@@ -1,4 +1,5 @@
-# encoding: UTF-8
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
@@ -8,6 +9,10 @@ from lxml import etree
 from PyQt4 import QtGui, QtCore, uic
 
 from pineboolib import flcontrols
+from pineboolib.fllegacy import FLTableDB
+#from pineboolib.fllegacy import FLFieldDB
+
+import zlib
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -71,7 +76,7 @@ def loadUi(path, widget):
 
 
 def createWidget(classname, parent=None):
-    cls = getattr(flcontrols, classname, None) or getattr(QtGui, classname, None)
+    cls = getattr(flcontrols, classname, None) or getattr(QtGui, classname, None) or getattr(FLTableDB, classname, None) #or getattr(FLFieldDB, classname, None)
     if cls is None:
         print("WARN: Class name not found in QtGui:", classname)
         widgt = QtGui.QWidget(parent)
@@ -199,6 +204,7 @@ def loadWidget(xml, widget=None):
                 #print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
             else:
                 print("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
+            continue
         if c.tag == "widget":
             # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
             # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
@@ -226,6 +232,9 @@ def loadIcon(xml):
     img_format = xmldata.get("format")
     data = unhexlify(xmldata.text.strip())
     pixmap = QtGui.QPixmap()
+    if img_format == "XPM.GZ":
+        data = zlib.decompress(data,15)
+        img_format = "XPM"
     pixmap.loadFromData(data, img_format)
     icon = QtGui.QIcon(pixmap)
     ICONS[name] = icon
@@ -297,10 +306,21 @@ def _loadVariant(variant):
             try:
                 if c.tag == "bold": p.setBold(bv)
                 elif c.tag == "italic": p.setItalic(bv)
+                elif c.tag == "family": p.setFamily(value)
                 else: print("unknown font style type", repr(c.tag))
             except Exception as e:
                 print(e)
         return p
+
+    if variant.tag =="set":
+        v = None
+        text = variant.text
+        libs = [QtCore.Qt]
+        if text=="WordBreak|AlignVCenter": text="AlignVCenter"
+        for lib in libs:
+            v = getattr(lib,text,None)
+        if v is not None: return v
+    
     if variant.tag == "enum":
         v = None
         libs = [Qt, QtGui.QFrame, QtGui.QSizePolicy]

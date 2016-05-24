@@ -1,4 +1,5 @@
-# encoding: UTF-8
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
@@ -13,6 +14,8 @@ from lxml import etree
 import psycopg2
 from binascii import unhexlify
 
+import zlib
+
 import sip
 sip.setapi('QString', 1)
 
@@ -24,6 +27,7 @@ import pineboolib
 from pineboolib import qt3ui
 from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.qsaglobals import aqtt
+from pineboolib.FLForm import FLForm
 import pineboolib.emptyscript
 
 from pineboolib import qsatype, qsaglobals, DlgConnect
@@ -351,6 +355,9 @@ class MainForm(object):
             xmldata = image.xpath("data")[0]
             img_format = xmldata.get("format")
             data = unhexlify(xmldata.text.strip())
+            if img_format == "XPM.GZ":
+                data = zlib.decompress(data,15)
+                img_format = "XPM"
             pixmap = QtGui.QPixmap()
             pixmap.loadFromData(data, img_format)
             icon = QtGui.QIcon(pixmap)
@@ -465,50 +472,12 @@ class XMLAction(XMLStruct):
 
     def execDefaultScript(self):
         print("Executing default script for Action", self.name)
-        self.load()
+        s = self.load()
+        s.iface.main()
 
     def unknowSlot(self):
         print("Executing unknow script for Action", self.name)
         #Aquí debería arramcar el script
-
-class FLForm(QtGui.QWidget):
-    known_instances = {}
-    def __init__(self, parent, action, load=False):
-        try:
-            assert (self.__class__,action) not in self.known_instances
-        except AssertionError:
-            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__,action),)
-                + "Puede que se estén perdiendo datos!" )
-        self.known_instances[(self.__class__,action)] = self
-        QtGui.QWidget.__init__(self, parent)
-        self.action = action
-        self.prj = action.prj
-        self.mod = action.mod
-        self.layout = QtGui.QVBoxLayout()
-        self.layout.setMargin(2)
-        self.layout.setSpacing(2)
-        self.setLayout(self.layout)
-        # self.widget = QtGui.QWidget()
-        # self.layout.addWidget(self.widget)
-        self.bottomToolbar = QtGui.QFrame()
-        self.bottomToolbar.setMaximumHeight(64)
-        self.bottomToolbar.setMinimumHeight(16)
-        self.bottomToolbar.layout = QtGui.QHBoxLayout()
-        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setMargin(0)
-        self.bottomToolbar.layout.setSpacing(0)
-        self.bottomToolbar.layout.addStretch()
-        self.toolButtonClose = QtGui.QToolButton()
-        self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
-        self.toolButtonClose.clicked.connect(self.close)
-        self.bottomToolbar.layout.addWidget(self.toolButtonClose)
-        self.layout.addWidget(self.bottomToolbar)
-        self.setWindowTitle(action.alias)
-        self.loaded = False
-        if load: self.load()
-
-    def load(self):
-        if self.loaded: return
 
 class FLMainForm(FLForm):
     """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """

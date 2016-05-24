@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
+# -*# -*- coding: utf-8 -*-
 """
     Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
     pineboolib.main(); para ello acepta los parámetros necesarios de consola
@@ -139,8 +139,14 @@ def main():
         connection_window.show()
         ret = app.exec_()
         if connection_window.close():
-            prjpath = connection_window.ruta
-        if not prjpath:
+            if connection_window.ruta:
+                prjpath = connection_window.ruta
+                print("Cargando desde ruta %r " % prjpath)
+                project.load(prjpath)
+            elif connection_window.database:
+                print("Cargando credenciales")
+                project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password)
+        if not connection_window.ruta and not connection_window.database:
             sys.exit(ret)
 
 

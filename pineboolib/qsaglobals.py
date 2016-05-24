@@ -1,4 +1,5 @@
-# encoding: UTF-8
+# -*- coding: utf-8 -*-
+
 from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import object
@@ -9,11 +10,13 @@ import traceback
 import pineboolib
 from pineboolib import flcontrols
 
+from pineboolib.fllegacy import FLUtil
+
 from pineboolib.utils import aqtt, auto_qt_translate_text
 
 def parseFloat(x): return float(x)
 
-util = flcontrols.FLUtil() # <- para cuando QS erróneo usa util sin definirla
+util = FLUtil.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
 # TODO: separar en otro fichero de utilidades
 def ustr(*t1):
