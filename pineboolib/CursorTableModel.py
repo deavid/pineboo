@@ -25,9 +25,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.field_aliases = []
         self.field_type = []
         for field in self._table.fields:
-            if field.visible_grid:
-                self.sql_fields.append(field.name)
-                self.field_aliases.append(aqtt(field.alias))
+            #if field.visible_grid:
+            self.sql_fields.append(field.name)
+            self.field_aliases.append(aqtt(field.alias))
             self.field_type.append(field.mtd_type)    
             if field.pk: self._pk = field.name
 
@@ -41,17 +41,22 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         parent = QtCore.QModelIndex()
         oldrows = self.rows
         self.beginRemoveRows(parent, 0, oldrows )
-        where_filter = ""
+        where_filter = " "
         for k, wfilter in sorted(self.where_filters.items()):
             if wfilter is None: continue
             wfilter = wfilter.strip()
             if not wfilter: continue
-            where_filter += " AND " + wfilter
+            if where_filter is " ":
+                where_filter = wfilter
+            else:
+                where_filter += " AND " + wfilter
+        if where_filter is " ":
+            where_filter = "1=1"
         self._cursor = self._prj.conn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # FIXME: Agregado limit de 5000 registros para evitar atascar pineboo
         # TODO: Convertir esto a un cursor de servidor
-        sql = """SELECT %s FROM %s WHERE 1=1 %s LIMIT 5000""" % (", ".join(self.sql_fields),self._table.name, where_filter)
+        sql = """SELECT %s FROM %s WHERE %s LIMIT 5000""" % (", ".join(self.sql_fields),self._table.name, where_filter)
         self._cursor.execute(sql)
         self.rows = 0
         self.endRemoveRows()
@@ -83,8 +88,26 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return self._pk
 
     def fieldType(self, fieldName): # devuelve el tipo de campo
-        return self.field_type[self.sql_fields.index(fieldname)]
-
+        value = None
+        try:
+            if not fieldName is None:
+                value = self.field_type[self.sql_fields.index(fieldName)]
+            else:
+                value = None
+            return value
+        except:
+            print("CursorTableModel: No se encuentra el campo %s" % fieldName)
+            return None
+            
+    
+    def alias(self, fieldName):
+        value = None
+        try:
+            value = self.field_aliases[self.sql_fields.index(fieldName)]
+            return value
+        except:
+            return value
+        
     def columnCount(self, parent = None):
         if parent is None: parent = QtCore.QModelIndex()
         if parent.isValid(): return 0

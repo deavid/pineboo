@@ -35,6 +35,7 @@ class FLSqlCursor(ProjectClass):
         return self._model.where_filters.get("main-filter", "")
 
     def setMainFilter(self, newFilter):
+        newFilter = newFilter
         print("New main filter:", newFilter)
         self._model.where_filters["main-filter"] = newFilter
 
@@ -43,7 +44,8 @@ class FLSqlCursor(ProjectClass):
             self._action = self._prj.actions[actionname]
         except KeyError:
             print("Accion no encontrada:", actionname)
-            self._action = self._prj.actions["articulos"]
+            return
+            #self._action = self._prj.actions["articulos"]
 
         if self._action.table:
             self._model = CursorTableModel(self._action, self._prj)
@@ -277,25 +279,26 @@ class FLSqlCursor(ProjectClass):
     def insertRecord(self):
         print("Insert a row ", self._action.name)
         self._mode = self.Insert
-        self._action.openDefaultFormRecord()
+        self._action.openDefaultFormRecord(self)
 
     @QtCore.pyqtSlot()
     def editRecord(self):
         print("Edit the row!", self._action.name)
-        self._mode = self.Insert
-        self._action.openDefaultFormRecord()
+        self._mode = self.Edit
+        self._action.openDefaultFormRecord(self)
 
 
     @QtCore.pyqtSlot()
     def deleteRecord(self):
-        self._mode = self.Delete
+        self._mode = self.Del
         print("Drop the row!", self._action.name)
-        self._action.openDefaultFormRecord()
+        self._action.openDefaultFormRecord(self)
 
     @QtCore.pyqtSlot()
     def browseRecord(self):
         print("Inspect, inspect!", self._action.name)
-        self._action.openDefaultFormRecord()
+        self._mode = self.Browse
+        self._action.openDefaultFormRecord(self)
 
     @QtCore.pyqtSlot()
     def copyRecord(self):

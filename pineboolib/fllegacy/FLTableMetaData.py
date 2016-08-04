@@ -13,7 +13,11 @@ from pineboolib.fllegacy.FLFieldMetaDataList import FLFieldMetaDataList
 sip.setapi('QVariant', 2)
 sip.setapi('QString', 1)
 
+<<<<<<< HEAD
 from PyQt4.QtCore import QString , QVariant
+=======
+from PyQt4.QtCore import QString, QVariant
+>>>>>>> 7b4bceb52f420a401a56e794f6d0cef12ccf6343
 
 """
 Mantiene la definicion de una tabla.

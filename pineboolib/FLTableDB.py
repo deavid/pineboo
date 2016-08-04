@@ -14,7 +14,7 @@ class FLTableDB(QtGui.QWidget):
     _comboBox_2 = None
     _topWidget = None
     _cursor = None
-
+    _loaded = False
 
     _tableName = None
     _foreignField = None
@@ -69,7 +69,6 @@ class FLTableDB(QtGui.QWidget):
             self._cursor = action_or_cursor
         elif isinstance(action_or_cursor,str):
             self._action = action_or_cursor
-            self.initCursor()
         else:
             self._cursor = None
         if self._cursor:
@@ -100,8 +99,16 @@ class FLTableDB(QtGui.QWidget):
     def loaded(self):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
-        print("FLTableDB: setting columns in interactive mode")
+        #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
         self._tableView._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
+        self._loaded = True
+        while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
+            parent_cursor = getattr(self._parent,"_cursor", None)
+            if parent_cursor: break
+            new_parent = self._parent.parentWidget()
+            if new_parent is None: break
+            self._parent = new_parent
+        self.initCursor()
 
     def cursor(self):
         assert self._cursor
@@ -189,29 +196,38 @@ class FLTableDB(QtGui.QWidget):
 
 
     def initCursor(self):
+        filtro = None
+        forenea = None
         if not self._foreignField:
             return
         if not self._fieldRelation:
             return
         if not self._tableName:
             return
-        print("tablename = %s" % self._tableName)  
-        print("foreignField = %s" % self._foreignField )
-        print("fieldRelation = %s" % self._fieldRelation)
-        parent = self.parentWidget() 
-        while True:
-            parent_cursor = getattr(parent,"_cursor", None)
-            if parent_cursor: 
-                print("Primo encontrado!!")
-                break
-            new_parent = parent.parentWidget()
-            if new_parent is None: 
-                print("No hay mas primos :(")
-                break
-            parent = new_parent
+        
+        if self._loaded:   
+            #print("Tabla %s" % self._tableName)
+            #print("FieldRelation %s" % self._fieldRelation)
+            #print("ForeignField %s" % self._foreignField)
+            tipo = self._cursor._model.fieldType(self._fieldRelation)
+            foranea = self._parent.parentWidget()._cursor.valueBuffer(self._foreignField)
+            if foranea is None:
+                print("FLTable(%s): campo foraneo \"%s.%s\" no encontrado." % (self._tableName,self._parent.parentWidget()._cursor.table(), self._foreignField))
+                return
+            if tipo is "uint":
+                filtro = "%s = %s" % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
+            else:
+                filtro = "%s = '%s'"  % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
+            
+            #print("Filtro:%s" % filtro)
+            self._cursor.setMainFilter(filtro)
+            self._cursor.refresh()
+        else:
+            self._cursor = FLSqlCursor(self._tableName)
+            
+            
 
-        self._cursor = FLSqlCursor(self._tableName)
-        #self._cursor.setAction(self._action)
+            #self._cursor.setMainFilter("%s = ")
 
     @QtCore.pyqtSlot()
     def close(self):

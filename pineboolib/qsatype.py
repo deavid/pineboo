@@ -8,10 +8,11 @@ from PyQt4 import QtCore, QtGui
 
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
+from pineboolib import FLFormSearchDB as FLFormSearchDB_legacy
 from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
-from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
+from pineboolib import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 
 def Object(x=None):
@@ -62,7 +63,7 @@ class FormDBWidget(QtGui.QWidget):
         return self._cursor
 
 def FLFormSearchDB(name):
-    return flcontrols.FLFormSearchDB(name)
+    return FLFormSearchDB_legacy.FLFormSearchDB(name)
 
 class Date(QtCore.QDate):
     pass

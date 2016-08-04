@@ -36,7 +36,7 @@ class FLFormDB(QtGui.QWidget):
         self.toolButtonClose = QtGui.QToolButton()
         self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
         self.toolButtonClose.clicked.connect(self.close)
-        self.bottomToolbar.layout.addWidget(self.toolButtonClose)
+        self.bottomToolbar.layout.addWidget(self.toolButtonClose) 
         self.layout.addWidget(self.bottomToolbar)
         self.setWindowTitle(action.alias)
         self.loaded = False
@@ -46,3 +46,4 @@ class FLFormDB(QtGui.QWidget):
 
     def load(self):
         if self.loaded: return
+    
