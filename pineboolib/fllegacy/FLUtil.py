@@ -2,6 +2,7 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
+import pineboolib
 
 class FLUtil(ProjectClass):
     progress_dialog_stack = []

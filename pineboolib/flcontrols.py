@@ -2,16 +2,12 @@
 
 from __future__ import print_function
 from __future__ import unicode_literals
-from builtins import str
-import traceback
-import sip
-sip.setapi('QString', 1)
 
 from PyQt4 import QtGui, QtCore # , uic
 
 import pineboolib
 #from pineboolib.qsaglobals import ustr
-from pineboolib.utils import DefFun, filedir
+from pineboolib.utils import DefFun
 from pineboolib import decorators
 
 Qt = QtCore.Qt
@@ -368,6 +364,7 @@ class FLFieldDB(QtGui.QWidget):
         self._layout.addWidget(self._label)
         self._layout.addWidget(self._lineEdit)
         self.setLayout(self._layout)
+        
     
     def __getattr__(self, name): return DefFun(self, name)
             
@@ -407,6 +404,7 @@ class FLFieldDB(QtGui.QWidget):
 
     @decorators.NotImplementedWarn
     def setFilter(self, newFilter):
+        self._filter = newFilter
         return True
 
     
@@ -424,11 +422,11 @@ class FLFieldDB(QtGui.QWidget):
         return True
 
 
-    def setFilter(self, newFilter):
-        self._filter = newFilter
-        return True
 
     def setShowEditor(self, show):
         self._showEditor = bool(show)
         self._lineEdit.setReadOnly(self._showEditor)
         return True
+    
+    def setValue(self, value):
+        self._lineEdit.setText(value)

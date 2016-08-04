@@ -2,8 +2,6 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.utils import DefFun
 
 from PyQt4 import QtCore,QtGui
 
@@ -54,6 +52,8 @@ class FLSqlCursor(ProjectClass):
         self._activatedCheckIntegrity = True
         self._activatedCommitActions = True
 
+    def action(self):
+        return self._action.name
 
     @decorators.NotImplementedWarn
     def setActivatedCheckIntegrity(self, state):
@@ -95,7 +95,7 @@ class FLSqlCursor(ProjectClass):
 
     def valueBuffer(self, fieldname):
         if self._currentregister < 0 or self._currentregister > self._model.rows: return None
-        return self._model.value(self._currentregister, fieldname)
+        return self._model.value(_currentregister, fieldname)
 
     @decorators.NotImplementedWarn 
     def valueBufferCopy(self,fieldname):
@@ -103,7 +103,6 @@ class FLSqlCursor(ProjectClass):
 
     @decorators.NotImplementedWarn
     def setValueBuffer(self, fieldname, newvalue):
-        valor = None
         if not fieldname == self._model.pK():
             value = self._model.value(self._currentregister, fieldname)
             if self._model.fieldType(fieldname) == "bool":
@@ -115,8 +114,8 @@ class FLSqlCursor(ProjectClass):
                 #parent = f.related.parent_model._meta.model_name
                 #model, a, b, c = self._obtenermodelo(parent)
                 #newvalue = model(newvalue)
-            if not newvalue is self.valueBufferCopy(fieldname):
-                self._model.setValue(fieldname,valor)
+            if not newvalue == self.valueBufferCopy(fieldname):
+                self._model.setValue(fieldname,newvalue)
             self.__bufferChanged(fieldname)
 
     @decorators.NotImplementedWarn
@@ -244,7 +243,6 @@ class FLSqlCursor(ProjectClass):
         return self._mode
 
     def refreshBuffer(self):
-        val = None
         self._update=dict() #cambiar
         if self.modeAccess() == self.Insert:
             if self._model.fieldType(self._model.pK()) == "serial":
@@ -272,6 +270,13 @@ class FLSqlCursor(ProjectClass):
 
     def primaryKey(self):
         return self._model.pK()
+
+    def size(self):
+        return len(self._model._table.fields)
+
+    @decorators.NotImplementedWarn
+    def commitBuffer(self):
+        return True
 
     @QtCore.pyqtSlot()
     def insertRecord(self):
@@ -301,8 +306,8 @@ class FLSqlCursor(ProjectClass):
     def copyRecord(self):
         print("Clone your clone", self._action.name)
 
-    def fieldDisabled(self, fN):
-        if self._mode is self.Insert or self._mode is self.Edit:
+    def fieldDisabled(fN):
+        if self._mode == self.Insert or self._mode == self.Edit:
             return True
         else:
             return False

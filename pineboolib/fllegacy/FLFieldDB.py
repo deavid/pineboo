@@ -10,7 +10,6 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from asyncio.windows_events import NULL
 from pineboolib.fllegacy.FLRelatiomMetaData import FLRelationMetaData
-from builtins import False
 from pineboolib.flcontrols import QComboBox
 from pineboolib.flparser.qsatype import FLSqlCursor
 from distlib.compat import IDENTIFIER

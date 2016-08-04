@@ -19,18 +19,16 @@ import zlib
 import sip
 sip.setapi('QString', 1)
 
-from PyQt4 import QtGui, QtCore, uic
+from PyQt4 import QtGui, QtCore
 if __name__ == "__main__":
     sys.path.append('..')
 
-import pineboolib
 from pineboolib import qt3ui
 from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.qsaglobals import aqtt
-from pineboolib.FLForm import FLForm
+from pineboolib.FLFormDB import FLFormDB
 import pineboolib.emptyscript
 
-from pineboolib import qsatype, qsaglobals, DlgConnect
+from pineboolib import qsaglobals
 
 from pineboolib.utils import filedir, one, Struct, XMLStruct
 Qt = QtCore.Qt
@@ -427,7 +425,7 @@ class XMLAction(XMLStruct):
         if self._record_loaded: return self.formrecord_widget
         print("Loading record action %s . . . " % (self.name))
         parent = None # Sin padre, ya que es ventana propia
-        self.formrecord_widget = FLFormRecord(parent,self, load = True)
+        self.formrecord_widget = FLFormDBRecord(parent,self, load = True)
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         self._record_loaded = True
         print("End of record action load %s (iface:%s ; widget:%s)"
@@ -479,7 +477,7 @@ class XMLAction(XMLStruct):
         print("Executing unknow script for Action", self.name)
         #Aquí debería arramcar el script
 
-class FLMainForm(FLForm):
+class FLMainForm(FLFormDB):
     """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """
     iface = None
     def load(self):
@@ -535,9 +533,15 @@ class FLMainForm(FLForm):
         self.iface = self.widget.iface
 
 
-class FLFormRecord(FLForm):
+class FLFormDBRecord(FLFormDB):
     """ Controlador dedicado a las ventanas de edición de registro (emergentes) """
     iface = None
+    _cursor = None
+    
+    
+    def __init__(self, parent, action, load=False):
+        super(FLFormDBRecord,self).__init__(parent, action, load)
+    
     def load(self):
         if self.loaded: return
         print("Loading (record) form %s . . . " % self.action.formrecord)

@@ -5,6 +5,9 @@ from PyQt4 import QtCore,QtGui
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import DefFun
+from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 
 class FLTableDB(QtGui.QWidget):
     _tableView = None
@@ -12,14 +15,8 @@ class FLTableDB(QtGui.QWidget):
     _lineEdit = None
     _comboBox_1 = None
     _comboBox_2 = None
-    _topWidget = None
-    _cursor = None
-
-
-    _tableName = None
-    _foreignField = None
-    _fieldRelation = None
-    _action = None
+    topWidget = QtGui.QWidget
+    showed = False
 
     def __init__(self, parent = None, action_or_cursor = None, *args):
         print("FLTableDB:", parent, action_or_cursor , args)
@@ -68,8 +65,7 @@ class FLTableDB(QtGui.QWidget):
         if isinstance(action_or_cursor,FLSqlCursor):
             self._cursor = action_or_cursor
         elif isinstance(action_or_cursor,str):
-            self._action = action_or_cursor
-            self.initCursor()
+            self._cursor = FLSqlCursor(action_or_cursor)
         else:
             self._cursor = None
         if self._cursor:
@@ -93,7 +89,6 @@ class FLTableDB(QtGui.QWidget):
         self.sort = []
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(100, self.loaded)
-        self._topWidget = parent
 
     def __getattr__(self, name): return DefFun(self, name)
 
@@ -135,8 +130,6 @@ class FLTableDB(QtGui.QWidget):
             return True
 
     def putSecondCol(self, fN):
-        if self._cursor is None:
-            return
         _oldPos= None
         _oldSecond = self._tableView._h_header.logicalIndex(1)
         for column in range(self._cursor._model.columnCount()):
@@ -155,32 +148,30 @@ class FLTableDB(QtGui.QWidget):
 
     def setTableName(self, tableName):
         self._tableName = tableName
-        self.initCursor()
-        return True
-    
-    def tableName(self):
-        return self._tableName
-    
-    def foreignField(self):
-        return self._foreignField
-    
-    def fieldRelation(self):
-        return self._fieldRelation
+        if self.showed:
+            if self.topWidget:
+                self.initCursor()
+            else:
+                self.initFakeEditor()
 
 
-    def setForeignField(self, foreignField):
-        self._foreignField = foreignField
-        self.initCursor()
-        return True
+    def setForeignField(self, foreingField):
+        self._foreingField = foreingField
+        if self.showed:
+            if self.topWidget:
+                self.initCursor()
+            else:
+                self.initFakeEditor()
+
 
 
     def setFieldRelation(self, fieldRelation):
         self._fieldRelation = fieldRelation
-        self.initCursor()
-        return True
-    
-    def setActionName(self, action):
-        self._action = action
+        if self.showed:
+            if self.topWidget:
+                self.initCursor()
+            else:
+                self.initFakeEditor()
 
 
 
@@ -188,30 +179,114 @@ class FLTableDB(QtGui.QWidget):
 
 
 
+    @decorators.NotImplementedWarn
     def initCursor(self):
-        if not self._foreignField:
-            return
-        if not self._fieldRelation:
-            return
-        if not self._tableName:
-            return
-        print("tablename = %s" % self._tableName)  
-        print("foreignField = %s" % self._foreignField )
-        print("fieldRelation = %s" % self._fieldRelation)
-        parent = self.parentWidget() 
-        while True:
-            parent_cursor = getattr(parent,"_cursor", None)
-            if parent_cursor: 
-                print("Primo encontrado!!")
-                break
-            new_parent = parent.parentWidget()
-            if new_parent is None: 
-                print("No hay mas primos :(")
-                break
-            parent = new_parent
+        # si no existe crea la tabla
+        if not self._cursor: return False
+        if not self._cursor._model: return False
 
-        self._cursor = FLSqlCursor(self._tableName)
-        #self._cursor.setAction(self._action)
+        self._tMD = 0
+
+        if not self._sortField: self._tMD = self._cursor._model.name()
+        if self._tMD:
+            self.sortField_ = self._tMD.value(self._cursor._currentregister, self._tMD.primaryKey())
+        ownTMD = False
+        if not self._tableName:
+            #if not cursor_->db()->manager()->existsTable(tableName_)) {
+            ownTMD = True
+            #tMD = cursor_->db()->manager()->createTable(tableName_);
+        else:
+            ownTMD = True
+            self._tMD = self._cursor._model._table.name
+
+        if not self._tMD:
+            return
+
+        if not self._foreignField or not self._fieldRelation:
+            if not self._cursor._model:
+                if ownTMD and self._tMD and not self._tMD.inCache():
+                    self._tMD = None
+        
+            return
+
+            if not self._cursor._model.name() == self._tableName:
+                ctxt = self._cursor.context();
+                self._cursor = FLSqlCursor(self._tableName)
+                if self._cursor:
+                    self._cursor.setContext(ctxt)
+                    cursorAux = 0
+        
+                if ownTMD and self._tMD and not self._tMD.inCache():
+                    self._tMD = None
+        
+                return
+        
+        else:
+            cursorTopWidget = self.topWidget._cursor() # ::qt_cast<FLFormDB *>(topWidget)->cursor()
+            if cursorTopWidget and not cursorTopWidget._model.name() == self._tableName:
+                self._cursor = cursorTopWidget
+    
+  
+
+        if not self._tableName or not self._foreignField or not self._fieldRelation or cursorAux:
+            if ownTMD and self._tMD and not self._tMD.inCache():
+                tMD = None
+    
+            return
+  
+        cursorAux = self._cursor
+        curName = self._cursor._model.name()
+        rMD = self._cursor._model.relation(self._foreignField,self._fieldRelation,self._tableName)
+        testM1 = self._tMD.relation(self._fieldRelation, self._foreignField, curName)
+        checkIntegrity = bool(False)
+
+        if not rMD:
+            if testM1:
+                checkIntegrity = (testM1.cardinality() == FLRelationMetaData.RELATION_M1)
+            fMD = FLTableMetaData(self._cursor._model.field(self._foreignField)) 
+            if (fMD):
+                tmdAux = self._cursor._model(self._tableName);
+                if not tmdAux or tmdAux.isQuery():
+                    checkIntegrity = False
+                if tmdAux and not tmdAux.inCache(): # mirar inCache()
+                    tmdAux = None
+                rMD = FLRelationMetaData(self._tableName,self._fieldRelation, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
+                fMD.addRelationMD(rMD)
+                print("FLTableDB : La relación entre la tabla del formulario %r y esta tabla %r de este campo no existe, pero sin embargo se han indicado los campos de relación( %r, %r )" % (curName, self._tableName, self._fieldRelation, self._foreignField))
+                print("FLTableDB : Creando automáticamente %r.%r --1M--> %r.%r" %  (curName, self._foreignField, self._tableName, self._fieldRelation))
+
+    
+            else:
+                print("FLTableDB : El campo ( %r ) indicado en la propiedad foreignField no se encuentra en la tabla ( %r )" % (self._foreignField, curName))
+        rMD = testM1
+        if not rMD:
+            fMD = FLFieldMetaData(tMD.field(self._fieldRelation))
+            if (fMD):
+                rMD = FLRelationMetaData(curName,self._foreignField, FLRelationMetaData.RELATION_1M, False, False, False)
+                fMD.addRelationMD(rMD)
+                print("FLTableDB : Creando automáticamente %r.%r --1M--> %r.%r" % (self._tableName, self._fieldRelation, curName, self._foreignField))
+            else:
+                print("FLTableDB : El campo ( %r ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %r )" % (self._fieldRelation, self._tableName))
+
+        self._cursor = FLSqlCursor(self._tableName, True, self._cursor.db().connectionName(), cursorAux, rMD, self);
+        if not self._cursor:
+            self._cursor = cursorAux
+            cursorAux = 0
+        else:
+            self._cursor.setContext(cursorAux.context())
+        if self.showed:
+            self.disconnect(cursorAux, QtCore.SIGNAL('newBuffer()'), self.refresh())
+            self.connect(cursorAux,QtCore.SIGNAL('newBuffer()'), self.refresh())
+  
+
+        if cursorAux and self.topWidget.isA("FLFormSearchDB"):
+            self.topWidget.setCaption(self._cursor._model.alias())
+            self.topWidget.setCursor(self._cursor) #::qt_cast<FLFormSearchDB *>(topWidget)->setCursor(cursor_);
+  
+
+        if ownTMD and tMD and not tMD.inCache():
+            tMD = None
+
 
     @QtCore.pyqtSlot()
     def close(self):
@@ -225,30 +300,7 @@ class FLTableDB(QtGui.QWidget):
     @QtCore.pyqtSlot()
     def show(self):
         print("FLTableDB: show event")
-        #super(FLTableDB, self).show()
-        
-        if self._cursor:
-            self._tableView._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
-            self._tableView.setModel(self._cursor._model)
-            self._tableView.setSelectionModel(self._cursor.selection())
-        self.tableRecords = self # control de tabla interno
-
-        #Carga de comboBoxs y connects .- posiblemente a mejorar
-        if self._cursor:
-            for column in range(self._cursor._model.columnCount()):
-                self._comboBox_1.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                self._comboBox_2.addItem(self._cursor._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-        self._comboBox_1.addItem("*")
-        self._comboBox_2.addItem("*")
-        self._comboBox_1.setCurrentIndex(0)
-        self._comboBox_2.setCurrentIndex(1)
-        self._comboBox_1.currentIndexChanged.connect(self.comboBox_putFirstCol)
-        self._comboBox_2.currentIndexChanged.connect(self.comboBox_putSecondCol)        
-
-        self.sort = []
-        self.timer_1 = QtCore.QTimer(self)
-        self.timer_1.singleShot(100, self.loaded)
-        
+        super(FLTableDB, self).show()
 
     @QtCore.pyqtSlot()
     def insertRecord(self):
@@ -269,12 +321,3 @@ class FLTableDB(QtGui.QWidget):
     @QtCore.pyqtSlot()
     def copyRecord(self):
         self._cursor.copyRecord()
-    
-    @decorators.WorkingOnThis
-    def setEditOnly(self, value):
-        return True
-    
-    @decorators.WorkingOnThis
-    def setReadOnly(self, value):
-        return True
-        
