@@ -20,6 +20,7 @@ class FLTableDB(QtGui.QWidget):
     _foreignField = None
     _fieldRelation = None
     _action = None
+    _foreignFilter = None
 
     def __init__(self, parent = None, action_or_cursor = None, *args):
         print("FLTableDB:", parent, action_or_cursor , args)
@@ -197,7 +198,6 @@ class FLTableDB(QtGui.QWidget):
 
     def initCursor(self):
         filtro = None
-        forenea = None
         if not self._foreignField:
             return
         if not self._fieldRelation:
@@ -215,12 +215,12 @@ class FLTableDB(QtGui.QWidget):
                 print("FLTable(%s): campo foraneo \"%s.%s\" no encontrado." % (self._tableName,self._parent.parentWidget()._cursor.table(), self._foreignField))
                 return
             if tipo is "uint":
-                filtro = "%s = %s" % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
+                self._foreignFilter = "%s = %s" % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
             else:
-                filtro = "%s = '%s'"  % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
+                self._foreignFilter = "%s = '%s'"  % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
             
             #print("Filtro:%s" % filtro)
-            self._cursor.setMainFilter(filtro)
+            self._cursor.setMainFilter(self._foreignFilter)
             self._cursor.refresh()
         else:
             self._cursor = FLSqlCursor(self._tableName)
@@ -236,7 +236,7 @@ class FLTableDB(QtGui.QWidget):
     @QtCore.pyqtSlot()
     def refresh(self):
         print("FLTableDB: refresh()", self.parent().parent().parent())
-        self._cursor.refresh()
+        self._cursor.setMainFilter(self._foreignFilter)
 
     @QtCore.pyqtSlot()
     def show(self):
