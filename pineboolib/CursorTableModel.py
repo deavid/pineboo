@@ -3,8 +3,10 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 from pineboolib.qsaglobals import ustr
+import pineboolib
 
 from PyQt4 import QtCore
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
 class CursorTableModel(QtCore.QAbstractTableModel):
     rows = 15
@@ -76,9 +78,19 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         print("rows:", self.rows)
 
     def value(self, row, fieldname):
-        if row < 0 or row >= self.rows: return None
+        value = None
+        if row < 0 or row >= self.rows: return value
         col = self.sql_fields.index(fieldname)
-        return self._data[row][col]
+        if self.field_type[col] == 'pixmap':
+            campo = self._data[row][col]
+            cur = pineboolib.project.conn.cursor()
+            sql = "SELECT contenido FROM fllarge WHERE refkey ='%s'" % campo
+            cur.execute(sql)
+            for ret, in cur:
+                value = ret
+        else:
+            value = self._data[row][col]
+        return value
 
     @decorators.NotImplementedWarn
     def setValue(self,fieldname, value):
