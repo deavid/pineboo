@@ -60,6 +60,8 @@ class FLFieldDB(QtGui.QWidget):
             self._parent = new_parent
             
         self._cursor = self._parent.parentWidget()._cursor
+        if not self._cursor:
+            self._cursor = self._parent._cursor
         #Si es un dato externo ...
         if not self._tableName is None and not self._tableName == "":
             self._editable = False
