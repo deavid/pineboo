@@ -2,6 +2,7 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
+from PyQt4.QtCore import QString
 import pineboolib
 
 class FLUtil(ProjectClass):
@@ -9,7 +10,7 @@ class FLUtil(ProjectClass):
     def __getattr__(self, name): return DefFun(self, name)
 
     def translate(self, group, string):
-        return QtCore.QString(string)
+        return QString(string)
 
     def sqlSelect(self, table, fieldname, where):
         if where: where = "AND " + where
