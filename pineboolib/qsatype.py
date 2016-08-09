@@ -73,4 +73,25 @@ class Date(QtCore.QDate):
     pass
 
 class Dialog(QtGui.QDialog):
+    _layout = None
+    
+    def __init__(self, title, f):
+        #FIXME: f no lo uso , es qt.windowsflg
+        super(Dialog, self).__init__()
+        self.setWindowTitle(title)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self._layout = QtGui.QVBoxLayout()
+        self.setLayout(self._layout)
+        
+    
+    def add(self, _object):
+        self._layout.addWidget(_object)
+        
+            
+        
+class GroupBox(QtGui.QGroupBox):
     pass
+
+class CheckBox(QtGui.QCheckBox):
+    pass
+        
