@@ -41,6 +41,7 @@ def FLTableDB(*args):
     return FLTableDB_Legacy.FLTableDB(*args)
 
 class FormDBWidget(QtGui.QWidget):
+    
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
@@ -60,7 +61,10 @@ class FormDBWidget(QtGui.QWidget):
         return ret
 
     def cursor(self):
-        return self._cursor
+        cursor = getattr(self.parentWidget(),"_cursor", None)
+        if not cursor:
+            cursor = self._cursor 
+        return cursor
 
 def FLFormSearchDB(name):
     return FLFormSearchDB_legacy.FLFormSearchDB(name)
