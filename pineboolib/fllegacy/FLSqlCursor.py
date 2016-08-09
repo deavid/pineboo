@@ -251,14 +251,16 @@ class FLSqlCursor(ProjectClass):
         if self.modeAccess() == self.Insert:
             if self._model.fieldType(self._model.pK()) == "serial":
                 q = FLSqlQuery()
-                q.setSelect(u"nextval('" + self._model._table + "_" + self._model._pk + "_seq')")
+                sequence = u"%s_%s_seq" % (self.table().name, self._model.pK())
+                q.setSelect("nextval('" + sequence + "')")
                 q.setFrom("")
                 q.setWhere("")
-                if not q.exec():
-                    print("not exec sequence")
+                if not q.exec_():
+                    print("not exec sequence ", sequence)
                     return None
                 if q.first():
                     val = q.value(0)
+                    #print("nextval(%s) = %s" % (sequence,val))
                     #self._update[pk] = val FIXME : Actualizar el registro con una consulta sql?
                 else:
                     return None
