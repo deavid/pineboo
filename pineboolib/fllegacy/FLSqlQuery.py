@@ -2,6 +2,8 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
+import pineboolib
+from pineboolib.fllegacy import FLSqlCursor
 
 class FLSqlQuery(ProjectClass):
     """
@@ -170,11 +172,14 @@ class FLSqlQuery(ProjectClass):
 
 
     @classmethod
-    def __damecursor(cls,miconnection=None):
+    def __damecursor(self,miconnection=None):
         if miconnection:
-            return connections[miconnection].cursor()
+            cursor = miconnection.cursor()
         else:
-            return dameConexionDef().cursor()
+            cursor = pineboolib.project.conn.cursor()
+        #print("__damecursor:", cursor)
+        return cursor
+        
     def __damePosDeCadena(self,sCampo):
         if isinstance(sCampo, int):
             return sCampo
