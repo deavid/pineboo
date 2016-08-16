@@ -9,6 +9,8 @@ class FLSqlQuery(ProjectClass):
     """
     Implementacion de FlSqlquery de Abanq para compatibilidad con python
     """
+    _sql = None
+    
     def __init__(self):
         self._sSELECT=""
         self._columns=[]
@@ -27,25 +29,28 @@ class FLSqlQuery(ProjectClass):
         self._sSELECT=sSELECT
         self._columns=[]
         for scolumna in self._sSELECT.split(","):
-            self._columns.append(scolumna.strip().upper())
+            self._columns.append(str(scolumna).strip().upper())
 
     def select(self):
         return self._sSELECT
 
     def setFrom(self,sFROM):
         self._sFROM=sFROM
+        self._sql = None
 
     def From(self):
         return self._sFROM
 
     def setWhere(self,swhere):
         self._sWHERE=swhere
+        self._sql = None
 
     def where(self):
         return self._sWHERE
 
     def setOrderBy(self,orderBy):
         self._sORDER=orderBy
+        self._sql = None
 
     def orderBy(self):
         return self._sORDER
@@ -54,9 +59,10 @@ class FLSqlQuery(ProjectClass):
         self._sTablas=tablas
         self._tables=[]
         for stable in self._sTablas.split(","):
-            self._tables.append(stable.strip().upper())
+            self._tables.append(str(stable).strip().upper())
+        self._sql = None
 
-    def sql(self):
+    def sql(self):              
         sSQL= "SELECT " + self._sSELECT
         if self._sFROM : 
             sSQL=sSQL + " FROM " +self._sFROM
@@ -64,9 +70,9 @@ class FLSqlQuery(ProjectClass):
             sSQL=sSQL + " WHERE " +self._sWHERE
         if self._sORDER : 
             sSQL=sSQL + " ORDER BY " +self._sORDER
-        return sSQL
-
-
+        return str(sSQL)     
+        
+        
     def setForwardOnly(self,valor):
         #De principio nada
         pass
