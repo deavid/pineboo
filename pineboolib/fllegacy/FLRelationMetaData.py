@@ -11,8 +11,8 @@ class FLRelationMetaData():
     Constantes de tipos de cardinalidades de una relacion 
     """
     
-    RELATION_1M = 0
-    RELATION_M1 = 1
+    RELATION_1M = "1M"
+    RELATION_M1 = "M1"
     
     
     count_ = 0
@@ -21,7 +21,6 @@ class FLRelationMetaData():
     
     
     
-    @decorators.BetaImplementation
     def __init__(self, *args, **kwargs):
         if len(args) == 1:
             self.inicializeFromFLRelationMetaData(args[0])
@@ -40,7 +39,6 @@ class FLRelationMetaData():
     @param uC Actualizaciones en cascada, sólo se tiene en cuenta en cardinalidades M1
     @param cI Chequeos de integridad sobre la relacion
     """
-    @decorators.BetaImplementation
     def inicializeNewFLRelationMetaData(self, fT, fF, rC, dC = False, uC = False, cI = True):
         self.d = FLRelationMetaDataPrivate(fT, fF, rC, dC, uC, cI) 
     
@@ -53,7 +51,6 @@ class FLRelationMetaData():
     """
     destructor
     """
-    @decorators.BetaImplementation  
     def __del__(self):
         --self.count_
         del self.d
@@ -64,7 +61,6 @@ class FLRelationMetaData():
 
     @param fN Nombre del campo relacionado
     """
-    @decorators.BetaImplementation
     def setField(self, fN):
         self.d.field_ = fN.lower()
 
@@ -82,7 +78,6 @@ class FLRelationMetaData():
 
     @return Devuelve el nombre de la tabla de la base de datos con la que se está relacionada
     """
-    @decorators.BetaImplementation
     def foreignTable(self):
         return self.d.foreignTable_
         
@@ -91,7 +86,6 @@ class FLRelationMetaData():
 
     @return Devuelve el nombre del campo de la tabla foránea con la que está relacionada
     """
-    @decorators.BetaImplementation
     def foreignField(self):
         return self.d.foreignField_
 
@@ -101,7 +95,6 @@ class FLRelationMetaData():
     @return Devuelve la cardinalidad de la relacion, mirando desde la tabla donde se
         define este objeto hacia la foránea
     """
-    @decorators.BetaImplementation
     def cardinality(self):
         return self.d.cardinality_
 
@@ -181,17 +174,16 @@ class FLRelationMetaDataPrivate():
     """
     checkIn_ = None
 
-    @decorators.BetaImplementation
     def __init__(self, *args, **kwargs):
         if len(args) == 0:
             self.inicializeFromFLRelationMetaDataPrivate()
         else:
             self.inicializeNewFLRelationMetaDataPrivate( args[0], args[1], args[2], args[3], args[4], args[5])
             
-    @decorators.BetaImplementation
+            
     def inicializeNewFLRelationMetaDataPrivate(self, fT, fF, rC, dC, uC, cI):
-        self.foreignTable_ = fT.lower()
-        self.foreignField_ = fF.lower()
+        self.foreignTable_ = str(fT).lower()
+        self.foreignField_ = str(fF).lower()
         self.cardinality_ = rC
         self.deleteCascade_ = dC
         self.updateCascade_ = uC
