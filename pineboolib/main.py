@@ -11,23 +11,22 @@ import os
 #import re,subprocess
 import traceback
 from lxml import etree
-import psycopg2
 from binascii import unhexlify
 
 import zlib
 
-import sip
-sip.setapi('QString', 1)
 
 from PyQt4 import QtGui, QtCore
 if __name__ == "__main__":
     sys.path.append('..')
 
 from pineboolib import qt3ui
+from pineboolib.PNConnection import PNConnection
 from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.FLFormDB import FLFormDB
-from pineboolib.FLFormDBRecord import FLFormDBRecord
+from pineboolib.fllegacy.FLFormDB_old import FLFormDB
+from pineboolib.fllegacy.FLFormDBRecord import FLFormDBRecord
 import pineboolib.emptyscript
+
 
 from pineboolib import qsaglobals
 
@@ -46,6 +45,8 @@ class DBAuth(XMLStruct):
 
 
 class Project(object):
+    conn = None # Almacena la conexión principal a la base de datos 
+    
     def __init__(self):
         self.tree = None
         self.root = None
@@ -110,15 +111,8 @@ class Project(object):
         if not os.path.exists(self.dir("cache")):
             os.makedirs(self.dir("cache"))
         # Conectar:
-        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
-                        self.dbname, self.dbserver.host, self.dbserver.port,
-                        self.dbauth.username, self.dbauth.password
-                    )
-        self.conn = psycopg2.connect(conninfostr)
-        try:
-            self.conn.set_client_encoding("UTF8")
-        except Exception:
-            print(traceback.format_exc())
+        
+        self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password)
 
         self.cur = self.conn.cursor()
         self.areas = {}
@@ -463,6 +457,9 @@ class XMLAction(XMLStruct):
         self.mainform_widget.init()
         w.addFormTab(self)
         #self.mainform_widget.show()
+    
+    def formRecord(self):
+        return self.form
 
     def openDefaultFormRecord(self, cursor = None):
         print("Opening default formRecord for Action", self.name)
