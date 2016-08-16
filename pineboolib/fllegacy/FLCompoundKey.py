@@ -45,7 +45,7 @@ class FLCompoundkey():
     """
     @decorators.BetaImplementation
     def addFieldMD(self, f):
-        x = FLFieldMetaData(f.name().lower(), f)
+        x = FLFieldMetaData(str(f.name()).lower(), f)
         x.attr = len(self.fieldList_) + 1
         self.fieldList_.append(x)
         
