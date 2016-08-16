@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from __future__ import unicode_literals
+from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 try:
     from future import standard_library
     standard_library.install_aliases()
@@ -15,6 +16,8 @@ import traceback
 from io import StringIO
 from lxml import etree
 from pineboolib.dbschema import db_postgresql as pginspect
+from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from PyQt4.QtCore import QString
 
 class Struct(object):
     pass
@@ -64,17 +67,130 @@ def getTableObj(tree,root):
     for xmlfield in table.xmlroot.xpath("field"):
         try:
             field = Struct()
+            field.name = None
+            field.alias = None
+            field.allowNull = False
+            field.pk = False
+            field.mtd_type = None
+            field.length_ = 0
+            field.calculated = False
+            field.visible = True
+            field.editable = True
+            field.pI = 4
+            field.pD = 0
+            field.iNX = False
+            field.uNI = False
+            field.coun = False
+            field.defValue = None
+            field.oT = False
+            field.rX = None
+            field.vG = True
+            field.gene = False
+            field.iCK = False
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             field.name = xmlfield.xpath("name/text()")[0]
             field.alias = one(xmlfield.xpath("alias/text()"))
             build_field_type(field, xmlfield)
+            field.length_ = one(xmlfield.xpath("length/text()"),0)
+            field.allowNull = text2bool(one(xmlfield.xpath("null/text()"),"true"))
             field.pk = text2bool(one(xmlfield.xpath("pk/text()"),"false"))
-            field.default = one(xmlfield.xpath("default/text()"),None)
-            field.visible_grid = text2bool(one(xmlfield.xpath("visiblegrid/text()"),"true"))
+            field.editable = text2bool(one(xmlfield.xpath("editable/text()"),"true"))
+            field.visible = text2bool(one(xmlfield.xpath("visible/text()"),"true"))
+            field.iCK = text2bool(one(xmlfield.xpath("ck/text()"),"false"))
+            field.defValue = one(xmlfield.xpath("default/text()"),None)
+            field.optionsList = one(xmlfield.xpath("optionslist/text()"),None)
+            field.vG = text2bool(one(xmlfield.xpath("visiblegrid/text()"),"true"))
+            field.rX = QString()
+            field.pI = one(xmlfield.xpath("partI/text()"), 4)
+            field.pD = one(xmlfield.xpath("partD/text()"), 0)
+            field.calculated = text2bool(one(xmlfield.xpath("counter/text()"),"false"))
+                        
             if field.pk: table.pk.append(field.name)
             if field.name in table.fields_idx: raise ValueError("La tabla %s tiene el campo %s repetido" % (table.name,field.name))
             field.number = len(table.fields)
             table.fields_idx[field.name] = field.number
-            table.fields.append(field)
+            fieldMD = FLFieldMetaData(field.name, field.alias, field.allowNull, field.pk, field.mtd_type, field.length_, field.calculated, field.visible, field.editable, field.pI, field.pD, field.iNX, field.uNI, field.coun, field.defValue, field.oT, field.rX, field.vG, field.gene, field.iCK)
+            relations = xmlfield.xpath("relation")
+            for xmlRelation in relations:
+                tableNameR = one(xmlRelation.xpath("table/text()"))
+                fieldRelation = one(xmlRelation.xpath("field/text()"))
+                cardR = one(xmlRelation.xpath("card/text()"))
+                delC = text2bool(one(xmlRelation.xpath("delC/text()"),"false"))
+                updC = text2bool(one(xmlRelation.xpath("updC/text()"),"false"))
+                checkIn = one(xmlRelation.xpath("checkIn/text()"),"true")
+                relation = FLRelationMetaData(tableNameR, fieldRelation, cardR, delC, updC, checkIn)
+                fieldMD.addRelationMD(relation)
+                
+            associateds = xmlfield.xpath("associated")
+            for xmlAssoc in associateds:
+                aWith = one(xmlRelation.xpath("with/text()"))
+                aBy = one(xmlRelation.xpath("by/text()"))
+                
+                fieldMD.setAssociatedField(aWith , aBy)
+                
+                 
+            if field.optionsList:
+                fieldMD.setOptionsList(field.optionsList)
+            
+            table.fields.append(fieldMD)
+                
+                
+            
+            #table.fields.append(fieldMD)
+                
+            #fieldMD.addRelationMD(relation)
+            #print(relationTableNameList_)
+            """
+            fieldMD = FLFieldMetaData(field.name, field.alias, field.allowNull, field.pk, field.mtd_type, field.length_, field.calculated, field.visible, field.editable, field.pI, field.pD, field.iNX, field.uNI, field.coun, field.defValue, field.oT, field.rX, field.vG, field.gene, field.iCK)
+
+            i = 0
+            l = len(relationTableNameList_)
+            l1 = len(relationFieldRelationList_)
+            l2 = len(relationCardList_)
+            while i < l:
+                print("%s.%s->%s de %s ojo (%s,%s) " % (table.name, field.name, i, l, l1, l2))
+                #print("%s.%s --(%s)--> %s.%s" % (table.name, field.name, relationCardList_[i],relationTableNameList_[i], relationFieldRelationList_[i]))
+                if relationDelCList_[i] == "false":
+                    delC = False
+                else:
+                    delC = True
+                
+                if relationupdCList_[i] == "false":
+                    updC = False
+                else:
+                    updC = True
+                
+                if relationCIList_[i] == "false":
+                    cI = False
+                else:
+                    cI = True
+                
+                relation = FLRelationMetaData(relationTableNameList_[i],relationFieldRelationList_[i], relationCardList_[i], delC, updC ,cI)
+                fieldMD.addRelationMD(relation)
+                i = i + 1
+            
+            
+            
+            
+            
+            
+            
+            table.fields.append(fieldMD)
+            """
         except Exception as e:
             print("ERROR: procesando tabla %r:" % table.name,  e)
             print(traceback.format_exc())
