@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib.fllegacy.FLFormDB_old import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib import decorators
 from pineboolib.utils import DefFun
