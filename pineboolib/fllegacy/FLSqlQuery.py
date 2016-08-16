@@ -4,13 +4,10 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 import pineboolib
 from pineboolib.fllegacy import FLSqlCursor
-
 class FLSqlQuery(ProjectClass):
     """
     Implementacion de FlSqlquery de Abanq para compatibilidad con python
     """
-    _sql = None
-    
     def __init__(self):
         self._sSELECT=""
         self._columns=[]
@@ -23,8 +20,8 @@ class FLSqlQuery(ProjectClass):
         self._datos=None
         self._posicion=None
         self._row=None
-
-       #Establecimiento de valores
+    
+    #Establecimiento de valores
     def setSelect(self,sSELECT):
         self._sSELECT=sSELECT
         self._columns=[]
@@ -36,21 +33,18 @@ class FLSqlQuery(ProjectClass):
 
     def setFrom(self,sFROM):
         self._sFROM=sFROM
-        self._sql = None
 
     def From(self):
         return self._sFROM
 
     def setWhere(self,swhere):
         self._sWHERE=swhere
-        self._sql = None
 
     def where(self):
         return self._sWHERE
 
     def setOrderBy(self,orderBy):
         self._sORDER=orderBy
-        self._sql = None
 
     def orderBy(self):
         return self._sORDER
@@ -60,9 +54,8 @@ class FLSqlQuery(ProjectClass):
         self._tables=[]
         for stable in self._sTablas.split(","):
             self._tables.append(str(stable).strip().upper())
-        self._sql = None
 
-    def sql(self):              
+    def sql(self):
         sSQL= "SELECT " + self._sSELECT
         if self._sFROM : 
             sSQL=sSQL + " FROM " +self._sFROM
@@ -70,15 +63,16 @@ class FLSqlQuery(ProjectClass):
             sSQL=sSQL + " WHERE " +self._sWHERE
         if self._sORDER : 
             sSQL=sSQL + " ORDER BY " +self._sORDER
-        return str(sSQL)     
-        
-        
+        return str(sSQL)
+
+
     def setForwardOnly(self,valor):
         #De principio nada
         pass
     #ejecucion de consulta y scroll
     def exec(self,connection=None):
         try:
+            print(self.sql())
             micursor=self.__damecursor(connection)
             micursor.execute(self.sql())
             self._cursor=micursor
@@ -129,7 +123,7 @@ class FLSqlQuery(ProjectClass):
         __cargarDatos
         if self._datos:
             self._posicion=len(self._datos)-1
-            self._row==self._datos[self._posicion]
+            self._row=self._datos[self._posicion]
         else:
             return False
 
@@ -138,7 +132,7 @@ class FLSqlQuery(ProjectClass):
         if self._datos:
             if self._posicion<0:
                 return False
-            self._row==self._datos[self._posicion]
+            self._row=self._datos[self._posicion]
             return True 
         else:
             return False 
@@ -178,14 +172,13 @@ class FLSqlQuery(ProjectClass):
 
 
     @classmethod
-    def __damecursor(self,miconnection=None):
+    def __damecursor(self ,miconnection=None):
         if miconnection:
             cursor = miconnection.cursor()
         else:
             cursor = pineboolib.project.conn.cursor()
-        #print("__damecursor:", cursor)
         return cursor
-        
+
     def __damePosDeCadena(self,sCampo):
         if isinstance(sCampo, int):
             return sCampo
