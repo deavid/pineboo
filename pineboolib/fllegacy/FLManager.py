@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import sip
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
+from PyQt4 import QtCore
+from PyQt4.QtCore import QVariant, QString 
+from pineboolib import decorators
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from future.utils import istext
 
-# switch on QVariant in Python3
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 1)
 
 """
 Esta clase sirve como administrador de la base de datos.
@@ -18,15 +20,16 @@ mediante objetos FLTableMetaData de una tabla dada.
 
 @author InfoSiAL S.L.
 """
-class FLManager(ProjectClass):
+class FLManager(QtCore.QObject):
     
     listTables_ = [] #Lista de las tablas de la base de datos, para optimizar lecturas
-    dictKeyMetaData_ = QDict<QString> #Diccionario de claves de metadatos, para optimizar lecturas
-    cacheMetaData_ = QDict<FLTableMetaData> #Caché de metadatos, para optimizar lecturas
-    cacheAction_ = QDict<FLAction> #Caché de definiciones de acciones, para optimizar lecturas
-    cacheMetaDataSys_ = QDict<FLTableMetaData> #Caché de metadatos de talblas del sistema para optimizar lecturas
-    db_ = FLSqlDatabase #Base de datos a utilizar por el manejador
+    dictKeyMetaData_ =None #Diccionario de claves de metadatos, para optimizar lecturas
+    cacheMetaData_ = None #Caché de metadatos, para optimizar lecturas
+    cacheAction_ = None #Caché de definiciones de acciones, para optimizar lecturas
+    cacheMetaDataSys_ = None #Caché de metadatos de talblas del sistema para optimizar lecturas
+    db_ = None #Base de datos a utilizar por el manejador
     initCount_ = 0 #Indica el número de veces que se ha llamado a FLManager::init()
+    buffer_ = None
 
 
     
@@ -34,21 +37,71 @@ class FLManager(ProjectClass):
     constructor
     """
     def __init__(self, db):
+        super(FLManager,self).__init__()
+        self.db_ = db
+        self.cacheMetaData_ = []
+        self.cacheAction_ = None
+        self.cacheMetaDataSys_ = None
+        self.listTables_ = None
+        self.dictKeyMetaData_ = None
+        self.initCount_ = 0
         
     """
     destructor
     """
     def __del__(self):
+        self.finish()
+        
 
     """
     Acciones de inicialización.
     """
     def init(self):
+        self.initCount_ = self.initCount_ + 1
+        tmpTMD = self.createSystemTable('flmetadata')
+        tmpTMD = self.createSystemTable('flseqs')
+        tmpTMP = self.createSystemTable('flsettings')
+        
+        if not self.dictKeyMetaData_:
+            self.dictKeyMetaData_ = []
+        
+        if not self.db_.dbAux():
+            return
+        
+        q = FLSqlQuery
+        q.setSql("SELECT tabla,xml FROM flmetadata")
+        if q.exec_(self.db_.dbAux()):
+            while q.next():
+                self.dictKeyMetaData_[q.value(0)] = q.value(1)
+                
+        if not self.cacheMetaData_:
+            self.cacheMetaData_ = []
+        
+        if not self.cacheAction_:
+            self.cacheAction_ = []
+        
+        if not self.cacheMetaDataSys_:
+            self.cacheMetaDataSys_ = []
+            
+        
+        
+        
+        
+                
+    
+        
+        
+        
+            
+            
+            
 
     """
     Acciones de finalización.
     """
+    @decorators.NotImplementedWarn
     def finish(self):
+        return True
     
     """
     Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
@@ -69,78 +122,32 @@ class FLManager(ProjectClass):
     @param quick Si TRUE no realiza chequeos, usar con cuidado
     @return Un objeto FLTableMetaData con los metadatos de la tabla solicitada
     """
-    def metadata(self, n, quick):
-        if quick is None: quick = False
+
+    def metadata(self, n, quick = False):
         
-        ret = self.metadataDev(n, quick)
-        if not quick and ret and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
-            msg = FLUtil.translate("sys","La estructura de los metadatos de la tabla '%s' y su estructura interna en la base de datos no coinciden. Debe regenerar la base de datos." % n)
-            print(msg)
+        if not n:
+            return None
         
-        if n.isEmpty() or not self.db_.dbAux():
-            return False
+        name = str(n)
+         
+        for metadata in self.cacheMetaData_:
+            if metadata.name() ==name:
+                return metadata
         
-        ret = False
-        acl = False
-        key = n
-        stream = QString
-        isSysTable = False
-        if n[0:2] is "sys" or self.isSystemTable(n):
-            isSysTable = True
+        
+        self.cacheMetaData_.append(FLTableMetaData(name))
+        for metadataN in self.cacheMetaData_:
+            if metadataN.name() == name:
+                return metadataN
             
-        if not isSysTable:
-            stream = self.db_.managerModules().contentCached(n + ".mtd", key)
-            
-            if stream.isEmpty():
-                print("FLManager : " + FLUtil.translate("sys","Error al cargar los metadatos para la tabla %s" % n))
-                return False
-            
-            if key.isEmpty():
-                key = n
-            
-        if self.cacheMetaData_ and not isSysTable:
-            ret = self.cacheMetaData_.find(key)
-        else if self.cacheMetaDataSys_ and isSysTable:
-            ret = self.cacheMetaDataSys_.find(key)
         
-        if not ret:
-            if isSysTable:
-                stream = self.db_.managerModules().contentCached(n + ".mtd")
-                if stream.isEmpty():
-                    print("FLManager : " + FLUtil.translate("sys","Error al cargar los metadatos para la tabla %s" % n))
-                    return False
-        
-        
-            ret = metadata(stream)
-            if not ret:
-                return False
-        
-            if self.cacheMetaData_ and not isSysTable and not ret.isQuery():
-                ret.setInCache()
-                self.cacheMetaData_.insert(key, ret)
-            else if self.cacheMetaDataSys_ and isSysTable:
-                ret.setInCache()
-                self.cacheMetaDataSys_.insert(key.ret)
-        
-        else:
-            acl = aqApp.acl()
-            
-            if not ret.fieldsNamesUnlock().isEmpty():
-                ret = FLTableMetaData(ret)
-            
-            if acl:
-                acl.process(ret)
-            
-            if not quick and not isSysTable and aqApp.consoleShow() and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
-                msg = FLUtil.translate("sys","La estructura de los metadatos de la tabla '%s' y su estructura interna en la base de datos no coinciden. Debe regenerar la base de datos." % n)
-                print(msg)
-        
-        return ret            
+                
             
 
-"""        
-    def metadataDev(self, n, quick):
-        if quick is None: quick = False
+    
+    @decorators.NotImplementedWarn   
+    def metadataDev(self, n, quick = None):
+        return True
 
     """
     Para obtener una consulta de la base de datos, a partir de un fichero XML.
@@ -153,7 +160,9 @@ class FLManager(ProjectClass):
     @param n Nombre de la consulta de la base de datos que se quiere obtener
     @return Un objeto FLSqlQuery que representa a la consulta que se quiere obtener
     """
-    FLSqlQuery *query(const QString &n, QObject *parent = 0);
+    @decorators.NotImplementedWarn
+    def query(self, n, parent = None):
+        return True
     
     """
     Obtiene la definición de una acción a partir de su nombre.
@@ -165,7 +174,9 @@ class FLManager(ProjectClass):
     @param n Nombre de la accion
     @return Un objeto FLAction con la descripcion de la accion
     """
-    FLAction *action(const QString &n);
+    @decorators.NotImplementedWarn
+    def action(self, n):
+        return True
     
     """
     Comprueba si existe la tabla especificada en la base de datos.
@@ -175,8 +186,9 @@ class FLManager(ProjectClass):
                 realiza una consulta a la base para obtener las tablas existentes
     @return TRUE si existe la tabla, FALSE en caso contrario
     """
-    bool existsTable(const QString &n, bool cache = true) const;
-    
+    @decorators.NotImplementedWarn
+    def existsTable(self,  n, cache = True):
+        return True
     """
     Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
 
@@ -187,14 +199,11 @@ class FLManager(ProjectClass):
     @param mtd2 Cadena de caracteres con XML que describe la primera tabla
     @return TRUE si las dos descripciones son iguales, y FALSE en caso contrario
     """
-    bool checkMetaData(const QString &mtd1, const QString &mtd2) {
-        return (!QString::compare(mtd1, mtd2));
-    }
-    
-    """
-    Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
-    """
-    bool checkMetaData(FLTableMetaData *tmd1, FLTableMetaData *tmd2);
+
+    def checkMetaData(self, mtd1, mtd2):
+        if mtd1 == mtd2:
+            return True
+        return False
     
     """
     Modifica la estructura o metadatos de una tabla, preservando los posibles datos
@@ -205,41 +214,27 @@ class FLManager(ProjectClass):
     que pudieran existir en ese momento en la tabla.
 
     @param n Nombre de la tabla a reconstruir
-    @return TRUE si la modificación tuvo éxito
-    """
-    bool alterTable(const QString &n);
-    
-    """
-    Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
-
-    Modifica la estructura de una tabla dada, preservando los datos. La nueva
-    estructura y la vieja se pasan en cadenas de caracteres con la descripcion XML.
-
-    @param n Nombre de la tabla a reconstruir
     @param mtd1 Descripcion en XML de la vieja estructura
     @param mtd2 Descripcion en XML de la nueva estructura
     @param key Clave sha1 de la vieja estructura
     @return TRUE si la modificación tuvo éxito
     """
-    bool alterTable(const QString &mtd1, const QString &mtd2, const QString &key = QString::null);
+    @decorators.NotImplementedWarn
+    def alterTable(self, mtd1 = None, mtd2 = None, key = None):
+        return True
     
     """
     Crea una tabla en la base de datos.
 
-    @param n Nombre de la tabla que se quiere crear
+    @param n_tmd Nombre o metadatos de la tabla que se quiere crear
     @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
       0 si no se pudo crear la tabla o ya existía
     """
-    FLTableMetaData *createTable(const QString &n);
+    @decorators.NotImplementedWarn
+    def createTable(self, n_or_tmd):
+        return True
     
-    """
-    Crea una tabla en la base de datos.
 
-    @param tmd Metadatos de la tabla
-    @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
-      0 si no se pudo crear la tabla o ya existía
-    """
-    FLTableMetaData *createTable(FLTableMetaData *tmd);
     
     """
     Devuelve el contenido del valor de de un campo formateado para ser reconocido
@@ -254,20 +249,15 @@ class FLManager(ProjectClass):
     @param v Valor que se quiere formatear para el campo indicado
     @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
     """
-    QString formatValueLike(FLFieldMetaData *fMD, const QVariant &v, const bool upper = false);
-    QString formatAssignValueLike(FLFieldMetaData *fMD, const QVariant &v, const bool upper = false);
-    QString formatAssignValueLike(const QString &fieldName, FLFieldMetaData *fMD, const QVariant &v, const bool upper = false);
-    QString formatAssignValueLike(const QString &fieldName, int t, const QVariant &v, const bool upper = false);
+    @decorators.NotImplementedWarn
+    def formatValueLike(self, *args, **kwargs):
+        return True
     
-    """
-    Este método hace lo mismo que el anterior, y se suministra por conveniencia.
+    @decorators.NotImplementedWarn
+    def formatAssignValueLike(self, *args, **kwargs):
+        return True   
 
-    @param t Tipo de datos del valor
-    @param v Valor que se quiere formatear para el campo indicado
-    @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
-    """
     
-    QString formatValueLike(int t, const QVariant &v, const bool upper = false);
     
     """
     Devuelve el contenido del valor de de un campo formateado para ser reconocido
@@ -282,33 +272,88 @@ class FLManager(ProjectClass):
     @param v Valor que se quiere formatear para el campo indicado
     @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
     """
-    QString formatValue(FLFieldMetaData *fMD, const QVariant &v, const bool upper = false);
-    QString formatAssignValue(FLFieldMetaData *fMD, const QVariant &v, const bool upper = false);
-    QString formatAssignValue(const QString &fieldName, FLFieldMetaData *fMD, const QVariant &v, const bool upper = false);
-    QString formatAssignValue(const QString &fieldName, int t, const QVariant &v, const bool upper = false);
+    def formatValue(self, *args, **kwargs):
+        if not args[0]:
+            return None
+        
+        if len(args) == 3:
+            return self.db_.formatValue(args[0], args[1], args[2])
+        else:
+            return self.formatValue(args[0].field(), args[1], args[2])
+            
+        
     
-    """
-    Este método hace lo mismo que el anterior, y se suministra por conveniencia.
-
-    @param t Tipo de datos del valor
-    @param v Valor que se quiere formatear para el campo indicado
-    @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
-    """
-    QString formatValue(int t, const QVariant &v, const bool upper = false);
     
-    """
-    Crea un objeto FLTableMetaData a partir de un elemento XML.
-
-    Dado un elemento XML, que contiene la descripción de una
-    tablas, construye y devuelve el objeto FLTableMetaData correspondiente.
-    NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    @param mtd Elemento XML con la descripción de la tabla
-    @param quick Si TRUE no realiza chequeos, usar con cuidado
-    @return Objeto FLTableMetaData que contiene la descrición de la relación
-    """
+    def formatAssignValue(self, *args, **kwargs):
+        
+        
+        if not args[0]:
+            #print("FLManager.formatAssignValue(). Primer argumento vacio %s" % args[0])
+            return "1 = 1"
+        
+        #print("tipo 0", type(args[0]))
+        #print("tipo 1", type(args[1]))
+        #print("tipo 2", type(args[2]))
+        
+        if isinstance(args[0], FLFieldMetaData):
+            
+            mtd = args[0].metadata()
+            if not mtd:
+                return self.formatAssignValue(args[0].name(), args[0].type(), args[1], args[2]) 
+            
+            if args[0].isPrimaryKey():
+                return self.formatAssignValue(mtd.primaryKey(True), args[0].type(), args[1], args[2])
+                
+            fieldName = args[0].name()
+            if args[0].isQuery() and not fieldName.contains("."):
+                prefixTable = args[0].name()
+                qry = self.query(args[0].query())
+                    
+                if qry:
+                    fL = qry.fieldList()
+                    
+                    for f in fL:
+                        prefixTable = f.section('.', 0, 0)
+                        if f.section('.', 1, 1) == fieldName:
+                            break
+                    
+                    qry.deleteLater()
+                    
+                fieldName.prepend(prefixTable + ".")
+                      
+            return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])    
+                
+        elif isinstance(args[0], FLFieldMetaData) and ( isinstance(args[0], str) or isinstance(args[0], QString)):
+            self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
+        
+        else:
+            if args[1] == None:
+                return "1 = 1"
+            
+            isText = False
+            t = args[1]
+            #t = str(args[1].toString())
+            #print("t es", t)
+            
+            if isinstance(t, str):
+                istext = True
+                
+            formatV = self.formatValue(args[1], args[2], args[3])
+            if not formatV:
+                return "1 = 1"
+            
+            if  args[3] and isText:
+                fName = "upper(%)" % args[0]
+            else:
+                fName = args[0]
+            
+            #print("%s=%s" % (fName, formatV))
+            return "%s=%s" % (fName, formatV)               
+            
+        
+                              
     
-    FLTableMetaData *metadata(QDomElement *mtd, bool quick = false);
+    
     
     """
     Crea un objeto FLFieldMetaData a partir de un elemento XML.
@@ -325,7 +370,9 @@ class FLManager(ProjectClass):
     @param ed Valor utilizado por defecto para la propiedad editable
     @return Objeto FLFieldMetaData que contiene la descripción del campo
     """
-    FLFieldMetaData *metadataField(QDomElement *field, bool v = true, bool ed = true);
+    @decorators.NotImplementedWarn
+    def metadataField(self, field, v = True, ed = True):
+        return True
     
     """
     Crea un objeto FLRelationMetaData a partir de un elemento XML.
@@ -338,7 +385,9 @@ class FLManager(ProjectClass):
     @param relation Elemento XML con la descripción de la relación
     @return Objeto FLRelationMetaData que contiene la descripción de la relación
     """
-    FLRelationMetaData *metadataRelation(QDomElement *relation);
+    @decorators.NotImplementedWarn
+    def metadataRelation(self, relation):
+        return True
     
     """
     Crea un objeto FLParameterQuery a partir de un elemento XML.
@@ -351,7 +400,9 @@ class FLManager(ProjectClass):
     @param parameter Elemento XML con la descripción del parámetro de una consulta
     @return Objeto FLParameterQuery que contiene la descrición del parámetro
     """
-    FLParameterQuery *queryParameter(QDomElement *parameter);
+    @decorators.NotImplementedWarn
+    def queryParameter(self, parameter):
+        return True
     
     """
     Crea un objeto FLGroupByQuery a partir de un elemento XML.
@@ -363,7 +414,9 @@ class FLManager(ProjectClass):
     @param group Elemento XML con la descripción del nivel de agrupamiento de una consulta.
     @return Objeto FLGroupByQuery que contiene la descrición del nivel de agrupamiento
     """
-    FLGroupByQuery *queryGroup(QDomElement *group);
+    @decorators.NotImplementedWarn
+    def queryGroup(self, group):
+        return True
     
     """
     Crea una tabla del sistema.
@@ -376,18 +429,24 @@ class FLManager(ProjectClass):
     @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
       0 si no se pudo crear la tabla o ya existía
     """
-    FLTableMetaData *createSystemTable(const QString &n);
+    @decorators.NotImplementedWarn
+    def createSystemTable(self, n):
+        return True
     
     """
     Carga en la lista de tablas los nombres de las tablas de la base de datos
     """
-    void loadTables();
+    @decorators.NotImplementedWarn
+    def loadTables(self):
+        return True
     
     """
     Limpieza la tabla flmetadata, actualiza el cotenido xml con el de los fichero .mtd
     actualmente cargados
     """
-    void cleanupMetaData();
+    @decorators.NotImplementedWarn
+    def cleanupMetaData(self):
+        return True
     
     """
     Para saber si la tabla dada es una tabla de sistema.
@@ -395,7 +454,14 @@ class FLManager(ProjectClass):
     @param n Nombre de la tabla.
     @return TRUE si es una tabla de sistema
     """
-    bool isSystemTable(const QString &n);
+    def isSystemTable(self, n):
+        if not n[2:] == "fl":
+            return False
+        
+        if n == ("flfiles","flmetadata","flmodules","flareas","flserial","flvar","flsettings","flseqs","flupdates"):
+            return True
+        
+        return False
     
     
     """
@@ -415,7 +481,9 @@ class FLManager(ProjectClass):
     @param largeValue Valor de gran tamaño del campo
     @return Clave de referencia al valor
     """
-    QString storeLargeValue(FLTableMetaData *mtd, const QString &largeValue);
+    @decorators.NotImplementedWarn
+    def storeLargeValue(self, mtd, largeValue):
+        return True
     
     """
     Obtiene el valor de gran tamaño segun su clave de referencia.
@@ -423,13 +491,17 @@ class FLManager(ProjectClass):
     @param refKey Clave de referencia. Esta clave se suele obtener mediante FLManager::storeLargeValue
     @return Valor de gran tamaño almacenado
     """
-    QVariant fetchLargeValue(const QString &refKey) const;
+    @decorators.NotImplementedWarn
+    def fetchLargeValue(self, refKey):
+        return True
     
     """
     Uso interno. Indica el número de veces que se ha llamado a FLManager::init().
     """
-    int initCount() const {
-    return initCount_;
-    }
+    def initCount(self):
+        return self.initCount_
 
 
+
+    
+    
