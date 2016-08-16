@@ -38,7 +38,8 @@ class PNBuffer(ProjectClass):
     
     def primeUpdate(self):
         for field in self.fieldList_:
-            field.value = self.convertToType(self.cursor_._model.value(self.cursor_._currentregister, field.name), field.type_)
+            #field.value = self.convertToType(self.cursor_._model.value(self.cursor_._currentregister, field.name), field.type_)
+            field.value = self.cursor_._model.value(self.cursor_._currentregister, field.name)
             
             #print("%s->%s" %(field.name, field.value))
     
