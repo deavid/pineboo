@@ -98,8 +98,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         
         if self.metadata().field(fieldname).type() == "pixmap":
             q = FLSqlQuery()     
-            consulta = "SELECT contenido FROM fllarge WHERE refkey ='%s'" % campo
-            q.setSql(consulta)
+            q.setSelect("contenido")
+            q.setFrom("fllarge")
+            q.setWhere("refkey == '%s'" % campo)
             q.exec_()
             q.first()
             return q.value(0)
