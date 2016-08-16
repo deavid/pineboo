@@ -9,8 +9,8 @@ from lxml import etree
 from PyQt4 import QtGui, QtCore, uic
 
 from pineboolib import flcontrols
-from pineboolib import FLTableDB
-from pineboolib import FLFieldDB
+from pineboolib.fllegacy import FLTableDB
+from pineboolib.fllegacy import FLFieldDB
 
 import zlib
 
