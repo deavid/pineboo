@@ -17,6 +17,10 @@ from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 class Struct(object):
     pass
 
+
+
+
+
 class PNBuffer(ProjectClass):
     
     fieldList_ = None
@@ -84,7 +88,14 @@ class PNBuffer(ProjectClass):
                 else:
                     return field.value
         
-        return QVariant()
+        return None
+    
+    def setValue(self, name, value):
+        
+        for field in  self.fieldList_:
+            if field.name == str(name):
+                field.value = value
+                return
         
                 
     def convertToType(self, value, fltype):
@@ -178,7 +189,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
     Este filtro persiste y se aplica al cursor durante toda su existencia,
     los filtros posteriores, siempre se ejecutaran unidos con 'AND' a este.
     """
-    mainFilter_ = None
+    #self.d._model.where_filters["main-filter"] = None
         
     """
     Accion asociada al cursor, esta accion pasa a ser propiedad de FLSqlCursor, que será el
@@ -304,6 +315,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
     _currentregister = None
     editionStates_ = None
     
+    countRefCursor
+    
     _current_changed = QtCore.pyqtSignal(int)
     
     def __init__(self):
@@ -312,6 +325,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.countRefCursor = 0
         self.currentRegister = -1
         self.acosCondName_ = QString()
+        self.buffer_ = None
         
 
         
@@ -505,9 +519,11 @@ class FLSqlCursor(ProjectClass):
         if self.d.timer_:
             del self.d.timer_
         
+        
         self.d.timer_ = QtCore.QTimer(self)
         self.d.timer_.timeout.connect(self.refreshDelayed)
-        self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
+        #self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
+        #self.first()
         
                
             
@@ -525,8 +541,8 @@ class FLSqlCursor(ProjectClass):
     @return Objeto FLTableMetaData con los metadatos de la tabla asociada al cursor
     """
     def metadata(self): 
-        if not self.d.metadata_:
-            print("FLSqlCursor(%s) Esta devolviendo un metadata vacio" % self.d.curName_)
+        #if not self.d.metadata_:
+            #print("FLSqlCursor(%s) Esta devolviendo un metadata vacio" % self.d.curName_)
         return self.d.metadata_
 
     """
@@ -544,7 +560,7 @@ class FLSqlCursor(ProjectClass):
     @return Cadena de texto con el filtro principal
     """
     def mainFilter(self):
-        return self.d.mainFilter_
+        return getattr(self.d._model,'where_filters["main-filter"]',None)
     
 
     """
@@ -594,7 +610,8 @@ class FLSqlCursor(ProjectClass):
     @param doRefresh Si TRUE tambien refresca el cursor
     """
     def setMainFilter(self, f, doRefresh = True):
-        self.d.mainFilter_ = f
+        #print("New main filter:", f)
+        self.d._model.where_filters["main-filter"] = f
         if doRefresh:
             self.refresh()
         
@@ -641,9 +658,8 @@ class FLSqlCursor(ProjectClass):
     @param fN Nombre del campo
     @param v Valor a establecer para el campo
     """
-    @decorators.NotImplementedWarn
     def setValueBuffer(self, fN, v):
-        return True
+        self.d.buffer_.setValue(fN, v)
 
     """
     Devuelve el valor de un campo del buffer.
@@ -656,13 +672,14 @@ class FLSqlCursor(ProjectClass):
         if self.d.rawValues_:
             return self.valueBufferRaw(fN)
         
-        if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
-            return QVariant()
+        #if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
+        if not self.d.buffer_ or not self.metadata():
+            return None
         
         field = self.metadata().field(fN)
         if not field:
-            print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.metadata().name(), fN))
-            return QVariant()
+            #print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.metadata().name(), fN))
+            return None
         
         type_ = field.type()
         fltype = field.flDecodeType(type_)
@@ -670,7 +687,7 @@ class FLSqlCursor(ProjectClass):
             if type_ == "double" or type_ == "int" or type_ == "uint":
                 return 0
         
-        v = QVariant()    
+        v = None    
         if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() == self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert: 
             pK = self.d.metadata_.primaryKey()
             if pK:
@@ -691,15 +708,16 @@ class FLSqlCursor(ProjectClass):
         #if v.isValid():
             #v.cast(fltype)
         
-        if not v is None and type_ == "pixmap":
-            vLarge = QVariant(self.d.db_.manager().fetchLargeValue(v.toString()))
-            if vLarge.isValid():
+        if v and type_ == "pixmap":
+            vLarge = self.d.db_.manager().fetchLargeValue(v)
+            if vLarge:
                 return vLarge
-        
+              
         return v
         
             
-            
+    def fetchLargeValue(self, value):
+        return self.d.db_.manager().fetchLargeValue(value)
          
         
 
@@ -708,9 +726,34 @@ class FLSqlCursor(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.NotImplementedWarn
     def valueBufferCopy(self, fN):
-        return True
+        if not self.d.bufferCopy_ and fN.isEmpty() or not self.d.metadata_:
+            return QVariant()
+        
+        field = self.d.metadata_.field(fN)
+        if not field:
+            print("FLSqlCursor::valueBufferCopy() : No existe el campo %s:%s" % (self.d.metadata_.name(), fN))
+            return QVariant()
+        
+        type_ = field.type()
+        if self.d.bufferCopy_.isNull(fN):
+            if type_ == "double" or type_ == "int" or type_ == "uint":
+                return 0
+        
+        v = self.d.bufferCopy_.value(fN)
+        
+        #v.cast(fltype)
+        
+        if not v.isNull() and type_ == "pixmap":
+            vl = self.d.db_.manager().fetchLargeValue(v)
+            if vl.isValid():
+                return vl
+        
+        return v 
+    
+        
+            
+            
 
     """
     Establece el valor de FLSqlCursor::edition.
@@ -847,7 +890,6 @@ class FLSqlCursor(ProjectClass):
         if not self.d.metadata_:
             return 
 
-        
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
             QtGui.QMessageBox.Warning(QtGui.qApp.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtGui.QMessageBox.Ok,0,0)
             return
@@ -907,9 +949,11 @@ class FLSqlCursor(ProjectClass):
     Al realizar esta copia se podra comprobar posteriormente si el buffer actual y la copia realizada
     difieren mediante el metodo FLSqlCursor::isModifiedBuffer().
     """
-    @decorators.NotImplementedWarn
     def updateBufferCopy(self):
-        return True
+        if not self.d.buffer_:
+            return None
+                
+        self.d.bufferCopy_ = self.d.buffer_
 
     """
     Indica si el contenido actual del buffer difiere de la copia guardada.
@@ -1005,7 +1049,11 @@ class FLSqlCursor(ProjectClass):
     """
     @decorators.NotImplementedWarn
     def isLocked(self):
+        #if not self.d.modeAccess_ == self.Insert and self.d.fieldsNamesUnlock_:
+        
         return False
+            
+            
     
     """
     Devuelve si el contenido de un campo en el buffer es nulo.
@@ -1191,8 +1239,13 @@ class FLSqlCursor(ProjectClass):
     
     
     def at(self):
-        row = self.d._currentregister
-        print("Row", self.d._currentregister)
+        if not self.d._currentregister:
+            row = 0
+        else:
+            row = self.d._currentregister
+            
+        if self.d._currentregister:
+            print("Row", row)
         if row < 0: return -1
         if row >= self.model().rows: return -2
         return row
@@ -1281,7 +1334,6 @@ class FLSqlCursor(ProjectClass):
     @return TRUE si se ha podido realizar el refresco, FALSE en caso contrario
     """
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def refreshBuffer(self):
         if not self.d.metadata_:
             return False
@@ -1330,15 +1382,12 @@ class FLSqlCursor(ProjectClass):
             self.newBuffer.emit()
         
         elif self.d.modeAccess_ == self.Edit:
-            print("FLCursor.refeshBuffer 1")
             if not self.commitBufferCursorRelation():
                 return False
             
-            print("FLCursor.refeshBuffer 2")
             if self.isLocked() and self.d.acosCondName_.isEmpty():
                 self.d.modeAccess_ = self.Browse
             
-            print("FLCursor.refeshBuffer 3")
             self.d.buffer_ = self.primeUpdate()
             self.setNotGenerateds()
             self.updateBufferCopy()
@@ -1393,9 +1442,25 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
-    def seek(self, i, relative = False, emite = False):
-        return True
+    @decorators.WorkingOnThis
+    def seek(self, i, relative = None, emite = None):
+        if self.d.modeAccess_ == self.Del:
+            return False
+        
+        #b = self.d.db_.seek( i, relative)
+        b = True
+        
+        
+        if b and emite:
+            self.currentChanged(self.at())
+        
+        if b:
+            return self.refreshBuffer()
+        
+        return b
+        
+        
+
 
     """
     Redefinicion del método next() de QSqlCursor.
@@ -1406,11 +1471,22 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
-    def next(self,  emite = True):
+    @QtCore.pyqtSlot(bool)
+    def __next__(self,  emite = True):
         if self.d.modeAccess_ == self.Del:
             return False
-        self.moveby(1)
+        
+        b = self.moveby(1)
+        
+        if b and emite:
+            self.d._current_changed.emit(self.at())
+        
+        if b:
+            return self.refreshBuffer()
+        
+        return b
+    
+    
         
     
         
@@ -1426,11 +1502,39 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
+    @QtCore.pyqtSlot(bool)
     def prev(self, emite = True):
-        return self.moveby(-1)
+        if self.d.modeAccess_ == self.Del:
+            return False
         
-
+        b = self.moveby(-1)
+        
+        if b and emite:
+            self.d._current_changed.emit(self.at())
+        
+        if b:
+            return self.refreshBuffer()
+        
+        return b
+        
+    
+    """
+    Mueve el cursor por la tabla:
+    """
+    
+    def move(self, row):
+        if row < 0: row = -1
+        if row >= self.d._model.rows: row = self.d._model.rows
+        if self.d._currentregister == row: return False
+        topLeft = self.d._model.index(row,0)
+        bottomRight = self.d._model.index(row,self.d._model.cols-1)
+        new_selection = QtGui.QItemSelection(topLeft, bottomRight)
+        self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
+        self.d._currentregister = row
+        #self.d._current_changed.emit(self.at())
+        if row < self.d._model.rows and row >= 0: return True
+        else: return False
+        
     """
     Redefinicion del método first() de QSqlCursor.
 
@@ -1439,10 +1543,24 @@ class FLSqlCursor(ProjectClass):
 
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
+    
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
+    @QtCore.pyqtSlot(bool)
     def first(self,  emite = True):
-        return self.move(0)
+        if self.d.modeAccess_ == self.Del:
+            return False
+        
+        b = self.move(0)
+        
+        if b and emite:
+            self.d._current_changed.emit(self.at())
+        
+        if b:
+            return self.refreshBuffer()
+        
+        return b
+    
+        
 
     """
     Redefinicion del método last() de QSqlCursor.
@@ -1453,9 +1571,21 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
+    @QtCore.pyqtSlot(bool)
     def last(self, emite = True):
-        return True
+        if self.d.modeAccess_ == self.Del:
+            return False
+        
+        b = self.move(self._model.rows-1)
+        
+        if b and emite:
+            self.d._current_changed.emit(self.at())
+        
+        if b:
+            return self.refreshBuffer()
+        
+        return b
+            
 
     """
     Redefinicion del método del() de QSqlCursor.
@@ -1472,9 +1602,54 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método select() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
-    def select(self, filter_, sort = None ): #sort = QtCore.QSqlIndex()
-        return True
+    @decorators.Incomplete
+    def select(self, filter_ = None, sort = None ): #sort = QtCore.QSqlIndex()
+        if not self.d.metadata_:
+            return False
+        
+        if filter_:
+            self.setFilter(filter_)
+        return
+    
+        self.clearMapCalcFields()
+        f = None
+        bFilter = self.baseFilter()
+        finalFilter = None
+        
+        if not finalFilter:
+            finalFilter = f
+        else:
+            if not filter or bFilter.contains(f):
+                finalFilter = bFilter
+            else:
+                if f.contains(bFilter):
+                    finalFilter = f 
+                else:
+                    finalFilter = "%s AND %s" % (bFilter, f)
+        
+        fields = []
+        if not self.d.isQuery_:
+            fields = sort.toStringList(self.d.metadata_.name())
+        else:
+            fields = sort.toStringList()
+        
+        finalFilter = finalFilter.simplifyWhiteSpaces()
+        
+        while finalFilter[:1] == ";":
+            finalFilter = finalFilter[(len(finalFilter) -1):]
+        
+        posOrderBy = None
+        fieldsOrderBy = None
+        
+        if "ORDER BY" in finalFilter:
+            posOrderBy = True
+        
+
+            
+            
+        
+           
+
 
     """
     Redefinicion del método sort() de QSqlCursor
@@ -1488,9 +1663,38 @@ class FLSqlCursor(ProjectClass):
     Obtiene el filtro base
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def baseFilter(self):
-        return True
+        relationFilter = None
+        finalFilter = None
+        
+        if self.d.cursorRelation_ and self.drelation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
+            fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
+            field = self.d.metadata_.field(self.d.relation_.field())
+            
+            if field:
+                relationFilter = self.d.db_.manager().formatAssignValue(field, fgValue, True)
+                filterAc = self.d.cursorRelation_.filterAssoc(self.d.relation_.foreignField(), self.d.metadata_)
+                
+                if filterAc:
+                    if not relationFilter:
+                        relationFilter = filterAc
+                    else:
+                        relationFilter = "%s AND %s" % (relationFilter, filterAc)
+        
+        if self.mainFilter():
+            finalFilter = self.mainFilter()
+        
+        if relationFilter and not relationFilter in finalFilter:
+            if not finalFilter:
+                finalFilter = relationFilter
+            else:
+                finalFilter = "%s AND %s" % (finalFilter, relationFilter)
+        
+        return finalFilter
+            
+            
+                
+
 
     """
     Obtiene el filtro actual
@@ -1510,13 +1714,15 @@ class FLSqlCursor(ProjectClass):
         finalFilter = filter_
         bFilter = self.baseFilter()
         
-        if not bFilter.isEmpty():
-            if finalFilter.isEmpty() or bFilter.contains(finalFilter):
+        if bFilter:
+            if not finalFilter:
                 finalFilter = bFilter
-            elif not finalFilter.contains(bFilter):
+            elif finalFilter in bFilter:
+                finalFilter = bFilter
+            elif not bFilter in finalFilter:
                 finalFilter = bFilter + " AND " + finalFilter
         
-        if not finalFilter.isEmpty() and not self.d.persistentFilter_.isEmpty() and not finalFilter.contains(self.d.persistentFilter_):
+        if finalFilter and self.d.persistentFilter_ and not self.d.persistentFilter_ in finalFilter:
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
         
         self.d.filter_ = finalFilter
@@ -1538,17 +1744,17 @@ class FLSqlCursor(ProjectClass):
     para editar el registro activo del cursor.
     """
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def editRecord(self):
         print("Edit the row!", self.actionName())
+        """
         if self.d.needUpdate():
             pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
             self.refresh()
             pos = self.atFromBinarySearch(pKN, pKValue.toString())
-            if not pos == self.at(): 
+            if not pos == self.at():
                 self.seek(pos, False, False)
-                
+        """        
         self.openFormInMode(self.Edit)
 
     """
@@ -1559,6 +1765,7 @@ class FLSqlCursor(ProjectClass):
     @decorators.BetaImplementation
     def browseRecord(self):
         print("Inspect, inspect!", self.actionName())
+        """
         if self.d.needUpdate():
             pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
@@ -1566,7 +1773,7 @@ class FLSqlCursor(ProjectClass):
             pos = self.atFromBinarySearch(pKN, pKValue.toString())
             if not pos == self.at(): 
                 self.seek(pos, False, False)
-        
+        """
         self.openFormInMode(self.Browse)
 
 
