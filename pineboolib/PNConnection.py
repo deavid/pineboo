@@ -6,6 +6,7 @@ from PyQt4 import QtCore
 import psycopg2
 import traceback
 from pineboolib.fllegacy.FLManager import FLManager
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
 
 
@@ -54,6 +55,9 @@ class PNConnection(QtCore.QObject):
             print(traceback.format_exc())
         return conn
     
+    def seek(self, offs, whence = 0):
+        return self.conn.seek(offs, whence)
+        
     def database(self, databaseName):
         conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
                         databaseName, self.db_host, self.db_port,
@@ -74,8 +78,23 @@ class PNConnection(QtCore.QObject):
     
     def formatValue(self, t, v, upper):
         return self.driverSql.formatValue(t, v, upper)
-
     
+    def nextSerialVal(self, table, field):
+        q = FLSqlQuery()
+        q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
+        q.setFrom("")
+        q.setWhere("")
+        if not q.exec():
+            print("not exec sequence")
+            return None
+        if q.first():
+            return q.value(0)
+        else:
+            return None
+
+    @decorators.NotImplementedWarn
+    def doTransaction(self, cursor):
+        return True
     
     
     
