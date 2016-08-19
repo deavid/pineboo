@@ -37,6 +37,7 @@ class FLTableMetaData(ProjectClass):
     def __init__(self, *args, **kwargs):
         super(FLTableMetaData,self).__init__()
         tmp = None
+        
         if len(args) == 1:
             if isinstance(args[0],QString) or isinstance(args[0], str):
                 #print("FLTableMetaData(%s).init()" % args[0])
@@ -47,22 +48,24 @@ class FLTableMetaData(ProjectClass):
             self.inicializeNewFLTableMetaData( *args, **kwargs)    
         
         
- 
     def inicializeFLTableMetaData(self, other):
         self.d = FLTableMetaDataPrivate()
         self.copy(other)
         
                                            
-
+    @decorators.BetaImplementation
     def inicializeNewFLTableMetaData(self, n, a, q = None):
         self.d = FLTableMetaDataPrivate(n, a, q)
     
         
     def inicializeFLTableMetaDataP(self, name):
         self.d = FLTableMetaDataPrivate(name)
+        self.d.compoundKey_ = FLCompoundkey()
         table = self._prj.tables[name]
         for field in table.fields:
             field.setMetadata(self)
+            if field.isCompoundKey():
+                self.d.compoundKey_.addFieldMD(field.name())
             if field.isPrimaryKey():
                 self.d.primaryKey_ = field.name()
             self.d.fieldList_.append(field)
@@ -106,7 +109,6 @@ class FLTableMetaData(ProjectClass):
 
     @param q Nombre de la consulta
     """
-    @decorators.BetaImplementation
     def setQuery(self, q):
         self.d.query_ = q
 
@@ -125,14 +127,12 @@ class FLTableMetaData(ProjectClass):
     el nombre de la tabla correponderá a la tabla principal de la consulta
     cuando esta referencie a varias tablas.
     """
-    @decorators.BetaImplementation
     def query(self):
         return self.d.query_
 
     """
     Obtiene si define los metadatos de una consulta
     """
-    @decorators.BetaImplementation
     def isQuery(self):
         if self.d.query_:
             return True
@@ -234,15 +234,15 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
     def fieldType(self, fN):
-        if fN.isEmpty():
-            return QVariant.Invalid
-        else:
-            if self.d.fieldList_[fN.lower()]:
-                return self.d.fieldList_[fN.lower()].d.type_
-            else:
-                return QVariant.Invalid 
+        if not fN:
+            return None
+        fN = str(fN)
+        for f in self.d.fieldList_:
+            if f.name() == fN.lower():
+                return f.type()
+        
+        return None
 
 
     """
@@ -250,19 +250,24 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
     def fieldIsPrimaryKey(self, fN):
-        return (self.d.primaryKey_ == fN.lower())
+        if not fN:
+            return None
+        fN = str(fN)
+        for f in self.d.fieldList_:
+            if f.name() == fN.lower():
+                return f.pK()
+        
+        return None
 
     """
     Obtiene si un campo es índice a partir de su nombre.
 
     @param fN Nombre del campo
     """
-    
     def fieldIsIndex(self, fN):
         if not fN:
-            return False
+            return None
         
         i = 0
         
@@ -272,7 +277,7 @@ class FLTableMetaData(ProjectClass):
             
             i = i + 1
         
-        return False
+        return None
 
     """
     Obtiene si un campo es contador.
@@ -618,11 +623,10 @@ class FLTableMetaData(ProjectClass):
       que forman dicha clave compuesta, incluido el campo consultado. En el caso
       que el campo consultado no pertenezca a ninguna clave compuesta devuelve 0
     """
-    @decorators.BetaImplementation
     def fieldListOfCompoundKey(self, fN):
         if self.d.compoundKey_ and self.d.compoundKey_.hasField(fN):
             return self.d.compoundKey_.fieldList()
-        return 
+        return None
 
     """
     Obtiene una cadena de texto que contiene los nombres de los campos separados por comas.
@@ -683,25 +687,24 @@ class FLTableMetaData(ProjectClass):
     Indica si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
     def inCache(self):
-        #return self.d.inCache_ #FIXME
-        return True
+        return self.d.inCache_
+
 
     """
     Establece si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
-    @decorators.BetaImplementation
     def setInCache(self, b = True):
         self.d.inCache_ = b
 
-    @decorators.BetaImplementation
     def copy(self, other):
         if other == self:
             return
      
-        od = other.d
-      
+        self.d = other.d
+        
+        """
         if od.compoundKey_:
-            self.d.compoundKey_ = FLCompoundkey(od.compoundKey_)
+            self.d.compoundKey_ = od.compoundKey_
         
         self.d.clearFieldList()
         
@@ -721,7 +724,7 @@ class FLTableMetaData(ProjectClass):
         #for it2 in od.fieldList_.values():
         #    if not od.fieldList_[it2].d.associatedFieldName_.isEmpty():
         #        od.fieldList_[it2].d.associatedField_ = self.field(od.fieldList_[it2].d.associatedFieldName_)
-                
+        """        
     
 
     def indexFieldObject(self, position):
@@ -766,7 +769,7 @@ class FLTableMetaDataPrivate():
     """
     Nombre de la consulta (fichero .qry) de la que define los metadatos
     """
-    query_ = None
+    query_ = []
 
     """
     Cadena de texto con los nombre de los campos separados por comas
@@ -911,10 +914,9 @@ class FLTableMetaDataPrivate():
     """
     Limpia la lista de definiciones de campos
     """
-    @decorators.BetaImplementation
     def clearFieldList(self):
-        self.fieldList_.clear()
-        self.fieldsNames_.clear()
+        self.fieldList_ = []
+        self.fieldsNames_ = []
 
 
 #endif
