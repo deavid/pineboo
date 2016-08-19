@@ -53,7 +53,7 @@ class FLFieldMetaData():
         ++self.count_
             
             
-    @decorators.BetaImplementation    
+    
     def inicializeFLFieldMetaData(self, other):
         self.d = FLFieldMetaDataPrivate()
         self.copy(other)
@@ -282,6 +282,7 @@ class FLFieldMetaData():
          relacion a añadir """
          
     def addRelationMD(self, r):
+        
         isRelM1 = False
         #print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
         if r.cardinality() == FLRelationMetaData.RELATION_M1:
@@ -289,6 +290,7 @@ class FLFieldMetaData():
         if isRelM1 and self.d.relationM1_:
             print("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
             return
+        
         
         r.setField(self.d.fieldName_)
         if isRelM1:
@@ -307,7 +309,6 @@ class FLFieldMetaData():
 
     @return Objeto con la lista de deficiones de la relaciones del campo
     """
-    @decorators.BetaImplementation
     def relationList(self):
         return self.d.relationList_
 
@@ -425,10 +426,24 @@ class FLFieldMetaData():
 
     @return Lista de opciones del campo
     """
-    @decorators.BetaImplementation
     def optionsList(self):
         return self.d.optionsList_
 
+    """
+    Devuelve el index de un campo determinado
+
+    @return Lista de opciones del campo
+    """    
+    def getIndexOptionsList(self, name):
+        i = 0
+        for option in self.d.optionsList_:
+            if option == str(name):
+                return i 
+            
+            i = i + 1
+            
+        return None
+        
     """
     Establece la lista de opciones para el campo
 
@@ -550,23 +565,20 @@ class FLFieldMetaData():
             self.d.searchOptions_.append(dato)
   
   
-    @decorators.BetaImplementation
     def copy(self, other):
         if other == self:
             return
+        
+        self = other
+        """
         od = other.d
         if od.relationM1_:
-            od.relationM1_.ref()
             self.d.relationM1_ = od.relationM1_
         
-        self.d.clearRelationlist()
+        self.d.clearRelationList()
         
         if od.relationList_:
-            for i in range(od.relationList_):
-                if not self.d.relationList_:
-                    self.d.relationList_ = FLRelationMetaDataList.FLRelationMetaDataList
-                
-                self.d.relationList_.append(od.relationList_[i])
+            self.d.relationList_ = od.relationList_
         
         self.d.fieldName_ = od.fieldName_
         self.d.alias_ = od.alias_
@@ -595,6 +607,7 @@ class FLFieldMetaData():
         self.d.generated_ = od.generated_
         self.d.isCompoundKey_ = od.isCompoundKey_
         self.d.hasOptionsList_ = od.hasOptionsList_    
+        """
     
     def formatAssignValue(self,fieldName , value, upper):
         if self.type() == ("", None) or fieldName.isEmpty():
@@ -908,7 +921,6 @@ class FLFieldMetaDataPrivate():
     """
     Limpia la lista de definiciones de relaciones
     """
-    @decorators.BetaImplementation
     def clearRelationList(self):
         self.relationList_ = []
         
