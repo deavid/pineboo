@@ -96,6 +96,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         col = self.metadata().indexPos(fieldname)
         campo = self._data[row][col]
         
+        """
         if self.metadata().field(fieldname).type() == "pixmap":
             q = FLSqlQuery()     
             q.setSelect("contenido")
@@ -106,7 +107,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return q.value(0)
         else:
             return campo
-            
+        """
+        return campo   
         
         """
         value = None
@@ -133,12 +135,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return True
 
     def pK(self): #devuelve el nombre del campo pk
-        return self.metadata().pK()
+        return self.tableMetadata().pK()
         #return self._pk
 
     def fieldType(self, fieldName): # devuelve el tipo de campo
-        self.tableMetadata().fieldIsIndex(fieldName)
-        return self.tableMetadata().field(fieldName).type()
+        field = self.tableMetadata().field(fieldName)
+        if field:
+            return field.type()
+        else:
+            return None
         """
         value = None
         try:
