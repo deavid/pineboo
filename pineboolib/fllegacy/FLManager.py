@@ -491,9 +491,19 @@ class FLManager(QtCore.QObject):
     @param refKey Clave de referencia. Esta clave se suele obtener mediante FLManager::storeLargeValue
     @return Valor de gran tamaño almacenado
     """
-    @decorators.NotImplementedWarn
     def fetchLargeValue(self, refKey):
-        return True
+        if not refKey[0:3] == "RK@":
+            return None
+        q = FLSqlQuery()
+        q.setSelect("contenido")
+        q.setFrom("fllarge")
+        q.setWhere(" refkey = '%s'" % refKey)
+        if q.exec_() and q.first():
+            v = q.value(0)
+            del q
+            return v
+        
+        return None
     
     """
     Uso interno. Indica el número de veces que se ha llamado a FLManager::init().
