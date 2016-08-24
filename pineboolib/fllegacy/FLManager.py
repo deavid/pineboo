@@ -8,6 +8,7 @@ from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from future.utils import istext
+from pineboolib.fllegacy.FLAction import FLAction
 
 
 """
@@ -40,7 +41,7 @@ class FLManager(QtCore.QObject):
         super(FLManager,self).__init__()
         self.db_ = db
         self.cacheMetaData_ = []
-        self.cacheAction_ = None
+        self.cacheAction_ = []
         self.cacheMetaDataSys_ = None
         self.listTables_ = None
         self.dictKeyMetaData_ = None
@@ -174,9 +175,22 @@ class FLManager(QtCore.QObject):
     @param n Nombre de la accion
     @return Un objeto FLAction con la descripcion de la accion
     """
-    @decorators.NotImplementedWarn
+    @decorators.Incomplete
     def action(self, n):
-        return True
+        if not n:
+            return None
+        
+        name = str(n)
+         
+        for action in self.cacheAction_:
+            if action.name() ==name:
+                return action
+        
+        actionN = FLAction()   
+        actionN.setName(name)
+        actionN.setTable(name)
+        self.cacheAction_.append(actionN)
+        return actionN
     
     """
     Comprueba si existe la tabla especificada en la base de datos.
