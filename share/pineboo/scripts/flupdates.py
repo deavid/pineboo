@@ -33,7 +33,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         self.iface = ifaceCtx(self)
     
     def interna_main(self):
-        sys.updateAbanQ()
+        sys.updatePineboo()
     
 
 
