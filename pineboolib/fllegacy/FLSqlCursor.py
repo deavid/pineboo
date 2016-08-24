@@ -14,6 +14,8 @@ from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
+import hashlib
+
 class Struct(object):
     pass
 
@@ -26,31 +28,44 @@ class PNBuffer(ProjectClass):
     fieldList_ = None
     cursor_ = None
     clearValues_ = False
-    
+    line_ = None
     
     def __init__(self, cursor):
         super(PNBuffer,self).__init__()    
         self.cursor_ = cursor
         self.fieldList_ = []
+        self.md5Sum_ = ""
         campos = self.cursor_.db_.manager().metadata(self.cursor_.curName_).fieldListObject()
         for campo in campos:
             field = Struct()
             field.name = campo.name()
             field.value = None
-            field.type_ = campo.type()
+            field.metadata = campo
+            field.type_ = field.metadata.type()
+            
+            self.line_ = None
             self.fieldList_.append(field)
     
-    def primeUpdate(self):
+    def primeUpdate(self, row = None):
+        if not row:
+            row = self.cursor_._currentregister
         for field in self.fieldList_:
+            #print("Procesando row", self.row())
             #field.value = self.convertToType(self.cursor_._model.value(self.cursor_._currentregister, field.name), field.type_)
-            field.value = self.cursor_._model.value(self.cursor_._currentregister, field.name)
+            field.value = self.cursor_._model.value(row , field.name)
+            
+        
+        line_ = self.cursor_._currentregister
             
             #print("%s->%s" %(field.name, field.value))
+    def row(self):
+        return self.line_
     
     def setNull(self, name):
         for field in  self.fieldList_:
             if field.name == str(name):
                 field.value = None
+           
     
     def isGenerated(self, name):
         return self.cursor_.db_.manager().metadata(self.cursor_.curName_).field(name).generated()
@@ -95,6 +110,7 @@ class PNBuffer(ProjectClass):
         for field in  self.fieldList_:
             if field.name == str(name):
                 field.value = value
+                self.setMd5Sum(value)
                 return
         
                 
@@ -128,6 +144,20 @@ class PNBuffer(ProjectClass):
         #print("Retornando =", value)
         
         return value
+    
+    """
+    Calcula el md5 de todos los valores contenidos en el buffer concatenando el md5 de un valor con el nombre del siguiente y calculando el nuevo md5
+    """
+    def setMd5Sum(self, value):
+        value = str(value)
+        cadena = "%s_%s" % (self.md5Sum_, value)
+        tmp = hashlib.md5(value).hexdigest()
+        self.md5Sum_ = tmp
+    
+    def md5Sum(self):
+        return self.md5Sum_
+    
+        
            
 
 
@@ -432,7 +462,7 @@ class FLSqlCursor(ProjectClass):
         super(FLSqlCursor,self).__init__()
         self._valid = False 
         self.d = FLSqlCursorPrivate()
-        nameCursor = name + QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz") + "-K"
+        self.d.nameCursor_ = "%s%s" % (name, QtCore.QDateTime.currentDateTime())
         
         if connectionName_or_db is None:
             #print("Init1") # si soy texto y estoy vacio
@@ -444,6 +474,12 @@ class FLSqlCursor(ProjectClass):
             #print("Init3", connectionName_or_db)
             self.d.db_ = connectionName_or_db
         
+        #for module in self._prj.modules:
+        #    for action in module.actions:
+        #        if action.name == name:
+        #            self.d.action_ = action
+        #            break
+                
         self.init(name, autopopulate, cR, r)
         
             
@@ -589,7 +625,7 @@ class FLSqlCursor(ProjectClass):
                 return False
             #self._action = self._prj.actions["articulos"]
 
-            if self._action.table:
+            if getattr(self._action,"table",None):
                 self.d._model = CursorTableModel(self._action, self._prj)
                 self._selection = QtGui.QItemSelectionModel(self.d._model)
                 self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
@@ -1311,10 +1347,7 @@ class FLSqlCursor(ProjectClass):
          return PNBuffer(self.d)
     
     def primeUpdate(self):
-        if not self.d.buffer_:
-            self.d.buffer_ = PNBuffer(self.d)
         self.d.buffer_.primeUpdate()
-        return self.d.buffer_
     
     @decorators.NotImplementedWarn
     def editBuffer(self, b):
@@ -1334,6 +1367,7 @@ class FLSqlCursor(ProjectClass):
     @return TRUE si se ha podido realizar el refresco, FALSE en caso contrario
     """
     @QtCore.pyqtSlot()
+    @decorators.BetaImplementation
     def refreshBuffer(self):
         if not self.d.metadata_:
             return False
@@ -1345,7 +1379,8 @@ class FLSqlCursor(ProjectClass):
             if not self.commitBufferCursorRelation():
                 return False
             
-            self.d.buffer_ = self.primeInsert()
+            if not self.d.buffer_:
+                self.d.buffer_ = PNBuffer(self.d)
             self.setNotGenerateds()
             
             fieldList = self.metadata().fieldListObject()
@@ -1388,7 +1423,10 @@ class FLSqlCursor(ProjectClass):
             if self.isLocked() and self.d.acosCondName_.isEmpty():
                 self.d.modeAccess_ = self.Browse
             
-            self.d.buffer_ = self.primeUpdate()
+            if not self.d.buffer_:
+                self.d.buffer_ = PNBuffer(self.d)
+                
+            self.d.buffer_.primeUpdate()
             self.setNotGenerateds()
             self.updateBufferCopy()
             self.newBuffer.emit()
@@ -1442,25 +1480,33 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.WorkingOnThis
+    @decorators.NotImplementedWarn
     def seek(self, i, relative = None, emite = None):
+        return False
+    
+    """
         if self.d.modeAccess_ == self.Del:
             return False
         
-        #b = self.d.db_.seek( i, relative)
-        b = True
-        
+        b = False
+            
+        if not self.d.buffer_:
+            b = True
+            
         
         if b and emite:
             self.currentChanged(self.at())
         
-        if b:
+        if b:  
             return self.refreshBuffer()
         
-        return b
+        else:
+            print("FLSqlCursor.seek(): buffer principal =", self.d.buffer_.md5Sum())
+        
+        return False
         
         
-
+    """
 
     """
     Redefinicion del método next() de QSqlCursor.
@@ -1644,7 +1690,8 @@ class FLSqlCursor(ProjectClass):
         if "ORDER BY" in finalFilter:
             posOrderBy = True
         
-
+        print(finalFilter)
+            
             
             
         
