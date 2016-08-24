@@ -53,7 +53,7 @@ class FLCompoundkey():
     """
     def hasField(self, fN):
         for i in self.fieldList_:
-            if i.name() == str(fN):
+            if i == str(fN):
                 return True
         
         return False
