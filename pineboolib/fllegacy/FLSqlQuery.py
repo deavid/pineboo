@@ -3,7 +3,6 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 import pineboolib
-from pineboolib.fllegacy import FLSqlCursor
 class FLSqlQuery(ProjectClass):
     """
     Implementacion de FlSqlquery de Abanq para compatibilidad con python
@@ -72,7 +71,7 @@ class FLSqlQuery(ProjectClass):
     #ejecucion de consulta y scroll
     def exec(self,connection=None):
         try:
-            print(self.sql())
+            #print(self.sql())
             micursor=self.__damecursor(connection)
             micursor.execute(self.sql())
             self._cursor=micursor
