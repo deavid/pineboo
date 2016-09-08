@@ -2,13 +2,17 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
+from PyQt4.QtCore import QString
+from PyQt4 import QtCore, QtGui
+import pineboolib
+from pineboolib.utils import DefFun
 
 class FLUtil(ProjectClass):
     progress_dialog_stack = []
     def __getattr__(self, name): return DefFun(self, name)
 
     def translate(self, group, string):
-        return QtCore.QString(string)
+        return QString(string)
 
     def sqlSelect(self, table, fieldname, where):
         if where: where = "AND " + where
@@ -19,7 +23,7 @@ class FLUtil(ProjectClass):
             return ret
 
     def createProgressDialog(self, title, steps):
-        pd_widget = ProgressDialog()
+        pd_widget = QtGui.QProgressDialog()
         pd_widget.setup(title, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
 
@@ -40,8 +44,16 @@ class FLUtil(ProjectClass):
         return [len(campos)]+campos
 
     def addMonths(self, fecha, offset):
-        if isinstance(fecha, str) or isinstance(fecha, QtCore.QString):
+        if isinstance(fecha, str) or isinstance(fecha, QString):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(fecha))
         return fecha.addMonths(offset)
+    
+    @decorators.NotImplementedWarn
+    def nextCounter(self, *args):
+        return True
+    
+    @decorators.NotImplementedWarn
+    def dateDMAtoAMD(self, value):
+        return value

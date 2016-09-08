@@ -1,0 +1,14 @@
+<project>
+    <name>Eneboo Base project</name>
+    <application-path>/home/jose/repos/github/pineboo</application-path>
+    <database-server>
+        <type>postgresql</type>
+        <host>127.0.0.1</host>
+        <port>5432</port>
+    </database-server>
+    <database-credentials>
+        <username>postgres</username>
+        <password>dkn42m</password>
+    </database-credentials>
+    <database-name>pruebas</database-name>
+</project>

@@ -4,14 +4,13 @@
 
 from pineboolib.fllegacy.FLRelationMetaDataList import FLRelationMetaDataList
 from pineboolib import decorators
-
-import sip
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 
-# switch on QVariant in Python3
-sip.setapi('QVariant', 2)
 
-from PyQt4.QtCore import QVariant
+from PyQt4.QtCore import QVariant, QString
+from PyQt4 import QtCore, QtGui
+from pineboolib.utils import aqtt
+
 
 
 class FLFieldMetaData():
@@ -45,29 +44,27 @@ class FLFieldMetaData():
     Check = 300
     count_ = 0
 
-    @decorators.BetaImplementation
+
     def __init__(self, *args, **kwargs):
         if len(args) == 1:
             self.inicializeFLFieldMetaData(args[0])
         else:
-            self.inicializeNewFLFieldMetaData( args, kwargs)    
+            self.inicializeNewFLFieldMetaData( *args, **kwargs)    
         ++self.count_
             
             
-    @decorators.BetaImplementation    
-    def inicializeFLFieldMetaData(self, *other):
+    
+    def inicializeFLFieldMetaData(self, other):
         self.d = FLFieldMetaDataPrivate()
-        self.copy()
+        self.copy(other)
         
                                            
-    @decorators.BetaImplementation
-    def inicializeNewFLFieldMetaData(self, n, a, aN, isPrimaryKey, t, l=0, c=False, v=True, ed=False, pI=4, pD=0, iNX=False, uNI=False,coun=False,defValue=None,oT=False, rX=None, vG=True,gen=True,iCK=False):  
+    def inicializeNewFLFieldMetaData(self, n, a, aN, isPrimaryKey, t, l=0, c=False, v=True, ed=True, pI=4, pD=0, iNX=False, uNI=False,coun=False,defValue=None,oT=False, rX=None, vG=True,gen=True,iCK=False):  
         self.d = FLFieldMetaDataPrivate(n, a, aN, isPrimaryKey, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK)
     
     """
     desctructor
     """
-    @decorators.BetaImplementation
     def __del__(self):
         del self.d
         --self.count_
@@ -79,7 +76,6 @@ class FLFieldMetaData():
 
     @return Nombre del campo
     """
-    @decorators.BetaImplementation
     def name(self):
         return self.d.fieldName_
 
@@ -98,16 +94,14 @@ class FLFieldMetaData():
 
     @return Alias del campo
     """
-    @decorators.BetaImplementation
     def alias(self):
-        return self.d.alias_
+        return aqtt(self.d.alias_)
 
     """
     Obtiene si permite nulos.
 
     @return TRUE si permite nulos, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def allowNull(self):
         return self.d.allowNull_
 
@@ -116,10 +110,10 @@ class FLFieldMetaData():
 
     @return TRUE si es clave primaria, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
+
     def isPrimaryKey(self):
         return self.d.isPrimaryKey_
-    @decorators.BetaImplementation
+    
     def setIsPrimaryKey(self, b):
         self.d.isPrimaryKey_ = b
     """
@@ -127,7 +121,6 @@ class FLFieldMetaData():
 
     @return TRUE si es clave compuesta, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def isCompoundKey(self):
         return self.d.isCompoundKey_
 
@@ -136,19 +129,14 @@ class FLFieldMetaData():
 
     @return El tipo del campo
     """
-    @decorators.BetaImplementation
     def type(self):
-        if self.d.tpye_ == self.Ckeck:
-            return bool
-        else:
-            return self.d.type_
+        return str(self.d.type_)
 
     """
     Obtiene la longitud del campo.
 
     @return La longitud del campo
     """
-    @decorators.BetaImplementation
     def length(self):
         return self.d.length_
 
@@ -157,7 +145,6 @@ class FLFieldMetaData():
 
     @return TRUE si el campo es calculado, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def calculated(self):
         return self.d.calculated_
 
@@ -166,7 +153,6 @@ class FLFieldMetaData():
 
     @param c Valor TRUE si se quiere poner el campo como calculado, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def setCalculated(self, c):
         self.d.calculated_ = c
 
@@ -175,7 +161,6 @@ class FLFieldMetaData():
 
     @return TRUE si el campo es editable, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def editable(self):
         return self.d.editable_
 
@@ -185,7 +170,6 @@ class FLFieldMetaData():
     @param ed Valor TRUE si se quiere que el campo sea editable, FALSE
           en caso contrario
     """
-    @decorators.BetaImplementation
     def setEditable(self, ed):
         self.d.editable_ = ed
 
@@ -194,7 +178,6 @@ class FLFieldMetaData():
 
     @return TRUE si el campo es visible, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def visible(self):
         return self.d.visible_
 
@@ -203,7 +186,6 @@ class FLFieldMetaData():
 
     @return TRUE si el campo es visible en la rejilla de la tabla, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def visibleGrid(self):
         return self.d.visibleGrid_
 
@@ -240,7 +222,6 @@ class FLFieldMetaData():
 
     @return El número de dígitos de la parte entera del campo
     """
-    @decorators.BetaImplementation
     def partInteger(self):
         return self.d.partInteger_
 
@@ -249,7 +230,6 @@ class FLFieldMetaData():
 
     @return El número de dígitos de la parte decimal del campo
     """
-    @decorators.BetaImplementation
     def partDecimal(self):
         return self.d.partDecimal_
     """
@@ -300,13 +280,17 @@ class FLFieldMetaData():
 
     @param r Objeto FlRelationMetaData con la definicion de la
          relacion a añadir """
-    
-    @decorators.BetaImplementation     
+         
     def addRelationMD(self, r):
-        isRelM1 = (r.cardinality() == FLRelationMetaData.RELATION_M1)
+        
+        isRelM1 = False
+        #print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
+        if r.cardinality() == FLRelationMetaData.RELATION_M1:
+            isRelM1 = True
         if isRelM1 and self.d.relationM1_:
             print("FLFieldMetaData: Se ha intentado crear más de una relación muchos a uno para el mismo campo")
             return
+        
         
         r.setField(self.d.fieldName_)
         if isRelM1:
@@ -314,7 +298,7 @@ class FLFieldMetaData():
             return
         
         if not self.d.relationList_:
-            self.d.relationList_ = FLRelationMetaDataList.FLRelationMetaDataList
+            self.d.relationList_ = []
         
         self.d.relationList_.append(r)
         
@@ -325,7 +309,6 @@ class FLFieldMetaData():
 
     @return Objeto con la lista de deficiones de la relaciones del campo
     """
-    @decorators.BetaImplementation
     def relationList(self):
         return self.d.relationList_
 
@@ -337,7 +320,6 @@ class FLFieldMetaData():
     @return Objeto FLRelationMetaData con la descripcion de la relacion
         muchos a uno para este campo
     """
-    @decorators.BetaImplementation
     def relationM1(self):
         return self.d.relationM1_
              
@@ -365,7 +347,8 @@ class FLFieldMetaData():
     #def setAssociatedField(self, rName, f):
     #    self.d.associatedFieldName_ = rName
     #    self.d.associatedFieldFilterTo_ = f
-    @decorators.BetaImplementation
+    
+    
     def setAssociatedField(self, rName, f ):
         if isinstance(rName, FLFieldMetaData):
             self.d.associatedField_ = rName
@@ -382,7 +365,6 @@ class FLFieldMetaData():
     @return Objeto FLFieldMetaData que define el campo asociado a este, o 0
       si no hay campo asociado
     """
-    @decorators.BetaImplementation
     def associatedField(self):
         return self.d.associatedField_
 
@@ -426,7 +408,6 @@ class FLFieldMetaData():
 
     @return TRUE si el campo se modifica fuera de transaccion, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def outTransaction(self):
         return self.d.outTransaction_
 
@@ -445,25 +426,38 @@ class FLFieldMetaData():
 
     @return Lista de opciones del campo
     """
-    @decorators.BetaImplementation
     def optionsList(self):
         return self.d.optionsList_
 
+    """
+    Devuelve el index de un campo determinado
+
+    @return Lista de opciones del campo
+    """    
+    def getIndexOptionsList(self, name):
+        i = 0
+        for option in self.d.optionsList_:
+            if option == str(name):
+                return i 
+            
+            i = i + 1
+            
+        return None
+        
     """
     Establece la lista de opciones para el campo
 
     @param ol Cadena de texto con la opciones para el campo
           separada por comas, p.e. "opcion1,opcion2,opcion3"
     """
-    @decorators.BetaImplementation
     def setOptionsList(self, ol):
         self.d.optionsList_ = []
-        
-        for componente in ol.split(";"):
-            if "QT_TRANSLATE_NOOP" in componente:
-                componente = componente[18:-1].split(",")
-                componente = componente[1].replace("\"","")
-            self.d.optionList_.append(componente)
+        if ol.find("QT_TRANSLATE") != -1:
+            for componente in ol.split(";"):
+                self.d.optionsList_.append(aqtt(componente))
+        else:
+            for componente in ol.split(","):
+                self.d.optionsList_.append(aqtt(componente))
                       
         if len(self.d.optionsList_) > 0:
             self.d.hasOptionsList_ = True
@@ -482,7 +476,6 @@ class FLFieldMetaData():
     """
     Obtiene si el campo tiene lista de opciones
     """
-    @decorators.BetaImplementation
     def hasOptionsList(self):
         return self.d.hasOptionsList_
 
@@ -514,7 +507,6 @@ class FLFieldMetaData():
     """
     Establece el objeto FLTableMetaData al que pertenece
     """
-    @decorators.BetaImplementation
     def setMetadata(self, mtd):
         self.d.mtd_ = mtd
 
@@ -522,34 +514,35 @@ class FLFieldMetaData():
     """
     Obtiene el objeto FLTableMetaData al que pertenece
     """
-    @decorators.BetaImplementation
     def metadata(self):
         return self.d.mtd_
 
     """
     Obtiene el tipo del campo convertido a un tipo equivalente de la clase QVariant
     """
-    @decorators.BetaImplementation
     def flDecodeType(self, fltype):
-        _type = None
         
-        if isinstance(fltype, QVariant.Int):
+        _type = None
+        #print("Decode", fltype)
+        
+        if fltype == "int":
             _type = QVariant.Int
-        elif isinstance(fltype, FLFieldMetaData.Serial) or isinstance(fltype, QVariant.UInt):
+        elif fltype == "serial" or fltype == "uint":
             _type = QVariant.UInt
-        elif isinstance(fltype, QVariant.Bool) or isinstance(fltype, FLFieldMetaData.Unlock):
+        elif fltype == "bool" or fltype == "unlock":
             _type = QVariant.Bool
-        elif isinstance(fltype, QVariant.Double):
+        elif fltype == "double":
             _type = QVariant.Double
-        elif isinstance(fltype, QVariant.Time):
+        elif fltype ==  "time":
             _type = QVariant.Time
-        elif isinstance(fltype, QVariant.Date):
+        elif fltype == "date":
             _type = QVariant.Date
-        elif isinstance(fltype, QVariant.String) or isinstance(fltype, QVariant.Pixmap) or isinstance(fltype, QVariant.StringList):
+        elif fltype == "string" or fltype == "pixmap" or fltype == "stringList":
             _type = QVariant.String
-        elif isinstance(fltype, QVariant.ByteArray):
+        elif fltype == "bytearray":
             _type = QVariant.ByteArray
         
+        #print("Return", _type)
         return _type
     """
     Devuelve diferentes opciones de búsqueda para este campo.
@@ -572,23 +565,20 @@ class FLFieldMetaData():
             self.d.searchOptions_.append(dato)
   
   
-    @decorators.BetaImplementation
     def copy(self, other):
         if other == self:
             return
+        
+        self = other
+        """
         od = other.d
         if od.relationM1_:
-            od.relationM1_.ref()
             self.d.relationM1_ = od.relationM1_
         
-        self.d.clearRelationlist()
+        self.d.clearRelationList()
         
         if od.relationList_:
-            for i in range(od.relationList_):
-                if not self.d.relationList_:
-                    self.d.relationList_ = FLRelationMetaDataList.FLRelationMetaDataList
-                
-                self.d.relationList_.append(od.relationList_[i])
+            self.d.relationList_ = od.relationList_
         
         self.d.fieldName_ = od.fieldName_
         self.d.alias_ = od.alias_
@@ -616,7 +606,38 @@ class FLFieldMetaData():
         self.d.visibleGrid_ = od.visibleGrid_
         self.d.generated_ = od.generated_
         self.d.isCompoundKey_ = od.isCompoundKey_
-        self.d.hasOptionsList_ = od.hasOptionsList_            
+        self.d.hasOptionsList_ = od.hasOptionsList_    
+        """
+    
+    def formatAssignValue(self,fieldName , value, upper):
+        if self.type() == ("", None) or fieldName.isEmpty():
+            return "1 = 1"
+        
+        isText = False
+        if value.type() == "string" or value.type() == "stringlist":
+            isText = True
+        
+        formatV = QString()
+        if value.type() == "int" or value.type() == "uint" or value.type() == "double":
+            formatV = value.toString()
+        else: 
+            formatV = "'" + value.toString() + "'"
+        
+        #print("FORMATV es %s, %s y value era %s" % (formatV, type(formatV), value.toString()))
+                 
+        if formatV.isEmpty():
+            return "1 = 1"
+        
+        if upper and isText:
+            fName = QString("upper(" + fieldName + ")")
+        else:
+            fName = QString(fieldName)
+        
+        return QString(fName + " = " + formatV)
+        
+        
+        
+                
                
     
 class FLFieldMetaDataPrivate():
@@ -821,23 +842,25 @@ class FLFieldMetaDataPrivate():
     """
     mtd_ = None
     
-    @decorators.BetaImplementation
+
     def __init__(self, *args, **kwargs):
+        
+        self.regExpValidator_ = QString()
         
         if len(args) == 0:
             self.inicializeEmpty()
         else:
-            self.inicialize(args, kwargs)
+            self.inicialize(*args, **kwargs)
         
-    @decorators.BetaImplementation
+ 
     def inicializeEmpty(self):
         self.relationList_ = None
         self.relationM1_ = None
         self.associatedField_ = None
         self.mtd_ = None
         
-    @decorators.BetaImplementation
-    def inicialize(self, n, a, aN, iPK, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
+
+    def inicialize(self, n, a, aN, iPK, t, l , c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
         self.fieldName_ = n.lower()
         self.alias_ = a
         if c:
@@ -869,21 +892,23 @@ class FLFieldMetaDataPrivate():
         self.fullyCalculated_ = False
         self.trimmed_ = False
         
-        if l < 0:
+        if int(l) < 0:
             self.length_ = 0
-        if pI < 0:
+        if int(pI) < 0:
             self.partInteger_ = 0
-        if pD < 0:
+        if int(pD) < 0:
             self.partDecimal_ = 0
         
-        if not isinstance(t, QVariant.String)  and l != 0: 
+        #print("Tipo ", t)
+        
+        if not t == "string" and not int(l) == 0: 
             self.length_ = 0
         
         
-        if not isinstance(t, QVariant.Int) and not isinstance(t, QVariant.UInt) and isinstance(t, QVariant.Double) and pI != 0: 
+        if not t == "int" and not t == "uint" and t == "double" and not int(pI) == 0: 
             self.partInteger_ = 0
         
-        if isinstance(t, QVariant.Double) and pD != 0: 
+        if t == "double" and not int(pD) == 0: 
             self.partDecimal_ = 0
 
     @decorators.BetaImplementation
@@ -896,7 +921,6 @@ class FLFieldMetaDataPrivate():
     """
     Limpia la lista de definiciones de relaciones
     """
-    @decorators.BetaImplementation
     def clearRelationList(self):
         self.relationList_ = []
         

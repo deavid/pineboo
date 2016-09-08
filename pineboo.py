@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 # -*# -*- coding: utf-8 -*-
+
+
+
 """
     Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
     pineboolib.main(); para ello acepta los parámetros necesarios de consola
@@ -30,6 +33,8 @@ except ImportError:
 
 try:
     import sip
+    # switch on QVariant in Python3
+    sip.setapi('QVariant', 1)
     sip.setapi('QString', 1)
 
     from PyQt4 import QtGui, QtCore, uic

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore,QtGui
+from PyQt4 import QtGui
 
-from pineboolib.utils import DefFun, filedir
+from pineboolib.utils import filedir
 
-class FLForm(QtGui.QWidget):
+class FLFormDB(QtGui.QWidget):
     known_instances = {}
+    _cursor = None
+    
     def __init__(self, parent, action, load=False):
         try:
             assert (self.__class__,action) not in self.known_instances
@@ -34,11 +36,17 @@ class FLForm(QtGui.QWidget):
         self.toolButtonClose = QtGui.QToolButton()
         self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
         self.toolButtonClose.clicked.connect(self.close)
-        self.bottomToolbar.layout.addWidget(self.toolButtonClose)
+        self.bottomToolbar.layout.addWidget(self.toolButtonClose) 
         self.layout.addWidget(self.bottomToolbar)
         self.setWindowTitle(action.alias)
         self.loaded = False
+        
+            
         if load: self.load()
 
     def load(self):
         if self.loaded: return
+    
+    def cursor(self):
+        return self._cursor
+    

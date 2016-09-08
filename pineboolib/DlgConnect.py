@@ -18,8 +18,8 @@ class DlgConnect(QtGui.QWidget):
 
     def load(self):
         self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
-        self.connect(self.ui.pbnStart, QtCore.SIGNAL("clicked()"), self.conectar)
-        self.connect(self.ui.pbnSearchFolder, QtCore.SIGNAL("clicked()"), self.findPathProject)
+        self.ui.pbnStart.clicked.connect(self.conectar)
+        self.ui.pbnSearchFolder.clicked.connect(self.findPathProject)
         DlgConnect.leFolder = self.ui.leFolder
         DlgConnect.leName = self.ui.leName
         DlgConnect.leUserName = self.ui.leUserName
@@ -27,7 +27,8 @@ class DlgConnect(QtGui.QWidget):
         DlgConnect.leHostName = self.ui.leHostName
         DlgConnect.lePort = self.ui.lePort
         DlgConnect.leDBName = self.ui.leDBName
-
+    
+    @QtCore.pyqtSlot()
     def conectar(self):
         DlgConnect.ruta = filedir(str(DlgConnect.leFolder.text()), str(DlgConnect.leName.text()))
         DlgConnect.username = DlgConnect.leUserName.text()
@@ -45,6 +46,8 @@ class DlgConnect(QtGui.QWidget):
             DlgConnect.ruta = None
         else:
             self.close()
+    
+    @QtCore.pyqtSlot()       
     def findPathProject(self):
         filename = QtGui.QFileDialog.getExistingDirectory(self, "Seleccione Directorio")
         if filename:
