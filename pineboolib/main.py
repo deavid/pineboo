@@ -45,8 +45,8 @@ class DBAuth(XMLStruct):
 
 
 class Project(object):
-    conn = None # Almacena la conexión principal a la base de datos 
-    
+    conn = None # Almacena la conexión principal a la base de datos
+
     def __init__(self):
         self.tree = None
         self.root = None
@@ -111,7 +111,7 @@ class Project(object):
         if not os.path.exists(self.dir("cache")):
             os.makedirs(self.dir("cache"))
         # Conectar:
-        
+
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password)
 
         self.cur = self.conn.cursor()
@@ -402,10 +402,10 @@ class XMLMainFormAction(XMLStruct):
     def run(self):
         print("Running MainFormAction:", self.name, self.text, self.slot)
         action = self.mod.actions[self.name]
-        getattr(action, self.slot, "unknowSlot")()
+        getattr(action, self.slot, "unknownSlot")()
 
 class XMLAction(XMLStruct):
-    
+
     def __init__(self, *args, **kwargs):
         super(XMLAction,self).__init__(*args, **kwargs)
         self.form = self._v("form")
@@ -457,7 +457,7 @@ class XMLAction(XMLStruct):
         self.mainform_widget.init()
         w.addFormTab(self)
         #self.mainform_widget.show()
-    
+
     def formRecord(self):
         return self.form
 
@@ -472,8 +472,8 @@ class XMLAction(XMLStruct):
         s = self.load()
         s.iface.main()
 
-    def unknowSlot(self):
-        print("Executing unknow script for Action", self.name)
+    def unknownSlot(self):
+        print("Executing unknown script for Action", self.name)
         #Aquí debería arramcar el script
 
 class FLMainForm(FLFormDB):
