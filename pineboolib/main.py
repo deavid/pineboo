@@ -401,8 +401,11 @@ class XMLMainFormAction(XMLStruct):
     slot = None
     def run(self):
         print("Running MainFormAction:", self.name, self.text, self.slot)
-        action = self.mod.actions[self.name]
-        getattr(action, self.slot, "unknownSlot")()
+        try:
+            action = self.mod.actions[self.name]
+            getattr(action, self.slot, "unknownSlot")()
+        finally:
+            print("END of Running MainFormAction:", self.name, self.text, self.slot)
 
 class XMLAction(XMLStruct):
 
