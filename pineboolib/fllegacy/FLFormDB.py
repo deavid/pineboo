@@ -206,7 +206,8 @@ class FLFormDB(QtGui.QWidget):
     def initScript(self):
         if self.iface:
             try:
-                self.iface.init()
+                timer = QtCore.QTimer(self)
+                timer.singleShot(300, self.iface.init)
                 return True
             except Exception:
                 return False
