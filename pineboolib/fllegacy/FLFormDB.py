@@ -4,8 +4,6 @@ from PyQt4 import QtGui, QtCore
 
 from pineboolib.utils import filedir
 from pineboolib import decorators
-import pineboolib.emptyscript
-from pineboolib import qt3ui
 import os.path, traceback
 import imp
 
@@ -195,6 +193,7 @@ class FLFormDB(QtGui.QWidget):
         self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
         if self.action.form:
+            from pineboolib import qt3ui
             form_path = self.prj.path(self.action.form+".ui")
             qt3ui.loadUi(form_path, self.widget)
 
@@ -214,6 +213,8 @@ class FLFormDB(QtGui.QWidget):
                 
 
     def load_script(self,scriptname):
+        # import aqui para evitar dependencia ciclica
+        import pineboolib.emptyscript
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
         if scriptname:
