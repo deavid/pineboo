@@ -8,7 +8,6 @@ from pineboolib import project
 from PyQt4 import QtCore, QtGui, Qt
 from pineboolib.utils import filedir
 import os.path, traceback
-from pineboolib import qt3ui
 
 class FLFormSearchDB( FLFormDB ):
     _accepted = None
