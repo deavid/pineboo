@@ -405,7 +405,7 @@ class FLFormDB(QtGui.QWidget):
         if not text:
             return
         
-        self.setCaptionWidget(text)
+        self.setWindowTitle(text)
         
 
     """

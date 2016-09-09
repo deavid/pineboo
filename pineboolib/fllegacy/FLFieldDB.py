@@ -1267,7 +1267,7 @@ class FLFieldDB(QtGui.QWidget):
                 #self.pushButtonDB.setVisible(False)
 
         elif type_ == "date":
-            if self.cursor_.modeAccess() == FLSqlCursor.Insert and nulo and not self.field.allowNull():
+            if self.cursor_.modeAccess() == FLSqlCursor.Insert and nulo and not field.allowNull():
                 defVal = field.defaultValue()
                 if not defVal.isValid() or defVal.isNull():
                     self.editor_.setDate(QtCore.QDate.currentDate())
