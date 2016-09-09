@@ -4,7 +4,10 @@ from PyQt4 import QtGui, QtCore
 
 from pineboolib.utils import filedir
 from pineboolib import decorators
-
+import pineboolib.emptyscript
+from pineboolib import qt3ui
+import os.path, traceback
+import imp
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -138,8 +141,105 @@ class FLFormDB(QtGui.QWidget):
     formReady = QtCore.pyqtSignal()
     
     
-    def __init__(self, *args, **kwargs):
-        #super(FLFormDB, self).__init__(self, *args, **kwargs)
+    known_instances = {}
+    _cursor = None
+    
+    def __init__(self, parent, action, load=False):
+        try:
+            assert (self.__class__,action) not in self.known_instances
+        except AssertionError:
+            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__,action),)
+                + "Puede que se estén perdiendo datos!" )
+        self.known_instances[(self.__class__,action)] = self
+        QtGui.QWidget.__init__(self, parent)
+        self.action = action
+        self.prj = action.prj
+        self.mod = action.mod
+        
+                
+        self.layout = QtGui.QVBoxLayout()
+        self.layout.setMargin(2)
+        self.layout.setSpacing(2)
+        self.setLayout(self.layout)
+        # self.widget = QtGui.QWidget()
+        # self.layout.addWidget(self.widget)
+        self.bottomToolbar = QtGui.QFrame()
+        self.bottomToolbar.setMaximumHeight(64)
+        self.bottomToolbar.setMinimumHeight(16)
+        self.bottomToolbar.layout = QtGui.QHBoxLayout()
+        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
+        self.bottomToolbar.layout.setMargin(0)
+        self.bottomToolbar.layout.setSpacing(0)
+        self.bottomToolbar.layout.addStretch()
+        self.toolButtonClose = QtGui.QToolButton()
+        self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
+        self.toolButtonClose.clicked.connect(self.close)
+        self.bottomToolbar.layout.addWidget(self.toolButtonClose) 
+        self.layout.addWidget(self.bottomToolbar)
+        self.setWindowTitle(action.alias)
+        
+        self.loaded = False
+        
+            
+        if load: self.load()
+
+        
+    def load(self):
+        if self.loaded: return
+        print("Loading form %s . . . " % self.action.form)
+        self.script = None
+        self.iface = None
+        try: script = self.action.scriptform or None
+        except AttributeError: script = None
+        self.load_script(script)
+        self.resize(550,350)
+        self.layout.insertWidget(0,self.widget)
+        if self.action.form:
+            form_path = self.prj.path(self.action.form+".ui")
+            qt3ui.loadUi(form_path, self.widget)
+
+        self.loaded = True
+
+    """
+    Invoca a la función "init" del script "masterprocess" asociado al formulario
+    """
+    @QtCore.pyqtSlot()
+    def initScript(self):
+        if self.iface:
+            try:
+                self.iface.init()
+                return True
+            except Exception:
+                return False
+                
+
+    def load_script(self,scriptname):
+        python_script_path = None
+        self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
+        if scriptname:
+            print("Loading script %s . . . " % scriptname)
+            # Intentar convertirlo a Python primero con flscriptparser2
+            script_path = self.prj.path(scriptname+".qs")
+            if not os.path.isfile(script_path): raise IOError
+            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
+            if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
+                print("Convirtiendo a Python . . .")
+                #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                from pineboolib.flparser import postparse
+                postparse.pythonify(script_path)
+
+            if not os.path.isfile(python_script_path):
+                raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
+            try:
+                self.script = imp.load_source(scriptname,python_script_path)
+                #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+            except Exception as e:
+                print("ERROR al cargar script QS para la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
+
+        self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+        self.widget = self.script.form
+        self.iface = self.widget.iface
         
 
 
@@ -168,16 +268,13 @@ class FLFormDB(QtGui.QWidget):
     destructor
     """
     def __del__(self):
-        print("FLform: Destructor")
+        print("FLFormDB: Destructor")
 
-    """
-    Establece el cursor que debe utilizar el formulario.
 
-    @param c Cursor con el que trabajar
-    """
-    @decorators.NotImplementedWarn
-    def setCursor(self, c):
-        return True
+
+    def setCursor(self, cursor):
+        print("Definiendo cursor")
+        self._cursor = cursor
 
     """
     Para obtener el cursor utilizado por el formulario.
@@ -222,9 +319,43 @@ class FLFormDB(QtGui.QWidget):
 
     @param w Widget principal para el formulario
     """
-    @decorators.NotImplementedWarn
-    def setMainWidget(self, w):
-        return True
+    @decorators.Incomplete
+    def setMainWidget(self, w = None):
+        if not self._cursor or not w:
+            print("Creamos la ventana (ignorado)")
+            return
+        print("Creamos la ventana")
+
+        if self.showed:
+            if self.mainWidget_ and not self.mainWidget_ == w:
+                self.initMainWidget(w)
+        else:
+            w.hide()
+
+        if self.layoutButtons:
+            del self.layoutButtons
+
+        if self.layout:
+            del self.layout
+
+
+        w.setFont(QtGui.qApp.font())
+        self.layout = QtGui.QVBoxLayout()
+        self.layout.addWidget(w)
+        self.layoutButtons = QtGui.QHBoxLayout()
+
+        #pbSize = Qt.QSize(22,22)
+
+        wt = QtGui.QToolButton.whatsThis()
+        wt.setIcon(QtGui.QIcon(filedir("icons","gtk-find.png")))
+        self.layoutButtons.addWidget(wt)
+        wt.show()
+
+        self.mainWidget_ = w
+
+        self._cursor.setEdition(False)
+        self._cursor.setBrowse(False)
+        self._cursor.recordChoosed.emit(self.acepted)
 
 
     """
@@ -284,13 +415,7 @@ class FLFormDB(QtGui.QWidget):
         return True
       
 
-    """
-    Invoca a la función "init" del script "masterprocess" asociado al formulario
-    """
-    @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
-    def initScript(self):
-        return True
+
 
     """
     Se activa al pulsar el boton aceptar
@@ -310,12 +435,12 @@ class FLFormDB(QtGui.QWidget):
 
     """
     Redefinida por conveniencia
-    """
+
     @QtCore.pyqtSlot()
     @decorators.NotImplementedWarn
     def show(self):
         return True
-
+    """
     """
     Muestra el formulario sin llamar al script "init".
     Utilizado en documentación para evitar conflictos al capturar los formularios
@@ -352,9 +477,16 @@ class FLFormDB(QtGui.QWidget):
     #private slots:
     
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def callInitScript(self):
-        return True
+   
+        
+        if not self.initScript():
+            return
+        
+    
+        if not self.isClosing_:
+            QtCore.QTimer(self).singleShot(0, self.emitFormReady)
+        
 
     #protected_:
 
@@ -392,9 +524,12 @@ class FLFormDB(QtGui.QWidget):
     """
     Indica si la interfaz de script está unida al objeto formulario
     """
-    @decorators.NotImplementedWarn
     def isIfaceBind(self):
-        return True
+        if self.iface:
+            return True
+        else:
+            return False
+
 
     """
     Captura evento cerrar
@@ -406,9 +541,27 @@ class FLFormDB(QtGui.QWidget):
     """
     Captura evento mostrar
     """
-    @decorators.NotImplementedWarn
     def showEvent(self, e):
-        return True
+        if not self.showed:
+            self.showed = True
+        v = None
+        if self.cursor_ and self.iface:
+            try:
+                v = self.iface.preloadMainFilter()
+            except Exception:
+                pass
+            
+            if v:
+                self.cursor_.setMainFilter(v,False)
+        
+        self.initMainWidget()
+        self.callInitScript()
+        if not self.isIfaceBind():
+            self.bindIface()
+            
+        
+            
+            
     """
     Captura evento ocultar
     """
@@ -432,7 +585,9 @@ class FLFormDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def initMainWidget(self, w = None):
-        return True
+        pass
+        
+
 
 
 

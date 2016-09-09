@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pineboolib
-from pineboolib.fllegacy.FLFormDB_old import FLFormDB
+from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib import qt3ui
 import traceback
 import os
@@ -61,39 +61,5 @@ class FLFormDBRecord(FLFormDB):
 
         self.loaded = True
 
-    def init(self):
-        if self.iface:
-            try:
-                self.iface.init()
-            except Exception as e:
-                print("ERROR al inicializar script de la accion %r:" % self.action.name, e)
-                print(traceback.format_exc(),"---")
 
-    def load_script(self,scriptname):
-        python_script_path = None
-        self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
-        if scriptname:
-            print("Loading script %s . . . " % scriptname)
-            # Intentar convertirlo a Python primero con flscriptparser2
-            script_path = self.prj.path(scriptname+".qs")
-            if not os.path.isfile(script_path): raise IOError
-            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
-            try:
-                if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-                    print("Convirtiendo a Python . . .")
-                    #ret = subprocess.call(["flscriptparser2", "--full",script_path])
-                    from pineboolib.flparser import postparse
-                    postparse.pythonify(script_path)
-
-                if not os.path.isfile(python_script_path):
-                    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
-                self.script = imp.load_source(scriptname,python_script_path)
-                #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
-            except Exception as e:
-                print("ERROR al cargar script QS para la accion %r:" % self.action.name, e)
-                print(traceback.format_exc(),"---")
-
-        self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
-        self.widget = self.script.form
-        self.iface = self.widget.iface
 
