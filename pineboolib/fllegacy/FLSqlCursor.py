@@ -153,7 +153,7 @@ class PNBuffer(ProjectClass):
     def setMd5Sum(self, value):
         value = str(value)
         cadena = "%s_%s" % (self.md5Sum_, value)
-        tmp = hashlib.md5(value).hexdigest()
+        tmp = hashlib.md5(value.encode()).hexdigest()
         self.md5Sum_ = tmp
     
     def md5Sum(self):
@@ -1635,7 +1635,7 @@ class FLSqlCursor(ProjectClass):
         if self.d.modeAccess_ == self.Del:
             return False
         
-        b = self.move(self._model.rows-1)
+        b = self.move(self.d._model.rows-1)
         
         if b and emite:
             self.d._current_changed.emit(self.at())
