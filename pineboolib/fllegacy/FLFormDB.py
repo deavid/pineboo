@@ -282,7 +282,7 @@ class FLFormDB(QtGui.QWidget):
     return Objeto FLSqlCursor con el cursor que contiene los registros para ser utilizados
       en el formulario
     """
-    def cursor(self):    
+    def cursor(self):  
         return self.cursor_;
 
 

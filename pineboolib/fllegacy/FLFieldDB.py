@@ -190,7 +190,7 @@ class FLFieldDB(QtGui.QWidget):
     def loaded(self):
         self._loaded = True
         while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
-            parent = getattr(self.topWidget_,"_cursor", None)
+            parent = getattr(self.topWidget_,"cursor_", None)
             if parent:
                 break
             new_parent = self.topWidget_.parentWidget()

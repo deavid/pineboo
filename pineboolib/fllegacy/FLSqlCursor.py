@@ -50,14 +50,16 @@ class PNBuffer(ProjectClass):
         if not row:
             row = self.cursor_._currentregister
         for field in self.fieldList_:
-            #print("Procesando row", self.row())
+            #print("Procesando row", row)
             #field.value = self.convertToType(self.cursor_._model.value(self.cursor_._currentregister, field.name), field.type_)
             field.value = self.cursor_._model.value(row , field.name)
+            #print("%s.%s->%s" %(self.cursor_.nameCursor_ , field.name, field.value))
             
         
-        line_ = self.cursor_._currentregister
+        self.line_ = self.cursor_._currentregister
             
-            #print("%s->%s" %(field.name, field.value))
+        
+        
     def row(self):
         return self.line_
     
@@ -478,8 +480,7 @@ class FLSqlCursor(ProjectClass):
         #    for action in module.actions:
         #        if action.name == name:
         #            self.d.action_ = action
-        #            break
-                
+        #            break      
         self.init(name, autopopulate, cR, r)
         
             
