@@ -6,6 +6,7 @@ from pineboolib.utils import filedir
 from pineboolib import decorators
 import os.path, traceback
 import imp
+from pineboolib.flcontrols import FLTable
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -269,12 +270,11 @@ class FLFormDB(QtGui.QWidget):
     destructor
     """
     def __del__(self):
-        print("FLFormDB: Destructor")
+        self.unbindIface()
 
 
 
     def setCursor(self, cursor):
-        print("Definiendo cursor")
         self.cursor_ = cursor
 
     """
@@ -320,60 +320,79 @@ class FLFormDB(QtGui.QWidget):
 
     @param w Widget principal para el formulario
     """
-    @decorators.Incomplete
     def setMainWidget(self, w = None):
-        if not self.cursor_ or not w:
-            print("Creamos la ventana (ignorado)")
-            return
-        print("Creamos la ventana")
-
-        if self.showed:
-            if self.mainWidget_ and not self.mainWidget_ == w:
-                self.initMainWidget(w)
+        if not w:
+            if not self.cursor_:
+                self.setMainWidget(self.prj.conn.managerModules().createForm(self.action_, self))
+                return
+            else:
+                self.setMainWidget(self.cursor_.db().managerModules().createForm(self.action_.name, self))
+                return
+        elif isinstance(w,str):
+            if not self.cursor_:
+                self.setMainWidget(self.prj.conn.managerModules().createUI(self.action_, self))
+                return
+            else:
+                self.setMainWidget(self.cursor_.db().managerModules().createUI(self.action_.name, self))
+                return
         else:
-            w.hide()
+            
+        
+            print("Creamos la ventana")
 
-        if self.layoutButtons:
-            del self.layoutButtons
+            if self.showed:
+                if self.mainWidget_ and not self.mainWidget_ == w:
+                    self.initMainWidget(w)
+            else:
+                w.hide()
 
-        if self.layout:
-            del self.layout
+            if self.layoutButtons:
+                del self.layoutButtons
+
+            if self.layout:
+                del self.layout
 
 
-        w.setFont(QtGui.qApp.font())
-        self.layout = QtGui.QVBoxLayout()
-        self.layout.addWidget(w)
-        self.layoutButtons = QtGui.QHBoxLayout()
+            w.setFont(QtGui.qApp.font())
+            self.layout = QtGui.QVBoxLayout()
+            self.layout.addWidget(w)
+            self.layoutButtons = QtGui.QHBoxLayout()
 
         #pbSize = Qt.QSize(22,22)
 
-        wt = QtGui.QToolButton.whatsThis()
-        wt.setIcon(QtGui.QIcon(filedir("icons","gtk-find.png")))
-        self.layoutButtons.addWidget(wt)
-        wt.show()
+            wt = QtGui.QToolButton.whatsThis()
+            wt.setIcon(QtGui.QIcon(filedir("icons","gtk-find.png")))
+            self.layoutButtons.addWidget(wt)
+            wt.show()
 
-        self.mainWidget_ = w
+            self.mainWidget_ = w
 
-        self.cursor_.setEdition(False)
-        self.cursor_.setBrowse(False)
-        self.cursor_.recordChoosed.emit(self.acepted)
+            #self.cursor_.setEdition(False)
+            #self.cursor_.setBrowse(False)
+            #self.cursor_.recordChoosed.emit(self.acepted)
 
 
     """
     Obtiene la imagen o captura de pantalla del formulario.
     """
-    @decorators.NotImplementedWarn
     def snapShot(self):
-        return True
+        pix = QtGui.QPixmap.grabWidget(self)
+        return pix.convertToImage()
 
     """
     Salva en un fichero con formato PNG la imagen o captura de pantalla del formulario.
 
     @param pathFile Ruta y nombre del fichero donde guardar la imagen
     """
-    @decorators.NotImplementedWarn
     def saveSnapShot(self, pathFile):
-        return True
+        
+        fi = QtCore.QFile(pathFile)
+        if not fi.OpenMode(QtCore.QIODevice.WriteOnly):
+            print("FLFormDB : Error I/O al intentar escribir el fichero", pathFile)
+            return
+        
+        self.snapShot().save(fi, "PNG")
+    
 
     """
     Establece el título de la ventana.
@@ -381,9 +400,12 @@ class FLFormDB(QtGui.QWidget):
     @param text Texto a establecer como título de la ventana
     @author Silix
     """
-    @decorators.NotImplementedWarn
     def setCaptionWidget(self, text):
-        return True
+        if not text:
+            return
+        
+        self.setCaptionWidget(text)
+        
 
     """
     Devuelve si se ha aceptado el formulario
@@ -394,15 +416,14 @@ class FLFormDB(QtGui.QWidget):
     """
     Devuelve el nombre de la clase del formulario en tiempo de ejecución
     """
-    @decorators.NotImplementedWarn
     def formClassName(self):
-        return True
+        return "FormDB"
 
     """
     Sólo para compatibilizar con FLFormSearchDB. Por defecto sólo llama QWidget::show
     """
-    @decorators.NotImplementedWarn
-    def exec(self, none):
+    def exec_(self):
+        self.show()
         return True
 
     #public slots:
@@ -411,9 +432,11 @@ class FLFormDB(QtGui.QWidget):
     Cierra el formulario
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def  close(self):
-        return True
+        if self.isClosing_:
+            return True
+        self.isClosing_ = True
+        self.isClosing_ = super(FLFormDB, self).close()
       
 
 
@@ -422,17 +445,15 @@ class FLFormDB(QtGui.QWidget):
     Se activa al pulsar el boton aceptar
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def accept(self):
-        return True
+        pass
 
     """
     Se activa al pulsar el botón cancelar
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def reject(self):
-        return True
+        pass
 
     """
     Redefinida por conveniencia
@@ -447,9 +468,11 @@ class FLFormDB(QtGui.QWidget):
     Utilizado en documentación para evitar conflictos al capturar los formularios
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def showForDocument(self):
-        return True
+        self.showed = True
+        self.mainWidget_.show()
+        self.resize(self.mainWidget().size())
+        super(FLFormDB, self).show()
 
     """
     Maximiza el formulario
@@ -471,9 +494,11 @@ class FLFormDB(QtGui.QWidget):
     Devuelve el script asociado al formulario
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def script(self):
-        return True
+        ifc = self.iface
+        if ifc:
+            return str(ifc)
+        return None
 
     #private slots:
     
@@ -513,14 +538,18 @@ class FLFormDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def bindIface(self):
-        return True
+        pass
+        
+        
 
     """
     Desune la interfaz de script al objeto del formulario
     """
-    @decorators.NotImplementedWarn
     def unbindIface(self):
-        return True
+        if not self.iface:
+            return
+        
+        self.iface = self.oldFormObj
 
     """
     Indica si la interfaz de script está unida al objeto formulario
@@ -535,9 +564,20 @@ class FLFormDB(QtGui.QWidget):
     """
     Captura evento cerrar
     """
-    @decorators.NotImplementedWarn
+
     def closeEvent(self, e):
-        return True
+        self.frameGeometry()
+        if self.focusWidget():
+            fdb = self.focusWidget().parentWidget()
+            if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
+                fdb.autoComFrame_.hide()
+                return
+        
+        self.setCursor(None)
+        self.closed.emit()
+        
+        super(FLFormDB, self).closeEvent(e)
+        self.deleteLater()
 
     """
     Captura evento mostrar
@@ -568,15 +608,16 @@ class FLFormDB(QtGui.QWidget):
     """
     @decorators.NotImplementedWarn
     def hideEvent(self, h):
-        return True
+        pass
         
 
     """
     Captura evento de entrar foco
     """
-    @decorators.NotImplementedWarn
     def focusInEvent(self, f):
-        return True
+        super(FLFormDB, self).focusInEvent(f)
+        if not self.isIfaceBind():
+            self.bindIface()
 
     """
     Inicializa componenentes del widget principal
@@ -587,9 +628,5 @@ class FLFormDB(QtGui.QWidget):
     @decorators.NotImplementedWarn
     def initMainWidget(self, w = None):
         pass
-        
 
 
-
-
-#endif
