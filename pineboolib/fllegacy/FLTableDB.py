@@ -219,14 +219,14 @@ class FLTableDB(QtGui.QWidget):
         if self._loaded:   
 
             tipo = self._cursor.model().fieldType(self._fieldRelation)
-            foranea = self._parent.parentWidget()._cursor.valueBuffer(self._foreignField)
+            foranea = self._parent.parentWidget().cursor().valueBuffer(self._foreignField)
             if foranea is None:
                 #print("FLTable(%s): campo foraneo \"%s.%s\" no encontrado." % (self._tableName,self._parent.parentWidget()._cursor.table(), self._foreignField))
                 return
             if tipo is "uint":
-                self._foreignFilter = "%s = %s" % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
+                self._foreignFilter = "%s = %s" % (self._fieldRelation, self._parent.parentWidget().cursor().valueBuffer(self._foreignField))
             else:
-                self._foreignFilter = "%s = '%s'"  % (self._fieldRelation, self._parent.parentWidget()._cursor.valueBuffer(self._foreignField))
+                self._foreignFilter = "%s = '%s'"  % (self._fieldRelation, self._parent.parentWidget().cursor().valueBuffer(self._foreignField))
             
             #print("Filtro:%s" % filtro)
             self._cursor.setMainFilter(self._foreignFilter)

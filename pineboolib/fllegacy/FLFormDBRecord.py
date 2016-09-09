@@ -23,7 +23,7 @@ class FLFormDBRecord(FLFormDB):
         super(FLFormDBRecord,self).__init__(parent, action, load)
         
         if isinstance(parent_or_cursor, FLSqlCursor):
-            self._cursor = parent_or_cursor
+            self.setCursor(parent_or_cursor)
             
         self.toolButtonAccept = QtGui.QToolButton()
         self.toolButtonAccept.setIcon(QtGui.QIcon(filedir("icons","gtk-add.png")))

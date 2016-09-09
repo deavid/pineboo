@@ -142,7 +142,7 @@ class FLFormDB(QtGui.QWidget):
     
     
     known_instances = {}
-    _cursor = None
+    cursor_ = None
     
     def __init__(self, parent, action, load=False):
         try:
@@ -274,7 +274,7 @@ class FLFormDB(QtGui.QWidget):
 
     def setCursor(self, cursor):
         print("Definiendo cursor")
-        self._cursor = cursor
+        self.cursor_ = cursor
 
     """
     Para obtener el cursor utilizado por el formulario.
@@ -321,7 +321,7 @@ class FLFormDB(QtGui.QWidget):
     """
     @decorators.Incomplete
     def setMainWidget(self, w = None):
-        if not self._cursor or not w:
+        if not self.cursor_ or not w:
             print("Creamos la ventana (ignorado)")
             return
         print("Creamos la ventana")
@@ -353,9 +353,9 @@ class FLFormDB(QtGui.QWidget):
 
         self.mainWidget_ = w
 
-        self._cursor.setEdition(False)
-        self._cursor.setBrowse(False)
-        self._cursor.recordChoosed.emit(self.acepted)
+        self.cursor_.setEdition(False)
+        self.cursor_.setBrowse(False)
+        self.cursor_.recordChoosed.emit(self.acepted)
 
 
     """

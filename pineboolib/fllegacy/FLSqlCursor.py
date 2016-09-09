@@ -557,7 +557,7 @@ class FLSqlCursor(ProjectClass):
         
         
         self.d.timer_ = QtCore.QTimer(self)
-        self.d.timer_.timeout.connect(self.refreshDelayed)
+        self.refreshDelayed()
         #self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
         #self.first()
         
@@ -1337,9 +1337,22 @@ class FLSqlCursor(ProjectClass):
     @param msec Cantidad de tiempo del lapsus, en milisegundos.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
-    def refreshDelayed(self, msec = 50):
-        return True
+    @decorators.BetaImplementation
+    def refreshDelayed(self, msec = 50):  
+        if not self.d.timer_:
+            return
+        self.d.timer_.start(msec)
+        
+        pos = self.atFrom()
+        if not self.seek(pos, False, True):
+            self.newBuffer.emit()
+        else:
+            if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
+                v = self.valueBuffer(self.d.relation_.field())
+                if not self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()) == v:
+                    self.d.cursorRelation_.setValueBuffer(self.d.relation_.foreignField(), v)
+                
+        
 
 
 
@@ -1483,7 +1496,6 @@ class FLSqlCursor(ProjectClass):
     @decorators.NotImplementedWarn
     def seek(self, i, relative = None, emite = None):
         return False
-    
     """
         if self.d.modeAccess_ == self.Del:
             return False

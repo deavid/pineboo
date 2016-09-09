@@ -2548,7 +2548,7 @@ class FLFieldDB(QtGui.QWidget):
     def showWidget(self):
         if not self._loaded: #Esperamos a que la carga se realice
             timer = QtCore.QTimer(self)
-            timer.singleShot(100, self.showWidget)
+            timer.singleShot(30, self.showWidget)
             return
         else:    
             if not self.showed:
