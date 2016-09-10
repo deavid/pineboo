@@ -62,7 +62,9 @@ class PNBuffer(ProjectClass):
         
         self.line_ = self.cursor_._currentregister
             
-        
+    def primeDelete(self):
+        for field in self.fieldList_:
+            field.value = None
         
     def row(self):
         return self.line_
@@ -974,12 +976,12 @@ class FLSqlCursor(ProjectClass):
             return
         
         if m == self.Del:
-            res = QtGui.QMessageBox.Warning(QtGui.qApp.focusWidget(), "Aviso","El registro activo será borrado. ¿ Está seguro ?",QtGui.QMessageBox.Ok,(QtGui.QMessageBox.No, QtGui.QMessageBox.Default, QtGui.QMessageBox.Escape))
+            res = QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso","El registro activo será borrado. ¿ Está seguro ?",QtGui.QMessageBox.Ok, QtGui.QMessageBox.No | QtGui.QMessageBox.Default| QtGui.QMessageBox.Escape)
             if res == QtGui.QMessageBox.No:
                 return
             
             self.transaction()
-            self.modeAccess(self.Del)
+            self.d.modeAccess_ = self.Del
             if not self.refreshBuffer():
                 self.commit()
             else:
@@ -1494,9 +1496,10 @@ class FLSqlCursor(ProjectClass):
                 self.d.modeAccess_ = self.Browse
                 return False
             
-            self.d.buffer_.primeDelete()
-            self.setNoGenerateds()
-            self.updateBufferCopy()
+            if self.d.buffer_:
+                self.d.buffer_.primeDelete()
+                self.setNoGenerateds()
+                self.updateBufferCopy()
             
         elif self.d.modeAccess_ == self.Browse:
             self.editBuffer(True)
