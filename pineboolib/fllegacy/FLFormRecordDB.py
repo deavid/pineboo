@@ -6,6 +6,7 @@ import traceback
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import filedir
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
    
     
@@ -244,6 +245,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonLast.hide()
         
         if self.bottomToolbar:
+            self.toolButtonClose.hide()
             self.bottomToolbar = QtGui.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
@@ -252,6 +254,7 @@ class FLFormRecordDB(FLFormDB):
         self.bottomToolbar.layout.setMargin(0)
         self.bottomToolbar.layout.setSpacing(0)
         self.bottomToolbar.layout.addStretch()
+        self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout.addWidget(self.bottomToolbar)
         #if self.layout:
         #    self.layout = None
@@ -428,6 +431,7 @@ class FLFormRecordDB(FLFormDB):
         self.frameGeometry()
         if self.focusWidget():
             fdb = self.focusWidget().parentWidget()
+            
             if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
                 fdb.autoComFrame_.hide()
                 return
@@ -458,7 +462,7 @@ class FLFormRecordDB(FLFormDB):
             self.closed.emit()
         
         super(FLFormRecordDB, self).closeEvent(e)
-        self.deleteLater()
+        #self.deleteLater()
 
     """
     Validación de formulario.
@@ -471,20 +475,62 @@ class FLFormRecordDB(FLFormDB):
     modificando los mismos campos mostrará un aviso de advertencia.
 
     @return TRUE si el formulario ha sido validado correctamente
-    """
-    @decorators.NotImplementedWarn    
+    """  
     def validateForm(self):
+        if not self.cursor_:
+            return True
+        mtd = self.cursor_.metadata()
+        if not mtd:
+            return True
+        
+        if self.cursor_.modeAccess() == FLSqlCursor.Edit and mtd.concurWarn():
+            colFields = []
+            colFields = self.cursor_.concurrencyFields()
+            
+            if colFields:
+                pKN = mtd.primaryKey()
+                pKWhere = self.cursor_.db().manager().formatAssignValue(mtd.field(pKN), self.cursor_.valueBuffer(pKN))
+                q = FLSqlQuery(None, self.cursor_.db().connectionName())
+                q.setTablesList(mtd.name())
+                q.setSelect(colFields)
+                q.setFrom(mtd.name())
+                q.setWhere(pKWhere)
+                q.setForwardOnly(True)
+                
+                if q.exec_() and q.next():
+                    i = 0
+                    for field in colFields:
+                        msg = "El campo '%s' con valor '%s' ha sido modificado\npor otro usuario con el valor '%s'" % (mtd.fieldNameToAlias(field), self.cursor_.valueBuffer(field), q.value(i))
+                        res = QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso de concurrencia", "\n\n ¿ Desea realmente modificar este campo ?\n\nSí : Ignora el cambio del otro usuario y utiliza el valor que acaba de introducir\nNo : Respeta el cambio del otro usuario e ignora el valor que ha introducido\nCancelar : Cancela el guardado del registro y vuelve a la edición del registro\n\n", QtGui.QMessageBox.Yes | QtGui.QMessageBox.Default, QtGui.QMessageBox.No, QtGui.QMessageBox.Cancel | QtGui.QMessageBox.Escape)
+                        if res == QtGui.QMessageBox.Cancel:
+                            return False
+                        
+                        if res == QtGui.QMessageBox.No:
+                            self.cursor_.setValueBuffer(field, q.value(i))                                
+            
+            if self.iface and self.cursor_.modeAccess() == FLSqlCursor.Insert or self.cursor_.modeAccess() == FLSqlCursor.Edit:
+                if self.iface:
+                    try:
+                        v = self.iface.validateForm()
+                    except Exception:
+                        pass
+                    
+                if v and not isinstance(v, bool):
+                    return False
+                            
         return True
-
     """
     Aceptación de formulario.
 
     Invoca a la función "acceptedForm" del script asociado al formulario, cuando
     se acepta el formulario y justo antes de hace el commit del registro.
     """
-    @decorators.NotImplementedWarn
     def acceptedForm(self):
-        pass
+        if self.iface:
+            try:
+                self.iface.acceptedForm()
+            except Exception:
+                pass
 
     """
     Después de fijar los cambios del buffer del registro actual.
