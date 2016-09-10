@@ -466,7 +466,6 @@ class FLFieldMetaData():
     """
     Obtiene si el campo es de tipo Check
     """
-    @decorators.BetaImplementation
     def isCheck(self):
         if self.d.type_ == self.Check:
             return True
