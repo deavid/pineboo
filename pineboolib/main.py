@@ -24,7 +24,7 @@ from pineboolib import qt3ui
 from pineboolib.PNConnection import PNConnection
 from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.fllegacy.FLFormDB import FLFormDB
-from pineboolib.fllegacy.FLFormDBRecord import FLFormDBRecord
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 import pineboolib.emptyscript
 
 
@@ -424,7 +424,7 @@ class XMLAction(XMLStruct):
         if self.formrecord_widget is None:
             print("Loading record action %s . . . " % (self.name))
             parent_or_cursor =  cursor # Sin padre, ya que es ventana propia
-            self.formrecord_widget = FLFormDBRecord(parent_or_cursor,self, load = True)
+            self.formrecord_widget = FLFormRecordDB(parent_or_cursor,self, load = True)
             self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
             #self._record_loaded = True
             print("End of record action load %s (iface:%s ; widget:%s)"
