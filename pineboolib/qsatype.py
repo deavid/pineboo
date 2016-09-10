@@ -61,7 +61,7 @@ class FormDBWidget(QtGui.QWidget):
         return ret
 
     def cursor(self):
-        cursor = getattr(self.parentWidget(),"_cursor", None)
+        cursor = getattr(self.parentWidget(),"cursor_", None)
         if not cursor:
             cursor = self._cursor 
         return cursor
