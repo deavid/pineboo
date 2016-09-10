@@ -244,6 +244,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonLast.hide()
         
         if self.bottomToolbar:
+            self.toolButtonClose.hide()
             self.bottomToolbar = QtGui.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
@@ -252,6 +253,7 @@ class FLFormRecordDB(FLFormDB):
         self.bottomToolbar.layout.setMargin(0)
         self.bottomToolbar.layout.setSpacing(0)
         self.bottomToolbar.layout.addStretch()
+        self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout.addWidget(self.bottomToolbar)
         #if self.layout:
         #    self.layout = None
@@ -458,7 +460,7 @@ class FLFormRecordDB(FLFormDB):
             self.closed.emit()
         
         super(FLFormRecordDB, self).closeEvent(e)
-        self.deleteLater()
+        #self.deleteLater()
 
     """
     Validación de formulario.
