@@ -19,6 +19,7 @@ class PNConnection(QtCore.QObject):
     db_password = None
     conn = None
     driverSql = None
+    transaction_ = None
     
     def __init__(self, db_name, db_host, db_port, db_userName, db_password):
         super(PNConnection,self).__init__()
@@ -97,6 +98,14 @@ class PNConnection(QtCore.QObject):
         return True
     
     
+    @decorators.NotImplementedWarn
+    def interactiveGUI(self):
+        return True
+    
+    
+    @decorators.NotImplementedWarn
+    def canDetectLocks(self):
+        return True
     
     
     
