@@ -129,6 +129,7 @@ class FLFormRecordDB(FLFormDB):
         
         if self.cursor_:
             self.initialModeAccess = self.cursor_.modeAccess()
+             
         else:
             self.initialModeAccess = FLSqlCursor.Browse
         
@@ -213,6 +214,7 @@ class FLFormRecordDB(FLFormDB):
                 self.cursor_.transaction()
                 self.initTransLevel = self.cursor_.transactionLevel()
                 self.setCaptionWidget(caption)
+                self.cursor_.setContext(self.iface) 
             
             self.loadControls()                
         else:

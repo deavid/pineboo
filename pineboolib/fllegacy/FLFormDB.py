@@ -178,9 +178,11 @@ class FLFormDB(QtGui.QWidget):
         self.setWindowTitle(action.alias)
         
         self.loaded = False
-        
+        self.idMDI_ = self.action.name
             
         if load: self.load()
+        
+        #self.initForm()
 
         
     def load(self):
@@ -199,6 +201,7 @@ class FLFormDB(QtGui.QWidget):
             qt3ui.loadUi(form_path, self.widget)
 
         self.loaded = True
+        
 
     """
     Invoca a la función "init" del script "masterprocess" asociado al formulario
@@ -520,19 +523,41 @@ class FLFormDB(QtGui.QWidget):
     """
     Inicialización
     """
-    @decorators.NotImplementedWarn
     def initForm(self):
-        return True
+      """
+        if self.cursor_ and self.cursor_.metadata():
+            caption = None
+            if self.action_:
+                #self.cursor_.setAction(self.action_)
+                caption = self.action_.name
+                if self.action.description:
+                    self.setWhatsThis(self.action_.description)
+                
+                self.idMDI_ = self.action_.name
+            
+            if not caption:
+                caption = self.cursor_.metadata().alias()
+            
+            self.setCaptionWidget(caption)
+            
+            #self.bindIface()
+            #self.setCursor(self.cursor_)
+        
+        else:
+       
+            self.setCaptionWidget("No hay metadatos")
+       """             
+        
+
 
     """
     Nombre interno del formulario
     """
-    @decorators.NotImplementedWarn
     def formName(self):
-        return True
-    @decorators.NotImplementedWarn
+        return "form%s" % self.idMDI_
+    
     def geoName(self):
-        return True
+        return self.formName()
 
     """
     Une la interfaz de script al objeto del formulario
@@ -607,9 +632,23 @@ class FLFormDB(QtGui.QWidget):
     """
     Captura evento ocultar
     """
-    @decorators.NotImplementedWarn
     def hideEvent(self, h):
-        pass
+        pW = self.parentWidget()
+        if not pW:
+            geo = QtCore.QRect(self.x(), self.y(), self.width(), self.height())
+            if self.isMinimized():
+                geo.setWidth(1)
+            elif self.isMaximized():
+                geo.setWidth(9999)
+        else:
+            geo = QtCore.QRect(pW.x(), pW.y(), pW.width(), pW.height())
+            
+        
+        self.prj.saveGeometryForm(self.geoName(), geo)
+                
+                
+                
+        
         
 
     """

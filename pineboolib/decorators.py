@@ -31,4 +31,12 @@ def Incomplete(fn):
         print("WARN: This implementation is incomplete : %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
         return ret
     return newfn
-    
+
+
+def needRevision(fn):
+    def newfn(*args,**kwargs):
+        ret = fn(*args,**kwargs)
+        x_args = [ repr(a) for a in args] + [ "%s=%s" % (k,repr(v)) for k,v in list(kwargs.items())]
+        print("WARN: This implementation need help by anther developer : %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
+        return ret
+    return newfn    

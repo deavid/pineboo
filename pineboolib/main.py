@@ -26,6 +26,7 @@ from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 import pineboolib.emptyscript
+from pineboolib import decorators
 
 
 from pineboolib import qsaglobals
@@ -168,6 +169,10 @@ class Project(object):
                 fileobj = File(self, idmodulo, nombre, basedir = root)
                 self.files[nombre] = fileobj
                 self.modules[idmodulo].add_project_file(fileobj)
+    
+    @decorators.NotImplementedWarn
+    def saveGeometryForm(self, name, geo):
+        pass
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):

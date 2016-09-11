@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators
+from pineboolib import decorators, fllegacy
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLUtil import FLUtil
@@ -15,6 +15,7 @@ from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib
+import pineboolib
 
 class Struct(object):
     pass
@@ -45,6 +46,9 @@ class PNBuffer(ProjectClass):
             
             self.line_ = None
             self.fieldList_.append(field)
+            
+    def count(self):
+        return len(self.fieldList_)
     
     def primeUpdate(self, row = None):
         if not row:
@@ -58,7 +62,9 @@ class PNBuffer(ProjectClass):
         
         self.line_ = self.cursor_._currentregister
             
-        
+    def primeDelete(self):
+        for field in self.fieldList_:
+            field.value = None
         
     def row(self):
         return self.line_
@@ -85,27 +91,48 @@ class PNBuffer(ProjectClass):
         else:
             return False
     
-    def isNull(self, name):
-        for field in  self.fieldList_:
-            if field.name == str(name):
-                if not field.value:
-                    #print("PNBuffer.isNull(True)")
-                    return True
-                else:
-                    return False
+    def isNull(self, n):
+        if isinstance(n , (str, QString)):
+            n = str(n)
+            for field in  self.fieldList_:
+                if field.name == str(n):
+                    if not field.value:
+                        #print("PNBuffer.isNull(True)")
+                        return True
+                    else:
+                        return False
+        else:
+            i = 0
+            for field in self.fieldList_:
+                if i == n:
+                    if not field.value:
+                        return True
+                    else:
+                        return False
+                i = i + 1
+                
         
         return True
     
-    def value(self, name):
-        for field in  self.fieldList_:
-            if field.name == str(name):
-                #print("PNBuffer.value(%s) = %s" % (name, field.value) )
-                if field.value is None:
-                    return None
-                else:
-                    return field.value
+    
+    def value(self, n):
+        if isinstance(n, (str, QString)):
+            n = str(n)
+            for field in  self.fieldList_:
+                if field.name == str(n):
+                    #print("PNBuffer.value(%s) = %s" % (name, field.value) )
+                    if field.value is None:
+                        return None
+                    else:
+                        return field.value
+        else:
+            i = 0
+            for field in self.fieldList_:
+                if i == n:
+                    return self.fieldList_[n].value
+                
         
-        return None
+            return None
     
     def setValue(self, name, value):
         
@@ -146,6 +173,10 @@ class PNBuffer(ProjectClass):
         #print("Retornando =", value)
         
         return value
+    
+    @decorators.NotImplementedWarn
+    def setGenerated(self, i, b):
+        pass
     
     """
     Calcula el md5 de todos los valores contenidos en el buffer concatenando el md5 de un valor con el nombre del siguiente y calculando el nuevo md5
@@ -335,7 +366,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
     """ Uso interno """
     isQuery_ = None
     isSysTable_ = None
-    mapCalcFields_ = None
+    mapCalcFields_ = []
     rawValues_ = None
     
     md5Tuples_ = None
@@ -728,7 +759,6 @@ class FLSqlCursor(ProjectClass):
         if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() == self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert: 
             pK = self.d.metadata_.primaryKey()
             if pK:
-                print("valueBuffer:soy PK")
                 pKV = self.d.buffer_.value(pK)
                 q = FLSqlQuery()
                 sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.d.metadata.name() , self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pK), pKV))
@@ -825,9 +855,8 @@ class FLSqlCursor(ProjectClass):
 
     @param c Contexto de ejecucion
     """
-    @decorators.NotImplementedWarn
     def setContext(self, c):
-        return True
+        self.d.ctxt_ = c
 
     """
     Para obtener el contexto de ejecución de scripts.
@@ -897,9 +926,15 @@ class FLSqlCursor(ProjectClass):
 
     @return TRUE si la operación tuvo exito
     """
-    @decorators.NotImplementedWarn
     def rollback(self):
-        return True
+        if not self.d.db_ and not self.d.db_.db():
+            print("FLSqlCursor::rollback() : No hay conexión con la base de datos")
+            return False
+        
+        return self.d.db_.doRollback(self)
+    
+        
+        
 
     """
     Hace efectiva la transacción y la acaba.
@@ -908,9 +943,18 @@ class FLSqlCursor(ProjectClass):
           si FALSE no hace ninguna de estas dos cosas y emite la señal de autoCommit
     @return TRUE si la operación tuvo exito
     """
-    @decorators.NotImplementedWarn
     def commit(self, notify = True):
-        return True
+        if not self.d.db_ and not self.d.db_.db():
+            print("FLSqlCursor::commit() : No hay conexión con la base de datos")
+            return False
+        
+        r = self.d.db_.doCommit(self, notify)
+        if r:
+            self.commited.emit()
+        
+        return r
+        
+            
     
     def size(self):
         return self.d._model.rowCount()
@@ -932,12 +976,12 @@ class FLSqlCursor(ProjectClass):
             return
         
         if m == self.Del:
-            res = QtGui.QMessageBox.Warning(QtGui.qApp.focusWidget(), "Aviso","El registro activo será borrado. ¿ Está seguro ?",QtGui.QMessageBox.Ok,(QtGui.QMessageBox.No, QtGui.QMessageBox.Default, QtGui.QMessageBox.Escape))
+            res = QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso","El registro activo será borrado. ¿ Está seguro ?",QtGui.QMessageBox.Ok, QtGui.QMessageBox.No | QtGui.QMessageBox.Default| QtGui.QMessageBox.Escape)
             if res == QtGui.QMessageBox.No:
                 return
             
             self.transaction()
-            self.modeAccess(self.Del)
+            self.d.modeAccess_ = self.Del
             if not self.refreshBuffer():
                 self.commit()
             else:
@@ -964,12 +1008,9 @@ class FLSqlCursor(ProjectClass):
          "registros de esta tabla : %s" % str(self.d.curName()) ,QtGui.QMessageBox.Ok,0,0)
             return
         
-        if self.refreshBuffer() or 1 == 1:
-            
+        if self.refreshBuffer():
             self._action.openDefaultFormRecord(self)
             self.updateBufferCopy()
-        else:
-            print("AUCHHH")
 
             
                
@@ -1146,9 +1187,120 @@ class FLSqlCursor(ProjectClass):
 
     @return Posición del registro dentro del cursor, o 0 si no encuentra coincidencia.
     """
-    @decorators.NotImplementedWarn
     def atFrom(self):
-        return True
+        if not self.d.buffer_ or not self.d.metadata_:
+            return 0
+        
+        pKN = self.d.metadata_.primaryKey()
+        pKValue = self.valueBuffer(pKN)
+        
+        pos = -99
+        
+        if pos == -99:
+            q = FLSqlQuery(None, self.d.db_.db())
+            sql = self.curFilter()
+            sqlIn = self.curFilter()
+            cFilter = self.curFilter()
+            field = self.d.metadata_.field(pKN)
+            
+            sqlPriKey = None
+            sqlFrom = None
+            sqlWhere = None
+            sqlPriKeyValue = None
+            sqlOrderBy = None
+            
+            if not self.d.isQuery_ or "." in pKN:
+                sqlPriKey = pKN
+                sqlFrom = self.d.metadata_.name()
+                sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
+            else:
+                qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
+                if qry:
+                    sqlPriKey = "%s.%s" % (self.d.metadata_.name(), pKN)
+                    sqlFrom = qry.From()
+                    sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
+                    qry.deleteLater()
+                else:
+                    print("FLSqlCursor::atFrom Error al crear la consulta")
+                    self.seek(self.at())
+                    if self.isValid():
+                        pos = self.at()
+                    else:
+                        pos = 0
+                    return pos
+            
+            if cFilter:
+                sqlWhere = cFilter
+                sql = "%s WHERE %s" % (sql, sqlWhere)
+            else:
+                sqlWhere = "1=1"
+            
+            if field:
+                sqlPriKeyValue = self.d.db_.manager().formatAssignValue(field, pKValue)
+                if cFilter:
+                    sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
+                else:
+                    sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
+                q.exec_(sqlIn)
+                if not q.next():
+                    print("OPSSSSS")
+                    self.seek(self.at())
+                    if self.isValid():
+                        pos = self.at()
+                    else:
+                        pos = 0
+                    return pos
+            
+            if self.d.isQuery_ and self.d.queryOrderBy_:
+                sqlOrderBy = self.d.queryOrderBy_
+                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+            elif len(self.sort()) > 0:
+                sqlOrderBy = self.sort()
+                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+            
+            if sqlPriKeyValue and self.d.db_.canOverPartition():
+                posEqual = sqlPriKeyValue.index("=")
+                leftSqlPriKey = sqlPriKeyValue[0:posEqual]
+                sqlRowNum = "SELECT rownum FROM (SELECT row_number() OVER (ORDER BY %s) as rownum, %s as %s FROM %s WHERE %s ORDER BY %s) as subnumrow where" % (sqlOrderBy, sqlPriKey,leftSqlPriKey, sqlFrom, sqlWhere, sqlOrderBy)
+                if q.exec_(sqlRowNum) and q.next():
+                    pos = int(q.value(0)) -1
+                    if pos >= 0:
+                        return pos
+
+            
+            found = False
+            q.exec_(sql)
+            
+            pos = 0
+            if q.first():
+                if not q.value(0) == pKValue:
+                    pos = q.size()
+                    if q.last() and pos > 1:
+                        pos = pos -1
+                        if not q.value(0) == pKValue:
+                            while q.prev() and pos > 1:
+                                pos = pos -1
+                                if q.value(0) == pKValue:
+                                    found = True
+                                    break
+                        
+                        else:
+                            found = True
+                
+                    else:
+                        found = True
+                    
+            if not found:
+                    self.seek(self.at())
+                    if self.isValid():
+                        pos = self.at()
+                    else:
+                        pos = 0
+        
+        return pos        
+                    
+            
+        
 
     """
     Obtiene la posición dentro del cursor del primer registro que en el campo indicado
@@ -1363,9 +1515,14 @@ class FLSqlCursor(ProjectClass):
     def primeUpdate(self):
         self.d.buffer_.primeUpdate()
     
-    @decorators.NotImplementedWarn
-    def editBuffer(self, b):
-        return True
+    
+    def editBuffer(self, b = None):
+        
+        if not self.d.buffer_:
+            self.d.buffer_ = PNBuffer(self.d)
+        self.primeUpdate()
+  
+        
         
     """
     Refresca el buffer segun el modo de acceso establecido.
@@ -1381,7 +1538,6 @@ class FLSqlCursor(ProjectClass):
     @return TRUE si se ha podido realizar el refresco, FALSE en caso contrario
     """
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def refreshBuffer(self):
         if not self.d.metadata_:
             return False
@@ -1451,20 +1607,24 @@ class FLSqlCursor(ProjectClass):
                 self.d.modeAccess_ = self.Browse
                 return False
             
-            self.d.buffer_.primeDelete()
-            self.setNoGenerateds()
-            self.updateBufferCopy()
+            if self.d.buffer_:
+                self.d.buffer_.primeDelete()
+                self.setNoGenerateds()
+                self.updateBufferCopy()
             
         elif self.d.modeAccess_ == self.Browse:
-            self.d.buffer_ = self.editBuffer(True)
+            self.editBuffer(True)
             self.setNoGenerateds()
             self.newBuffer.emit()
         
+        
+
         return True
             
         
-        
-     
+    @decorators.NotImplementedWarn
+    def setNoGenerateds(self):
+        pass
         
 
     """
@@ -1653,9 +1813,27 @@ class FLSqlCursor(ProjectClass):
     en cascada, en caso afirmativo borrar también los registros relacionados en cardinalidad 1M.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def __del__(self, invalidate = True):
-        return True
+        delMtd = None
+        if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
+            delMtd = True
+            
+        mtd = self.d.metadata_
+        if self.d.transactionsOpened_:
+            t = self.name()
+            if self.d.metadata_:
+                t = self.d.metadata_.name()
+                msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
+            self.rollbackOpened(-1, msg)
+        
+        del self.d
+        if delMtd:
+            del mtd
+        
+        self.countRefCursor = self.countRefCursor -1    
+
+        
+        
 
     """
     Redefinicion del método select() de QSqlCursor
@@ -1806,15 +1984,14 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def editRecord(self):
         print("Edit the row!", self.actionName())
-        """
         if self.d.needUpdate():
             pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
             self.refresh()
-            pos = self.atFromBinarySearch(pKN, pKValue.toString())
+            pos = self.atFromBinarySearch(pKN, pKValue)
             if not pos == self.at():
                 self.seek(pos, False, False)
-        """        
+
         self.openFormInMode(self.Edit)
 
     """
@@ -1822,18 +1999,15 @@ class FLSqlCursor(ProjectClass):
     para sólo visualizar el registro activo del cursor.
     """
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def browseRecord(self):
         print("Inspect, inspect!", self.actionName())
-        """
         if self.d.needUpdate():
             pKN = self.d.metadata_.primaryKey()
             pKValue = self.valueBuffer(pKN)
             self.refresh()
-            pos = self.atFromBinarySearch(pKN, pKValue.toString())
+            pos = self.atFromBinarySearch(pKN, pKValue)
             if not pos == self.at(): 
                 self.seek(pos, False, False)
-        """
         self.openFormInMode(self.Browse)
 
 
@@ -1885,9 +2059,185 @@ class FLSqlCursor(ProjectClass):
     """
     
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
+    @decorators.needRevision
     def commitBuffer(self, emite = True, checkLocks = False):
-        return True
+        if not self.d.buffer_ or not self.d.metadata_:
+            return False
+        
+        if self.d.db_.interactiveGUI() and self.d.db_.canDetectLocks() and (checkLocks or self.d.metadata_.detectLocks()):
+            self.checkRisksLocks()
+            if self.d.inRisksLocks_ and QtGui.QMessageBox.No == QtGui.QMessageBox.warning(None, "Bloqueo inminente", "Los registros que va a modificar están bloqueados actualmente,\nsi continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n\n¿ Desa continuar aunque exista riesgo de bloqueo ?", QtGui.QMessageBox.Ok, QtGui.QMessageBox.No | QtGui.QMessageBox.Default | QtGui.QMessageBox.Escape):
+                return False
+        
+        if not self.checkIntegrity():
+            return False
+        
+        flapp = QtGui.qApp
+        fieldNameCheck = None
+        
+        if self.d.modeAccess_ == self.Edit or self.d.modeAccess_ == self.Insert:
+            fieldList = self.d.metadata_.fieldListObject()
+            
+            for field in fieldList:
+                if field.isCheck():
+                    fieldNameCheck = field.name()
+                    self.d.buffer_.setGenerated(fieldNameCheck, False)
+                    if self.d.bufferCopy_:
+                        self.d.bufferCopy_.setGenerated(fieldNameCheck, False)
+                    continue
+                
+                if not self.d.buffer_.isGenerated(field.name()):
+                    continue
+                
+                if self.d.ctxt_ and field.calculated():
+                    v = None
+                    try:
+                        v = self.d.ctxt_.calculateField(field.name())
+                    except Exception: 
+                        print("FLSqlCursor.commitBuffer(): EL campo %s es calculado, pero no se ha calculado nada" % field.name())
+                    
+                    if v:
+                        self.setValueBuffer(field.name(), v)
+        
+        
+        functionBefore = None
+        functionAfter = None
+        if not self.d.modeAccess_ == FLSqlCursor.Browse and self.d.activatedCommitActions_:
+            idMod = self.d.db_.managerModules().idModuleOfFile("%s.%s" % (self.d.metadata_.name(),"mtd"))
+            
+            if idMod:
+                functionBefore = "%s.beforeCommit_%s" % (idMod, self.d.metadata_.name())
+                functionAfter = "%s.afterCommit_%s" % (idMod, self.d.metadata_.name())
+            else:
+                functionBefore = "sys.beforeCommit_%s" % self.d.metadata_.name()
+                functionAfter = "sys.afterCommit_%s" % self.d.metadata_.name()
+            
+            if functionBefore:
+                #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
+                cI = self.d.ctxt_
+                v = flapp.call(functionBefore, cI, None)
+                if v and not isinstance(v ,bool):
+                    return False
+        
+        if not self.checkIntegrity():
+            return
+        
+        pKN = self.d.metadata_.primaryKey()
+        updated = False
+        savePoint = None
+        
+        if self.d.modeAccess_ == self.Insert:
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata():
+                    self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
+                    self.d.cursorRelation_.setAskForCancelChanges(True)
+            
+            pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
+            self.insert(False)
+            if not self.d.db_.canSavePoint():
+                if self.d.db_.currentSavePoint_:
+                    self.d.db_.currentSavePoint_.saveInsert(pKN, self.d.buffer_, self)
+            
+            
+            if not functionAfter and self.d.activatedCommitActions_:
+                if not savePoint:
+                    savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
+                savePoint.saveInsert(pKN, self.d.buffer_, self)
+            
+            if not pkWhere in self.d.persistentFilter_:
+                if not self.d.persistentFilter_:
+                    self.d.persistentFilter_ = pkWhere
+                else:
+                    self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
+            
+            updated = True
+        
+        elif self.d.modeAccess_ == self.Edit:
+            if not self.d.db_.canSavePoint():
+                if self.d.db_.currentSavePoint_:
+                    self.d.db_.currentSavePoint_.saveEdit(pKN, self.d.bufferCopy_, self)
+            
+            if functionAfter and self.d.activatedCommitActions_:
+                if not savePoint:
+                    savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
+                savePoint.saveEdit(pKN, self.d.bufferCopy_, self)
+            
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata():
+                    self.d.cursorRelation_.setAskForCancelChanges(True)
+            
+            if self.isModifiedBuffer():
+                i = 0
+                while i < self.d.buffer_.count():
+                    if self.d.buffer_.value(i) == self.d.bufferCopy_.value(i) and self.d.buffer_.isNull(i) and self.d.bufferCopy_.isNull(i):
+                        self.d.buffer_.setGenerated(i, False)
+                        
+                    i = i +1
+                
+                self.update(False)
+                i = 0
+                while i < self.d.buffer_.count():
+                    self.d.buffer_.setGenerated(i, True)
+                    i = i + 1
+                
+                updated = True
+                self.setNotGenerateds()
+            
+        
+        elif self.d.modeAccess_ == self.Del:
+            if not self.d.db_.canSavePoint():
+                if self.d.db_.currentSavePoint_:
+                    self.d.db_.currentSavePoint_.saveDel(pKN, self.d.bufferCopy_, self)
+            
+            if functionAfter and self.d.activatedCommitActions_:
+                if not savePoint:
+                    savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
+                savePoint.saveDel(pKN, self.d.bufferCopy_, self)
+            
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata():
+                    self.d.cursorRelation_.setAskForCancelChanges(True)
+                #del(False) FIXME?
+                updated = True
+        
+        
+        #if updated and self.lastError().type() != QsqlError:None:
+        if updated:
+            if savePoint == True:
+                del savePoint
+            
+            return False
+        
+        if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
+            #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
+            cI = self.d.ctxt_
+            v = flapp.call(functionAfter, cI, None)
+            if v and not isinstance(v ,bool):
+                if savePoint == True:
+                    savePoint.undo()
+                    del savePoint
+                
+                return False
+            
+        
+        if savePoint == True:
+            del savePoint
+        
+        self.d.modeAccess_ = self.Browse
+        if updated == True:
+            if fieldNameCheck:
+                self.d.buffer_.setGenerated(fieldNameCheck, True)
+                if self.d.bufferCopy_:
+                    self.d.bufferCopy_.setGenerated(fieldNameCheck, True)
+            
+            self.setFilter(None)
+            self.clearMapCalcFields()
+        
+        if updated == True and emite == True:
+            self.cursorUpdated.emit()
+        
+        self.bufferCommited.emit()
+                                                       
 
     """
     Manda el contenido del buffer del cursor relacionado a dicho cursor.
@@ -1896,17 +2246,71 @@ class FLSqlCursor(ProjectClass):
     correspondiente que recibe los cambios.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def commitBufferCursorRelation(self):
-        return True
+        ok = True
+        activeWid = QtGui.qApp.activeModalWidget()
+        if not activeWid:
+            activeWid = QtGui.qApp.activePopupWidget()
+        if not activeWid:
+            activeWid = QtGui.qApp.activeWindow()
+                    
+        activeWidEnabled = False
+        if activeWid: 
+            activeWidEnabled = activeWid.isEnabled()
+                
+        if self.d.modeAccess_ == self.Insert:
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.modeAccess() == self.Insert:
+                    
+                    
+                    if activeWid and activeWidEnabled:
+                        activeWid.setEnabled(False)
+                    
+                    if not self.d.cursorRelation_.commitBuffer():
+                        self.d.modeAccess_ = self.Browse
+                        ok = False
+                    else:
+                        self.setFilter(None)
+                        self.d.cursorRelation_.refresh()
+                        self.d.cursorRelation_.setModeAccess(self.Edit)
+                        self.d.cursorRelation_.refreshBuffer()
+                    
+                    if activeWid and activeWidEnabled:
+                        activeWid.setEnabled(True)
+        
+        if self.d.modeAccess_ == self.Browse or self.d.modeAccess_ == self.Edit:
+            if self.d.cursorRelation_ and self.d.relation_:
+                if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.modeAccess() == self.Insert:
+                    if activeWid and activeWidEnabled:
+                        activeWid.setEnabled(False)
+                    
+                    if not self.d.cursorRelation_.commitBuffer():
+                        self.d.modeAccess_ = self.Browse
+                        ok = False
+                    else:
+                        self.d.cursorRelation_.refresh()
+                        self.d.cursorRelation_.setModeAccess(self.Edit)
+                        self.d.cursorRelation_.refreshBuffer()
+                    
+                    if activeWid and activeWidEnabled:
+                        activeWid.setEnabled(True)
+        
+        return ok
+                        
+                    
+
+                
 
     """
     @return El nivel actual de anidamiento de transacciones, 0 no hay transaccion
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def transactionLevel(self):
-        return True
+        if self.d.db_:
+            return self.d.db_.transaction_
+        else:
+            return 0
+        
 
     """
     @return La lista con los niveles de las transacciones que ha iniciado este cursor y continuan abiertas
@@ -1924,9 +2328,33 @@ class FLSqlCursor(ProjectClass):
                 Si es vacía no muestra nada.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
-    def rollbackOpened(self, count = -1, msg = QString()):
-        return True
+    def rollbackOpened(self, count = -1, msg = None):
+        ct = None
+        if count < 0:
+            ct = self.d.transactionsOpened_.count()
+        else:
+            ct = count
+        
+        if ct > 0 and msg:
+            t = None
+            if self.d.metadata_:
+                t = self.d.metadata_.name()
+            else:
+                t = self.name()
+            
+            m = "%sSqLCursor::rollbackOpened: %s %s" % (msg, count, t)
+            self.d.msgBoxWarning(m, False)
+        elif ct > 0:
+            print("SqLCursor::rollbackOpened: %s %s" % (count, self.name))
+        
+        i = 0
+        while i < ct:
+            print("FLSqlCursor : Deshaciendo transacción abierta", self.transactionLevel())
+            self.rollback()
+    
+     
+        
+        
 
     """
     Termina transacciones abiertas por este cursor.
@@ -2057,9 +2485,9 @@ class FLSqlCursor(ProjectClass):
     def setExtraFieldAttributes(self):
         return True
     
-    @decorators.NotImplementedWarn
+    
     def clearMapCalcFields(self):
-        return True
+        self.d.mapCalcFields_ = []
     
     @decorators.NotImplementedWarn
     def valueBufferRaw(self, fN):

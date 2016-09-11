@@ -193,7 +193,6 @@ class FLFieldMetaData():
     """
     @return TRUE si el campo es generado, es decir, se incluye en las consultas
     """
-    @decorators.BetaImplementation
     def generated(self):
         return self.d.generated_
 
@@ -203,7 +202,6 @@ class FLFieldMetaData():
     @param v Valor TRUE si se quiere poner el campo como visible, FALSE
          en caso contrario
     """
-    @decorators.BetaImplementation
     def setVisible(self, v):
         self.d.visible_ = v
 
@@ -213,7 +211,6 @@ class FLFieldMetaData():
     @param v Valor TRUE si se quiere poner el campo como visible, FALSE
          en caso contrario
     """
-    @decorators.BetaImplementation
     def setVisibleGrid(self, v):
         self.d.visibleGrid_ = v
 
@@ -466,7 +463,6 @@ class FLFieldMetaData():
     """
     Obtiene si el campo es de tipo Check
     """
-    @decorators.BetaImplementation
     def isCheck(self):
         if self.d.type_ == self.Check:
             return True
