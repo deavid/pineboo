@@ -173,7 +173,11 @@ class Project(object):
     @decorators.NotImplementedWarn
     def saveGeometryForm(self, name, geo):
         pass
-
+    
+    @decorators.NotImplementedWarn
+    def call(self, function, aList , objectContext ):
+        return True
+    
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):
         self.prj = project
