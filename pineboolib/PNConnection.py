@@ -7,6 +7,7 @@ import psycopg2
 import traceback
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 
 
 
@@ -20,6 +21,8 @@ class PNConnection(QtCore.QObject):
     conn = None
     driverSql = None
     transaction_ = None
+    _managerModules = None
+    _manager = None
     
     def __init__(self, db_name, db_host, db_port, db_userName, db_password):
         super(PNConnection,self).__init__()
@@ -41,6 +44,7 @@ class PNConnection(QtCore.QObject):
         
         self.conn = self.conectar(conninfostr)
         self._manager = FLManager(self)
+        self._managerModules = FLManagerModules(self.conn)
         
     def connectionName(self):
         return self.db_name
@@ -107,6 +111,8 @@ class PNConnection(QtCore.QObject):
     def canDetectLocks(self):
         return True
     
+    def managerModules(self):
+        return self._managerModules
     
     
     
