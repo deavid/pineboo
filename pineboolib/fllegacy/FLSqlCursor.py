@@ -16,7 +16,6 @@ from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib
 import pineboolib
-from _operator import pos
 
 class Struct(object):
     pass
@@ -1814,9 +1813,27 @@ class FLSqlCursor(ProjectClass):
     en cascada, en caso afirmativo borrar también los registros relacionados en cardinalidad 1M.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def __del__(self, invalidate = True):
-        return True
+        delMtd = None
+        if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
+            delMtd = True
+            
+        mtd = self.d.metadata_
+        if self.d.transactionsOpened_:
+            t = self.name()
+            if self.d.metadata_:
+                t = self.d.metadata_.name()
+                msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
+            self.rollbackOpened(-1, msg)
+        
+        del self.d
+        if delMtd:
+            del mtd
+        
+        self.countRefCursor = self.countRefCursor -1    
+
+        
+        
 
     """
     Redefinicion del método select() de QSqlCursor
