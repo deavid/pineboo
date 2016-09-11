@@ -16,6 +16,7 @@ from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib
 import pineboolib
+from _operator import pos
 
 class Struct(object):
     pass
@@ -1187,9 +1188,120 @@ class FLSqlCursor(ProjectClass):
 
     @return Posición del registro dentro del cursor, o 0 si no encuentra coincidencia.
     """
-    @decorators.NotImplementedWarn
     def atFrom(self):
-        return True
+        if not self.d.buffer_ or not self.d.metadata_:
+            return 0
+        
+        pKN = self.d.metadata_.primaryKey()
+        pKValue = self.valueBuffer(pKN)
+        
+        pos = -99
+        
+        if pos == -99:
+            q = FLSqlQuery(None, self.d.db_.db())
+            sql = self.curFilter()
+            sqlIn = self.curFilter()
+            cFilter = self.curFilter()
+            field = self.d.metadata_.field(pKN)
+            
+            sqlPriKey = None
+            sqlFrom = None
+            sqlWhere = None
+            sqlPriKeyValue = None
+            sqlOrderBy = None
+            
+            if not self.d.isQuery_ or "." in pKN:
+                sqlPriKey = pKN
+                sqlFrom = self.d.metadata_.name()
+                sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
+            else:
+                qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
+                if qry:
+                    sqlPriKey = "%s.%s" % (self.d.metadata_.name(), pKN)
+                    sqlFrom = qry.From()
+                    sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
+                    qry.deleteLater()
+                else:
+                    print("FLSqlCursor::atFrom Error al crear la consulta")
+                    self.seek(self.at())
+                    if self.isValid():
+                        pos = self.at()
+                    else:
+                        pos = 0
+                    return pos
+            
+            if cFilter:
+                sqlWhere = cFilter
+                sql = "%s WHERE %s" % (sql, sqlWhere)
+            else:
+                sqlWhere = "1=1"
+            
+            if field:
+                sqlPriKeyValue = self.d.db_.manager().formatAssignValue(field, pKValue)
+                if cFilter:
+                    sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
+                else:
+                    sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
+                q.exec_(sqlIn)
+                if not q.next():
+                    print("OPSSSSS")
+                    self.seek(self.at())
+                    if self.isValid():
+                        pos = self.at()
+                    else:
+                        pos = 0
+                    return pos
+            
+            if self.d.isQuery_ and self.d.queryOrderBy_:
+                sqlOrderBy = self.d.queryOrderBy_
+                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+            elif len(self.sort()) > 0:
+                sqlOrderBy = self.sort()
+                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+            
+            if sqlPriKeyValue and self.d.db_.canOverPartition():
+                posEqual = sqlPriKeyValue.index("=")
+                leftSqlPriKey = sqlPriKeyValue[0:posEqual]
+                sqlRowNum = "SELECT rownum FROM (SELECT row_number() OVER (ORDER BY %s) as rownum, %s as %s FROM %s WHERE %s ORDER BY %s) as subnumrow where" % (sqlOrderBy, sqlPriKey,leftSqlPriKey, sqlFrom, sqlWhere, sqlOrderBy)
+                if q.exec_(sqlRowNum) and q.next():
+                    pos = int(q.value(0)) -1
+                    if pos >= 0:
+                        return pos
+
+            
+            found = False
+            q.exec_(sql)
+            
+            pos = 0
+            if q.first():
+                if not q.value(0) == pKValue:
+                    pos = q.size()
+                    if q.last() and pos > 1:
+                        pos = pos -1
+                        if not q.value(0) == pKValue:
+                            while q.prev() and pos > 1:
+                                pos = pos -1
+                                if q.value(0) == pKValue:
+                                    found = True
+                                    break
+                        
+                        else:
+                            found = True
+                
+                    else:
+                        found = True
+                    
+            if not found:
+                    self.seek(self.at())
+                    if self.isValid():
+                        pos = self.at()
+                    else:
+                        pos = 0
+        
+        return pos        
+                    
+            
+        
 
     """
     Obtiene la posición dentro del cursor del primer registro que en el campo indicado
@@ -1974,7 +2086,7 @@ class FLSqlCursor(ProjectClass):
         functionBefore = None
         functionAfter = None
         if not self.d.modeAccess_ == FLSqlCursor.Browse and self.d.activatedCommitActions_:
-            idMod = self.d.db_.managerModules().idModuleOfFile("%s.%s" % (self.d.metadata_.name(),".mtd"))
+            idMod = self.d.db_.managerModules().idModuleOfFile("%s.%s" % (self.d.metadata_.name(),"mtd"))
             
             if idMod:
                 functionBefore = "%s.beforeCommit_%s" % (idMod, self.d.metadata_.name())
