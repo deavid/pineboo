@@ -23,6 +23,7 @@ class PNConnection(QtCore.QObject):
     transaction_ = None
     _managerModules = None
     _manager = None
+    currentSavePoint_ = None
     
     def __init__(self, db_name, db_host, db_port, db_userName, db_password):
         super(PNConnection,self).__init__()
@@ -101,11 +102,17 @@ class PNConnection(QtCore.QObject):
     def doTransaction(self, cursor):
         return True
     
+    @decorators.NotImplementedWarn
+    def doRollback(self, cursor):
+        return True
     
     @decorators.NotImplementedWarn
     def interactiveGUI(self):
         return True
     
+    @decorators.NotImplementedWarn
+    def doCommit(self, cursor, notify):
+        return True
     
     @decorators.NotImplementedWarn
     def canDetectLocks(self):
@@ -114,6 +121,9 @@ class PNConnection(QtCore.QObject):
     def managerModules(self):
         return self._managerModules
     
+    @decorators.NotImplementedWarn
+    def canSavePoint(self):
+        return False
     
     
     

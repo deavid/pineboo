@@ -10,12 +10,12 @@ from PyQt4 import QtCore,QtGui
 from PyQt4.QtCore import QString, QVariant
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
+from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 
 from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib
-import pineboolib
 
 class Struct(object):
     pass
@@ -378,7 +378,6 @@ class FLSqlCursorPrivate(QtCore.QObject):
     _currentregister = None
     editionStates_ = None
     
-    countRefCursor
     
     _current_changed = QtCore.pyqtSignal(int)
     
@@ -446,6 +445,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
             
         self.md5Tuples_ = md5Str
         return need
+    
+    
       
 
         
@@ -1815,7 +1816,7 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def __del__(self, invalidate = True):
         delMtd = None
-        if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
+        if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
             
         mtd = self.d.metadata_
@@ -1830,7 +1831,7 @@ class FLSqlCursor(ProjectClass):
         if delMtd:
             del mtd
         
-        self.countRefCursor = self.countRefCursor -1    
+        #self.d.countRefCursor = self.d.countRefCursor - 1     FIXME
 
         
         
@@ -2059,7 +2060,6 @@ class FLSqlCursor(ProjectClass):
     """
     
     @QtCore.pyqtSlot()
-    @decorators.needRevision
     def commitBuffer(self, emite = True, checkLocks = False):
         if not self.d.buffer_ or not self.d.metadata_:
             return False
@@ -2072,7 +2072,7 @@ class FLSqlCursor(ProjectClass):
         if not self.checkIntegrity():
             return False
         
-        flapp = QtGui.qApp
+
         fieldNameCheck = None
         
         if self.d.modeAccess_ == self.Edit or self.d.modeAccess_ == self.Insert:
@@ -2113,9 +2113,8 @@ class FLSqlCursor(ProjectClass):
                 functionAfter = "sys.afterCommit_%s" % self.d.metadata_.name()
             
             if functionBefore:
-                #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
                 cI = self.d.ctxt_
-                v = flapp.call(functionBefore, cI, None)
+                v = self._prj.call(functionBefore, cI, None)
                 if v and not isinstance(v ,bool):
                     return False
         
@@ -2141,7 +2140,7 @@ class FLSqlCursor(ProjectClass):
             
             if not functionAfter and self.d.activatedCommitActions_:
                 if not savePoint:
-                    savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
+                    savePoint = FLSqlSavePoint(None)
                 savePoint.saveInsert(pKN, self.d.buffer_, self)
             
             if not pkWhere in self.d.persistentFilter_:
@@ -2159,7 +2158,8 @@ class FLSqlCursor(ProjectClass):
             
             if functionAfter and self.d.activatedCommitActions_:
                 if not savePoint:
-                    savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
+                    savePoint = FLSqlSavePoint(None)
+                print("-->", pKN, self.d.bufferCopy_, self)
                 savePoint.saveEdit(pKN, self.d.bufferCopy_, self)
             
             if self.d.cursorRelation_ and self.d.relation_:
@@ -2201,25 +2201,23 @@ class FLSqlCursor(ProjectClass):
                 updated = True
         
         
-        #if updated and self.lastError().type() != QsqlError:None:
-        if updated:
+        if updated and self.lastError():
             if savePoint == True:
                 del savePoint
-            
             return False
         
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.d.ctxt_
-            v = flapp.call(functionAfter, cI, None)
+            v = self._prj.call(functionAfter, cI, None)
             if v and not isinstance(v ,bool):
+                print(21)
                 if savePoint == True:
                     savePoint.undo()
                     del savePoint
                 
                 return False
             
-        
         if savePoint == True:
             del savePoint
         
@@ -2237,7 +2235,8 @@ class FLSqlCursor(ProjectClass):
             self.cursorUpdated.emit()
         
         self.bufferCommited.emit()
-                                                       
+        
+        return True                                               
 
     """
     Manda el contenido del buffer del cursor relacionado a dicho cursor.
@@ -2493,6 +2492,27 @@ class FLSqlCursor(ProjectClass):
     def valueBufferRaw(self, fN):
         return True
     
+    @decorators.NotImplementedWarn
+    def sort(self):
+        return None
+    
+    @decorators.NotImplementedWarn
+    def list(self):
+        return None
+    
+    @decorators.NotImplementedWarn
+    def filter(self):
+        return None
+    
+    @decorators.NotImplementedWarn
+    def update(self, notify):
+        return None
+    """
+    Indica el último error 
+    """
+    @decorators.NotImplementedWarn
+    def lastError(self):
+        return None
     """
     signals:
     """
