@@ -524,6 +524,11 @@ class FLManager(QtCore.QObject):
     """
     def initCount(self):
         return self.initCount_
+    
+
+    @decorators.NotImplementedWarn
+    def existTable(self, name):
+        return True
 
 
 
