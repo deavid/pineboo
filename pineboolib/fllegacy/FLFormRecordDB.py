@@ -174,7 +174,7 @@ class FLFormRecordDB(FLFormDB):
     @author Silix
     """
     def setCaptionWidget(self, text):
-        if not text:
+        if not text or not self.cursor_:
             return
         
         if self.cursor_.modeAccess() == FLSqlCursor.Insert:
@@ -248,7 +248,7 @@ class FLFormRecordDB(FLFormDB):
         
         if self.bottomToolbar:
             self.toolButtonClose.hide()
-            self.bottomToolbar = QtGui.QFrame()
+        self.bottomToolbar = QtGui.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
         self.bottomToolbar.layout = QtGui.QHBoxLayout()
