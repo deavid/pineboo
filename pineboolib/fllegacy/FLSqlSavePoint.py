@@ -2,9 +2,9 @@
 
 #Completada Si
 from PyQt4 import QtCore
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
-from pineboolib import decorators
+from pineboolib import decorators, fllegacy
+import pineboolib
 
 
 """
@@ -33,22 +33,25 @@ class opInfo():
     filter = None
     name = None
     cursor = None
-    @decorators.BetaImplementation
-    def __init(self,*args,**kwargs):
-        if len(args > 0):
-            self.opInfo2(args)
+
+
+    def __init__(self,*args,**kwargs):
+        if len(args) > 0:
+
+            self.opInfo2(*args)
+            
         else:
+
             self.opInfo1()
         
         
         
         
-        
-    @decorators.BetaImplementation    
+           
     def opInfo1(self):
         return 
     
-    @decorators.BetaImplementation   
+    
     def opInfo2(self, pK, o, b, a, s, f, n, c ): # * c:
         self.primaryKey = pK
         self.op = o 
@@ -59,15 +62,19 @@ class opInfo():
         self.name = n 
         self.cursor = c 
         
-        c.destroyed.connect(self.cursorDestroyed())
+        #c.destroyed.connect(self.cursorDestroyed())
     
-    @decorators.BetaImplementation
     def __del__(self):
-        return
+        pass
         
-    @QtCore.pyqtSlot()
-    def cursorDestroyed(self):
-        self.cursor = None
+    #@QtCore.pyqtSlot()
+    #def cursorDestroyed(self):
+    #    self.cursor = None
+        
+    
+    @decorators.NotImplementedWarn
+    def setAutoDelete(self, b):
+        pass
 
     """
     Punto de salvaguarda de un conjunto de operaciones básicas
@@ -122,35 +129,47 @@ class FLSqlSavePoint():
     Identificador del punto de salvaguarda
     """
     id_ = None
+    countRefSavePoint = 0
     """
     constructor.
+    
+    
 
     @param id Identificador para el punto de salvaguarda.
     """
-    @decorators.BetaImplementation
-    def __init__(self):
-        self.id_ = 0
-        self.opInfos = []
+
+    def __init__(self, _id = None):
+        
+        self.opInfos.append(opInfo())
+        self.opInfos[0].setAutoDelete(True)
+        
+        if _id:
+            self.id_ = _id
+        else:
+            self.id_ = self.opInfos[0]
+        
+        self.countRefSavePoint = self.countRefSavePoint + 1
     """
     destructor.
     """
-    @decorators.BetaImplementation
+    
     def __del__(self):
         if self.opInfos:
-            self.opInfos.clear()
-        del self.opInfos
+            self.opInfos = []
+        
+        self.countRefSavePoint = self.countRefSavePoint - 1
 
     """
     Establece el identificador del punto de salvaguarda.
     """
-    @decorators.BetaImplementation
+
     def setId(self, id_ ):
         self.id_ = id_
 
     """
     Obtiene el identificador del punto de salvaguarda.
     """
-    @decorators.BetaImplementation
+
     def id(self):
         return self.id_
 
@@ -160,7 +179,7 @@ class FLSqlSavePoint():
     Todas las operaciones almacenadas son eliminadas, por lo tanto, despues de
     invocar a este método ya no se podrán deshacer.
     """
-    @decorators.BetaImplementation
+    
     def clear(self):
         self.opInfos.clear()
     """
@@ -168,7 +187,8 @@ class FLSqlSavePoint():
     """
     @decorators.BetaImplementation
     def undo(self):
-        while not self.opInfos == []:
+        
+        while self.opInfos:
             opInf = self.opInfos.pop()
             if opInf.op == 0:
                 self.undoInsert(opInf)
@@ -186,10 +206,10 @@ class FLSqlSavePoint():
     @param cursor Cursor asociado.
     """
     @decorators.BetaImplementation
-    def saveInsert(self, primaryKey, buffer,cursor):
+    def saveInsert(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name(), cursor))
+        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
     """
     Guarda el buffer con el contenido del registro a editar.
 
@@ -197,11 +217,15 @@ class FLSqlSavePoint():
     @param buffer buffer con el contenido del registro.
     @param cursor Cursor asociado.
     """
-    @decorators.BetaImplementation
     def saveEdit( self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return 
-        self.opInfos.append( opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name(), cursor))
+        print(cursor.at())
+        print(cursor.sort())
+        print(cursor.filter())
+        print(cursor.nameCursor())
+        
+        self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
     """
     Guarda el buffer con el contenido del registro a borrar.
 
@@ -213,7 +237,7 @@ class FLSqlSavePoint():
     def saveDel(self, primaryKey, buffer, cursor ):
         if not cursor or not buffer:
             return 
-        self.opInfos.append( opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name(), cursor))
+        self.opInfos.append( opInfo(primaryKey, 2, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
 
 
     """
@@ -226,7 +250,7 @@ class FLSqlSavePoint():
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = FLSqlCursor(opInf.name)
+            cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
         
@@ -256,7 +280,7 @@ class FLSqlSavePoint():
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = FLSqlCursor(opInf.name)
+            cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
         
@@ -285,7 +309,7 @@ class FLSqlSavePoint():
         cursor_ = opInf.cursor
         owner = False
         if not cursor_:
-            cursor_ = FLSqlCursor(opInf.name)
+            cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
         

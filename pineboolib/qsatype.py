@@ -8,6 +8,7 @@ from PyQt4 import QtCore, QtGui
 
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
+from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
 from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
@@ -40,6 +41,7 @@ def FLTableDB(*args):
     return FLTableDB_Legacy.FLTableDB(*args)
 
 class FormDBWidget(QtGui.QWidget):
+    
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
@@ -59,13 +61,37 @@ class FormDBWidget(QtGui.QWidget):
         return ret
 
     def cursor(self):
-        return self._cursor
+        cursor = getattr(self.parentWidget(),"cursor_", None)
+        if not cursor:
+            cursor = self._cursor 
+        return cursor
 
 def FLFormSearchDB(name):
-    return flcontrols.FLFormSearchDB(name)
+    return FLFormSearchDB_legacy.FLFormSearchDB(name)
 
 class Date(QtCore.QDate):
     pass
 
 class Dialog(QtGui.QDialog):
+    _layout = None
+    
+    def __init__(self, title, f):
+        #FIXME: f no lo uso , es qt.windowsflg
+        super(Dialog, self).__init__()
+        self.setWindowTitle(title)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self._layout = QtGui.QVBoxLayout()
+        self.setLayout(self._layout)
+        
+    
+    def add(self, _object):
+        self._layout.addWidget(_object)
+        
+            
+        
+class GroupBox(QtGui.QGroupBox):
     pass
+
+class CheckBox(QtGui.QCheckBox):
+    pass
+        

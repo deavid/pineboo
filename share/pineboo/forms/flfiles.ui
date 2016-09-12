@@ -130,8 +130,8 @@
                     <property name="text">
                         <string></string>
                     </property>
-                    <property name="pixmap">
-                        <pixmap>image0</pixmap>
+                    <property name="iconSet">
+                        <iconset>image0</iconset>
                     </property>
                     <property name="accel">
                         <string>E</string>
@@ -150,8 +150,8 @@
                     <property name="text">
                         <string></string>
                     </property>
-                    <property name="pixmap">
-                        <pixmap>image1</pixmap>
+                    <property name="iconSet">
+                        <iconset>image1</iconset>
                     </property>
                     <property name="accel">
                         <string>E</string>

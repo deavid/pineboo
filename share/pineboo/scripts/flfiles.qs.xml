@@ -1,0 +1,1228 @@
+<Source>
+  <Function name="init">
+    <Source>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="contenido"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="this"/>
+            <FunctionCall name="cursor"/>
+            <FunctionCall name="valueBuffer">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="contenido"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <DeclarationBlock mode="VAR">
+        <Variable name="botonEditar">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="botonEditar"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="pbXMLEditor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="pbXMLEditor"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Expression>
+            <Member>
+              <Identifier name="cursor"/>
+              <FunctionCall name="modeAccess"/>
+            </Member>
+            <Compare type="EQ"/>
+            <Member>
+              <Identifier name="cursor"/>
+              <Identifier name="Browse"/>
+            </Member>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="botonEditar"/>
+              <FunctionCall name="setEnabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="pbXMLEditor"/>
+              <FunctionCall name="setEnabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="acceptedForm">
+    <Source>
+      <InstructionCall>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="cursor"/>
+          <FunctionCall name="setValueBuffer">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="contenido"/>
+              </Value>
+              <Value>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="child">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="contenido"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                  <Identifier name="text"/>
+                </Member>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="tipoDeFichero">
+    <Arguments>
+      <Variable name="nombre"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="posPunto">
+          <Value>
+            <Member>
+              <Identifier name="nombre"/>
+              <FunctionCall name="lastIndexOf">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="."/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Member>
+            <Identifier name="nombre"/>
+            <FunctionCall name="right">
+              <CallArguments>
+                <Expression>
+                  <Member>
+                    <Identifier name="nombre"/>
+                    <Identifier name="length"/>
+                  </Member>
+                  <OpMath type="MINUS"/>
+                  <Identifier name="posPunto"/>
+                </Expression>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="editarFichero">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <Member>
+              <Identifier name="cursor"/>
+              <FunctionCall name="checkIntegrity"/>
+            </Member>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="nombre"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+              <FunctionCall name="setDisabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="true"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <DeclarationBlock mode="VAR">
+            <Variable name="nombre">
+              <Value>
+                <Member>
+                  <Identifier name="cursor"/>
+                  <FunctionCall name="valueBuffer">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="nombre"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="tipo">
+              <Value>
+                <FunctionCall name="tipoDeFichero">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="nombre"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="temporal">
+              <Value>
+                <Member>
+                  <Identifier name="System"/>
+                  <FunctionCall name="getenv">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="TMP"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="temporal"/>
+                  <FunctionCall name="isEmpty"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="temporal"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="System"/>
+                    <FunctionCall name="getenv">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="TMPDIR"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+            </Source>
+          </If>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="temporal"/>
+                  <FunctionCall name="isEmpty"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="temporal"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="System"/>
+                    <FunctionCall name="getenv">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="HOME"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+            </Source>
+          </If>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="temporal"/>
+                  <FunctionCall name="isEmpty"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="temporal"/>
+                <OpUpdate type="EQUALS"/>
+                <Expression>
+                  <Member>
+                    <Identifier name="sys"/>
+                    <FunctionCall name="installPrefix"/>
+                  </Member>
+                  <OpMath type="PLUS"/>
+                  <Constant delim="&quot;" type="String" value="/share/facturalux/tmp"/>
+                </Expression>
+              </InstructionUpdate>
+            </Source>
+          </If>
+          <InstructionUpdate>
+            <Identifier name="temporal"/>
+            <OpUpdate type="EQUALS"/>
+            <Expression>
+              <Identifier name="temporal"/>
+              <OpMath type="PLUS"/>
+              <Constant delim="&quot;" type="String" value="/"/>
+              <OpMath type="PLUS"/>
+              <Member>
+                <Identifier name="cursor"/>
+                <FunctionCall name="valueBuffer">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="nombre"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Expression>
+          </InstructionUpdate>
+          <DeclarationBlock mode="VAR">
+            <Variable name="contenido">
+              <Value>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="child">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="contenido"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                  <Identifier name="text"/>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <Switch>
+            <Condition>
+              <Value>
+                <Identifier name="tipo"/>
+              </Value>
+            </Condition>
+            <Case>
+              <Value>
+                <Constant delim="&quot;" type="String" value=".ui"/>
+              </Value>
+              <Source>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="File"/>
+                    <FunctionCall name="write">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="temporal"/>
+                        </Value>
+                        <Value>
+                          <Identifier name="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <DeclarationBlock mode="VAR">
+                  <Variable name="comando">
+                    <Expression>
+                      <Member>
+                        <Identifier name="sys"/>
+                        <FunctionCall name="installPrefix"/>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/bin/designer"/>
+                    </Expression>
+                  </Variable>
+                </DeclarationBlock>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="true"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="Process"/>
+                    <FunctionCall name="execute">
+                      <CallArguments>
+                        <Value>
+                          <Constant>
+                            <CallArguments>
+                              <Value>
+                                <Identifier name="comando"/>
+                              </Value>
+                              <Value>
+                                <Identifier name="temporal"/>
+                              </Value>
+                            </CallArguments>
+                          </Constant>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="child">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <Identifier name="text"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Member>
+                      <Identifier name="File"/>
+                      <FunctionCall name="read">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="temporal"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="false"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionFlow type="BREAK"/>
+              </Source>
+            </Case>
+            <Case>
+              <Value>
+                <Constant delim="&quot;" type="String" value=".ts"/>
+              </Value>
+              <Source>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="File"/>
+                    <FunctionCall name="write">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="temporal"/>
+                        </Value>
+                        <Value>
+                          <Identifier name="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <DeclarationBlock mode="VAR">
+                  <Variable name="comando">
+                    <Expression>
+                      <Member>
+                        <Identifier name="sys"/>
+                        <FunctionCall name="installPrefix"/>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/bin/linguist"/>
+                    </Expression>
+                  </Variable>
+                </DeclarationBlock>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="true"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="Process"/>
+                    <FunctionCall name="execute">
+                      <CallArguments>
+                        <Value>
+                          <Constant>
+                            <CallArguments>
+                              <Value>
+                                <Identifier name="comando"/>
+                              </Value>
+                              <Value>
+                                <Identifier name="temporal"/>
+                              </Value>
+                            </CallArguments>
+                          </Constant>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="child">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <Identifier name="text"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Member>
+                      <Identifier name="File"/>
+                      <FunctionCall name="read">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="temporal"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="false"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionFlow type="BREAK"/>
+              </Source>
+            </Case>
+            <Case>
+              <Value>
+                <Constant delim="&quot;" type="String" value=".kut"/>
+              </Value>
+              <Source>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="File"/>
+                    <FunctionCall name="write">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="temporal"/>
+                        </Value>
+                        <Value>
+                          <Identifier name="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <DeclarationBlock mode="VAR">
+                  <Variable name="comando">
+                    <Expression>
+                      <Member>
+                        <Identifier name="sys"/>
+                        <FunctionCall name="installPrefix"/>
+                      </Member>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="/bin/kudesigner"/>
+                    </Expression>
+                  </Variable>
+                </DeclarationBlock>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="true"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="Process"/>
+                    <FunctionCall name="execute">
+                      <CallArguments>
+                        <Value>
+                          <Constant>
+                            <CallArguments>
+                              <Value>
+                                <Identifier name="comando"/>
+                              </Value>
+                              <Value>
+                                <Identifier name="temporal"/>
+                              </Value>
+                            </CallArguments>
+                          </Constant>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="child">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <Identifier name="text"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Member>
+                      <Identifier name="File"/>
+                      <FunctionCall name="read">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="temporal"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="false"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionFlow type="BREAK"/>
+              </Source>
+            </Case>
+            <Case>
+              <Value>
+                <Constant delim="&quot;" type="String" value=".qs"/>
+              </Value>
+              <Source>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="true"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <DeclarationBlock mode="VAR">
+                  <Variable name="editor">
+                    <Value>
+                      <New>
+                        <FunctionCall name="FLScriptEditor">
+                          <CallArguments>
+                            <Value>
+                              <Identifier name="nombre"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </New>
+                    </Value>
+                  </Variable>
+                </DeclarationBlock>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="editor"/>
+                    <FunctionCall name="exec"/>
+                  </Member>
+                </InstructionCall>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="child">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <Identifier name="text"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Member>
+                      <Identifier name="editor"/>
+                      <FunctionCall name="code"/>
+                    </Member>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="false"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionFlow type="BREAK"/>
+              </Source>
+            </Case>
+            <CaseDefault>
+              <Source>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="true"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <DeclarationBlock mode="VAR">
+                  <Variable name="dialog">
+                    <Value>
+                      <New>
+                        <FunctionCall name="Dialog"/>
+                      </New>
+                    </Value>
+                  </Variable>
+                </DeclarationBlock>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="dialog"/>
+                    <Identifier name="width"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Constant type="Number" value="600"/>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="dialog"/>
+                    <Identifier name="cancelButtonText"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value=""/>
+                  </Value>
+                </InstructionUpdate>
+                <DeclarationBlock mode="VAR">
+                  <Variable name="editor">
+                    <Value>
+                      <New>
+                        <FunctionCall name="TextEdit"/>
+                      </New>
+                    </Value>
+                  </Variable>
+                </DeclarationBlock>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="editor"/>
+                    <Identifier name="textFormat"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Member>
+                      <Identifier name="editor"/>
+                      <Identifier name="PlainText"/>
+                    </Member>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="editor"/>
+                    <Identifier name="text"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Identifier name="contenido"/>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="dialog"/>
+                    <FunctionCall name="add">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="editor"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="dialog"/>
+                    <FunctionCall name="exec"/>
+                  </Member>
+                </InstructionCall>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="child">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="contenido"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <Identifier name="text"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Member>
+                      <Identifier name="editor"/>
+                      <Identifier name="text"/>
+                    </Member>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="this"/>
+                    <FunctionCall name="setDisabled">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="false"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+              </Source>
+            </CaseDefault>
+          </Switch>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="editarFicheroXML">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <Member>
+              <Identifier name="cursor"/>
+              <FunctionCall name="checkIntegrity"/>
+            </Member>
+          </Value>
+        </Condition>
+        <Source>
+          <DeclarationBlock mode="VAR">
+            <Variable name="temporal">
+              <Value>
+                <Member>
+                  <Identifier name="System"/>
+                  <FunctionCall name="getenv">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="TMP"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="temporal"/>
+                  <FunctionCall name="isEmpty"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="temporal"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="System"/>
+                    <FunctionCall name="getenv">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="TMPDIR"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+            </Source>
+          </If>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="temporal"/>
+                  <FunctionCall name="isEmpty"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="temporal"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="System"/>
+                    <FunctionCall name="getenv">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="HOME"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+            </Source>
+          </If>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="temporal"/>
+                  <FunctionCall name="isEmpty"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="temporal"/>
+                <OpUpdate type="EQUALS"/>
+                <Expression>
+                  <Member>
+                    <Identifier name="sys"/>
+                    <FunctionCall name="installPrefix"/>
+                  </Member>
+                  <OpMath type="PLUS"/>
+                  <Constant delim="&quot;" type="String" value="/share/facturalux/tmp"/>
+                </Expression>
+              </InstructionUpdate>
+            </Source>
+          </If>
+          <InstructionUpdate>
+            <Identifier name="temporal"/>
+            <OpUpdate type="EQUALS"/>
+            <Expression>
+              <Identifier name="temporal"/>
+              <OpMath type="PLUS"/>
+              <Constant delim="&quot;" type="String" value="/"/>
+              <OpMath type="PLUS"/>
+              <Member>
+                <Identifier name="cursor"/>
+                <FunctionCall name="valueBuffer">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="nombre"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Expression>
+          </InstructionUpdate>
+          <DeclarationBlock mode="VAR">
+            <Variable name="contenido">
+              <Value>
+                <Member>
+                  <Identifier name="this"/>
+                  <FunctionCall name="child">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="contenido"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                  <Identifier name="text"/>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <InstructionCall>
+            <Member>
+              <Identifier name="File"/>
+              <FunctionCall name="write">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="temporal"/>
+                  </Value>
+                  <Value>
+                    <Identifier name="contenido"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <DeclarationBlock mode="VAR">
+            <Variable name="comando">
+              <Expression>
+                <Member>
+                  <Identifier name="sys"/>
+                  <FunctionCall name="installPrefix"/>
+                </Member>
+                <OpMath type="PLUS"/>
+                <Constant delim="&quot;" type="String" value="/bin/teddy"/>
+              </Expression>
+            </Variable>
+          </DeclarationBlock>
+          <InstructionCall>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="setDisabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="true"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="Process"/>
+              <FunctionCall name="execute">
+                <CallArguments>
+                  <Value>
+                    <Constant>
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="comando"/>
+                        </Value>
+                        <Value>
+                          <Identifier name="temporal"/>
+                        </Value>
+                      </CallArguments>
+                    </Constant>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionUpdate>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="contenido"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+              <Identifier name="text"/>
+            </Member>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Member>
+                <Identifier name="File"/>
+                <FunctionCall name="read">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="temporal"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionUpdate>
+          <InstructionCall>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="setDisabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="calculateField">
+    <Arguments>
+      <Variable name="fN"/>
+    </Arguments>
+    <Source>
+      <If>
+        <Condition>
+          <Expression>
+            <Identifier name="fN"/>
+            <Compare type="EQ"/>
+            <Constant delim="&quot;" type="String" value="sha"/>
+          </Expression>
+        </Condition>
+        <Source>
+          <DeclarationBlock mode="VAR">
+            <Variable name="util">
+              <Value>
+                <New>
+                  <FunctionCall name="FLUtil"/>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="util"/>
+                <FunctionCall name="sha1">
+                  <CallArguments>
+                    <Value>
+                      <Member>
+                        <Identifier name="this"/>
+                        <FunctionCall name="cursor"/>
+                        <FunctionCall name="valueBuffer">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="contenido"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+</Source>

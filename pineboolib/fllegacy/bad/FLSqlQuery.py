@@ -2,7 +2,7 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-import pineboolib
+
 class FLSqlQuery(ProjectClass):
     """
     Implementacion de FlSqlquery de Abanq para compatibilidad con python
@@ -25,7 +25,7 @@ class FLSqlQuery(ProjectClass):
         self._sSELECT=sSELECT
         self._columns=[]
         for scolumna in self._sSELECT.split(","):
-            self._columns.append(str(scolumna).strip().upper())
+            self._columns.append(scolumna.strip().upper())
 
     def select(self):
         return self._sSELECT
@@ -52,7 +52,7 @@ class FLSqlQuery(ProjectClass):
         self._sTablas=tablas
         self._tables=[]
         for stable in self._sTablas.split(","):
-            self._tables.append(str(stable).strip().upper())
+            self._tables.append(stable.strip().upper())
 
     def sql(self):
         sSQL= "SELECT " + self._sSELECT
@@ -62,7 +62,7 @@ class FLSqlQuery(ProjectClass):
             sSQL=sSQL + " WHERE " +self._sWHERE
         if self._sORDER : 
             sSQL=sSQL + " ORDER BY " +self._sORDER
-        return str(sSQL)
+        return sSQL
 
 
     def setForwardOnly(self,valor):
@@ -71,7 +71,6 @@ class FLSqlQuery(ProjectClass):
     #ejecucion de consulta y scroll
     def exec(self,connection=None):
         try:
-            #print(self.sql())
             micursor=self.__damecursor(connection)
             micursor.execute(self.sql())
             self._cursor=micursor
@@ -171,13 +170,11 @@ class FLSqlQuery(ProjectClass):
 
 
     @classmethod
-    def __damecursor(self ,miconnection=None):
+    def __damecursor(cls,miconnection=None):
         if miconnection:
-            cursor = miconnection.cursor()
+            return connections[miconnection].cursor()
         else:
-            cursor = pineboolib.project.conn.cursor()
-        return cursor
-
+            return dameConexionDef().cursor()
     def __damePosDeCadena(self,sCampo):
         if isinstance(sCampo, int):
             return sCampo

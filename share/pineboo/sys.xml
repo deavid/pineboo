@@ -28,6 +28,7 @@
 	</action>
 
 	<action>
+	<alias>QT_TRANSLATE_NOOP("MetaData","Carga de Módulos")</alias>
 		<name>flloadmod</name>
 		<scriptform>flloadmod</scriptform>
 	</action>
@@ -95,6 +96,7 @@
 	</action>
 	
 	<action>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Actualizaciones automáticas")</alias>
 		<name>flupdates</name>
 		<scriptform>flupdates</scriptform>
 	</action>

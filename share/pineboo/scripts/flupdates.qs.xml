@@ -1,0 +1,122 @@
+<Source>
+  <Class name="interna">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="ctx" type="Object"/>
+      </DeclarationBlock>
+      <Function name="interna">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionUpdate>
+            <Member>
+              <Identifier name="this"/>
+              <Identifier name="ctx"/>
+            </Member>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Identifier name="context"/>
+            </Value>
+          </InstructionUpdate>
+        </Source>
+      </Function>
+      <Function name="main">
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="this"/>
+              <Identifier name="ctx"/>
+              <FunctionCall name="interna_main"/>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="oficial" extends="interna">
+    <Source>
+      <Function name="oficial">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="interna">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="head" extends="oficial">
+    <Source>
+      <Function name="head">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="oficial">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="ifaceCtx" extends="head">
+    <Source>
+      <Function name="ifaceCtx">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="head">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <DeclarationBlock mode="CONST">
+    <Variable name="iface">
+      <Value>
+        <New>
+          <FunctionCall name="ifaceCtx">
+            <CallArguments>
+              <Value>
+                <Identifier name="this"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </New>
+      </Value>
+    </Variable>
+  </DeclarationBlock>
+  <Function name="interna_main">
+    <Source>
+      <InstructionCall>
+        <Member>
+          <Identifier name="sys"/>
+          <FunctionCall name="updateAbanQ"/>
+        </Member>
+      </InstructionCall>
+    </Source>
+  </Function>
+</Source>

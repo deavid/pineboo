@@ -492,8 +492,8 @@
                             <property name="text">
                                 <string></string>
                             </property>
-                            <property name="pixmap">
-                                <pixmap>image4</pixmap>
+                            <property name="iconSet">
+                                <iconset>image4</iconset>
                             </property>
                             <property name="accel">
                                 <string>C</string>
@@ -535,8 +535,8 @@
                             <property name="text">
                                 <string></string>
                             </property>
-                            <property name="pixmap">
-                                <pixmap>image5</pixmap>
+                            <property name="iconSet">
+                                <iconset>image5</iconset>
                             </property>
                             <property name="accel">
                                 <string>X</string>

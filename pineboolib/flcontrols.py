@@ -2,16 +2,12 @@
 
 from __future__ import print_function
 from __future__ import unicode_literals
-from builtins import str
-import traceback
-import sip
-sip.setapi('QString', 1)
 
 from PyQt4 import QtGui, QtCore # , uic
 
 import pineboolib
 #from pineboolib.qsaglobals import ustr
-from pineboolib.utils import DefFun, filedir
+from pineboolib.utils import DefFun
 from pineboolib import decorators
 
 Qt = QtCore.Qt
@@ -65,7 +61,6 @@ class QButtonGroup(QtGui.QFrame):
     def selectedId(self): return 0
 
 
-
 class ProgressDialog(QtGui.QWidget):
     def __init__(self, *args, **kwargs):
         super(ProgressDialog,self).__init__(*args, **kwargs)
@@ -92,43 +87,6 @@ class ProgressDialog(QtGui.QWidget):
 class FLTable(QtGui.QTableWidget):
     def __getattr__(self, name): return DefFun(self, name)
 
-class FLFormSearchDB( QtGui.QWidget ):
-    _accepted = None
-    _cursor = None
-
-    def __init__(self,cursor):
-        super(FLFormSearchDB,self).__init__()
-        self._accepted = False
-        self._cursor = FLSqlCursor(cursor)
-
-    def __getattr__(self, name): return DefFun(self, name)
-
-    @decorators.NotImplementedWarn
-    def setCursor(self):
-        print("Definiendo cursor")
-
-    @decorators.NotImplementedWarn
-    def setMainWidget(self):
-
-        print("Creamos la ventana")
-        
-
-    @decorators.NotImplementedWarn
-    def exec_(self, valor):
-        print("Ejecutamos la ventana y esperamos respuesta, introducimos desde y hasta en cursor")
-        return valor
-
-    @decorators.NotImplementedWarn
-    def setFilter(self):
-        print("configuramos Filtro")
-
-    @decorators.NotImplementedWarn
-    def accepted(self):
-        return self._accepted
-
-    @decorators.NotImplementedWarn
-    def cursor(self):
-        return self._cursor
 
 
 class FLReportViewer(ProjectClass):
@@ -347,88 +305,3 @@ class QPushButton(QtGui.QPushButton):
         return self.setCheckable(v)
 
     toggleButton = property(getToggleButton,setToggleButton)
-
-class FLFieldDB(QtGui.QWidget):
-    _fieldName = "undefined"
-    _label = None
-    _lineEdit = None 
-    _layout = None
-    _tableName = None
-    _fieldAlias = None
-    
-
-    def __init__(self, parent, *args):
-        super(FLFieldDB,self).__init__(parent,*args)
-        #TODO: Detectar el tipo de campo y añadir los controles adecuados, Por defecto todos son campos de texto
-        self._lineEdit = QtGui.QLineEdit()
-        self._layout = QtGui.QHBoxLayout()
-        self._label = QtGui.QLabel()
-        spacer = QtGui.QSpacerItem(40,0,QtGui.QSizePolicy.Fixed,QtGui.QSizePolicy.Expanding)
-        self._layout.addItem(spacer)
-        self._layout.addWidget(self._label)
-        self._layout.addWidget(self._lineEdit)
-        self.setLayout(self._layout)
-    
-    def __getattr__(self, name): return DefFun(self, name)
-            
-    @property
-    def fieldName(self):
-        return self._fieldName
-
-    @fieldName.setter
-    def fieldName(self):
-        return self._fieldName
-        
-
-    def setFieldName(self, fN):
-        self._fieldName = fN
-        self._fieldAlias = fN
-        self._label.setText(self._fieldAlias)
-       
-    @QtCore.pyqtSlot()
-    def searchValue(self):
-        print("FLFieldDB: searchValue()")
-        return None
-
-    @QtCore.pyqtSlot()
-    def setMapValue(self):
-        print("FLFieldDB: setMapValue()")
-        return None        
-
-    def setShowAlias(self, show):
-        self._showAlias = bool(show)
-        if not self._showAlias:
-            self._label.setText("")
-
-    
-    def setTableName(self, tableName):
-        self._tableName = tableName
-        return True
-
-    @decorators.NotImplementedWarn
-    def setFilter(self, newFilter):
-        return True
-
-    
-    def setFieldAlias(self, fieldAlias):
-        self._fieldAlias = fieldAlias
-        return True
-
-
-    def setForeignField(self, foreingField):
-        self._foreingField = foreingField
-        return True
-
-    def setFieldRelation(self, fieldRelation):
-        self._fieldRelation = fieldRelation
-        return True
-
-
-    def setFilter(self, newFilter):
-        self._filter = newFilter
-        return True
-
-    def setShowEditor(self, show):
-        self._showEditor = bool(show)
-        self._lineEdit.setReadOnly(self._showEditor)
-        return True

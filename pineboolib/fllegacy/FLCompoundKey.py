@@ -25,16 +25,14 @@ class FLCompoundkey():
     """
     fieldList_ = []
     
-    @decorators.BetaImplementation
     def __init__(self, other = None):
-        self.fieldList_ = FLFieldMetaDataList.FLFieldMetaDataList
+        self.fieldList_ = []
         if other:
             self.copy(other)
         
     
     
-    
-    @decorators.BetaImplementation    
+      
     def __del__(self):
         self.fieldList_ = None
 
@@ -43,11 +41,8 @@ class FLCompoundkey():
 
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
-    @decorators.BetaImplementation
     def addFieldMD(self, f):
-        x = FLFieldMetaData(f.name().lower(), f)
-        x.attr = len(self.fieldList_) + 1
-        self.fieldList_.append(x)
+        self.fieldList_.append(f)
         
 
     """
@@ -56,10 +51,9 @@ class FLCompoundkey():
     @param fN Nombre del campo del que se desea saber si pertenece o no a la clave compuesta
     @return TRUE si el campo forma parte de la clave compuesta, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
     def hasField(self, fN):
-        for i in range(len(self.fieldList_)):
-            if self.fieldList_[i].name() == fN:
+        for i in self.fieldList_:
+            if i == str(fN):
                 return True
         
         return False
@@ -69,7 +63,6 @@ class FLCompoundkey():
 
     @return Objeto con la lista de deficiones de campos de la clave compuesta
     """
-    @decorators.BetaImplementation
     def fieldList(self):
         return self.fieldList_
 

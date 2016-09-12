@@ -8,4 +8,4 @@ class FLRelationMetaDataList():
     Lista de relaciones
     """
     #typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
-    FLRelationMetaDataList = {}
+    FLRelationMetaDataList = []
