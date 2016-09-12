@@ -102,6 +102,9 @@ class PNConnection(QtCore.QObject):
     def doTransaction(self, cursor):
         return True
     
+    @decorators.NotImplementedWarn
+    def doRollback(self, cursor):
+        return True
     
     @decorators.NotImplementedWarn
     def interactiveGUI(self):
