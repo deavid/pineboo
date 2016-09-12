@@ -378,7 +378,6 @@ class FLSqlCursorPrivate(QtCore.QObject):
     _currentregister = None
     editionStates_ = None
     
-    countRefCursor
     
     _current_changed = QtCore.pyqtSignal(int)
     
@@ -446,6 +445,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
             
         self.md5Tuples_ = md5Str
         return need
+    
+    
       
 
         
@@ -1815,7 +1816,7 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def __del__(self, invalidate = True):
         delMtd = None
-        if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
+        if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
             
         mtd = self.d.metadata_
@@ -1830,7 +1831,7 @@ class FLSqlCursor(ProjectClass):
         if delMtd:
             del mtd
         
-        self.countRefCursor = self.countRefCursor -1    
+        #self.d.countRefCursor = self.d.countRefCursor - 1     FIXME
 
         
         
