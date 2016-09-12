@@ -142,15 +142,19 @@ class FLFormDB(QtGui.QWidget):
     
     known_instances = {}
     cursor_ = None
+    bottomToolbar = None
+    pushButtonCancel = None
+    
     
     def __init__(self, parent, action, load=False):
+        super(QtGui.QWidget, self).__init__(parent)
         try:
             assert (self.__class__,action) not in self.known_instances
         except AssertionError:
             print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__,action),)
                 + "Puede que se estén perdiendo datos!" )
         self.known_instances[(self.__class__,action)] = self
-        QtGui.QWidget.__init__(self, parent)
+        
         self.action = action
         self.prj = action.prj
         self.mod = action.mod
@@ -160,29 +164,17 @@ class FLFormDB(QtGui.QWidget):
         self.layout.setMargin(2)
         self.layout.setSpacing(2)
         self.setLayout(self.layout)
-        # self.widget = QtGui.QWidget()
-        # self.layout.addWidget(self.widget)
-        self.bottomToolbar = QtGui.QFrame()
-        self.bottomToolbar.setMaximumHeight(64)
-        self.bottomToolbar.setMinimumHeight(16)
-        self.bottomToolbar.layout = QtGui.QHBoxLayout()
-        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setMargin(0)
-        self.bottomToolbar.layout.setSpacing(0)
-        self.bottomToolbar.layout.addStretch()
-        self.toolButtonClose = QtGui.QToolButton()
-        self.toolButtonClose.setIcon(QtGui.QIcon(filedir("icons","gtk-cancel.png")))
-        self.toolButtonClose.clicked.connect(self.close)
-        self.bottomToolbar.layout.addWidget(self.toolButtonClose) 
-        self.layout.addWidget(self.bottomToolbar)
+
+
         self.setWindowTitle(action.alias)
         
         self.loaded = False
         self.idMDI_ = self.action.name
+        
             
         if load: self.load()
         
-        #self.initForm()
+        self.initForm()
 
         
     def load(self):
@@ -524,7 +516,10 @@ class FLFormDB(QtGui.QWidget):
     Inicialización
     """
     def initForm(self):
-      """
+        
+        self.loadControls()
+       
+        """ 
         if self.cursor_ and self.cursor_.metadata():
             caption = None
             if self.action_:
@@ -542,13 +537,58 @@ class FLFormDB(QtGui.QWidget):
             
             #self.bindIface()
             #self.setCursor(self.cursor_)
+            
+            
+            
         
         else:
        
-            self.setCaptionWidget("No hay metadatos")
-       """             
+            self.setCaptionWidget("No hay metadatos")     
+                  
+        """
+    
+    def loadControls(self):
+        if self.pushButtonCancel:
+            self.pushButtonCancel.hide()
         
-
+        if self.bottomToolbar:
+            self.toolButtonClose.hide()
+        self.bottomToolbar = QtGui.QFrame()
+        self.bottomToolbar.setMaximumHeight(64)
+        self.bottomToolbar.setMinimumHeight(16)
+        self.bottomToolbar.layout = QtGui.QHBoxLayout()
+        self.bottomToolbar.setLayout(self.bottomToolbar.layout)
+        self.bottomToolbar.layout.setMargin(0)
+        self.bottomToolbar.layout.setSpacing(0)
+        self.bottomToolbar.layout.addStretch()
+        self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.layout.addWidget(self.bottomToolbar)
+        #if self.layout:
+        #    self.layout = None
+        #Limpiamos la toolbar
+        
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(0) ,QtGui.QSizePolicy.Policy(0))
+        sizePolicy.setHeightForWidth(True)
+        
+        pbSize = QtCore.QSize(22,22)
+                
+            
+        if not self.pushButtonCancel:
+            self.pushButtonCancel = QtGui.QToolButton()
+            self.pushButtonCancel.clicked.connect(self.close)
+                
+        self.pushButtonCancel.setSizePolicy(sizePolicy)
+        self.pushButtonCancel.setMaximumSize(pbSize)
+        self.pushButtonCancel.setMinimumSize(pbSize)
+        self.pushButtonCancel.setIcon(QtGui.QIcon(filedir("icons","gtk-stop.png")))
+        self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.pushButtonCancel.setFocus()
+        self.pushButtonCancel.setWhatsThis("Aceptar y cerrar formulario (Esc)")
+        self.pushButtonCancel.setToolTip("Aceptar y cerrar formulario (Esc)")
+        self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
+        self.setFocusPolicy(QtCore.Qt.NoFocus)                  
+            
+                
 
     """
     Nombre interno del formulario
