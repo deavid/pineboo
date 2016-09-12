@@ -727,8 +727,10 @@ class FLSqlCursor(ProjectClass):
     @param fN Nombre del campo
     @param v Valor a establecer para el campo
     """
+    @decorators.BetaImplementation
     def setValueBuffer(self, fN, v):
         self.d.buffer_.setValue(fN, v)
+        self.bufferChanged.emit(fN)
 
     """
     Devuelve el valor de un campo del buffer.
