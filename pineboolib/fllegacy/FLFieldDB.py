@@ -196,7 +196,7 @@ class FLFieldDB(QtGui.QWidget):
             new_parent = self.topWidget_.parentWidget()
             if new_parent is None:
                 self.topWidget_ = None 
-                print("FLFieldDB : El widget de nivel superior deber ser de la clase FLFormDB o heredar de ella")
+                print("FLFieldDB : El widget de nivel superior deber ser de la clase FLFormDB o heredar de ella (o fuí demasiado rápido y no lo esperé)")
                 break
             self.topWidget_ = new_parent
                   
