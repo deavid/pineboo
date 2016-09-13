@@ -1459,7 +1459,7 @@ class FLFieldDB(QtGui.QWidget):
                         self.cursor_.newBuffer.disconnect(self.setNoShowed)
                     except:
                         a = 1
-                self.cursor_.newBuffer.connect(self.setNoSowed)
+                self.cursor_.newBuffer.connect(self.setNoShowed)
             
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
             if self.showed:
