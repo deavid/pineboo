@@ -1398,8 +1398,9 @@ class FLSqlCursor(ProjectClass):
             
         
         
-            
-        
+    @decorators.NotImplementedWarn        
+    def aqWasDeleted(self):
+        return None    
         
 
     """
