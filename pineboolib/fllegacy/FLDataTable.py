@@ -99,7 +99,7 @@ class FLDataTable(QtGui.QTableView):
                 if curChg:
                     self.setFLReadOnly(self.readonly_)
                     self.setEditOnly(self.editonly_)
-                    self.insertOnly(self.insertonly_)
+                    self.setInsertOnly(self.insertonly_)
                     self.setOnlyTable(self.onlyTable_)
                 
                 try:
@@ -117,7 +117,7 @@ class FLDataTable(QtGui.QTableView):
                 if not self.popup_:
                     self.cursor_.cursorUpdated.connect(self.refresh)
                 self.cursor_.destroyed.connect(self.cursorDestroyed)
-        
+            
             
         #super(FLDataTable, self).setSqlCursor(c , True, False)
     """
@@ -285,9 +285,10 @@ class FLDataTable(QtGui.QTableView):
     """
     Redefinida por conveniencia
     """
-    @decorators.NotImplementedWarn
-    def focusOutEvent(self):
+    def focusOutEvent(self, e):
+        #setPaletteBackgroundColor(qApp->palette().color(QPalette::Active, QColorGroup::Background)) FIXME
         pass
+        
 
     """
     Redefinida por conveniencia
@@ -452,8 +453,18 @@ class FLDataTable(QtGui.QTableView):
     """
     Redefinida por conveniencia
     """
+    @decorators.Incomplete
     def refresh(self):
-        pass
+        if self.popup_:
+            self.cursor_.d._model.refresh()
+        if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
+            self.refreshing_ = True
+            self.cursor_.refresh()
+
+        self.refreshing_ = False
+    
+    
+                   
 
     """
     Hace que la fila seleccionada esté visible
