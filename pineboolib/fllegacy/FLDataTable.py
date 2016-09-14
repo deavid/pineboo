@@ -571,9 +571,13 @@ class FLDataTable(QtGui.QTableView):
     """
     Numero de registros que ofrece el cursor
     """
-    @decorators.BetaImplementation
     def numRows(self):
+        if not self.cursor_:
+            return -1
+        
         return self.cursor_.model().columnCount()
+    
+    
 
 
 
