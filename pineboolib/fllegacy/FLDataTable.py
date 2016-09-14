@@ -459,10 +459,17 @@ class FLDataTable(QtGui.QTableView):
     def refresh(self):
         if self.popup_:
             self.cursor_.refresh()
+            
         if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
             self.hide()
             self.refreshing_ = True
+            if self.persistentFilter_:
+                print("Persistente es", self.persistentFilter_)
+                self.cursor_.setFilter(self.persistentFilter_)
             self.cursor_.refresh()
+            self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents) 
+            self.setModel(self.cursor_.model())
+            
             QtCore.QTimer.singleShot(0, self.show)
         self.refreshing_ = False
     
@@ -571,12 +578,24 @@ class FLDataTable(QtGui.QTableView):
     """
     Numero de registros que ofrece el cursor
     """
-    @decorators.BetaImplementation
     def numRows(self):
+        if not self.cursor_:
+            return -1
+        
         return self.cursor_.model().columnCount()
+    
+    
+    def setModel(self, model):
+        super(FLDataTable, self).setModel(model)
+        
+        for column in range(model.columnCount()):
+                field = model.metadata().indexFieldObject(column)
+                if not field.visibleGrid():
+                    self.setColumnHidden(column, True)
 
-
-
+        self.setSelectionModel(self.cursor_.selection())
+        
+        
 class FLCheckBox(QtGui.QCheckBox):
     
     row_ = None

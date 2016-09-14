@@ -916,8 +916,7 @@ class FLTableDB(QtGui.QWidget):
     """
     @decorators.BetaImplementation
     def refresh(self, refreshHead = False, refreshData = False):
-        
-        if not self.cursor_:
+        if not self.cursor_ or not self.tableRecords_:
             return
 
         tMD = self.cursor_.metadata()
@@ -927,19 +926,14 @@ class FLTableDB(QtGui.QWidget):
         if not self.tableName_:
             self.tableName_ = tMD.name()
         
-        self.tableRecords_.hide()
-        self.tableRecords_._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
-        self.tableRecords_.setModel(self.cursor_.model())
-        self.tableRecords_.setSelectionModel(self.cursor_.selection())
+        
         
         
         if refreshHead:
-            
-            for column in range(self.cursor_.model().columnCount()):
-                field = self.cursor_.model().metadata().indexFieldObject(column)
-                if not field.visibleGrid():
-                    self.tableRecords_.setColumnHidden(column, True)
-                              
+            self.tableRecords_._h_header.hide()
+            # ----> ?????
+            self.tableRecords_._h_header.show()
+                                       
          
         
         if refreshData or self.sender():
