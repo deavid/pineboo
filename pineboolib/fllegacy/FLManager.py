@@ -339,34 +339,28 @@ class FLManager(QtCore.QObject):
             return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])    
                 
         elif isinstance(args[1], FLFieldMetaData) and ( isinstance(args[0], str) or isinstance(args[0], QString)):
-            self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
+            return self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
         
         elif isinstance(args[0], FLFieldMetaData) and len(args) == 2:
-            self.formatAssignValue(args[0].name(), args[0], args[1], False)
+            return self.formatAssignValue(args[0].name(), args[0], args[1], False)
         else:
             if args[1] == None:
                 return "1 = 1"
-            
-            isText = False
-            t = args[1]
-            #t = str(args[1].toString())
-            #print("t es", t)
-            
-            if isinstance(t, str):
-                istext = True
-            
 
+            
+            print(args)
             formatV = self.formatValue(args[1], args[2], args[3])
             if not formatV:
                 return "1 = 1"
             
-            if  len(args) == 4 and isText:
-                fName = "upper(%)" % args[0]
+            if  len(args) == 4 and args[1] == "string":
+                fName = "upper(%s)" % args[0]
             else:
                 fName = args[0]
             
             #print("%s=%s" % (fName, formatV))
-            return "%s = %s" % (fName, formatV)               
+            retorno = "%s = %s" % (fName, formatV)
+            return retorno              
             
         
                               
