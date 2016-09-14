@@ -39,6 +39,8 @@ class FLDataTable(QtGui.QTableView):
         self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.setAlternatingRowColors(True)
         
+        self.popup_ = popup
+        
         
 
         
@@ -456,11 +458,12 @@ class FLDataTable(QtGui.QTableView):
     @decorators.Incomplete
     def refresh(self):
         if self.popup_:
-            self.cursor_.d._model.refresh()
+            self.cursor_.refresh()
         if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
+            self.hide()
             self.refreshing_ = True
             self.cursor_.refresh()
-
+            QtCore.QTimer.singleShot(0, self.show)
         self.refreshing_ = False
     
     

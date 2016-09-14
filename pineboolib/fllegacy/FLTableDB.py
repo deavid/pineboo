@@ -480,8 +480,7 @@ class FLTableDB(QtGui.QWidget):
             timer.singleShot(30, self.showWidget)
             return 
         else:
-            if not self.showed and not self._initCursorWhenLoad and self.cursor_:
-
+            if not self.showed and not self._initCursorWhenLoad and self.cursor_ and self.tableRecords_:
                 if not self.topWidget:
                     self.initFakeEditor()
                     self.showed = True
@@ -501,7 +500,7 @@ class FLTableDB(QtGui.QWidget):
                         return
             
             
-                self.tableRecords()
+                
                 
 
 
@@ -543,17 +542,34 @@ class FLTableDB(QtGui.QWidget):
                 if ownTMD and tMD and not tMD.inCache():
                     del tMD
                 
-                """
-                Aquí asigno el cursor a FLDataTable. Se cambiará
-                """
-                       
-                self.tableRecords_.setFLSqlCursor(self.cursor_)
                 
             if self._initCursorWhenLoad:
-                self._initCursorWhenLoad = False
+                self._initCursorWhenLoad = False              
                 self.initCursor()
                 self.showWidget()
-
+            
+            if not self.tableRecords_:
+                if not self.tableName_: 
+                    if not self.cursor_:
+                        self.initCursor()
+                        QtCore.QTimer.singleShot(50, self.showWidget)
+                        return
+                    self.tableRecords()
+                    self.setTableRecordsCursor()
+                    self.showWidget()
+                elif self.tableName_:
+                    if not self.cursor_:
+                        self.initCursor()
+                        QtCore.QTimer.singleShot(50, self.showWidget)
+                        return
+                    
+                    if self.tableName_ == self.cursor_.curName():
+                        self.tableRecords()
+                        self.setTableRecordsCursor()
+                        self.showWidget()
+                    
+                
+                      
     """
     Obtiene el componente tabla de registros
     """
@@ -578,8 +594,7 @@ class FLTableDB(QtGui.QWidget):
         self.tabControlLayout.addWidget(self.comboBoxFieldToSearch2)
         
         self.tabDataLayout.addLayout(self.tabControlLayout)
-        
-        
+            
         
         if not self.tableRecords_:
             self.tableRecords_ = FLDataTable(self, "tableRecords")
@@ -594,11 +609,6 @@ class FLTableDB(QtGui.QWidget):
             self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
             self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
 
-        
-        tCursor = self.tableRecords_.cursor()
-        
-        if not tCursor:
-            self.setTableRecordsCursor()
                 
         return self.tableRecords_
     
@@ -1230,10 +1240,8 @@ class FLTableDB(QtGui.QWidget):
         if ownTMD or tMD and not tMD.inCache():
             del tMD
 
-                
-                    
          
- 
+        
     """
     Posiciona el cursor en un registro valido
     """
