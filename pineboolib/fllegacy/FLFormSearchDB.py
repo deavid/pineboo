@@ -64,8 +64,9 @@ class FLFormSearchDB(FLFormDB):
             
             name = args[0]
              
+            
+            self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
             action = self.cursor_.action()
-            self.cursor_= self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
             self.accepted_ = False
 
         elif isinstance(args[0], FLSqlCursor):
@@ -80,8 +81,6 @@ class FLFormSearchDB(FLFormDB):
                 parent = args[2]
             
             self.cursor_ = args[0]
-        
-        print("FLFormSearhDB.init()", self.cursor_.name)
         
         super(FLFormSearchDB,self).__init__(parent, action)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
