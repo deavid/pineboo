@@ -348,7 +348,6 @@ class FLManager(QtCore.QObject):
                 return "1 = 1"
 
             
-            print(args)
             formatV = self.formatValue(args[1], args[2], args[3])
             if not formatV:
                 return "1 = 1"
