@@ -407,7 +407,7 @@ class FLTableMetaData(ProjectClass):
       cuando esta exista. Si no existe devuelve 0
     """
     def relation(self, fN, fFN, fTN):
-        if fN.isEmpty():
+        if not fN:
             return
         
         field = None

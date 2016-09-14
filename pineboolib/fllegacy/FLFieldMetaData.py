@@ -816,7 +816,7 @@ class FLFieldMetaDataPrivate():
     """
     Indica si el campo es generado, es decir, se incluye en las consultas
     """
-    generated_ = None
+    generated_ = False
 
     """
     Almacena si el campo es clave compuesta
