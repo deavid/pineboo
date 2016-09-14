@@ -128,8 +128,9 @@ class FLManager(QtCore.QObject):
         
         if not n:
             return None
-        
-        name = str(n)
+
+        name = "%s" % n
+
          
         for metadata in self.cacheMetaData_:
             if metadata.name() ==name:
@@ -307,21 +308,21 @@ class FLManager(QtCore.QObject):
         
         #print("tipo 0", type(args[0]))
         #print("tipo 1", type(args[1]))
-        #print("tipo 2", type(args[2]))
+        #print("tipo 2", type(args[2]))]
         
-        if isinstance(args[0], FLFieldMetaData):
-            
-            mtd = args[0].metadata()
+        if isinstance(args[0], FLFieldMetaData) and len(args) == 3:
+            fMD = args[0]
+            mtd = fMD.metadata()
             if not mtd:
-                return self.formatAssignValue(args[0].name(), args[0].type(), args[1], args[2]) 
+                return self.formatAssignValue(fMD.name(), fMD.type(), args[1], args[2]) 
             
-            if args[0].isPrimaryKey():
-                return self.formatAssignValue(mtd.primaryKey(True), args[0].type(), args[1], args[2])
+            if fMD.isPrimaryKey():
+                return self.formatAssignValue(mtd.primaryKey(True), fMD.type(), args[1], args[2])
                 
-            fieldName = args[0].name()
-            if args[0].isQuery() and not fieldName.contains("."):
-                prefixTable = args[0].name()
-                qry = self.query(args[0].query())
+            fieldName = fMD.name()
+            if mtd.isQuery() and not "." in fieldName:
+                prefixTable = mtd.name()
+                qry = self.query(mtd.query())
                     
                 if qry:
                     fL = qry.fieldList()
@@ -337,32 +338,28 @@ class FLManager(QtCore.QObject):
                       
             return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])    
                 
-        elif isinstance(args[0], FLFieldMetaData) and ( isinstance(args[0], str) or isinstance(args[0], QString)):
-            self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
+        elif isinstance(args[1], FLFieldMetaData) and ( isinstance(args[0], str) or isinstance(args[0], QString)):
+            return self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
         
+        elif isinstance(args[0], FLFieldMetaData) and len(args) == 2:
+            return self.formatAssignValue(args[0].name(), args[0], args[1], False)
         else:
             if args[1] == None:
                 return "1 = 1"
+
             
-            isText = False
-            t = args[1]
-            #t = str(args[1].toString())
-            #print("t es", t)
-            
-            if isinstance(t, str):
-                istext = True
-                
             formatV = self.formatValue(args[1], args[2], args[3])
             if not formatV:
                 return "1 = 1"
             
-            if  args[3] and isText:
-                fName = "upper(%)" % args[0]
+            if  len(args) == 4 and args[1] == "string":
+                fName = "upper(%s)" % args[0]
             else:
                 fName = args[0]
             
             #print("%s=%s" % (fName, formatV))
-            return "%s=%s" % (fName, formatV)               
+            retorno = "%s = %s" % (fName, formatV)
+            return retorno              
             
         
                               
@@ -524,6 +521,11 @@ class FLManager(QtCore.QObject):
     """
     def initCount(self):
         return self.initCount_
+    
+
+    @decorators.NotImplementedWarn
+    def existTable(self, name):
+        return True
 
 
 

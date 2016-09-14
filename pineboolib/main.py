@@ -436,7 +436,8 @@ class XMLAction(XMLStruct):
         self.formrecord_widget = FLFormRecordDB(parent_or_cursor,self, load = True)
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         #self._record_loaded = True
-        print("End of record action load %s (iface:%s ; widget:%s)"
+        if self.mainform_widget:
+            print("End of record action load %s (iface:%s ; widget:%s)"
                 % (self.name,
                 repr(self.mainform_widget.iface),
                 repr(self.mainform_widget.widget)

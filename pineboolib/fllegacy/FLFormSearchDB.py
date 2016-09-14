@@ -58,25 +58,28 @@ class FLFormSearchDB(FLFormDB):
         
         if isinstance(args[0], str):
             #@param actionName Nombre de la acción asociada al formulario
-            name = args[0]
+            
             if len(args) == 2:
                 parent = args[1]
             
-            self.cursor_= FLSqlCursor(name)
+            name = args[0]
+             
             action = self.cursor_.action()
+            self.cursor_= self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
             self.accepted_ = False
 
         elif isinstance(args[0], FLSqlCursor):
             #@param cursor Objeto FLSqlCursor para asignar a este formulario
             #@param actionName Nombre de la acción asociada al formulario
-            self.cursor_ = args[0]
-            if len(args) == 2:
+            
+            if len(args) > 2:
                 action = args[1]
-                name = self.action_.name
+                name = action.name
+                
             if len(args) == 3:
                 parent = args[2]
             
-            self.cursor_ = FLSqlCursor(name, True, "default", None, None, self) 
+            self.cursor_ = args[0]
         
         print("FLFormSearhDB.init()", self.cursor_.name)
         
