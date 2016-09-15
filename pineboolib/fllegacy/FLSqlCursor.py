@@ -1890,8 +1890,10 @@ class FLSqlCursor(ProjectClass):
             
             else:
                 finalFilter = _filter
-                
-        self.d._model.refresh()
+        
+        self.setMainFilter(finalFilter , False)
+        self.d._model.refresh()        
+        
         self.newBuffer.emit()
             
             
@@ -1914,7 +1916,7 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def baseFilter(self):
         relationFilter = None
-        finalFilter = None
+        finalFilter = "1 = 1"
         
         if self.d.cursorRelation_ and self.drelation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
             
