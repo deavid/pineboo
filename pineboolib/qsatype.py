@@ -62,9 +62,10 @@ class FormDBWidget(QtGui.QWidget):
 
     def cursor(self):
         cursor = getattr(self.parentWidget(),"cursor_", None)
-        if not cursor:
-            cursor = self.cursor_ 
-        return cursor
+        if cursor:
+            del self.cursor_
+            self.cursor_ = cursor
+        return self.cursor_
 
 def FLFormSearchDB(name):
     return FLFormSearchDB_legacy.FLFormSearchDB(name)
