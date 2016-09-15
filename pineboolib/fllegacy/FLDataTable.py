@@ -18,10 +18,12 @@ class FLDataTable(QtGui.QTableView):
     """
     constructor
     """
-
+    _parent = None
 
     def __init__(self, parent = None, name = None, popup = False):
         super(FLDataTable, self).__init__(parent)
+        
+        if parent: self._parent = parent
         
         if not name:
             self.setName("FLDataTable")
@@ -591,6 +593,18 @@ class FLDataTable(QtGui.QTableView):
                 field = model.metadata().indexFieldObject(column)
                 if not field.visibleGrid():
                     self.setColumnHidden(column, True)
+                else:
+                    self._parent.comboBoxFieldToSearch.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                    self._parent.comboBoxFieldToSearch2.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+        self._parent.comboBoxFieldToSearch.addItem("*")
+        self._parent.comboBoxFieldToSearch2.addItem("*")
+        self._parent.comboBoxFieldToSearch.setCurrentIndex(0)
+        self._parent.comboBoxFieldToSearch2.setCurrentIndex(1)
+        self._parent.comboBoxFieldToSearch.currentIndexChanged.connect(self._parent.putFirstCol)
+        self._parent.comboBoxFieldToSearch2.currentIndexChanged.connect(self._parent.putSecondCol) 
+        
+        print("Pariente es", self._parent, self._parent.comboBoxFieldToSearch)
+        
 
         self.setSelectionModel(self.cursor_.selection())
         

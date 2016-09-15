@@ -422,14 +422,14 @@ class FLTableDB(QtGui.QWidget):
         if not self.tableRecords_ or not self.lineEditSearch or not self.comboBoxFieldToSearch or not self.comboBoxFieldToSearch2 or not self.cursor_:
             return super(FLTableDB, self).eventFilter(obj, ev)
         
-        if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, self.tableRecords_):
+        if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, FLDataTable):
             k = ev
             
             if k.key() == QtCore.Qt.Key_F2:
                 self.comboBoxFieldToSearch.popup()
                 return True
         
-        if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, self.lineEditSearch):
+        if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, QtGui.QLineEdit):
             k = ev
             
             if k.key() == QtCore.Qt.Key_Enter or k.key() == QtCore.Qt.Key_Return:
@@ -445,20 +445,20 @@ class FLTableDB(QtGui.QWidget):
                 self.tableRecords_.setFocus()
                 return True
             
-            if k.key() == QtCore.Qt.key_F2:
+            if k.key() == QtCore.Qt.Key_F2:
                 self.comboBoxFieldToSearch.popup()
                 return True
             
             if k.text() == "'" or k.text() == "\\":
                 return True
             
-            if isinstance(obj, self.tableRecords_) or isinstance(obj, self.lineEditSearch):
-                return False
-            else:
-                return super(FLTableDB, self).eventFilter(obj, ev)
+        if isinstance(obj, FLDataTable) or isinstance(obj, QtGui.QLineEdit):
+            return False
+        else:
+            return super(FLTableDB, self).eventFilter(obj, ev)
             
         
-
+        
     """
     Captura evento mostrar
     """
@@ -1075,23 +1075,37 @@ class FLTableDB(QtGui.QWidget):
     @author viernes@xmarts.com.mx
     @author InfoSiAL, S.L.
     """
-
-    def putFirstCol(self, c):
+    def putFirstCol(self, c, update2 = True):
+        if isinstance(c, int):
+            alias = self.cursor_.model().headerData(c, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
+        else:
+            alias = c
+            
+        self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
+        
+        _oldFirst = self.tableRecords_._h_header.logicalIndex(0)
         _oldPos= None
-        _oldFirst = self.tableRecords_._h_header.logicalIndex(0)    
+        pos = 0
         for column in range(self.cursor_.model().columnCount()):
-            if self.cursor_.model().headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == c.lower():
-                _oldPos = self.tableRecords_._h_header.visualIndex(column) 
-                #if not self._comboBox_1.currentText() == c:
-                #    self._comboBox_1.setCurrentIndex(column)
-                #    return False
+            if not self.cursor_.model().metadata().indexFieldObject(column).visibleGrid():
+                pos = pos + 1
+            if self.cursor_.model().headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == alias.lower():
+                
+                    
+                self.comboBoxFieldToSearch.setCurrentIndex(column)
+                _oldPos= self.tableRecords_._h_header.visualIndex(pos)
                 break
-
-        if not _oldPos or c == "*":
+            
+            pos = pos + 1
+        
+        self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
+        
+        if not _oldPos or alias == "*":
             return False
         else:         
             self.tableRecords_._h_header.swapSections(_oldPos, 0)
-            #self._comboBox_2.setCurrentIndex(_oldFirst)
+            if update2:
+                self.comboBoxFieldToSearch2.setCurrentIndex(_oldFirst)
             return True
 
     """
@@ -1099,9 +1113,36 @@ class FLTableDB(QtGui.QWidget):
 
     @author Silix - dpinelo
     """
-    @decorators.NotImplementedWarn
-    def putSecondCol(self, c ):
-        pass
+    def putSecondCol(self, c):
+        if isinstance(c, int):
+            alias = self.cursor_.model().headerData(c, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
+        else:
+            alias = c
+            
+        self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(self.putSecondCol)
+        
+        _oldPos= None
+        _oldSecond = self.tableRecords_._h_header.logicalIndex(1)
+        pos = 0
+        for column in range(self.cursor_.model().columnCount()):
+            if not self.cursor_.model().metadata().indexFieldObject(column).visibleGrid():
+                pos = pos + 1
+            if self.cursor_.model().headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole).lower() == alias.lower():
+                
+                    
+                self.comboBoxFieldToSearch2.setCurrentIndex(column)
+                _oldPos= self.tableRecords_._h_header.visualIndex(pos)
+                break
+            
+            pos = pos + 1
+        
+        self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
+        
+        if not self.comboBoxFieldToSearch.currentText() == self.comboBoxFieldToSearch2.currentText():           
+            self.tableRecords_._h_header.swapSections(_oldPos, 1)
+        else:
+            self.putFirstCol(_oldSecond, False)
+        return True
 
     """
     Mueve una columna de un campo origen a la columna de otro campo destino
