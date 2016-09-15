@@ -45,7 +45,7 @@ class FormDBWidget(QtGui.QWidget):
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
-        self._cursor = FLSqlCursor(action.name)
+        self.cursor_ = FLSqlCursor(action.name)
         self._prj = project
         self._class_init()
 
@@ -63,7 +63,7 @@ class FormDBWidget(QtGui.QWidget):
     def cursor(self):
         cursor = getattr(self.parentWidget(),"cursor_", None)
         if not cursor:
-            cursor = self._cursor 
+            cursor = self.cursor_ 
         return cursor
 
 def FLFormSearchDB(name):

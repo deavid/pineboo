@@ -1891,8 +1891,8 @@ class FLSqlCursor(ProjectClass):
             else:
                 finalFilter = _filter
                 
-             
-        self.setMainFilter(finalFilter, False)
+        print("mainFilter", finalFilter)
+        self.setMainFilter("1 = 1", False)
         self.d._model.refresh()
         self.newBuffer.emit()
             
