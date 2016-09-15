@@ -464,7 +464,6 @@ class FLDataTable(QtGui.QTableView):
             self.hide()
             self.refreshing_ = True
             if self.persistentFilter_:
-                print("Persistente es", self.persistentFilter_)
                 self.cursor_.setFilter(self.persistentFilter_)
             self.cursor_.refresh()
             self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents) 

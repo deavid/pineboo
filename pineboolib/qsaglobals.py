@@ -162,6 +162,8 @@ class qsa:
     def __setattr__(self, k,v):
         if not self.loaded: return super(qsa, self).__setattr__(k,v)
         try:
+            if not self.parent:
+                return
             f = getattr(self.parent,k)
             if callable(f): return f(v)
             else: return setattr(self.parent,k,v)
