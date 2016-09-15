@@ -246,6 +246,8 @@ class FLFormSearchDB(FLFormDB):
             v = None
         
         self.inExec_ = False
+        
+        return v
                     
 
     """
