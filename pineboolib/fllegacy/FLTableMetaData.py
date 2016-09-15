@@ -69,6 +69,9 @@ class FLTableMetaData(ProjectClass):
             if field.isPrimaryKey():
                 self.d.primaryKey_ = field.name()
             self.d.fieldList_.append(field)
+            
+            if field.type() == FLFieldMetaData.Unlock:
+                self.d.fieldsNamesUnlock_.append(field.name())
 
     """
     destructor
@@ -150,13 +153,13 @@ class FLTableMetaData(ProjectClass):
             return
         if not f.metadata():
             f.setMetadata(self)
-        self.d.fieldList_[self.d.fieldName_.lower()] = f 
-        self.d.addFieldName(f.d.fieldName_)
+        self.d.fieldList_.append(f) 
+        self.d.addFieldName(f.name())
         self.d.formatAlias(f)
-        if f.d.type_ == FLFieldMetaData.Unlock:
-            self.d.fieldsNamesUnlock_.append(f.d.fieldName_)
+        if f.type() == FLFieldMetaData.Unlock:
+            self.d.fieldsNamesUnlock_.append(f.name())
         if f.d.isPrimaryKey_:
-            self.d.primaryKey_ = f.d.fieldName_.lower()
+            self.d.primaryKey_ = f.name().lower()
 
     """
     Elimina la descripción de un campo de la lista de descripciones de campos.
@@ -641,7 +644,6 @@ class FLTableMetaData(ProjectClass):
     """
     Lista de nombres de campos de la tabla que son del tipo FLFieldMetaData::Unlock
     """
-    @decorators.BetaImplementation
     def fieldsNamesUnlock(self):
         return self.d.fieldsNamesUnlock_
     """
