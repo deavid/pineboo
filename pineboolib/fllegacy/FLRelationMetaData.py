@@ -69,7 +69,6 @@ class FLRelationMetaData():
 
     @return Devuelve el nombre del campo relacionado
     """
-    @decorators.BetaImplementation
     def field(self):
         return self.d.field_
 

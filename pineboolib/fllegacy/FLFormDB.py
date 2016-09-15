@@ -280,7 +280,7 @@ class FLFormDB(QtGui.QWidget):
       en el formulario
     """
     def cursor(self):  
-        return self.cursor_;
+        return self.cursor_
 
 
     """

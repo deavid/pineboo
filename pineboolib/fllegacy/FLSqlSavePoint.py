@@ -220,10 +220,6 @@ class FLSqlSavePoint():
     def saveEdit( self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return 
-        print(cursor.at())
-        print(cursor.sort())
-        print(cursor.filter())
-        print(cursor.nameCursor())
         
         self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
     """
