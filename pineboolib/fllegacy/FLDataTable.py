@@ -601,12 +601,62 @@ class FLDataTable(QtGui.QTableView):
         self._parent.comboBoxFieldToSearch.setCurrentIndex(0)
         self._parent.comboBoxFieldToSearch2.setCurrentIndex(1)
         self._parent.comboBoxFieldToSearch.currentIndexChanged.connect(self._parent.putFirstCol)
-        self._parent.comboBoxFieldToSearch2.currentIndexChanged.connect(self._parent.putSecondCol) 
-        
-        print("Pariente es", self._parent, self._parent.comboBoxFieldToSearch)
-        
-
+        self._parent.comboBoxFieldToSearch2.currentIndexChanged.connect(self._parent.putSecondCol)
         self.setSelectionModel(self.cursor_.selection())
+    
+    def indexVisualColumn(self, name):
+        
+            return
+        
+        
+    """
+    Retorna el index real (incusive columnas ocultas) a partir de un nombre de un campo
+    @param name El nombre del campo a buscar en la tabla
+    @return posicion de la columna en la tabla
+    """
+    
+    def realColumnIndex(self, name):
+        if not isinstance(name, str) or not self.cursor_:
+            return -1
+      
+        return self.cursor_.model().metadata().fieldIsIndex(name)
+        
+        
+    """
+    Retorna el index real (incusive columnas ocultas) a partir de un index de columnas visibles.
+    @param c posicion de la columna visible.
+    @return posicion real de la columna
+    """   
+    def visualIndexToRealIndex(self, c):  
+        if not isinstance(c, int) or not self.cursor_:return
+        
+        model = self.cursor_.model()
+        posReal = 0
+        posVisual = 0
+        _return = None
+        for column in range(model.columnCount()):
+            field = model.metadata().indexFieldObject(column)
+            if not field.visibleGrid():
+                posVisual = posVisual - 1
+            else:
+                if c == posVisual:
+                    _return = posReal
+                    break
+            
+            posVisual = posVisual + 1    
+            posReal = posReal + 1
+        
+        _return = self._h_header.visualIndex(posReal)      
+        return _return
+                
+        
+             
+            
+                 
+            
+            
+        
+        
         
         
 class FLCheckBox(QtGui.QCheckBox):
