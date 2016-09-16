@@ -84,7 +84,7 @@ class FLTableDB(QtGui.QWidget):
         #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
         self._loaded = True
         while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
-            parent_cursor = getattr(self.topWidget,"_cursor", None)
+            parent_cursor = getattr(self.topWidget,"cursor_", None)
             if parent_cursor: break
             new_parent = self.topWidget.parentWidget()
             if new_parent is None: break
@@ -94,7 +94,7 @@ class FLTableDB(QtGui.QWidget):
             print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
             return
         
-        self.cursor_ = self.topWidget._cursor
+        self.cursor_ = self.topWidget.cursor_
         self.setFont(QtGui.qApp.font())
         
         if not self._name:

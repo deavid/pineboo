@@ -39,9 +39,9 @@ class FLFieldMetaData():
   @param iCK Indica si es clave compuesta
     """  
 
-    Serial = 100
-    Unlock = 200
-    Check = 300
+    Serial = "serial"
+    Unlock = "unlock"
+    Check = "bool"
     count_ = 0
 
 
