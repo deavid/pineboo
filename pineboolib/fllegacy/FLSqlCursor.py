@@ -203,7 +203,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
     """
     Buffer con un registro del cursor.
 
-    Según el modo de acceso FLSqlCursor::Mode establecido para el cusor, este buffer contendr
+    Según el modo de acceso FLSqlCursor::Mode establecido para el cusor, este buffer contendrá
     el registro activo de dicho cursor listo para insertar,editar,borrar o navegar.
     """
     buffer_ = None
@@ -290,13 +290,13 @@ class FLSqlCursorPrivate(QtCore.QObject):
     ctxt_ = None
         
     """
-    Crónometro interno
+    Cronómetro interno
     """
     timer_ = None
         
     """
     Cuando el cursor proviene de una consulta indica si ya se han agregado al mismo
-    la definicón de los campos que lo componen
+    la definición de los campos que lo componen
     """
     populated_ = False
         
@@ -1138,10 +1138,13 @@ class FLSqlCursor(ProjectClass):
 
     @return TRUE si está bloqueado, FALSE en caso contrario.
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def isLocked(self):
-        #if not self.d.modeAccess_ == self.Insert and self.d.fieldsNamesUnlock_:
-        
+        # En el motor Eneboo se recorre el array fieldsNamesUnlock_, pero no se rellena todavía. Uso temporalmente self.d.buffer_.fieldList_
+        if not self.d.modeAccess_ == self.Insert and self.d.buffer_ and self.d.buffer_(self.d.metadata_.primaryKey()):
+            for field in self.d.buffer_.fieldList_:
+                if field.metadata.type() == "unlock" and not self.d.buffer_(field.metadata.name()):
+                    return True
         return False
             
             
