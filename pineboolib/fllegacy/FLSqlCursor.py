@@ -1140,10 +1140,9 @@ class FLSqlCursor(ProjectClass):
     """
     @decorators.BetaImplementation
     def isLocked(self):
-        # En el motor Eneboo se recorre el array fieldsNamesUnlock_, pero no se rellena todavía. Uso temporalmente self.d.buffer_.fieldList_
-        if not self.d.modeAccess_ == self.Insert and self.d.buffer_ and self.d.buffer_(self.d.metadata_.primaryKey()):
-            for field in self.d.buffer_.fieldList_:
-                if field.metadata.type() == "unlock" and not self.d.buffer_(field.metadata.name()):
+        if not self.d.modeAccess_ == self.Insert and self.fieldsNamesUnlock_ and self.d.buffer_ and self.d.buffer_.value(self.d.metadata_.primaryKey()):
+            for field in self.fieldsNamesUnlock_:
+                if not self.d.buffer_.value(field):
                     return True
         return False
             
