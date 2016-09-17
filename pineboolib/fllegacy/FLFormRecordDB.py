@@ -112,7 +112,7 @@ class FLFormRecordDB(FLFormDB):
     def __init__(self, parent_or_cursor, action, load=False):
         
         self._uiName = action.formrecord
-        self._scriptForm = action.scriptform
+        self._scriptForm = action.scriptformrecord
         
         if not isinstance(parent_or_cursor, FLSqlCursor):
             parent = parent_or_cursor
