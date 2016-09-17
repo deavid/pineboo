@@ -23,7 +23,8 @@ class FLDataTable(QtGui.QTableView):
     def __init__(self, parent = None, name = None, popup = False):
         super(FLDataTable, self).__init__(parent)
         
-        if parent: self._parent = parent
+        if parent: 
+            self._parent = parent
         
         if not name:
             self.setName("FLDataTable")
@@ -64,34 +65,7 @@ class FLDataTable(QtGui.QTableView):
     Establece el cursor
     """
     def setFLSqlCursor(self, c):
-        if c and c.metadata():
-            if not self.cursor_:
-                try:
-                    self.currentChanged.disconnect(self.selectRow)
-                except:
-                    pass
-                
-                #try:
-                #    self.clicked.disconnect(self.selectRow) FIXME
-                #except:
-                #    pass
-                
-                self.currentChanged.connect(self.selectRow)
-                #self.clicked.connect(self.selectRow) FIXME
-            else:
-                try:
-                    self.cursor_.currentChanged.disconnect(self.selectRow)
-                except:
-                    pass
-                
-                if not self.popup_:
-                    try:
-                        self.cursor_.cursorUpdated.disconnect(self.refresh)
-                    except:
-                        pass
-                
-                self.cursor_.destroyed.connect(self.cursorDestroyed)
-            
+        if c and c.metadata():           
             curChg = None
             if self.cursor_ and not self.cursor_ == c:
                 self.cursor_.restoreEditionFlag(self)
@@ -99,31 +73,16 @@ class FLDataTable(QtGui.QTableView):
                 curChg = True
             
             self.cursor_ = c
+            
             if self.cursor_:
                 if curChg:
                     self.setFLReadOnly(self.readonly_)
                     self.setEditOnly(self.editonly_)
                     self.setInsertOnly(self.insertonly_)
                     self.setOnlyTable(self.onlyTable_)
-                
-                try:
-                    self.cursor_.currentChanged.disconnect(self.selectRow)
-                except:
-                    pass
-                
-                if not self.popup_:
-                    try:
-                        self.cursor_.cursorUpdated.disconnect(self.refresh)
-                    except:
-                        pass
-                    
-                self.cursor_.currentChanged.connect(self.selectRow)
-                if not self.popup_:
-                    self.cursor_.cursorUpdated.connect(self.refresh)
-                self.cursor_.destroyed.connect(self.cursorDestroyed)
-            
-            
-        #super(FLDataTable, self).setSqlCursor(c , True, False)
+                                
+            self.setModel(self.cursor_.model())
+            self.setSelectionModel(self.cursor_.selection())
     """
     Establece un filtro persistente que siempre se aplica al cursor antes
     de hacer un refresh
@@ -435,6 +394,9 @@ class FLDataTable(QtGui.QTableView):
     @param c Columna de la celda activa
     """
     @decorators.NotImplementedWarn
+    @QtCore.pyqtSlot(int, int)
+    @QtCore.pyqtSlot(int)
+    @QtCore.pyqtSlot()
     def selectRow(self, r = -1, c = -1):
         pass
     """
@@ -467,7 +429,7 @@ class FLDataTable(QtGui.QTableView):
             if self.persistentFilter_:
                 self.cursor_.setFilter(self.persistentFilter_)
             self.cursor_.refresh() 
-            self.setModel(self.cursor_.model())
+            
             
             QtCore.QTimer.singleShot(0, self.show)
         self.refreshing_ = False
@@ -561,7 +523,9 @@ class FLDataTable(QtGui.QTableView):
     """
     recordChoosed = QtCore.pyqtSignal()
     
-    currentChanged = QtCore.pyqtSignal(int, int)
+
+    def currentChanged(self, row, row2):
+        self.cursor_.selection_currentRowChanged(row, row2)
 
     """
     Indica que ha cambiado el estado del campo de selección de un registro. Es decir
