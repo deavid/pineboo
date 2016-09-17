@@ -1,5 +1,5 @@
 from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators
+from pineboolib import decorators, qt3ui
 
 """
 Gestor de módulos.
@@ -185,9 +185,15 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero que contiene la descricpción del formulario.
     @return QWidget correspondiente al formulario construido.
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def createUI(self, n, connector = None, parent = None, name = None):
-        return None
+        
+        
+            if not ".ui" in n:
+                n = n +".ui"
+            form_path = parent.prj.path(n)
+            qt3ui.loadUi(form_path, parent.widget)
+        
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
