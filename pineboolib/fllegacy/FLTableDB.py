@@ -570,9 +570,11 @@ class FLTableDB(QtGui.QWidget):
                     
                     if self.tableName_ == self.cursor_.curName():
                         self.tableRecords()
-                        self.setTableRecordsCursor()
-                        self.showWidget()
+                        if self.cursor_.model():
+                            self.setTableRecordsCursor()
+                            self.showWidget()
                     
+                        
             
                 
                 
@@ -618,22 +620,27 @@ class FLTableDB(QtGui.QWidget):
         
         self.lineEditSearch.textChanged.connect(self.filterRecords)
         model = self.cursor_.model()
-        for column in range(model.columnCount()):
-            field = model.metadata().indexFieldObject(column)
-            if not field.visibleGrid():
-                self.tableRecords_.setColumnHidden(column, True)
-            else:
-                self.comboBoxFieldToSearch.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                self.comboBoxFieldToSearch2.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                self.comboBoxFieldToSearch.addItem("*")
-                self.comboBoxFieldToSearch2.addItem("*")
-                self.comboBoxFieldToSearch.setCurrentIndex(0)
-                self.comboBoxFieldToSearch2.setCurrentIndex(1)
-                self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
-                self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
-                self._controlsInit = True
+        
+        if model:
+            for column in range(model.columnCount()):
+                field = model.metadata().indexFieldObject(column)
+                if not field.visibleGrid():
+                    self.tableRecords_.setColumnHidden(column, True)
+                else:
+                    self.comboBoxFieldToSearch.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                    self.comboBoxFieldToSearch2.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                    self.comboBoxFieldToSearch.addItem("*")
+                    self.comboBoxFieldToSearch2.addItem("*")
+                    self.comboBoxFieldToSearch.setCurrentIndex(0)
+                    self.comboBoxFieldToSearch2.setCurrentIndex(1)
+                    self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
+                    self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
+                    self._controlsInit = True
 
-                
+        else:
+            self.comboBoxFieldToSearch.addItem("*")
+            self.comboBoxFieldToSearch2.addItem("*")                  
+        
         return self.tableRecords_
     
         
@@ -1475,7 +1482,8 @@ class FLTableDB(QtGui.QWidget):
     """
     @QtCore.pyqtSlot(str)
     def filterRecords(self, p):
-        
+        if not self.cursor_.model():
+            return
         bFilter = None
         p = str(p)
         refreshData = None
