@@ -574,25 +574,7 @@ class FLTableDB(QtGui.QWidget):
                         self.showWidget()
                     
             
-            if not self._controlsInit:
                 
-                self.lineEditSearch.textChanged.connect(self.filterRecords)
-                
-                model = self.cursor_.model()
-                for column in range(model.columnCount()):
-                    field = model.metadata().indexFieldObject(column)
-                    if not field.visibleGrid():
-                        self.setColumnHidden(column, True)
-                    else:
-                        self.comboBoxFieldToSearch.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                        self.comboBoxFieldToSearch2.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                self.comboBoxFieldToSearch.addItem("*")
-                self.comboBoxFieldToSearch2.addItem("*")
-                self.comboBoxFieldToSearch.setCurrentIndex(0)
-                self.comboBoxFieldToSearch2.setCurrentIndex(1)
-                self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
-                self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
-                self._controlsInit = True
                 
                       
     """
@@ -633,6 +615,23 @@ class FLTableDB(QtGui.QWidget):
             self.setTabOrder(self.tableRecords_, self.lineEditSearch)
             self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
             self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+        
+        self.lineEditSearch.textChanged.connect(self.filterRecords)
+        model = self.cursor_.model()
+        for column in range(model.columnCount()):
+            field = model.metadata().indexFieldObject(column)
+            if not field.visibleGrid():
+                self.tableRecords_.setColumnHidden(column, True)
+            else:
+                self.comboBoxFieldToSearch.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                self.comboBoxFieldToSearch2.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                self.comboBoxFieldToSearch.addItem("*")
+                self.comboBoxFieldToSearch2.addItem("*")
+                self.comboBoxFieldToSearch.setCurrentIndex(0)
+                self.comboBoxFieldToSearch2.setCurrentIndex(1)
+                self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
+                self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
+                self._controlsInit = True
 
                 
         return self.tableRecords_
@@ -648,16 +647,11 @@ class FLTableDB(QtGui.QWidget):
 
     def setTableRecordsCursor(self):
         self.tableRecords_.setFLSqlCursor(self.cursor_)
-        if self.showed:
-            try:
-                self.tableRecords_.currentChanged.disconnect(self.currentChanged)
-            except:
-                pass
-        self.tableRecords_.currentChanged.connect(self.currentChanged)
-
-        self.tableRecords_.recordChoosed.connect(self.chooseRecord)
-        
-
+        try:
+            self.tableRecords_.doubleClicked.disconnect(self.chooseRecord)
+        except:
+            pass
+        self.tableRecords_.doubleClicked.connect(self.chooseRecord)
 
     """
     Refresca la pestaña datos aplicando el filtro
@@ -1175,9 +1169,8 @@ class FLTableDB(QtGui.QWidget):
         
         field = self.cursor_.metadata().indexFieldObject(to)
 
-        if to == 0 and not self.comboBoxFieldToSearch.currentIndex() == from_: # Si ha cambiado la primera columna
+        if to == 0: # Si ha cambiado la primera columna
             
-            _oldIndex = self.comboBoxFieldToSearch.currentIndex()
             
             try:
                 self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
@@ -1192,20 +1185,31 @@ class FLTableDB(QtGui.QWidget):
                 self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(self.putSecondCol)
             except:
                 pass
-            self.comboBoxFieldToSearch2.setCurrentIndex(_oldIndex)
+            #Falta mejorar
+            if self.comboBoxFieldToSearch.currentIndex() == self.comboBoxFieldToSearch2.currentIndex():
+                self.comboBoxFieldToSearch2.setCurrentIndex(self.tableRecords_._h_header.logicalIndex(0))
             self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
             
             
             
         
-        if (to == 1 and not self.comboBoxFieldToSearch2.currentIndex() == from_): #Si es la segunda columna o ha cambiado la primera ...
+        if (to == 1): #Si es la segunda columna ...
             try:
                 self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(self.putSecondCol)
             except:
                 pass
             self.comboBoxFieldToSearch2.setCurrentIndex(from_)
             self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
-                
+            
+            
+            if self.comboBoxFieldToSearch.currentIndex() == self.comboBoxFieldToSearch2.currentIndex():
+                try:
+                    self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
+                except:
+                    pass
+                if self.comboBoxFieldToSearch.currentIndex() == self.comboBoxFieldToSearch2.currentIndex():
+                    self.comboBoxFieldToSearch.setCurrentIndex(self.tableRecords_._h_header.logicalIndex(1))
+                self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
             
             
         if not textSearch:
@@ -1561,7 +1565,9 @@ class FLTableDB(QtGui.QWidget):
     """
     Señal emitida cuando se establece cambia el registro seleccionado.
     """
-    currentChanged = QtCore.pyqtSignal()
+    #currentChanged = QtCore.pyqtSignal()
     
-    
-    chooseRecord = QtCore.pyqtSignal()
+    @QtCore.pyqtSlot()
+    @decorators.BetaImplementation
+    def chooseRecord(self):
+        self.editRecord()
