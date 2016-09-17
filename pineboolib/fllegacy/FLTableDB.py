@@ -629,13 +629,13 @@ class FLTableDB(QtGui.QWidget):
                 else:
                     self.comboBoxFieldToSearch.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
                     self.comboBoxFieldToSearch2.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                    self.comboBoxFieldToSearch.addItem("*")
-                    self.comboBoxFieldToSearch2.addItem("*")
-                    self.comboBoxFieldToSearch.setCurrentIndex(0)
-                    self.comboBoxFieldToSearch2.setCurrentIndex(1)
-                    self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
-                    self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
-                    self._controlsInit = True
+            self.comboBoxFieldToSearch.addItem("*")
+            self.comboBoxFieldToSearch2.addItem("*")
+            self.comboBoxFieldToSearch.setCurrentIndex(0)
+            self.comboBoxFieldToSearch2.setCurrentIndex(1)
+            self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
+            self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
+            self._controlsInit = True
 
         else:
             self.comboBoxFieldToSearch.addItem("*")
@@ -941,6 +941,9 @@ class FLTableDB(QtGui.QWidget):
     Actualiza el conjunto de registros.
     """
     @decorators.BetaImplementation
+    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(bool, bool)
     def refresh(self, refreshHead = False, refreshData = False):
         print("Refresh", refreshHead, refreshData)
         if not self.cursor_ or not self.tableRecords_:
@@ -1031,7 +1034,7 @@ class FLTableDB(QtGui.QWidget):
         
         
         if refreshData:
-            QtCore.QTimer.singleShot(msec, self.refresh(False, True))
+            QtCore.QTimer.singleShot(msec, self.refresh(False, refreshData))
         
         self.seekCursor()
 
