@@ -463,12 +463,10 @@ class FLDataTable(QtGui.QTableView):
             self.cursor_.refresh()
             
         if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
-            self.hide()
             self.refreshing_ = True
             if self.persistentFilter_:
                 self.cursor_.setFilter(self.persistentFilter_)
-            self.cursor_.refresh()
-            self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents) 
+            self.cursor_.refresh() 
             self.setModel(self.cursor_.model())
             
             QtCore.QTimer.singleShot(0, self.show)
@@ -584,25 +582,6 @@ class FLDataTable(QtGui.QTableView):
             return -1
         
         return self.cursor_.model().columnCount()
-    
-    
-    def setModel(self, model):
-        super(FLDataTable, self).setModel(model)
-        
-        for column in range(model.columnCount()):
-                field = model.metadata().indexFieldObject(column)
-                if not field.visibleGrid():
-                    self.setColumnHidden(column, True)
-                else:
-                    self._parent.comboBoxFieldToSearch.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                    self._parent.comboBoxFieldToSearch2.addItem(model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-        self._parent.comboBoxFieldToSearch.addItem("*")
-        self._parent.comboBoxFieldToSearch2.addItem("*")
-        self._parent.comboBoxFieldToSearch.setCurrentIndex(0)
-        self._parent.comboBoxFieldToSearch2.setCurrentIndex(1)
-        self._parent.comboBoxFieldToSearch.currentIndexChanged.connect(self._parent.putFirstCol)
-        self._parent.comboBoxFieldToSearch2.currentIndexChanged.connect(self._parent.putSecondCol)
-        self.setSelectionModel(self.cursor_.selection())
     
     def indexVisualColumn(self, name):
         
