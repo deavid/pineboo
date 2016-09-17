@@ -18,10 +18,13 @@ class FLDataTable(QtGui.QTableView):
     """
     constructor
     """
-
+    _parent = None
 
     def __init__(self, parent = None, name = None, popup = False):
         super(FLDataTable, self).__init__(parent)
+        
+        if parent: 
+            self._parent = parent
         
         if not name:
             self.setName("FLDataTable")
@@ -62,34 +65,7 @@ class FLDataTable(QtGui.QTableView):
     Establece el cursor
     """
     def setFLSqlCursor(self, c):
-        if c and c.metadata():
-            if not self.cursor_:
-                try:
-                    self.currentChanged.disconnect(self.selectRow)
-                except:
-                    pass
-                
-                #try:
-                #    self.clicked.disconnect(self.selectRow) FIXME
-                #except:
-                #    pass
-                
-                self.currentChanged.connect(self.selectRow)
-                #self.clicked.connect(self.selectRow) FIXME
-            else:
-                try:
-                    self.cursor_.currentChanged.disconnect(self.selectRow)
-                except:
-                    pass
-                
-                if not self.popup_:
-                    try:
-                        self.cursor_.cursorUpdated.disconnect(self.refresh)
-                    except:
-                        pass
-                
-                self.cursor_.destroyed.connect(self.cursorDestroyed)
-            
+        if c and c.metadata():           
             curChg = None
             if self.cursor_ and not self.cursor_ == c:
                 self.cursor_.restoreEditionFlag(self)
@@ -97,31 +73,16 @@ class FLDataTable(QtGui.QTableView):
                 curChg = True
             
             self.cursor_ = c
+            
             if self.cursor_:
                 if curChg:
                     self.setFLReadOnly(self.readonly_)
                     self.setEditOnly(self.editonly_)
                     self.setInsertOnly(self.insertonly_)
                     self.setOnlyTable(self.onlyTable_)
-                
-                try:
-                    self.cursor_.currentChanged.disconnect(self.selectRow)
-                except:
-                    pass
-                
-                if not self.popup_:
-                    try:
-                        self.cursor_.cursorUpdated.disconnect(self.refresh)
-                    except:
-                        pass
-                    
-                self.cursor_.currentChanged.connect(self.selectRow)
-                if not self.popup_:
-                    self.cursor_.cursorUpdated.connect(self.refresh)
-                self.cursor_.destroyed.connect(self.cursorDestroyed)
-            
-            
-        #super(FLDataTable, self).setSqlCursor(c , True, False)
+                                
+            self.setModel(self.cursor_.model())
+            self.setSelectionModel(self.cursor_.selection())
     """
     Establece un filtro persistente que siempre se aplica al cursor antes
     de hacer un refresh
@@ -433,6 +394,9 @@ class FLDataTable(QtGui.QTableView):
     @param c Columna de la celda activa
     """
     @decorators.NotImplementedWarn
+    @QtCore.pyqtSlot(int, int)
+    @QtCore.pyqtSlot(int)
+    @QtCore.pyqtSlot()
     def selectRow(self, r = -1, c = -1):
         pass
     """
@@ -461,13 +425,11 @@ class FLDataTable(QtGui.QTableView):
             self.cursor_.refresh()
             
         if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
-            self.hide()
             self.refreshing_ = True
             if self.persistentFilter_:
                 self.cursor_.setFilter(self.persistentFilter_)
-            self.cursor_.refresh()
-            self._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents) 
-            self.setModel(self.cursor_.model())
+            self.cursor_.refresh() 
+            
             
             QtCore.QTimer.singleShot(0, self.show)
         self.refreshing_ = False
@@ -561,7 +523,9 @@ class FLDataTable(QtGui.QTableView):
     """
     recordChoosed = QtCore.pyqtSignal()
     
-    currentChanged = QtCore.pyqtSignal(int, int)
+
+    def currentChanged(self, row, row2):
+        self.cursor_.selection_currentRowChanged(row, row2)
 
     """
     Indica que ha cambiado el estado del campo de selección de un registro. Es decir
@@ -583,16 +547,59 @@ class FLDataTable(QtGui.QTableView):
         
         return self.cursor_.model().columnCount()
     
-    
-    def setModel(self, model):
-        super(FLDataTable, self).setModel(model)
+    def indexVisualColumn(self, name):
         
+            return
+        
+        
+    """
+    Retorna el index real (incusive columnas ocultas) a partir de un nombre de un campo
+    @param name El nombre del campo a buscar en la tabla
+    @return posicion de la columna en la tabla
+    """
+    
+    def realColumnIndex(self, name):
+        if not isinstance(name, str) or not self.cursor_:
+            return -1
+      
+        return self.cursor_.model().metadata().fieldIsIndex(name)
+        
+        
+    """
+    Retorna el index real (incusive columnas ocultas) a partir de un index de columnas visibles.
+    @param c posicion de la columna visible.
+    @return posicion real de la columna
+    """   
+    def visualIndexToRealIndex(self, c):  
+        if not isinstance(c, int) or not self.cursor_:return
+        
+        model = self.cursor_.model()
+        posReal = 0
+        posVisual = 0
+        _return = None
         for column in range(model.columnCount()):
-                field = model.metadata().indexFieldObject(column)
-                if not field.visibleGrid():
-                    self.setColumnHidden(column, True)
-
-        self.setSelectionModel(self.cursor_.selection())
+            field = model.metadata().indexFieldObject(column)
+            if not field.visibleGrid():
+                posVisual = posVisual - 1
+            else:
+                if c == posVisual:
+                    _return = posReal
+                    break
+            
+            posVisual = posVisual + 1    
+            posReal = posReal + 1
+        
+        _return = self._h_header.visualIndex(posReal)      
+        return _return
+                
+        
+             
+            
+                 
+            
+            
+        
+        
         
         
 class FLCheckBox(QtGui.QCheckBox):

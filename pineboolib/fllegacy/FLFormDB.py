@@ -6,7 +6,6 @@ from pineboolib.utils import filedir
 from pineboolib import decorators
 import os.path, traceback
 import imp
-from pineboolib.flcontrols import FLTable
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -145,6 +144,8 @@ class FLFormDB(QtGui.QWidget):
     bottomToolbar = None
     pushButtonCancel = None
     
+    _uiName = None
+    _scriptForm = None
     
     def __init__(self, parent, action, load=False):
         super(QtGui.QWidget, self).__init__(parent)
@@ -158,14 +159,18 @@ class FLFormDB(QtGui.QWidget):
         self.action = action
         self.prj = action.prj
         self.mod = action.mod
-        
                 
         self.layout = QtGui.QVBoxLayout()
         self.layout.setMargin(2)
         self.layout.setSpacing(2)
         self.setLayout(self.layout)
-
-
+        
+        if not self._uiName:
+            self._uiName = action.form
+        
+        if not self._scriptForm:
+            self._scriptForm = action.scriptform
+        
         self.setWindowTitle(action.alias)
         
         self.loaded = False
@@ -179,19 +184,16 @@ class FLFormDB(QtGui.QWidget):
         
     def load(self):
         if self.loaded: return
-        print("Loading form %s . . . " % self.action.form)
+        print("Loading form %s . . . " % self._uiName)
         self.script = None
         self.iface = None
-        try: script = self.action.scriptform or None
+        try: script = self._scriptForm or None
         except AttributeError: script = None
         self.load_script(script)
         self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
-        if self.action.form:
-            from pineboolib import qt3ui
-            form_path = self.prj.path(self.action.form+".ui")
-            qt3ui.loadUi(form_path, self.widget)
-
+        if self._uiName:
+            self.prj.conn.managerModules().createUI(self._uiName, None, self)
         self.loaded = True
         
 
@@ -203,8 +205,11 @@ class FLFormDB(QtGui.QWidget):
         if self.iface:
             try:
                 timer = QtCore.QTimer(self)
-                timer.singleShot(300, self.iface.init)
-                return True
+                if self.loaded:
+                    timer.singleShot(50, self.iface.init)
+                    return True
+                else:
+                    timer.singleShot(50,self.initScript)
             except Exception:
                 return False
                 
