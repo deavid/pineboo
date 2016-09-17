@@ -205,8 +205,11 @@ class FLFormDB(QtGui.QWidget):
         if self.iface:
             try:
                 timer = QtCore.QTimer(self)
-                timer.singleShot(300, self.iface.init)
-                return True
+                if self.loaded:
+                    timer.singleShot(50, self.iface.init)
+                    return True
+                else:
+                    timer.singleShot(50,self.initScript)
             except Exception:
                 return False
                 
