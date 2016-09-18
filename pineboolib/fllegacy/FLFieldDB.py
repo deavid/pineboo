@@ -2132,7 +2132,9 @@ class FLFieldDB(QtGui.QWidget):
                 a = mng.action(self.actionName_)
                 a.setTable(field.relationM1().foreignField())
             
-            f = FLFormSearchDB(c, a.name(), self.topWidget_)
+            f = FLFormSearchDB(c, a.name(), None)
+            f.setWindowModality(QtCore.Qt.ApplicationModal)
+            
         else:
             mng = self.cursor_.db().manager()
             if not self.actionName_:
@@ -2146,9 +2148,11 @@ class FLFieldDB(QtGui.QWidget):
                 a.setTable(field.relationM1().foreignTable())
             c = FLSqlCursor(a.table())
             #f = FLFormSearchDB(c, a.name(), self.topWidget_)
-            f = FLFormSearchDB(c, c.action(), self.topWidget_)
+            f = FLFormSearchDB(c, c.action(), None)
+            f.setWindowModality(QtCore.Qt.ApplicationModal)
         
         f.setMainWidget()
+        """
         lObjs = f.queryList("FLTableDB")
         obj = lObjs.first()
         del lObjs
@@ -2168,14 +2172,16 @@ class FLFieldDB(QtGui.QWidget):
                     objTdb.setInitSearch(curValue)
                     objTdb.putFisrtCol(field.relationM1().foreignField())
                 QtCore.QTimer.singleShot(0,objTdb.lineEditSearch, self.setFocus)
-            v = f.exec_(field.relationM1().foreignField())
-            if v:
-                self.setValue("")
-                self.setValue(v)
+        """
+        v = f.exec_(field.relationM1().foreignField())
+        if v:
+            self.setValue("")
+            self.setValue(v)
         
-        f.close()
-        if c:
-            del c #c.deletelater()
+        #FIXME
+        #f.close()
+        #if c:
+            #c.deletelater()
           
             
 
