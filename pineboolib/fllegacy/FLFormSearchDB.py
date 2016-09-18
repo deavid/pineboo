@@ -4,10 +4,8 @@ from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib import decorators
 from pineboolib.utils import DefFun
-from pineboolib import project
-from PyQt4 import QtCore, QtGui, Qt
+from PyQt4 import QtCore, QtGui
 from pineboolib.utils import filedir
-import os.path, traceback
 
 class FLFormSearchDB(FLFormDB):
 

@@ -24,7 +24,9 @@ class FLLineEdit(QtGui.QLineEdit):
     
     _tipo = None 
     partDecimal = 0
+    _maxValue = None
     autoSelect = True
+    _name = None
     
     lostFocus = QtCore.pyqtSignal()
     textChanged = QtCore.pyqtSignal(QString)
@@ -32,11 +34,22 @@ class FLLineEdit(QtGui.QLineEdit):
     
     def __init__(self, parent, name):
         super(FLLineEdit,self).__init__(parent)
-        self.name = name
+        self._name = name
+        self._fieldName = parent.fieldName_
+        self._tipo = parent.cursor_.metadata().fieldType(self._name)
     
     
-    def setText(self, *args, **kwargs):
-        QtGui.QLineEdit.setText(self, args[0])
+    def setText(self, texto):
+        if self._maxValue:
+            if self._maxValue < texto:
+                texto = self._maxValue
+        super(FLLineEdit, self).setText(texto)
+    
+    """
+    Especifica un valor máximo para el text (numérico)
+    """
+    def setMaxValue(self, value):
+        self._maxValue = value
 
     """
     def focusInEvent(self, *f):
@@ -1656,15 +1669,18 @@ class FLFieldDB(QtGui.QWidget):
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             
         elif type_ == "serial":
-            #self.editor_ = FLSpinBox(self, "editor")
             self.editor_ = FLLineEdit(self, "editor")
             self.editor_.setFont(QtGui.qApp.font())
-            self.editor_.setMaxValue(pow(10, self.partInteger_) -1)
+            self.editor_.setMaxValue(pow(10, field.partInteger()) -1)
             sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
             sizePolicy.setHeightForWidth(True)
-            self.editor.setSizePolicy(sizePolicy)
+            self.editor_.setSizePolicy(sizePolicy)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
-            self.editor_.installEventFilter()
+            self.editor_.installEventFilter(self)
+            self.editor_.setDisabled(True)
+            self.editor_.setAlignment(QtCore.Qt.AlignRight)
+            self.pushButtonDB.hide()
+            
             if self.showed:
                 self.editor_.valueChanged.disconnect(self.updateValue)
             self.editor_.valueChanged.connect(self.updateValue)
@@ -2116,7 +2132,9 @@ class FLFieldDB(QtGui.QWidget):
                 a = mng.action(self.actionName_)
                 a.setTable(field.relationM1().foreignField())
             
-            f = FLFormSearchDB(c, a.name(), self.topWidget_)
+            f = FLFormSearchDB(c, a.name(), None)
+            f.setWindowModality(QtCore.Qt.ApplicationModal)
+            
         else:
             mng = self.cursor_.db().manager()
             if not self.actionName_:
@@ -2130,9 +2148,11 @@ class FLFieldDB(QtGui.QWidget):
                 a.setTable(field.relationM1().foreignTable())
             c = FLSqlCursor(a.table())
             #f = FLFormSearchDB(c, a.name(), self.topWidget_)
-            f = FLFormSearchDB(c, c.action(), self.topWidget_)
+            f = FLFormSearchDB(c, c.action(), None)
+            f.setWindowModality(QtCore.Qt.ApplicationModal)
         
         f.setMainWidget()
+        """
         lObjs = f.queryList("FLTableDB")
         obj = lObjs.first()
         del lObjs
@@ -2152,14 +2172,16 @@ class FLFieldDB(QtGui.QWidget):
                     objTdb.setInitSearch(curValue)
                     objTdb.putFisrtCol(field.relationM1().foreignField())
                 QtCore.QTimer.singleShot(0,objTdb.lineEditSearch, self.setFocus)
-            v = f.exec_(field.relationM1().foreignField())
-            if v:
-                self.setValue("")
-                self.setValue(v)
+        """
+        v = f.exec_(field.relationM1().foreignField())
+        if v:
+            self.setValue("")
+            self.setValue(v)
         
-        f.close()
-        if c:
-            del c #c.deletelater()
+        #FIXME
+        #f.close()
+        #if c:
+            #c.deletelater()
           
             
 

@@ -168,7 +168,7 @@ class FLFormDB(QtGui.QWidget):
         if not self._uiName:
             self._uiName = action.form
         
-        if not self._scriptForm:
+        if not self._scriptForm and getattr(action,"scriptform", None):
             self._scriptForm = action.scriptform
         
         self.setWindowTitle(action.alias)
