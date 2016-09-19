@@ -1728,7 +1728,7 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
-    def __next__(self,  emite = True):
+    def next(self,  emite = True):
         if self.d.modeAccess_ == self.Del:
             return False
         
