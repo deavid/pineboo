@@ -68,7 +68,9 @@ class FormDBWidget(QtGui.QWidget):
         return self.cursor_
 
 def FLFormSearchDB(name):
-    return FLFormSearchDB_legacy.FLFormSearchDB(name)
+    widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
+    widget.setWindowModality(QtCore.Qt.ApplicationModal)
+    return widget
 
 class Date(QtCore.QDate):
     pass

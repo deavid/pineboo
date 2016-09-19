@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt4 import QtGui, QtCore
 from pineboolib.fllegacy.FLFormDB import FLFormDB
-from pineboolib import qt3ui
 import traceback
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
@@ -112,7 +111,10 @@ class FLFormRecordDB(FLFormDB):
   
     def __init__(self, parent_or_cursor, action, load=False):
         
+        self._uiName = action.formrecord
         
+        if getattr(action,"scriptformrecord", None):
+            self._scriptForm = action.scriptformrecord
         
         if not isinstance(parent_or_cursor, FLSqlCursor):
             parent = parent_or_cursor
@@ -126,7 +128,6 @@ class FLFormRecordDB(FLFormDB):
             self.setCursor(parent_or_cursor)
         
         self.name_ = action.name
-        
         if self.cursor_:
             self.initialModeAccess = self.cursor_.modeAccess()
              
@@ -139,24 +140,6 @@ class FLFormRecordDB(FLFormDB):
 
     def loaded(self):
         return self.loaded
-
-    
-    def load(self):
-        if self.loaded: return
-        print("Loading (record) form %s . . . " % self.action.formrecord)
-        self.script = None
-        self.iface = None
-        try: script = self.action.scriptformrecord or None
-        except AttributeError: script = None
-        self.load_script(script)
-        self.resize(550,350)
-        self.layout.insertWidget(0,self.widget)
-        if self.action.form:
-            form_path = self.prj.path(self.action.formrecord+".ui")
-            qt3ui.loadUi(form_path, self.widget)
-
-        self.loaded = True
-
 
 
     """

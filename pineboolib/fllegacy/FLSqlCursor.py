@@ -663,21 +663,23 @@ class FLSqlCursor(ProjectClass):
                 #print("FLSqlCursor.setAction(): Action no encontrada : %s en %s actions. Es posible que la tabla no exista" % (a, len(self._prj.actions)))
                 return False
             #self._action = self._prj.actions["articulos"]
-
+            
             if getattr(self._action,"table",None):
                 self.d._model = CursorTableModel(self._action, self._prj)
-                self._selection = QtGui.QItemSelectionModel(self.d._model)
+                self._selection = QtGui.QItemSelectionModel(self.model())
                 self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
                 self._currentregister = self._selection.currentIndex().row()
                 self.d.metadata_ = self.db().manager().metadata(self._action.table)
             else:
                 return False
+            
             self.d.activatedCheckIntegrity_ = True
             self.d.activatedCommitActions_ = True
             return True
         else:
             self.d.action_ = a
 
+        
     """
     Establece el filtro principal del cursor.
 
@@ -1439,7 +1441,9 @@ class FLSqlCursor(ProjectClass):
     def selection(self):
         return self._selection
     
-    def selection_currentRowChanged(self, current, previous):
+    @QtCore.pyqtSlot(int, int)
+    @QtCore.pyqtSlot(int)
+    def selection_currentRowChanged(self, current, previous = None):
         if self.d._currentregister == current.row(): return False
         self.d._currentregister = current.row()
         self.d._current_changed.emit(self.at())
@@ -2159,11 +2163,12 @@ class FLSqlCursor(ProjectClass):
                     savePoint = FLSqlSavePoint(None)
                 savePoint.saveInsert(pKN, self.d.buffer_, self)
             
-            if not pkWhere in self.d.persistentFilter_:
+            
                 if not self.d.persistentFilter_:
                     self.d.persistentFilter_ = pkWhere
                 else:
-                    self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
+                    if not pkWhere in self.d.persistentFilter_:
+                        self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
             
             updated = True
         
