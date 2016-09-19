@@ -721,7 +721,7 @@ class FLFormRecordDB(FLFormDB):
                     self.cursor_.setModeAccess(self.initialModeAccess)
                     self.accepted_ = False
                     self.cursor_.transaction()
-                    self.cursor_.__next__()
+                    self.cursor_.next()
                     self.initScript()
 
     """
