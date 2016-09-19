@@ -203,7 +203,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
     """
     Buffer con un registro del cursor.
 
-    Según el modo de acceso FLSqlCursor::Mode establecido para el cusor, este buffer contendr
+    Según el modo de acceso FLSqlCursor::Mode establecido para el cusor, este buffer contendrá
     el registro activo de dicho cursor listo para insertar,editar,borrar o navegar.
     """
     buffer_ = None
@@ -290,13 +290,13 @@ class FLSqlCursorPrivate(QtCore.QObject):
     ctxt_ = None
         
     """
-    Crónometro interno
+    Cronómetro interno
     """
     timer_ = None
         
     """
     Cuando el cursor proviene de una consulta indica si ya se han agregado al mismo
-    la definicón de los campos que lo componen
+    la definición de los campos que lo componen
     """
     populated_ = False
         
@@ -739,6 +739,7 @@ class FLSqlCursor(ProjectClass):
     @decorators.Incomplete
     def setValueBuffer(self, fN, v):
         self.d.buffer_.setValue(fN, v)
+        self.bufferChanged.emit(fN)
 
     """
     Devuelve el valor de un campo del buffer.
@@ -1139,10 +1140,12 @@ class FLSqlCursor(ProjectClass):
 
     @return TRUE si está bloqueado, FALSE en caso contrario.
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def isLocked(self):
-        #if not self.d.modeAccess_ == self.Insert and self.d.fieldsNamesUnlock_:
-        
+        if not self.d.modeAccess_ == self.Insert and self.fieldsNamesUnlock_ and self.d.buffer_ and self.d.buffer_.value(self.d.metadata_.primaryKey()):
+            for field in self.fieldsNamesUnlock_:
+                if not self.d.buffer_.value(field):
+                    return True
         return False
             
             
@@ -1729,7 +1732,7 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
-    def __next__(self,  emite = True):
+    def next(self,  emite = True):
         if self.d.modeAccess_ == self.Del:
             return False
         
