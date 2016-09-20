@@ -1842,6 +1842,7 @@ class FLFieldDB(QtGui.QWidget):
             self.editor_.setSizePolicy(sizePolicy)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.installEventFilter(self)
+            self.pushButtonDB.hide()
             if self.showed:
                 self.editor_.valueChanged.disconnect(self.updateValue)
                 
