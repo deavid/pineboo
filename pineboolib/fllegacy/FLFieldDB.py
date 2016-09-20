@@ -2054,8 +2054,7 @@ class FLFieldDB(QtGui.QWidget):
         
         v = self.cursor_.valueBuffer(field.name())
         if not v or ( fMD and self.cursor_.bufferIsNull(fMD.name())):
-            #QtGui.QMessageBox.warning(qApp->focusWidget(), tr("Aviso"), tr("Debe indicar un valor para %1").arg(field->alias()), QMessageBox::Ok, 0, 0); #FIXME
-            print("Debe indicar un valor para",field.alias())
+            QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtGui.QMessageBox.Ok, 0, 0)
             return
         
         mng = FLManager(self.cursor_.db().manager())
