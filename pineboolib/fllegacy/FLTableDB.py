@@ -130,7 +130,7 @@ class FLTableDB(QtGui.QWidget):
     return Objeto FLSqlCursor con el cursor que contiene los registros para ser utilizados en el formulario
     """
     def cursor(self):
-        if self.cursor_.modeAccess() == FLSqlCursor.Browse:
+        if not self.cursor_.d.buffer_:
             self.cursor_.refreshBuffer()
         return self.cursor_
 
