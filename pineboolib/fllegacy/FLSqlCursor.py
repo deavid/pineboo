@@ -988,7 +988,7 @@ class FLSqlCursor(ProjectClass):
             return 
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
-            QtGui.QMessageBox.Warning(QtGui.qApp.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtGui.QMessageBox.Ok,0,0)
+            QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtGui.QMessageBox.Ok,0,0)
             return
         
         if m == self.Del:
