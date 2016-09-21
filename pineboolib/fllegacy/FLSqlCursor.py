@@ -51,13 +51,10 @@ class PNBuffer(ProjectClass):
         return len(self.fieldList_)
     
     def primeUpdate(self, row = None):
-        if not row:
+        if row < 0:
             row = self.cursor_._currentregister
         for field in self.fieldList_:
-            #print("Procesando row", row)
-            #field.value = self.convertToType(self.cursor_._model.value(self.cursor_._currentregister, field.name), field.type_)
             field.value = self.cursor_._model.value(row , field.name)
-            #print("%s.%s->%s" %(self.cursor_.nameCursor_ , field.name, field.value))
             
         
         self.line_ = self.cursor_._currentregister
@@ -391,7 +388,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         super(FLSqlCursorPrivate,self).__init__()
         self.metadata_ = None
         self.countRefCursor = 0
-        self.currentRegister = -1
+        self._currentRegister = -1
         self.acosCondName_ = QString()
         self.buffer_ = None
         
@@ -1555,7 +1552,7 @@ class FLSqlCursor(ProjectClass):
          return PNBuffer(self.d)
     
     def primeUpdate(self):
-        self.d.buffer_.primeUpdate()
+        self.d.buffer_.primeUpdate(self.at())
     
     
     def editBuffer(self, b = None):
@@ -1638,7 +1635,7 @@ class FLSqlCursor(ProjectClass):
             if not self.d.buffer_:
                 self.d.buffer_ = PNBuffer(self.d)
                 
-            self.d.buffer_.primeUpdate()
+            self.d.buffer_.primeUpdate(self.at())
             self.setNotGenerateds()
             self.updateBufferCopy()
             self.newBuffer.emit()
@@ -1655,14 +1652,8 @@ class FLSqlCursor(ProjectClass):
                 self.updateBufferCopy()
             
         elif self.d.modeAccess_ == self.Browse:
-            if not self.d.buffer_:
-                self.d.buffer_ = PNBuffer(self.d)
-            self.d.buffer_.primeUpdate()
             self.editBuffer(True)
-            self.setNoGenerateds()
-            
-
-                
+            self.setNoGenerateds()    
             self.newBuffer.emit()
         
         
