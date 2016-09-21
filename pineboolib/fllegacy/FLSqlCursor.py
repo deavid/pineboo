@@ -538,7 +538,8 @@ class FLSqlCursor(ProjectClass):
         else:
             print("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
             return None
-            
+        
+        self.d.modeAccess_ = FLSqlCursor.Browse    
        
         #if not name.isEmpty():
         #    if not self.d.db_.manager().existsTable(name):
@@ -1654,8 +1655,14 @@ class FLSqlCursor(ProjectClass):
                 self.updateBufferCopy()
             
         elif self.d.modeAccess_ == self.Browse:
+            if not self.d.buffer_:
+                self.d.buffer_ = PNBuffer(self.d)
+            self.d.buffer_.primeUpdate()
             self.editBuffer(True)
             self.setNoGenerateds()
+            
+
+                
             self.newBuffer.emit()
         
         
