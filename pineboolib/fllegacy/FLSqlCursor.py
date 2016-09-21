@@ -598,7 +598,8 @@ class FLSqlCursor(ProjectClass):
         #self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
         #self.first()
         
-               
+    def table(self):
+        return self.metadata().name()          
             
             
     def __getattr__(self, name): return DefFun(self, name)    
