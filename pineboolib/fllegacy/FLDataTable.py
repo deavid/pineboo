@@ -83,10 +83,17 @@ class FLDataTable(QtGui.QTableView):
                                 
             self.setModel(self.cursor_.model())
             self.setSelectionModel(self.cursor_.selection())
+            if self.cursor_.at() >= 0:
+                QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
     """
     Establece un filtro persistente que siempre se aplica al cursor antes
     de hacer un refresh
     """
+    
+    def marcaRow(self):
+
+        self.selectRow(self.cursor_.at())
+    
     def setPersistentFilter(self, pFilter):
         self.persistentFilter_ = pFilter
     """
@@ -384,21 +391,6 @@ class FLDataTable(QtGui.QTableView):
         return self.paintFieldMtd_
     
     timerViewRepaint_ = None
-
-
-
-    """
-    Selecciona la fila completa en la que estß la celda activa.
-
-    @param r Fila de la celda activa
-    @param c Columna de la celda activa
-    """
-    @decorators.NotImplementedWarn
-    @QtCore.pyqtSlot(int, int)
-    @QtCore.pyqtSlot(int)
-    @QtCore.pyqtSlot()
-    def selectRow(self, r = -1, c = -1):
-        pass
     """
     Redefinida por conveniencia
     """
