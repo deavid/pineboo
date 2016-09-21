@@ -83,8 +83,8 @@ class FLDataTable(QtGui.QTableView):
                                 
             self.setModel(self.cursor_.model())
             self.setSelectionModel(self.cursor_.selection())
-            if self.cursor_.at() >= 0:
-                QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
+            #if self.cursor_.at() >= 0:
+            #    QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
     """
     Establece un filtro persistente que siempre se aplica al cursor antes
     de hacer un refresh
