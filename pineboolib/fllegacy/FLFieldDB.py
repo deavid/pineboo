@@ -41,9 +41,9 @@ class FLLineEdit(QtGui.QLineEdit):
     
     def setText(self, texto):
         if self._maxValue:
-            if self._maxValue < texto:
+            if self._maxValue < int(texto):
                 texto = self._maxValue
-        super(FLLineEdit, self).setText(texto)
+        super(FLLineEdit, self).setText(str(texto))
     
     """
     Especifica un valor máximo para el text (numérico)
@@ -1230,12 +1230,12 @@ class FLFieldDB(QtGui.QWidget):
         
         elif type_ == "serial":
             try:
-                self.editor_.valueChanged.disconnect(self.updateValue)
+                self.editor_.textChanged.disconnect(self.updateValue)
             except:
                 a = 1
             self.editor_.setText(str(0))
                 
-            self.editor_.valueChanged.connect(self.updateValue)
+            self.editor_.textChanged.connect(self.updateValue)
         
         
         elif type_ == "pixmap":
@@ -1682,8 +1682,11 @@ class FLFieldDB(QtGui.QWidget):
             self.pushButtonDB.hide()
             
             if self.showed:
-                self.editor_.valueChanged.disconnect(self.updateValue)
-            self.editor_.valueChanged.connect(self.updateValue)
+                try:
+                    self.editor_.textChanged.disconnect(self.updateValue)
+                except:
+                    pass
+            self.editor_.textChanged.connect(self.updateValue)
             
         
         elif type_ == "pixmap":
