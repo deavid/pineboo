@@ -29,7 +29,6 @@ import pineboolib.emptyscript
 from pineboolib import decorators
 
 
-from pineboolib import qsaglobals
 
 from pineboolib.utils import filedir, one, Struct, XMLStruct
 Qt = QtCore.Qt
@@ -169,15 +168,15 @@ class Project(object):
                 fileobj = File(self, idmodulo, nombre, basedir = root)
                 self.files[nombre] = fileobj
                 self.modules[idmodulo].add_project_file(fileobj)
-    
+
     @decorators.NotImplementedWarn
     def saveGeometryForm(self, name, geo):
         pass
-    
+
     @decorators.NotImplementedWarn
     def call(self, function, aList , objectContext ):
         return True
-    
+
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):
         self.prj = project
@@ -261,6 +260,10 @@ class File(object):
 
 class DelayedObjectProxyLoader(object):
     def __init__(self, obj, *args, **kwargs):
+        self._name = "unnamed-loader"
+        if "name" in kwargs:
+            self._name = kwargs["name"]
+            del kwargs["name"]
         self._obj = obj
         self._args = args
         self._kwargs = kwargs
@@ -268,6 +271,7 @@ class DelayedObjectProxyLoader(object):
 
     def __load(self):
         if not self.loaded_obj:
+            print("DelayedObjectProxyLoader: loading %s %r( *%r **%r)" % (self._name, self._obj, self._args, self._kwargs))
             self.loaded_obj = self._obj(*self._args,**self._kwargs)
         return self.loaded_obj
 
@@ -282,6 +286,8 @@ class ModuleActions(object):
         self.path = path
         assert path
     def load(self):
+        from pineboolib import qsaglobals
+
         self.parser = etree.XMLParser(
                         ns_clean=True,
                         encoding="ISO-8859-15",
@@ -303,7 +309,8 @@ class ModuleActions(object):
         if hasattr(qsaglobals,action.name):
             print("INFO: No se sobreescribe variable de entorno", action.name)
         else:
-            setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load))
+            setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
+
         for xmlaction in self.root:
             action =  XMLAction(xmlaction)
             action.mod = self
@@ -311,7 +318,16 @@ class ModuleActions(object):
             try: name = action.name
             except AttributeError: name = "unnamed"
             self.prj.actions[name] = action
-            #print action
+            #print(":::" , self.mod.name, name)
+            if hasattr(qsaglobals,"form" + name):
+                print("INFO: No se sobreescribe variable de entorno", "form" + name)
+            else:
+                setattr(qsaglobals, "form" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (action.name,name)))
+
+            if hasattr(qsaglobals,"formRecord" + name):
+                print("INFO: No se sobreescribe variable de entorno", "formRecord" + name)
+            else:
+                setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.formRecord%s" % (action.name,name)))
 
     def __contains__(self, k): return k in self.prj.actions
     def __getitem__(self, k): return self.prj.actions[k]
