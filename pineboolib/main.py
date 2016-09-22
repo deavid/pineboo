@@ -175,6 +175,13 @@ class Project(object):
 
     @decorators.NotImplementedWarn
     def call(self, function, aList , objectContext ):
+        print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" % (function, aList , objectContext ))
+        # Hay que resolver la llamada a funcion "function" dentro de qsaglobals
+        # y buscar la resolución de los objetos separando por puntos.
+
+        # la llamada aqui tipica es "flfactalma.beforeCommit_articulos"
+
+
         return True
 
 class Module(object):
