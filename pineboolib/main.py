@@ -307,7 +307,8 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals,action.name):
-            print("INFO: No se sobreescribe variable de entorno", action.name)
+            #print("INFO: No se sobreescribe variable de entorno", action.name)
+            pass
         else:
             setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
 
@@ -321,12 +322,14 @@ class ModuleActions(object):
             #print(":::" , self.mod.name, name)
             if name != "unnamed":
                 if hasattr(qsaglobals,"form" + name):
-                    print("INFO: No se sobreescribe variable de entorno", "form" + name)
+                    #print("INFO: No se sobreescribe variable de entorno", "form" + name)
+                    pass
                 else:
                     setattr(qsaglobals, "form" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name,name)))
 
                 if hasattr(qsaglobals,"formRecord" + name):
-                    print("INFO: No se sobreescribe variable de entorno", "formRecord" + name)
+                    #print("INFO: No se sobreescribe variable de entorno", "formRecord" + name)
+                    pass
                 else:
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name,name)))
 
