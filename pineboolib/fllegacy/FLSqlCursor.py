@@ -780,9 +780,14 @@ class FLSqlCursor(ProjectClass):
         if self.d.rawValues_:
             return self.valueBufferRaw(fN)
 
-        #if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
-        if not self.d.buffer_ or not self.metadata():
+        if not self.metadata():
             return None
+        
+        #if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
+        if not self.d.buffer_:
+            self.refreshBuffer()
+        
+
 
         field = self.metadata().field(fN)
         if not field:
