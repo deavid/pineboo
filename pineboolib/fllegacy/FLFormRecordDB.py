@@ -422,17 +422,20 @@ class FLFormRecordDB(FLFormDB):
                     return
             except Exception:
                 pass
-        
+
         if self.cursor_:
-            levels = self.cursor_.transactionLevel() - self.initTransLevel
-            if levels > 0:
-                self.cursor_.rollbackOpened(levels, "Se han detectado transacciones no finalizadas en la última operación.\n"
-                   "Se van a cancelar las transacciones pendientes.\n"
-                   "Los últimos datos introducidos no han sido guardados, por favor\n"
-                   "revise sus últimas acciones y repita las operaciones que no\n"
-                   "se han guardado.\n"
-                   "FLFormRecordDB::closeEvent: %s %s" % (levels, self.name()))
-            
+            try:
+                levels = self.cursor_.transactionLevel() - self.initTransLevel
+                if levels > 0:
+                    self.cursor_.rollbackOpened(levels, "Se han detectado transacciones no finalizadas en la última operación.\n"
+                       "Se van a cancelar las transacciones pendientes.\n"
+                       "Los últimos datos introducidos no han sido guardados, por favor\n"
+                       "revise sus últimas acciones y repita las operaciones que no\n"
+                       "se han guardado.\n"
+                       "FLFormRecordDB::closeEvent: %s %s" % (levels, self.name()))
+            except Exception:
+                print("ERROR: FLFormRecordDB @ closeEvent :: las transacciones aún no funcionan.");
+
             if self.accepted_:
                 if not self.cursor_.commit():
                     return
@@ -442,12 +445,12 @@ class FLFormRecordDB(FLFormDB):
                     return
                 else:
                     self.cursor_.select()
-            
+
             self.closed.emit()
             self.setCursor(None)
         else:
             self.closed.emit()
-        
+
         super(FLFormRecordDB, self).closeEvent(e)
         #self.deleteLater()
 
