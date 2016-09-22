@@ -51,13 +51,10 @@ class PNBuffer(ProjectClass):
         return len(self.fieldList_)
     
     def primeUpdate(self, row = None):
-        if not row:
+        if row < 0:
             row = self.cursor_._currentregister
         for field in self.fieldList_:
-            #print("Procesando row", row)
-            #field.value = self.convertToType(self.cursor_._model.value(self.cursor_._currentregister, field.name), field.type_)
             field.value = self.cursor_._model.value(row , field.name)
-            #print("%s.%s->%s" %(self.cursor_.nameCursor_ , field.name, field.value))
             
         
         self.line_ = self.cursor_._currentregister
@@ -391,7 +388,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         super(FLSqlCursorPrivate,self).__init__()
         self.metadata_ = None
         self.countRefCursor = 0
-        self.currentRegister = -1
+        self._currentRegister = -1
         self.acosCondName_ = QString()
         self.buffer_ = None
         
@@ -538,7 +535,8 @@ class FLSqlCursor(ProjectClass):
         else:
             print("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
             return None
-            
+        
+        self.d.modeAccess_ = FLSqlCursor.Browse    
        
         #if not name.isEmpty():
         #    if not self.d.db_.manager().existsTable(name):
@@ -600,7 +598,8 @@ class FLSqlCursor(ProjectClass):
         #self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
         #self.first()
         
-               
+    def table(self):
+        return self.metadata().name()          
             
             
     def __getattr__(self, name): return DefFun(self, name)    
@@ -987,7 +986,7 @@ class FLSqlCursor(ProjectClass):
             return 
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
-            QtGui.QMessageBox.Warning(QtGui.qApp.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtGui.QMessageBox.Ok,0,0)
+            QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtGui.QMessageBox.Ok,0,0)
             return
         
         if m == self.Del:
@@ -1554,7 +1553,7 @@ class FLSqlCursor(ProjectClass):
          return PNBuffer(self.d)
     
     def primeUpdate(self):
-        self.d.buffer_.primeUpdate()
+        self.d.buffer_.primeUpdate(self.at())
     
     
     def editBuffer(self, b = None):
@@ -1637,7 +1636,7 @@ class FLSqlCursor(ProjectClass):
             if not self.d.buffer_:
                 self.d.buffer_ = PNBuffer(self.d)
                 
-            self.d.buffer_.primeUpdate()
+            self.d.buffer_.primeUpdate(self.at())
             self.setNotGenerateds()
             self.updateBufferCopy()
             self.newBuffer.emit()
@@ -1655,7 +1654,7 @@ class FLSqlCursor(ProjectClass):
             
         elif self.d.modeAccess_ == self.Browse:
             self.editBuffer(True)
-            self.setNoGenerateds()
+            self.setNoGenerateds()    
             self.newBuffer.emit()
         
         

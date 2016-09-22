@@ -130,6 +130,8 @@ class FLTableDB(QtGui.QWidget):
     return Objeto FLSqlCursor con el cursor que contiene los registros para ser utilizados en el formulario
     """
     def cursor(self):
+        if not self.cursor_.d.buffer_:
+            self.cursor_.refreshBuffer()
         return self.cursor_
 
     """
@@ -945,7 +947,6 @@ class FLTableDB(QtGui.QWidget):
     @QtCore.pyqtSlot(bool)
     @QtCore.pyqtSlot(bool, bool)
     def refresh(self, refreshHead = False, refreshData = False):
-        print("Refresh", refreshHead, refreshData)
         if not self.cursor_ or not self.tableRecords_:
             return
 
@@ -1034,11 +1035,17 @@ class FLTableDB(QtGui.QWidget):
         
         
         if refreshData:
-            QtCore.QTimer.singleShot(msec, self.refresh(False, refreshData))
+            self._refreshData = True
+        else:
+            self._refreshData = False
+            QtCore.QTimer.singleShot(msec, self.refreshDelayed2)
         
         self.seekCursor()
 
-
+    def refreshDelayed2(self):
+        self.refresh(False, self._refreshData)
+        self._refreshData = None
+        
     """
     Invoca al método FLSqlCursor::insertRecord()
     """
