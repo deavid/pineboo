@@ -319,15 +319,16 @@ class ModuleActions(object):
             except AttributeError: name = "unnamed"
             self.prj.actions[name] = action
             #print(":::" , self.mod.name, name)
-            if hasattr(qsaglobals,"form" + name):
-                print("INFO: No se sobreescribe variable de entorno", "form" + name)
-            else:
-                setattr(qsaglobals, "form" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (action.name,name)))
+            if name != "unnamed":
+                if hasattr(qsaglobals,"form" + name):
+                    print("INFO: No se sobreescribe variable de entorno", "form" + name)
+                else:
+                    setattr(qsaglobals, "form" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.form%s" % (self.mod.name,name)))
 
-            if hasattr(qsaglobals,"formRecord" + name):
-                print("INFO: No se sobreescribe variable de entorno", "formRecord" + name)
-            else:
-                setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.formRecord%s" % (action.name,name)))
+                if hasattr(qsaglobals,"formRecord" + name):
+                    print("INFO: No se sobreescribe variable de entorno", "formRecord" + name)
+                else:
+                    setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name,name)))
 
     def __contains__(self, k): return k in self.prj.actions
     def __getitem__(self, k): return self.prj.actions[k]

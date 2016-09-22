@@ -20,8 +20,11 @@ def Object(x=None):
     return dict(x)
 
 def Array(x=None):
-    if x is None: return {}
-    else: return list(x)
+    try:
+        if x is None: return {}
+        else: return list(x)
+    except TypeError:
+        return [x]
 
 def Boolean(x=False): return bool(x)
 

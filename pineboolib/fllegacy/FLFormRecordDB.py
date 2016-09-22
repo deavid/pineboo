@@ -416,10 +416,12 @@ class FLFormRecordDB(FLFormDB):
         self.frameGeometry()
         if self.focusWidget():
             fdb = self.focusWidget().parentWidget()
-            
-            if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
-                fdb.autoComFrame_.hide()
-                return
+            try:
+                if fdb.autoComFrame_.isvisible():
+                    fdb.autoComFrame_.hide()
+                    return
+            except Exception:
+                pass
         
         if self.cursor_:
             levels = self.cursor_.transactionLevel() - self.initTransLevel
