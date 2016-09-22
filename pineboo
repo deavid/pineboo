@@ -2,5 +2,5 @@
 
 cd "$(dirname "$0")"
 
-python3 pineboo.py "$@"
+python3 -u pineboo.py "$@"
 
