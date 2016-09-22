@@ -15,6 +15,8 @@ from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 
+from pineboolib import decorators
+
 def Object(x=None):
     if x is None: x = {}
     return dict(x)
@@ -43,8 +45,19 @@ def FLTableDB(*args):
     if not args: return None
     return FLTableDB_Legacy.FLTableDB(*args)
 
+@decorators.NotImplementedWarn
+def FLCodBar(*args, **kwargs):
+    class flcodbar:
+        def nameToType(self, name):
+            return name
+        def pixmap(self):
+            return None
+        def validBarcode(self):
+            return None
+    return flcodbar()
+
 class FormDBWidget(QtGui.QWidget):
-    
+
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
@@ -80,7 +93,7 @@ class Date(QtCore.QDate):
 
 class Dialog(QtGui.QDialog):
     _layout = None
-    
+
     def __init__(self, title, f):
         #FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
@@ -88,16 +101,16 @@ class Dialog(QtGui.QDialog):
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self._layout = QtGui.QVBoxLayout()
         self.setLayout(self._layout)
-        
-    
+
+
     def add(self, _object):
         self._layout.addWidget(_object)
-        
-            
-        
+
+
+
 class GroupBox(QtGui.QGroupBox):
     pass
 
 class CheckBox(QtGui.QCheckBox):
     pass
-        
+
