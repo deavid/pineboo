@@ -788,7 +788,7 @@ class FLSqlCursor(ProjectClass):
             self.refreshBuffer()
 
         if not self.d.buffer_:
-            print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.")
+            print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.", self.curName())
             return None
 
 
