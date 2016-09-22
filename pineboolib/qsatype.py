@@ -69,9 +69,16 @@ class FormDBWidget(QtGui.QWidget):
         pass
 
     def child(self, childName):
-        ret = self.findChild(QtGui.QWidget, childName)
-        if ret is None:
-            print("WARN: No se encontró el control %r" % childName)
+        try:
+            ret = self.findChild(QtGui.QWidget, childName)
+        except RuntimeError as rte:
+            # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
+            # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
+            print("ERROR: Al buscar el control %r encontramos el error %r" % (childName,rte))
+            ret = None
+        else:
+            if ret is None:
+                print("WARN: No se encontró el control %r" % childName)
         #else:
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
         return ret

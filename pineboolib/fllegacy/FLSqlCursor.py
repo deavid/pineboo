@@ -782,11 +782,14 @@ class FLSqlCursor(ProjectClass):
 
         if not self.metadata():
             return None
-        
+
         #if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
         if not self.d.buffer_:
             self.refreshBuffer()
-        
+
+        if not self.d.buffer_:
+            print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.")
+            return None
 
 
         field = self.metadata().field(fN)
