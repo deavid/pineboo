@@ -1601,4 +1601,13 @@ class FLTableDB(QtGui.QWidget):
     @QtCore.pyqtSlot()
     @decorators.BetaImplementation
     def chooseRecord(self):
-        self.editRecord()
+        if isinstance(self.topWidget, FLFormSearchDB):
+            if self.topWidget.inExec_:
+                    self.topWidget.accept()
+                    return
+            
+        if self.cursor().isLocked():
+            print("FLTable(%s):Registro bloqueado. Modo Solo lectura" % self.cursor().curName())
+            self.browseRecord()
+        else:   
+            self.editRecord()
