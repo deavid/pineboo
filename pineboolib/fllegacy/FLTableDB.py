@@ -94,7 +94,11 @@ class FLTableDB(QtGui.QWidget):
             new_parent = self.topWidget.parentWidget()
             if new_parent is None: break
             self.topWidget = new_parent
-
+        
+        
+        if getattr(self.topWidget.parentWidget(), "cursor_", None):
+            self.topWidget = self.topWidget.parentWidget()
+            
         if not parent_cursor:
             print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
             return
