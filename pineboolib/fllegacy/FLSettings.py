@@ -1,11 +1,57 @@
 # -*- coding: utf-8 -*-
 
+from PyQt4 import QtCore
+
+from pineboolib.flcontrols import ProjectClass
+from pineboolib import decorators
+from pineboolib.utils import filedir
 
 
 
 
-class FLSettings():
+
+class FLSettings(ProjectClass):
     
+    s = QtCore.QSettings(QtCore.QSettings.NativeFormat, QtCore.QSettings.UserScope,"Eneboo","Pineboo")
     
-    def readEntry(self, name, default = None):
-        return default
+    @decorators.BetaImplementation 
+    def readListEntry(self, key, retOk = False):
+        ret = []
+        if key in self.s:
+            ret = self.s.value(key)
+        return ret
+    
+    @decorators.BetaImplementation    
+    def readEntry(self, _key, _def = None, retOk = False):
+
+        
+        ret = self.s.value(_key, None) #devuelve un QVariant !!!!
+        if ret:
+            ret = str(ret.toString())
+            if ret == "":
+                ret = None
+                   
+        return ret
+    
+    @decorators.BetaImplementation
+    def readNumEntry(self, key, _def = 0, retOk = False):
+        ret = self.s.value(key)
+        return int(ret)
+        
+    @decorators.BetaImplementation
+    def readDoubleEntry(self, key, _def = 0, retOk = False):
+        ret = self.s.value(key)
+        return float(ret)
+    
+    @decorators.BetaImplementation
+    def readBoolEntry(self, key, _def = False, retOk = False):
+        ret = self.s.value(key)
+        return bool(ret)
+        
+    @decorators.BetaImplementation
+    def writeEntry(self, key, value):
+        self.s.setValue(key, value)
+    
+    @decorators.BetaImplementation
+    def writeEntryList(self, key, value):
+        self.s.setValue(key, value)
