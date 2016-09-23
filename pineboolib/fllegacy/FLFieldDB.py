@@ -144,7 +144,7 @@ class FLFieldDB(QtGui.QWidget):
 
 
 
-        self.maxPixImages_ = FLSettings.readEntry("maxPixImages",None)
+        self.maxPixImages_ = FLSettings().readEntry("maxPixImages",None)
         if self.maxPixImages_ is None:
             self.maxPixImages_ = 600
 
