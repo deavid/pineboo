@@ -2725,7 +2725,7 @@ class FLFieldDB(QtGui.QWidget):
     def notNullColor(self):
         if not self.initNotNullColor_:
             self.initNotNullColor_ = True
-        self.notNullColor_ = FLSettings.readEntry("ebcomportamiento/colorObligatorio",None)
+        self.notNullColor_ = FLSettings().readEntry("ebcomportamiento/colorObligatorio",None)
         if self.notNullColor_ is None:
             self.notNullColor_ = QtGui.QColor(255, 233, 173)
         return self.notNullColor_
