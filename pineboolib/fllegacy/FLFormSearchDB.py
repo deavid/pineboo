@@ -4,10 +4,8 @@ from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib import decorators
 from pineboolib.utils import DefFun
-from pineboolib import project
-from PyQt4 import QtCore, QtGui, Qt
+from PyQt4 import QtCore, QtGui
 from pineboolib.utils import filedir
-import os.path, traceback
 
 class FLFormSearchDB(FLFormDB):
 
@@ -44,7 +42,7 @@ class FLFormSearchDB(FLFormDB):
     accepted_ = None
     cursor_ = None
     
-
+    eventloop = None
     """
     constructor.
     """
@@ -64,8 +62,9 @@ class FLFormSearchDB(FLFormDB):
             
             name = args[0]
              
+            
+            self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
             action = self.cursor_.action()
-            self.cursor_= self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
             self.accepted_ = False
 
         elif isinstance(args[0], FLSqlCursor):
@@ -80,8 +79,6 @@ class FLFormSearchDB(FLFormDB):
                 parent = args[2]
             
             self.cursor_ = args[0]
-        
-        print("FLFormSearhDB.init()", self.cursor_.name)
         
         super(FLFormSearchDB,self).__init__(parent, action)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
@@ -203,6 +200,9 @@ class FLFormSearchDB(FLFormDB):
         if not self.cursor_:
             return None
         
+        if not self.cursor_.isLocked():
+            self.cursor_.setModeAccess(FLSqlCursor.Edit)
+            
         if self.loop or self.inExec_:
             print("FLFormSearchDB::exec(): Se ha detectado una llamada recursiva")
             super(FLFormDB,self).show()
@@ -232,6 +232,8 @@ class FLFormSearchDB(FLFormDB):
         
         self.accepted_ = False
         self.loop = True
+        self.eventloop = QtCore.QEventLoop()      
+        self.eventloop.exec_()
         
         #if not self.isClosing_ and not self.acceptingRejecting_:
             #QtCore.QEventLoop().enterLoop() FIXME
@@ -246,7 +248,8 @@ class FLFormSearchDB(FLFormDB):
         else:
             v = None
         
-        self.inExec_ = False
+        self.inExec_ = False   
+        return v
                     
 
     """
@@ -328,7 +331,7 @@ class FLFormSearchDB(FLFormDB):
         super(FLFormSearchDB, self).hide()
         if self.loop:
             self.loop = False
-            QtCore.QEventLoop.exit()
+            self.eventloop.exit()
 
     """
     Se activa al pulsar el boton aceptar
@@ -339,8 +342,12 @@ class FLFormSearchDB(FLFormDB):
             return
         self.frameGeometry()
         if self.cursor_:
-            self.cursor_.recordChoosed.disconnect(self.accept)
+            try:
+                self.cursor_.recordChoosed.disconnect(self.accept)
+            except:
+                pass
         self.acceptingRejecting_ = True
+        self.accepted_ = True
         self.hide()
         
     """
@@ -352,7 +359,10 @@ class FLFormSearchDB(FLFormDB):
             return
         self.frameGeometry()
         if self.cursor_:
-            self.cursor_.recordChoosed.disconnect(self.accept)
+            try:
+                self.cursor_.recordChoosed.disconnect(self.accept)
+            except:
+                pass
         self.acceptingRejecting_ = True
         self.hide()
 
