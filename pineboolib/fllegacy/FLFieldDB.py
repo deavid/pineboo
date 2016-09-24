@@ -44,6 +44,7 @@ class FLLineEdit(QtGui.QLineEdit):
             if self._maxValue < int(texto):
                 texto = self._maxValue
         super(FLLineEdit, self).setText(str(texto))
+        self.textChanged.emit(texto)
 
     """
     Especifica un valor máximo para el text (numérico)
@@ -1097,7 +1098,7 @@ class FLFieldDB(QtGui.QWidget):
 
 
                 if not field.relationM1():
-                    # print( "FLFieldDB :",FLUtil.translate("app","El campo de la relación debe estar relacionado en M1"))
+                    print( "FLFieldDB :El campo de la relación debe estar relacionado en M1")
                     if tmd and not tmd.inCache():
                         del tmd
                     return
@@ -1163,7 +1164,7 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
-                a = 1
+                pass
             s = None
             if v:
                 s = round(float(v), partDecimal)
@@ -1182,7 +1183,7 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
-                a = 1
+                pass
 
             if v:
                 if ol:
@@ -1198,7 +1199,8 @@ class FLFieldDB(QtGui.QWidget):
 
             if not ol and doHome:
                 self.editor_.home(False)
-                self.editor_.textChanged.connect(self.updateValue)
+            
+            self.editor_.textChanged.connect(self.updateValue)
 
 
 
@@ -1206,7 +1208,7 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
-                a = 1
+                pass
             #s = None
             if not nulo:
                 if v:
@@ -1219,7 +1221,7 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
-                a = 1
+                pass
             #s = None
             if not nulo:
                 if v:
@@ -1232,7 +1234,7 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
-                a = 1
+                pass
             self.editor_.setText(str(0))
 
             self.editor_.textChanged.connect(self.updateValue)
@@ -1290,8 +1292,8 @@ class FLFieldDB(QtGui.QWidget):
                 try:
                     self.editor_.valueChanged.disconnect(self.updateValue)
                 except:
-                    a = 1
-                #self.editor_.valueChanged.connect(self.updateValue) FIXME
+                    pass
+                self.editor_.valueChanged.connect(self.updateValue)
 
 
 
@@ -1306,8 +1308,8 @@ class FLFieldDB(QtGui.QWidget):
                 try:
                     self.editor_.valueChanged.disconnect(self.updateValue)
                 except:
-                    a = 1
-                #self.editor_.valueChanged.connect(self.updateValue) #FIXME
+                    pass
+                self.editor_.valueChanged.connect(self.updateValue)
 
 
 
@@ -1315,7 +1317,7 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
-                a = 1
+                pass
             if v:
                 self.editor_.setText(v)
             self.editor_.textChanged.connect(self.updateValue)
@@ -1325,7 +1327,7 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.editor_.toggled.disconnect(self.updateValue)
             except:
-                a = 1
+                pass
 
             if v:
                 v = bool(v)
@@ -1371,12 +1373,18 @@ class FLFieldDB(QtGui.QWidget):
                 #FIXME: self.cursor_ = FLSqlCursor(self.tableName_, True, FLSqlConnections.database().connectionName(), 0, 0, self)
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
             if self.showed:
-                self.cursor_.cursorUpdated.disconnect(self.refresh)
+                try:
+                    self.cursor_.cursorUpdated.disconnect(self.refresh)
+                except:
+                    pass
             self.cursor_.cursorUpdated.connect(self.refresh)
             return
         else:
             if self.cursorBackup_:
-                self.cursor_.cursorUpdated.disconnect(self.refresh)
+                try:
+                    self.cursor_.cursorUpdated.disconnect(self.refresh)
+                except:
+                    pass
                 self.cursor_ = self.cursorBackup_
                 self.cursorBackup_ = False
 
@@ -1387,19 +1395,22 @@ class FLFieldDB(QtGui.QWidget):
         if self.tableName_.isEmpty() and self.foreignField_.isEmpty() and self.fieldRelation_.isEmpty():
             if not self.foreignField_.isEmpty() and not self.fieldRelation_.isEmpty():
                 if self.showed:
-                    self.cursor_.bufferChanged.disconnect(self.refresh)
+                    try:
+                        self.cursor_.bufferChanged.disconnect(self.refresh)
+                    except:
+                        pass
                 self.cursor_.bufferChanged.connect(self.refresh)
 
             if self.showed:
                 try:
                     self.cursor_.newBuffer.disconnect(self.refresh)
                 except:
-                    a = 1
+                    pass
 
                 try:
                     self.cursor_.bufferChanged.disconnect(self.refreshQuick)
                 except:
-                    a = 1
+                    pass
 
             self.cursor_.newBuffer.connect(self.refresh)
             self.cursor_.bufferChanged.connect(self.refreshQuick)
@@ -1420,12 +1431,12 @@ class FLFieldDB(QtGui.QWidget):
             try:
                 self.cursor_.newBuffer.disconnect(self.refresh)
             except:
-                a = 1
+                pass
 
             try:
                 self.cursor_.bufferChanged.disconnect(self.refreshQuick)
             except:
-                a = 1
+                pass
 
 
             self.cursorAux = self.cursor_
@@ -1458,9 +1469,16 @@ class FLFieldDB(QtGui.QWidget):
             if not self.cursor_:
                 self.cursor_ = self.cursorAux
                 if self.showed:
-                    self.cursor_.newBuffer.disconnect(self.refresh)
-                    self.cursor_.bufferChanged.disconnect(self.refreshQuick)
-
+                    try:
+                        self.cursor_.newBuffer.disconnect(self.refresh)
+                    except:
+                        pass
+                    
+                    try:
+                        self.cursor_.bufferChanged.disconnect(self.refreshQuick)
+                    except:
+                        pass
+                    
                 self.cursor_.newBuffer.connect(self.refresh)
                 self.cursor_.bufferChanged.connect(self.refreshQuick)
                 self.cursorAux = False
@@ -1472,7 +1490,7 @@ class FLFieldDB(QtGui.QWidget):
                     try:
                         self.cursor_.newBuffer.disconnect(self.setNoShowed)
                     except:
-                        a = 1
+                        pass
                 self.cursor_.newBuffer.connect(self.setNoShowed)
 
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
@@ -1480,12 +1498,12 @@ class FLFieldDB(QtGui.QWidget):
                 try:
                     self.cursor_.newBuffer.disconnect(self.refresh)
                 except:
-                    a = 1
+                    pass
 
                 try:
                     self.cursor_.bufferChanged.disconnect(self.refreshQuick)
                 except:
-                    a = 1
+                    pass
 
             self.cursor_.newBuffer.connect(self.refresh)
             self.cursor_.bufferChanged.connect(self.refreshQuick)
@@ -1591,7 +1609,7 @@ class FLFieldDB(QtGui.QWidget):
                     try:
                         self.editor_.activated.disconnect(self.updateValue)
                     except:
-                        a = 1
+                        pass
                 self.editor_.activated.connect(self.updateValue)
 
             else:
@@ -1827,7 +1845,10 @@ class FLFieldDB(QtGui.QWidget):
                     #self.keyF2Pressed_.connect(self.pbAux_.animateClick) #FIXME
 
             if self.showed:
-                self.editor_.valueChanged.disconnect(self.updateValue)
+                try:
+                    self.editor_.valueChanged.disconnect(self.updateValue)
+                except:
+                    pass
 
             self.editor_.valueChanged.connect(self.updateValue) #FIXME
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
@@ -1848,7 +1869,10 @@ class FLFieldDB(QtGui.QWidget):
             self.editor_.installEventFilter(self)
             self.pushButtonDB.hide()
             if self.showed:
-                self.editor_.valueChanged.disconnect(self.updateValue)
+                try:
+                    self.editor_.valueChanged.disconnect(self.updateValue)
+                except:
+                    pass
 
             #self.editor_.valueChanged.connect(self.updateValue) #FIXME
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
@@ -1883,7 +1907,7 @@ class FLFieldDB(QtGui.QWidget):
                 try:
                     self.editor_.textChanged.disconnect(self.updateValue)
                 except:
-                    a = 1
+                    pass
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -1915,7 +1939,7 @@ class FLFieldDB(QtGui.QWidget):
                 try:
                     self.editor_.toggled.disconnect(self.updateValue)
                 except:
-                    a = 1
+                    pass
             self.editor_.toggled.connect(self.updateValue)
 
         if self.editor_:
