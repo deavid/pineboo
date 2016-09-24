@@ -833,6 +833,7 @@ class FLTableMetaDataPrivate():
 
     def __init__(self, *args, **kwargs):
         self.fieldList_ = []
+        self.fieldsNamesUnlock_ = []
         #print("Vaciando field list ahora",  len(self.fieldList_))
         if len(args) == 0:
             self.inicializeFLTableMetaDataPrivate()
