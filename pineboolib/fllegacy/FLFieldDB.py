@@ -30,7 +30,6 @@ class FLLineEdit(QtGui.QLineEdit):
     _name = None
 
     lostFocus = QtCore.pyqtSignal()
-    textChanged = QtCore.pyqtSignal(QString)
 
 
     def __init__(self, parent, name):
@@ -46,6 +45,13 @@ class FLLineEdit(QtGui.QLineEdit):
                 texto = self._maxValue
         super(FLLineEdit, self).setText(str(texto))
         self.textChanged.emit(texto)
+        
+    def text(self):
+        texto =  super(FLLineEdit, self).text()
+        if texto == "":
+            texto = None
+        
+        return texto
 
     """
     Especifica un valor máximo para el text (numérico)
@@ -566,8 +572,7 @@ class FLFieldDB(QtGui.QWidget):
     @QtCore.pyqtSlot('QString')
     def updateValue(self, data = None):
         if isinstance(data, QString): #Para quitar en el futuro
-            data = str(data)
-            
+            data = str(data)   
         isNull = False
         if data is None:
             if not self.cursor_:
@@ -659,7 +664,7 @@ class FLFieldDB(QtGui.QWidget):
             
             s = tAux
             if field.type() == "string" and not ol:
-                if s[0] == " ":
+                if len(s) > 0 and s[0] == " ":
                     self.cursor_.bufferChanged.disconnect(self.refreshQuick)
                     self.cursor.setValueBuffer(self.fieldName_, s[1:])
                     self.cursor_.bufferChanged.connect(self.refreshQuick)
@@ -667,11 +672,8 @@ class FLFieldDB(QtGui.QWidget):
 
             if self.editor_ and (field.type() == "double" or field.type() == "int" or field.type() == "uint"):
                 s = self.editor_.text()
-
-            if not s:
-                self.cursor_.setValueBuffer(self.fieldName_, None)
-            else:
-                self.cursor_.setValueBuffer(self.fieldName_, s)
+                
+            self.cursor_.setValueBuffer(self.fieldName_, s)
 
             if self.isVisible() and self.hasFocus() and field.type() == "string" and field.length() == len(s):
                 self.focusNextPrevChild(True)
@@ -1155,7 +1157,10 @@ class FLFieldDB(QtGui.QWidget):
         ol = field.hasOptionsList()
 
         fDis = False
-
+        
+        if isinstance(v , QString): #Para quitar
+            v = str(v)
+        
         if self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or ( modeAcces == FLSqlCursor.Edit and ( field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or not field.editable() or modeAcces == FLSqlCursor.Browse:
             fDis = True
 
