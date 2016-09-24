@@ -784,13 +784,15 @@ class FLSqlCursor(ProjectClass):
             return None
 
         #if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
-        if not self.d.buffer_:
-            self.refreshBuffer()
+        if self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert:
+            if not self.d.buffer_:
+                self.refreshBuffer()
 
-        if not self.d.buffer_:
-            print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.", self.curName())
+            if not self.d.buffer_:
+                print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.", self.curName())
+                return None
+        else:
             return None
-
 
         field = self.metadata().field(fN)
         if not field:
@@ -1578,7 +1580,6 @@ class FLSqlCursor(ProjectClass):
         else:
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 v = self.valueBuffer(self.d.relation_.field())
-                print("v vale")
                 if not self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()) == v:
                     self.d.cursorRelation_.setValueBuffer(self.d.relation_.foreignField(), v)
 
