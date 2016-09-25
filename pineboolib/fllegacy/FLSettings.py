@@ -20,8 +20,7 @@ class FLSettings(ProjectClass):
         if key in self.s:
             ret = self.s.value(key)
         return ret
-    
-    @decorators.BetaImplementation    
+        
     def readEntry(self, _key, _def = None, retOk = False):
 
         

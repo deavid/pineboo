@@ -37,7 +37,7 @@ class FLTableMetaData(ProjectClass):
     def __init__(self, *args, **kwargs):
         super(FLTableMetaData,self).__init__()
         tmp = None
-        
+                
         if len(args) == 1:
             if isinstance(args[0],QString) or isinstance(args[0], str):
                 #print("FLTableMetaData(%s).init()" % args[0])
@@ -118,7 +118,6 @@ class FLTableMetaData(ProjectClass):
     """
     Obtiene el alias asociado a la tabla
     """
-    @decorators.BetaImplementation
     def alias(self):
         return self.d.alias_
 
@@ -834,6 +833,7 @@ class FLTableMetaDataPrivate():
 
     def __init__(self, *args, **kwargs):
         self.fieldList_ = []
+        self.fieldsNamesUnlock_ = []
         #print("Vaciando field list ahora",  len(self.fieldList_))
         if len(args) == 0:
             self.inicializeFLTableMetaDataPrivate()

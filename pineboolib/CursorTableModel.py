@@ -129,13 +129,29 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             value = self._data[row][col]
         return value
         """
-
+    
+    """
+    Asigna un valor una celda
+    @param row. Columna afectada
+    @param fieldname. Nonbre de la fila afectata. Se puede obtener la columna con self.metadata().indexPos(fieldname)
+    @param value. Valor a asignar. Puede ser texto, pixmap, etc...
+    """
     @decorators.NotImplementedWarn
-    def setValue(self,fieldname, value):
-        return True
+    def setValue(self, row, fieldname, value):
+        col = self.metadata().indexPos(fieldname)
+        print("CursorTableModel.setValueBuffer(row %s, col %s) = %s" % (row, col, value))
+    
+    """
+    Crea una nueva linea en el tableModel
+    @param buffer . PNBuffer a añadir
+    """
+    @decorators.NotImplementedWarn
+    def newRowFromBuffer(self, buffer):
+        pass
+            
 
     def pK(self): #devuelve el nombre del campo pk
-        return self.tableMetadata().pK()
+        return self.tableMetadata().primaryKey()
         #return self._pk
 
     def fieldType(self, fieldName): # devuelve el tipo de campo

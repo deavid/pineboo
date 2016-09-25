@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from PyQt4 import QtCore
-from PyQt4.QtCore import QVariant, QString 
+from PyQt4.QtCore import QString
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from future.utils import istext
 from pineboolib.fllegacy.FLAction import FLAction
+from pineboolib.utils import filedir
+import os
 
 
 """
@@ -201,9 +201,21 @@ class FLManager(QtCore.QObject):
                 realiza una consulta a la base para obtener las tablas existentes
     @return TRUE si existe la tabla, FALSE en caso contrario
     """
-    @decorators.NotImplementedWarn
     def existsTable(self,  n, cache = True):
-        return True
+        
+        if cache:
+            modId = self.db_.managerModules().idModuleOfFile(n +".mtd")
+            return os.path.exists(filedir("../tempdata/cache/%s/file.mtd/%s" %(modId, n)))
+        
+        
+        q = FLSqlQuery()
+        sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
+        q.setTablesList(n)
+        q.setSelect("*")
+        q.setFrom(n)
+        q.setWhere("1 = 1 LIMIT 1")
+        return q.exec_()
+    
     """
     Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
 
@@ -522,10 +534,6 @@ class FLManager(QtCore.QObject):
     def initCount(self):
         return self.initCount_
     
-
-    @decorators.NotImplementedWarn
-    def existTable(self, name):
-        return True
 
 
 

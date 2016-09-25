@@ -767,7 +767,9 @@ class FLFieldDB(QtGui.QWidget):
         """
         if type_ == "uint" or type_ == "int" or type_ == "string":
             if self.editor_:
-                doHome = self.editor_.text().isEmpty()
+                doHome = False
+                if not self.editor_.text():
+                    doHome = True
                 if v:
                     self.editor_.setText(v)
                 else:
@@ -874,7 +876,7 @@ class FLFieldDB(QtGui.QWidget):
             return v
 
         type_ = field.type()
-        fltype = FLFieldMetaData.flDecodeType(type_)
+        #fltype = FLFieldMetaData.flDecodeType(type_)
         if self.cursor_.bufferIsNull(self.fieldName_):
             if type_ == "double" or type_ == "int" or type_ == "uint":
                 return 0

@@ -43,7 +43,8 @@ class PNBuffer(ProjectClass):
             field.value = None
             field.metadata = campo
             field.type_ = field.metadata.type()
-
+            field.modified = False
+            
             self.line_ = None
             self.fieldList_.append(field)
 
@@ -80,6 +81,7 @@ class PNBuffer(ProjectClass):
         if b:
             for field in  self.fieldList_:
                 field.value = None
+                field.modified = False
 
 
     def isEmpty(self):
@@ -136,6 +138,7 @@ class PNBuffer(ProjectClass):
         for field in  self.fieldList_:
             if field.name == str(name):
                 field.value = value
+                field.modified = True
                 self.setMd5Sum(value)
                 return
 
@@ -190,11 +193,30 @@ class PNBuffer(ProjectClass):
 
     def md5Sum(self):
         return self.md5Sum_
+    
+    def modifiedFields(self):
+        lista = []
+        for f in self.fieldList_:
+            if f.modified:
+                lista.append(f.name)
+        
+        return lista
 
 
+    def pK(self):
+        for f in self.fieldList_:
+            if f.metadata.isPrimaryKey():
+                return f.name
 
-
-
+        print("PNBuffer.pk(): No se ha encontrado clave Primaria")
+    
+    def indexField(self, name):
+        i = 0
+        for f in self.fieldList_:
+            if f.name == name:
+                return i
+            
+            i = i + 1
 
 
 
@@ -1093,9 +1115,12 @@ class FLSqlCursor(ProjectClass):
 
     @return TRUE si el buffer y la copia son distintas, FALSE en caso contrario
     """
-    @decorators.NotImplementedWarn
     def isModifiedBuffer(self):
-        return True
+        modifiedFields = self.d.buffer_.modifiedFields()
+        if modifiedFields:
+            return True
+        else:
+            return False
 
     """
     Establece el valor de FLSqlCursor::askForCancelChanges_ .
@@ -2117,6 +2142,7 @@ class FLSqlCursor(ProjectClass):
     """
 
     @QtCore.pyqtSlot()
+    @decorators.BetaImplementation
     def commitBuffer(self, emite = True, checkLocks = False):
         if not self.d.buffer_ or not self.d.metadata_:
             return False
@@ -2224,18 +2250,18 @@ class FLSqlCursor(ProjectClass):
                     self.d.cursorRelation_.setAskForCancelChanges(True)
 
             if self.isModifiedBuffer():
-                i = 0
-                while i < self.d.buffer_.count():
-                    if self.d.buffer_.value(i) == self.d.bufferCopy_.value(i) and self.d.buffer_.isNull(i) and self.d.bufferCopy_.isNull(i):
-                        self.d.buffer_.setGenerated(i, False)
+                #i = 0
+                #while i < self.d.buffer_.count():
+                #    if self.d.buffer_.value(i) == self.d.bufferCopy_.value(i) and self.d.buffer_.isNull(i) and self.d.bufferCopy_.isNull(i):
+                #        self.d.buffer_.setGenerated(i, False)
 
-                    i = i +1
+                #    i = i +1
 
                 self.update(False)
-                i = 0
-                while i < self.d.buffer_.count():
-                    self.d.buffer_.setGenerated(i, True)
-                    i = i + 1
+                #i = 0
+                #while i < self.d.buffer_.count():
+                #    self.d.buffer_.setGenerated(i, True)
+                #    i = i + 1
 
                 updated = True
                 self.setNotGenerateds()
@@ -2564,9 +2590,36 @@ class FLSqlCursor(ProjectClass):
     def filter(self):
         return self.d.filter_
 
-    @decorators.NotImplementedWarn
+    """
+    Actualiza tableModel con el buffer
+    """
     def update(self, notify):
-        return None
+        
+        if self.modeAccess() == FLSqlCursor.Edit:
+            # solo los campos modified
+            lista = self.d.buffer_.modifiedFields()
+            pKValue = self.d.buffer_.value(self.d.buffer_.pK())
+            
+            row = 0
+            while row < self.model().rowCount():
+                if self.model().value(row, self.model().pK()) == pKValue:
+                    for fieldName in lista:
+                        self.model().setValue(row, fieldName, self.d.buffer_.value(fieldName))
+                    
+                    break
+                
+                row = row + 1
+           
+            if notify:
+                self.bufferCommited.emit()
+            
+        
+        elif self.modeAccess() == FLSqlCursor.Insert:
+            self.model().newRowFromBuffer(self.d.buffer_)
+        
+            if notify:
+                self.bufferCommited.emit()
+    
     """
     Indica el último error
     """
