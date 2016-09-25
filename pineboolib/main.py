@@ -173,16 +173,24 @@ class Project(object):
     def saveGeometryForm(self, name, geo):
         pass
 
-    @decorators.NotImplementedWarn
     def call(self, function, aList , objectContext ):
+        # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
         print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" % (function, aList , objectContext ))
+        import pineboolib.qsaglobals
+        fn = None
+        try:
+            fn = eval(function, pineboolib.qsaglobals.__dict__)
+            return fn(*aList)
+        except Exception:
+            print("** JS.CALL :: ERROR:", traceback.format_exc())
+
         # Hay que resolver la llamada a funcion "function" dentro de qsaglobals
         # y buscar la resolución de los objetos separando por puntos.
 
         # la llamada aqui tipica es "flfactalma.beforeCommit_articulos"
 
 
-        return True
+        return None
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):

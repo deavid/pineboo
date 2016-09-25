@@ -44,7 +44,7 @@ class PNBuffer(ProjectClass):
             field.metadata = campo
             field.type_ = field.metadata.type()
             field.modified = False
-            
+
             self.line_ = None
             self.fieldList_.append(field)
 
@@ -193,13 +193,13 @@ class PNBuffer(ProjectClass):
 
     def md5Sum(self):
         return self.md5Sum_
-    
+
     def modifiedFields(self):
         lista = []
         for f in self.fieldList_:
             if f.modified:
                 lista.append(f.name)
-        
+
         return lista
 
 
@@ -209,13 +209,13 @@ class PNBuffer(ProjectClass):
                 return f.name
 
         print("PNBuffer.pk(): No se ha encontrado clave Primaria")
-    
+
     def indexField(self, name):
         i = 0
         for f in self.fieldList_:
             if f.name == name:
                 return i
-            
+
             i = i + 1
 
 
@@ -2189,15 +2189,15 @@ class FLSqlCursor(ProjectClass):
             idMod = self.d.db_.managerModules().idModuleOfFile("%s.%s" % (self.d.metadata_.name(),"mtd"))
 
             if idMod:
-                functionBefore = "%s.beforeCommit_%s" % (idMod, self.d.metadata_.name())
-                functionAfter = "%s.afterCommit_%s" % (idMod, self.d.metadata_.name())
+                functionBefore = "%s.iface.beforeCommit_%s" % (idMod, self.d.metadata_.name())
+                functionAfter = "%s.iface.afterCommit_%s" % (idMod, self.d.metadata_.name())
             else:
-                functionBefore = "sys.beforeCommit_%s" % self.d.metadata_.name()
-                functionAfter = "sys.afterCommit_%s" % self.d.metadata_.name()
+                functionBefore = "sys.iface.beforeCommit_%s" % self.d.metadata_.name()
+                functionAfter = "sys.iface.afterCommit_%s" % self.d.metadata_.name()
 
             if functionBefore:
                 cI = self.d.ctxt_
-                v = self._prj.call(functionBefore, cI, None)
+                v = self._prj.call(functionBefore, [self], cI)
                 if v and not isinstance(v ,bool):
                     return False
 
@@ -2292,7 +2292,7 @@ class FLSqlCursor(ProjectClass):
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.d.ctxt_
-            v = self._prj.call(functionAfter, cI, None)
+            v = self._prj.call(functionAfter, [self], cI)
             if v and not isinstance(v ,bool):
                 print(21)
                 if savePoint == True:
@@ -2594,32 +2594,32 @@ class FLSqlCursor(ProjectClass):
     Actualiza tableModel con el buffer
     """
     def update(self, notify):
-        
+
         if self.modeAccess() == FLSqlCursor.Edit:
             # solo los campos modified
             lista = self.d.buffer_.modifiedFields()
             pKValue = self.d.buffer_.value(self.d.buffer_.pK())
-            
+
             row = 0
             while row < self.model().rowCount():
                 if self.model().value(row, self.model().pK()) == pKValue:
                     for fieldName in lista:
                         self.model().setValue(row, fieldName, self.d.buffer_.value(fieldName))
-                    
+
                     break
-                
+
                 row = row + 1
-           
+
             if notify:
                 self.bufferCommited.emit()
-            
-        
+
+
         elif self.modeAccess() == FLSqlCursor.Insert:
             self.model().newRowFromBuffer(self.d.buffer_)
-        
+
             if notify:
                 self.bufferCommited.emit()
-    
+
     """
     Indica el último error
     """
