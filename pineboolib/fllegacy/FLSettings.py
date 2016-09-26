@@ -35,7 +35,7 @@ class FLSettings(ProjectClass):
             if ret.toString() == "":
                 ret = _def
         
-        print("Retornando %s ---> %s" % (_key, ret))          
+        #print("Retornando %s ---> %s" % (_key, ret))          
         return ret
     
     @decorators.BetaImplementation
