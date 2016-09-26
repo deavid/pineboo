@@ -17,6 +17,8 @@ import zlib
 
 
 from PyQt4 import QtGui, QtCore
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLSettings import FLSettings
 if __name__ == "__main__":
     sys.path.append('..')
 
@@ -169,9 +171,15 @@ class Project(object):
                 self.files[nombre] = fileobj
                 self.modules[idmodulo].add_project_file(fileobj)
 
-    @decorators.NotImplementedWarn
+    
     def saveGeometryForm(self, name, geo):
-        pass
+        name = "geo/%s" % name
+        FLSettings().writeEntry(name, geo)
+        
+    
+    def loadGeometryForm(self, name):
+        name = name = "geo/%s" % name
+        return FLSettings().readEntry(name, None)
 
     def call(self, function, aList , objectContext ):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
