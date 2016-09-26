@@ -671,8 +671,9 @@ class FLFormDB(QtGui.QWidget):
         if not self.isIfaceBind():
             self.bindIface()
             
-        
-            
+        size = self.prj.loadGeometryForm(self.geoName())
+        if size:
+            self.resize(size)   
             
     """
     Captura evento ocultar
@@ -680,13 +681,13 @@ class FLFormDB(QtGui.QWidget):
     def hideEvent(self, h):
         pW = self.parentWidget()
         if not pW:
-            geo = QtCore.QRect(self.x(), self.y(), self.width(), self.height())
+            geo = QtCore.QSize(self.width(), self.height())
             if self.isMinimized():
                 geo.setWidth(1)
             elif self.isMaximized():
                 geo.setWidth(9999)
         else:
-            geo = QtCore.QRect(pW.x(), pW.y(), pW.width(), pW.height())
+            geo = QtCore.QSize(pW.width(), pW.height())
             
         
         self.prj.saveGeometryForm(self.geoName(), geo)
