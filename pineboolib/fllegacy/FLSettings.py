@@ -25,11 +25,17 @@ class FLSettings(ProjectClass):
 
         
         ret = self.s.value(_key, None) #devuelve un QVariant !!!!
-        if ret:
-            ret = str(ret.toString())
-            if ret == "":
-                ret = None
-                   
+        
+        if "geo" in _key:
+            ret = ret.toSize()
+            print("Geo vale", ret)
+            if not ret:
+                ret = _def
+        else:
+            if ret.toString() == "":
+                ret = _def
+        
+        print("Retornando %s ---> %s" % (_key, ret))          
         return ret
     
     @decorators.BetaImplementation
