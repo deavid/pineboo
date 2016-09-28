@@ -83,7 +83,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.rows = newrows
         self._data = []
         for row in self._cursor:
-            self._data.append(row)
+            self._data.append(list(row))
         self.endInsertRows()
         topLeft = self.index(0,0)
         bottomRight = self.index(self.rows-1,self.cols-1)
@@ -138,8 +138,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     """
     @decorators.NotImplementedWarn
     def setValue(self, row, fieldname, value):
+
         col = self.metadata().indexPos(fieldname)
-        print("CursorTableModel.setValueBuffer(row %s, col %s) = %s" % (row, col, value))
+
+        print("CursorTableModel.setValue(row %s, col %s) = %r" % (row, col, value))
+
+        try:
+
+            self._data[row][col] = value
+
+        except Exception:
+
+            print("CursorTableModel.setValue(row %s, col %s) = %r :: ERROR:" % (row, col, value), traceback.format_exc())
     
     """
     Crea una nueva linea en el tableModel
