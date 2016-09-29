@@ -220,9 +220,29 @@ class FLUtil(ProjectClass):
     @param m Nombre de la moneda
     @return Cadena de texto con su expresión hablada
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def enLetraMoneda(self, n, m):
-        pass
+        nTemp = n * -1.00 if n < 0.00 else n
+        entero = partInteger(nTemp)
+        decimal = partDecimal(nTemp)
+        res = ""
+
+        if entero > 0:
+            res = enLetra(entero) + " " + m
+
+        if entero > 0 and decimal > 0:
+            # res += QString(" ") + QT_TR_NOOP("con") + " " + enLetra(decimal) + " " + QT_TR_NOOP("céntimos");
+            res += " " + "con" + " " + enLetra(decimal) + " " + "céntimos"
+
+        if entero <= 0 and decimal > 0:
+            # res = enLetra(decimal) + " " + QT_TR_NOOP("céntimos");
+            res = enLetra(decimal) + " " + "céntimos"
+
+        if n < 0.00:
+            # res = QT_TR_NOOP("menos") + QString(" ") + res;
+            res = "menos" + " " + res
+
+        return res.upper()
 
     """
     Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
@@ -235,9 +255,11 @@ class FLUtil(ProjectClass):
     @param n Número a transladar a su forma hablada. Debe ser positivo
     @return Cadena de texto con su expresión hablada
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def enLetraMonedaEuro(self, n):
-        pass
+        # return enLetraMoneda(n, QT_TR_NOOP("euros"));
+        return enLetraMoneda(n, "euros")
+
     """
     Obtiene la letra asociada al némero del D.N.I. español.
 
@@ -257,7 +279,7 @@ class FLUtil(ProjectClass):
     """
     def nombreCampos(self, tablename):
         campos = pineboolib.project.db().metadata(tablename).fieldsNames()
-        return [len(campos)]+campos
+        return [len(campos)] + campos
 
     """
     Obtiene el número del digito de control, para cuentas bancarias.
@@ -311,10 +333,40 @@ class FLUtil(ProjectClass):
     @param s Cadena de texto a la que se le quieren poder separadores de miles
     @return Devuelve la cadena formateada con los separadores de miles
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def formatoMiles(self, s):
-        pass
-    
+        decimal, entera
+        ret = ''
+        # dot = QApplication::tr(".")
+        dot = '.'
+        neg = s[0] == '-'
+
+        if '.' in s:
+            # decimal = QApplication::tr(",") + s.section('.', -1, -1)
+            # entera = s.section('.', -2, -2).remove('.')
+            aStr = s.split('.')
+            decimal = ',' + aStr[len(aStr) - 1]
+            entera = aStr[len(aStr) - 2].replace('.', '')
+        else:
+            entera = s
+
+        if neg:
+            entera.replace('-', '')
+
+        length = len(entera)
+
+        while length > 3:
+            ret = dot + entera[-3:] + ret
+            entera = entera[:-3]
+            length = len(entera)
+
+        ret = entera + ret + decimal
+
+        if neg:
+            ret = '-' + ret
+
+        return ret
+
     """
     Traducción de una cadena al idioma local
 
@@ -328,7 +380,7 @@ class FLUtil(ProjectClass):
     @decorators.BetaImplementation
     def translate(self, group, string):
         return QString(string)
-    #return qApp->translate(contexto, s);
+        # return qApp->translate(contexto, s);
 
     """
     Devuelve si el numero de tarjeta de Credito es valido.
@@ -676,7 +728,7 @@ class FLUtil(ProjectClass):
     @return Valor resultante de la query o falso si no encuentra nada.
     """
     @decorators.BetaImplementation
-    def sqlSelect(self, f, s, w, tL = None, size = 0, connName = "default"):
+    def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
         q = FLSqlQuery(None, connName)
         if tL:
             q.setTablesList(tL)
@@ -701,7 +753,7 @@ class FLUtil(ProjectClass):
     Usar con precaución.
     """
     @decorators.NotImplementedWarn
-    def quickSqlSelect(self, f, s, w, connName = "default"):
+    def quickSqlSelect(self, f, s, w, connName="default"):
         pass
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
@@ -713,7 +765,7 @@ class FLUtil(ProjectClass):
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
     @decorators.NotImplementedWarn
-    def sqlInsert(self, t, fL, vL, connName = "default"):
+    def sqlInsert(self, t, fL, vL, connName="default"):
         pass
 
     """
@@ -727,7 +779,7 @@ class FLUtil(ProjectClass):
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
     @decorators.NotImplementedWarn
-    def sqlUpdate(self, t, fL, vL, w, connName = "default"):
+    def sqlUpdate(self, t, fL, vL, w, connName="default"):
         pass
     """
     Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
@@ -737,15 +789,28 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.NotImplementedWarn
-    def sqlDelete(self, t, w, connName = "default"):
-        pass
+    @decorators.BetaImplementation
+    def sqlDelete(self, t, w, connName="default"):
+        c = FLSqlCursor(t, true, connName)
+        c.setForwardOnly(true)
+
+        if not c.select(w):
+            return False
+
+        while c.next():
+            c.setModeAccess(FLSqlCursor.DEL)
+            c.refreshBuffer()
+            if not c.commitBuffer():
+                return False
+
+        return True
+
     """
     Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
     Usar con precaución.
     """
     @decorators.NotImplementedWarn
-    def quickSqlDelete(self, t, w, connName = "default"):
+    def quickSqlDelete(self, t, w, connName="default"):
         pass
     """
     Crea un diálogo de progreso
