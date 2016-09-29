@@ -6,6 +6,7 @@ from PyQt4.QtCore import QString
 from PyQt4 import QtCore, QtGui
 import pineboolib
 from pineboolib.utils import DefFun
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
 
@@ -48,7 +49,7 @@ class FLUtil(ProjectClass):
     """
     def partInteger(self, n):
         i, d = divmod(n, 1)
-        return i
+        return int(i)
 
     """
     Obtiene la parte decimal de un número.
@@ -60,7 +61,8 @@ class FLUtil(ProjectClass):
     """
     def partDecimal(self, n):
         i, d = divmod(n, 1)
-        return d
+        d = d * 100
+        return int(d)
 
     """
     Enunciado de las unidades de un número.
@@ -196,8 +198,8 @@ class FLUtil(ProjectClass):
             return buffer
         
         if n < 1000000:
-            buffer = self.centenasmillar(n)
-            return buffer 
+            buffer = self.centenamillar(n)
+            return buffer
         else:
             if n / 1000000 == 1:
                 buffer = "un millon"
@@ -205,7 +207,7 @@ class FLUtil(ProjectClass):
                 buffer = self.centenas(n / 1000000)
                 buffer = buffer + " millones "
         
-        buffer = buffer + self.centenasmillar(n % 1000000)
+        buffer = buffer + self.centenamillar(n % 1000000)
         return buffer.upper()
     
     """
@@ -223,20 +225,20 @@ class FLUtil(ProjectClass):
     @decorators.BetaImplementation
     def enLetraMoneda(self, n, m):
         nTemp = n * -1.00 if n < 0.00 else n
-        entero = partInteger(nTemp)
-        decimal = partDecimal(nTemp)
+        entero = self.partInteger(nTemp)
+        decimal = self.partDecimal(nTemp)
         res = ""
 
         if entero > 0:
-            res = enLetra(entero) + " " + m
+            res = self.enLetra(entero) + " " + m
 
         if entero > 0 and decimal > 0:
             # res += QString(" ") + QT_TR_NOOP("con") + " " + enLetra(decimal) + " " + QT_TR_NOOP("céntimos");
-            res += " " + "con" + " " + enLetra(decimal) + " " + "céntimos"
+            res += " " + "con" + " " + self.enLetra(decimal) + " " + "céntimos"
 
         if entero <= 0 and decimal > 0:
             # res = enLetra(decimal) + " " + QT_TR_NOOP("céntimos");
-            res = enLetra(decimal) + " " + "céntimos"
+            res = self.enLetra(decimal) + " " + "céntimos"
 
         if n < 0.00:
             # res = QT_TR_NOOP("menos") + QString(" ") + res;
@@ -258,7 +260,7 @@ class FLUtil(ProjectClass):
     @decorators.BetaImplementation
     def enLetraMonedaEuro(self, n):
         # return enLetraMoneda(n, QT_TR_NOOP("euros"));
-        return enLetraMoneda(n, "euros")
+        return self.enLetraMoneda(n, "euros")
 
     """
     Obtiene la letra asociada al némero del D.N.I. español.
@@ -335,7 +337,9 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def formatoMiles(self, s):
-        decimal, entera
+        s = str(s)
+        decimal = ''
+        entera = ''
         ret = ''
         # dot = QApplication::tr(".")
         dot = '.'
@@ -343,7 +347,6 @@ class FLUtil(ProjectClass):
 
         if '.' in s:
             # decimal = QApplication::tr(",") + s.section('.', -1, -1)
-            # entera = s.section('.', -2, -2).remove('.')
             aStr = s.split('.')
             decimal = ',' + aStr[-1]
             entera = aStr[-2].replace('.', '')
