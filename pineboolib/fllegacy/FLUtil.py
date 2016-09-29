@@ -348,8 +348,8 @@ class FLUtil(ProjectClass):
         if '.' in s:
             # decimal = QApplication::tr(",") + s.section('.', -1, -1)
             aStr = s.split('.')
-            decimal = ',' + aStr[len(aStr) - 1]
-            entera = aStr[len(aStr) - 2].replace('.', '')
+            decimal = ',' + aStr[-1]
+            entera = aStr[-2].replace('.', '')
         else:
             entera = s
 
@@ -467,13 +467,13 @@ class FLUtil(ProjectClass):
             q.setTablesList(tMD.name())
             q.setSelect(name)
             q.setFrom(tMD.name())
-            q.setWhere("LENGHT(%s)=%s" % (name, len))
+            q.setWhere("LENGTH(%s)=%d" % (name, _len))
             q.setOrderBy(name + " DESC")
         
             if not q.exec():
                 return None
         
-            maxRange = pow(10, len)
+            maxRange = 10 ** _len
             numero = maxRange
         
             while numero >= maxRange:
@@ -522,8 +522,8 @@ class FLUtil(ProjectClass):
             len_ = field.length() - len(serie)
             cadena = None
             
-            where = "LEGTH(%s)=%s AND substring(%s FROM 1 for %s) = '%s'" % (name, field.length(), name, len(serie), serie)
-            select = "substring(%s FROM %s) as %s" % (name, len(serie) + 1, name)
+            where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
+            select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
             q = FLSqlQuery(None, cursor_.db().connectionName())
             q.setForwardOnly(True)
             q.setTablesList(tMD.name())
@@ -535,7 +535,7 @@ class FLUtil(ProjectClass):
             if not q.exec():
                 return None
             
-            maxRange = pow(10, len_)
+            maxRange = 10 ** len_
             numero = maxRange
             
             while numero >= maxRange:
@@ -548,7 +548,7 @@ class FLUtil(ProjectClass):
             
             if type_ == "string" or type_ == "double":
                 cadena = numero
-                if len(cadena) < len:
+                if len(cadena) < _len:
                     relleno = cadena.rjust(_len - len(cadena), '0')
                     cadena = relleno + cadena
                 
