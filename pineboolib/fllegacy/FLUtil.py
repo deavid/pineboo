@@ -516,7 +516,7 @@ class FLUtil(ProjectClass):
             if not type_ == "string" and not type_ == "double":
                 return None
             
-            len_ = field.length() - len(serie)
+            _len = field.length() - len(serie)
             cadena = None
             
             where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
@@ -532,7 +532,7 @@ class FLUtil(ProjectClass):
             if not q.exec():
                 return None
             
-            maxRange = 10 ** len_
+            maxRange = 10 ** _len
             numero = maxRange
             
             while numero >= maxRange:
@@ -883,7 +883,7 @@ class FLUtil(ProjectClass):
         pass
     
     @decorators.NotImplementedWarn
-    def usha1(self, data,len_):
+    def usha1(self, data,_len):
         pass
 
     """
