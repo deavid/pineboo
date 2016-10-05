@@ -2,8 +2,11 @@
 
 from PyQt4 import QtCore,QtGui
 
-from PyQt4.QtCore import QString, QVariant, Qt
+from PyQt4.QtCore import QString, Qt
 
+# TODO: Borrar el import del QVariant!!. QVariant es necesario en C++ porque es
+# ... el único modo de representar un tipo polimórfico. En Python esto es innecesario.
+from PyQt4.QtCore import QVariant
 
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
@@ -45,12 +48,12 @@ class FLLineEdit(QtGui.QLineEdit):
                 texto = self._maxValue
         super(FLLineEdit, self).setText(str(texto))
         self.textChanged.emit(texto)
-        
+
     def text(self):
         texto =  super(FLLineEdit, self).text()
         if texto == "":
             texto = None
-        
+
         return texto
 
     """
@@ -572,7 +575,7 @@ class FLFieldDB(QtGui.QWidget):
     @QtCore.pyqtSlot('QString')
     def updateValue(self, data = None):
         if isinstance(data, QString): #Para quitar en el futuro
-            data = str(data)   
+            data = str(data)
         isNull = False
         if data is None:
             if not self.cursor_:
@@ -580,9 +583,9 @@ class FLFieldDB(QtGui.QWidget):
             ted = self.editor_
             if not isinstance(ted, FLLineEdit):
                 return
-            
+
             t = self.editor_.text()
-            
+
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if t == self.cursor_.valueBuffer(self.fieldName_):
                     return
@@ -636,7 +639,8 @@ class FLFieldDB(QtGui.QWidget):
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if data == bool(self.cursor_.valueBuffer(self.fieldName_)):
                     return
-            self.cursor_.setValueBuffer(self.fieldName_, QtCore.QVariant(data, 0))
+            # self.cursor_.setValueBuffer(self.fieldName_, QtCore.QVariant(data, 0)) # ... esto porqué era un QVariant??
+            self.cursor_.setValueBuffer(self.fieldName_, data)
         elif isinstance(data, str):
             if not self.cursor_:
                 return
@@ -660,8 +664,8 @@ class FLFieldDB(QtGui.QWidget):
 
             elif not tAux:
                 return
-            
-            
+
+
             s = tAux
             if field.type() == "string" and not ol:
                 if len(s) > 0 and s[0] == " ":
@@ -672,7 +676,7 @@ class FLFieldDB(QtGui.QWidget):
 
             if self.editor_ and (field.type() == "double" or field.type() == "int" or field.type() == "uint"):
                 s = self.editor_.text()
-                
+
             self.cursor_.setValueBuffer(self.fieldName_, s)
 
             if self.isVisible() and self.hasFocus() and field.type() == "string" and field.length() == len(s):
@@ -857,22 +861,21 @@ class FLFieldDB(QtGui.QWidget):
     """
     def value(self):
         if not self.cursor_:
-            return QVariant()
+            return None
 
         tMD = self.cursor_.metadata()
         if not tMD:
-            return QVariant()
+            return None
 
         field = tMD.field(self.fieldName_)
         if not field:
             print(FLUtil.tr("FLFieldDB::value() : No existe el campo ") + self.fieldName_)
-            return QVariant()
+            return None
 
-        v = QVariant()
+        v = None
 
         if field.hasOptionsList():
-            v = self.editor_.currentItem()
-            v.cast(QVariant.Int)
+            v = int(self.editor_.currentItem())
             return v
 
         type_ = field.type()
@@ -906,7 +909,7 @@ class FLFieldDB(QtGui.QWidget):
 
         elif type_ == "bool":
             if self.editor_:
-                v = QVariant(self.editor_.isChecked(),False)
+                v = self.editor_.isChecked()
 
         v.cast(fltype)
         return v
@@ -1040,7 +1043,7 @@ class FLFieldDB(QtGui.QWidget):
     Establece el número de decimales
     """
     def setPartDecimal(self, d):
-        if self.editor_ and isinstance(self._editor.type , QVariant.Double):
+        if self.editor_ and isinstance(self._editor.type , (float, QVariant.Double) ):
             self.partDecimal_ = d
             self.editor_.partDecimal = d
             self.refreshQuick(self.fieldName_)
@@ -1159,10 +1162,10 @@ class FLFieldDB(QtGui.QWidget):
         ol = field.hasOptionsList()
 
         fDis = False
-        
+
         if isinstance(v , QString): #Para quitar
             v = str(v)
-        
+
         if self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or ( modeAcces == FLSqlCursor.Edit and ( field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or not field.editable() or modeAcces == FLSqlCursor.Browse:
             fDis = True
 
@@ -1207,7 +1210,7 @@ class FLFieldDB(QtGui.QWidget):
 
             if not ol and doHome:
                 self.editor_.home(False)
-            
+
             self.editor_.textChanged.connect(self.updateValue)
 
 
@@ -1481,12 +1484,12 @@ class FLFieldDB(QtGui.QWidget):
                         self.cursor_.newBuffer.disconnect(self.refresh)
                     except:
                         pass
-                    
+
                     try:
                         self.cursor_.bufferChanged.disconnect(self.refreshQuick)
                     except:
                         pass
-                    
+
                 self.cursor_.newBuffer.connect(self.refresh)
                 self.cursor_.bufferChanged.connect(self.refreshQuick)
                 self.cursorAux = False
