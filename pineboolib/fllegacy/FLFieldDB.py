@@ -54,7 +54,7 @@ class FLLineEdit(QtGui.QLineEdit):
         if texto == "":
             texto = None
 
-        return texto
+        return str(texto)
 
     """
     Especifica un valor máximo para el text (numérico)
