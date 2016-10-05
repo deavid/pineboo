@@ -4,7 +4,6 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, fllegacy
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import DefFun
-from pineboolib.fllegacy.FLUtil import FLUtil
 
 from PyQt4 import QtCore,QtGui
 from PyQt4.QtCore import QString, QVariant
@@ -2684,3 +2683,4 @@ class FLSqlCursor(ProjectClass):
     clearPersistentFilter = QtCore.pyqtSignal()
 
 #endif
+from pineboolib.fllegacy.FLUtil import FLUtil

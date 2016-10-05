@@ -6,23 +6,20 @@ from PyQt4.QtCore import QString
 from PyQt4 import QtCore, QtGui
 import pineboolib
 from pineboolib.utils import DefFun
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLSettings import FLSettings
 
 
 class FLUtil(ProjectClass):
-    
+
     progress_dialog_stack = []
     vecUnidades = ['','uno','dos','tres','cuatro','cinco','seis', 'siete','ocho','nueve','diez','once','doce','trece',
                    'catorce','quince','dieciseis','diecisiete','dieciocho','diecinueve','veinte','veintiun','veintidos',
                    'veintitres','veinticuatro','veinticinco','veintiseis','veintisiete','veintiocho','veintinueve']
-    
+
     vecDecenas = ['','','','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa']
     vecCentenas = ['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos',
                    'setecientos','ochocientos','novecientos']
-    
-    
+
+
 
     """
     Clase con métodos, herramientas y utiles necesarios para ciertas operaciones.
@@ -37,7 +34,7 @@ class FLUtil(ProjectClass):
     """
 
     def __getattr__(self, name): return DefFun(self, name)
-    
+
     """
     Obtiene la parte entera de un número.
 
@@ -72,8 +69,8 @@ class FLUtil(ProjectClass):
     def unidades(self, n):
         if n > 0:
             return self.vecUnidades[n]
-        
-            
+
+
 
     """
     Pasa una cadena a codificación utf-8
@@ -92,17 +89,17 @@ class FLUtil(ProjectClass):
     """
     def centenamillar(self, n):
         buffer = None
-        
+
         if n < 10000:
             buffer = self.decenasmillar(n)
             return buffer
-        
+
         buffer = self.centenas(n / 1000)
         buffer = buffer + " mil "
         buffer = buffer + self.centenas(n % 1000)
-        
+
         return buffer
-        
+
 
     """
     Enunciado de las decenas de un número.
@@ -111,7 +108,7 @@ class FLUtil(ProjectClass):
     """
     def decenas(self, n):
         buffer = None
-        
+
         if n < 30:
             buffer = self.unidades(n)
         else:
@@ -119,8 +116,8 @@ class FLUtil(ProjectClass):
             if n % 10:
                 buffer = buffer + " y "
                 buffer = buffer + self.unidades(n % 10)
-                
-            
+
+
         return buffer
 
     """
@@ -132,14 +129,14 @@ class FLUtil(ProjectClass):
         buffer = None
         if n == 100:
             buffer = "cien"
-        
+
         elif n < 100:
             buffer = self.decenas(n)
         else:
             buffer = buffer + self.vecCentenas[self.partInteger(n / 100)]
             buffer = buffer + " "
             buffer = buffer + self.decenas( n % 100)
-        
+
         return buffer
 
     """
@@ -151,19 +148,19 @@ class FLUtil(ProjectClass):
         buffer = None
         if n < 1000:
             buffer = ""
-        
+
         if n/1000 == 1:
             buffer = "mil "
-        
+
         if n/1000 > 1:
             buffer = self.unidades(n / 1000)
             buffer = buffer + " mil "
-        
+
         buffer = buffer + self.centenas( n % 1000)
-        
+
         return buffer
-    
-    
+
+
 
     """
     Enunciado de las decenas de millar de un número.
@@ -175,7 +172,7 @@ class FLUtil(ProjectClass):
         if n < 10000:
             buffer = self.unidadesmillar(n)
             return buffer
-        
+
         buffer = self.decenas(n / 1000)
         buffer = buffer + " mil "
         buffer = buffer + self.centenas( n % 10000)
@@ -196,7 +193,7 @@ class FLUtil(ProjectClass):
         if n > 1000000000:
             buffer = "Sólo hay capacidad hasta mil millones"
             return buffer
-        
+
         if n < 1000000:
             buffer = self.centenamillar(n)
             return buffer
@@ -206,10 +203,10 @@ class FLUtil(ProjectClass):
             else:
                 buffer = self.centenas(n / 1000000)
                 buffer = buffer + " millones "
-        
+
         buffer = buffer + self.centenamillar(n % 1000000)
         return buffer.upper()
-    
+
     """
     Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
     y en cualquier moneda indicada.
@@ -413,14 +410,14 @@ class FLUtil(ProjectClass):
     @return Qvariant con el numero siguiente.
     @author Andrés Otón Urbano.
     """
-    
+
     """
     dpinelo: Este método es una extensión de nextCounter pero permitiendo la introducción de una primera
     secuencia de caracteres. Es útil cuando queremos mantener diversos contadores dentro de una misma tabla.
     Ejemplo, Tabla Grupo de clientes: Agregamos un campo prefijo, que será una letra: A, B, C, D.
     Queremos que la numeración de los clientes sea del tipo A00001, o B000023. Con esta función, podremos
     seguir usando los métodos counter cuando agregamos esa letra.
-  
+
     Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla para una serie determinada.
 
     Este metodo es muy util cuando se insertan registros en los que
@@ -438,30 +435,30 @@ class FLUtil(ProjectClass):
     @author Andrés Otón Urbano.
     """
     def nextCounter(self, *args, **kwargs):
-        
+
         if len(args) == 2:
             name = args[0]
             cursor_ = args[1]
-            
+
             if not cursor_:
                 return None
-        
+
             tMD = cursor_.metadata()
             if not tMD:
                 return None
-        
+
             field = tMD.field(name)
             if not field:
                 return None
-        
+
             type_ = field.type()
-        
+
             if not type_ == "string" and not not type_ == "double":
                 return None
-        
+
             _len = field.length()
             cadena = None
-        
+
             q = FLSqlQuery(None, cursor_.db().connectionName())
             q.setForwardOnly(True)
             q.setTablesList(tMD.name())
@@ -469,59 +466,59 @@ class FLUtil(ProjectClass):
             q.setFrom(tMD.name())
             q.setWhere("LENGTH(%s)=%d" % (name, _len))
             q.setOrderBy(name + " DESC")
-        
+
             if not q.exec():
                 return None
-        
+
             maxRange = 10 ** _len
             numero = maxRange
-        
+
             while numero >= maxRange:
                 if not q.next():
                     numero = 1
                     break
-            
+
                 numero = float(q.value(0))
                 numero = numero + 1
-        
-        
+
+
             if type_ == "string":
                 cadena = str(numero)
                 if len(cadena) < _len:
                     relleno = None
                     relleno = cadena.rjust(_len - len(cadena), '0')
                     cadena = str + cadena
-            
+
                 return cadena
-        
+
             if type_ == "double":
                 return numero
-        
+
             return None
-        
+
         else:
             serie = args[0]
             name = args[1]
             cursor_ = args[2]
-            
+
             if not cursor_:
                 return None
-            
+
             tMD = cursor_.metadata()
             if not tMD:
                 return None
-            
+
             field = tMD.field(name)
             if not field:
                 return None
-            
+
             type_ = field.type()
             if not type_ == "string" and not type_ == "double":
                 return None
-            
+
             _len = field.length() - len(serie)
             cadena = None
-            
+
             where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
             select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
             q = FLSqlQuery(None, cursor_.db().connectionName())
@@ -530,33 +527,33 @@ class FLUtil(ProjectClass):
             q.setSelect(select)
             q.setFrom(tMD.name())
             q.setWhere(where)
-            q.setOrderBy(name + " DESC") 
-            
+            q.setOrderBy(name + " DESC")
+
             if not q.exec():
                 return None
-            
+
             maxRange = 10 ** _len
             numero = maxRange
-            
+
             while numero >= maxRange:
                 if not q.next():
                     numero = 1
                     break
-                
+
                 numero = float(q.value(0))
                 numero = numero + 1
-            
+
             if type_ == "string" or type_ == "double":
                 cadena = numero
                 if len(cadena) < _len:
                     relleno = cadena.rjust(_len - len(cadena), '0')
                     cadena = relleno + cadena
-                
+
                 #res = serie + cadena
                 return cadena
-            
+
             return None
-                    
+
     """
     Nos devuelve el siguiente valor de la secuencia segun la profundidad indicada por nivel.
     Para explicar el funcionamiento pondremos un ejemplo. Supongamos una secuencia tipo %A-%N.
@@ -603,7 +600,7 @@ class FLUtil(ProjectClass):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(fecha))
-        return fecha.addDays(offset)        
+        return fecha.addDays(offset)
 
     """
     Suma meses a una fecha.
@@ -632,7 +629,7 @@ class FLUtil(ProjectClass):
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
         return fecha.addYears(offset)
-    
+
     """
     Diferencia de dias desde una fecha a otra.
 
@@ -665,7 +662,7 @@ class FLUtil(ProjectClass):
 
     @return Valor del setting
     """
-    
+
     def readSettingEntry(self, key, def_ = None, ok = False):
         return FLSettings().readEntry(key, def_, ok)
     """
@@ -694,7 +691,7 @@ class FLUtil(ProjectClass):
         q.setTablesList("flsettings")
         if q.exec() and q.fisrt():
             return q.value(0)
-            
+
 
     """
     Establece el valor de un setting en la tabla flsettings
@@ -737,17 +734,17 @@ class FLUtil(ProjectClass):
             q.setTablesList(tL)
         else:
             q.setTablesList(f)
-        
+
         q.setSelect(s)
         q.setFrom(f)
         q.setWhere(w)
         q.setForwardOnly(True)
         if not q.exec():
             return False
-        
+
         if q.next():
             return q.value(0)
-        
+
         if size:
             return False
 
@@ -825,7 +822,7 @@ class FLUtil(ProjectClass):
         pd_widget = QtGui.QProgressDialog()
         pd_widget.setup(title, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
-  
+
     """
     Destruye el diálogo de progreso
     """
@@ -851,7 +848,7 @@ class FLUtil(ProjectClass):
     """
     def setLabelText(self, l, id_ = "default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
-        pd_widget.setLabelText(l)      
+        pd_widget.setLabelText(l)
 
     """
     Establece el número total de pasos del diálogo
@@ -861,7 +858,7 @@ class FLUtil(ProjectClass):
     def setTotalSteps(self, tS, id_ = "default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setTotalSteps(tS)
-  
+
     """
     Establece el contenido de un documento XML.
 
@@ -884,7 +881,7 @@ class FLUtil(ProjectClass):
     @decorators.NotImplementedWarn
     def sha1(self, str_):
         pass
-    
+
     @decorators.NotImplementedWarn
     def usha1(self, data,_len):
         pass
@@ -953,7 +950,7 @@ class FLUtil(ProjectClass):
     @decorators.NotImplementedWarn
     def serialLettertoNumber(self, letter):
         pass
-    
+
     """
     Esta función convierte un numero a su correspondiente secuencia de Letras.
 
@@ -962,7 +959,7 @@ class FLUtil(ProjectClass):
     @decorators.NotImplementedWarn
     def serialNumbertoLetter(self, number):
         pass
-    
+
     """
     Busca ficheros recursivamente en las rutas indicadas y según el patrón indicado
 
@@ -991,7 +988,7 @@ class FLUtil(ProjectClass):
     @decorators.NotImplementedWarn
     def findFiles(self, paths, filter_ = "*", breakOnFirstMatch = False):
         pass
-    
+
     """
     Uso interno
     """
@@ -1009,3 +1006,8 @@ class FLUtil(ProjectClass):
     @decorators.NotImplementedWarn
     def savePixmap(self, data, filename, format_):
         pass
+
+
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLSettings import FLSettings

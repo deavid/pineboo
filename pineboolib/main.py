@@ -17,16 +17,10 @@ import zlib
 
 
 from PyQt4 import QtGui, QtCore
-from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSettings import FLSettings
 if __name__ == "__main__":
     sys.path.append('..')
 
-from pineboolib import qt3ui
-from pineboolib.PNConnection import PNConnection
-from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.fllegacy.FLFormDB import FLFormDB
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 import pineboolib.emptyscript
 from pineboolib import decorators
 
@@ -171,12 +165,12 @@ class Project(object):
                 self.files[nombre] = fileobj
                 self.modules[idmodulo].add_project_file(fileobj)
 
-    
+
     def saveGeometryForm(self, name, geo):
         name = "geo/%s" % name
         FLSettings().writeEntry(name, geo)
-        
-    
+
+
     def loadGeometryForm(self, name):
         name = name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
@@ -532,6 +526,9 @@ class XMLAction(XMLStruct):
         print("Executing unknown script for Action", self.name)
         #Aquí debería arramcar el script
 
+
+from pineboolib.fllegacy.FLFormDB import FLFormDB
+
 class FLMainForm(FLFormDB):
     """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """
     pass
@@ -539,3 +536,8 @@ class FLMainForm(FLFormDB):
 
 
 
+from pineboolib import qt3ui
+from pineboolib.PNConnection import PNConnection
+from pineboolib.dbschema.schemaupdater import parseTable
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
