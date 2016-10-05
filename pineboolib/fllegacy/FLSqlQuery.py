@@ -18,6 +18,7 @@ class FLSqlQuery(ProjectClass):
     """
 
     def __init__(self, parent = None, connectionName = "default"):
+        super(FLSqlQuery, self).__init__()
         
         self.d = FLSqlQueryPrivate()
         self.d.db_ = self._prj.conn
@@ -477,7 +478,7 @@ class FLSqlQuery(ProjectClass):
         return self.d.fieldMetaDataList_
     
 
-    countRefQuery = None
+    countRefQuery = 0
 
     """
     Para obtener la base de datos sobre la que trabaja
