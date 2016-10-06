@@ -1809,12 +1809,10 @@ class FLSqlCursor(ProjectClass):
 
         return b
 
-
-
-
-
     def moveby(self, pos):
-        return self.move(pos+self.d._currentregister)
+        if self.d._currentregister:
+            pos += self.d._currentregister
+        return self.move(pos)
 
     """
     Redefinicion del método prev() de QSqlCursor.
