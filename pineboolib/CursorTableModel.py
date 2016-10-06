@@ -31,6 +31,19 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.field_aliases = []
         self.field_type = []
         self.field_metaData = []
+
+        # Indices de busqueda segun PK y CK. Los array "pos" guardan las posiciones
+        # de las columnas afectadas. PK normalmente valdrá [0,].
+        # CK puede ser [] o [2,3,4] por ejemplo.
+        # En los IDX tendremos como clave el valor compuesto, en array, de la clave.
+        # Como valor del IDX tenemos la posicion de la fila.
+        # Si se hace alguna operación en _data como borrar filas intermedias hay
+        # que invalidar los indices. Opcionalmente, regenerarlos.
+        self.pkpos = []
+        self.ckpos = []
+        self.pkidx = {}
+        self.ckidx = {}
+        self.indexes_valid = False # Establecer a False otra vez si el contenido de los indices es erróneo.
         #for field in self._table.fields:
             #if field.visible_grid:
             #self.sql_fields.append(field.name())
@@ -41,8 +54,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.rows = 0
         self.where_filters = {}
         self.refresh()
-        
-    
+
+
     def metadata(self):
         return self._prj.conn.manager().metadata(self._table.name)
 
@@ -66,12 +79,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # FIXME: Agregado limit de 5000 registros para evitar atascar pineboo
         # TODO: Convertir esto a un cursor de servidor
-        sql_fields = []
-        for field in self.tableMetadata().fieldListObject():
+        self.sql_fields = []
+        self.pkpos = []
+        self.ckpos = []
+        for n,field in enumerate(self.tableMetadata().fieldListObject()):
             #if field.visibleGrid():
             #    sql_fields.append(field.name())
-            sql_fields.append(field.name())
-        sql = """SELECT %s FROM %s WHERE %s LIMIT 5000""" % (", ".join(sql_fields),self.tableMetadata().name(), where_filter)
+            if field.isPrimaryKey(): self.pkpos.append(n)
+            if field.isCompoundKey(): self.ckpos.append(n)
+
+            self.sql_fields.append(field.name())
+
+        sql = """SELECT %s FROM %s WHERE %s LIMIT 5000""" % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         self._cursor.execute(sql)
         self.rows = 0
         self.endRemoveRows()
@@ -82,23 +101,35 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #print("QUERY:", sql)
         self.rows = newrows
         self._data = []
-        for row in self._cursor:
-            self._data.append(list(row))
+        for n,row in enumerate(self._cursor):
+            row = list(row)
+            self._data.append(row)
+            self.indexUpdateRow(n)
+        self.indexes_valid = True
         self.endInsertRows()
         topLeft = self.index(0,0)
         bottomRight = self.index(self.rows-1,self.cols-1)
         self.dataChanged.emit(topLeft,bottomRight)
         #print("rows:", self.rows)
 
+    def indexUpdateRow(self, rownum):
+        row = self._data[rownum]
+        if self.pkpos:
+            key = tuple([ row[x] for x in self.pkpos ])
+            self.pkidx[key] = rownum
+        if self.ckpos:
+            key = tuple([ row[x] for x in self.ckpos ])
+            self.ckidx[key] = rownum
+
     def value(self, row, fieldname):
         if row < 0 or row >= self.rows: return None
-        
+
         col = self.metadata().indexPos(fieldname)
         campo = self._data[row][col]
-        
+
         """
         if self.metadata().field(fieldname).type() == "pixmap":
-            q = FLSqlQuery()     
+            q = FLSqlQuery()
             q.setSelect("contenido")
             q.setFrom("fllarge")
             q.setWhere("refkey == '%s'" % campo)
@@ -108,8 +139,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         else:
             return campo
         """
-        return campo   
-        
+        return campo
+
         """
         value = None
         if row < 0 or row >= self.rows: return value
@@ -129,28 +160,68 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             value = self._data[row][col]
         return value
         """
-    
+    def updateValuesDB(self, pKValue, dict_update):
+        row = self.findPKRow([pKValue])
+        if row is None:
+            raise AssertionError("Los indices del CursorTableModel no devolvieron un registro (%r)" % (pKValue))
+
+        if self.value(row, self.pK()) != pKValue:
+            raise AssertionError("Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.value(row, self.pK()), pKValue))
+
+        self.setValuesDict(row, dict_update)
+        pkey_name = self.tableMetadata().primaryKey()
+        # TODO: la conversion de mogrify de bytes a STR va a dar problemas con los acentos...
+        where_filter = "%s = %s" % (pkey_name, (self._cursor.mogrify("%s",[pKValue])))
+        print("pkvalue = %r" % pKValue)
+        update_set = []
+
+        for key, value in dict_update.items():
+            update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
+            print("field %r = %r" % (key,value))
+
+        update_set_txt = ", ".join(update_set)
+        sql = """UPDATE %s SET %s WHERE %s RETURNING *""" % (self.tableMetadata().name(), update_set_txt, where_filter)
+        print("MODIFYING SQL :: ", sql)
+        self._cursor.execute(sql)
+        returning_fields = [ x[0] for x in self._cursor.description ]
+
+        for orow in self._cursor:
+            dict_update = dict(zip(returning_fields, orow))
+            self.setValuesDict(row, dict_update)
+
+
+
     """
-    Asigna un valor una celda
+    Asigna un valor una fila usando un diccionario
     @param row. Columna afectada
-    @param fieldname. Nonbre de la fila afectata. Se puede obtener la columna con self.metadata().indexPos(fieldname)
-    @param value. Valor a asignar. Puede ser texto, pixmap, etc...
+    @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
     """
-    @decorators.NotImplementedWarn
-    def setValue(self, row, fieldname, value):
+    @decorators.BetaImplementation
+    def setValuesDict(self, row, update_dict):
 
-        col = self.metadata().indexPos(fieldname)
-
-        print("CursorTableModel.setValue(row %s, col %s) = %r" % (row, col, value))
+        print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
 
         try:
-
-            self._data[row][col] = value
+            for fieldname,value in update_dict.items():
+                col = self.metadata().indexPos(fieldname)
+                self._data[row][col] = value
+            self.indexUpdateRow(row)
 
         except Exception:
 
-            print("CursorTableModel.setValue(row %s, col %s) = %r :: ERROR:" % (row, col, value), traceback.format_exc())
-    
+            print("CursorTableModel.setValuesDict(row %s) = %r :: ERROR:" % (row, update_dict), traceback.format_exc())
+
+
+    """
+    Asigna un valor una celda
+    @param row. Columna afectada
+    @param fieldname. Nonbre de la fila afectada. Se puede obtener la columna con self.metadata().indexPos(fieldname)
+    @param value. Valor a asignar. Puede ser texto, pixmap, etc...
+    """
+    def setValue(self, row, fieldname, value):
+        # Reimplementación para que todo pase por el método genérico.
+        self.setValuesDict(self, row, { fieldname : value } )
+
     """
     Crea una nueva linea en el tableModel
     @param buffer . PNBuffer a añadir
@@ -158,7 +229,33 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     @decorators.NotImplementedWarn
     def newRowFromBuffer(self, buffer):
         pass
-            
+
+    def findPKRow(self, pklist):
+        if not isinstance(pklist, (tuple, list)):
+            raise ValueError("findPKRow expects a list as first argument. Enclose PK inside brackets [self.pkvalue]")
+        if not self.indexes_valid:
+            for n in range(self.rows):
+                self.indexUpdateRow(n)
+            self.indexes_valid = True
+        pklist = tuple(pklist)
+        if pklist not in self.pkidx:
+            print("CursorTableModel.findPKRow:: PK not found: %r (requires list, not integer or string)" % pklist)
+            return None
+        return self.pkidx[pklist]
+
+    def findCKRow(self, cklist):
+        if not isinstance(cklist, (tuple, list)):
+            raise ValueError("findCKRow expects a list as first argument.")
+        if not self.indexes_valid:
+            for n in range(self.rows):
+                self.indexUpdateRow(n)
+            self.indexes_valid = True
+        cklist = tuple(cklist)
+        if cklist not in self.ckidx:
+            print("CursorTableModel.findCKRow:: CK not found: %r (requires list, not integer or string)" % pklist)
+            return None
+        return self.ckidx[cklist]
+
 
     def pK(self): #devuelve el nombre del campo pk
         return self.tableMetadata().primaryKey()
@@ -181,7 +278,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         except:
             print("CursorTableModel: No se encuentra el campo %s" % fieldName)
             return None
-            
+
         """
     def alias(self, fieldName):
         return self.tableMetadata().field(fieldName).alias()
@@ -234,7 +331,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 raise
 
         return None
-    
+
     def fieldMetadata(self, fieldName):
         return self.tableMetadata().field(fieldName)
         """
@@ -247,7 +344,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         """
     def tableMetadata(self):
         return self._prj.conn.manager().metadata(self._table.name)
-        
-    
-        
-        
+
+
+
+

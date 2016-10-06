@@ -10,13 +10,11 @@ import traceback
 import pineboolib
 from pineboolib import flcontrols
 
-from pineboolib.fllegacy import FLUtil
 
 from pineboolib.utils import aqtt, auto_qt_translate_text
 
 def parseFloat(x): return float(x)
 
-util = FLUtil.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
 # TODO: separar en otro fichero de utilidades
 def ustr(*t1):
@@ -178,6 +176,8 @@ class qsa:
                 print(traceback.format_exc(4))
 
 
+from pineboolib.fllegacy import FLUtil
+util = FLUtil.FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
 # -------------------------- FORBIDDEN FRUIT ----------------------------------
 # Esto de aquí es debido a que en Python3 decidieron que era mejor abandonar
