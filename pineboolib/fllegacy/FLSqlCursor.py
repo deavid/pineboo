@@ -1323,7 +1323,7 @@ class FLSqlCursor(ProjectClass):
                     sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
                 else:
                     sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
-                q.exec_(sqlIn)
+                q.exec_(self.d.db_, sqlIn)
                 if not q.next():
                     self.seek(self.at())
                     if self.isValid():
