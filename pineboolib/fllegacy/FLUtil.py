@@ -6,7 +6,6 @@ from PyQt4.QtCore import QString
 from PyQt4 import QtCore, QtGui
 import pineboolib
 from pineboolib.utils import DefFun
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
 
@@ -72,8 +71,6 @@ class FLUtil(ProjectClass):
     def unidades(self, n):
         if n > 0:
             return self.vecUnidades[n]
-        
-            
 
     """
     Pasa una cadena a codificación utf-8
@@ -653,9 +650,18 @@ class FLUtil(ProjectClass):
 
     @return Cadena que contiene el número formateado
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def buildNumber(self, v, tipo, partDecimal):
-        pass
+        d = float(v) * 10**partDecimal
+        d = round(d)
+        d = d / 10**partDecimal
+        # ret.setNum(d, tipo, partDecimal)
+        # formamos algo de este tipo: '{:.3f}'.format(34.14159265358979)
+        # '34.142'
+        f = '{:.' + str(partDecimal) + 'f}'
+        ret = f.format(d)
+        return ret
+
     """
     Lee el valor de un setting en el directorio de la instalación de AbanQ
 
@@ -665,8 +671,8 @@ class FLUtil(ProjectClass):
 
     @return Valor del setting
     """
-    
-    def readSettingEntry(self, key, def_ = None, ok = False):
+
+    def readSettingEntry(self, key, def_=None, ok=False):
         return FLSettings().readEntry(key, def_, ok)
     """
     Establece el valor de un setting en el directorio de instalación de AbanQ
@@ -694,7 +700,6 @@ class FLUtil(ProjectClass):
         q.setTablesList("flsettings")
         if q.exec() and q.fisrt():
             return q.value(0)
-            
 
     """
     Establece el valor de un setting en la tabla flsettings
@@ -716,9 +721,23 @@ class FLUtil(ProjectClass):
 
     @return Número redondeado
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def roundFieldValue(self, n, table, field):
-        pass
+        from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
+        tmd = FLSqlConnections().database().manager().metadata(table)
+        if not tmd:
+            return 0
+        fmd = tmd.field(field)
+        if not fmd:
+            if tmd and not tmd.inCache():
+                del tmd
+            return 0
+
+        ret = self.buildNumber(n, 'f', fmd.partDecimal())
+        if tmd and not tmd.inCache():
+            del tmd
+        return ret
+
     """
     Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
 
@@ -737,17 +756,17 @@ class FLUtil(ProjectClass):
             q.setTablesList(tL)
         else:
             q.setTablesList(f)
-        
+
         q.setSelect(s)
         q.setFrom(f)
         q.setWhere(w)
         q.setForwardOnly(True)
         if not q.exec():
             return False
-        
+
         if q.next():
             return q.value(0)
-        
+
         if size:
             return False
 
@@ -755,9 +774,16 @@ class FLUtil(ProjectClass):
     Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
     Usar con precaución.
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def quickSqlSelect(self, f, s, w, connName="default"):
-        pass
+        from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
+        if not w:
+            sql = "select " + s + " from " + f
+        else:
+            sql = "select " + s + " from " + f + " where " + w
+        q = FLSqlQuery(sql, FLSqlConnections().database(connName).db())
+        return q.value(0) if q.next() else False
+
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
 
@@ -794,11 +820,13 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def sqlDelete(self, t, w, connName="default"):
-        c = FLSqlCursor(t, true, connName)
-        c.setForwardOnly(true)
+        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+        c = FLSqlCursor(t, True, connName)
+        c.setForwardOnly(True)
 
-        if not c.select(w):
-            return False
+        # if not c.select(w):
+        #     return False
+        c.select(w)
 
         while c.next():
             c.setModeAccess(FLSqlCursor.DEL)

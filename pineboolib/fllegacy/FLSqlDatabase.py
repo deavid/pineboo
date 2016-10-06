@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-#Completada Si
+# Completada Si
 from PyQt4 import QtCore, QtGui
-#from pineboolib.fllegacy.FLUtil import FLUtil
+# from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
@@ -10,10 +10,6 @@ from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
-
-
-
-
 
 
 class FLSqlDatabase():
@@ -427,68 +423,68 @@ class FLSqlDatabase():
     @param cur Cursor sobre el que calcular la posición del registro.
     @return Posición del registro dentro del cursor.
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def atFrom(self, *cur):
         if not self.db_ or not cur:
             return None
-        
+
         dr = cur.driver()
-        
+
         return dr.atForm(cur)
-    
+
     """
     @return Conexión principal a la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def db(self):
         return self.db_
 
     """
     @return Conexión auxiliar a la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def dbAux(self):
         return self.dbAux_
 
     """
     @return Nombre de la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def database(self):
         return self.database_
 
     """
     @return Usuario utilizado para conectar a la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def user(self):
         return self.user_
 
     """
     @return Contraseña utilizada para conectar a la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def password(self):
         return self.password_
 
     """
     @return Dirección del servidor donde se encuentra la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def host(self):
         return self.host_
 
     """
     @return Puerto TCP utlizado para conectar al servidor de la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def port(self):
         return self.port_
-    
+
     """
     @return Nombre interno del driver utilizado para conectar a la base de datos actual
     """
-    @decorators.BetaImplementation   
+    @decorators.BetaImplementation
     def driverName(self):
         return self.driverName_
 
@@ -745,12 +741,12 @@ class FLSqlDatabase():
     def interactiveGUI(self):
         #return interactiveGUI_ && qApp && !qApp->aqWasDeleted();
         return self.interactiveGUI_
-    
-    @decorators.BetaImplementation   
-    def setInteractiveGUI(self, on = True):
+
+    @decorators.BetaImplementation
+    def setInteractiveGUI(self, on=True):
         self.interactiveGui_ = on
-        if self.globalAQSInterpreter:
-            self.globalAQSInterpreter.setInteractiveGUI(self.interactiveGUI_)
+        # if self.globalAQSInterpreter:
+        #     self.globalAQSInterpreter.setInteractiveGUI(self.interactiveGUI_)
 
     """ Ver propiedad qsaExceptions_   """
     @decorators.BetaImplementation   
