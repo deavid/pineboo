@@ -884,7 +884,7 @@ class FLSqlCursor(ProjectClass):
 
         #v.cast(fltype)
 
-        if not v.isNull() and type_ == "pixmap":
+        if v and type_ == "pixmap":
             vl = self.d.db_.manager().fetchLargeValue(v)
             if vl.isValid():
                 return vl
