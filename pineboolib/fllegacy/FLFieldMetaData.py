@@ -397,6 +397,8 @@ class FLFieldMetaData():
     """
     @decorators.BetaImplementation
     def defaultValue(self):
+        if not self.d.defaultValue_:
+            self.d.defaultValue_ = ""
         return self.d.defaultValue_
 
     """
