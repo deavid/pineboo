@@ -1606,7 +1606,7 @@ class FLFieldDB(QtGui.QWidget):
         self.initMaxSize_ = self.maximumSize()
         self.initMinSize_ = self.minimumSize()
 
-        if type_ == "unit" or type_ == "int" or type_ == "double" or type_ == "string":
+        if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
                 self.editor_ = QtGui.QComboBox()
                 self.editor_.name = "editor"
@@ -2843,7 +2843,7 @@ class FLIntValidator(QtGui.QIntValidator):
 class FLUIntValidator(QtGui.QIntValidator):
 
     def __init__(self, *args, **kwargs):
-            super(FLUIntValidator, self).__init__(*args)
+            super(FLUIntValidator, self).__init__()
 
     def validate(self, input_, i):
         if input_.isEmpty():
