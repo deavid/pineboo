@@ -1190,8 +1190,10 @@ class FLFieldDB(QtGui.QWidget):
             if v:
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
-            elif not nulo:
+            elif nulo:
                 self.editor_.setText(field.defaultValue())
+            else:
+                self.editor_.setText("0,00")
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -2811,7 +2813,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 class FLIntValidator(QtGui.QIntValidator):
 
     def __init__(self, *args, **kwargs):
-            super(FLIntValidator, self).__init__(*args)
+            super(FLIntValidator, self).__init__()
 
     def validate(self, input_, i):
         if input_.isEmpty():
@@ -2849,7 +2851,7 @@ class FLUIntValidator(QtGui.QIntValidator):
         if input_.isEmpty():
             return QtGui.QValidator.Acceptable
 
-        iV = QtGui.QIntValidator(0, 1000000000, 0)
+        iV = QtGui.QIntValidator()
         state = iV.validate(input_, i)
         if state == QtGui.QValidator.Intermediate:
             state = QtGui.QValidator.Invalid
