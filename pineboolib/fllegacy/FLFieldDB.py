@@ -1577,7 +1577,7 @@ class FLFieldDB(QtGui.QWidget):
         self.fieldAlias_ = field.alias()
 
         self.textLabelDB.setFont(QtGui.QApplication.font())
-        if self.showAlias_ and not type == "pixmap" and not type == "bool":
+        if not type_ == "pixmap" and not type_ == "bool":
             if not field.allowNull() and field.editable():
                 self.textLabelDB.setText(self.fieldAlias_ + QString("*"))
             else:
