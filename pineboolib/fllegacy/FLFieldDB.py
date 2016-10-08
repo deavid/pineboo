@@ -242,7 +242,7 @@ class FLFieldDB(QtGui.QWidget):
             self.setName("FLFieldDB")
 
         self.cursorBackup_ = False
-        self.partDecimal_ = -1
+        self.partDecimal_ = None
 
 
 
@@ -677,7 +677,7 @@ class FLFieldDB(QtGui.QWidget):
 
             s = tAux
             if field.type() == "string" and not ol:
-                if len(s) > 0 and s[0] == " ":
+                if len(s) > 1 and s[0] == " ":
                     self.cursor_.bufferChanged.disconnect(self.refreshQuick)
                     self.cursor.setValueBuffer(self.fieldName_, s[1:])
                     self.cursor_.bufferChanged.connect(self.refreshQuick)
@@ -809,25 +809,23 @@ class FLFieldDB(QtGui.QWidget):
 
         elif type_ == "double":
             if self.editor_:
-                #s = QString()
-                #if not isNull:
-                #    if not self.partDecimal_ == -1:
-                #        s.setNum(v.toDouble(), 'f', self.partDecimal_ )
-                #    else:
-                #        s.setNum(v.toDouble(), 'f', field.partDecimal() )
-                #self.editor_.setText(s)
-                if v:
-                    self.editor_.setText(str(v))
-                #else:
-                #    self.editor_.setText(0.00)
+                s = None
+                if v :
+                    if self.partDecimal_:
+                        s = round(float(v), self.partDecimal_)
+                    else:
+                        s = round(float(v), field.partDecimal())
+                    
+                    self.editor_.setText(str(s))
+
 
 
         elif type_ == "serial":
             if self.editor_:
                 if not v:
-                    self.editor_.setValue(0)
+                    self.editor_.setText("0")
                 else:
-                    self.editor_.setValue(str(v))
+                    self.editor_.setText(str(v))
 
 
         elif type_ == "pixmap":
@@ -1158,12 +1156,15 @@ class FLFieldDB(QtGui.QWidget):
         if not field:
             return
         type_ = field.type()
+        
+        
+        
         if not type_ == "pixmap" and not self.editor_:
             return
 
         modeAcces = self.cursor_.modeAccess()
-        partDecimal = -1
-        if not self.partDecimal_ == -1:
+        partDecimal = None
+        if self.partDecimal_:
             partDecimal = self.partDecimal_
         else:
             partDecimal = field.partDecimal()
@@ -1188,12 +1189,9 @@ class FLFieldDB(QtGui.QWidget):
             s = None
             if v:
                 s = round(float(v), partDecimal)
-                if not nulo:
-                    self.editor_.setText(str(s))
-                else:
-                    self.editor_.setText(str(s))
-            else:
-                self.editor_.setText("0.00")
+                self.editor_.setText(str(s))
+            elif not nulo:
+                self.editor_.setText(field.defaultValue())
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -1209,11 +1207,12 @@ class FLFieldDB(QtGui.QWidget):
                 if ol:
                     self.editor_.setCurrentIndex(field.getIndexOptionsList(v))
                 else:
-                    if v:
-                        self.editor_.setText(v)
+                    self.editor_.setText(v)
             else:
                 if ol:
                     self.editor_.setCurrentIndex(0)
+                elif not nulo:
+                    self.editor_.setText(field.defaultValue())
                 else:
                     self.editor_.setText("")
 
@@ -1230,11 +1229,11 @@ class FLFieldDB(QtGui.QWidget):
             except:
                 pass
             #s = None
-            if not nulo:
-                if v:
-                    self.editor_.setText(str(s))
-                else:
-                    self.editor_.setText("0")
+            if v:
+                self.editor_.setText(str(v))
+            elif not nulo:
+                    self.editor_.setText(field.defaultValue())
+                    
             self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "int":
@@ -1242,12 +1241,12 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
                 pass
-            #s = None
-            if not nulo:
-                if v:
-                    self.editor_.setText(str(s))
-                else:
-                    self.editor_.setText("0")
+            
+            if v:
+                self.editor_.setText(str(s))
+            elif not nulo:
+                self.editor_.setText(field.defaultValue())
+                
             self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "serial":
@@ -1569,10 +1568,11 @@ class FLFieldDB(QtGui.QWidget):
         len = field.length()
         partInteger = field.partInteger()
         partDecimal = None
-        if self.partDecimal_ > -1:
-            partDecimal = self.partDecimal_
-        else:
-            partDecimal = field.partDecimal()
+        if type_ == "double":
+            if self.partDecimal_:
+                partDecimal = self.partDecimal_
+            else:
+                partDecimal = field.partDecimal()
 
         #rX = field.regExpValidator()
         ol = field.hasOptionsList()
