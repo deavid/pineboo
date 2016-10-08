@@ -179,7 +179,8 @@ class FLFieldDB(QtGui.QWidget):
         self.fieldName_ = QString()
         self.foreignField_ = QString()
         self.fieldRelation_ = QString()
-        self.textLabelDB = QtGui.QLabel() #No inicia originalmente aqui
+        self.textLabelDB = QtGui.QLabel()
+        self.textLabelDB.setMinimumHeight(22) #No inicia originalmente aqui
         self.fieldAlias_ = QString()
         self.actionName_ = QString()
         self.filter_ = QString()
@@ -194,7 +195,8 @@ class FLFieldDB(QtGui.QWidget):
         PBSizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed ,QtGui.QSizePolicy.Fixed)
         PBSizePolicy.setHeightForWidth(True)
         self.pushButtonDB.setSizePolicy(PBSizePolicy)
-        self.pushButtonDB.setMinimumSize(32, 32)
+        self.pushButtonDB.setMinimumSize(22, 22)
+        self.pushButtonDB.setMaximumSize(22, 22)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(filedir("icons","flfielddb.png")))
         self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
@@ -1603,7 +1605,7 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 self.editor_.setAutoCompletion(True)
-                self.editor_.setMinimumSize(32, 32)
+                self.editor_.setMinimumSize(22, 22)
                 self.editor_.setFont(QtGui.qApp.font())
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull():
@@ -1626,7 +1628,7 @@ class FLFieldDB(QtGui.QWidget):
             else:
                 self.editor_ = FLLineEdit(self, "editor")
                 self.editor_.setFont(QtGui.qApp.font())
-                self.editor_.setMinimumSize(32, 32)
+                self.editor_.setMinimumSize(22, 22)
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
