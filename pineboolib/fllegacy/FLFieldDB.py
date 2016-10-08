@@ -179,8 +179,15 @@ class FLFieldDB(QtGui.QWidget):
         self.fieldName_ = QString()
         self.foreignField_ = QString()
         self.fieldRelation_ = QString()
+        
         self.textLabelDB = QtGui.QLabel()
         self.textLabelDB.setMinimumHeight(22) #No inicia originalmente aqui
+        self.textLabelDB.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
+        #self.textLabelDB.setFrameShape(QtGui.QFrame.WinPanel)
+        self.textLabelDB.setFrameShadow(QtGui.QFrame.Plain)
+        self.textLabelDB.setLineWidth(0)
+        self.textLabelDB.setTextFormat(QtCore.Qt.PlainText)
+        
         self.fieldAlias_ = QString()
         self.actionName_ = QString()
         self.filter_ = QString()
