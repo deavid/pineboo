@@ -1616,7 +1616,7 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.setFont(QtGui.qApp.font())
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull():
-                        self.editor_.palette().setColor(QtGui.QPalette.Base, self.notNullColor())
+                        self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
 
                 olTranslated = []
                 olNoTranslated = field.optionsList()
@@ -1640,7 +1640,7 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull():
-                        self.editor_.palette().setColor(QtGui.QPalette.Base, self.notNullColor())
+                        self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
@@ -1699,7 +1699,7 @@ class FLFieldDB(QtGui.QWidget):
                     tlf.setUnderline(True)
                     self.textLabelDB.setFont(tlf)
                     cB = QtGui.QColor(Qt.cyan)
-                    self.textLabelDB.palette().setColor(QtGui.QPalette.Base, cB)
+                    self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
                     self.textLabelDB.setCursor(Qt.PointingHandCursor)
 
             sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
