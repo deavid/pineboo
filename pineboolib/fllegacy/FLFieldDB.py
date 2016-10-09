@@ -27,7 +27,7 @@ from pineboolib.flparser.flpremerge import isinside
 class FLLineEdit(QtGui.QLineEdit):
 
     _tipo = None
-    partDecimal = 0
+    _partDecimal = 0
     _maxValue = None
     autoSelect = True
     _name = None
@@ -39,14 +39,37 @@ class FLLineEdit(QtGui.QLineEdit):
         super(FLLineEdit,self).__init__(parent)
         self._name = name
         self._fieldName = parent.fieldName_
-        self._tipo = parent.cursor_.metadata().fieldType(self._name)
+        self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
+        self._partDecimal = parent.partDecimal_
 
 
     def setText(self, texto):
         if self._maxValue:
             if self._maxValue < int(texto):
                 texto = self._maxValue
-        super(FLLineEdit, self).setText(str(texto))
+        
+        texto = str(texto)        
+        #Miramos si le falta digitos a la parte decimal ...
+        if self._tipo == "double" and len(texto) > 0:
+            if texto == "0":
+                texto = "0.00"
+            i = None
+            l = len(texto) - 1
+            try:
+                i = texto.index(".")
+            except:
+                pass
+            
+            if i:   
+                #print("Posicion de . (%s) de %s en %s" % (i, l, texto))
+                f = (i + self._partDecimal) - l
+                #print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
+                while f > 0:
+                    texto = texto + "0"
+                    f = f - 1
+            
+        
+        super(FLLineEdit, self).setText(texto)
         self.textChanged.emit(texto)
 
     def text(self):
@@ -1050,11 +1073,9 @@ class FLFieldDB(QtGui.QWidget):
     Establece el número de decimales
     """
     def setPartDecimal(self, d):
-        if self.editor_ and isinstance(self._editor.type , (float, QVariant.Double) ):
             self.partDecimal_ = d
-            self.editor_.partDecimal = d
             self.refreshQuick(self.fieldName_)
-            self.editor_.setText(self.editor_.text(),False)
+            #self.editor_.setText(self.editor_.text(),False)
 
 
     """
@@ -1168,6 +1189,7 @@ class FLFieldDB(QtGui.QWidget):
             partDecimal = self.partDecimal_
         else:
             partDecimal = field.partDecimal()
+            self.partDecimal_ = field.partDecimal()
 
         ol = field.hasOptionsList()
 
@@ -1193,7 +1215,7 @@ class FLFieldDB(QtGui.QWidget):
             elif nulo:
                 self.editor_.setText(field.defaultValue())
             else:
-                self.editor_.setText("0,00")
+                self.editor_.setText("0.00")
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -1575,6 +1597,7 @@ class FLFieldDB(QtGui.QWidget):
                 partDecimal = self.partDecimal_
             else:
                 partDecimal = field.partDecimal()
+                self.partDecimal_ = field.partDecimal()
 
         #rX = field.regExpValidator()
         ol = field.hasOptionsList()
