@@ -1784,12 +1784,22 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux3_.setWhatsThis("Abrir fichero de imagen")
                     self.lytButtons.addWidget(self.pbAux3_)
                     if self.showed:
-                        self.pbAux3_.clicked.disconnect(self.searchPixmap)
+                        try:
+                            self.pbAux3_.clicked.disconnect(self.searchPixmap)
+                        except:
+                            pass
                     self.pbAux3_.clicked.connect(self.searchPixmap)
                     if not hasPushButtonDB:
                         if self.showed:
-                            self.KeyF2Pressed_.disconnect(self.pbAux3_.animateClick)
-                        #self.KeyF2Pressed_.connect(self.pbAux3_.animateClick)
+                            try:
+                                self.KeyF2Pressed_.disconnect(self.pbAux3_.animateClick)
+                            except:
+                                pass
+                        try:
+                            self.KeyF2Pressed_.connect(self.pbAux3_.animateClick)
+                        except:
+                            pass
+                        
                         self.pbAux3_.setFocusPolicy(Qt.StrongFocus)
                         self.pbAux3_.installEventFilter(self)
 
@@ -1804,7 +1814,10 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux4_.setWhatsThis("Pegar imagen desde el portapapeles")
                     self.lytButtons.addWidget(self.pbAux4_)
                     if self.showed:
-                        self.pbAux4_.clicked.disconnect(self.clearPixmap)
+                        try:
+                            self.pbAux4_.clicked.disconnect(self.clearPixmap)
+                        except:
+                            pass
                     self.pbAux4_.clicked.connect(self.clearPixmap)
 
 
@@ -1820,7 +1833,10 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux_.setWhatsThis("Borrar imagen")
                     self.lytButtons.addWidget(self.pbAux_)
                     if self.showed:
-                        self.pbAux_.clicked.disconnect(self.clearPixmap)
+                        try:
+                            self.pbAux_.clicked.disconnect(self.clearPixmap)
+                        except:
+                            pass
                     self.pbAux_.clicked.connect(self.clearPixmap)
 
 
@@ -1844,7 +1860,10 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux2_.setWhatsThis("Guardar imagen como...")
                     self.lytButtons.addWidget(self.pbAux2_)
                     if self.showed:
-                        savepixmap.activated.disconnect(self.savePixmap)
+                        try:
+                            savepixmap.activated.disconnect(self.savePixmap)
+                        except:
+                            pass
                     savepixmap.activated.connect(self.savePixmap)
 
                     if hasPushButtonDB:
@@ -2646,7 +2665,7 @@ class FLFieldDB(QtGui.QWidget):
             timer.singleShot(30, self.showWidget)
             return
         else:
-            if not self.showed:
+            if not self.showed and not self._initEditorWhenLoad and not self._initCursorWhenLoad:
                 if self.topWidget_:
                     self.refresh()
                     #if self.cursorAux:
@@ -2687,18 +2706,18 @@ class FLFieldDB(QtGui.QWidget):
                                 if not tMD.inCache():
                                     del tMD
 
-
+                    
                 else:
                     self.initFakeEditor()
-                    self.showed = True
-                    #print("FLFieldDB(%s).showWidget(): No tengo Padre! Snif !" % self.name)
+                
+                
+                self.showed = True
 
-
+                
+                
             if self._initCursorWhenLoad:
                 self._initCursorWhenLoad = False
-                self.setNoShowed()
                 self.initCursor()
-                self.showWidget()
 
             if self._initEditorWhenLoad:
                 self._initEditorWhenLoad = False
