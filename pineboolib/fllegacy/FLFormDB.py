@@ -640,7 +640,7 @@ class FLFormDB(QtGui.QWidget):
         self.frameGeometry()
         if self.focusWidget():
             fdb = self.focusWidget().parentWidget()
-            if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
+            if fdb and getattr(fdb,"autoComFrame_",None) and fdb.autoComFrame_.isvisible():
                 fdb.autoComFrame_.hide()
                 return
         
