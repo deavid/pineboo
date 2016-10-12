@@ -20,7 +20,6 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
-from pineboolib.flparser.flpremerge import isinside
 
 
 
@@ -1391,12 +1390,172 @@ class FLFieldDB(QtGui.QWidget):
     """
     Refresco rápido
     """
-
-    @decorators.NotImplementedWarn
     @QtCore.pyqtSlot('QString')
     def refreshQuick(self, fN = None):
-        return
-
+        if not fN or not fN == self.fieldName_ or not self.cursor_:
+            return
+        
+        tMD = self.cursor_.metadata()
+        field = tMD.field(self.fieldName_)
+        
+        if not field:
+            return
+        
+        if field.outTransaction():
+            return
+        
+        type_ = field.type()
+        
+        if not type_ == "pixmap" and not self.editor_:
+            return
+        
+        v = self.cursor_.valueBuffer(self.fieldName_)
+        nulo = self.cursor_.bufferIsNull(self.fieldName_)
+        
+        if self.partDecimal_ == -1:
+            self.partDecimal_ = field.partDecimal()
+        
+        partDecimal = self.partDecimal_
+        ol = field.hasOptionsList()
+        
+        if type_ == "double":
+            if str(v) == self.editor_.text():
+                return
+            
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            if not nulo:
+                self.editor_.setText(v, False)
+            
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        elif type_ == "string":
+            doHome = False
+            
+            if ol:
+                if str(v) == self.editor_.currentText():
+                    return
+            else:
+                if str(v) == self.editor_.text():
+                    return
+                
+                if not self.editor_.text():
+                    doHome = True
+            
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            if v:
+                if ol:
+                    self.editor_.setCurrentIndex(field.optionsList().index(v))
+                
+                else:
+                    self.editor_.setText(v, False)
+            
+            else:
+                if ol:
+                    self.editor_.setCurrentIndex(0)
+                
+                else:
+                    self.editor_.setText("", False)
+            
+            if not ol and doHome:
+                self.editor_.home(False)
+            
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        elif type_ == "uint" or type_ == "int" or type_ == "serial":
+            if v == int(self.editor_.text()):
+                return
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            if not nulo:
+                self.editor_.setText(v)
+            
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        elif type_ == "pixmap":
+            if not self.editorImg_:
+                self.editorImg_ = FLPixmapView(self)
+                self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
+                self.editorImg_.setSizePolicy(self.sizePolicy())
+                self.editorImg_.setMaximumSize(self.initMaxSize_)
+                self.editorImg_.setMinimumSize(self.initMinSize_)
+                self.editorImg_.setAutoScaled(True)
+                self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
+                if field.visible():
+                    self.editorImg_.show()
+                
+            if not nulo:
+                if not v:
+                    self.editorImg_.clear()
+                    return
+            
+            pix = QtGui.QPixmap()
+            pix.loadFromData(v)
+            
+            if pix.isNull():
+                self.editorImg_.clear()
+            else:
+                self.editorImg_.setPixmap(pix)
+        
+        elif type_ == "date":
+            if v == str(self.editor_.date()):
+                return
+            
+            try:
+                self.editor_.valueChanged.disconnect(self.updateValue)
+            except:
+                pass
+        
+            self.editor_.setDate(v)
+            self.editor_.valueChanged.connect(self.updateValue)
+        
+        elif type_ == "time":
+            if v == str(self.editor_.time()):
+                return
+            
+            try:
+                self.editor_.valueChanged.disconnect(self.updateValue)
+            except:
+                pass
+        
+            self.editor_.setTime(v)
+            self.editor_.valueChanged.connect(self.updateValue)
+        
+        elif type_ == "stringlist":
+            if v == self.editor_.text():
+                return
+            
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            self.editor_.setText(v)
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        
+        elif type_ == "bool":
+            if v == self.editor_.isChecked():
+                return
+            
+            try:
+                self.editor_.toggled.disconnect(self.updateValue)
+            except:
+                pass
+            
+            self.editor_.setChecked(v)
+            self.editor_.toggled.connect(self.updateValue)
+                                    
 
     """
     Inicia el cursor segun este campo sea de la tabla origen o de
