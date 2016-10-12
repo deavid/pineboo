@@ -630,7 +630,6 @@ class FLFieldDB(QtGui.QWidget):
                 self.cursor_.setValueBuffer(self.fieldName_, t)
 
 
-
         elif isinstance(data,QtCore.QDate):
             if not self.cursor_:
                 return
@@ -672,7 +671,7 @@ class FLFieldDB(QtGui.QWidget):
                     return
             # self.cursor_.setValueBuffer(self.fieldName_, QtCore.QVariant(data, 0)) # ... esto porqué era un QVariant??
             self.cursor_.setValueBuffer(self.fieldName_, data)
-        elif isinstance(data, str):
+        elif isinstance(data, str) or isinstance(data, int):
             if not self.cursor_:
                 return
 
@@ -687,7 +686,7 @@ class FLFieldDB(QtGui.QWidget):
             tAux = data
 
             if ol and self.editor_:
-                tAux = self._editor.currentItem()
+                tAux = field.optionsList()[data]
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if tAux == self.cursor_.valueBuffer(self.fieldName_):
@@ -704,11 +703,14 @@ class FLFieldDB(QtGui.QWidget):
                     self.cursor.setValueBuffer(self.fieldName_, s[1:])
                     self.cursor_.bufferChanged.connect(self.refreshQuick)
                     return
-
+            
             if self.editor_ and (field.type() == "double" or field.type() == "int" or field.type() == "uint"):
                 s = self.editor_.text()
-
-            self.cursor_.setValueBuffer(self.fieldName_, s)
+            
+            if s:
+                self.cursor_.setValueBuffer(self.fieldName_, s)
+            else:
+                self.cursor_.setValueBuffer(self.fieldName_, "")
 
             if self.isVisible() and self.hasFocus() and field.type() == "string" and field.length() == len(s):
                 self.focusNextPrevChild(True)
