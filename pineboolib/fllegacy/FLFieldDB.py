@@ -42,7 +42,7 @@ class FLLineEdit(QtGui.QLineEdit):
         self._partDecimal = parent.partDecimal_
 
 
-    def setText(self, texto):
+    def setText(self, texto, b = True):
         if self._maxValue:
             if self._maxValue < int(texto):
                 texto = self._maxValue
