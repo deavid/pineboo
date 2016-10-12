@@ -220,7 +220,7 @@ class FLFieldMetaData():
     @return El número de dígitos de la parte entera del campo
     """
     def partInteger(self):
-        return self.d.partInteger_
+        return int(self.d.partInteger_)
 
     """
     Obtiene el número de dígitos de la parte decimal.
@@ -228,7 +228,7 @@ class FLFieldMetaData():
     @return El número de dígitos de la parte decimal del campo
     """
     def partDecimal(self):
-        return self.d.partDecimal_
+        return int(self.d.partDecimal_)
     """
     Obtiene si el campo es contador.
 
@@ -397,6 +397,8 @@ class FLFieldMetaData():
     """
     @decorators.BetaImplementation
     def defaultValue(self):
+        if not self.d.defaultValue_:
+            self.d.defaultValue_ = ""
         return self.d.defaultValue_
 
     """
@@ -904,7 +906,7 @@ class FLFieldMetaDataPrivate():
         if not t == "int" and not t == "uint" and t == "double" and not int(pI) == 0: 
             self.partInteger_ = 0
         
-        if t == "double" and not int(pD) == 0: 
+        if t == "double" and not int(pD) >= 0: 
             self.partDecimal_ = 0
 
     @decorators.BetaImplementation

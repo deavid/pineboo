@@ -20,14 +20,13 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
-from pineboolib.flparser.flpremerge import isinside
 
 
 
 class FLLineEdit(QtGui.QLineEdit):
 
     _tipo = None
-    partDecimal = 0
+    _partDecimal = 0
     _maxValue = None
     autoSelect = True
     _name = None
@@ -39,14 +38,37 @@ class FLLineEdit(QtGui.QLineEdit):
         super(FLLineEdit,self).__init__(parent)
         self._name = name
         self._fieldName = parent.fieldName_
-        self._tipo = parent.cursor_.metadata().fieldType(self._name)
+        self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
+        self._partDecimal = parent.partDecimal_
 
 
-    def setText(self, texto):
+    def setText(self, texto, b = True):
         if self._maxValue:
             if self._maxValue < int(texto):
                 texto = self._maxValue
-        super(FLLineEdit, self).setText(str(texto))
+        
+        texto = str(texto)        
+        #Miramos si le falta digitos a la parte decimal ...
+        if self._tipo == "double" and len(texto) > 0:
+            if texto == "0":
+                texto = "0.00"
+            i = None
+            l = len(texto) - 1
+            try:
+                i = texto.index(".")
+            except:
+                pass
+            
+            if i:   
+                #print("Posicion de . (%s) de %s en %s" % (i, l, texto))
+                f = (i + self._partDecimal) - l
+                #print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
+                while f > 0:
+                    texto = texto + "0"
+                    f = f - 1
+            
+        
+        super(FLLineEdit, self).setText(texto)
         self.textChanged.emit(texto)
 
     def text(self):
@@ -179,7 +201,15 @@ class FLFieldDB(QtGui.QWidget):
         self.fieldName_ = QString()
         self.foreignField_ = QString()
         self.fieldRelation_ = QString()
-        self.textLabelDB = QtGui.QLabel() #No inicia originalmente aqui
+        
+        self.textLabelDB = QtGui.QLabel()
+        self.textLabelDB.setMinimumHeight(22) #No inicia originalmente aqui
+        self.textLabelDB.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
+        #self.textLabelDB.setFrameShape(QtGui.QFrame.WinPanel)
+        self.textLabelDB.setFrameShadow(QtGui.QFrame.Plain)
+        self.textLabelDB.setLineWidth(0)
+        self.textLabelDB.setTextFormat(QtCore.Qt.PlainText)
+        
         self.fieldAlias_ = QString()
         self.actionName_ = QString()
         self.filter_ = QString()
@@ -194,7 +224,8 @@ class FLFieldDB(QtGui.QWidget):
         PBSizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed ,QtGui.QSizePolicy.Fixed)
         PBSizePolicy.setHeightForWidth(True)
         self.pushButtonDB.setSizePolicy(PBSizePolicy)
-        self.pushButtonDB.setMinimumSize(32, 32)
+        self.pushButtonDB.setMinimumSize(22, 22)
+        self.pushButtonDB.setMaximumSize(22, 22)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(filedir("icons","flfielddb.png")))
         self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
@@ -233,7 +264,7 @@ class FLFieldDB(QtGui.QWidget):
             self.setName("FLFieldDB")
 
         self.cursorBackup_ = False
-        self.partDecimal_ = -1
+        self.partDecimal_ = None
 
 
 
@@ -599,7 +630,6 @@ class FLFieldDB(QtGui.QWidget):
                 self.cursor_.setValueBuffer(self.fieldName_, t)
 
 
-
         elif isinstance(data,QtCore.QDate):
             if not self.cursor_:
                 return
@@ -641,7 +671,7 @@ class FLFieldDB(QtGui.QWidget):
                     return
             # self.cursor_.setValueBuffer(self.fieldName_, QtCore.QVariant(data, 0)) # ... esto porqué era un QVariant??
             self.cursor_.setValueBuffer(self.fieldName_, data)
-        elif isinstance(data, str):
+        elif isinstance(data, str) or isinstance(data, int):
             if not self.cursor_:
                 return
 
@@ -656,7 +686,7 @@ class FLFieldDB(QtGui.QWidget):
             tAux = data
 
             if ol and self.editor_:
-                tAux = self._editor.currentItem()
+                tAux = field.optionsList()[data]
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if tAux == self.cursor_.valueBuffer(self.fieldName_):
@@ -668,16 +698,19 @@ class FLFieldDB(QtGui.QWidget):
 
             s = tAux
             if field.type() == "string" and not ol:
-                if len(s) > 0 and s[0] == " ":
+                if len(s) > 1 and s[0] == " ":
                     self.cursor_.bufferChanged.disconnect(self.refreshQuick)
                     self.cursor.setValueBuffer(self.fieldName_, s[1:])
                     self.cursor_.bufferChanged.connect(self.refreshQuick)
                     return
-
+            
             if self.editor_ and (field.type() == "double" or field.type() == "int" or field.type() == "uint"):
                 s = self.editor_.text()
-
-            self.cursor_.setValueBuffer(self.fieldName_, s)
+            
+            if s:
+                self.cursor_.setValueBuffer(self.fieldName_, s)
+            else:
+                self.cursor_.setValueBuffer(self.fieldName_, "")
 
             if self.isVisible() and self.hasFocus() and field.type() == "string" and field.length() == len(s):
                 self.focusNextPrevChild(True)
@@ -800,25 +833,23 @@ class FLFieldDB(QtGui.QWidget):
 
         elif type_ == "double":
             if self.editor_:
-                #s = QString()
-                #if not isNull:
-                #    if not self.partDecimal_ == -1:
-                #        s.setNum(v.toDouble(), 'f', self.partDecimal_ )
-                #    else:
-                #        s.setNum(v.toDouble(), 'f', field.partDecimal() )
-                #self.editor_.setText(s)
-                if v:
-                    self.editor_.setText(str(v))
-                #else:
-                #    self.editor_.setText(0.00)
+                s = None
+                if v :
+                    if self.partDecimal_:
+                        s = round(float(v), self.partDecimal_)
+                    else:
+                        s = round(float(v), field.partDecimal())
+                    
+                    self.editor_.setText(str(s))
+
 
 
         elif type_ == "serial":
             if self.editor_:
                 if not v:
-                    self.editor_.setValue(0)
+                    self.editor_.setText("0")
                 else:
-                    self.editor_.setValue(str(v))
+                    self.editor_.setText(str(v))
 
 
         elif type_ == "pixmap":
@@ -1043,11 +1074,9 @@ class FLFieldDB(QtGui.QWidget):
     Establece el número de decimales
     """
     def setPartDecimal(self, d):
-        if self.editor_ and isinstance(self._editor.type , (float, QVariant.Double) ):
             self.partDecimal_ = d
-            self.editor_.partDecimal = d
             self.refreshQuick(self.fieldName_)
-            self.editor_.setText(self.editor_.text(),False)
+            #self.editor_.setText(self.editor_.text(),False)
 
 
     """
@@ -1149,15 +1178,19 @@ class FLFieldDB(QtGui.QWidget):
         if not field:
             return
         type_ = field.type()
+        
+        
+        
         if not type_ == "pixmap" and not self.editor_:
             return
 
         modeAcces = self.cursor_.modeAccess()
-        partDecimal = -1
-        if not self.partDecimal_ == -1:
+        partDecimal = None
+        if self.partDecimal_:
             partDecimal = self.partDecimal_
         else:
             partDecimal = field.partDecimal()
+            self.partDecimal_ = field.partDecimal()
 
         ol = field.hasOptionsList()
 
@@ -1179,10 +1212,9 @@ class FLFieldDB(QtGui.QWidget):
             s = None
             if v:
                 s = round(float(v), partDecimal)
-                if not nulo:
-                    self.editor_.setText(str(s))
-                else:
-                    self.editor_.setText(str(s))
+                self.editor_.setText(str(s))
+            elif nulo:
+                self.editor_.setText(field.defaultValue())
             else:
                 self.editor_.setText("0.00")
 
@@ -1200,11 +1232,12 @@ class FLFieldDB(QtGui.QWidget):
                 if ol:
                     self.editor_.setCurrentIndex(field.getIndexOptionsList(v))
                 else:
-                    if v:
-                        self.editor_.setText(v)
+                    self.editor_.setText(v)
             else:
                 if ol:
                     self.editor_.setCurrentIndex(0)
+                elif not nulo:
+                    self.editor_.setText(field.defaultValue())
                 else:
                     self.editor_.setText("")
 
@@ -1221,11 +1254,11 @@ class FLFieldDB(QtGui.QWidget):
             except:
                 pass
             #s = None
-            if not nulo:
-                if v:
-                    self.editor_.setText(str(s))
-                else:
-                    self.editor_.setText("0")
+            if v:
+                self.editor_.setText(str(v))
+            elif not nulo:
+                    self.editor_.setText(field.defaultValue())
+                    
             self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "int":
@@ -1233,12 +1266,12 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.textChanged.disconnect(self.updateValue)
             except:
                 pass
-            #s = None
-            if not nulo:
-                if v:
-                    self.editor_.setText(str(s))
-                else:
-                    self.editor_.setText("0")
+            
+            if v:
+                self.editor_.setText(str(s))
+            elif not nulo:
+                self.editor_.setText(field.defaultValue())
+                
             self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "serial":
@@ -1359,12 +1392,172 @@ class FLFieldDB(QtGui.QWidget):
     """
     Refresco rápido
     """
-
-    @decorators.NotImplementedWarn
     @QtCore.pyqtSlot('QString')
     def refreshQuick(self, fN = None):
-        return
-
+        if not fN or not fN == self.fieldName_ or not self.cursor_:
+            return
+        
+        tMD = self.cursor_.metadata()
+        field = tMD.field(self.fieldName_)
+        
+        if not field:
+            return
+        
+        if field.outTransaction():
+            return
+        
+        type_ = field.type()
+        
+        if not type_ == "pixmap" and not self.editor_:
+            return
+        
+        v = self.cursor_.valueBuffer(self.fieldName_)
+        nulo = self.cursor_.bufferIsNull(self.fieldName_)
+        
+        if self.partDecimal_ == -1:
+            self.partDecimal_ = field.partDecimal()
+        
+        partDecimal = self.partDecimal_
+        ol = field.hasOptionsList()
+        
+        if type_ == "double":
+            if str(v) == self.editor_.text():
+                return
+            
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            if not nulo:
+                self.editor_.setText(v, False)
+            
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        elif type_ == "string":
+            doHome = False
+            
+            if ol:
+                if str(v) == self.editor_.currentText():
+                    return
+            else:
+                if str(v) == self.editor_.text():
+                    return
+                
+                if not self.editor_.text():
+                    doHome = True
+            
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            if v:
+                if ol:
+                    self.editor_.setCurrentIndex(field.optionsList().index(v))
+                
+                else:
+                    self.editor_.setText(v, False)
+            
+            else:
+                if ol:
+                    self.editor_.setCurrentIndex(0)
+                
+                else:
+                    self.editor_.setText("", False)
+            
+            if not ol and doHome:
+                self.editor_.home(False)
+            
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        elif type_ == "uint" or type_ == "int" or type_ == "serial":
+            if v == int(self.editor_.text()):
+                return
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            if not nulo:
+                self.editor_.setText(v)
+            
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        elif type_ == "pixmap":
+            if not self.editorImg_:
+                self.editorImg_ = FLPixmapView(self)
+                self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
+                self.editorImg_.setSizePolicy(self.sizePolicy())
+                self.editorImg_.setMaximumSize(self.initMaxSize_)
+                self.editorImg_.setMinimumSize(self.initMinSize_)
+                self.editorImg_.setAutoScaled(True)
+                self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
+                if field.visible():
+                    self.editorImg_.show()
+                
+            if not nulo:
+                if not v:
+                    self.editorImg_.clear()
+                    return
+            
+            pix = QtGui.QPixmap()
+            pix.loadFromData(v)
+            
+            if pix.isNull():
+                self.editorImg_.clear()
+            else:
+                self.editorImg_.setPixmap(pix)
+        
+        elif type_ == "date":
+            if v == str(self.editor_.date()):
+                return
+            
+            try:
+                self.editor_.valueChanged.disconnect(self.updateValue)
+            except:
+                pass
+        
+            self.editor_.setDate(v)
+            self.editor_.valueChanged.connect(self.updateValue)
+        
+        elif type_ == "time":
+            if v == str(self.editor_.time()):
+                return
+            
+            try:
+                self.editor_.valueChanged.disconnect(self.updateValue)
+            except:
+                pass
+        
+            self.editor_.setTime(v)
+            self.editor_.valueChanged.connect(self.updateValue)
+        
+        elif type_ == "stringlist":
+            if v == self.editor_.text():
+                return
+            
+            try:
+                self.editor_.textChanged.disconnect(self.updateValue)
+            except:
+                pass
+            
+            self.editor_.setText(v)
+            self.editor_.textChanged.connect(self.updateValue)
+        
+        
+        elif type_ == "bool":
+            if v == self.editor_.isChecked():
+                return
+            
+            try:
+                self.editor_.toggled.disconnect(self.updateValue)
+            except:
+                pass
+            
+            self.editor_.setChecked(v)
+            self.editor_.toggled.connect(self.updateValue)
+                                    
 
     """
     Inicia el cursor segun este campo sea de la tabla origen o de
@@ -1560,10 +1753,12 @@ class FLFieldDB(QtGui.QWidget):
         len = field.length()
         partInteger = field.partInteger()
         partDecimal = None
-        if self.partDecimal_ > -1:
-            partDecimal = self.partDecimal_
-        else:
-            partDecimal = field.partDecimal()
+        if type_ == "double":
+            if self.partDecimal_:
+                partDecimal = self.partDecimal_
+            else:
+                partDecimal = field.partDecimal()
+                self.partDecimal_ = field.partDecimal()
 
         #rX = field.regExpValidator()
         ol = field.hasOptionsList()
@@ -1577,7 +1772,7 @@ class FLFieldDB(QtGui.QWidget):
         self.fieldAlias_ = field.alias()
 
         self.textLabelDB.setFont(QtGui.QApplication.font())
-        if self.showAlias_ and not type == "pixmap" and not type == "bool":
+        if not type_ == "pixmap" and not type_ == "bool":
             if not field.allowNull() and field.editable():
                 self.textLabelDB.setText(self.fieldAlias_ + QString("*"))
             else:
@@ -1597,17 +1792,17 @@ class FLFieldDB(QtGui.QWidget):
         self.initMaxSize_ = self.maximumSize()
         self.initMinSize_ = self.minimumSize()
 
-        if type_ == "unit" or type_ == "int" or type_ == "double" or type_ == "string":
+        if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
                 self.editor_ = QtGui.QComboBox()
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 self.editor_.setAutoCompletion(True)
-                self.editor_.setMinimumSize(32, 32)
+                self.editor_.setMinimumSize(22, 22)
                 self.editor_.setFont(QtGui.qApp.font())
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull():
-                        self.editor_.palette().setColor(QtGui.QPalette.Base, self.notNullColor())
+                        self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
 
                 olTranslated = []
                 olNoTranslated = field.optionsList()
@@ -1626,12 +1821,12 @@ class FLFieldDB(QtGui.QWidget):
             else:
                 self.editor_ = FLLineEdit(self, "editor")
                 self.editor_.setFont(QtGui.qApp.font())
-                self.editor_.setMinimumSize(32, 32)
+                self.editor_.setMinimumSize(22, 22)
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull():
-                        self.editor_.palette().setColor(QtGui.QPalette.Base, self.notNullColor())
+                        self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
@@ -1690,7 +1885,7 @@ class FLFieldDB(QtGui.QWidget):
                     tlf.setUnderline(True)
                     self.textLabelDB.setFont(tlf)
                     cB = QtGui.QColor(Qt.cyan)
-                    self.textLabelDB.palette().setColor(QtGui.QPalette.Base, cB)
+                    self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
                     self.textLabelDB.setCursor(Qt.PointingHandCursor)
 
             sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
@@ -1750,12 +1945,22 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux3_.setWhatsThis("Abrir fichero de imagen")
                     self.lytButtons.addWidget(self.pbAux3_)
                     if self.showed:
-                        self.pbAux3_.clicked.disconnect(self.searchPixmap)
+                        try:
+                            self.pbAux3_.clicked.disconnect(self.searchPixmap)
+                        except:
+                            pass
                     self.pbAux3_.clicked.connect(self.searchPixmap)
                     if not hasPushButtonDB:
                         if self.showed:
-                            self.KeyF2Pressed_.disconnect(self.pbAux3_.animateClick)
-                        #self.KeyF2Pressed_.connect(self.pbAux3_.animateClick)
+                            try:
+                                self.KeyF2Pressed_.disconnect(self.pbAux3_.animateClick)
+                            except:
+                                pass
+                        try:
+                            self.KeyF2Pressed_.connect(self.pbAux3_.animateClick)
+                        except:
+                            pass
+                        
                         self.pbAux3_.setFocusPolicy(Qt.StrongFocus)
                         self.pbAux3_.installEventFilter(self)
 
@@ -1770,7 +1975,10 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux4_.setWhatsThis("Pegar imagen desde el portapapeles")
                     self.lytButtons.addWidget(self.pbAux4_)
                     if self.showed:
-                        self.pbAux4_.clicked.disconnect(self.clearPixmap)
+                        try:
+                            self.pbAux4_.clicked.disconnect(self.clearPixmap)
+                        except:
+                            pass
                     self.pbAux4_.clicked.connect(self.clearPixmap)
 
 
@@ -1786,7 +1994,10 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux_.setWhatsThis("Borrar imagen")
                     self.lytButtons.addWidget(self.pbAux_)
                     if self.showed:
-                        self.pbAux_.clicked.disconnect(self.clearPixmap)
+                        try:
+                            self.pbAux_.clicked.disconnect(self.clearPixmap)
+                        except:
+                            pass
                     self.pbAux_.clicked.connect(self.clearPixmap)
 
 
@@ -1810,7 +2021,10 @@ class FLFieldDB(QtGui.QWidget):
                     self.pbAux2_.setWhatsThis("Guardar imagen como...")
                     self.lytButtons.addWidget(self.pbAux2_)
                     if self.showed:
-                        savepixmap.activated.disconnect(self.savePixmap)
+                        try:
+                            savepixmap.activated.disconnect(self.savePixmap)
+                        except:
+                            pass
                     savepixmap.activated.connect(self.savePixmap)
 
                     if hasPushButtonDB:
@@ -2612,7 +2826,7 @@ class FLFieldDB(QtGui.QWidget):
             timer.singleShot(30, self.showWidget)
             return
         else:
-            if not self.showed:
+            if not self.showed and not self._initEditorWhenLoad and not self._initCursorWhenLoad:
                 if self.topWidget_:
                     self.refresh()
                     #if self.cursorAux:
@@ -2653,18 +2867,18 @@ class FLFieldDB(QtGui.QWidget):
                                 if not tMD.inCache():
                                     del tMD
 
-
+                    
                 else:
                     self.initFakeEditor()
-                    self.showed = True
-                    #print("FLFieldDB(%s).showWidget(): No tengo Padre! Snif !" % self.name)
+                
+                
+                self.showed = True
 
-
+                
+                
             if self._initCursorWhenLoad:
                 self._initCursorWhenLoad = False
-                self.setNoShowed()
                 self.initCursor()
-                self.showWidget()
 
             if self._initEditorWhenLoad:
                 self._initEditorWhenLoad = False
@@ -2802,7 +3016,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 class FLIntValidator(QtGui.QIntValidator):
 
     def __init__(self, *args, **kwargs):
-            super(FLIntValidator, self).__init__(*args)
+            super(FLIntValidator, self).__init__()
 
     def validate(self, input_, i):
         if input_.isEmpty():
@@ -2834,13 +3048,13 @@ class FLIntValidator(QtGui.QIntValidator):
 class FLUIntValidator(QtGui.QIntValidator):
 
     def __init__(self, *args, **kwargs):
-            super(FLUIntValidator, self).__init__(*args)
+            super(FLUIntValidator, self).__init__()
 
     def validate(self, input_, i):
         if input_.isEmpty():
             return QtGui.QValidator.Acceptable
 
-        iV = QtGui.QIntValidator(0, 1000000000, 0)
+        iV = QtGui.QIntValidator()
         state = iV.validate(input_, i)
         if state == QtGui.QValidator.Intermediate:
             state = QtGui.QValidator.Invalid

@@ -884,7 +884,7 @@ class FLSqlCursor(ProjectClass):
 
         #v.cast(fltype)
 
-        if not v.isNull() and type_ == "pixmap":
+        if v and type_ == "pixmap":
             vl = self.d.db_.manager().fetchLargeValue(v)
             if vl.isValid():
                 return vl
@@ -1323,7 +1323,7 @@ class FLSqlCursor(ProjectClass):
                     sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
                 else:
                     sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
-                q.exec_(sqlIn)
+                q.exec_(self.d.db_, sqlIn)
                 if not q.next():
                     self.seek(self.at())
                     if self.isValid():

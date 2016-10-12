@@ -125,5 +125,9 @@ class PNConnection(QtCore.QObject):
     def canSavePoint(self):
         return False
     
+    @decorators.NotImplementedWarn
+    def canOverPartition(self):
+        return False
+    
     
     

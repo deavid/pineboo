@@ -24,10 +24,19 @@ class FLSqlQuery(ProjectClass):
         self.d.db_ = self._prj.conn
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
+        self._posicion = None
+        self._datos = None
 
 
     def __del__(self):
-        del self.d
+        try:
+            del self.d                        
+            del self._datos
+            self._cursor.close()
+            del self._cursor
+        except:
+            pass
+        
         self.countRefQuery = self.countRefQuery - 1
         
     
@@ -35,11 +44,13 @@ class FLSqlQuery(ProjectClass):
     Ejecuta la consulta
     """
     
-    def exec(self):
+    def exec(self, sql = None):
+        if not sql:
+            sql = self.sql()
         try:
             #print(self.sql())
             micursor=self.__damecursor()
-            micursor.execute(self.sql())
+            micursor.execute(sql)
             self._cursor=micursor
         except:
             return False
@@ -61,8 +72,10 @@ class FLSqlQuery(ProjectClass):
             self._datos=self._cursor.fetchall()
     
     
-    def  exec_(self):
-        return self.exec()
+    def  exec_(self, conn = None, sql = None):
+        if conn:
+            self.d.db_ = conn
+        return self.exec(sql)
 
     """
     Añade la descripción parámetro al diccionario de parámetros.
@@ -149,7 +162,8 @@ class FLSqlQuery(ProjectClass):
     
     def setSelect(self, s, sep = ","):
         
-        self.d.select_ = s.strip_whitespace()
+        self.d.select_ = s
+        #self.d.select_ = s.strip_whitespace()
         #self.d.select_ = self.d.select_.simplifyWhiteSpace()
         
         if not sep in s and not "*" in s:
@@ -191,7 +205,8 @@ class FLSqlQuery(ProjectClass):
            genera la consulta
     """
     def setFrom(self, f):
-        self.d.from_ = f.strip_whitespace()
+        self.d.from_ = f
+        #self.d.from_ = f.strip_whitespace()
         #self.d.from_ = self.d.from_.simplifyWhiteSpace()
 
     """
@@ -202,7 +217,8 @@ class FLSqlQuery(ProjectClass):
     """
     
     def setWhere(self, w):
-        self.d.where_ = w.strip_whitespace()
+        self.d.where_ = w
+        #self.d.where_ = w.strip_whitespace()
         #self.d.where_ = self.d.where_.simplifyWhiteSpace()
 
     """
@@ -213,7 +229,8 @@ class FLSqlQuery(ProjectClass):
     """
     
     def setOrderBy(self, w):
-        self.d.orderBy_ = w.strip_whitespace()
+        self.d.orderBy_ = w
+        #self.d.orderBy_ = w.strip_whitespace()
         #self.d.orderBy_ = self.d.orderBy_.simplifyWhiteSpace()
 
     """
@@ -227,7 +244,7 @@ class FLSqlQuery(ProjectClass):
     """
     def sql(self):
         for tableName in self.d.tablesList_:
-            if not self.d.db_.existsTable(tableName) and not self.d.db_.createTable(tableName):
+            if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
                 return
         
         res = None
@@ -491,6 +508,8 @@ class FLSqlQuery(ProjectClass):
     Privado
     """
     d = None
+    
+    _posicion = None
 
     @decorators.NotImplementedWarn
     def isValid(self):
