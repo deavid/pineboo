@@ -4,7 +4,6 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, fllegacy
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import DefFun
-from pineboolib.fllegacy.FLUtil import FLUtil
 
 from PyQt4 import QtCore,QtGui
 from PyQt4.QtCore import QString, QVariant
@@ -15,7 +14,7 @@ from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
-import hashlib
+import hashlib, traceback
 
 class Struct(object):
     pass
@@ -43,6 +42,7 @@ class PNBuffer(ProjectClass):
             field.value = None
             field.metadata = campo
             field.type_ = field.metadata.type()
+            field.modified = False
 
             self.line_ = None
             self.fieldList_.append(field)
@@ -80,6 +80,7 @@ class PNBuffer(ProjectClass):
         if b:
             for field in  self.fieldList_:
                 field.value = None
+                field.modified = False
 
 
     def isEmpty(self):
@@ -132,10 +133,13 @@ class PNBuffer(ProjectClass):
             return None
 
     def setValue(self, name, value):
+        if value is not None and not isinstance(value, (int, float, str)):
+            raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
 
         for field in  self.fieldList_:
             if field.name == str(name):
                 field.value = value
+                field.modified = True
                 self.setMd5Sum(value)
                 return
 
@@ -191,10 +195,29 @@ class PNBuffer(ProjectClass):
     def md5Sum(self):
         return self.md5Sum_
 
+    def modifiedFields(self):
+        lista = []
+        for f in self.fieldList_:
+            if f.modified:
+                lista.append(f.name)
+
+        return lista
 
 
+    def pK(self):
+        for f in self.fieldList_:
+            if f.metadata.isPrimaryKey():
+                return f.name
 
+        print("PNBuffer.pk(): No se ha encontrado clave Primaria")
 
+    def indexField(self, name):
+        i = 0
+        for f in self.fieldList_:
+            if f.name == name:
+                return i
+
+            i = i + 1
 
 
 
@@ -861,7 +884,7 @@ class FLSqlCursor(ProjectClass):
 
         #v.cast(fltype)
 
-        if not v.isNull() and type_ == "pixmap":
+        if v and type_ == "pixmap":
             vl = self.d.db_.manager().fetchLargeValue(v)
             if vl.isValid():
                 return vl
@@ -1093,9 +1116,12 @@ class FLSqlCursor(ProjectClass):
 
     @return TRUE si el buffer y la copia son distintas, FALSE en caso contrario
     """
-    @decorators.NotImplementedWarn
     def isModifiedBuffer(self):
-        return True
+        modifiedFields = self.d.buffer_.modifiedFields()
+        if modifiedFields:
+            return True
+        else:
+            return False
 
     """
     Establece el valor de FLSqlCursor::askForCancelChanges_ .
@@ -1297,7 +1323,7 @@ class FLSqlCursor(ProjectClass):
                     sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
                 else:
                     sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
-                q.exec_(sqlIn)
+                q.exec_(self.d.db_, sqlIn)
                 if not q.next():
                     self.seek(self.at())
                     if self.isValid():
@@ -1783,12 +1809,10 @@ class FLSqlCursor(ProjectClass):
 
         return b
 
-
-
-
-
     def moveby(self, pos):
-        return self.move(pos+self.d._currentregister)
+        if self.d._currentregister:
+            pos += self.d._currentregister
+        return self.move(pos)
 
     """
     Redefinicion del método prev() de QSqlCursor.
@@ -2117,6 +2141,7 @@ class FLSqlCursor(ProjectClass):
     """
 
     @QtCore.pyqtSlot()
+    @decorators.BetaImplementation
     def commitBuffer(self, emite = True, checkLocks = False):
         if not self.d.buffer_ or not self.d.metadata_:
             return False
@@ -2163,15 +2188,15 @@ class FLSqlCursor(ProjectClass):
             idMod = self.d.db_.managerModules().idModuleOfFile("%s.%s" % (self.d.metadata_.name(),"mtd"))
 
             if idMod:
-                functionBefore = "%s.beforeCommit_%s" % (idMod, self.d.metadata_.name())
-                functionAfter = "%s.afterCommit_%s" % (idMod, self.d.metadata_.name())
+                functionBefore = "%s.iface.beforeCommit_%s" % (idMod, self.d.metadata_.name())
+                functionAfter = "%s.iface.afterCommit_%s" % (idMod, self.d.metadata_.name())
             else:
-                functionBefore = "sys.beforeCommit_%s" % self.d.metadata_.name()
-                functionAfter = "sys.afterCommit_%s" % self.d.metadata_.name()
+                functionBefore = "sys.iface.beforeCommit_%s" % self.d.metadata_.name()
+                functionAfter = "sys.iface.afterCommit_%s" % self.d.metadata_.name()
 
             if functionBefore:
                 cI = self.d.ctxt_
-                v = self._prj.call(functionBefore, cI, None)
+                v = self._prj.call(functionBefore, [self], cI)
                 if v and not isinstance(v ,bool):
                     return False
 
@@ -2189,7 +2214,8 @@ class FLSqlCursor(ProjectClass):
                     self.d.cursorRelation_.setAskForCancelChanges(True)
 
             pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
-            self.insert(False)
+            #self.insert(False)
+            self.update(False) # NOTE: la funcion insert no está implementada. Tampoco tiene porqué tener dos funciones distintas.
             if not self.d.db_.canSavePoint():
                 if self.d.db_.currentSavePoint_:
                     self.d.db_.currentSavePoint_.saveInsert(pKN, self.d.buffer_, self)
@@ -2222,23 +2248,27 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
-
+            print("FLSqlCursor -- commitBuffer -- Edit . 20 . ")
             if self.isModifiedBuffer():
-                i = 0
-                while i < self.d.buffer_.count():
-                    if self.d.buffer_.value(i) == self.d.bufferCopy_.value(i) and self.d.buffer_.isNull(i) and self.d.bufferCopy_.isNull(i):
-                        self.d.buffer_.setGenerated(i, False)
+                #i = 0
+                #while i < self.d.buffer_.count():
+                #    if self.d.buffer_.value(i) == self.d.bufferCopy_.value(i) and self.d.buffer_.isNull(i) and self.d.bufferCopy_.isNull(i):
+                #        self.d.buffer_.setGenerated(i, False)
 
-                    i = i +1
+                #    i = i +1
 
+                print("FLSqlCursor -- commitBuffer -- Edit . 22 . ")
                 self.update(False)
-                i = 0
-                while i < self.d.buffer_.count():
-                    self.d.buffer_.setGenerated(i, True)
-                    i = i + 1
+                #i = 0
+                #while i < self.d.buffer_.count():
+                #    self.d.buffer_.setGenerated(i, True)
+                #    i = i + 1
+
+                print("FLSqlCursor -- commitBuffer -- Edit . 25 . ")
 
                 updated = True
                 self.setNotGenerateds()
+            print("FLSqlCursor -- commitBuffer -- Edit . 30 . ")
 
 
         elif self.d.modeAccess_ == self.Del:
@@ -2254,7 +2284,7 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
-                #del(False) FIXME?
+                #self.del(False) FIXME?
                 updated = True
 
 
@@ -2266,7 +2296,7 @@ class FLSqlCursor(ProjectClass):
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.d.ctxt_
-            v = self._prj.call(functionAfter, cI, None)
+            v = self._prj.call(functionAfter, [self], cI)
             if v and not isinstance(v ,bool):
                 print(21)
                 if savePoint == True:
@@ -2564,9 +2594,57 @@ class FLSqlCursor(ProjectClass):
     def filter(self):
         return self.d.filter_
 
-    @decorators.NotImplementedWarn
+    """
+    Actualiza tableModel con el buffer
+    """
     def update(self, notify):
-        return None
+        print("FLSqlCursor.update --- BEGIN")
+        if self.modeAccess() == FLSqlCursor.Edit:
+            # solo los campos modified
+            lista = self.d.buffer_.modifiedFields()
+            # TODO: pKVaue debe ser el valueBufferCopy, es decir, el antiguo. Para
+            # .. soportar updates de PKey, que, aunque inapropiados deberían funcionar.
+            pKValue = self.d.buffer_.value(self.d.buffer_.pK())
+
+            dict_update = dict([(fieldName, self.d.buffer_.value(fieldName)) for fieldName in lista])
+
+            try:
+                update_successful = self.model().updateValuesDB(pKValue, dict_update)
+            except Exception:
+                print("FLSqlCursor.update:: Unhandled error on model updateRowDB:: ", traceback.format_exc())
+                update_successful = False
+            # TODO: En el futuro, si no se puede conseguir un update, hay que "tirar atrás" todo.
+            if update_successful:
+                row = self.model().findPKRow([pKValue])
+                if row is not None:
+                    if self.model().value(row, self.model().pK()) != pKValue:
+                        raise AssertionError("Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.model().value(row, self.model().pK()), pKValue))
+                    self.model().setValuesDict(row, dict_update)
+
+                else:
+                    # Método clásico
+                    print("FLSqlCursor.update :: WARN :: Los indices del CursorTableModel no funcionan o el PKey no existe.")
+                    row = 0
+                    while row < self.model().rowCount():
+                        if self.model().value(row, self.model().pK()) == pKValue:
+                            for fieldName in lista:
+                                self.model().setValue(row, fieldName, self.d.buffer_.value(fieldName))
+
+                            break
+
+                        row = row + 1
+
+            if notify:
+                self.bufferCommited.emit()
+
+
+        elif self.modeAccess() == FLSqlCursor.Insert:
+            self.model().newRowFromBuffer(self.d.buffer_)
+
+            if notify:
+                self.bufferCommited.emit()
+        print("FLSqlCursor.update --- END")
+
     """
     Indica el último error
     """
@@ -2631,3 +2709,4 @@ class FLSqlCursor(ProjectClass):
     clearPersistentFilter = QtCore.pyqtSignal()
 
 #endif
+from pineboolib.fllegacy.FLUtil import FLUtil

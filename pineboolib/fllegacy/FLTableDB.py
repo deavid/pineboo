@@ -500,7 +500,7 @@ class FLTableDB(QtGui.QWidget):
                 tMD = None
                 ownTMD = None
                 if self.tableName_:
-                    if not self.cursor_.db().manager().existTable(self.tableName_):
+                    if not self.cursor_.db().manager().existsTable(self.tableName_):
                         ownTMD = True
                         tMD = self.cursor_.db().manager().createTable(self.tableName_)
                     else:
@@ -1307,7 +1307,7 @@ class FLTableDB(QtGui.QWidget):
 
         ownTMD = None
         if self.tableName_:
-            if not self.cursor_.db().manager().existTable(self.tableName_):
+            if not self.cursor_.db().manager().existsTable(self.tableName_):
                 ownTMD = True
                 tMD = self.cursor_.db().manager().createTable(self.tableName_)
             else:

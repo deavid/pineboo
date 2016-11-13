@@ -17,14 +17,10 @@ import zlib
 
 
 from PyQt4 import QtGui, QtCore
+from pineboolib.fllegacy.FLSettings import FLSettings
 if __name__ == "__main__":
     sys.path.append('..')
 
-from pineboolib import qt3ui
-from pineboolib.PNConnection import PNConnection
-from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.fllegacy.FLFormDB import FLFormDB
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 import pineboolib.emptyscript
 from pineboolib import decorators
 
@@ -169,20 +165,34 @@ class Project(object):
                 self.files[nombre] = fileobj
                 self.modules[idmodulo].add_project_file(fileobj)
 
-    @decorators.NotImplementedWarn
-    def saveGeometryForm(self, name, geo):
-        pass
 
-    @decorators.NotImplementedWarn
+    def saveGeometryForm(self, name, geo):
+        name = "geo/%s" % name
+        FLSettings().writeEntry(name, geo)
+
+
+    def loadGeometryForm(self, name):
+        name = name = "geo/%s" % name
+        return FLSettings().readEntry(name, None)
+
     def call(self, function, aList , objectContext ):
+        # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
         print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" % (function, aList , objectContext ))
+        import pineboolib.qsaglobals
+        fn = None
+        try:
+            fn = eval(function, pineboolib.qsaglobals.__dict__)
+            return fn(*aList)
+        except Exception:
+            print("** JS.CALL :: ERROR:", traceback.format_exc())
+
         # Hay que resolver la llamada a funcion "function" dentro de qsaglobals
         # y buscar la resolución de los objetos separando por puntos.
 
         # la llamada aqui tipica es "flfactalma.beforeCommit_articulos"
 
 
-        return True
+        return None
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):
@@ -516,6 +526,9 @@ class XMLAction(XMLStruct):
         print("Executing unknown script for Action", self.name)
         #Aquí debería arramcar el script
 
+
+from pineboolib.fllegacy.FLFormDB import FLFormDB
+
 class FLMainForm(FLFormDB):
     """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """
     pass
@@ -523,3 +536,8 @@ class FLMainForm(FLFormDB):
 
 
 
+from pineboolib import qt3ui
+from pineboolib.PNConnection import PNConnection
+from pineboolib.dbschema.schemaupdater import parseTable
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB

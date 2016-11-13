@@ -185,7 +185,6 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero que contiene la descricpción del formulario.
     @return QWidget correspondiente al formulario construido.
     """
-    @decorators.BetaImplementation
     def createUI(self, n, connector = None, parent = None, name = None):
         
         

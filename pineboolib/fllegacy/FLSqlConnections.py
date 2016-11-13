@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-#Completa Si
+# Completa Si
 
 import sip
-# switch on QVariant in Python3
-sip.setapi('QVariant', 2)
-sip.setapi('QString', 1)
-
 from pineboolib.fllegacy.FLSqlDatabase import FLSqlDatabase
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
 
 from PyQt4.QtCore import QString
+# switch on QVariant in Python3
+# sip.setapi('QVariant', 2)
+sip.setapi('QString', 1)
 
 
 """
@@ -25,15 +24,19 @@ La conexión por defecto tendrá el nombre "default".
 
 @author InfoSiAL S.L.
 """
+
+
 class FLSqlConnections():
-    
+
     @decorators.BetaImplementation
     def addDatabase(self, *args, **kwargs):
-        if isinstance(args[0],QString):
+        if isinstance(args[0], QString):
             self.addDatabase1(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7])
+        elif len(args) < 2:
+            self.addDatabase2(args[0])
         else:
-            self.addDataBase2(args[0], args[1])
-            
+            self.addDatabase2(args[0], args[1])
+
     """
     Añade una base de datos a las conexiones disponibles.
 
@@ -54,19 +57,19 @@ class FLSqlConnections():
     @return TRUE si se pudo realizar la conexión, FALSE en caso contrario
     """
     @decorators.BetaImplementation
-    def addDatabase1(self, driverAlias, nameDB, user, password, host, port, connectionName, connectOptions = QString.null):
-        
+    def addDatabase1(self, driverAlias, nameDB, user, password, host, port, connectionName, connectOptions=None):
+
         db = FLSqlDatabase()
-        if not db.loadDriver( db.driverAliastoDriverName(driverAlias), connectionName):
+        if not db.loadDriver(db.driverAliastoDriverName(driverAlias), connectionName):
             del db
-            print("FLSqlConnections::addDatabase : Driver no cargado %s" %  driverAlias)
+            print("FLSqlConnections::addDatabase : Driver no cargado %s" % driverAlias)
             return False
-        
+
         if not db.connectDB(nameDB, user, password, host, port, connectionName, connectOptions):
             del db
             print("FLSqlConnections::addDatabase : No se pudo conectar a %s" % nameDB)
             return False
-        
+
         return self.addDatabase(db, connectionName)
     """
     Sobrecargada por conveniencia
@@ -78,23 +81,22 @@ class FLSqlConnections():
     @return TRUE si se pudo realizar la conexión, FALSE en caso contrario
     """
     @decorators.BetaImplementation
-    def addDatabase2(self, *db, connectionName = "default"):
+    def addDatabase2(self, db, connectionName="default"):
         if not self.d:
             self.d = FLSqlConnectionsPrivate()
         if not db:
             return False
-        
-        newDB = self.d.dictDB.get(connectionName)        
-        
+
+        newDB = self.d.dictDB.get(connectionName)
+
         if newDB and newDB == db:
             return True
-        
+
         self.d.dictDB[connectionName] = db
         if not self.d.defaultDB == db and connectionName == "default":
             self.d.defaultDB = db
-        
-        return True
 
+        return True
 
     """
     Elimina una base de datos de las conexiones disponibles.
@@ -108,10 +110,10 @@ class FLSqlConnections():
     def removeDatabase(self, connectionName):
         if not self.d or not self.d.dictDB:
             return False
-        
+
         if connectionName == "default":
             self.d.defaultDB = None
-        
+
         return self.d.dictDB(connectionName).clear()
 
     """
@@ -121,30 +123,29 @@ class FLSqlConnections():
     @return La base de datos correspondiente al nombre de conexion indicado
     """
     @decorators.BetaImplementation
-    def database(self, connectionName = "default"):
+    def database(self, connectionName="default"):
         if not self.d:
             self.d = FLSqlConnectionsPrivate()
-        
+
         if connectionName == "default":
             if not self.d.defaultDB:
                 self.addDatabase(FLSqlDatabase())
             return self.d.defaultDB
-    
+
         if not self.d.dictDB:
             self.addDatabase(FLSqlDatabase())
             return self.d.defaultDB
-    
-        ret = self.d.dictDB.get(connectionName) 
-        
+
+        ret = self.d.dictDB.get(connectionName)
+
         if not ret:
             print(FLUtil.translate("FLSqlConnections::database : No existe la conexión '%s', se devuelve la conexión por defecto 'default'" % connectionName))
-    
+
             if not self.d.defaultDB:
                 self.addDatabase(FLSqlDatabase())
             ret = self.defaultDB
-    
+
         return ret
-        
 
     """
     Finalizar todas las conexiones
