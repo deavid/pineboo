@@ -28,7 +28,7 @@ class FLSettings(ProjectClass):
         
         if "geo" in _key:
             ret = ret.toSize()
-            print("Geo vale", ret)
+            #print("Geo vale", ret)
             if not ret:
                 ret = _def
         else:
@@ -53,7 +53,6 @@ class FLSettings(ProjectClass):
         ret = self.s.value(key)
         return bool(ret)
         
-    @decorators.BetaImplementation
     def writeEntry(self, key, value):
         self.s.setValue(key, value)
     
