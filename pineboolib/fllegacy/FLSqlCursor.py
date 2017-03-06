@@ -815,8 +815,12 @@ class FLSqlCursor(ProjectClass):
                 print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.", self.curName())
                 return None
         else:
-            return None
-
+            #return None //Devolvemos el valor del buffer si es insert
+            if not self.d.buffer_:
+                return None
+            else:
+                return self.d.buffer_.value(fN)
+            
         field = self.metadata().field(fN)
         if not field:
             #print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.metadata().name(), fN))
