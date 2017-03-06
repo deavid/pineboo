@@ -1724,6 +1724,9 @@ class FLSqlCursor(ProjectClass):
             self.editBuffer(True)
             self.setNoGenerateds()
             self.newBuffer.emit()
+        
+        else:
+            print("ERROR FLSqlCursor.refreshBuffer(). No hay definido modeAccess()")
 
 
 
@@ -1988,9 +1991,9 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def baseFilter(self):
         relationFilter = None
-        finalFilter = "1 = 1"
+        finalFilter = None
 
-        if self.d.cursorRelation_ and self.drelation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
+        if self.d.cursorRelation_ and self.d.relation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
 
             fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
             field = self.d.metadata_.field(self.d.relation_.field())
