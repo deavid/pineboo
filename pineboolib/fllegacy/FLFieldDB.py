@@ -1114,8 +1114,9 @@ class FLFieldDB(QtGui.QWidget):
         if not fN:
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
+            
             if self.cursor_.cursorRelation():
-                if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) == "":
+                if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
                     v = None
                     
 
@@ -2330,7 +2331,7 @@ class FLFieldDB(QtGui.QWidget):
 
         c.setAction(a)
 
-        self.modemodeAccess = self.cursor_.modeAccess()
+        self.modeAccess = self.cursor_.modeAccess()
         if self.modeAccess == FLSqlCursor.Insert or self.modeAccess == FLSqlCursor.Del:
             self.modeAccess = FLSqlCursor.Edit
 
