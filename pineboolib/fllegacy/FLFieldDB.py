@@ -1114,6 +1114,11 @@ class FLFieldDB(QtGui.QWidget):
         if not fN:
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
+            if self.cursor_.cursorRelation():
+                if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) == "":
+                    v = None
+                    
+
         else:
             if not self.cursorAux and fN.lower() == self.fieldRelation_.lower():
                 if self.cursor_.bufferIsNull(self.fieldRelation_):
@@ -1147,7 +1152,6 @@ class FLFieldDB(QtGui.QWidget):
                 q.setTablesList(field.relationM1().foreignTable())
                 q.setSelect("%s,%s" % (self.foreignField, field.relationM1().foreignField()))
                 q.setFrom(field.relationM1().foreignTable())
-
                 where = field.formatAssignValue(field.relationM1().foreignField(), v, True)
                 filterAc = QString(self.cursor_.filterAssoc(self.fieldRelation_, tmd))
 
@@ -1410,7 +1414,6 @@ class FLFieldDB(QtGui.QWidget):
         
         if not type_ == "pixmap" and not self.editor_:
             return
-        
         v = self.cursor_.valueBuffer(self.fieldName_)
         nulo = self.cursor_.bufferIsNull(self.fieldName_)
         
@@ -2832,6 +2835,7 @@ class FLFieldDB(QtGui.QWidget):
                     #if self.cursorAux:
                         #print("Cursor auxiliar a ", self.tableName_)
                     if self.cursorAux and self.cursor_ and self.cursor_.bufferIsNull(self.fieldName_):
+
                         if not self.cursorAux.bufferIsNull(self.foreignField_):
                             mng = self.cursor_.db().manager()
                             tMD = self.cursor_.metadata()
