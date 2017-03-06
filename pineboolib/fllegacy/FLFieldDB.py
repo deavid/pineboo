@@ -3153,6 +3153,8 @@ class FLDateEdit(QtGui.QDateEdit):
 
     def __init__(self, parent, name):
         super(FLDateEdit,self).__init__(parent)
+        self.setMinimumWidth(90)
+        self.setMaximumWidth(90)
 
 
 
