@@ -61,7 +61,13 @@ class FLTableMetaData(ProjectClass):
     def inicializeFLTableMetaDataP(self, name):
         self.d = FLTableMetaDataPrivate(name)
         self.d.compoundKey_ = FLCompoundkey()
-        table = self._prj.tables[name]
+        
+        
+        try:
+            table = self._prj.tables[name]
+        except:
+            return None
+        
         for field in table.fields:
             field.setMetadata(self)
             if field.isCompoundKey():
