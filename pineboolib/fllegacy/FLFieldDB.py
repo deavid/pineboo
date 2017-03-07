@@ -41,6 +41,8 @@ class FLLineEdit(QtGui.QLineEdit):
         self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
         self._partDecimal = parent.partDecimal_
 
+    def __getattr__(self, name): 
+        return DefFun(self, name)
 
     def setText(self, texto, b = True):
         if self._maxValue:
@@ -1806,7 +1808,8 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.setFont(QtGui.qApp.font())
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull():
-                        self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+                        #self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+                        self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
 
                 olTranslated = []
                 olNoTranslated = field.optionsList()
@@ -1830,7 +1833,8 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull():
-                        self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+                        #self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+                        self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
@@ -2753,7 +2757,7 @@ class FLFieldDB(QtGui.QWidget):
                                     cBg = QtGui.QColor.blue()
                                     cBg = QtGui.QApplication().palette().color(QtGui.QPalette.Active, QtGui.QPalette.Base)
                                 else:
-                                    cBg = self.NotNullColor()
+                                    cBg = self.NotNullColor().name()
 
                                 le.setDisabled(False)
                                 le.setReadOnly(False)
