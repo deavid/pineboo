@@ -159,6 +159,7 @@ class FLFieldDB(QtGui.QWidget):
 
     _initCursorWhenLoad = False
     _initEditorWhenLoad = False
+    _refreshLaterEditor = False
 
     editorImgInit_ = None
 
@@ -638,12 +639,14 @@ class FLFieldDB(QtGui.QWidget):
             if not data:
                 isNull = True
             if not self.cursor_.bufferIsNull(self.fieldName_):
-                if data == self.cursor_.valueBuffer(self.fieldName_).toDate():
+                data = str(data.toString("yyyy-MM-dd"))
+                if str(data) == self.cursor_.valueBuffer(self.fieldName_):
                     return
             elif isNull:
                 return
+            
             if isNull:
-                self.cursor_.setValueBuffer(self.fieldName_, QtCore.QDate())
+                self.cursor_.setValueBuffer(self.fieldName_, str(QtCore.QDate().toString("yyyy-MM-dd")))
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
@@ -659,6 +662,7 @@ class FLFieldDB(QtGui.QWidget):
                     return
             elif isNull:
                 return
+            
             if isNull:
                 data = str(QtCore.QTime().toString("hh:mm:ss"))      
                 self.cursor_.setValueBuffer(self.fieldName_, data)
@@ -734,7 +738,6 @@ class FLFieldDB(QtGui.QWidget):
     """
 
     def setValue(self, v):
-
         # --> Para quitar con el tiempo
         if v and isinstance(v, str):
             if str(v[0:3]) == "RK@":
@@ -1191,6 +1194,7 @@ class FLFieldDB(QtGui.QWidget):
         
         
         if not type_ == "pixmap" and not self.editor_:
+            self._refreshLaterEditor = fN
             return
 
         modeAcces = self.cursor_.modeAccess()
@@ -1343,11 +1347,15 @@ class FLFieldDB(QtGui.QWidget):
                     self.editor_.setDate(defVal.toDate())
             else:
                 try:
-                    self.editor_.valueChanged.disconnect(self.updateValue)
+                    self.editor_.dateChanged.disconnect(self.updateValue)
                 except:
                     pass
-                self.editor_.valueChanged.connect(self.updateValue)
 
+                
+                if v:
+                    self.editor_.setDate(v)
+                
+                self.editor_.dateChanged.connect(self.updateValue)
 
 
         elif type_ == "time":
@@ -1738,13 +1746,10 @@ class FLFieldDB(QtGui.QWidget):
     e inicia un QDataEdit)
     """
     def initEditor(self):
-
+        
         if not self.cursor_:
             return
 
-
-
-        #print("FlFieldDB(%s.%s).initEditor()" % (self.tableName_, self.fieldName_))
         if self.editor_:
             del self.editor_
             self.editor_ = None
@@ -1812,10 +1817,10 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_.setAutoCompletion(True)
                 self.editor_.setMinimumSize(22, 22)
                 self.editor_.setFont(QtGui.qApp.font())
-                if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                    if not field.allowNull():
+                #if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
+                    #if not field.allowNull():
                         #self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
-                        self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
+                        #self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
 
                 olTranslated = []
                 olNoTranslated = field.optionsList()
@@ -1838,7 +1843,7 @@ class FLFieldDB(QtGui.QWidget):
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                    if not field.allowNull():
+                    if not field.allowNull() and field.editable():
                         #self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                         self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
                     self.editor_.installEventFilter(self)
@@ -1898,8 +1903,9 @@ class FLFieldDB(QtGui.QWidget):
                     tlf = self.textLabelDB.font()
                     tlf.setUnderline(True)
                     self.textLabelDB.setFont(tlf)
-                    cB = QtGui.QColor(Qt.cyan)
-                    self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
+                    cB = QtGui.QColor(Qt.darkBlue)
+                    #self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
+                    self.textLabelDB.setStyleSheet('color:' + cB.name())
                     self.textLabelDB.setCursor(Qt.PointingHandCursor)
 
             sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
@@ -2061,35 +2067,36 @@ class FLFieldDB(QtGui.QWidget):
             self.pushButtonDB.hide()
 
             if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                if not self.pbAux_:
-                    self.pbAux_ = QtGui.QPushButton(self)
-                    self.pbAux_.setFlat(True)
-                    sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
-                    sizePolicy.setHeightForWidth(True)
-                    self.pbAux_.setSizePolicy(sizePolicy)
-                    self.pbAux_.setMinimumSize(25, 25)
-                    self.pbAux_.setMaximumSize(25, 25)
-                    self.pbAux_.setFocusPolicy(Qt.NoFocus)
-                    self.pbAux_.setIcon(QtGui.QIcon(filedir("icons","date.png")))
-                    self.pbAux_.setText("")
-                    self.pbAux_.setToolTip("Seleccionar fecha (F2)")
-                    self.pbAux_.setWhatsThis("Seleccionar fecha (F2)")
+                #if not self.pbAux_:
+                    #self.pbAux_ = QtGui.QPushButton(self)
+                    #self.pbAux_.setFlat(True)
+                    #sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
+                    #sizePolicy.setHeightForWidth(True)
+                    #self.pbAux_.setSizePolicy(sizePolicy)
+                    #self.pbAux_.setMinimumSize(25, 25)
+                    #self.pbAux_.setMaximumSize(25, 25)
+                    #self.pbAux_.setFocusPolicy(Qt.NoFocus)
+                    #self.pbAux_.setIcon(QtGui.QIcon(filedir("icons","date.png")))
+                    #self.pbAux_.setText("")
+                    #self.pbAux_.setToolTip("Seleccionar fecha (F2)")
+                    #self.pbAux_.setWhatsThis("Seleccionar fecha (F2)")
                     #self.lytButtons.addWidget(self.pbAux_) FIXME
-                    self.FLWidgetFieldDBLayout.addWidget(self.pbAux_)
-                    if self.showed:
-                        self.pbAux_.clicked.disconnect(self.toggleDatePicker)
-                        self.KeyF2Pressed_.disconnect(self.pbAux_.animateClick)
+                    #self.FLWidgetFieldDBLayout.addWidget(self.pbAux_)
+                    #if self.showed:
+                        #self.pbAux_.clicked.disconnect(self.toggleDatePicker)
+                        #self.KeyF2Pressed_.disconnect(self.pbAux_.animateClick)
 
-                    self.pbAux_.clicked.connect(self.toggleDatePicker)
+                    #self.pbAux_.clicked.connect(self.toggleDatePicker)
                     #self.keyF2Pressed_.connect(self.pbAux_.animateClick) #FIXME
+                    self.editor_.setCalendarPopup(True)
 
             if self.showed:
                 try:
-                    self.editor_.valueChanged.disconnect(self.updateValue)
+                    self.editor_.dateChanged.disconnect(self.updateValue)
                 except:
                     pass
 
-            self.editor_.valueChanged.connect(self.updateValue) #FIXME
+            self.editor_.dateChanged.connect(self.updateValue)
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
                 defVal = field.defaultValue()
                 if not defVal.isValid() or defVal.isNull():
@@ -2204,6 +2211,9 @@ class FLFieldDB(QtGui.QWidget):
             self.setShowEditor(self.showEditor_)
 
 
+        if not self._refreshLaterEditor == False:
+            self.refresh(self._refreshLaterEditor)
+            self._refreshLaterEditor = False
 
 
 
@@ -2232,13 +2242,6 @@ class FLFieldDB(QtGui.QWidget):
 
 
 
-
-    """
-    Muestra/Oculta el seleccionador de fechas.
-    """
-    @decorators.NotImplementedWarn
-    def toggleDatePicker(self):
-        return
 
 
 
@@ -2837,12 +2840,13 @@ class FLFieldDB(QtGui.QWidget):
     def showWidget(self):
         if not self._loaded: #Esperamos a que la carga se realice
             timer = QtCore.QTimer(self)
-            timer.singleShot(30, self.showWidget)
+            timer.singleShot(15, self.showWidget)
             return
         else:
             if not self.showed and not self._initEditorWhenLoad and not self._initCursorWhenLoad:
                 if self.topWidget_:
                     self.refresh()
+                    
                     #if self.cursorAux:
                         #print("Cursor auxiliar a ", self.tableName_)
                     if self.cursorAux and self.cursor_ and self.cursor_.bufferIsNull(self.fieldName_):
@@ -3168,14 +3172,30 @@ class FLDateEdit(QtGui.QDateEdit):
 
     def __init__(self, parent, name):
         super(FLDateEdit,self).__init__(parent)
-        self.setMinimumWidth(90)
-        self.setMaximumWidth(90)
+        self.setDisplayFormat("dd-MM-yyyy")
+        self.setMinimumWidth(120)
+        self.setMaximumWidth(120)
+    
+    def setDate(self, d):
+        if isinstance(d, str):
+            d = d.split('-')
+            date = QtCore.QDate(int(d[0]),int(d[1]), int(d[2]))
+        else:
+            date = d
+        
+        super(FLDateEdit, self).setDate(date)
+            
+        
+    def __getattr__(self, name): 
+        return DefFun(self, name)
 
 class FLTimeEdit(QtGui.QTimeEdit):
     
     def __init__(self, parent):
         super(FLTimeEdit,self).__init__(parent)
         self.setDisplayFormat("hh:mm:ss")
+        self.setMinimumWidth(90)
+        self.setMaximumWidth(90)
     
     def setTime(self, v):
         if isinstance(v, str):
