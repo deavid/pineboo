@@ -638,8 +638,11 @@ class FLFieldDB(QtGui.QWidget):
                 return
             if not data:
                 isNull = True
-            if not self.cursor_.bufferIsNull(self.fieldName_):
+            else:
                 data = str(data.toString("yyyy-MM-dd"))
+                
+            if not self.cursor_.bufferIsNull(self.fieldName_):
+                
                 if str(data) == self.cursor_.valueBuffer(self.fieldName_):
                     return
             elif isNull:
@@ -1362,9 +1365,9 @@ class FLFieldDB(QtGui.QWidget):
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and nulo and not field.allowNull():
                 defVal = field.defaultValue()
                 if not defVal.isValid() or defVal.isNull():
-                    self.editor_.setDate(QtCore.QTime.currentTime())
+                    self.editor_.setTime(QtCore.QTime.currentTime())
                 else:
-                    self.editor_.setDate(defVal.toTime())
+                    self.editor_.setTime(defVal.toTime())
             else:
                 try:
                     self.editor_.timeChanged.disconnect(self.updateValue)
