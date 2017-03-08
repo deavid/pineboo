@@ -654,12 +654,14 @@ class FLFieldDB(QtGui.QWidget):
             if not data:
                 isNull = True
             if not self.cursor_.bufferIsNull(self.fieldName_):
-                if data == self.cursor_.valueBuffer(self.fieldName_).toTime():
+                data = str(data.toString("hh:mm:ss"))
+                if str(data) == self.cursor_.valueBuffer(self.fieldName_):
                     return
             elif isNull:
                 return
             if isNull:
-                self.cursor_.setValueBuffer(self.fieldName_, QtCore.QTime())
+                data = str(QtCore.QTime().toString("hh:mm:ss"))      
+                self.cursor_.setValueBuffer(self.fieldName_, data)
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
@@ -1357,10 +1359,14 @@ class FLFieldDB(QtGui.QWidget):
                     self.editor_.setDate(defVal.toTime())
             else:
                 try:
-                    self.editor_.valueChanged.disconnect(self.updateValue)
+                    self.editor_.timeChanged.disconnect(self.updateValue)
                 except:
                     pass
-                self.editor_.valueChanged.connect(self.updateValue)
+                
+                if v:
+                    self.editor_.setTime(v)
+                                        
+                self.editor_.timeChanged.connect(self.updateValue)
 
 
 
@@ -1532,12 +1538,12 @@ class FLFieldDB(QtGui.QWidget):
                 return
             
             try:
-                self.editor_.valueChanged.disconnect(self.updateValue)
+                self.editor_.timeChanged.disconnect(self.updateValue)
             except:
                 pass
         
             self.editor_.setTime(v)
-            self.editor_.valueChanged.connect(self.updateValue)
+            self.editor_.timeChanged.connect(self.updateValue)
         
         elif type_ == "stringlist":
             if v == self.editor_.text():
@@ -2092,7 +2098,7 @@ class FLFieldDB(QtGui.QWidget):
                     self.editor_.setDate(defVal.toDate())
 
         elif type_ == "time":
-            self.editor_ = QtGui.QTimeEdit(self)
+            self.editor_ = FLTimeEdit(self)
             self.editor_.setFont(QtGui.qApp.font())
             #self.editor_.setAutoAdvance(True)
             sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
@@ -2103,17 +2109,17 @@ class FLFieldDB(QtGui.QWidget):
             self.pushButtonDB.hide()
             if self.showed:
                 try:
-                    self.editor_.valueChanged.disconnect(self.updateValue)
+                    self.editor_.timeChanged.disconnect(self.updateValue)
                 except:
                     pass
 
-            #self.editor_.valueChanged.connect(self.updateValue) #FIXME
+            self.editor_.timeChanged.connect(self.updateValue)
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
                 defVal = field.defaultValue()
                 if not defVal.isValid() or defVal.isNull():
-                    self.editor_.setDate(QtCore.QDate.CurrentTime())
+                    self.editor_.setTime(QtCore.QDate.CurrentTime())
                 else:
-                    self.editor_.setDate(defVal.toTime())
+                    self.editor_.setTime(defVal.toTime())
 
 
         elif type_ == "stringlist":
@@ -3164,6 +3170,31 @@ class FLDateEdit(QtGui.QDateEdit):
         super(FLDateEdit,self).__init__(parent)
         self.setMinimumWidth(90)
         self.setMaximumWidth(90)
+
+class FLTimeEdit(QtGui.QTimeEdit):
+    
+    def __init__(self, parent):
+        super(FLTimeEdit,self).__init__(parent)
+        self.setDisplayFormat("hh:mm:ss")
+    
+    def setTime(self, v):
+        if isinstance(v, str):
+            v = v.split(':')
+            time = QtCore.QTime(int(v[0]),int(v[1]),int(v[2]))
+        else:
+            time = v
+        super(FLTimeEdit,self).setTime(time)   
+        
+    
+    
+    
+    
+    def __getattr__(self, name): 
+        return DefFun(self, name)
+
+
+    
+    
 
 
 
