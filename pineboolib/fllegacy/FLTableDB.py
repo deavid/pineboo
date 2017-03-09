@@ -946,7 +946,6 @@ class FLTableDB(QtGui.QWidget):
     """
     Actualiza el conjunto de registros.
     """
-    @decorators.BetaImplementation
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
     @QtCore.pyqtSlot(bool, bool)
@@ -1314,7 +1313,7 @@ class FLTableDB(QtGui.QWidget):
                 ownTMD = True
                 tMD = self.cursor_.db().manager().metadata(self.tableName_)
 
-            if not tMD:
+            if not tMD or isinstance(tMD,bool):
                 return
 
             if not self.foreignField_ or not self.fieldRelation_:

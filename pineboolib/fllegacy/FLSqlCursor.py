@@ -815,8 +815,12 @@ class FLSqlCursor(ProjectClass):
                 print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.", self.curName())
                 return None
         else:
-            return None
-
+            #return None //Devolvemos el valor del buffer si es insert
+            if not self.d.buffer_:
+                return None
+            else:
+                return self.d.buffer_.value(fN)
+            
         field = self.metadata().field(fN)
         if not field:
             #print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.metadata().name(), fN))
@@ -1720,6 +1724,9 @@ class FLSqlCursor(ProjectClass):
             self.editBuffer(True)
             self.setNoGenerateds()
             self.newBuffer.emit()
+        
+        else:
+            print("ERROR FLSqlCursor.refreshBuffer(). No hay definido modeAccess()")
 
 
 
@@ -1984,9 +1991,9 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def baseFilter(self):
         relationFilter = None
-        finalFilter = "1 = 1"
+        finalFilter = None
 
-        if self.d.cursorRelation_ and self.drelation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
+        if self.d.cursorRelation_ and self.d.relation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
 
             fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
             field = self.d.metadata_.field(self.d.relation_.field())

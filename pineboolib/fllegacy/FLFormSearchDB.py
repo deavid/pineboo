@@ -306,7 +306,7 @@ class FLFormSearchDB(FLFormDB):
         
         if self.isHidden():
             self.closed.emit()
-            QtGui.QWidget.closeEvent(e)
+            super(FLFormSearchDB, self).closeEvent(e)
             self.deleteLater()
             
 
