@@ -171,12 +171,22 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.setValuesDict(row, dict_update)
         pkey_name = self.tableMetadata().primaryKey()
         # TODO: la conversion de mogrify de bytes a STR va a dar problemas con los acentos...
-        where_filter = "%s = %s" % (pkey_name, (self._cursor.mogrify("%s",[pKValue])))
+        typePK_ = self.tableMetadata().field(self.tableMetadata().primaryKey()).type()
+        pKValue = self._prj.conn.manager().formatValue(typePK_, pKValue, False)
+        #if typePK_ == "string" or typePK_ == "pixmap" or typePK_ == "stringlist" or typePK_ == "time" or typePK_ == "date":
+            #pKValue = str("'" + pKValue + "'")
+            
+        where_filter = "%s = %s" % (pkey_name, pKValue)
         print("pkvalue = %r" % pKValue)
         update_set = []
 
         for key, value in dict_update.items():
-            update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
+            type_ = self.tableMetadata().field(key).type()
+            #if type_ == "string" or type_ == "pixmap" or type_ == "stringlist" or type_ == "time" or type_ == "date":
+                #value = str("'" + value + "'")
+            value = self._prj.conn.manager().formatValue(type_, value, False)
+            #update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
+            update_set.append("%s = %s" % (key, value))
             print("field %r = %r" % (key,value))
 
         update_set_txt = ", ".join(update_set)
