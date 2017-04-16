@@ -6,6 +6,10 @@ import datetime
 
 from PyQt4 import QtCore, QtGui
 
+# Cargar toda la API de Qt para que sea visible.
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
+
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
 from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
@@ -46,6 +50,24 @@ def FLTableDB(*args):
     return FLTableDB_Legacy.FLTableDB(*args)
 
 QTable = FLTable
+Color = QtGui.QColor
+QColor = QtGui.QColor
+QDateEdit = QtGui.QDateEdit
+
+File = QtCore.QFile
+
+@decorators.NotImplementedWarn
+def FLPosPrinter(*args, **kwargs):
+    class flposprinter:
+        pass
+    return flposprinter()
+
+
+@decorators.NotImplementedWarn
+def FLDomDocument(*args, **kwargs):
+    class fldomdocument:
+        pass
+    return fldomdocument()
 
 @decorators.NotImplementedWarn
 def FLCodBar(*args, **kwargs):
