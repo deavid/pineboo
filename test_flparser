@@ -46,5 +46,7 @@ import sys, re, traceback, os, gc
 
 
 import pineboolib.flparser.postparse
+app = QtGui.QApplication(sys.argv)
+
 if __name__ == "__main__":
     pineboolib.flparser.postparse.main()

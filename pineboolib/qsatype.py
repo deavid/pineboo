@@ -45,6 +45,8 @@ def FLTableDB(*args):
     if not args: return None
     return FLTableDB_Legacy.FLTableDB(*args)
 
+QTable = FLTable
+
 @decorators.NotImplementedWarn
 def FLCodBar(*args, **kwargs):
     class flcodbar:
