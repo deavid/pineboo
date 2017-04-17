@@ -60,7 +60,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return self._prj.conn.manager().metadata(self._table.name)
 
     def refresh(self):
-        #print("refrescando modelo tabla %s" % self.tableMetadata().name())
+        #print("refrescando modelo tabla %r , query %r" % (self._table.name, self._table.query_table))
         parent = QtCore.QModelIndex()
         oldrows = self.rows
         self.beginRemoveRows(parent, 0, oldrows )
@@ -79,6 +79,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # FIXME: Agregado limit de 5000 registros para evitar atascar pineboo
         # TODO: Convertir esto a un cursor de servidor
+        if self._table.query_table:
+            # FIXME: Como no tenemos soporte para Queries, desactivamos el refresh.
+            print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
+            
+            return
         self.sql_fields = []
         self.pkpos = []
         self.ckpos = []
