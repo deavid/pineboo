@@ -41,6 +41,9 @@ def FLSqlQuery(*args):
 def FLUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
 
+def AQUtil(*args):
+    return FLUtil_Legacy.FLUtil(*args)
+
 def FLSqlCursor(action=None):
     if action is None: return None
     return FLSqlCursor_Legacy.FLSqlCursor(action)

@@ -53,6 +53,7 @@ def connect(sender, signal, receiver, slot):
         print("Connect Error::", sender, signal, receiver, slot)
         return False
     m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
+    if slot.endswith("()"): slot = slot[:-2]
     remote_fn = getattr(receiver, slot, None)
     if remote_fn:
         try:
@@ -74,7 +75,10 @@ def connect(sender, signal, receiver, slot):
             return False
 
     else:
-        QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))
+        if isinstance(receiver, QtCore.QObject):
+            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))
+        else:
+            print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." % (sender, signal, receiver, slot))
     return True
 
 QMessageBox = QtGui.QMessageBox
@@ -176,8 +180,9 @@ class qsa:
                 print(traceback.format_exc(4))
 
 
-from pineboolib.fllegacy import FLUtil
-util = FLUtil.FLUtil() # <- para cuando QS erróneo usa util sin definirla
+from pineboolib.fllegacy.FLUtil import FLUtil
+AQUtil = FLUtil() # A falta de crear AQUtil, usamos la versión anterior
+util = FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
 # -------------------------- FORBIDDEN FRUIT ----------------------------------
 # Esto de aquí es debido a que en Python3 decidieron que era mejor abandonar
