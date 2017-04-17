@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import time
 import re
+import traceback
 
 MSG_EMITTED = {}
 CLEAN_REGEX = re.compile(r'\s*object\s+at\s+0x[0-9a-zA-Z]{6,38}', re.VERBOSE)
 MINIMUM_TIME_FOR_REPRINT = 300
+def print_stack(maxsize=1):
+    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
+        print(tb.rstrip())
 
 def clean_repr(x):
     x = repr(x)
@@ -20,6 +24,7 @@ def NotImplementedWarn(fn):
         if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
             print("WARN: Not yet impl.: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
+            print_stack()
         return ret
     return newfn
 
