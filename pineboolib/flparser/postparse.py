@@ -187,6 +187,12 @@ class Function(ListNamedObject):
     def add_vartype(self, argn, subelem):
         self.xml.set("returns", str(subelem.xmlname))
 
+class FunctionAnon(ListObject):
+    tags = ["funcdeclaration_anon"]
+
+class FunctionAnonExec(ListObject):
+    tags = ["funcdeclaration_anon_exec"]
+
 class Variable(NamedObject):
     tags = ["vardecl"]
     callback_subelem = NamedObject.callback_subelem.copy()
@@ -446,6 +452,9 @@ class Module(object):
             # fp, pathname, description = imp.find_module(self.name,[self.path])
             self.module = imp.load_module(name, fp, pathname, description)
             result = True
+        except FileNotFoundError:
+            print("Fichero %r no encontrado" % self.name)
+            result = False
         except Exception as e:
             print(traceback.format_exc())
             result = False
@@ -487,6 +496,10 @@ def parseArgs(argv):
                     action="store_true", dest="full", default=False,
                     help="write xml file from qs")
 
+    parser.add_option("--cache",
+                    action="store_true", dest="cache", default=False,
+                    help="If dest file exists, don't regenerate it")
+
     (options, args) = parser.parse_args(argv)
     return (options, args)
 
@@ -507,20 +520,36 @@ def execute(options, args):
     if options.optdebug:
         print(options, args)
     if options.full:
+        execpython = options.exec_python
+        options.exec_python = False
         options.full = False
         options.toxml = True
         print("Pass 1 - Parse and write XML file . . .")
-        execute(options,args)
+        try:
+            execute(options,args)
+        except Exception:
+            print("Error parseando:");
+            print(traceback.format_exc())
 
         options.toxml = False
         options.topython = True
         print("Pass 2 - Pythonize and write PY file . . .")
-        execute(options,[ arg+".xml" for arg in args])
+        try:
+          execute(options,[ arg+".xml" for arg in args])
+        except Exception:
+            print("Error convirtiendo:");
+            print(traceback.format_exc())
 
-        options.topython = False
-        options.exec_python = True
-        #print "Pass 3 - Test PY file load . . ."
-        #execute(options,[ (arg+".xml.py").replace(".qs.xml.py",".py") for arg in args])
+        if execpython:
+          options.exec_python = execpython 
+          print("Pass 3 - Test PY file load . . .")
+          options.topython = False
+          try:
+            execute(options,[ (arg+".xml.py").replace(".qs.xml.py",".py") for arg in args])
+          except Exception:
+              print("Error al ejecutar Python:");
+              print(traceback.format_exc())
+          
         print("Done.")
 
     elif options.exec_python:
@@ -528,31 +557,63 @@ def execute(options, args):
         for filename in args:
             realpath = os.path.realpath(filename)
             path, name = os.path.split(realpath)
+            if not os.path.exists(realpath):
+                print("Fichero no existe: %s" % name)
+                continue
+              
             mod = Module(name, path)
-            if mod.loadModule():
-                print(mod.module)
-                print(mod.module.form)
-            else:
+            if not mod.loadModule():
                 print("Error cargando modulo %s" % name)
 
     elif options.topython:
         from .pytnyzer import pythonize
-        for filename in args:
+        import io
+        if options.cache:
+            args = [ x for x in args if not os.path.exists((x+".py").replace(".qs.xml.py",".py"))
+                        or os.path.getmtime(x) > os.path.getctime((x+".py").replace(".qs.xml.py",".py")) ]
+            
+        nfs = len(args)
+        for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
             if options.storepath:
                 destname = os.path.join(options.storepath,bname+".py")
             else:
                 destname = filename+".py"
             destname = destname.replace(".qs.xml.py",".py")
-            pythonize(filename, destname)
+            if not os.path.exists(filename):
+                print("Fichero %r no encontrado" % filename)
+                continue
+            sys.stdout.write("Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname,100.0*(nf+1.0)/nfs))
+            sys.stdout.flush();
+            old_stderr = sys.stdout
+            stream = io.StringIO()
+            sys.stdout = stream
+            try:
+                pythonize(filename, destname, destname + ".debug")
+            except Exception:
+                print("Error al pythonificar %r:" % filename)
+                print(traceback.format_exc())
+            sys.stdout = old_stderr 
+            text = stream.getvalue()
+            if len(text) > 2:
+                print("%s: " % bname + ("\n%s: " % bname).join(text.splitlines()))
+                
 
     else:
+        if options.cache:
+            args = [ x for x in args if not os.path.exists(x+".xml") 
+                        or os.path.getmtime(x) > os.path.getctime(x+".xml")]
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
             sys.stdout.write("Parsing File: %-35s . . . .        (%.1f%%)    " % (bname,100.0*(nf+1.0)/nfs))
             sys.stdout.flush();
-            prog = flscriptparse.parse(open(filename,"r", encoding="latin-1").read())
+            try:
+                filecontent = open(filename,"r", encoding="latin-1").read()
+            except Exception as e:
+                print("Error: No se pudo abrir fichero %-35s          \n" % (repr(filename)), e)
+                continue
+            prog = flscriptparse.parse(filecontent)
             sys.stdout.write("\r");
             if not prog:
                 print("Error: No se pudo abrir %-35s          \n" % (repr(filename)))
@@ -563,8 +624,14 @@ def execute(options, args):
             if options.toxml == False:
                 # Si no se quiere guardar resultado, no hace falta calcular mas
                 continue
-
-            tree_data = flscriptparse.calctree(prog, alias_mode = 0)
+            
+            tree_data = None
+            try:
+                tree_data = flscriptparse.calctree(prog, alias_mode = 0)
+            except Exception:
+                print("Error al convertir a XML %r:" % bname)
+                print("\n".join(traceback.format_exc().splitlines()[-7:]))
+            
             if not tree_data:
                 print("No se pudo parsear %-35s          \n" % (repr(filename)))
                 continue

@@ -34,6 +34,10 @@ class ProjectClass(QtCore.QObject):
     def __init__(self):
         super(ProjectClass, self).__init__()
         self._prj = pineboolib.project
+    def __iter__(self):
+        # Para soportar el modo Javascript de "attribute" in object
+        # agregamos soporte de iteración
+        return iter(self.__dict__.keys())        
 
 class QCheckBox(QtGui.QCheckBox):
     def __getattr__(self, name): return DefFun(self, name)

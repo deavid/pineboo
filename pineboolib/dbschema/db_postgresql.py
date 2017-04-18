@@ -3,7 +3,7 @@
 from __future__ import unicode_literals
 from builtins import object
 
-class Struct(object):
+class DbStruct(object):
     pass
 
 def get_oids(conn):
@@ -18,7 +18,7 @@ def get_oids(conn):
         ORDER BY 2, 3;
         """)
     for oid, namespace, relname in cur:
-        obj = Struct()
+        obj = DbStruct()
         obj.oid = oid
         obj.namespace = namespace
         obj.name = relname
@@ -39,7 +39,7 @@ def get_relname_oid(conn, relname):
         ORDER BY 2, 3;
         """, [relname])
     for oid, namespace, relname in cur:
-        obj = Struct()
+        obj = DbStruct()
         obj.oid = oid
         obj.namespace = namespace
         obj.name = relname
@@ -86,7 +86,7 @@ def get_table_columns(conn,obj):
         ORDER BY a.attnum
         """, [obj.oid])
     for name, format_type, format_extra, notnull, number in cur:
-        field = Struct()
+        field = DbStruct()
         field.name = name
         field.format_type = format_type
         field.format_extra = format_extra
@@ -122,7 +122,7 @@ def get_table_indexes(conn,obj):
         """, [obj.oid])
 
     for oid, name, isprimary, isunique, isclustered, isvalid, sql_definition, tablespace_oid in cur:
-        index = Struct()
+        index = DbStruct()
         index.oid = oid
         index.name = name
         index.isprimary = isprimary
@@ -147,7 +147,7 @@ def get_table_parents(conn,obj):
         WHERE i.inhrelid = %s ORDER BY inhseqno
         """, [obj.oid])
     for oid, relname, namespace in cur:
-        obj = Struct()
+        obj = DbStruct()
         obj.oid = oid
         obj.namespace = namespace
         obj.name = relname

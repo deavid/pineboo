@@ -22,6 +22,12 @@ from PyQt4.QtCore import QString
 class Struct(object):
     pass
 
+class SchemaTableStruct(Struct):
+    pass
+
+class SchemaFieldStruct(Struct):
+    pass
+
 def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
     file_alike = StringIO(contenido)
 
@@ -51,22 +57,24 @@ def parseTable(nombre, contenido, encoding = "UTF-8", remove_blank_text = True):
     return getTableObj(tree,root)
 
 def getTableObj(tree,root):
-    table = Struct()
+    table = SchemaTableStruct()
     table.xmltree = tree
     table.xmlroot = root
     query_name = one(table.xmlroot.xpath("query/text()"),None)
     name = table.xmlroot.xpath("name/text()")[0]
+    table.tablename = name
     if query_name:
         table.name = query_name
         table.query_table = name
     else:
         table.name = name
+        table.query_table = None
     table.fields = []
     table.pk = []
     table.fields_idx = {}
     for xmlfield in table.xmlroot.xpath("field"):
         try:
-            field = Struct()
+            field = SchemaFieldStruct()
             field.name = None
             field.alias = None
             field.allowNull = False
