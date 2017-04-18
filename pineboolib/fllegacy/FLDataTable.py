@@ -33,9 +33,9 @@ class FLDataTable(QtGui.QTableView):
         self.pixNo_ = filedir("icons","lock.png")
         
         self._v_header = self.verticalHeader()
-        self._v_header.setDefaultSectionSize(18)
+        self._v_header.setDefaultSectionSize(22)
         self._h_header = self.horizontalHeader()
-        self._h_header.setDefaultSectionSize(70)
+        self._h_header.setDefaultSectionSize(120)
         self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
         self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
@@ -47,7 +47,14 @@ class FLDataTable(QtGui.QTableView):
         
 
         
-        
+    def dataChanged(self, topLeft, bottomRight):
+        from pineboolib.CursorTableModel import CursorTableModel
+        model = self.model()
+        if isinstance(model, CursorTableModel):
+            for col, width in enumerate(model._column_hints):
+                self.setColumnWidth(col, width)
+                self._h_header.resizeSection(col, width)
+            self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
 
     """
     desctructor
@@ -362,13 +369,13 @@ class FLDataTable(QtGui.QTableView):
     changingNumRows_ = None
     
     def syncNumRows(self):
+        print("syncNumRows")
         
         if self.changingNumRows_:
             return
-        
-        if not self.numRows() == self.cursor_.size():
+        if self.numRows() != self.cursor_.size():
             self.changingNumRows_ = True
-            self.setNumRows(self.cursor_.sizze())
+            self.setNumRows(self.cursor_.size())
             self.changingNumRows_ = False
             
 
@@ -413,6 +420,7 @@ class FLDataTable(QtGui.QTableView):
     """
     @decorators.Incomplete
     def refresh(self):
+        print("FLDataTable:refresh()")
         if self.popup_:
             self.cursor_.refresh()
             
@@ -551,6 +559,7 @@ class FLDataTable(QtGui.QTableView):
     """
     
     def realColumnIndex(self, name):
+        print("FLDataTable:realColumnIndex");
         if not isinstance(name, str) or not self.cursor_:
             return -1
       
@@ -563,6 +572,7 @@ class FLDataTable(QtGui.QTableView):
     @return posicion real de la columna
     """   
     def visualIndexToRealIndex(self, c):  
+        print("FLDataTable:visualIndexToRealIndex");
         if not isinstance(c, int) or not self.cursor_:return
         
         model = self.cursor_.model()

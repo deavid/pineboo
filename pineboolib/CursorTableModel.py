@@ -1,5 +1,5 @@
 # # -*- coding: utf-8 -*-
-
+import math
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 from pineboolib.qsaglobals import ustr
@@ -10,12 +10,19 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import traceback
-
+DisplayRole = QtCore.Qt.DisplayRole 
+EditRole = QtCore.Qt.EditRole
+Horizontal = QtCore.Qt.Horizontal
+Vertical = QtCore.Qt.Vertical
+QVariant_invalid = QtCore.QVariant()
+QVariant = QtCore.QVariant
+QAbstractTableModel_headerData = QtCore.QAbstractTableModel.headerData
 class CursorTableModel(QtCore.QAbstractTableModel):
     rows = 15
     cols = 5
     _cursor = None
-
+    ROW_BATCH_COUNT = 50
+    
     def __init__(self, action,project, *args):
         super(CursorTableModel,self).__init__(*args)
         from pineboolib.qsaglobals import aqtt
@@ -24,7 +31,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._prj = project
         if action and action.table:
             self._table = project.tables[action.table]
-            project.conn.manager().metadata(self._table.name)
+            self._metadata = project.conn.manager().metadata(self._table.name)
         else:
             raise AssertionError
         self.sql_fields = []
@@ -50,17 +57,20 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             #self.field_metaData.append(field)
         #    self.tableMetadata().addField(field)
         self._data = []
+        self._vdata = {}
+        self._column_hints = []
         self.cols = len(self.tableMetadata().fieldListObject())
+        self.col_aliases = [ str(self.tableMetadata().indexFieldObject(i).alias()) for i in range(self.cols) ]
         self.rows = 0
         self.where_filters = {}
         self.refresh()
 
 
     def metadata(self):
-        return self._prj.conn.manager().metadata(self._table.name)
+        #print("CursorTableModel: METADATA: " + self._table.name)
+        return self._metadata
 
     def refresh(self):
-        #print("refrescando modelo tabla %r , query %r" % (self._table.name, self._table.query_table))
         parent = QtCore.QModelIndex()
         oldrows = self.rows
         self.beginRemoveRows(parent, 0, oldrows )
@@ -77,7 +87,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             where_filter = "1=1"
         self._cursor = self._prj.conn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
-        # FIXME: Agregado limit de 5000 registros para evitar atascar pineboo
+        # FIXME: Agregado limit de 50000 registros para evitar atascar pineboo
+        # FIXME: Cuando el limit aplica, el resize de la tabla es mucho más lento. Porqué?
         # TODO: Convertir esto a un cursor de servidor
         if self._table.query_table:
             # FIXME: Como no tenemos soporte para Queries, desactivamos el refresh.
@@ -95,23 +106,36 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
             self.sql_fields.append(field.name())
 
-        sql = """SELECT %s FROM %s WHERE %s LIMIT 5000""" % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
+        sql = """SELECT %s FROM %s WHERE %s LIMIT 50000""" % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         self._cursor.execute(sql)
         self.rows = 0
         self.endRemoveRows()
         if oldrows > 0:
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
         newrows = self._cursor.rowcount
+        print("refrescando modelo tabla %r , query %r, rows: %d" % (self._table.name, self._table.query_table, newrows))
         self.beginInsertRows(parent, 0, newrows - 1)
         #print("QUERY:", sql)
         self.rows = newrows
         self._data = []
+        self._column_hints = [120.0] * len(self.sql_fields)
+        s_d_ap = self._data.append
+        _vd = self._vdata
         for n,row in enumerate(self._cursor):
             row = list(row)
-            self._data.append(row)
+            s_d_ap(row)
+            for r, val in enumerate(row):
+                txt = ustr(val)
+                ltxt = len(txt)
+                if n < 150:
+                    newlen = 40 + math.tanh(ltxt/3000.0) * 35000.0
+                    self._column_hints[r] =  (self._column_hints[r] * 5 + newlen)/6.0
+                _vd[n*1000+r] = QVariant(txt)
             self.indexUpdateRow(n)
+        self._column_hints = [ int(x) for x in self._column_hints ]
         self.indexes_valid = True
         self.endInsertRows()
+        print("fin refresco modelo tabla %r , query %r, rows: %d" % (self._table.name, self._table.query_table, newrows))
         topLeft = self.index(0,0)
         bottomRight = self.index(self.rows-1,self.cols-1)
         self.dataChanged.emit(topLeft,bottomRight)
@@ -220,6 +244,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             for fieldname,value in update_dict.items():
                 col = self.metadata().indexPos(fieldname)
                 self._data[row][col] = value
+                self._vdata[row*1000+col] = QtCore.QVariant(ustr(value))
             self.indexUpdateRow(row)
 
         except Exception:
@@ -306,46 +331,38 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return value
         """
     def columnCount(self, parent = None):
+        return self.cols
         if parent is None: parent = QtCore.QModelIndex()
         if parent.isValid(): return 0
         #print(self.cols)
-        #print("colcount", self.cols)
+        print("colcount", self.cols)
         return self.cols
 
     def rowCount(self, parent = None):
+        return self.rows
         if parent is None: parent = QtCore.QModelIndex()
         if parent.isValid(): return 0
-        #print("rowcount", self.rows)
+        print("rowcount", self.rows)
         return self.rows
 
     def headerData(self, section, orientation, role):
-        if orientation == QtCore.Qt.Horizontal:
-            if role == QtCore.Qt.DisplayRole:
-                #if self.field_metaData[section].visibleGrid():
-                #    return "%s" % self.field_metaData[section].alias()
-                #else:
-                #    return None
-                #return self.field_metaData[section].alias()
-                alias = str(self.tableMetadata().indexFieldObject(section).alias())
-                #print(alias)
-                return alias
-        return QtCore.QAbstractTableModel.headerData(self, section, orientation, role)
+        if role == DisplayRole:
+            if orientation == Horizontal:
+                return self.col_aliases[section]
+            elif orientation == Vertical:
+                return section +1
+        return QVariant_invalid
+            
+        return QAbstractTableModel_headerData(self, section, orientation, role)
 
-    def data(self, index, role = QtCore.Qt.DisplayRole):
+    def data(self, index, role):
         row = index.row()
         col = index.column()
-        if role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole:
-            try:
-                val = self._data[row][col]
-                ret = ustr(val)
-                #print " data -> ", row, col, ret
-                return ret
-            except Exception as e:
-                print("CursorTableModel.data:", row,col,e)
-                print(traceback.format_exc())
-                raise
+        if role == DisplayRole or role == EditRole:
+            return self._vdata[row*1000+col]
+            
 
-        return None
+        return QVariant_invalid
 
     def fieldMetadata(self, fieldName):
         return self.tableMetadata().field(fieldName)
