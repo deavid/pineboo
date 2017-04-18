@@ -21,7 +21,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     rows = 15
     cols = 5
     _cursor = None
-    ROW_BATCH_COUNT = 50
+    
     
     def __init__(self, action,project, *args):
         super(CursorTableModel,self).__init__(*args)
@@ -62,6 +62,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.cols = len(self.tableMetadata().fieldListObject())
         self.col_aliases = [ str(self.tableMetadata().indexFieldObject(i).alias()) for i in range(self.cols) ]
         self.rows = 0
+        self.rowsLoaded = 0
         self.where_filters = {}
         self.refresh()
 
@@ -70,9 +71,56 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #print("CursorTableModel: METADATA: " + self._table.name)
         return self._metadata
 
+    def canFetchMore(self,index):
+        ret = self.rows > self.rowsLoaded
+        print("canFetchMore: %r" % ret)
+        return ret
+ 
+    def fetchMore(self,index):
+        ROW_BATCH_COUNT = min(100 + self.rowsLoaded // 10, 5000)
+        
+        parent = index
+        fromrow = self.rowsLoaded
+        torow = min(self.rowsLoaded + ROW_BATCH_COUNT, self.rows) - 1
+        if torow < fromrow: return
+    
+        print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        self.beginInsertRows(parent, fromrow, torow)
+        #print("QUERY:", sql)
+        s_d_ap = self._data.append
+        _vd = self._vdata
+        for n,row in enumerate(self._cursor):
+            n+=fromrow
+            
+            row = list(row)
+            s_d_ap(row)
+            #print("row: %d : %d " % (len(self._data),n + 1)) 
+            #assert(len(self._data) == n + 1) 
+            for r, val in enumerate(row):
+                txt = ustr(val)
+                ltxt = len(txt)
+                if n < 150:
+                    newlen = 40 + math.tanh(ltxt/3000.0) * 35000.0
+                    self._column_hints[r] =  (self._column_hints[r] * 5 + newlen)/6.0
+                _vd[n*1000+r] = QVariant(txt)
+            
+            self.indexUpdateRow(n)
+            if n >= torow: break
+
+            
+        self._column_hints = [ int(x) for x in self._column_hints ]
+        self.indexes_valid = True
+        self.rowsLoaded = torow + 1
+        self.endInsertRows()
+        print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        topLeft = self.index(fromrow,0)
+        bottomRight = self.index(torow,self.cols-1)
+        self.dataChanged.emit(topLeft,bottomRight)
+ 
+
     def refresh(self):
         parent = QtCore.QModelIndex()
-        oldrows = self.rows
+        oldrows = self.rowsLoaded
         self.beginRemoveRows(parent, 0, oldrows )
         where_filter = " "
         for k, wfilter in sorted(self.where_filters.items()):
@@ -87,9 +135,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             where_filter = "1=1"
         self._cursor = self._prj.conn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
-        # FIXME: Agregado limit de 50000 registros para evitar atascar pineboo
-        # FIXME: Cuando el limit aplica, el resize de la tabla es mucho más lento. Porqué?
-        # TODO: Convertir esto a un cursor de servidor
+        # TODO: Convertir esto a un cursor de servidor (hasta 20.000 registros funciona bastante bien)
         if self._table.query_table:
             # FIXME: Como no tenemos soporte para Queries, desactivamos el refresh.
             print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
@@ -106,40 +152,19 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
             self.sql_fields.append(field.name())
 
-        sql = """SELECT %s FROM %s WHERE %s LIMIT 50000""" % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
+        sql = """SELECT %s FROM %s WHERE %s """ % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         self._cursor.execute(sql)
         self.rows = 0
+        self.rowsLoaded = 0
         self.endRemoveRows()
         if oldrows > 0:
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
         newrows = self._cursor.rowcount
-        print("refrescando modelo tabla %r , query %r, rows: %d" % (self._table.name, self._table.query_table, newrows))
-        self.beginInsertRows(parent, 0, newrows - 1)
-        #print("QUERY:", sql)
+        #print("rows:", self.rows)
         self.rows = newrows
         self._data = []
         self._column_hints = [120.0] * len(self.sql_fields)
-        s_d_ap = self._data.append
-        _vd = self._vdata
-        for n,row in enumerate(self._cursor):
-            row = list(row)
-            s_d_ap(row)
-            for r, val in enumerate(row):
-                txt = ustr(val)
-                ltxt = len(txt)
-                if n < 150:
-                    newlen = 40 + math.tanh(ltxt/3000.0) * 35000.0
-                    self._column_hints[r] =  (self._column_hints[r] * 5 + newlen)/6.0
-                _vd[n*1000+r] = QVariant(txt)
-            self.indexUpdateRow(n)
-        self._column_hints = [ int(x) for x in self._column_hints ]
-        self.indexes_valid = True
-        self.endInsertRows()
-        print("fin refresco modelo tabla %r , query %r, rows: %d" % (self._table.name, self._table.query_table, newrows))
-        topLeft = self.index(0,0)
-        bottomRight = self.index(self.rows-1,self.cols-1)
-        self.dataChanged.emit(topLeft,bottomRight)
-        #print("rows:", self.rows)
+        self.fetchMore(parent)
 
     def indexUpdateRow(self, rownum):
         row = self._data[rownum]
@@ -339,7 +364,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return self.cols
 
     def rowCount(self, parent = None):
-        return self.rows
+        return self.rowsLoaded
         if parent is None: parent = QtCore.QModelIndex()
         if parent.isValid(): return 0
         print("rowcount", self.rows)
@@ -359,6 +384,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         row = index.row()
         col = index.column()
         if role == DisplayRole or role == EditRole:
+            #if row > self.rowsLoaded: 
             return self._vdata[row*1000+col]
             
 
