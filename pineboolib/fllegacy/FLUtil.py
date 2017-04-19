@@ -691,15 +691,16 @@ class FLUtil(ProjectClass):
 
     @return Valor del setting
     """
-    @decorators.BetaImplementation
     def readDBSettingEntry(self, key):
-        q = FLSqlQuery
-        q.select(key)
+        q = FLSqlQuery()
+        q.setSelect("valor")
         q.setFrom("flsettings")
-        q.setWhere("1 = 1")
+        q.setWhere("flkey = '%s'" % key)
         q.setTablesList("flsettings")
-        if q.exec() and q.fisrt():
+        if q.exec() and q.first():
             return q.value(0)
+        
+        return None
 
     """
     Establece el valor de un setting en la tabla flsettings
@@ -709,9 +710,18 @@ class FLUtil(ProjectClass):
 
     @return Indicador de si la escritura del settings se realiza correctamente
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def writeDBSettingEntry(self, key, value):
-        pass
+        result = None
+        where = "flkey='%s'" % key
+        found = self.sqlSelect("flsettings", "valor", where, "flsettings")
+        if not found:
+            result = self.sqlInsert("flsettings", "flkey,valor","%s,%s" % (key, value))
+        else:
+            result = self.sqlUpdate("flsettings", "valor", value, where)
+        
+        return result
+        
     """
     Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -749,7 +759,7 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Valor resultante de la query o falso si no encuentra nada.
     """
-    @decorators.BetaImplementation
+    
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
         q = FLSqlQuery(None, connName)
         if tL:
@@ -793,9 +803,25 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def sqlInsert(self, t, fL, vL, connName="default"):
-        pass
+        
+        if not fL.len == vL:
+            return False
+        
+        c = FLSqlCursor(t, True, connName)
+        c.setModeAccess(FLSqlCursor.Insert)
+        c.refreshBuffer()
+        
+        for f,v in (fL,vL):
+            if v == "NULL":
+                c.bufferSetNull(f)
+            else:
+                c.setValueBuffer(f,v)
+        
+        return c.commitBuffer()
+        
+        
 
     """
     Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
