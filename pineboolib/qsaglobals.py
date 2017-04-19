@@ -38,10 +38,10 @@ def debug(txt):
 
 class SysType(object):
     def __init__(self):
-        self._name_user = pineboolib.project.conn.db_userName
+        self._name_user = None
 
     def nameUser(self): 
-        return self._name_user
+        return pineboolib.project.conn.db_userName
     
     def isLoadedModule(self, modulename):
         prj = pineboolib.project
