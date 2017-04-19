@@ -21,7 +21,7 @@ class FLSqlQuery(ProjectClass):
         super(FLSqlQuery, self).__init__()
         
         self.d = FLSqlQueryPrivate()
-        self.d.db_ = self._prj.conn
+        self.d.db_ = pineboolib.project.conn
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
         self._posicion = None
@@ -43,12 +43,14 @@ class FLSqlQuery(ProjectClass):
     """
     Ejecuta la consulta
     """
-    
     def exec(self, sql = None):
         if not sql:
             sql = self.sql()
+        
+        if not sql:
+            return False
+        
         try:
-            #print(self.sql())
             micursor=self.__damecursor()
             micursor.execute(sql)
             self._cursor=micursor
@@ -59,7 +61,7 @@ class FLSqlQuery(ProjectClass):
     
     @classmethod
     def __damecursor(self):
-        if self.d.db_:
+        if getattr(self.d,"db_", None):
             cursor = self.d.db_.cursor()
         else:
             cursor = pineboolib.project.conn.cursor()
@@ -248,6 +250,10 @@ class FLSqlQuery(ProjectClass):
                 return
         
         res = None
+        
+        if not self.d.select_:
+            return False
+        
         
         if not self.d.from_:
             res = "SELECT %s" % self.d.select_

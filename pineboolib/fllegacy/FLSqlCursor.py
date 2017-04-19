@@ -1339,7 +1339,7 @@ class FLSqlCursor(ProjectClass):
             if self.d.isQuery_ and self.d.queryOrderBy_:
                 sqlOrderBy = self.d.queryOrderBy_
                 sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
-            elif len(self.sort()) > 0:
+            elif self.sort() and len(self.sort()) > 0:
                 sqlOrderBy = self.sort()
                 sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
 
