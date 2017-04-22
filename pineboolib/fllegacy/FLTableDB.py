@@ -1091,7 +1091,7 @@ class FLTableDB(QtGui.QWidget):
 
         w = self.sender()
         if w and (not self.cursor_ or self.reqOnlyTable_):
-            w.setDisaBled(True)
+            w.setDisabled(True)
             return
 
         if self.cursor_:
