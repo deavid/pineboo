@@ -184,7 +184,7 @@ class Project(object):
             fn = eval(function, pineboolib.qsaglobals.__dict__)
             return fn(*aList)
         except Exception:
-            print("** JS.CALL :: ERROR:", traceback.format_exc())
+            print("** JS.CALL :: ERROR:", traceback.format_exc().splitlines()[-1])
 
         # Hay que resolver la llamada a funcion "function" dentro de qsaglobals
         # y buscar la resolución de los objetos separando por puntos.

@@ -21,9 +21,51 @@ from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 
 from pineboolib import decorators
 
+class StructMyDict(dict):
+
+     def __getattr__(self, name):
+         try:
+             return self[name]
+         except KeyError as e:
+             raise AttributeError(e)
+
+     def __setattr__(self, name, value):
+         self[name] = value
+         
+def Function(args, source):
+    # Leer código QS embebido en Source
+    # asumir que es una funcion anónima, tal que: 
+    #  -> function($args) { source }
+    # compilar la funcion y devolver el puntero
+    qs_source = """
+function anon(%s) {
+    %s
+} """ % (args,source)
+    print("Compilando QS en línea: ", qs_source)
+    from pineboolib.flparser import flscriptparse
+    from pineboolib.flparser import postparse
+    from pineboolib.flparser.pytnyzer import write_python_file, string_template
+    import io
+    prog = flscriptparse.parse(qs_source)
+    tree_data = flscriptparse.calctree(prog, alias_mode = 0)
+    ast = postparse.post_parse(tree_data)
+    tpl = string_template
+    
+    f1 = io.StringIO()
+
+    write_python_file(f1,ast,tpl)
+    pyprog = f1.getvalue()
+    print("Resultado: ", pyprog)
+    glob = {}
+    loc = {}
+    exec(pyprog, glob, loc)
+    # ... y lo peor es que funciona. W-T-F.
+    
+    return loc["anon"]
+
 def Object(x=None):
     if x is None: x = {}
-    return dict(x)
+    return StructMyDict(x)
 
 def Array(x=None):
     try:
