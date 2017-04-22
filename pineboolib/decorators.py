@@ -54,6 +54,19 @@ def BetaImplementation(fn):
         return ret
     return newfn
 
+def Empty(fn): # Similar a NotImplemented, pero sin traceback. Para funciones que de momento no necesitamos (clonadas del motor C++ por ejemplo)
+    def newfn(*args,**kwargs):
+        global MSG_EMITTED
+        ret = fn(*args,**kwargs)
+        x_args = [ clean_repr(a) for a in args] + [ "%s=%s" % (k,clean_repr(v)) for k,v in list(kwargs.items())]
+        keyname = fn.__name__
+        now = time.time()
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
+            MSG_EMITTED[keyname] = now
+            print("WARN: Empty: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
+        return ret
+    return newfn
+
 def Incomplete(fn):
     def newfn(*args,**kwargs):
         global MSG_EMITTED

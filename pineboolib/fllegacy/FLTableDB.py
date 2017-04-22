@@ -1411,7 +1411,7 @@ class FLTableDB(QtGui.QWidget):
     """
     Posiciona el cursor en un registro valido
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def seekCursor(self):
         return
         textSearch = self.lineEditSearch.text()
@@ -1595,7 +1595,7 @@ class FLTableDB(QtGui.QWidget):
     """
     Señal emitida cuando se establece cambia el registro seleccionado.
     """
-    #currentChanged = QtCore.pyqtSignal()
+    currentChanged = QtCore.pyqtSignal()
 
     @QtCore.pyqtSlot()
     @decorators.BetaImplementation

@@ -848,7 +848,7 @@ class FLSqlCursor(ProjectClass):
 
         else:
             v = self.d.buffer_.value(fN)
-            #print("FLSqlCursor.valueBuffer(%s) = %s" % (fN, v))
+            print("FLSqlCursor.valueBuffer(%s) = %s" % (fN, v))
         #if v.isValid():
             #v.cast(fltype)
 
@@ -1485,9 +1485,9 @@ class FLSqlCursor(ProjectClass):
 
 
 
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def aqWasDeleted(self):
-        return None
+        return False
 
 
     """
@@ -1515,7 +1515,8 @@ class FLSqlCursor(ProjectClass):
         if self.d._currentregister == current.row(): return False
         self.d._currentregister = current.row()
         self.d._current_changed.emit(self.at())
-        print("cursor:%s , row:%d" %(self._action.table, self.d._currentregister ))
+        self.refreshBuffer() # agregado para que FLTableDB actualice el buffer al pulsar.
+        print("cursor:%s , row:%d" %(self._action.table, self.d._currentregister ), self)
 
 
     def at(self):
@@ -1765,7 +1766,7 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
+    @decorators.Empty
     def seek(self, i, relative = None, emite = None):
         return False
     """

@@ -711,7 +711,7 @@ class FLFormDB(QtGui.QWidget):
     @param w Widget a inicializar. Si no se establece utiliza
             por defecto el widget principal actual
     """
-    @decorators.NotImplementedWarn
+    @decorators.Empty
     def initMainWidget(self, w = None):
         pass
 

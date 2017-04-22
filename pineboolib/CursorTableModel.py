@@ -73,7 +73,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
     def canFetchMore(self,index):
         ret = self.rows > self.rowsLoaded
-        print("canFetchMore: %r" % ret)
+        #print("canFetchMore: %r" % ret)
         return ret
  
     def fetchMore(self,index):
@@ -112,7 +112,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.indexes_valid = True
         self.rowsLoaded = torow + 1
         self.endInsertRows()
-        print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        #print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         topLeft = self.index(fromrow,0)
         bottomRight = self.index(torow,self.cols-1)
         self.dataChanged.emit(topLeft,bottomRight)
