@@ -32,7 +32,7 @@ def ustr1(t):
         return None
 
 def debug(txt):
-    print("DEBUG:", ustr(txt))
+    print("---> DEBUG:", ustr(txt))
 
 
 
@@ -46,6 +46,8 @@ class SysType(object):
     def isLoadedModule(self, modulename):
         prj = pineboolib.project
         return modulename in prj.modules
+    def translate(self, text):
+        return text
 sys = SysType()
 
 
