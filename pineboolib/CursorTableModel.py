@@ -173,7 +173,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         tiempo_inicial = time()
         self.fetchMore(parent)
         tiempo_final = time()
-        print("fin refresco tabla '%s' ,(%s Segundos)" % ( self._table.name, tiempo_final - tiempo_inicial))
+        print("fin refresco tabla '%s'  ::  (%.3fs)" % ( self._table.name, tiempo_final - tiempo_inicial))
         
     def indexUpdateRow(self, rownum):
         row = self._data[rownum]

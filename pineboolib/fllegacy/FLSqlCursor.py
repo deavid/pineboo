@@ -848,7 +848,7 @@ class FLSqlCursor(ProjectClass):
 
         else:
             v = self.d.buffer_.value(fN)
-            print("FLSqlCursor.valueBuffer(%s) = %s" % (fN, v))
+            #print("FLSqlCursor.valueBuffer(%s) = %s" % (fN, v))
         #if v.isValid():
             #v.cast(fltype)
 
