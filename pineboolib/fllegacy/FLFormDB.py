@@ -5,7 +5,8 @@ from PyQt4 import QtGui, QtCore
 from pineboolib.utils import filedir
 from pineboolib import decorators
 import os.path, traceback
-import imp
+#import imp
+import importlib
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -219,7 +220,17 @@ class FLFormDB(QtGui.QWidget):
         import pineboolib.emptyscript
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
-        if scriptname:
+        
+        overload_pyfile = os.path.join(self.prj.tmpdir,"overloadpy",scriptname+".py")
+        if os.path.isfile(overload_pyfile):
+            print("WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
+            try:
+                self.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
+            except Exception as e:
+                print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
+            
+        elif scriptname:
             print("Loading script %s . . . " % scriptname)
             # Intentar convertirlo a Python primero con flscriptparser2
             script_path = self.prj.path(scriptname+".qs")
@@ -234,7 +245,9 @@ class FLFormDB(QtGui.QWidget):
             if not os.path.isfile(python_script_path):
                 raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             try:
-                self.script = imp.load_source(scriptname,python_script_path)
+                print("Cargando %s : %s " % (scriptname,python_script_path.replace(self.prj.tmpdir,"tempdata")))
+                self.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
+                #self.script = imp.load_source(scriptname,python_script_path)
                 #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
                 print("ERROR al cargar script QS para la accion %r:" % self.action.name, e)

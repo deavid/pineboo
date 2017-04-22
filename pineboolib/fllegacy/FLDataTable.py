@@ -408,7 +408,7 @@ class FLDataTable(QtGui.QTableView):
         
         if not self.hasFocus():
             #setPaletteBackgroundColor(qApp->palette().color(QPalette::Active, QColorGroup::Base)); FIXME
-            super(FLDataTable, self).refresh()
+            super(FLDataTable, self).update() # refresh en Qt4 -> update()
         else:
             self.syncNumRows()
         
@@ -526,6 +526,7 @@ class FLDataTable(QtGui.QTableView):
 
     def currentChanged(self, row, row2):
         self.cursor_.selection_currentRowChanged(row, row2)
+        self.recordChoosed.emit()
 
     """
     Indica que ha cambiado el estado del campo de selección de un registro. Es decir

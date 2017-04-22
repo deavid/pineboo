@@ -589,6 +589,9 @@ class FLTableDB(QtGui.QWidget):
     Obtiene el componente tabla de registros
     """
     def tableRecords(self):
+        if self.tableRecords_:
+            print("ERROR: tableRecords - llamada doble")
+            return
 
         self.tabDataLayout = QtGui.QVBoxLayout()
         self.comboBoxFieldToSearch = QtGui.QComboBox()
@@ -623,6 +626,7 @@ class FLTableDB(QtGui.QWidget):
             self.setTabOrder(self.tableRecords_, self.lineEditSearch)
             self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
             self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+            self.tableRecords_.recordChoosed.connect(self.currentChanged)
 
         self.lineEditSearch.textChanged.connect(self.filterRecords)
         model = self.cursor_.model()
