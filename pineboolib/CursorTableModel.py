@@ -10,6 +10,9 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import traceback
+
+from time import time
+
 DisplayRole = QtCore.Qt.DisplayRole 
 EditRole = QtCore.Qt.EditRole
 Horizontal = QtCore.Qt.Horizontal
@@ -167,8 +170,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.rows = newrows
         self._data = []
         self._column_hints = [120.0] * len(self.sql_fields)
+        tiempo_inicial = time()
         self.fetchMore(parent)
-
+        tiempo_final = time()
+        print("fin refresco tabla '%s' ,(%s Segundos)" % ( self._table.name, tiempo_final - tiempo_inicial))
+        
     def indexUpdateRow(self, rownum):
         row = self._data[rownum]
         if self.pkpos:
