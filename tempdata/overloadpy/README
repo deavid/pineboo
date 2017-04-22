@@ -1,0 +1,16 @@
+Carpeta para "sobrecargar" ficheros Python de un proyecto Eneboo.
+
+Si se encuentra aquí un fichero python, por ejemplo masterclientes.py, se usará
+ese en lugar de la base de datos. El objetivo es para facilitar la depuración
+del motor.
+
+Se emplaza aquí el fichero ya transformado que se quiera depurar. Entonces
+al cargar ese, podemos cambiarlo directamente sin tener que cargar módulos
+con Pydba o Eneboo.
+
+Hay que tener cuidado de vaciarla, o cargará el módulo siempre incluso con
+otras bases de datos.
+
+Es muy posible que reabriendo la pestaña o formulario cargue ya el fichero
+nuevo, sin necesidad de reinicar Pineboo.
+
