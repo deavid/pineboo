@@ -1,5 +1,5 @@
 # # -*- coding: utf-8 -*-
-import math
+import math, random
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 from pineboolib.qsaglobals import ustr
@@ -151,8 +151,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if field.isCompoundKey(): self.ckpos.append(n)
 
             self.sql_fields.append(field.name())
-
-        sql = """SELECT %s FROM %s WHERE %s """ % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
+        self._curname = "cur_" + self._table.name + "_%08d" % (random.randint(1,100000))
+        sql = """DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s """ % (self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
+        #sql = """SELECT %s FROM %s WHERE %s """ % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
+        self._cursor.execute(sql)
+        sql = """FETCH 500 FROM %s""" % self._curname 
         self._cursor.execute(sql)
         self.rows = 0
         self.rowsLoaded = 0
