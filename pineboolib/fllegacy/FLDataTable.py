@@ -420,7 +420,7 @@ class FLDataTable(QtGui.QTableView):
     """
     @decorators.Incomplete
     def refresh(self):
-        print("FLDataTable:refresh()")
+        #print("FLDataTable:refresh()")
         if self.popup_:
             self.cursor_.refresh()
             

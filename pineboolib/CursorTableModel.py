@@ -80,6 +80,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return ret
  
     def fetchMore(self,index):
+        tiempo_inicial = time()
         ROW_BATCH_COUNT = min(100 + self.rowsLoaded // 10, 5000)
         
         parent = index
@@ -87,7 +88,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         torow = min(self.rowsLoaded + ROW_BATCH_COUNT, self.rows) - 1
         if torow < fromrow: return
     
-        print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        #print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         self.beginInsertRows(parent, fromrow, torow)
         #print("QUERY:", sql)
         s_d_ap = self._data.append
@@ -119,6 +120,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         topLeft = self.index(fromrow,0)
         bottomRight = self.index(torow,self.cols-1)
         self.dataChanged.emit(topLeft,bottomRight)
+        tiempo_final = time()
+        print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % ( self._table.name, self.rows, (fromrow,torow), tiempo_final - tiempo_inicial))
  
 
     def refresh(self):
@@ -170,10 +173,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.rows = newrows
         self._data = []
         self._column_hints = [120.0] * len(self.sql_fields)
-        tiempo_inicial = time()
         self.fetchMore(parent)
-        tiempo_final = time()
-        print("fin refresco tabla '%s'  ::  (%.3fs)" % ( self._table.name, tiempo_final - tiempo_inicial))
         
     def indexUpdateRow(self, rownum):
         row = self._data[rownum]

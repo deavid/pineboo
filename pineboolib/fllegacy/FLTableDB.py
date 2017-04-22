@@ -979,14 +979,16 @@ class FLTableDB(QtGui.QWidget):
                     self.tableRecords_.setColumnHidden(column, True)
                 else:
                     self.tableRecords_.setColumnHidden(column, False)
-
+                    
+            # FIXME FIX: Esto lo he implementado en otro lado manualmente. A elminar, o mover algo de aquel código aquí.
+            
             # FIXME: Este proceso es MUY LENTO. No deberíamos hacer esto.
             # Hay que buscar alguna forma manual de iterar las primeras N filas, o calcular un
             # valor por defecto rápidamente.
-            self.tableRecords_._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
-            if model.rows * model.cols > 500*10:
-                # Esto evitará que se calcule para las que tienen más de 500*10 celdas.
-                self.tableRecords_._h_header.setResizeMode(0)
+            #self.tableRecords_._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
+            #if model.rows * model.cols > 500*10:
+            #    # Esto evitará que se calcule para las que tienen más de 500*10 celdas.
+            #    self.tableRecords_._h_header.setResizeMode(0)
             # ... de todos modos tendríamos que, con un timer o algo para desactivar el modo. Una vez
             # ... ya redimensionadas inicialmente, lo único que hace es lastrar Pineboo mucho.
 
