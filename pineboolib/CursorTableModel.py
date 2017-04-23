@@ -11,7 +11,9 @@ from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import traceback
 
-from time import time
+import threading
+
+import time
 
 DisplayRole = QtCore.Qt.DisplayRole 
 EditRole = QtCore.Qt.EditRole
@@ -64,9 +66,19 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._column_hints = []
         self.cols = len(self.tableMetadata().fieldListObject())
         self.col_aliases = [ str(self.tableMetadata().indexFieldObject(i).alias()) for i in range(self.cols) ]
+        self.fetchLock = threading.Lock()
         self.rows = 0
         self.rowsLoaded = 0
         self.where_filters = {}
+        self.pendingRows = 0
+        self.lastFetch = 0
+        self.fetchedRows = 0
+        self.threadFetcher = threading.Thread(target=self.threadFetch)
+        self.threadFetcherStop = threading.Event()
+        
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.updateRows)
+        self.timer.start(1000)        
         self.refresh()
 
 
@@ -78,40 +90,143 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         ret = self.rows > self.rowsLoaded
         #print("canFetchMore: %r" % ret)
         return ret
- 
+
+    def data(self, index, role):
+        row = index.row()
+        col = index.column()
+        if role == DisplayRole or role == EditRole:
+            #if row > self.rowsLoaded *0.95 - 200 and time.time() - self.lastFetch> 0.3: self.fetchMore(QtCore.QModelIndex())
+            d = self._vdata[row*1000+col]
+            #if type(d) is str:
+            #    d = QVariant(d)
+            #    self._vdata[row*1000+col] = d
+
+            return d
+            
+
+        return QVariant_invalid
+    
+    def threadFetch(self):
+        ct = threading.current_thread()
+        print(ct, "Thread: Begin (INIT)")
+        ROW_BATCH_COUNT = 200
+        # Almacenamos en local el evento Stop para que
+        # si otro thread se levanta, vea otra versión distinta.
+        stop = self.threadFetcherStop 
+        #print(ct, "Thread: Begin (SLEEP)")
+        self.threadFetcherStop.wait(3)
+        #print(ct, "Thread: Begin (WORKING)")
+        for i in range(1000):
+            lastRows = self.fetchedRows
+            #print(ct, "Thread: Loop (SLEEPING)")
+            self.threadFetcherStop.wait(0.50)
+            if self.threadFetcherStop.is_set(): 
+                break
+            #print(ct, "Thread: Loop (WAITING)")
+            with self.fetchLock:
+                #print(ct, "Thread: Loop (READING)")
+                s_d_ap = self._data.append
+                _vd = self._vdata
+                for y,row in enumerate(self._cursor):
+                    n=self.fetchedRows
+                    self.fetchedRows += 1
+                    self.pendingRows -= 1
+                    
+                    
+                    row = list(row)
+                    s_d_ap(row)
+                    #print("row: %d : %d " % (len(self._data),n + 1)) 
+                    #assert(len(self._data) == n + 1) 
+                    for r, val in enumerate(row):
+                        txt = ustr(val)
+                        _vd[n*1000+r] = txt # QVariant(txt)
+                    
+                    self.indexUpdateRow(n)
+                    if y+1 >= ROW_BATCH_COUNT:
+                        break
+                if self.pendingRows <=0:
+                    print(ct, "Thread: Loop (FETCHING)")
+                    # Try fetch more.
+                    sql = """FETCH %d FROM %s""" % (ROW_BATCH_COUNT*10,self._curname) 
+                    self._cursor.execute(sql)
+                    newrows = self._cursor.rowcount
+                    self.pendingRows = newrows
+                    self.rows += newrows
+                    print("rows: ", self.rows)
+                    
+            if lastRows == self.fetchedRows or time.time() - self.lastFetch > 10:
+                break
+        print(ct, "Thread: End (CLOSING)")
+            
+    def updateRows(self):
+        ROW_BATCH_COUNT = 200 if self.threadFetcher.is_alive() else 0
+        
+        parent = QtCore.QModelIndex()
+        fromrow = self.rowsLoaded
+        torow = self.fetchedRows - ROW_BATCH_COUNT - 1
+        if torow - fromrow < 10: return
+        print("Updaterows %s (UPDATE:%d)" % (self._table.name, torow - fromrow +1) )
+    
+        self.beginInsertRows(parent, fromrow, torow)
+        self.rowsLoaded = torow + 1
+        self.endInsertRows()
+        #print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        topLeft = self.index(fromrow,0)
+        bottomRight = self.index(torow,self.cols-1)
+        self.dataChanged.emit(topLeft,bottomRight)
+        
+        
     def fetchMore(self,index):
-        tiempo_inicial = time()
-        ROW_BATCH_COUNT = min(100 + self.rowsLoaded // 10, 5000)
+        tiempo_inicial = time.time()
+        ROW_BATCH_COUNT = min(200 + self.rowsLoaded // 10, 1000)
+        #ROW_BATCH_COUNT = 200
         
         parent = index
         fromrow = self.rowsLoaded
         torow = min(self.rowsLoaded + ROW_BATCH_COUNT, self.rows) - 1
+        if self.fetchedRows - ROW_BATCH_COUNT - 1  > torow:
+            torow = self.fetchedRows - ROW_BATCH_COUNT - 1
+            
         if torow < fromrow: return
-    
+        
         #print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         self.beginInsertRows(parent, fromrow, torow)
         #print("QUERY:", sql)
         s_d_ap = self._data.append
         _vd = self._vdata
-        for n,row in enumerate(self._cursor):
-            n+=fromrow
-            
-            row = list(row)
-            s_d_ap(row)
-            #print("row: %d : %d " % (len(self._data),n + 1)) 
-            #assert(len(self._data) == n + 1) 
-            for r, val in enumerate(row):
-                txt = ustr(val)
-                ltxt = len(txt)
-                if n < 150:
-                    newlen = 40 + math.tanh(ltxt/3000.0) * 35000.0
-                    self._column_hints[r] =  (self._column_hints[r] * 5 + newlen)/6.0
-                _vd[n*1000+r] = QVariant(txt)
-            
-            self.indexUpdateRow(n)
-            if n >= torow: break
 
-            
+        if self.fetchedRows <= torow: 
+            with self.fetchLock:
+                for row in self._cursor:
+                    n=self.fetchedRows
+                    self.fetchedRows += 1
+                    self.pendingRows -= 1
+                    
+                    
+                    row = list(row)
+                    s_d_ap(row)
+                    #print("row: %d : %d " % (len(self._data),n + 1)) 
+                    #assert(len(self._data) == n + 1) 
+                    for r, val in enumerate(row):
+                        txt = ustr(val)
+                        _vd[n*1000+r] = txt # QVariant(txt)
+                        if n < 150:
+                            ltxt = len(txt)
+                            newlen = 40 + math.tanh(ltxt/3000.0) * 35000.0
+                            self._column_hints[r] =  (self._column_hints[r] * 5 + newlen)/6.0
+                    
+                    self.indexUpdateRow(n)
+                    if n >= torow: break
+
+                if self.pendingRows <=0:
+                    # Try fetch more.
+                    sql = """FETCH %d FROM %s""" % (ROW_BATCH_COUNT*5,self._curname) 
+                    self._cursor.execute(sql)
+                    newrows = self._cursor.rowcount
+                    #print("rows:", self.rows)
+                    self.rows += newrows
+                    self.pendingRows = newrows
+        #print(self.pendingRows)
         self._column_hints = [ int(x) for x in self._column_hints ]
         self.indexes_valid = True
         self.rowsLoaded = torow + 1
@@ -120,7 +235,14 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         topLeft = self.index(fromrow,0)
         bottomRight = self.index(torow,self.cols-1)
         self.dataChanged.emit(topLeft,bottomRight)
-        tiempo_final = time()
+        tiempo_final = time.time()
+        self.lastFetch = tiempo_final
+        if not self.threadFetcher.is_alive() and self.pendingRows > 0: 
+            self.threadFetcher = threading.Thread(target=self.threadFetch)
+            self.threadFetcherStop = threading.Event()
+            self.threadFetcher.start()
+            
+        
         print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % ( self._table.name, self.rows, (fromrow,torow), tiempo_final - tiempo_inicial))
  
 
@@ -128,6 +250,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         parent = QtCore.QModelIndex()
         oldrows = self.rowsLoaded
         self.beginRemoveRows(parent, 0, oldrows )
+        self.threadFetcherStop.set()
+        if self.threadFetcher.is_alive(): self.threadFetcher.join()
+        self.rows = 0
+        self.rowsLoaded = 0
+        self.fetchedRows = 0
+        self.sql_fields = []
+        self.pkpos = []
+        self.ckpos = []
+        self._data = []
+        self.endRemoveRows()
+        if oldrows > 0:
+            self.rowsRemoved.emit(parent, 0, oldrows - 1)
         where_filter = " "
         for k, wfilter in sorted(self.where_filters.items()):
             if wfilter is None: continue
@@ -147,9 +281,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
             
             return
-        self.sql_fields = []
-        self.pkpos = []
-        self.ckpos = []
+
         for n,field in enumerate(self.tableMetadata().fieldListObject()):
             #if field.visibleGrid():
             #    sql_fields.append(field.name())
@@ -161,20 +293,19 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         sql = """DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s """ % (self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         #sql = """SELECT %s FROM %s WHERE %s """ % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         self._cursor.execute(sql)
-        sql = """FETCH 500 FROM %s""" % self._curname 
+        sql = """FETCH 1000 FROM %s""" % self._curname 
         self._cursor.execute(sql)
-        self.rows = 0
-        self.rowsLoaded = 0
-        self.endRemoveRows()
-        if oldrows > 0:
-            self.rowsRemoved.emit(parent, 0, oldrows - 1)
         newrows = self._cursor.rowcount
-        #print("rows:", self.rows)
         self.rows = newrows
-        self._data = []
+        #print("rows:", self.rows)
+        self.pendingRows = newrows
+
         self._column_hints = [120.0] * len(self.sql_fields)
+        #self.threadFetcher = threading.Thread(target=self.threadFetch)
+        #self.threadFetcherStop = threading.Event()
+        #self.threadFetcher.start()
         self.fetchMore(parent)
-        
+
     def indexUpdateRow(self, rownum):
         row = self._data[rownum]
         if self.pkpos:
@@ -186,7 +317,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
     def value(self, row, fieldname):
         if row < 0 or row >= self.rows: return None
-
         col = self.metadata().indexPos(fieldname)
         campo = self._data[row][col]
 
@@ -388,16 +518,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return QVariant_invalid
             
         return QAbstractTableModel_headerData(self, section, orientation, role)
-
-    def data(self, index, role):
-        row = index.row()
-        col = index.column()
-        if role == DisplayRole or role == EditRole:
-            #if row > self.rowsLoaded: 
-            return self._vdata[row*1000+col]
-            
-
-        return QVariant_invalid
 
     def fieldMetadata(self, fieldName):
         return self.tableMetadata().field(fieldName)
