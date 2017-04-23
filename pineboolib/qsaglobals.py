@@ -32,18 +32,22 @@ def ustr1(t):
         return None
 
 def debug(txt):
-    print("DEBUG:", ustr(txt))
+    print("---> DEBUG:", ustr(txt))
 
 
 
 class SysType(object):
     def __init__(self):
-        self._name_user = "database_user"
+        self._name_user = None
 
-    def nameUser(self): return self._name_user
+    def nameUser(self): 
+        return pineboolib.project.conn.db_userName
+    
     def isLoadedModule(self, modulename):
         prj = pineboolib.project
         return modulename in prj.modules
+    def translate(self, text):
+        return text
 sys = SysType()
 
 

@@ -1339,7 +1339,7 @@ class FLSqlCursor(ProjectClass):
             if self.d.isQuery_ and self.d.queryOrderBy_:
                 sqlOrderBy = self.d.queryOrderBy_
                 sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
-            elif len(self.sort()) > 0:
+            elif self.sort() and len(self.sort()) > 0:
                 sqlOrderBy = self.sort()
                 sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
 
@@ -1485,9 +1485,9 @@ class FLSqlCursor(ProjectClass):
 
 
 
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def aqWasDeleted(self):
-        return None
+        return False
 
 
     """
@@ -1515,7 +1515,8 @@ class FLSqlCursor(ProjectClass):
         if self.d._currentregister == current.row(): return False
         self.d._currentregister = current.row()
         self.d._current_changed.emit(self.at())
-        print("cursor:%s , row:%d" %(self._action.table, self.d._currentregister ))
+        self.refreshBuffer() # agregado para que FLTableDB actualice el buffer al pulsar.
+        print("cursor:%s , row:%d" %(self._action.table, self.d._currentregister ), self)
 
 
     def at(self):
@@ -1765,7 +1766,7 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
+    @decorators.Empty
     def seek(self, i, relative = None, emite = None):
         return False
     """
