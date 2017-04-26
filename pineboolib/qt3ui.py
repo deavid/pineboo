@@ -32,7 +32,8 @@ def loadUi(path, widget):
     tree = etree.parse(path, parser)
     root = tree.getroot()
     ICONS = {}
-
+    widget.hide()
+    
     for xmlimage in root.xpath("images/image"):
         loadIcon(xmlimage)
 
@@ -40,6 +41,7 @@ def loadUi(path, widget):
         loadWidget(xmlwidget, widget)
 
     formname = widget.objectName() # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
+    print("form:", formname)
     for xmlconnection in root.xpath("connections/connection"):
         sender_name = xmlconnection.xpath("sender/text()")[0]
         signal_name = xmlconnection.xpath("signal/text()")[0]
@@ -74,6 +76,7 @@ def loadUi(path, widget):
             print("Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
             print("Error:", e.__class__.__name__, e)
 
+    widget.show()
 
 def createWidget(classname, parent=None):
     cls = getattr(flcontrols, classname, None) or getattr(QtGui, classname, None) or getattr(FLTableDB, classname, None) or getattr(FLFieldDB, classname, None)
@@ -208,10 +211,11 @@ def loadWidget(xml, widget=None):
         if c.tag == "widget":
             # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
             # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
-            new_widget = createWidget(c.get("class"), parent=None)
+            new_widget = createWidget(c.get("class"), parent=widget)
+            new_widget.hide()
             new_widget._attrs = {}
-            new_widget.show()
             loadWidget(c, new_widget)
+            new_widget.show()
             title = new_widget._attrs.get("title","UnnamedTab")
             if isinstance(widget, QtGui.QTabWidget):
                 widget.addTab(new_widget,title)
