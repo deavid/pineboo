@@ -64,6 +64,8 @@ class MainForm(QtGui.QWidget):
         assert area.idarea not in self.areas
         vl = QtGui.QWidget()
         vl.layout = QtGui.QVBoxLayout() #layout de la pestaña
+        vl.layout.setSpacing(0)
+        vl.layout.setContentsMargins(5, 0, 0, 0)
         moduleToolBox = QtGui.QToolBox(self)#toolbox de cada módulo
 
         self.areas.append(area.idarea)
@@ -85,8 +87,8 @@ class MainForm(QtGui.QWidget):
 
         vBLayout = QtGui.QWidget()
         vBLayout.layout = QtGui.QVBoxLayout() #layout de cada módulo.
-        vBLayout.layout.setSpacing(1)
-        vBLayout.layout.setContentsMargins(1, 1, 1, 1)
+        vBLayout.layout.setSpacing(0)
+        vBLayout.layout.setContentsMargins(0, 0, 0, 0)
 
         vBLayout.setLayout(vBLayout.layout)
 
@@ -104,19 +106,21 @@ class MainForm(QtGui.QWidget):
             print("WARN: Ignorando modulo %r por fallo al cargar" % (module.name))
             return False
         #print "Running module %s . . . " % self.name
-        vBLayout.setSpacing(1)
-        vBLayout.setContentsMargins(1,1,1,1)
+        iconsize = QtCore.QSize(22,22)
+        vBLayout.setSpacing(0)
+        vBLayout.setContentsMargins(0,0,0,0)
         for key in module.mainform.toolbar:
             action = module.mainform.actions[key]
 
             button = QtGui.QToolButton()
             button.setText(action.text)
             button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+            button.setIconSize(iconsize)
             button.setAutoRaise(True)
             if action.icon: button.setIcon(action.icon)
             button.clicked.connect(action.run)
             vBLayout.addWidget(button)
-
+        vBLayout.addStretch()
 
 mainWindow = MainForm()
 

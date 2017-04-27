@@ -75,7 +75,6 @@ def loadUi(path, widget):
         except Exception as e:
             print("Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
             print("Error:", e.__class__.__name__, e)
-
     widget.show()
 
 def createWidget(classname, parent=None):
@@ -159,6 +158,8 @@ def loadWidget(xml, widget=None):
         widget.setLayout(widget.layout)
         widget.layout.setSpacing(1)
         widget.layout.setContentsMargins(1,1,1,1)
+        widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+
 
     layouts_pending_process = []
     properties = []
@@ -172,6 +173,8 @@ def loadWidget(xml, widget=None):
                 print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
                 continue
             widget.layout = QtGui.QVBoxLayout()
+            widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
             continue
@@ -180,6 +183,7 @@ def loadWidget(xml, widget=None):
                 print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
                 continue
             widget.layout = QtGui.QHBoxLayout()
+            widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
             continue
@@ -188,6 +192,7 @@ def loadWidget(xml, widget=None):
                 print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
                 continue
             widget.layout = QtGui.QGridLayout()
+            widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
             layouts_pending_process += [(c,"grid")]
             #process_layout_box(c, mode="grid")
             continue

@@ -189,15 +189,22 @@ class FLFieldDB(QtGui.QWidget):
         #self._parent = parent
 
         self.FLLayoutH = QtGui.QVBoxLayout(self)
+        self.FLLayoutH.setContentsMargins(1,1,1,1)
+        self.FLLayoutH.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
 
         self.lytButtons = QtGui.QHBoxLayout()
         self.lytButtons.setMargin(0)
-        self.lytButtons.setSpacing(2)
+        self.lytButtons.setSpacing(1)
+        self.lytButtons.setContentsMargins(1,1,1,1)
+        self.lytButtons.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        
         #self.lytButtons.SetMinimumSize(22,22)
         #self.lytButtons.SetMaximumSize(22,22)
 
 
         self.FLWidgetFieldDBLayout = QtGui.QHBoxLayout()
+        self.FLWidgetFieldDBLayout.setContentsMargins(1,1,1,1)
+        self.FLWidgetFieldDBLayout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         self.FLLayoutH.addLayout(self.lytButtons)
         self.FLLayoutH.addLayout(self.FLWidgetFieldDBLayout)
         self.tableName_ = QString()

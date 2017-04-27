@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>453</width>
-    <height>531</height>
+    <width>890</width>
+    <height>585</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,13 +15,13 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0">
    <property name="spacing">
-    <number>4</number>
+    <number>0</number>
    </property>
    <property name="sizeConstraint">
-    <enum>QLayout::SetMaximumSize</enum>
+    <enum>QLayout::SetMinAndMaxSize</enum>
    </property>
    <property name="margin">
-    <number>1</number>
+    <number>0</number>
    </property>
    <item>
     <widget class="QFrame" name="frame_4">
@@ -60,9 +60,14 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>220</width>
+       <width>180</width>
        <height>250</height>
       </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
      </property>
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
@@ -70,7 +75,15 @@
      <property name="tabSpacing">
       <number>8</number>
      </property>
-     <widget class="QWidget" name="areasTabPage1_2" native="true">
+     <widget class="QWidget" name="areasTabPage1_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>180</width>
+        <height>556</height>
+       </rect>
+      </property>
       <attribute name="label">
        <string/>
       </attribute>

@@ -162,8 +162,10 @@ class FLFormDB(QtGui.QWidget):
         self.mod = action.mod
                 
         self.layout = QtGui.QVBoxLayout()
-        self.layout.setMargin(2)
-        self.layout.setSpacing(2)
+        self.layout.setMargin(1)
+        self.layout.setSpacing(1)
+        self.layout.setContentsMargins(1,1,1,1)
+        self.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         self.setLayout(self.layout)
         
         if not self._uiName:
@@ -191,8 +193,12 @@ class FLFormDB(QtGui.QWidget):
         try: script = self._scriptForm or None
         except AttributeError: script = None
         self.load_script(script)
-        self.resize(550,350)
+        #self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
+        self.layout.setSpacing(1)
+        self.layout.setContentsMargins(1,1,1,1)
+        self.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        
         if self._uiName:
             self.prj.conn.managerModules().createUI(self._uiName, None, self)
         self.loaded = True
