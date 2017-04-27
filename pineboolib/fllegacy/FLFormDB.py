@@ -220,6 +220,8 @@ class FLFormDB(QtGui.QWidget):
         import pineboolib.emptyscript
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
+        script_path_qs = self.prj.path(scriptname+".qs")
+        script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
         
         overload_pyfile = os.path.join(self.prj.tmpdir,"overloadpy",scriptname+".py")
         if os.path.isfile(overload_pyfile):
@@ -230,12 +232,23 @@ class FLFormDB(QtGui.QWidget):
                 print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
                 print(traceback.format_exc(),"---")
             
-        elif scriptname:
-            print("Loading script %s . . . " % scriptname)
-            # Intentar convertirlo a Python primero con flscriptparser2
-            script_path = self.prj.path(scriptname+".qs")
+        elif script_path_py:
+            script_path = script_path_py
+            print("Loading script PY %s . . . " % scriptname)
             if not os.path.isfile(script_path): raise IOError
-            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
+            try:
+                print("Cargando %s : %s " % (scriptname,script_path.replace(self.prj.tmpdir,"tempdata")))
+                self.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
+            except Exception as e:
+                print("ERROR al cargar script PY para la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
+            
+        elif script_path_qs:
+            script_path = script_path_qs
+            print("Loading script QS %s . . . " % scriptname)
+            # Intentar convertirlo a Python primero con flscriptparser2
+            if not os.path.isfile(script_path): raise IOError
+            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".qs.py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
                 print("Convirtiendo a Python . . .")
                 #ret = subprocess.call(["flscriptparser2", "--full",script_path])

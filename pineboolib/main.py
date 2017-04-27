@@ -4,7 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import str
 from builtins import object
-import sys
+import sys,time
 import imp
 #import os.path
 import os
@@ -127,6 +127,7 @@ class Project(object):
         self.cur.execute(""" SELECT idmodulo, nombre, sha::varchar(16) FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"),"w")
         self.files = {}
+        tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")): raise AssertionError
         for idmodulo, nombre, sha in self.cur:
             if idmodulo not in self.modules: continue # I
@@ -156,7 +157,9 @@ class Project(object):
                     txt = contenido.encode("ISO-8859-15","replace")
 
                 f2.write(txt)
-
+        tiempo_fin = time.time()
+        print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
+        
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
         for root, dirs, files in os.walk(filedir("..","share","pineboo")):
@@ -210,7 +213,6 @@ class Module(object):
         self.files[fileobj.filename] = fileobj
 
     def load(self):
-        #print "Loading module %s . . . " % self.name
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
@@ -219,7 +221,7 @@ class Module(object):
         if pathui is None:
             print("ERROR: modulo %r: fichero UI no existe" % (self.name))
             return False
-
+        tiempo_1 = time.time()
         try:
             self.actions = ModuleActions(self, pathxml)
             self.actions.load()
@@ -233,7 +235,8 @@ class Module(object):
         # TODO: Load Main Script:
         self.mainscript = None
         # /-----------------------
-
+        tiempo_2 = time.time()
+        
         for tablefile in self.files:
             if not tablefile.endswith(".mtd"): continue
             name, ext = os.path.splitext(tablefile)
@@ -248,6 +251,9 @@ class Module(object):
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
+        tiempo_3 = time.time()
+        if tiempo_3 - tiempo_1 > 0.2:
+            print("Carga del modulo %s : %.3fs ,  %.3fs" % (self.name, tiempo_2-tiempo_1, tiempo_3-tiempo_2))
 
         self.loaded = True
         return True

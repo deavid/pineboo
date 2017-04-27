@@ -96,20 +96,7 @@ def getTableObj(tree,root):
             field.gene = False
             field.iCK = False
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+                
             field.name = xmlfield.xpath("name/text()")[0]
             field.alias = one(xmlfield.xpath("alias/text()"))
             build_field_type(field, xmlfield)
@@ -122,11 +109,13 @@ def getTableObj(tree,root):
             field.defValue = one(xmlfield.xpath("default/text()"),None)
             field.optionsList = one(xmlfield.xpath("optionslist/text()"),None)
             field.vG = text2bool(one(xmlfield.xpath("visiblegrid/text()"),"true"))
-            field.rX = QString()
+            field.rX = ""
             field.pI = one(xmlfield.xpath("partI/text()"), 4)
             field.pD = one(xmlfield.xpath("partD/text()"), 0)
             field.calculated = text2bool(one(xmlfield.xpath("counter/text()"),"false"))
-                        
+            
+            # TODO: la lectura insistente con xpath parece ralentizar el parseo de las MTD
+            
             if field.pk: table.pk.append(field.name)
             if field.name in table.fields_idx: raise ValueError("La tabla %s tiene el campo %s repetido" % (table.name,field.name))
             field.number = len(table.fields)

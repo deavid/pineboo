@@ -122,7 +122,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         sql = """FETCH %d FROM %s""" % (2000,self._curname) 
         self._cursor.execute(sql)
         tiempo_final = time.time()
-        print("Thread: ", sql, "time: %.3fs" % (tiempo_final - tiempo_inicial))
+        if tiempo_final - tiempo_inicial > 0.2:
+            print("Thread: ", sql, "time: %.3fs" % (tiempo_final - tiempo_inicial))
         
         
         
@@ -155,7 +156,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if self.fetchedRows - ROW_BATCH_COUNT - 1  > torow:
             torow = self.fetchedRows - ROW_BATCH_COUNT - 1
             
-        print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        #print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         if torow < fromrow: return
         
         #print("QUERY:", sql)
@@ -208,8 +209,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.threadFetcherStop = threading.Event()
             self.threadFetcher.start()
             
-        
-        print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % ( self._table.name, self.rows, (fromrow,torow), tiempo_final - tiempo_inicial))
+        if tiempo_final - tiempo_inicial > 0.2:
+            print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % ( self._table.name, self.rows, (fromrow,torow), tiempo_final - tiempo_inicial))
  
 
     def refresh(self):
