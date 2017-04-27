@@ -23,6 +23,10 @@ class MainForm(QtGui.QWidget):
     def load(self):
         self.ui = uic.loadUi(filedir('forms/mainform.ui'), self)
         self.areasTab = self.ui.areasTab
+        try:
+            self.areasTab.removeItem = self.areasTab.removeTab
+            self.areasTab.addItem = self.areasTab.addTab
+        except Exception: pass
         self.areasTab.removeItem(0) #Borramos tab de ejemplo.
         self.formTab = self.ui.formTab
         self.formTab.setTabsClosable(True)
@@ -65,7 +69,9 @@ class MainForm(QtGui.QWidget):
         vl = QtGui.QWidget()
         vl.layout = QtGui.QVBoxLayout() #layout de la pestaña
         vl.layout.setSpacing(0)
-        vl.layout.setContentsMargins(5, 0, 0, 0)
+        vl.layout.setContentsMargins(0, 0, 0, 0)
+        vl.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        
         moduleToolBox = QtGui.QToolBox(self)#toolbox de cada módulo
 
         self.areas.append(area.idarea)
@@ -87,6 +93,8 @@ class MainForm(QtGui.QWidget):
 
         vBLayout = QtGui.QWidget()
         vBLayout.layout = QtGui.QVBoxLayout() #layout de cada módulo.
+        vBLayout.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+
         vBLayout.layout.setSpacing(0)
         vBLayout.layout.setContentsMargins(0, 0, 0, 0)
 
@@ -107,6 +115,7 @@ class MainForm(QtGui.QWidget):
             return False
         #print "Running module %s . . . " % self.name
         iconsize = QtCore.QSize(22,22)
+        iconsize = QtCore.QSize(16,16)
         vBLayout.setSpacing(0)
         vBLayout.setContentsMargins(0,0,0,0)
         for key in module.mainform.toolbar:
