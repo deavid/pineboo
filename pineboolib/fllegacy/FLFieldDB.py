@@ -2753,12 +2753,12 @@ class FLFieldDB(QtGui.QWidget):
     def setEnabled(self , enable):       
         #print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
         if self.editor_:
-            if getattr(self.editor_,"setReadOnly"):
-                self.editor_.setReadOnly(True)
+            if hasattr(self.editor_,"setReadOnly"):
+                self.editor_.setReadOnly(not enable)
             else:
-                self.editor_.setEnabled(False)
+                self.editor_.setEnabled(enable)
         if self.pushButtonDB:
-            self.pushButtonDB.setEnabled(False)
+            self.pushButtonDB.setEnabled(enable)
         return
         if enable:
             self.setAttribute(Qt.WA_ForceDisabled, False)

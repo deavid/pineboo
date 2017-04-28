@@ -157,8 +157,8 @@ def loadWidget(xml, widget=None):
                 print("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
+        widget.layout.setMargin(1)
         widget.layout.setSpacing(1)
-        widget.layout.setContentsMargins(1,1,1,1)
         widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
 
 
@@ -176,7 +176,7 @@ def loadWidget(xml, widget=None):
             widget.layout = QtGui.QVBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
             widget.layout.setSpacing(1)
-            widget.layout.setContentsMargins(1,1,1,1)
+            widget.layout.setMargin(2)
 
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
@@ -188,7 +188,7 @@ def loadWidget(xml, widget=None):
             widget.layout = QtGui.QHBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
             widget.layout.setSpacing(1)
-            widget.layout.setContentsMargins(1,1,1,1)
+            widget.layout.setMargin(2)
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
             continue
@@ -199,7 +199,7 @@ def loadWidget(xml, widget=None):
             widget.layout = QtGui.QGridLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
             widget.layout.setSpacing(1)
-            widget.layout.setContentsMargins(1,1,1,1)
+            widget.layout.setMargin(2)
             layouts_pending_process += [(c,"grid")]
             #process_layout_box(c, mode="grid")
             continue
