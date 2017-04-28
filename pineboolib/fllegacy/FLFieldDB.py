@@ -189,13 +189,14 @@ class FLFieldDB(QtGui.QWidget):
         #self._parent = parent
 
         self.FLLayoutH = QtGui.QVBoxLayout(self)
-        self.FLLayoutH.setContentsMargins(1,1,1,1)
+        self.FLLayoutH.setMargin(0)
+        self.FLLayoutH.setSpacing(0)
+        self.FLLayoutH.setContentsMargins(0,0,0,0)
         self.FLLayoutH.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
 
         self.lytButtons = QtGui.QHBoxLayout()
         self.lytButtons.setMargin(0)
         self.lytButtons.setSpacing(1)
-        self.lytButtons.setContentsMargins(1,1,1,1)
         self.lytButtons.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         
         #self.lytButtons.SetMinimumSize(22,22)
@@ -203,7 +204,8 @@ class FLFieldDB(QtGui.QWidget):
 
 
         self.FLWidgetFieldDBLayout = QtGui.QHBoxLayout()
-        self.FLWidgetFieldDBLayout.setContentsMargins(1,1,1,1)
+        self.FLWidgetFieldDBLayout.setSpacing(0)
+        self.FLWidgetFieldDBLayout.setMargin(0)
         self.FLWidgetFieldDBLayout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         self.FLLayoutH.addLayout(self.lytButtons)
         self.FLLayoutH.addLayout(self.FLWidgetFieldDBLayout)
@@ -213,7 +215,7 @@ class FLFieldDB(QtGui.QWidget):
         self.fieldRelation_ = QString()
         
         self.textLabelDB = QtGui.QLabel()
-        self.textLabelDB.setMinimumHeight(22) #No inicia originalmente aqui
+        self.textLabelDB.setMinimumHeight(16) #No inicia originalmente aqui
         self.textLabelDB.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
         #self.textLabelDB.setFrameShape(QtGui.QFrame.WinPanel)
         self.textLabelDB.setFrameShadow(QtGui.QFrame.Plain)
@@ -234,8 +236,8 @@ class FLFieldDB(QtGui.QWidget):
         PBSizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed ,QtGui.QSizePolicy.Fixed)
         PBSizePolicy.setHeightForWidth(True)
         self.pushButtonDB.setSizePolicy(PBSizePolicy)
-        self.pushButtonDB.setMinimumSize(22, 22)
-        self.pushButtonDB.setMaximumSize(22, 22)
+        self.pushButtonDB.setMinimumSize(16, 16)
+        self.pushButtonDB.setMaximumSize(24, 24)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(filedir("icons","flfielddb.png")))
         self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
@@ -2741,12 +2743,23 @@ class FLFieldDB(QtGui.QWidget):
         if self.editor_ and self.editor_.hasFocus:
             self.activatedAccel.emit()
 
+    def setDisabled(self, disable):
+        self.setEnabled(not disable)
 
 
     """
     Redefinida por conveniencia
     """
-    def setEnabled(self , enable):
+    def setEnabled(self , enable):       
+        #print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
+        if self.editor_:
+            if getattr(self.editor_,"setReadOnly"):
+                self.editor_.setReadOnly(True)
+            else:
+                self.editor_.setEnabled(False)
+        if self.pushButtonDB:
+            self.pushButtonDB.setEnabled(False)
+        return
         if enable:
             self.setAttribute(Qt.WA_ForceDisabled, False)
         else:

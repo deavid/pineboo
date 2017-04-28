@@ -113,6 +113,7 @@ def loadWidget(xml, widget=None):
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
                 value = int(xmlprop.get("stdset"))
+                value /= 2
             except Exception as e: value = 0
             if pname == "contentsMargins":
                 value = QtCore.QMargins(value, value, value, value)
@@ -174,6 +175,8 @@ def loadWidget(xml, widget=None):
                 continue
             widget.layout = QtGui.QVBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+            widget.layout.setSpacing(1)
+            widget.layout.setContentsMargins(1,1,1,1)
 
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
@@ -184,6 +187,8 @@ def loadWidget(xml, widget=None):
                 continue
             widget.layout = QtGui.QHBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+            widget.layout.setSpacing(1)
+            widget.layout.setContentsMargins(1,1,1,1)
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
             continue
@@ -193,6 +198,8 @@ def loadWidget(xml, widget=None):
                 continue
             widget.layout = QtGui.QGridLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+            widget.layout.setSpacing(1)
+            widget.layout.setContentsMargins(1,1,1,1)
             layouts_pending_process += [(c,"grid")]
             #process_layout_box(c, mode="grid")
             continue
