@@ -2958,8 +2958,10 @@ class FLFieldDB(QtGui.QWidget):
 
         if not self.editor_:
             self.editor_ = QtGui.QLineEdit()
-            self.editor_.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+            self.editor_.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
             self.textLabelDB.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+            self.editor_.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+            self.editor_.setMinimumWidth(100)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.setFocusPolicy(Qt.StrongFocus)
             self.setFocusProxy(self.editor_)

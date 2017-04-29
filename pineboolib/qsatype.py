@@ -94,6 +94,7 @@ def FLTableDB(*args):
     if not args: return None
     return FLTableDB_Legacy.FLTableDB(*args)
 
+FLListViewItem = QtGui.QListView
 QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor

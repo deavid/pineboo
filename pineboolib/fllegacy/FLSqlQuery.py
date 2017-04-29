@@ -245,9 +245,9 @@ class FLSqlQuery(ProjectClass):
     @return Cadena de texto con la sentencia completa SQL que genera la consulta
     """
     def sql(self):
-        for tableName in self.d.tablesList_:
-            if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
-                return
+        #for tableName in self.d.tablesList_:
+        #    if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
+        #        return
         
         res = None
         

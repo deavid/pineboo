@@ -175,8 +175,8 @@ def loadWidget(xml, widget=None):
                 continue
             widget.layout = QtGui.QVBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
-            widget.layout.setSpacing(1)
-            widget.layout.setMargin(2)
+            widget.layout.setSpacing(3)
+            widget.layout.setMargin(3)
 
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
@@ -187,8 +187,8 @@ def loadWidget(xml, widget=None):
                 continue
             widget.layout = QtGui.QHBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
-            widget.layout.setSpacing(1)
-            widget.layout.setMargin(2)
+            widget.layout.setSpacing(3)
+            widget.layout.setMargin(3)
             layouts_pending_process += [(c,"box")]
             #process_layout_box(c, mode="box")
             continue
@@ -198,8 +198,8 @@ def loadWidget(xml, widget=None):
                 continue
             widget.layout = QtGui.QGridLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
-            widget.layout.setSpacing(1)
-            widget.layout.setMargin(2)
+            widget.layout.setSpacing(3)
+            widget.layout.setMargin(3)
             layouts_pending_process += [(c,"grid")]
             #process_layout_box(c, mode="grid")
             continue
@@ -227,6 +227,7 @@ def loadWidget(xml, widget=None):
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget)
+            new_widget.setContentsMargins(0,0,0,0)
             new_widget.show()
             title = new_widget._attrs.get("title","UnnamedTab")
             if isinstance(widget, QtGui.QTabWidget):

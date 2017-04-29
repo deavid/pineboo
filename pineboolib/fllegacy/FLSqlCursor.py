@@ -686,7 +686,7 @@ class FLSqlCursor(ProjectClass):
     @return Cadena de texto con el filtro principal
     """
     def mainFilter(self):
-        return getattr(self.d._model,'where_filters["main-filter"]',None)
+        return getattr(self.d._model,'where_filters["main-filter"]',"")
 
 
     """
