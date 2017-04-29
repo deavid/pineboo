@@ -1293,7 +1293,7 @@ class FLFieldDB(QtGui.QWidget):
                 pass
             
             if v:
-                self.editor_.setText(str(s))
+                self.editor_.setText(str(v))
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
                 
@@ -3036,11 +3036,11 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
         input_.replace(",", ".")
 
-        state = QtGui.QDoubleValidator.validate(input_, i)
+        state = QtGui.QDoubleValidator.validate(self,input_, i)
 
-        if isinstance(state, QtGui.QValidator.Invalid) or isinstance(state, QtGui.QValidator.Intermediate):
+        if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
             s = QString(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QDoubleValidator.validate(s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+            if input_.left(1) == "-" and (QtGui.QDoubleValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
@@ -3059,6 +3059,8 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
 class FLIntValidator(QtGui.QIntValidator):
 
+    DECIMAL_POINT = QtCore.QLocale().decimalPoint()
+    
     def __init__(self, *args, **kwargs):
             super(FLIntValidator, self).__init__()
 
@@ -3068,18 +3070,18 @@ class FLIntValidator(QtGui.QIntValidator):
 
         input_.replace(",", ".")
 
-        state = QtGui.QIntValidator.validate(input_, i)
+        state = QtGui.QIntValidator.validate(self,input_, i)
 
-        if isinstance(state, QtGui.QValidator.Invalid) or isinstance(state, QtGui.QValidator.Intermediate):
+        if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
             s = QString(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QIntValidator.validate(s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+            if input_.left(1) == "-" and (QtGui.QIntValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
         else:
             state = QtGui.QValidator.Acceptable
 
-        if (QtGui.qApp.commaSeparator() == ","):
+        if (self.DECIMAL_POINT == ","):
             input_.replace(".", ",")
         else:
             input_.replace(",", ".")
@@ -3099,7 +3101,7 @@ class FLUIntValidator(QtGui.QIntValidator):
             return QtGui.QValidator.Acceptable
 
         iV = QtGui.QIntValidator()
-        state = iV.validate(input_, i)
+        state = iV.validate(self,input_, i)
         if state == QtGui.QValidator.Intermediate:
             state = QtGui.QValidator.Invalid
 

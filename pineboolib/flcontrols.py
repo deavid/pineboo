@@ -59,7 +59,7 @@ class QComboBox(QtGui.QComboBox):
 
     def setCurrentItem(self, i): return self.setCurrentIndex(i)
 
-class QButtonGroup(QtGui.QFrame):
+class QButtonGroup(QtGui.QGroupBox):
     def __getattr__(self, name): return DefFun(self, name)
     @property
     def selectedId(self): return 0

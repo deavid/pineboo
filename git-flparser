@@ -1,5 +1,5 @@
 #!/bin/bash
-SZ=$(( $(git ls-files -- "*qs" | wc -l) / 10 ))
+SZ=$(( $(git ls-files -- "*qs" | wc -l) / 10 + 1))
 function count {
    typeset C=0
    while read L; do
