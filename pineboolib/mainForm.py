@@ -19,7 +19,12 @@ class MainForm(QtGui.QWidget):
     ui = None
     areasTab = None
     formTab = None
-
+    debugLevel = 100
+    
+    @classmethod
+    def setDebugLevel(self, q):
+        MainForm.debugLevel = q
+    
     def load(self):
         self.ui = uic.loadUi(filedir('forms/mainform.ui'), self)
         self.areasTab = self.ui.areasTab
@@ -83,7 +88,7 @@ class MainForm(QtGui.QWidget):
 
 
     def addModuleInTab(self, module):
-        print("- Procesando %s " % module.name)
+        if MainForm.debugLevel > 50: print("- Procesando %s " % module.name)
         #Creamos pestañas de areas y un vBLayout por cada módulo. Despues ahí metemos los actions de cada módulo
         if module.areaid not in self.areas:
             self.addAreaTab(Struct(idarea=module.areaid, descripcion=module.areaid))

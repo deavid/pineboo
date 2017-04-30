@@ -14,7 +14,7 @@ from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
-import hashlib, traceback
+import hashlib, traceback, weakref
 
 class Struct(object):
     pass
@@ -933,7 +933,7 @@ class FLSqlCursor(ProjectClass):
     @param c Contexto de ejecucion
     """
     def setContext(self, c):
-        self.d.ctxt_ = c
+        self.d.ctxt_ = weakref.ref(c)
 
     """
     Para obtener el contexto de ejecución de scripts.
@@ -943,7 +943,7 @@ class FLSqlCursor(ProjectClass):
     @return Contexto de ejecución
     """
     def context(self):
-        return self.d.ctxt_
+        return self.d.ctxt_()
 
 
     """
@@ -2179,10 +2179,10 @@ class FLSqlCursor(ProjectClass):
                 if not self.d.buffer_.isGenerated(field.name()):
                     continue
 
-                if self.d.ctxt_ and field.calculated():
+                if self.d.ctxt_() and field.calculated():
                     v = None
                     try:
-                        v = self.d.ctxt_.calculateField(field.name())
+                        v = self.d.ctxt_().calculateField(field.name())
                     except Exception:
                         print("FLSqlCursor.commitBuffer(): EL campo %s es calculado, pero no se ha calculado nada" % field.name())
 
@@ -2203,7 +2203,7 @@ class FLSqlCursor(ProjectClass):
                 functionAfter = "sys.iface.afterCommit_%s" % self.d.metadata_.name()
 
             if functionBefore:
-                cI = self.d.ctxt_
+                cI = self.d.ctxt_()
                 v = self._prj.call(functionBefore, [self], cI)
                 if v and not isinstance(v ,bool):
                     return False
@@ -2303,7 +2303,7 @@ class FLSqlCursor(ProjectClass):
 
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
-            cI = self.d.ctxt_
+            cI = self.d.ctxt_()
             v = self._prj.call(functionAfter, [self], cI)
             if v and not isinstance(v ,bool):
                 print(21)

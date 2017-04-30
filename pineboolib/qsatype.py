@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 import os
-import datetime
+import datetime, weakref
 
 from PyQt4 import QtCore, QtGui
 
@@ -20,6 +20,7 @@ from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 
 from pineboolib import decorators
+import traceback
 
 class StructMyDict(dict):
 
@@ -120,11 +121,48 @@ def FLCodBar(*args, **kwargs):
     class flcodbar:
         def nameToType(self, name):
             return name
+        def pixmapError(self):
+            return QtGui.QPixmap()
         def pixmap(self):
-            return None
+            return QtGui.QPixmap()
         def validBarcode(self):
             return None
     return flcodbar()
+
+def print_stack(maxsize=1):
+    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
+        print(tb.rstrip())
+
+def check_gc_referrers(typename, w_obj, name):
+    import threading, time
+    def checkfn():
+        import gc
+        time.sleep(2)
+        gc.collect()
+        obj = w_obj()
+        if not obj: return
+        # TODO: Si ves el mensaje a continuación significa que "algo" ha dejado
+        # ..... alguna referencia a un formulario (o similar) que impide que se destruya
+        # ..... cuando se deja de usar. Causando que los connects no se destruyan tampoco
+        # ..... y que se llamen referenciando al código antiguo y fallando.
+        print("HINT: Objetos referenciando %r::%r (%r) :" % (typename, obj, name))
+        for ref in gc.get_referrers(obj):
+            
+            if isinstance(ref, dict): 
+                x = []
+                for k,v in ref.items():
+                    if v is obj:
+                        k = "(**)" + k
+                        x.insert(0,k)
+                    else:
+                        x.append(k)    
+                print(" - ", repr(x[:48]))
+            else:
+                print(" - ", repr(ref))
+
+        
+    threading.Thread(target = checkfn).start()
+    
 
 class FormDBWidget(QtGui.QWidget):
 
@@ -134,10 +172,27 @@ class FormDBWidget(QtGui.QWidget):
         self.cursor_ = FLSqlCursor(action.name)
         self._prj = project
         self._class_init()
+        
+    def __del__(self):
+        print("FormDBWidget: Borrando form para accion %r" % self._action.name)
+        
 
     def _class_init(self):
         pass
-
+    
+    def closeEvent(self, event):
+        can_exit = True
+        print("FormDBWidget: closeEvent para accion %r" % self._action.name)
+        check_gc_referrers("FormDBWidget:"+self.__class__.__name__, weakref.ref(self), self._action.name)
+        if hasattr(self, 'iface'):
+            check_gc_referrers("FormDBWidget.iface:"+self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
+            del self.iface.ctx 
+            del self.iface 
+        
+        if can_exit:
+            event.accept() # let the window close
+        else:
+            event.ignore()
     def child(self, childName):
         try:
             ret = self.findChild(QtGui.QWidget, childName)
@@ -145,6 +200,12 @@ class FormDBWidget(QtGui.QWidget):
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
             print("ERROR: Al buscar el control %r encontramos el error %r" % (childName,rte))
+            print_stack(8)
+            import gc
+            gc.collect()
+            print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" % (self, self._action.name, gc.get_referrers(self)))
+            if hasattr(self, 'iface'):
+                print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (self.iface, gc.get_referrers(self.iface)))
             ret = None
         else:
             if ret is None:
@@ -154,10 +215,17 @@ class FormDBWidget(QtGui.QWidget):
         return ret
 
     def cursor(self):
-        cursor = getattr(self.parentWidget(),"cursor_", None)
-        if cursor:
-            del self.cursor_
-            self.cursor_ = cursor
+        cursor = None
+        try:
+            if self.parentWidget():
+                cursor = getattr(self.parentWidget(),"cursor_", None)
+            if cursor:
+                del self.cursor_
+                self.cursor_ = cursor
+        except Exception:
+            # FIXME: A veces parentWidget existía pero fue eliminado. Da un error
+            # ... en principio debería ser seguro omitir el error.
+            pass
         return self.cursor_
 
 def FLFormSearchDB(name):

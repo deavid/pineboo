@@ -28,7 +28,7 @@ componentes serán plugins, como FLFieldDB o FLTableDB.
 @author InfoSiAL S.L.
 """
 
-class FLFormDB(QtGui.QWidget):
+class FLFormDB(QtGui.QDialog):
 
     """
     Cursor, con los registros, utilizado por el formulario
@@ -226,6 +226,11 @@ class FLFormDB(QtGui.QWidget):
         import pineboolib.emptyscript
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
+        if scriptname is None:
+            self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            self.widget = self.script.form
+            self.iface = self.widget.iface
+            return 
         script_path_qs = self.prj.path(scriptname+".qs")
         script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
         
@@ -465,7 +470,7 @@ class FLFormDB(QtGui.QWidget):
     Cierra el formulario
     """
     @QtCore.pyqtSlot()
-    def  close(self):
+    def close(self):
         if self.isClosing_:
             return True
         self.isClosing_ = True
@@ -681,6 +686,14 @@ class FLFormDB(QtGui.QWidget):
         
         super(FLFormDB, self).closeEvent(e)
         self.deleteLater()
+        try:
+            #self.script.form.close()
+            self.script.form = None
+            self.iface = None
+            self.widget.close()
+            del self.widget
+        except Exception:
+            pass
 
     """
     Captura evento mostrar
