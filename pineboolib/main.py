@@ -266,7 +266,11 @@ class File(object):
         self.module = module
         self.filename = filename
         self.sha = sha
-        self.name, self.ext = os.path.splitext(filename)
+        if filename.endswith(".qs.py"):
+            self.ext = ".qs.py"
+            self.name = os.path.splitext(os.path.splitext(filename)[0])[0]
+        else:
+            self.name, self.ext = os.path.splitext(filename)
         if self.sha:
             self.filekey = "%s/file%s/%s/%s%s" % (module, self.ext, self.name, sha,self.ext)
         else:
