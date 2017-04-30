@@ -63,6 +63,7 @@ class Project(object):
     def setDebugLevel(self, q):
         Project.debugLevel = q
         decorators.Options.DEBUG_LEVEL = q
+        qt3ui.Options.DEBUG_LEVEL = q
         
 
     def load_db(self, dbname, host, port, user, passwd):
@@ -529,7 +530,7 @@ class XMLAction(XMLStruct):
         return self.form
 
     def openDefaultFormRecord(self, cursor = None):
-        if Project.debugLevel > 50: print("Opening default formRecord for Action", self.name)
+        if Project.debugLevel > -50: print("Opening default formRecord for Action", self.name)
         w = self.loadRecord(cursor)
         #w.init()
         w.show()

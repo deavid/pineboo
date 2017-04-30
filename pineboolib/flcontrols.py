@@ -50,6 +50,10 @@ class QCheckBox(QtGui.QCheckBox):
     def checked(self, v):
         self.setCheckState(v)
 
+class QLabel(QtGui.QLabel):
+    def setText(self, text):
+        if not isinstance(text, str): text = str(text)
+        QtGui.QLabel.setText(self, text)
 
 
 class QComboBox(QtGui.QComboBox):

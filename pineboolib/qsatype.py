@@ -146,8 +146,7 @@ def check_gc_referrers(typename, w_obj, name):
         # ..... cuando se deja de usar. Causando que los connects no se destruyan tampoco
         # ..... y que se llamen referenciando al código antiguo y fallando.
         print("HINT: Objetos referenciando %r::%r (%r) :" % (typename, obj, name))
-        for ref in gc.get_referrers(obj):
-            
+        for ref in gc.get_referrers(obj):           
             if isinstance(ref, dict): 
                 x = []
                 for k,v in ref.items():
@@ -158,6 +157,7 @@ def check_gc_referrers(typename, w_obj, name):
                         x.append(k)    
                 print(" - ", repr(x[:48]))
             else:
+                if "<frame" in str(repr(ref)): continue
                 print(" - ", repr(ref))
 
         

@@ -383,6 +383,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
 
         try:
+            if isinstance(self._data[row], tuple):
+                self._data[row] = list(self._data[row])
             for fieldname,value in update_dict.items():
                 col = self.metadata().indexPos(fieldname)
                 self._data[row][col] = value

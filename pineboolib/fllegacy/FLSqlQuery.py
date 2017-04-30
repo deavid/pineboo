@@ -175,7 +175,7 @@ class FLSqlQuery(ProjectClass):
         
         fieldListAux = s.split(sep)
         for f in fieldListAux:
-            f = f.strip_whitespace()
+            f = str(f).strip()
             
         
         table = None

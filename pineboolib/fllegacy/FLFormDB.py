@@ -308,6 +308,11 @@ class FLFormDB(QtGui.QDialog):
     destructor
     """
     def __del__(self):
+        # TODO: Esto hay que moverlo al closeEvent o al close()
+        # ..... los métodos __del__ de python son muy poco fiables. 
+        # ..... Se lanzan o muy tarde, o nunca. 
+        # (De todos modos creo que ya hice lo mismo a mano en el closeEvent en commits anteriores)
+        
         self.unbindIface()
 
 

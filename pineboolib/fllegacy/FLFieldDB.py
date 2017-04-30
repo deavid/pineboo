@@ -22,6 +22,8 @@ from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 
 
+DEBUG = False
+
 
 class FLLineEdit(QtGui.QLineEdit):
 
@@ -268,9 +270,15 @@ class FLFieldDB(QtGui.QWidget):
             self.topWidget_ = new_parent
 
         if self.topWidget_:
-                self.cursor_ = self.topWidget_.cursor()
-                #print("Hay topWidget en %s", self)
-
+            self.cursor_ = self.topWidget_.cursor()
+            #print("Hay topWidget en %s", self)
+        if DEBUG:
+            if self.cursor_:
+                print("*** FLFieldDB::loaded: cursor: %r name: %r at:%r" % (self.cursor_, self.cursor_.curName(),self.cursor_.at()))
+                cur_values = [ f.value for f in self.cursor_.d.buffer_.fieldList_]
+                print("*** cursor Buffer: %r" % cur_values)
+            else:
+                print("*** FLFieldDB::loaded: SIN cursor ??")
 
         if not self.name:
             self.setName("FLFieldDB")
@@ -1122,7 +1130,7 @@ class FLFieldDB(QtGui.QWidget):
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN = None):
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
-            #print("FLField.refresh() Cancelado")
+            print("FLField.refresh() Cancelado")
             return
         tMD = self.cursor_.metadata()
         if not tMD:
@@ -1136,7 +1144,12 @@ class FLFieldDB(QtGui.QWidget):
             
             if self.cursor_.cursorRelation():
                 if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
-                    v = None
+                    # FIXME: Este código estaba provocando errores al cargar formRecord hijos
+                    # ... el problema es, que posiblemente el cursorRelation entrega información
+                    # ... errónea, y aunque comentar el código soluciona esto, seguramente esconde
+                    # ... otros errores en el cursorRelation. Pendiente de investigar más.
+                    #v = None
+                    print("FLFieldDB: valueBuffer padre vacío.")
                     
 
         else:
@@ -1223,6 +1236,7 @@ class FLFieldDB(QtGui.QWidget):
 
         if isinstance(v , QString): #Para quitar
             v = str(v)
+        if DEBUG: print("FLFieldDB:: refresh fN:%r fieldName:%r v:%s" % (fN,self.fieldName_,repr(v)[:64]))
 
         if self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or ( modeAcces == FLSqlCursor.Edit and ( field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or not field.editable() or modeAcces == FLSqlCursor.Browse:
             fDis = True

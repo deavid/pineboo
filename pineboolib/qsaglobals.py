@@ -13,7 +13,9 @@ from pineboolib import flcontrols
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
 
-def parseFloat(x): return float(x)
+def parseFloat(x): 
+    if x is None: return None
+    return float(x)
 
 
 # TODO: separar en otro fichero de utilidades
@@ -42,6 +44,8 @@ class SysType(object):
 
     def nameUser(self): 
         return pineboolib.project.conn.db_userName
+    def interactiveGUI(self):
+        return "Pineboo"
     
     def isLoadedModule(self, modulename):
         prj = pineboolib.project

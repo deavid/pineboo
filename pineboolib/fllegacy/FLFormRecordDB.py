@@ -7,7 +7,7 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
-
+DEBUG = False
 
 """
 
@@ -130,8 +130,14 @@ class FLFormRecordDB(FLFormDB):
         self.name_ = action.name
         if self.cursor_:
             self.initialModeAccess = self.cursor_.modeAccess()
+            if DEBUG:
+                print("*** FLFormRecordDB::__init__: cursor: %r name: %r at:%r" % (self.cursor_, self.cursor_.curName(),self.cursor_.at()))
+                cur_values = [ f.value for f in self.cursor_.d.buffer_.fieldList_]
+                print("*** cursor Buffer: %r" % cur_values)
+                
 
         else:
+            if DEBUG: print("*** FLFormRecordDB::__init__ -> Sin cursor??")
             self.initialModeAccess = FLSqlCursor.Browse
 
         self.initForm()

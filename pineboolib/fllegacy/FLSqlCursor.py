@@ -124,13 +124,11 @@ class PNBuffer(ProjectClass):
                     else:
                         return field.value
         else:
-            i = 0
-            for field in self.fieldList_:
-                if i == n:
-                    return self.fieldList_[n].value
+            try:
+                return self.fieldList_[n].value
+            except Exception:
+                return None
 
-
-            return None
 
     def setValue(self, name, value):
         if value is not None and not isinstance(value, (int, float, str)):
@@ -1411,7 +1409,7 @@ class FLSqlCursor(ProjectClass):
     Redefinido por conveniencia
     """
     @decorators.NotImplementedWarn
-    def exec(self, query):
+    def exec_(self, query):
         return True
 
     @decorators.BetaImplementation

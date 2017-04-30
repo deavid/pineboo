@@ -17,6 +17,10 @@ import zlib
 Qt = QtCore.Qt
 ICONS = {}
 
+class Options:
+    DEBUG_LEVEL = 100
+
+
 # TODO: Refactorizar este fichero como una clase. ICONS es la lista de iconos
 #      para un solo formulario. Debe existir una clase LoadUI y que ICONS sea
 #      una variable de ésta. Para cada nuevo formulario se debería instanciar
@@ -41,7 +45,7 @@ def loadUi(path, widget):
         loadWidget(xmlwidget, widget)
 
     formname = widget.objectName() # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
-    print("form:", formname)
+    if Options.DEBUG_LEVEL > 0: print("form:", formname)
     for xmlconnection in root.xpath("connections/connection"):
         sender_name = xmlconnection.xpath("sender/text()")[0]
         signal_name = xmlconnection.xpath("signal/text()")[0]
@@ -52,20 +56,22 @@ def loadUi(path, widget):
         else:
             sender = widget.findChild(QtGui.QWidget, sender_name)
         receiver = None
-        if sender is None: print("Connection sender not found:", sender_name)
+        if sender is None: 
+            if Options.DEBUG_LEVEL > 50: print("Connection sender not found:", sender_name)
         if receiv_name == formname:
             receiver = widget
             fn_name = slot_name.rstrip("()")
-            print("Conectando de UI a QS: (%r.%r -> %r.%r)" % (sender_name, signal_name, receiv_name, fn_name))
+            if Options.DEBUG_LEVEL > 50: print("Conectando de UI a QS: (%r.%r -> %r.%r)" % (sender_name, signal_name, receiv_name, fn_name))
             #print dir(widget.iface)
             if hasattr(widget.iface, fn_name):
                 try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), getattr(widget.iface, fn_name))
                 except Exception as e:
-                    print("Error connecting:",
+                    if Options.DEBUG_LEVEL > 50: 
+                        print("Error connecting:",
                           sender, QtCore.SIGNAL(signal_name),
                           receiver, QtCore.SLOT(slot_name),
                           getattr(widget.iface, fn_name))
-                    print("Error:", e.__class__.__name__, e)
+                    if Options.DEBUG_LEVEL > 50: print("Connect Error:", e.__class__.__name__, e)
                 continue
 
         if receiver is None: receiver = widget.findChild(QtGui.QWidget, receiv_name)
@@ -73,8 +79,8 @@ def loadUi(path, widget):
         if sender is None or receiver is None: continue
         try: QtCore.QObject.connect(sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
         except Exception as e:
-            print("Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
-            print("Error:", e.__class__.__name__, e)
+            if Options.DEBUG_LEVEL > 50: print("Error connecting:", sender, QtCore.SIGNAL(signal_name), receiver, QtCore.SLOT(slot_name))
+            if Options.DEBUG_LEVEL > 50: print("Error:", e.__class__.__name__, e)
     widget.show()
 
 def createWidget(classname, parent=None):
@@ -107,7 +113,7 @@ def loadWidget(xml, widget=None):
         else:
             set_fn = getattr(widget, setpname, None)
         if set_fn is None:
-            print("qt3ui: Missing property", pname, " for %r" % widget.__class__)
+            if Options.DEBUG_LEVEL > 50: print("qt3ui: Missing property", pname, " for %r" % widget.__class__)
             return
         #print "Found property", pname
         if pname == "contentsMargins" or pname == "layoutSpacing":
@@ -122,8 +128,8 @@ def loadWidget(xml, widget=None):
 
         try: set_fn(value)
         except Exception as e:
-            print(e, repr(value))
-            print(etree.tostring(xmlprop))
+            if Options.DEBUG_LEVEL > 50: print(e, repr(value))
+            if Options.DEBUG_LEVEL > 50: print(etree.tostring(xmlprop))
 
     def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:
@@ -154,7 +160,7 @@ def loadWidget(xml, widget=None):
                     else:
                         widget.layout.rowStretch(row)
             else:
-                print("qt3ui: Unknown layout xml tag", repr(c.tag))
+                if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
         widget.layout.setMargin(1)
@@ -171,7 +177,7 @@ def loadWidget(xml, widget=None):
         if c.tag == "vbox":
             # TODO: layout se solapa con el layout de FormInternalObj
             if isinstance(getattr(widget,"layout", None),QtGui.QLayout):
-                print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
+                if Options.DEBUG_LEVEL > 50: print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
                 continue
             widget.layout = QtGui.QVBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
@@ -183,7 +189,7 @@ def loadWidget(xml, widget=None):
             continue
         if c.tag == "hbox":
             if isinstance(getattr(widget,"layout", None),QtGui.QLayout):
-                print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
+                if Options.DEBUG_LEVEL > 50: print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
                 continue
             widget.layout = QtGui.QHBoxLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
@@ -194,7 +200,7 @@ def loadWidget(xml, widget=None):
             continue
         if c.tag == "grid":
             if isinstance(getattr(widget,"layout", None),QtGui.QLayout):
-                print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
+                if Options.DEBUG_LEVEL > 50: print("qt3ui: Trying to replace layout. Ignoring.", repr(c.tag), widget.layout)
                 continue
             widget.layout = QtGui.QGridLayout()
             widget.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
@@ -233,10 +239,10 @@ def loadWidget(xml, widget=None):
             if isinstance(widget, QtGui.QTabWidget):
                 widget.addTab(new_widget,title)
             else:
-                print("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
+                if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
             continue
 
-        print("qt3ui: Unknown widget xml tag", widget.__class__, repr(c.tag))
+        if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown widget xml tag", widget.__class__, repr(c.tag))
     for c in properties:
         process_property(c)
     for c,m in layouts_pending_process:
@@ -326,7 +332,7 @@ def _loadVariant(variant):
                 elif c.tag == "family": p.setFamily(value)
                 else: print("unknown font style type", repr(c.tag))
             except Exception as e:
-                print(e)
+                if Options.DEBUG_LEVEL > 50: print(e)
         return p
 
     if variant.tag =="set":
@@ -346,6 +352,6 @@ def _loadVariant(variant):
             if v is not None: return v            
         if text == "GroupBoxPanel": return QtGui.QFrame.StyledPanel
 
-    print("qt3ui: Unknown variant:", etree.tostring(variant))
+    if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown variant:", etree.tostring(variant))
 
 
