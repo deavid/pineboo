@@ -229,7 +229,7 @@ def loadWidget(xml, widget=None):
         if c.tag == "widget":
             # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
             # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
-            new_widget = createWidget(c.get("class"), parent=widget)
+            new_widget = createWidget(c.get("class"), parent=None)
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget)
