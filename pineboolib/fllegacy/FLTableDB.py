@@ -10,7 +10,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
-
+DEBUG = False
 
 class FLTableDB(QtGui.QWidget):
 
