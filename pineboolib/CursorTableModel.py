@@ -13,7 +13,8 @@ import traceback
 
 import threading
 
-import time
+import time, itertools
+
 
 DisplayRole = QtCore.Qt.DisplayRole 
 EditRole = QtCore.Qt.EditRole
@@ -28,6 +29,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     _cursor = None
     USE_THREADS = False
     USE_TIMER = False
+    CURSOR_COUNT = itertools.count()
     
     def __init__(self, action,project, *args):
         super(CursorTableModel,self).__init__(*args)
@@ -256,7 +258,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if field.isCompoundKey(): self.ckpos.append(n)
 
             self.sql_fields.append(field.name())
-        self._curname = "cur_" + self._table.name + "_%08d" % (random.randint(1,100000))
+        self._curname = "cur_" + self._table.name + "_%08d" % (next(self.CURSOR_COUNT))
         sql = """DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s """ % (self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         #sql = """SELECT %s FROM %s WHERE %s """ % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         self._cursor.execute(sql)

@@ -549,7 +549,7 @@ class FLSqlCursor(ProjectClass):
         super(FLSqlCursor,self).__init__()
         self._valid = False
         self.d = FLSqlCursorPrivate()
-        self.d.nameCursor_ = "%s%s" % (name, QtCore.QDateTime.currentDateTime())
+        self.d.nameCursor_ = "%s_%s" % (name, QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
         if connectionName_or_db is None:
             #print("Init1") # si soy texto y estoy vacio

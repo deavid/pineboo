@@ -26,7 +26,7 @@ class Options:
 #      una variable de ésta. Para cada nuevo formulario se debería instanciar
 #      una nueva clase.
 
-def loadUi(path, widget):
+def loadUi(path, widget, parent = None):
     global ICONS
     parser = etree.XMLParser(
         ns_clean=True,
@@ -37,12 +37,12 @@ def loadUi(path, widget):
     root = tree.getroot()
     ICONS = {}
     widget.hide()
-    
+    if parent is None: parent = widget
     for xmlimage in root.xpath("images/image"):
         loadIcon(xmlimage)
 
     for xmlwidget in root.xpath("widget"):
-        loadWidget(xmlwidget, widget)
+        loadWidget(xmlwidget, widget, parent)
 
     formname = widget.objectName() # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     if Options.DEBUG_LEVEL > 0: print("form:", formname)
@@ -84,7 +84,10 @@ def loadUi(path, widget):
     widget.show()
 
 def createWidget(classname, parent=None):
-    cls = getattr(flcontrols, classname, None) or getattr(QtGui, classname, None) or getattr(FLTableDB, classname, None) or getattr(FLFieldDB, classname, None)
+    cls = getattr(flcontrols, classname, None) or \
+            getattr(QtGui, classname, None) or \
+            getattr(FLTableDB, classname, None) or \
+            getattr(FLFieldDB, classname, None)
     if cls is None:
         print("WARN: Class name not found in QtGui:", classname)
         widgt = QtGui.QWidget(parent)
@@ -92,7 +95,7 @@ def createWidget(classname, parent=None):
         return widgt
     return cls(parent)
 
-def loadWidget(xml, widget=None):
+def loadWidget(xml, widget=None, parent=None):
     translate_properties = {
         "caption" : "windowTitle",
         "name" : "objectName",
@@ -103,6 +106,8 @@ def loadWidget(xml, widget=None):
     }
     if widget is None:
         raise ValueError
+    if parent is None:
+        parent = widget
 
     def process_property(xmlprop, widget=widget):
         pname = xmlprop.get("name")
@@ -141,7 +146,7 @@ def loadWidget(xml, widget=None):
                 process_property(c, widget.layout)
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
-                loadWidget(c, new_widget)
+                loadWidget(c, new_widget, parent)
                 new_widget.show()
                 if mode == "box":
                     widget.layout.addWidget(new_widget)
@@ -229,14 +234,14 @@ def loadWidget(xml, widget=None):
         if c.tag == "widget":
             # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
             # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
-            new_widget = createWidget(c.get("class"), parent=None)
+            new_widget = createWidget(c.get("class"), parent=parent)
             new_widget.hide()
             new_widget._attrs = {}
-            loadWidget(c, new_widget)
+            loadWidget(c, new_widget, parent)
             new_widget.setContentsMargins(0,0,0,0)
             new_widget.show()
-            title = new_widget._attrs.get("title","UnnamedTab")
             if isinstance(widget, QtGui.QTabWidget):
+                title = new_widget._attrs.get("title","UnnamedTab")
                 widget.addTab(new_widget,title)
             else:
                 if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
