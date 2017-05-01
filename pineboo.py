@@ -122,8 +122,24 @@ def main():
                       help="Load everything. Then exit. (Populates Pineboo cache)")
 
     (options, args) = parser.parse_args()
+    
+    
     app = QtGui.QApplication(sys.argv)
-
+    noto_fonts = [
+        "NotoSans-BoldItalic.ttf",
+        "NotoSans-Bold.ttf",
+        "NotoSans-Italic.ttf",
+        "NotoSans-Regular.ttf",
+    ]
+    for fontfile in noto_fonts:
+        QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
+                                               
+    QtGui.QApplication.setStyle("QtCurve")
+    font = QtGui.QFont('Noto Sans',9)
+    font.setBold(False)
+    font.setItalic(False)
+    QtGui.QApplication.setFont(font)
+        
     pineboolib.no_python_cache = options.no_python_cache
 
     # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget

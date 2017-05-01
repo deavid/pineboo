@@ -1149,7 +1149,7 @@ class FLFieldDB(QtGui.QWidget):
                     # ... errónea, y aunque comentar el código soluciona esto, seguramente esconde
                     # ... otros errores en el cursorRelation. Pendiente de investigar más.
                     #v = None
-                    print("FLFieldDB: valueBuffer padre vacío.")
+                    if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
                     
 
         else:
@@ -2768,7 +2768,19 @@ class FLFieldDB(QtGui.QWidget):
         #print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
         if self.editor_:
             if hasattr(self.editor_,"setReadOnly"):
+                tMD = self.cursor_.metadata()
+                field = tMD.field(self.fieldName_)
+
                 self.editor_.setReadOnly(not enable)
+                if not enable or not field.editable():
+                    self.editor_.setStyleSheet('background-color: #f0f0f0')
+                else:
+                    # TODO: al re-habilitar un control, restaurar el color que le toca
+                    if not field.allowNull():
+                        self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
+                    else:
+                        self.editor_.setStyleSheet('background-color: #fff')
+
             else:
                 self.editor_.setEnabled(enable)
         if self.pushButtonDB:

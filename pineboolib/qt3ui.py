@@ -175,6 +175,7 @@ def loadWidget(xml, widget=None, parent=None):
 
     layouts_pending_process = []
     properties = []
+    unbold_fonts = []
     for c in xml:
         if c.tag == "property":
             properties.append(c)
@@ -245,6 +246,7 @@ def loadWidget(xml, widget=None, parent=None):
                 widget.addTab(new_widget,title)
             else:
                 if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
+            unbold_fonts.append(new_widget)
             continue
 
         if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown widget xml tag", widget.__class__, repr(c.tag))
@@ -252,6 +254,11 @@ def loadWidget(xml, widget=None, parent=None):
         process_property(c)
     for c,m in layouts_pending_process:
         process_layout_box(c,mode=m)
+    for new_widget in unbold_fonts:
+        f = new_widget.font()
+        f.setBold(False)
+        f.setItalic(False)
+        new_widget.setFont(f)
 
 def loadIcon(xml):
     global ICONS

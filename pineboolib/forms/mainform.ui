@@ -10,6 +10,12 @@
     <height>593</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Noto Sans</family>
+    <pointsize>8</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -66,6 +72,7 @@
      </property>
      <property name="font">
       <font>
+       <family>Noto Sans</family>
        <pointsize>8</pointsize>
       </font>
      </property>
@@ -90,7 +97,7 @@
      <property name="documentMode">
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="areasTabPage1" native="true">
+     <widget class="QWidget" name="areasTabPage1">
       <attribute name="title">
        <string/>
       </attribute>
@@ -115,6 +122,12 @@
        <horstretch>20</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <family>Noto Sans</family>
+       <pointsize>10</pointsize>
+      </font>
      </property>
      <property name="currentIndex">
       <number>0</number>
