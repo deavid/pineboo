@@ -15,6 +15,7 @@ import threading
 
 import time, itertools
 
+DEBUG = False
 
 DisplayRole = QtCore.Qt.DisplayRole 
 EditRole = QtCore.Qt.EditRole
@@ -124,8 +125,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         sql = """FETCH %d FROM %s""" % (2000,self._curname) 
         self._cursor.execute(sql)
         tiempo_final = time.time()
-        if tiempo_final - tiempo_inicial > 0.2:
-            print("Thread: ", sql, "time: %.3fs" % (tiempo_final - tiempo_inicial))
+        if DEBUG: 
+            if tiempo_final - tiempo_inicial > 0.2:
+                print("Thread: ", sql, "time: %.3fs" % (tiempo_final - tiempo_inicial))
         
         
         
@@ -136,7 +138,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         fromrow = self.rowsLoaded
         torow = self.fetchedRows - ROW_BATCH_COUNT - 1
         if torow - fromrow < 10: return
-        print("Updaterows %s (UPDATE:%d)" % (self._table.name, torow - fromrow +1) )
+        if DEBUG: print("Updaterows %s (UPDATE:%d)" % (self._table.name, torow - fromrow +1) )
     
         self.beginInsertRows(parent, fromrow, torow)
         self.rowsLoaded = torow + 1
@@ -382,15 +384,26 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     @decorators.BetaImplementation
     def setValuesDict(self, row, update_dict):
 
-        print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
+        if DEBUG: print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
 
         try:
             if isinstance(self._data[row], tuple):
                 self._data[row] = list(self._data[row])
+            r = self._vdata[row]
+            if r is None:
+                r = [ str(x) for x in self._data[row] ]
+                self._vdata[row] = r
+            colsnotfound = []
             for fieldname,value in update_dict.items():
-                col = self.metadata().indexPos(fieldname)
-                self._data[row][col] = value
-                self._vdata[row*1000+col] = QtCore.QVariant(ustr(value))
+                #col = self.metadata().indexPos(fieldname)
+                try:
+                    col = self.sql_fields.index(fieldname)
+                    self._data[row][col] = value
+                    r[col] = QtCore.QVariant(ustr(value))
+                except ValueError:
+                    colsnotfound.append(fieldname)
+            if colsnotfound:
+                print("CursorTableModel.setValuesDict:: columns not found: %r" % (colsnotfound))
             self.indexUpdateRow(row)
 
         except Exception:

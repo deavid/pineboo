@@ -1149,7 +1149,7 @@ class FLFieldDB(QtGui.QWidget):
                     # ... errónea, y aunque comentar el código soluciona esto, seguramente esconde
                     # ... otros errores en el cursorRelation. Pendiente de investigar más.
                     #v = None
-                    print("FLFieldDB: valueBuffer padre vacío.")
+                    if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
                     
 
         else:

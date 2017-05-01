@@ -144,7 +144,7 @@ class FLTableDB(QtGui.QWidget):
 
         ownTMD = None
         if self.tableName_:
-            print("**FLTableDB::name: %r tableName: %r" % (self.objectName(), self.tableName_))
+            if DEBUG: print("**FLTableDB::name: %r tableName: %r" % (self.objectName(), self.tableName_))
 
             if not self.cursor_.db().manager().existsTable(self.tableName_):
                 ownTMD = True
@@ -218,10 +218,10 @@ class FLTableDB(QtGui.QWidget):
             if fMD:
                 rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
-                print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
+                if DEBUG: print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
 
             else:
-                print("FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (self.fieldRelation_, self.tableName_))
+                if DEBUG: print("FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (self.fieldRelation_, self.tableName_))
 
         self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), self.cursorAux, rMD, self)
         if not self.cursor_:
