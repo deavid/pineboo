@@ -35,7 +35,7 @@ class PNSqlDrivers():
                 s = v
 
             else:
-                if upper:
+                if upper and isinstance(v,str):
                     v = v.upper()
 
                 s = "'%s'" % v

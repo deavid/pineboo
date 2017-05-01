@@ -95,38 +95,31 @@ def getTableObj(tree,root):
             field.vG = True
             field.gene = False
             field.iCK = False
+            fks = {}
+            for fieldprop in xmlfield:
+                if fieldprop.text: fks[fieldprop.tag] = fieldprop.text
+                #else: fks[fieldprop.tag] = fieldprop
+                #print("Field Prop: %r:%r" % (fieldprop.tag,fieldprop.text))
+                
+            field.name = fks.get("name")
+            field.alias = fks.get("alias")
+            build_field_type(field, xmlfield, fks)
+            field.length_ = fks.get("length",0)
+            field.allowNull = text2bool(fks.get("null","true"))
+            field.pk = text2bool(fks.get("pk","false"))
+            field.editable = text2bool(fks.get("editable","true"))
+            field.visible = text2bool(fks.get("visible","true"))
+            field.iCK =  text2bool(fks.get("ck","false"))
+            field.defValue = fks.get("default")
+            field.optionsList = fks.get("optionslist")
+            field.vG = text2bool(fks.get("visiblegrid","true"))
+            field.rX = ""
+            field.pI = fks.get("partI",4)
+            field.pD = fks.get("partD",0)
+            field.calculated = text2bool(fks.get("counter","false"))
             
+            # TODO: la lectura insistente con xpath parece ralentizar el parseo de las MTD
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            field.name = xmlfield.xpath("name/text()")[0]
-            field.alias = one(xmlfield.xpath("alias/text()"))
-            build_field_type(field, xmlfield)
-            field.length_ = one(xmlfield.xpath("length/text()"),0)
-            field.allowNull = text2bool(one(xmlfield.xpath("null/text()"),"true"))
-            field.pk = text2bool(one(xmlfield.xpath("pk/text()"),"false"))
-            field.editable = text2bool(one(xmlfield.xpath("editable/text()"),"true"))
-            field.visible = text2bool(one(xmlfield.xpath("visible/text()"),"true"))
-            field.iCK = text2bool(one(xmlfield.xpath("ck/text()"),"false"))
-            field.defValue = one(xmlfield.xpath("default/text()"),None)
-            field.optionsList = one(xmlfield.xpath("optionslist/text()"),None)
-            field.vG = text2bool(one(xmlfield.xpath("visiblegrid/text()"),"true"))
-            field.rX = QString()
-            field.pI = one(xmlfield.xpath("partI/text()"), 4)
-            field.pD = one(xmlfield.xpath("partD/text()"), 0)
-            field.calculated = text2bool(one(xmlfield.xpath("counter/text()"),"false"))
-                        
             if field.pk: table.pk.append(field.name)
             if field.name in table.fields_idx: raise ValueError("La tabla %s tiene el campo %s repetido" % (table.name,field.name))
             field.number = len(table.fields)
@@ -134,19 +127,26 @@ def getTableObj(tree,root):
             fieldMD = FLFieldMetaData(field.name, field.alias, field.allowNull, field.pk, field.mtd_type, field.length_, field.calculated, field.visible, field.editable, field.pI, field.pD, field.iNX, field.uNI, field.coun, field.defValue, field.oT, field.rX, field.vG, field.gene, field.iCK)
             relations = xmlfield.xpath("relation")
             for xmlRelation in relations:
-                tableNameR = one(xmlRelation.xpath("table/text()"))
-                fieldRelation = one(xmlRelation.xpath("field/text()"))
-                cardR = one(xmlRelation.xpath("card/text()"))
-                delC = text2bool(one(xmlRelation.xpath("delC/text()"),"false"))
-                updC = text2bool(one(xmlRelation.xpath("updC/text()"),"false"))
-                checkIn = one(xmlRelation.xpath("checkIn/text()"),"true")
+                rks = {}
+                for rel in xmlRelation:
+                    if rel.text: rks[rel.tag] = rel.text
+                    
+                tableNameR = rks.get("table")
+                fieldRelation = rks.get("field")
+                cardR = rks.get("card")
+                delC = text2bool(rks.get("delC","false"))
+                updC = text2bool(rks.get("updC","false"))
+                checkIn = rks.get("checkIn")
                 relation = FLRelationMetaData(tableNameR, fieldRelation, cardR, delC, updC, checkIn)
                 fieldMD.addRelationMD(relation)
                 
             associateds = xmlfield.xpath("associated")
             for xmlAssoc in associateds:
-                aWith = one(xmlRelation.xpath("with/text()"))
-                aBy = one(xmlRelation.xpath("by/text()"))
+                aks = {}
+                for assoc in xmlAssoc:
+                    if assoc.text: aks[assoc.tag] = assoc.text
+                aWith = aks.get("with")
+                aBy = aks.get("by")
                 
                 fieldMD.setAssociatedField(aWith , aBy)
                 
@@ -264,7 +264,7 @@ def create_table(conn, table):
     """ % (table.name, ",\n".join(field_sql_list)))
 
 
-def build_field_type(field, xmlfield):
+def build_field_type(field, xmlfield, fks):
     typetr={
         'string'    : 'character varying',
         'double'    : 'double precision',
@@ -281,9 +281,9 @@ def build_field_type(field, xmlfield):
         'time'      : 'time',
         'bytearray' : 'bytea',
     }
-    field.mtd_type = one(xmlfield.xpath("type/text()"),"string")
-    field.nullable = text2bool(one(xmlfield.xpath("null/text()"),"true"))
-    field.length = int(one(xmlfield.xpath("length/text()"),"64"))
+    field.mtd_type = fks.get("type","string")
+    field.nullable = text2bool(fks.get("null","true"))
+    field.length = int(fks.get("length","64"))
     field.sql_type = typetr.get(field.mtd_type,field.mtd_type)
     if field.sql_type == "character varying": field.sql_type += "(%d)" % field.length
     field.sql_nullable = "" if field.nullable else "NOT NULL"

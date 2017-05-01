@@ -13,7 +13,9 @@ import traceback
 
 import threading
 
-import time
+import time, itertools
+
+DEBUG = False
 
 DisplayRole = QtCore.Qt.DisplayRole 
 EditRole = QtCore.Qt.EditRole
@@ -28,6 +30,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     _cursor = None
     USE_THREADS = False
     USE_TIMER = False
+    CURSOR_COUNT = itertools.count()
     
     def __init__(self, action,project, *args):
         super(CursorTableModel,self).__init__(*args)
@@ -122,7 +125,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         sql = """FETCH %d FROM %s""" % (2000,self._curname) 
         self._cursor.execute(sql)
         tiempo_final = time.time()
-        print("Thread: ", sql, "time: %.3fs" % (tiempo_final - tiempo_inicial))
+        if DEBUG: 
+            if tiempo_final - tiempo_inicial > 0.2:
+                print("Thread: ", sql, "time: %.3fs" % (tiempo_final - tiempo_inicial))
         
         
         
@@ -133,7 +138,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         fromrow = self.rowsLoaded
         torow = self.fetchedRows - ROW_BATCH_COUNT - 1
         if torow - fromrow < 10: return
-        print("Updaterows %s (UPDATE:%d)" % (self._table.name, torow - fromrow +1) )
+        if DEBUG: print("Updaterows %s (UPDATE:%d)" % (self._table.name, torow - fromrow +1) )
     
         self.beginInsertRows(parent, fromrow, torow)
         self.rowsLoaded = torow + 1
@@ -155,7 +160,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if self.fetchedRows - ROW_BATCH_COUNT - 1  > torow:
             torow = self.fetchedRows - ROW_BATCH_COUNT - 1
             
-        print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        #print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         if torow < fromrow: return
         
         #print("QUERY:", sql)
@@ -208,8 +213,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.threadFetcherStop = threading.Event()
             self.threadFetcher.start()
             
-        
-        print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % ( self._table.name, self.rows, (fromrow,torow), tiempo_final - tiempo_inicial))
+        if tiempo_final - tiempo_inicial > 0.2:
+            print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % ( self._table.name, self.rows, (fromrow,torow), tiempo_final - tiempo_inicial))
  
 
     def refresh(self):
@@ -255,7 +260,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if field.isCompoundKey(): self.ckpos.append(n)
 
             self.sql_fields.append(field.name())
-        self._curname = "cur_" + self._table.name + "_%08d" % (random.randint(1,100000))
+        self._curname = "cur_" + self._table.name + "_%08d" % (next(self.CURSOR_COUNT))
         sql = """DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s """ % (self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         #sql = """SELECT %s FROM %s WHERE %s """ % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         self._cursor.execute(sql)
@@ -379,13 +384,26 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     @decorators.BetaImplementation
     def setValuesDict(self, row, update_dict):
 
-        print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
+        if DEBUG: print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
 
         try:
+            if isinstance(self._data[row], tuple):
+                self._data[row] = list(self._data[row])
+            r = self._vdata[row]
+            if r is None:
+                r = [ str(x) for x in self._data[row] ]
+                self._vdata[row] = r
+            colsnotfound = []
             for fieldname,value in update_dict.items():
-                col = self.metadata().indexPos(fieldname)
-                self._data[row][col] = value
-                self._vdata[row*1000+col] = QtCore.QVariant(ustr(value))
+                #col = self.metadata().indexPos(fieldname)
+                try:
+                    col = self.sql_fields.index(fieldname)
+                    self._data[row][col] = value
+                    r[col] = QtCore.QVariant(ustr(value))
+                except ValueError:
+                    colsnotfound.append(fieldname)
+            if colsnotfound:
+                print("CursorTableModel.setValuesDict:: columns not found: %r" % (colsnotfound))
             self.indexUpdateRow(row)
 
         except Exception:

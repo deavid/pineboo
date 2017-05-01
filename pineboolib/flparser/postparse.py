@@ -523,7 +523,7 @@ def execute(options, args):
         options.exec_python = False
         options.full = False
         options.toxml = True
-        print("Pass 1 - Parse and write XML file . . .")
+        if options.verbose: print("Pass 1 - Parse and write XML file . . .")
         try:
             execute(options,args)
         except Exception:
@@ -532,7 +532,7 @@ def execute(options, args):
 
         options.toxml = False
         options.topython = True
-        print("Pass 2 - Pythonize and write PY file . . .")
+        if options.verbose: print("Pass 2 - Pythonize and write PY file . . .")
         try:
           execute(options,[ arg+".xml" for arg in args])
         except Exception:
@@ -541,10 +541,10 @@ def execute(options, args):
 
         if execpython:
           options.exec_python = execpython 
-          print("Pass 3 - Test PY file load . . .")
+          if options.verbose: print("Pass 3 - Test PY file load . . .")
           options.topython = False
           try:
-            execute(options,[ (arg+".xml.py").replace(".qs.xml.py",".py") for arg in args])
+            execute(options,[ (arg+".xml.py").replace(".qs.xml.py",".qs.py") for arg in args])
           except Exception:
               print("Error al ejecutar Python:");
               print(traceback.format_exc())
@@ -568,8 +568,8 @@ def execute(options, args):
         from .pytnyzer import pythonize
         import io
         if options.cache:
-            args = [ x for x in args if not os.path.exists((x+".py").replace(".qs.xml.py",".py"))
-                        or os.path.getmtime(x) > os.path.getctime((x+".py").replace(".qs.xml.py",".py")) ]
+            args = [ x for x in args if not os.path.exists((x+".py").replace(".qs.xml.py",".qs.py"))
+                        or os.path.getmtime(x) > os.path.getctime((x+".py").replace(".qs.xml.py",".qs.py")) ]
             
         nfs = len(args)
         for nf, filename in enumerate(args):
@@ -578,12 +578,12 @@ def execute(options, args):
                 destname = os.path.join(options.storepath,bname+".py")
             else:
                 destname = filename+".py"
-            destname = destname.replace(".qs.xml.py",".py")
+            destname = destname.replace(".qs.xml.py",".qs.py")
             if not os.path.exists(filename):
                 print("Fichero %r no encontrado" % filename)
                 continue
-            sys.stdout.write("Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname,100.0*(nf+1.0)/nfs))
-            sys.stdout.flush();
+            if options.verbose: sys.stdout.write("Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname,100.0*(nf+1.0)/nfs))
+            if options.verbose: sys.stdout.flush();
             old_stderr = sys.stdout
             stream = io.StringIO()
             sys.stdout = stream
@@ -605,8 +605,8 @@ def execute(options, args):
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
-            sys.stdout.write("Parsing File: %-35s . . . .        (%.1f%%)    " % (bname,100.0*(nf+1.0)/nfs))
-            sys.stdout.flush();
+            if options.verbose: sys.stdout.write("Parsing File: %-35s . . . .        (%.1f%%)    " % (bname,100.0*(nf+1.0)/nfs))
+            if options.verbose: sys.stdout.flush();
             try:
                 filecontent = open(filename,"r", encoding="latin-1").read()
             except Exception as e:

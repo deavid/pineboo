@@ -2,6 +2,7 @@
 
 import os, os.path, re
 
+DEBUG = False
 
 def auto_qt_translate_text(text):
     """ función utilizada para eliminar los QT_TRANSLATE de eneboo. Esta función ahora mismo no traduce nada."""
@@ -87,18 +88,18 @@ class DefFun:
         self.realfun = None
     def __str__(self):
         if self.realfun:
-            print("%r: Redirigiendo Propiedad a función %r" % (self.parent.__class__, self.funname))
+            if DEBUG: print("%r: Redirigiendo Propiedad a función %r" % (self.parent.__class__, self.funname))
             return self.realfun()
-        print("WARN: %r: Propiedad no implementada %r" % (self.parent.__class__, self.funname))
+        if DEBUG: print("WARN: %r: Propiedad no implementada %r" % (self.parent.__class__, self.funname))
         return 0
 
     def __call__(self, *args):
 
         if self.realfun:
-            print("%r: Redirigiendo Llamada a función %r %r" % (self.parent.__class__, self.funname, args))
+            if DEBUG: print("%r: Redirigiendo Llamada a función %r %r" % (self.parent.__class__, self.funname, args))
             return self.realfun(*args)
 
-        print("WARN: %r: Método no implementado %r %r" % (self.parent.__class__, self.funname, args))
+        if DEBUG: print("WARN: %r: Método no implementado %r %r" % (self.parent.__class__, self.funname, args))
         return None
 
 

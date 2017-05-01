@@ -1,0 +1,14 @@
+#!/bin/bash
+SZ=$(( $(git ls-files -- "*qs" | wc -l) / 10 + 1))
+function count {
+   typeset C=0
+   while read L; do
+      C=$(( C + 1 ))
+      if [ $(( $C % $1 )) -eq 0 ]; then
+         echo $(( 100 * $C / $SZ )) "%"  1>&2
+      fi
+      echo "$L"
+   done
+}
+
+git ls-files -- "*qs" | shuf | xargs -n10 -P8 flparser --full -q | count 1 > /dev/null

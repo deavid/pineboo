@@ -50,6 +50,10 @@ class QCheckBox(QtGui.QCheckBox):
     def checked(self, v):
         self.setCheckState(v)
 
+class QLabel(QtGui.QLabel):
+    def setText(self, text):
+        if not isinstance(text, str): text = str(text)
+        QtGui.QLabel.setText(self, text)
 
 
 class QComboBox(QtGui.QComboBox):
@@ -59,7 +63,7 @@ class QComboBox(QtGui.QComboBox):
 
     def setCurrentItem(self, i): return self.setCurrentIndex(i)
 
-class QButtonGroup(QtGui.QFrame):
+class QButtonGroup(QtGui.QGroupBox):
     def __getattr__(self, name): return DefFun(self, name)
     @property
     def selectedId(self): return 0
@@ -92,6 +96,21 @@ class FLTable(QtGui.QTableWidget):
     def __getattr__(self, name): return DefFun(self, name)
 
 
+class QTabWidget(QtGui.QTabWidget):
+    def setTabEnabled(self, tab, enabled):
+        #print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
+        if isinstance(tab, int): return QtGui.QTabWidget.setTabEnabled(self, tab, enabled)
+        if isinstance(tab, str): 
+            tabs = [ str(QtGui.QTabWidget.tabText(self, i)).lower().replace("&","") for i in range(self.count()) ]
+            try:
+                idx = tabs.index(tab.lower())              
+                return QtGui.QTabWidget.setTabEnabled(self, idx, enabled)
+            except ValueError:
+                print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled), tabs)
+                return False
+        print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
+    
+        
 
 class FLReportViewer(ProjectClass):
     Append = 0x01

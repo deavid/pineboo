@@ -10,7 +10,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
-
+DEBUG = False
 
 class FLTableDB(QtGui.QWidget):
 
@@ -71,9 +71,9 @@ class FLTableDB(QtGui.QWidget):
     def __init__(self, parent, name = None):
         super(FLTableDB, self).__init__(parent)
 
+        self.topWidget = parent
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(0, self.loaded)
-        self.topWidget = parent
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -87,7 +87,6 @@ class FLTableDB(QtGui.QWidget):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
-        self._loaded = True
         while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             parent_cursor = getattr(self.topWidget,"cursor_", None)
             if parent_cursor: break
@@ -108,22 +107,145 @@ class FLTableDB(QtGui.QWidget):
 
         if not self._name:
             self.setName("FLTableDB")
-
+            
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.refreshDelayed)
 
-        self.showWidget()
-
-
-
-
-
-
-
+        # FIXME: El problema de que aparezca al editar un registro que no es, es por carga doble de initCursor()
+        # ...... Cuando se lanza showWidget, y tiene _initCursorWhenLoad, lanza initCursor y luego otra vez.
+        # ...... esta doble carga provoca el error y deja en el formulario el cursor original.
+        self._initCursorWhenLoad = False
+        self.showWidget() 
+        self._loaded = True
 
         self.initCursor()
+        if DEBUG: print("**FLTableDB::name: %r cursor: %r" % (self.objectName(), self.cursor_.d.nameCursor_))
+        
     def setName(self, name):
         self._name = name
+
+    """
+    Inicia el cursor segun este campo sea de la tabla origen o de
+    una tabla relacionada
+    """
+    def initCursor(self):
+        if not self.topWidget or not self.cursor_:
+            return
+
+        if not self.cursor_.metadata():
+            return
+
+        
+        tMD = self.cursor_.metadata()
+        if not self.sortField_:
+            if tMD:
+                self.sortField_ = tMD.field(tMD.primaryKey())
+
+
+        ownTMD = None
+        if self.tableName_:
+            if DEBUG: print("**FLTableDB::name: %r tableName: %r" % (self.objectName(), self.tableName_))
+
+            if not self.cursor_.db().manager().existsTable(self.tableName_):
+                ownTMD = True
+                tMD = self.cursor_.db().manager().createTable(self.tableName_)
+            else:
+                ownTMD = True
+                tMD = self.cursor_.db().manager().metadata(self.tableName_)
+
+            if not tMD or isinstance(tMD,bool):
+                return
+
+            if not self.foreignField_ or not self.fieldRelation_:
+                if not self.cursor_.metadata():
+                    if ownTMD and tMD and not tMD.inCache():
+                        del tMD
+                    return
+
+                if not self.cursor_.metadata().name() == self.tableName_:
+                    ctxt = self.cursor_.context()
+                    self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), None, None , self)
+
+
+                    if self.cursor_:
+                        self.cursor_.setContext(ctxt)
+                        self.cursorAux = None
+
+                    if ownTMD and tMD and not tMD.inCache():
+                        del tMD
+
+                    return
+
+            else:
+                cursorTopWidget = self.topWidget.cursor()
+                if cursorTopWidget and not cursorTopWidget.metadata().name() == self.tableName_:
+                    self.cursor_ = cursorTopWidget
+
+        if not self.tableName_ or not self.foreignField_ or not self.fieldRelation_ or self.cursorAux:
+            if ownTMD and tMD and not tMD.inCache():
+                del tMD
+
+            return
+
+        self.cursorAux = self.cursor_
+        curName = self.cursor_.metadata().name()
+        rMD =  self.cursor_.metadata().relation(self.foreignField_, self.fieldRelation_, self.tableName_)
+        testM1 = tMD.relation(self.fieldRelation_, self.foreignField_, curName)
+        checkIntegrity = False
+        if not rMD:
+            if testM1:
+                if testM1.cardinality() == FLRelationMetaData.RELATION_M1:
+                    checkIntegrity = True
+            fMD = self.cursor_.metadata().field(self.foreignField_)
+            if fMD:
+                tmdAux = self.cursor_.db().manager().metadata(self.tableName_)
+                if not tmdAux or tmdAux.isQuery():
+                    checkIntegrity = False
+                if tmdAux and not tmdAux.inCache():
+                    del tmdAux
+
+                rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
+                fMD.addRelationMD(rMD)
+                #print("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, pero sin embargo se han indicado los campos de relación( %s, %s )" % ( curName, self.tableName_, self.fieldRelation_, self.foreignField_))
+                #print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (curName, self.foreignField_, self.tableName_, self.fieldRelation_))
+            else:
+                #print("FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )" % (self.foreignField_, curName))
+                pass
+
+        rMD = testM1
+        if not rMD:
+            fMD = tMD.field(self.fieldRelation_)
+            if fMD:
+                rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
+                fMD.addRelationMD(rMD)
+                if DEBUG: print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
+
+            else:
+                if DEBUG: print("FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (self.fieldRelation_, self.tableName_))
+
+        self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), self.cursorAux, rMD, self)
+        if not self.cursor_:
+            self.cursor_ = self.cursorAux
+            self.cursorAux = None
+
+        else:
+
+            self.cursor_.setContext(self.cursorAux.context())
+            if self.showed:
+                try:
+                    self.cursorAux.newBuffer.disconnect(self.refresh)
+                except:
+                    pass
+
+            self.cursorAux.newBuffer.connect(self.refresh)
+
+        if self.cursorAux and isinstance(self.topWidget, FLFormSearchDB):
+            self.topWidget.setCaption(self.cursor_.metadata().alias())
+            self.topWidget_.setCursor(self.cursor_)
+
+        if ownTMD or tMD and not tMD.inCache():
+            del tMD
+
 
 
 
@@ -154,6 +276,7 @@ class FLTableDB(QtGui.QWidget):
     """
     def setTableName(self, fT):
         self.tableName_ = fT
+
         if self.showed:
             if self.topwidget:
                 self.initCursor()
@@ -1291,128 +1414,6 @@ class FLTableDB(QtGui.QWidget):
 
         """
         #self.tableRecords_.show()
-    """
-    Inicia el cursor segun este campo sea de la tabla origen o de
-    una tabla relacionada
-    """
-    def initCursor(self):
-        if not self.topWidget or not self.cursor_:
-            return
-
-        if not self.cursor_.metadata():
-            return
-
-        tMD = None
-
-        if not self.sortField_:
-            tMD = self.cursor_.metadata()
-            if tMD:
-                self.sortField_ = tMD.field(tMD.primaryKey())
-
-
-        ownTMD = None
-        if self.tableName_:
-            if not self.cursor_.db().manager().existsTable(self.tableName_):
-                ownTMD = True
-                tMD = self.cursor_.db().manager().createTable(self.tableName_)
-            else:
-                ownTMD = True
-                tMD = self.cursor_.db().manager().metadata(self.tableName_)
-
-            if not tMD or isinstance(tMD,bool):
-                return
-
-            if not self.foreignField_ or not self.fieldRelation_:
-                if not self.cursor_.metadata():
-                    if ownTMD and tMD and not tMD.inCache():
-                        del tMD
-                    return
-
-                if not self.cursor_.metadata().name() == self.tableName_:
-                    ctxt = self.cursor_.context()
-                    self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), None, None , self)
-
-
-                    if self.cursor_:
-                        self.cursor_.setContext(ctxt)
-                        self.cursorAux = None
-
-                    if ownTMD and tMD and not tMD.inCache():
-                        del tMD
-
-                    return
-
-            else:
-                cursorTopWidget = self.topWidget.cursor()
-                if cursorTopWidget and not cursorTopWidget.metadata().name() == self.tableName_:
-                    self.cursor_ = cursorTopWidget
-
-        if not self.tableName_ or not self.foreignField_ or not self.fieldRelation_ or self.cursorAux:
-            if ownTMD and tMD and not tMD.inCache():
-                del tMD
-
-            return
-
-        self.cursorAux = self.cursor_
-        curName = self.cursor_.metadata().name()
-        rMD =  self.cursor_.metadata().relation(self.foreignField_, self.fieldRelation_, self.tableName_)
-        testM1 = tMD.relation(self.fieldRelation_, self.foreignField_, curName)
-        checkIntegrity = False
-        if not rMD:
-            if testM1:
-                if testM1.cardinality() == FLRelationMetaData.RELATION_M1:
-                    checkIntegrity = True
-            fMD = self.cursor_.metadata().field(self.foreignField_)
-            if fMD:
-                tmdAux = self.cursor_.db().manager().metadata(self.tableName_)
-                if not tmdAux or tmdAux.isQuery():
-                    checkIntegrity = False
-                if tmdAux and not tmdAux.inCache():
-                    del tmdAux
-
-                rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
-                fMD.addRelationMD(rMD)
-                #print("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, pero sin embargo se han indicado los campos de relación( %s, %s )" % ( curName, self.tableName_, self.fieldRelation_, self.foreignField_))
-                #print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (curName, self.foreignField_, self.tableName_, self.fieldRelation_))
-            else:
-                #print("FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )" % (self.foreignField_, curName))
-                pass
-
-        rMD = testM1
-        if not rMD:
-            fMD = tMD.field(self.fieldRelation_)
-            if fMD:
-                rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
-                fMD.addRelationMD(rMD)
-                print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
-
-            else:
-                print("FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (self.fieldRelation_, self.tableName_))
-
-        self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), self.cursorAux, rMD, self)
-        if not self.cursor_:
-            self.cursor_ = self.cursorAux
-            self.cursorAux = None
-
-        else:
-
-            self.cursor_.setContext(self.cursorAux.context())
-            if self.showed:
-                try:
-                    self.cursorAux.newBuffer.disconnect(self.refresh)
-                except:
-                    pass
-
-            self.cursorAux.newBuffer.connect(self.refresh)
-
-        if self.cursorAux and isinstance(self.topWidget, FLFormSearchDB):
-            self.topWidget.setCaption(self.cursor_.metadata().alias())
-            self.topWidget_.setCursor(self.cursor_)
-
-        if ownTMD or tMD and not tMD.inCache():
-            del tMD
-
-
 
     """
     Posiciona el cursor en un registro valido

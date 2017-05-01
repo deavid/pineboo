@@ -28,7 +28,7 @@ componentes serán plugins, como FLFieldDB o FLTableDB.
 @author InfoSiAL S.L.
 """
 
-class FLFormDB(QtGui.QWidget):
+class FLFormDB(QtGui.QDialog):
 
     """
     Cursor, con los registros, utilizado por el formulario
@@ -162,8 +162,10 @@ class FLFormDB(QtGui.QWidget):
         self.mod = action.mod
                 
         self.layout = QtGui.QVBoxLayout()
-        self.layout.setMargin(2)
-        self.layout.setSpacing(2)
+        self.layout.setMargin(1)
+        self.layout.setSpacing(1)
+        self.layout.setContentsMargins(1,1,1,1)
+        self.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         self.setLayout(self.layout)
         
         if not self._uiName:
@@ -191,8 +193,12 @@ class FLFormDB(QtGui.QWidget):
         try: script = self._scriptForm or None
         except AttributeError: script = None
         self.load_script(script)
-        self.resize(550,350)
+        #self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
+        self.layout.setSpacing(1)
+        self.layout.setContentsMargins(1,1,1,1)
+        self.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        
         if self._uiName:
             self.prj.conn.managerModules().createUI(self._uiName, None, self)
         self.loaded = True
@@ -220,6 +226,13 @@ class FLFormDB(QtGui.QWidget):
         import pineboolib.emptyscript
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
+        if scriptname is None:
+            self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            self.widget = self.script.form
+            self.iface = self.widget.iface
+            return 
+        script_path_qs = self.prj.path(scriptname+".qs")
+        script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
         
         overload_pyfile = os.path.join(self.prj.tmpdir,"overloadpy",scriptname+".py")
         if os.path.isfile(overload_pyfile):
@@ -230,12 +243,23 @@ class FLFormDB(QtGui.QWidget):
                 print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
                 print(traceback.format_exc(),"---")
             
-        elif scriptname:
-            print("Loading script %s . . . " % scriptname)
-            # Intentar convertirlo a Python primero con flscriptparser2
-            script_path = self.prj.path(scriptname+".qs")
+        elif script_path_py:
+            script_path = script_path_py
+            print("Loading script PY %s . . . " % scriptname)
             if not os.path.isfile(script_path): raise IOError
-            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".py")
+            try:
+                print("Cargando %s : %s " % (scriptname,script_path.replace(self.prj.tmpdir,"tempdata")))
+                self.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
+            except Exception as e:
+                print("ERROR al cargar script PY para la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
+            
+        elif script_path_qs:
+            script_path = script_path_qs
+            print("Loading script QS %s . . . " % scriptname)
+            # Intentar convertirlo a Python primero con flscriptparser2
+            if not os.path.isfile(script_path): raise IOError
+            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".qs.py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
                 print("Convirtiendo a Python . . .")
                 #ret = subprocess.call(["flscriptparser2", "--full",script_path])
@@ -284,6 +308,11 @@ class FLFormDB(QtGui.QWidget):
     destructor
     """
     def __del__(self):
+        # TODO: Esto hay que moverlo al closeEvent o al close()
+        # ..... los métodos __del__ de python son muy poco fiables. 
+        # ..... Se lanzan o muy tarde, o nunca. 
+        # (De todos modos creo que ya hice lo mismo a mano en el closeEvent en commits anteriores)
+        
         self.unbindIface()
 
 
@@ -446,7 +475,7 @@ class FLFormDB(QtGui.QWidget):
     Cierra el formulario
     """
     @QtCore.pyqtSlot()
-    def  close(self):
+    def close(self):
         if self.isClosing_:
             return True
         self.isClosing_ = True
@@ -662,6 +691,14 @@ class FLFormDB(QtGui.QWidget):
         
         super(FLFormDB, self).closeEvent(e)
         self.deleteLater()
+        try:
+            #self.script.form.close()
+            self.script.form = None
+            self.iface = None
+            self.widget.close()
+            del self.widget
+        except Exception:
+            pass
 
     """
     Captura evento mostrar

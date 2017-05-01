@@ -122,15 +122,36 @@ def main():
                       help="Load everything. Then exit. (Populates Pineboo cache)")
 
     (options, args) = parser.parse_args()
+    
+    
     app = QtGui.QApplication(sys.argv)
-
+    noto_fonts = [
+        "NotoSans-BoldItalic.ttf",
+        "NotoSans-Bold.ttf",
+        "NotoSans-Italic.ttf",
+        "NotoSans-Regular.ttf",
+    ]
+    for fontfile in noto_fonts:
+        QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
+                                               
+    QtGui.QApplication.setStyle("QtCurve")
+    font = QtGui.QFont('Noto Sans',9)
+    font.setBold(False)
+    font.setItalic(False)
+    QtGui.QApplication.setFont(font)
+        
     pineboolib.no_python_cache = options.no_python_cache
 
     # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
     from pineboolib import mainForm
 
     project = pineboolib.main.Project()
-
+    if options.verbose:
+        project.setDebugLevel(100)
+        mainForm.MainForm.setDebugLevel(100)
+    else:
+        project.setDebugLevel(0)
+        mainForm.MainForm.setDebugLevel(0)
     if options.project:
         if not options.project.endswith(".xml"):
             options.project += ".xml"
@@ -160,10 +181,10 @@ def main():
 
 
 
-    print("Iniciando proyecto ...")
+    if options.verbose: print("Iniciando proyecto ...")
     project.run()
 
-    print("Creando interfaz ...")
+    if options.verbose: print("Creando interfaz ...")
     if options.action:
         objaction = None
         for k, module in list(project.modules.items()):
@@ -178,12 +199,12 @@ def main():
 
         main_window = mainForm.mainWindow
         main_window.load()
-        print("Módulos y pestañas ...")
+        if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
             main_window.addAreaTab(area)
         for k,module in sorted(project.modules.items()):
             main_window.addModuleInTab(module)
-        print("Abriendo interfaz ...")
+        if options.verbose: print("Abriendo interfaz ...")
         main_window.show()
 
         objaction.openDefaultForm()
@@ -194,22 +215,22 @@ def main():
         main_window = mainForm.mainWindow
         main_window.load()
         ret = 0
-        print("Módulos y pestañas ...")
+        if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
             main_window.addAreaTab(area)
         for k,module in sorted(project.modules.items()):
             main_window.addModuleInTab(module)
         if options.preload:
-            print("Precarga ...")
+            if options.verbose: print("Precarga ...")
             for action in project.actions:
-                print("* * * Cargando acción %s . . . " % action)
+                if options.verbose: print("* * * Cargando acción %s . . . " % action)
                 try:
                     project.actions[action].load()
                 except Exception:
                     print(traceback.format_exc())
                     project.conn.conn.rollback()
         else:
-            print("Abriendo interfaz ...")
+            if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
             ret = app.exec_()
         mainForm.mainWindow = None

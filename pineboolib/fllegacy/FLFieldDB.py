@@ -22,6 +22,8 @@ from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 
 
+DEBUG = False
+
 
 class FLLineEdit(QtGui.QLineEdit):
 
@@ -189,15 +191,24 @@ class FLFieldDB(QtGui.QWidget):
         #self._parent = parent
 
         self.FLLayoutH = QtGui.QVBoxLayout(self)
+        self.FLLayoutH.setMargin(0)
+        self.FLLayoutH.setSpacing(0)
+        self.FLLayoutH.setContentsMargins(0,0,0,0)
+        self.FLLayoutH.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
 
         self.lytButtons = QtGui.QHBoxLayout()
         self.lytButtons.setMargin(0)
-        self.lytButtons.setSpacing(2)
+        self.lytButtons.setSpacing(1)
+        self.lytButtons.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        
         #self.lytButtons.SetMinimumSize(22,22)
         #self.lytButtons.SetMaximumSize(22,22)
 
 
         self.FLWidgetFieldDBLayout = QtGui.QHBoxLayout()
+        self.FLWidgetFieldDBLayout.setSpacing(0)
+        self.FLWidgetFieldDBLayout.setMargin(0)
+        self.FLWidgetFieldDBLayout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         self.FLLayoutH.addLayout(self.lytButtons)
         self.FLLayoutH.addLayout(self.FLWidgetFieldDBLayout)
         self.tableName_ = QString()
@@ -206,7 +217,7 @@ class FLFieldDB(QtGui.QWidget):
         self.fieldRelation_ = QString()
         
         self.textLabelDB = QtGui.QLabel()
-        self.textLabelDB.setMinimumHeight(22) #No inicia originalmente aqui
+        self.textLabelDB.setMinimumHeight(16) #No inicia originalmente aqui
         self.textLabelDB.setAlignment(QtCore.Qt.AlignVCenter | QtCore.Qt.AlignLeft)
         #self.textLabelDB.setFrameShape(QtGui.QFrame.WinPanel)
         self.textLabelDB.setFrameShadow(QtGui.QFrame.Plain)
@@ -227,8 +238,8 @@ class FLFieldDB(QtGui.QWidget):
         PBSizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed ,QtGui.QSizePolicy.Fixed)
         PBSizePolicy.setHeightForWidth(True)
         self.pushButtonDB.setSizePolicy(PBSizePolicy)
-        self.pushButtonDB.setMinimumSize(22, 22)
-        self.pushButtonDB.setMaximumSize(22, 22)
+        self.pushButtonDB.setMinimumSize(16, 16)
+        self.pushButtonDB.setMaximumSize(24, 24)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(filedir("icons","flfielddb.png")))
         self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
@@ -259,9 +270,15 @@ class FLFieldDB(QtGui.QWidget):
             self.topWidget_ = new_parent
 
         if self.topWidget_:
-                self.cursor_ = self.topWidget_.cursor()
-                #print("Hay topWidget en %s", self)
-
+            self.cursor_ = self.topWidget_.cursor()
+            #print("Hay topWidget en %s", self)
+        if DEBUG:
+            if self.cursor_:
+                print("*** FLFieldDB::loaded: cursor: %r name: %r at:%r" % (self.cursor_, self.cursor_.curName(),self.cursor_.at()))
+                cur_values = [ f.value for f in self.cursor_.d.buffer_.fieldList_]
+                print("*** cursor Buffer: %r" % cur_values)
+            else:
+                print("*** FLFieldDB::loaded: SIN cursor ??")
 
         if not self.name:
             self.setName("FLFieldDB")
@@ -1113,7 +1130,7 @@ class FLFieldDB(QtGui.QWidget):
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN = None):
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
-            #print("FLField.refresh() Cancelado")
+            print("FLField.refresh() Cancelado")
             return
         tMD = self.cursor_.metadata()
         if not tMD:
@@ -1127,7 +1144,12 @@ class FLFieldDB(QtGui.QWidget):
             
             if self.cursor_.cursorRelation():
                 if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
-                    v = None
+                    # FIXME: Este código estaba provocando errores al cargar formRecord hijos
+                    # ... el problema es, que posiblemente el cursorRelation entrega información
+                    # ... errónea, y aunque comentar el código soluciona esto, seguramente esconde
+                    # ... otros errores en el cursorRelation. Pendiente de investigar más.
+                    #v = None
+                    if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
                     
 
         else:
@@ -1214,6 +1236,7 @@ class FLFieldDB(QtGui.QWidget):
 
         if isinstance(v , QString): #Para quitar
             v = str(v)
+        if DEBUG: print("FLFieldDB:: refresh fN:%r fieldName:%r v:%s" % (fN,self.fieldName_,repr(v)[:64]))
 
         if self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or ( modeAcces == FLSqlCursor.Edit and ( field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or not field.editable() or modeAcces == FLSqlCursor.Browse:
             fDis = True
@@ -1284,7 +1307,7 @@ class FLFieldDB(QtGui.QWidget):
                 pass
             
             if v:
-                self.editor_.setText(str(s))
+                self.editor_.setText(str(v))
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
                 
@@ -2734,12 +2757,35 @@ class FLFieldDB(QtGui.QWidget):
         if self.editor_ and self.editor_.hasFocus:
             self.activatedAccel.emit()
 
+    def setDisabled(self, disable):
+        self.setEnabled(not disable)
 
 
     """
     Redefinida por conveniencia
     """
-    def setEnabled(self , enable):
+    def setEnabled(self , enable):       
+        #print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
+        if self.editor_:
+            if hasattr(self.editor_,"setReadOnly"):
+                tMD = self.cursor_.metadata()
+                field = tMD.field(self.fieldName_)
+
+                self.editor_.setReadOnly(not enable)
+                if not enable or not field.editable():
+                    self.editor_.setStyleSheet('background-color: #f0f0f0')
+                else:
+                    # TODO: al re-habilitar un control, restaurar el color que le toca
+                    if not field.allowNull():
+                        self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
+                    else:
+                        self.editor_.setStyleSheet('background-color: #fff')
+
+            else:
+                self.editor_.setEnabled(enable)
+        if self.pushButtonDB:
+            self.pushButtonDB.setEnabled(enable)
+        return
         if enable:
             self.setAttribute(Qt.WA_ForceDisabled, False)
         else:
@@ -2938,8 +2984,10 @@ class FLFieldDB(QtGui.QWidget):
 
         if not self.editor_:
             self.editor_ = QtGui.QLineEdit()
-            self.editor_.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+            self.editor_.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
             self.textLabelDB.setSizePolicy(QtGui.QSizePolicy.Ignored, QtGui.QSizePolicy.Fixed)
+            self.editor_.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+            self.editor_.setMinimumWidth(100)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.setFocusPolicy(Qt.StrongFocus)
             self.setFocusProxy(self.editor_)
@@ -3014,11 +3062,11 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
         input_.replace(",", ".")
 
-        state = QtGui.QDoubleValidator.validate(input_, i)
+        state = QtGui.QDoubleValidator.validate(self,input_, i)
 
-        if isinstance(state, QtGui.QValidator.Invalid) or isinstance(state, QtGui.QValidator.Intermediate):
+        if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
             s = QString(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QDoubleValidator.validate(s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+            if input_.left(1) == "-" and (QtGui.QDoubleValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
@@ -3037,6 +3085,8 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
 class FLIntValidator(QtGui.QIntValidator):
 
+    DECIMAL_POINT = QtCore.QLocale().decimalPoint()
+    
     def __init__(self, *args, **kwargs):
             super(FLIntValidator, self).__init__()
 
@@ -3046,18 +3096,18 @@ class FLIntValidator(QtGui.QIntValidator):
 
         input_.replace(",", ".")
 
-        state = QtGui.QIntValidator.validate(input_, i)
+        state = QtGui.QIntValidator.validate(self,input_, i)
 
-        if isinstance(state, QtGui.QValidator.Invalid) or isinstance(state, QtGui.QValidator.Intermediate):
+        if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
             s = QString(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QIntValidator.validate(s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+            if input_.left(1) == "-" and (QtGui.QIntValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
         else:
             state = QtGui.QValidator.Acceptable
 
-        if (QtGui.qApp.commaSeparator() == ","):
+        if (self.DECIMAL_POINT == ","):
             input_.replace(".", ",")
         else:
             input_.replace(",", ".")
@@ -3077,7 +3127,7 @@ class FLUIntValidator(QtGui.QIntValidator):
             return QtGui.QValidator.Acceptable
 
         iV = QtGui.QIntValidator()
-        state = iV.validate(input_, i)
+        state = iV.validate(self,input_, i)
         if state == QtGui.QValidator.Intermediate:
             state = QtGui.QValidator.Invalid
 
