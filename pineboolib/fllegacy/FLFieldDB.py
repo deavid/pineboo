@@ -194,7 +194,7 @@ class FLFieldDB(QtGui.QWidget):
         self.FLLayoutH.setMargin(0)
         self.FLLayoutH.setSpacing(0)
         self.FLLayoutH.setContentsMargins(0,0,0,0)
-        self.FLLayoutH.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        #self.FLLayoutH.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
 
         self.lytButtons = QtGui.QHBoxLayout()
         self.lytButtons.setMargin(0)
