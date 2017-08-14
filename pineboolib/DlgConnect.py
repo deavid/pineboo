@@ -15,9 +15,17 @@ class DlgConnect(QtGui.QWidget):
     portnumber = ""
     database = ""
     ui = None
+        
 
     def load(self):
         self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
+        
+        frameGm = self.frameGeometry()
+        screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
+        centerPoint = QtGui.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
+        
         self.ui.pbnStart.clicked.connect(self.conectar)
         self.ui.pbnSearchFolder.clicked.connect(self.findPathProject)
         DlgConnect.leFolder = self.ui.leFolder

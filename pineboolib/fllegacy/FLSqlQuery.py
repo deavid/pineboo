@@ -8,6 +8,8 @@ import pineboolib
 
 class FLSqlQuery(ProjectClass):
     
+    countRefQuery = 0
+    connName = None
     """
     Maneja consultas con características específicas para AbanQ, hereda de QSqlQuery.
 
@@ -17,15 +19,26 @@ class FLSqlQuery(ProjectClass):
     @author InfoSiAL S.L.
     """
 
-    def __init__(self, parent = None, connectionName = "default"):
+    def __init__(self, *args):
         super(FLSqlQuery, self).__init__()
-        
+        self.connName = None
         self.d = FLSqlQueryPrivate()
         self.d.db_ = pineboolib.project.conn
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
         self._posicion = None
         self._datos = None
+        retornoQry = None
+        
+        if len(args):
+            retornoQry = pineboolib.project.conn.manager().query(args[0], self)
+        
+        if retornoQry:
+            self = retornoQry
+        
+        if len(args) == 2:
+            self.connName = args[1]
+            
 
 
     def __del__(self):
@@ -101,7 +114,7 @@ class FLSqlQuery(ProjectClass):
             self.d.groupDict_ = {}
         
         if g:
-            self.d.groupDict_.insert(float(g.level()), g)
+            self.d.groupDict_[g.level()] = g.field()
 
     """
     Tipo de datos diccionario de parametros
@@ -183,8 +196,12 @@ class FLSqlQuery(ProjectClass):
         self.d.fieldList_.clear()
         
         for f in fieldListAux:
-            table = f[:f.index(".")]
-            field = f[f.index(".") + 1:]
+            try:
+                table = f[:f.index(".")]
+                field = f[f.index(".") + 1:]
+            except:
+                a = 1
+                
             if field == "*":
                 mtd = self.d.db_.manager().metadata(table, True)
                 if mtd:
@@ -265,12 +282,16 @@ class FLSqlQuery(ProjectClass):
         if self.d.groupDict_ and not self.d.orderBy_:
             res = res + " ORDER BY "
             initGD = None
-            for gD in self.d.groupDict_:
+            i = 0
+            while i < len(self.d.groupDict_):
+                gD = self.d.groupDict_[i]
                 if not initGD:
                     res = res + gD
                     initGD = True
                 else:
                     res = res + ", " + gD
+                
+                i = i + 1
             
         
         elif self.d.orderBy_:
@@ -741,4 +762,18 @@ class FLSqlQueryPrivate():
     """
     db_ = None
 
-
+class FLGroupByQuery(ProjectClass):
+    
+    level_ = None
+    field_ = None
+    
+    def __init__(self, n, v):
+        super(FLGroupByQuery, self).__init__()
+        self.level_ = n
+        self.field_ = v
+    
+    def level(self):
+        return self.level_
+    
+    def field(self):
+        return self.field_
