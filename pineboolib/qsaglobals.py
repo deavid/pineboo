@@ -15,7 +15,7 @@ import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
 
 def parseFloat(x): 
-    if x is None: return None
+    if x is None: return 0
     return float(x)
 
 def isNaN(x):
