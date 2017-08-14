@@ -3,6 +3,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+from pineboolib import decorators
 try:
     from future import standard_library
     standard_library.install_aliases()
@@ -205,7 +206,7 @@ def getTableObj(tree,root):
     return table
 
 def text2bool(text):
-    text = text.strip().lower()
+    text = str(text).strip().lower()
     if text.startswith("t"): return True
     if text.startswith("f"): return False
 
