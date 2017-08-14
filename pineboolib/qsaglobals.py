@@ -6,6 +6,7 @@ from builtins import object
 import re
 from PyQt4 import QtCore, QtGui
 
+
 import traceback
 import pineboolib
 from pineboolib import flcontrols
@@ -16,6 +17,16 @@ from pineboolib.utils import aqtt, auto_qt_translate_text
 def parseFloat(x): 
     if x is None: return None
     return float(x)
+
+def isNaN(x):
+    if not x:
+        return True
+    
+    try:
+        float(x)
+        return False
+    except ValueError:
+        return True
 
 
 # TODO: separar en otro fichero de utilidades
@@ -166,7 +177,7 @@ class qsa:
     parent = None
     loaded = False
     def __init__(self, parent):
-        if isinstance(parent,str): parent = QtCore.QString(parent)
+        if isinstance(parent,str): parent = parent
         self.parent = parent
         self.loaded = True
 
