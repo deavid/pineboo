@@ -133,6 +133,7 @@ def main():
     ]
     for fontfile in noto_fonts:
         QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
+    
                                                
     QtGui.QApplication.setStyle("QtCurve")
     font = QtGui.QFont('Noto Sans',9)
@@ -167,7 +168,7 @@ def main():
         connection_window.load()
         connection_window.show()
         ret = app.exec_()
-        if connection_window.close():
+        if connection_window.close():    
             if connection_window.ruta:
                 prjpath = connection_window.ruta
                 print("Cargando desde ruta %r " % prjpath)
@@ -175,15 +176,32 @@ def main():
             elif connection_window.database:
                 print("Cargando credenciales")
                 project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password)
+            
+            
+            
+            
         if not connection_window.ruta and not connection_window.database:
             sys.exit(ret)
 
+        #Cargando spashscreen
+    # Create and display the splash screen
+    splash_pix = QtGui.QPixmap(filedir("../share/splashscreen/splash_%s.png" % project.dbname))
+    splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
+    splash.show()
+    
+    frameGm = splash.frameGeometry()
+    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
+    centerPoint = QtGui.QApplication.desktop().screenGeometry(screen).center()
+    frameGm.moveCenter(centerPoint)
+    splash.move(frameGm.topLeft())
 
 
-
+    splash.showMessage("Iniciando proyecto ...")
     if options.verbose: print("Iniciando proyecto ...")
     project.run()
 
+    splash.showMessage("Creando interfaz ...")
     if options.verbose: print("Creando interfaz ...")
     if options.action:
         objaction = None
@@ -199,15 +217,17 @@ def main():
 
         main_window = mainForm.mainWindow
         main_window.load()
+        splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
             main_window.addAreaTab(area)
         for k,module in sorted(project.modules.items()):
             main_window.addModuleInTab(module)
+        splash.showMessage("Abriendo interfaz ...")
         if options.verbose: print("Abriendo interfaz ...")
         main_window.show()
-
         objaction.openDefaultForm()
+        splash.hide()
         ret = app.exec_()
         mainForm.mainWindow = None
         return ret
@@ -215,6 +235,7 @@ def main():
         main_window = mainForm.mainWindow
         main_window.load()
         ret = 0
+        splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
             main_window.addAreaTab(area)
@@ -230,14 +251,20 @@ def main():
                     print(traceback.format_exc())
                     project.conn.conn.rollback()
         else:
+            splash.showMessage("Abriendo interfaz ...")
             if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
+    
+            splash.showMessage("Listo ...")
+            QtCore.QTimer.singleShot(2000, splash.hide)
+            
             ret = app.exec_()
         mainForm.mainWindow = None
         del main_window
         del project
         return ret
-
+    
+    
 if __name__ == "__main__":
     ret = main()
     gc.collect()
