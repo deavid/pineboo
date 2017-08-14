@@ -27,6 +27,14 @@ class MainForm(QtGui.QWidget):
     
     def load(self):
         self.ui = uic.loadUi(filedir('forms/mainform.ui'), self)
+        
+        frameGm = self.frameGeometry()
+        screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
+        centerPoint = QtGui.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
+        
+        
         self.areasTab = self.ui.areasTab
         try:
             self.areasTab.removeItem = self.areasTab.removeTab
@@ -135,6 +143,33 @@ class MainForm(QtGui.QWidget):
             button.clicked.connect(action.run)
             vBLayout.addWidget(button)
         vBLayout.addStretch()
+    
+    
+    
+    def closeEvent(self, evnt):
+        
+        dialog = QtGui.QDialog()
+        dialog.setWindowTitle("Salir de Pineboo")
+        dialog.setWindowModality(QtCore.Qt.ApplicationModal)
+        _layout = QtGui.QVBoxLayout()
+        dialog.setLayout(_layout)
+        buttonBox = QtGui.QDialogButtonBox()
+        OKButton = QtGui.QPushButton("&Aceptar")
+        cancelButton = QtGui.QPushButton("&Cancelar")
+        
+        buttonBox.addButton(OKButton, QtGui.QDialogButtonBox.AcceptRole)
+        buttonBox.addButton(cancelButton, QtGui.QDialogButtonBox.RejectRole)
+        label = QtGui.QLabel("¿ Desea salir ?")
+        _layout.addWidget(label)
+        _layout.addWidget(buttonBox)
+        OKButton.clicked.connect(dialog.accept)
+        cancelButton.clicked.connect(dialog.reject)
+        
+        if not dialog.exec_():
+            evnt.ignore()
+        else:
+            print("FIXME::Guardando pestañas abiertas ...")
+        
 
 mainWindow = MainForm()
 
