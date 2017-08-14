@@ -13,11 +13,12 @@ from PyQt4.QtCore import *
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
 from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
-from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
+from pineboolib.flcontrols import FLTable, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
+from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
 from pineboolib import decorators
 import traceback
@@ -68,18 +69,47 @@ def Object(x=None):
     if x is None: x = {}
     return StructMyDict(x)
 
-def Array(x=None):
-    try:
-        if x is None: return {}
-        else: return list(x)
-    except TypeError:
-        return [x]
+#def Array(x=None):
+    #try:
+        #if x is None: return {}
+        #else: return list(x)
+    #except TypeError:
+        #return [x]
+        
+class Array(object):
+    
+    dict_ = None
+    key_ = None
+    
+    def __init__(self, data = None):
+        if not data:
+            self.dict_ = {}
+        else:
+            self.dict_ = data
+    
+    def __setitem__(self, key, value):
+        self.dict_[key] = value
+        
+            
+        
+    def __getitem__(self, key):
+        #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
+        return self.dict_[key]
+    
+    def __getattr__(self, k):
+        if k == 'length': 
+            return len(self.dict_)
+            
+        
 
 def Boolean(x=False): return bool(x)
 
 def FLSqlQuery(*args):
     #if not args: return None
-    return FLSqlQuery_Legacy.FLSqlQuery(*args)
+    query_ = FLSqlQuery_Legacy.FLSqlQuery(*args)
+        
+        
+    return query_
 
 def FLUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
@@ -109,6 +139,9 @@ def FLPosPrinter(*args, **kwargs):
         pass
     return flposprinter()
 
+@decorators.BetaImplementation
+def FLReportViewer():
+    return FLReportViewer_Legacy.FLReportViewer()
 
 @decorators.NotImplementedWarn
 def FLDomDocument(*args, **kwargs):
@@ -238,24 +271,52 @@ class Date(QtCore.QDate):
 
 class Dialog(QtGui.QDialog):
     _layout = None
+    buttonBox = None
+    OKButtonText = None
+    cancelButtonText = None
+    OKButton = None
+    cancelButton = None
 
-    def __init__(self, title, f):
+    def __init__(self, title, f, desc=None):
         #FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
         self.setWindowTitle(title)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self._layout = QtGui.QVBoxLayout()
         self.setLayout(self._layout)
+        self.buttonBox = QtGui.QDialogButtonBox()
+        self.OKButton = QtGui.QPushButton("&Aceptar")
+        self.cancelButton = QtGui.QPushButton("&Cancelar")
+        self.buttonBox.addButton(self.OKButton, QtGui.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(self.cancelButton, QtGui.QDialogButtonBox.RejectRole)
+        self.OKButton.clicked.connect(self.accept)
+        self.cancelButton.clicked.connect(self.reject)
 
 
     def add(self, _object):
         self._layout.addWidget(_object)
 
+    def exec_(self):
+        if (self.OKButtonText):
+            self.OKButton.setText(self.OKButtonText)
+        if (self.cancelButtonText):
+            self.cancelButton.setText(self.cancelButtonText)
+        self._layout.addWidget(self.buttonBox)
 
+        return super(Dialog, self).exec_()
 
 class GroupBox(QtGui.QGroupBox):
-    pass
+    def __init__(self):
+        super(GroupBox, self).__init__()
+        self._layout = QtGui.QHBoxLayout()
+        self.setLayout(self._layout)
+
+    def add(self, _object):     
+        self._layout.addWidget(_object)
 
 class CheckBox(QtGui.QCheckBox):
     pass
 
+   
+    
+        
