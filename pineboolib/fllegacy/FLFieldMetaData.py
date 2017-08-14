@@ -77,7 +77,7 @@ class FLFieldMetaData():
     @return Nombre del campo
     """
     def name(self):
-        return self.d.fieldName_
+        return str(self.d.fieldName_)
 
 
     """
@@ -196,6 +196,8 @@ class FLFieldMetaData():
     def generated(self):
         return self.d.generated_
 
+    def setGenerated(self, value):
+        self.d.generated_ = value
     """
     Establece si el campo es visible.
 
@@ -518,26 +520,26 @@ class FLFieldMetaData():
     """
     Obtiene el tipo del campo convertido a un tipo equivalente de la clase QVariant
     """
-    def flDecodeType(self, fltype):
+    def flDecodeType(self, fltype_):
         
         _type = None
         #print("Decode", fltype)
         
-        if fltype == "int":
+        if fltype_ == "int":
             _type = QVariant.Int
-        elif fltype == "serial" or fltype == "uint":
+        elif fltype_ == "serial" or fltype_ == "uint":
             _type = QVariant.UInt
-        elif fltype == "bool" or fltype == "unlock":
+        elif fltype_ == "bool" or fltype_ == "unlock":
             _type = QVariant.Bool
-        elif fltype == "double":
+        elif fltype_ == "double":
             _type = QVariant.Double
-        elif fltype ==  "time":
+        elif fltype_ ==  "time":
             _type = QVariant.Time
-        elif fltype == "date":
+        elif fltype_ == "date":
             _type = QVariant.Date
-        elif fltype == "string" or fltype == "pixmap" or fltype == "stringList":
+        elif fltype_ == "string" or fltype_ == "pixmap" or fltype_ == "stringList":
             _type = QVariant.String
-        elif fltype == "bytearray":
+        elif fltype_ == "bytearray":
             _type = QVariant.ByteArray
         
         #print("Return", _type)
@@ -892,19 +894,20 @@ class FLFieldMetaDataPrivate():
         
         if int(l) < 0:
             self.length_ = 0
+
+
         if int(pI) < 0:
             self.partInteger_ = 0
         if int(pD) < 0:
             self.partDecimal_ = 0
-        
         #print("Tipo ", t)
         
         if not t == "string" and not int(l) == 0: 
             self.length_ = 0
         
         
-        if not t == "int" and not t == "uint" and t == "double" and not int(pI) == 0: 
-            self.partInteger_ = 0
+        #if not t == "int" and not t == "uint" and t == "double" and not int(pI) == 0: 
+            #self.partInteger_ = 0
         
         if t == "double" and not int(pD) >= 0: 
             self.partDecimal_ = 0
