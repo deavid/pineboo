@@ -2,7 +2,7 @@
 
 from PyQt4 import QtCore,QtGui
 
-from PyQt4.QtCore import Qt, QString
+from PyQt4.QtCore import Qt
 
 # TODO: Borrar el import del QVariant!!. QVariant es necesario en C++ porque es
 # ... el único modo de representar un tipo polimórfico. En Python esto es innecesario.
@@ -296,7 +296,7 @@ class FLFieldDB(QtGui.QWidget):
     labelClicked = QtCore.pyqtSignal()
     keyReturnPressed = QtCore.pyqtSignal()
     lostFocus = QtCore.pyqtSignal()
-    textChanged = QtCore.pyqtSignal(QString)
+    textChanged = QtCore.pyqtSignal(str)
     keyF2Pressed_ = QtCore.pyqtSignal(name = "keyF2Pressed")
     
     firstRefresh = None
@@ -339,10 +339,10 @@ class FLFieldDB(QtGui.QWidget):
         self.FLWidgetFieldDBLayout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
         self.FLLayoutH.addLayout(self.lytButtons)
         self.FLLayoutH.addLayout(self.FLWidgetFieldDBLayout)
-        self.tableName_ = QString()
-        self.fieldName_ = QString()
-        self.foreignField_ = QString()
-        self.fieldRelation_ = QString()
+        self.tableName_ = None
+        self.fieldName_ = None
+        self.foreignField_ = None
+        self.fieldRelation_ = None
         
         self.textLabelDB = QtGui.QLabel()
         self.textLabelDB.setMinimumHeight(16) #No inicia originalmente aqui
@@ -352,9 +352,9 @@ class FLFieldDB(QtGui.QWidget):
         self.textLabelDB.setLineWidth(0)
         self.textLabelDB.setTextFormat(QtCore.Qt.PlainText)
         
-        self.fieldAlias_ = QString()
-        self.actionName_ = QString()
-        self.filter_ = QString()
+        self.fieldAlias_ = None
+        self.actionName_ = None
+        self.filter_ = None
 
 
         self.FLWidgetFieldDBLayout.addWidget(self.textLabelDB)
@@ -436,7 +436,7 @@ class FLFieldDB(QtGui.QWidget):
     """
 
     def setActionName(self, aN):
-        self.actionName_ = QString(aN)
+        self.actionName_ = str(aN)
         if self.showed and self.topWidget_:
             self.initEditor()
             self.initCursor()
@@ -480,7 +480,7 @@ class FLFieldDB(QtGui.QWidget):
     """
 
     def setFieldName(self, fN):
-        self.fieldName_ = QString(fN)
+        self.fieldName_ = str(fN)
         if self.showed:
             if self.topWidget_:
                 self.initCursor()
@@ -507,7 +507,7 @@ class FLFieldDB(QtGui.QWidget):
     """
 
     def setTableName(self, fT):
-        self.tableName_ = QString(fT)
+        self.tableName_ = str(fT)
         if self.showed:
             if self.topWidget_:
                 self.initCursor()
@@ -534,7 +534,7 @@ class FLFieldDB(QtGui.QWidget):
     """
 
     def setForeignField(self, fN):
-        self.foreignField_ = QString(fN)
+        self.foreignField_ = str(fN)
         if self.showed:
             if self.topWidget:
                 self.initCursor()
@@ -562,7 +562,7 @@ class FLFieldDB(QtGui.QWidget):
     """
 
     def setFieldRelation(self, fN):
-        self.fieldRelation_ = QString(fN)
+        self.fieldRelation_ = str(fN)
         if self.showed:
             if self.topWidget:
                 self.initCursor()
@@ -1405,8 +1405,8 @@ class FLFieldDB(QtGui.QWidget):
 
         fDis = False
 
-        if isinstance(v , QString): #Para quitar
-            v = str(v)
+        #if isinstance(v , QString): #Para quitar
+            #v = str(v)
         if DEBUG: print("FLFieldDB:: refresh fN:%r fieldName:%r v:%s" % (fN,self.fieldName_,repr(v)[:64]))
 
         if self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or ( modeAcces == FLSqlCursor.Edit and ( field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or not field.editable() or modeAcces == FLSqlCursor.Browse:
@@ -1986,7 +1986,7 @@ class FLFieldDB(QtGui.QWidget):
         #rX = field.regExpValidator()
         ol = field.hasOptionsList()
 
-        rt = QString()
+        rt = None
         if field.relationM1():
             if not field.relationM1().foreignTable() == tMD.name():
                 rt = field.relationM1().foreignTable()
@@ -1997,7 +1997,7 @@ class FLFieldDB(QtGui.QWidget):
         self.textLabelDB.setFont(QtGui.QApplication.font())
         if not type_ == "pixmap" and not type_ == "bool":
             if not field.allowNull() and field.editable():
-                self.textLabelDB.setText(self.fieldAlias_ + QString("*"))
+                self.textLabelDB.setText("%s*" % self.fieldAlias_)
             else:
                 self.textLabelDB.setText(self.fieldAlias_)
         else:
@@ -2471,7 +2471,7 @@ class FLFieldDB(QtGui.QWidget):
         if self.editorImg_:
             fmt = QtGui.QImage.outputFormats()
             fmt = fmt.at(f)
-            ext = QString(fmt).lower()
+            ext = str(fmt).lower()
             filename = "imagen.%s" % ext
             ext = "*.%s" % ext
             savefilename = QtGui.QFileDialog.getSaveFileName( filename.lower(), ext , self.filename_, FLUtil.tr("Guardar imagen como"))
@@ -2512,7 +2512,7 @@ class FLFieldDB(QtGui.QWidget):
         if not self.cursor_:
             return
 
-        if self.fieldName_.isEmpty():
+        if not self.fieldName_:
             return
 
         tMD = self.cursor_.metadata()
@@ -2545,7 +2545,7 @@ class FLFieldDB(QtGui.QWidget):
         if c.size() <= 0:
             return
 
-        if self.actionName_.isEmpty():
+        if not self.actionName_:
             a = c.action()
         else:
             a = self.actionName_
@@ -2753,7 +2753,7 @@ class FLFieldDB(QtGui.QWidget):
         if not QtGui.QPixmapCache.find(s.left(100)):
             QtGui.QPixmapCache.insert(s.left(100), pix)
 
-        self.updateValue(QString(s))
+        self.updateValue(str(s))
 
     """
   Carga una imagen en el campo de tipo pixmap con el ancho y alto preferido
@@ -2798,7 +2798,7 @@ class FLFieldDB(QtGui.QWidget):
         if not QtGui.QPixmapCache.find(s.left(100)):
             QtGui.QPixmapCache.insert(s.left(100), pix)
 
-        self.updateValue(QString(s))
+        self.updateValue(str(s))
 
     """
   Carga una imagen desde el portapapeles en el campo de tipo pixmap
@@ -2847,7 +2847,7 @@ class FLFieldDB(QtGui.QWidget):
         if not QtGui.QPixmapCache.find(s.left(100)):
             QtGui.QPixmapCache.insert(s.left(100), pix)
 
-        self.updateValue(QString(s))
+        self.updateValue(str(s))
 
 
 
@@ -2894,7 +2894,7 @@ class FLFieldDB(QtGui.QWidget):
     @param v Valor
     """
     @decorators.NotImplementedWarn
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def setMapValue(self, v):
         self.fieldMapValue_ = self.sender()
         self.mapValue_ = v
@@ -2927,7 +2927,7 @@ class FLFieldDB(QtGui.QWidget):
     La señal textChanged del editor (sólo si el editor es FLLineEdit)
     está conectada a este slot.
     """
-    @QtCore.pyqtSlot(QString)
+    @QtCore.pyqtSlot(str)
     def emitTextChanged(self, t):
         self.textChanged.emit(t)
 
@@ -3108,7 +3108,7 @@ class FLFieldDB(QtGui.QWidget):
                                     else:
                                         where += " AND " + filterAc
 
-                                if self.filter_.isEmpty():
+                                if not self.filter_:
                                     q.setWhere(where)
                                 else:
                                     q.setWhere(self.filter_ + " AND " + where)
@@ -3191,7 +3191,7 @@ class FLFieldDB(QtGui.QWidget):
             self.pushButtonDB.hide()
 
 
-        prty = QString()
+        prty = None
         if not self.tableName_.isEmpty():
             prty += "tN:" + self.tableName_ + ","
         if not self.foreignField_.isEmpty():
@@ -3249,7 +3249,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         state = QtGui.QDoubleValidator.validate(self,input_, i)
 
         if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
-            s = QString(input_.right(input_.length() - 1))
+            s = str(input_.right(input_.length() - 1))
             if input_.left(1) == "-" and (QtGui.QDoubleValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
                 state = QtGui.QValidator.Acceptable
             else:
@@ -3283,7 +3283,7 @@ class FLIntValidator(QtGui.QIntValidator):
         state = QtGui.QIntValidator.validate(self,input_, i)
 
         if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
-            s = QString(input_.right(input_.length() - 1))
+            s = str(input_.right(input_.length() - 1))
             if input_.left(1) == "-" and (QtGui.QIntValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
                 state = QtGui.QValidator.Acceptable
             else:
@@ -3307,7 +3307,7 @@ class FLUIntValidator(QtGui.QIntValidator):
             super(FLUIntValidator, self).__init__()
 
     def validate(self, input_, i):
-        if input_.isEmpty():
+        if not input_:
             return QtGui.QValidator.Acceptable
 
         iV = QtGui.QIntValidator()

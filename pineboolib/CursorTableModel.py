@@ -21,8 +21,8 @@ DisplayRole = QtCore.Qt.DisplayRole
 EditRole = QtCore.Qt.EditRole
 Horizontal = QtCore.Qt.Horizontal
 Vertical = QtCore.Qt.Vertical
-QVariant_invalid = QtCore.QVariant()
-QVariant = QtCore.QVariant
+QVariant_invalid = None
+QVariant = str()
 QAbstractTableModel_headerData = QtCore.QAbstractTableModel.headerData
 class CursorTableModel(QtCore.QAbstractTableModel):
     rows = 15
@@ -234,6 +234,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if oldrows > 0:
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
         where_filter = " "
+        
         for k, wfilter in sorted(self.where_filters.items()):
             if wfilter is None: continue
             wfilter = wfilter.strip()
@@ -244,6 +245,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 where_filter += " AND " + wfilter
         if where_filter is " ":
             where_filter = "1=1"
+        
         self._cursor = self._prj.conn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # TODO: Convertir esto a un cursor de servidor (hasta 20.000 registros funciona bastante bien)
@@ -399,7 +401,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 try:
                     col = self.sql_fields.index(fieldname)
                     self._data[row][col] = value
-                    r[col] = QtCore.QVariant(ustr(value))
+                    r[col] = value
                 except ValueError:
                     colsnotfound.append(fieldname)
             if colsnotfound:
@@ -420,14 +422,49 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def setValue(self, row, fieldname, value):
         # Reimplementación para que todo pase por el método genérico.
         self.setValuesDict(self, row, { fieldname : value } )
-
+    
+    
+    """
+    Dibuja el valor correcto
+    """
+    
+    def paintCell(self, format_, value):
+        print("Dibujando formato", format_)
+        return QtCore.QVariant(ustr(value))
     """
     Crea una nueva linea en el tableModel
     @param buffer . PNBuffer a añadir
     """
     @decorators.NotImplementedWarn
     def newRowFromBuffer(self, buffer):
-        pass
+        try: 
+            if DEBUG: print("CursorTableModel.newRowFromBuffer")
+            return 
+            colsnotfound = []
+            
+            
+            self._data.append([])
+            self._vdata.append([])
+            newRow = self.rowCount()
+
+            for fieldBuffer in buffer.fieldsList():
+                #col = self.metadata().indexPos(fieldname)
+                try:
+                    #col = self.sql_fields.index(fieldBuffer.name)
+                    #self._data++#Nueva linea
+                    self._data[newRow].append(fieldBuffer.value)
+                    self._vdata[newRow].append(fieldBuffer.value) 
+                    
+                except ValueError:
+                    colsnotfound.append(fieldBuffer.name)
+            if colsnotfound:
+                print("CursorTableModel.newRowFromBuffer:: columns not found: %r" % (colsnotfound))
+            self.indexUpdateRow(newRow)
+
+        except Exception:
+
+            print("CursorTableModel.newRowFromBuffer(row %s) :: ERROR:" % newRow, traceback.format_exc())
+        
 
     def findPKRow(self, pklist):
         if not isinstance(pklist, (tuple, list)):
@@ -451,7 +488,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.indexes_valid = True
         cklist = tuple(cklist)
         if cklist not in self.ckidx:
-            print("CursorTableModel.findCKRow:: CK not found: %r (requires list, not integer or string)" % pklist)
+            print("CursorTableModel.findCKRow:: CK not found: %r (requires list, not integer or string)" % cklist)
             return None
         return self.ckidx[cklist]
 

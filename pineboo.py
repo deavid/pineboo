@@ -32,10 +32,10 @@ except ImportError:
     sys.exit(32)
 
 try:
-    import sip
+    #import sip
     # switch on QVariant in Python3
-    sip.setapi('QVariant', 1)
-    sip.setapi('QString', 1)
+    #sip.setapi('QVariant', 1)
+    #sip.setapi('QString', 1)
 
     from PyQt4 import QtGui, QtCore, uic
 except ImportError:

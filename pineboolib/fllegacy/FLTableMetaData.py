@@ -6,7 +6,7 @@ from pineboolib import decorators
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLCompoundKey import FLCompoundkey
 from pineboolib.flcontrols import ProjectClass
-from PyQt4.QtCore import QString, QVariant
+#from PyQt4.QtCore import QString, QVariant
 
 """
 Mantiene la definicion de una tabla.
@@ -36,10 +36,10 @@ class FLTableMetaData(ProjectClass):
   
     def __init__(self, *args, **kwargs):
         super(FLTableMetaData,self).__init__()
-        tmp = None
+        #tmp = None
                 
         if len(args) == 1:
-            if isinstance(args[0],QString) or isinstance(args[0], str):
+            if isinstance(args[0],str):
                 #print("FLTableMetaData(%s).init()" % args[0])
                 self.inicializeFLTableMetaDataP(args[0])  
             else:
@@ -200,7 +200,7 @@ class FLTableMetaData(ProjectClass):
             return self.d.primaryKey_
         
         if prefixTable:
-            return str(self.d.name_ + QString(".") + self.d.primaryKey_)
+            return str("%s.%s" % (self.d.name_, self.d.primaryKey_))
         else:
             return str(self.d.primaryKey_)
   
@@ -212,7 +212,7 @@ class FLTableMetaData(ProjectClass):
 
     def fieldNameToAlias(self, fN):
         
-        if fN.isEmpty():
+        if not fN:
             return fN
         
         for key in self.d.fieldList_:
@@ -229,7 +229,7 @@ class FLTableMetaData(ProjectClass):
     @decorators.BetaImplementation
     def fieldAliasToName(self, aN):
             
-        if aN.isEmpty():
+        if not aN:
             return aN
         
         if self.d.fieldAliasMap_.has_key(aN):
@@ -380,7 +380,7 @@ class FLTableMetaData(ProjectClass):
         if field and field.d.relationM1_:
             return field.d.relationM1_.foreignTable()
         
-        return QString.Null
+        return None
 
     """
     Obtiene el nombre del campo de la tabla foránea relacionado con el indicado mediante
@@ -405,7 +405,7 @@ class FLTableMetaData(ProjectClass):
         if field and field.d.relationM1_:
             return field.d.relationM1_.foreignField()
         
-        return QString.Null        
+        return None      
 
     """
     Obtiene el objeto relación que definen dos campos.
@@ -593,20 +593,20 @@ class FLTableMetaData(ProjectClass):
     @param prefixTable Si es TRUE se añade un prefijo a cada campo con el nombre de la tabla; nombretabla.nombrecampo
     @return Cadena de caracteres con los nombres de los campos separados por comas
     """
+    @decorators.BetaImplementation
     def fieldList(self, prefixTable = False):
         listado = []
         
-        if prefixTable:
-            cadena = ", %s." % self.name()
+        cadena = None
+        
+        if prefixTable == True:
+            cadena = "%s." % self.name()
         else:
-            cadena = ", "
+            cadena = ""
         
         for field in self.d.fieldList_:
-            #print("NOMBRE =", field.name())
-            listado.append(field.name())
-            #cadenaFinal = cadena.join(listado) 
-        #print("CADENA FINAL", cadenaFinal)
-        #return cadenaFinal
+            listado.append("%s%s" % (cadena, field.name()))
+
         return listado   
     
     def fieldListObject(self):
@@ -911,11 +911,11 @@ class FLTableMetaDataPrivate():
         if not f:
             return
         
-        alias = QString(f.alias())
-        field = QString(f.name().lower())
+        alias = str(f.alias())
+        field = str(f.name().lower())
         
         if self.aliasFieldMap_.has_key(alias):
-            alias += QString("(") + QString(len(self.aliasFieldMap_) + 1) + QString(")")
+            alias += "(%s)" % str(len(self.aliasFieldMap_) + 1)
         
         f.d.alias_ = alias
         

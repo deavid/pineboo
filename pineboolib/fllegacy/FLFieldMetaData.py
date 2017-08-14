@@ -2,13 +2,13 @@
 
 #Completa Si
 
-from pineboolib.fllegacy.FLRelationMetaDataList import FLRelationMetaDataList
+#from pineboolib.fllegacy.FLRelationMetaDataList import FLRelationMetaDataList
 from pineboolib import decorators
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 
 
-from PyQt4.QtCore import QVariant, QString
-from PyQt4 import QtCore, QtGui
+#from PyQt4.QtCore import QVariant, QString
+#from PyQt4 import QtCore, QtGui
 from pineboolib.utils import aqtt
 
 
@@ -526,21 +526,21 @@ class FLFieldMetaData():
         #print("Decode", fltype)
         
         if fltype_ == "int":
-            _type = QVariant.Int
+            _type = "int"
         elif fltype_ == "serial" or fltype_ == "uint":
-            _type = QVariant.UInt
+            _type = "uint"
         elif fltype_ == "bool" or fltype_ == "unlock":
-            _type = QVariant.Bool
+            _type = "bool"
         elif fltype_ == "double":
-            _type = QVariant.Double
+            _type = "double"
         elif fltype_ ==  "time":
-            _type = QVariant.Time
+            _type = "time"
         elif fltype_ == "date":
-            _type = QVariant.Date
+            _type = "date"
         elif fltype_ == "string" or fltype_ == "pixmap" or fltype_ == "stringList":
-            _type = QVariant.String
+            _type = "string"
         elif fltype_ == "bytearray":
-            _type = QVariant.ByteArray
+            _type = "bytearray"
         
         #print("Return", _type)
         return _type
@@ -617,7 +617,7 @@ class FLFieldMetaData():
         if value.type() == "string" or value.type() == "stringlist":
             isText = True
         
-        formatV = QString()
+        formatV = ""
         if value.type() == "int" or value.type() == "uint" or value.type() == "double":
             formatV = value.toString()
         else: 
@@ -629,11 +629,11 @@ class FLFieldMetaData():
             return "1 = 1"
         
         if upper and isText:
-            fName = QString("upper(" + fieldName + ")")
+            fName =str("upper(" + fieldName + ")")
         else:
-            fName = QString(fieldName)
+            fName = str(fieldName)
         
-        return QString(fName + " = " + formatV)
+        return str(fName + " = " + formatV)
         
         
         
@@ -845,7 +845,7 @@ class FLFieldMetaDataPrivate():
 
     def __init__(self, *args, **kwargs):
         
-        self.regExpValidator_ = QString()
+        self.regExpValidator_ = ""
         
         if len(args) == 0:
             self.inicializeEmpty()

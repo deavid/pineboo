@@ -18,7 +18,6 @@ from io import StringIO
 from lxml import etree
 from pineboolib.dbschema import db_postgresql as pginspect
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from PyQt4.QtCore import QString
 
 class Struct(object):
     pass

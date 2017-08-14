@@ -2,7 +2,7 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-from PyQt4.QtCore import QString
+#from PyQt4.QtCore import QString
 from PyQt4 import QtCore, QtGui
 import pineboolib
 from pineboolib.utils import DefFun
@@ -424,7 +424,7 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def translate(self, group, string):
-        return QString(string)
+        return str(string)
         # return qApp->translate(contexto, s);
 
     """
@@ -641,7 +641,7 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de dias
     """
     def addDays(self, fecha, offset):
-        if isinstance(fecha, str) or isinstance(fecha, QString):
+        if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(fecha))
@@ -655,7 +655,7 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de meses
     """
     def addMonths(self, fecha, offset):
-        if isinstance(fecha, str) or isinstance(fecha, QString):
+        if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(fecha))
@@ -669,7 +669,7 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de años
     """
     def addYears(self, fecha, offset):
-        if isinstance(fecha, str) or isinstance(fecha, QString):
+        if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
