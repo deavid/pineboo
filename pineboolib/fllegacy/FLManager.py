@@ -2,12 +2,12 @@
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from PyQt4 import QtCore
-from PyQt4.QtCore import QString
 from pineboolib import decorators
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery, FLGroupByQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLAction import FLAction
 from pineboolib.utils import filedir
+from lxml import etree
 import os
 
 
@@ -162,9 +162,44 @@ class FLManager(QtCore.QObject):
     @param n Nombre de la consulta de la base de datos que se quiere obtener
     @return Un objeto FLSqlQuery que representa a la consulta que se quiere obtener
     """
-    @decorators.NotImplementedWarn
     def query(self, n, parent = None):
-        return True
+        qryName = "%s.qry" % n
+        qry_ = self.db_.managerModules().contentCached(qryName)
+        
+        if not qry_:
+            return None
+        
+        parser_ = etree.XMLParser(
+            ns_clean=True,
+            encoding="UTF-8",
+            remove_blank_text=True,
+            )
+        
+        
+        root_ = etree.fromstring(qry_, parser_)
+        parent.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
+        parent.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
+        parent.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
+        orderBy_ = None
+        try:
+            orderBy_ = root_.xpath("order/text()")[0].strip(' \t\n\r')
+            parent.setOrderBy(orderBy_)
+        except:
+            a = 1
+            
+        
+        groupXml_ = root_.xpath("group")
+        group_ = []
+        i = 0
+        while i < len(groupXml_):
+            gr = groupXml_[i]
+            if float(gr.xpath("level/text()")[0].strip(' \t\n\r')) == i:
+                #print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
+                parent.addGroup(FLGroupByQuery(i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
+                i = i + 1
+        
+        
+        return parent
     
     """
     Obtiene la definición de una acción a partir de su nombre.
@@ -205,7 +240,7 @@ class FLManager(QtCore.QObject):
         
         if cache:
             modId = self.db_.managerModules().idModuleOfFile(n +".mtd")
-            return os.path.exists(filedir("../tempdata/cache/%s/file.mtd/%s" %(modId, n)))
+            return os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
         
         
         q = FLSqlQuery()
