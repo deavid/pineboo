@@ -74,7 +74,9 @@ class FLTableMetaData(ProjectClass):
                 self.d.compoundKey_.addFieldMD(field.name())
             if field.isPrimaryKey():
                 self.d.primaryKey_ = field.name()
+                
             self.d.fieldList_.append(field)
+            self.d.fieldsNames_.append(field.name())
             
             if field.type() == FLFieldMetaData.Unlock:
                 self.d.fieldsNamesUnlock_.append(field.name())
@@ -600,10 +602,12 @@ class FLTableMetaData(ProjectClass):
             cadena = ", "
         
         for field in self.d.fieldList_:
+            #print("NOMBRE =", field.name())
             listado.append(field.name())
-            cadenaFinal = cadena.join(listado) 
-        
-        return cadenaFinal   
+            #cadenaFinal = cadena.join(listado) 
+        #print("CADENA FINAL", cadenaFinal)
+        #return cadenaFinal
+        return listado   
     
     def fieldListObject(self):
         #print("FiledList count", len(self.d.fieldList_))
@@ -642,7 +646,6 @@ class FLTableMetaData(ProjectClass):
     El orden de los campos de izquierda a derecha es el correspondiente al orden en que
     se han añadido con el método addFieldMD() o addFieldName()
     """
-    @decorators.BetaImplementation
     def fieldsNames(self):
         return self.d.fieldsNames_
 
