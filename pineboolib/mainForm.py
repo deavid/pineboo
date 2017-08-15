@@ -7,12 +7,12 @@ import traceback
 import os.path
 from binascii import unhexlify
 
-from PyQt4 import QtGui, QtCore, uic
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 Qt = QtCore.Qt
 
 from pineboolib.utils import filedir, Struct
 
-class MainForm(QtGui.QWidget):
+class MainForm(QtWidgets.QWidget):
     areas = []
     toolBoxs = []
     tab = 0
@@ -29,8 +29,8 @@ class MainForm(QtGui.QWidget):
         self.ui = uic.loadUi(filedir('forms/mainform.ui'), self)
         
         frameGm = self.frameGeometry()
-        screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
-        centerPoint = QtGui.QApplication.desktop().screenGeometry(screen).center()
+        screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
         
@@ -44,7 +44,7 @@ class MainForm(QtGui.QWidget):
         self.formTab = self.ui.formTab
         self.formTab.setTabsClosable(True)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.connect(self.formTab, QtCore.SIGNAL('tabCloseRequested(int)'), self.closeFormTab)
+        self.formTab.tabCloseRequested[int].connect(self.closeFormTab)
         self.formTab.removeTab(0)
         app_icon = QtGui.QIcon()
         app_icon.addFile(filedir('icons/pineboo-logo-16.png'), QtCore.QSize(16,16))
@@ -79,13 +79,13 @@ class MainForm(QtGui.QWidget):
 
     def addAreaTab(self, area):
         assert area.idarea not in self.areas
-        vl = QtGui.QWidget()
-        vl.layout = QtGui.QVBoxLayout() #layout de la pestaña
+        vl = QtWidgets.QWidget()
+        vl.layout = QtWidgets.QVBoxLayout() #layout de la pestaña
         vl.layout.setSpacing(0)
         vl.layout.setContentsMargins(0, 0, 0, 0)
-        vl.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        vl.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         
-        moduleToolBox = QtGui.QToolBox(self)#toolbox de cada módulo
+        moduleToolBox = QtWidgets.QToolBox(self)#toolbox de cada módulo
 
         self.areas.append(area.idarea)
         self.toolBoxs.append(moduleToolBox)
@@ -104,9 +104,9 @@ class MainForm(QtGui.QWidget):
 
         moduleToolBox = self.toolBoxs[self.areas.index(module.areaid)]
 
-        vBLayout = QtGui.QWidget()
-        vBLayout.layout = QtGui.QVBoxLayout() #layout de cada módulo.
-        vBLayout.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        vBLayout = QtWidgets.QWidget()
+        vBLayout.layout = QtWidgets.QVBoxLayout() #layout de cada módulo.
+        vBLayout.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         vBLayout.layout.setSpacing(0)
         vBLayout.layout.setContentsMargins(0, 0, 0, 0)
@@ -134,7 +134,7 @@ class MainForm(QtGui.QWidget):
         for key in module.mainform.toolbar:
             action = module.mainform.actions[key]
 
-            button = QtGui.QToolButton()
+            button = QtWidgets.QToolButton()
             button.setText(action.text)
             button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
             button.setIconSize(iconsize)
@@ -148,18 +148,18 @@ class MainForm(QtGui.QWidget):
     
     def closeEvent(self, evnt):
         
-        dialog = QtGui.QDialog()
+        dialog = QtWidgets.QDialog()
         dialog.setWindowTitle("Salir de Pineboo")
         dialog.setWindowModality(QtCore.Qt.ApplicationModal)
-        _layout = QtGui.QVBoxLayout()
+        _layout = QtWidgets.QVBoxLayout()
         dialog.setLayout(_layout)
-        buttonBox = QtGui.QDialogButtonBox()
-        OKButton = QtGui.QPushButton("&Aceptar")
-        cancelButton = QtGui.QPushButton("&Cancelar")
+        buttonBox = QtWidgets.QDialogButtonBox()
+        OKButton = QtWidgets.QPushButton("&Aceptar")
+        cancelButton = QtWidgets.QPushButton("&Cancelar")
         
-        buttonBox.addButton(OKButton, QtGui.QDialogButtonBox.AcceptRole)
-        buttonBox.addButton(cancelButton, QtGui.QDialogButtonBox.RejectRole)
-        label = QtGui.QLabel("¿ Desea salir ?")
+        buttonBox.addButton(OKButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        buttonBox.addButton(cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
+        label = QtWidgets.QLabel("¿ Desea salir ?")
         _layout.addWidget(label)
         _layout.addWidget(buttonBox)
         OKButton.clicked.connect(dialog.accept)

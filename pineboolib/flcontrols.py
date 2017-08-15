@@ -3,7 +3,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from PyQt4 import QtGui, QtCore # , uic
+from PyQt5 import QtCore, QtWidgets #, QtGui, QtWidgets, uic
 
 import pineboolib
 #from pineboolib.qsaglobals import ustr
@@ -27,7 +27,7 @@ def ustr1(t):
 def ustr(*t1):
     return "".join([ ustr1(t) for t in t1 ])
 
-class QLayoutWidget(QtGui.QWidget):
+class QLayoutWidget(QtWidgets.QWidget):
     pass
 
 class ProjectClass(QtCore.QObject):
@@ -39,7 +39,7 @@ class ProjectClass(QtCore.QObject):
         # agregamos soporte de iteración
         return iter(self.__dict__.keys())        
 
-class QCheckBox(QtGui.QCheckBox):
+class QCheckBox(QtWidgets.QCheckBox):
     def __getattr__(self, name): return DefFun(self, name)
 
     @QtCore.pyqtProperty(int)
@@ -50,26 +50,26 @@ class QCheckBox(QtGui.QCheckBox):
     def checked(self, v):
         self.setCheckState(v)
 
-class QLabel(QtGui.QLabel):
+class QLabel(QtWidgets.QLabel):
     def setText(self, text):
         if not isinstance(text, str): text = str(text)
-        QtGui.QLabel.setText(self, text)
+        QtWidgets.QLabel.setText(self, text)
 
 
-class QComboBox(QtGui.QComboBox):
+class QComboBox(QtWidgets.QComboBox):
     def __getattr__(self, name): return DefFun(self, name)
     @property
     def currentItem(self): return self.currentIndex
 
     def setCurrentItem(self, i): return self.setCurrentIndex(i)
 
-class QButtonGroup(QtGui.QGroupBox):
+class QButtonGroup(QtWidgets.QGroupBox):
     def __getattr__(self, name): return DefFun(self, name)
     @property
     def selectedId(self): return 0
 
 
-class ProgressDialog(QtGui.QWidget):
+class ProgressDialog(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super(ProgressDialog,self).__init__(*args, **kwargs)
         self.title = "Untitled"
@@ -92,26 +92,26 @@ class ProgressDialog(QtGui.QWidget):
         QtCore.QCoreApplication.processEvents(QtCore.QEventLoop.ExcludeUserInputEvents)
 
 
-class FLTable(QtGui.QTableWidget):
+class FLTable(QtWidgets.QTableWidget):
     def __getattr__(self, name): return DefFun(self, name)
 
 
-class QTabWidget(QtGui.QTabWidget):
+class QTabWidget(QtWidgets.QTabWidget):
     def setTabEnabled(self, tab, enabled):
         #print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
-        if isinstance(tab, int): return QtGui.QTabWidget.setTabEnabled(self, tab, enabled)
+        if isinstance(tab, int): return QtWidgets.QTabWidget.setTabEnabled(self, tab, enabled)
         if isinstance(tab, str): 
-            tabs = [ str(QtGui.QTabWidget.tabText(self, i)).lower().replace("&","") for i in range(self.count()) ]
+            tabs = [ str(QtWidgets.QTabWidget.tabText(self, i)).lower().replace("&","") for i in range(self.count()) ]
             try:
                 idx = tabs.index(tab.lower())              
-                return QtGui.QTabWidget.setTabEnabled(self, idx, enabled)
+                return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
             except ValueError:
                 print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled), tabs)
                 return False
         print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
 
 
-class QLineEdit(QtGui.QLineEdit):
+class QLineEdit(QtWidgets.QLineEdit):
     def __init__(self, *args, **kwargs):
         super(QLineEdit, self).__init__(*args,**kwargs)
         class TextEmul:
@@ -134,7 +134,7 @@ class QLineEdit(QtGui.QLineEdit):
     def defaultFunction(self, *args, **kwargs):
         print("flcontrols.QLineEdit: llamada a método no implementado", args,kwargs)
 
-class QListView(QtGui.QListView):
+class QListView(QtWidgets.QListView):
     def __init__(self, *args, **kwargs):
         super(QListView, self).__init__(*args, **kwargs)
 
@@ -145,7 +145,7 @@ class QListView(QtGui.QListView):
     def defaultFunction(self, *args, **kwargs):
         print("flcontrols.QListView: llamada a método no implementado", args,kwargs)
 
-class QPushButton(QtGui.QPushButton):
+class QPushButton(QtWidgets.QPushButton):
     @property
     def pixmap(self):
         return self.icon()

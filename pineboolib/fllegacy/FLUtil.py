@@ -3,7 +3,7 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 #from PyQt4.QtCore import QString
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -921,7 +921,7 @@ class FLUtil(ProjectClass):
     @param tS Número total de pasos a realizar
     """
     def createProgressDialog(self, title, steps, id_ = "default"):
-        pd_widget = QtGui.QProgressDialog(title, self.translate("scripts","Cancelar"),0,steps)
+        pd_widget = QtWidgets.QProgressDialog(title, self.translate("scripts","Cancelar"),0,steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
 
     """

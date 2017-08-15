@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators

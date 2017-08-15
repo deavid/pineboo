@@ -5,8 +5,8 @@ from pineboolib import decorators, fllegacy
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import DefFun
 
-from PyQt4 import QtCore,QtGui
-from PyQt4.QtCore import QVariant
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QVariant
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
@@ -15,6 +15,12 @@ from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib, traceback, weakref
+
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
 
 class Struct(object):
     pass
@@ -723,7 +729,7 @@ class FLSqlCursor(ProjectClass):
 
             if getattr(self._action,"table",None):
                 self.d._model = CursorTableModel(self._action, self._prj)
-                self._selection = QtGui.QItemSelectionModel(self.model())
+                self._selection = QtCore.QItemSelectionModel(self.model())
                 self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
                 self._currentregister = self._selection.currentIndex().row()
                 self.d.metadata_ = self.db().manager().metadata(self._action.table)
@@ -1062,12 +1068,12 @@ class FLSqlCursor(ProjectClass):
             return
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
-            QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtGui.QMessageBox.Ok,0,0)
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtWidgets.QMessageBox.Ok,0,0)
             return
 
         if m == self.Del:
-            res = QtGui.QMessageBox.warning(QtGui.qApp.focusWidget(), "Aviso","El registro activo será borrado. ¿ Está seguro ?",QtGui.QMessageBox.Ok, QtGui.QMessageBox.No | QtGui.QMessageBox.Default| QtGui.QMessageBox.Escape)
-            if res == QtGui.QMessageBox.No:
+            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso","El registro activo será borrado. ¿ Está seguro ?",QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default| QtWidgets.QMessageBox.Escape)
+            if res == QtWidgets.QMessageBox.No:
                 return
 
             self.transaction()
@@ -1094,8 +1100,8 @@ class FLSqlCursor(ProjectClass):
             return
 
         if not self._action.formRecord():
-            QtGui.QMessageBox.Warning(QtGui.qApp.focusWidget(), "Aviso","No hay definido ningún formulario para manejar "
-         "registros de esta tabla : %s" % str(self.curName()) ,QtGui.QMessageBox.Ok,0,0)
+            QtWidgets.QMessageBox.Warning(QtWidgets.QApplication.focusWidget(), "Aviso","No hay definido ningún formulario para manejar "
+         "registros de esta tabla : %s" % str(self.curName()) ,QtWidgets.QMessageBox.Ok,0,0)
             return
 
         if self.refreshBuffer():
@@ -1519,7 +1525,8 @@ class FLSqlCursor(ProjectClass):
 
     def selection(self):
         return self._selection
-
+    
+    @QtCore.pyqtSlot(QtCore.QModelIndex, QtCore.QModelIndex)
     @QtCore.pyqtSlot(int, int)
     @QtCore.pyqtSlot(int)
     def selection_currentRowChanged(self, current, previous = None):
@@ -1872,8 +1879,8 @@ class FLSqlCursor(ProjectClass):
         if self.d._currentregister == row: return False
         topLeft = self.d._model.index(row,0)
         bottomRight = self.d._model.index(row,self.d._model.cols-1)
-        new_selection = QtGui.QItemSelection(topLeft, bottomRight)
-        self._selection.select(new_selection, QtGui.QItemSelectionModel.ClearAndSelect)
+        new_selection = QtCore.QItemSelection(topLeft, bottomRight)
+        self._selection.select(new_selection, QtCore.QItemSelectionModel.ClearAndSelect)
         self.d._currentregister = row
         #self.d._current_changed.emit(self.at())
         if row < self.d._model.rows and row >= 0: return True
@@ -2175,7 +2182,7 @@ class FLSqlCursor(ProjectClass):
 
         if self.d.db_.interactiveGUI() and self.d.db_.canDetectLocks() and (checkLocks or self.d.metadata_.detectLocks()):
             self.checkRisksLocks()
-            if self.d.inRisksLocks_ and QtGui.QMessageBox.No == QtGui.QMessageBox.warning(None, "Bloqueo inminente", "Los registros que va a modificar están bloqueados actualmente,\nsi continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n\n¿ Desa continuar aunque exista riesgo de bloqueo ?", QtGui.QMessageBox.Ok, QtGui.QMessageBox.No | QtGui.QMessageBox.Default | QtGui.QMessageBox.Escape):
+            if self.d.inRisksLocks_ and QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(None, "Bloqueo inminente", "Los registros que va a modificar están bloqueados actualmente,\nsi continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n\n¿ Desa continuar aunque exista riesgo de bloqueo ?", QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape):
                 return False
 
         if not self.checkIntegrity():
@@ -2360,11 +2367,11 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def commitBufferCursorRelation(self):
         ok = True
-        activeWid = QtGui.qApp.activeModalWidget()
+        activeWid = QtWidgets.QApplication.activeModalWidget()
         if not activeWid:
-            activeWid = QtGui.qApp.activePopupWidget()
+            activeWid = QtWidgets.QApplication.activePopupWidget()
         if not activeWid:
-            activeWid = QtGui.qApp.activeWindow()
+            activeWid = QtWidgets.QApplication.activeWindow()
 
         activeWidEnabled = False
         if activeWid:

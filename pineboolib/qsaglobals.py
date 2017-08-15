@@ -4,7 +4,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import object
 import re
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 import traceback
@@ -87,7 +87,9 @@ def connect(sender, signal, receiver, slot):
         try:
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
-            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), proxy_fn(weak_fn, weak_receiver, slot))
+            sl_name = signal.replace("()","")
+            
+            getattr(sender, sl_name).connect(proxy_fn(weak_fn, weak_receiver, slot))
         except RuntimeError as e:
             print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
             print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
@@ -98,20 +100,22 @@ def connect(sender, signal, receiver, slot):
         remote_fn = getattr(remote_obj, m.group(2), None)
         if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
-            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), remote_fn)
+            sg_name = signal.replace("()", "")
+            sg_name = sg_name.replace("(QString)", "")
+            getattr(sender, sg_name).connect(remote_fn)
         except RuntimeError as e:
-            print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
+            print("ERROR Connecting:", sender, sg_name, remote_fn)
             print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
             return False
 
     else:
         if isinstance(receiver, QtCore.QObject):
-            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))
+            sender.signal.connect(receiver.slot)
         else:
             print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." % (sender, signal, receiver, slot))
     return True
 
-QMessageBox = QtGui.QMessageBox
+QMessageBox = QtWidgets.QMessageBox
 
 class MessageBox(QMessageBox):
     @classmethod
@@ -156,8 +160,8 @@ class MessageBox(QMessageBox):
 class Input(object):
     @classmethod
     def getText(cls, question, prevtxt, title):
-        text, ok = QtGui.QInputDialog.getText(None, title,
-                question, QtGui.QLineEdit.Normal, prevtxt)
+        text, ok = QtWidgets.QInputDialog.getText(None, title,
+                question, QtWidgets.QLineEdit.Normal, prevtxt)
         if not ok: return None
         return text
 

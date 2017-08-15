@@ -3,11 +3,11 @@
 from __future__ import unicode_literals
 from builtins import str
 import os
-from PyQt4 import QtGui, QtCore, uic
+from PyQt5 import QtWidgets, QtCore, uic
 
 from pineboolib.utils import filedir
 
-class DlgConnect(QtGui.QWidget):
+class DlgConnect(QtWidgets.QWidget):
     ruta = ""
     username = ""
     password = ""
@@ -21,8 +21,8 @@ class DlgConnect(QtGui.QWidget):
         self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
         
         frameGm = self.frameGeometry()
-        screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
-        centerPoint = QtGui.QApplication.desktop().screenGeometry(screen).center()
+        screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
         

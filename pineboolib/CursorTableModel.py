@@ -5,7 +5,7 @@ from pineboolib import decorators
 from pineboolib.qsaglobals import ustr
 import pineboolib
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData

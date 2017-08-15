@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery, FLGroupByQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
@@ -21,6 +21,12 @@ mediante objetos FLTableMetaData de una tabla dada.
 
 @author InfoSiAL S.L.
 """
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
+
 class FLManager(QtCore.QObject):
     
     listTables_ = [] #Lista de las tablas de la base de datos, para optimizar lecturas

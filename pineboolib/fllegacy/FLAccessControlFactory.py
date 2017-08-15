@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore,QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
+
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
 
 class FLAccessControlFactory():
     
@@ -28,14 +34,14 @@ class FLAccessControlFactory():
         if not obj:
             print("NO OBJ")
         
-        if obj == QtGui.QMainWindow:
+        if obj == QtWidgets.QMainWindow:
             return "mainwindow"
         if obj == FLTableMetaData:
             return "table"
         if obj == FLFormDB:
             return "form"
         
-        return QtCore.QString("")
+        return QString("")
     
         
 class FLAccessControlMainWindow():
@@ -99,7 +105,7 @@ class FLAccessControlForm():
     @decorators.BetaImplementation
     def __init__(self, obj):
         cg = QtGui.QcolorGroup()
-        bd = QtGui.Qcolor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QColourGroup.Background))
+        bd = QtGui.Qcolor(QApplication.palette().color(QtGui.QPalette.Active, QtGui.QColourGroup.Background))
         cg.setColor(QtGui.QColourGroup.Foreground, bg)
         cg.setColor(QtGui.QColourGroup.Text, bg)
         cg.setColor(QtGui.QColourGroup.ButtonText, bg)
@@ -159,9 +165,9 @@ class FLAccessControlForm():
         it = self.acosPerms_
         
         for i in range(it.current()):
-            w = QtGui.QWidget(fm.child(it.currentKey(), "QWidget"))
+            w = QtWidgets.QWidget(fm.child(it.currentKey(), "QWidget"))
             if w:
-                perm = QtCore.QString(it)
+                perm = QString(it)
                 if perm == "-w" or perm == "--":
                     w.setPalette(pal)
                     w.setDisabled(True)
@@ -272,7 +278,7 @@ class FLAccessControlTable():
                 permR = 'r'
             if field.editable():
                 permW = 'w'
-            self.acosPerms_.replace(field.name(), QtCore.QString(permR + permW))
+            self.acosPerms_.replace(field.name(), QString(permR + permW))
   
     
            

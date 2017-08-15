@@ -1,5 +1,6 @@
 #!/usr/bin/python3 -u
 # -*# -*- coding: utf-8 -*-
+from PyQt5 import QtWidgets
 
 
 
@@ -37,11 +38,11 @@ try:
     #sip.setapi('QVariant', 1)
     #sip.setapi('QString', 1)
 
-    from PyQt4 import QtGui, QtCore, uic
+    from PyQt5 import QtGui, QtCore, uic
 except ImportError:
     print(traceback.format_exc())
     print()
-    print("HINT: Instale el paquete python3-pyqt4 e intente de nuevo")
+    print("HINT: Instale el paquete python3-pyqt5 e intente de nuevo")
     print()
     sys.exit(32)
 
@@ -121,10 +122,13 @@ def main():
                       action="store_true", dest="preload", default=False,
                       help="Load everything. Then exit. (Populates Pineboo cache)")
 
+    
+    
+    
+    app = QtWidgets.QApplication(sys.argv)
+    
     (options, args) = parser.parse_args()
     
-    
-    app = QtGui.QApplication(sys.argv)
     noto_fonts = [
         "NotoSans-BoldItalic.ttf",
         "NotoSans-Bold.ttf",
@@ -135,11 +139,11 @@ def main():
         QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
     
                                                
-    QtGui.QApplication.setStyle("QtCurve")
+    QtWidgets.QApplication.setStyle("QtCurve")
     font = QtGui.QFont('Noto Sans',9)
     font.setBold(False)
     font.setItalic(False)
-    QtGui.QApplication.setFont(font)
+    QtWidgets.QApplication.setFont(font)
         
     pineboolib.no_python_cache = options.no_python_cache
 
@@ -186,13 +190,13 @@ def main():
         #Cargando spashscreen
     # Create and display the splash screen
     splash_pix = QtGui.QPixmap(filedir("../share/splashscreen/splash_%s.png" % project.dbname))
-    splash = QtGui.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
     
     frameGm = splash.frameGeometry()
-    screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
-    centerPoint = QtGui.QApplication.desktop().screenGeometry(screen).center()
+    screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+    centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
     frameGm.moveCenter(centerPoint)
     splash.move(frameGm.topLeft())
 
@@ -258,7 +262,7 @@ def main():
             splash.showMessage("Listo ...")
             QtCore.QTimer.singleShot(2000, splash.hide)
             
-            ret = app.exec_()
+        ret = app.exec_()
         mainForm.mainWindow = None
         del main_window
         del project

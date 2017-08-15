@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 import os
 import datetime, weakref
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 # Cargar toda la API de Qt para que sea visible.
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
@@ -125,11 +125,11 @@ def FLTableDB(*args):
     if not args: return None
     return FLTableDB_Legacy.FLTableDB(*args)
 
-FLListViewItem = QtGui.QListView
+FLListViewItem = QtWidgets.QListView
 QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor
-QDateEdit = QtGui.QDateEdit
+QDateEdit = QtWidgets.QDateEdit
 
 File = QtCore.QFile
 
@@ -197,7 +197,7 @@ def check_gc_referrers(typename, w_obj, name):
     threading.Thread(target = checkfn).start()
     
 
-class FormDBWidget(QtGui.QWidget):
+class FormDBWidget(QtWidgets.QWidget):
 
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
@@ -228,7 +228,7 @@ class FormDBWidget(QtGui.QWidget):
             event.ignore()
     def child(self, childName):
         try:
-            ret = self.findChild(QtGui.QWidget, childName)
+            ret = self.findChild(QtWidgets.QWidget, childName)
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
@@ -269,7 +269,7 @@ def FLFormSearchDB(name):
 class Date(QtCore.QDate):
     pass
 
-class Dialog(QtGui.QDialog):
+class Dialog(QtWidgets.QDialog):
     _layout = None
     buttonBox = None
     OKButtonText = None
@@ -282,13 +282,13 @@ class Dialog(QtGui.QDialog):
         super(Dialog, self).__init__()
         self.setWindowTitle(title)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
-        self._layout = QtGui.QVBoxLayout()
+        self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
-        self.buttonBox = QtGui.QDialogButtonBox()
-        self.OKButton = QtGui.QPushButton("&Aceptar")
-        self.cancelButton = QtGui.QPushButton("&Cancelar")
-        self.buttonBox.addButton(self.OKButton, QtGui.QDialogButtonBox.AcceptRole)
-        self.buttonBox.addButton(self.cancelButton, QtGui.QDialogButtonBox.RejectRole)
+        self.buttonBox = QtWidgets.QDialogButtonBox()
+        self.OKButton = QtWidgets.QPushButton("&Aceptar")
+        self.cancelButton = QtWidgets.QPushButton("&Cancelar")
+        self.buttonBox.addButton(self.OKButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
         self.OKButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
 
@@ -305,16 +305,16 @@ class Dialog(QtGui.QDialog):
 
         return super(Dialog, self).exec_()
 
-class GroupBox(QtGui.QGroupBox):
+class GroupBox(QtWidgets.QGroupBox):
     def __init__(self):
         super(GroupBox, self).__init__()
-        self._layout = QtGui.QHBoxLayout()
+        self._layout = QtWidgets.QHBoxLayout()
         self.setLayout(self._layout)
 
     def add(self, _object):     
         self._layout.addWidget(_object)
 
-class CheckBox(QtGui.QCheckBox):
+class CheckBox(QtWidgets.QCheckBox):
     pass
 
    

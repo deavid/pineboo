@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import Qt
+from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 from pineboolib import decorators
 from pineboolib.fllegacy.FLDataTable import FLDataTable, FLCheckBox
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
@@ -10,7 +10,7 @@ from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.qsatype import QDateEdit
+#from pineboolib.qsatype import QDateEdit as QDateEdit
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.flcontrols import QComboBox
 from pineboolib.fllegacy.FLFieldDB import FLLineEdit, FLDoubleValidator,\
@@ -20,7 +20,7 @@ from pineboolib.utils import DefFun, filedir
 
 DEBUG = False
 
-class FLTableDB(QtGui.QWidget):
+class FLTableDB(QtWidgets.QWidget):
 
     """
     PLUGIN que contiene una tabla de la base de datos.
@@ -123,7 +123,7 @@ class FLTableDB(QtGui.QWidget):
             return
 
         self.cursor_ = self.topWidget.cursor_
-        self.setFont(QtGui.qApp.font())
+        self.setFont(QtWidgets.QApplication.font())
 
         if not self._name:
             self.setName("FLTableDB")
@@ -585,7 +585,7 @@ class FLTableDB(QtGui.QWidget):
                 self.comboBoxFieldToSearch.popup()
                 return True
 
-        if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, QtGui.QLineEdit):
+        if ev.type() == QtCore.QEvent.KeyPress and isinstance(obj, QtWidgets.QLineEdit):
             k = ev
 
             if k.key() == QtCore.Qt.Key_Enter or k.key() == QtCore.Qt.Key_Return:
@@ -608,7 +608,7 @@ class FLTableDB(QtGui.QWidget):
             if k.text() == "'" or k.text() == "\\":
                 return True
 
-        if isinstance(obj, FLDataTable) or isinstance(obj, QtGui.QLineEdit):
+        if isinstance(obj, FLDataTable) or isinstance(obj, QtWidgets.QLineEdit):
             return False
         else:
             return super(FLTableDB, self).eventFilter(obj, ev)
@@ -738,16 +738,16 @@ class FLTableDB(QtGui.QWidget):
             print("ERROR: tableRecords - llamada doble")
             return
 
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed ,QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed ,QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHeightForWidth(True)
 
-        self.dataLayout = QtGui.QHBoxLayout() #Contiene tabData y tabFilters
-        self.tabData = QtGui.QVBoxLayout() # contiene data
-        self.tabFilter = QtGui.QVBoxLayout() #contiene filtros
-        self.buttonsLayout = QtGui.QVBoxLayout() # Contiene botones lateral (datos, filtros, odf)
-        self.masterLayout = QtGui.QVBoxLayout() #Contiene todos los layouts
+        self.dataLayout = QtWidgets.QHBoxLayout() #Contiene tabData y tabFilters
+        self.tabData = QtWidgets.QVBoxLayout() # contiene data
+        self.tabFilter = QtWidgets.QVBoxLayout() #contiene filtros
+        self.buttonsLayout = QtWidgets.QVBoxLayout() # Contiene botones lateral (datos, filtros, odf)
+        self.masterLayout = QtWidgets.QVBoxLayout() #Contiene todos los layouts
         
-        self.pbData = QtGui.QPushButton(self)
+        self.pbData = QtWidgets.QPushButton(self)
         self.pbData.setSizePolicy(sizePolicy)
         self.pbData.setMinimumSize(22, 22)
         self.pbData.setFocusPolicy(Qt.NoFocus)
@@ -758,7 +758,7 @@ class FLTableDB(QtGui.QWidget):
         self.buttonsLayout.addWidget(self.pbData)
         self.pbData.clicked.connect(self.activeTabData)
         
-        self.pbFilter = QtGui.QPushButton(self)
+        self.pbFilter = QtWidgets.QPushButton(self)
         self.pbFilter.setSizePolicy(sizePolicy)
         self.pbFilter.setMinimumSize(22, 22)
         self.pbFilter.setFocusPolicy(Qt.NoFocus)
@@ -770,7 +770,7 @@ class FLTableDB(QtGui.QWidget):
         self.pbFilter.clicked.connect(self.activeTabFilter)     
 
 
-        self.pbOdf = QtGui.QPushButton(self)
+        self.pbOdf = QtWidgets.QPushButton(self)
         self.pbOdf.setSizePolicy(sizePolicy)
         self.pbOdf.setMinimumSize(22, 22)
         self.pbOdf.setFocusPolicy(Qt.NoFocus)
@@ -781,7 +781,7 @@ class FLTableDB(QtGui.QWidget):
         self.buttonsLayout.addWidget(self.pbOdf)
         self.pbOdf.clicked.connect(self.exportToOds)
         
-        self.pbClean = QtGui.QPushButton(self)
+        self.pbClean = QtWidgets.QPushButton(self)
         self.pbClean.setSizePolicy(sizePolicy)
         self.pbClean.setMinimumSize(22, 22)
         self.pbClean.setFocusPolicy(Qt.NoFocus)
@@ -792,20 +792,20 @@ class FLTableDB(QtGui.QWidget):
         #self.tabFilter.addWidget(self.pbClean)
         self.pbClean.clicked.connect(self.tdbFilterClear)
         
-        spacer = QtGui.QSpacerItem(20,20, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        spacer = QtWidgets.QSpacerItem(20,20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.buttonsLayout.addItem(spacer)
         
         
-        self.comboBoxFieldToSearch = QtGui.QComboBox()
-        self.comboBoxFieldToSearch2 = QtGui.QComboBox()
-        self.lineEditSearch = QtGui.QLineEdit()
-        label1 = QtGui.QLabel()
-        label2 = QtGui.QLabel()
+        self.comboBoxFieldToSearch = QtWidgets.QComboBox()
+        self.comboBoxFieldToSearch2 = QtWidgets.QComboBox()
+        self.lineEditSearch = QtWidgets.QLineEdit()
+        label1 = QtWidgets.QLabel()
+        label2 = QtWidgets.QLabel()
 
         label1.setText("Buscar")
         label2.setText("en")
 
-        self.tabControlLayout = QtGui.QHBoxLayout()
+        self.tabControlLayout = QtWidgets.QHBoxLayout()
 
         self.tabControlLayout.addWidget(label1)
         self.tabControlLayout.addWidget(self.lineEditSearch)

@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 from pineboolib.fllegacy import FLTranslations
 from pineboolib import decorators
+
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
 
 class FLTranslator():
     
@@ -29,8 +35,8 @@ class FLTranslator():
     """
     @decorators.BetaImplementation
     def loadTsContent(self, key):
-        tsFile = QtCore.QString(self.AQ_DISKCACHE_FILEPATH(key))
-        qmFile = QtCore.QString(self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm")
+        tsFile = QString(self.AQ_DISKCACHE_FILEPATH(key))
+        qmFile = QString(self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm")
         
         if QtCore.QFile.exist(qmFile):
             if tsFile.isEmpty():

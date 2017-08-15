@@ -1,0 +1,2453 @@
+<Source>
+  <DeclarationBlock mode="VAR">
+    <Variable name="util">
+      <Value>
+        <New>
+          <FunctionCall name="FLUtil"/>
+        </New>
+      </Value>
+    </Variable>
+  </DeclarationBlock>
+  <Function name="main">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="continuar">
+          <Value>
+            <Member>
+              <Identifier name="MessageBox"/>
+              <FunctionCall name="warning">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Antes de cargar un m&#243;dulo aseg&#250;rese de tener una copia de seguridad de todos los datos,\ny de que no hay ningun otro usuario conectado a la base de datos mientras se realiza la carga.\n\n&#191;Desea continuar?"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="Yes"/>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="No"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Expression>
+            <Identifier name="continuar"/>
+            <Compare type="EQ"/>
+            <Member>
+              <Identifier name="MessageBox"/>
+              <Identifier name="No"/>
+            </Member>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN"/>
+        </Source>
+      </If>
+      <DeclarationBlock mode="VAR">
+        <Variable name="nombreFichero">
+          <Value>
+            <Member>
+              <Identifier name="FileDialog"/>
+              <FunctionCall name="getOpenFileName">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="modfiles(*.mod)"/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Elegir Fichero"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <Identifier name="nombreFichero"/>
+          </Value>
+        </Condition>
+        <Source>
+          <DeclarationBlock mode="VAR">
+            <Variable name="fichero">
+              <Value>
+                <New>
+                  <FunctionCall name="File">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="nombreFichero"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Value>
+                <OpUnary type="LNOT">
+                  <Member>
+                    <Identifier name="formRecordflmodules"/>
+                    <FunctionCall name="aceptarLicenciaDelModulo">
+                      <CallArguments>
+                        <Expression>
+                          <Member>
+                            <Identifier name="fichero"/>
+                            <Identifier name="path"/>
+                          </Member>
+                          <OpMath type="PLUS"/>
+                          <Constant delim="&quot;" type="String" value="/"/>
+                        </Expression>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </OpUnary>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="MessageBox"/>
+                  <FunctionCall name="critical">
+                    <CallArguments>
+                      <Value>
+                        <Member>
+                          <Identifier name="util"/>
+                          <FunctionCall name="translate">
+                            <CallArguments>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="scripts"/>
+                              </Value>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="Imposible cargar el m&#243;dulo.\nLicencia del m&#243;dulo no aceptada."/>
+                              </Value>
+                            </CallArguments>
+                          </FunctionCall>
+                        </Member>
+                      </Value>
+                      <Value>
+                        <Member>
+                          <Identifier name="MessageBox"/>
+                          <Identifier name="Ok"/>
+                        </Member>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <InstructionFlow type="RETURN"/>
+            </Source>
+          </If>
+          <DeclarationBlock mode="VAR">
+            <Variable name="modulo"/>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="descripcion"/>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="area"/>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="desArea"/>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="version"/>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="nombreIcono"/>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="versionMinimaFL"/>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="dependencias">
+              <Value>
+                <Constant>
+                  <list_constant arg00="LBRACKET" arg01="callargs" arg02="RBRACKET"/>
+                </Constant>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <InstructionCall>
+            <Member>
+              <Identifier name="fichero"/>
+              <FunctionCall name="open">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="File"/>
+                      <Identifier name="ReadOnly"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <DeclarationBlock mode="VAR">
+            <Variable name="f">
+              <Value>
+                <Member>
+                  <Identifier name="fichero"/>
+                  <FunctionCall name="read"/>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="xmlModule">
+              <Value>
+                <New>
+                  <FunctionCall name="FLDomDocument"/>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <Identifier name="xmlModule"/>
+                  <FunctionCall name="setContent">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="f"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <DeclarationBlock mode="VAR">
+                <Variable name="nodeModule">
+                  <Value>
+                    <Member>
+                      <Identifier name="xmlModule"/>
+                      <FunctionCall name="namedItem">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="MODULE"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <If>
+                <Condition>
+                  <Value>
+                    <OpUnary type="LNOT">
+                      <Identifier name="nodeModule"/>
+                    </OpUnary>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <FunctionCall name="critical">
+                        <CallArguments>
+                          <Value>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="Error en la carga del fichero xml .mod"/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                          </Value>
+                          <Value>
+                            <Member>
+                              <Identifier name="MessageBox"/>
+                              <Identifier name="Ok"/>
+                            </Member>
+                          </Value>
+                          <Value>
+                            <Member>
+                              <Identifier name="MessageBox"/>
+                              <Identifier name="NoButton"/>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+              </If>
+              <InstructionUpdate>
+                <Identifier name="modulo"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="nodeModule"/>
+                    <FunctionCall name="namedItem">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="name"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <FunctionCall name="toElement"/>
+                    <FunctionCall name="text"/>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Identifier name="descripcion"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="nodeModule"/>
+                    <FunctionCall name="namedItem">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="alias"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <FunctionCall name="toElement"/>
+                    <FunctionCall name="text"/>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Identifier name="area"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="nodeModule"/>
+                    <FunctionCall name="namedItem">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="area"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <FunctionCall name="toElement"/>
+                    <FunctionCall name="text"/>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Identifier name="desArea"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="nodeModule"/>
+                    <FunctionCall name="namedItem">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="areaname"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <FunctionCall name="toElement"/>
+                    <FunctionCall name="text"/>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Identifier name="version"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="nodeModule"/>
+                    <FunctionCall name="namedItem">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="version"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <FunctionCall name="toElement"/>
+                    <FunctionCall name="text"/>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Identifier name="nombreIcono"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="nodeModule"/>
+                    <FunctionCall name="namedItem">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="icon"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <FunctionCall name="toElement"/>
+                    <FunctionCall name="text"/>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <If>
+                <Condition>
+                  <Value>
+                    <Member>
+                      <Identifier name="nodeModule"/>
+                      <FunctionCall name="namedItem">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="flversion"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionUpdate>
+                    <Identifier name="versionMinimaFL"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Value>
+                      <Member>
+                        <Identifier name="nodeModule"/>
+                        <FunctionCall name="namedItem">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="flversion"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                        <FunctionCall name="toElement"/>
+                        <FunctionCall name="text"/>
+                      </Member>
+                    </Value>
+                  </InstructionUpdate>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Value>
+                    <Member>
+                      <Identifier name="nodeModule"/>
+                      <FunctionCall name="namedItem">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="dependencies"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Condition>
+                <Source>
+                  <DeclarationBlock mode="VAR">
+                    <Variable name="nodeDepend">
+                      <Value>
+                        <Member>
+                          <Identifier name="xmlModule"/>
+                          <FunctionCall name="elementsByTagName">
+                            <CallArguments>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="dependency"/>
+                              </Value>
+                            </CallArguments>
+                          </FunctionCall>
+                        </Member>
+                      </Value>
+                    </Variable>
+                  </DeclarationBlock>
+                  <For>
+                    <ForInitialize>
+                      <Variable name="i">
+                        <Value>
+                          <Constant type="Number" value="0"/>
+                        </Value>
+                      </Variable>
+                    </ForInitialize>
+                    <ForCompare>
+                      <Expression>
+                        <Identifier name="i"/>
+                        <Compare type="LT"/>
+                        <Member>
+                          <Identifier name="nodeDepend"/>
+                          <FunctionCall name="length"/>
+                        </Member>
+                      </Expression>
+                    </ForCompare>
+                    <ForIncrement>
+                      <InlineUpdate type="PLUSPLUS" mode="read-update">
+                        <Identifier name="i"/>
+                      </InlineUpdate>
+                    </ForIncrement>
+                    <Source>
+                      <InstructionUpdate>
+                        <ArrayMember>
+                          <Identifier name="dependencias"/>
+                          <Value>
+                            <Identifier name="i"/>
+                          </Value>
+                        </ArrayMember>
+                        <OpUpdate type="EQUALS"/>
+                        <Value>
+                          <Member>
+                            <Identifier name="nodeDepend"/>
+                            <FunctionCall name="item">
+                              <CallArguments>
+                                <Value>
+                                  <Identifier name="i"/>
+                                </Value>
+                              </CallArguments>
+                            </FunctionCall>
+                            <FunctionCall name="toElement"/>
+                            <FunctionCall name="text"/>
+                          </Member>
+                        </Value>
+                      </InstructionUpdate>
+                    </Source>
+                  </For>
+                </Source>
+              </If>
+            </Source>
+            <Else>
+              <Source>
+                <DeclarationBlock mode="VAR">
+                  <Variable name="aF">
+                    <Value>
+                      <Member>
+                        <Identifier name="f"/>
+                        <FunctionCall name="split">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="\n"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Member>
+                    </Value>
+                  </Variable>
+                </DeclarationBlock>
+                <InstructionUpdate>
+                  <Identifier name="modulo"/>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <FunctionCall name="dameValor">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="aF"/>
+                            <Value>
+                              <Constant type="Number" value="0"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionUpdate>
+                  <Identifier name="descripcion"/>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <FunctionCall name="dameValor">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="aF"/>
+                            <Value>
+                              <Constant type="Number" value="1"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionUpdate>
+                  <Identifier name="area"/>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <FunctionCall name="dameValor">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="aF"/>
+                            <Value>
+                              <Constant type="Number" value="2"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionUpdate>
+                  <Identifier name="desArea"/>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <FunctionCall name="dameValor">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="aF"/>
+                            <Value>
+                              <Constant type="Number" value="3"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionUpdate>
+                  <Identifier name="version"/>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <FunctionCall name="dameValor">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="aF"/>
+                            <Value>
+                              <Constant type="Number" value="4"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionUpdate>
+                  <Identifier name="nombreIcono"/>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <FunctionCall name="dameValor">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="aF"/>
+                            <Value>
+                              <Constant type="Number" value="5"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Value>
+                </InstructionUpdate>
+                <If>
+                  <Condition>
+                    <Expression>
+                      <Member>
+                        <Identifier name="aF"/>
+                        <Identifier name="length"/>
+                      </Member>
+                      <Compare type="GT"/>
+                      <Constant type="Number" value="6"/>
+                    </Expression>
+                  </Condition>
+                  <Source>
+                    <InstructionUpdate>
+                      <Identifier name="versionMinimaFL"/>
+                      <OpUpdate type="EQUALS"/>
+                      <Value>
+                        <FunctionCall name="dameValor">
+                          <CallArguments>
+                            <Value>
+                              <ArrayMember>
+                                <Identifier name="aF"/>
+                                <Value>
+                                  <Constant type="Number" value="6"/>
+                                </Value>
+                              </ArrayMember>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                      </Value>
+                    </InstructionUpdate>
+                  </Source>
+                </If>
+                <If>
+                  <Condition>
+                    <Expression>
+                      <Member>
+                        <Identifier name="aF"/>
+                        <Identifier name="length"/>
+                      </Member>
+                      <Compare type="GT"/>
+                      <Constant type="Number" value="7"/>
+                    </Expression>
+                  </Condition>
+                  <Source>
+                    <InstructionUpdate>
+                      <Identifier name="dependencias"/>
+                      <OpUpdate type="EQUALS"/>
+                      <Value>
+                        <Member>
+                          <FunctionCall name="dameValor">
+                            <CallArguments>
+                              <Value>
+                                <ArrayMember>
+                                  <Identifier name="aF"/>
+                                  <Value>
+                                    <Constant type="Number" value="7"/>
+                                  </Value>
+                                </ArrayMember>
+                              </Value>
+                            </CallArguments>
+                          </FunctionCall>
+                          <FunctionCall name="split">
+                            <CallArguments>
+                              <Value>
+                                <Constant>
+                                  <regexbody>
+                                    <regexchar arg00="LBRACKET"/>
+                                    <regexchar arg00="COMMA"/>
+                                    <regexchar arg00="RBRACKET"/>
+                                  </regexbody>
+                                </Constant>
+                              </Value>
+                            </CallArguments>
+                          </FunctionCall>
+                        </Member>
+                      </Value>
+                    </InstructionUpdate>
+                  </Source>
+                </If>
+              </Source>
+            </Else>
+          </If>
+          <InstructionUpdate>
+            <Identifier name="descripcion"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <FunctionCall name="traducirCadena">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="descripcion"/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="fichero"/>
+                      <Identifier name="path"/>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Identifier name="modulo"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Value>
+          </InstructionUpdate>
+          <InstructionUpdate>
+            <Identifier name="desArea"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <FunctionCall name="traducirCadena">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="desArea"/>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="fichero"/>
+                      <Identifier name="path"/>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Identifier name="modulo"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Value>
+          </InstructionUpdate>
+          <DeclarationBlock mode="VAR">
+            <Variable name="fichIcono">
+              <Value>
+                <New>
+                  <FunctionCall name="File">
+                    <CallArguments>
+                      <Expression>
+                        <Member>
+                          <Identifier name="fichero"/>
+                          <Identifier name="path"/>
+                        </Member>
+                        <OpMath type="PLUS"/>
+                        <Constant delim="&quot;" type="String" value="/"/>
+                        <OpMath type="PLUS"/>
+                        <Identifier name="nombreIcono"/>
+                      </Expression>
+                    </CallArguments>
+                  </FunctionCall>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <InstructionCall>
+            <Member>
+              <Identifier name="fichIcono"/>
+              <FunctionCall name="open">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="File"/>
+                      <Identifier name="ReadOnly"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <DeclarationBlock mode="VAR">
+            <Variable name="icono">
+              <Value>
+                <Member>
+                  <Identifier name="fichIcono"/>
+                  <FunctionCall name="read"/>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <DeclarationBlock mode="VAR">
+            <Variable name="versionSys">
+              <Value>
+                <Member>
+                  <Identifier name="sys"/>
+                  <FunctionCall name="version"/>
+                  <FunctionCall name="match">
+                    <CallArguments>
+                      <Value>
+                        <Constant>
+                          <regexbody>
+                            <regexchar arg00="LBRACKET"/>
+                            <regexchar arg00="ICONST:'0'"/>
+                            <regexchar arg00="MINUS"/>
+                            <regexchar arg00="ICONST:'9'"/>
+                            <regexchar arg00="RBRACKET"/>
+                            <regexchar arg00="PLUS"/>
+                            <regexchar arg00="PERIOD"/>
+                            <regexchar arg00="LBRACKET"/>
+                            <regexchar arg00="ICONST:'0'"/>
+                            <regexchar arg00="MINUS"/>
+                            <regexchar arg00="ICONST:'9'"/>
+                            <regexchar arg00="RBRACKET"/>
+                            <regexchar arg00="PLUS"/>
+                          </regexbody>
+                        </Constant>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Expression>
+                <FunctionCall name="compararVersiones">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="versionSys"/>
+                    </Value>
+                    <Value>
+                      <Identifier name="versionMinimaFL"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+                <Compare type="EQ"/>
+                <Constant type="Number" value="2"/>
+              </Expression>
+            </Condition>
+            <Source>
+              <DeclarationBlock mode="VAR">
+                <Variable name="contVersion">
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <FunctionCall name="warning">
+                        <CallArguments>
+                          <Expression>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="Este m&#243;dulo necesita la versi&#243;n "/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                            <OpMath type="PLUS"/>
+                            <Identifier name="versionMinimaFL"/>
+                            <OpMath type="PLUS"/>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value=" o superior de la aplicaci&#243;n base,\nactualmente la versi&#243;n instalada es la "/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                            <OpMath type="PLUS"/>
+                            <Member>
+                              <Identifier name="sys"/>
+                              <FunctionCall name="version"/>
+                            </Member>
+                            <OpMath type="PLUS"/>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value=".\nFacturaLUX puede fallar por esta causa.\n&#191;Desea continuar la carga?"/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                          </Expression>
+                          <Value>
+                            <Member>
+                              <Identifier name="MessageBox"/>
+                              <Identifier name="Yes"/>
+                            </Member>
+                          </Value>
+                          <Value>
+                            <Member>
+                              <Identifier name="MessageBox"/>
+                              <Identifier name="No"/>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <If>
+                <Condition>
+                  <Expression>
+                    <Identifier name="contVersion"/>
+                    <Compare type="EQ"/>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="No"/>
+                    </Member>
+                  </Expression>
+                </Condition>
+                <Source>
+                  <InstructionFlow type="RETURN"/>
+                </Source>
+              </If>
+            </Source>
+          </If>
+          <If>
+            <Condition>
+              <Expression>
+                <FunctionCall name="evaluarDependencias">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="dependencias"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+                <Compare type="EQ"/>
+                <Identifier name="false"/>
+              </Expression>
+            </Condition>
+            <Source>
+              <InstructionFlow type="RETURN"/>
+            </Source>
+          </If>
+          <If>
+            <Condition>
+              <Value>
+                <OpUnary type="LNOT">
+                  <FunctionCall name="valorPorClave">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="flareas"/>
+                      </Value>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="idarea"/>
+                      </Value>
+                      <Expression>
+                        <Constant delim="&quot;" type="String" value="idarea = '"/>
+                        <OpMath type="PLUS"/>
+                        <Identifier name="area"/>
+                        <OpMath type="PLUS"/>
+                        <Constant delim="&quot;" type="String" value="'"/>
+                      </Expression>
+                    </CallArguments>
+                  </FunctionCall>
+                </OpUnary>
+              </Value>
+            </Condition>
+            <Source>
+              <DeclarationBlock mode="VAR">
+                <Variable name="crearArea">
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <FunctionCall name="warning">
+                        <CallArguments>
+                          <Expression>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="El &#225;rea con el identificador "/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                            <OpMath type="PLUS"/>
+                            <Identifier name="area"/>
+                            <OpMath type="PLUS"/>
+                            <Member>
+                              <Identifier name="util"/>
+                              <FunctionCall name="translate">
+                                <CallArguments>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value="scripts"/>
+                                  </Value>
+                                  <Value>
+                                    <Constant delim="&quot;" type="String" value=" no existe. &#191;Desea crearla?"/>
+                                  </Value>
+                                </CallArguments>
+                              </FunctionCall>
+                            </Member>
+                          </Expression>
+                          <Value>
+                            <Member>
+                              <Identifier name="MessageBox"/>
+                              <Identifier name="Yes"/>
+                            </Member>
+                          </Value>
+                          <Value>
+                            <Member>
+                              <Identifier name="MessageBox"/>
+                              <Identifier name="No"/>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <If>
+                <Condition>
+                  <Expression>
+                    <Identifier name="crearArea"/>
+                    <Compare type="EQ"/>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="No"/>
+                    </Member>
+                  </Expression>
+                </Condition>
+                <Source>
+                  <InstructionFlow type="RETURN"/>
+                </Source>
+              </If>
+              <DeclarationBlock mode="VAR">
+                <Variable name="dialogo">
+                  <Value>
+                    <New>
+                      <Identifier name="Dialog"/>
+                    </New>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="dialogo"/>
+                  <Identifier name="width"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Constant type="Number" value="400"/>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="dialogo"/>
+                  <Identifier name="caption"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Expression>
+                  <Member>
+                    <Identifier name="util"/>
+                    <FunctionCall name="translate">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="scripts"/>
+                        </Value>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="Crear &#225;rea "/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                  <OpMath type="PLUS"/>
+                  <Identifier name="area"/>
+                  <OpMath type="PLUS"/>
+                  <Constant delim="&quot;" type="String" value=":"/>
+                </Expression>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="dialogo"/>
+                  <Identifier name="okButtonText"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="util"/>
+                    <FunctionCall name="translate">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="scripts"/>
+                        </Value>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="Aceptar"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="dialogo"/>
+                  <Identifier name="cancelButtonText"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="util"/>
+                    <FunctionCall name="translate">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="scripts"/>
+                        </Value>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="Cancelar"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <DeclarationBlock mode="VAR">
+                <Variable name="leDesArea">
+                  <Value>
+                    <New>
+                      <Identifier name="LineEdit"/>
+                    </New>
+                  </Value>
+                </Variable>
+              </DeclarationBlock>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="leDesArea"/>
+                  <Identifier name="text"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Identifier name="desArea"/>
+                </Value>
+              </InstructionUpdate>
+              <InstructionUpdate>
+                <Member>
+                  <Identifier name="leDesArea"/>
+                  <Identifier name="label"/>
+                </Member>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="util"/>
+                    <FunctionCall name="translate">
+                      <CallArguments>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="scripts"/>
+                        </Value>
+                        <Value>
+                          <Constant delim="&quot;" type="String" value="Descripci&#243;n: "/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <InstructionCall>
+                <Member>
+                  <Identifier name="dialogo"/>
+                  <FunctionCall name="add">
+                    <CallArguments>
+                      <Value>
+                        <Identifier name="leDesArea"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </InstructionCall>
+              <If>
+                <Condition>
+                  <Value>
+                    <Member>
+                      <Identifier name="dialogo"/>
+                      <FunctionCall name="exec"/>
+                    </Member>
+                  </Value>
+                </Condition>
+                <Source>
+                  <DeclarationBlock mode="VAR">
+                    <Variable name="curArea">
+                      <Value>
+                        <New>
+                          <FunctionCall name="FLSqlCursor">
+                            <CallArguments>
+                              <Value>
+                                <Constant delim="&quot;" type="String" value="flareas"/>
+                              </Value>
+                            </CallArguments>
+                          </FunctionCall>
+                        </New>
+                      </Value>
+                    </Variable>
+                  </DeclarationBlock>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="curArea"/>
+                      <FunctionCall name="setModeAccess">
+                        <CallArguments>
+                          <Value>
+                            <Member>
+                              <Identifier name="curArea"/>
+                              <Identifier name="Insert"/>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="curArea"/>
+                      <FunctionCall name="refreshBuffer"/>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="curArea"/>
+                      <FunctionCall name="setValueBuffer">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="idarea"/>
+                          </Value>
+                          <Value>
+                            <Identifier name="area"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="curArea"/>
+                      <FunctionCall name="setValueBuffer">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="descripcion"/>
+                          </Value>
+                          <Value>
+                            <Member>
+                              <Identifier name="leDesArea"/>
+                              <Identifier name="text"/>
+                            </Member>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <Member>
+                      <Identifier name="curArea"/>
+                      <FunctionCall name="commitBuffer"/>
+                    </Member>
+                  </InstructionCall>
+                </Source>
+                <Else>
+                  <Source>
+                    <InstructionFlow type="RETURN"/>
+                  </Source>
+                </Else>
+              </If>
+            </Source>
+          </If>
+          <DeclarationBlock mode="VAR">
+            <Variable name="recargar"/>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Value>
+                <FunctionCall name="valorPorClave">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="flmodules"/>
+                    </Value>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="idmodulo"/>
+                    </Value>
+                    <Expression>
+                      <Constant delim="&quot;" type="String" value="idmodulo = '"/>
+                      <OpMath type="PLUS"/>
+                      <Identifier name="modulo"/>
+                      <OpMath type="PLUS"/>
+                      <Constant delim="&quot;" type="String" value="'"/>
+                    </Expression>
+                  </CallArguments>
+                </FunctionCall>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="recargar"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="MessageBox"/>
+                    <FunctionCall name="warning">
+                      <CallArguments>
+                        <Expression>
+                          <Member>
+                            <Identifier name="util"/>
+                            <FunctionCall name="translate">
+                              <CallArguments>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value="scripts"/>
+                                </Value>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value="El m&#243;dulo "/>
+                                </Value>
+                              </CallArguments>
+                            </FunctionCall>
+                          </Member>
+                          <OpMath type="PLUS"/>
+                          <Identifier name="modulo"/>
+                          <OpMath type="PLUS"/>
+                          <Member>
+                            <Identifier name="util"/>
+                            <FunctionCall name="translate">
+                              <CallArguments>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value="scripts"/>
+                                </Value>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value=" ya existe. &#191;Desea recargarlo?"/>
+                                </Value>
+                              </CallArguments>
+                            </FunctionCall>
+                          </Member>
+                        </Expression>
+                        <Value>
+                          <Member>
+                            <Identifier name="MessageBox"/>
+                            <Identifier name="Yes"/>
+                          </Member>
+                        </Value>
+                        <Value>
+                          <Member>
+                            <Identifier name="MessageBox"/>
+                            <Identifier name="No"/>
+                          </Member>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <If>
+                <Condition>
+                  <Expression>
+                    <Identifier name="recargar"/>
+                    <Compare type="EQ"/>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="No"/>
+                    </Member>
+                  </Expression>
+                </Condition>
+                <Source>
+                  <InstructionFlow type="RETURN"/>
+                </Source>
+              </If>
+            </Source>
+          </If>
+          <DeclarationBlock mode="VAR">
+            <Variable name="curModulo">
+              <Value>
+                <New>
+                  <FunctionCall name="FLSqlCursor">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="flmodules"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <If>
+            <Condition>
+              <Expression>
+                <Identifier name="recargar"/>
+                <Compare type="EQ"/>
+                <Member>
+                  <Identifier name="MessageBox"/>
+                  <Identifier name="Yes"/>
+                </Member>
+              </Expression>
+            </Condition>
+            <Source>
+              <With>
+                <Identifier name="curModulo"/>
+                <Source>
+                  <InstructionCall>
+                    <FunctionCall name="select">
+                      <CallArguments>
+                        <Expression>
+                          <Constant delim="&quot;" type="String" value="idmodulo = '"/>
+                          <OpMath type="PLUS"/>
+                          <Identifier name="modulo"/>
+                          <OpMath type="PLUS"/>
+                          <Constant delim="&quot;" type="String" value="'"/>
+                        </Expression>
+                      </CallArguments>
+                    </FunctionCall>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <FunctionCall name="first"/>
+                  </InstructionCall>
+                  <InstructionCall>
+                    <FunctionCall name="setModeAccess">
+                      <CallArguments>
+                        <Value>
+                          <Member>
+                            <Identifier name="curModulo"/>
+                            <Identifier name="Edit"/>
+                          </Member>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </InstructionCall>
+                </Source>
+              </With>
+            </Source>
+            <Else>
+              <Source>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="curModulo"/>
+                    <FunctionCall name="setModeAccess">
+                      <CallArguments>
+                        <Value>
+                          <Member>
+                            <Identifier name="curModulo"/>
+                            <Identifier name="Insert"/>
+                          </Member>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+              </Source>
+            </Else>
+          </If>
+          <With>
+            <Identifier name="curModulo"/>
+            <Source>
+              <InstructionCall>
+                <FunctionCall name="refreshBuffer"/>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="setValueBuffer">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="idmodulo"/>
+                    </Value>
+                    <Value>
+                      <Identifier name="modulo"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="setValueBuffer">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="descripcion"/>
+                    </Value>
+                    <Value>
+                      <Identifier name="descripcion"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="setValueBuffer">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="idarea"/>
+                    </Value>
+                    <Value>
+                      <Identifier name="area"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="setValueBuffer">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="version"/>
+                    </Value>
+                    <Value>
+                      <Identifier name="version"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="setValueBuffer">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="icono"/>
+                    </Value>
+                    <Value>
+                      <Identifier name="icono"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </InstructionCall>
+              <InstructionCall>
+                <FunctionCall name="commitBuffer"/>
+              </InstructionCall>
+            </Source>
+          </With>
+          <DeclarationBlock mode="VAR">
+            <Variable name="curSeleccion">
+              <Value>
+                <New>
+                  <FunctionCall name="FLSqlCursor">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="flmodules"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </New>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <InstructionCall>
+            <Member>
+              <Identifier name="curModulo"/>
+              <FunctionCall name="setMainFilter">
+                <CallArguments>
+                  <Expression>
+                    <Constant delim="&quot;" type="String" value="idmodulo = '"/>
+                    <OpMath type="PLUS"/>
+                    <Identifier name="modulo"/>
+                    <OpMath type="PLUS"/>
+                    <Constant delim="&quot;" type="String" value="'"/>
+                  </Expression>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="curModulo"/>
+              <FunctionCall name="editRecord"/>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="formRecordflmodules"/>
+              <FunctionCall name="cargarDeDisco">
+                <CallArguments>
+                  <Expression>
+                    <Member>
+                      <Identifier name="fichero"/>
+                      <Identifier name="path"/>
+                    </Member>
+                    <OpMath type="PLUS"/>
+                    <Constant delim="&quot;" type="String" value="/"/>
+                  </Expression>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionCall>
+            <Member>
+              <Identifier name="formRecordflmodules"/>
+              <FunctionCall name="accept"/>
+            </Member>
+          </InstructionCall>
+          <DeclarationBlock mode="VAR">
+            <Variable name="setting" type="String">
+              <Expression>
+                <Constant delim="&quot;" type="String" value="scripts/sys/modLastModule_"/>
+                <OpMath type="PLUS"/>
+                <Member>
+                  <Identifier name="sys"/>
+                  <FunctionCall name="nameBD"/>
+                </Member>
+              </Expression>
+            </Variable>
+          </DeclarationBlock>
+          <InstructionCall>
+            <Member>
+              <Identifier name="util"/>
+              <FunctionCall name="writeSettingEntry">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="setting"/>
+                  </Value>
+                  <Value>
+                    <Identifier name="nombreFichero"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="dameValor">
+    <Arguments>
+      <Variable name="linea"/>
+    </Arguments>
+    <Source>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Identifier name="linea"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="valorPorClave">
+    <Arguments>
+      <Variable name="tabla"/>
+      <Variable name="campo"/>
+      <Variable name="where"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="valor"/>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="query">
+          <Value>
+            <New>
+              <FunctionCall name="FLSqlQuery"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <Member>
+          <Identifier name="query"/>
+          <FunctionCall name="setTablesList">
+            <CallArguments>
+              <Value>
+                <Identifier name="tabla"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <InstructionCall>
+        <Member>
+          <Identifier name="query"/>
+          <FunctionCall name="setSelect">
+            <CallArguments>
+              <Value>
+                <Identifier name="campo"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <InstructionCall>
+        <Member>
+          <Identifier name="query"/>
+          <FunctionCall name="setFrom">
+            <CallArguments>
+              <Value>
+                <Identifier name="tabla"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <InstructionCall>
+        <Member>
+          <Identifier name="query"/>
+          <FunctionCall name="setWhere">
+            <CallArguments>
+              <Expression>
+                <Identifier name="where"/>
+                <OpMath type="PLUS"/>
+                <Constant delim="&quot;" type="String" value=";"/>
+              </Expression>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <InstructionCall>
+        <Member>
+          <Identifier name="query"/>
+          <FunctionCall name="exec"/>
+        </Member>
+      </InstructionCall>
+      <If>
+        <Condition>
+          <Value>
+            <Member>
+              <Identifier name="query"/>
+              <FunctionCall name="next"/>
+            </Member>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionUpdate>
+            <Identifier name="valor"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Member>
+                <Identifier name="query"/>
+                <FunctionCall name="value">
+                  <CallArguments>
+                    <Value>
+                      <Constant type="Number" value="0"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionUpdate>
+        </Source>
+      </If>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Identifier name="valor"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="compararVersiones">
+    <Arguments>
+      <Variable name="v1"/>
+      <Variable name="v2"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="a1"/>
+        <Variable name="a2"/>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Expression>
+            <Identifier name="v1"/>
+            <Compare type="LAND"/>
+            <Identifier name="v2"/>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionUpdate>
+            <Identifier name="a1"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Member>
+                <Identifier name="v1"/>
+                <FunctionCall name="split">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="."/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionUpdate>
+          <InstructionUpdate>
+            <Identifier name="a2"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Member>
+                <Identifier name="v2"/>
+                <FunctionCall name="split">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="."/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionUpdate>
+          <For>
+            <ForInitialize>
+              <Variable name="i">
+                <Value>
+                  <Constant type="Number" value="0"/>
+                </Value>
+              </Variable>
+            </ForInitialize>
+            <ForCompare>
+              <Expression>
+                <Identifier name="i"/>
+                <Compare type="LT"/>
+                <Member>
+                  <Identifier name="a1"/>
+                  <Identifier name="length"/>
+                </Member>
+              </Expression>
+            </ForCompare>
+            <ForIncrement>
+              <InlineUpdate type="PLUSPLUS" mode="read-update">
+                <Identifier name="i"/>
+              </InlineUpdate>
+            </ForIncrement>
+            <Source>
+              <If>
+                <Condition>
+                  <Expression>
+                    <FunctionCall name="parseInt">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="a1"/>
+                            <Value>
+                              <Identifier name="i"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <Compare type="GT"/>
+                    <FunctionCall name="parseInt">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="a2"/>
+                            <Value>
+                              <Identifier name="i"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Expression>
+                </Condition>
+                <Source>
+                  <InstructionFlow type="RETURN">
+                    <Value>
+                      <Constant type="Number" value="1"/>
+                    </Value>
+                  </InstructionFlow>
+                </Source>
+              </If>
+              <If>
+                <Condition>
+                  <Expression>
+                    <FunctionCall name="parseInt">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="a1"/>
+                            <Value>
+                              <Identifier name="i"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                    <Compare type="LT"/>
+                    <FunctionCall name="parseInt">
+                      <CallArguments>
+                        <Value>
+                          <ArrayMember>
+                            <Identifier name="a2"/>
+                            <Value>
+                              <Identifier name="i"/>
+                            </Value>
+                          </ArrayMember>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Expression>
+                </Condition>
+                <Source>
+                  <InstructionFlow type="RETURN">
+                    <Value>
+                      <Constant type="Number" value="2"/>
+                    </Value>
+                  </InstructionFlow>
+                </Source>
+              </If>
+            </Source>
+          </For>
+        </Source>
+      </If>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Constant type="Number" value="0"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="evaluarDependencias">
+    <Arguments>
+      <Variable name="dependencias"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="res"/>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Identifier name="dependencias"/>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="true"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <For>
+        <ForInitialize>
+          <Variable name="i">
+            <Value>
+              <Constant type="Number" value="0"/>
+            </Value>
+          </Variable>
+        </ForInitialize>
+        <ForCompare>
+          <Expression>
+            <Identifier name="i"/>
+            <Compare type="LT"/>
+            <Member>
+              <Identifier name="dependencias"/>
+              <Identifier name="length"/>
+            </Member>
+          </Expression>
+        </ForCompare>
+        <ForIncrement>
+          <InlineUpdate type="PLUSPLUS" mode="read-update">
+            <Identifier name="i"/>
+          </InlineUpdate>
+        </ForIncrement>
+        <Source>
+          <If>
+            <Condition>
+              <Value>
+                <Member>
+                  <ArrayMember>
+                    <Identifier name="dependencias"/>
+                    <Value>
+                      <Identifier name="i"/>
+                    </Value>
+                  </ArrayMember>
+                  <FunctionCall name="isEmpty"/>
+                </Member>
+              </Value>
+            </Condition>
+            <Source>
+              <InstructionFlow type="CONTINUE"/>
+            </Source>
+          </If>
+          <If>
+            <Condition>
+              <Expression>
+                <Member>
+                  <Identifier name="sys"/>
+                  <FunctionCall name="isLoadedModule">
+                    <CallArguments>
+                      <Value>
+                        <ArrayMember>
+                          <Identifier name="dependencias"/>
+                          <Value>
+                            <Identifier name="i"/>
+                          </Value>
+                        </ArrayMember>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+                <Compare type="EQ"/>
+                <Identifier name="false"/>
+              </Expression>
+            </Condition>
+            <Source>
+              <InstructionUpdate>
+                <Identifier name="res"/>
+                <OpUpdate type="EQUALS"/>
+                <Value>
+                  <Member>
+                    <Identifier name="MessageBox"/>
+                    <FunctionCall name="warning">
+                      <CallArguments>
+                        <Expression>
+                          <Member>
+                            <Identifier name="util"/>
+                            <FunctionCall name="translate">
+                              <CallArguments>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value="scripts"/>
+                                </Value>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value="Este m&#243;dulo depende del m&#243;dulo "/>
+                                </Value>
+                              </CallArguments>
+                            </FunctionCall>
+                          </Member>
+                          <OpMath type="PLUS"/>
+                          <ArrayMember>
+                            <Identifier name="dependencias"/>
+                            <Value>
+                              <Identifier name="i"/>
+                            </Value>
+                          </ArrayMember>
+                          <OpMath type="PLUS"/>
+                          <Member>
+                            <Identifier name="util"/>
+                            <FunctionCall name="translate">
+                              <CallArguments>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value="scripts"/>
+                                </Value>
+                                <Value>
+                                  <Constant delim="&quot;" type="String" value=", que no est&#225; instalado.\nFacturaLUX puede fallar por esta causa.\n&#191;Desea continuar la carga?"/>
+                                </Value>
+                              </CallArguments>
+                            </FunctionCall>
+                          </Member>
+                        </Expression>
+                        <Value>
+                          <Member>
+                            <Identifier name="MessageBox"/>
+                            <Identifier name="Yes"/>
+                          </Member>
+                        </Value>
+                        <Value>
+                          <Member>
+                            <Identifier name="MessageBox"/>
+                            <Identifier name="No"/>
+                          </Member>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </Value>
+              </InstructionUpdate>
+              <If>
+                <Condition>
+                  <Expression>
+                    <Identifier name="res"/>
+                    <Compare type="EQ"/>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="No"/>
+                    </Member>
+                  </Expression>
+                </Condition>
+                <Source>
+                  <InstructionFlow type="RETURN">
+                    <Value>
+                      <Identifier name="false"/>
+                    </Value>
+                  </InstructionFlow>
+                </Source>
+              </If>
+            </Source>
+          </If>
+        </Source>
+      </For>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Identifier name="true"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="traducirCadena">
+    <Arguments>
+      <Variable name="cadena"/>
+      <Variable name="path"/>
+      <Variable name="modulo"/>
+    </Arguments>
+    <Source>
+      <If>
+        <Condition>
+          <Expression>
+            <Member>
+              <Identifier name="cadena"/>
+              <FunctionCall name="find">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="QT_TRANSLATE_NOOP"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+            <Compare type="EQ"/>
+            <OpUnary type="MINUS">
+              <Constant type="Number" value="1"/>
+            </OpUnary>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="cadena"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <InstructionUpdate>
+        <Identifier name="cadena"/>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="cadena"/>
+            <FunctionCall name="mid">
+              <CallArguments>
+                <Value>
+                  <Constant type="Number" value="41"/>
+                </Value>
+                <Expression>
+                  <Member>
+                    <Identifier name="cadena"/>
+                    <Identifier name="length"/>
+                  </Member>
+                  <OpMath type="MINUS"/>
+                  <Constant type="Number" value="43"/>
+                </Expression>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <DeclarationBlock mode="VAR">
+        <Variable name="nombreFichero"/>
+      </DeclarationBlock>
+      <TryCatch>
+        <Source>
+          <InstructionUpdate>
+            <Identifier name="nombreFichero"/>
+            <OpUpdate type="EQUALS"/>
+            <Expression>
+              <Identifier name="path"/>
+              <OpMath type="PLUS"/>
+              <Constant delim="&quot;" type="String" value="/translations/"/>
+              <OpMath type="PLUS"/>
+              <Identifier name="modulo"/>
+              <OpMath type="PLUS"/>
+              <Constant delim="&quot;" type="String" value="."/>
+              <OpMath type="PLUS"/>
+              <Member>
+                <Identifier name="util"/>
+                <FunctionCall name="getIdioma"/>
+              </Member>
+              <OpMath type="PLUS"/>
+              <Constant delim="&quot;" type="String" value=".ts"/>
+            </Expression>
+          </InstructionUpdate>
+        </Source>
+        <Identifier name="e"/>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="cadena"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </TryCatch>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="File"/>
+                <FunctionCall name="exists">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="nombreFichero"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="cadena"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <DeclarationBlock mode="VAR">
+        <Variable name="fichero">
+          <Value>
+            <New>
+              <FunctionCall name="File">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="nombreFichero"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <Member>
+          <Identifier name="fichero"/>
+          <FunctionCall name="open">
+            <CallArguments>
+              <Value>
+                <Member>
+                  <Identifier name="File"/>
+                  <Identifier name="ReadOnly"/>
+                </Member>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="f">
+          <Value>
+            <Member>
+              <Identifier name="fichero"/>
+              <FunctionCall name="read"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="xmlTranslations">
+          <Value>
+            <New>
+              <FunctionCall name="FLDomDocument"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <Member>
+              <Identifier name="xmlTranslations"/>
+              <FunctionCall name="setContent">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="f"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Condition>
+        <Source>
+          <DeclarationBlock mode="VAR">
+            <Variable name="nodeMess">
+              <Value>
+                <Member>
+                  <Identifier name="xmlTranslations"/>
+                  <FunctionCall name="elementsByTagName">
+                    <CallArguments>
+                      <Value>
+                        <Constant delim="&quot;" type="String" value="message"/>
+                      </Value>
+                    </CallArguments>
+                  </FunctionCall>
+                </Member>
+              </Value>
+            </Variable>
+          </DeclarationBlock>
+          <For>
+            <ForInitialize>
+              <Variable name="i">
+                <Value>
+                  <Constant type="Number" value="0"/>
+                </Value>
+              </Variable>
+            </ForInitialize>
+            <ForCompare>
+              <Expression>
+                <Identifier name="i"/>
+                <Compare type="LT"/>
+                <Member>
+                  <Identifier name="nodeMess"/>
+                  <FunctionCall name="length"/>
+                </Member>
+              </Expression>
+            </ForCompare>
+            <ForIncrement>
+              <InlineUpdate type="PLUSPLUS" mode="read-update">
+                <Identifier name="i"/>
+              </InlineUpdate>
+            </ForIncrement>
+            <Source>
+              <If>
+                <Condition>
+                  <Expression>
+                    <Member>
+                      <Identifier name="nodeMess"/>
+                      <FunctionCall name="item">
+                        <CallArguments>
+                          <Value>
+                            <Identifier name="i"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                      <FunctionCall name="namedItem">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="source"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                      <FunctionCall name="toElement"/>
+                      <FunctionCall name="text"/>
+                    </Member>
+                    <Compare type="EQ"/>
+                    <Identifier name="cadena"/>
+                  </Expression>
+                </Condition>
+                <Source>
+                  <InstructionUpdate>
+                    <Identifier name="traduccion"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Value>
+                      <Member>
+                        <Identifier name="nodeMess"/>
+                        <FunctionCall name="item">
+                          <CallArguments>
+                            <Value>
+                              <Identifier name="i"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                        <FunctionCall name="namedItem">
+                          <CallArguments>
+                            <Value>
+                              <Constant delim="&quot;" type="String" value="translation"/>
+                            </Value>
+                          </CallArguments>
+                        </FunctionCall>
+                        <FunctionCall name="toElement"/>
+                        <FunctionCall name="text"/>
+                      </Member>
+                    </Value>
+                  </InstructionUpdate>
+                  <If>
+                    <Condition>
+                      <Value>
+                        <Identifier name="traduccion"/>
+                      </Value>
+                    </Condition>
+                    <Source>
+                      <InstructionUpdate>
+                        <Identifier name="cadena"/>
+                        <OpUpdate type="EQUALS"/>
+                        <Value>
+                          <Identifier name="traduccion"/>
+                        </Value>
+                      </InstructionUpdate>
+                    </Source>
+                  </If>
+                </Source>
+              </If>
+            </Source>
+          </For>
+        </Source>
+      </If>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Identifier name="cadena"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+</Source>

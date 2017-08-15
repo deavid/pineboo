@@ -16,7 +16,7 @@ from binascii import unhexlify
 import zlib
 
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 if __name__ == "__main__":
     sys.path.append('..')

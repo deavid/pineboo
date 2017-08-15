@@ -2,7 +2,7 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib.utils import DefFun
 from pineboolib import decorators
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 
 class FLReportViewer(ProjectClass):

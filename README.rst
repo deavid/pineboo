@@ -27,16 +27,16 @@ Aproximaciones existentes
 ---------------------------
 Solo existe una única aproximación a la ejecución de proyectos de Eneboo:
 
- - Python2.6 + PyQt4 + PsycoPG2
+ - Python3.x + PyQt5 + PsycoPG2 (El un futuro será según opción sql seleccionada (PostgreSQL, MySQL, SQLite, ...)
  - Motor realizado integramente en Python
  - Conversión al vuelo de QSA a PY con parseador FLScriptParser2 
- - Conversión al vuelo de formularios Qt3 a Qt4 creando un UiLoader manualmente
+ - Conversión al vuelo de formularios Qt3 a Qt5 creando un UiLoader manualmente
  
 
 Dependencias
 ----------------
- - Python 2.5/2.6/2.7 (probado con 2.6)
- - PyQt4
+ - Python 3.x
+ - PyQt5
  - PsycoPG2
  - Python PLY (flscriptparser)
  - Python LXML

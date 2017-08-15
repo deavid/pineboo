@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib.utils import filedir
 from pineboolib import decorators
@@ -28,7 +28,7 @@ componentes serán plugins, como FLFieldDB o FLTableDB.
 @author InfoSiAL S.L.
 """
 
-class FLFormDB(QtGui.QDialog):
+class FLFormDB(QtWidgets.QDialog):
 
     """
     Cursor, con los registros, utilizado por el formulario
@@ -149,7 +149,7 @@ class FLFormDB(QtGui.QDialog):
     _scriptForm = None
     
     def __init__(self, parent, action, load=False):
-        super(QtGui.QWidget, self).__init__(parent)
+        super(QtWidgets.QWidget, self).__init__(parent)
         try:
             assert (self.__class__,action) not in self.known_instances
         except AssertionError:
@@ -161,11 +161,11 @@ class FLFormDB(QtGui.QDialog):
         self.prj = action.prj
         self.mod = action.mod
                 
-        self.layout = QtGui.QVBoxLayout()
-        self.layout.setMargin(1)
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.setContentsMargins(1, 1, 1, 1)
         self.layout.setSpacing(1)
         self.layout.setContentsMargins(1,1,1,1)
-        self.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         self.setLayout(self.layout)
         
         if not self._uiName:
@@ -197,7 +197,7 @@ class FLFormDB(QtGui.QDialog):
         self.layout.insertWidget(0,self.widget)
         self.layout.setSpacing(1)
         self.layout.setContentsMargins(1,1,1,1)
-        self.layout.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         
         if self._uiName:
             self.prj.conn.managerModules().createUI(self._uiName, None, self)
@@ -396,14 +396,14 @@ class FLFormDB(QtGui.QDialog):
                 del self.layout
 
 
-            w.setFont(QtGui.qApp.font())
-            self.layout = QtGui.QVBoxLayout()
+            w.setFont(QtWidgets.QApplication.font())
+            self.layout = QtWidgets.QVBoxLayout()
             self.layout.addWidget(w)
-            self.layoutButtons = QtGui.QHBoxLayout()
+            self.layoutButtons = QtWidgets.QHBoxLayout()
 
         #pbSize = Qt.QSize(22,22)
 
-            wt = QtGui.QToolButton.whatsThis()
+            wt = QtWidgets.QToolButton.whatsThis()
             wt.setIcon(QtGui.QIcon(filedir("icons","gtk-find.png")))
             self.layoutButtons.addWidget(wt)
             wt.show()
@@ -600,12 +600,12 @@ class FLFormDB(QtGui.QDialog):
         
         if self.bottomToolbar:
             self.toolButtonClose.hide()
-        self.bottomToolbar = QtGui.QFrame()
+        self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
-        self.bottomToolbar.layout = QtGui.QHBoxLayout()
+        self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
         self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setMargin(0)
+        self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
         self.bottomToolbar.layout.setSpacing(0)
         self.bottomToolbar.layout.addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
@@ -614,14 +614,14 @@ class FLFormDB(QtGui.QDialog):
         #    self.layout = None
         #Limpiamos la toolbar
         
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(0) ,QtGui.QSizePolicy.Policy(0))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0) ,QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
         
         pbSize = QtCore.QSize(22,22)
                 
             
         if not self.pushButtonCancel:
-            self.pushButtonCancel = QtGui.QToolButton()
+            self.pushButtonCancel = QtWidgets.QToolButton()
             self.pushButtonCancel.clicked.connect(self.close)
                 
         self.pushButtonCancel.setSizePolicy(sizePolicy)

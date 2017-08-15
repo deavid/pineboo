@@ -1,6 +1,6 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import pineboolib
 
@@ -303,7 +303,7 @@ class FLSqlQuery(ProjectClass):
                 
                 if not v:
                     ok = True
-                    v = QtGui.QInputDialog.getText(QtGui.QApplication, "Entrada de parámetros de la consulta", pD.alias(),None , None)
+                    v = QtWidgets.QInputDialog.getText(QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD.alias(),None , None)
                 
                 res = res.replace(pD.key(), self.d.db_.manager().formatValue(pD.type(), v))
         

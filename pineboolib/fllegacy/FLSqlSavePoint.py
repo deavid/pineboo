@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 #Completada Si
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 from pineboolib import decorators, fllegacy
 import pineboolib

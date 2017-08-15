@@ -7,9 +7,14 @@ from pineboolib.fllegacy.FLSqlDatabase import FLSqlDatabase
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
 
-from PyQt4.QtCore import QString
 # switch on QVariant in Python3
 # sip.setapi('QVariant', 2)
+try:
+    QString = unicode
+except NameError:
+    # Python 3
+    QString = str
+
 sip.setapi('QString', 1)
 
 
