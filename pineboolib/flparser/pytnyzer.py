@@ -511,6 +511,7 @@ class Variable(ASTPython):
             yield "expr", "="
             expr = 0
             for dtype, data in parse_ast(value).generate(isolate = False):
+                
                 if self.elem.get("type",None) == "Array" and data == "[]":
                     yield "expr", "qsatype.Array()"
                     expr += 1
@@ -539,8 +540,6 @@ class Variable(ASTPython):
                     yield "expr", "None"
                 else:
                     yield "expr", "qsatype.%s()" % dtype
-        
-        #print("--->", name, dtype)
                 
         
         #if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
@@ -714,6 +713,9 @@ class Member(ASTPython):
             "text",
             "join",
             "date",
+            "toString()",
+            "charAt",
+            "isEmpty()"
         ]
 
         for member in replace_members:
@@ -725,7 +727,16 @@ class Member(ASTPython):
                         part2 = arguments[idx+1:]
                     except IndexError:
                         part2 = [] # Para los que son últimos y no tienen parte adicional
-                    arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
+                    if member == "toString()": 
+                        arguments = ["str(%s)" % (".".join(part1))] + part2
+                    elif member == "isEmpty()": 
+                        arguments = ["%s == None" % (".".join(part1))] + part2
+                    elif member == "charAt":
+                        value = arg[7:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s[%s]" % (".".join(part1), value)] + part2
+                    else:
+                        arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
         yield "expr", ".".join(arguments)
 
 class ArrayMember(ASTPython):
