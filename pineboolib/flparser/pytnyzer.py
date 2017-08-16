@@ -336,6 +336,8 @@ class For(ASTPython):
         if init_expr:
             yield "line", " ".join(init_expr)
             yield "line", "while_pass = True"
+        else:
+            yield "line", "while_pass = True"
 
         incr_expr = []
         incr_lines = []
@@ -538,7 +540,7 @@ class Variable(ASTPython):
                 else:
                     yield "expr", "qsatype.%s()" % dtype
         
-        print("--->", name, dtype)
+        #print("--->", name, dtype)
                 
         
         #if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
