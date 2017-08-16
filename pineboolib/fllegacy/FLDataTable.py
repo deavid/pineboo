@@ -226,9 +226,11 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Filtrado de eventos
     """
-    @decorators.NotImplementedWarn
-    def eventFilter(self, o, e):
-        return True
+    def eventFilter(self, *args, **kwargs):
+        return super(FLDataTable, self).eventFilter( *args, **kwargs)
+    
+    def dataChanged(self, *args, **kwargs):
+        return super(FLDataTable, self).dataChanged( *args, **kwargs)
 
     """
     Redefinido por conveniencia para pintar la celda
