@@ -25,6 +25,7 @@ def id_translate(name):
     if name == "this": name = "self"
 
     if name == "startsWith": name = "startswith"
+    if name == "endsWith": name = "endswith"
     return name
 
 ast_class_types = []
@@ -173,6 +174,7 @@ class FunctionCall(ASTPython):
     def generate(self, **kwargs):
         name = id_translate(self.elem.get("name"))
         parent = self.elem.getparent()
+        data_ = None
         if parent.tag == "InstructionCall":
             classes = parent.xpath("ancestor::Class")
             if classes:
@@ -190,6 +192,7 @@ class FunctionCall(ASTPython):
         for n,arg in enumerate(self.elem.xpath("CallArguments/*")):
             expr = []
             for dtype, data in parse_ast(arg).generate(isolate = False):
+                data_ = data
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -200,7 +203,8 @@ class FunctionCall(ASTPython):
                 yield "debug", etree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
-
+        
+        
         yield "expr", "%s(%s)" % (name,", ".join(arguments))
 
 class If(ASTPython):
@@ -331,6 +335,7 @@ class For(ASTPython):
                 init_expr.append(" ".join(expr))
         if init_expr:
             yield "line", " ".join(init_expr)
+            yield "line", "while_pass = True"
 
         incr_expr = []
         incr_lines = []
@@ -361,12 +366,24 @@ class For(ASTPython):
                 main_expr.append(" ".join(expr))
         #yield "debug", "WHILE-FROM-QS-FOR: (%r;%r;%r)" % (init_expr,main_expr,incr_lines)
         yield "line", "while %s:" % (" ".join(main_expr))
+        yield "begin", "block-for"
+        yield "line", "if not while_pass:"
+        yield "begin", "block-while_pass"
+        if incr_lines:
+            for line in incr_lines:
+                yield "line", line
+        yield "line", "while_pass = True"
+        yield "line", "continue"
+        yield "end", "block-while_pass"
+        yield "line", "while_pass = False"
+         
         for source in self.elem.xpath("Source"):
-            yield "begin", "block-for"
             for obj in parse_ast(source).generate(include_pass=False): yield obj
             if incr_lines:
                 for line in incr_lines:
                     yield "line", line
+                
+            yield "line", "while_pass = True"
             yield "end", "block-for"
 
 class ForIn(ASTPython):
@@ -492,6 +509,11 @@ class Variable(ASTPython):
             yield "expr", "="
             expr = 0
             for dtype, data in parse_ast(value).generate(isolate = False):
+                if self.elem.get("type",None) == "Array" and data == "[]":
+                    yield "expr", "qsatype.Array()"
+                    expr += 1
+                    continue
+                
                 if dtype == "expr": expr += 1
                 yield dtype, data
             if expr == 0:
@@ -499,7 +521,7 @@ class Variable(ASTPython):
 
         dtype = self.elem.get("type",None)
 
-        if values == 0 and force_value == True:
+        if (values == 0) and force_value == True:
             yield "expr", "="
             if dtype is None:
                 yield "expr", "None"
@@ -515,7 +537,10 @@ class Variable(ASTPython):
                     yield "expr", "None"
                 else:
                     yield "expr", "qsatype.%s()" % dtype
-
+        
+        print("--->", name, dtype)
+                
+        
         #if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
 
 class InstructionUpdate(ASTPython):
