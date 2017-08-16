@@ -1454,7 +1454,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if not ol and doHome:
                 self.editor_.home(False)
             
-            self.editor_.textChanged.connect(self.updateValue)
+            if not ol:
+                self.editor_.textChanged.connect(self.updateValue)
 
 
 
@@ -2020,7 +2021,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_ = QtWidgets.QComboBox()
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
-                self.editor_.setAutoCompletion(True)
+                #self.editor_.setAutoCompletion(True)
                 self.editor_.setMinimumSize(22, 22)
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 #if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
@@ -2674,7 +2675,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
 
-        if self.fieldName_.isEmpty():
+        if not self.fieldName_:
             return
         tMD = FLTableMetaData(self.cursor_.metadata())
         if not tMD:
