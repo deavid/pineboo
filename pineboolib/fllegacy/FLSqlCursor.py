@@ -15,7 +15,6 @@ from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib, traceback, weakref
-
 try:
     QString = unicode
 except NameError:
@@ -78,7 +77,14 @@ class PNBuffer(ProjectClass):
 
 
     def isGenerated(self, name):
-        return self.cursor_.db_.manager().metadata(self.cursor_.curName_).field(name).generated()
+        curName = self.cursor_.curName_
+        field = self.cursor_.db_.manager().metadata(curName).field(name)
+        if not field:
+            retorno = True
+        else:
+            retorno = field.generated()
+            
+        return retorno
 
 
     def clearValues(self, b):
@@ -95,8 +101,7 @@ class PNBuffer(ProjectClass):
             return False
 
     def isNull(self, n):
-        if not str(n).isdigit():
-            n = str(n)
+        if isinstance(n, str):
             for field in  self.fieldList_:
                 if field.name == n:
                     if not field.value:
@@ -376,8 +381,11 @@ class FLSqlCursorPrivate(QtCore.QObject):
     Nombre del cursor
     """
     curName_ = None
-
-
+    
+    """
+    Orden actual
+    """
+    sort_ = None
     """
     Auxiliares para la comprobacion de riesgos de bloqueos
     """
@@ -1401,8 +1409,7 @@ class FLSqlCursor(ProjectClass):
 
         return pos
 
-
-
+        
 
     """
     Obtiene la posición dentro del cursor del primer registro que en el campo indicado
@@ -2005,9 +2012,8 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método sort() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def setSort(self, sort):
-        return True
+        self.d.sort_ = sort
 
     """
     Obtiene el filtro base
@@ -2617,9 +2623,9 @@ class FLSqlCursor(ProjectClass):
     def valueBufferRaw(self, fN):
         return True
 
-    @decorators.NotImplementedWarn
+
     def sort(self):
-        return None
+        return self.d.sort_
 
     @decorators.NotImplementedWarn
     def list(self):
