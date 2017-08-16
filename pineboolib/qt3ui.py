@@ -76,7 +76,7 @@ def loadUi(path, widget, parent = None):
             #print dir(widget.iface)
             if hasattr(widget.iface, fn_name):
                 try:
-                    getattr(sender, signal_name).connect(getattr(widget.iface, fn_name))
+                    getattr(sender, sg_name).connect(getattr(widget.iface, fn_name))
                 except Exception as e:
                     if Options.DEBUG_LEVEL > 50: 
                         print("Error connecting:",
