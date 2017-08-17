@@ -338,7 +338,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Indicador para evitar refrescos anidados
     """
-    refreshing_ = None
+    refreshing_ = False
     refresh_timer_ = None
 
     """
@@ -426,8 +426,11 @@ class FLDataTable(QtWidgets.QTableView):
         if self.popup_:
             self.cursor_.refresh()
             
-        if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
+        #if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
+        if self.refreshing_ == False and self.cursor_:
             self.refreshing_ = True
+            self.hide()
+            
             if self.persistentFilter_:
                 self.cursor_.setFilter(self.persistentFilter_)
             self.cursor_.refresh() 
