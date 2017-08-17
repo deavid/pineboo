@@ -22,6 +22,7 @@ from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
 from pineboolib import decorators
 import traceback
+from PyQt5.Qt import QWidget
 
 class StructMyDict(dict):
 
@@ -99,8 +100,8 @@ class Array(object):
     def __getattr__(self, k):
         if k == 'length': 
             return len(self.dict_)
-            
-        
+
+       
 
 def Boolean(x=False): return bool(x)
 
@@ -264,10 +265,40 @@ class FormDBWidget(QtWidgets.QWidget):
 def FLFormSearchDB(name):
     widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
     widget.setWindowModality(QtCore.Qt.ApplicationModal)
+    widget.load()
+    widget.cursor_.setContext(widget.iface)
     return widget
 
-class Date(QtCore.QDate):
-    pass
+class Date(object):
+    
+    date_ = None
+    time_ = None
+    
+    def __init__(self):
+        super(Date, self).__init__()
+        self.date_ = QtCore.QDate.currentDate()
+        self.time_ = QtCore.QTime.currentTime()
+    
+    def toString(self, *args, **kwargs):
+        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"),self.date_.toString("MM"),self.date_.toString("dd"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
+        return texto
+
+class FLVariant(object):
+    
+    obj_ = None
+    
+    def __init__(self, objeto):
+        self.obj_ = objeto
+    
+    def __getattr__(self, k):
+        if k == 'toString':
+            if isinstance(self.obj_, str):
+                return self.str(self.obj_)
+            else:
+                return getattr(self.obj_, k)
+        
+        return getattr(self.obj_, k)
+        
 
 class Dialog(QtWidgets.QDialog):
     _layout = None

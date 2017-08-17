@@ -671,6 +671,7 @@ class InstructionFlow(ASTPython):
 class Member(ASTPython):
     def generate(self, **kwargs):
         arguments = []
+        funs = None
         for n,arg in enumerate(self.elem):
             expr = []
             for dtype, data in parse_ast(arg).generate():
@@ -715,9 +716,9 @@ class Member(ASTPython):
             "date",
             "toString()",
             "charAt",
-            "isEmpty()"
+            "isEmpty()",
+            "left" ,
         ]
-
         for member in replace_members:
             for idx,arg in enumerate(arguments):
                 if member == arg or arg.startswith(member+"("):
@@ -728,13 +729,18 @@ class Member(ASTPython):
                     except IndexError:
                         part2 = [] # Para los que son últimos y no tienen parte adicional
                     if member == "toString()": 
-                        arguments = ["str(%s)" % (".".join(part1))] + part2
+                        arguments = ["qsatype.FLVariant(%s).%s" % (".".join(part1), arg)] + part2
+                    #    arguments = ["str(%s)" % (".".join(part1))] + part2
                     elif member == "isEmpty()": 
                         arguments = ["%s == None" % (".".join(part1))] + part2
                     elif member == "charAt":
                         value = arg[7:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
+                    elif member == "left":
+                        value = arg[5:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s[0:%s]" % (".".join(part1), value)] + part2
                     else:
                         arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
         yield "expr", ".".join(arguments)
@@ -1112,10 +1118,15 @@ def pythonize(filename, destfilename, debugname = None):
         raise
     ast = ast_tree.getroot()
     tpl = string_template
+    template_exist = False
     for cls in ast.xpath("Class"):
         tpl = file_template
+        template_exist = True
         break
-
+    
+    if template_exist == False:
+        tpl = file_template
+    
     f1 = open(destfilename,"w")
     write_python_file(f1,ast,tpl)
     f1.close()
