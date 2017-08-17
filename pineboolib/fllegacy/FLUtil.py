@@ -878,9 +878,25 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
-        pass
+        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+        c = FLSqlCursor(t, True, connName)
+        c.setForwardOnly(True)
+
+        # if not c.select(w):
+        #     return False
+        c.select(w)
+
+        while c.next():
+            c.setModeAccess(FLSqlCursor.EDIT)
+            c.refreshBuffer()
+            for f,v in zip(fL, vL):
+                c.setValueBuffer(f, v)
+            if not c.commitBuffer():
+                return False
+
+        return True
     """
     Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
 
