@@ -124,7 +124,7 @@ class Project(object):
 
         self.cur = self.conn.cursor()
         self.areas = {}
-        self.cur.execute(""" SELECT idarea, descripcion FROM flareas WHERE bloqueo = TRUE """)
+        self.cur.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
         for idarea, descripcion in self.cur:
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
@@ -543,7 +543,10 @@ class XMLAction(XMLStruct):
     def execDefaultScript(self):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
         s = self.load()
-        s.iface.main()
+        if s.iface:
+            s.iface.main()
+        else:
+            s.script.form.main()
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)
