@@ -86,7 +86,10 @@ class FLLineEdit(QtWidgets.QLineEdit):
         if self._tipo == "double":
             
             texto_old = texto
-            texto = texto.replace(",",".")
+            if (QtCore.QLocale().decimalPoint() == ","):
+                texto = texto.replace(".",",")
+            else:
+                texto = texto.replace(",",".")
             
             if not texto_old == texto:
                 cambiarComa_ = True
@@ -145,7 +148,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
             super(FLLineEdit, self).setText(texto)
         
         if denegarCambioEnteros_ == True and not decimales_ == None:
-            texto = "%s.%s" % (enteros_[0:len(enteros_) -1],decimales_)
+            texto = "%s%s%s" % (enteros_[0:len(enteros_) -1], QtCore.QLocale().decimalPoint(), decimales_)
             super(FLLineEdit, self).setText(texto)
         elif denegarCambioEnteros_ == True and decimales_ == None:
             texto = enteros_[0:len(enteros_) -1]
@@ -3276,7 +3279,7 @@ class FLIntValidator(QtGui.QIntValidator):
             super(FLIntValidator, self).__init__()
 
     def validate(self, input_, i):
-        if input_.isEmpty():
+        if not input_:
             return QtGui.QValidator.Acceptable
 
         input_.replace(",", ".")
