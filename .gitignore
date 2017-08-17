@@ -2,8 +2,8 @@
 *~
 tempdata/*
 projects/*
-share/eneboo/scripts/*.py
-share/eneboo/scripts/*.qs.xml
+share/pineboo/scripts/*.py
+share/pineboo/scripts/*.qs.xml
 .project
 .pydevproject
 .settings/
