@@ -1508,7 +1508,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.lineEditSearch.textChanged.connect(self.filterRecords)
             self.lineEditSearch.selectAll()
             self.initSearch_ = None
-            self.seekCursor()
+            #self.seekCursor()
 
         if not self.readonly_ == self.reqReadOnly_ or (self.tableRecords_ and not self.readonly_ == self.tableRecords_.flReadOnly()):
             self.setReadOnly(self.reqReadOnly_)
@@ -1980,7 +1980,6 @@ class FLTableDB(QtWidgets.QWidget):
     currentChanged = QtCore.pyqtSignal()
 
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def chooseRecord(self):
         if isinstance(self.topWidget, FLFormSearchDB):
             if self.topWidget.inExec_:
