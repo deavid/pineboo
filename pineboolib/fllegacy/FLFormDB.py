@@ -279,7 +279,8 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
         self.widget = self.script.form
-        self.iface = self.widget.iface
+        if getattr(self.widget,"iface",None):
+            self.iface = self.widget.iface
         
 
 
@@ -565,7 +566,6 @@ class FLFormDB(QtWidgets.QDialog):
     def initForm(self):
         
         self.loadControls()
-       
         """ 
         if self.cursor_ and self.cursor_.metadata():
             caption = None
