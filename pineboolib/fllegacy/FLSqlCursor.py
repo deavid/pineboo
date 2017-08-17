@@ -701,7 +701,7 @@ class FLSqlCursor(ProjectClass):
     @return Cadena de texto con el filtro principal
     """
     def mainFilter(self):
-        return getattr(self.d._model,'where_filters["main-filter"]',"")
+        return self.d._model.where_filters["main-filter"]
 
 
     """
@@ -758,11 +758,15 @@ class FLSqlCursor(ProjectClass):
     @param doRefresh Si TRUE tambien refresca el cursor
     """
     def setMainFilter(self, f, doRefresh = True):
-        #print("New main filter:", f)
+        if f == "":
+            f = "1 = 1"
+            
+            
         if self.d._model:
             self.d._model.where_filters["main-filter"] = f
             if doRefresh:
                 self.refresh()
+
 
 
     """
@@ -807,7 +811,7 @@ class FLSqlCursor(ProjectClass):
     @param fN Nombre del campo
     @param v Valor a establecer para el campo
     """
-    @decorators.BetaImplementation
+    
     def setValueBuffer(self, fN, v):
         if not self.d.buffer_:
             self.primeUpdate()
@@ -928,9 +932,11 @@ class FLSqlCursor(ProjectClass):
 
     @param b TRUE o FALSE
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def setEdition(self, b, m = None):
-        return True
+        if b == True:
+            self.setEditMode()
+            
 
     @decorators.NotImplementedWarn
     def restoreEditionFlag(self, m):
@@ -1996,9 +2002,10 @@ class FLSqlCursor(ProjectClass):
 
             else:
                 finalFilter = _filter
-        
-        self.setMainFilter(finalFilter , False)
-        self.d._model.refresh()
+                
+        if finalFilter:
+            self.setMainFilter(finalFilter , False)
+            self.d._model.refresh()
 
         self.newBuffer.emit()
 
@@ -2215,6 +2222,7 @@ class FLSqlCursor(ProjectClass):
                     v = None
                     try:
                         v = self.d.ctxt_().calculateField(field.name())
+                        #v = self.
                     except Exception:
                         print("FLSqlCursor.commitBuffer(): EL campo %s es calculado, pero no se ha calculado nada" % field.name())
 
