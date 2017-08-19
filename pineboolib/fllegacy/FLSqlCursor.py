@@ -59,7 +59,10 @@ class PNBuffer(ProjectClass):
         if row < 0:
             row = self.cursor_._currentregister
         for field in self.fieldList_:
-            field.value = self.cursor_._model.value(row , field.name)
+            if self.cursor_._model.value(row , field.name) == "None":
+                field.value = None
+            else:
+                field.value = self.cursor_._model.value(row , field.name)
 
         self.line_ = self.cursor_._currentregister
 
@@ -124,6 +127,7 @@ class PNBuffer(ProjectClass):
 
 
     def value(self, n):
+
         if not str(n).isdigit():
             for field in  self.fieldList_:
                 if field.name == str(n):
@@ -2002,11 +2006,11 @@ class FLSqlCursor(ProjectClass):
 
             else:
                 finalFilter = _filter
-                
+           
         if finalFilter:
             self.setMainFilter(finalFilter , False)
             self.d._model.refresh()
-
+         
         self.newBuffer.emit()
 
 
