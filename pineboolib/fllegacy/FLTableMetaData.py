@@ -593,7 +593,6 @@ class FLTableMetaData(ProjectClass):
     @param prefixTable Si es TRUE se añade un prefijo a cada campo con el nombre de la tabla; nombretabla.nombrecampo
     @return Cadena de caracteres con los nombres de los campos separados por comas
     """
-    @decorators.BetaImplementation
     def fieldList(self, prefixTable = False):
         listado = []
         
