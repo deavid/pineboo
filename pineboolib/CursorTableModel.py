@@ -98,23 +98,25 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         ret = self.rows > self.rowsLoaded
         #print("canFetchMore: %r" % ret)
         return ret
-
+    
     def data(self, index, role):
+        #print("Data ", index, role)
+        #print("Registros", self.rowCount())
         row = index.row()
         col = index.column()
+        r = None
         if role == DisplayRole or role == EditRole:
-            r = self._vdata[row]
+            #r = self._vdata[row]
             if r is None:
                 r = [ str(x) for x in self._data[row] ]
-                self._vdata[row] = r
+                self._data[row] = r
             d = r[col]
             #if row > self.rowsLoaded *0.95 - 200 and time.time() - self.lastFetch> 0.3: self.fetchMore(QtCore.QModelIndex())
             #d = self._vdata[row*1000+col]
             #if type(d) is str:
             #    d = QVariant(d)
             #    self._vdata[row*1000+col] = d
-
-            return d
+            return d 
             
 
         return QVariant_invalid
