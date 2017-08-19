@@ -1056,10 +1056,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not v:
                     self.editorImg_.clear()
                     return
-                pix = QtGui.QPixmap()
+                pix = QtGui.QPixmap(v)
                 #if not QtGui.QPixmapCache().find(cs.left(100), pix):
-                if not (pix.loadFromData(v)):
-                    print("FLFieldDB(%s) :: La imagen no se ha cargado correctamente" % self.fieldName_)
+                #print("FLFieldDB(%s) :: La imagen no se ha cargado correctamente" % self.fieldName_)
                 #    QtGui.QPixmapCache().insert(cs.left(100), pix)
                 #print("PIX =", pix)
                 if pix:
@@ -1499,7 +1498,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
 
         elif type_ == "pixmap":
-            if not self.editorImgInit_:
+            if not self.editorImgInit_ or not self.editorImg_:
                 self.editorImg_ = FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
@@ -1513,8 +1512,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 if field.visible():
                     self.editorImg_.show()
-            else:
-                return
+                else:
+                    return
                 #else:
             #if modeAcces == FLSqlCursor.Browse:
             if field.visible():
@@ -1526,9 +1525,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 #if cs.isEmpty():
                 #    self.editorImg_.clear()
                 #    return
-                pix = QtGui.QPixmap()
+                pix = QtGui.QPixmap(v)
                 #if not QtGui.QPixmapCache.find(cs.left(100), pix):
-                pix.loadFromData(v)
+                #pix.loadFromData()
                     #QtGui.QPixmapCache.insert(cs.left(100), pix)
 
                 if not pix is None:
@@ -2250,12 +2249,12 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux2_.setToolTip("Guardar imagen como...")
                     self.pbAux2_.setWhatsThis("Guardar imagen como...")
                     self.lytButtons.addWidget(self.pbAux2_)
-                    if self.showed:
-                        try:
-                            savepixmap.activated.disconnect(self.savePixmap)
-                        except:
-                            pass
-                    savepixmap.activated.connect(self.savePixmap)
+                    #if self.showed:
+                    #    try:
+                    #        savepixmap.activated.disconnect(self.savePixmap)
+                    #    except:
+                    #        pass
+                    #savepixmap.activated.connect(self.savePixmap)
 
                     if hasPushButtonDB:
                         self.pushButtonDB.installEventFilter(self)

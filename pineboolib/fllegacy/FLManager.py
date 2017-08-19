@@ -565,6 +565,19 @@ class FLManager(QtCore.QObject):
         if q.exec_() and q.first():
             v = q.value(0)
             del q
+            #print(v)
+            if v.find("{"):
+                v = v[v.find("{") + 3:]
+                v = v[:v.find("};") + 1]
+                #v = v.replace("\t", "")
+                v = v.replace("\n", "")
+                #v = v.replace("\",", ",")
+                #v = v.replace(",\"", ",")
+                v = v.replace("\t", "    ")
+                #v = v.replace("\n\"", "")
+                #v = v.split(",")
+            v = v.split('","')
+                #print(v)
             return v
         
         return None
