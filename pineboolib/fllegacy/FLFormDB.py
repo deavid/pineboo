@@ -622,6 +622,7 @@ class FLFormDB(QtWidgets.QDialog):
             
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
+            self.pushButtonCancel.setAccessibleName("pushButtonCancel")
             self.pushButtonCancel.clicked.connect(self.close)
                 
         self.pushButtonCancel.setSizePolicy(sizePolicy)

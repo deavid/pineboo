@@ -79,7 +79,7 @@ class FLFormRecordDB(FLFormDB):
     """
     Indica si se debe mostrar el botón Aceptar y Continuar
     """
-    showAcceptContinue_ = None
+    showAcceptContinue_ = True
 
     """
     Indica que se está intentando aceptar los cambios
@@ -204,6 +204,11 @@ class FLFormRecordDB(FLFormDB):
                 self.initTransLevel = self.cursor_.transactionLevel()
                 self.setCaptionWidget(caption)
                 self.cursor_.setContext(self.iface)
+            
+            if self.cursor_.modeAccess() == FLSqlCursor.Insert:
+                self.showAcceptContinue_ = True
+            else:
+                self.showAcceptContinue_ = False
 
             self.loadControls()
         else:
@@ -259,6 +264,7 @@ class FLFormRecordDB(FLFormDB):
         if self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if not self.pushButtonFirst:
                 self.pushButtonFirst = QtWidgets.QToolButton()
+                self.pushButtonFirst.setAccessibleName("pushButtonFirst")
                 self.pushButtonFirst.setIcon(QtGui.QIcon(filedir("icons","gtk-goto-first-ltr.png")))
                 self.pushButtonFirst.clicked.connect(self.firstRecord)
                 self.pushButtonFirst.setSizePolicy(sizePolicy)
@@ -273,6 +279,7 @@ class FLFormRecordDB(FLFormDB):
 
             if not self.pushButtonPrevious:
                 self.pushButtonPrevious = QtWidgets.QToolButton()
+                self.pushButtonPrevious.setAccessibleName("pushButtonPrevious")
                 self.pushButtonPrevious.setIcon(QtGui.QIcon(filedir("icons","gtk-go-back-ltr.png")))
                 self.pushButtonPrevious.clicked.connect(self.previousRecord)
                 self.pushButtonPrevious.setSizePolicy(sizePolicy)
@@ -287,6 +294,7 @@ class FLFormRecordDB(FLFormDB):
 
             if not self.pushButtonNext:
                 self.pushButtonNext = QtWidgets.QToolButton()
+                self.pushButtonNext.setAccessibleName("pushButtonNext")
                 self.pushButtonNext.setIcon(QtGui.QIcon(filedir("icons","gtk-go-back-rtl.png")))
                 self.pushButtonNext.clicked.connect(self.nextRecord)
                 self.pushButtonNext.setSizePolicy(sizePolicy)
@@ -301,6 +309,7 @@ class FLFormRecordDB(FLFormDB):
 
             if not self.pushButtonLast:
                 self.pushButtonLast = QtWidgets.QToolButton()
+                self.pushButtonLast.setAccessibleName("pushButtonLast")
                 self.pushButtonLast.setIcon(QtGui.QIcon(filedir("icons","gtk-goto-last-ltr.png")))
                 self.pushButtonLast.clicked.connect(self.lastRecord)
                 self.pushButtonLast.setSizePolicy(sizePolicy)
@@ -319,6 +328,7 @@ class FLFormRecordDB(FLFormDB):
             if self.showAcceptContinue_:
                 if not self.pushButtonAcceptContinue:
                     self.pushButtonAcceptContinue = QtWidgets.QToolButton()
+                    self.pushButtonAcceptContinue.setAccessibleName("pushButtonAcceptContinue")
                     self.pushButtonAcceptContinue.clicked.connect(self.acceptContinue)
 
                 self.pushButtonAcceptContinue.setSizePolicy(sizePolicy)
@@ -326,14 +336,15 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonAcceptContinue.setMinimumSize(pbSize)
                 self.pushButtonAcceptContinue.setIcon(QtGui.QIcon(filedir("icons","gtk-refresh.png")))
                 #pushButtonAcceptContinue->setAccel(QKeySequence(Qt::Key_F9)); FIXME
-                self.pushButtonAcceptContinue.whatsThis("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
-                self.pushButtonAcceptContinue.toolTip("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
+                self.pushButtonAcceptContinue.setWhatsThis("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
+                self.pushButtonAcceptContinue.setToolTip("Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
                 self.pushButtonAcceptContinue.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.bottomToolbar.layout.addWidget(self.pushButtonAcceptContinue)
                 #self.pushButtonAcceptContinue.show()
 
             if not self.pushButtonAccept:
                 self.pushButtonAccept = QtWidgets.QToolButton()
+                self.pushButtonAccept.setAccessibleName("pushButtonAccept")
                 self.pushButtonAccept.clicked.connect(self.accept)
 
             self.pushButtonAccept.setSizePolicy(sizePolicy)
@@ -350,6 +361,7 @@ class FLFormRecordDB(FLFormDB):
 
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
+            self.pushButtonCancel.setAccessibleName("pushButtonCancel")
             try:
                 self.cursor_.autocommit.connect(self.disablePushButtonCancel)
             except:
