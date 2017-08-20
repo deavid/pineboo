@@ -4,10 +4,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from PyQt5.QtCore import Qt
 
-# TODO: Borrar el import del QVariant!!. QVariant es necesario en C++ porque es
-# ... el único modo de representar un tipo polimórfico. En Python esto es innecesario.
-from PyQt5.QtCore import QVariant
-
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import DefFun, filedir
@@ -1375,8 +1371,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 q.setWhere(where)
 
                 if q.exec_() and q.next():
-                    v0 = QVariant(q.value(0))
-                    v1 = QVariant(q.value(1))
+                    v0 = q.value(0)
+                    v1 = q.value(1)
                     if not v0 == self.value():
                         self.setValue(v0)
                     if not v1 == v:
@@ -2462,7 +2458,7 @@ class FLFieldDB(QtWidgets.QWidget):
     def clearPixmap(self):
         if not self.editorImg_:
             self.editorImg_.clear()
-            self.cursor_.setValueBuffer(self.fieldName_, QVariant())
+            self.cursor_.setValueBuffer(self.fieldName_, None)
 
 
     """
