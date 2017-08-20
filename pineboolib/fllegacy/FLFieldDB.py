@@ -1600,7 +1600,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if not v is None:
                 
-                self.editor_.setChecked(bool(v))
+                self.editor_.setChecked(v)
             else:
                 self.editor_.setChecked(bool(field.defaultValue()))
                 

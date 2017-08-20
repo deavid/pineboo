@@ -76,7 +76,10 @@ class PNBuffer(ProjectClass):
     def setNull(self, name):
         for field in  self.fieldList_:
             if field.name == str(name):
-                field.value = None
+                self.setValue(name, None)
+                return True
+        
+        return False
 
 
     def isGenerated(self, name):
@@ -133,8 +136,11 @@ class PNBuffer(ProjectClass):
                 if field.name == str(n):
                     #print("PNBuffer.value(%s) = %s" % (name, field.value) )
                     if field.value is None:
-                        return None
+                        if field.type_ == "bool":
+                            return False
                     else:
+                        if field.type_ == "bool":
+                            return str(field.value) == "True"
                         return field.value
         else:
             try:
@@ -1448,9 +1454,9 @@ class FLSqlCursor(ProjectClass):
     def exec_(self, query):
         return True
 
-    @decorators.BetaImplementation
     def setNull(self, name):
-        self.d.buffer_.setNull(name)
+        if self.d.buffer_.setNull(name):
+            self.newBuffer.emit()
 
     """
     Para obtener la base de datos sobre la que trabaja
