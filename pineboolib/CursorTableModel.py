@@ -426,14 +426,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # Reimplementación para que todo pase por el método genérico.
         self.setValuesDict(self, row, { fieldname : value } )
     
-    
-    """
-    Dibuja el valor correcto
-    """
-    
-    def paintCell(self, format_, value):
-        print("Dibujando formato", format_)
-        return QtCore.QVariant(ustr(value))
     """
     Crea una nueva linea en el tableModel
     @param buffer . PNBuffer a añadir
