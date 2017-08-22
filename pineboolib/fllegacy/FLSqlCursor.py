@@ -3,6 +3,7 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, fllegacy
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import DefFun
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -124,7 +125,6 @@ class PNBuffer(ProjectClass):
 
 
         return True
-
 
     def value(self, n):
 
@@ -437,6 +437,9 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
 
     _current_changed = QtCore.pyqtSignal(int)
+    
+    FlagStateList = AQBoolFlagStateList()
+    FlagState = AQBoolFlagState()
 
     def __init__(self):
         super(FLSqlCursorPrivate,self).__init__()
@@ -445,6 +448,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self._currentRegister = -1
         self.acosCondName_ = None
         self.buffer_ = None
+        self.editionStates_ = None
 
 
 
@@ -938,26 +942,99 @@ class FLSqlCursor(ProjectClass):
     """
     @decorators.BetaImplementation
     def setEdition(self, b, m = None):
-        if b == True:
-            self.setEditMode()
+        
+        if not m:
+            self.d.edition_ = b
+            return
+        
+        stateChanges = (not b == self.d.edition_)
+        
+        if stateChanges and not self.d.editionStates_:
+            self.d.editionStates_ = AQBoolFlagStateList()
+        
+        if not self.d.editionStates_:
+            return
+        
+        i = self.d.editionStates_.find(m)
+        if not i and stateChanges:
+            i = AQBoolFlagState()
+            i. modifier_ = m
+            i.prevValue_ = self.d.edition_
+            self.d.editionStates_.append(i)
+        elif i:
+            if stateChanges:
+                self.d.editionStates_.pushOnTop(i)
+                i.prevValue_ = self.d.edition_
+            else:
+                self.d.editionStates_.erase(i)
+        
+        if stateChanges:
+            self.d.edition_ = b
+
             
 
-    @decorators.NotImplementedWarn
     def restoreEditionFlag(self, m):
-        return True
+    
+        if not getattr(self.d, "editionStates_", None):       
+            return
+            
+        i = self.d.editionStates_.find(m)
+        
+        if i and i == self.d.editionStates_.cur_:
+            self.d.edition_ = i.prevValue_
+        
+        if i:
+            self.d.editionStates_.erase(i)
+        
+        
 
     """
     Establece el valor de FLSqlCursor::browse.
 
     @param b TRUE o FALSE
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def setBrowse(self, b,m = None):
-        return True
+        if not m:
+            self.d.browse_ = b
+            return
+        
+        stateChanges = (not b == self.d.browse_)
+        
+        if stateChanges and not self.d.borwseStates_:
+            self.d.browseStates_ = AQBoolFlagStateList()
+        
+        if not self.d.browseStates_:
+            return
+        
+        i = self.d.browseStates_.find(m)
+        if not i and stateChanges:
+            i = AQBoolFlagState()
+            i. modifier_ = m
+            i.prevValue_ = self.d.browse_
+            self.d.browseStates_.append(i)
+        elif i:
+            if stateChanges:
+                self.d.browseStates_.pushOnTop(i)
+                i.prevValue_ = self.d.browse_
+            else:
+                self.d.browseStates_.erase(i)
+        
+        if stateChanges:
+            self.d.browse_ = b
 
-    @decorators.NotImplementedWarn
+
     def restoreBrowseFlag(self, m):
-        return True
+        if not getattr(self.d, "browseStates_", None):
+            return
+        
+        i == self.d.browseStates_.find(m)
+        
+        if i and i == self.d.browseStates_.cur_:
+            self.d.browse_ = i.prevValue_
+        
+        if i:
+            self.d.browseStates_.erase(i)
 
     """
     Establece el contexto de ejecución de scripts
@@ -1233,10 +1310,20 @@ class FLSqlCursor(ProjectClass):
     @param fN Nombre del campo
     @param v Valor para el campo unlock
     """
-    @decorators.NotImplementedWarn
+    
     def setUnLock(self, fN, v):
-        return True
+        if self.d.metadata_ or not self.d.modeAccess_ == self.browse:
+            return
+        
+        if not self.d.metadata_.fieldType(fN) == FLFieldMetaData.Unlock:
+            print("FLSqlCursor::setUnLock sólo permite modificar campos del tipo Unlock")
+            return
 
+        self.d.buffer_ = self.primeUpdate()
+        self.d.buffer_.setValue(fN, v)
+        self.update()
+        self.refreshBuffer()
+        
 
     """
     Para comprobar si el registro actual del cursor está bloqueado.
@@ -1272,17 +1359,21 @@ class FLSqlCursor(ProjectClass):
 
     @param pos_or_name Nombre o pos del campo en el buffer
     """
-    @decorators.NotImplementedWarn
     def bufferSetNull(self, pos_or_name):
-        return True
+        
+        if self.d.buffer_:
+            self.d.buffer_.setNull(pos_or_name)
 
     """
     Devuelve si el contenido de un campo en el bufferCopy en nulo.
 
     @param pos_or_name Nombre o pos del campo en el bufferCopy
     """
-    @decorators.NotImplementedWarn
+    
     def bufferCopyIsNull(self, pos_or_name):
+        
+        if self.d.bufferCopy_:
+            return self.d.bufferCopy_.isNull(pos_or_name)
         return True
 
 
@@ -1291,9 +1382,11 @@ class FLSqlCursor(ProjectClass):
 
     @param pos_or_name Nombre o pos del campo en el bufferCopy
     """
-    @decorators.NotImplementedWarn
+
     def bufferCopySetNull(self, pos_or_name):
-        return True
+        
+        if self.d.bufferCopy_:
+            self.d.bufferCopy_.setNull(pos_or_name)
 
 
     """
@@ -2760,6 +2853,113 @@ class FLSqlCursor(ProjectClass):
 
     """ Uso interno """
     clearPersistentFilter = QtCore.pyqtSignal()
+    
+    
+class AQBoolFlagState(object):
+    
+    modified_ = None
+    prevValue_ = None
+    prev_ = None
+    next_ = None
+    count_ = False
+    
+    def __init__(self):
+        self.modified_ = None
+        self.prevValue_ = False
+        self.prev_ = None
+        self.next_ = None
+        
+        if not self.count_:
+            self.count_ = self.count_ + 1
+        print("---------------->AQBoolFlagState.count_ =", self.count_)
+    
+    def __del__(self):
+        self.count_ = self.count - 1
+    
+    def dumpDebug(self):
+        if DEBUG: print("%s <- (%s : [%s, %s]) -> %s" % (prev_, this, modifier_, prevValue_, next_))
+        
+        
+    
+    
+    
+class AQBoolFlagStateList(object):
+    
+    cur_ = None
+    
+    def __init__(self):
+        self.cur_ = AQBoolFlagState()
+    
+    
+    
+    
+    def __del__(self):
+        self.clear()
+    
+    def dumpDebug(self):
+        if DEBUG: print("Current %s" % self.cur_)
+        while self.cur_:
+            self.cur_.dumpDebug()
+            self.cur_ = self.cur_.prev
+        
+        if DEBUG: print("AQBoolFlagState count %s", self.cur_.count_)
+    
+    def clear(self):
+        while(self.cur_):
+            pv = self.cur_.prev_
+            self.cur_ = None
+            self.cur_ = pv
+            
+    def isEmpty(self):
+        return (self.cur_ == None)
+    
+    def find(self, m):
+        it = self.cur_
+        while (it and not it.modified_ == m):
+            it = it.prev_
+        
+        return it
+        
+        
+            
+    
+    def append(self, i):
+        if not self.cur_:
+            self.cur_ = i
+            self.cur_.next_ = None
+            self.cur_.prev_ = None
+            return
+    
+        self.cur_.next_ = i
+        i.prev_ = self.cur_
+        self.cur_ = i
+        self.cur_.next_ = None
+    
+    def erase(self, i, del_):
+        if not self.cur_:
+            return
+        
+        if self.cur_ == i:
+            if self.cur_.prev_:
+                self.cur_ = self.cur_.prev_
+                self.cur_.next_ = None
+            else:
+                self.cur_ = None
+        else:
+            if i.next_:
+                i.next_.prev_ = i.prev_
+            if i.prev_:
+                i.prev_.next_ = i.next_
+        
+        if not del_:
+            i.next_ = None
+            i.prev_ = None
+        else:
+            del i
+    
+    def pushOnTop(self, i):
+        if self.cur_ == i:
+            return
+        self.erase(i, False)
+        self.append(i)
 
-#endif
-from pineboolib.fllegacy.FLUtil import FLUtil
