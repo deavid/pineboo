@@ -1174,11 +1174,11 @@ class FLSqlCursor(ProjectClass):
             return
 
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
-            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso","No hay ningún registro seleccionado",QtWidgets.QMessageBox.Ok,0,0)
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),FLUtil.tr("Aviso"),FLUtil.tr("No hay ningún registro seleccionado"))
             return
 
         if m == self.Del:
-            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso","El registro activo será borrado. ¿ Está seguro ?",QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default| QtWidgets.QMessageBox.Escape)
+            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), FLUtil.tr("Aviso"),FLUtil.tr("El registro activo será borrado. ¿ Está seguro ?"),QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No)
             if res == QtWidgets.QMessageBox.No:
                 return
 
