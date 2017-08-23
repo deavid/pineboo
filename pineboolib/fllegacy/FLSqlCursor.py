@@ -62,6 +62,11 @@ class PNBuffer(ProjectClass):
         for field in self.fieldList_:
             if self.cursor_._model.value(row , field.name) == "None":
                 field.value = None
+            elif field.type_ == "unlock":
+                if self.cursor_._model.value(row , field.name) == "True" or self.cursor_._model.value(row , field.name) == True:
+                    field.value = True
+                else:
+                    field.value = False
             else:
                 field.value = self.cursor_._model.value(row , field.name)
 
@@ -438,8 +443,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
     _current_changed = QtCore.pyqtSignal(int)
     
-    FlagStateList = AQBoolFlagStateList()
-    FlagState = AQBoolFlagState()
+    FlagStateList = None
+    FlagState = None
 
     def __init__(self):
         super(FLSqlCursorPrivate,self).__init__()
@@ -1334,8 +1339,9 @@ class FLSqlCursor(ProjectClass):
     def isLocked(self):
         if not self.d.modeAccess_ == self.Insert and self.fieldsNamesUnlock_ and self.d.buffer_ and self.d.buffer_.value(self.d.metadata_.primaryKey()):
             for field in self.fieldsNamesUnlock_:
-                if not self.d.buffer_.value(field):
+                if self.d.buffer_.value(field) is False: 
                     return True
+                          
         return False
 
 

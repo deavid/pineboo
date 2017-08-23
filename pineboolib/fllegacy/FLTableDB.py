@@ -364,7 +364,7 @@ class FLTableDB(QtWidgets.QWidget):
         if self.tableRecords_:
             self.readonly = mode
             self.tableRecords_.setFLReadOnly(mode)
-            #self.readOnlyChanged(mode).emit() FIXME
+            self.readOnlyChanged.emit(mode)
 
         self.reqReadOnly_ = mode
 
@@ -379,7 +379,7 @@ class FLTableDB(QtWidgets.QWidget):
         if self.tableRecords_:
             self.editonly_ = mode
             self.tableRecords_.setEditOnly(mode)
-            #self.editOnlyChanged(mode).emit() #FIXME
+            self.editOnlyChanged.emit(mode)
 
         self.reqEditOnly_ = mode
 
@@ -393,7 +393,7 @@ class FLTableDB(QtWidgets.QWidget):
         if self.tableRecords_:
             self.insertonly_ = mode
             self.tableRecords_.setInsertOnly(mode)
-            self.insertOnlyChanged(mode).emit()
+            self.insertOnlyChanged.emit(mode)
 
         self.reqInsertOnly = mode
 
@@ -1559,7 +1559,17 @@ class FLTableDB(QtWidgets.QWidget):
     def insertRecord(self):
 
         w = self.sender()
-        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        #if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        relationLock  = False
+            
+        if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
+            relationLock = self.cursor_.cursorRelation().isLocked()
+        
+        
+        if w and self.cursor().isLocked() or self.browseOnly() or self.onlyTable() or self.editOnly() or relationLock:
+            
+            
+            
             w.setDisabled(True)
             return
 
@@ -1572,7 +1582,15 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def editRecord(self):
         w = self.sender()
-        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        
+        #if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        relationLock  = False
+            
+        if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
+            relationLock = self.cursor_.cursorRelation().isLocked()
+        
+        
+        if w and self.cursor().isLocked() or self.browseOnly() or self.onlyTable() or relationLock:
             w.setDisabled(True)
             return
 
@@ -1985,9 +2003,15 @@ class FLTableDB(QtWidgets.QWidget):
             if self.topWidget.inExec_:
                     self.topWidget.accept()
                     return
+                      
+        relationLock  = False
             
-        if self.cursor().isLocked():
-            print("FLTable(%s):Registro bloqueado. Modo Solo lectura" % self.cursor().curName())
-            self.browseRecord()
+        if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
+            relationLock = self.cursor_.cursorRelation().isLocked()
+        
+        
+        if self.cursor().isLocked() or self.browseOnly() or relationLock:
+            print("FLTable(%s):Registro bloqueado. Modo Solo lectura." % self.cursor().curName())
+            self.cursor().browseRecord()
         else:   
-            self.editRecord()
+            self.cursor().editRecord()
