@@ -1206,8 +1206,7 @@ class FLSqlCursor(ProjectClass):
             return
 
         if not self._action.formRecord():
-            QtWidgets.QMessageBox.Warning(QtWidgets.QApplication.focusWidget(), "Aviso","No hay definido ningún formulario para manejar "
-         "registros de esta tabla : %s" % str(self.curName()) ,QtWidgets.QMessageBox.Ok,0,0)
+            QtWidgets.QMessageBox.Warning(QtWidgets.QApplication.focusWidget(), FLUtil.tr("Aviso"),FLUtil.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()) ,QtWidgets.QMessageBox.Ok)
             return
 
         if self.refreshBuffer():
@@ -2093,7 +2092,6 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método select() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    @decorators.Incomplete
     def select(self, _filter = None, sort = None ): #sort = QtCore.QSqlIndex()
 
         if not self.d.metadata_:
