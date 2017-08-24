@@ -460,6 +460,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.acosCondName_ = None
         self.buffer_ = None
         self.editionStates_ = None
+        self.activatedCheckIntegrity_ = True
 
 
 
@@ -519,7 +520,9 @@ class FLSqlCursorPrivate(QtCore.QObject):
         return need
 
 
-
+    def msgBoxWarning(self, msg):
+        QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget, msg)
+        
 
 
 
@@ -820,9 +823,50 @@ class FLSqlCursor(ProjectClass):
     @param fN Nombre del campo
     @param functionName Nombre de la función a invocar del script
     """
-    @decorators.NotImplementedWarn
+    
     def setAtomicValueBuffer(self, fN, functionName):
-        return True
+        if not self.d.buffer_ or not fN or not self.d.metadata_:
+            return
+        
+        field = self.d.metadata_.field(fN)
+        
+        if not field:
+            print(FLUtil.tr("FLSqlCursor::setAtomicValueBuffer() : No existe el campo ") + self.d.metadata_.name() + ":" + fN)
+            return
+        
+        if not self.d.db_.dbAux():
+            return
+        
+        type = field.type()
+        fltype = FLFieldMetaData.FlDecodeType(type)
+        pK = self.d.metadata_.primaryKey()
+        v = None
+        
+        if self.d.cursorRelation_ and self.d.modeAccess_ == self.Browse:
+            self.d.cursorRelation_.commit(False)
+        
+        if pK and not self.d.db_.db() == self.d.db_.dbAux():
+            pKV = self.d.buffer_.value(pK)
+            self.d.db_.dbAux().transaction()
+            
+            arglist = []
+            arglist.append(fN)
+            arglist.append(self.d.buffer_.value(fN))
+            v = self._prj.call(functionName, arglist, self.d.ctxt_)
+            
+            q = FLSqlQuery(None, self.d.db_.dbAux())
+            if q.exec_("UPDATE  %s SET %s = %s WHERE %s" % (self.d.metadata_.name(), fN, self.d.db_.manager().formatValue(type, v), self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pK), pKV))):
+                self.d.db_.dbAux().commit()
+            else:
+                self.d.db_.dbAux().rollback()
+        else:
+            print(FLUtil.tr("FLSqlCursor : No se puede actualizar el campo de forma atómica, porque no existe clave primaria"))
+        
+        self.d.buffer_.setValue(fN, v)
+        self.bufferChanged.emit()
+            
+            
+        
 
     """
     Establece el valor de un campo del buffer con un valor.
@@ -832,10 +876,49 @@ class FLSqlCursor(ProjectClass):
     """
     
     def setValueBuffer(self, fN, v):
-        if not self.d.buffer_:
+        #if not self.d.buffer_ or not fN or not self.d.metadata_:
+            #return
+        
+        if not self.d.buffer_:  # Si no lo pongo malo....
             self.primeUpdate()
+        
+        if not fN or not self.d.metadata_:
+            return
+        
+        field = self.d.metadata_.field(fN)
+        if not field:
+            print(FLUtil.tr("FLSqlCursor::setValueBuffer() : No existe el campo ") + self.d.metadata_.name() + ":" + fN)
+            return
+        
+        type_ = field.type()
+        fltype = field.flDecodeType(type_)
+        vv = v
+        
+        if isinstance(vv, bool) or not fltype == "bool":
+            vv = None
+        if vv:
+            if vv and type == "pixmap":
+                largeValue = self.d.db_.manager().storeLargeValue(self.d.metadata_, str(vv))
+                if largeValue:
+                    vv = largeValue
+        
+        if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() == self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert:
+            pK = self.d.metadata_.primaryKey()
             
-        self.d.buffer_.setValue(fN, v)
+            if self.d.cursorRelation_ and not self.d.modeAccess_ == self.Browse:
+                self.d.cursorRelation_.commit(False)
+            
+            if pK:
+                pKV = self.d.buffer_.value(pK)
+                q = FLSqlQuery(None, self.d.db_.dbAux())
+                q.exec_("UPDATE %s SET %s = %s WHERE %s" % (self.d.metadata_.name(), fN, self.d.db_.manager().formatvalue(type, vv), self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pK, pKV))))
+            else:
+                FLUtil.tr("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
+        
+        else:
+            self.d.buffer_.setValue(fN, v)
+            
+        
         self.bufferChanged.emit(fN)
 
     """
@@ -1286,7 +1369,7 @@ class FLSqlCursor(ProjectClass):
     """
     @decorators.NotImplementedWarn
     def msgCheckIntegrity(self):
-        return True
+        return False
 
     """
     Realiza comprobaciones de intregidad.
@@ -1301,8 +1384,21 @@ class FLSqlCursor(ProjectClass):
     @return TRUE si se ha podido entregar el buffer al cursor, y FALSE si ha fallado alguna comprobacion
       de integridad
     """
-    @decorators.NotImplementedWarn
     def checkIntegrity(self, showError = True):
+        if not self.d.buffer_ or not self.d.metadata_:
+            return False
+        if not self.d.activatedCheckIntegrity_:
+            return True
+        
+        msg = self.msgCheckIntegrity()
+        if msg:
+            if showError:
+                if self.d.modeAccess_ == self.Inset or self.d.modeAccess_ == self.Edit:
+                    self.d.msgBoxWarning(FLUtil.tr("No se puede validad el registro actual:\n") + msg)
+                elif self.d.modeAccess_ == self.Del:
+                    self.d.msgBoxWarning(FLUtil.tr("No se puede borrar registro:\n") + msg)
+            return False
+        
         return True
 
     """
@@ -2575,7 +2671,7 @@ class FLSqlCursor(ProjectClass):
     def rollbackOpened(self, count = -1, msg = None):
         ct = None
         if count < 0:
-            ct = self.d.transactionsOpened_.count()
+            ct = len(self.d.transactionsOpened_)
         else:
             ct = count
 
@@ -2608,9 +2704,36 @@ class FLSqlCursor(ProjectClass):
                 Si es vacía no muestra nada.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def commitOpened(self, count = -1, msg = None):
-        return True
+        ct = None
+        t = None
+        if count < 0:
+            ct = len(self.d.transactionsOpened_)
+        else:
+            ct = count
+        
+        if self.d.metadata_:
+            t = self.d.metadata_.name()
+        else:
+            t = self.name()
+            
+        
+        
+        if ct and msg:
+            m = "%sSqlCursor::commitOpened: %s %s" % (msg, str(count), t)
+            self.d.msgBoxWarning(m, False)
+            print(m)
+        elif ct > 0:
+            print("SqlCursor::commitOpened: %d %s" % (count, self.name()))
+        
+        i = 0
+        while i < ct:
+            print(FLUtil.tr("FLSqlCursor : Terminando transacción abierta"), self.transactionLevel())
+            self.commit()
+            i = i + 1
+        
+            
+        
 
     """
     Entra en un bucle de comprobacion de riesgos de bloqueos para esta tabla y el registro actual
@@ -2697,9 +2820,48 @@ class FLSqlCursor(ProjectClass):
     Cambia el cursor a otra conexión de base de datos
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def changeConnection(self, connName):
-        return True
+        curConnName = self.connectionName()
+        if curConnName == connName:
+            return
+        
+        newDB = self._prj.conn.database(connName)
+        if curConnName == newDB.connectionName():
+            return
+        
+        if self.d.transactionsOpened_:
+            mtd = self.d.metadata_
+            t = None
+            if mtd:
+                t = mtd.name()
+            else:
+                t = self.name()
+            
+            msg = FLUtil.tr("Se han detectado transacciones no finalizadas en la última operación.\n"
+             "Se van a cancelar las transacciones pendientes.\n"
+             "Los últimos datos introducidos no han sido guardados, por favor\n"
+             "revise sus últimas acciones y repita las operaciones que no\n"
+             "se han guardado.\n") + "SqlCursor::changeConnection: %s\n" % t
+            self.rollbackOpened(-1, msg)
+        
+        bufferNoEmpty = (not self.d.buffer_ == None)
+        
+        bufferBackup = None
+        if bufferNoEmpty:
+            bufferBackup = self.d.buffer_
+            self.d.buffer_ = None
+        
+        c = FLSqlCursor(None, True, newDB.db())
+        self.d.db_ = newDB
+        self.init(self.d.curName_, True, self.d.cursorRelation_, self.d.relation_)
+        
+        if(bufferNoEmpty):
+            #self.d.buffer_ QSqlCursor::edtiBuffer()
+            self.d.buffer_ = bufferBackup
+        
+        self.connectionChanged.emit()
+        
+            
 
 
 
