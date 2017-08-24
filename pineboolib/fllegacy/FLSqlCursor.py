@@ -41,7 +41,7 @@ class PNBuffer(ProjectClass):
         self.cursor_ = cursor
         self.fieldList_ = []
         self.md5Sum_ = ""
-        campos = self.cursor_.db_.manager().metadata(self.cursor_.curName_).fieldListObject()
+        campos = self.cursor_.d.db_.manager().metadata(self.cursor_.d.curName_).fieldListObject()
         for campo in campos:
             field = Struct()
             field.name = str(campo.name())
@@ -58,19 +58,23 @@ class PNBuffer(ProjectClass):
 
     def primeUpdate(self, row = None):
         if row < 0:
-            row = self.cursor_._currentregister
+            row = self.cursor_.d._currentregister
         for field in self.fieldList_:
-            if self.cursor_._model.value(row , field.name) == "None":
+            if self.cursor_.d._model.value(row , field.name) == "None":
                 field.value = None
             elif field.type_ == "unlock":
-                if self.cursor_._model.value(row , field.name) == "True" or self.cursor_._model.value(row , field.name) == True:
+                if self.cursor_.d._model.value(row , field.name) == "True" or self.cursor_.d._model.value(row , field.name) == True:
                     field.value = True
                 else:
                     field.value = False
             else:
-                field.value = self.cursor_._model.value(row , field.name)
+                field.value = self.cursor_.d._model.value(row , field.name)
+            
 
-        self.line_ = self.cursor_._currentregister
+            self.cursor_.bufferChanged.emit(field.name)
+
+        self.line_ = self.cursor_.d._currentregister
+        
 
     def primeDelete(self):
         for field in self.fieldList_:
@@ -89,8 +93,8 @@ class PNBuffer(ProjectClass):
 
 
     def isGenerated(self, name):
-        curName = self.cursor_.curName_
-        field = self.cursor_.db_.manager().metadata(curName).field(name)
+        curName = self.cursor_.d.curName_
+        field = self.cursor_.d.db_.manager().metadata(curName).field(name)
         if not field:
             retorno = True
         else:
@@ -160,10 +164,11 @@ class PNBuffer(ProjectClass):
 
         for field in  self.fieldList_:
             if field.name == str(name):
-                field.value = value
-                field.modified = True
-                self.setMd5Sum(value)
-                return
+                if not field.value == value: 
+                    field.value = value
+                    field.modified = True
+                    self.setMd5Sum(value)
+                    return
 
 
     def convertToType(self, value, fltype):
@@ -200,7 +205,7 @@ class PNBuffer(ProjectClass):
     def setGenerated(self, name, value):
         for field in self.fieldList_:
             if field.name == name:
-                self.cursor_.db_.manager().metadata(self.cursor_.curName_).field(name).setGenerated(True)
+                self.cursor_.d.db_.manager().metadata(self.cursor_.d.curName_).field(name).setGenerated(True)
                 return
 
     """
@@ -449,6 +454,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
     _current_changed = QtCore.pyqtSignal(int)
     
+    
     FlagStateList = None
     FlagState = None
 
@@ -627,11 +633,11 @@ class FLSqlCursor(ProjectClass):
 
         self.d.modeAccess_ = FLSqlCursor.Browse
 
-        #if not name.isEmpty():
-        #    if not self.d.db_.manager().existsTable(name):
-        #        self.d.metadata_ = self.d.db_.manager().createTable(name)
-        #    else:
-        #        self.d.metadata_ = self.d.db_.manager().metadata(name)
+        if name:
+            if not self.d.db_.manager().existsTable(name):
+                self.d.metadata_ = self.d.db_.manager().createTable(name)
+        else:
+            self.d.metadata_ = self.d.db_.manager().metadata(name)
         self.d.cursorRelation_ = cR
         if r: # FLRelationMetaData
             if self.d.relation_ and self.d.relation_.deref():
@@ -642,7 +648,7 @@ class FLSqlCursor(ProjectClass):
         else:
             self.d.relation_ = None
 
-        if not self.metadata():
+        if not self.d.metadata_:
             return
 
         self.fieldsNamesUnlock_ = self.metadata().fieldsNamesUnlock()
@@ -656,26 +662,25 @@ class FLSqlCursor(ProjectClass):
         if self.d.isQuery_:
             qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
             self.d.query_ = qry.sql()
-            if qry and not self.d.query_.isEmpty():
-                self.exec(self.d.query_)
+            if qry and self.d.query_:
+                self.exec_(self.d.query_)
             if qry:
                 self.qry.deleteLater()
         else:
             self.setName(self.metadata().name(), autopopulate)
 
-        if self.d.modeAccess_ == self.Browse:
-            if cR and r:
-                try:
-                    cR.bufferChanged.disconnect(self.refresh)
-                except:
-                    pass
-
-                cR.bufferChanged.connect(self.refresh)
-                try:
-                    cR.newBuffer.disconnect(self.clearPersistentFilter)
-                except:
-                    pass
-                cR.newBuffer.connect(self.clearPersistentFilter)
+        self.d.modeAccess_ = self.Browse
+        if cR and r:
+            try:
+                cR.bufferChanged.disconnect(self.refresh)
+            except:
+                pass
+            cR.bufferChanged.connect(self.refresh)
+            try:
+                cR.newBuffer.disconnect(self.clearPersistentFilter)
+            except:
+                pass
+            cR.newBuffer.connect(self.clearPersistentFilter)
         else:
             self.seek(None)
 
@@ -1854,12 +1859,12 @@ class FLSqlCursor(ProjectClass):
 
 
     def primeInsert(self):
-         return PNBuffer(self.d)
+         return PNBuffer(self)
 
 
     def primeUpdate(self):
         if not self.d.buffer_:
-            self.d.buffer_ = PNBuffer(self.d)
+            self.d.buffer_ = PNBuffer(self)
         
         if not self.baseFilter() or not self.d._currentregister == None:
             self.d.buffer_.primeUpdate(self.at())
@@ -1898,7 +1903,7 @@ class FLSqlCursor(ProjectClass):
                 return False
 
             if not self.d.buffer_:
-                self.d.buffer_ = PNBuffer(self.d)
+                self.d.buffer_ = PNBuffer(self)
             self.setNotGenerateds()
 
             fieldList = self.metadata().fieldListObject()
@@ -2910,6 +2915,9 @@ class FLSqlCursor(ProjectClass):
 
     def filter(self):
         return self.d.filter_
+    
+    def clearPersistentFilter(self):
+        self.d.persistentFilter_ = None
 
     """
     Actualiza tableModel con el buffer
