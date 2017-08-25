@@ -1727,8 +1727,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editorImg_.clear()
                     return
             
-            pix = QtGui.QPixmap()
-            pix.loadFromData(v)
+            pix = QtGui.QPixmap(v)
+            #pix.loadFromData(v)
             
             if pix.isNull():
                 self.editorImg_.clear()
@@ -2531,7 +2531,7 @@ class FLFieldDB(QtWidgets.QWidget):
         
         v = self.cursor_.valueBuffer(field.name())
         if not v or ( fMD and self.cursor_.bufferIsNull(fMD.name())):
-            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtWidgets.QMessageBox.Ok, 0, 0)
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtWidgets.QMessageBox.Ok)
             return
 
         mng = FLManager(self.cursor_.db().manager())
