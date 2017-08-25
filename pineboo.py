@@ -1,9 +1,5 @@
 #!/usr/bin/python3 -u
 # -*# -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
-
-
-
 """
     Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
     pineboolib.main(); para ello acepta los parámetros necesarios de consola
@@ -14,38 +10,47 @@ from optparse import OptionParser
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+dependeces = []
 
 try:
     from lxml import etree
 except ImportError:
     print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-lxml e intente de nuevo")
-    print()
-    sys.exit(32)
+    dependeces.append("python3-lxml")
+ 
 try:
     import psycopg2
 except ImportError:
     print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
-    print()
-    sys.exit(32)
+    dependeces.append("python3-psycopg2")
+
 
 try:
-    #import sip
-    # switch on QVariant in Python3
-    #sip.setapi('QVariant', 1)
-    #sip.setapi('QString', 1)
-
-    from PyQt5 import QtGui, QtCore, uic
+    import ply
 except ImportError:
     print(traceback.format_exc())
+    dependeces.append("python3-ply")
+
+try:
+    import future
+except ImportError:
+    print(traceback.format_exc())
+    dependeces.append("python3-future")
+
+try:
+
+    from PyQt5 import QtGui, QtCore, uic, QtWidgets
+except ImportError:
+    print(traceback.format_exc())
+    dependeces.append("python3-pyqt5")
+
+if len(dependeces) > 0:
     print()
-    print("HINT: Instale el paquete python3-pyqt5 e intente de nuevo")
+    print("HINT: Dependencias incumplidas:")
+    for dep in dependeces:
+        print("HINT: Instale el paquete %s e intente de nuevo" % dep)
     print()
     sys.exit(32)
-
 
 from pineboolib.utils import filedir
 import pineboolib.DlgConnect
