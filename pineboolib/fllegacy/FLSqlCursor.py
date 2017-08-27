@@ -158,7 +158,7 @@ class PNBuffer(ProjectClass):
                 return None
 
 
-    def setValue(self, name, value):
+    def setValue(self, name, value, mark_ = True):
         if value is not None and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
 
@@ -166,7 +166,8 @@ class PNBuffer(ProjectClass):
             if field.name == str(name):
                 if not field.value == value: 
                     field.value = value
-                    field.modified = True
+                    if mark_:
+                        field.modified = True
                     self.setMd5Sum(value)
                     return
 
@@ -634,8 +635,9 @@ class FLSqlCursor(ProjectClass):
         self.d.modeAccess_ = FLSqlCursor.Browse
 
         if name:
-            if not self.d.db_.manager().existsTable(name):
-                self.d.metadata_ = self.d.db_.manager().createTable(name)
+            pass #FIXME
+            #if not self.d.db_.manager().existsTable(name):
+                #self.d.metadata_ = self.d.db_.manager().createTable(name)
         else:
             self.d.metadata_ = self.d.db_.manager().metadata(name)
         self.d.cursorRelation_ = cR
@@ -651,7 +653,7 @@ class FLSqlCursor(ProjectClass):
         if not self.d.metadata_:
             return
 
-        self.fieldsNamesUnlock_ = self.metadata().fieldsNamesUnlock()
+        self.fieldsNamesUnlock_ = self.d.metadata_.fieldsNamesUnlock()
 
         self.d.isQuery_ = self.metadata().isQuery()
         if (name[len(name)-3:]) == "sys" or self.db().manager().isSystemTable(name):
@@ -1006,13 +1008,13 @@ class FLSqlCursor(ProjectClass):
     @param fN Nombre del campo
     """
     def valueBufferCopy(self, fN):
-        if not self.d.bufferCopy_ and fN.isEmpty() or not self.d.metadata_:
-            return QVariant()
+        if not self.d.bufferCopy_ and fN == None or not self.d.metadata_:
+            return None
 
         field = self.d.metadata_.field(fN)
         if not field:
-            print("FLSqlCursor::valueBufferCopy() : No existe el campo %s:%s" % (self.d.metadata_.name(), fN))
-            return QVariant()
+            FLUtil.tr("FLSqlCursor::valueBufferCopy() : No existe el campo ") + self.d.metadata_.name() + ":"+ fN
+            return None
 
         type_ = field.type()
         if self.d.bufferCopy_.isNull(fN):
@@ -1143,7 +1145,8 @@ class FLSqlCursor(ProjectClass):
     @param c Contexto de ejecucion
     """
     def setContext(self, c):
-        self.d.ctxt_ = weakref.ref(c)
+        if c:
+            self.d.ctxt_ = weakref.ref(c)
 
     """
     Para obtener el contexto de ejecución de scripts.
@@ -1321,8 +1324,10 @@ class FLSqlCursor(ProjectClass):
         if not self.d.buffer_:
             return None
 
-        self.d.bufferCopy_ = self.d.buffer_
-
+        self.d.bufferCopy_ = PNBuffer(self)
+        for field in self.d.buffer_.fieldsList():
+            self.d.bufferCopy_.setValue(field.name, field.value, False)
+            
     """
     Indica si el contenido actual del buffer difiere de la copia guardada.
 
@@ -1372,9 +1377,234 @@ class FLSqlCursor(ProjectClass):
     claves primarias y si hay nulos en campos que no lo permiten cuando se inserta o se edita.
     Si alguna comprobacion falla devuelve un mensaje describiendo el fallo.
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def msgCheckIntegrity(self):
-        return False
+        msg = ""
+        
+        if not self.d.buffer_ or not self.d.metadata_:
+            msg = "\nBuffer vacío o no hay metadatos"
+            return msg
+        
+        if self.d.modeAccess_ == self.Insert or self.d.modeAccess_ == self.Edit:
+            if not self.isModifiedBuffer() and self.d.modeAccess_ == self.Edit:
+                return msg
+            fieldList = self.d.metadata_.fieldListObject()
+            checkedCK = False
+            
+            if not fieldList:
+                return msg
+            
+            for field in fieldList:
+                
+                fiName = field.name()
+                if not self.d.buffer_.isGenerated(fiName):
+                    continue
+                
+                s = None
+                if not self.d.buffer_.isNull(fiName):
+                    s = self.d.buffer_.value(fiName)
+                    if not str(s):
+                        s = None
+                
+                fMD = field.associatedField()
+                if fMD and s and not s == None:
+                    if not field.relationM1():
+                        msg = msg + "\n" + (FLUtil.tr("FLSqlCursor : Error en metadatos, el campo %1 tiene un campo asociado pero no existe relación muchos a uno").arg(self.d.metadata_.name()) + ":" + fiName)
+                        continue
+                    
+                    r = field.relationM1()
+                    if not r.checkIn():
+                        continue
+                    tMD = self.d.db_.manager().metadata(field.relationM1().foreignTable())
+                    if not tMD:
+                        continue
+                    fmdName = fMD.name()
+                    ss = None
+                    if not self.d.buffer_.isNull(fmdName):
+                        ss = self.d.buffer_.value(fmdName)
+                        #if not ss:
+                            #ss = None
+                    
+                    if ss:
+                        filter = "%s AND %s" % (self.d.db_.manager().formatAssignValue(field.associatedFieldFilterTo(), fMD, ss, True), self.d.db_.mager().formatAssignValue(field.relationM1().foreignField(), field,s , True))
+                        q = FLSqlQuery(None, self.d.db_.connectionName())
+                        q.setTablesList(tMD.name())
+                        q.setSelect(field.associatedFieldFilterTo())
+                        q.setFrom(tMD.name())
+                        q.setWhere(filter)
+                        q.setForwardOnly(True)
+                        q.exec_()
+                        if not q.next():
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : %1 no pertenece a %2").arg(s, ss)
+                        else:
+                            self.d.buffer_.setValue(fmdName, q.value(0))
+                    
+                    else:
+                        msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : %1 no se puede asociar a un valor NULO").arg(s)
+                    
+                    if not tMD.inCache():
+                        del tMD
+                
+                
+                if self.d.modeAccess_ == self.Edit and self.d.buffer_.value(fiName) == self.d.bufferCopy_.value(fiName):
+                    continue
+                
+                if self.d.buffer_.isNull(fiName) and not field.allowNull() and not field.type() == FLFieldMetaData.Serial:
+                    msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : No puede ser nulo")
+                
+                if field.isUnique():
+                    pK = self.d.metadata_.primaryKey()
+                    if not self.d.buffer_.isNull(pK) and not s == None:
+                        pKV = self.d.buffer_.value(pK)
+                        q = FLSqlQuery(None, self.d.db_.connectionName())
+                        q.setTablesList(self.d.metadata_.name())
+                        q.setSelect(fiName)
+                        q.setFrom(self.d.metadata_.name())
+                        q.setWhere("%s AND %s <> %s" % (self.d.db_.manager().formatAssignValue(field, s, True), self.d.metadata_.primaryKey(self.d.isQuery_), self.d.db_.manager().formatValue(self.d.metadata_.fieldType(pK), pKV)))
+                        q.setForwardOnly(True)
+                        q.exec_()
+                        if (q.next()):
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s))
+                
+                if field.isPrimaryKey() and self.d.modeAccess_ == self.Insert and not s == None:
+                    q = FLSqlQuery(None, self.d.db_.connectionName())
+                    q.setTablesList(self.d.metadata_.name())
+                    q.setSelect(fiName)
+                    q.setFrom(self.d.metadata_.name())
+                    q.setWhere(self.d.db_.manager().formatAssignValue(field, s, True))
+                    q.setForwardOnly(True)
+                    q.exec_()
+                    if q.next():
+                        msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Es clave primaria y requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s))
+                
+                if field.relationM1() and not s == None:
+                    if field.relationM1().checkIn() and not field.relationM1().foreignTable() == self.d.metadata_.name():
+                        r = field.relationM1()
+                        tMD = self.d.db_.manager().metadata(r.foreignTable())
+                        if not tMD:
+                            continue
+                        q = FLSqlQuery(None, self.d.db_.connectionName())
+                        q.setTablesList(tMD.name())
+                        q.setSelect(r.foreignField())
+                        q.setFrom(tMD.name())
+                        q.setWhere(self.d.db_.manager().formatAssignValue(r.foreignField(), field, s , True))
+                        q.setForwardOnly(True)
+                        q.exec_()
+                        if not q.next():
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : El valor %1 no existe en la tabla %2").arg(str(s), r.foreignTable())
+                        else:
+                            self.d.buffer_.setValue(fiName, q.value(0))
+                        
+                        if not tMD.inCache():
+                            del tMD
+                
+                fieldListCK = self.d.metadata_.fieldListOfCompoundKey(fiName)
+                if fieldListCK and not checkedCK and self.d.modeAccess_ == self.Insert:
+                    if fieldListCK:
+                        filter = None
+                        field = None
+                        valuesFields = None
+                        for fieldCK in fieldListCK:
+                            sCK = self.d.buffer_.value(fieldCK.name())
+                            if filter == None:
+                                filter = self.d.db_.manager().formatAssignValue(fieldCK, sCK, True)
+                            else:
+                                filter = "%s AND %s" % (filter, self.d.db_.manager().formatAssignValue(FieldCK, sCK, True))
+                            if field == None:
+                                field = fieldCK.alias()
+                            else:
+                                field = "%s+%s" % (field, fieldCK.alias())
+                            if valuesFields == None:
+                                valuesFields = str(sCK)
+                            else:
+                                valuesFields = "%s+%s" % (valuesFields, str(sCK))
+                        
+                        q = FLSqlQuery(None, self.d.db_.connectionName())
+                        q.setTablesList(self.d.metadata_.name())
+                        q.setSelect(fiName)
+                        q.setFrom(self.d.metadata_.name())
+                        q.setWhere(filter)
+                        q.setForwardOnly(True)
+                        q.exec_()
+                        if q.next():
+                            msg = msg + "\n" + fields + FLUtil.tr(" : Requiere valor único, y ya hay otro registro con el valor %1").arg(valuesFields)
+                        
+                        checkedCK = True
+                
+        
+        elif self.d.modeAccess_ == self.Del:
+            fieldList = self.d.metadata_.fieldListObject()
+            fiName = None
+            s = None
+            
+            for field in fieldList:
+                fiName = field.name()
+                if not self.d.buffer_.isGenerated(fiName):
+                    continue
+                
+                s = None
+                if not self.d.buffer_.isNull(fiName):
+                    s = self.d.buffer_.value(fiName)
+                    if str(s):
+                        s = None
+                
+                if not s or s == None:
+                    continue
+                
+                relationList = field.relationList()
+                
+                if not relationList:
+                    continue
+                
+                if relationList:
+                    for r in relationList:
+                        if not r.checkIn():
+                            continue
+                        mtd = self.d.db_.manager().metadata(r.foreignTable())
+                        if not mtd:
+                            continue
+                        f = mtd.field(r.foreignField())
+                        if f:
+                            if f.relationM1():
+                                if f.relationM1().deleteCascade():
+                                    if not mtd.inCache():
+                                        del mtd
+                                    continue
+                                if not f.relationM1().checkIn():
+                                    if not mtd.inCache():
+                                        del mtd
+                                    continue
+                            else:
+                                if not mtd.inCache():
+                                    del mtd
+                                continue
+                        
+                        else:
+                            msg = msg + "\n" + FLUtil.tr("FLSqlCursor : Error en metadatos, %1.%2 no es válido.\nCampo relacionado con %3.%4.").arg(mtd.name(), r.foreignField(), self.d.metadata_.name(), field.name())  
+                            if not mtd.inCache():
+                                del mtd
+                            continue
+                        
+                        q = FLSqlQuery(None, self.d.db_.connectionName())
+                        q.setTablesList(mtd.name())
+                        q.setSelect(r.foreignField())
+                        q.setFrom(mtd.name())
+                        q.setWhere(self.d.db_.manager().formatAssignValue(r.foreignField(), field, s, True))
+                        q.setForwardOnly()
+                        q.exec_()
+                        if q.next():
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Con el valor %1 hay registros en la tabla %2:%3").arg(str(s), mtd.name(), mtd.alias())
+                        
+                        if not mtd.inCache():
+                            del mtd
+        
+        return msg
+            
+            
+                            
+                            
+                            
+                    
 
     """
     Realiza comprobaciones de intregidad.
