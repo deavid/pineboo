@@ -137,6 +137,8 @@ def getTableObj(tree,root):
                 delC = text2bool(rks.get("delC","false"))
                 updC = text2bool(rks.get("updC","false"))
                 checkIn = rks.get("checkIn")
+                if checkIn == None:
+                    checkIn = True
                 relation = FLRelationMetaData(tableNameR, fieldRelation, cardR, delC, updC, checkIn)
                 fieldMD.addRelationMD(relation)
                 
