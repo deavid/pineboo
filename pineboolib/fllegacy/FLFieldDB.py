@@ -1871,7 +1871,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursorAux = self.cursor_
             curName = self.cursor_.metadata().name()
-
+            
             rMD = tMD.relation(self.fieldRelation_, self.foreignField_, curName)
             if not rMD:
                 checkIntegrity = False
@@ -1880,17 +1880,16 @@ class FLFieldDB(QtWidgets.QWidget):
                     if testM1.cardinality() == FLRelationMetaData.RELATION_1M:
                         checkIntegrity = True
                 fMD = tMD.field(self.fieldRelation_)
-                #print("EOOOOOO", fMD)
 
                 if fMD:
                     rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False,False, checkIntegrity)
 
                     fMD.addRelationMD(rMD)
-                    #print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, pero sin embargo se han indicado los campos de relación( %s, %s)" % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
-                    #print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" % (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
+                    print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, pero sin embargo se han indicado los campos de relación( %s, %s)" % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
+                    print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" % (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
                 else:
-                    #print("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (self.fieldRelation_, self.tableName_))
-                    pass
+                    print("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (self.fieldRelation_, self.tableName_))
+                    #pass
 
             if self.tableName_:
                 #self.cursor_ = FLSqlCursor(self.tableName_)
