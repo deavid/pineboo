@@ -1483,13 +1483,11 @@ class FLSqlCursor(ProjectClass):
                         msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : Es clave primaria y requiere valores únicos, y ya hay otro registro con el valor %s en este campo" % s
                 
                 if field.relationM1() and s:
-                    print(fiName, 1)
                     if field.relationM1().checkIn() and not field.relationM1().foreignTable() == self.d.metadata_.name():
                         r = field.relationM1()
                         tMD = self.d.db_.manager().metadata(r.foreignTable())
                         if not tMD:
                             continue
-                        print(fiName, 2)
                         q = FLSqlQuery(None, self.d.db_.connectionName())
                         q.setTablesList(tMD.name())
                         q.setSelect(r.foreignField())
@@ -1497,13 +1495,10 @@ class FLSqlCursor(ProjectClass):
                         q.setWhere(self.d.db_.manager().formatAssignValue(r.foreignField(), field, s , True))
                         q.setForwardOnly(True)
                         q.exec_()
-                        print(fiName, 3)
                         if not q.next():
-                            print(fiName, 31)
                             #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : El valor %1 no existe en la tabla %2").arg(str(s), r.foreignTable())
                             msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : El valor %s no existe en la tabla %s" % (s, r.foreignTable())
                         else:
-                            print(fiName, 4)
                             self.d.buffer_.setValue(fiName, q.value(0))
                         
                         if not tMD.inCache():
