@@ -414,11 +414,11 @@ class FLTableMetaData(ProjectClass):
     @param fFN Nombre del campo foráneo a esta tabla que forma parte de la relación
     @param  fTN Nombre de la tabla foránea
     @return Devuelve un objeto FLRelationMetaData con la información de la relación, siempre y
-      cuando esta exista. Si no existe devuelve 0
+      cuando esta exista. Si no existe devuelve False
     """
     def relation(self, fN, fFN, fTN):
         if not fN:
-            return
+            return False
         
         field = None
         
@@ -432,17 +432,13 @@ class FLTableMetaData(ProjectClass):
                 return field.d.relationM1_
             
             relationList = field.d.relationList_
-            if not relationList:
-                return
             
-            if len(relationList) == 0:
-                return
+            if relationList:
+                for itR in relationList:
+                    if itR.foreignField() == str(fFN).lower() and itR.foreignTable() == str(fTN).lower():
+                        return itR
             
-            for itR in relationList:
-                if itR.foreignField() == str(fFN).lower() and itR.foreignTable() == str(fTN).lower():
-                    return itR
-            
-            return
+            return False
    
 
     """
