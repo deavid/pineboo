@@ -528,7 +528,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
 
     def msgBoxWarning(self, msg):
-        QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget, msg)
+        QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),"Pineboo", msg)
         
 
 
@@ -1409,7 +1409,8 @@ class FLSqlCursor(ProjectClass):
                 fMD = field.associatedField()
                 if fMD and s and not s == None:
                     if not field.relationM1():
-                        msg = msg + "\n" + (FLUtil.tr("FLSqlCursor : Error en metadatos, el campo %1 tiene un campo asociado pero no existe relación muchos a uno").arg(self.d.metadata_.name()) + ":" + fiName)
+                        #msg = msg + "\n" + (FLUtil.tr("FLSqlCursor : Error en metadatos, el campo %1 tiene un campo asociado pero no existe relación muchos a uno").arg(self.d.metadata_.name()) + ":" + fiName)
+                        msg = msg + "\n" + "FLSqlCursor : Error en metadatos, el campo %s tiene un campo asociado pero no existe relación muchos a uno:%s" % (self.d.metadata_.name(), fiName)
                         continue
                     
                     r = field.relationM1()
@@ -1435,13 +1436,14 @@ class FLSqlCursor(ProjectClass):
                         q.setForwardOnly(True)
                         q.exec_()
                         if not q.next():
-                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : %1 no pertenece a %2").arg(s, ss)
+                            #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : %1 no pertenece a %2").arg(s, ss)
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : %s no pertenece a %s" % (s, ss)
                         else:
                             self.d.buffer_.setValue(fmdName, q.value(0))
                     
                     else:
-                        msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : %1 no se puede asociar a un valor NULO").arg(s)
-                    
+                        #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : %1 no se puede asociar a un valor NULO").arg(s)
+                        msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : %s no se puede asociar a un valor NULO" % s
                     if not tMD.inCache():
                         del tMD
                 
@@ -1450,7 +1452,8 @@ class FLSqlCursor(ProjectClass):
                     continue
                 
                 if self.d.buffer_.isNull(fiName) and not field.allowNull() and not field.type() == FLFieldMetaData.Serial:
-                    msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : No puede ser nulo")
+                    #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : No puede ser nulo")
+                    msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : No puede ser nulo"
                 
                 if field.isUnique():
                     pK = self.d.metadata_.primaryKey()
@@ -1464,8 +1467,9 @@ class FLSqlCursor(ProjectClass):
                         q.setForwardOnly(True)
                         q.exec_()
                         if (q.next()):
-                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s))
-                
+                            #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s))
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : Requiere valores únicos, y ya hay otro registro con el valor %s en este campo" % s
+                            
                 if field.isPrimaryKey() and self.d.modeAccess_ == self.Insert and not s == None:
                     q = FLSqlQuery(None, self.d.db_.connectionName())
                     q.setTablesList(self.d.metadata_.name())
@@ -1475,14 +1479,17 @@ class FLSqlCursor(ProjectClass):
                     q.setForwardOnly(True)
                     q.exec_()
                     if q.next():
-                        msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Es clave primaria y requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s))
+                        #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Es clave primaria y requiere valores únicos, y ya hay otro registro con el valor %1 en este campo").arg(str(s))
+                        msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : Es clave primaria y requiere valores únicos, y ya hay otro registro con el valor %s en este campo" % s
                 
-                if field.relationM1() and not s == None:
+                if field.relationM1() and s:
+                    print(fiName, 1)
                     if field.relationM1().checkIn() and not field.relationM1().foreignTable() == self.d.metadata_.name():
                         r = field.relationM1()
                         tMD = self.d.db_.manager().metadata(r.foreignTable())
                         if not tMD:
                             continue
+                        print(fiName, 2)
                         q = FLSqlQuery(None, self.d.db_.connectionName())
                         q.setTablesList(tMD.name())
                         q.setSelect(r.foreignField())
@@ -1490,9 +1497,13 @@ class FLSqlCursor(ProjectClass):
                         q.setWhere(self.d.db_.manager().formatAssignValue(r.foreignField(), field, s , True))
                         q.setForwardOnly(True)
                         q.exec_()
+                        print(fiName, 3)
                         if not q.next():
-                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : El valor %1 no existe en la tabla %2").arg(str(s), r.foreignTable())
+                            print(fiName, 31)
+                            #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : El valor %1 no existe en la tabla %2").arg(str(s), r.foreignTable())
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : El valor %s no existe en la tabla %s" % (s, r.foreignTable())
                         else:
+                            print(fiName, 4)
                             self.d.buffer_.setValue(fiName, q.value(0))
                         
                         if not tMD.inCache():
@@ -1527,7 +1538,8 @@ class FLSqlCursor(ProjectClass):
                         q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
-                            msg = msg + "\n" + fields + FLUtil.tr(" : Requiere valor único, y ya hay otro registro con el valor %1").arg(valuesFields)
+                            #msg = msg + "\n" + fields + FLUtil.tr(" : Requiere valor único, y ya hay otro registro con el valor %1").arg(valuesFields)
+                            msg = msg + "\n" + fields + " : Requiere valor único, y ya hay otro registro con el valor %s" % valuesFields
                         
                         checkedCK = True
                 
@@ -1580,7 +1592,8 @@ class FLSqlCursor(ProjectClass):
                                 continue
                         
                         else:
-                            msg = msg + "\n" + FLUtil.tr("FLSqlCursor : Error en metadatos, %1.%2 no es válido.\nCampo relacionado con %3.%4.").arg(mtd.name(), r.foreignField(), self.d.metadata_.name(), field.name())  
+                            #msg = msg + "\n" + FLUtil.tr("FLSqlCursor : Error en metadatos, %1.%2 no es válido.\nCampo relacionado con %3.%4.").arg(mtd.name(), r.foreignField(), self.d.metadata_.name(), field.name()) 
+                            msg = msg + "\n" + "FLSqlCursor : Error en metadatos, %s.%s no es válido.\nCampo relacionado con %s.%s." % (mtd.name(), r.foreignField(), self.d.metadata_.name(), field.name()) 
                             if not mtd.inCache():
                                 del mtd
                             continue
@@ -1593,7 +1606,8 @@ class FLSqlCursor(ProjectClass):
                         q.setForwardOnly()
                         q.exec_()
                         if q.next():
-                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Con el valor %1 hay registros en la tabla %2:%3").arg(str(s), mtd.name(), mtd.alias())
+                            #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Con el valor %1 hay registros en la tabla %2:%3").arg(str(s), mtd.name(), mtd.alias())
+                            msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + " : Con el valor %s hay registros en la tabla %s:%s" % (s, mtd.name(), mtd.alias())
                         
                         if not mtd.inCache():
                             del mtd
@@ -1629,9 +1643,11 @@ class FLSqlCursor(ProjectClass):
         if msg:
             if showError:
                 if self.d.modeAccess_ == self.Inset or self.d.modeAccess_ == self.Edit:
-                    self.d.msgBoxWarning(FLUtil.tr("No se puede validad el registro actual:\n") + msg)
+                    #self.d.msgBoxWarning(FLUtil.tr("No se puede validad el registro actual:\n") + msg)
+                    self.d.msgBoxWarning("No se puede validad el registro actual:\n" + msg)
                 elif self.d.modeAccess_ == self.Del:
-                    self.d.msgBoxWarning(FLUtil.tr("No se puede borrar registro:\n") + msg)
+                    #self.d.msgBoxWarning(FLUtil.tr("No se puede borrar registro:\n") + msg)
+                    self.d.msgBoxWarning("No se puede borrar registro:\n" + msg)
             return False
         
         return True
