@@ -143,17 +143,10 @@ class PNBuffer(ProjectClass):
         if not str(n).isdigit():
             for field in  self.fieldList_:
                 if field.name == str(n):
-                    #print("PNBuffer.value(%s) = %s" % (name, field.value) )
-                    if field.value is None:
-                        if field.type_ == "bool":
-                            return False
-                    else:
-                        if field.type_ == "bool":
-                            return str(field.value) == "True"
-                        return field.value
+                    return self.convertToType(field.value, field.type_)
         else:
             try:
-                return self.fieldList_[n].value
+                return self.convertToType(self.fieldList_[n].value, self.fieldList_[n].type_)
             except Exception:
                 return None
 
@@ -172,14 +165,42 @@ class PNBuffer(ProjectClass):
                     return
 
 
-    def convertToType(self, value, fltype):
-        _type = None
-
-        #print("Recogiendo %s tipo(%s) para convertir a fltype %s " % (value, type(value), fltype))
-
+    def convertToType(self, value, type_):
+        
+        
         if value is None:
-            #print("Retornando %s vacio" % fltype)
-            return ""
+            if type_ == "bool":
+                return False
+            
+            elif type_ == "unlock":
+                return True
+            
+            elif type_ in ("int", "uint"):
+                return int(0)
+            elif type_ == "double":
+                return float(0.00)
+            elif type_ in ("string","pixmap","stringlist"):
+                return ""
+        
+        else:
+            if type_ in ("bool","unlock"):
+                return (str(value) == "True")
+            elif type_ in ("int", "uint"):
+                return int(value)
+            elif type_ == "double":
+                return float(value)
+            elif type_ in ("string","pixmap","stringlist"):
+                return str(value)
+               
+            
+        
+            
+        return value
+            
+            
+                
+        
+        
         """
 
         if fltype == "int":
@@ -201,7 +222,7 @@ class PNBuffer(ProjectClass):
         """
         #print("Retornando =", value)
 
-        return value
+        #return value
 
     def setGenerated(self, name, value):
         for field in self.fieldList_:
