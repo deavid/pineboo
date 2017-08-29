@@ -505,7 +505,10 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def setTableName(self, fT):
-        self.tableName_ = str(fT)
+        
+        self.tableName_ = None
+        if not fT == "":
+            self.tableName_ = fT
         if self.showed:
             if self.topWidget_:
                 self.initCursor()
@@ -524,7 +527,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def foreignField(self):
-        return self.foreingField_
+        return self.foreignField_
     """
     Para establecer el nombre del campo foráneo.
 
@@ -1008,12 +1011,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 if doHome:
                     self.editor_.home(False)
-            else:
-                return
-                #self.editor_.hide()
 
-
-                return
         elif type_ == "stringList":
             if not self.editor_:
                 return
@@ -1296,6 +1294,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN = None):
+        #print("refrescando", fN, self.fieldName_)
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
             print("FLField.refresh() Cancelado")
             return
@@ -1329,10 +1328,10 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not tmd:
                     return
 
-                if self.topWidget_ and not self.topWidget_.isShown() and not self.cursor_.modeAccess() == FLSqlCursor.Insert:
-                    if tmd and not tmd.inCache():
-                        del tmd
-                    return
+                #if self.topWidget_ and not self.topWidget_.isShown() and not self.cursor_.modeAccess() == FLSqlCursor.Insert:
+                #    if tmd and not tmd.inCache():
+                #        del tmd
+                #    return
 
                 if not field:
                     if tmd and not tmd.inCache():
@@ -1350,11 +1349,10 @@ class FLFieldDB(QtWidgets.QWidget):
                 q = FLSqlQuery()
                 q.setForwardOnly(True)
                 q.setTablesList(field.relationM1().foreignTable())
-                q.setSelect("%s,%s" % (self.foreignField, field.relationM1().foreignField()))
+                q.setSelect("%s,%s" % (self.foreignField(), field.relationM1().foreignField()))
                 q.setFrom(field.relationM1().foreignTable())
                 where = field.formatAssignValue(field.relationM1().foreignField(), v, True)
-                filterAc = str(self.cursor_.filterAssoc(self.fieldRelation_, tmd))
-
+                filterAc = self.cursor_.filterAssoc(self.fieldRelation_, tmd)
                 if filterAc:
                     if not where:
                         where = filterAc
@@ -1369,7 +1367,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     where = str(self.filter_ + " AND " + where)
                 
                 q.setWhere(where)
-
+                
                 if q.exec_() and q.next():
                     v0 = q.value(0)
                     v1 = q.value(1)
@@ -1822,7 +1820,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
 
-        if not self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
+        if not self.tableName_ or not self.foreignField_ or not self.fieldRelation_:
             if self.foreignField_ and self.fieldRelation_:
                 if self.showed:
                     try:

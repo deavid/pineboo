@@ -610,22 +610,22 @@ class FLFieldMetaData():
         """
     
     def formatAssignValue(self,fieldName , value, upper):
-        if self.type() == ("", None) or fieldName.isEmpty():
+        if self.type() in ("", None) or not fieldName:
             return "1 = 1"
         
         isText = False
-        if value.type() == "string" or value.type() == "stringlist":
+        if isinstance(value, str):
             isText = True
         
         formatV = ""
-        if value.type() == "int" or value.type() == "uint" or value.type() == "double":
-            formatV = value.toString()
+        if isinstance(value, (int, float)):
+            formatV = str(value)
         else: 
-            formatV = "'" + value.toString() + "'"
+            formatV = "'" + str(value) + "'"
         
         #print("FORMATV es %s, %s y value era %s" % (formatV, type(formatV), value.toString()))
                  
-        if formatV.isEmpty():
+        if not formatV:
             return "1 = 1"
         
         if upper and isText:
