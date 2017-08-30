@@ -718,6 +718,7 @@ class Member(ASTPython):
             "charAt",
             "isEmpty()",
             "left" ,
+            "right" ,
         ]
         for member in replace_members:
             for idx,arg in enumerate(arguments):
@@ -729,7 +730,7 @@ class Member(ASTPython):
                     except IndexError:
                         part2 = [] # Para los que son últimos y no tienen parte adicional
                     if member == "toString()": 
-                        arguments = ["qsatype.FLVariant(%s).%s" % (".".join(part1), arg)] + part2
+                        arguments = ["parseString(%s)" % ".".join(part1)] + part2
                     #    arguments = ["str(%s)" % (".".join(part1))] + part2
                     elif member == "isEmpty()": 
                         arguments = ["%s == None" % (".".join(part1))] + part2
@@ -741,6 +742,12 @@ class Member(ASTPython):
                         value = arg[5:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[0:%s]" % (".".join(part1), value)] + part2
+                    elif member == "right":
+                        value = arg[6:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1),".".join(part1), value)] + part2
+                        
+                        
                     else:
                         arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
         yield "expr", ".".join(arguments)
