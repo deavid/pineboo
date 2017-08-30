@@ -1,8 +1,5 @@
 #!/usr/bin/python3 -u
 # -*# -*- coding: utf-8 -*-
-
-
-
 """
     Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
     pineboolib.main(); para ello acepta los parámetros necesarios de consola
@@ -13,38 +10,47 @@ from optparse import OptionParser
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+dependeces = []
 
 try:
     from lxml import etree
 except ImportError:
     print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-lxml e intente de nuevo")
-    print()
-    sys.exit(32)
+    dependeces.append("python3-lxml")
+ 
 try:
     import psycopg2
 except ImportError:
     print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
-    print()
-    sys.exit(32)
+    dependeces.append("python3-psycopg2")
+
 
 try:
-    import sip
-    # switch on QVariant in Python3
-    sip.setapi('QVariant', 1)
-    sip.setapi('QString', 1)
-
-    from PyQt4 import QtGui, QtCore, uic
+    import ply
 except ImportError:
     print(traceback.format_exc())
+    dependeces.append("python3-ply")
+
+try:
+    import future
+except ImportError:
+    print(traceback.format_exc())
+    dependeces.append("python3-future")
+
+try:
+
+    from PyQt5 import QtGui, QtCore, uic, QtWidgets
+except ImportError:
+    print(traceback.format_exc())
+    dependeces.append("python3-pyqt5")
+
+if len(dependeces) > 0:
     print()
-    print("HINT: Instale el paquete python3-pyqt4 e intente de nuevo")
+    print("HINT: Dependencias incumplidas:")
+    for dep in dependeces:
+        print("HINT: Instale el paquete %s e intente de nuevo" % dep)
     print()
     sys.exit(32)
-
 
 from pineboolib.utils import filedir
 import pineboolib.DlgConnect
@@ -121,10 +127,13 @@ def main():
                       action="store_true", dest="preload", default=False,
                       help="Load everything. Then exit. (Populates Pineboo cache)")
 
+    
+    
+    
+    app = QtWidgets.QApplication(sys.argv)
+    
     (options, args) = parser.parse_args()
     
-    
-    app = QtGui.QApplication(sys.argv)
     noto_fonts = [
         "NotoSans-BoldItalic.ttf",
         "NotoSans-Bold.ttf",
@@ -133,12 +142,13 @@ def main():
     ]
     for fontfile in noto_fonts:
         QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
+    
                                                
-    QtGui.QApplication.setStyle("QtCurve")
+    QtWidgets.QApplication.setStyle("QtCurve")
     font = QtGui.QFont('Noto Sans',9)
     font.setBold(False)
     font.setItalic(False)
-    QtGui.QApplication.setFont(font)
+    QtWidgets.QApplication.setFont(font)
         
     pineboolib.no_python_cache = options.no_python_cache
 
@@ -167,7 +177,7 @@ def main():
         connection_window.load()
         connection_window.show()
         ret = app.exec_()
-        if connection_window.close():
+        if connection_window.close():    
             if connection_window.ruta:
                 prjpath = connection_window.ruta
                 print("Cargando desde ruta %r " % prjpath)
@@ -175,15 +185,32 @@ def main():
             elif connection_window.database:
                 print("Cargando credenciales")
                 project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password)
+            
+            
+            
+            
         if not connection_window.ruta and not connection_window.database:
             sys.exit(ret)
 
+        #Cargando spashscreen
+    # Create and display the splash screen
+    splash_pix = QtGui.QPixmap(filedir("../share/splashscreen/splash_%s.png" % project.dbname))
+    splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash.setMask(splash_pix.mask())
+    splash.show()
+    
+    frameGm = splash.frameGeometry()
+    screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+    centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+    frameGm.moveCenter(centerPoint)
+    splash.move(frameGm.topLeft())
 
 
-
+    splash.showMessage("Iniciando proyecto ...")
     if options.verbose: print("Iniciando proyecto ...")
     project.run()
 
+    splash.showMessage("Creando interfaz ...")
     if options.verbose: print("Creando interfaz ...")
     if options.action:
         objaction = None
@@ -199,15 +226,17 @@ def main():
 
         main_window = mainForm.mainWindow
         main_window.load()
+        splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
             main_window.addAreaTab(area)
         for k,module in sorted(project.modules.items()):
             main_window.addModuleInTab(module)
+        splash.showMessage("Abriendo interfaz ...")
         if options.verbose: print("Abriendo interfaz ...")
         main_window.show()
-
         objaction.openDefaultForm()
+        splash.hide()
         ret = app.exec_()
         mainForm.mainWindow = None
         return ret
@@ -215,6 +244,7 @@ def main():
         main_window = mainForm.mainWindow
         main_window.load()
         ret = 0
+        splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
             main_window.addAreaTab(area)
@@ -230,14 +260,20 @@ def main():
                     print(traceback.format_exc())
                     project.conn.conn.rollback()
         else:
+            splash.showMessage("Abriendo interfaz ...")
             if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
-            ret = app.exec_()
+    
+            splash.showMessage("Listo ...")
+            QtCore.QTimer.singleShot(2000, splash.hide)
+            
+        ret = app.exec_()
         mainForm.mainWindow = None
         del main_window
         del project
         return ret
-
+    
+    
 if __name__ == "__main__":
     ret = main()
     gc.collect()

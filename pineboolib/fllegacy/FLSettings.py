@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
@@ -27,12 +27,13 @@ class FLSettings(ProjectClass):
         ret = self.s.value(_key, None) #devuelve un QVariant !!!!
         
         if "geo" in _key:
-            ret = ret.toSize()
-            #print("Geo vale", ret)
+            #print("Geo vale", str(ret))
+            #ret = ret.toSize()
+            #print("Geo vale", str(ret))
             if not ret:
                 ret = _def
         else:
-            if ret.toString() == "":
+            if str(ret) == "":
                 ret = _def
         
         #print("Retornando %s ---> %s" % (_key, ret))          

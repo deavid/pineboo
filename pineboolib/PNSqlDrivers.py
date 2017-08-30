@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-#from pineboolib.flcontrols import ProjectClass
-from PyQt4.QtCore import QVariant, QTime, QString
+from PyQt5.QtCore import QTime
 
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.dbschema.schemaupdater import text2bool
-from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy import FLUtil
 
 class PNSqlDrivers():
 
@@ -16,7 +14,7 @@ class PNSqlDrivers():
 
 
     def formatValue(self, type_, v, upper):
-
+        util = FLUtil.FLUtil()
         if self.driverName == "PGSql":
             s = None
             # TODO: psycopg2.mogrify ???
@@ -25,8 +23,8 @@ class PNSqlDrivers():
                 s = text2bool(v)
 
             elif type_ == "date":
-                s = "'%s'" % FLUtil.dateDMAtoAMD(v)
-
+                s = "'%s'" % util.dateDMAtoAMD(v)
+                
             elif type_ == "time":
                 time = QTime(s)
                 s = "'%s'" % time
@@ -35,7 +33,7 @@ class PNSqlDrivers():
                 s = v
 
             else:
-                if upper and isinstance(v,str):
+                if upper == True and type_ == "string":
                     v = v.upper()
 
                 s = "'%s'" % v

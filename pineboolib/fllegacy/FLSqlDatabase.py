@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Completada Si
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 # from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -993,9 +993,9 @@ class FLSqlDatabase():
         
         cancel = False
         if self.interactiveGUI() and (cur.d.modeAccess() == FLSqlCursor.INSERT or cur.d.modeAccess_ == FLSqlCursor.EDIT) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
-            res = QtGui.QMessageBox.information(self,FLUtil.translate("app","Cancelar cambios"),FLUtil.translate("app","Todos los cambios efectuados se cancelarán.¿Está seguro?"),
-                                           QtGui.QMessageBox.Yes, QtGui.QMessageBox.No | QtGui.QMessageBox.Default | QtGui.QMessageBox.Escape)
-            if res == QtGui.QMessageBox.No:
+            res = QtWidgets.QMessageBox.information(self,FLUtil.translate("app","Cancelar cambios"),FLUtil.translate("app","Todos los cambios efectuados se cancelarán.¿Está seguro?"),
+                                           QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape)
+            if res == QtWidgets.QMessageBox.No:
                 return False
             cancel = True
         

@@ -1,5 +1,7 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, qt3ui
+from pineboolib.utils import filedir
+import os
 
 """
 Gestor de módulos.
@@ -122,9 +124,16 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero.
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    @decorators.NotImplementedWarn
     def content(self, n):
-        return None
+        query = "SELECT contenido FROM flfiles WHERE nombre='%s'" % n
+        cursor = self.db_.cursor()
+        try:
+            cursor.execute(query)
+        except:
+            return None
+        
+        for contenido in cursor:
+            return contenido[0]
 
     """
     Obtiene el contenido de un fichero de script, procesándolo para cambiar las conexiones que contenga,
@@ -148,9 +157,9 @@ class FLManagerModules(ProjectClass):
     @param pN Ruta y nombre del fichero en el sistema de ficheros
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    @decorators.NotImplementedWarn
     def contentFS(self, pN):
-        return None
+        file_ = open(pN,'r')
+        return file_.read()
 
     """
     Obtiene el contenido de un fichero, utilizando la caché de memoria y disco.
@@ -161,9 +170,32 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero.
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    @decorators.NotImplementedWarn
     def contentCached(self, n, shaKey = None):
-        return None
+        if not shaKey:
+            query = "SELECT sha FROM flfiles WHERE nombre='%s'" % n
+            cursor = self.db_.cursor()
+            try:
+                cursor.execute(query)
+            except:
+                return None
+        
+            for contenido in cursor:
+                shaKey = contenido[0]          
+            
+            
+            
+            
+            
+            
+        data = None
+        modId = self._prj.conn.managerModules().idModuleOfFile(n)
+        name_ = n[:n.index(".")]
+        ext_ = n[n.index(".") + 1:]   
+        if(os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" %(self._prj.dbname, modId, ext_, name_)))):
+            data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %(self._prj.dbname, modId, ext_, name_, shaKey[:16], ext_)))
+        else:
+            data = self.content(n)
+        return data
 
     """
     Almacena el contenido de un fichero en un módulo dado.

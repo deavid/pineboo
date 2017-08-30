@@ -2,8 +2,8 @@
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-from PyQt4.QtCore import QString
-from PyQt4 import QtCore, QtGui
+#from PyQt4.QtCore import QString
+from PyQt5 import QtCore, QtGui, QtWidgets
 import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -277,7 +277,7 @@ class FLUtil(ProjectClass):
     @return Lista de campos
     """
     def nombreCampos(self, tablename):
-        campos = pineboolib.project.db().metadata(tablename).fieldsNames()
+        campos = pineboolib.project.conn.manager().metadata(tablename).fieldsNames()
         return [len(campos)] + campos
 
     """
@@ -309,9 +309,32 @@ class FLUtil(ProjectClass):
     @param  f Cadena de texto con la fecha a transformar
     @return Cadena de texto con la fecha transformada
     """
-    @decorators.NotImplementedWarn
     def dateDMAtoAMD(self, f):
-        pass
+        dia_ = None
+        mes_ = None
+        ano_ = None
+        
+        f = str(f)
+        
+        array_ = f.split("-")
+        if len(array_) == 3:
+            dia_ = array_[0]
+            mes_ = array_[1]
+            ano_ = array_[2]
+        else:
+            array_ = f.split("/")
+            if len(array_) == 3:
+                dia_ = array_[0]
+                mes_ = array_[1]
+                ano_ = array_[2]
+            else:
+                dia_ = f[0:2]
+                mes_ = f[2:2]
+                ano_ = f[4:4]
+         
+            
+        retorno = "%s-%s-%s" % (ano_, mes_, dia_)
+        return retorno
 
     """
     Convierte fechas del tipo AAAA-MM-DD, AAAA-MM-DD o
@@ -320,9 +343,31 @@ class FLUtil(ProjectClass):
     @param  f Cadena de texto con la fecha a transformar
     @return Cadena de texto con la fecha transformada
     """
-    @decorators.NotImplementedWarn
+    
     def dateAMDtoDMA(self, f):
-        pass
+        dia_ = None
+        mes_ = None
+        ano_ = None
+        
+        array_ = f.split("-")
+        if len(array_) == 3:
+            ano_ = array_[0]
+            mes_ = array_[1]
+            dia_ = array_[2]
+        else:
+            array_ = f.split("/")
+            if len(array_) == 3:
+                ano_ = array_[0]
+                mes_ = array_[1]
+                dia_ = array_[2]
+            else:
+                ano_ = f[0:4]
+                mes_ = f[4:2]
+                dia_ = f[6:2]
+         
+            
+        retorno = "%s-%s-%s" % (dia_, mes_, ano_)
+        return retorno
     """
     Formatea una cadena de texto poniéndole separadores de miles.
 
@@ -379,7 +424,7 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def translate(self, group, string):
-        return QString(string)
+        return str(string)
         # return qApp->translate(contexto, s);
 
     """
@@ -596,7 +641,7 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de dias
     """
     def addDays(self, fecha, offset):
-        if isinstance(fecha, str) or isinstance(fecha, QString):
+        if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(fecha))
@@ -610,7 +655,7 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de meses
     """
     def addMonths(self, fecha, offset):
-        if isinstance(fecha, str) or isinstance(fecha, QString):
+        if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(fecha))
@@ -624,7 +669,7 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de años
     """
     def addYears(self, fecha, offset):
-        if isinstance(fecha, str) or isinstance(fecha, QString):
+        if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
@@ -833,9 +878,25 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
-        pass
+        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+        c = FLSqlCursor(t, True, connName)
+        c.setForwardOnly(True)
+
+        # if not c.select(w):
+        #     return False
+        c.select(w)
+
+        while c.next():
+            c.setModeAccess(FLSqlCursor.EDIT)
+            c.refreshBuffer()
+            for f,v in zip(fL, vL):
+                c.setValueBuffer(f, v)
+            if not c.commitBuffer():
+                return False
+
+        return True
     """
     Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
 
@@ -876,8 +937,7 @@ class FLUtil(ProjectClass):
     @param tS Número total de pasos a realizar
     """
     def createProgressDialog(self, title, steps, id_ = "default"):
-        pd_widget = QtGui.QProgressDialog()
-        pd_widget.setup(title, steps)
+        pd_widget = QtWidgets.QProgressDialog(title, self.translate("scripts","Cancelar"),0,steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
 
     """
@@ -896,7 +956,7 @@ class FLUtil(ProjectClass):
     """
     def setProgress(self, step_number, id_ = "default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
-        pd_widget.setProgress(step_number)
+        pd_widget.setValue(step_number)
 
     """
     Cambia el texto de la etiqueta del diálogo

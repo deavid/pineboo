@@ -4,7 +4,7 @@ from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib import decorators
 from pineboolib.utils import DefFun
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.utils import filedir
 
 class FLFormSearchDB(FLFormDB):
@@ -121,18 +121,18 @@ class FLFormSearchDB(FLFormDB):
     
     def loadControls(self):
         
-        self.bottomToolbar = QtGui.QFrame()
+        self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
-        self.bottomToolbar.layout = QtGui.QHBoxLayout()
+        self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
         self.bottomToolbar.setLayout(self.bottomToolbar.layout)
-        self.bottomToolbar.layout.setMargin(0)
+        self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
         self.bottomToolbar.layout.setSpacing(0)
         self.bottomToolbar.layout.addStretch()
         self.bottomToolbar.setFocusPolicy(QtCore.Qt.NoFocus)
         self.layout.addWidget(self.bottomToolbar)
 
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(0) ,QtGui.QSizePolicy.Policy(0))
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(0) ,QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
         
         pbSize = QtCore.QSize(22,22)
@@ -142,7 +142,8 @@ class FLFormSearchDB(FLFormDB):
                 
             
         if not self.pushButtonAccept:
-            self.pushButtonAccept = QtGui.QToolButton()
+            self.pushButtonAccept = QtWidgets.QToolButton()
+            self.pushButtonAccept.setAccessibleName("pushButtonAccept")
             self.pushButtonAccept.clicked.connect(self.accept)
                 
         self.pushButtonAccept.setSizePolicy(sizePolicy)
@@ -159,7 +160,8 @@ class FLFormSearchDB(FLFormDB):
                 
             
         if not self.pushButtonCancel:
-            self.pushButtonCancel = QtGui.QToolButton()
+            self.pushButtonCancel = QtWidgets.QToolButton()
+            self.pushButtonCancel.setAccessibleName("pushButtonCancel")
             self.pushButtonCancel.clicked.connect(self.reject)
                 
         self.pushButtonCancel.setSizePolicy(sizePolicy)
@@ -288,9 +290,12 @@ class FLFormSearchDB(FLFormDB):
         self.frameGeometry()
         if self.focusWidget():
             fdb = self.focusWidget().parentWidget()
-            if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
-                fdb.autoComFrame_.hide()
-                return
+            try:
+                if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
+                    fdb.autoComFrame_.hide()
+                    return
+            except:
+                a = 1
         
         if self.cursor_ and self.pushButtonCancel:
             if not self.pushButtonCancel.isEnabled():

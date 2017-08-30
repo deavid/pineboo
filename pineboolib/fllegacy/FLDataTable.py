@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy import FLSqlCursor
 
 
-class FLDataTable(QtGui.QTableView):
+class FLDataTable(QtWidgets.QTableView):
   
     """
     Clase que es una redefinicion de la clase QDataTable,
@@ -36,10 +36,10 @@ class FLDataTable(QtGui.QTableView):
         self._v_header.setDefaultSectionSize(22)
         self._h_header = self.horizontalHeader()
         self._h_header.setDefaultSectionSize(120)
-        self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
-        self.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        self.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self._h_header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
+        self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.setAlternatingRowColors(True)
         
         self.popup_ = popup
@@ -54,7 +54,7 @@ class FLDataTable(QtGui.QTableView):
             for col, width in enumerate(model._column_hints):
                 self.setColumnWidth(col, width)
                 self._h_header.resizeSection(col, width)
-            self._h_header.setResizeMode(QtGui.QHeaderView.Interactive)
+            self._h_header.setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
 
     """
     desctructor
@@ -226,9 +226,11 @@ class FLDataTable(QtGui.QTableView):
     """
     Filtrado de eventos
     """
-    @decorators.NotImplementedWarn
-    def eventFilter(self, o, e):
-        pass
+    def eventFilter(self, *args, **kwargs):
+        return super(FLDataTable, self).eventFilter( *args, **kwargs)
+    
+    def dataChanged(self, *args, **kwargs):
+        return super(FLDataTable, self).dataChanged( *args, **kwargs)
 
     """
     Redefinido por conveniencia para pintar la celda
@@ -336,7 +338,7 @@ class FLDataTable(QtGui.QTableView):
     """
     Indicador para evitar refrescos anidados
     """
-    refreshing_ = None
+    refreshing_ = False
     refresh_timer_ = None
 
     """
@@ -424,8 +426,11 @@ class FLDataTable(QtGui.QTableView):
         if self.popup_:
             self.cursor_.refresh()
             
-        if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
+        #if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
+        if self.refreshing_ == False and self.cursor_:
             self.refreshing_ = True
+            self.hide()
+            
             if self.persistentFilter_:
                 self.cursor_.setFilter(self.persistentFilter_)
             self.cursor_.refresh() 
@@ -605,7 +610,7 @@ class FLDataTable(QtGui.QTableView):
         
         
         
-class FLCheckBox(QtGui.QCheckBox):
+class FLCheckBox(QtWidgets.QCheckBox):
     
     row_ = None
     
@@ -627,7 +632,7 @@ class FLCheckBox(QtGui.QCheckBox):
             p.fillRect(0, 0, wrect.width() -1, wrect.height() -1, bu)
         
         #irect = QtGui.QStyle.visualRect(Qt_LayoutDirection, QRect, QRect)
-        irect = QtGui.QStyle().visualRect(self.layoutDirection() , rect, self.rect())
+        irect = QtWidgets.QStyle().visualRect(self.layoutDirection() , rect, self.rect())
         p.fillRect(irect, QtCore.Qt.white)
         p.drawRect(irect)
         

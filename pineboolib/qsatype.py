@@ -4,23 +4,25 @@ from __future__ import unicode_literals
 import os
 import datetime, weakref
 
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 # Cargar toda la API de Qt para que sea visible.
-from PyQt4.QtGui import *
-from PyQt4.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
 from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
-from pineboolib.flcontrols import FLTable, FLReportViewer, QLineEdit
+from pineboolib.flcontrols import FLTable, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
+from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
 from pineboolib import decorators
 import traceback
+from PyQt5.Qt import QWidget
 
 class StructMyDict(dict):
 
@@ -68,18 +70,47 @@ def Object(x=None):
     if x is None: x = {}
     return StructMyDict(x)
 
-def Array(x=None):
-    try:
-        if x is None: return {}
-        else: return list(x)
-    except TypeError:
-        return [x]
+#def Array(x=None):
+    #try:
+        #if x is None: return {}
+        #else: return list(x)
+    #except TypeError:
+        #return [x]
+        
+class Array(object):
+    
+    dict_ = None
+    key_ = None
+    
+    def __init__(self, data = None):
+        if not data:
+            self.dict_ = {}
+        else:
+            self.dict_ = data
+    
+    def __setitem__(self, key, value):
+        self.dict_[key] = value
+        
+            
+        
+    def __getitem__(self, key):
+        #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
+        return self.dict_[key]
+    
+    def __getattr__(self, k):
+        if k == 'length': 
+            return len(self.dict_)
+
+       
 
 def Boolean(x=False): return bool(x)
 
 def FLSqlQuery(*args):
     #if not args: return None
-    return FLSqlQuery_Legacy.FLSqlQuery(*args)
+    query_ = FLSqlQuery_Legacy.FLSqlQuery(*args)
+        
+        
+    return query_
 
 def FLUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
@@ -95,11 +126,11 @@ def FLTableDB(*args):
     if not args: return None
     return FLTableDB_Legacy.FLTableDB(*args)
 
-FLListViewItem = QtGui.QListView
+FLListViewItem = QtWidgets.QListView
 QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor
-QDateEdit = QtGui.QDateEdit
+QDateEdit = QtWidgets.QDateEdit
 
 File = QtCore.QFile
 
@@ -109,6 +140,9 @@ def FLPosPrinter(*args, **kwargs):
         pass
     return flposprinter()
 
+@decorators.BetaImplementation
+def FLReportViewer():
+    return FLReportViewer_Legacy.FLReportViewer()
 
 @decorators.NotImplementedWarn
 def FLDomDocument(*args, **kwargs):
@@ -164,7 +198,7 @@ def check_gc_referrers(typename, w_obj, name):
     threading.Thread(target = checkfn).start()
     
 
-class FormDBWidget(QtGui.QWidget):
+class FormDBWidget(QtWidgets.QWidget):
 
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
@@ -195,7 +229,7 @@ class FormDBWidget(QtGui.QWidget):
             event.ignore()
     def child(self, childName):
         try:
-            ret = self.findChild(QtGui.QWidget, childName)
+            ret = self.findChild(QtWidgets.QWidget, childName)
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
@@ -231,31 +265,92 @@ class FormDBWidget(QtGui.QWidget):
 def FLFormSearchDB(name):
     widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
     widget.setWindowModality(QtCore.Qt.ApplicationModal)
+    widget.load()
+    widget.cursor_.setContext(widget.iface)
     return widget
 
-class Date(QtCore.QDate):
+class Date(object):
+    
+    date_ = None
+    time_ = None
+    
+    def __init__(self):
+        super(Date, self).__init__()
+        self.date_ = QtCore.QDate.currentDate()
+        self.time_ = QtCore.QTime.currentTime()
+    
+    def toString(self, *args, **kwargs):
+        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"),self.date_.toString("MM"),self.date_.toString("dd"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
+        return texto
+
+@decorators.NotImplementedWarn
+class Process(object):
+    
+    def __init__(self):
+        pass
+
+@decorators.NotImplementedWarn
+class Dir(object):
+    
+    def __init__(self, ruta):
+        pass
+    
+    def entryList(self, patron):
+        pass
+
+@decorators.BetaImplementation
+class RadioButton(QtWidgets.QRadioButton):
     pass
+        
 
-class Dialog(QtGui.QDialog):
+class Dialog(QtWidgets.QDialog):
     _layout = None
+    buttonBox = None
+    OKButtonText = None
+    cancelButtonText = None
+    OKButton = None
+    cancelButton = None
 
-    def __init__(self, title, f):
+    def __init__(self, title, f, desc=None):
         #FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
         self.setWindowTitle(title)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
-        self._layout = QtGui.QVBoxLayout()
+        self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
+        self.buttonBox = QtWidgets.QDialogButtonBox()
+        self.OKButton = QtWidgets.QPushButton("&Aceptar")
+        self.cancelButton = QtWidgets.QPushButton("&Cancelar")
+        self.buttonBox.addButton(self.OKButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
+        self.OKButton.clicked.connect(self.accept)
+        self.cancelButton.clicked.connect(self.reject)
 
 
     def add(self, _object):
         self._layout.addWidget(_object)
 
+    def exec_(self):
+        if (self.OKButtonText):
+            self.OKButton.setText(self.OKButtonText)
+        if (self.cancelButtonText):
+            self.cancelButton.setText(self.cancelButtonText)
+        self._layout.addWidget(self.buttonBox)
 
+        return super(Dialog, self).exec_()
 
-class GroupBox(QtGui.QGroupBox):
+class GroupBox(QtWidgets.QGroupBox):
+    def __init__(self):
+        super(GroupBox, self).__init__()
+        self._layout = QtWidgets.QHBoxLayout()
+        self.setLayout(self._layout)
+
+    def add(self, _object):     
+        self._layout.addWidget(_object)
+
+class CheckBox(QtWidgets.QCheckBox):
     pass
 
-class CheckBox(QtGui.QCheckBox):
-    pass
-
+   
+    
+        

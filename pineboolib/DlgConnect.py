@@ -3,11 +3,11 @@
 from __future__ import unicode_literals
 from builtins import str
 import os
-from PyQt4 import QtGui, QtCore, uic
+from PyQt5 import QtWidgets, QtCore, uic
 
 from pineboolib.utils import filedir
 
-class DlgConnect(QtGui.QWidget):
+class DlgConnect(QtWidgets.QWidget):
     ruta = ""
     username = ""
     password = ""
@@ -15,9 +15,17 @@ class DlgConnect(QtGui.QWidget):
     portnumber = ""
     database = ""
     ui = None
+        
 
     def load(self):
         self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
+        
+        frameGm = self.frameGeometry()
+        screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
+        
         self.ui.pbnStart.clicked.connect(self.conectar)
         self.ui.pbnSearchFolder.clicked.connect(self.findPathProject)
         DlgConnect.leFolder = self.ui.leFolder
@@ -30,7 +38,14 @@ class DlgConnect(QtGui.QWidget):
     
     @QtCore.pyqtSlot()
     def conectar(self):
-        DlgConnect.ruta = filedir(str(DlgConnect.leFolder.text()), str(DlgConnect.leName.text()))
+        folder_ =None
+        
+        if DlgConnect.leFolder.text():
+            folder_ = DlgConnect.leFolder.text()
+        else:
+            folder_ = filedir("../projects")
+            
+        DlgConnect.ruta = filedir(str(folder_), str(DlgConnect.leName.text()))
         DlgConnect.username = DlgConnect.leUserName.text()
         DlgConnect.password = DlgConnect.lePassword.text()
         DlgConnect.hostname = DlgConnect.leHostName.text()
@@ -42,13 +57,13 @@ class DlgConnect(QtGui.QWidget):
         elif not DlgConnect.ruta.endswith(".xml"):
             DlgConnect.ruta += ".xml"
         if not os.path.isfile(DlgConnect.ruta) and DlgConnect.leName.text():
-            QtGui.QMessageBox.information(self, "AVISO", "El proyecto \n" + DlgConnect.ruta +" no existe")
+            QtWidgets.QMessageBox.information(self, "AVISO", "El proyecto \n" + DlgConnect.ruta +" no existe")
             DlgConnect.ruta = None
         else:
             self.close()
     
     @QtCore.pyqtSlot()       
     def findPathProject(self):
-        filename = QtGui.QFileDialog.getExistingDirectory(self, "Seleccione Directorio")
+        filename = QtWidgets.QFileDialog.getExistingDirectory(self, "Seleccione Directorio")
         if filename:
             DlgConnect.leFolder.setText(str(filename))

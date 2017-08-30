@@ -2,7 +2,7 @@
 
 #from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, PNSqlDrivers
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 import psycopg2
 import traceback
 from pineboolib.fllegacy.FLManager import FLManager

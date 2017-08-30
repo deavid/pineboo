@@ -16,7 +16,7 @@ from binascii import unhexlify
 import zlib
 
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 if __name__ == "__main__":
     sys.path.append('..')
@@ -114,13 +114,17 @@ class Project(object):
         # Preparar temporal
         if not os.path.exists(self.dir("cache")):
             os.makedirs(self.dir("cache"))
+        
+        if not os.path.exists(self.dir("cache")):
+            os.makedirs(self.dir("cache"))
+            
         # Conectar:
 
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password)
 
         self.cur = self.conn.cursor()
         self.areas = {}
-        self.cur.execute(""" SELECT idarea, descripcion FROM flareas WHERE bloqueo = TRUE """)
+        self.cur.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
         for idarea, descripcion in self.cur:
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
@@ -144,8 +148,8 @@ class Project(object):
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey+"\n")
-            if os.path.exists(self.dir("cache",fileobj.filekey)): continue
-            fileobjdir = os.path.dirname(self.dir("cache",fileobj.filekey))
+            if os.path.exists(self.dir("cache" ,fileobj.filekey)): continue
+            fileobjdir = os.path.dirname(self.dir("cache" ,fileobj.filekey))
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
             cur2 = self.conn.cursor()
@@ -153,7 +157,7 @@ class Project(object):
                     + "WHERE idmodulo = %s AND nombre = %s "
                     + "        AND sha::varchar(16) = %s", [idmodulo, nombre, sha] )
             for (contenido,) in cur2:
-                f2 = open(self.dir("cache",fileobj.filekey),"wb")
+                f2 = open(self.dir("cache" , fileobj.filekey),"wb")
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
                 txt = ""
                 try:
@@ -280,7 +284,7 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
         if self.sha:
-            self.filekey = "%s/file%s/%s/%s%s" % (module, self.ext, self.name, sha,self.ext)
+            self.filekey = "%s/%s/file%s/%s/%s%s" % ( self.prj.dbname, module, self.ext, self.name, sha,self.ext)
         else:
             self.filekey = filename
         self.basedir = basedir
@@ -320,6 +324,7 @@ class ModuleActions(object):
         self.prj = module.prj
         self.path = path
         assert path
+        
     def load(self):
         from pineboolib import qsaglobals
 
@@ -366,7 +371,7 @@ class ModuleActions(object):
                     if Project.debugLevel > 150: print("INFO: No se sobreescribe variable de entorno", "formRecord" + name)
                     pass
                 else:
-                    setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name,name)))
+                    setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name,name)))
 
     def __contains__(self, k): return k in self.prj.actions
     def __getitem__(self, k): return self.prj.actions[k]
@@ -538,7 +543,10 @@ class XMLAction(XMLStruct):
     def execDefaultScript(self):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
         s = self.load()
-        s.iface.main()
+        if s.iface:
+            s.iface.main()
+        else:
+            s.script.form.main()
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)

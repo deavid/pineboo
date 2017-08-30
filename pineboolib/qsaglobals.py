@@ -4,7 +4,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import object
 import re
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 import traceback
 import pineboolib
@@ -14,8 +15,32 @@ import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
 
 def parseFloat(x): 
-    if x is None: return None
+    if x is None: return 0
     return float(x)
+
+class parseString(object):
+    
+    obj_ = None
+    
+    def __init__(self, objeto):
+        self.obj_ = objeto
+        
+        return self.obj_
+
+def parseInt(x):
+    if x is None: return 0
+    return int(x)
+    
+
+def isNaN(x):
+    if not x:
+        return True
+    
+    try:
+        float(x)
+        return False
+    except ValueError:
+        return True
 
 
 # TODO: separar en otro fichero de utilidades
@@ -76,7 +101,9 @@ def connect(sender, signal, receiver, slot):
         try:
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
-            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), proxy_fn(weak_fn, weak_receiver, slot))
+            sl_name = signal.replace("()","")
+            
+            getattr(sender, sl_name).connect(proxy_fn(weak_fn, weak_receiver, slot))
         except RuntimeError as e:
             print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
             print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
@@ -87,20 +114,22 @@ def connect(sender, signal, receiver, slot):
         remote_fn = getattr(remote_obj, m.group(2), None)
         if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
-            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), remote_fn)
+            sg_name = signal.replace("()", "")
+            sg_name = sg_name.replace("(QString)", "")
+            getattr(sender, sg_name).connect(remote_fn)
         except RuntimeError as e:
-            print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
+            print("ERROR Connecting:", sender, sg_name, remote_fn)
             print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
             return False
 
     else:
         if isinstance(receiver, QtCore.QObject):
-            QtCore.QObject.connect(sender, QtCore.SIGNAL(signal), receiver, QtCore.SLOT(slot))
+            sender.signal.connect(receiver.slot)
         else:
             print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." % (sender, signal, receiver, slot))
     return True
 
-QMessageBox = QtGui.QMessageBox
+QMessageBox = QtWidgets.QMessageBox
 
 class MessageBox(QMessageBox):
     @classmethod
@@ -145,8 +174,8 @@ class MessageBox(QMessageBox):
 class Input(object):
     @classmethod
     def getText(cls, question, prevtxt, title):
-        text, ok = QtGui.QInputDialog.getText(None, title,
-                question, QtGui.QLineEdit.Normal, prevtxt)
+        text, ok = QtWidgets.QInputDialog.getText(None, title,
+                question, QtWidgets.QLineEdit.Normal, prevtxt)
         if not ok: return None
         return text
 
@@ -166,7 +195,7 @@ class qsa:
     parent = None
     loaded = False
     def __init__(self, parent):
-        if isinstance(parent,str): parent = QtCore.QString(parent)
+        if isinstance(parent,str): parent = parent
         self.parent = parent
         self.loaded = True
 
@@ -178,7 +207,11 @@ class qsa:
             if callable(f): return f()
             else: return f
         except Exception:
-            if k == 'length': return len(self.parent)
+            if k == 'length':
+                if self.parent:
+                    return len(self.parent)
+                else:
+                    return 0
             print("FATAL: qsa: error al intentar emular getattr de %r.%r" % (self.parent, k))
             print(traceback.format_exc(4))
 
