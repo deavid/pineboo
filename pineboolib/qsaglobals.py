@@ -18,6 +18,20 @@ def parseFloat(x):
     if x is None: return 0
     return float(x)
 
+class parseString(object):
+    
+    obj_ = None
+    
+    def __init__(self, objeto):
+        self.obj_ = objeto
+        
+        return self.obj_
+
+def parseInt(x):
+    if x is None: return 0
+    return int(x)
+    
+
 def isNaN(x):
     if not x:
         return True
@@ -193,7 +207,11 @@ class qsa:
             if callable(f): return f()
             else: return f
         except Exception:
-            if k == 'length': return len(self.parent)
+            if k == 'length':
+                if self.parent:
+                    return len(self.parent)
+                else:
+                    return 0
             print("FATAL: qsa: error al intentar emular getattr de %r.%r" % (self.parent, k))
             print(traceback.format_exc(4))
 
