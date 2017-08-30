@@ -283,21 +283,24 @@ class Date(object):
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"),self.date_.toString("MM"),self.date_.toString("dd"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
         return texto
 
-class FLVariant(object):
+@decorators.NotImplementedWarn
+class Process(object):
     
-    obj_ = None
+    def __init__(self):
+        pass
+
+@decorators.NotImplementedWarn
+class Dir(object):
     
-    def __init__(self, objeto):
-        self.obj_ = objeto
+    def __init__(self, ruta):
+        pass
     
-    def __getattr__(self, k):
-        if k == 'toString':
-            if isinstance(self.obj_, str):
-                return self.str(self.obj_)
-            else:
-                return getattr(self.obj_, k)
-        
-        return getattr(self.obj_, k)
+    def entryList(self, patron):
+        pass
+
+@decorators.BetaImplementation
+class RadioButton(QtWidgets.QRadioButton):
+    pass
         
 
 class Dialog(QtWidgets.QDialog):
