@@ -946,7 +946,6 @@ class FLSqlCursor(ProjectClass):
         else:
             self.d.buffer_.setValue(fN, v)
             
-        
         self.bufferChanged.emit(fN)
 
     """
@@ -2127,9 +2126,13 @@ class FLSqlCursor(ProjectClass):
     def primeUpdate(self):
         if not self.d.buffer_:
             self.d.buffer_ = PNBuffer(self)
+            
         
-        if not self.baseFilter() or not self.d._currentregister == None:
-            self.d.buffer_.primeUpdate(self.at())
+        #if not self.baseFilter() or not self.d._currentregister == None:
+        #    self.d.buffer_.primeUpdate(self.at())
+        #    return
+        
+        self.d.buffer_.primeUpdate(self.at())
 
 
     def editBuffer(self, b = None):
