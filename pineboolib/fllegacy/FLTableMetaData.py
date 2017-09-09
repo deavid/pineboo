@@ -705,7 +705,7 @@ class FLTableMetaData(ProjectClass):
         if other == self:
             return
      
-        self.d = other.d
+        self.d = copy.deepcopy(other.d)
         
         """
         if od.compoundKey_:

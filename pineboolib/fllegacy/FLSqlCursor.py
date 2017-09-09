@@ -1958,15 +1958,14 @@ class FLSqlCursor(ProjectClass):
 
         if not tableMD:
             return None
-
+        
         fieldAc = field.associatedField()
         if not fieldAc:
             #if ownTMD and not tableMD.inCache():
                 #del tableMD
-
             return None
 
-        fieldBy = field.associatedFieldTo()
+        fieldBy = field.associatedFieldFilterTo()
         if not tableMD.field(fieldBy) or self.d.buffer_.isNull(fieldAc.name()):
             #if ownTMD and not tableMD.inCache():
                 #del tableMD
@@ -1976,7 +1975,7 @@ class FLSqlCursor(ProjectClass):
         if vv:
             #if ownTMD and not tableMD.inCache():
                 #del tableMD
-            return self.d.db_.manager().fomatAssignValue(fieldBy, fieldAc, vv, True)
+            return self.d.db_.manager().formatAssignValue(fieldBy, fieldAc, vv, True)
 
         #if ownTMD and not tableMD.inCache():
             #del rableMD

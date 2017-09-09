@@ -2562,7 +2562,6 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int)
     def searchValue(self):
-
         if not self.cursor_:
             return
 
@@ -2581,19 +2580,18 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         fMD = field.associatedField()
-
+        
         if fMD:
             if not fMD.relationM1():
                 print("FLFieldDB : El campo asociado debe tener una relación M1")
                 return
-
             v = self.cursor_.valueBuffer(fMD.name())
             if not v or self.cursor_.bufferIsNull(fMD.name()):
                 QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", str("Debe indicar un valor para", fMD.alias()))
                 return
 
             mng = self.cursor_.db().manager()
-            c = FLSqlCursor(fMD.relationM1().foreignTable())
+            c = FLSqlCursor(field.relationM1().foreignTable())
             c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
 
             if c.size() > 0:
@@ -2602,10 +2600,11 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.actionName_:
                 a = mng.action(field.relationM1().foreignTable())
             else:
-                print(2)
                 a = mng.action(self.actionName_)
                 a.setTable(field.relationM1().foreignField())
-
+            
+            
+            
             f = FLFormSearchDB(c, a.name(), None)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
 

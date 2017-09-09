@@ -71,14 +71,26 @@ class FLFormSearchDB(FLFormDB):
             #@param cursor Objeto FLSqlCursor para asignar a este formulario
             #@param actionName Nombre de la acción asociada al formulario
             
-            if len(args) > 2:
-                action = args[1]
-                name = action.name
                 
             if len(args) == 3:
                 parent = args[2]
+                name = args[1]
             
             self.cursor_ = args[0]
+            action = self.cursor_.action()
+            
+        
+        elif len(args) == 2:
+                action = args[0]
+                parent = args[1]
+                name = action.name()
+                self.cursor_ = FLSqlCursor(action.table(), True, "default", None, None, self)
+                
+                
+            
+        
+        if not parent:
+            parent = QtWidgets.QApplication.activeModalWidget()
         
         super(FLFormSearchDB,self).__init__(parent, action)
         self.setFocusPolicy(QtCore.Qt.NoFocus)

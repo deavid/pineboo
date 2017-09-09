@@ -149,8 +149,10 @@ def getTableObj(tree,root):
                     if assoc.text: aks[assoc.tag] = assoc.text
                 aWith = aks.get("with")
                 aBy = aks.get("by")
-                
-                fieldMD.setAssociatedField(aWith , aBy)
+                for _field in table.fields:
+                    if _field.name() == aWith:
+                        fieldMD.setAssociatedField(_field , aBy)
+                        break
                 
                  
             if field.optionsList:
