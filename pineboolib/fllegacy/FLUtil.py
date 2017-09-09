@@ -8,7 +8,7 @@ import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
-
+import platform
 
 class FLUtil(ProjectClass):
 
@@ -757,7 +757,7 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def writeDBSettingEntry(self, key, value):
-        result = None
+        result = False
         where = "flkey='%s'" % key
         found = self.sqlSelect("flsettings", "valor", where, "flsettings")
         if not found:
@@ -1054,9 +1054,16 @@ class FLUtil(ProjectClass):
 
     @return Código del sistema operativo (WIN32, LINUX, MACX)
     """
-    @decorators.NotImplementedWarn
     def getOS(self):
-        pass
+        if platform.system() == "Windows":
+            return "WIN32"    
+        elif platform.system() == "Linux" or platform.system() == "Linux2":
+            return "LINUX"
+        elif platform.system() == "Darwin":
+            return "MACX"
+        else:
+            return platform.system()
+        
 
     """
     Esta función convierte una cadena que es una serie de letras en su correspondiente valor numerico.
