@@ -350,6 +350,9 @@ class GroupBox(QtWidgets.QGroupBox):
 class CheckBox(QtWidgets.QCheckBox):
     pass
 
+class Dir(qsaglobals.Dir):
+    pass
+
    
     
         
