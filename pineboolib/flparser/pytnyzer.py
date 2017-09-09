@@ -715,7 +715,6 @@ class Member(ASTPython):
             "join",
             "date",
             "toString()",
-            "charAt",
             "isEmpty()",
             "left" ,
             "right" ,
@@ -734,10 +733,6 @@ class Member(ASTPython):
                     #    arguments = ["str(%s)" % (".".join(part1))] + part2
                     elif member == "isEmpty()": 
                         arguments = ["%s == None" % (".".join(part1))] + part2
-                    elif member == "charAt":
-                        value = arg[7:]
-                        value = value[:len(value) - 1]
-                        arguments = ["%s[%s]" % (".".join(part1), value)] + part2
                     elif member == "left":
                         value = arg[5:]
                         value = value[:len(value) - 1]
