@@ -650,7 +650,7 @@ class FLSqlCursor(ProjectClass):
         if self.setAction(self.d.curName_):
             self.d.countRefCursor = self.d.countRefCursor + 1
         else:
-            print("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
+            #print("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
             return None
 
         self.d.modeAccess_ = FLSqlCursor.Browse
