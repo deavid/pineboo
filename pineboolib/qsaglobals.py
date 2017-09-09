@@ -4,28 +4,68 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import object
 import re
+import os.path
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 import traceback
 import pineboolib
-from pineboolib import flcontrols
+from pineboolib import flcontrols, decorators
+from pineboolib.utils import filedir
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
+from PyQt5.Qt import QMainWindow
+
+class File(object):
+    
+    @classmethod
+    def exists(cls, name):
+        return os.path.isfile(name)
+     
+
+class FileDialog(QtWidgets.QFileDialog):
+    
+    def __init__(self):
+        super(FileDialog, self).__init__()    
+
+
+class Dir(object):
+    
+    home = None
+    
+    def __init__(self, ruta):
+        self.home = filedir("..")
+    
+    def entryList(self, patron):
+        pass
+
+
 
 def parseFloat(x): 
     if x is None: return 0
     return float(x)
 
-class parseString(object):
+class parseString(str):
     
-    obj_ = None
+    #obj_ = None
     
     def __init__(self, objeto):
-        self.obj_ = objeto
         
-        return self.obj_
+        if getattr(objeto,"toString()", None):
+            self = objeto.toString()
+            #self.obj_ = objeto.toString()
+        else:
+            if objeto:
+                self = str(objeto)
+                #self.obj_ = str(objeto)
+                
+    def charAt(self, pos):
+        try:
+            return self[pos]
+        except:
+            return False
+            
 
 def parseInt(x):
     if x is None: return 0
@@ -77,6 +117,15 @@ class SysType(object):
         return modulename in prj.modules
     def translate(self, text):
         return text
+    
+    def osName(self):
+        util = FLUtil()
+        return util.getOS()
+    
+    @decorators.NotImplementedWarn
+    def setCaptionMainWidget(self, value):
+        return True
+    
 sys = SysType()
 
 def proxy_fn(wf, wr, slot):
@@ -116,6 +165,7 @@ def connect(sender, signal, receiver, slot):
         try:
             sg_name = signal.replace("()", "")
             sg_name = sg_name.replace("(QString)", "")
+            sg_name = sg_name.replace("(int)", "")
             getattr(sender, sg_name).connect(remote_fn)
         except RuntimeError as e:
             print("ERROR Connecting:", sender, sg_name, remote_fn)
