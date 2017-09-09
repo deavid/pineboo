@@ -48,20 +48,38 @@ class QCheckBox(QtWidgets.QCheckBox):
 
     @checked.setter
     def checked(self, v):
+        if not v:
+            v = False
         self.setCheckState(v)
 
 class QLabel(QtWidgets.QLabel):
-    def setText(self, text):
-        if not isinstance(text, str): text = str(text)
-        QtWidgets.QLabel.setText(self, text)
+    
+    def __getattr__(self, name): 
+        return DefFun(self, name)
+    
+    @QtCore.pyqtProperty(str)
+    def text(self):
+        return self.text()
+    
+    @text.setter
+    def text(self, v):
+        self.setText(v)
+    
+    #def setText(self, text):
+        #if not isinstance(text, str): text = str(text)
+        #QtWidgets.QLabel.setText(self, text)
 
 
 class QComboBox(QtWidgets.QComboBox):
     def __getattr__(self, name): return DefFun(self, name)
-    @property
+    
+    @QtCore.pyqtProperty(str)
     def currentItem(self): return self.currentIndex
 
-    def setCurrentItem(self, i): return self.setCurrentIndex(i)
+    @currentItem.setter
+    def currentItem(self, i):
+        if i:
+            self.setCurrentIndex(i)
 
 class QButtonGroup(QtWidgets.QGroupBox):
     def __getattr__(self, name): return DefFun(self, name)
