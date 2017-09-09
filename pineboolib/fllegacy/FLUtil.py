@@ -889,7 +889,7 @@ class FLUtil(ProjectClass):
         c.select(w)
 
         while c.next():
-            c.setModeAccess(FLSqlCursor.EDIT)
+            c.setModeAccess(FLSqlCursor.Edit)
             c.refreshBuffer()
             for f,v in zip(fL, vL):
                 c.setValueBuffer(f, v)
