@@ -43,7 +43,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         self._partDecimal = parent.partDecimal_
         self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()         
         self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-        self.textChanged.connect(self.controlFormato)
+        #self.textChanged.connect(self.controlFormato)
         self._parent = parent
 
     def __getattr__(self, name):
@@ -1012,7 +1012,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 if doHome:
                     self.editor_.home(False)
 
-        elif type_ == "stringList":
+        elif type_ == "stringlist":
             if not self.editor_:
                 return
 
@@ -1031,7 +1031,6 @@ class FLFieldDB(QtWidgets.QWidget):
                         s = round(float(v), self.partDecimal_)
                     else:
                         s = round(float(v), field.partDecimal())
-                    
                     self.editor_.setText(str(s))
 
 
@@ -1294,7 +1293,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN = None):
-        #print("refrescando", fN, self.fieldName_)
+        #print("refrescando", self.fieldName_)
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
             print("FLField.refresh() Cancelado")
             return
@@ -1305,6 +1304,7 @@ class FLFieldDB(QtWidgets.QWidget):
         v = None
         nulo = False
         if not fN:
+            
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
             
@@ -1713,8 +1713,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editorImg_ = FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
-                self.editorImg_.setMaximumSize(self.initMaxSize_)
-                self.editorImg_.setMinimumSize(self.initMinSize_)
+                self.editorImg_.setMaximumSize(self.maximumSize())
+                self.editorImg_.setMinimumSize(self.minimumSize())
                 self.editorImg_.setAutoScaled(True)
                 self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
                 if field.visible():

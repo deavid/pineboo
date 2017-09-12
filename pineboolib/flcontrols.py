@@ -63,11 +63,14 @@ class QLabel(QtWidgets.QLabel):
     
     @text.setter
     def text(self, v):
+        if not isinstance(v, str): 
+            v = str(v)
         self.setText(v)
     
-    #def setText(self, text):
-        #if not isinstance(text, str): text = str(text)
-        #QtWidgets.QLabel.setText(self, text)
+    def setText(self, text):
+        if not isinstance(text, str): 
+            text = str(text)
+        super(QLabel, self).setText(text)
 
 
 class QComboBox(QtWidgets.QComboBox):

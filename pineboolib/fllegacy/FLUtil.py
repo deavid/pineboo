@@ -697,6 +697,7 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def buildNumber(self, v, tipo, partDecimal):
+        if not v: v= 0
         d = float(v) * 10**partDecimal
         d = round(d)
         d = d / 10**partDecimal
