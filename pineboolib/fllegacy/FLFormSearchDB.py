@@ -261,6 +261,8 @@ class FLFormSearchDB(FLFormDB):
             v = self.cursor_.valueBuffer(valor)
         else:
             v = None
+            self.close()
+            return False
         
         self.inExec_ = False   
         return v
