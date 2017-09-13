@@ -46,25 +46,31 @@ def parseFloat(x):
     if x is None: return 0
     return float(x)
 
-class parseString(str):
+class parseString(object):
     
-    #obj_ = None
+    obj_ = None
     
     def __init__(self, objeto):
-        
-        if getattr(objeto,"toString()", None):
-            self = objeto.toString()
-            #self.obj_ = objeto.toString()
-        else:
-            if objeto:
-                self = str(objeto)
-                #self.obj_ = str(objeto)
+        try:
+            self.obj_ = objeto.toString()
+        except:
+            self.obj_ = str(objeto)
+            
+    def __str__(self):
+        return self.obj_
+    
+    def __getitem__(self, key):
+        return self.obj_.__getitem__(key)
+    
+    
                 
     def charAt(self, pos):
         try:
-            return self[pos]
+            return self.obj_[pos]
         except:
             return False
+    
+        
             
 
 def parseInt(x):
