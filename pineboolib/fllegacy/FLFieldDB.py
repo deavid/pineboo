@@ -288,7 +288,6 @@ class FLFieldDB(QtWidgets.QWidget):
     _initEditorWhenLoad = False
     _refreshLaterEditor = False
 
-    editorImgInit_ = None
 
     pushButtonDB = None
     keyF4Pressed = QtCore.pyqtSignal()
@@ -1308,14 +1307,15 @@ class FLFieldDB(QtWidgets.QWidget):
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
             
-            if self.cursor_.cursorRelation():
-                if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
+            #if self.cursor_.cursorRelation():
+                #print(1)
+                #if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
                     # FIXME: Este código estaba provocando errores al cargar formRecord hijos
                     # ... el problema es, que posiblemente el cursorRelation entrega información
                     # ... errónea, y aunque comentar el código soluciona esto, seguramente esconde
                     # ... otros errores en el cursorRelation. Pendiente de investigar más.
                     #v = None
-                    if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
+                    #if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
                     
 
         else:
@@ -1492,7 +1492,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
 
         elif type_ == "pixmap":
-            if not self.editorImgInit_ or not self.editorImg_:
+            if not self.editorImg_:
                 self.editorImg_ = FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
@@ -1502,7 +1502,6 @@ class FLFieldDB(QtWidgets.QWidget):
                 #self.FLWidgetFieldDBLayout.removeWidget(self.pushButtonDB)
                 self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
                 self.pushButtonDB.hide()
-                self.editorImgInit_ = True
 
                 if field.visible():
                     self.editorImg_.show()
@@ -1952,13 +1951,13 @@ class FLFieldDB(QtWidgets.QWidget):
         if not self.cursor_:
             return
 
-        if self.editor_:
-            del self.editor_
-            self.editor_ = None
+        #if self.editor_:
+        #    del self.editor_
+        #    self.editor_ = None
 
-        if self.editorImg_:
-            del self.editorImg_
-            self.editorImg_ = None
+        #if self.editorImg_:
+        #    del self.editorImg_
+        #    self.editorImg_ = None
 
         tMD = self.cursor_.metadata()
         if not tMD:
@@ -2138,8 +2137,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "pixmap":
             if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                if not self.editorImgInit_:
-                    self.editorImgInit_ = True
+                if not self.editorImg_:
                     self.FLWidgetFieldDBLayout.setDirection(QtWidgets.QBoxLayout.Down)
                     self.editorImg_ = FLPixmapView(self)
                     self.editorImg_.setFocusPolicy(Qt.NoFocus)
