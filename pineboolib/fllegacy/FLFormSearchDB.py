@@ -209,7 +209,6 @@ class FLFormSearchDB(FLFormDB):
     @param n Nombre del un campo del cursor del formulario
     @return El valor del campo si se acepta, o QVariant::Invalid si se cancela
     """
-    @decorators.BetaImplementation
     def exec_(self, valor):
         if not self.cursor_:
             return None

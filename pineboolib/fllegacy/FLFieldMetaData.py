@@ -376,7 +376,6 @@ class FLFieldMetaData():
     @return Nombre del campo de la tabla foránea M-1, al que hay que aplicar el filtro
       según el valor del campo asociado
     """
-    @decorators.BetaImplementation
     def associatedFieldFilterTo(self):
         return self.d.associatedFieldFilterTo_
 
