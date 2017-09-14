@@ -185,7 +185,7 @@ class PNBuffer(ProjectClass):
         else:
             if type_ in ("bool","unlock"):
                 return (str(value) == "True")
-            elif type_ in ("int", "uint"):
+            elif type_ in ("int", "uint", "serial"):
                 return int(value)
             elif type_ == "double":
                 return float(value)
@@ -1447,7 +1447,7 @@ class FLSqlCursor(ProjectClass):
                             #ss = None
                     
                     if ss:
-                        filter = "%s AND %s" % (self.d.db_.manager().formatAssignValue(field.associatedFieldFilterTo(), fMD, ss, True), self.d.db_.mager().formatAssignValue(field.relationM1().foreignField(), field,s , True))
+                        filter = "%s AND %s" % (self.d.db_.manager().formatAssignValue(field.associatedFieldFilterTo(), fMD, ss, True), self.d.db_.manager().formatAssignValue(field.relationM1().foreignField(), field,s , True))
                         q = FLSqlQuery(None, self.d.db_.connectionName())
                         q.setTablesList(tMD.name())
                         q.setSelect(field.associatedFieldFilterTo())
@@ -2474,10 +2474,11 @@ class FLSqlCursor(ProjectClass):
 
             else:
                 finalFilter = _filter
-           
+        
         if finalFilter:
             self.setMainFilter(finalFilter , False)
             self.d._model.refresh()
+            self.refreshBuffer()
          
         self.newBuffer.emit()
 
