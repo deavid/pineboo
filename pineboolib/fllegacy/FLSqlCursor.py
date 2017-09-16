@@ -492,7 +492,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
 
 
-
+    @decorators.BetaImplementation
     def __del__(self):
 
         if self.metadata_:
@@ -548,8 +548,10 @@ class FLSqlCursorPrivate(QtCore.QObject):
         return need
 
 
-    def msgBoxWarning(self, msg):
-        QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),"Pineboo", msg)
+    def msgBoxWarning(self, msg, throwException = False):
+        
+        if not throwException:
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),"Pineboo", msg)
         
 
 
@@ -2431,14 +2433,16 @@ class FLSqlCursor(ProjectClass):
     en cascada, en caso afirmativo borrar también los registros relacionados en cardinalidad 1M.
     """
     @QtCore.pyqtSlot()
+    @decorators.NotImplementedWarn
     def __del__(self, invalidate = True):
         delMtd = None
         if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
 
         mtd = self.d.metadata_
-        if self.d.transactionsOpened_:
-            t = self.name()
+        print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
+        if len(self.d.transactionsOpened_): #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
+            t = self.curName()
             if self.d.metadata_:
                 t = self.d.metadata_.name()
                 msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
@@ -2541,9 +2545,26 @@ class FLSqlCursor(ProjectClass):
     Obtiene el filtro actual
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def curFilter(self):
-        return True
+        f = self.filter()
+        bFilter = self.baseFilter()
+        if f:
+            while f.endswith(";"):
+                f = f[0:len(f) -1]
+        
+        if not bFilter:
+            return f
+        else:
+            if not f or bFilter.__contains__(f):
+                return bFilter
+            else:
+                if f.__contains__(bFilter):
+                    return f
+                else:
+                    return "%s aND %s" % (bFilter, f)
+    
+        
+        
 
     """
     Redefinicion del método setFilter() de QSqlCursor
@@ -2805,7 +2826,7 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
-                #self.del(False) FIXME?
+                self.del__(False)
                 updated = True
 
 
@@ -2913,7 +2934,7 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def transactionLevel(self):
         if self.d.db_:
-            return self.d.db_.transaction_
+            return self.d.db_.transactionLevel()
         else:
             return 0
 
@@ -2938,6 +2959,7 @@ class FLSqlCursor(ProjectClass):
                 Si es vacía no muestra nada.
     """
     @QtCore.pyqtSlot()
+    @decorators.BetaImplementation
     def rollbackOpened(self, count = -1, msg = None):
         ct = None
         if count < 0:
@@ -2961,6 +2983,7 @@ class FLSqlCursor(ProjectClass):
         while i < ct:
             print("FLSqlCursor : Deshaciendo transacción abierta", self.transactionLevel())
             self.rollback()
+            i = i + 1
 
 
 

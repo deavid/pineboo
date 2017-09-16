@@ -104,7 +104,7 @@ class FLFormSearchDB(FLFormDB):
             return
 
 
-        
+        self.eventloop = QtCore.QEventLoop() 
         self.initForm()
                     
         
@@ -120,8 +120,6 @@ class FLFormSearchDB(FLFormDB):
             self.cursor_.restoreBrowseFlag(self)
             
         FLFormDB.__delattr__(self, *args, **kwargs)
-        
-        
 
     """
     formReady = QtCore.pyqtSignal()
@@ -244,8 +242,7 @@ class FLFormSearchDB(FLFormDB):
             timer2.singleShot(0, self.emitFormReady)
         
         self.accepted_ = False
-        self.loop = True
-        self.eventloop = QtCore.QEventLoop()      
+        self.loop = True     
         self.eventloop.exec_()
         
         #if not self.isClosing_ and not self.acceptingRejecting_:

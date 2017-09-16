@@ -1,44 +1,36 @@
 # -*- coding: utf-8 -*-
+from gi import importlib
+from pineboolib.flcontrols import ProjectClass
 
-from PyQt5.QtCore import QTime
-
-from pineboolib.dbschema.schemaupdater import text2bool
-from pineboolib.fllegacy import FLUtil
-
-class PNSqlDrivers():
+class PNSqlDrivers(ProjectClass):
 
     driverName = None
-
+    driver_ = None
+    
     def __init__(self, driverName = "PGSql"):
-        self.driverName = driverName
+        
+        module_ = importlib.import_module("pineboolib.plugins.sql.%s" % driverName)
+        self.driver_ = getattr(module_, driverName)()
+        
+        if self.driver_:
+            self.driverName = driverName
+            print("Driver cargado",self.driver_.name(), self.driver_.version())
+        else:
+            print("PNSqlDrivers :: No se ha podidio inicializar el driver")
+    
+    
+    def driver(self):
+        return self.driver_
+    
+    def driverName(self):
+        return self.driverName()
+    
+    def __getattr__(self, k):
+        return getattr(self.driver_,k)
+            
 
 
-    def formatValue(self, type_, v, upper):
-        util = FLUtil.FLUtil()
-        if self.driverName == "PGSql":
-            s = None
-            # TODO: psycopg2.mogrify ???
-
-            if type_ == "bool" or type_ == "unlock":
-                s = text2bool(v)
-
-            elif type_ == "date":
-                s = "'%s'" % util.dateDMAtoAMD(v)
-                
-            elif type_ == "time":
-                time = QTime(s)
-                s = "'%s'" % time
-
-            elif type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "serial":
-                s = v
-
-            else:
-                if upper == True and type_ == "string":
-                    v = v.upper()
-
-                s = "'%s'" % v
-            #print ("PNSqlDriver.formatValue(%s, %s) = %s" % (type_, v, s))
-            return s
+    
 
 
 
