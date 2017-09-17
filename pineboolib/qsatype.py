@@ -259,9 +259,10 @@ class FormDBWidget(QtWidgets.QWidget):
         try:
             if self.parentWidget():
                 cursor = getattr(self.parentWidget(),"cursor_", None)
-            if cursor:
-                del self.cursor_
-                self.cursor_ = cursor
+
+            if cursor and not cursor is self.cursor_ :
+                #self.cursor_.__del__(True)
+                return cursor
         except Exception:
             # FIXME: A veces parentWidget existía pero fue eliminado. Da un error
             # ... en principio debería ser seguro omitir el error.
