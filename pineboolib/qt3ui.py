@@ -56,8 +56,10 @@ def loadUi(path, widget, parent = None):
         
         sg_name = signal_name.replace("()","")
         sg_name = sg_name.replace("(bool)","")
+        sg_name = sg_name.replace("(const QString&)","")
         sl_name = slot_name.replace("()","")
         sl_name = sl_name.replace("(bool)","")
+        sl_name = sl_name.replace("(const QString&)","")
         
         #print("SG_NAME", sg_name)
         #print("SL_NAME", sl_name)
