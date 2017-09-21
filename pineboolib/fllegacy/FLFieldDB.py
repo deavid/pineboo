@@ -295,7 +295,7 @@ class FLFieldDB(QtWidgets.QWidget):
     keyReturnPressed = QtCore.pyqtSignal()
     lostFocus = QtCore.pyqtSignal()
     textChanged = QtCore.pyqtSignal(str)
-    keyF2Pressed_ = QtCore.pyqtSignal(name = "keyF2Pressed")
+    keyF2Pressed = QtCore.pyqtSignal()
     
     firstRefresh = None
 
@@ -733,7 +733,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 return True
 
             if k.key() == Qt.Key_F2:
-                self.keyF2Pressed_.emit()
+                self.keyF2Pressed.emit()
                 return True
 
             return False
@@ -2093,12 +2093,12 @@ class FLFieldDB(QtWidgets.QWidget):
                 if hasPushButtonDB:
                     if self.showed:
                         try:
-                            self.KeyF2Pressed_.disconnect(self.pushButtonDB.animateClick())
+                            self.KeyF2Pressed.disconnect(self.pushButtonDB.animateClick())
                             self.labelClicked.disconnect(self.openFormRecordRelation)
                         except:
                             a = 1
 
-                    self.keyF2Pressed_.connect(self.pushButtonDB.animateClick) #FIXME
+                    self.keyF2Pressed.connect(self.pushButtonDB.animateClick) #FIXME
                     self.labelClicked.connect(self.openFormRecordRelation)
                     self.textLabelDB.installEventFilter(self)
                     tlf = self.textLabelDB.font()
@@ -2173,11 +2173,11 @@ class FLFieldDB(QtWidgets.QWidget):
                     if not hasPushButtonDB:
                         if self.showed:
                             try:
-                                self.KeyF2Pressed_.disconnect(self.pbAux3_.animateClick)
+                                self.KeyF2Pressed.disconnect(self.pbAux3_.animateClick)
                             except:
                                 pass
                         try:
-                            self.KeyF2Pressed_.connect(self.pbAux3_.animateClick)
+                            self.KeyF2Pressed.connect(self.pbAux3_.animateClick)
                         except:
                             pass
                         
@@ -2905,7 +2905,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     @QtCore.pyqtSlot()
     def emitKeyF2Pressed(self):
-        self.keyF2Pressed_.emit()
+        self.keyF2Pressed.emit()
 
     """
     Emite la señal de labelClicked. Se usa en los campos M1 para editar el formulario de edición del valor seleccionado.
