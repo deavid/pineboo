@@ -489,6 +489,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.buffer_ = None
         self.editionStates_ = None
         self.activatedCheckIntegrity_ = True
+        self.askForCancelChanges_ = True
 
 
 
@@ -1704,7 +1705,6 @@ class FLSqlCursor(ProjectClass):
 
     @return TRUE si está bloqueado, FALSE en caso contrario.
     """
-    @decorators.BetaImplementation
     def isLocked(self):
         if not self.d.modeAccess_ == self.Insert and self.fieldsNamesUnlock_ and self.d.buffer_ and self.d.buffer_.value(self.d.metadata_.primaryKey()):
             for field in self.fieldsNamesUnlock_:
@@ -2433,15 +2433,15 @@ class FLSqlCursor(ProjectClass):
     en cascada, en caso afirmativo borrar también los registros relacionados en cardinalidad 1M.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def __del__(self, invalidate = True):
         delMtd = None
         if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
 
         mtd = self.d.metadata_
-        print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
-        if len(self.d.transactionsOpened_): #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
+        if self.d.transactionsOpened_:
+            print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
+        if len(self.d.transactionsOpened_) > 0: #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
             t = self.curName()
             if self.d.metadata_:
                 t = self.d.metadata_.name()
