@@ -19,17 +19,23 @@ class PGSql(object):
     version_ = None
     conn_ = None
     name_ = None
+    errorList = None
     
     def __init__(self):
-        self.version_ = "0.1"
+        self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "postGreSQL"
+        self.name_ = "PostGreSQL"
+        self.open_ = False
+        self.errorList = []
     
     def version(self):
         return self.version_
     
     def name(self):
         return self.name_
+    
+    def isOpen(self):
+        return self.open_
     
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         
@@ -38,6 +44,10 @@ class PGSql(object):
                         db_name, db_host, db_port,
                         db_userName, db_password)
         self.conn_ = psycopg2.connect(conninfostr)
+        
+        if self.conn_:
+            self.open_ = True
+        
         return self.conn_
      
     
@@ -73,8 +83,14 @@ class PGSql(object):
     def canOverPartition(self):
         return True
     
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def hasFeature(self, value):
+        
+        if value == "Transactions":
+            return  True
+        
+        
+        
         if getattr(self.conn_, value, None):
             return True
         else:
@@ -100,4 +116,59 @@ class PGSql(object):
     
     def canSavePoint(self):
         return True
+    
+    def rollbackSavePoint(self, n):
+        if not self.canSavePoint():
+            return False
+        
+        if not self.isOpen():
+            print("PSQLDriver::rollbackSavePoint: Database not open")
+            return False
+        
+        cmd = ("rollback to savepoint sv_%s" % n)
+
+        q = FLSqlQuery()
+        q.setSelect(cmd)
+        q.setFrom("")
+        q.setWhere("")
+        if not q.exec():
+            self.setLastError("No se pudo deshacer punto de salvaguarda", "rollback to savepoint sv_%s" % n)
+            return False
+        
+        return True 
+    
+    def setLastError(self, text, command):
+        print("PGSql:ERROR:%s (%s)" % (text, command))
+        self.errorList.append("%s (%s)" % (text, command))
+    
+    
+    def commitTransaction(self):
+        if not self.isOpen():
+            print("PSQLDriver::commitTransaction: Database not open")
+        
+        if not self.conn_.commit():
+            self.setLastError("No se pudo aceptar la transacción", "COMMIT")
+            return False
+        
+        return True
+    
+    def rollbackTransaction(self):
+        if not self.isOpen():
+            print("PSQLDriver::commitTransaction: Database not open")
+        
+        if not self.conn_.rollback():
+            self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
+            return False
+        
+        return True
+    
+    @decorators.BetaImplementation
+    def transaction(self):
+        return True
+    
+    
+            
+            
+            
+            
         
