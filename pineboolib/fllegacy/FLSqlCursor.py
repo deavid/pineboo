@@ -1064,7 +1064,6 @@ class FLSqlCursor(ProjectClass):
 
     @param b TRUE o FALSE
     """
-    @decorators.BetaImplementation
     def setEdition(self, b, m = None):
         
         if not m:
@@ -1117,7 +1116,6 @@ class FLSqlCursor(ProjectClass):
 
     @param b TRUE o FALSE
     """
-    @decorators.BetaImplementation
     def setBrowse(self, b,m = None):
         if not m:
             self.d.browse_ = b
@@ -2276,10 +2274,8 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.Empty
     def seek(self, i, relative = None, emite = None):
-        return False
-    """
+
         if self.d.modeAccess_ == self.Del:
             return False
 
@@ -2290,18 +2286,17 @@ class FLSqlCursor(ProjectClass):
 
 
         if b and emite:
-            self.currentChanged(self.at())
+            self.currentChanged.emit(self.at())
 
         if b:
             return self.refreshBuffer()
 
-        else:
-            print("FLSqlCursor.seek(): buffer principal =", self.d.buffer_.md5Sum())
+        #else:
+            #print("FLSqlCursor.seek(): buffer principal =", self.d.buffer_.md5Sum())
 
         return False
 
 
-    """
 
     """
     Redefinicion del método next() de QSqlCursor.
@@ -2682,7 +2677,6 @@ class FLSqlCursor(ProjectClass):
     """
 
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def commitBuffer(self, emite = True, checkLocks = False):
         if not self.d.buffer_ or not self.d.metadata_:
             return False
@@ -2712,7 +2706,7 @@ class FLSqlCursor(ProjectClass):
                 if not self.d.buffer_.isGenerated(field.name()):
                     continue
 
-                if self.d.ctxt_() and field.calculated():
+                if self.context() and field.calculated():
                     v = None
                     try:
                         v = self.d.ctxt_().calculateField(field.name())
