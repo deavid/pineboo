@@ -653,7 +653,7 @@ class FLUtil(ProjectClass):
         
         if not isinstance(retorno, QtCore.QDate):
             print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(retorno))
-        return retorno.addDays(offset)
+        return retorno.addDays(offset).toString("dd-MM-yyyy")
 
     """
     Suma meses a una fecha.
@@ -672,7 +672,7 @@ class FLUtil(ProjectClass):
         
         if not isinstance(retorno, QtCore.QDate):
             print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(retorno))
-        return retorno.addMonths(offset)
+        return retorno.addMonths(offset).toString("dd-MM-yyyy")
 
     """
     Suma años a una fecha.
