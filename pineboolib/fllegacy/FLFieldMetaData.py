@@ -237,7 +237,6 @@ class FLFieldMetaData():
 
     @return TRUE si el campo es una referencia con contador
     """
-    @decorators.BetaImplementation
     def isCounter(self):
         return self.d.contador_
 
@@ -397,7 +396,6 @@ class FLFieldMetaData():
 
     @return Valor que se asigna por defecto al campo
     """
-    @decorators.BetaImplementation
     def defaultValue(self):
         if not self.d.defaultValue_:
             self.d.defaultValue_ = ""
