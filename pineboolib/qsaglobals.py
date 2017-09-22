@@ -49,12 +49,15 @@ def parseFloat(x):
 class parseString(object):
     
     obj_ = None
+    length = None
     
     def __init__(self, objeto):
         try:
             self.obj_ = objeto.toString()
         except:
             self.obj_ = str(objeto)
+        
+        self.length = len(self.obj_)
             
     def __str__(self):
         return self.obj_
@@ -69,6 +72,8 @@ class parseString(object):
             return self.obj_[pos]
         except:
             return False
+    
+    
     
         
             
