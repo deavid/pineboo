@@ -130,6 +130,8 @@ def loadWidget(xml, widget=None, parent=None):
         setpname = "set" + pname[0].upper() + pname[1:]
         if pname == "layoutSpacing":
             set_fn = widget.layout.setSpacing
+        elif pname == "margin":
+            set_fn = widget.setContentsMargins
         else:
             set_fn = getattr(widget, setpname, None)
         if set_fn is None:
@@ -143,6 +145,15 @@ def loadWidget(xml, widget=None, parent=None):
             except Exception as e: value = 0
             if pname == "contentsMargins":
                 value = QtCore.QMargins(value, value, value, value)
+                
+        elif pname == "margin":
+            try:
+                value = loadVariant(xmlprop)
+            except:
+                value = 0
+                
+            value = QtCore.QMargins(value, value, value, value)
+            
         else:
             value = loadVariant(xmlprop)
 
@@ -367,8 +378,11 @@ def _loadVariant(variant):
         text = variant.text
         libs = [QtCore.Qt]
         if text=="WordBreak|AlignVCenter": text="AlignVCenter"
+        if text=="WordBreak|AlignTop": text="AlignTop"
+        if text=="AlignVCenter|AlignRight": text= "AlignRight"
+        if text=="AlignVCenter|AlignLeft": text="AlignLeft"
         for lib in libs:
-            v = getattr(lib,text,None)
+                v = getattr(lib,text,None)
         if v is not None: return v
     
     if variant.tag == "enum":
