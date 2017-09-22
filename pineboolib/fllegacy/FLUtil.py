@@ -422,7 +422,7 @@ class FLUtil(ProjectClass):
     @param s Cadena de texto a traducir
     @return Devuelve la cadena traducida al idioma local
     """
-    @decorators.BetaImplementation
+    
     def translate(self, group, string):
         return str(string)
         # return qApp->translate(contexto, s);
@@ -531,7 +531,6 @@ class FLUtil(ProjectClass):
                 cadena = str(numero)
                 
                 if len(cadena) < _len:
-                    print("Cadena ...", cadena,len(cadena), _len)
                     relleno = None
                     relleno = cadena.rjust(_len , '0')
                     cadena = relleno
@@ -708,7 +707,6 @@ class FLUtil(ProjectClass):
 
     @return Cadena que contiene el número formateado
     """
-    @decorators.BetaImplementation
     def buildNumber(self, v, tipo, partDecimal):
         if not v: v= 0
         d = float(v) * 10**partDecimal
@@ -790,7 +788,6 @@ class FLUtil(ProjectClass):
 
     @return Número redondeado
     """
-    @decorators.BetaImplementation
     def roundFieldValue(self, n, table, field):
 
         tmd = self._prj.conn.manager().metadata(table)
