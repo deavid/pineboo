@@ -501,7 +501,7 @@ class FLUtil(ProjectClass):
             if not type_ == "string" and not not type_ == "double":
                 return None
 
-            _len = field.length()
+            _len = int(field.length())
             cadena = None
 
             q = FLSqlQuery(None, cursor_.db().connectionName())
@@ -509,7 +509,7 @@ class FLUtil(ProjectClass):
             q.setTablesList(tMD.name())
             q.setSelect(name)
             q.setFrom(tMD.name())
-            q.setWhere("LENGTH(%s)=%d" % (name, _len))
+            q.setWhere("LENGTH(%s)=%s" % (name, _len))
             q.setOrderBy(name + " DESC")
 
             if not q.exec():
@@ -523,16 +523,18 @@ class FLUtil(ProjectClass):
                     numero = 1
                     break
 
-                numero = float(q.value(0))
+                numero = int(q.value(0))
                 numero = numero + 1
 
 
             if type_ == "string":
                 cadena = str(numero)
+                
                 if len(cadena) < _len:
+                    print("Cadena ...", cadena,len(cadena), _len)
                     relleno = None
-                    relleno = cadena.rjust(_len - len(cadena), '0')
-                    cadena = str + cadena
+                    relleno = cadena.rjust(_len , '0')
+                    cadena = relleno
 
                 return cadena
 
@@ -779,8 +781,8 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def roundFieldValue(self, n, table, field):
-        from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
-        tmd = FLSqlConnections().database().manager().metadata(table)
+
+        tmd = self._prj.conn.manager().metadata(table)
         if not tmd:
             return 0
         fmd = tmd.field(field)
@@ -816,7 +818,7 @@ class FLUtil(ProjectClass):
         q.setSelect(s)
         q.setFrom(f)
         q.setWhere(w)
-        q.setForwardOnly(True)
+        #q.setForwardOnly(True)
         if not q.exec():
             return False
 
