@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators, fllegacy
+from pineboolib import decorators, fllegacy, qsaglobals
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import DefFun
@@ -152,7 +152,7 @@ class PNBuffer(ProjectClass):
 
 
     def setValue(self, name, value, mark_ = True):
-        if value is not None and not isinstance(value, (int, float, str)):
+        if value is not None and not isinstance(value, (int, float, str, qsaglobals.parseString)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
 
         for field in  self.fieldList_:
@@ -496,8 +496,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
     @decorators.BetaImplementation
     def __del__(self):
 
-        if self.metadata_:
-            self.undoAcl()
+        #if self.metadata_:
+        #    self.undoAcl() #En un futuro FIXME
 
         if self.bufferCopy_:
             del self.bufferCopy_
@@ -1320,9 +1320,9 @@ class FLSqlCursor(ProjectClass):
         if not self._action.formRecord():
             QtWidgets.QMessageBox.Warning(QtWidgets.QApplication.focusWidget(), FLUtil.tr("Aviso"),FLUtil.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()) ,QtWidgets.QMessageBox.Ok)
             return
-
+        
+        self._action.openDefaultFormRecord(self)
         if self.refreshBuffer():
-            self._action.openDefaultFormRecord(self)
             self.updateBufferCopy()
 
 
@@ -2186,16 +2186,19 @@ class FLSqlCursor(ProjectClass):
                         self.d.buffer_.setValue(fiName, defVal)
 
                     if type_ == "serial":
+                        
                         self.d.buffer_.setValue(fiName, "%u" % self.d.db_.nextSerialVal(self.d.metadata_.name(), fiName))
-
+                    
                     if field.isCounter():
-                        siguiente = self.calculateCounter(fiName)
-                        if siguiente.isValid():
-                            self.d.buffer_.setValue(fiName, siguiente)
-                        else:
-                            siguiente = FLUtil.nextCounter(fiName, self)
-                            if siguiente.isValid():
-                                self.d.buffer_.setValue(fiName, siguiente)
+                        siguiente = None
+                        if self.context():
+                            try:
+                                siguiente = self.context().calculateCounter()
+                            except:
+                                siguiente = FLUtil.nextCounter(field.name(), self)
+
+                            if siguiente:
+                                self.d.buffer_.setValue(field.name(), siguiente)
 
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
@@ -2432,7 +2435,8 @@ class FLSqlCursor(ProjectClass):
         delMtd = None
         if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
-
+        
+        msg = None
         mtd = self.d.metadata_
         if self.d.transactionsOpened_:
             print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
