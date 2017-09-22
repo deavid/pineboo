@@ -645,9 +645,15 @@ class FLUtil(ProjectClass):
     def addDays(self, fecha, offset):
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
+            
+        retorno = fecha
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(fecha))
-        return fecha.addDays(offset)
+            tmp = QtCore.QDateTime(fecha)
+            retorno = tmp.date()
+        
+        if not isinstance(retorno, QtCore.QDate):
+            print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(retorno))
+        return retorno.addDays(offset)
 
     """
     Suma meses a una fecha.
@@ -658,10 +664,15 @@ class FLUtil(ProjectClass):
     """
     def addMonths(self, fecha, offset):
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha)
+            retorno = QtCore.QDate.fromString(fecha)
+        
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(fecha))
-        return fecha.addMonths(offset)
+            tmp = QtCore.QDateTime(fecha)
+            retorno = tmp.date()
+        
+        if not isinstance(retorno, QtCore.QDate):
+            print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(retorno))
+        return retorno.addMonths(offset)
 
     """
     Suma años a una fecha.
