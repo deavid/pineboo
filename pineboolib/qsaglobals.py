@@ -15,7 +15,7 @@ from pineboolib.utils import filedir
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
-from PyQt5.Qt import QMainWindow
+from PyQt5.Qt import QMainWindow, QDate
 
 class File(object):
     
@@ -73,6 +73,8 @@ class parseString(object):
         except:
             return False
     
+    def substring(self, ini, fin):
+        return self.obj_[ini: fin]    
     
     
         
@@ -189,6 +191,14 @@ def connect(sender, signal, receiver, slot):
         else:
             print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." % (sender, signal, receiver, slot))
     return True
+
+class Date(object):
+    
+    @classmethod
+    def parse(cls, value):
+        return QtCore.QDate.fromString(value)
+
+
 
 QMessageBox = QtWidgets.QMessageBox
 
