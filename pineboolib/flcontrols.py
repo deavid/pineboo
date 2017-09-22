@@ -133,27 +133,21 @@ class QTabWidget(QtWidgets.QTabWidget):
 
 
 class QLineEdit(QtWidgets.QLineEdit):
-    def __init__(self, *args, **kwargs):
-        super(QLineEdit, self).__init__(*args,**kwargs)
-        class TextEmul:
-            def __init__(self, parent, f):
-                self.parent = parent
-                self.f = f
-            def __call__(self):
-                return self.f()
-            def __str__(self):
-                return self.f()
-            def __getattr__(self, name):
-                return getattr(self.f(),name)
-
-        self.text = TextEmul(self, super(QLineEdit,self).text)
-
-    def __getattr__(self, name):
-        print("flcontrols.QLineEdit: Emulando método %r" % name)
-        return self.defaultFunction
-
-    def defaultFunction(self, *args, **kwargs):
-        print("flcontrols.QLineEdit: llamada a método no implementado", args,kwargs)
+    
+    
+    @QtCore.pyqtProperty(str)
+    def text(self):
+        return super(QLineEdit, self).text()
+    
+    @text.setter
+    def text(self, v):
+        if not isinstance(v, str): 
+            v = str(v)
+        super(QLineEdit, self).setText(v)
+    
+    #def __getattr__(self, name): 
+        #return DefFun(self, name)
+        
 
 class QListView(QtWidgets.QListView):
     def __init__(self, *args, **kwargs):
