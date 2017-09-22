@@ -171,7 +171,8 @@ class PNConnection(QtCore.QObject):
         
         if self.transaction_ == 0 and self.canTransaction():
             print("Deshaciendo Transacción...")
-            if self.conn.rollback():
+            try:
+                self.conn.rollback()
                 self.lastActiveCursor_ = None
                 
                 if not self.canSavePoint():
@@ -188,7 +189,7 @@ class PNConnection(QtCore.QObject):
                 
                 #aqApp.TransactionRoolback.emit(cur)
                 return True
-            else:
+            except:
                 print("FLSqlDatabase::doRollback : Fallo al intentar deshacer transacción")
                 return False
         
@@ -262,7 +263,8 @@ class PNConnection(QtCore.QObject):
         
         if self.transaction_ == 0 and self.canTransaction():
             print("Terminando transacción...")
-            if self.conn.commit():
+            try:
+                self.conn.commit()
                 self.lastActiveCursor_ = None
                 
                 if not self.canSavePoint():
@@ -279,7 +281,7 @@ class PNConnection(QtCore.QObject):
                 #aqApp.emitTransactionEnd(cur)
                 
                 return True
-            else:
+            except:
                 print("PNConnect::doCommit : Fallo al intentar terminar transacción")
                 return False
         else:
