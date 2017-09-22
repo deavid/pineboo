@@ -122,7 +122,8 @@ class Project(object):
         # Conectar:
 
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password)
-
+        util = FLUtil()
+        util.writeSettingEntry(u"DBA/lastDB",self.dbname)
         self.cur = self.conn.cursor()
         self.areas = {}
         self.cur.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
@@ -188,7 +189,7 @@ class Project(object):
 
 
     def loadGeometryForm(self, name):
-        name = name = "geo/%s" % name
+        name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
 
     def call(self, function, aList , objectContext ):
