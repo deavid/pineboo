@@ -26,8 +26,11 @@ class File(object):
 
 class FileDialog(QtWidgets.QFileDialog):
     
-    def __init__(self):
-        super(FileDialog, self).__init__()    
+    #def __init__(self):
+        #super(FileDialog, self).__init__()    
+    
+    def getExistingDirectory(basedir):
+        return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
 
 
 class Dir(object):
@@ -46,6 +49,7 @@ def parseFloat(x):
     if x is None: return 0
     return float(x)
 
+"""
 class parseString(object):
     
     obj_ = None
@@ -76,6 +80,13 @@ class parseString(object):
     def substring(self, ini, fin):
         return self.obj_[ini: fin]    
     
+ """   
+    
+def parseString(objeto):
+    try:
+        return objeto.toString()
+    except:
+        return str(objeto)
     
         
             
@@ -122,12 +133,13 @@ class SysType(object):
 
     def nameUser(self): 
         return pineboolib.project.conn.db_userName
+    
     def interactiveGUI(self):
         return "Pineboo"
     
     def isLoadedModule(self, modulename):
-        prj = pineboolib.project
-        return modulename in prj.modules
+        return modulename in pineboolib.project.modules
+    
     def translate(self, text):
         return text
     
@@ -135,9 +147,10 @@ class SysType(object):
         util = FLUtil()
         return util.getOS()
     
-    @decorators.NotImplementedWarn
+    
     def setCaptionMainWidget(self, value):
-        return True
+        pineboolib.project.mainWindow.setWindowTitle(value)
+        
     
 sys = SysType()
 
