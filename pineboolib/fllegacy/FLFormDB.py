@@ -222,7 +222,16 @@ class FLFormDB(QtWidgets.QDialog):
                 
 
     def load_script(self,scriptname):
-        # import aqui para evitar dependencia ciclica
+        #Si ya esta cargado se reusa...
+        if getattr(self.action, "script",None):
+            self.script = self.action.script
+            #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            self.widget = self.script.form
+            if getattr(self.widget,"iface",None):
+                self.iface = self.widget.iface
+            return
+        
+        
         import pineboolib.emptyscript
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos

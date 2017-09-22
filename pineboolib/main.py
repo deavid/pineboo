@@ -545,11 +545,16 @@ class XMLAction(XMLStruct):
     def execDefaultScript(self):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
         
-        scriptname = self.scriptform
+        self.load_script(self.scriptform, None)
+        if getattr(self.script.form,"iface",None):
+            self.script.form.iface.main()
+
+    def load_script(self, scriptname, parent= None):
+        
                         # import aqui para evitar dependencia ciclica
         import pineboolib.emptyscript
         python_script_path = None
-        script = pineboolib.emptyscript # primero default, luego sobreescribimos
+        self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
 
         script_path_qs = self.prj.path(scriptname+".qs")
         script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
@@ -558,7 +563,7 @@ class XMLAction(XMLStruct):
         if os.path.isfile(overload_pyfile):
             print("WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
             try:
-                script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
+                self.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
             except Exception as e:
                 print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
                 print(traceback.format_exc(),"---")
@@ -569,7 +574,7 @@ class XMLAction(XMLStruct):
             if not os.path.isfile(script_path): raise IOError
             try:
                 print("Cargando %s : %s " % (scriptname,script_path.replace(self.prj.tmpdir,"tempdata")))
-                script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
+                self.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
             except Exception as e:
                 print("ERROR al cargar script PY para la accion %r:" % self.action.name, e)
                 print(traceback.format_exc(),"---")
@@ -590,7 +595,7 @@ class XMLAction(XMLStruct):
                 raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             try:
                 print("Cargando %s : %s " % (scriptname,python_script_path.replace(self.prj.tmpdir,"tempdata")))
-                script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
+                self.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
                 #self.script = imp.load_source(scriptname,python_script_path)
                 #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
@@ -598,12 +603,7 @@ class XMLAction(XMLStruct):
                 print(traceback.format_exc(),"---")
             
         
-        script.form = script.FormInternalObj(self, self.prj, None)
-        widget = script.form
-        if getattr(widget,"iface",None):
-            iface = widget.iface
-        
-        iface.main()
+        self.script.form = self.script.FormInternalObj(self, self.prj, parent)
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)
