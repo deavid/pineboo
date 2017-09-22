@@ -116,7 +116,8 @@ def getTableObj(tree,root):
             field.rX = ""
             field.pI = fks.get("partI",4)
             field.pD = fks.get("partD",0)
-            field.calculated = text2bool(fks.get("counter","false"))
+            field.calculated = text2bool(fks.get("calculated","false"))
+            field.coun = text2bool(fks.get("counter","false"))
             
             # TODO: la lectura insistente con xpath parece ralentizar el parseo de las MTD
             
