@@ -1698,7 +1698,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.textChanged.connect(self.updateValue)
         
         elif type_ == "uint" or type_ == "int" or type_ == "serial":
-            if v == int(self.editor_.text()):
+            if v == self.editor_.text():
                 return
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
@@ -2053,7 +2053,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
-                    #self.editor_.setValidator(FLDoubleValidator(None, pow(10, partInteger) -1 , self.editor_)) FIXME
+                    self.editor_.setValidator(FLDoubleValidator(None, pow(10, partInteger) -1 , self.editor_))
                     self.editor_.setAlignment(Qt.AlignRight)
                 else:
                     if type_ == "uint" or type_ == "int":
@@ -3234,9 +3234,11 @@ class FLFieldDB(QtWidgets.QWidget):
 class FLDoubleValidator(QtGui.QDoubleValidator):
 
     def __init__(self, *args, **kwargs):
-            super(FLDoubleValidator, self).__init__(*args)
+            super(FLDoubleValidator, self).__init__()
 
     def validate(self, input_, i):
+        return super(FLDoubleValidator, self).validate(input_, i)
+        """
         if input_.isEmpty():
             return QtGui.QValidator.Acceptable
 
@@ -3259,41 +3261,38 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
             input_.replace(",", ".")
 
         return state
-
+        """
 
 
 
 class FLIntValidator(QtGui.QIntValidator):
-
-    DECIMAL_POINT = QtCore.QLocale().decimalPoint()
-    
+ 
     def __init__(self, *args, **kwargs):
             super(FLIntValidator, self).__init__()
 
     def validate(self, input_, i):
+        """
         if not input_:
             return QtGui.QValidator.Acceptable
+        if QtCore.QLocale().decimalPoint() == ",":
+            input_ = input_.replace(".", QtCore.QLocale().decimalPoint())
+        else:
+            input_ = input_.replace(",", QtCore.QLocale().decimalPoint())
 
-        input_.replace(",", ".")
-
-        state = QtGui.QIntValidator.validate(self,input_, i)
-
+        iV = QtGui.QIntValidator()
+        state = super(FLIntValidator, self).validate(input_, i)
         if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
-            s = str(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QIntValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+            s = input_[1:]
+            if input_[0] == "-" and super(FLIntValidator, self).validate(self, s, i) == QtGui.QValidator.Acceptable:
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
         else:
+            
             state = QtGui.QValidator.Acceptable
-
-        if (self.DECIMAL_POINT == ","):
-            input_.replace(".", ",")
-        else:
-            input_.replace(",", ".")
-
         return state
-
+        """
+        return super(FLIntValidator, self).validate(input_, i)
 
 
 
@@ -3416,7 +3415,7 @@ class FLDateEdit(QtWidgets.QDateEdit):
         
         
         
-        if isinstance(d, str):
+        if not isinstance(d, QtCore.QDate):
             date = QtCore.QDate.fromString(d,"dd-MM-yyyy")
         else:
             date = d
