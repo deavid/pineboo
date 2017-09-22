@@ -10,6 +10,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 #from PyQt4.QtCore import QVariant, QString
 #from PyQt4 import QtCore, QtGui
 from pineboolib.utils import aqtt
+import copy
 
 
 
@@ -568,7 +569,7 @@ class FLFieldMetaData():
         if other == self:
             return
         
-        self = other
+        self = copy.copy(other)
         """
         od = other.d
         if od.relationM1_:
