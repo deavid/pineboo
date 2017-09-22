@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import DefFun, filedir
+from pineboolib.utils import DefFun, filedir, aqtt
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
@@ -1434,8 +1434,10 @@ class FLFieldDB(QtWidgets.QWidget):
             except:
                 pass
 
-            if not v is None:
+            if v:
                 if ol:
+                    if v.find("QT_TRANSLATE") != -1:
+                        v = aqtt(v)
                     self.editor_.setCurrentIndex(field.getIndexOptionsList(v))
                 else:
                     self.editor_.setText(v)
