@@ -934,6 +934,7 @@ class FLFieldDB(QtWidgets.QWidget):
         # <--
 
         if not self.cursor_ or not v:
+            print("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)" % (self.fieldName_, self))
             return
         #if v:
         #    print("FLFieldDB(%s).setValue(%s) ---> %s" % (self.fieldName_, v, self.editor_))
@@ -1548,7 +1549,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     pass
 
                 
-                if not v is None:
+                if v:
                     v = FLUtil().dateDMAtoAMD(v)
                     self.editor_.setDate(v)
                 else:
@@ -3419,7 +3420,6 @@ class FLDateEdit(QtWidgets.QDateEdit):
             date = QtCore.QDate.fromString(d,"dd-MM-yyyy")
         else:
             date = d
-        
         super(FLDateEdit, self).setDate(date)
             
         
