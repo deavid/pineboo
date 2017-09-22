@@ -763,8 +763,8 @@ class FLFormDB(QtWidgets.QDialog):
     @param w Widget a inicializar. Si no se establece utiliza
             por defecto el widget principal actual
     """
-    @decorators.Empty
     def initMainWidget(self, w = None):
-        pass
+        if not self.showed:
+            self.show()
 
 
