@@ -167,8 +167,7 @@ class PNBuffer(ProjectClass):
 
     def convertToType(self, value, type_):
         
-        
-        if value is None:
+        if value == None or value == u"None":
             if type_ == "bool":
                 return False
             
@@ -2975,7 +2974,7 @@ class FLSqlCursor(ProjectClass):
             m = "%sSqLCursor::rollbackOpened: %s %s" % (msg, count, t)
             self.d.msgBoxWarning(m, False)
         elif ct > 0:
-            print("SqLCursor::rollbackOpened: %s %s" % (count, self.name))
+            print("SqLCursor::rollbackOpened: %s %s" % (count, self.name()))
 
         i = 0
         while i < ct:
