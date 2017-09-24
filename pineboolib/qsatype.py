@@ -9,6 +9,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 # Cargar toda la API de Qt para que sea visible.
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtCore import QIODevice
 
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
@@ -19,6 +20,8 @@ from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
+
+from pineboolib.utils import filedir
 
 from pineboolib import decorators
 import traceback
@@ -355,11 +358,13 @@ class GroupBox(QtWidgets.QGroupBox):
 class CheckBox(QtWidgets.QCheckBox):
     pass
 
-class Dir(qsaglobals.Dir):
+class Dir(object):
     path_ = None
+    home = None 
+    
     def __init__(self, path):
         self.path_ = path
-        super(Dir, self).__init__(path)
+        self.home = filedir("..")
     
     def entryList(self, patron):
         p = os.walk(self.path_)
@@ -368,6 +373,25 @@ class Dir(qsaglobals.Dir):
             if fnmatch.fnmatch(file, patron):
                 retorno.append(file)
         return retorno
+
+class File(QtCore.QFile):
+    fichero = None
+    mode = None
+        
+    ReadOnly = QIODevice.ReadOnly
+    WriteOnly = QIODevice.WriteOnly
+    ReadWrite = QIODevice.ReadWrite
+    
+    def __init__(self, rutaFichero):
+        self.fichero = rutaFichero
+        super(File, self).__init__(rutaFichero)
+    
+    #def open(self, mode):
+    #    super(File, self).open(self.fichero, mode)
+    
+    def read(self):
+        in_ = QTextStream(self)
+        return in_.readAll()
    
     
         

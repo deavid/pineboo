@@ -6,13 +6,13 @@ from builtins import object
 import re
 import os.path
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QIODevice
+
 
 
 import traceback
 import pineboolib
 from pineboolib import flcontrols, decorators
-from pineboolib.utils import filedir
+
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
@@ -33,16 +33,6 @@ class FileDialog(QtWidgets.QFileDialog):
     def getExistingDirectory(basedir):
         return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
 
-
-class Dir(object):
-    
-    home = None
-    
-    def __init__(self, ruta):
-        self.home = filedir("..")
-    
-    def entryList(self, patron):
-        pass
 
 
 
@@ -211,26 +201,6 @@ class Date(object):
     @classmethod
     def parse(cls, value):
         return QtCore.QDate.fromString(value)
-
-class File(QtCore.QFile):
-    fichero = None
-    mode = None
-        
-    ReadOnly = QIODevice.ReadOnly
-    WriteOnly = QIODevice.WriteOnly
-    ReadWrite = QIODevice.ReadWrite
-    
-    def __init__(self, rutaFichero):
-        self.fichero = rutaFichero
-        super(File, self).__init__(rutaFichero)
-    
-    #def open(self, mode):
-    #    super(File, self).open(self.fichero, mode)
-    
-    def read(self):
-        in_ = QTextStream(self)
-        return in_.readAll()
-        
 
 
 
