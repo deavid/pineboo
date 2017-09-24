@@ -27,6 +27,7 @@ def id_translate(name):
     if name == "startsWith": name = "startswith"
     if name == "endsWith": name = "endswith"
     if name == "lastIndexOf": name = "rfind"
+    if name == "File": name = "qsatype.File"
     return name
 
 ast_class_types = []
@@ -900,7 +901,7 @@ class New(ASTPython):
                 if child.tag == "Identifier": data = data+"()"
                 ident = data[:data.find("(")]
                 if ident.find(".") == -1:
-                    if len(self.elem.xpath("//Class[@name='%s']" % ident)) == 0 and not ident == "File":
+                    if len(self.elem.xpath("//Class[@name='%s']" % ident)) == 0:
                         data = "qsatype." + data
                 yield dtype, data
 
