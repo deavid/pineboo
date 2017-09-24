@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import os
+import os, fnmatch
 import datetime, weakref
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -138,7 +138,7 @@ Color = QtGui.QColor
 QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
 
-File = QtCore.QFile
+                    
 
 @decorators.NotImplementedWarn
 def FLPosPrinter(*args, **kwargs):
@@ -206,6 +206,9 @@ def check_gc_referrers(typename, w_obj, name):
 
 class FormDBWidget(QtWidgets.QWidget):
 
+    closed =  QtCore.pyqtSignal()
+    cursor_ = None
+    
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
@@ -230,9 +233,11 @@ class FormDBWidget(QtWidgets.QWidget):
             del self.iface 
         
         if can_exit:
+            self.closed.emit()
             event.accept() # let the window close
         else:
             event.ignore()
+            
     def child(self, childName):
         try:
             ret = self.findChild(QtWidgets.QWidget, childName)
@@ -261,7 +266,6 @@ class FormDBWidget(QtWidgets.QWidget):
                 cursor = getattr(self.parentWidget(),"cursor_", None)
 
             if cursor and not cursor is self.cursor_ :
-                #self.cursor_.__del__(True)
                 return cursor
         except Exception:
             # FIXME: A veces parentWidget existía pero fue eliminado. Da un error
@@ -352,8 +356,18 @@ class CheckBox(QtWidgets.QCheckBox):
     pass
 
 class Dir(qsaglobals.Dir):
-    pass
-
+    path_ = None
+    def __init__(self, path):
+        self.path_ = path
+        super(Dir, self).__init__(path)
+    
+    def entryList(self, patron):
+        p = os.walk(self.path_)
+        retorno = []
+        for file in os.listdir(self.path_):
+            if fnmatch.fnmatch(file, patron):
+                retorno.append(file)
+        return retorno
    
     
         
