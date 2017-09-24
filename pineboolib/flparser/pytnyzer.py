@@ -26,6 +26,7 @@ def id_translate(name):
 
     if name == "startsWith": name = "startswith"
     if name == "endsWith": name = "endswith"
+    if name == "lastIndexOf": name = "rfind"
     return name
 
 ast_class_types = []
@@ -386,6 +387,11 @@ class For(ASTPython):
                     yield "line", line
                 
             yield "line", "while_pass = True"
+            yield "line", "try:"
+            yield "begin", "block-error-catch" # Si es por ejemplo un charAt y hace out of index nos saca del while
+            yield "line", "%s" % (" ".join(main_expr))
+            yield "end", "block-error-catch"
+            yield "line", "except: break"
             yield "end", "block-for"
 
 class ForIn(ASTPython):
@@ -512,7 +518,8 @@ class Variable(ASTPython):
             expr = 0
             for dtype, data in parse_ast(value).generate(isolate = False):
                 
-                if self.elem.get("type",None) == "Array" and data == "[]":
+                #if self.elem.get("type",None) == "Array" and data == "[]":
+                if data == "[]":
                     yield "expr", "qsatype.Array()"
                     expr += 1
                     continue
@@ -718,6 +725,7 @@ class Member(ASTPython):
             "isEmpty()",
             "left" ,
             "right" ,
+            "charAt"
         ]
         for member in replace_members:
             for idx,arg in enumerate(arguments):
@@ -741,6 +749,15 @@ class Member(ASTPython):
                         value = arg[6:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1),".".join(part1), value)] + part2
+                    elif member == "length":
+                        value = arg[7:]
+                        value = value[:len(value) - 1]
+                        arguments = ["len(%s)" % (".".join(part1))] + part2
+                    elif member == "charAt":
+                        value = arg[7:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s[%s]" % (".".join(part1), value)] + part2
+                        
                         
                         
                     else:
@@ -883,7 +900,7 @@ class New(ASTPython):
                 if child.tag == "Identifier": data = data+"()"
                 ident = data[:data.find("(")]
                 if ident.find(".") == -1:
-                    if len(self.elem.xpath("//Class[@name='%s']" % ident)) == 0:
+                    if len(self.elem.xpath("//Class[@name='%s']" % ident)) == 0 and not ident == "File":
                         data = "qsatype." + data
                 yield dtype, data
 
