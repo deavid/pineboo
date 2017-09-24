@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators, fllegacy
+from pineboolib import decorators, fllegacy, qsaglobals
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import DefFun
@@ -152,7 +152,7 @@ class PNBuffer(ProjectClass):
 
 
     def setValue(self, name, value, mark_ = True):
-        if value is not None and not isinstance(value, (int, float, str)):
+        if value is not None and not isinstance(value, (int, float, str, qsaglobals.parseString)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
 
         for field in  self.fieldList_:
@@ -167,8 +167,7 @@ class PNBuffer(ProjectClass):
 
     def convertToType(self, value, type_):
         
-        
-        if value is None:
+        if value == None or value == u"None":
             if type_ == "bool":
                 return False
             
@@ -185,7 +184,7 @@ class PNBuffer(ProjectClass):
         else:
             if type_ in ("bool","unlock"):
                 return (str(value) == "True")
-            elif type_ in ("int", "uint"):
+            elif type_ in ("int", "uint", "serial"):
                 return int(value)
             elif type_ == "double":
                 return float(value)
@@ -489,14 +488,15 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.buffer_ = None
         self.editionStates_ = None
         self.activatedCheckIntegrity_ = True
+        self.askForCancelChanges_ = True
 
 
 
-
+    @decorators.BetaImplementation
     def __del__(self):
 
-        if self.metadata_:
-            self.undoAcl()
+        #if self.metadata_:
+        #    self.undoAcl() #En un futuro FIXME
 
         if self.bufferCopy_:
             del self.bufferCopy_
@@ -548,8 +548,10 @@ class FLSqlCursorPrivate(QtCore.QObject):
         return need
 
 
-    def msgBoxWarning(self, msg):
-        QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),"Pineboo", msg)
+    def msgBoxWarning(self, msg, throwException = False):
+        
+        if not throwException:
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),"Pineboo", msg)
         
 
 
@@ -650,7 +652,7 @@ class FLSqlCursor(ProjectClass):
         if self.setAction(self.d.curName_):
             self.d.countRefCursor = self.d.countRefCursor + 1
         else:
-            print("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
+            #print("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
             return None
 
         self.d.modeAccess_ = FLSqlCursor.Browse
@@ -1061,7 +1063,6 @@ class FLSqlCursor(ProjectClass):
 
     @param b TRUE o FALSE
     """
-    @decorators.BetaImplementation
     def setEdition(self, b, m = None):
         
         if not m:
@@ -1114,7 +1115,6 @@ class FLSqlCursor(ProjectClass):
 
     @param b TRUE o FALSE
     """
-    @decorators.BetaImplementation
     def setBrowse(self, b,m = None):
         if not m:
             self.d.browse_ = b
@@ -1319,9 +1319,9 @@ class FLSqlCursor(ProjectClass):
         if not self._action.formRecord():
             QtWidgets.QMessageBox.Warning(QtWidgets.QApplication.focusWidget(), FLUtil.tr("Aviso"),FLUtil.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()) ,QtWidgets.QMessageBox.Ok)
             return
-
+        
+        self._action.openDefaultFormRecord(self)
         if self.refreshBuffer():
-            self._action.openDefaultFormRecord(self)
             self.updateBufferCopy()
 
 
@@ -1447,7 +1447,7 @@ class FLSqlCursor(ProjectClass):
                             #ss = None
                     
                     if ss:
-                        filter = "%s AND %s" % (self.d.db_.manager().formatAssignValue(field.associatedFieldFilterTo(), fMD, ss, True), self.d.db_.mager().formatAssignValue(field.relationM1().foreignField(), field,s , True))
+                        filter = "%s AND %s" % (self.d.db_.manager().formatAssignValue(field.associatedFieldFilterTo(), fMD, ss, True), self.d.db_.manager().formatAssignValue(field.relationM1().foreignField(), field,s , True))
                         q = FLSqlQuery(None, self.d.db_.connectionName())
                         q.setTablesList(tMD.name())
                         q.setSelect(field.associatedFieldFilterTo())
@@ -1702,7 +1702,6 @@ class FLSqlCursor(ProjectClass):
 
     @return TRUE si está bloqueado, FALSE en caso contrario.
     """
-    @decorators.BetaImplementation
     def isLocked(self):
         if not self.d.modeAccess_ == self.Insert and self.fieldsNamesUnlock_ and self.d.buffer_ and self.d.buffer_.value(self.d.metadata_.primaryKey()):
             for field in self.fieldsNamesUnlock_:
@@ -1958,15 +1957,14 @@ class FLSqlCursor(ProjectClass):
 
         if not tableMD:
             return None
-
+        
         fieldAc = field.associatedField()
         if not fieldAc:
             #if ownTMD and not tableMD.inCache():
                 #del tableMD
-
             return None
 
-        fieldBy = field.associatedFieldTo()
+        fieldBy = field.associatedFieldFilterTo()
         if not tableMD.field(fieldBy) or self.d.buffer_.isNull(fieldAc.name()):
             #if ownTMD and not tableMD.inCache():
                 #del tableMD
@@ -1976,7 +1974,7 @@ class FLSqlCursor(ProjectClass):
         if vv:
             #if ownTMD and not tableMD.inCache():
                 #del tableMD
-            return self.d.db_.manager().fomatAssignValue(fieldBy, fieldAc, vv, True)
+            return self.d.db_.manager().formatAssignValue(fieldBy, fieldAc, vv, True)
 
         #if ownTMD and not tableMD.inCache():
             #del rableMD
@@ -2187,16 +2185,19 @@ class FLSqlCursor(ProjectClass):
                         self.d.buffer_.setValue(fiName, defVal)
 
                     if type_ == "serial":
+                        
                         self.d.buffer_.setValue(fiName, "%u" % self.d.db_.nextSerialVal(self.d.metadata_.name(), fiName))
-
+                    
                     if field.isCounter():
-                        siguiente = self.calculateCounter(fiName)
-                        if siguiente.isValid():
-                            self.d.buffer_.setValue(fiName, siguiente)
-                        else:
-                            siguiente = FLUtil.nextCounter(fiName, self)
-                            if siguiente.isValid():
-                                self.d.buffer_.setValue(fiName, siguiente)
+                        siguiente = None
+                        if self.context():
+                            try:
+                                siguiente = self.context().calculateCounter()
+                            except:
+                                siguiente = FLUtil.nextCounter(field.name(), self)
+
+                            if siguiente:
+                                self.d.buffer_.setValue(field.name(), siguiente)
 
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
@@ -2275,10 +2276,8 @@ class FLSqlCursor(ProjectClass):
     @param emit Si TRUE emite la señal FLSqlCursor::currentChanged()
     """
     @QtCore.pyqtSlot()
-    @decorators.Empty
     def seek(self, i, relative = None, emite = None):
-        return False
-    """
+
         if self.d.modeAccess_ == self.Del:
             return False
 
@@ -2289,18 +2288,17 @@ class FLSqlCursor(ProjectClass):
 
 
         if b and emite:
-            self.currentChanged(self.at())
+            self.currentChanged.emit(self.at())
 
         if b:
             return self.refreshBuffer()
 
-        else:
-            print("FLSqlCursor.seek(): buffer principal =", self.d.buffer_.md5Sum())
+        #else:
+            #print("FLSqlCursor.seek(): buffer principal =", self.d.buffer_.md5Sum())
 
         return False
 
 
-    """
 
     """
     Redefinicion del método next() de QSqlCursor.
@@ -2436,10 +2434,13 @@ class FLSqlCursor(ProjectClass):
         delMtd = None
         if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
-
+        
+        msg = None
         mtd = self.d.metadata_
         if self.d.transactionsOpened_:
-            t = self.name()
+            print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
+        if len(self.d.transactionsOpened_) > 0: #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
+            t = self.curName()
             if self.d.metadata_:
                 t = self.d.metadata_.name()
                 msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
@@ -2475,10 +2476,11 @@ class FLSqlCursor(ProjectClass):
 
             else:
                 finalFilter = _filter
-           
+        
         if finalFilter:
             self.setMainFilter(finalFilter , False)
             self.d._model.refresh()
+            self.refreshBuffer()
          
         self.newBuffer.emit()
 
@@ -2541,9 +2543,26 @@ class FLSqlCursor(ProjectClass):
     Obtiene el filtro actual
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def curFilter(self):
-        return True
+        f = self.filter()
+        bFilter = self.baseFilter()
+        if f:
+            while f.endswith(";"):
+                f = f[0:len(f) -1]
+        
+        if not bFilter:
+            return f
+        else:
+            if not f or bFilter.__contains__(f):
+                return bFilter
+            else:
+                if f.__contains__(bFilter):
+                    return f
+                else:
+                    return "%s aND %s" % (bFilter, f)
+    
+        
+        
 
     """
     Redefinicion del método setFilter() de QSqlCursor
@@ -2661,7 +2680,6 @@ class FLSqlCursor(ProjectClass):
     """
 
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def commitBuffer(self, emite = True, checkLocks = False):
         if not self.d.buffer_ or not self.d.metadata_:
             return False
@@ -2691,7 +2709,7 @@ class FLSqlCursor(ProjectClass):
                 if not self.d.buffer_.isGenerated(field.name()):
                     continue
 
-                if self.d.ctxt_() and field.calculated():
+                if self.context() and field.calculated():
                     v = None
                     try:
                         v = self.d.ctxt_().calculateField(field.name())
@@ -2805,7 +2823,7 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
-                #self.del(False) FIXME?
+                self.del__(False)
                 updated = True
 
 
@@ -2913,7 +2931,7 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def transactionLevel(self):
         if self.d.db_:
-            return self.d.db_.transaction_
+            return self.d.db_.transactionLevel()
         else:
             return 0
 
@@ -2938,6 +2956,7 @@ class FLSqlCursor(ProjectClass):
                 Si es vacía no muestra nada.
     """
     @QtCore.pyqtSlot()
+    @decorators.BetaImplementation
     def rollbackOpened(self, count = -1, msg = None):
         ct = None
         if count < 0:
@@ -2955,12 +2974,13 @@ class FLSqlCursor(ProjectClass):
             m = "%sSqLCursor::rollbackOpened: %s %s" % (msg, count, t)
             self.d.msgBoxWarning(m, False)
         elif ct > 0:
-            print("SqLCursor::rollbackOpened: %s %s" % (count, self.name))
+            print("SqLCursor::rollbackOpened: %s %s" % (count, self.name()))
 
         i = 0
         while i < ct:
             print("FLSqlCursor : Deshaciendo transacción abierta", self.transactionLevel())
             self.rollback()
+            i = i + 1
 
 
 

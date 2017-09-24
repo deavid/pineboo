@@ -33,6 +33,7 @@ class opInfo():
     filter = None
     name = None
     cursor = None
+    autoDelete_ = None
 
 
     def __init__(self,*args,**kwargs):
@@ -44,7 +45,7 @@ class opInfo():
 
             self.opInfo1()
         
-        
+        self.setAutoDelete(False)
         
         
            
@@ -72,9 +73,8 @@ class opInfo():
     #    self.cursor = None
         
     
-    @decorators.NotImplementedWarn
     def setAutoDelete(self, b):
-        pass
+        self.autoDelete_ = b
 
     """
     Punto de salvaguarda de un conjunto de operaciones básicas

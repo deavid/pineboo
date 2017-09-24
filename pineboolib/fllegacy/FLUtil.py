@@ -8,7 +8,7 @@ import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
-
+import platform
 
 class FLUtil(ProjectClass):
 
@@ -422,7 +422,7 @@ class FLUtil(ProjectClass):
     @param s Cadena de texto a traducir
     @return Devuelve la cadena traducida al idioma local
     """
-    @decorators.BetaImplementation
+    
     def translate(self, group, string):
         return str(string)
         # return qApp->translate(contexto, s);
@@ -501,7 +501,7 @@ class FLUtil(ProjectClass):
             if not type_ == "string" and not not type_ == "double":
                 return None
 
-            _len = field.length()
+            _len = int(field.length())
             cadena = None
 
             q = FLSqlQuery(None, cursor_.db().connectionName())
@@ -509,7 +509,7 @@ class FLUtil(ProjectClass):
             q.setTablesList(tMD.name())
             q.setSelect(name)
             q.setFrom(tMD.name())
-            q.setWhere("LENGTH(%s)=%d" % (name, _len))
+            q.setWhere("LENGTH(%s)=%s" % (name, _len))
             q.setOrderBy(name + " DESC")
 
             if not q.exec():
@@ -523,16 +523,17 @@ class FLUtil(ProjectClass):
                     numero = 1
                     break
 
-                numero = float(q.value(0))
+                numero = int(q.value(0))
                 numero = numero + 1
 
 
             if type_ == "string":
                 cadena = str(numero)
+                
                 if len(cadena) < _len:
                     relleno = None
-                    relleno = cadena.rjust(_len - len(cadena), '0')
-                    cadena = str + cadena
+                    relleno = cadena.rjust(_len , '0')
+                    cadena = relleno
 
                 return cadena
 
@@ -643,9 +644,15 @@ class FLUtil(ProjectClass):
     def addDays(self, fecha, offset):
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha)
+            
+        retorno = fecha
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(fecha))
-        return fecha.addDays(offset)
+            tmp = QtCore.QDateTime(fecha)
+            retorno = tmp.date()
+        
+        if not isinstance(retorno, QtCore.QDate):
+            print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(retorno))
+        return retorno.addDays(offset).toString("dd-MM-yyyy")
 
     """
     Suma meses a una fecha.
@@ -656,10 +663,15 @@ class FLUtil(ProjectClass):
     """
     def addMonths(self, fecha, offset):
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha)
+            retorno = QtCore.QDate.fromString(fecha)
+        
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(fecha))
-        return fecha.addMonths(offset)
+            tmp = QtCore.QDateTime(fecha)
+            retorno = tmp.date()
+        
+        if not isinstance(retorno, QtCore.QDate):
+            print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(retorno))
+        return retorno.addMonths(offset).toString("dd-MM-yyyy")
 
     """
     Suma años a una fecha.
@@ -695,8 +707,8 @@ class FLUtil(ProjectClass):
 
     @return Cadena que contiene el número formateado
     """
-    @decorators.BetaImplementation
     def buildNumber(self, v, tipo, partDecimal):
+        if not v: v= 0
         d = float(v) * 10**partDecimal
         d = round(d)
         d = d / 10**partDecimal
@@ -757,7 +769,7 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def writeDBSettingEntry(self, key, value):
-        result = None
+        result = False
         where = "flkey='%s'" % key
         found = self.sqlSelect("flsettings", "valor", where, "flsettings")
         if not found:
@@ -776,10 +788,9 @@ class FLUtil(ProjectClass):
 
     @return Número redondeado
     """
-    @decorators.BetaImplementation
     def roundFieldValue(self, n, table, field):
-        from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
-        tmd = FLSqlConnections().database().manager().metadata(table)
+
+        tmd = self._prj.conn.manager().metadata(table)
         if not tmd:
             return 0
         fmd = tmd.field(field)
@@ -815,7 +826,7 @@ class FLUtil(ProjectClass):
         q.setSelect(s)
         q.setFrom(f)
         q.setWhere(w)
-        q.setForwardOnly(True)
+        #q.setForwardOnly(True)
         if not q.exec():
             return False
 
@@ -889,7 +900,7 @@ class FLUtil(ProjectClass):
         c.select(w)
 
         while c.next():
-            c.setModeAccess(FLSqlCursor.EDIT)
+            c.setModeAccess(FLSqlCursor.Edit)
             c.refreshBuffer()
             for f,v in zip(fL, vL):
                 c.setValueBuffer(f, v)
@@ -1054,9 +1065,16 @@ class FLUtil(ProjectClass):
 
     @return Código del sistema operativo (WIN32, LINUX, MACX)
     """
-    @decorators.NotImplementedWarn
     def getOS(self):
-        pass
+        if platform.system() == "Windows":
+            return "WIN32"    
+        elif platform.system() == "Linux" or platform.system() == "Linux2":
+            return "LINUX"
+        elif platform.system() == "Darwin":
+            return "MACX"
+        else:
+            return platform.system()
+        
 
     """
     Esta función convierte una cadena que es una serie de letras en su correspondiente valor numerico.

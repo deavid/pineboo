@@ -193,7 +193,7 @@ class FLFormRecordDB(FLFormDB):
                     self.setWhatsThis(self.action_.description)
                 self.idMDI_ = self.action_.name
 
-            self.bindIface()
+            #self.bindIface()
             self.setCursor(self.cursor_)
 
             if not caption:

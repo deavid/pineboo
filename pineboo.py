@@ -18,11 +18,11 @@ except ImportError:
     print(traceback.format_exc())
     dependeces.append("python3-lxml")
  
-try:
-    import psycopg2
-except ImportError:
-    print(traceback.format_exc())
-    dependeces.append("python3-psycopg2")
+#try:
+#    import psycopg2
+#except ImportError:
+#    print(traceback.format_exc())
+#    dependeces.append("python3-psycopg2")
 
 
 try:

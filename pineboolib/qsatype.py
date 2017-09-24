@@ -85,15 +85,21 @@ class Array(object):
     def __init__(self, data = None):
         if not data:
             self.dict_ = {}
+        elif isinstance(data, int):
+            self.dict_ = {} # dimensiones por ahora a cero
         else:
             self.dict_ = data
     
     def __setitem__(self, key, value):
+        #if isinstance(key, int):
+            #key = str(key)
         self.dict_[key] = value
         
             
         
     def __getitem__(self, key):
+        #if isinstance(key, int):
+            #key = str(key)
         #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
         return self.dict_[key]
     
@@ -253,9 +259,10 @@ class FormDBWidget(QtWidgets.QWidget):
         try:
             if self.parentWidget():
                 cursor = getattr(self.parentWidget(),"cursor_", None)
-            if cursor:
-                del self.cursor_
-                self.cursor_ = cursor
+
+            if cursor and not cursor is self.cursor_ :
+                #self.cursor_.__del__(True)
+                return cursor
         except Exception:
             # FIXME: A veces parentWidget existía pero fue eliminado. Da un error
             # ... en principio debería ser seguro omitir el error.
@@ -289,19 +296,12 @@ class Process(object):
     def __init__(self):
         pass
 
-@decorators.NotImplementedWarn
-class Dir(object):
-    
-    def __init__(self, ruta):
-        pass
-    
-    def entryList(self, patron):
-        pass
 
 @decorators.BetaImplementation
 class RadioButton(QtWidgets.QRadioButton):
     pass
         
+
 
 class Dialog(QtWidgets.QDialog):
     _layout = None
@@ -349,6 +349,9 @@ class GroupBox(QtWidgets.QGroupBox):
         self._layout.addWidget(_object)
 
 class CheckBox(QtWidgets.QCheckBox):
+    pass
+
+class Dir(qsaglobals.Dir):
     pass
 
    

@@ -4,28 +4,92 @@ from __future__ import print_function
 from __future__ import unicode_literals
 from builtins import object
 import re
+import os.path
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 import traceback
 import pineboolib
-from pineboolib import flcontrols
+from pineboolib import flcontrols, decorators
+from pineboolib.utils import filedir
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
+from PyQt5.Qt import QMainWindow, QDate
+
+class File(object):
+    
+    @classmethod
+    def exists(cls, name):
+        return os.path.isfile(name)
+     
+
+class FileDialog(QtWidgets.QFileDialog):
+    
+    #def __init__(self):
+        #super(FileDialog, self).__init__()    
+    
+    def getExistingDirectory(basedir):
+        return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
+
+
+class Dir(object):
+    
+    home = None
+    
+    def __init__(self, ruta):
+        self.home = filedir("..")
+    
+    def entryList(self, patron):
+        pass
+
+
 
 def parseFloat(x): 
     if x is None: return 0
     return float(x)
 
+"""
 class parseString(object):
     
     obj_ = None
+    length = None
     
     def __init__(self, objeto):
-        self.obj_ = objeto
+        try:
+            self.obj_ = objeto.toString()
+        except:
+            self.obj_ = str(objeto)
         
+        self.length = len(self.obj_)
+            
+    def __str__(self):
         return self.obj_
+    
+    def __getitem__(self, key):
+        return self.obj_.__getitem__(key)
+    
+    
+                
+    def charAt(self, pos):
+        try:
+            return self.obj_[pos]
+        except:
+            return False
+    
+    def substring(self, ini, fin):
+        return self.obj_[ini: fin]    
+    
+ """   
+    
+def parseString(objeto):
+    try:
+        return objeto.toString()
+    except:
+        return str(objeto)
+    
+        
+            
 
 def parseInt(x):
     if x is None: return 0
@@ -69,14 +133,25 @@ class SysType(object):
 
     def nameUser(self): 
         return pineboolib.project.conn.db_userName
+    
     def interactiveGUI(self):
         return "Pineboo"
     
     def isLoadedModule(self, modulename):
-        prj = pineboolib.project
-        return modulename in prj.modules
+        return modulename in pineboolib.project.modules
+    
     def translate(self, text):
         return text
+    
+    def osName(self):
+        util = FLUtil()
+        return util.getOS()
+    
+    
+    def setCaptionMainWidget(self, value):
+        pineboolib.project.mainWindow.setWindowTitle(value)
+        
+    
 sys = SysType()
 
 def proxy_fn(wf, wr, slot):
@@ -116,6 +191,7 @@ def connect(sender, signal, receiver, slot):
         try:
             sg_name = signal.replace("()", "")
             sg_name = sg_name.replace("(QString)", "")
+            sg_name = sg_name.replace("(int)", "")
             getattr(sender, sg_name).connect(remote_fn)
         except RuntimeError as e:
             print("ERROR Connecting:", sender, sg_name, remote_fn)
@@ -128,6 +204,14 @@ def connect(sender, signal, receiver, slot):
         else:
             print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." % (sender, signal, receiver, slot))
     return True
+
+class Date(object):
+    
+    @classmethod
+    def parse(cls, value):
+        return QtCore.QDate.fromString(value)
+
+
 
 QMessageBox = QtWidgets.QMessageBox
 

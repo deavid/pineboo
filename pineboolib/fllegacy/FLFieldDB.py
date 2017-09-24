@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import DefFun, filedir
+from pineboolib.utils import DefFun, filedir, aqtt
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
@@ -43,7 +43,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         self._partDecimal = parent.partDecimal_
         self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()         
         self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-        self.textChanged.connect(self.controlFormato)
+        #self.textChanged.connect(self.controlFormato)
         self._parent = parent
 
     def __getattr__(self, name):
@@ -288,7 +288,6 @@ class FLFieldDB(QtWidgets.QWidget):
     _initEditorWhenLoad = False
     _refreshLaterEditor = False
 
-    editorImgInit_ = None
 
     pushButtonDB = None
     keyF4Pressed = QtCore.pyqtSignal()
@@ -296,7 +295,7 @@ class FLFieldDB(QtWidgets.QWidget):
     keyReturnPressed = QtCore.pyqtSignal()
     lostFocus = QtCore.pyqtSignal()
     textChanged = QtCore.pyqtSignal(str)
-    keyF2Pressed_ = QtCore.pyqtSignal(name = "keyF2Pressed")
+    keyF2Pressed = QtCore.pyqtSignal()
     
     firstRefresh = None
 
@@ -734,7 +733,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 return True
 
             if k.key() == Qt.Key_F2:
-                self.keyF2Pressed_.emit()
+                self.keyF2Pressed.emit()
                 return True
 
             return False
@@ -935,6 +934,7 @@ class FLFieldDB(QtWidgets.QWidget):
         # <--
 
         if not self.cursor_ or not v:
+            print("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)" % (self.fieldName_, self))
             return
         #if v:
         #    print("FLFieldDB(%s).setValue(%s) ---> %s" % (self.fieldName_, v, self.editor_))
@@ -1012,7 +1012,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 if doHome:
                     self.editor_.home(False)
 
-        elif type_ == "stringList":
+        elif type_ == "stringlist":
             if not self.editor_:
                 return
 
@@ -1031,7 +1031,6 @@ class FLFieldDB(QtWidgets.QWidget):
                         s = round(float(v), self.partDecimal_)
                     else:
                         s = round(float(v), field.partDecimal())
-                    
                     self.editor_.setText(str(s))
 
 
@@ -1294,7 +1293,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN = None):
-        #print("refrescando", fN, self.fieldName_)
+        #print("refrescando", self.fieldName_)
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
             print("FLField.refresh() Cancelado")
             return
@@ -1305,17 +1304,19 @@ class FLFieldDB(QtWidgets.QWidget):
         v = None
         nulo = False
         if not fN:
+            
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
             
-            if self.cursor_.cursorRelation():
-                if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
+            #if self.cursor_.cursorRelation():
+                #print(1)
+                #if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
                     # FIXME: Este código estaba provocando errores al cargar formRecord hijos
                     # ... el problema es, que posiblemente el cursorRelation entrega información
                     # ... errónea, y aunque comentar el código soluciona esto, seguramente esconde
                     # ... otros errores en el cursorRelation. Pendiente de investigar más.
                     #v = None
-                    if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
+                    #if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
                     
 
         else:
@@ -1434,8 +1435,10 @@ class FLFieldDB(QtWidgets.QWidget):
             except:
                 pass
 
-            if not v is None:
+            if v:
                 if ol:
+                    if v.find("QT_TRANSLATE") != -1:
+                        v = aqtt(v)
                     self.editor_.setCurrentIndex(field.getIndexOptionsList(v))
                 else:
                     self.editor_.setText(v)
@@ -1492,7 +1495,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
 
         elif type_ == "pixmap":
-            if not self.editorImgInit_ or not self.editorImg_:
+            if not self.editorImg_:
                 self.editorImg_ = FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
@@ -1502,7 +1505,6 @@ class FLFieldDB(QtWidgets.QWidget):
                 #self.FLWidgetFieldDBLayout.removeWidget(self.pushButtonDB)
                 self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
                 self.pushButtonDB.hide()
-                self.editorImgInit_ = True
 
                 if field.visible():
                     self.editorImg_.show()
@@ -1547,7 +1549,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     pass
 
                 
-                if not v is None:
+                if v:
                     v = FLUtil().dateDMAtoAMD(v)
                     self.editor_.setDate(v)
                 else:
@@ -1696,7 +1698,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.textChanged.connect(self.updateValue)
         
         elif type_ == "uint" or type_ == "int" or type_ == "serial":
-            if v == int(self.editor_.text()):
+            if v == self.editor_.text():
                 return
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
@@ -1713,8 +1715,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editorImg_ = FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
-                self.editorImg_.setMaximumSize(self.initMaxSize_)
-                self.editorImg_.setMinimumSize(self.initMinSize_)
+                self.editorImg_.setMaximumSize(self.maximumSize())
+                self.editorImg_.setMinimumSize(self.minimumSize())
                 self.editorImg_.setAutoScaled(True)
                 self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
                 if field.visible():
@@ -1952,13 +1954,13 @@ class FLFieldDB(QtWidgets.QWidget):
         if not self.cursor_:
             return
 
-        if self.editor_:
-            del self.editor_
-            self.editor_ = None
+        #if self.editor_:
+        #    del self.editor_
+        #    self.editor_ = None
 
-        if self.editorImg_:
-            del self.editorImg_
-            self.editorImg_ = None
+        #if self.editorImg_:
+        #    del self.editorImg_
+        #    self.editorImg_ = None
 
         tMD = self.cursor_.metadata()
         if not tMD:
@@ -2051,7 +2053,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
-                    #self.editor_.setValidator(FLDoubleValidator(None, pow(10, partInteger) -1 , self.editor_)) FIXME
+                    self.editor_.setValidator(FLDoubleValidator(None, pow(10, partInteger) -1 , self.editor_))
                     self.editor_.setAlignment(Qt.AlignRight)
                 else:
                     if type_ == "uint" or type_ == "int":
@@ -2094,12 +2096,12 @@ class FLFieldDB(QtWidgets.QWidget):
                 if hasPushButtonDB:
                     if self.showed:
                         try:
-                            self.KeyF2Pressed_.disconnect(self.pushButtonDB.animateClick())
+                            self.KeyF2Pressed.disconnect(self.pushButtonDB.animateClick())
                             self.labelClicked.disconnect(self.openFormRecordRelation)
                         except:
                             a = 1
 
-                    self.keyF2Pressed_.connect(self.pushButtonDB.animateClick) #FIXME
+                    self.keyF2Pressed.connect(self.pushButtonDB.animateClick) #FIXME
                     self.labelClicked.connect(self.openFormRecordRelation)
                     self.textLabelDB.installEventFilter(self)
                     tlf = self.textLabelDB.font()
@@ -2138,8 +2140,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "pixmap":
             if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                if not self.editorImgInit_:
-                    self.editorImgInit_ = True
+                if not self.editorImg_:
                     self.FLWidgetFieldDBLayout.setDirection(QtWidgets.QBoxLayout.Down)
                     self.editorImg_ = FLPixmapView(self)
                     self.editorImg_.setFocusPolicy(Qt.NoFocus)
@@ -2175,11 +2176,11 @@ class FLFieldDB(QtWidgets.QWidget):
                     if not hasPushButtonDB:
                         if self.showed:
                             try:
-                                self.KeyF2Pressed_.disconnect(self.pbAux3_.animateClick)
+                                self.KeyF2Pressed.disconnect(self.pbAux3_.animateClick)
                             except:
                                 pass
                         try:
-                            self.KeyF2Pressed_.connect(self.pbAux3_.animateClick)
+                            self.KeyF2Pressed.connect(self.pbAux3_.animateClick)
                         except:
                             pass
                         
@@ -2562,7 +2563,6 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int)
     def searchValue(self):
-
         if not self.cursor_:
             return
 
@@ -2581,19 +2581,18 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         fMD = field.associatedField()
-
+        
         if fMD:
             if not fMD.relationM1():
                 print("FLFieldDB : El campo asociado debe tener una relación M1")
                 return
-
             v = self.cursor_.valueBuffer(fMD.name())
             if not v or self.cursor_.bufferIsNull(fMD.name()):
                 QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", str("Debe indicar un valor para", fMD.alias()))
                 return
 
             mng = self.cursor_.db().manager()
-            c = FLSqlCursor(fMD.relationM1().foreignTable())
+            c = FLSqlCursor(field.relationM1().foreignTable())
             c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
 
             if c.size() > 0:
@@ -2602,10 +2601,11 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.actionName_:
                 a = mng.action(field.relationM1().foreignTable())
             else:
-                print(2)
                 a = mng.action(self.actionName_)
                 a.setTable(field.relationM1().foreignField())
-
+            
+            
+            
             f = FLFormSearchDB(c, a.name(), None)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
 
@@ -2908,7 +2908,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     @QtCore.pyqtSlot()
     def emitKeyF2Pressed(self):
-        self.keyF2Pressed_.emit()
+        self.keyF2Pressed.emit()
 
     """
     Emite la señal de labelClicked. Se usa en los campos M1 para editar el formulario de edición del valor seleccionado.
@@ -3234,9 +3234,11 @@ class FLFieldDB(QtWidgets.QWidget):
 class FLDoubleValidator(QtGui.QDoubleValidator):
 
     def __init__(self, *args, **kwargs):
-            super(FLDoubleValidator, self).__init__(*args)
+            super(FLDoubleValidator, self).__init__()
 
     def validate(self, input_, i):
+        return super(FLDoubleValidator, self).validate(input_, i)
+        """
         if input_.isEmpty():
             return QtGui.QValidator.Acceptable
 
@@ -3259,41 +3261,38 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
             input_.replace(",", ".")
 
         return state
-
+        """
 
 
 
 class FLIntValidator(QtGui.QIntValidator):
-
-    DECIMAL_POINT = QtCore.QLocale().decimalPoint()
-    
+ 
     def __init__(self, *args, **kwargs):
             super(FLIntValidator, self).__init__()
 
     def validate(self, input_, i):
+        """
         if not input_:
             return QtGui.QValidator.Acceptable
+        if QtCore.QLocale().decimalPoint() == ",":
+            input_ = input_.replace(".", QtCore.QLocale().decimalPoint())
+        else:
+            input_ = input_.replace(",", QtCore.QLocale().decimalPoint())
 
-        input_.replace(",", ".")
-
-        state = QtGui.QIntValidator.validate(self,input_, i)
-
+        iV = QtGui.QIntValidator()
+        state = super(FLIntValidator, self).validate(input_, i)
         if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
-            s = str(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QIntValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+            s = input_[1:]
+            if input_[0] == "-" and super(FLIntValidator, self).validate(self, s, i) == QtGui.QValidator.Acceptable:
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
         else:
+            
             state = QtGui.QValidator.Acceptable
-
-        if (self.DECIMAL_POINT == ","):
-            input_.replace(".", ",")
-        else:
-            input_.replace(",", ".")
-
         return state
-
+        """
+        return super(FLIntValidator, self).validate(input_, i)
 
 
 
@@ -3416,11 +3415,10 @@ class FLDateEdit(QtWidgets.QDateEdit):
         
         
         
-        if isinstance(d, str):
+        if not isinstance(d, QtCore.QDate):
             date = QtCore.QDate.fromString(d,"dd-MM-yyyy")
         else:
             date = d
-        
         super(FLDateEdit, self).setDate(date)
             
         

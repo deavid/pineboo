@@ -302,11 +302,17 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 key = tuple([ row[x] for x in self.ckpos ])
                 self.ckidx[key] = n + rowrange[0]
 
-    def value(self, row, fieldname):
+    def value(self, row, fieldName):
+        if row == None : return None
         if row < 0 or row >= self.rows: return None
-        col = self.metadata().indexPos(fieldname)
+        col = self.metadata().indexPos(fieldName)
         campo = self._data[row][col]
 
+        type_ = self.metadata().field(fieldName).type()
+        
+        if type_ in ("serial", "uint", "int"):
+            if not campo == None and not campo == "None":
+                campo = int(campo)
         """
         if self.metadata().field(fieldname).type() == "pixmap":
             q = FLSqlQuery()
@@ -357,7 +363,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             #pKValue = str("'" + pKValue + "'")
             
         where_filter = "%s = %s" % (pkey_name, pKValue)
-        print("pkvalue = %r" % pKValue)
         update_set = []
 
         for key, value in dict_update.items():
@@ -367,7 +372,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             value = self._prj.conn.manager().formatValue(type_, value, False)
             #update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
             update_set.append("%s = %s" % (key, value))
-            print("field %r = %r" % (key,value))
 
         update_set_txt = ", ".join(update_set)
         sql = """UPDATE %s SET %s WHERE %s RETURNING *""" % (self.tableMetadata().name(), update_set_txt, where_filter)

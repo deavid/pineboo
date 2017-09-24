@@ -213,16 +213,25 @@ class FLFormDB(QtWidgets.QDialog):
             try:
                 timer = QtCore.QTimer(self)
                 if self.loaded:
-                    timer.singleShot(50, self.iface.init)
+                    timer.singleShot(250, self.iface.init)
                     return True
                 else:
-                    timer.singleShot(50,self.initScript)
+                    timer.singleShot(250,self.initScript)
             except Exception:
                 return False
                 
 
     def load_script(self,scriptname):
-        # import aqui para evitar dependencia ciclica
+        #Si ya esta cargado se reusa...
+        if getattr(self.action, "script",None):
+            self.script = self.action.script
+            #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            self.widget = self.script.form
+            if getattr(self.widget,"iface",None):
+                self.iface = self.widget.iface
+            return
+        
+        
         import pineboolib.emptyscript
         python_script_path = None
         self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
@@ -763,8 +772,8 @@ class FLFormDB(QtWidgets.QDialog):
     @param w Widget a inicializar. Si no se establece utiliza
             por defecto el widget principal actual
     """
-    @decorators.Empty
     def initMainWidget(self, w = None):
-        pass
+        if not self.showed:
+            self.show()
 
 

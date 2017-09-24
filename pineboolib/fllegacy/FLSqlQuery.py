@@ -176,18 +176,18 @@ class FLSqlQuery(ProjectClass):
     """
     
     def setSelect(self, s, sep = ","):
-        
         self.d.select_ = s
         #self.d.select_ = s.strip_whitespace()
         #self.d.select_ = self.d.select_.simplifyWhiteSpace()
         
-        if not sep in s and not "*" in s:
+        if not isinstance(s, list) and not "*" in s:
             self.d.fieldList_.clear()
             self.d.fieldList_.append(s)
+
             return
         
-        fieldListAux = s.split(sep)
-        for f in fieldListAux:
+        #fieldListAux = s.split(sep)
+        for f in s:
             f = str(f).strip()
             
         
@@ -195,12 +195,12 @@ class FLSqlQuery(ProjectClass):
         field = None
         self.d.fieldList_.clear()
         
-        for f in fieldListAux:
+        for f in s:
             try:
                 table = f[:f.index(".")]
                 field = f[f.index(".") + 1:]
             except:
-                a = 1
+                pass
                 
             if field == "*":
                 mtd = self.d.db_.manager().metadata(table, True)
@@ -582,9 +582,9 @@ class FLSqlQuery(ProjectClass):
     def isForwardOnly(self):
         pass
     
-    @decorators.NotImplementedWarn
+    
     def setForwardOnly(self, forward):
-        pass
+        pass #No hace nada
 
     
     @decorators.NotImplementedWarn

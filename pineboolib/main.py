@@ -14,6 +14,7 @@ from lxml import etree
 from binascii import unhexlify
 
 import zlib
+import importlib
 
 
 from PyQt5 import QtCore, QtGui
@@ -121,7 +122,8 @@ class Project(object):
         # Conectar:
 
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password)
-
+        util = FLUtil()
+        util.writeSettingEntry(u"DBA/lastDB",self.dbname)
         self.cur = self.conn.cursor()
         self.areas = {}
         self.cur.execute(""" SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
@@ -187,7 +189,7 @@ class Project(object):
 
 
     def loadGeometryForm(self, name):
-        name = name = "geo/%s" % name
+        name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
 
     def call(self, function, aList , objectContext ):
@@ -510,7 +512,8 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > 50: print("Loading action %s . . . " % (self.name))
         from pineboolib import mainForm
         w = mainForm.mainWindow
-        self.mainform_widget = FLMainForm(w,self, load = True)
+        if not self.mainform_widget:
+            self.mainform_widget = FLMainForm(w,self, load = True)
         self._loaded = True
         if Project.debugLevel > 50: print("End of action load %s (iface:%s ; widget:%s)"
               % (self.name,
@@ -542,15 +545,72 @@ class XMLAction(XMLStruct):
 
     def execDefaultScript(self):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
-        s = self.load()
-        if s.iface:
-            s.iface.main()
-        else:
-            s.script.form.main()
+        
+        self.load_script(self.scriptform, None)
+        if getattr(self.script.form,"iface",None):
+            self.script.form.iface.main()
+
+    def load_script(self, scriptname, parent= None):
+        
+                        # import aqui para evitar dependencia ciclica
+        import pineboolib.emptyscript
+        python_script_path = None
+        self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
+
+        script_path_qs = self.prj.path(scriptname+".qs")
+        script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
+        
+        overload_pyfile = os.path.join(self.prj.tmpdir,"overloadpy",scriptname+".py")
+        if os.path.isfile(overload_pyfile):
+            print("WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
+            try:
+                self.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
+            except Exception as e:
+                print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
+            
+        elif script_path_py:
+            script_path = script_path_py
+            print("Loading script PY %s . . . " % scriptname)
+            if not os.path.isfile(script_path): raise IOError
+            try:
+                print("Cargando %s : %s " % (scriptname,script_path.replace(self.prj.tmpdir,"tempdata")))
+                self.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
+            except Exception as e:
+                print("ERROR al cargar script PY para la accion %r:" % self.action.name, e)
+                print(traceback.format_exc(),"---")
+            
+        elif script_path_qs:
+            script_path = script_path_qs
+            print("Loading script QS %s . . . " % scriptname)
+            # Intentar convertirlo a Python primero con flscriptparser2
+            if not os.path.isfile(script_path): raise IOError
+            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".qs.py")
+            if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
+                print("Convirtiendo a Python . . .")
+                #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                from pineboolib.flparser import postparse
+                postparse.pythonify(script_path)
+
+            if not os.path.isfile(python_script_path):
+                raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
+            try:
+                print("Cargando %s : %s " % (scriptname,python_script_path.replace(self.prj.tmpdir,"tempdata")))
+                self.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
+                #self.script = imp.load_source(scriptname,python_script_path)
+                #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+            except Exception as e:
+                print("ERROR al cargar script QS para la accion %r:" % self.name, e)
+                print(traceback.format_exc(),"---")
+            
+        
+        self.script.form = self.script.FormInternalObj(self, self.prj, parent)
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)
         #Aquí debería arramcar el script
+
+
 
 
 from pineboolib.fllegacy.FLFormDB import FLFormDB

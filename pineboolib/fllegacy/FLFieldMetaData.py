@@ -10,6 +10,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 #from PyQt4.QtCore import QVariant, QString
 #from PyQt4 import QtCore, QtGui
 from pineboolib.utils import aqtt
+import copy
 
 
 
@@ -236,7 +237,6 @@ class FLFieldMetaData():
 
     @return TRUE si el campo es una referencia con contador
     """
-    @decorators.BetaImplementation
     def isCounter(self):
         return self.d.contador_
 
@@ -376,7 +376,6 @@ class FLFieldMetaData():
     @return Nombre del campo de la tabla foránea M-1, al que hay que aplicar el filtro
       según el valor del campo asociado
     """
-    @decorators.BetaImplementation
     def associatedFieldFilterTo(self):
         return self.d.associatedFieldFilterTo_
 
@@ -397,7 +396,6 @@ class FLFieldMetaData():
 
     @return Valor que se asigna por defecto al campo
     """
-    @decorators.BetaImplementation
     def defaultValue(self):
         if not self.d.defaultValue_:
             self.d.defaultValue_ = ""
@@ -569,7 +567,7 @@ class FLFieldMetaData():
         if other == self:
             return
         
-        self = other
+        self = copy.copy(other)
         """
         od = other.d
         if od.relationM1_:
