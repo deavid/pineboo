@@ -28,6 +28,8 @@ def id_translate(name):
     if name == "endsWith": name = "endswith"
     if name == "lastIndexOf": name = "rfind"
     if name == "File": name = "qsatype.File"
+    if name == "findRev": name = "find"
+    if name == "toLowerCase": name = "lower"
     return name
 
 ast_class_types = []
@@ -726,6 +728,7 @@ class Member(ASTPython):
             "isEmpty()",
             "left" ,
             "right" ,
+            "mid" ,
             "charAt"
         ]
         for member in replace_members:
@@ -750,6 +753,10 @@ class Member(ASTPython):
                         value = arg[6:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1),".".join(part1), value)] + part2
+                    elif member == "mid":
+                        value = arg[4:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s[(%s):]" % (".".join(part1), value)] + part2
                     elif member == "length":
                         value = arg[7:]
                         value = value[:len(value) - 1]
@@ -762,7 +769,10 @@ class Member(ASTPython):
                         
                         
                     else:
-                        arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
+                        if ".".join(part1):
+                            arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
+                        else:
+                            arguments = ["%s" % arg] + part2
         yield "expr", ".".join(arguments)
 
 class ArrayMember(ASTPython):
