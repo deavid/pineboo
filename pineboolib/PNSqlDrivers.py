@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from gi import importlib
+import importlib
 from pineboolib.flcontrols import ProjectClass
 
 class PNSqlDrivers(ProjectClass):
