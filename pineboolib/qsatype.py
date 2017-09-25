@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import os, fnmatch
+import os, fnmatch, re
 import datetime, weakref
+from lxml import etree
+from io import StringIO
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -153,11 +155,41 @@ def FLPosPrinter(*args, **kwargs):
 def FLReportViewer():
     return FLReportViewer_Legacy.FLReportViewer()
 
-@decorators.NotImplementedWarn
-def FLDomDocument(*args, **kwargs):
-    class fldomdocument:
-        pass
-    return fldomdocument()
+
+class FLDomDocument(object):
+    
+    parser = None
+    tree = None
+    root_ = None
+    string_ = None
+    
+    def __init__(self):
+        self.parser = etree.XMLParser(recover=True, encoding='utf-8')
+        self.string_ = None
+        
+
+    def setContent(self, value):
+        try:
+            self.string_ = value
+            if value.startswith('<?'):
+                value = re.sub(r'^\<\?.*?\?\>','', value, flags=re.DOTALL)
+            self.tree = etree.fromstring(value, self.parser)
+            #self.root_ = self.tree.getroot()
+            return True
+        except:
+            return False
+    
+    @decorators.NotImplementedWarn
+    def namedItem(self, name):
+        return True
+
+    def toString(self, value = None):
+        return self.string_
+    
+    
+        
+    
+        
 
 @decorators.NotImplementedWarn
 def FLCodBar(*args, **kwargs):
@@ -296,6 +328,27 @@ class Date(object):
     def toString(self, *args, **kwargs):
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"),self.date_.toString("MM"),self.date_.toString("dd"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
         return texto
+    
+    def getYear(self):
+        return self.date_.year()
+    
+    def getMonth(self):
+        return self.date_.month()
+    
+    def getDay(self):
+        return self.date_.day()
+    
+    def getHours(self):
+        return self.time_.hour()
+    
+    def getMinutes(self):
+        return self.time_.minute()
+    
+    def getSeconds(self):
+        return self.time_.second()
+    
+    def getMilliseconds(self):
+        return self.time_.msec()
 
 @decorators.NotImplementedWarn
 class Process(object):
