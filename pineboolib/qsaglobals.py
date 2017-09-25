@@ -141,6 +141,12 @@ class SysType(object):
     
     def setCaptionMainWidget(self, value):
         pineboolib.project.mainWindow.setWindowTitle(value)
+    
+    @decorators.NotImplementedWarn
+    def toUnicode(self, text, format):
+        return text
+        
+
         
     
 sys = SysType()
