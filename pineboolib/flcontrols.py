@@ -118,18 +118,27 @@ class FLTable(QtWidgets.QTableWidget):
 
 
 class QTabWidget(QtWidgets.QTabWidget):
+    
     def setTabEnabled(self, tab, enabled):
         #print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
         if isinstance(tab, int): return QtWidgets.QTabWidget.setTabEnabled(self, tab, enabled)
-        if isinstance(tab, str): 
+        if isinstance(tab, str):
+            """
             tabs = [ str(QtWidgets.QTabWidget.tabText(self, i)).lower().replace("&","") for i in range(self.count()) ]
             try:
                 idx = tabs.index(tab.lower())              
                 return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
+            """
+            try:
+                for idx in range(self.count()):
+                    if self.widget(idx).objectName() == tab.lower():
+                        return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
+                
             except ValueError:
                 print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled), tabs)
                 return False
         print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
+         
 
 
 class QLineEdit(QtWidgets.QLineEdit):
