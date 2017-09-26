@@ -729,7 +729,7 @@ class FLUtil(ProjectClass):
     @return Valor del setting
     """
 
-    def readSettingEntry(self, key, def_=None, ok=False):
+    def readSettingEntry(self, key, def_=u"", ok=False):
         return FLSettings().readEntry(key, def_, ok)
     """
     Establece el valor de un setting en el directorio de instalación de AbanQ
