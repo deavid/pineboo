@@ -68,16 +68,26 @@ class PNConnection(QtCore.QObject):
             print(traceback.format_exc())
         return conn
     
+    def driverName(self):
+        return self.driver().driverName()
+    
+    def host(self):
+        return self.db_host
+    
+    def port(self):
+        return self.db_port
+    
+    def database(self):
+        return self.db_name
+    
+    def user(self):
+        return self.db_userName
+    
+    def password(self):
+        return self.db_password
+    
     def seek(self, offs, whence = 0):
         return self.conn.seek(offs, whence)
-        
-    def database(self, databaseName):
-        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
-                        databaseName, self.db_host, self.db_port,
-                        self.db_userName, self.db_password
-                    )
-        return self.conectar(conninfostr)
-    
     
     def manager(self):
         return self._manager
