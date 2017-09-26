@@ -100,10 +100,18 @@ def isNaN(x):
 
 # TODO: separar en otro fichero de utilidades
 def ustr(*t1):
+
     return "".join([ ustr1(t) for t in t1 ])
 
 def ustr1(t):
     if isinstance(t, str): return t
+    
+    if isinstance(t, float):
+        try:
+            t = int(t)
+        except:
+            pass
+        
     #if isinstance(t, QtCore.QString): return str(t)
     if isinstance(t, str): return str(t,"UTF-8")
     try:
@@ -116,7 +124,10 @@ def ustr1(t):
 def debug(txt):
     print("---> DEBUG:", ustr(txt))
 
-
+class aqApp(object):
+    
+    def db():
+        return pineboolib.project.conn
 
 class SysType(object):
     def __init__(self):
@@ -142,9 +153,9 @@ class SysType(object):
     def setCaptionMainWidget(self, value):
         pineboolib.project.mainWindow.setWindowTitle(value)
     
-    @decorators.NotImplementedWarn
+    
     def toUnicode(self, text, format):
-        return text
+        return u"%s" % text
         
 
         
