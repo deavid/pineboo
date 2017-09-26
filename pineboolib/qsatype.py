@@ -179,9 +179,8 @@ class FLDomDocument(object):
         except:
             return False
     
-    @decorators.NotImplementedWarn
     def namedItem(self, name):
-        return True
+        return u"<%s" % name in self.string_
 
     def toString(self, value = None):
         return self.string_
@@ -350,14 +349,81 @@ class Date(object):
     def getMilliseconds(self):
         return self.time_.msec()
 
-@decorators.NotImplementedWarn
-class Process(object):
+
+class Process(QtCore.QProcess):
     
-    def __init__(self):
-        pass
+    running = None
+    
+    def __init__(self, *args):
+        super(Process, self).__init__()
+        self.finished.connect(self.ExitStatus)
+        self.stateChanged.connect(self.cambioRunning)
+        self.readyReadStandardOutput.connect(self.readData)
+        if args:
+            self.runing = False
+            self.setProgram(args[0])
+            argumentos = args[1:]
+            self.setArguments(argumentos)
+        
+        
+    def start(self):
+        self.running = True
+        super(Process, self).start()
+    
+    def stop(self):
+        self.running = False
+        super(Process, self).stop()
+    
+    def writeToStdin(self, stdin_):
+        stdin_as_bytes = stdin_.encode('utf-8')
+        self.writeData(stdin_as_bytes)
+        #self.closeWriteChannel()
+    
+    def readFromStdout(self):
+        Stdout_ = None
+        while self.canReadLine():
+            line = self.readLine()
+            Stdout_ = Stdout_ + line
+        return 
+        
+    
+    def cambioRunning(self, state_):
+        #print("Estado", self.processId(), self.workingDirectory(), self.program(), self.arguments(), state_)
+        if state_ == QtCore.QProcess.NotRunning:
+            self.running = False
+            txt_ = None
+            error_ = self.error()
+            if error_:
+                if error_ == 0:
+                    txt_ = "El proceso ha fallado al iniciarse. El programa no se ha llamado correctamente o no tiene permisos suficientes para invocar el programa"
+                elif error_ == 1:
+                    txt_ = "El programa ha fallado tiempo despues de iniciarse correntamente"
+                elif error_ == 2:
+                    txt_ = "El último waitFor ha fallado. El estado del proceso no ha cambiado, y puede volver a intentar llamarlo de nuevo"
+                elif error_ == 4:
+                    txt_ = "Un error ha ocurrido cuando se intentaba escribir en el proceso. Por ejemplo , el proceso no se está ejecutando o ha cerrado el canal de entrada"
+                elif error_ == 3:
+                    txt_ = "Un error ha ocurrido cuando se intentaba leer del proceso. Por ejemplo , el proceso no se está ejecutando"
+                elif error_ == 5:
+                    txt_ = "Un error desconocido ha ocurrido"
+                else:
+                    txt_ = "Error no contemplado (%s)" % error_
+            
+                print("Error: (%s) :: %s" % (self.processId(), txt_))
+        else:
+            self.runnin = True
+        
+    
+    def __setattr__(self, name, value):
+        if name == "workingDirectory":
+            self.setWorkingDirectory(value)
+        else:
+            super(Process, self).__setattr__(name, value)
+           
+            
 
 
-@decorators.BetaImplementation
+
 class RadioButton(QtWidgets.QRadioButton):
     pass
         
@@ -445,6 +511,12 @@ class File(QtCore.QFile):
     def read(self):
         in_ = QTextStream(self)
         return in_.readAll()
+    
+    def write(self, text):
+        #encodig = text.property("encoding")
+        out_ = QTextStream(self)
+        out_ << text
+        
    
     
         
