@@ -14,7 +14,7 @@ except ImportError:
     print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
 
 
-class PGSql(object):
+class FLQPSQL(object):
     
     version_ = None
     conn_ = None
@@ -24,14 +24,14 @@ class PGSql(object):
     def __init__(self):
         self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "PostGreSQL"
+        self.name_ = "FLQPSQL"
         self.open_ = False
         self.errorList = []
     
     def version(self):
         return self.version_
     
-    def name(self):
+    def driverName(self):
         return self.name_
     
     def isOpen(self):
