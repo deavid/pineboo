@@ -111,6 +111,18 @@ class Array(object):
     def __getattr__(self, k):
         if k == 'length': 
             return len(self.dict_)
+    
+    def __len__(self):
+        len_ = 0
+        
+        for l in self.dict_:
+            len_ = len_ + 1
+            
+        return len_
+        
+    
+    
+    
 
        
 
