@@ -8,14 +8,15 @@ import os.path
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
+
 import traceback
 import pineboolib
 from pineboolib import flcontrols, decorators
-from pineboolib.utils import filedir
+
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
-from PyQt5.Qt import QMainWindow, QDate
+from PyQt5.Qt import QMainWindow, QDate, QTextStream
 
 class File(object):
     
@@ -32,16 +33,6 @@ class FileDialog(QtWidgets.QFileDialog):
     def getExistingDirectory(basedir):
         return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
 
-
-class Dir(object):
-    
-    home = None
-    
-    def __init__(self, ruta):
-        self.home = filedir("..")
-    
-    def entryList(self, patron):
-        pass
 
 
 
@@ -150,6 +141,12 @@ class SysType(object):
     
     def setCaptionMainWidget(self, value):
         pineboolib.project.mainWindow.setWindowTitle(value)
+    
+    @decorators.NotImplementedWarn
+    def toUnicode(self, text, format):
+        return text
+        
+
         
     
 sys = SysType()

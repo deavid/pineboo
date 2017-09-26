@@ -26,6 +26,10 @@ def id_translate(name):
 
     if name == "startsWith": name = "startswith"
     if name == "endsWith": name = "endswith"
+    if name == "lastIndexOf": name = "rfind"
+    if name == "File": name = "qsatype.File"
+    if name == "findRev": name = "find"
+    if name == "toLowerCase": name = "lower"
     return name
 
 ast_class_types = []
@@ -386,6 +390,11 @@ class For(ASTPython):
                     yield "line", line
                 
             yield "line", "while_pass = True"
+            yield "line", "try:"
+            yield "begin", "block-error-catch" # Si es por ejemplo un charAt y hace out of index nos saca del while
+            yield "line", "%s" % (" ".join(main_expr))
+            yield "end", "block-error-catch"
+            yield "line", "except: break"
             yield "end", "block-for"
 
 class ForIn(ASTPython):
@@ -512,7 +521,8 @@ class Variable(ASTPython):
             expr = 0
             for dtype, data in parse_ast(value).generate(isolate = False):
                 
-                if self.elem.get("type",None) == "Array" and data == "[]":
+                #if self.elem.get("type",None) == "Array" and data == "[]":
+                if data == "[]":
                     yield "expr", "qsatype.Array()"
                     expr += 1
                     continue
@@ -718,6 +728,8 @@ class Member(ASTPython):
             "isEmpty()",
             "left" ,
             "right" ,
+            "mid" ,
+            "charAt"
         ]
         for member in replace_members:
             for idx,arg in enumerate(arguments):
@@ -741,10 +753,26 @@ class Member(ASTPython):
                         value = arg[6:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1),".".join(part1), value)] + part2
+                    elif member == "mid":
+                        value = arg[4:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s[(%s):]" % (".".join(part1), value)] + part2
+                    elif member == "length":
+                        value = arg[7:]
+                        value = value[:len(value) - 1]
+                        arguments = ["len(%s)" % (".".join(part1))] + part2
+                    elif member == "charAt":
+                        value = arg[7:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s[%s]" % (".".join(part1), value)] + part2
+                        
                         
                         
                     else:
-                        arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
+                        if ".".join(part1):
+                            arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
+                        else:
+                            arguments = ["%s" % arg] + part2
         yield "expr", ".".join(arguments)
 
 class ArrayMember(ASTPython):

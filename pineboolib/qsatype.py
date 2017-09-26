@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
-import os
+import os, fnmatch, re
 import datetime, weakref
+from lxml import etree
+from io import StringIO
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 # Cargar toda la API de Qt para que sea visible.
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtCore import QIODevice
 
 from pineboolib import qsaglobals
 from pineboolib import flcontrols
@@ -19,6 +22,8 @@ from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
+
+from pineboolib.utils import filedir
 
 from pineboolib import decorators
 import traceback
@@ -138,7 +143,7 @@ Color = QtGui.QColor
 QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
 
-File = QtCore.QFile
+                    
 
 @decorators.NotImplementedWarn
 def FLPosPrinter(*args, **kwargs):
@@ -150,11 +155,41 @@ def FLPosPrinter(*args, **kwargs):
 def FLReportViewer():
     return FLReportViewer_Legacy.FLReportViewer()
 
-@decorators.NotImplementedWarn
-def FLDomDocument(*args, **kwargs):
-    class fldomdocument:
-        pass
-    return fldomdocument()
+
+class FLDomDocument(object):
+    
+    parser = None
+    tree = None
+    root_ = None
+    string_ = None
+    
+    def __init__(self):
+        self.parser = etree.XMLParser(recover=True, encoding='utf-8')
+        self.string_ = None
+        
+
+    def setContent(self, value):
+        try:
+            self.string_ = value
+            if value.startswith('<?'):
+                value = re.sub(r'^\<\?.*?\?\>','', value, flags=re.DOTALL)
+            self.tree = etree.fromstring(value, self.parser)
+            #self.root_ = self.tree.getroot()
+            return True
+        except:
+            return False
+    
+    @decorators.NotImplementedWarn
+    def namedItem(self, name):
+        return True
+
+    def toString(self, value = None):
+        return self.string_
+    
+    
+        
+    
+        
 
 @decorators.NotImplementedWarn
 def FLCodBar(*args, **kwargs):
@@ -206,6 +241,9 @@ def check_gc_referrers(typename, w_obj, name):
 
 class FormDBWidget(QtWidgets.QWidget):
 
+    closed =  QtCore.pyqtSignal()
+    cursor_ = None
+    
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
@@ -230,9 +268,11 @@ class FormDBWidget(QtWidgets.QWidget):
             del self.iface 
         
         if can_exit:
+            self.closed.emit()
             event.accept() # let the window close
         else:
             event.ignore()
+            
     def child(self, childName):
         try:
             ret = self.findChild(QtWidgets.QWidget, childName)
@@ -261,7 +301,6 @@ class FormDBWidget(QtWidgets.QWidget):
                 cursor = getattr(self.parentWidget(),"cursor_", None)
 
             if cursor and not cursor is self.cursor_ :
-                #self.cursor_.__del__(True)
                 return cursor
         except Exception:
             # FIXME: A veces parentWidget existía pero fue eliminado. Da un error
@@ -289,6 +328,27 @@ class Date(object):
     def toString(self, *args, **kwargs):
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"),self.date_.toString("MM"),self.date_.toString("dd"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
         return texto
+    
+    def getYear(self):
+        return self.date_.year()
+    
+    def getMonth(self):
+        return self.date_.month()
+    
+    def getDay(self):
+        return self.date_.day()
+    
+    def getHours(self):
+        return self.time_.hour()
+    
+    def getMinutes(self):
+        return self.time_.minute()
+    
+    def getSeconds(self):
+        return self.time_.second()
+    
+    def getMilliseconds(self):
+        return self.time_.msec()
 
 @decorators.NotImplementedWarn
 class Process(object):
@@ -351,9 +411,40 @@ class GroupBox(QtWidgets.QGroupBox):
 class CheckBox(QtWidgets.QCheckBox):
     pass
 
-class Dir(qsaglobals.Dir):
-    pass
+class Dir(object):
+    path_ = None
+    home = None 
+    
+    def __init__(self, path):
+        self.path_ = path
+        self.home = filedir("..")
+    
+    def entryList(self, patron):
+        p = os.walk(self.path_)
+        retorno = []
+        for file in os.listdir(self.path_):
+            if fnmatch.fnmatch(file, patron):
+                retorno.append(file)
+        return retorno
 
+class File(QtCore.QFile):
+    fichero = None
+    mode = None
+        
+    ReadOnly = QIODevice.ReadOnly
+    WriteOnly = QIODevice.WriteOnly
+    ReadWrite = QIODevice.ReadWrite
+    
+    def __init__(self, rutaFichero):
+        self.fichero = rutaFichero
+        super(File, self).__init__(rutaFichero)
+    
+    #def open(self, mode):
+    #    super(File, self).open(self.fichero, mode)
+    
+    def read(self):
+        in_ = QTextStream(self)
+        return in_.readAll()
    
     
         
