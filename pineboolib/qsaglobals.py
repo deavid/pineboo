@@ -197,9 +197,18 @@ def connect(sender, signal, receiver, slot):
         remote_fn = getattr(remote_obj, m.group(2), None)
         if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
-            sg_name = signal.replace("()", "")
-            sg_name = sg_name.replace("(QString)", "")
-            sg_name = sg_name.replace("(int)", "")
+            #sg_name = signal.replace("()", "")
+            #sg_name = sg_name.replace("(QString)", "")
+            #sg_name = sg_name.replace("(int)", "")
+            #sg_name = sg_name.replace("(int, int)", "")
+            
+            if signal.find("(") > -1:
+                sg_name = signal[:signal.find("(")]
+            else:
+                sg_name = signal
+                
+            
+            
             getattr(sender, sg_name).connect(remote_fn)
         except RuntimeError as e:
             print("ERROR Connecting:", sender, sg_name, remote_fn)
