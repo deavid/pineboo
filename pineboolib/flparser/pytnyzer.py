@@ -30,6 +30,7 @@ def id_translate(name):
     if name == "File": name = "qsatype.File"
     if name == "findRev": name = "find"
     if name == "toLowerCase": name = "lower"
+    if name == "Process": name = "qsatype.Process"
     return name
 
 ast_class_types = []
