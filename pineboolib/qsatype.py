@@ -258,9 +258,13 @@ class FormDBWidget(QtWidgets.QWidget):
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
-        self.cursor_ = FLSqlCursor(action.name)
+        self.cursor_ = None
+        #self.cursor_ = FLSqlCursor(action.name)
         self._prj = project
-        self._class_init()
+        try:
+            self._class_init()
+        except:
+            pass
         
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
@@ -306,17 +310,16 @@ class FormDBWidget(QtWidgets.QWidget):
         return ret
 
     def cursor(self):
-        cursor = None
-        try:
-            if self.parentWidget():
-                cursor = getattr(self.parentWidget(),"cursor_", None)
+        
+        if self.parentWidget() and not self.cursor_:
+            cursor = getattr(self.parentWidget(),"cursor_", None)
 
-            if cursor and not cursor is self.cursor_ :
-                return cursor
-        except Exception:
-            # FIXME: A veces parentWidget existía pero fue eliminado. Da un error
-            # ... en principio debería ser seguro omitir el error.
-            pass
+            if cursor:
+                self.cursor_ = cursor
+        
+        if not self.cursor_:
+            self.cursor_ = FLSqlCursor(self._action.name)
+        
         return self.cursor_
 
 def FLFormSearchDB(name):

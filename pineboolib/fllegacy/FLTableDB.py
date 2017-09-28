@@ -83,7 +83,6 @@ class FLTableDB(QtWidgets.QWidget):
 
 
     _controlsInit = None
-    realParent = None
 
     """
     constructor
@@ -91,7 +90,6 @@ class FLTableDB(QtWidgets.QWidget):
 
     def __init__(self, parent, name = None):
         super(FLTableDB, self).__init__(parent)
-        self.realParent = parent
         self.topWidget = parent
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(0, self.loaded)
@@ -108,11 +106,9 @@ class FLTableDB(QtWidgets.QWidget):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
-        numero =  None
         while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             try:
                 parent_cursor = self.topWidget.cursor()
-                numero = 1
             except:
                 pass
             if not isinstance(parent_cursor, FLSqlCursor):
