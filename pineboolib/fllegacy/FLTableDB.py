@@ -1831,9 +1831,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Redefinida por conveniencia
     """
-    @decorators.NotImplementedWarn
     def setEnabled(self, b):
-        pass
+        self.setReadOnly(not b)
 
     """
     Establece el ancho de una columna
