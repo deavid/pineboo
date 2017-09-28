@@ -2202,7 +2202,7 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
 
-            self.d.undoAcl()
+            #self.d.undoAcl() FIXME
             self.updateBufferCopy()
             self.newBuffer.emit()
 
@@ -2437,6 +2437,7 @@ class FLSqlCursor(ProjectClass):
         
         msg = None
         mtd = self.d.metadata_
+        """
         if self.d.transactionsOpened_:
             print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
         if len(self.d.transactionsOpened_) > 0: #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
@@ -2445,7 +2446,7 @@ class FLSqlCursor(ProjectClass):
                 t = self.d.metadata_.name()
                 msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
             self.rollbackOpened(-1, msg)
-
+        """
         del self.d
         if delMtd:
             del mtd
@@ -3259,9 +3260,8 @@ class FLSqlCursor(ProjectClass):
     """
     Indica el último error
     """
-    @decorators.NotImplementedWarn
     def lastError(self):
-        return None
+        return self.db().lastError()
     """
     signals:
     """

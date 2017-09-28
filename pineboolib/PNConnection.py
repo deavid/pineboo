@@ -71,6 +71,9 @@ class PNConnection(QtCore.QObject):
     def driverName(self):
         return self.driver().driverName()
     
+    def lastError(self):
+        return self.driver().lastError()
+    
     def host(self):
         return self.db_host
     
