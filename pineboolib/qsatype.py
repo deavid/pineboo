@@ -365,12 +365,14 @@ class Date(object):
 class Process(QtCore.QProcess):
     
     running = None
+    stderr = None
     
     def __init__(self, *args):
         super(Process, self).__init__()
         self.finished.connect(self.ExitStatus)
         self.stateChanged.connect(self.cambioRunning)
         self.readyReadStandardOutput.connect(self.readData)
+        self.stderr = None
         if args:
             self.runing = False
             self.setProgram(args[0])
@@ -420,7 +422,8 @@ class Process(QtCore.QProcess):
                     txt_ = "Un error desconocido ha ocurrido"
                 else:
                     txt_ = "Error no contemplado (%s)" % error_
-            
+                
+                self.stderr = txt_
                 print("Error: (%s) :: %s" % (self.processId(), txt_))
         else:
             self.runnin = True
