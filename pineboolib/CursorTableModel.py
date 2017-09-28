@@ -434,35 +434,33 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     Crea una nueva linea en el tableModel
     @param buffer . PNBuffer a añadir
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def newRowFromBuffer(self, buffer):
-        try: 
-            if DEBUG: print("CursorTableModel.newRowFromBuffer")
-            return 
-            colsnotfound = []
+        #Metemos lineas en la tabla de la bd
+        campos = None
+        valores = None
+        for b in buffer.fieldsList():
+            value = None
+            if not b.value:
+                value = buffer.cursor_.d.db_.manager().metadata(buffer.cursor_.d.curName_).field(b.name).defaultValue()
+            else:
+                value = b.value
             
+            if value: # si el campo se rellena o hay valor default
+                value = self._prj.conn.manager().formatValue(b.type_, value, False)
+                if not campos:
+                    campos = b.name
+                    valores = value
+                else:
+                    campos = u"%s,%s" % (campos, b.name)
+                    valores = u"%s,%s" % ( valores, value)
             
-            self._data.append([])
-            self._vdata.append([])
-            newRow = self.rowCount()
-
-            for fieldBuffer in buffer.fieldsList():
-                #col = self.metadata().indexPos(fieldname)
-                try:
-                    #col = self.sql_fields.index(fieldBuffer.name)
-                    #self._data++#Nueva linea
-                    self._data[newRow].append(fieldBuffer.value)
-                    self._vdata[newRow].append(fieldBuffer.value) 
-                    
-                except ValueError:
-                    colsnotfound.append(fieldBuffer.name)
-            if colsnotfound:
-                print("CursorTableModel.newRowFromBuffer:: columns not found: %r" % (colsnotfound))
-            self.indexUpdateRow(newRow)
-
-        except Exception:
-
-            print("CursorTableModel.newRowFromBuffer(row %s) :: ERROR:" % newRow, traceback.format_exc())
+        if campos:
+            sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
+            print("INSERT!!!!", sql)
+        
+            self._cursor.execute(sql)
+            self.refresh()
         
 
     def findPKRow(self, pklist):
