@@ -488,6 +488,8 @@ class Switch(ASTPython):
         # yield "line", "assert( %s )" % name_pr2
 
 class With(ASTPython):
+    python_keywords = ["setValueBuffer","setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess","commitBuffer","commit"]
+        
     def generate(self, **kwargs):
         key = "%02x" % random.randint(0,255)
         name = "w%s_obj" % key
@@ -504,11 +506,21 @@ class With(ASTPython):
             yield "debug", "Expression %d not understood" % n
             yield "debug", etree.tostring(arg)
 
-        yield "line", "%s = %s" % (name, " ".join(var_expr))
-
+        #yield "line", "%s = %s #WITH" % (name, " ".join(var_expr))
+        yield "line"," #WITH_START"
         for obj in parse_ast(source).generate(break_mode = True):
-            yield obj
-        yield "line", "del %s" % name
+            obj_ = None
+            for t in self.python_keywords:
+                if obj[1].startswith(t):
+                    obj_ = (obj[0],"%s.%s" % (" ".join(var_expr), obj[1]))
+                    break
+                
+            if not obj_:
+                obj_ = obj
+                
+            yield obj_
+        #yield "line", "del %s" % name
+        yield "line"," #WITH_END"
 
 class Variable(ASTPython):
     def generate(self, force_value = False, **kwargs):
