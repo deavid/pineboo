@@ -767,17 +767,21 @@ class FLUtil(ProjectClass):
 
     @return Indicador de si la escritura del settings se realiza correctamente
     """
-    @decorators.BetaImplementation
     def writeDBSettingEntry(self, key, value):
         result = False
         where = "flkey='%s'" % key
         found = self.sqlSelect("flsettings", "valor", where, "flsettings")
-        if not found:
-            result = self.sqlInsert("flsettings", "flkey,valor","%s,%s" % (key, value))
+        cursor = self._prj.conn.cursor()
+        if not found:   
+            sql = "INSERT INTO %s (flkey, valor) VALUES (%s, %s)" % ("flsettings", key, value)
         else:
-            result = self.sqlUpdate("flsettings", "valor", value, where)
+            sql = "UPDATE %s SET valor = '%s' WHERE %s" % ("flsettings", value, where)
+        try:
+            cursor.execute(sql)
+        except:
+            return False
         
-        return result
+        return True
         
     """
     Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
