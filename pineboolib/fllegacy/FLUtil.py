@@ -778,6 +778,7 @@ class FLUtil(ProjectClass):
             sql = "UPDATE %s SET valor = '%s' WHERE %s" % ("flsettings", value, where)
         try:
             cursor.execute(sql)
+            cursor.close()
         except:
             return False
         
