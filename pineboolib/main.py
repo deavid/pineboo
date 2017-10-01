@@ -54,6 +54,7 @@ class Project(object):
         self.apppath = None
         self.tmpdir = None
         self.parser = None
+        self.driverAlias = None
         
 
         self.actions = {}
@@ -67,7 +68,7 @@ class Project(object):
         qt3ui.Options.DEBUG_LEVEL = q
         
 
-    def load_db(self, dbname, host, port, user, passwd):
+    def load_db(self, dbname, host, port, user, passwd, driveralias):
         self.dbserver = DBServer()
         self.dbserver.host = host
         self.dbserver.port = port
@@ -75,6 +76,7 @@ class Project(object):
         self.dbauth.username = user
         self.dbauth.password = passwd
         self.dbname = dbname
+        self.driverAlias = driveralias
         self.apppath = filedir("..")
         self.tmpdir = filedir("../tempdata")
 
@@ -95,6 +97,7 @@ class Project(object):
         self.dbauth = DBAuth(one(self.root.xpath("database-credentials")))
         self.dbname = one(self.root.xpath("database-name/text()"))
         self.apppath = one(self.root.xpath("application-path/text()"))
+        self.driverAlias = one(self.root.xpath("database-driver/text()"))
         self.tmpdir = filedir("../tempdata")
 
         self.actions = {}
@@ -121,7 +124,7 @@ class Project(object):
             
         # Conectar:
 
-        self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password)
+        self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.driverAlias)
         util = FLUtil()
         util.writeSettingEntry(u"DBA/lastDB",self.dbname)
         self.cur = self.conn.cursor()

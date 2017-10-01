@@ -19,6 +19,7 @@ class FLQPSQL(object):
     version_ = None
     conn_ = None
     name_ = None
+    alias_ = None
     errorList = None
     lastError_ = None
     
@@ -28,6 +29,7 @@ class FLQPSQL(object):
         self.name_ = "FLQPSQL"
         self.open_ = False
         self.errorList = []
+        self.alias_ = "PostgreSQL"
     
     def version(self):
         return self.version_

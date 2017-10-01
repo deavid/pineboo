@@ -4,7 +4,7 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, PNSqlDrivers
 from PyQt5 import QtCore,QtWidgets
 import psycopg2
-import traceback
+import traceback, sys
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
@@ -31,7 +31,7 @@ class PNConnection(QtCore.QObject):
     queueSavePoints_ = None
     interactiveGUI_ = None
     
-    def __init__(self, db_name, db_host, db_port, db_userName, db_password):
+    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias):
         super(PNConnection,self).__init__()
         
         
@@ -41,8 +41,14 @@ class PNConnection(QtCore.QObject):
         self.db_userName = db_userName
         self.db_password = db_password
         self.driverSql = PNSqlDrivers.PNSqlDrivers()
+        driverName_ = self.driverSql.aliasToName(driverAlias)
         
-        self.conn = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
+        if (driverName_ and self.driverSql.loadDriver(driverName_)):
+            self.conn = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
+        else:
+            print("PNConnection.ERROR: No se encontro el driver \'%s\'" % driverAlias)
+            sys.exit(0)
+            
         self._manager = FLManager(self)
         self._managerModules = FLManagerModules(self.conn)
         
