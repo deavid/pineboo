@@ -68,10 +68,6 @@ class PNConnection(QtCore.QObject):
     
     def conectar(self, db_name, db_host, db_port, db_userName, db_password):
         conn = self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
-        try:
-            conn.set_client_encoding("UTF8")
-        except Exception:
-            print(traceback.format_exc())
         return conn
     
     def driverName(self):
