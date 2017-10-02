@@ -28,6 +28,7 @@ from pineboolib.utils import filedir
 from pineboolib import decorators
 import traceback
 from PyQt5.Qt import QWidget
+from sys import stderr
 
 class StructMyDict(dict):
 
@@ -369,12 +370,12 @@ class Process(QtCore.QProcess):
     
     running = None
     stderr = None
+    stdout = None
     
     def __init__(self, *args):
         super(Process, self).__init__()
-        self.finished.connect(self.ExitStatus)
-        self.stateChanged.connect(self.cambioRunning)
-        self.readyReadStandardOutput.connect(self.readData)
+        self.readyReadStandardOutput.connect(self.stdoutReady)
+        self.readyReadStandardError.connect(self.stderrReady)
         self.stderr = None
         if args:
             self.runing = False
@@ -396,40 +397,11 @@ class Process(QtCore.QProcess):
         self.writeData(stdin_as_bytes)
         #self.closeWriteChannel()
     
-    def readFromStdout(self):
-        Stdout_ = None
-        while self.canReadLine():
-            line = self.readLine()
-            Stdout_ = Stdout_ + line
-        return 
-        
+    def stdoutReady(self):
+        self.stdout = str(self.readAllStandardOutput())
     
-    def cambioRunning(self, state_):
-        #print("Estado", self.processId(), self.workingDirectory(), self.program(), self.arguments(), state_)
-        if state_ == QtCore.QProcess.NotRunning:
-            self.running = False
-            txt_ = None
-            error_ = self.error()
-            if error_:
-                if error_ == 0:
-                    txt_ = "El proceso ha fallado al iniciarse. El programa no se ha llamado correctamente o no tiene permisos suficientes para invocar el programa"
-                elif error_ == 1:
-                    txt_ = "El programa ha fallado tiempo despues de iniciarse correntamente"
-                elif error_ == 2:
-                    txt_ = "El último waitFor ha fallado. El estado del proceso no ha cambiado, y puede volver a intentar llamarlo de nuevo"
-                elif error_ == 4:
-                    txt_ = "Un error ha ocurrido cuando se intentaba escribir en el proceso. Por ejemplo , el proceso no se está ejecutando o ha cerrado el canal de entrada"
-                elif error_ == 3:
-                    txt_ = "Un error ha ocurrido cuando se intentaba leer del proceso. Por ejemplo , el proceso no se está ejecutando"
-                elif error_ == 5:
-                    txt_ = "Un error desconocido ha ocurrido"
-                else:
-                    txt_ = "Error no contemplado (%s)" % error_
-                
-                self.stderr = txt_
-                print("Error: (%s) :: %s" % (self.processId(), txt_))
-        else:
-            self.runnin = True
+    def stderrReady(self):
+        self.stderr = str(self.readAllStandardError())
         
     
     def __setattr__(self, name, value):
@@ -437,6 +409,23 @@ class Process(QtCore.QProcess):
             self.setWorkingDirectory(value)
         else:
             super(Process, self).__setattr__(name, value)
+    
+    def execute(comando): 
+           
+        pro = QtCore.QProcess()
+        array = comando.split(" ")
+        programa = array[0]
+        argumentos = array[1:]
+        pro.setProgram(programa)
+        pro.setArguments(argumentos)
+        pro.start()
+        pro.waitForFinished(30000)
+        Process.stdout = pro.readAllStandardOutput()
+        Process.stderr = pro.readAllStandardError()
+        
+        
+        
+
            
             
 
