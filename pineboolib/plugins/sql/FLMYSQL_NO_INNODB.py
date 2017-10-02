@@ -1,4 +1,4 @@
-import os
+
 from PyQt5.QtCore import QTime
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
@@ -8,13 +8,13 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
 
 try:
-    import sqlite3
+    import MySQLdb
 except ImportError:
     print(traceback.format_exc())
-    print("HINT: Instale el paquete python3-sqlite3 e intente de nuevo")
+    print("HINT: Instale el paquete python3-mysqldb e intente de nuevo")
 
 
-class FLsqlite(object):
+class FLMYSQL_NO_INNODB(object):
     
     version_ = None
     conn_ = None
@@ -24,12 +24,12 @@ class FLsqlite(object):
     lastError_ = None
     
     def __init__(self):
-        self.version_ = "0.1"
+        self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "FLsqlite"
+        self.name_ = "FLMYSQL_NO_INNODB"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "SQLite3"
+        self.alias_ = "MySQL No InnoDB"
     
     def version(self):
         return self.version_
@@ -42,19 +42,12 @@ class FLsqlite(object):
     
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         
-        db_filename = db_name
-        db_is_new = not os.path.exists(db_filename)
-        self.conn_ = sqlite3.connect(db_filename)
-        
-        if db_is_new:
-            print("La base de datos %s no existe" % db_filename)
-        
+        self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
         
         if self.conn_:
             self.open_ = True
+
         
-        #self.conn_.text_factory = os.fsdecode
-        self.conn_.text_factory = lambda x: str(x, 'latin1')
         return self.conn_
      
     
@@ -64,15 +57,13 @@ class FLsqlite(object):
             util = FLUtil.FLUtil()
         
             s = None
-            # TODO: psycopg2.mogrify ???
+            
             if v == None:
                 v = ""
+            # TODO: psycopg2.mogrify ???
 
             if type_ == "bool" or type_ == "unlock":
-                if v[0].lower() == "t":
-                    s = 1
-                else:
-                    s = 0
+                s = text2bool(v)
 
             elif type_ == "date":
                 s = "'%s'" % util.dateDMAtoAMD(v)
@@ -203,9 +194,9 @@ class FLsqlite(object):
             
     def setType(self, type_, leng = None):
         if leng:
-            return " %s(%s)" % (type_.upper(), leng)
+            return "::%s(%s)" % (type_, leng)
         else:
-            return " %s" % type_.upper()        
+            return "::%s" % type_       
             
             
         

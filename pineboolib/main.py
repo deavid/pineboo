@@ -105,6 +105,11 @@ class Project(object):
         
         if not getattr(self.dbserver, "type", None):
             self.dbserver.type = None
+            
+        if not self.dbauth:
+            self.dbauth.username = None
+            self.dbauth.password = None
+            
         self.actions = {}
         self.tables = {}
         pineboolib.project = self
@@ -136,7 +141,7 @@ class Project(object):
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
         # Obtener modulos activos
-        self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ % self.conn.driver()._true_)
+        self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ % self.conn.driver().formatValue("bool","True",False))
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in self.cur:
             self.modules[idmodulo] = Module(self, idarea, idmodulo, descripcion, icono)
@@ -160,9 +165,8 @@ class Project(object):
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
             cur2 = self.conn.cursor()
-            cur2.execute("SELECT contenido FROM flfiles "
-                    + "WHERE idmodulo = %s AND nombre = %s "
-                    + "        AND sha = %s" ,[idmodulo, nombre, sha] )
+            sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue("string",idmodulo,False), self.conn.driver().formatValue("string",nombre,False), self.conn.driver().formatValue("string",sha,False))
+            cur2.execute(sql)
             for (contenido,) in cur2:
                 f2 = open(self.dir("cache" , fileobj.filekey),"wb")
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo

@@ -16,9 +16,6 @@ except ImportError:
 
 class FLQPSQL(object):
     
-    _true_ = "TRUE"
-    _false_ = "FALSE"
-    
     version_ = None
     conn_ = None
     name_ = None
@@ -68,6 +65,9 @@ class FLQPSQL(object):
             util = FLUtil.FLUtil()
         
             s = None
+            
+            if v == None:
+                v = ""
             # TODO: psycopg2.mogrify ???
 
             if type_ == "bool" or type_ == "unlock":
@@ -88,7 +88,7 @@ class FLQPSQL(object):
                     v = v.upper()
 
                 s = "'%s'" % v
-            #print ("PNSqlDriver.formatValue(%s, %s) = %s" % (type_, v, s))
+            #print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
             return s
 
     def canOverPartition(self):
