@@ -14,24 +14,27 @@ except ImportError:
     print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
 
 
-class PGSql(object):
+class FLQPSQL(object):
     
     version_ = None
     conn_ = None
     name_ = None
+    alias_ = None
     errorList = None
+    lastError_ = None
     
     def __init__(self):
         self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "PostGreSQL"
+        self.name_ = "FLQPSQL"
         self.open_ = False
         self.errorList = []
+        self.alias_ = "PostgreSQL"
     
     def version(self):
         return self.version_
     
-    def name(self):
+    def driverName(self):
         return self.name_
     
     def isOpen(self):
@@ -138,8 +141,10 @@ class PGSql(object):
         return True 
     
     def setLastError(self, text, command):
-        print("PGSql:ERROR:%s (%s)" % (text, command))
-        self.errorList.append("%s (%s)" % (text, command))
+        self.lastError_ = "%s (%s)" % (text, command)
+    
+    def lastError(self):
+        return self.lastError_
     
     
     def commitTransaction(self):
@@ -166,6 +171,25 @@ class PGSql(object):
     def transaction(self):
         return True
     
+    def releaseSavePoint(self, n):
+        if not self.canSavePoint():
+            return False
+        
+        if not self.isOpen():
+            print("PSQLDriver::releaseSavePoint: Database not open")
+            return False
+        
+        cmd = ("release savepoint sv_%s" % n)
+
+        q = FLSqlQuery()
+        q.setSelect(cmd)
+        q.setFrom("")
+        q.setWhere("")
+        if not q.exec():
+            self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
+            return False
+        
+        return True 
     
             
             

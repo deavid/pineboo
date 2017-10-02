@@ -105,7 +105,21 @@
        <item row="2" column="1">
         <widget class="QLineEdit" name="lePort"/>
        </item>
-       <item row="3" column="1">
+       <item row="3" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Driver SQL</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cBDrivers"/>
+         </item>
+        </layout>
+       </item>
+       <item row="4" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>

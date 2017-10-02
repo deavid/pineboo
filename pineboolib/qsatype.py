@@ -28,6 +28,7 @@ from pineboolib.utils import filedir
 from pineboolib import decorators
 import traceback
 from PyQt5.Qt import QWidget
+from sys import stderr
 
 class StructMyDict(dict):
 
@@ -111,6 +112,18 @@ class Array(object):
     def __getattr__(self, k):
         if k == 'length': 
             return len(self.dict_)
+    
+    def __len__(self):
+        len_ = 0
+        
+        for l in self.dict_:
+            len_ = len_ + 1
+            
+        return len_
+        
+    
+    
+    
 
        
 
@@ -179,9 +192,8 @@ class FLDomDocument(object):
         except:
             return False
     
-    @decorators.NotImplementedWarn
     def namedItem(self, name):
-        return True
+        return u"<%s" % name in self.string_
 
     def toString(self, value = None):
         return self.string_
@@ -247,9 +259,13 @@ class FormDBWidget(QtWidgets.QWidget):
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
-        self.cursor_ = FLSqlCursor(action.name)
+        self.cursor_ = None
+        #self.cursor_ = FLSqlCursor(action.name)
         self._prj = project
-        self._class_init()
+        try:
+            self._class_init()
+        except:
+            pass
         
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
@@ -295,17 +311,16 @@ class FormDBWidget(QtWidgets.QWidget):
         return ret
 
     def cursor(self):
-        cursor = None
-        try:
-            if self.parentWidget():
-                cursor = getattr(self.parentWidget(),"cursor_", None)
+        
+        if self.parentWidget() and not self.cursor_:
+            cursor = getattr(self.parentWidget(),"cursor_", None)
 
-            if cursor and not cursor is self.cursor_ :
-                return cursor
-        except Exception:
-            # FIXME: A veces parentWidget existía pero fue eliminado. Da un error
-            # ... en principio debería ser seguro omitir el error.
-            pass
+            if cursor:
+                self.cursor_ = cursor
+        
+        if not self.cursor_:
+            self.cursor_ = FLSqlCursor(self._action.name)
+        
         return self.cursor_
 
 def FLFormSearchDB(name):
@@ -350,14 +365,72 @@ class Date(object):
     def getMilliseconds(self):
         return self.time_.msec()
 
-@decorators.NotImplementedWarn
-class Process(object):
+
+class Process(QtCore.QProcess):
     
-    def __init__(self):
-        pass
+    running = None
+    stderr = None
+    stdout = None
+    
+    def __init__(self, *args):
+        super(Process, self).__init__()
+        self.readyReadStandardOutput.connect(self.stdoutReady)
+        self.readyReadStandardError.connect(self.stderrReady)
+        self.stderr = None
+        if args:
+            self.runing = False
+            self.setProgram(args[0])
+            argumentos = args[1:]
+            self.setArguments(argumentos)
+        
+        
+    def start(self):
+        self.running = True
+        super(Process, self).start()
+    
+    def stop(self):
+        self.running = False
+        super(Process, self).stop()
+    
+    def writeToStdin(self, stdin_):
+        stdin_as_bytes = stdin_.encode('utf-8')
+        self.writeData(stdin_as_bytes)
+        #self.closeWriteChannel()
+    
+    def stdoutReady(self):
+        self.stdout = str(self.readAllStandardOutput())
+    
+    def stderrReady(self):
+        self.stderr = str(self.readAllStandardError())
+        
+    
+    def __setattr__(self, name, value):
+        if name == "workingDirectory":
+            self.setWorkingDirectory(value)
+        else:
+            super(Process, self).__setattr__(name, value)
+    
+    def execute(comando): 
+           
+        pro = QtCore.QProcess()
+        array = comando.split(" ")
+        programa = array[0]
+        argumentos = array[1:]
+        pro.setProgram(programa)
+        pro.setArguments(argumentos)
+        pro.start()
+        pro.waitForFinished(30000)
+        Process.stdout = pro.readAllStandardOutput()
+        Process.stderr = pro.readAllStandardError()
+        
+        
+        
+
+           
+            
 
 
-@decorators.BetaImplementation
+
 class RadioButton(QtWidgets.QRadioButton):
     pass
         
@@ -445,6 +518,12 @@ class File(QtCore.QFile):
     def read(self):
         in_ = QTextStream(self)
         return in_.readAll()
+    
+    def write(self, text):
+        #encodig = text.property("encoding")
+        out_ = QTextStream(self)
+        out_ << text
+        
    
     
         

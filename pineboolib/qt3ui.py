@@ -13,6 +13,7 @@ from pineboolib.fllegacy import FLTableDB
 from pineboolib.fllegacy import FLFieldDB
 
 import zlib
+from PyQt5.QtWidgets import QGroupBox
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -270,7 +271,15 @@ def loadWidget(xml, widget=None, parent=None):
             if isinstance(widget, QtWidgets.QTabWidget):
                 title = new_widget._attrs.get("title","UnnamedTab")
                 widget.addTab(new_widget,title)
-            else:
+                
+            elif isinstance(widget, QtWidgets.QGroupBox) or isinstance(widget, QtWidgets.QWidget):
+                lay = widget.layout()
+                if not lay:
+                    lay = QtWidgets.QVBoxLayout()
+                    widget.setLayout(lay)
+                
+                lay.addWidget(new_widget)                           
+            else: 
                 if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
             unbold_fonts.append(new_widget)
             continue
@@ -390,8 +399,11 @@ def _loadVariant(variant):
         libs = [Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy]
         for lib in libs:
             v = getattr(lib, text, None)
-            if v is not None: return v            
+            if v is not None: return v          
         if text == "GroupBoxPanel": return QtWidgets.QFrame.StyledPanel
+        if text == "Single": return QtWidgets.QAbstractItemView.SingleSelection
+        if text == "FollowStyle": return "QtWidgets.QTableView {selection-background-color: red;}"
+        
 
     if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown variant:", etree.tostring(variant))
 

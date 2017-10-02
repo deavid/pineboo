@@ -90,7 +90,6 @@ class FLTableDB(QtWidgets.QWidget):
 
     def __init__(self, parent, name = None):
         super(FLTableDB, self).__init__(parent)
-
         self.topWidget = parent
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(0, self.loaded)
@@ -108,15 +107,21 @@ class FLTableDB(QtWidgets.QWidget):
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
         while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
-            parent_cursor = getattr(self.topWidget,"cursor_", None)
-            if parent_cursor: break
+            if isinstance(self.topWidget.parentWidget(), FLFormSearchDB):
+                self.topWidget = self.topWidget.parentWidget()
+            try:
+                parent_cursor = self.topWidget.cursor()
+            except:
+                pass
+            if not isinstance(parent_cursor, FLSqlCursor):
+                parent_cursor = None
+            if parent_cursor:
+                break
             new_parent = self.topWidget.parentWidget()
             if new_parent is None: break
             self.topWidget = new_parent
+    
         
-        
-        if getattr(self.topWidget.parentWidget(), "cursor_", None):
-            self.topWidget = self.topWidget.parentWidget()
             
         if not parent_cursor:
             print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
@@ -621,7 +626,6 @@ class FLTableDB(QtWidgets.QWidget):
     def showEvent(self, e):
         super(FLTableDB, self).showEvent(e)
         self.showWidget()
-
 
 
 
@@ -1831,9 +1835,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Redefinida por conveniencia
     """
-    @decorators.NotImplementedWarn
     def setEnabled(self, b):
-        pass
+        self.setReadOnly(not b)
 
     """
     Establece el ancho de una columna
@@ -2001,8 +2004,8 @@ class FLTableDB(QtWidgets.QWidget):
     def chooseRecord(self):
         if isinstance(self.topWidget, FLFormSearchDB):
             if self.topWidget.inExec_:
-                    self.topWidget.accept()
-                    return
+                self.topWidget.accept()
+                return
                       
         relationLock  = False
             

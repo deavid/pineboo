@@ -100,10 +100,18 @@ def isNaN(x):
 
 # TODO: separar en otro fichero de utilidades
 def ustr(*t1):
+
     return "".join([ ustr1(t) for t in t1 ])
 
 def ustr1(t):
     if isinstance(t, str): return t
+    
+    if isinstance(t, float):
+        try:
+            t = int(t)
+        except:
+            pass
+        
     #if isinstance(t, QtCore.QString): return str(t)
     if isinstance(t, str): return str(t,"UTF-8")
     try:
@@ -116,7 +124,10 @@ def ustr1(t):
 def debug(txt):
     print("---> DEBUG:", ustr(txt))
 
-
+class aqApp(object):
+    
+    def db():
+        return pineboolib.project.conn
 
 class SysType(object):
     def __init__(self):
@@ -142,9 +153,9 @@ class SysType(object):
     def setCaptionMainWidget(self, value):
         pineboolib.project.mainWindow.setWindowTitle(value)
     
-    @decorators.NotImplementedWarn
+    
     def toUnicode(self, text, format):
-        return text
+        return u"%s" % text
         
 
         
@@ -186,9 +197,18 @@ def connect(sender, signal, receiver, slot):
         remote_fn = getattr(remote_obj, m.group(2), None)
         if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
-            sg_name = signal.replace("()", "")
-            sg_name = sg_name.replace("(QString)", "")
-            sg_name = sg_name.replace("(int)", "")
+            #sg_name = signal.replace("()", "")
+            #sg_name = sg_name.replace("(QString)", "")
+            #sg_name = sg_name.replace("(int)", "")
+            #sg_name = sg_name.replace("(int, int)", "")
+            
+            if signal.find("(") > -1:
+                sg_name = signal[:signal.find("(")]
+            else:
+                sg_name = signal
+                
+            
+            
             getattr(sender, sg_name).connect(remote_fn)
         except RuntimeError as e:
             print("ERROR Connecting:", sender, sg_name, remote_fn)

@@ -6,6 +6,7 @@ import os
 from PyQt5 import QtWidgets, QtCore, uic
 
 from pineboolib.utils import filedir
+from pineboolib.PNSqlDrivers import PNSqlDrivers
 
 class DlgConnect(QtWidgets.QWidget):
     ruta = ""
@@ -35,6 +36,19 @@ class DlgConnect(QtWidgets.QWidget):
         DlgConnect.leHostName = self.ui.leHostName
         DlgConnect.lePort = self.ui.lePort
         DlgConnect.leDBName = self.ui.leDBName
+        DlgConnect.cBDrivers = self.ui.cBDrivers
+        
+        DV = PNSqlDrivers()
+        list = DV.aliasList()
+        DlgConnect.cBDrivers.addItems(list)
+        
+        i = 0
+        while i < DlgConnect.cBDrivers.count():
+            if DV.aliasToName(DlgConnect.cBDrivers.itemText(i)) == DV.defaultDriverName:
+                DlgConnect.cBDrivers.setCurrentIndex(i)
+                break
+            
+            i = i + 1
     
     @QtCore.pyqtSlot()
     def conectar(self):
@@ -51,6 +65,7 @@ class DlgConnect(QtWidgets.QWidget):
         DlgConnect.hostname = DlgConnect.leHostName.text()
         DlgConnect.portnumber = DlgConnect.lePort.text()
         DlgConnect.database = DlgConnect.leDBName.text()
+        DlgConnect.driveralias = DlgConnect.cBDrivers.currentText()
 
         if not DlgConnect.leName.text():
             DlgConnect.ruta = ""

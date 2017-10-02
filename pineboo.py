@@ -71,6 +71,7 @@ def translate_connstring(connstring):
     host = "127.0.0.1"
     port = "5432"
     dbname = ""
+    driver_alias = ""
     user_pass = None
     host_port = None
     try:
@@ -90,7 +91,8 @@ def translate_connstring(connstring):
         user_pass = user_pass.split(":")
         if len(user_pass) == 1: user = user_pass[0]
         elif len(user_pass) == 2: user, passwd = user_pass[0], user_pass[1]
-        else: raise ValueError("La cadena de usuario tiene dos veces dos puntos.")
+        elif len(user_pass) == 3: user, passwd, driver_alias = user_pass[0], user_pass[1], user_pass[2]
+        else: raise ValueError("La cadena de usuario tiene tres veces dos puntos.")
 
     if host_port:
         host_port = host_port.split(":")
@@ -101,7 +103,7 @@ def translate_connstring(connstring):
     if not re.match(r"\w+", dbname): raise ValueError("base de datos no valida")
     if not re.match(r"\d+", port): raise ValueError("puerto no valido")
 
-    return user, passwd, host, port, dbname
+    return user, passwd, driver_alias, host, port, dbname
 
 
 def main():
@@ -114,7 +116,7 @@ def main():
     parser.add_option("-l", "--load", dest="project",
                       help="load projects/PROJECT.xml and run it", metavar="PROJECT")
     parser.add_option("-c", "--connect", dest="connection",
-                      help="connect to database with user and password.", metavar="user:passwd@host:port/database")
+                      help="connect to database with user and password.", metavar="user:passwd:driver_alias@host:port/database")
     parser.add_option("-q", "--quiet",
                       action="store_false", dest="verbose", default=True,
                       help="don't print status messages to stdout")
@@ -170,8 +172,8 @@ def main():
             raise ValueError("el proyecto %s no existe." % options.project)
         project.load(prjpath)
     elif options.connection:
-        user, passwd, host, port, dbname = translate_connstring(options.connection)
-        project.load_db(dbname, host, port, user, passwd)
+        user, passwd,driver_alias, host, port, dbname = translate_connstring(options.connection)
+        project.load_db(dbname, host, port, user, passwd, driver_alias)
     else:
         connection_window = pineboolib.DlgConnect.DlgConnect()
         connection_window.load()
@@ -184,7 +186,7 @@ def main():
                 project.load(prjpath)
             elif connection_window.database:
                 print("Cargando credenciales")
-                project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password)
+                project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password, connection_window.driveralias)
             
             
             

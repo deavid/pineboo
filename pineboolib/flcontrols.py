@@ -118,19 +118,87 @@ class FLTable(QtWidgets.QTableWidget):
 
 
 class QTabWidget(QtWidgets.QTabWidget):
+    
     def setTabEnabled(self, tab, enabled):
         #print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
         if isinstance(tab, int): return QtWidgets.QTabWidget.setTabEnabled(self, tab, enabled)
-        if isinstance(tab, str): 
+        if isinstance(tab, str):
+            """
             tabs = [ str(QtWidgets.QTabWidget.tabText(self, i)).lower().replace("&","") for i in range(self.count()) ]
             try:
                 idx = tabs.index(tab.lower())              
                 return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
+            """
+            try:
+                for idx in range(self.count()):
+                    if self.widget(idx).objectName() == tab.lower():
+                        return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
+                
             except ValueError:
                 print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled), tabs)
                 return False
         print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
+         
+class QTable(QtWidgets.QTableWidget):
+    
+    lineaActual = None
+    currentChanged = QtCore.pyqtSignal()
+    
+    def __init__(self, parent = None):
+        if not parent:
+            parent = self.parentWidget()
+        super(QTable, self).__init__(parent)
+        
+        self.lineaActual = -1
+        self.currentCellChanged.connect(self.currentChanged_)
+    
+    def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
+        self.currentChanged.emit(currentRow, currentColumn)
+        
+    
+    def numRows(self):
+        return self.rowCount()
+    
+    def setNumRows(self, n):
+        self.setRowCount(n)
+       
+    def numCols(self):
+        return self.columnCount()
+    
+    def setNumCols(self, n):
+        self.setColumnCount(n)
+    
+    def setReadOnly(self, b):
+        if b == True:
+            self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        else:
+            self.setEditTriggers(QtWidgets.QAbstractItemView.EditTriggers)
+    
 
+    def selectionMode(self):
+        return super(QTable, self).selectionMode()
+    
+    
+    def setFocusStyle(self, m):
+        self.setStyleSheet(m)
+    
+    def setColumnLabels(self, separador, lista):
+        array_ = lista.split(separador)
+        self.setHorizontalHeaderLabels(array_)
+    
+    def insertRows(self, numero):
+        self.lineaActual = numero
+        
+    def setText(self, sangrado, col, value):
+        self.setItem(col, self.lineaActual, QtWidgets.QTableWidgetItem(value))
+    
+        
+        
+    
+    
+        
+            
+    
 
 class QLineEdit(QtWidgets.QLineEdit):
     
