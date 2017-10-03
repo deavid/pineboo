@@ -62,11 +62,13 @@ class PNBuffer(ProjectClass):
         for field in self.fieldList_:
             if self.cursor_.d._model.value(row , field.name) == "None":
                 field.value = None
+                
             elif field.type_ == "unlock":
                 if self.cursor_.d._model.value(row , field.name) == "True" or self.cursor_.d._model.value(row , field.name) == True:
                     field.value = True
                 else:
                     field.value = False
+                    
             else:
                 field.value = self.cursor_.d._model.value(row , field.name)
             
@@ -152,7 +154,7 @@ class PNBuffer(ProjectClass):
 
 
     def setValue(self, name, value, mark_ = True):
-        if value is not None and not isinstance(value, (int, float, str, qsaglobals.parseString)):
+        if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
 
         for field in  self.fieldList_:
@@ -190,6 +192,14 @@ class PNBuffer(ProjectClass):
                 return float(value)
             elif type_ in ("string","pixmap","stringlist"):
                 return str(value)
+            
+            elif type_ == "date" and not isinstance(value, str): 
+                 fv = value
+                 return fv.strftime('%Y-%m-%d')
+            
+            elif type_ == "time" and not isinstance(value, str): 
+                 fv = value
+                 return fv.strftime('%H:%M:%S')
                
             
         
@@ -1350,7 +1360,7 @@ class FLSqlCursor(ProjectClass):
 
         self.d.bufferCopy_ = PNBuffer(self)
         for field in self.d.buffer_.fieldsList():
-            self.d.bufferCopy_.setValue(field.name, field.value, False)
+            self.d.bufferCopy_.setValue(field.name, self.d.buffer_.value(field.name), False)
             
     """
     Indica si el contenido actual del buffer difiere de la copia guardada.
