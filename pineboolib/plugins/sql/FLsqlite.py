@@ -1,4 +1,4 @@
-import os
+import os, sys
 from PyQt5.QtCore import QTime
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
@@ -7,11 +7,7 @@ from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
 
-try:
-    import sqlite3
-except ImportError:
-    print(traceback.format_exc())
-    print("HINT: Instale el paquete python3-sqlite3 e intente de nuevo")
+
 
 
 class FLsqlite(object):
@@ -44,6 +40,14 @@ class FLsqlite(object):
         
         db_filename = db_name
         db_is_new = not os.path.exists(db_filename)
+        
+        try:
+            import sqlite3
+        except ImportError:
+            print(traceback.format_exc())
+            print("HINT: Instale el paquete python3-sqlite3 e intente de nuevo")
+            sys.exit(0)
+            
         self.conn_ = sqlite3.connect(db_filename)
         
         if db_is_new:

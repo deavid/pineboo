@@ -1,4 +1,4 @@
-
+import sys
 from PyQt5.QtCore import QTime
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
@@ -6,12 +6,6 @@ from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
-
-try:
-    import MySQLdb
-except ImportError:
-    print(traceback.format_exc())
-    print("HINT: Instale el paquete python3-mysqldb e intente de nuevo")
 
 
 class FLMYSQL_NO_INNODB(object):
@@ -26,10 +20,10 @@ class FLMYSQL_NO_INNODB(object):
     def __init__(self):
         self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "FLMYSQL_NO_INNODB"
+        self.name_ = "FLMYSQL"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "MySQL No InnoDB"
+        self.alias_ = "MySQL"
     
     def version(self):
         return self.version_
@@ -41,6 +35,13 @@ class FLMYSQL_NO_INNODB(object):
         return self.open_
     
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
+        
+        try:
+            import MySQLdb
+        except ImportError:
+            print(traceback.format_exc())
+            print("HINT: Instale el paquete python3-mysqldb e intente de nuevo")
+            sys.exit(0)
         
         self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
         
