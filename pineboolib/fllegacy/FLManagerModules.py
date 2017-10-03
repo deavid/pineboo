@@ -192,7 +192,7 @@ class FLManagerModules(ProjectClass):
         name_ = n[:n.index(".")]
         ext_ = n[n.index(".") + 1:]   
         if(os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" %(self._prj.dbname, modId, ext_, name_)))):
-            data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %(self._prj.dbname, modId, ext_, name_, shaKey[:16], ext_)))
+            data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %(self._prj.dbname, modId, ext_, name_, shaKey, ext_)))
         else:
             data = self.content(n)
         return data
