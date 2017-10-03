@@ -932,7 +932,7 @@ class FLUtil(ProjectClass):
         c.select(w)
 
         while c.next():
-            c.setModeAccess(FLSqlCursor.DEL)
+            c.setModeAccess(FLSqlCursor.Del)
             c.refreshBuffer()
             if not c.commitBuffer():
                 return False
