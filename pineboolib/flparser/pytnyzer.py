@@ -783,7 +783,7 @@ class Member(ASTPython):
                         
                     else:
                         if ".".join(part1):
-                            arguments = ["qsa(%s).%s" % (".".join(part1), arg)] + part2
+                            arguments = ["%s.%s" % (".".join(part1), arg)] + part2
                         else:
                             arguments = ["%s" % arg] + part2
         yield "expr", ".".join(arguments)
