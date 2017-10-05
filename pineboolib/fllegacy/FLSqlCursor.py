@@ -629,7 +629,7 @@ class FLSqlCursor(ProjectClass):
         self.d = FLSqlCursorPrivate()
         self.d.nameCursor_ = "%s_%s" % (name, QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
-        if connectionName_or_db is None:
+        if connectionName_or_db == None:
             #print("Init1") # si soy texto y estoy vacio
             self.d.db_ = self._prj.conn
         #elif isinstance(connectionName_or_db, QString) or isinstance(connectionName_or_db, str):
@@ -934,15 +934,15 @@ class FLSqlCursor(ProjectClass):
         fltype = field.flDecodeType(type_)
         vv = v
         
-        if isinstance(vv, bool) or not fltype == "bool":
+        if isinstance(vv, bool) or fltype == "bool":
             vv = None
-        if vv:
-            if vv and type == "pixmap":
-                largeValue = self.d.db_.manager().storeLargeValue(self.d.metadata_, str(vv))
-                if largeValue:
-                    vv = largeValue
         
-        if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() == self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert:
+        if vv and type_ == "pixmap":
+           
+            largeValue = self.d.db_.manager().storeLargeValue(self.d.metadata_, vv)
+            if largeValue:
+                vv = largeValue
+        if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() is self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert:
             pK = self.d.metadata_.primaryKey()
             
             if self.d.cursorRelation_ and not self.d.modeAccess_ == self.Browse:
@@ -956,7 +956,7 @@ class FLSqlCursor(ProjectClass):
                 FLUtil.tr("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
         
         else:
-            self.d.buffer_.setValue(fN, v)
+            self.d.buffer_.setValue(fN, vv)
             
         self.bufferChanged.emit(fN)
 
