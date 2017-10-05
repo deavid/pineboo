@@ -868,7 +868,12 @@ class FLFieldDB(QtWidgets.QWidget):
                     return
             
             self.cursor_.setValueBuffer(self.fieldName_, str(data))
+        
+        elif isinstance(self.editorImg_, FLPixmapView):
+            if data == self.cursor_.valueBuffer(self.fieldName_):
+                return
             
+            self.cursor_.setValueBuffer(self.fieldName_, data)   
         
         """    
         elif isinstance(self.editor_, str) or isinstance(data, int):
@@ -933,7 +938,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 v = self.cursor_.fetchLargeValue(v)
         # <--
 
-        if not self.cursor_ or not v:
+        if not self.cursor_:
             print("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)" % (self.fieldName_, self))
             return
         #if v:
@@ -2047,7 +2052,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-                    if not field.allowNull() and field.editable():
+                    if not field.allowNull() and field.editable() and not (type_ == "time" or type_ == "date"):
                         #self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                         self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
                     self.editor_.installEventFilter(self)
@@ -2199,10 +2204,10 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.lytButtons.addWidget(self.pbAux4_)
                     if self.showed:
                         try:
-                            self.pbAux4_.clicked.disconnect(self.clearPixmap)
+                            self.pbAux4_.clicked.disconnect(self.setPixmapFromClipboard)
                         except:
                             pass
-                    self.pbAux4_.clicked.connect(self.clearPixmap)
+                    self.pbAux4_.clicked.connect(self.setPixmapFromClipboard)
 
 
 
@@ -2226,15 +2231,13 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 if not self.pbAux2_:
                     self.pbAux2_ = QtWidgets.QPushButton(self)
-                    savepixmap = QtWidgets.QMenu(self.pbAux2_)
-                    #FIXME a  mejorar
-                    fmt = QtGui.QPictureIO.outputFormats()
-                    id = 0
-                    for format in fmt:
-                        savepixmap.insertItem(format , id)
-                        id = id + 1
+                    savepixmap_ = QtWidgets.QMenu(self.pbAux2_)
+                    savepixmap_.addAction("JPG")
+                    savepixmap_.addAction("XPM")
+                    savepixmap_.addAction("PNG")
+                    savepixmap_.addAction("BMP")
 
-                    self.pbAux2_.setMenu(savepixmap)
+                    self.pbAux2_.setMenu(savepixmap_)
                     self.pbAux2_.setSizePolicy(sizePolicy)
                     self.pbAux2_.setMinimumSize(22, 22)
                     self.pbAux2_.setFocusPolicy(Qt.NoFocus)
@@ -2243,12 +2246,12 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux2_.setToolTip("Guardar imagen como...")
                     self.pbAux2_.setWhatsThis("Guardar imagen como...")
                     self.lytButtons.addWidget(self.pbAux2_)
-                    #if self.showed:
-                    #    try:
-                    #        savepixmap.activated.disconnect(self.savePixmap)
-                    #    except:
-                    #        pass
-                    #savepixmap.activated.connect(self.savePixmap)
+                    if self.showed:
+                        try:
+                            savepixmap_.triggered.disconnect(self.savePixmap)
+                        except:
+                            pass
+                    savepixmap_.triggered.connect(self.savePixmap)
 
                     if hasPushButtonDB:
                         self.pushButtonDB.installEventFilter(self)
@@ -2454,7 +2457,7 @@ class FLFieldDB(QtWidgets.QWidget):
     Borra imagen en campos tipo Pixmap.
     """
     def clearPixmap(self):
-        if not self.editorImg_:
+        if self.editorImg_:
             self.editorImg_.clear()
             self.cursor_.setValueBuffer(self.fieldName_, None)
 
@@ -2466,19 +2469,17 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     def savePixmap(self, f):
         if self.editorImg_:
-            fmt = QtGui.QImage.outputFormats()
-            fmt = fmt.at(f)
-            ext = str(fmt).lower()
+            ext = f.text().lower()
             filename = "imagen.%s" % ext
             ext = "*.%s" % ext
-            savefilename = QtWidgets.QFileDialog.getSaveFileName( filename.lower(), ext , self.filename_, FLUtil.tr("Guardar imagen como"))[0]
-            if not savefilename.isEmpty():
-                pix = QtGui.QPixmap()
+            util = FLUtil()
+            savefilename = QtWidgets.QFileDialog.getSaveFileName(self, util.translate("Pineboo", "Guardar imagen como"), filename , ext)
+            if savefilename:
+                pix = QtGui.QPixmap(self.editorImg_.pixmap())
                 QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
-                pix.loadFromDate(self.value().toCString())
-                if not pix.isNull():
-                    if not pix.save(savefilename, fmt):
-                        QtWidgets.QMessageBox.warning(self, FLUtil.tr("Error"), FLUtil.tr("Error guardando fichero"))
+                if pix:
+                    if not pix.save(savefilename[0]):
+                        QtWidgets.QMessageBox.warning(self, util.translate("Pineboo","Error"), util.translate("Pineboo","Error guardando fichero"))
 
             QtWidgets.QApplication.restoreOverrideCursor()
 
@@ -2676,28 +2677,21 @@ class FLFieldDB(QtWidgets.QWidget):
         if not tMD:
             return
 
-        field = FLFieldMetaData(tMD.field(self.fieldName_))
+        field = tMD.field(self.fieldName_)
+
         if not field:
             return
-
+        util = FLUtil()
         if field.type() == "pixmap":
-            fd = QtWidgets.QFileDialog(self,0,True)
-            #p = FLPixmapView(fd)
-
-            #p.setAutoScaled(True)
-            fd.setContentsPreviewEnabled(True)
-            #fd.setContentsPreview(p, p)
-            fd.setPreviewMode(QtWidgets.QFileDialog.Contents)
-            fd.setCaption(tr("Elegir archivo"))
-            fd.setFilter("*")
-
+            fd = QtWidgets.QFileDialog(self,util.translate("pineboo", "Elegir archivo"),None,"*")
+            fd.setViewMode(QtWidgets.QFileDialog.Detail)
             filename = None
             if (fd.exec_() == QtWidgets.QDialog.Accepted):
-                filename = fd.selectedFile()
+                filename = fd.selectedFiles()
 
-            if filename.isEmpty():
+            if not filename:
                 return
-            self.setPixmap(filename)
+            self.setPixmap(filename[0])
 
 
 
@@ -2705,17 +2699,15 @@ class FLFieldDB(QtWidgets.QWidget):
   Carga una imagen en el campo de tipo pixmap
   @param filename: Ruta al fichero que contiene la imagen
     """
-    @decorators.BetaImplementation
     def setPixmap(self, filename):
         img = QtGui.QImage(filename)
 
-        if img.isNull():
+        if not img:
             return
 
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
         pix = QtGui.QPixmap()
-        s = None
-        buffer = QtCore.QBuffer(s)
+        buffer = QtCore.QBuffer()
 
         if img.width() <= self.maxPixImages_ and img.height() <= self.maxPixImages_:
             pix.convertFromImage(img)
@@ -2724,32 +2716,33 @@ class FLFieldDB(QtWidgets.QWidget):
             newHeight = 0
             if img.width() < img.height():
                 newHeight = self.maxPixImages_
-                newWidth = round(newWidth * img.width() / img.heigth())
+                newWidth = round(newWidth * img.width() / img.height())
             else:
-                newWidth = self.mapPixImages_
+                newWidth = self.maxPixImages_
                 newHeight = round(newWidth * img.height() / img.width())
-            pix.convertFromImage(img.scale(newWidth, newHeight, QtGui.QImage.ScaleMin))
+            pix.convertFromImage(img.scaled(newWidth, newHeight))
 
         QtWidgets.QApplication.restoreOverrideCursor()
 
-        if pix.isNull():
+        if not pix:
             return
 
         self.editorImg_.setPixmap(pix)
-
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
-        buffer.open(Qt.IO_WriteOnly)
+        buffer.open(QtCore.QBuffer.ReadWrite)
         pix.save(buffer,"XPM")
 
         QtWidgets.QApplication.restoreOverrideCursor()
 
-        if s.isEmpty():
+        if not buffer:
             return
-
-        if not QtGui.QPixmapCache.find(s.left(100)):
-            QtGui.QPixmapCache.insert(s.left(100), pix)
-
-        self.updateValue(str(s))
+        s = None
+        
+        s = str(buffer.data(),"utf-8")
+     
+        #if not QtGui.QPixmapCache.find(s.left(100)):
+        #    QtGui.QPixmapCache.insert(s.left(100), pix)
+        self.updateValue(s)
 
     """
   Carga una imagen en el campo de tipo pixmap con el ancho y alto preferido
@@ -2759,56 +2752,56 @@ class FLFieldDB(QtWidgets.QWidget):
   @param h: alto preferido de la imagen
   @author Silix
     """
-    @decorators.NotImplementedWarn
     def setPixmapFromPixmap(self, pixmap, w = 0, h = 0):
         if pixmap.isNull():
             return
 
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
-        pix = None
-        s = None
-        buffer = QtCore.QBuffer(s)
+        pix = QtGui.QPixmap()
+        buffer = QtCore.QBuffer()
 
         img = QtGui.QImage(pixmap.convertToImage())
         if not w == 0 and not h == 0:
-            pix.convertFromImage(img.scale(w, h, QtGui.QImage.ScaleMin))
+            pix.convertFromImage(img.scaled(w, h))
         else:
             pix.convertFromImage(img)
 
         QtWidgets.QApplication.restoreOverrideCursor()
-        if pix.isNull():
+        if not pix:
             return
 
         self.editorImg_.setPixmap(pix)
-
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
-
-        buffer.open(Qt.IO_WriteOnly)
+        buffer.open(QtCore.QBuffer.ReadWrite)
         pix.save(buffer,"XPM")
 
         QtWidgets.QApplication.restoreOverrideCursor()
 
-        if s.isEmpty():
+        if not buffer:
             return
-
-        if not QtGui.QPixmapCache.find(s.left(100)):
-            QtGui.QPixmapCache.insert(s.left(100), pix)
-
-        self.updateValue(str(s))
+        s = None
+        
+        s = str(buffer.data(),"utf-8")
+     
+        #if not QtGui.QPixmapCache.find(s.left(100)):
+        #    QtGui.QPixmapCache.insert(s.left(100), pix)
+        self.updateValue(s)
 
     """
   Carga una imagen desde el portapapeles en el campo de tipo pixmap
   @author Silix
     """
-    @decorators.NotImplementedWarn
-    def setPixmapFromClipboard(self):
-        img = QtGui.QImage(QtWidgets.QApplication.clipboard().image())
-        if img.isNull():
+    def setPixmapFromClipboard(self, unknown):
+        clb = QtWidgets.QApplication.clipboard()
+        img = clb.image()
+        
+        print(type(img))
+        if not isinstance(img, QtGui.QImage):
             return
+        
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
-        pix = None
-        s = None
-        buffer = QtCore.QBuffer(s)
+        pix = QtGui.QPixmap()
+        buffer = QtCore.QBuffer()
 
         if img.width() <= self.maxPixImages_ and img.height() <= self.maxPixImages_:
             pix.convertFromImage(img)
@@ -2822,28 +2815,29 @@ class FLFieldDB(QtWidgets.QWidget):
                 newWidth = self.maxPixImages_
                 newHeight = round(newWidth * img.height() / img.width())
 
-            pix.convertFromImage(img.scale(newWidth, newHeight, QtGui.QImage.ScaleMin))
+            pix.convertFromImage(img.scaled(newWidth, newHeight))
 
         QtWidgets.QApplication.restoreOverrideCursor()
 
-        if pix.isNull():
+        if not pix:
             return
 
         self.editorImg_.setPixmap(pix)
-
         QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
-        buffer.open(Qt.IO_WriteOnly)
+        buffer.open(QtCore.QBuffer.ReadWrite)
         pix.save(buffer,"XPM")
 
         QtWidgets.QApplication.restoreOverrideCursor()
 
-        if s.isEmpty():
+        if not buffer:
             return
-
-        if not QtGui.QPixmapCache.find(s.left(100)):
-            QtGui.QPixmapCache.insert(s.left(100), pix)
-
-        self.updateValue(str(s))
+        s = None
+        
+        s = str(buffer.data(),"utf-8")
+     
+        #if not QtGui.QPixmapCache.find(s.left(100)):
+        #    QtGui.QPixmapCache.insert(s.left(100), pix)
+        self.updateValue(s)
 
 
 
@@ -2954,7 +2948,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.setStyleSheet('background-color: #f0f0f0')
                 else:
                     # TODO: al re-habilitar un control, restaurar el color que le toca
-                    if not field.allowNull():
+                    if not field.allowNull() and not (field.type() == "time" or field.type() == "date"):
                         self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
                     else:
                         self.editor_.setStyleSheet('background-color: #fff')
@@ -3420,7 +3414,7 @@ class FLDateEdit(QtWidgets.QDateEdit):
         else:
             date = d
         super(FLDateEdit, self).setDate(date)
-            
+        self.setStyleSheet('color: black')    
         
     def __getattr__(self, name): 
         return DefFun(self, name)
