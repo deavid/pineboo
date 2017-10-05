@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from PyQt5 import QtCore
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery, FLGroupByQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLAction import FLAction
+from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import filedir
 from lxml import etree
 import os
@@ -27,7 +29,7 @@ except NameError:
     # Python 3
     QString = str
 
-class FLManager(QtCore.QObject):
+class FLManager(ProjectClass):
     
     listTables_ = [] #Lista de las tablas de la base de datos, para optimizar lecturas
     dictKeyMetaData_ =None #Diccionario de claves de metadatos, para optimizar lecturas
@@ -545,9 +547,56 @@ class FLManager(QtCore.QObject):
     @param largeValue Valor de gran tamaño del campo
     @return Clave de referencia al valor
     """
-    @decorators.NotImplementedWarn
     def storeLargeValue(self, mtd, largeValue):
-        return True
+        
+        if largeValue[0:3] == "RK@" or not mtd:
+            return None
+        
+        tableName = mtd.name()
+        if self.isSystemTable(tableName):
+            return None
+        
+        tableLarge = None
+        
+        if self._prj.singleFLLarge():
+            tableLarge = "fllarge"
+        else:
+            tableLarge = "fllarge_%s" % tableName
+            if not self.existsTable(tableLarge):
+                mtdLarge = FLTableMetaData(tableLarge, tableLarge)
+                fieldLarge = FLFieldMetaData("refkey", "refkey", False, True, "string", 100)
+                mtdLarge.addFieldMD(fieldLarge)
+                fieldLarge2 = FLFieldMetaData("sha","sha", True, False, "string", 50)
+                mtdLarge.addFieldMD(fieldLarge2)
+                fieldLarge3 = FLFieldMetaData("contenido","contenido", True, False, "stringlist")
+                mtdLarge.addFieldMD(fieldLarge3)
+                mtdAux = self.createTable(mtdLarge)
+                mtd.insertChild(mtdLarge)
+                if not mtdAux:
+                    return None
+            
+        util = FLUtil()
+        sha = str(util.sha(largeValue))
+        refKey = "RK@%s@%s" % (tableName, sha)
+        q = FLSqlQuery()
+        q.setSelect("refkey")
+        q.setFrom("fllarge")
+        q.setWhere(" refkey = '%s'" % refKey)
+        if q.exec_() and q.first():
+            if not q.value(0) == sha:
+                sql = "UPDATE %s SET contenido = '%s' WHERE refkey ='%s'" % (tableLarge, largeValue, refKey)
+                if not util.execSql(sql, "Aux"):
+                    print("FLManager::ERROR:StoreLargeValue.Update %s.%s" % (tableLarge,refKey))
+                    return None
+        else:
+            sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (tableLarge, largeValue, refKey)
+            if not util.execSql(sql, "Aux"):
+                print("FLManager::ERROR:StoreLargeValue.Insert %s.%s" % (tableLarge,refKey))
+                return None
+        
+        return refKey
+            
+                
     
     """
     Obtiene el valor de gran tamaño segun su clave de referencia.
