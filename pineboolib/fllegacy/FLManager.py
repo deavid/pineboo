@@ -576,7 +576,7 @@ class FLManager(ProjectClass):
                     return None
             
         util = FLUtil()
-        sha = str(util.sha(largeValue))
+        sha = str(util.sha1(largeValue))
         refKey = "RK@%s@%s" % (tableName, sha)
         q = FLSqlQuery()
         q.setSelect("refkey")

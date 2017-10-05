@@ -1012,7 +1012,7 @@ class FLUtil(ProjectClass):
     @return Clave correspondiente en digitos hexadecimales
     """
 
-    def sha(self, str_):
+    def sha1(self, str_):
         sha_ = hashlib.new("sha1",str_.encode())
         st = "%s" % sha_.hexdigest()
         st = st.upper()
