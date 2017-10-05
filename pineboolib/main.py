@@ -65,6 +65,12 @@ class Project(object):
         Project.debugLevel = q
         decorators.Options.DEBUG_LEVEL = q
         qt3ui.Options.DEBUG_LEVEL = q
+    
+    """
+    Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)
+    """
+    def singleFLLarge(self):
+        return True
         
 
     def load_db(self, dbname, host, port, user, passwd, driveralias):
