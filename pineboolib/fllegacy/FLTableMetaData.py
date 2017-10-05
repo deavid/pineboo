@@ -6,6 +6,7 @@ from pineboolib import decorators
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLCompoundKey import FLCompoundkey
 from pineboolib.flcontrols import ProjectClass
+import copy
 #from PyQt4.QtCore import QString, QVariant
 
 """
@@ -705,7 +706,7 @@ class FLTableMetaData(ProjectClass):
         if other == self:
             return
      
-        self.d = copy.deepcopy(other.d)
+        self.d = copy.copy(other.d)
         
         """
         if od.compoundKey_:
