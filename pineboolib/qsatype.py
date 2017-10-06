@@ -341,7 +341,7 @@ class Date(object):
         self.time_ = QtCore.QTime.currentTime()
     
     def toString(self, *args, **kwargs):
-        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"),self.date_.toString("MM"),self.date_.toString("dd"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
+        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"),self.date_.toString("MM"),self.date_.toString("yyyy"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
         return texto
     
     def getYear(self):
