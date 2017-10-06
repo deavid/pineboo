@@ -142,7 +142,7 @@ class QTabWidget(QtWidgets.QTabWidget):
 class QTable(QtWidgets.QTableWidget):
     
     lineaActual = None
-    currentChanged = QtCore.pyqtSignal()
+    currentChanged = QtCore.pyqtSignal(int, int)
     
     def __init__(self, parent = None):
         if not parent:
@@ -153,14 +153,12 @@ class QTable(QtWidgets.QTableWidget):
         self.currentCellChanged.connect(self.currentChanged_)
     
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
+        print(currentRow, currentColumn, previousRow, previousColumn)
         self.currentChanged.emit(currentRow, currentColumn)
         
     
     def numRows(self):
         return self.rowCount()
-    
-    def setNumRows(self, n):
-        self.setRowCount(n)
        
     def numCols(self):
         return self.columnCount()
@@ -187,10 +185,16 @@ class QTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(array_)
     
     def insertRows(self, numero):
-        self.lineaActual = numero
+        self.setRowCount(numero + 1)
         
+    def text(self, row, col):
+        print(row, col)
+        return self.item(row , col).text()
+        
+    
     def setText(self, sangrado, col, value):
-        self.setItem(col, self.lineaActual, QtWidgets.QTableWidgetItem(value))
+        self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
+    
     
         
         

@@ -16,6 +16,7 @@ from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib, traceback, weakref
+import copy
 try:
     QString = unicode
 except NameError:
@@ -49,6 +50,7 @@ class PNBuffer(ProjectClass):
             field.metadata = campo
             field.type_ = field.metadata.type()
             field.modified = False
+            field.originalValue = None
 
             self.line_ = None
             self.fieldList_.append(field)
@@ -62,17 +64,20 @@ class PNBuffer(ProjectClass):
         for field in self.fieldList_:
             if self.cursor_.d._model.value(row , field.name) == "None":
                 field.value = None
+                
             elif field.type_ == "unlock":
                 if self.cursor_.d._model.value(row , field.name) == "True" or self.cursor_.d._model.value(row , field.name) == True:
                     field.value = True
                 else:
                     field.value = False
+                    
             else:
                 field.value = self.cursor_.d._model.value(row , field.name)
             
-
+            
+            field.originalValue = copy.copy(field.value)
             self.cursor_.bufferChanged.emit(field.name)
-
+            
         self.line_ = self.cursor_.d._currentregister
         
 
@@ -120,7 +125,7 @@ class PNBuffer(ProjectClass):
         if isinstance(n, str):
             for field in  self.fieldList_:
                 if field.name == n:
-                    if not field.value:
+                    if field.value == None:
                         #print("PNBuffer.isNull(True)")
                         return True
                     else:
@@ -142,7 +147,7 @@ class PNBuffer(ProjectClass):
 
         if not str(n).isdigit():
             for field in  self.fieldList_:
-                if field.name == str(n):
+                if field.name.lower() == str(n).lower():
                     return self.convertToType(field.value, field.type_)
         else:
             try:
@@ -152,16 +157,21 @@ class PNBuffer(ProjectClass):
 
 
     def setValue(self, name, value, mark_ = True):
-        if value is not None and not isinstance(value, (int, float, str, qsaglobals.parseString)):
+        if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
 
         for field in  self.fieldList_:
             if field.name == str(name):
+                if field.type_ == "bool":
+                    value = str(value)
                 if not field.value == value: 
                     field.value = value
                     if mark_:
-                        field.modified = True
-                    self.setMd5Sum(value)
+                        if not field.value == field.originalValue:
+                            field.modified = True
+                        else:
+                            field.modified = False
+                    #self.setMd5Sum(value)
                     return
 
 
@@ -190,6 +200,14 @@ class PNBuffer(ProjectClass):
                 return float(value)
             elif type_ in ("string","pixmap","stringlist"):
                 return str(value)
+            
+            elif type_ == "date" and not isinstance(value, str): 
+                 fv = value
+                 return fv.strftime('%Y-%m-%d')
+            
+            elif type_ == "time" and not isinstance(value, str): 
+                 fv = value
+                 return fv.strftime('%H:%M:%S')
                
             
         
@@ -619,7 +637,7 @@ class FLSqlCursor(ProjectClass):
         self.d = FLSqlCursorPrivate()
         self.d.nameCursor_ = "%s_%s" % (name, QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
-        if connectionName_or_db is None:
+        if connectionName_or_db == None:
             #print("Init1") # si soy texto y estoy vacio
             self.d.db_ = self._prj.conn
         #elif isinstance(connectionName_or_db, QString) or isinstance(connectionName_or_db, str):
@@ -923,16 +941,18 @@ class FLSqlCursor(ProjectClass):
         type_ = field.type()
         fltype = field.flDecodeType(type_)
         vv = v
-        
-        if isinstance(vv, bool) or not fltype == "bool":
+        """
+        Esto de abajo? bool
+        """
+        if isinstance(vv, bool) or fltype == "bool":
             vv = None
-        if vv:
-            if vv and type == "pixmap":
-                largeValue = self.d.db_.manager().storeLargeValue(self.d.metadata_, str(vv))
-                if largeValue:
-                    vv = largeValue
         
-        if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() == self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert:
+        if vv and type_ == "pixmap":
+           
+            largeValue = self.d.db_.manager().storeLargeValue(self.d.metadata_, vv)
+            if largeValue:
+                vv = largeValue
+        if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() is self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert:
             pK = self.d.metadata_.primaryKey()
             
             if self.d.cursorRelation_ and not self.d.modeAccess_ == self.Browse:
@@ -946,7 +966,7 @@ class FLSqlCursor(ProjectClass):
                 FLUtil.tr("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
         
         else:
-            self.d.buffer_.setValue(fN, v)
+            self.d.buffer_.setValue(fN, vv)
             
         self.bufferChanged.emit(fN)
 
@@ -1176,7 +1196,11 @@ class FLSqlCursor(ProjectClass):
     @return Contexto de ejecución
     """
     def context(self):
-        return self.d.ctxt_()
+        if self.d.ctxt_:
+            return self.d.ctxt_()
+        else:
+            print("HINT: FLSqlCursor(%s).context(). No hay contexto" % self.curName())
+            return None
 
 
     """
@@ -1346,7 +1370,7 @@ class FLSqlCursor(ProjectClass):
 
         self.d.bufferCopy_ = PNBuffer(self)
         for field in self.d.buffer_.fieldsList():
-            self.d.bufferCopy_.setValue(field.name, field.value, False)
+            self.d.bufferCopy_.setValue(field.name, self.d.buffer_.value(field.name), False)
             
     """
     Indica si el contenido actual del buffer difiere de la copia guardada.
@@ -2482,7 +2506,8 @@ class FLSqlCursor(ProjectClass):
             self.setMainFilter(finalFilter , False)
             self.d._model.refresh()
             self.refreshBuffer()
-         
+        
+        self.d._currentregister = None 
         self.newBuffer.emit()
 
 
@@ -2569,7 +2594,6 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método setFilter() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    @decorators.BetaImplementation
     def setFilter(self, filter_):
 
         finalFilter = filter_
@@ -2735,7 +2759,7 @@ class FLSqlCursor(ProjectClass):
                 functionAfter = "sys.iface.afterCommit_%s" % self.d.metadata_.name()
 
             if functionBefore:
-                cI = self.d.ctxt_()
+                cI = self.context()
                 v = self._prj.call(functionBefore, [self], cI)
                 if v and not isinstance(v ,bool):
                     return False
@@ -2827,7 +2851,7 @@ class FLSqlCursor(ProjectClass):
                 self.del__(False)
                 updated = True
 
-
+        
         if updated and self.lastError():
             if savePoint == True:
                 del savePoint
@@ -2835,7 +2859,7 @@ class FLSqlCursor(ProjectClass):
 
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
-            cI = self.d.ctxt_()
+            cI = self.context()
             v = self._prj.call(functionAfter, [self], cI)
             if v and not isinstance(v ,bool):
                 if savePoint == True:
@@ -2861,7 +2885,6 @@ class FLSqlCursor(ProjectClass):
             self.cursorUpdated.emit()
 
         self.bufferCommited.emit()
-
         return True
 
     """
@@ -3219,7 +3242,6 @@ class FLSqlCursor(ProjectClass):
             pKValue = self.d.buffer_.value(self.d.buffer_.pK())
 
             dict_update = dict([(fieldName, self.d.buffer_.value(fieldName)) for fieldName in lista])
-
             try:
                 update_successful = self.model().updateValuesDB(pKValue, dict_update)
             except Exception:

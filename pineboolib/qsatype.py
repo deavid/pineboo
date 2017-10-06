@@ -112,6 +112,9 @@ class Array(object):
     def __getattr__(self, k):
         if k == 'length': 
             return len(self.dict_)
+        else:
+            print("Solicitando atributo", k)
+            return self.dict_[k]
     
     def __len__(self):
         len_ = 0
@@ -292,6 +295,10 @@ class FormDBWidget(QtWidgets.QWidget):
     def child(self, childName):
         try:
             ret = self.findChild(QtWidgets.QWidget, childName)
+            if not ret:
+                ret = self.parentWidget().findChild(QtWidgets.QWidget, childName)
+                    
+                     
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
@@ -341,7 +348,7 @@ class Date(object):
         self.time_ = QtCore.QTime.currentTime()
     
     def toString(self, *args, **kwargs):
-        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"),self.date_.toString("MM"),self.date_.toString("dd"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
+        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"),self.date_.toString("MM"),self.date_.toString("yyyy"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
         return texto
     
     def getYear(self):

@@ -399,7 +399,7 @@ class FLSqlQuery(ProjectClass):
     """
     def value(self, n, raw = False):
         if isinstance(n, str):
-            n=self.__damePosDeCadena(n)
+            n=self.fieldNameToPos(n)
         if raw:
             return self.d.db_.fetchLargeValue(self._row[n])
         else:   
@@ -416,7 +416,7 @@ class FLSqlQuery(ProjectClass):
     @param n Nombre del campo de la consulta
     """
     def isNull(self,n):
-        i=self.__damePosDeCadena(n)
+        i=self.self.fieldNameToPos(n)
         return (self._row[i]==None)
 
 
@@ -440,9 +440,14 @@ class FLSqlQuery(ProjectClass):
     @param n Nombre del campo
     @return Posicion del campo en la consulta. Si no existe el campo devuelve -1
     """
-    @decorators.NotImplementedWarn
     def fieldNameToPos(self, n):
-        pass
+        i = 0
+        for field in self.d.fieldList_:
+            if field.lower() == n.lower():
+                return i
+            i = i + 1
+        
+        return False
 
     """
     Para obtener la lista de nombres de las tablas de la consulta.

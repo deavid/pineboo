@@ -1,4 +1,4 @@
-import sys
+import os, sys
 from PyQt5.QtCore import QTime
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
@@ -10,7 +10,7 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
 
 
-class FLQPSQL(object):
+class FLsqlite(object):
     
     version_ = None
     conn_ = None
@@ -20,12 +20,12 @@ class FLQPSQL(object):
     lastError_ = None
     
     def __init__(self):
-        self.version_ = "0.2"
+        self.version_ = "0.1"
         self.conn_ = None
-        self.name_ = "FLQPSQL"
+        self.name_ = "FLsqlite"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "PostgreSQL"
+        self.alias_ = "SQLite3"
     
     def version(self):
         return self.version_
@@ -38,29 +38,27 @@ class FLQPSQL(object):
     
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         
+        db_filename = db_name
+        db_is_new = not os.path.exists(db_filename)
+        
         try:
-            import psycopg2
+            import sqlite3
         except ImportError:
             print(traceback.format_exc())
-            print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
+            print("HINT: Instale el paquete python3-sqlite3 e intente de nuevo")
             sys.exit(0)
+            
+        self.conn_ = sqlite3.connect(db_filename)
         
-        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
-                        db_name, db_host, db_port,
-                        db_userName, db_password)
+        if db_is_new:
+            print("La base de datos %s no existe" % db_filename)
         
-        
-        
-        self.conn_ = psycopg2.connect(conninfostr)
         
         if self.conn_:
             self.open_ = True
         
-        try:
-            self.conn_.set_client_encoding("UTF8")
-        except Exception:
-            print(traceback.format_exc())
-        
+        #self.conn_.text_factory = os.fsdecode
+        self.conn_.text_factory = lambda x: str(x, 'latin1')
         return self.conn_
      
     
@@ -70,13 +68,15 @@ class FLQPSQL(object):
             util = FLUtil.FLUtil()
         
             s = None
-            
+            # TODO: psycopg2.mogrify ???
             if v == None:
                 v = ""
-            # TODO: psycopg2.mogrify ???
 
             if type_ == "bool" or type_ == "unlock":
-                s = text2bool(v)
+                if v[0].lower() == "t":
+                    s = 1
+                else:
+                    s = 0
 
             elif type_ == "date":
                 s = "'%s'" % util.dateDMAtoAMD(v)
@@ -207,9 +207,9 @@ class FLQPSQL(object):
             
     def setType(self, type_, leng = None):
         if leng:
-            return "::%s(%s)" % (type_, leng)
+            return " %s(%s)" % (type_.upper(), leng)
         else:
-            return "::%s" % type_       
+            return " %s" % type_.upper()        
             
             
         

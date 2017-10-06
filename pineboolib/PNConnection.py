@@ -34,16 +34,16 @@ class PNConnection(QtCore.QObject):
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias):
         super(PNConnection,self).__init__()
         
-        
+        self.connAux = {}
         self.db_name = db_name
         self.db_host = db_host
         self.db_port = db_port
         self.db_userName = db_userName
         self.db_password = db_password
         self.driverSql = PNSqlDrivers.PNSqlDrivers()
-        driverName_ = self.driverSql.aliasToName(driverAlias)
+        self.driverName_ = self.driverSql.aliasToName(driverAlias)
         
-        if (driverName_ and self.driverSql.loadDriver(driverName_)):
+        if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):
             self.conn = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
         else:
             print("PNConnection.ERROR: No se encontro el driver \'%s\'" % driverAlias)
@@ -60,6 +60,20 @@ class PNConnection(QtCore.QObject):
     def connectionName(self):
         return self.db_name
     
+    """
+    Permite seleccionar una conexion que no es la default, Si no existe la crea
+    """
+    def useConn(self, name):
+        if name == "default":
+            return self.conn
+        
+        if not name in self.connAux:
+            print("PNConnection::Creando nueva conexión", name)
+            self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password, self.driverSql.nameToAlias(self.driverName()))
+        
+        return self.connAux[name]
+        
+    
     def driver(self):
         return self.driverSql.driver()
     
@@ -68,10 +82,6 @@ class PNConnection(QtCore.QObject):
     
     def conectar(self, db_name, db_host, db_port, db_userName, db_password):
         conn = self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
-        try:
-            conn.set_client_encoding("UTF8")
-        except Exception:
-            print(traceback.format_exc())
         return conn
     
     def driverName(self):
@@ -107,6 +117,9 @@ class PNConnection(QtCore.QObject):
     
     def db(self):
         return self.conn
+    
+    def dbAux(self):
+        return self.useConn("dbAux").conn
     
     def formatValue(self, t, v, upper):
         return self.driverSql.formatValue(t, v, upper)

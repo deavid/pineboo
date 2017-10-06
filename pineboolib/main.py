@@ -54,7 +54,6 @@ class Project(object):
         self.apppath = None
         self.tmpdir = None
         self.parser = None
-        self.driverAlias = None
         
 
         self.actions = {}
@@ -66,17 +65,23 @@ class Project(object):
         Project.debugLevel = q
         decorators.Options.DEBUG_LEVEL = q
         qt3ui.Options.DEBUG_LEVEL = q
+    
+    """
+    Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)
+    """
+    def singleFLLarge(self):
+        return True
         
 
     def load_db(self, dbname, host, port, user, passwd, driveralias):
         self.dbserver = DBServer()
         self.dbserver.host = host
         self.dbserver.port = port
+        self.dbserver.type = driveralias
         self.dbauth = DBAuth()
         self.dbauth.username = user
         self.dbauth.password = passwd
         self.dbname = dbname
-        self.driverAlias = driveralias
         self.apppath = filedir("..")
         self.tmpdir = filedir("../tempdata")
 
@@ -97,9 +102,20 @@ class Project(object):
         self.dbauth = DBAuth(one(self.root.xpath("database-credentials")))
         self.dbname = one(self.root.xpath("database-name/text()"))
         self.apppath = one(self.root.xpath("application-path/text()"))
-        self.driverAlias = one(self.root.xpath("database-driver/text()"))
         self.tmpdir = filedir("../tempdata")
-
+        if not getattr(self.dbserver, "host", None):
+            self.dbserver.host = None
+        
+        if not getattr(self.dbserver, "port", None):
+            self.dbserver.port = None
+        
+        if not getattr(self.dbserver, "type", None):
+            self.dbserver.type = None
+            
+        if not self.dbauth:
+            self.dbauth.username = None
+            self.dbauth.password = None
+            
         self.actions = {}
         self.tables = {}
         pineboolib.project = self
@@ -118,13 +134,10 @@ class Project(object):
         # Preparar temporal
         if not os.path.exists(self.dir("cache")):
             os.makedirs(self.dir("cache"))
-        
-        if not os.path.exists(self.dir("cache")):
-            os.makedirs(self.dir("cache"))
             
         # Conectar:
 
-        self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.driverAlias)
+        self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.dbserver.type)
         util = FLUtil()
         util.writeSettingEntry(u"DBA/lastDB",self.dbname)
         self.cur = self.conn.cursor()
@@ -134,14 +147,14 @@ class Project(object):
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
         # Obtener modulos activos
-        self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = TRUE """)
+        self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ % self.conn.driver().formatValue("bool","True",False))
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in self.cur:
             self.modules[idmodulo] = Module(self, idarea, idmodulo, descripcion, icono)
         self.modules["sys"] = Module(self,"sys","sys","Administración",None)#Añadimos módulo sistema(falta icono)
 
         # Descargar proyecto . . .
-        self.cur.execute(""" SELECT idmodulo, nombre, sha::varchar(16) FROM flfiles ORDER BY idmodulo, nombre """)
+        self.cur.execute(""" SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"),"w")
         self.files = {}
         tiempo_ini = time.time()
@@ -158,9 +171,8 @@ class Project(object):
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
             cur2 = self.conn.cursor()
-            cur2.execute("SELECT contenido FROM flfiles "
-                    + "WHERE idmodulo = %s AND nombre = %s "
-                    + "        AND sha::varchar(16) = %s", [idmodulo, nombre, sha] )
+            sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue("string",idmodulo,False), self.conn.driver().formatValue("string",nombre,False), self.conn.driver().formatValue("string",sha,False))
+            cur2.execute(sql)
             for (contenido,) in cur2:
                 f2 = open(self.dir("cache" , fileobj.filekey),"wb")
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
@@ -288,8 +300,16 @@ class File(object):
             self.name = os.path.splitext(os.path.splitext(filename)[0])[0]
         else:
             self.name, self.ext = os.path.splitext(filename)
+        
+        db_name = None
+        if self.prj.dbname.endswith("s3db"):
+            db_name= self.prj.dbname[self.prj.dbname.rfind("/") + 1:-5]
+        else:
+            db_name = self.prj.dbname
+        
+        
         if self.sha:
-            self.filekey = "%s/%s/file%s/%s/%s%s" % ( self.prj.dbname, module, self.ext, self.name, sha,self.ext)
+            self.filekey = "%s/%s/file%s/%s/%s%s" % ( db_name, module, self.ext, self.name, sha,self.ext)
         else:
             self.filekey = filename
         self.basedir = basedir

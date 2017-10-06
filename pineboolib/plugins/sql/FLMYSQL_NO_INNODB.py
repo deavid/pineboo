@@ -8,9 +8,7 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
 
 
-
-
-class FLQPSQL(object):
+class FLMYSQL_NO_INNODB(object):
     
     version_ = None
     conn_ = None
@@ -22,10 +20,10 @@ class FLQPSQL(object):
     def __init__(self):
         self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "FLQPSQL"
+        self.name_ = "FLMYSQL"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "PostgreSQL"
+        self.alias_ = "MySQL"
     
     def version(self):
         return self.version_
@@ -39,27 +37,17 @@ class FLQPSQL(object):
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         
         try:
-            import psycopg2
+            import MySQLdb
         except ImportError:
             print(traceback.format_exc())
-            print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
+            print("HINT: Instale el paquete python3-mysqldb e intente de nuevo")
             sys.exit(0)
         
-        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
-                        db_name, db_host, db_port,
-                        db_userName, db_password)
-        
-        
-        
-        self.conn_ = psycopg2.connect(conninfostr)
+        self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
         
         if self.conn_:
             self.open_ = True
-        
-        try:
-            self.conn_.set_client_encoding("UTF8")
-        except Exception:
-            print(traceback.format_exc())
+
         
         return self.conn_
      

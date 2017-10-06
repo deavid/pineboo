@@ -8,7 +8,7 @@ import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
-import platform
+import platform, hashlib, traceback
 
 class FLUtil(ProjectClass):
 
@@ -313,8 +313,10 @@ class FLUtil(ProjectClass):
         dia_ = None
         mes_ = None
         ano_ = None
-        
         f = str(f)
+        
+        if f.find("T") > -1:
+            f = f[:f.find("T")]
         
         array_ = f.split("-")
         if len(array_) == 3:
@@ -867,7 +869,7 @@ class FLUtil(ProjectClass):
     @decorators.BetaImplementation
     def sqlInsert(self, t, fL, vL, connName="default"):
         
-        if not fL.len == vL:
+        if not len(fL) == len(vL):
             return False
         
         c = FLSqlCursor(t, True, connName)
@@ -875,7 +877,7 @@ class FLUtil(ProjectClass):
         c.refreshBuffer()
         
         for f,v in (fL,vL):
-            if v == "NULL":
+            if v == None:
                 c.bufferSetNull(f)
             else:
                 c.setValueBuffer(f,v)
@@ -932,7 +934,7 @@ class FLUtil(ProjectClass):
         c.select(w)
 
         while c.next():
-            c.setModeAccess(FLSqlCursor.DEL)
+            c.setModeAccess(FLSqlCursor.Del)
             c.refreshBuffer()
             if not c.commitBuffer():
                 return False
@@ -1011,10 +1013,13 @@ class FLUtil(ProjectClass):
     @param str Cadena de la que obtener la clave SHA1
     @return Clave correspondiente en digitos hexadecimales
     """
-    @decorators.NotImplementedWarn
-    def sha1(self, str_):
-        pass
 
+    def sha1(self, str_):
+        sha_ = hashlib.new("sha1",str_.encode())
+        st = "%s" % sha_.hexdigest()
+        st = st.upper()
+        return st
+    
     @decorators.NotImplementedWarn
     def usha1(self, data,_len):
         pass
@@ -1132,9 +1137,17 @@ class FLUtil(ProjectClass):
     """
     Uso interno
     """
-    @decorators.NotImplementedWarn
+
     def execSql(self, sql, connName = "default"):
-        pass
+        conn_ = self._prj.conn.useConn(connName)
+        cur = conn_.cursor()
+        try:
+            cur.execute(sql)
+            conn_.conn.commit()
+            return True
+        except Exception:
+            print(traceback.format_exc())
+            return False
     """
     Guarda imagen Pixmap en una ruta determinada.
 
