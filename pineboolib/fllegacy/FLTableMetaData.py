@@ -72,7 +72,7 @@ class FLTableMetaData(ProjectClass):
         for field in table.fields:
             field.setMetadata(self)
             if field.isCompoundKey():
-                self.d.compoundKey_.addFieldMD(field.name())
+                self.d.compoundKey_.addFieldMD(field)
             if field.isPrimaryKey():
                 self.d.primaryKey_ = field.name()
                 
