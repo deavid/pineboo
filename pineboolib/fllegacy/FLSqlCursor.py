@@ -162,6 +162,8 @@ class PNBuffer(ProjectClass):
 
         for field in  self.fieldList_:
             if field.name == str(name):
+                if field.type_ == "bool":
+                    value = str(value)
                 if not field.value == value: 
                     field.value = value
                     if mark_:
