@@ -91,7 +91,10 @@ class PNBuffer(ProjectClass):
     def setNull(self, name):
         for field in  self.fieldList_:
             if field.name == str(name):
-                self.setValue(name, None)
+                if field.type_ == "date":
+                    self.setValue(field.name,"2000-01-01" )
+                else:
+                    self.setValue(name, None)
                 return True
         
         return False
@@ -941,11 +944,6 @@ class FLSqlCursor(ProjectClass):
         type_ = field.type()
         fltype = field.flDecodeType(type_)
         vv = v
-        """
-        Esto de abajo? bool
-        """
-        if isinstance(vv, bool) or fltype == "bool":
-            vv = None
         
         if vv and type_ == "pixmap":
            
