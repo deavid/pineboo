@@ -264,7 +264,7 @@ class FLFormRecordDB(FLFormDB):
         if self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if not self.pushButtonFirst:
                 self.pushButtonFirst = QtWidgets.QToolButton()
-                self.pushButtonFirst.setAccessibleName("pushButtonFirst")
+                self.pushButtonFirst.setObjectName("pushButtonFirst")
                 self.pushButtonFirst.setIcon(QtGui.QIcon(filedir("icons","gtk-goto-first-ltr.png")))
                 self.pushButtonFirst.clicked.connect(self.firstRecord)
                 self.pushButtonFirst.setSizePolicy(sizePolicy)
@@ -279,7 +279,7 @@ class FLFormRecordDB(FLFormDB):
 
             if not self.pushButtonPrevious:
                 self.pushButtonPrevious = QtWidgets.QToolButton()
-                self.pushButtonPrevious.setAccessibleName("pushButtonPrevious")
+                self.pushButtonPrevious.setObjectName("pushButtonPrevious")
                 self.pushButtonPrevious.setIcon(QtGui.QIcon(filedir("icons","gtk-go-back-ltr.png")))
                 self.pushButtonPrevious.clicked.connect(self.previousRecord)
                 self.pushButtonPrevious.setSizePolicy(sizePolicy)
@@ -294,7 +294,7 @@ class FLFormRecordDB(FLFormDB):
 
             if not self.pushButtonNext:
                 self.pushButtonNext = QtWidgets.QToolButton()
-                self.pushButtonNext.setAccessibleName("pushButtonNext")
+                self.pushButtonNext.setObjectName("pushButtonNext")
                 self.pushButtonNext.setIcon(QtGui.QIcon(filedir("icons","gtk-go-back-rtl.png")))
                 self.pushButtonNext.clicked.connect(self.nextRecord)
                 self.pushButtonNext.setSizePolicy(sizePolicy)
@@ -309,7 +309,7 @@ class FLFormRecordDB(FLFormDB):
 
             if not self.pushButtonLast:
                 self.pushButtonLast = QtWidgets.QToolButton()
-                self.pushButtonLast.setAccessibleName("pushButtonLast")
+                self.pushButtonLast.setObjectName("pushButtonLast")
                 self.pushButtonLast.setIcon(QtGui.QIcon(filedir("icons","gtk-goto-last-ltr.png")))
                 self.pushButtonLast.clicked.connect(self.lastRecord)
                 self.pushButtonLast.setSizePolicy(sizePolicy)
@@ -328,7 +328,7 @@ class FLFormRecordDB(FLFormDB):
             if self.showAcceptContinue_:
                 if not self.pushButtonAcceptContinue:
                     self.pushButtonAcceptContinue = QtWidgets.QToolButton()
-                    self.pushButtonAcceptContinue.setAccessibleName("pushButtonAcceptContinue")
+                    self.pushButtonAcceptContinue.setObjectName("pushButtonAcceptContinue")
                     self.pushButtonAcceptContinue.clicked.connect(self.acceptContinue)
 
                 self.pushButtonAcceptContinue.setSizePolicy(sizePolicy)
@@ -344,7 +344,7 @@ class FLFormRecordDB(FLFormDB):
 
             if not self.pushButtonAccept:
                 self.pushButtonAccept = QtWidgets.QToolButton()
-                self.pushButtonAccept.setAccessibleName("pushButtonAccept")
+                self.pushButtonAccept.setObjectName("pushButtonAccept")
                 self.pushButtonAccept.clicked.connect(self.accept)
 
             self.pushButtonAccept.setSizePolicy(sizePolicy)
@@ -361,7 +361,7 @@ class FLFormRecordDB(FLFormDB):
 
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
-            self.pushButtonCancel.setAccessibleName("pushButtonCancel")
+            self.pushButtonCancel.setObjectName("pushButtonCancel")
             try:
                 self.cursor_.autocommit.connect(self.disablePushButtonCancel)
             except:

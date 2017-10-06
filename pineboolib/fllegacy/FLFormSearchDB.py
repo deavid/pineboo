@@ -153,7 +153,7 @@ class FLFormSearchDB(FLFormDB):
             
         if not self.pushButtonAccept:
             self.pushButtonAccept = QtWidgets.QToolButton()
-            self.pushButtonAccept.setAccessibleName("pushButtonAccept")
+            self.pushButtonAccept.setObjectName("pushButtonAccept")
             self.pushButtonAccept.clicked.connect(self.accept)
                 
         self.pushButtonAccept.setSizePolicy(sizePolicy)
@@ -171,7 +171,7 @@ class FLFormSearchDB(FLFormDB):
             
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
-            self.pushButtonCancel.setAccessibleName("pushButtonCancel")
+            self.pushButtonCancel.setObjectName("pushButtonCancel")
             self.pushButtonCancel.clicked.connect(self.reject)
                 
         self.pushButtonCancel.setSizePolicy(sizePolicy)
