@@ -112,6 +112,9 @@ class Array(object):
     def __getattr__(self, k):
         if k == 'length': 
             return len(self.dict_)
+        else:
+            print("Solicitando atributo", k)
+            return self.dict_[k]
     
     def __len__(self):
         len_ = 0
