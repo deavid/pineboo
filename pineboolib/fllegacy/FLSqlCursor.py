@@ -147,7 +147,7 @@ class PNBuffer(ProjectClass):
 
         if not str(n).isdigit():
             for field in  self.fieldList_:
-                if field.name == str(n):
+                if field.name.lower() == str(n).lower():
                     return self.convertToType(field.value, field.type_)
         else:
             try:
