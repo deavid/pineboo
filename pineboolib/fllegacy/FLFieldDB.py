@@ -16,6 +16,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
+import datetime
 
 
 DEBUG = False
@@ -794,7 +795,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         """
         if isinstance(self.editor_, FLDateEdit):
-            data = str(self.editor_.date().toString("dd-MM-yyyy"))
+            data = str(self.editor_.date().toString("yyyy-MM-dd"))
             
             if not data:
                 isNull = True
@@ -1555,7 +1556,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 
                 if v:
-                    v = FLUtil().dateDMAtoAMD(v)
+                    util = FLUtil()
+                    v = util.dateDMAtoAMD(v)
                     self.editor_.setDate(v)
                 else:
                     self.editor_.setDate()
@@ -1748,7 +1750,6 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.valueChanged.disconnect(self.updateValue)
             except:
                 pass
-        
             self.editor_.setDate(v)
             self.editor_.valueChanged.connect(self.updateValue)
         
@@ -3106,7 +3107,10 @@ class FLFieldDB(QtWidgets.QWidget):
                                 #print("where tipo", type(where))
                                 #print("Consulta = %s" % q.sql())
                                 if q.exec_() and q.first():
-                                    self.setValue(q.value(0))
+                                    value = q.value(0)
+                                    if isinstance(value, datetime.date):
+                                        value = value.strftime('%d-%m-%Y')
+                                    self.setValue(value)
                                 if not tMD.inCache():
                                     del tMD
                     
@@ -3403,7 +3407,6 @@ class FLDateEdit(QtWidgets.QDateEdit):
         self.setMaximumWidth(120)
     
     def setDate(self, d = None):
-        
         if d is None:
             d = str("01-01-2000")
         
