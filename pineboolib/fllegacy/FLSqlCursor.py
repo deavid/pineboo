@@ -16,6 +16,7 @@ from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 
 import hashlib, traceback, weakref
+import copy
 try:
     QString = unicode
 except NameError:
@@ -49,6 +50,7 @@ class PNBuffer(ProjectClass):
             field.metadata = campo
             field.type_ = field.metadata.type()
             field.modified = False
+            field.originalValue = None
 
             self.line_ = None
             self.fieldList_.append(field)
@@ -72,9 +74,10 @@ class PNBuffer(ProjectClass):
             else:
                 field.value = self.cursor_.d._model.value(row , field.name)
             
-
+            
+            field.originalValue = copy.copy(field.value)
             self.cursor_.bufferChanged.emit(field.name)
-
+            
         self.line_ = self.cursor_.d._currentregister
         
 
@@ -162,8 +165,11 @@ class PNBuffer(ProjectClass):
                 if not field.value == value: 
                     field.value = value
                     if mark_:
-                        field.modified = True
-                    self.setMd5Sum(value)
+                        if not field.value == field.originalValue:
+                            field.modified = True
+                        else:
+                            field.modified = False
+                    #self.setMd5Sum(value)
                     return
 
 
@@ -933,7 +939,9 @@ class FLSqlCursor(ProjectClass):
         type_ = field.type()
         fltype = field.flDecodeType(type_)
         vv = v
-        
+        """
+        Esto de abajo? bool
+        """
         if isinstance(vv, bool) or fltype == "bool":
             vv = None
         
@@ -2496,7 +2504,8 @@ class FLSqlCursor(ProjectClass):
             self.setMainFilter(finalFilter , False)
             self.d._model.refresh()
             self.refreshBuffer()
-         
+        
+        self.d._currentregister = None 
         self.newBuffer.emit()
 
 
@@ -2840,7 +2849,7 @@ class FLSqlCursor(ProjectClass):
                 self.del__(False)
                 updated = True
 
-
+        
         if updated and self.lastError():
             if savePoint == True:
                 del savePoint
@@ -2874,7 +2883,6 @@ class FLSqlCursor(ProjectClass):
             self.cursorUpdated.emit()
 
         self.bufferCommited.emit()
-
         return True
 
     """
@@ -3232,7 +3240,6 @@ class FLSqlCursor(ProjectClass):
             pKValue = self.d.buffer_.value(self.d.buffer_.pK())
 
             dict_update = dict([(fieldName, self.d.buffer_.value(fieldName)) for fieldName in lista])
-
             try:
                 update_successful = self.model().updateValuesDB(pKValue, dict_update)
             except Exception:
