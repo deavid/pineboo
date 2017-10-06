@@ -292,6 +292,10 @@ class FormDBWidget(QtWidgets.QWidget):
     def child(self, childName):
         try:
             ret = self.findChild(QtWidgets.QWidget, childName)
+            if not ret:
+                ret = self.parentWidget().findChild(QtWidgets.QWidget, childName)
+                    
+                     
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
