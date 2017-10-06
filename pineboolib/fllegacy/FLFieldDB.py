@@ -3410,7 +3410,8 @@ class FLDateEdit(QtWidgets.QDateEdit):
         if d is None:
             d = str("01-01-2000")
         
-        
+        if "T" in d:
+            d = d[:d.find("T")]
         
         if not isinstance(d, QtCore.QDate):
             date = QtCore.QDate.fromString(d,"dd-MM-yyyy")
