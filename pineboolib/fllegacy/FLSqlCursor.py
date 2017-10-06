@@ -125,7 +125,7 @@ class PNBuffer(ProjectClass):
         if isinstance(n, str):
             for field in  self.fieldList_:
                 if field.name == n:
-                    if not field.value:
+                    if field.value == None:
                         #print("PNBuffer.isNull(True)")
                         return True
                     else:
