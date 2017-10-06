@@ -313,8 +313,10 @@ class FLUtil(ProjectClass):
         dia_ = None
         mes_ = None
         ano_ = None
-        
         f = str(f)
+        
+        if f.find("T") > -1:
+            f = f[:f.find("T")]
         
         array_ = f.split("-")
         if len(array_) == 3:
