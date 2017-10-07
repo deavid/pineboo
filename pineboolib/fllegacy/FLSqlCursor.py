@@ -993,7 +993,7 @@ class FLSqlCursor(ProjectClass):
         else:
             #return None //Devolvemos el valor del buffer si es insert
             if not self.d.buffer_:
-                print("No hay buffer de ", self.curName())
+                #print("No hay buffer de ", self.curName())
                 return None
             else:
                 return self.d.buffer_.value(fN)
@@ -1197,7 +1197,7 @@ class FLSqlCursor(ProjectClass):
         if self.d.ctxt_:
             return self.d.ctxt_()
         else:
-            print("HINT: FLSqlCursor(%s).context(). No hay contexto" % self.curName())
+            #print("HINT: FLSqlCursor(%s).context(). No hay contexto" % self.curName())
             return None
 
 
@@ -2381,6 +2381,10 @@ class FLSqlCursor(ProjectClass):
     """
 
     def move(self, row):
+        
+        if not getattr(self.d, "_model", None):
+            return False
+        
         if row < 0: row = -1
         if row >= self.d._model.rows: row = self.d._model.rows
         if self.d._currentregister == row: return False
