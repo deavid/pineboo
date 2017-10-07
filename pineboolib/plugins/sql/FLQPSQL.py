@@ -82,8 +82,7 @@ class FLQPSQL(object):
                 s = "'%s'" % util.dateDMAtoAMD(v)
                 
             elif type_ == "time":
-                time = QTime(s)
-                s = "'%s'" % time
+                s = "'%s'" % v
 
             elif type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "serial":
                 s = v
