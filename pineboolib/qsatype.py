@@ -88,13 +88,13 @@ class Array(object):
     dict_ = None
     key_ = None
     
-    def __init__(self, data = None):
-        if not data:
+    def __init__(self, *args):
+        if not len(args):
             self.dict_ = {}
-        elif isinstance(data, int):
+        elif isinstance(args[0], int) and len(args) == 1:
             self.dict_ = {} # dimensiones por ahora a cero
         else:
-            self.dict_ = data
+            self.dict_ = args
     
     def __setitem__(self, key, value):
         #if isinstance(key, int):
@@ -328,6 +328,21 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = FLSqlCursor(self._action.name)
         
         return self.cursor_
+    
+    """
+    FIX: Cuando usamos this como cursor
+    """
+    def valueBuffer(self, name):
+        return self.cursor().valueBuffer(name)
+    
+    def isNull(self, name):
+        return self.cursor().isNull(name)
+    
+    
+    
+    
+    
+    
 
 def FLFormSearchDB(name):
     widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
