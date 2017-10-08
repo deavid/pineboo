@@ -339,6 +339,11 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 AQUtil = FLUtil() # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil() # <- para cuando QS erróneo usa util sin definirla
 
+Insert = 0
+Edit = 1
+Del = 2
+Browse = 3
+
 # -------------------------- FORBIDDEN FRUIT ----------------------------------
 # Esto de aquí es debido a que en Python3 decidieron que era mejor abandonar
 # QString en favor de los strings de python3. Por lo tanto ahora el código QS
