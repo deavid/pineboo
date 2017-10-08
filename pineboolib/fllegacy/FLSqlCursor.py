@@ -14,6 +14,7 @@ from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 
 from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from pineboolib.utils import XMLStruct
 
 import hashlib, traceback, weakref
 import copy
@@ -801,11 +802,14 @@ class FLSqlCursor(ProjectClass):
         
         if isinstance(a, str):
             #print("FLSqlCursor(%s): setAction(%s)" % (self.d.curName_, a))
+            self._action = XMLStruct()
             try:
                 self._action = self._prj.actions[str(a)]
             except KeyError:
+                print("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
+                self._action.table = a
                 #print("FLSqlCursor.setAction(): Action no encontrada : %s en %s actions. Es posible que la tabla no exista" % (a, len(self._prj.actions)))
-                return False
+                #return False
             #self._action = self._prj.actions["articulos"]
 
             if getattr(self._action,"table",None):
