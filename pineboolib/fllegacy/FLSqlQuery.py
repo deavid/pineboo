@@ -3,7 +3,7 @@ from pineboolib import decorators
 from PyQt5 import QtGui, QtWidgets
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import pineboolib
-import traceback
+import traceback, datetime
 
 
 
@@ -411,14 +411,30 @@ class FLSqlQuery(ProjectClass):
              en vez de contenido al que apunta esa referencia
     """
     def value(self, n, raw = False):
+        pos = None
         if isinstance(n, str):
-            n=self.fieldNameToPos(n)
+            pos=self.fieldNameToPos(n)
+            name = n
+        else:
+            pos = n
+            name = self.fieldList()[n]
+            
+            
+        
         if raw:
-            return self.d.db_.fetchLargeValue(self._row[n])
-        else:   
-            return self._row[n]
+            return self.d.db_.fetchLargeValue(self._row[pos])
+        else:
+            
+            retorno = self._row[pos]
+            
+            if not type(retorno) in (str, int, bool, float, datetime.date) and not retorno == None:
+                print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" % (name, type(retorno), retorno))
+                retorno = float(retorno)      
+            
+             
+            return retorno
   
-  
+        
     """
     Indica si un campo de la consulta es nulo o no
 
