@@ -7,7 +7,7 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import DefFun
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QVariant
+from PyQt5.QtCore import QVariant, QDate
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
@@ -207,7 +207,10 @@ class PNBuffer(ProjectClass):
             
             elif type_ == "date" and not isinstance(value, str): 
                  fv = value
-                 return fv.strftime('%Y-%m-%d')
+                 if isinstance(fv, QDate):
+                     return fv.toString("yyyy-MM-dd")
+                 else:
+                     return fv.strftime('%Y-%m-%d')
             
             elif type_ == "time" and not isinstance(value, str): 
                  fv = value
@@ -2513,7 +2516,7 @@ class FLSqlCursor(ProjectClass):
             self.d._model.refresh()
             self.refreshBuffer()
         
-        self.d._currentregister = None 
+        self.d._currentregister = -1
         self.newBuffer.emit()
 
 
@@ -3367,7 +3370,7 @@ class AQBoolFlagState(object):
         print("---------------->AQBoolFlagState.count_ =", self.count_)
     
     def __del__(self):
-        self.count_ = self.count - 1
+        self.count_ = self.count_ - 1
     
     def dumpDebug(self):
         if DEBUG: print("%s <- (%s : [%s, %s]) -> %s" % (prev_, this, modifier_, prevValue_, next_))
