@@ -488,7 +488,7 @@ class Switch(ASTPython):
         # yield "line", "assert( %s )" % name_pr2
 
 class With(ASTPython):
-    python_keywords = ["setValueBuffer","setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess","commitBuffer","commit"]
+    python_keywords = ["setValueBuffer","setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess","commitBuffer","commit","refreshBuffer"]
         
     def generate(self, **kwargs):
         key = "%02x" % random.randint(0,255)

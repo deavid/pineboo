@@ -719,6 +719,8 @@ class FLUtil(ProjectClass):
         # '34.142'
         f = '{:.' + str(partDecimal) + 'f}'
         ret = f.format(d)
+        if tipo == "float":
+            ret = float(ret)
         return ret
 
     """
@@ -806,7 +808,7 @@ class FLUtil(ProjectClass):
                 del tmd
             return 0
 
-        ret = self.buildNumber(n, 'f', fmd.partDecimal())
+        ret = self.buildNumber(n, 'float', fmd.partDecimal())
         if tmd and not tmd.inCache():
             del tmd
         return ret

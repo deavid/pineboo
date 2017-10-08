@@ -3,6 +3,7 @@ from pineboolib import decorators
 from PyQt5 import QtGui, QtWidgets
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import pineboolib
+import traceback
 
 
 
@@ -23,7 +24,12 @@ class FLSqlQuery(ProjectClass):
         super(FLSqlQuery, self).__init__()
         self.connName = None
         self.d = FLSqlQueryPrivate()
-        self.d.db_ = pineboolib.project.conn
+        if len(args) <= 1:
+            self.d.db_ = pineboolib.project.conn
+        else:
+            self.d.db_ = pineboolib.project.conn.useConn(args[1])
+            self.connName = args[1]
+            
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
         self._posicion = None
@@ -35,9 +41,7 @@ class FLSqlQuery(ProjectClass):
         
         if retornoQry:
             self = retornoQry
-        
-        if len(args) == 2:
-            self.connName = args[1]
+
             
 
 
@@ -59,15 +63,21 @@ class FLSqlQuery(ProjectClass):
     def exec(self, sql = None):
         if not sql:
             sql = self.sql()
+
         
         if not sql:
             return False
         
+        """
+        En algunas consultas va con ';' , esto lo limpio 
+        """
+        sql = sql.replace(";","")
         try:
             micursor=self.__damecursor()
             micursor.execute(sql)
             self._cursor=micursor
-        except:
+        except Exception:
+            print(traceback.format_exc())
             return False
         else:
             return True 
@@ -195,13 +205,16 @@ class FLSqlQuery(ProjectClass):
         field = None
         self.d.fieldList_.clear()
         
+        if isinstance(s, str):
+            s = s.split(sep)
+        
         for f in s:
             try:
                 table = f[:f.index(".")]
                 field = f[f.index(".") + 1:]
             except:
                 pass
-                
+            
             if field == "*":
                 mtd = self.d.db_.manager().metadata(table, True)
                 if mtd:
@@ -617,7 +630,8 @@ class FLSqlQuery(ProjectClass):
                     return False
                 else:
                     return  True
-            except:
+            except Exception:
+                print(traceback.format_exc())
                 return False 
     
     def prev(self):
