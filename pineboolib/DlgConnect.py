@@ -47,11 +47,14 @@ class DlgConnect(QtWidgets.QWidget):
 
         # MODIFICACION 4 PARA CONECTOR SQLITE : DEFINIMOS LO QUE HACEN LOS BOTONES nuevos 
         self.ui.pbnCargarDatos.clicked.connect(self.ChargeProject)
-        self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
+        #self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
         self.ui.pbnBorrarProyecto.clicked.connect(self.DeleteProject)
         self.ui.pbnGuardarProyecto.clicked.connect(self.SaveProject)
-        self.ui.pbnProyecto_Ejemplo.clicked.connect(self.SaveProjectEjemplo)
+        #self.ui.pbnProyecto_Ejemplo.clicked.connect(self.SaveProjectEjemplo)
         # hasta aqui la modificación 4
+        
+        self.ui.leFolderSQLITE.setText(filedir("../projects"))
+        self.ShowTable()
 
         DlgConnect.leName = self.ui.leName
         DlgConnect.leDBName = self.ui.leDBName
@@ -95,6 +98,7 @@ class DlgConnect(QtWidgets.QWidget):
         DlgConnect.database = DlgConnect.leDBName.text()
         DlgConnect.driveralias = DlgConnect.cBDrivers.currentText()
 
+        """
         if not DlgConnect.leName.text():
             DlgConnect.ruta = ""
         elif not DlgConnect.ruta.endswith(".xml"):
@@ -104,12 +108,15 @@ class DlgConnect(QtWidgets.QWidget):
             DlgConnect.ruta = None
         else:
             self.close()
-    
+        """
+        self.close()
+        
     @QtCore.pyqtSlot()       
     def findPathProject(self):
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, "Seleccione Directorio")
         if filename:
             DlgConnect.leFolder.setText(str(filename))
+            self.ShowTable()
 
         # cambiamos el directorio de trabajo donde guardar la base de datos Sqlite:
         os.chdir(filename)
@@ -142,7 +149,8 @@ class DlgConnect(QtWidgets.QWidget):
         # escribir los campos de la fila ELEGIDA en la zona de "CARGAR DATOS":
         DlgConnect.leName.setText(str(valor1))
         DlgConnect.leDBName.setText(str(valor2))
-        #DlgConnect.leDBType.setText(str(valor3))
+        id = DlgConnect.cBDrivers.findText(str(valor3))
+        DlgConnect.cBDrivers.setCurrentIndex(id)
         DlgConnect.leHostName.setText(str(valor4))
         DlgConnect.lePort.setText(str(valor5))
         DlgConnect.leUserName.setText(str(valor6))
@@ -182,7 +190,9 @@ class DlgConnect(QtWidgets.QWidget):
         self.tableWidget.clear()
         self.tableWidget.setHorizontalHeaderLabels(['Name', 'DBname', 'DBType', 'DBHost', 'DBPort', 'Username', 'Password'])
         currentRowCount = self.tableWidget.rowCount() #necessary even when there are no rows in the table
-
+        
+        self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         # escribir el campo 0 de la fila 1:
         for conector in conectores:
             inx = conectores.index(conector)
@@ -198,10 +208,18 @@ class DlgConnect(QtWidgets.QWidget):
 
         db.commit()
         db.close()
-
+        self.tableWidget.doubleClicked.connect(self.on_click)
         print ("TABLA MOSTRADA")
 # hasta aqui la modificación 9
-
+    
+    @QtCore.pyqtSlot()
+    def on_click(self):
+        for currentQTableWidgetItem in self.tableWidget.selectedItems():
+            DlgConnect.leFila.setText(str(currentQTableWidgetItem.row() + 1))
+            self.ChargeProject()
+            self.conectar()
+            
+    
 
 # MODIFICACION 10 PARA CONECTOR SQLITE :añado uso botón BORRAR PROYECTO
     @QtCore.pyqtSlot()
@@ -235,7 +253,7 @@ class DlgConnect(QtWidgets.QWidget):
         #id2 = str(self.ui.leID.text())
         name2 = str(self.ui.leName.text())
         dbname2 = str(self.ui.leDBName.text())
-        #dbtype2 = str(self.ui.leDBType.text())
+        dbtype2 = self.ui.cBDrivers.currentText()
         dbhost2 = str(self.ui.leHostName.text())
         dbport2 = str(self.ui.lePort.text())
         username2 = str(self.ui.leUserName.text())
@@ -247,7 +265,7 @@ class DlgConnect(QtWidgets.QWidget):
         INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES (?,?,?,?,?,?,?)''', (name2, dbname2, dbtype2, dbhost2, dbport2, username2, password2))
         db.commit()
         print ("PROYECTO GUARDADO")
-
+        
 
         db.close()
 # hasta aqui la modificación 11

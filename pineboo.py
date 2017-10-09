@@ -180,11 +180,12 @@ def main():
         connection_window.show()
         ret = app.exec_()
         if connection_window.close():    
-            if connection_window.ruta:
-                prjpath = connection_window.ruta
-                print("Cargando desde ruta %r " % prjpath)
-                project.load(prjpath)
-            elif connection_window.database:
+            #if connection_window.ruta:
+            #    prjpath = connection_window.ruta
+            #    print("Cargando desde ruta %r " % prjpath)
+            #    project.load(prjpath)
+            #elif connection_window.database:
+            if connection_window.database:
                 print("Cargando credenciales")
                 project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password, connection_window.driveralias)
             
