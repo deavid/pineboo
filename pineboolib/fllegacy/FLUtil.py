@@ -88,7 +88,7 @@ class FLUtil(ProjectClass):
     @param n Número a tratar. Debe ser positivo
     """
     def centenamillar(self, n):
-        buffer = None
+        buffer = ""
 
         if n < 10000:
             buffer = self.decenasmillar(n)
@@ -107,7 +107,7 @@ class FLUtil(ProjectClass):
     @param n Número a tratar. Debe ser positivo
     """
     def decenas(self, n):
-        buffer = None
+        buffer = ""
 
         if n < 30:
             buffer = self.unidades(n)
@@ -126,7 +126,7 @@ class FLUtil(ProjectClass):
     @param n Número a tratar. Debe ser positivo
     """
     def centenas(self, n):
-        buffer = None
+        buffer = ""
         if n == 100:
             buffer = "cien"
 
@@ -145,7 +145,7 @@ class FLUtil(ProjectClass):
     @param n Número a tratar. Debe ser positivo
     """
     def unidadesmillar(self, n):
-        buffer = None
+        buffer = ""
         if n < 1000:
             buffer = ""
 
@@ -168,7 +168,7 @@ class FLUtil(ProjectClass):
     @param n Número a tratar. Debe ser positivo
     """
     def decenasmillar(self, n):
-        buffer = None
+        buffer = ""
         if n < 10000:
             buffer = self.unidadesmillar(n)
             return buffer
@@ -189,7 +189,7 @@ class FLUtil(ProjectClass):
     @return Cadena de texto con su expresión hablada
     """
     def enLetra(self, n):
-        buffer = None
+        buffer = ""
         if n > 1000000000:
             buffer = "Sólo hay capacidad hasta mil millones"
             return buffer
@@ -298,9 +298,33 @@ class FLUtil(ProjectClass):
     @param n Número del que se debe obtener el dígito de control
     @return Caracter con el dígito de control asociado al número dado
     """
-    @decorators.NotImplementedWarn
+
     def calcularDC(self, n):
-        pass
+        Tabla = [6,3,7,9,10,5,8,4,2,1]
+        
+        DC = None
+        Suma = 0
+        nDigitos = len(n) - 1
+        
+        ct = 1
+        
+        while ct <= len(n):
+            Suma = Suma + (Tabla[nDigitos] * (int(n[ct - 1]) - 0))
+            nDigitos = nDigitos - 1
+            ct = ct + 1
+        
+        DC = 11 - (Suma  % 11)
+        if DC == 11:
+            DC = 0
+        elif DC == 10:
+            DC = 1
+        
+        char = chr(DC + 48)
+        return char
+    
+            
+        
+        
 
     """
     Convierte fechas del tipo DD-MM-AAAA, DD/MM/AAAA o
@@ -645,16 +669,10 @@ class FLUtil(ProjectClass):
     """
     def addDays(self, fecha, offset):
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha)
-            
-        retorno = fecha
+            fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            tmp = QtCore.QDateTime(fecha)
-            retorno = tmp.date()
-        
-        if not isinstance(retorno, QtCore.QDate):
-            print("FATAL: FLUtil.addDays: No reconozco el tipo de dato %r" % type(retorno))
-        return retorno.addDays(offset).toString("dd-MM-yyyy")
+            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
+        return fecha.addDays(offset).toString("yyyy-MM-dd")
 
     """
     Suma meses a una fecha.
@@ -665,15 +683,10 @@ class FLUtil(ProjectClass):
     """
     def addMonths(self, fecha, offset):
         if isinstance(fecha, str):
-            retorno = QtCore.QDate.fromString(fecha)
-        
+            fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            tmp = QtCore.QDateTime(fecha)
-            retorno = tmp.date()
-        
-        if not isinstance(retorno, QtCore.QDate):
-            print("FATAL: FLUtil.addMonths: No reconozco el tipo de dato %r" % type(retorno))
-        return retorno.addMonths(offset).toString("dd-MM-yyyy")
+            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
+        return fecha.addMonths(offset).toString("yyyy-MM-dd")
 
     """
     Suma años a una fecha.
@@ -684,10 +697,10 @@ class FLUtil(ProjectClass):
     """
     def addYears(self, fecha, offset):
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha)
+            fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
             print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
-        return fecha.addYears(offset)
+        return fecha.addYears(offset).toString("yyyy-MM-dd")
 
     """
     Diferencia de dias desde una fecha a otra.

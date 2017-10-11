@@ -63,7 +63,7 @@ class PNConnection(QtCore.QObject):
     """
     Permite seleccionar una conexion que no es la default, Si no existe la crea
     """
-    def useConn(self, name):
+    def useConn(self, name = "default"):
         if name == "default":
             return self.conn
         
