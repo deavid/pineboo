@@ -87,8 +87,10 @@ class Array(object):
     
     dict_ = None
     key_ = None
+    names_ = None
     
     def __init__(self, *args):
+        self.names_ = []
         if not len(args):
             self.dict_ = {}
         elif isinstance(args[0], int) and len(args) == 1:
@@ -96,6 +98,7 @@ class Array(object):
         elif isinstance(args[0], list):
             self.dict_ = {}
             for field in args[0]:
+                self.names_.append(field)
                 self.dict_[field] = field 
         else:
             self.dict_ = args
@@ -109,11 +112,7 @@ class Array(object):
         
     def __getitem__(self, key):
         if isinstance(key, int):
-            i = 0
-            for k in self.dict_.keys():
-                if i == key:
-                    return self.dict_[k]
-                i = i + 1
+           return self.dict_[self.names_[key]]
         else:
             #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
             return self.dict_[key]
