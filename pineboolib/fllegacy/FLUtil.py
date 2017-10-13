@@ -9,6 +9,7 @@ from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
 import platform, hashlib, traceback
+import datetime
 
 class FLUtil(ProjectClass):
 
@@ -506,7 +507,6 @@ class FLUtil(ProjectClass):
     @author Andrés Otón Urbano.
     """
     def nextCounter(self, *args, **kwargs):
-
         if len(args) == 2:
             name = args[0]
             cursor_ = args[1]
@@ -853,7 +853,10 @@ class FLUtil(ProjectClass):
             return False
 
         if q.next():
-            return q.value(0)
+            valor = q.value(0)
+            if isinstance(valor, datetime.date):
+                valor = str(valor)
+            return valor
 
         if size:
             return False
