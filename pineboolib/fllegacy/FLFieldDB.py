@@ -302,6 +302,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
 
     def __init__(self, parent, *args):
+        print("init!!", self)
         super(FLFieldDB, self).__init__(parent)
 
 
@@ -858,7 +859,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if data == self.cursor_.valueBuffer(self.fieldName_):
                     return
-
+            
             self.cursor_.setValueBuffer(self.fieldName_, data)
         
         elif isinstance(self.editor_, QtWidgets.QComboBox):
@@ -933,12 +934,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def setValue(self, v):
-        # --> Para quitar con el tiempo
-        if v and isinstance(v, str):
-            if str(v[0:3]) == "RK@":
-                v = self.cursor_.fetchLargeValue(v)
-        # <--
-
+        print("seteando", self, v)
         if not self.cursor_:
             print("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)" % (self.fieldName_, self))
             return
@@ -1374,7 +1370,6 @@ class FLFieldDB(QtWidgets.QWidget):
                     where = str(self.filter_ + " AND " + where)
                 
                 q.setWhere(where)
-                
                 if q.exec_() and q.next():
                     v0 = q.value(0)
                     v1 = q.value(1)
@@ -1532,7 +1527,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 #pix.loadFromData()
                     #QtGui.QPixmapCache.insert(cs.left(100), pix)
 
-                if not pix is None:
+                if pix:
                     self.editorImg_.setPixmap(pix)
                 else:
                     self.editorImg_.clear()
@@ -1702,7 +1697,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if not ol and doHome:
                 self.editor_.home(False)
             
-            self.editor_.textChanged.connect(self.updateValue)
+                self.editor_.textChanged.connect(self.updateValue)
         
         elif type_ == "uint" or type_ == "int" or type_ == "serial":
             if v == self.editor_.text():
@@ -2621,7 +2616,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 a = mng.action(self.actionName_)
                 if not a:
                     return
-                a.setTable(field.relationM1().foreignTable())
+                a.setTable(field.relationM1().foreignTable()) 
             c = FLSqlCursor(a.table())
             #f = FLFormSearchDB(c, a.name(), self.topWidget_)
             f = FLFormSearchDB(c, c.action(), None)
@@ -2650,14 +2645,13 @@ class FLFieldDB(QtWidgets.QWidget):
                 QtCore.QTimer.singleShot(0,objTdb.lineEditSearch, self.setFocus)
         """
         v = f.exec_(field.relationM1().foreignField())
+        f.close()
+        if c:
+            c.deletelater()
         if v:
             self.setValue("")
             self.setValue(v)
-
-        #FIXME
-        #f.close()
-        #if c:
-            #c.deletelater()
+        
 
 
 
@@ -3108,6 +3102,9 @@ class FLFieldDB(QtWidgets.QWidget):
                                 #print("Consulta = %s" % q.sql())
                                 if q.exec_() and q.first():
                                     value = q.value(0)
+                                    if isinstance(value, str):
+                                        if value[0:3] == "RK@":
+                                            value = self.cursor_.fetchLargeValue(value)
                                     if isinstance(value, datetime.date):
                                         value = value.strftime('%d-%m-%Y')
                                     self.setValue(value)
@@ -3294,12 +3291,13 @@ class FLIntValidator(QtGui.QIntValidator):
 
 
 
-class FLUIntValidator(QtGui.QIntValidator):
+class FLUIntValidator(QtGui.QDoubleValidator):
 
     def __init__(self, *args, **kwargs):
             super(FLUIntValidator, self).__init__()
 
     def validate(self, input_, i):
+        """
         if not input_:
             return QtGui.QValidator.Acceptable
 
@@ -3309,7 +3307,8 @@ class FLUIntValidator(QtGui.QIntValidator):
             state = QtGui.QValidator.Invalid
 
         return state
-
+        """
+        return super(FLUIntValidator, self).validate(input_, i)
 
 
 
@@ -3410,8 +3409,9 @@ class FLDateEdit(QtWidgets.QDateEdit):
         if d is None:
             d = str("01-01-2000")
         
-        if "T" in d:
-            d = d[:d.find("T")]
+        if isinstance(d, str):
+            if "T" in d:
+                d = d[:d.find("T")]
         
         if not isinstance(d, QtCore.QDate):
             date = QtCore.QDate.fromString(d,"dd-MM-yyyy")
