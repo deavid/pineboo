@@ -514,10 +514,10 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.editionStates_ = None
         self.activatedCheckIntegrity_ = True
         self.askForCancelChanges_ = True
+        self.transactionsOpened_ = []
 
 
 
-    @decorators.BetaImplementation
     def __del__(self):
 
         #if self.metadata_:
@@ -539,6 +539,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
         if self.browseStates_:
             del self.browseStates_
             #print("AQBoolFlagState count", self.count_)
+        if self.transactionsOpened_:
+            del self.transactionsOpened_
 
     @decorators.NotImplementedWarn
     def doAcl(self):
@@ -669,7 +671,7 @@ class FLSqlCursor(ProjectClass):
     Código de inicialización común para los constructores
     """
     def init(self, name, autopopulate, cR, r):
-        #print("FLSqlCursor(%s): Init()" % name)
+        #print("FLSqlCursor(%s): Init() %s (%s, %s)" % (name, self, cR, r))
 
         #if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
 
@@ -778,7 +780,10 @@ class FLSqlCursor(ProjectClass):
     @return Cadena de texto con el filtro principal
     """
     def mainFilter(self):
-        return self.d._model.where_filters["main-filter"]
+        if getattr(self.d._model, "where_filters", None):
+            return self.d._model.where_filters["main-filter"]
+        else:
+            return None
 
 
     """
@@ -800,7 +805,7 @@ class FLSqlCursor(ProjectClass):
     def setAction(self, a):
         #if isinstance(a, str) or isinstance(a, QString):
 
-        a = str(a) # FIXME: Quitar cuando se quite QString
+        #a = str(a) # FIXME: Quitar cuando se quite QString
         
         
         if isinstance(a, str):
@@ -809,7 +814,7 @@ class FLSqlCursor(ProjectClass):
             try:
                 self._action = self._prj.actions[str(a)]
             except KeyError:
-                print("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
+                #print("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
                 self._action.table = a
                 #print("FLSqlCursor.setAction(): Action no encontrada : %s en %s actions. Es posible que la tabla no exista" % (a, len(self._prj.actions)))
                 #return False
@@ -817,6 +822,10 @@ class FLSqlCursor(ProjectClass):
 
             if getattr(self._action,"table",None):
                 self.d._model = CursorTableModel(self._action, self._prj)
+                if not self.d._model:
+                    return None
+                
+                
                 self._selection = QtCore.QItemSelectionModel(self.model())
                 self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
                 self._currentregister = self._selection.currentIndex().row()
@@ -838,10 +847,10 @@ class FLSqlCursor(ProjectClass):
     @param doRefresh Si TRUE tambien refresca el cursor
     """
     def setMainFilter(self, f, doRefresh = True):
-        if f == "":
-            f = "1 = 1"
+        #if f == "":
+        #    f = "1 = 1"
             
-            
+        #print("--------------------->Añadiendo filtro",  f)   
         if self.d._model:
             self.d._model.where_filters["main-filter"] = f
             if doRefresh:
@@ -990,28 +999,37 @@ class FLSqlCursor(ProjectClass):
             return None
 
         #if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
-        if self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert:
+        if (self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert) or not self.d.buffer_:
             if not self.d.buffer_:
+                #print("solicitando rb de", self.curName(), self.modeAccess(), self.d._currentregister, self.model().rows)
                 self.refreshBuffer()
 
             if not self.d.buffer_:
-                print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.", self.curName())
-                return None
-        else:
-            #return None //Devolvemos el valor del buffer si es insert
-            if not self.d.buffer_:
-                #print("No hay buffer de ", self.curName())
+                #print("ERROR: FLSqlCursor(%s): aún después de refresh, no tengo buffer." % self.curName())
                 return None
             else:
-                return self.d.buffer_.value(fN)
+                field = self.metadata().field(fN)
+                if field:
+                    type_ = field.type()
+                    v = self.d.buffer_.value(fN)
+                
+                    if type_ == "pixmap":
+                        return self.d.db_.manager().fetchLargeValue(v)
+                    else:
+                        return v
+                else:
+                    return None
+        
             
         field = self.metadata().field(fN)
         if not field:
-            #print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.metadata().name(), fN))
+            print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.curName(), fN))
             return None
 
         type_ = field.type()
         fltype = field.flDecodeType(type_)
+        
+
         if self.d.buffer_.isNull(fN):
             if type_ == "double" or type_ == "int" or type_ == "uint":
                 return 0
@@ -1804,7 +1822,7 @@ class FLSqlCursor(ProjectClass):
     def atFrom(self):
         if not self.d.buffer_ or not self.d.metadata_:
             return 0
-
+        
         pKN = self.d.metadata_.primaryKey()
         pKValue = self.valueBuffer(pKN)
 
@@ -2185,19 +2203,19 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
         if not self.d.metadata_:
-            return False
-
+            return False  
+        
         if not self.isValid() and not self.d.modeAccess_ == self.Insert:
             return False
-
         if self.d.modeAccess_ == self.Insert:
+
             if not self.commitBufferCursorRelation():
                 return False
-
+            
             if not self.d.buffer_:
                 self.d.buffer_ = PNBuffer(self)
             self.setNotGenerateds()
-
+            
             fieldList = self.metadata().fieldListObject()
             if fieldList:
                 for field in fieldList:
@@ -2227,7 +2245,7 @@ class FLSqlCursor(ProjectClass):
 
                             if siguiente:
                                 self.d.buffer_.setValue(field.name(), siguiente)
-
+            
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
 
@@ -2464,13 +2482,14 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def __del__(self, invalidate = True):
+        #print("FLSqlCursor(%s). Eliminando cursor" % self.curName(), self)
         delMtd = None
         if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
         
         msg = None
         mtd = self.d.metadata_
-        """
+        
         if self.d.transactionsOpened_:
             print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
         if len(self.d.transactionsOpened_) > 0: #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
@@ -2479,7 +2498,7 @@ class FLSqlCursor(ProjectClass):
                 t = self.d.metadata_.name()
                 msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
             self.rollbackOpened(-1, msg)
-        """
+        
         del self.d
         if delMtd:
             del mtd
@@ -2504,6 +2523,7 @@ class FLSqlCursor(ProjectClass):
         if _filter:
             if bFilter:
                 if not _filter in bFilter:
+                    
                     finalFilter = "%s AND %s" % (bFilter, _filter)
                 else:
                     finalFilter = bFilter
@@ -2512,8 +2532,12 @@ class FLSqlCursor(ProjectClass):
                 finalFilter = _filter
         
         if finalFilter:
+            #print("Asignando filtro", finalFilter)
             self.setMainFilter(finalFilter , False)
-            self.d._model.refresh()
+            self.model().refresh()
+            if self.modeAccess() == self.Browse:
+                self.first()
+            #print("self.d._currentregister", self.d._currentregister)
             self.refreshBuffer()
         
         self.d._currentregister = -1
@@ -2539,16 +2563,16 @@ class FLSqlCursor(ProjectClass):
     def baseFilter(self):
         #print("basefilter", self.curName())
         relationFilter = None
-        finalFilter = None
+        finalFilter = ""
 
         if self.d.cursorRelation_ and self.d.relation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
 
             fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
             field = self.d.metadata_.field(self.d.relation_.field())
-            if not fgValue:
-                fgValue = ""
+            #if not fgValue:
+            #    fgValue = ""
 
-            if field and not fgValue == None:
+            if field and fgValue:
                 relationFilter = self.d.db_.manager().formatAssignValue(field, fgValue, True)
                 filterAc = self.d.cursorRelation_.filterAssoc(self.d.relation_.foreignField(), self.d.metadata_)
 
@@ -2588,10 +2612,10 @@ class FLSqlCursor(ProjectClass):
         if not bFilter:
             return f
         else:
-            if not f or bFilter.__contains__(f):
+            if not f or f in bFilter:
                 return bFilter
             else:
-                if f.__contains__(bFilter):
+                if bFilter in f:
                     return f
                 else:
                     return "%s aND %s" % (bFilter, f)
