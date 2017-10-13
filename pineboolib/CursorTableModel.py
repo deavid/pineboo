@@ -39,7 +39,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._action = action
         self._prj = project
         if action and action.table:
-            self._table = project.tables[action.table]
+            try:
+                self._table = project.tables[action.table]
+            except:
+                #print("CursortableModel : Tabla %s no declarada en project.tables" % action.table)
+                return None
+            
             self._metadata = project.conn.manager().metadata(self._table.name)
         else:
             raise AssertionError
@@ -215,7 +220,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.threadFetcher = threading.Thread(target=self.threadFetch)
             self.threadFetcherStop = threading.Event()
             self.threadFetcher.start()
-            
+        
         if tiempo_final - tiempo_inicial > 0.2:
             print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % ( self._table.name, self.rows, (fromrow,torow), tiempo_final - tiempo_inicial))
  
@@ -268,6 +273,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._curname = "cur_" + self._table.name + "_%08d" % (next(self.CURSOR_COUNT))
         sql = """DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s """ % (self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
         #sql = """SELECT %s FROM %s WHERE %s """ % (", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
+        
+        #print("----->", self._curname, sql)
         self._cursor.execute(sql)
         sql = """FETCH %d FROM %s""" % (1000,self._curname) 
         self._cursor.execute(sql)
