@@ -2850,11 +2850,59 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     @decorators.NotImplementedWarn
     @QtCore.pyqtSlot(str)
-    def setMapValue(self, v):
-        self.fieldMapValue_ = self.sender()
-        self.mapValue_ = v
-        self.setMapValue()
-        #FIXME: Falta sin parametro
+    def setMapValue(self, v = None):
+        if v:
+            self.fieldMapValue_ = self.sender()
+            self.mapValue_ = v
+            self.setMapValue()
+        else:
+            if not self.fieldMapValue_ or not self.cursor_:
+                return
+            tMD = self.cursor_.metadata()
+            if not tMD:
+                return
+            
+            fSN = self.fieldMapValue_.fieldName()
+            field = self.tMD.field(self.fieldName_)
+            fieldSender = tMD.field(fSN)
+            
+            if not field or not fieldSender:
+                return
+            
+            if field.relationM1():
+                if not feld.relationM1().foreignTable() == tMD.name():
+                    mng = self.cursor_.db().manager()
+                    rt = field.relationM1().foreignTable()
+                    fF = self.fieldMapValue_.foreignTable()
+                    q = FLSqlQuery(None, self.cursor_.db().connectionName())
+                    q.setForwardOnly(True)
+                    q.setTablesList(rt)
+                    q.setSelect("%s,%s" %(field.relationM1().foreignField(), fF) )
+                    q.setFrom(rt)
+                    
+                    where = mng.formatAssignValue(fF, fieldSender, self.mapValue_, True)
+                    assocTmd = mng.metadata(rt)
+                    filterAc = self.cursor_.filterAssoc(fF, assocTmd)
+                    if assocTmd and not assocTmd.inCache():
+                        del assocTmd
+                    
+                    if filterAc:
+                        if not where:
+                            where = filterAc
+                        else:
+                            where = "% AND %s" % (where, filterAc)
+                    
+                    if not self.filter_:
+                        q.setWhere(where)
+                    else:
+                        q.setWhere("%s AND %s" % (self.filter_, where))
+                    
+                    if q.exec_() and q.next():
+                        self.setValue("")
+                        self.setValue(q.value(0))
+                         
+            
+
 
 
 
