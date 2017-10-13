@@ -241,17 +241,17 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.endRemoveRows()
         if oldrows > 0:
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
-        where_filter = " "
+        where_filter = None
         
         for k, wfilter in sorted(self.where_filters.items()):
             if wfilter is None: continue
             wfilter = wfilter.strip()
             if not wfilter: continue
-            if where_filter is " ":
+            if not where_filter:
                 where_filter = wfilter
             else:
                 where_filter += " AND " + wfilter
-        if where_filter is " ":
+        if not where_filter:
             where_filter = "1=1"
         
         self._cursor = self._prj.conn.cursor()
@@ -441,7 +441,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     Crea una nueva linea en el tableModel
     @param buffer . PNBuffer a añadir
     """
-    @decorators.BetaImplementation
     def newRowFromBuffer(self, buffer):
         #Metemos lineas en la tabla de la bd
         campos = None
@@ -464,7 +463,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
-            print("INSERT!!!!", sql)
         
             self._cursor.execute(sql)
             self.refresh()
