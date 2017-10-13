@@ -106,6 +106,9 @@ class Array(object):
     def __setitem__(self, key, value):
         #if isinstance(key, int):
             #key = str(key)
+        if not key in self.names_:
+            self.names_.append(key)
+            
         self.dict_[key] = value
         
             
@@ -461,7 +464,15 @@ class Process(QtCore.QProcess):
 
 
 class RadioButton(QtWidgets.QRadioButton):
-    pass
+    
+    def __ini__(self):
+        super(RadioButton, self).__init__()
+    
+    def __setattr__(self, name, value):
+        if name == "text":
+            self.setText(value)
+        else:
+            super(RadioButton, self).__setattr__(name, value)
         
 
 
@@ -504,7 +515,7 @@ class Dialog(QtWidgets.QDialog):
 class GroupBox(QtWidgets.QGroupBox):
     def __init__(self):
         super(GroupBox, self).__init__()
-        self._layout = QtWidgets.QHBoxLayout()
+        self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
 
     def add(self, _object):     
