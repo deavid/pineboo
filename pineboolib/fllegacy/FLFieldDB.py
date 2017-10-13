@@ -246,7 +246,7 @@ class FLFieldDB(QtWidgets.QWidget):
     _partDecimal = None
     autoSelect = False
 
-    editor_ = False #Editor para el contenido del campo que representa el componente
+    editor_ = None #Editor para el contenido del campo que representa el componente
     fieldName_ = None #Nombre del campo de la tabla al que esta asociado este componente
     tableName_ = None #Nombre de la tabla fóranea
     actionName_ = None #Nombre de la accion
@@ -285,8 +285,6 @@ class FLFieldDB(QtWidgets.QWidget):
     FLWidgetFieldDBLayout = None
     name = None
 
-    _initCursorWhenLoad = False
-    _initEditorWhenLoad = False
     _refreshLaterEditor = False
 
 
@@ -302,7 +300,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
 
     def __init__(self, parent, *args):
-        print("init!!", self)
         super(FLFieldDB, self).__init__(parent)
 
 
@@ -392,6 +389,7 @@ class FLFieldDB(QtWidgets.QWidget):
             new_parent = self.topWidget_.parentWidget()
             if new_parent is None:
                 self.topWidget_ = None
+                print(self.parentWidget())
                 print("FLFieldDB : El widget de nivel superior deber ser de la clase FLFormDB o heredar de ella (o fuí demasiado rápido y no lo esperé)")
                 break
             self.topWidget_ = new_parent
@@ -412,6 +410,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.cursorBackup_ = False
         self.partDecimal_ = None
+        self.initCursor()
+        self.initEditor()
 
 
 
@@ -436,14 +436,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setActionName(self, aN):
         self.actionName_ = str(aN)
-        if self.showed and self.topWidget_:
-            self.initEditor()
-            self.initCursor()
-
-        else:
-            self._initCursorWhenLoad = True
-            self._initEditorWhenLoad = True
-            self.initFakeEditor()
 
     """
     Para obtener el nombre del campo.
@@ -480,15 +472,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setFieldName(self, fN):
         self.fieldName_ = str(fN)
-        if self.showed:
-            if self.topWidget_:
-                self.initCursor()
-                self.initEditor()
-            else:
-                self.initFakeEditor()
-        else:
-            self._initCursorWhenLoad = True
-            self._initEditorWhenLoad = True
 
     """
     Para obtener el nombre de la tabla foránea.
@@ -510,15 +493,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.tableName_ = None
         if not fT == "":
             self.tableName_ = fT
-        if self.showed:
-            if self.topWidget_:
-                self.initCursor()
-                self.initEditor()
-            else:
-                self.initFakeEditor()
-        else:
-            self._initCursorWhenLoad = True
-            self._initEditorWhenLoad = True
+
 
 
     """
@@ -537,15 +512,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setForeignField(self, fN):
         self.foreignField_ = str(fN)
-        if self.showed:
-            if self.topWidget:
-                self.initCursor()
-                self.initEditor()
-            else:
-                self.initFakeEditor()
-        else:
-            self._initCursorWhenLoad = True
-            self._initEditorWhenLoad = True
 
     """
     Para obtener el nombre del campo relacionado.
@@ -565,15 +531,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setFieldRelation(self, fN):
         self.fieldRelation_ = str(fN)
-        if self.showed:
-            if self.topWidget:
-                self.initCursor()
-                self.initEditor()
-            else:
-                self.initFakeEditor()
-        else:
-            self._initCursorWhenLoad = True
-            self._initEditorWhenLoad = True
 
     """
     Para establecer el alias del campo, mostrado en su etiqueta si showAlias es true
@@ -662,6 +619,9 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int)
     def eventFilter(self,obj, event):
+        if not obj:
+            return True
+        
         QtWidgets.QWidget.eventFilter(self, obj, event)
         timerActive = False
         if event.type() == QtCore.QEvent.KeyPress:
@@ -826,9 +786,8 @@ class FLFieldDB(QtWidgets.QWidget):
             elif isNull:
                 return
             
-            if isNull:
-                data = str(QtCore.QTime().toString("hh:mm:ss"))      
-                self.cursor_.setValueBuffer(self.fieldName_, data)
+            if isNull:   
+                self.cursor_.setValueBuffer(self.fieldName_, str(QtCore.QTime().toString("hh:mm:ss")))
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
@@ -919,9 +878,18 @@ class FLFieldDB(QtWidgets.QWidget):
             #if self.isVisible() and self.hasFocus() and field.type() == "string" and field.length() == len(s):
                 #self.focusNextPrevChild(True)
 
-
-
-
+    def status(self):
+        print("****************STATUS**************")
+        print("FLField:", self.fieldName_)
+        print("FieldAlias:", self.fieldAlias_)
+        print("FieldRelation:", self.fieldRelation_)
+        print("Cursor:", self.cursor_)
+        if self.cursor_:
+            print("CurName:", self.cursor().curName())
+        print("Editor: %s, EditorImg: %s" % (self.editor_, self.editorImg_))
+        print("RefreshLaterEditor:", self._refreshLaterEditor)
+        print("************************************")
+        
 
 
 
@@ -934,12 +902,14 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def setValue(self, v):
-        print("seteando", self, v)
         if not self.cursor_:
             print("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)" % (self.fieldName_, self))
             return
         #if v:
         #    print("FLFieldDB(%s).setValue(%s) ---> %s" % (self.fieldName_, v, self.editor_))
+        
+            
+        
         tMD = self.cursor_.metadata()
         if not tMD:
             return
@@ -1951,7 +1921,7 @@ class FLFieldDB(QtWidgets.QWidget):
     e inicia un QDataEdit)
     """
     def initEditor(self):
-        
+        #print("Inicializando editor", self.fieldName_)
         if not self.cursor_:
             return
 
@@ -3059,7 +3029,7 @@ class FLFieldDB(QtWidgets.QWidget):
             timer.singleShot(15, self.showWidget)
             return
         else:
-            if not self.showed and not self._initEditorWhenLoad and not self._initCursorWhenLoad:
+            if not self.showed:
                 if self.topWidget_:
                     self.showed = True
                     if not self.firstRefresh:         
@@ -3119,15 +3089,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 
                 
-            if self._initCursorWhenLoad:
-                self._initCursorWhenLoad = False
-                self.initCursor()
-
-            if self._initEditorWhenLoad:
-                self._initEditorWhenLoad = False
-                self.setNoShowed()
-                self.initEditor()
-                self.showWidget()
 
 
 
