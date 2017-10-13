@@ -128,9 +128,8 @@ class PNBuffer(ProjectClass):
     def isNull(self, n):
         if isinstance(n, str):
             for field in  self.fieldList_:
-                if field.name == n:
+                if field.name == n:                
                     if field.value == None:
-                        #print("PNBuffer.isNull(True)")
                         return True
                     else:
                         return False
@@ -163,7 +162,6 @@ class PNBuffer(ProjectClass):
     def setValue(self, name, value, mark_ = True):
         if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
-
         for field in  self.fieldList_:
             if field.name == str(name):
                 if field.type_ == "bool":
@@ -576,7 +574,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
 
     def msgBoxWarning(self, msg, throwException = False):
-        
+        print(msg)
         if not throwException:
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),"Pineboo", msg)
         
@@ -1444,10 +1442,8 @@ class FLSqlCursor(ProjectClass):
     claves primarias y si hay nulos en campos que no lo permiten cuando se inserta o se edita.
     Si alguna comprobacion falla devuelve un mensaje describiendo el fallo.
     """
-    @decorators.BetaImplementation
     def msgCheckIntegrity(self):
         msg = ""
-        
         if not self.d.buffer_ or not self.d.metadata_:
             msg = "\nBuffer vacío o no hay metadatos"
             return msg
@@ -1704,14 +1700,13 @@ class FLSqlCursor(ProjectClass):
         msg = self.msgCheckIntegrity()
         if msg:
             if showError:
-                if self.d.modeAccess_ == self.Inset or self.d.modeAccess_ == self.Edit:
+                if self.d.modeAccess_ == self.Insert or self.d.modeAccess_ == self.Edit:
                     #self.d.msgBoxWarning(FLUtil.tr("No se puede validad el registro actual:\n") + msg)
                     self.d.msgBoxWarning("No se puede validad el registro actual:\n" + msg)
                 elif self.d.modeAccess_ == self.Del:
                     #self.d.msgBoxWarning(FLUtil.tr("No se puede borrar registro:\n") + msg)
                     self.d.msgBoxWarning("No se puede borrar registro:\n" + msg)
             return False
-        
         return True
 
     """
@@ -1861,7 +1856,8 @@ class FLSqlCursor(ProjectClass):
                     else:
                         pos = 0
                     return pos
-
+            
+            
             if cFilter:
                 sqlWhere = cFilter
                 sql = "%s WHERE %s" % (sql, sqlWhere)
@@ -2535,9 +2531,6 @@ class FLSqlCursor(ProjectClass):
             #print("Asignando filtro", finalFilter)
             self.setMainFilter(finalFilter , False)
             self.model().refresh()
-            if self.modeAccess() == self.Browse:
-                self.first()
-            #print("self.d._currentregister", self.d._currentregister)
             self.refreshBuffer()
         
         self.d._currentregister = -1
@@ -2803,7 +2796,6 @@ class FLSqlCursor(ProjectClass):
         pKN = self.d.metadata_.primaryKey()
         updated = False
         savePoint = None
-
         if self.d.modeAccess_ == self.Insert:
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
@@ -2889,7 +2881,6 @@ class FLSqlCursor(ProjectClass):
             if savePoint == True:
                 del savePoint
             return False
-
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.context()
@@ -2903,7 +2894,6 @@ class FLSqlCursor(ProjectClass):
 
         if savePoint == True:
             del savePoint
-
         self.d.modeAccess_ = self.Browse
         if updated == True:
             if fieldNameCheck:
