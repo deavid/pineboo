@@ -305,7 +305,7 @@ class FLFormSearchDB(FLFormDB):
                     fdb.autoComFrame_.hide()
                     return
             except:
-                a = 1
+                pass
         
         if self.cursor_ and self.pushButtonCancel:
             if not self.pushButtonCancel.isEnabled():
