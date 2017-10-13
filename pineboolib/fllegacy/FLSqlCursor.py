@@ -2237,7 +2237,8 @@ class FLSqlCursor(ProjectClass):
                             try:
                                 siguiente = self.context().calculateCounter()
                             except:
-                                siguiente = FLUtil.nextCounter(field.name(), self)
+                                util = FLUtil()
+                                siguiente = util.nextCounter(field.name(), self)
 
                             if siguiente:
                                 self.d.buffer_.setValue(field.name(), siguiente)
