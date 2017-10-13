@@ -412,12 +412,14 @@ class FLSqlQuery(ProjectClass):
     """
     def value(self, n, raw = False):
         pos = None
+        name = None
+        
         if isinstance(n, str):
             pos=self.fieldNameToPos(n)
             name = n
         else:
             pos = n
-            name = self.fieldList()[n]
+            name = self.posToFieldName(pos)
             
             
         
