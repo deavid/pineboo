@@ -460,6 +460,7 @@ class FLFormRecordDB(FLFormDB):
                 self.afterCommitTransaction()
             else:
                 if not self.cursor_.rollback():
+                    e.ignore()
                     return
                 else:
                     self.cursor_.select()
