@@ -72,15 +72,22 @@ class FLSqlQuery(ProjectClass):
         En algunas consultas va con ';' , esto lo limpio 
         """
         sql = sql.replace(";","")
+        
+        micursor=self.__damecursor()
+        conn = self.__dameConn()
+        
         try:
-            micursor=self.__damecursor()
             micursor.execute(sql)
             self._cursor=micursor
         except Exception:
             print(traceback.format_exc())
+            conn.rollback()
             return False
-        else:
-            return True 
+        
+        conn.commit()
+        
+            
+        return True 
     
     @classmethod
     def __damecursor(self):
@@ -89,6 +96,18 @@ class FLSqlQuery(ProjectClass):
         else:
             cursor = pineboolib.project.conn.cursor()
         return cursor
+    
+    def __dameConn(self):
+        from pineboolib.PNConnection import PNConnection
+        if getattr(self.d,"db_", None):
+            if isinstance(self.d.db_, PNConnection):
+                conn = self.d.db_.conn
+            else:
+                conn = self.d.db_
+        else:
+            conn = pineboolib.project.conn.conn
+        return conn
+        
     
     def __cargarDatos(self):
         if self._datos:
