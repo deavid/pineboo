@@ -142,15 +142,14 @@ class FLQPSQL(object):
         
         cmd = ("rollback to savepoint sv_%s" % n)
 
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec():
-            self.setLastError("No se pudo deshacer punto de salvaguarda", "rollback to savepoint sv_%s" % n)
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute(cmd)
+        except:
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "rollback to savepoint sv_%s" % n)
             return False
         
-        return True 
+        return True
     
     def setLastError(self, text, command):
         self.lastError_ = "%s (%s)" % (text, command)
