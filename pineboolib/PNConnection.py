@@ -274,7 +274,7 @@ class PNConnection(QtCore.QObject):
     def interactiveGUI(self):
         return self.interactiveGUI_
     
-    def doCommit(self, cur, notify):
+    def doCommit(self, cur, notify = True):
         if not cur and not self.db():
             return False
         
