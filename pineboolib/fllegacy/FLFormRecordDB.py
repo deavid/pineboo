@@ -650,7 +650,7 @@ class FLFormRecordDB(FLFormDB):
                 if not caption:
                     caption = self.cursor_.metadata().alias()
                 self.cursor_.transaction()
-                self.setCaptionWidget("Insertar", caption)
+                self.setCaptionWidget(caption)
                 if self.initFocusWidget_:
                     self.initFocusWidget_.setFocus()
                 self.cursor_.refreshBuffer()
