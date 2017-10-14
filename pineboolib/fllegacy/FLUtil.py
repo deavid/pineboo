@@ -842,6 +842,11 @@ class FLUtil(ProjectClass):
     """
     
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
+        
+        if w == None or w == "":
+            return False
+        
+        
         q = FLSqlQuery(None, connName)
         if tL:
             q.setTablesList(tL)
@@ -930,8 +935,15 @@ class FLUtil(ProjectClass):
         while c.next():
             c.setModeAccess(FLSqlCursor.Edit)
             c.refreshBuffer()
-            for f,v in zip(fL, vL):
-                c.setValueBuffer(f, v)
+            
+            if isinstance(fL, list):
+                i = 0
+                for f in fL:
+                    c.setValueBuffer(f, vL[i])
+                    i = i + 1
+            else:
+                c.setValueBuffer(fL, vL)
+                
             if not c.commitBuffer():
                 return False
 
