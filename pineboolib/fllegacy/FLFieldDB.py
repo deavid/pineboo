@@ -170,6 +170,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
                 texto = "0."
                 while d < self._partDecimal:
                     texto = texto + "0"
+                    d = d + 1
                     
             i = None
             l = len(texto) - 1
