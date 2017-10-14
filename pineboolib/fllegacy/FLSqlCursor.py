@@ -295,6 +295,11 @@ class PNBuffer(ProjectClass):
 
     def fieldsList(self):
         return self.fieldList_
+    
+    def field(self, name):
+        for f in self.fieldList_:
+            if f.name == name:
+                return f
 
 ################################################################################
 ################################################################################
@@ -1337,7 +1342,8 @@ class FLSqlCursor(ProjectClass):
             res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), util.tr("Aviso"), util.tr("El registro activo será borrado. ¿ Está seguro ?"),QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No)
             if res == QtWidgets.QMessageBox.No:
                 return
-
+            
+            
             self.transaction()
             self.d.modeAccess_ = self.Del
             if not self.refreshBuffer():
@@ -1347,7 +1353,10 @@ class FLSqlCursor(ProjectClass):
                     self.rollback()
                 else:
                     self.commit()
+            
             return
+
+
 
 
         self.d.modeAccess_ = m
@@ -2874,8 +2883,16 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
-                self.del__(False)
-                updated = True
+                #self.del__(False)
+                
+            self.model().delRow(self)
+                
+                
+                
+                
+                
+                
+            updated = True
 
         
         if updated and self.lastError():

@@ -467,6 +467,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self._cursor.execute(sql)
             self.refresh()
         
+    def delRow(self, cursor):
+            pKName = self.tableMetadata().primaryKey()
+            typePK = self.tableMetadata().field(pKName).type()
+            tableName = self.tableMetadata().name()
+            sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
+            print(sql)
+            self._cursor.execute(sql)
+            self.refresh()
+        
 
     def findPKRow(self, pklist):
         if not isinstance(pklist, (tuple, list)):
