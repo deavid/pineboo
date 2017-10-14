@@ -106,6 +106,7 @@ class FLTableDB(QtWidgets.QWidget):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
+        parent_cursor = None
         while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             if isinstance(self.topWidget.parentWidget(), FLFormSearchDB):
                 self.topWidget = self.topWidget.parentWidget()
