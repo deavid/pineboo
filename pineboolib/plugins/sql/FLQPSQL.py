@@ -191,13 +191,12 @@ class FLQPSQL(object):
             print("PSQLDriver::releaseSavePoint: Database not open")
             return False
         
-        cmd = ("release savepoint sv_%s" % n)
-
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec():
+        cmd = "release savepoint sv_%s" % n
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute(cmd)
+        except:
             self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
             return False
         
