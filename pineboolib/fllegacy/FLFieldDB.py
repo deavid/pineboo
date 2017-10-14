@@ -2618,7 +2618,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if c:
             c.deletelater()
         if v:
-            self.setValue("")
+            #self.setValue("")
             self.setValue(v)
         
 
