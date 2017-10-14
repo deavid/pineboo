@@ -524,6 +524,13 @@ class GroupBox(QtWidgets.QGroupBox):
 class CheckBox(QtWidgets.QCheckBox):
     pass
 
+class ComboBox(QtWidgets.QComboBox):
+    pass
+        
+
+class LineEdit(QWidget):
+    pass
+
 class Dir(object):
     path_ = None
     home = None 
