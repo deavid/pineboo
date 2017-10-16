@@ -62,15 +62,17 @@ class PNBuffer(ProjectClass):
     def primeUpdate(self, row = None):
         if row < 0:
             row = self.cursor_.d._currentregister
+        
         for field in self.fieldList_:
-            if self.cursor_.d._model.value(row , field.name) == "None":
-                field.value = None
-                
-            elif field.type_ == "unlock":
-                if self.cursor_.d._model.value(row , field.name) == "True" or self.cursor_.d._model.value(row , field.name) == True:
+            
+            if field.type_ == "unlock" or field.type_ == "bool":
+                if self.cursor_.d._model.value(row , field.name) in ("True", True, 1):
                     field.value = True
                 else:
                     field.value = False
+            
+            elif self.cursor_.d._model.value(row , field.name) == "None":
+                field.value = None
                     
             else:
                 field.value = self.cursor_.d._model.value(row , field.name)
@@ -147,7 +149,7 @@ class PNBuffer(ProjectClass):
         return True
 
     def value(self, n):
-
+        
         if not str(n).isdigit():
             for field in  self.fieldList_:
                 if field.name.lower() == str(n).lower():
@@ -179,13 +181,9 @@ class PNBuffer(ProjectClass):
 
     def convertToType(self, value, type_):
         
-        if value == None or value == u"None":
-            if type_ == "bool":
+        if value in (u"None", None):
+            if type_ in ("bool","unlock"):
                 return False
-            
-            elif type_ == "unlock":
-                return True
-            
             elif type_ in ("int", "uint"):
                 return int(0)
             elif type_ == "double":
