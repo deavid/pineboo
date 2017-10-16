@@ -34,7 +34,10 @@ class FLSqlQuery(ProjectClass):
         self._row = None
         self._posicion = None
         self._datos = None
+        self._cursor = None
         retornoQry = None
+        
+        
         
         if len(args):
             retornoQry = pineboolib.project.conn.manager().query(args[0], self)
@@ -650,7 +653,10 @@ class FLSqlQuery(ProjectClass):
     def seek(self, i, relative = False):
         pass
   
-    def next(self):        
+    def next(self):
+        if not self._cursor:
+            return False
+                
         if self._posicion is None:
             self._posicion=0            
         else:
@@ -672,6 +678,9 @@ class FLSqlQuery(ProjectClass):
                 return False 
     
     def prev(self):
+        if not self._cursor:
+            return False
+        
         self._posicion-=1
         if self._datos:
             if self._posicion<0:
@@ -682,6 +691,9 @@ class FLSqlQuery(ProjectClass):
             return False 
 
     def first(self):
+        if not self._cursor:
+            return False
+        
         self._posicion=0
         if self._datos:
             self._row==self._datos[0]
@@ -697,6 +709,9 @@ class FLSqlQuery(ProjectClass):
                 return False
 
     def last(self):
+        if not self._cursor:
+            return False
+        
         if self._datos:
             self._posicion=len(self._datos)-1
             self._row=self._datos[self._posicion]
