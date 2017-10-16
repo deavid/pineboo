@@ -450,6 +450,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if not b.value:
                 value = buffer.cursor_.d.db_.manager().metadata(buffer.cursor_.d.curName_).field(b.name).defaultValue()
             else:
+                
                 value = b.value
             
             if value: # si el campo se rellena o hay valor default
@@ -463,8 +464,17 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
-        
-            self._cursor.execute(sql)
+            conn = self._prj.conn.db()
+            try:
+                self._cursor.execute(sql)
+                conn.commit()
+            except Exception:
+                print("CursorTableModel.newRowFromBuffer() :: ERROR:" , traceback.format_exc())
+                conn.rollback()
+                return
+                
+                
+                
             self.refresh()
         
     def delRow(self, cursor):
