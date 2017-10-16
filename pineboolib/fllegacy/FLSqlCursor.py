@@ -164,9 +164,10 @@ class PNBuffer(ProjectClass):
     def setValue(self, name, value, mark_ = True):
         if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
+        
         for field in  self.fieldList_:
             if field.name == str(name):
-                if field.type_ == "bool":
+                if field.type_ in ("bool","unlock"):
                     value = str(value)
                 if not field.value == value: 
                     field.value = value
@@ -207,6 +208,9 @@ class PNBuffer(ProjectClass):
                      return fv.toString("yyyy-MM-dd")
                  else:
                      return fv.strftime('%Y-%m-%d')
+                 
+            elif type_ == "date" and value == "null":
+                return None
             
             elif type_ == "time" and not isinstance(value, str): 
                  fv = value

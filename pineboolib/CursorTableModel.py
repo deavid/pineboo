@@ -447,12 +447,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         valores = None
         for b in buffer.fieldsList():
             value = None
-            if not b.value:
+            if not buffer.value(b.name):
                 value = buffer.cursor_.d.db_.manager().metadata(buffer.cursor_.d.curName_).field(b.name).defaultValue()
             else:
                 
-                value = b.value
-            
+                value = buffer.value(b.name)
             if value: # si el campo se rellena o hay valor default
                 value = self._prj.conn.manager().formatValue(b.type_, value, False)
                 if not campos:
@@ -461,7 +460,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 else:
                     campos = u"%s,%s" % (campos, b.name)
                     valores = u"%s,%s" % ( valores, value)
-            
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
             conn = self._prj.conn.db()
