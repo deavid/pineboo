@@ -852,7 +852,7 @@ class FLSqlCursor(ProjectClass):
         #    f = "1 = 1"
             
         #print("--------------------->Añadiendo filtro",  f)   
-        if self.d._model:
+        if self.d._model and self.d._model.where_filters:
             self.d._model.where_filters["main-filter"] = f
             if doRefresh:
                 self.refresh()
