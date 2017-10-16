@@ -252,7 +252,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             else:
                 where_filter += " AND " + wfilter
         if not where_filter:
-            where_filter = "1=1"
+            where_filter = "1 = 0"
         
         self._cursor = self._prj.conn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.

@@ -2519,10 +2519,13 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método select() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    def select(self, _filter = "1 = 1", sort = None ): #sort = QtCore.QSqlIndex()
+    def select(self, _filter = None, sort = None ): #sort = QtCore.QSqlIndex()
 
         if not self.d.metadata_:
             return False
+        
+        if not self.cursorRelation() and _filter == None:
+            _filter = "1 = 1"
         
         bFilter = self.baseFilter()
         finalFilter = bFilter
