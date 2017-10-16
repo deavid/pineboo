@@ -1408,6 +1408,9 @@ class FLSqlCursor(ProjectClass):
     @return TRUE si el buffer y la copia son distintas, FALSE en caso contrario
     """
     def isModifiedBuffer(self):
+        if not self.d.buffer_:
+            return False
+        
         modifiedFields = self.d.buffer_.modifiedFields()
         if modifiedFields:
             return True
