@@ -111,6 +111,13 @@ def getTableObj(tree,root):
             field.visible = text2bool(fks.get("visible","true"))
             field.iCK =  text2bool(fks.get("ck","false"))
             field.defValue = fks.get("default")
+            if field.mtd_type == "bool":
+                if not field.defValue == None:
+                    if field.defValue == "true":
+                        field.defValue = True
+                    else:
+                        field.defValue = False
+                        
             field.optionsList = fks.get("optionslist")
             field.vG = text2bool(fks.get("visiblegrid","true"))
             field.rX = ""
