@@ -181,8 +181,8 @@ class FLRelationMetaDataPrivate():
             
             
     def inicializeNewFLRelationMetaDataPrivate(self, fT, fF, rC, dC, uC, cI):
-        self.foreignTable_ = str(fT).lower()
-        self.foreignField_ = str(fF).lower()
+        self.foreignTable_ = fT.lower()
+        self.foreignField_ = fF.lower()
         self.cardinality_ = rC
         self.deleteCascade_ = dC
         self.updateCascade_ = uC
