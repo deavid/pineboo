@@ -2794,7 +2794,7 @@ class FLSqlCursor(ProjectClass):
 
             if functionBefore:
                 cI = self.context()
-                v = self._prj.call(functionBefore, [self], cI)
+                v = self._prj.call(functionBefore, [self], cI, False)
                 if v and not isinstance(v ,bool):
                     return False
 
@@ -2900,7 +2900,7 @@ class FLSqlCursor(ProjectClass):
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.context()
-            v = self._prj.call(functionAfter, [self], cI)
+            v = self._prj.call(functionAfter, [self], cI, False)
             if v and not isinstance(v ,bool):
                 if savePoint == True:
                     savePoint.undo()

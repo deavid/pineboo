@@ -207,7 +207,7 @@ class Project(object):
         name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
 
-    def call(self, function, aList , objectContext ):
+    def call(self, function, aList , objectContext , showException = True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
         if Project.debugLevel > 50: print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" % (function, aList , objectContext ))
         import pineboolib.qsaglobals
@@ -217,7 +217,8 @@ class Project(object):
             return fn(*aList)
         except Exception:
             #print("** JS.CALL :: ERROR:", traceback.format_exc().splitlines()[-1])
-            print("** JS.CALL :: ERROR:", traceback.format_exc())
+            if showException:
+                print("** JS.CALL :: ERROR:", traceback.format_exc())
         # Hay que resolver la llamada a funcion "function" dentro de qsaglobals
         # y buscar la resolución de los objetos separando por puntos.
 
