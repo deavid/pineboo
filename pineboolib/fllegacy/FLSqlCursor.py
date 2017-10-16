@@ -2806,7 +2806,7 @@ class FLSqlCursor(ProjectClass):
         savePoint = None
         if self.d.modeAccess_ == self.Insert:
             if self.d.cursorRelation_ and self.d.relation_:
-                if self.d.cursorRelation_.metadata():
+                if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()):
                     self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
                     self.d.cursorRelation_.setAskForCancelChanges(True)
 
