@@ -1338,7 +1338,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 #    q.setWhere(str(self.filter_ + " AND " + where))
                 if self.filter_:
                     where = str(self.filter_ + " AND " + where)
-                
+                    
                 q.setWhere(where)
                 if q.exec_() and q.next():
                     v0 = q.value(0)
@@ -2898,7 +2898,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         q.setWhere("%s AND %s" % (self.filter_, where))
                     
                     if q.exec_() and q.next():
-                        self.setValue("")
+                        #self.setValue("")
                         self.setValue(q.value(0))
                          
             

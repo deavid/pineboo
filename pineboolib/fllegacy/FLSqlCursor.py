@@ -2529,7 +2529,6 @@ class FLSqlCursor(ProjectClass):
         
         bFilter = self.baseFilter()
         finalFilter = bFilter
-        print(self.curName(), "---->", _filter, bFilter)
         
         if _filter:
             if bFilter:
@@ -2543,7 +2542,6 @@ class FLSqlCursor(ProjectClass):
                 finalFilter = _filter
         
         if finalFilter:
-            print("Asignando filtro", finalFilter)
             self.setMainFilter(finalFilter , False)
             self.model().refresh()
             self.refreshBuffer()
