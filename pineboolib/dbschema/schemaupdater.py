@@ -111,7 +111,7 @@ def getTableObj(tree,root):
             field.visible = text2bool(fks.get("visible","true"))
             field.iCK =  text2bool(fks.get("ck","false"))
             field.defValue = fks.get("default")
-            if field.mtd_type == "bool":
+            if field.mtd_type in ("bool", "unlock"):
                 if not field.defValue == None:
                     if field.defValue == "true":
                         field.defValue = True
