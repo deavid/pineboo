@@ -520,6 +520,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.activatedCheckIntegrity_ = True
         self.askForCancelChanges_ = True
         self.transactionsOpened_ = []
+        self.cursorRelation_ = None
 
 
 
