@@ -852,7 +852,7 @@ class FLSqlCursor(ProjectClass):
         #    f = "1 = 1"
             
         #print("--------------------->Añadiendo filtro",  f)   
-        if self.d._model and self.d._model.where_filters:
+        if self.d._model and getattr(self.d._model, "where_filters", None):
             self.d._model.where_filters["main-filter"] = f
             if doRefresh:
                 self.refresh()
@@ -2519,13 +2519,14 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método select() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    def select(self, _filter = None, sort = None ): #sort = QtCore.QSqlIndex()
+    def select(self, _filter = "1 = 1", sort = None ): #sort = QtCore.QSqlIndex()
 
         if not self.d.metadata_:
             return False
         
         bFilter = self.baseFilter()
         finalFilter = bFilter
+        print(self.curName(), "---->", _filter, bFilter)
         
         if _filter:
             if bFilter:
@@ -2539,7 +2540,7 @@ class FLSqlCursor(ProjectClass):
                 finalFilter = _filter
         
         if finalFilter:
-            #print("Asignando filtro", finalFilter)
+            print("Asignando filtro", finalFilter)
             self.setMainFilter(finalFilter , False)
             self.model().refresh()
             self.refreshBuffer()
