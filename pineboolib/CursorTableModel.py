@@ -441,7 +441,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     Crea una nueva linea en el tableModel
     @param buffer . PNBuffer a añadir
     """
-    def newRowFromBuffer(self, buffer):
+    def Insert(self, buffer):
         #Metemos lineas en la tabla de la bd
         campos = None
         valores = None
@@ -467,7 +467,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self._cursor.execute(sql)
                 conn.commit()
             except Exception:
-                print("CursorTableModel.newRowFromBuffer() :: ERROR:" , traceback.format_exc())
+                print("CursorTableModel.Insert() :: ERROR:" , traceback.format_exc())
                 conn.rollback()
                 return
                 
@@ -475,14 +475,21 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 
             self.refresh()
         
-    def delRow(self, cursor):
-            pKName = self.tableMetadata().primaryKey()
-            typePK = self.tableMetadata().field(pKName).type()
-            tableName = self.tableMetadata().name()
-            sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
-            print(sql)
+    def Delete(self, cursor):
+        pKName = self.tableMetadata().primaryKey()
+        typePK = self.tableMetadata().field(pKName).type()
+        tableName = self.tableMetadata().name()
+        sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
+        conn = self._prj.conn.db()
+        try:
             self._cursor.execute(sql)
-            self.refresh()
+            conn.commit()
+        except Exception:
+            print("CursorTableModel.Delete() :: ERROR:" , traceback.format_exc())
+            conn.rollback()
+            return
+            
+        self.refresh()
         
 
     def findPKRow(self, pklist):

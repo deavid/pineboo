@@ -2892,7 +2892,7 @@ class FLSqlCursor(ProjectClass):
                     self.d.cursorRelation_.setAskForCancelChanges(True)
                 #self.del__(False)
                 
-            self.model().delRow(self)
+            self.model().Delete(self)
                 
                 
                 
@@ -3321,7 +3321,7 @@ class FLSqlCursor(ProjectClass):
 
 
         elif self.modeAccess() == FLSqlCursor.Insert:
-            self.model().newRowFromBuffer(self.d.buffer_)
+            self.model().Insert(self.d.buffer_)
 
             if notify:
                 self.bufferCommited.emit()
