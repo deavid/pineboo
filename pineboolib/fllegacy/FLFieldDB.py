@@ -1046,7 +1046,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.setTime(v)
 
         elif type == "bool":
-            if self.editor_ and v:
+            if self.editor_ and not v == None:
                 self.editor_.setChecked(v)
 
 
@@ -1570,11 +1570,11 @@ class FLFieldDB(QtWidgets.QWidget):
             except:
                 pass
 
-            if not v is None:
+            if not v == None:
                 
                 self.editor_.setChecked(v)
             else:
-                self.editor_.setChecked(bool(field.defaultValue()))
+                self.editor_.setChecked(field.defaultValue())
                 
 
             self.editor_.toggled.connect(self.updateValue)
