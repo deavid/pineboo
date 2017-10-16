@@ -488,7 +488,7 @@ class Switch(ASTPython):
         # yield "line", "assert( %s )" % name_pr2
 
 class With(ASTPython):
-    python_keywords = ["setValueBuffer","setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess","commitBuffer","commit","refreshBuffer","setNull"]
+    python_keywords = ["select","select", "first","next","prev","last","setValueBuffer","setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess","commitBuffer","commit","refreshBuffer","setNull"]
         
     def generate(self, **kwargs):
         key = "%02x" % random.randint(0,255)
@@ -513,6 +513,9 @@ class With(ASTPython):
             for t in self.python_keywords:
                 if obj[1].startswith(t):
                     obj_ = (obj[0],"%s.%s" % (" ".join(var_expr), obj[1]))
+                    break
+                elif obj[1].find(".") == -1 and obj[1].find(t) > -1:
+                    obj_ = (obj[0],obj[1].replace(t, "%s.%s" % (" ".join(var_expr), t)))
                     break
                 
             if not obj_:
