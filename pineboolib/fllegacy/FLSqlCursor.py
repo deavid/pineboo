@@ -749,6 +749,9 @@ class FLSqlCursor(ProjectClass):
         self.refreshDelayed()
         #self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
         #self.first()
+    
+    def conn(self):
+        return self.d.db_
 
     def table(self):
         return self.metadata().name()
@@ -827,7 +830,7 @@ class FLSqlCursor(ProjectClass):
             #self._action = self._prj.actions["articulos"]
 
             if getattr(self._action,"table",None):
-                self.d._model = CursorTableModel(self._action, self._prj)
+                self.d._model = CursorTableModel(self._action, self._prj, self.conn())
                 if not self.d._model:
                     return None
                 

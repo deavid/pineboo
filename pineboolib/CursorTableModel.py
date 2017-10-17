@@ -28,11 +28,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     rows = 15
     cols = 5
     _cursor = None
+    _cursorConn = None
     USE_THREADS = False
     USE_TIMER = False
     CURSOR_COUNT = itertools.count()
     
-    def __init__(self, action,project, *args):
+    def __init__(self, action, project, conn, *args):
         super(CursorTableModel,self).__init__(*args)
         from pineboolib.qsaglobals import aqtt
 
@@ -48,6 +49,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self._metadata = project.conn.manager().metadata(self._table.name)
         else:
             raise AssertionError
+        self._cursorConn = conn
         self.sql_fields = []
         self.field_aliases = []
         self.field_type = []
@@ -254,7 +256,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if not where_filter:
             where_filter = "1 = 0"
         
-        self._cursor = self._prj.conn.cursor()
+        self._cursor = self._cursorConn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # TODO: Convertir esto a un cursor de servidor (hasta 20.000 registros funciona bastante bien)
         if self._table.query_table:
@@ -461,7 +463,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                     valores = u"%s,%s" % ( valores, value)
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
-            conn = self._prj.conn.db()
+            conn = self._cursorConn
             try:
                 self._cursor.execute(sql)
                 conn.commit()
@@ -479,7 +481,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         typePK = self.tableMetadata().field(pKName).type()
         tableName = self.tableMetadata().name()
         sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
-        conn = self._prj.conn.db()
+        conn = self._cursorConn
         try:
             self._cursor.execute(sql)
             conn.commit()
