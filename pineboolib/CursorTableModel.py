@@ -463,7 +463,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                     valores = u"%s,%s" % ( valores, value)
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
-            conn = self._cursorConn
+            conn = self._cursorConn.db()
             try:
                 self._cursor.execute(sql)
                 conn.commit()
@@ -481,7 +481,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         typePK = self.tableMetadata().field(pKName).type()
         tableName = self.tableMetadata().name()
         sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
-        conn = self._cursorConn
+        conn = self._cursorConn.db()
         try:
             self._cursor.execute(sql)
             conn.commit()
