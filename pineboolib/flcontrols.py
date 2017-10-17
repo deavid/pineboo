@@ -3,7 +3,7 @@
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from PyQt5 import QtCore, QtWidgets #, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtWidgets, QtGui #, QtGui, QtWidgets, uic
 
 import pineboolib
 #from pineboolib.qsaglobals import ustr
@@ -222,13 +222,30 @@ class QLineEdit(QtWidgets.QLineEdit):
         
 
 class QListView(QtWidgets.QListView):
+    
+    model = None
+    
     def __init__(self, *args, **kwargs):
         super(QListView, self).__init__(*args, **kwargs)
+        
+        self.model = QtGui.QStandardItemModel(self)
+        
+        
+        
 
     def __getattr__(self, name):
         print("flcontrols.QListView: Emulando método %r" % name)
         return self.defaultFunction
 
+    def addItem(self, item):
+        it = QtGui.QStandardItem(item)
+        self.model.appendRow(it)
+        self.setModel(self.model)
+    
+    @decorators.Deprecated
+    def setItemMargin(self, margin):
+        pass
+        
     def defaultFunction(self, *args, **kwargs):
         print("flcontrols.QListView: llamada a método no implementado", args,kwargs)
 
@@ -257,3 +274,11 @@ class QPushButton(QtWidgets.QPushButton):
         return self.setCheckable(v)
 
     toggleButton = property(getToggleButton,setToggleButton)
+
+class QGroupBox(QtWidgets.QGroupBox):
+    
+    def __init__(self, *args, **kwargs):
+        super(QGroupBox, self).__init__(*args, **kwargs)
+    
+    def setLineWidth(self, width):
+        self.setContentsMargins(width, width, width, width)
