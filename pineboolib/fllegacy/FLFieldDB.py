@@ -1574,7 +1574,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 
                 self.editor_.setChecked(v)
             else:
-                self.editor_.setChecked(field.defaultValue())
+                dV = field.defaultValue()
+                if not dV == None:
+                    self.editor_.setChecked(dV)
                 
 
             self.editor_.toggled.connect(self.updateValue)

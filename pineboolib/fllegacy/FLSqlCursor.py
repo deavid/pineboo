@@ -2285,14 +2285,14 @@ class FLSqlCursor(ProjectClass):
             self.newBuffer.emit()
 
         elif self.d.modeAccess_ == self.Del:
-            print("j")
+            
             if self.isLocked():
                 self.d.msgBoxWarning("Registro bloqueado, no se puede eliminar")
                 self.d.modeAccess_ = self.Browse
                 return False
-            print("k")
+
             if self.d.buffer_:
-                print("l")
+                
                 #self.d.buffer_.primeDelete()
                 self.setNotGenerateds()
                 self.updateBufferCopy()
