@@ -640,7 +640,7 @@ class FLSqlQuery(ProjectClass):
     def isForwardOnly(self):
         pass
     
-    
+    @decorators.Deprecated
     def setForwardOnly(self, forward):
         pass #No hace nada
 
