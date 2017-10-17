@@ -1529,8 +1529,10 @@ class FLSqlCursor(ProjectClass):
                         del tMD
                 
                 
-                if self.d.modeAccess_ == self.Edit and self.d.buffer_.value(fiName) == self.d.bufferCopy_.value(fiName):
-                    continue
+                if self.d.modeAccess_ == self.Edit:
+                    if self.d.buffer_ and self.d.bufferCopy_:
+                        if self.d.buffer_.value(fiName) == self.d.bufferCopy_.value(fiName):
+                            continue
                 
                 if self.d.buffer_.isNull(fiName) and not field.allowNull() and not field.type() == FLFieldMetaData.Serial:
                     #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : No puede ser nulo")
@@ -2828,8 +2830,8 @@ class FLSqlCursor(ProjectClass):
                     self.d.cursorRelation_.setAskForCancelChanges(True)
 
             pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
-            #self.insert(False)
-            self.update(False) # NOTE: la funcion insert no está implementada. Tampoco tiene porqué tener dos funciones distintas.
+            self.model().Insert(self.d.buffer_)
+            self.update(False)
             if not self.d.db_.canSavePoint():
                 if self.d.db_.currentSavePoint_:
                     self.d.db_.currentSavePoint_.saveInsert(pKN, self.d.buffer_, self)
@@ -2846,8 +2848,12 @@ class FLSqlCursor(ProjectClass):
                 else:
                     if not pkWhere in self.d.persistentFilter_:
                         self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
-
+            
+            
+            
+            
             updated = True
+            
 
         elif self.d.modeAccess_ == self.Edit:
             if not self.d.db_.canSavePoint():
@@ -3328,11 +3334,6 @@ class FLSqlCursor(ProjectClass):
                 self.bufferCommited.emit()
 
 
-        elif self.modeAccess() == FLSqlCursor.Insert:
-            self.model().Insert(self.d.buffer_)
-
-            if notify:
-                self.bufferCommited.emit()
         print("FLSqlCursor.update --- END")
 
     """
