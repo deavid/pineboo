@@ -478,14 +478,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             conn = self._cursorConn.db()
             try:
                 self._cursor.execute(sql)
-                conn.commit()
             except Exception:
                 print("CursorTableModel.Insert() :: ERROR:" , traceback.format_exc())
                 conn.rollback()
                 return
-                
-                
-                
+                  
+            conn.commit()    
             self.refresh()
         
     def Delete(self, cursor):
@@ -495,13 +493,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
         conn = self._cursorConn.db()
         try:
-            self._cursor.execute(sql)
-            conn.commit()
+            self._cursor.execute(sql)         
         except Exception:
             print("CursorTableModel.Delete() :: ERROR:" , traceback.format_exc())
             conn.rollback()
             return
-            
+        
+        conn.commit()   
         self.refresh()
         
 
