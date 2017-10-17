@@ -97,3 +97,17 @@ def needRevision(fn):
             if Options.DEBUG_LEVEL > 10: print("WARN: Needs help: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
         return ret
     return newfn
+
+def Deprecated(fn):
+    def newfn(*args,**kwargs):
+        global MSG_EMITTED
+        ret = fn(*args,**kwargs)
+        x_args = [ clean_repr(a) for a in args] + [ "%s=%s" % (k,clean_repr(v)) for k,v in list(kwargs.items())]
+        keyname = fn.__name__+repr(x_args)
+        now = time.time()
+        if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
+            MSG_EMITTED[keyname] = now
+            if Options.DEBUG_LEVEL > 50: print("WARN: Deprecated: %s(%s) -> %s" % (fn.__name__,", ".join(x_args),repr(ret)))
+            if Options.DEBUG_LEVEL > 90: print_stack()
+        return ret
+    return newfn
