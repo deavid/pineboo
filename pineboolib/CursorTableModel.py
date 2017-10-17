@@ -32,11 +32,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     USE_THREADS = False
     USE_TIMER = False
     CURSOR_COUNT = itertools.count()
+    rowsLoaded = 0
+    where_filters = {}
+    _table = None
     
     def __init__(self, action, project, conn, *args):
         super(CursorTableModel,self).__init__(*args)
         from pineboolib.qsaglobals import aqtt
-
+        
+        self.rowsLoaded = 0
+        self.where_filters = {}
+        self._cursorConn = conn
+        
         self._action = action
         self._prj = project
         if action and action.table:
@@ -44,12 +51,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self._table = project.tables[action.table]
             except:
                 #print("CursortableModel : Tabla %s no declarada en project.tables" % action.table)
+                self._table = None
                 return None
             
             self._metadata = project.conn.manager().metadata(self._table.name)
         else:
             raise AssertionError
-        self._cursorConn = conn
+        
         self.sql_fields = []
         self.field_aliases = []
         self.field_type = []
@@ -228,6 +236,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
  
 
     def refresh(self):
+        if not self._table:
+            print("ERROR: CursorTableModel :: No hay tabla")
+            return 
+            
         parent = QtCore.QModelIndex()
         oldrows = self.rowsLoaded
         self.beginRemoveRows(parent, 0, oldrows )
