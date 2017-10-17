@@ -76,9 +76,9 @@ class FLSqlQuery(ProjectClass):
         """
         sql = sql.replace(";","")
         
-        micursor=self.__damecursor()
+        #micursor=self.__damecursor()
         conn = self.__dameConn()
-        
+        micursor = conn.cursor()
         try:
             micursor.execute(sql)
             self._cursor=micursor
@@ -86,7 +86,6 @@ class FLSqlQuery(ProjectClass):
             print(traceback.format_exc())
             conn.rollback()
             return False
-        
         conn.commit()
         
             
