@@ -139,7 +139,7 @@ class PNBuffer(ProjectClass):
             i = 0
             for field in self.fieldList_:
                 if i == n:
-                    if not field.value:
+                    if field.value == None:
                         return True
                     else:
                         return False
@@ -1623,17 +1623,20 @@ class FLSqlCursor(ProjectClass):
             s = None
             
             for field in fieldList:
-                fiName = field.name()
-                if not self.d.buffer_.isGenerated(fiName):
+                #fiName = field.name()
+                if not self.d.buffer_.isGenerated(field.name()):
                     continue
                 
                 s = None
-                if not self.d.buffer_.isNull(fiName):
-                    s = self.d.buffer_.value(fiName)
-                    if str(s):
-                        s = None
                 
-                if not s or s == None:
+                
+                
+                if not self.d.buffer_.isNull(field.name()):
+                    s = self.d.buffer_.value(field.name())
+                    #if s:
+                    #    s = None
+                
+                if s == None:
                     continue
                 
                 relationList = field.relationList()
@@ -1676,7 +1679,7 @@ class FLSqlCursor(ProjectClass):
                         q.setSelect(r.foreignField())
                         q.setFrom(mtd.name())
                         q.setWhere(self.d.db_.manager().formatAssignValue(r.foreignField(), field, s, True))
-                        q.setForwardOnly()
+                        q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
                             #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Con el valor %1 hay registros en la tabla %2:%3").arg(str(s), mtd.name(), mtd.alias())
@@ -1711,7 +1714,6 @@ class FLSqlCursor(ProjectClass):
             return False
         if not self.d.activatedCheckIntegrity_:
             return True
-        
         msg = self.msgCheckIntegrity()
         if msg:
             if showError:
@@ -2218,6 +2220,7 @@ class FLSqlCursor(ProjectClass):
         
         if not self.isValid() and not self.d.modeAccess_ == self.Insert:
             return False
+        
         if self.d.modeAccess_ == self.Insert:
 
             if not self.commitBufferCursorRelation():
@@ -2282,13 +2285,15 @@ class FLSqlCursor(ProjectClass):
             self.newBuffer.emit()
 
         elif self.d.modeAccess_ == self.Del:
+            print("j")
             if self.isLocked():
-                self.d.msgboxWarning("Registro bloqueado, no se puede eliminar")
+                self.d.msgBoxWarning("Registro bloqueado, no se puede eliminar")
                 self.d.modeAccess_ = self.Browse
                 return False
-
+            print("k")
             if self.d.buffer_:
-                self.d.buffer_.primeDelete()
+                print("l")
+                #self.d.buffer_.primeDelete()
                 self.setNotGenerateds()
                 self.updateBufferCopy()
 
@@ -2757,10 +2762,9 @@ class FLSqlCursor(ProjectClass):
             self.checkRisksLocks()
             if self.d.inRisksLocks_ and QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(None, "Bloqueo inminente", "Los registros que va a modificar están bloqueados actualmente,\nsi continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n\n¿ Desa continuar aunque exista riesgo de bloqueo ?", QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape):
                 return False
-
+            
         if not self.checkIntegrity():
             return False
-
 
         fieldNameCheck = None
 
