@@ -2557,7 +2557,7 @@ class FLSqlCursor(ProjectClass):
                 finalFilter = _filter
         
         if finalFilter:
-            self.setMainFilter(finalFilter , False)
+            self.setFilter(finalFilter)
             self.model().refresh()
             self.refreshBuffer()
         
@@ -2612,7 +2612,7 @@ class FLSqlCursor(ProjectClass):
             else:
                 if not relationFilter in finalFilter:
                     finalFilter = "%s AND %s" % (finalFilter, relationFilter)
-
+        
         return finalFilter
 
 
@@ -2664,6 +2664,8 @@ class FLSqlCursor(ProjectClass):
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
 
         self.d.filter_ = finalFilter
+        if self.d._model and getattr(self.d._model, "where_filters", None):
+            self.d._model.where_filters["filter"] = self.d.filter_
 
 
 
