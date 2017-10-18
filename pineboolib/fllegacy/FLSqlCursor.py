@@ -2894,14 +2894,14 @@ class FLSqlCursor(ProjectClass):
 
 
         elif self.d.modeAccess_ == self.Del:
-            if not self.d.db_.canSavePoint():
-                if self.d.db_.currentSavePoint_:
-                    self.d.db_.currentSavePoint_.saveDel(pKN, self.d.bufferCopy_, self)
-
-            if functionAfter and self.d.activatedCommitActions_:
-                if not savePoint:
-                    savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
-                savePoint.saveDel(pKN, self.d.bufferCopy_, self)
+            #if not self.d.db_.canSavePoint():
+            #    if self.d.db_.currentSavePoint_:
+            #        self.d.db_.currentSavePoint_.saveDel(pKN, self.d.bufferCopy_, self)
+            
+            #if functionAfter and self.d.activatedCommitActions_:
+            #    if not savePoint:
+            #        savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
+            #    savePoint.saveDel(pKN, self.d.bufferCopy_, self)
 
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
@@ -2919,22 +2919,22 @@ class FLSqlCursor(ProjectClass):
 
         
         if updated and self.lastError():
-            if savePoint == True:
-                del savePoint
+            #if savePoint == True:
+            #    del savePoint
             return False
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.context()
             v = self._prj.call(functionAfter, [self], cI, False)
             if v and not isinstance(v ,bool):
-                if savePoint == True:
-                    savePoint.undo()
-                    del savePoint
+                #if savePoint == True:
+                #    savePoint.undo()
+                #    del savePoint
 
                 return False
 
-        if savePoint == True:
-            del savePoint
+        #if savePoint == True:
+        #    del savePoint
         self.d.modeAccess_ = self.Browse
         if updated == True:
             if fieldNameCheck:

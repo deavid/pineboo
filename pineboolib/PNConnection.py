@@ -126,25 +126,19 @@ class PNConnection(QtCore.QObject):
     
     def nextSerialVal(self, table, field):
         self.driverSql.nextSerialVal(table, field)
+    
+    def canSavePoint(self):
+        return True
 
     def doTransaction(self, cursor):
         if not cursor or not self.db():
             return False
         
-        if self.transaction_ == 0 and self.canTransaction():
+        if self.transaction_ == 0:
             print("Iniciando Transacción...")
-            if self.driver().transaction(cursor):
+            if self.transaction():
+                self.savePoint(self.transaction_)
                 self.lastActiveCursor_ = cursor
-                #ProjectClass.emitTransactionBegin(cursor)
-                """
-                if not self.canSavePoint():
-                    if self.currentSavePoint_:
-                        del self.currentSavePoint_
-                        self.currentSavePoint_ = 0
-                    
-                    self.stackSavePoints_.clear()
-                    self.queueSavePoints_.clear()
-                """
                 self.transaction_ = self.transaction_ + 1
                 #cursor.d.transactionsOpened_.push(self.transaction_)
                 cursor.d.transactionsOpened_.append(self.transaction_)
@@ -154,22 +148,7 @@ class PNConnection(QtCore.QObject):
                 return False
         else:
             print("Creando punto de salvaguarda %s" % self.transaction_)
-            """
-            if not self.canSavePoint():
-                if self.transaction_ == 0:
-                    if self.currentSavePoint_:
-                        del self.currentSavePoint_
-                        self.currentSavePoint_ = 0
-                    
-                    self.stackSavePoints_.clear()
-                    self.queueSavePoints_.clear()
-                
-
-                    self.stackSavePoints_.append(self.currentSavePoint_) #push
-                        
-                self.currentSavePoint_ = FLSqlSavePoint(self.transaction_)
-            """
-            self.savePoint(cursor, int(self.transaction_))
+            self.savePoint(self.transaction_)
             
             self.transaction_ = self.transaction_ + 1
             cursor.d.transactionsOpened_.append(self.transaction_) #push
@@ -202,26 +181,16 @@ class PNConnection(QtCore.QObject):
         else:
             return True
         
-        if self.transaction_ == 0 and self.canTransaction():
+        if self.transaction_ == 0:
             print("Deshaciendo Transacción...")
             try:
-                #self.conn.rollBack()
-                self.driver().rollbackTransaction(cur)
+                self.rollbackSavePoint(self.transaction_)
+                self.rollbackTransaction()
                 self.lastActiveCursor_ = None
-                """
-                if not self.canSavePoint():
-                    if self.currentSavePoint_:
-                        del self.currentSavePoint
-                        self.currrentSavePoint = None
-                    
-                    self.stackSavePoints_.clear()
-                    self.queueSavepoints_.clear()
-                """
                 cur.d.modeAccess_ = FLSqlCursor.Browse
                 if cancel:
                     cur.select()
                 
-                #aqApp.TransactionRoolback.emit(cur)
                 return True
             except:
                 print("FLSqlDatabase::doRollback : Fallo al intentar deshacer transacción")
@@ -229,43 +198,7 @@ class PNConnection(QtCore.QObject):
         
         else:
             print("Restaurando punto de salvaguarda %s..." % self.transaction_)
-            """
-            if not self.canSavePoint():
-                tamQueue = len(self.queueSavePoints_)
-                tempId = None
-                
-                i = 0
-                while i < tamQueue:
-                    tempSavePoint = self.queueSavePoints_.dequeue()
-                    tempId = tempSavePoint.id()
-                    if tempId > self.transaction_ or self.transaction_ == 0:
-                        tempSavePoint.undo()
-                        del tempSavePoint
-                    else:
-                        self.queueSavePoints_.enqueue(tempSavePoint)
-                    
-                    i = i + 1
-                
-                if self.currentSavePoint_:
-                    self.currentSavePoint_.undo()
-                    del self.currentSavePoint_
-                    self.currentSavePoint_ = None
-                    if self.stackSavePoints_:
-                        self.currentSavePoint_ = self.stackSavePoints_.pop()
-                
-                if self.transaction_ == 0:
-                    if self.currentSavePoint_:
-                        del self.currentSavePoint_
-                        self.currentSavePoint_ = None
-                    
-                    self.stackSavePoints_.clear()
-                    self.queueSavePoints_.clear()
-                
-            else:
-            
-                self.rollbackSavePoint(self.transaction_)
-            """
-            self.rollbackSavePoint(cur, int(self.transaction_))
+            self.rollbackSavePoint(self.transaction_)
             cur.d.modeAccess_ = FLSqlCursor.Browse
             return True
     
@@ -299,21 +232,14 @@ class PNConnection(QtCore.QObject):
             
             return True
         
-        if self.transaction_ == 0 and self.canTransaction():
+        if self.transaction_ == 0:
             print("Terminando transacción...")
             try:
                 #self.conn.commit()
-                self.driver().commitTransaction(cur)
+                self.releaseSavePoint(self.transaction_)
+                self.commitTransaction()
                 self.lastActiveCursor_ = None
-                """
-                if not self.canSavePoint():
-                    if self.currentSavePoint_:
-                        del self.currentSavePoint_
-                        self.currentSavePoint_ = None
-                    
-                    self.stackSavePoints_.clear()
-                    self.queueSavePoints_.clear()
-                """
+
                 if notify:
                     cur.d.modeAccess_ = FLSqlCursor.Browse
                     
@@ -325,52 +251,13 @@ class PNConnection(QtCore.QObject):
                 return False
         else:
             print("Liberando punto de salvaguarda %s..." % self.transaction_)
-            if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):
-                """
-                if not self.canSavePoint():
-                    if self.currentSavePoint_:
-                        del self.currentSavePoint_
-                        self.currentSavePoint_ = None
-                    
-                    self.stackSavePoints_.clear()
-                    self.queueSavePoints_.clear()
-                else:
-                    self.releaseSavePoint(self.transaction_)
-                """
-                self.releaseSavePoint(cur, int(self.transaction_))
+            if self.transaction_ == 1:
+                self.releaseSavePoint(self.transaction_)
                 if notify:
                     cur.d.modeAccess_ = FLSqlCursor.Browse
                 
                 return True
-            """
-            if not self.canSavePoint():
-                tamQueue = len(self.queueSavePoints_)
-                tempSavePoint = None
-                
-                i = 0
-                while i < tamQueue:
-                    tempSavePoint = self.queueSavePoints_.dequeue()
-                    tempSavePoint.setId(self.transaction_ -1)
-                    self.queueSavePoints_.enqueue(tempSavePoint)
-                    
-                    i = i + 1
-                
-                if self.currentSavePoint_:
-                    self.currentSavePoint_.undo()
-                    del self.currentSavePoint_
-                    self.currentSavePoint_ = None
-                    if self.stackSavePoints_:
-                        self.currentSavePoint_ = self.stackSavePoints_.pop()
-                
-                if self.transaction_ == 0:
-                    self.queueSavePoints_.enqueue(self.currentSavePoint_)
-                    self.currentSavePoint_ = None
-                    if self.stackSavePoints_:
-                        self.currentSavePoint_ = self.stackSavePoints_.pop()
-            else:
-                self.releaseSavePoint(self.transaction_)
-            """
-            self.releaseSavePoint(cur, self.transaction_)
+            self.releaseSavePoint(self.transaction_)
             
             if notify:
                 cur.d.modeAccess_ = FLSqlCursor.Browse
@@ -389,8 +276,7 @@ class PNConnection(QtCore.QObject):
     def managerModules(self):
         return self._managerModules
     
-    def canSavePoint(self):
-        return self.driver().canSavePoint()
+    
     
     def canOverPartition(self):
         if not self.db():
@@ -398,37 +284,50 @@ class PNConnection(QtCore.QObject):
         
         return self.driver().canOverPartition()
     
-    def releaseSavePoint(self, cursor, savePoint):
+    def savePoint(self, savePoint):
         if not self.db():
             return False
         
-        return self.driver().releaseSavePoint(cursor, savePoint)
+        return self.driver().savePoint(savePoint)
     
-    def rollbackSavePoint(self, cursor, savePoint):
+    def releaseSavePoint(self, savePoint):
         if not self.db():
             return False
         
-        return self.driver().rollbackSavePoint(cursor, savePoint)
-        
+        return self.driver().releaseSavePoint(savePoint)
     
-    def canTransaction(self):
+    def rollbackSavePoint(self, savePoint):
         if not self.db():
             return False
         
-        return self.driver().hasFeature("Transactions")
+        return self.driver().rollbackSavePoint(savePoint)
+ 
+ 
+    def transaction(self):
+        if not self.db():
+            return False
         
+        return self.driver().transaction()    
+    
+    def commitTransaction(self):
+        if not self.db():
+            return False
+        
+        return self.driver().commitTransaction()   
+    
+    
+    def rollbackTransaction(self):
+        if not self.db():
+            return False
+        
+        return self.driver().rollbackTransaction()    
+      
     
     def nextSerialVal(self, table, field):
         if not self.db():
             return False
         
         return self.driver().nextSerialVal(table, field)    
-    
-    def savePoint(self, cursor, number):
-        if not self.db():
-            return False
-        
-        self.driver().savePoint(cursor, number)
     
     
     

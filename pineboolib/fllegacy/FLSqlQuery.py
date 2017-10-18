@@ -84,9 +84,9 @@ class FLSqlQuery(ProjectClass):
             self._cursor=micursor
         except Exception:
             print(traceback.format_exc())
-            conn.rollback()
+            #conn.rollback()
             return False
-        conn.commit()
+        #conn.commit()
         
             
         return True 
