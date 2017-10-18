@@ -145,8 +145,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         
         try: 
             self._cursor.execute(sql)
-        except:
-            conn.rollback()
+        except Exception:
+            #conn.rollback()
+            print("CursorTableModel.threadFetch :: ERROR:" , traceback.format_exc())
             
         tiempo_final = time.time()
         if DEBUG: 
@@ -481,15 +482,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                     valores = u"%s,%s" % ( valores, value)
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
-            conn = self._cursorConn.db()
+            #conn = self._cursorConn.db()
             try:
                 self._cursor.execute(sql)
             except Exception:
                 print("CursorTableModel.Insert() :: ERROR:" , traceback.format_exc())
-                conn.rollback()
+                #conn.rollback()
                 return
                   
-            conn.commit()    
+            #conn.commit()    
             self.refresh()
         
     def Delete(self, cursor):
@@ -497,7 +498,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         typePK = self.tableMetadata().field(pKName).type()
         tableName = self.tableMetadata().name()
         sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
-        conn = self._cursorConn.db()
+        #conn = self._cursorConn.db()
         try:
             self._cursor.execute(sql)         
         except Exception:
@@ -505,7 +506,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             conn.rollback()
             return
         
-        conn.commit()   
+        #conn.commit()   
         self.refresh()
         
 

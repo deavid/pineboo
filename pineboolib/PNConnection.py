@@ -133,10 +133,10 @@ class PNConnection(QtCore.QObject):
         
         if self.transaction_ == 0 and self.canTransaction():
             print("Iniciando Transacción...")
-            if self.driver().transaction():
+            if self.driver().transaction(cursor):
                 self.lastActiveCursor_ = cursor
                 #ProjectClass.emitTransactionBegin(cursor)
-            
+                """
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
                         del self.currentSavePoint_
@@ -144,7 +144,7 @@ class PNConnection(QtCore.QObject):
                     
                     self.stackSavePoints_.clear()
                     self.queueSavePoints_.clear()
-            
+                """
                 self.transaction_ = self.transaction_ + 1
                 #cursor.d.transactionsOpened_.push(self.transaction_)
                 cursor.d.transactionsOpened_.append(self.transaction_)
@@ -154,6 +154,7 @@ class PNConnection(QtCore.QObject):
                 return False
         else:
             print("Creando punto de salvaguarda %s" % self.transaction_)
+            """
             if not self.canSavePoint():
                 if self.transaction_ == 0:
                     if self.currentSavePoint_:
@@ -167,8 +168,8 @@ class PNConnection(QtCore.QObject):
                     self.stackSavePoints_.append(self.currentSavePoint_) #push
                         
                 self.currentSavePoint_ = FLSqlSavePoint(self.transaction_)
-            
-            self.savePoint(int(self.transaction_))
+            """
+            self.savePoint(cursor, int(self.transaction_))
             
             self.transaction_ = self.transaction_ + 1
             cursor.d.transactionsOpened_.append(self.transaction_) #push
@@ -204,9 +205,10 @@ class PNConnection(QtCore.QObject):
         if self.transaction_ == 0 and self.canTransaction():
             print("Deshaciendo Transacción...")
             try:
-                self.conn.rollback()
+                #self.conn.rollBack()
+                self.driver().rollbackTransaction(cur)
                 self.lastActiveCursor_ = None
-                
+                """
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
                         del self.currentSavePoint
@@ -214,7 +216,7 @@ class PNConnection(QtCore.QObject):
                     
                     self.stackSavePoints_.clear()
                     self.queueSavepoints_.clear()
-                
+                """
                 cur.d.modeAccess_ = FLSqlCursor.Browse
                 if cancel:
                     cur.select()
@@ -227,6 +229,7 @@ class PNConnection(QtCore.QObject):
         
         else:
             print("Restaurando punto de salvaguarda %s..." % self.transaction_)
+            """
             if not self.canSavePoint():
                 tamQueue = len(self.queueSavePoints_)
                 tempId = None
@@ -259,8 +262,10 @@ class PNConnection(QtCore.QObject):
                     self.queueSavePoints_.clear()
                 
             else:
-                self.rollbackSavePoint(self.transaction_)
             
+                self.rollbackSavePoint(self.transaction_)
+            """
+            self.rollbackSavePoint(cur, int(self.transaction_))
             cur.d.modeAccess_ = FLSqlCursor.Browse
             return True
     
@@ -297,9 +302,10 @@ class PNConnection(QtCore.QObject):
         if self.transaction_ == 0 and self.canTransaction():
             print("Terminando transacción...")
             try:
-                self.conn.commit()
+                #self.conn.commit()
+                self.driver().commitTransaction(cur)
                 self.lastActiveCursor_ = None
-                
+                """
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
                         del self.currentSavePoint_
@@ -307,7 +313,7 @@ class PNConnection(QtCore.QObject):
                     
                     self.stackSavePoints_.clear()
                     self.queueSavePoints_.clear()
-                
+                """
                 if notify:
                     cur.d.modeAccess_ = FLSqlCursor.Browse
                     
@@ -320,6 +326,7 @@ class PNConnection(QtCore.QObject):
         else:
             print("Liberando punto de salvaguarda %s..." % self.transaction_)
             if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):
+                """
                 if not self.canSavePoint():
                     if self.currentSavePoint_:
                         del self.currentSavePoint_
@@ -329,12 +336,13 @@ class PNConnection(QtCore.QObject):
                     self.queueSavePoints_.clear()
                 else:
                     self.releaseSavePoint(self.transaction_)
-                
+                """
+                self.releaseSavePoint(cur, int(self.transaction_))
                 if notify:
                     cur.d.modeAccess_ = FLSqlCursor.Browse
                 
                 return True
-            
+            """
             if not self.canSavePoint():
                 tamQueue = len(self.queueSavePoints_)
                 tempSavePoint = None
@@ -361,8 +369,10 @@ class PNConnection(QtCore.QObject):
                         self.currentSavePoint_ = self.stackSavePoints_.pop()
             else:
                 self.releaseSavePoint(self.transaction_)
+            """
+            self.releaseSavePoint(cur, self.transaction_)
             
-            if notity:
+            if notify:
                 cur.d.modeAccess_ = FLSqlCursor.Browse
                 
                     
@@ -388,17 +398,17 @@ class PNConnection(QtCore.QObject):
         
         return self.driver().canOverPartition()
     
-    def releaseSavePoint(self, savePoint):
+    def releaseSavePoint(self, cursor, savePoint):
         if not self.db():
             return False
         
-        return self.driver().releaseSavePoint(savePoint)
+        return self.driver().releaseSavePoint(cursor, savePoint)
     
-    def rollbackSavePoint(self, savePoint):
+    def rollbackSavePoint(self, cursor, savePoint):
         if not self.db():
             return False
         
-        return self.driver().rollbackSavePoint(savePoint)
+        return self.driver().rollbackSavePoint(cursor, savePoint)
         
     
     def canTransaction(self):
@@ -414,11 +424,11 @@ class PNConnection(QtCore.QObject):
         
         return self.driver().nextSerialVal(table, field)    
     
-    def savePoint(self, number):
+    def savePoint(self, cursor, number):
         if not self.db():
             return False
         
-        self.driver().savePoint(number)
+        self.driver().savePoint(cursor, number)
     
     
     

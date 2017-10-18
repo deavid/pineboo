@@ -6,6 +6,7 @@ from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import auto_qt_translate_text
+import traceback
 
 
 
@@ -127,14 +128,30 @@ class FLQPSQL(object):
         else:
             return None
     
-    @decorators.NotImplementedWarn
-    def savePoint(self, number):
-        pass
+    def savePoint(self, cursor, n):
+        if not self.canSavePoint():
+            return False
+        
+        if not self.isOpen():
+            print("PSQLDriver::savePoint: Database not open")
+            return False
+        
+        cmd = "SAVEPOINT sv_%s" % n
+        
+        #cursor = self.conn_.cursor()
+        try:
+            cursor.execute(cmd)
+        except Exception:
+            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
+            print("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s" % n, traceback.format_exc())
+            return False
+        
+        return True 
     
     def canSavePoint(self):
         return True
     
-    def rollbackSavePoint(self, n):
+    def rollbackSavePoint(self, cursor, n):
         if not self.canSavePoint():
             return False
         
@@ -142,14 +159,13 @@ class FLQPSQL(object):
             print("PSQLDriver::rollbackSavePoint: Database not open")
             return False
         
-        cmd = ("rollback to savepoint sv_%s" % n)
 
-        cursor = self.conn_.cursor()
+        #cursor = self.conn_.cursor()
         try:
-            cursor.execute(cmd)
-        except:
-            self.setLastError("No se pudo rollback a punto de salvaguarda", "rollback to savepoint sv_%s" % n)
-            self.conn_.rollback()
+            cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            print("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" % n, traceback.format_exc())
             return False
         
         return True
@@ -161,32 +177,50 @@ class FLQPSQL(object):
         return self.lastError_
     
     
-    def commitTransaction(self):
+    def commitTransaction(self, cursor):
         if not self.isOpen():
             print("PSQLDriver::commitTransaction: Database not open")
         
-        if not self.conn_.commit():
+        try:
+            #self.conn_.commit()
+            cursor.execute("COMMIT")
+        except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            self.conn_.rollback()
+            print("PSQLDriver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
             return False
         
         return True
     
-    def rollbackTransaction(self):
+    def rollbackTransaction(self, cursor):
         if not self.isOpen():
-            print("PSQLDriver::commitTransaction: Database not open")
+            print("PSQLDriver::rollbackTransaction: Database not open")
         
-        if not self.conn_.rollback():
+        try:
+            #self.conn_.rollback()
+            cursor.execute("ROLLBACK")
+        except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
+            print("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
             return False
         
         return True
     
-    @decorators.BetaImplementation
-    def transaction(self):
+
+    def transaction(self, cursor):
+        if not self.isOpen():
+            print("PSQLDriver::transaction: Database not open")
+        
+        #cursor = self.conn_.cursor()
+        try:
+            cursor.execute("BEGIN")
+        except Exception:
+            self.setLastError("No se pudo crear la transacción", "BEGIN")
+            print("PSQLDriver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())
+            return False
+        
         return True
     
-    def releaseSavePoint(self, n):
+    def releaseSavePoint(self, cursor, n):
         if not self.canSavePoint():
             return False
         
@@ -194,14 +228,15 @@ class FLQPSQL(object):
             print("PSQLDriver::releaseSavePoint: Database not open")
             return False
         
-        cmd = "release savepoint sv_%s" % n
+        cmd = "RELEASE SAVEPOINT sv_%s" % n
         
-        cursor = self.conn_.cursor()
+        #cursor = self.conn_.cursor()
         try:
             cursor.execute(cmd)
-        except:
-            self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
-            self.conn_.rollback()
+        except Exception:
+            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
+            print("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" % n,  traceback.format_exc())
+        
             return False
         
         return True 
