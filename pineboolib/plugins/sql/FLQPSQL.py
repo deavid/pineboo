@@ -221,7 +221,23 @@ class FLQPSQL(object):
         if leng:
             return "::%s(%s)" % (type_, leng)
         else:
-            return "::%s" % type_       
+            return "::%s" % type_
+    
+    
+    def refreshQuery(self, declare, fields, table, where):
+        return "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (declare , fields , table, where)
+    
+    def refreshFetch(self, number, curname, table, cursor):
+        try:
+            cursor.execute("FETCH %d FROM %s" % (number, curname))
+        except Exception:
+            print("PSQLDriver.refreshFetch", traceback.format_exc())
+    
+    def useThreads(self):
+        return True
+    
+    def useTimer(self):
+        return False        
             
             
         
