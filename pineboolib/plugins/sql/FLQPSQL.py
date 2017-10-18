@@ -54,6 +54,7 @@ class FLQPSQL(object):
         
         
         self.conn_ = psycopg2.connect(conninfostr)
+        self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a false para que las transacciones funcionen
         
         if self.conn_:
             self.open_ = True
