@@ -168,7 +168,7 @@ class PNConnection(QtCore.QObject):
                         
                 self.currentSavePoint_ = FLSqlSavePoint(self.transaction_)
             
-                self.savePoint(int(self.transaction_))
+            self.savePoint(int(self.transaction_))
             
             self.transaction_ = self.transaction_ + 1
             cursor.d.transactionsOpened_.append(self.transaction_) #push
