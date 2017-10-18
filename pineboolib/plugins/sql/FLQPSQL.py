@@ -149,6 +149,7 @@ class FLQPSQL(object):
             cursor.execute(cmd)
         except:
             self.setLastError("No se pudo rollback a punto de salvaguarda", "rollback to savepoint sv_%s" % n)
+            self.conn_.rollback()
             return False
         
         return True
@@ -166,6 +167,7 @@ class FLQPSQL(object):
         
         if not self.conn_.commit():
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
+            self.conn_.rollback()
             return False
         
         return True
@@ -199,6 +201,7 @@ class FLQPSQL(object):
             cursor.execute(cmd)
         except:
             self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
+            self.conn_.rollback()
             return False
         
         return True 
