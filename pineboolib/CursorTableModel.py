@@ -140,8 +140,14 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #ct = threading.current_thread()
         #print("Thread: FETCH (INIT)")
         tiempo_inicial = time.time()
-        sql = """FETCH %d FROM %s""" % (2000,self._curname) 
-        self._cursor.execute(sql)
+        sql = """FETCH %d FROM %s""" % (2000,self._curname)
+        conn = self._cursorConn.db()
+        
+        try: 
+            self._cursor.execute(sql)
+        except:
+            conn.rollback()
+            
         tiempo_final = time.time()
         if DEBUG: 
             if tiempo_final - tiempo_inicial > 0.2:
