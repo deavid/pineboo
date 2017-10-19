@@ -207,11 +207,14 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
             if self.USE_THREADS == True and self.threadFetcher.is_alive(): self.threadFetcher.join()
             
-            c_all = self._prj.conn.driver().fetchAll(self._cursor, tablename, where_filter, ", ".join(self.sql_fields))
-            if not isinstance(c_all, int):
-                newrows = len(c_all) #self._cursor.rowcount
-            else:
-                newrows = c_all
+            if tablename == None:
+                tablename = self.tableMetadata().name()
+            
+            if where_filter == None:
+                where_filter = self.where_filter
+            
+            c_all = self._prj.conn.driver().fetchAll(self._cursor, tablename, where_filter, ", ".join(self.sql_fields), self._curname)
+            newrows = len(c_all) #self._cursor.rowcount
             from_rows = self.rows
             self._data += c_all
             self._vdata += [None] * newrows
@@ -294,6 +297,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if not where_filter:
             where_filter = "1 = 0"
         
+        self.where_filter = where_filter
         self._cursor = self._cursorConn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # TODO: Convertir esto a un cursor de servidor (hasta 20.000 registros funciona bastante bien)
@@ -312,13 +316,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.sql_fields.append(field.name())
         self._curname = "cur_" + self._table.name + "_%08d" % (next(self.CURSOR_COUNT))
         
-        sql = self.refreshQuery(self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter)
+        self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter, self._cursor, self._cursorConn.db())
         
-        
-        try:
-            self._cursor.execute(sql)
-        except Exception:
-            print("CursorTableModel.Refresh", traceback.format_exc())
             
         self.refreshFetch(1000,self._curname, self.tableMetadata().name(), self._cursor)
 
@@ -333,11 +332,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #self.threadFetcher.start()
         self.fetchMore(parent, self.tableMetadata().name(),where_filter)
     
-    def refreshQuery(self, declare, fields, table, where):
-        return self._prj.conn.driver().refreshQuery(declare, fields, table, where)
-    
-    def refreshFetch(self, number, curname, table, cursor):
-        self._prj.conn.driver().refreshFetch(number, curname, table, cursor)
+    def refreshFetch(self, number, curname, tablename, cursor):
+        self._prj.conn.driver().refreshFetch(number, curname, tablename, cursor, ", ".join(self.sql_fields), self.where_filter)
+        
     
 
     def indexUpdateRow(self, rownum):

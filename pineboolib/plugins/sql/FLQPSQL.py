@@ -224,10 +224,14 @@ class FLQPSQL(object):
             return "::%s" % type_
     
     
-    def refreshQuery(self, declare, fields, table, where):
-        return "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (declare , fields , table, where)
+    def refreshQuery(self, curname, fields, table, where, cursor, conn):
+        sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (curname , fields , table, where)
+        try:
+            cursor.execute(sql)
+        except Exception:
+            print("CursorTableModel.Refresh", traceback.format_exc())
     
-    def refreshFetch(self, number, curname, table, cursor):
+    def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         try:
             cursor.execute("FETCH %d FROM %s" % (number, curname))
         except Exception:
@@ -239,7 +243,7 @@ class FLQPSQL(object):
     def useTimer(self):
         return False      
     
-    def fetchAll(self, cursor, tablename, where_filter, fields):
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         return cursor.fetchall()  
             
             

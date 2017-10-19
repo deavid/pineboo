@@ -20,6 +20,7 @@ class FLsqlite(object):
     alias_ = None
     errorList = None
     lastError_ = None
+    declare = None
     
     def __init__(self):
         self.version_ = "0.2"
@@ -28,6 +29,7 @@ class FLsqlite(object):
         self.open_ = False
         self.errorList = []
         self.alias_ = "SQLite3"
+        self.declare = []
     
     def version(self):
         return self.version_
@@ -99,7 +101,7 @@ class FLsqlite(object):
                 v = auto_qt_translate_text(v)
                 if upper == True and type_ == "string":
                     v = v.upper()
-
+                    #v = v.encode("UTF-8")
                 s = "'%s'" % v
             #print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
             return s
@@ -146,7 +148,7 @@ class FLsqlite(object):
 
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
+            cursor.execute("ROLLBACK TRANSACTION TO SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
             print("SQL3Driver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" % n, traceback.format_exc())
@@ -167,7 +169,7 @@ class FLsqlite(object):
         
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("COMMIT")
+            cursor.execute("COMMIT TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
             print("SQL3Driver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
@@ -181,7 +183,7 @@ class FLsqlite(object):
         
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("ROLLBACK")
+            cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
             print("SQL3Driver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
@@ -196,7 +198,7 @@ class FLsqlite(object):
         
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("BEGIN")
+            cursor.execute("BEGIN DEFERRED TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN")
             print("SQL3Driver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())
@@ -229,13 +231,20 @@ class FLsqlite(object):
             return " %s" % type_.upper()             
     
     
-    def refreshQuery(self, declare, fields, table, where):
+    def refreshQuery(self, curname, fields, table, where, cursor, conn):
         sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where)
-        print(sql)
-        return sql
+        #print(sql, where)
+        #return "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (declare , fields , table, where)
+        cursor.execute(sql)
+        #self.declare[curname] = cursor
+
     
-    def refreshFetch(self, number, curname, table, cursor):
+    def refreshFetch(self, number, curname, table, cursor, fields, where):
         try:
+            sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where)
+            #self.declare[curname].fetchmany(number)
+            cursor.execute(sql)
+            #print("refreshFetch", cursor, curname)
             cursor.fetchmany(number)
         except Exception:
             print("SQL3Driver:: refreshFetch",  traceback.format_exc())
@@ -246,15 +255,19 @@ class FLsqlite(object):
     def useTimer(self):
         return True
     
-    def fetchAll(self, cursor, tablename, where_filter, fields):
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         try:
             sql = "SELECT %s FROM %s WHERE %s" % (fields, tablename, where_filter)
-            print("SQL-->", sql)
+            #print("SQL-->", sql)
             cursor.execute(sql)
+            #return self.declare[curname].fetchall()
+            #print("refreshAll", cursor, curname)
             return cursor.fetchall()
+        
+        
         except Exception:
             print("SQL3Driver:: fetchAll",  traceback.format_exc())
-            return 0
+            return []
             
        
             
