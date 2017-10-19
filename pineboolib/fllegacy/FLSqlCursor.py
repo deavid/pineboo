@@ -168,8 +168,17 @@ class PNBuffer(ProjectClass):
         for field in  self.fieldList_:
             if field.name == str(name):
                 if field.type_ in ("bool","unlock"):
+                    if value == "false":
+                        value = False
+                    elif value == "true":
+                        value = True
+                        
                     value = str(value)
-                if not field.value == value: 
+                if not field.value == value:
+                    
+                    if field.type_ == "date" and value == None: #Evitamos poner un date a None
+                        return
+                    
                     field.value = value
                     if mark_:
                         if not field.value == field.originalValue:
@@ -2561,7 +2570,7 @@ class FLSqlCursor(ProjectClass):
             self.model().refresh()
             self.refreshBuffer()
         
-        self.d._currentregister = -1
+        #self.d._currentregister = -1
         self.newBuffer.emit()
 
 
