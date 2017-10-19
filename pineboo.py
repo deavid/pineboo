@@ -7,7 +7,7 @@
 """
 import sys, re, traceback, os, gc
 from optparse import OptionParser
-import signal
+import signal, importlib
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 dependeces = []
@@ -155,7 +155,11 @@ def main():
     pineboolib.no_python_cache = options.no_python_cache
 
     # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
-    from pineboolib import mainForm
+    mf = "Pineboo"
+    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % mf)
+    #mainForm = getattr(module_, "MainForm")()
+        
+    #from pineboolib import mainForm
 
     project = pineboolib.main.Project()
     if options.verbose:
