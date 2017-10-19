@@ -78,9 +78,6 @@ class FLTableDB(QtWidgets.QWidget):
     buttonsLayout = None
     masterLayout = None
 
-    _initCursorWhenLoad = None
-    _initTableRecordWhenLoad = None
-
 
     _controlsInit = None
 
@@ -140,7 +137,6 @@ class FLTableDB(QtWidgets.QWidget):
         # FIXME: El problema de que aparezca al editar un registro que no es, es por carga doble de initCursor()
         # ...... Cuando se lanza showWidget, y tiene _initCursorWhenLoad, lanza initCursor y luego otra vez.
         # ...... esta doble carga provoca el error y deja en el formulario el cursor original.
-        self._initCursorWhenLoad = False
         
         self.mapCondType = []
         self.showWidget() 
@@ -304,16 +300,10 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def setTableName(self, fT):
         self.tableName_ = fT
-
-        if self.showed:
-            if self.topwidget:
-                self.initCursor()
-            else:
-                self.initFakeEditor()
-
+        if self.topwidget:
+            self.initCursor()
         else:
-            self._initCursorWhenLoad = True
-            self._initTableRecordWhenLoad = True
+            self.initFakeEditor()
 
 
     """
@@ -331,14 +321,10 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def setForeignField(self, fN):
         self.foreignField_ = fN
-        if self.showed:
-            if self.topwidget:
-                self.initCursor()
-            else:
-                self.initFakeEditor()
+        if self.topwidget:
+            self.initCursor()
         else:
-            self._initCursorWhenLoad = True
-            self._initTableRecordWhenLoad = True
+            self.initFakeEditor()
     """
     Para obtener el nombre del campo relacionado.
 
@@ -354,15 +340,10 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def setFieldRelation(self, fN):
         self.fieldRelation_ = fN
-        if self.showed:
-            if self.topwidget:
-                self.initCursor()
-            else:
-                self.initFakeEditor()
-
+        if self.topwidget:
+            self.initCursor()
         else:
-            self._initCursorWhenLoad = True
-            self._initTableRecordWhenLoad = True
+            self.initFakeEditor()
     """
     Establece si el componente esta en modo solo lectura o no.
     """
@@ -641,7 +622,7 @@ class FLTableDB(QtWidgets.QWidget):
             timer.singleShot(30, self.showWidget)
             return
         else:
-            if not self.showed and not self._initCursorWhenLoad and self.cursor_ and self.tableRecords_:
+            if not self.showed and self.cursor_ and self.tableRecords_:
                 if not self.topWidget:
                     self.initFakeEditor()
                     self.showed = True
@@ -704,10 +685,6 @@ class FLTableDB(QtWidgets.QWidget):
                     del tMD
 
 
-            if self._initCursorWhenLoad:
-                self._initCursorWhenLoad = False
-                self.initCursor()
-                self.showWidget()
 
             if not self.tableRecords_:
                 if not self.tableName_:
