@@ -1560,8 +1560,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::insertRecord()
     """
-    @QtCore.pyqtSlot()
-    def insertRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def insertRecord(self, unknown = None):
 
         w = self.sender()
         #if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
@@ -1584,8 +1584,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::editRecord()
     """
-    @QtCore.pyqtSlot()
-    def editRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def editRecord(self, unknown = None):
         w = self.sender()
         
         #if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
@@ -1604,8 +1604,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::browseRecord()
     """
-    @QtCore.pyqtSlot()
-    def browseRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def browseRecord(self, unknown):
 
         w = self.sender()
         if w and (not self.cursor_ or self.reqOnlyTable_):
@@ -1618,8 +1618,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::deleteRecord()
     """
-    @QtCore.pyqtSlot()
-    def deleteRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def deleteRecord(self, unknown):
         w = self.sender()
         if w and (not self.cursor_ or self.reqReadOnly_ or self.reqInsertOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)
