@@ -237,7 +237,10 @@ class FLQPSQL(object):
         return True
     
     def useTimer(self):
-        return False        
+        return False      
+    
+    def fetchAll(self, cursor, tablename, where_filter, fields):
+        return cursor.fetchall()  
             
             
         

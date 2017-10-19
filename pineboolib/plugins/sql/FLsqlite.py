@@ -6,6 +6,7 @@ from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import auto_qt_translate_text
+import traceback
 
 
 
@@ -243,8 +244,17 @@ class FLsqlite(object):
         return False
     
     def useTimer(self):
-        return True 
+        return True
     
+    def fetchAll(self, cursor, tablename, where_filter, fields):
+        try:
+            sql = "SELECT %s FROM %s WHERE %s" % (fields, tablename, where_filter)
+            print("SQL-->", sql)
+            cursor.execute(sql)
+            return cursor.fetchall()
+        except Exception:
+            print("SQL3Driver:: fetchAll",  traceback.format_exc())
+            return 0
             
        
             

@@ -187,7 +187,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.dataChanged.emit(topLeft,bottomRight)
         
         
-    def fetchMore(self,index):
+    def fetchMore(self,index, tablename = None, where_filter = None):
         tiempo_inicial = time.time()
         #ROW_BATCH_COUNT = min(200 + self.rowsLoaded // 10, 1000)
         ROW_BATCH_COUNT = 1000
@@ -207,8 +207,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
             if self.USE_THREADS == True and self.threadFetcher.is_alive(): self.threadFetcher.join()
             
-            c_all = self._cursor.fetchall()
-            newrows = len(c_all) #self._cursor.rowcount
+            c_all = self._prj.conn.driver().fetchAll(self._cursor, tablename, where_filter, ", ".join(self.sql_fields))
+            if not isinstance(c_all, int):
+                newrows = len(c_all) #self._cursor.rowcount
+            else:
+                newrows = c_all
             from_rows = self.rows
             self._data += c_all
             self._vdata += [None] * newrows
@@ -328,7 +331,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #self.threadFetcher = threading.Thread(target=self.threadFetch)
         #self.threadFetcherStop = threading.Event()
         #self.threadFetcher.start()
-        self.fetchMore(parent)
+        self.fetchMore(parent, self.tableMetadata().name(),where_filter)
     
     def refreshQuery(self, declare, fields, table, where):
         return self._prj.conn.driver().refreshQuery(declare, fields, table, where)
