@@ -155,13 +155,14 @@ def main():
     pineboolib.no_python_cache = options.no_python_cache
 
     # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
-    mf = "Pineboo"
-    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % mf)
+
+    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % pineboolib.main.Project.mainFormName)
     #mainForm = getattr(module_, "MainForm")()
         
     #from pineboolib import mainForm
 
     project = pineboolib.main.Project()
+    
     if options.verbose:
         project.setDebugLevel(100)
         mainForm.MainForm.setDebugLevel(100)
