@@ -199,6 +199,8 @@ class Project(object):
                 fileobj = File(self, idmodulo, nombre, basedir = root)
                 self.files[nombre] = fileobj
                 self.modules[idmodulo].add_project_file(fileobj)
+        
+        
 
 
     def saveGeometryForm(self, name, geo):
@@ -650,11 +652,11 @@ class XMLAction(XMLStruct):
     def initModule(self, name):
         
         moduleName = self.prj.actions[name].mod.moduleName
-        if moduleName == None:
+        if moduleName in (None, "sys"):
             return
         if not moduleName in self.prj._initModules:
             self.prj._initModules.append(moduleName)
-            self.prj.call("%s.iface.init()" % moduleName, [self], None, False)
+            self.prj.call("%s.iface.init()" % moduleName, [], None, False)
             return
 
 

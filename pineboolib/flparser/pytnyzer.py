@@ -1065,6 +1065,7 @@ def file_template(ast):
     yield "line", "from pineboolib import qsatype"
     yield "line", "from pineboolib.qsaglobals import *"
     yield "line", "import traceback"
+    yield "line", "sys = SysType()"
     yield "line", ""
     sourceclasses = etree.Element("Source")
     for cls in ast.xpath("Class"):

@@ -158,9 +158,8 @@ class SysType(object):
         return u"%s" % text
         
 
-        
+       
     
-sys = SysType()
 
 def proxy_fn(wf, wr, slot):
     def fn(*args,**kwargs):

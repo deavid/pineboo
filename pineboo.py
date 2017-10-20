@@ -243,8 +243,10 @@ def main():
         splash.showMessage("Abriendo interfaz ...")
         if options.verbose: print("Abriendo interfaz ...")
         main_window.show()
+        project.call("sys.widget.init()", [], None, True)
         objaction.openDefaultForm()
         splash.hide()
+        
         ret = app.exec_()
         mainForm.mainWindow = None
         return ret
@@ -271,7 +273,7 @@ def main():
             splash.showMessage("Abriendo interfaz ...")
             if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
-    
+            project.call("sys.widget.init()", [], None, True)
             splash.showMessage("Listo ...")
             QtCore.QTimer.singleShot(2000, splash.hide)
             
