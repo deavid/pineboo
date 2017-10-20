@@ -17,7 +17,7 @@ class FLReportViewer(ProjectClass):
     displayReport_ = None
 
     def __init__(self, *args):
-        super(FLReportViewer,self).__init__()
+        super(FLReportViewer, self).__init__()
         #  FLReportViewerInterface() : QObject(0), obj_(0) {
         #  FLReportViewerInterface(FLReportViewer *obj) : QObject(obj), obj_(0) {
         #  FLReportViewerInterface(QWidget *w, bool) : QObject(w) {
@@ -27,26 +27,25 @@ class FLReportViewer(ProjectClass):
         self.data_ = None
         self.displayReport_ = True
 
-    def __getattr__(self, name): return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
     def connects(self):
         pass
 
-    def renderReport(self, initRow = 0, initCol = 0, append = False, displayReport = True):
+    def renderReport(self, initRow=0, initCol=0, append=False, displayReport=True):
         self.append = append
         self.displayReport_ = displayReport
         return True
 
     @decorators.NotImplementedWarn
-    def renderReport2(self, initRow = 0, initCol = 0, flags = Display):
+    def renderReport2(self, initRow=0, initCol=0, flags=Display):
         return True
-
 
     def setReportData(self, xmlDoc_Or_Query):
         self.data_ = xmlDoc_Or_Query
 
-
-    def setReportTemplate(self,  t, style = None):
+    def setReportTemplate(self, t, style=None):
         self.template_ = t
 
     @decorators.NotImplementedWarn
@@ -57,7 +56,6 @@ class FLReportViewer(ProjectClass):
     def reportTemplate(self):
         return None
 
-    
     def exec_(self):
         print("FIXME::FLReportViewer.exec_() !!!")
         return
@@ -71,82 +69,109 @@ class FLReportViewer(ProjectClass):
         return None
 
     @decorators.NotImplementedWarn
-    def printReport(self): return None
+    def printReport(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def printReportToPS(self,outPsFile): return None
+    def printReportToPS(self, outPsFile):
+        return None
 
     @decorators.NotImplementedWarn
-    def printReportToPDF(self,outPdfFile): return None
+    def printReportToPDF(self, outPdfFile):
+        return None
 
     @decorators.NotImplementedWarn
-    def setNumCopies(self,numCopies): return None
+    def setNumCopies(self, numCopies):
+        return None
 
     @decorators.NotImplementedWarn
-    def setPrintToPos(self,ptp): return None
+    def setPrintToPos(self, ptp):
+        return None
 
     @decorators.NotImplementedWarn
-    def setPrinterName(self,pName): return None
+    def setPrinterName(self, pName):
+        return None
 
     @decorators.NotImplementedWarn
-    def reportPrinted(self): return True
+    def reportPrinted(self):
+        return True
 
     @decorators.NotImplementedWarn
-    def reparent(self,parentFrame): return None
+    def reparent(self, parentFrame):
+        return None
 
     @decorators.NotImplementedWarn
-    def slotFirstPage(self): return None
+    def slotFirstPage(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def slotLastPage(self): return None
+    def slotLastPage(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def slotNextPage(self): return None
+    def slotNextPage(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def slotPrevPage(self): return None
+    def slotPrevPage(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def slotZoomUp(self): return None
+    def slotZoomUp(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def slotZoomDown(self): return None
+    def slotZoomDown(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def exportFileCSVData(self): return None
+    def exportFileCSVData(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def exportToPDF(self): return None
+    def exportToPDF(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def sendEMailPDF(self): return None
+    def sendEMailPDF(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def saveSVGStyle(self): return None
+    def saveSVGStyle(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def saveSimpleSVGStyle(self): return None
+    def saveSimpleSVGStyle(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def loadSVGStyle(self): return None
+    def loadSVGStyle(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def setAutoClose(self,b): return None
+    def setAutoClose(self, b):
+        return None
 
     @decorators.NotImplementedWarn
-    def setResolution(self,dpi): return None
+    def setResolution(self, dpi):
+        return None
 
     @decorators.NotImplementedWarn
-    def setPixel(self,relDpi): return None
+    def setPixel(self, relDpi):
+        return None
 
     @decorators.NotImplementedWarn
-    def setDefaults(self): return None
+    def setDefaults(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def updateReport(self): return None
+    def updateReport(self):
+        return None
 
     @decorators.NotImplementedWarn
-    def updateDisplay(self): return None
+    def updateDisplay(self):
+        return None
+
 
 """
   void setStyleName(const QString &style) {
