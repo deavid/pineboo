@@ -2570,7 +2570,7 @@ class FLSqlCursor(ProjectClass):
             self.model().refresh()
             self.refreshBuffer()
         
-        #self.d._currentregister = -1
+        self.d._currentregister = -1
         self.newBuffer.emit()
 
 
@@ -2657,9 +2657,12 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método setFilter() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    def setFilter(self, filter_):
+    def setFilter(self, _filter):
+        
+        if not self.cursorRelation() and _filter == None:
+            _filter = "1 = 1"
 
-        finalFilter = filter_
+        finalFilter = _filter
         bFilter = self.baseFilter()
         if bFilter:
             if not finalFilter:
