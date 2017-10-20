@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import traceback
 import pineboolib
 from pineboolib import flcontrols, decorators
-
+from pineboolib.flcontrols import ProjectClass
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
@@ -151,15 +151,17 @@ class SysType(object):
     
     
     def setCaptionMainWidget(self, value):
-        pineboolib.project.mainWindow.setWindowTitle(value)
-    
+       self.mainWidget().setWindowTitle("Pineboo - %s" % value)
+       pass
     
     def toUnicode(self, text, format):
         return u"%s" % text
+    
+    def mainWidget(self):
+        return pineboolib.project.main_window.ui
         
 
        
-    
 
 def proxy_fn(wf, wr, slot):
     def fn(*args,**kwargs):

@@ -163,6 +163,7 @@ def main():
 
     project = pineboolib.main.Project()
     
+    
     if options.verbose:
         project.setDebugLevel(100)
         mainForm.MainForm.setDebugLevel(100)
@@ -234,6 +235,7 @@ def main():
 
         main_window = mainForm.mainWindow
         main_window.load()
+        
         splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):

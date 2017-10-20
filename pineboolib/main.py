@@ -46,6 +46,7 @@ class Project(object):
     debugLevel = 100
     mainFormName = "Pineboo"
     _initModules = None
+    main_window = None
     
     def __init__(self):
         self.tree = None
@@ -57,6 +58,7 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self._initModules = []
+        self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s" % self.mainFormName).mainWindow
         
 
         self.actions = {}
