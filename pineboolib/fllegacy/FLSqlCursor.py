@@ -2570,7 +2570,7 @@ class FLSqlCursor(ProjectClass):
             self.model().refresh()
             self.refreshBuffer()
         
-        self.d._currentregister = -1
+        #self.d._currentregister = -1
         self.newBuffer.emit()
 
 
