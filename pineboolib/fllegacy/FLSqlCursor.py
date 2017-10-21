@@ -62,15 +62,17 @@ class PNBuffer(ProjectClass):
     def primeUpdate(self, row = None):
         if row < 0:
             row = self.cursor_.d._currentregister
+        
         for field in self.fieldList_:
-            if self.cursor_.d._model.value(row , field.name) == "None":
-                field.value = None
-                
-            elif field.type_ == "unlock":
-                if self.cursor_.d._model.value(row , field.name) == "True" or self.cursor_.d._model.value(row , field.name) == True:
+            
+            if field.type_ == "unlock" or field.type_ == "bool":
+                if self.cursor_.d._model.value(row , field.name) in ("True", True, 1):
                     field.value = True
                 else:
                     field.value = False
+            
+            elif self.cursor_.d._model.value(row , field.name) == "None":
+                field.value = None
                     
             else:
                 field.value = self.cursor_.d._model.value(row , field.name)
@@ -92,10 +94,10 @@ class PNBuffer(ProjectClass):
     def setNull(self, name):
         for field in  self.fieldList_:
             if field.name == str(name):
-                if field.type_ == "date":
-                    self.setValue(field.name,"2000-01-01" )
-                else:
-                    self.setValue(name, None)
+                #if field.type_ == "date":
+                #    self.setValue(field.name,"2000-01-01" )
+                #else:
+                self.setValue(name, None)
                 return True
         
         return False
@@ -128,9 +130,8 @@ class PNBuffer(ProjectClass):
     def isNull(self, n):
         if isinstance(n, str):
             for field in  self.fieldList_:
-                if field.name == n:
+                if field.name == n:                
                     if field.value == None:
-                        #print("PNBuffer.isNull(True)")
                         return True
                     else:
                         return False
@@ -138,7 +139,7 @@ class PNBuffer(ProjectClass):
             i = 0
             for field in self.fieldList_:
                 if i == n:
-                    if not field.value:
+                    if field.value == None:
                         return True
                     else:
                         return False
@@ -148,7 +149,7 @@ class PNBuffer(ProjectClass):
         return True
 
     def value(self, n):
-
+        
         if not str(n).isdigit():
             for field in  self.fieldList_:
                 if field.name.lower() == str(n).lower():
@@ -163,12 +164,21 @@ class PNBuffer(ProjectClass):
     def setValue(self, name, value, mark_ = True):
         if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
-
+        
         for field in  self.fieldList_:
             if field.name == str(name):
-                if field.type_ == "bool":
+                if field.type_ in ("bool","unlock"):
+                    if value == "false":
+                        value = False
+                    elif value == "true":
+                        value = True
+                        
                     value = str(value)
-                if not field.value == value: 
+                if not field.value == value:
+                    
+                    if field.type_ == "date" and value == None: #Evitamos poner un date a None
+                        return
+                    
                     field.value = value
                     if mark_:
                         if not field.value == field.originalValue:
@@ -181,13 +191,9 @@ class PNBuffer(ProjectClass):
 
     def convertToType(self, value, type_):
         
-        if value == None or value == u"None":
-            if type_ == "bool":
+        if value in (u"None", None):
+            if type_ in ("bool","unlock"):
                 return False
-            
-            elif type_ == "unlock":
-                return True
-            
             elif type_ in ("int", "uint"):
                 return int(0)
             elif type_ == "double":
@@ -211,6 +217,9 @@ class PNBuffer(ProjectClass):
                      return fv.toString("yyyy-MM-dd")
                  else:
                      return fv.strftime('%Y-%m-%d')
+                 
+            elif type_ == "date" and value == "null":
+                return None
             
             elif type_ == "time" and not isinstance(value, str): 
                  fv = value
@@ -297,6 +306,11 @@ class PNBuffer(ProjectClass):
 
     def fieldsList(self):
         return self.fieldList_
+    
+    def field(self, name):
+        for f in self.fieldList_:
+            if f.name == name:
+                return f
 
 ################################################################################
 ################################################################################
@@ -514,10 +528,11 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.editionStates_ = None
         self.activatedCheckIntegrity_ = True
         self.askForCancelChanges_ = True
+        self.transactionsOpened_ = []
+        self.cursorRelation_ = None
 
 
 
-    @decorators.BetaImplementation
     def __del__(self):
 
         #if self.metadata_:
@@ -539,6 +554,8 @@ class FLSqlCursorPrivate(QtCore.QObject):
         if self.browseStates_:
             del self.browseStates_
             #print("AQBoolFlagState count", self.count_)
+        if self.transactionsOpened_:
+            del self.transactionsOpened_
 
     @decorators.NotImplementedWarn
     def doAcl(self):
@@ -574,7 +591,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
 
     def msgBoxWarning(self, msg, throwException = False):
-        
+        print(msg)
         if not throwException:
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),"Pineboo", msg)
         
@@ -669,7 +686,7 @@ class FLSqlCursor(ProjectClass):
     Código de inicialización común para los constructores
     """
     def init(self, name, autopopulate, cR, r):
-        #print("FLSqlCursor(%s): Init()" % name)
+        #print("FLSqlCursor(%s): Init() %s (%s, %s)" % (name, self, cR, r))
 
         #if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
 
@@ -741,6 +758,9 @@ class FLSqlCursor(ProjectClass):
         self.refreshDelayed()
         #self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
         #self.first()
+    
+    def conn(self):
+        return self.d.db_
 
     def table(self):
         return self.metadata().name()
@@ -778,7 +798,10 @@ class FLSqlCursor(ProjectClass):
     @return Cadena de texto con el filtro principal
     """
     def mainFilter(self):
-        return self.d._model.where_filters["main-filter"]
+        if getattr(self.d._model, "where_filters", None):
+            return self.d._model.where_filters["main-filter"]
+        else:
+            return None
 
 
     """
@@ -800,7 +823,7 @@ class FLSqlCursor(ProjectClass):
     def setAction(self, a):
         #if isinstance(a, str) or isinstance(a, QString):
 
-        a = str(a) # FIXME: Quitar cuando se quite QString
+        #a = str(a) # FIXME: Quitar cuando se quite QString
         
         
         if isinstance(a, str):
@@ -809,14 +832,18 @@ class FLSqlCursor(ProjectClass):
             try:
                 self._action = self._prj.actions[str(a)]
             except KeyError:
-                print("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
+                #print("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
                 self._action.table = a
                 #print("FLSqlCursor.setAction(): Action no encontrada : %s en %s actions. Es posible que la tabla no exista" % (a, len(self._prj.actions)))
                 #return False
             #self._action = self._prj.actions["articulos"]
 
             if getattr(self._action,"table",None):
-                self.d._model = CursorTableModel(self._action, self._prj)
+                self.d._model = CursorTableModel(self._action, self._prj, self.conn())
+                if not self.d._model:
+                    return None
+                
+                
                 self._selection = QtCore.QItemSelectionModel(self.model())
                 self._selection.currentRowChanged.connect(self.selection_currentRowChanged)
                 self._currentregister = self._selection.currentIndex().row()
@@ -838,11 +865,11 @@ class FLSqlCursor(ProjectClass):
     @param doRefresh Si TRUE tambien refresca el cursor
     """
     def setMainFilter(self, f, doRefresh = True):
-        if f == "":
-            f = "1 = 1"
+        #if f == "":
+        #    f = "1 = 1"
             
-            
-        if self.d._model:
+        #print("--------------------->Añadiendo filtro",  f)   
+        if self.d._model and getattr(self.d._model, "where_filters", None):
             self.d._model.where_filters["main-filter"] = f
             if doRefresh:
                 self.refresh()
@@ -990,28 +1017,37 @@ class FLSqlCursor(ProjectClass):
             return None
 
         #if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
-        if self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert:
+        if (self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert) or not self.d.buffer_:
             if not self.d.buffer_:
+                #print("solicitando rb de", self.curName(), self.modeAccess(), self.d._currentregister, self.model().rows)
                 self.refreshBuffer()
 
             if not self.d.buffer_:
-                print("ERROR: FLSqlCursor: aún después de refresh, no tengo buffer.", self.curName())
-                return None
-        else:
-            #return None //Devolvemos el valor del buffer si es insert
-            if not self.d.buffer_:
-                #print("No hay buffer de ", self.curName())
+                #print("ERROR: FLSqlCursor(%s): aún después de refresh, no tengo buffer." % self.curName())
                 return None
             else:
-                return self.d.buffer_.value(fN)
+                field = self.metadata().field(fN)
+                if field:
+                    type_ = field.type()
+                    v = self.d.buffer_.value(fN)
+                
+                    if type_ == "pixmap":
+                        return self.d.db_.manager().fetchLargeValue(v)
+                    else:
+                        return v
+                else:
+                    return None
+        
             
         field = self.metadata().field(fN)
         if not field:
-            #print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.metadata().name(), fN))
+            print("FLSqlCursor::valueBuffer() : No existe el campo %s:%s" % (self.curName(), fN))
             return None
 
         type_ = field.type()
         fltype = field.flDecodeType(type_)
+        
+
         if self.d.buffer_.isNull(fN):
             if type_ == "double" or type_ == "int" or type_ == "uint":
                 return 0
@@ -1312,16 +1348,17 @@ class FLSqlCursor(ProjectClass):
     def openFormInMode(self, m, cont = True):
         if not self.d.metadata_:
             return
-
+        util = FLUtil()
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
-            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),FLUtil.tr("Aviso"),FLUtil.tr("No hay ningún registro seleccionado"))
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), util.tr("Aviso"), util.tr("No hay ningún registro seleccionado"))
             return
 
         if m == self.Del:
-            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), FLUtil.tr("Aviso"),FLUtil.tr("El registro activo será borrado. ¿ Está seguro ?"),QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No)
+            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), util.tr("Aviso"), util.tr("El registro activo será borrado. ¿ Está seguro ?"),QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No)
             if res == QtWidgets.QMessageBox.No:
                 return
-
+            
+            
             self.transaction()
             self.d.modeAccess_ = self.Del
             if not self.refreshBuffer():
@@ -1331,7 +1368,10 @@ class FLSqlCursor(ProjectClass):
                     self.rollback()
                 else:
                     self.commit()
+            
             return
+
+
 
 
         self.d.modeAccess_ = m
@@ -1385,6 +1425,9 @@ class FLSqlCursor(ProjectClass):
     @return TRUE si el buffer y la copia son distintas, FALSE en caso contrario
     """
     def isModifiedBuffer(self):
+        if not self.d.buffer_:
+            return False
+        
         modifiedFields = self.d.buffer_.modifiedFields()
         if modifiedFields:
             return True
@@ -1426,10 +1469,8 @@ class FLSqlCursor(ProjectClass):
     claves primarias y si hay nulos en campos que no lo permiten cuando se inserta o se edita.
     Si alguna comprobacion falla devuelve un mensaje describiendo el fallo.
     """
-    @decorators.BetaImplementation
     def msgCheckIntegrity(self):
         msg = ""
-        
         if not self.d.buffer_ or not self.d.metadata_:
             msg = "\nBuffer vacío o no hay metadatos"
             return msg
@@ -1497,8 +1538,10 @@ class FLSqlCursor(ProjectClass):
                         del tMD
                 
                 
-                if self.d.modeAccess_ == self.Edit and self.d.buffer_.value(fiName) == self.d.bufferCopy_.value(fiName):
-                    continue
+                if self.d.modeAccess_ == self.Edit:
+                    if self.d.buffer_ and self.d.bufferCopy_:
+                        if self.d.buffer_.value(fiName) == self.d.bufferCopy_.value(fiName):
+                            continue
                 
                 if self.d.buffer_.isNull(fiName) and not field.allowNull() and not field.type() == FLFieldMetaData.Serial:
                     #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : No puede ser nulo")
@@ -1594,17 +1637,20 @@ class FLSqlCursor(ProjectClass):
             s = None
             
             for field in fieldList:
-                fiName = field.name()
-                if not self.d.buffer_.isGenerated(fiName):
+                #fiName = field.name()
+                if not self.d.buffer_.isGenerated(field.name()):
                     continue
                 
                 s = None
-                if not self.d.buffer_.isNull(fiName):
-                    s = self.d.buffer_.value(fiName)
-                    if str(s):
-                        s = None
                 
-                if not s or s == None:
+                
+                
+                if not self.d.buffer_.isNull(field.name()):
+                    s = self.d.buffer_.value(field.name())
+                    #if s:
+                    #    s = None
+                
+                if s == None:
                     continue
                 
                 relationList = field.relationList()
@@ -1647,7 +1693,7 @@ class FLSqlCursor(ProjectClass):
                         q.setSelect(r.foreignField())
                         q.setFrom(mtd.name())
                         q.setWhere(self.d.db_.manager().formatAssignValue(r.foreignField(), field, s, True))
-                        q.setForwardOnly()
+                        q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
                             #msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() + FLUtil.tr(" : Con el valor %1 hay registros en la tabla %2:%3").arg(str(s), mtd.name(), mtd.alias())
@@ -1682,18 +1728,16 @@ class FLSqlCursor(ProjectClass):
             return False
         if not self.d.activatedCheckIntegrity_:
             return True
-        
         msg = self.msgCheckIntegrity()
         if msg:
             if showError:
-                if self.d.modeAccess_ == self.Inset or self.d.modeAccess_ == self.Edit:
+                if self.d.modeAccess_ == self.Insert or self.d.modeAccess_ == self.Edit:
                     #self.d.msgBoxWarning(FLUtil.tr("No se puede validad el registro actual:\n") + msg)
                     self.d.msgBoxWarning("No se puede validad el registro actual:\n" + msg)
                 elif self.d.modeAccess_ == self.Del:
                     #self.d.msgBoxWarning(FLUtil.tr("No se puede borrar registro:\n") + msg)
                     self.d.msgBoxWarning("No se puede borrar registro:\n" + msg)
             return False
-        
         return True
 
     """
@@ -1804,7 +1848,7 @@ class FLSqlCursor(ProjectClass):
     def atFrom(self):
         if not self.d.buffer_ or not self.d.metadata_:
             return 0
-
+        
         pKN = self.d.metadata_.primaryKey()
         pKValue = self.valueBuffer(pKN)
 
@@ -1843,7 +1887,8 @@ class FLSqlCursor(ProjectClass):
                     else:
                         pos = 0
                     return pos
-
+            
+            
             if cFilter:
                 sqlWhere = cFilter
                 sql = "%s WHERE %s" % (sql, sqlWhere)
@@ -2185,19 +2230,20 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
         if not self.d.metadata_:
-            return False
-
+            return False  
+        
         if not self.isValid() and not self.d.modeAccess_ == self.Insert:
             return False
-
+        
         if self.d.modeAccess_ == self.Insert:
+
             if not self.commitBufferCursorRelation():
                 return False
-
+            
             if not self.d.buffer_:
                 self.d.buffer_ = PNBuffer(self)
             self.setNotGenerateds()
-
+            
             fieldList = self.metadata().fieldListObject()
             if fieldList:
                 for field in fieldList:
@@ -2223,11 +2269,12 @@ class FLSqlCursor(ProjectClass):
                             try:
                                 siguiente = self.context().calculateCounter()
                             except:
-                                siguiente = FLUtil.nextCounter(field.name(), self)
+                                util = FLUtil()
+                                siguiente = util.nextCounter(field.name(), self)
 
                             if siguiente:
                                 self.d.buffer_.setValue(field.name(), siguiente)
-
+            
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
 
@@ -2252,13 +2299,15 @@ class FLSqlCursor(ProjectClass):
             self.newBuffer.emit()
 
         elif self.d.modeAccess_ == self.Del:
+            
             if self.isLocked():
-                self.d.msgboxWarning("Registro bloqueado, no se puede eliminar")
+                self.d.msgBoxWarning("Registro bloqueado, no se puede eliminar")
                 self.d.modeAccess_ = self.Browse
                 return False
 
             if self.d.buffer_:
-                self.d.buffer_.primeDelete()
+                
+                #self.d.buffer_.primeDelete()
                 self.setNotGenerateds()
                 self.updateBufferCopy()
 
@@ -2464,13 +2513,14 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def __del__(self, invalidate = True):
+        #print("FLSqlCursor(%s). Eliminando cursor" % self.curName(), self)
         delMtd = None
         if self.d.metadata_ and not self.d.metadata_.inCache():
             delMtd = True
         
         msg = None
         mtd = self.d.metadata_
-        """
+        
         if self.d.transactionsOpened_:
             print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
         if len(self.d.transactionsOpened_) > 0: #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
@@ -2479,7 +2529,7 @@ class FLSqlCursor(ProjectClass):
                 t = self.d.metadata_.name()
                 msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
             self.rollbackOpened(-1, msg)
-        """
+        
         del self.d
         if delMtd:
             del mtd
@@ -2498,12 +2548,16 @@ class FLSqlCursor(ProjectClass):
         if not self.d.metadata_:
             return False
         
+        if not self.cursorRelation() and _filter == None:
+            _filter = "1 = 1"
+        
         bFilter = self.baseFilter()
         finalFilter = bFilter
         
         if _filter:
             if bFilter:
                 if not _filter in bFilter:
+                    
                     finalFilter = "%s AND %s" % (bFilter, _filter)
                 else:
                     finalFilter = bFilter
@@ -2512,8 +2566,8 @@ class FLSqlCursor(ProjectClass):
                 finalFilter = _filter
         
         if finalFilter:
-            self.setMainFilter(finalFilter , False)
-            self.d._model.refresh()
+            self.setFilter(finalFilter)
+            self.model().refresh()
             self.refreshBuffer()
         
         self.d._currentregister = -1
@@ -2539,16 +2593,16 @@ class FLSqlCursor(ProjectClass):
     def baseFilter(self):
         #print("basefilter", self.curName())
         relationFilter = None
-        finalFilter = None
+        finalFilter = ""
 
         if self.d.cursorRelation_ and self.d.relation_ and self.d.metadata_ and self.d.cursorRelation_.metadata():
 
             fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
             field = self.d.metadata_.field(self.d.relation_.field())
-            if not fgValue:
-                fgValue = ""
+            #if not fgValue:
+            #    fgValue = ""
 
-            if field and not fgValue == None:
+            if field and fgValue:
                 relationFilter = self.d.db_.manager().formatAssignValue(field, fgValue, True)
                 filterAc = self.d.cursorRelation_.filterAssoc(self.d.relation_.foreignField(), self.d.metadata_)
 
@@ -2567,7 +2621,7 @@ class FLSqlCursor(ProjectClass):
             else:
                 if not relationFilter in finalFilter:
                     finalFilter = "%s AND %s" % (finalFilter, relationFilter)
-
+        
         return finalFilter
 
 
@@ -2588,10 +2642,10 @@ class FLSqlCursor(ProjectClass):
         if not bFilter:
             return f
         else:
-            if not f or bFilter.__contains__(f):
+            if not f or f in bFilter:
                 return bFilter
             else:
-                if f.__contains__(bFilter):
+                if bFilter in f:
                     return f
                 else:
                     return "%s aND %s" % (bFilter, f)
@@ -2603,9 +2657,12 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método setFilter() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    def setFilter(self, filter_):
+    def setFilter(self, _filter):
+        
+        if not self.cursorRelation() and _filter == None:
+            _filter = "1 = 1"
 
-        finalFilter = filter_
+        finalFilter = _filter
         bFilter = self.baseFilter()
         if bFilter:
             if not finalFilter:
@@ -2619,6 +2676,8 @@ class FLSqlCursor(ProjectClass):
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
 
         self.d.filter_ = finalFilter
+        if self.d._model and getattr(self.d._model, "where_filters", None):
+            self.d._model.where_filters["filter"] = self.d.filter_
 
 
 
@@ -2722,10 +2781,9 @@ class FLSqlCursor(ProjectClass):
             self.checkRisksLocks()
             if self.d.inRisksLocks_ and QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(None, "Bloqueo inminente", "Los registros que va a modificar están bloqueados actualmente,\nsi continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n\n¿ Desa continuar aunque exista riesgo de bloqueo ?", QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape):
                 return False
-
+            
         if not self.checkIntegrity():
             return False
-
 
         fieldNameCheck = None
 
@@ -2769,7 +2827,7 @@ class FLSqlCursor(ProjectClass):
 
             if functionBefore:
                 cI = self.context()
-                v = self._prj.call(functionBefore, [self], cI)
+                v = self._prj.call(functionBefore, [self], cI, False)
                 if v and not isinstance(v ,bool):
                     return False
 
@@ -2779,16 +2837,15 @@ class FLSqlCursor(ProjectClass):
         pKN = self.d.metadata_.primaryKey()
         updated = False
         savePoint = None
-
         if self.d.modeAccess_ == self.Insert:
             if self.d.cursorRelation_ and self.d.relation_:
-                if self.d.cursorRelation_.metadata():
+                if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()):
                     self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
                     self.d.cursorRelation_.setAskForCancelChanges(True)
 
             pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
-            #self.insert(False)
-            self.update(False) # NOTE: la funcion insert no está implementada. Tampoco tiene porqué tener dos funciones distintas.
+            self.model().Insert(self.d.buffer_)
+            self.update(False)
             if not self.d.db_.canSavePoint():
                 if self.d.db_.currentSavePoint_:
                     self.d.db_.currentSavePoint_.saveInsert(pKN, self.d.buffer_, self)
@@ -2805,8 +2862,12 @@ class FLSqlCursor(ProjectClass):
                 else:
                     if not pkWhere in self.d.persistentFilter_:
                         self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
-
+            
+            
+            
+            
             updated = True
+            
 
         elif self.d.modeAccess_ == self.Edit:
             if not self.d.db_.canSavePoint():
@@ -2845,41 +2906,47 @@ class FLSqlCursor(ProjectClass):
 
 
         elif self.d.modeAccess_ == self.Del:
-            if not self.d.db_.canSavePoint():
-                if self.d.db_.currentSavePoint_:
-                    self.d.db_.currentSavePoint_.saveDel(pKN, self.d.bufferCopy_, self)
-
-            if functionAfter and self.d.activatedCommitActions_:
-                if not savePoint:
-                    savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
-                savePoint.saveDel(pKN, self.d.bufferCopy_, self)
+            #if not self.d.db_.canSavePoint():
+            #    if self.d.db_.currentSavePoint_:
+            #        self.d.db_.currentSavePoint_.saveDel(pKN, self.d.bufferCopy_, self)
+            
+            #if functionAfter and self.d.activatedCommitActions_:
+            #    if not savePoint:
+            #        savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
+            #    savePoint.saveDel(pKN, self.d.bufferCopy_, self)
 
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
-                self.del__(False)
-                updated = True
+                #self.del__(False)
+                
+            self.model().Delete(self)
+                
+                
+                
+                
+                
+                
+            updated = True
 
         
         if updated and self.lastError():
-            if savePoint == True:
-                del savePoint
+            #if savePoint == True:
+            #    del savePoint
             return False
-
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.context()
-            v = self._prj.call(functionAfter, [self], cI)
+            v = self._prj.call(functionAfter, [self], cI, False)
             if v and not isinstance(v ,bool):
-                if savePoint == True:
-                    savePoint.undo()
-                    del savePoint
+                #if savePoint == True:
+                #    savePoint.undo()
+                #    del savePoint
 
                 return False
 
-        if savePoint == True:
-            del savePoint
-
+        #if savePoint == True:
+        #    del savePoint
         self.d.modeAccess_ = self.Browse
         if updated == True:
             if fieldNameCheck:
@@ -3281,11 +3348,6 @@ class FLSqlCursor(ProjectClass):
                 self.bufferCommited.emit()
 
 
-        elif self.modeAccess() == FLSqlCursor.Insert:
-            self.model().newRowFromBuffer(self.d.buffer_)
-
-            if notify:
-                self.bufferCommited.emit()
         print("FLSqlCursor.update --- END")
 
     """

@@ -87,27 +87,38 @@ class Array(object):
     
     dict_ = None
     key_ = None
+    names_ = None
     
     def __init__(self, *args):
+        self.names_ = []
         if not len(args):
             self.dict_ = {}
         elif isinstance(args[0], int) and len(args) == 1:
             self.dict_ = {} # dimensiones por ahora a cero
+        elif isinstance(args[0], list):
+            self.dict_ = {}
+            for field in args[0]:
+                self.names_.append(field)
+                self.dict_[field] = field 
         else:
             self.dict_ = args
     
     def __setitem__(self, key, value):
         #if isinstance(key, int):
             #key = str(key)
+        if not key in self.names_:
+            self.names_.append(key)
+            
         self.dict_[key] = value
         
             
         
     def __getitem__(self, key):
-        #if isinstance(key, int):
-            #key = str(key)
-        #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
-        return self.dict_[key]
+        if isinstance(key, int):
+           return self.dict_[self.names_[key]]
+        else:
+            #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
+            return self.dict_[key]
     
     def __getattr__(self, k):
         if k == 'length': 
@@ -453,7 +464,15 @@ class Process(QtCore.QProcess):
 
 
 class RadioButton(QtWidgets.QRadioButton):
-    pass
+    
+    def __ini__(self):
+        super(RadioButton, self).__init__()
+    
+    def __setattr__(self, name, value):
+        if name == "text":
+            self.setText(value)
+        else:
+            super(RadioButton, self).__setattr__(name, value)
         
 
 
@@ -496,13 +515,20 @@ class Dialog(QtWidgets.QDialog):
 class GroupBox(QtWidgets.QGroupBox):
     def __init__(self):
         super(GroupBox, self).__init__()
-        self._layout = QtWidgets.QHBoxLayout()
+        self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
 
     def add(self, _object):     
         self._layout.addWidget(_object)
 
 class CheckBox(QtWidgets.QCheckBox):
+    pass
+
+class ComboBox(QtWidgets.QComboBox):
+    pass
+        
+
+class LineEdit(QWidget):
     pass
 
 class Dir(object):

@@ -5,6 +5,8 @@ from pineboolib import decorators
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.utils import auto_qt_translate_text
+import traceback
 
 
 
@@ -18,14 +20,16 @@ class FLsqlite(object):
     alias_ = None
     errorList = None
     lastError_ = None
+    declare = None
     
     def __init__(self):
-        self.version_ = "0.1"
+        self.version_ = "0.2"
         self.conn_ = None
         self.name_ = "FLsqlite"
         self.open_ = False
         self.errorList = []
         self.alias_ = "SQLite3"
+        self.declare = []
     
     def version(self):
         return self.version_
@@ -73,10 +77,16 @@ class FLsqlite(object):
                 v = ""
 
             if type_ == "bool" or type_ == "unlock":
-                if v[0].lower() == "t":
-                    s = 1
-                else:
-                    s = 0
+                if isinstance(v, str):
+                    if v[0].lower() == "t":
+                        s = 1
+                    else:
+                        s = 0
+                elif isinstance(v, bool):
+                    if v == True:
+                        s = 1
+                    else:
+                        s = 0
 
             elif type_ == "date":
                 s = "'%s'" % util.dateDMAtoAMD(v)
@@ -88,29 +98,16 @@ class FLsqlite(object):
                 s = v
 
             else:
+                v = auto_qt_translate_text(v)
                 if upper == True and type_ == "string":
                     v = v.upper()
-
+                    #v = v.encode("UTF-8")
                 s = "'%s'" % v
             #print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
             return s
 
     def canOverPartition(self):
         return True
-    
-    @decorators.BetaImplementation
-    def hasFeature(self, value):
-        
-        if value == "Transactions":
-            return  True
-        
-        
-        
-        if getattr(self.conn_, value, None):
-            return True
-        else:
-            return False
-    
     
     def nextSerialVal(self, table, field):
         q = FLSqlQuery()
@@ -125,32 +122,39 @@ class FLsqlite(object):
         else:
             return None
     
-    @decorators.NotImplementedWarn
-    def savePoint(self, number):
-        pass
+    def savePoint(self, n):
+        if not self.isOpen():
+            print("SQL3Driver::savePoint: Database not open")
+            return False
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
+            print("SQL3Driver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s" % n, traceback.format_exc())
+            return False
+        
+        return True 
     
     def canSavePoint(self):
         return True
     
     def rollbackSavePoint(self, n):
-        if not self.canSavePoint():
-            return False
-        
         if not self.isOpen():
-            print("PSQLDriver::rollbackSavePoint: Database not open")
+            print("SQL3Driver::rollbackSavePoint: Database not open")
             return False
         
-        cmd = ("rollback to savepoint sv_%s" % n)
 
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec():
-            self.setLastError("No se pudo deshacer punto de salvaguarda", "rollback to savepoint sv_%s" % n)
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("ROLLBACK TRANSACTION TO SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            print("SQL3Driver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" % n, traceback.format_exc())
             return False
         
-        return True 
+        return True
     
     def setLastError(self, text, command):
         self.lastError_ = "%s (%s)" % (text, command)
@@ -161,54 +165,111 @@ class FLsqlite(object):
     
     def commitTransaction(self):
         if not self.isOpen():
-            print("PSQLDriver::commitTransaction: Database not open")
+            print("SQL3Driver::commitTransaction: Database not open")
         
-        if not self.conn_.commit():
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("COMMIT TRANSACTION")
+        except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
+            print("SQL3Driver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
             return False
         
         return True
     
     def rollbackTransaction(self):
         if not self.isOpen():
-            print("PSQLDriver::commitTransaction: Database not open")
+            print("SQL3Driver::rollbackTransaction: Database not open")
         
-        if not self.conn_.rollback():
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("ROLLBACK TRANSACTION")
+        except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
+            print("SQL3Driver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
             return False
         
         return True
     
-    @decorators.BetaImplementation
+
     def transaction(self):
+        if not self.isOpen():
+            print("SQL3Driver::transaction: Database not open")
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("BEGIN DEFERRED TRANSACTION")
+        except Exception:
+            self.setLastError("No se pudo crear la transacción", "BEGIN")
+            print("SQL3Driver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())
+            return False
+        
         return True
     
     def releaseSavePoint(self, n):
-        if not self.canSavePoint():
-            return False
         
         if not self.isOpen():
-            print("PSQLDriver::releaseSavePoint: Database not open")
+            print("SQL3Driver::releaseSavePoint: Database not open")
             return False
         
-        cmd = ("release savepoint sv_%s" % n)
-
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec():
-            self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
+            print("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" % n,  traceback.format_exc())
+        
             return False
         
         return True 
     
-            
+
     def setType(self, type_, leng = None):
         if leng:
             return " %s(%s)" % (type_.upper(), leng)
         else:
-            return " %s" % type_.upper()        
+            return " %s" % type_.upper()             
+    
+    
+    def refreshQuery(self, curname, fields, table, where, cursor, conn):
+        sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where)
+        #print(sql, where)
+        #return "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (declare , fields , table, where)
+        cursor.execute(sql)
+        #self.declare[curname] = cursor
+
+    
+    def refreshFetch(self, number, curname, table, cursor, fields, where):
+        try:
+            sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where)
+            #self.declare[curname].fetchmany(number)
+            cursor.execute(sql)
+            #print("refreshFetch", cursor, curname)
+            cursor.fetchmany(number)
+        except Exception:
+            print("SQL3Driver:: refreshFetch",  traceback.format_exc())
+            
+    def useThreads(self):
+        return False
+    
+    def useTimer(self):
+        return True
+    
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
+        try:
+            sql = "SELECT %s FROM %s WHERE %s" % (fields, tablename, where_filter)
+            #print("SQL-->", sql)
+            cursor.execute(sql)
+            #return self.declare[curname].fetchall()
+            #print("refreshAll", cursor, curname)
+            return cursor.fetchall()
+        
+        
+        except Exception:
+            print("SQL3Driver:: fetchAll",  traceback.format_exc())
+            return []
+            
+       
             
             
         

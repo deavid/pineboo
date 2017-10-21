@@ -17,11 +17,11 @@
  ***************************************************************************/
 
 function init() {
-  if (isLoadedModule("flfactppal")) {
+  if (sys.isLoadedModule("flfactppal")) {
     var util: FLUtil = new FLUtil();
     var codEjercicio: String = flfactppal.iface.pub_ejercicioActual();
     var nombreEjercicio: String = util.sqlSelect("ejercicios", "nombre", "codejercicio='" + codEjercicio + "'");
-    setCaptionMainWidget(nombreEjercicio);
+    sys.setCaptionMainWidget(nombreEjercicio);
   }
   //return;
   if (sys.mainWidget() != undefined) {

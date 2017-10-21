@@ -78,9 +78,6 @@ class FLTableDB(QtWidgets.QWidget):
     buttonsLayout = None
     masterLayout = None
 
-    _initCursorWhenLoad = None
-    _initTableRecordWhenLoad = None
-
 
     _controlsInit = None
 
@@ -106,6 +103,7 @@ class FLTableDB(QtWidgets.QWidget):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
         #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
+        parent_cursor = None
         while True: #Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             if isinstance(self.topWidget.parentWidget(), FLFormSearchDB):
                 self.topWidget = self.topWidget.parentWidget()
@@ -139,7 +137,6 @@ class FLTableDB(QtWidgets.QWidget):
         # FIXME: El problema de que aparezca al editar un registro que no es, es por carga doble de initCursor()
         # ...... Cuando se lanza showWidget, y tiene _initCursorWhenLoad, lanza initCursor y luego otra vez.
         # ...... esta doble carga provoca el error y deja en el formulario el cursor original.
-        self._initCursorWhenLoad = False
         
         self.mapCondType = []
         self.showWidget() 
@@ -233,10 +230,10 @@ class FLTableDB(QtWidgets.QWidget):
 
                 rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
                 fMD.addRelationMD(rMD)
-                #print("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, pero sin embargo se han indicado los campos de relación( %s, %s )" % ( curName, self.tableName_, self.fieldRelation_, self.foreignField_))
-                #print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (curName, self.foreignField_, self.tableName_, self.fieldRelation_))
+                print("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, pero sin embargo se han indicado los campos de relación( %s, %s )" % ( curName, self.tableName_, self.fieldRelation_, self.foreignField_))
+                print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" % (curName, self.foreignField_, self.tableName_, self.fieldRelation_))
             else:
-                #print("FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )" % (self.foreignField_, curName))
+                print("FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )" % (self.foreignField_, curName))
                 pass
 
         rMD = testM1
@@ -303,16 +300,10 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def setTableName(self, fT):
         self.tableName_ = fT
-
-        if self.showed:
-            if self.topwidget:
-                self.initCursor()
-            else:
-                self.initFakeEditor()
-
+        if self.topwidget:
+            self.initCursor()
         else:
-            self._initCursorWhenLoad = True
-            self._initTableRecordWhenLoad = True
+            self.initFakeEditor()
 
 
     """
@@ -330,14 +321,10 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def setForeignField(self, fN):
         self.foreignField_ = fN
-        if self.showed:
-            if self.topwidget:
-                self.initCursor()
-            else:
-                self.initFakeEditor()
+        if self.topwidget:
+            self.initCursor()
         else:
-            self._initCursorWhenLoad = True
-            self._initTableRecordWhenLoad = True
+            self.initFakeEditor()
     """
     Para obtener el nombre del campo relacionado.
 
@@ -353,15 +340,10 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def setFieldRelation(self, fN):
         self.fieldRelation_ = fN
-        if self.showed:
-            if self.topwidget:
-                self.initCursor()
-            else:
-                self.initFakeEditor()
-
+        if self.topwidget:
+            self.initCursor()
         else:
-            self._initCursorWhenLoad = True
-            self._initTableRecordWhenLoad = True
+            self.initFakeEditor()
     """
     Establece si el componente esta en modo solo lectura o no.
     """
@@ -640,7 +622,7 @@ class FLTableDB(QtWidgets.QWidget):
             timer.singleShot(30, self.showWidget)
             return
         else:
-            if not self.showed and not self._initCursorWhenLoad and self.cursor_ and self.tableRecords_:
+            if not self.showed and self.cursor_ and self.tableRecords_:
                 if not self.topWidget:
                     self.initFakeEditor()
                     self.showed = True
@@ -703,10 +685,6 @@ class FLTableDB(QtWidgets.QWidget):
                     del tMD
 
 
-            if self._initCursorWhenLoad:
-                self._initCursorWhenLoad = False
-                self.initCursor()
-                self.showWidget()
 
             if not self.tableRecords_:
                 if not self.tableName_:
@@ -1559,8 +1537,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::insertRecord()
     """
-    @QtCore.pyqtSlot()
-    def insertRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def insertRecord(self, unknown = None):
 
         w = self.sender()
         #if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
@@ -1583,8 +1561,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::editRecord()
     """
-    @QtCore.pyqtSlot()
-    def editRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def editRecord(self, unknown = None):
         w = self.sender()
         
         #if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
@@ -1603,8 +1581,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::browseRecord()
     """
-    @QtCore.pyqtSlot()
-    def browseRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def browseRecord(self, unknown):
 
         w = self.sender()
         if w and (not self.cursor_ or self.reqOnlyTable_):
@@ -1617,8 +1595,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Invoca al método FLSqlCursor::deleteRecord()
     """
-    @QtCore.pyqtSlot()
-    def deleteRecord(self):
+    @QtCore.pyqtSlot(bool)
+    def deleteRecord(self, unknown):
         w = self.sender()
         if w and (not self.cursor_ or self.reqReadOnly_ or self.reqInsertOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)

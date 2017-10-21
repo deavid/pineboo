@@ -44,6 +44,9 @@ class DBAuth(XMLStruct):
 class Project(object):
     conn = None # Almacena la conexión principal a la base de datos
     debugLevel = 100
+    mainFormName = "Pineboo"
+    _initModules = None
+    main_window = None
     
     def __init__(self):
         self.tree = None
@@ -54,6 +57,8 @@ class Project(object):
         self.apppath = None
         self.tmpdir = None
         self.parser = None
+        self._initModules = []
+        self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s" % self.mainFormName).mainWindow
         
 
         self.actions = {}
@@ -196,6 +201,8 @@ class Project(object):
                 fileobj = File(self, idmodulo, nombre, basedir = root)
                 self.files[nombre] = fileobj
                 self.modules[idmodulo].add_project_file(fileobj)
+        
+        
 
 
     def saveGeometryForm(self, name, geo):
@@ -207,7 +214,7 @@ class Project(object):
         name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
 
-    def call(self, function, aList , objectContext ):
+    def call(self, function, aList , objectContext , showException = True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
         if Project.debugLevel > 50: print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" % (function, aList , objectContext ))
         import pineboolib.qsaglobals
@@ -217,7 +224,8 @@ class Project(object):
             return fn(*aList)
         except Exception:
             #print("** JS.CALL :: ERROR:", traceback.format_exc().splitlines()[-1])
-            print("** JS.CALL :: ERROR:", traceback.format_exc())
+            if showException:
+                print("** JS.CALL :: ERROR:", traceback.format_exc())
         # Hay que resolver la llamada a funcion "function" dentro de qsaglobals
         # y buscar la resolución de los objetos separando por puntos.
 
@@ -252,7 +260,7 @@ class Module(object):
             return False
         tiempo_1 = time.time()
         try:
-            self.actions = ModuleActions(self, pathxml)
+            self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
             self.mainform = MainForm(self, pathui)
             self.mainform.load()
@@ -344,10 +352,11 @@ class DelayedObjectProxyLoader(object):
         return getattr(obj,name)
 
 class ModuleActions(object):
-    def __init__(self, module, path):
+    def __init__(self, module, path, modulename):
         self.mod = module
         self.prj = module.prj
         self.path = path
+        self.moduleName = modulename
         assert path
         
     def load(self):
@@ -502,7 +511,8 @@ class XMLMainFormAction(XMLStruct):
             if Project.debugLevel > 50: print("END of Running MainFormAction:", self.name, self.text, self.slot)
 
 class XMLAction(XMLStruct):
-
+    
+    
     def __init__(self, *args, **kwargs):
         super(XMLAction,self).__init__(*args, **kwargs)
         self.form = self._v("form")
@@ -528,12 +538,14 @@ class XMLAction(XMLStruct):
                 repr(self.mainform_widget.widget)
                 )
             )
+            
+        self.initModule(self.name)
         return self.formrecord_widget
 
     def load(self):
         if self._loaded: return self.mainform_widget
         if Project.debugLevel > 50: print("Loading action %s . . . " % (self.name))
-        from pineboolib import mainForm
+        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % Project.mainFormName)
         w = mainForm.mainWindow
         if not self.mainform_widget:
             self.mainform_widget = FLMainForm(w,self, load = True)
@@ -544,6 +556,8 @@ class XMLAction(XMLStruct):
                 repr(self.mainform_widget.widget)
                 )
             )
+        
+        self.initModule(self.name)
         return self.mainform_widget
 
     def openDefaultForm(self):
@@ -551,7 +565,7 @@ class XMLAction(XMLStruct):
         self.load()
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # ... construido antes que cualquier widget
-        from pineboolib import mainForm
+        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % Project.mainFormName)
         w = mainForm.mainWindow
         #self.mainform_widget.init()
         w.addFormTab(self)
@@ -632,6 +646,20 @@ class XMLAction(XMLStruct):
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)
         #Aquí debería arramcar el script
+    
+    
+    """
+    Inicializa el modulo del form en caso de que no se inicializara ya
+    """
+    def initModule(self, name):
+        
+        moduleName = self.prj.actions[name].mod.moduleName
+        if moduleName in (None, "sys"):
+            return
+        if not moduleName in self.prj._initModules:
+            self.prj._initModules.append(moduleName)
+            self.prj.call("%s.iface.init()" % moduleName, [], None, False)
+            return
 
 
 

@@ -397,8 +397,8 @@ class FLFieldMetaData():
     @return Valor que se asigna por defecto al campo
     """
     def defaultValue(self):
-        if not self.d.defaultValue_:
-            self.d.defaultValue_ = ""
+        if self.d.defaultValue_ in (None,"null"):
+            self.d.defaultValue_ = None
         return self.d.defaultValue_
 
     """

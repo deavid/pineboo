@@ -5,6 +5,8 @@ from pineboolib import decorators
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.utils import auto_qt_translate_text
+import traceback
 
 
 
@@ -20,7 +22,7 @@ class FLQPSQL(object):
     lastError_ = None
     
     def __init__(self):
-        self.version_ = "0.2"
+        self.version_ = "0.3"
         self.conn_ = None
         self.name_ = "FLQPSQL"
         self.open_ = False
@@ -52,6 +54,8 @@ class FLQPSQL(object):
         
         
         self.conn_ = psycopg2.connect(conninfostr)
+        #self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a false para que las transacciones funcionen
+        self.conn_.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         
         if self.conn_:
             self.open_ = True
@@ -88,6 +92,7 @@ class FLQPSQL(object):
                 s = v
 
             else:
+                v = auto_qt_translate_text(v)
                 if upper == True and type_ == "string":
                     v = v.upper()
 
@@ -97,20 +102,6 @@ class FLQPSQL(object):
 
     def canOverPartition(self):
         return True
-    
-    @decorators.BetaImplementation
-    def hasFeature(self, value):
-        
-        if value == "Transactions":
-            return  True
-        
-        
-        
-        if getattr(self.conn_, value, None):
-            return True
-        else:
-            return False
-    
     
     def nextSerialVal(self, table, field):
         q = FLSqlQuery()
@@ -125,32 +116,39 @@ class FLQPSQL(object):
         else:
             return None
     
-    @decorators.NotImplementedWarn
-    def savePoint(self, number):
-        pass
+    def savePoint(self, n):
+        if not self.isOpen():
+            print("PSQLDriver::savePoint: Database not open")
+            return False
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
+            print("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s" % n, traceback.format_exc())
+            return False
+        
+        return True 
     
     def canSavePoint(self):
         return True
     
     def rollbackSavePoint(self, n):
-        if not self.canSavePoint():
-            return False
-        
         if not self.isOpen():
             print("PSQLDriver::rollbackSavePoint: Database not open")
             return False
         
-        cmd = ("rollback to savepoint sv_%s" % n)
 
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec():
-            self.setLastError("No se pudo deshacer punto de salvaguarda", "rollback to savepoint sv_%s" % n)
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            print("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" % n, traceback.format_exc())
             return False
         
-        return True 
+        return True
     
     def setLastError(self, text, command):
         self.lastError_ = "%s (%s)" % (text, command)
@@ -163,42 +161,57 @@ class FLQPSQL(object):
         if not self.isOpen():
             print("PSQLDriver::commitTransaction: Database not open")
         
-        if not self.conn_.commit():
+        try:
+            self.conn_.commit()
+        except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
+            print("PSQLDriver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
             return False
         
         return True
     
     def rollbackTransaction(self):
         if not self.isOpen():
-            print("PSQLDriver::commitTransaction: Database not open")
+            print("PSQLDriver::rollbackTransaction: Database not open")
         
-        if not self.conn_.rollback():
+        
+        try:
+            self.conn_.rollback()
+        except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
+            print("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
             return False
         
         return True
     
-    @decorators.BetaImplementation
+
     def transaction(self):
+        if not self.isOpen():
+            print("PSQLDriver::transaction: Database not open")
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("BEGIN")
+        except Exception:
+            self.setLastError("No se pudo crear la transacción", "BEGIN")
+            print("PSQLDriver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())
+            return False
+        
         return True
     
     def releaseSavePoint(self, n):
-        if not self.canSavePoint():
-            return False
         
         if not self.isOpen():
             print("PSQLDriver::releaseSavePoint: Database not open")
             return False
         
-        cmd = ("release savepoint sv_%s" % n)
-
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec():
-            self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
+            print("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" % n,  traceback.format_exc())
+        
             return False
         
         return True 
@@ -208,7 +221,30 @@ class FLQPSQL(object):
         if leng:
             return "::%s(%s)" % (type_, leng)
         else:
-            return "::%s" % type_       
+            return "::%s" % type_
+    
+    
+    def refreshQuery(self, curname, fields, table, where, cursor, conn):
+        sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (curname , fields , table, where)
+        try:
+            cursor.execute(sql)
+        except Exception:
+            print("CursorTableModel.Refresh", traceback.format_exc())
+    
+    def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
+        try:
+            cursor.execute("FETCH %d FROM %s" % (number, curname))
+        except Exception:
+            print("PSQLDriver.refreshFetch", traceback.format_exc())
+    
+    def useThreads(self):
+        return True
+    
+    def useTimer(self):
+        return False      
+    
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
+        return cursor.fetchall()  
             
             
         

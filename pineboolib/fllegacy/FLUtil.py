@@ -9,6 +9,7 @@ from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
 import platform, hashlib, traceback
+import datetime
 
 class FLUtil(ProjectClass):
 
@@ -506,7 +507,6 @@ class FLUtil(ProjectClass):
     @author Andrés Otón Urbano.
     """
     def nextCounter(self, *args, **kwargs):
-
         if len(args) == 2:
             name = args[0]
             cursor_ = args[1]
@@ -747,7 +747,10 @@ class FLUtil(ProjectClass):
     """
 
     def readSettingEntry(self, key, def_=u"", ok=False):
-        return FLSettings().readEntry(key, def_, ok)
+        value = FLSettings().readEntry(key, def_, ok)
+        if value == None:
+            value = def_
+        return value
     """
     Establece el valor de un setting en el directorio de instalación de AbanQ
 
@@ -839,6 +842,11 @@ class FLUtil(ProjectClass):
     """
     
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
+        
+        if w == None or w == "":
+            return False
+        
+        
         q = FLSqlQuery(None, connName)
         if tL:
             q.setTablesList(tL)
@@ -853,7 +861,10 @@ class FLUtil(ProjectClass):
             return False
 
         if q.next():
-            return q.value(0)
+            valor = q.value(0)
+            if isinstance(valor, datetime.date):
+                valor = str(valor)
+            return valor
 
         if size:
             return False
@@ -924,8 +935,15 @@ class FLUtil(ProjectClass):
         while c.next():
             c.setModeAccess(FLSqlCursor.Edit)
             c.refreshBuffer()
-            for f,v in zip(fL, vL):
-                c.setValueBuffer(f, v)
+            
+            if isinstance(fL, list):
+                i = 0
+                for f in fL:
+                    c.setValueBuffer(f, vL[i])
+                    i = i + 1
+            else:
+                c.setValueBuffer(fL, vL)
+                
             if not c.commitBuffer():
                 return False
 

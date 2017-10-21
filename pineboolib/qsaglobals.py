@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 import traceback
 import pineboolib
 from pineboolib import flcontrols, decorators
-
+from pineboolib.flcontrols import ProjectClass
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
@@ -151,16 +151,17 @@ class SysType(object):
     
     
     def setCaptionMainWidget(self, value):
-        pineboolib.project.mainWindow.setWindowTitle(value)
-    
+       self.mainWidget().setWindowTitle("Pineboo - %s" % value)
+       pass
     
     def toUnicode(self, text, format):
         return u"%s" % text
+    
+    def mainWidget(self):
+        return pineboolib.project.main_window.ui
         
 
-        
-    
-sys = SysType()
+       
 
 def proxy_fn(wf, wr, slot):
     def fn(*args,**kwargs):
@@ -186,6 +187,11 @@ def connect(sender, signal, receiver, slot):
             weak_receiver = weakref.ref(receiver)
             sl_name = signal.replace("()","")
             
+            try:
+                getattr(sender, sl_name).disconnect(proxy_fn(weak_fn, weak_receiver, slot))
+            except:
+                pass
+            
             getattr(sender, sl_name).connect(proxy_fn(weak_fn, weak_receiver, slot))
         except RuntimeError as e:
             print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
@@ -207,6 +213,10 @@ def connect(sender, signal, receiver, slot):
             else:
                 sg_name = signal
                 
+            try:
+               getattr(sender, sg_name).disconnect(remote_fn)
+            except:
+                pass 
             
             
             getattr(sender, sg_name).connect(remote_fn)
@@ -217,6 +227,13 @@ def connect(sender, signal, receiver, slot):
 
     else:
         if isinstance(receiver, QtCore.QObject):
+            
+            try:
+               sender.signal.disconnect(receiver.slot)
+            except:
+                pass 
+            
+            
             sender.signal.connect(receiver.slot)
         else:
             print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." % (sender, signal, receiver, slot))

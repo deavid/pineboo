@@ -197,6 +197,9 @@ class FLTableMetaData(ProjectClass):
     @param prefixTable Si es TRUE se añade un prefijo con el nombre de la tabla; nombretabla.nombrecampo
     """
     def primaryKey(self, prefixTable = False):
+        if not self.d.primaryKey_:
+            return None
+        
         if "." in self.d.primaryKey_:
             return self.d.primaryKey_
         
@@ -796,7 +799,7 @@ class FLTableMetaDataPrivate():
     """
     Clave primaria
     """
-    primaryKey_ = False
+    primaryKey_ = None
 
     """
     Indica si se debe avisar de colisión de concurrencia entre sesiones.

@@ -5,6 +5,7 @@ from pineboolib import decorators
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.utils import auto_qt_translate_text
 
 
 
@@ -76,6 +77,7 @@ class FLMYSQL_NO_INNODB(object):
                 s = v
 
             else:
+                v = auto_qt_translate_text(v)
                 if upper == True and type_ == "string":
                     v = v.upper()
 

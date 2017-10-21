@@ -7,7 +7,7 @@
 """
 import sys, re, traceback, os, gc
 from optparse import OptionParser
-import signal
+import signal, importlib
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 dependeces = []
@@ -155,9 +155,15 @@ def main():
     pineboolib.no_python_cache = options.no_python_cache
 
     # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
-    from pineboolib import mainForm
+
+    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % pineboolib.main.Project.mainFormName)
+    #mainForm = getattr(module_, "MainForm")()
+        
+    #from pineboolib import mainForm
 
     project = pineboolib.main.Project()
+    
+    
     if options.verbose:
         project.setDebugLevel(100)
         mainForm.MainForm.setDebugLevel(100)
@@ -229,6 +235,7 @@ def main():
 
         main_window = mainForm.mainWindow
         main_window.load()
+        
         splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
@@ -238,8 +245,10 @@ def main():
         splash.showMessage("Abriendo interfaz ...")
         if options.verbose: print("Abriendo interfaz ...")
         main_window.show()
+        project.call("sys.widget.init()", [], None, True)
         objaction.openDefaultForm()
         splash.hide()
+        
         ret = app.exec_()
         mainForm.mainWindow = None
         return ret
@@ -266,7 +275,7 @@ def main():
             splash.showMessage("Abriendo interfaz ...")
             if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
-    
+            project.call("sys.widget.init()", [], None, True)
             splash.showMessage("Listo ...")
             QtCore.QTimer.singleShot(2000, splash.hide)
             

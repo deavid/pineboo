@@ -34,7 +34,10 @@ class FLSqlQuery(ProjectClass):
         self._row = None
         self._posicion = None
         self._datos = None
+        self._cursor = None
         retornoQry = None
+        
+        
         
         if len(args):
             retornoQry = pineboolib.project.conn.manager().query(args[0], self)
@@ -72,15 +75,21 @@ class FLSqlQuery(ProjectClass):
         En algunas consultas va con ';' , esto lo limpio 
         """
         sql = sql.replace(";","")
+        
+        #micursor=self.__damecursor()
+        conn = self.__dameConn()
+        micursor = conn.cursor()
         try:
-            micursor=self.__damecursor()
             micursor.execute(sql)
             self._cursor=micursor
         except Exception:
             print(traceback.format_exc())
+            #conn.rollback()
             return False
-        else:
-            return True 
+        #conn.commit()
+        
+            
+        return True 
     
     @classmethod
     def __damecursor(self):
@@ -89,6 +98,18 @@ class FLSqlQuery(ProjectClass):
         else:
             cursor = pineboolib.project.conn.cursor()
         return cursor
+    
+    def __dameConn(self):
+        from pineboolib.PNConnection import PNConnection
+        if getattr(self.d,"db_", None):
+            if isinstance(self.d.db_, PNConnection):
+                conn = self.d.db_.conn
+            else:
+                conn = self.d.db_
+        else:
+            conn = pineboolib.project.conn.conn
+        return conn
+        
     
     def __cargarDatos(self):
         if self._datos:
@@ -412,12 +433,14 @@ class FLSqlQuery(ProjectClass):
     """
     def value(self, n, raw = False):
         pos = None
+        name = None
+        
         if isinstance(n, str):
             pos=self.fieldNameToPos(n)
             name = n
         else:
             pos = n
-            name = self.fieldList()[n]
+            name = self.posToFieldName(pos)
             
             
         
@@ -616,7 +639,7 @@ class FLSqlQuery(ProjectClass):
     def isForwardOnly(self):
         pass
     
-    
+    @decorators.Deprecated
     def setForwardOnly(self, forward):
         pass #No hace nada
 
@@ -629,7 +652,10 @@ class FLSqlQuery(ProjectClass):
     def seek(self, i, relative = False):
         pass
   
-    def next(self):        
+    def next(self):
+        if not self._cursor:
+            return False
+                
         if self._posicion is None:
             self._posicion=0            
         else:
@@ -651,6 +677,9 @@ class FLSqlQuery(ProjectClass):
                 return False 
     
     def prev(self):
+        if not self._cursor:
+            return False
+        
         self._posicion-=1
         if self._datos:
             if self._posicion<0:
@@ -661,6 +690,9 @@ class FLSqlQuery(ProjectClass):
             return False 
 
     def first(self):
+        if not self._cursor:
+            return False
+        
         self._posicion=0
         if self._datos:
             self._row==self._datos[0]
@@ -676,6 +708,9 @@ class FLSqlQuery(ProjectClass):
                 return False
 
     def last(self):
+        if not self._cursor:
+            return False
+        
         if self._datos:
             self._posicion=len(self._datos)-1
             self._row=self._datos[self._posicion]
