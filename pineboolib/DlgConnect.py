@@ -14,7 +14,6 @@ import sqlite3
 # MODIFICACION 2 PARA CONECTOR SQLITE :añado librerías de conexión con qt5: SÓLO RENOMBRO LOS DE QT4
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtSql import *
 import sys
 
 # MODIFICACION 3 PARA CONECTOR SQLITE :añado debugging modulo PARA VER LOS PASOS: sirve cuando activas esto:
