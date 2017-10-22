@@ -1,16 +1,10 @@
 #!/usr/bin/python
-from __future__ import print_function
-from __future__ import absolute_import
 from builtins import str
 from builtins import object
 from optparse import OptionParser
 import os, os.path, sys
 import imp, traceback
 from lxml import etree
-try:
-    from future.utils import with_metaclass
-except ImportError:
-    pass
     
 
 try:
@@ -55,7 +49,7 @@ class TagObjectFactory(type):
         xml_class_types.append(cls)
         super(TagObjectFactory, cls).__init__(name, bases, dct)
 
-class TagObject(with_metaclass(TagObjectFactory, object)):
+class TagObject(object, metaclass=TagObjectFactory):
     tags = []
     set_child_argn = False
     name_is_first_id = False

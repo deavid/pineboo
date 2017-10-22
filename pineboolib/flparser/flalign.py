@@ -1,4 +1,3 @@
-from __future__ import print_function
 from builtins import next
 from builtins import object
 import os, os.path, sys
