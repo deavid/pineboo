@@ -1162,15 +1162,11 @@ def pythonize(filename, destfilename, debugname = None):
         raise
     ast = ast_tree.getroot()
     tpl = string_template
-    template_exist = False
+
     for cls in ast.xpath("Class"):
         tpl = file_template
-        template_exist = True
         break
-    
-    if template_exist == False:
-        tpl = file_template
-    
+
     f1 = open(destfilename,"w")
     write_python_file(f1,ast,tpl)
     f1.close()

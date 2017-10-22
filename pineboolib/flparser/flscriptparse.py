@@ -426,6 +426,7 @@ p_parse.__doc__ =     '''
               | EQUALS
               | OR
               | SCONST
+	      | SEMI
               | error
 
     regexflags : ID
