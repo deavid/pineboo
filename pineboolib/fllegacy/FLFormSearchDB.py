@@ -329,13 +329,6 @@ class FLFormSearchDB(FLFormDB):
 
 
     """
-    Invoca a la función "init()" del script asociado al formulario
-    """
-    @QtCore.pyqtSlot()
-    def initScript(self):
-        return False
-
-    """
     Redefinida por conveniencia
     """
     @QtCore.pyqtSlot()
