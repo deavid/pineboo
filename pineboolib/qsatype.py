@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 import os, fnmatch, re
 import datetime, weakref
 from lxml import etree
