@@ -134,14 +134,18 @@ class DlgConnect(QtWidgets.QWidget):
         #if filename:
         #    os.chdir(filename)
 
-        fila = str(self.ui.leFila.text())
+        for currentQTableWidgetItem in self.tableWidget.selectedItems():
+            DlgConnect.leFila.setText(str(currentQTableWidgetItem.row() + 1))
+            fila = str(self.ui.leFila.text())
+        par = (fila,)
+        #fila = str(self.ui.leFila.text())
         
         #ABRIMOS LA BASE DE DATOS:
         
         cursor = self.dbProjects_.cursor()
         # ELEGIR UNA FILA DE LA TABLA proyectos DE LA BASE DE DATOS:
         
-        cursor.execute("SELECT * FROM proyectos WHERE id= %s" % fila)
+        cursor.execute("SELECT * FROM proyectos WHERE id=?", par)
         for registro in cursor:
             valor1 = registro[1]
             valor2 = registro[2]
@@ -229,20 +233,28 @@ class DlgConnect(QtWidgets.QWidget):
 # MODIFICACION 10 PARA CONECTOR SQLITE :añado uso botón BORRAR PROYECTO
     @QtCore.pyqtSlot()
     def DeleteProject(self):
-
-        #ABRIMOS LA BASE DE DATOS:
-        #db = sqlite3.connect('pinebooconectores.sqlite')
+        if self.dbProjects_:
+            self.dbProjects_.close()
+        # Creamos la conexión con la BASE DE DATOS SQLITE3 DB
+        self.dbProjects_ = sqlite3.connect(filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite')
+        
         cursor = self.dbProjects_.cursor()
         
         # ELEGIR UNA FILA DE LA TABLA proyectos DE LA BASE DE DATOS:
-        fila = str(self.ui.leFila.text())
-        print(fila)
-        cursor.execute("DELETE FROM proyectos WHERE id= %s" % fila)
+        for currentQTableWidgetItem in self.tableWidget.selectedItems():
+            DlgConnect.leFila.setText(str(currentQTableWidgetItem.row() + 1))
+            fila = str(self.ui.leFila.text())
+        par = (fila,)
+        print(par)
+        cursor.execute("DELETE FROM proyectos WHERE id=?", par)
+        #enviamos la orden:
+        self.dbProjects_.commit()
+        self.dbProjects_.close()
 
-        #db.commit()
         print ("PROYECTO BORRADO")
-
-        #self.dbProjects_.close()
+        self.tableWidget.clear()
+        self.ShowTable()
+            
 # hasta aqui la modificación 10
 
 # MODIFICACION 11 PARA CONECTOR SQLITE :añado uso botón GUARDAR PROYECTO
