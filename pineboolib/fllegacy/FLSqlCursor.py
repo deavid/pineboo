@@ -2548,8 +2548,6 @@ class FLSqlCursor(ProjectClass):
         if not self.d.metadata_:
             return False
         
-        if not self.cursorRelation() and _filter == None:
-            _filter = "1 = 1"
         
         bFilter = self.baseFilter()
         finalFilter = bFilter
@@ -2602,7 +2600,7 @@ class FLSqlCursor(ProjectClass):
             #if not fgValue:
             #    fgValue = ""
 
-            if field and fgValue:
+            if field and not fgValue == None:
                 relationFilter = self.d.db_.manager().formatAssignValue(field, fgValue, True)
                 filterAc = self.d.cursorRelation_.filterAssoc(self.d.relation_.foreignField(), self.d.metadata_)
 
@@ -2658,9 +2656,6 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def setFilter(self, _filter):
-        
-        if not self.cursorRelation() and _filter == None:
-            _filter = "1 = 1"
 
         finalFilter = _filter
         bFilter = self.baseFilter()
