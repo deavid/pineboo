@@ -62,9 +62,12 @@ class XMLStruct(Struct):
                     text = aqtt(child.text)
                     key = child.tag
                 if isinstance(text, str): text = text.strip()
-                setattr(self, key, text)
-                self._attrs.append(key)
-                # print self.__name__, key, text
+                try:
+                    setattr(self, key, text)
+                    self._attrs.append(key)
+                except:
+                    print("utils.XMLStruct: Omitiendo", self.__name__, key, text)
+                    
     def __str__(self):
         attrs = [ "%s=%s" % (k,repr(getattr(self,k))) for k in self._attrs ]
         txtattrs = " ".join(attrs)
