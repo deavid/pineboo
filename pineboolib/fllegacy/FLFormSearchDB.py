@@ -211,8 +211,8 @@ class FLFormSearchDB(FLFormDB):
         if not self.cursor_:
             return None
         
-        if not self.cursor_.isLocked():
-            self.cursor_.setModeAccess(FLSqlCursor.Edit)
+        #if not self.cursor_.isLocked():
+        #    self.cursor_.setModeAccess(FLSqlCursor.Edit)
             
         if self.loop or self.inExec_:
             print("FLFormSearchDB::exec(): Se ha detectado una llamada recursiva")
