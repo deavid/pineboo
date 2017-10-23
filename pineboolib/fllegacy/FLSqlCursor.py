@@ -1783,6 +1783,25 @@ class FLSqlCursor(ProjectClass):
                           
         return False
 
+    """
+    Devuelve el contenido del buffer
+    """
+    
+    def buffer(self):
+        if self.d.buffer_:
+            return self.d.buffer_
+        else:
+            return None
+    
+    """
+    Devuelve el contenido del bufferCopy
+    """
+    
+    def bufferCopy(self):
+        if self.d.bufferCopy_:
+            return self.d.bufferCopy_
+        else:
+            return None
 
 
     """
@@ -2090,6 +2109,20 @@ class FLSqlCursor(ProjectClass):
         self.d._current_changed.emit(self.at())
         self.refreshBuffer() # agregado para que FLTableDB actualice el buffer al pulsar.
         print("cursor:%s , row:%d" %(self._action.table, self.d._currentregister ), self)
+        
+    def selection_pk(self, value):
+        
+        i = 0
+        while i <= self.model().rowCount():
+            if self.model().value(i, self.buffer().pK()) == value:
+                return self.move(i)
+            
+            i = i + 1
+        
+        return False
+        
+        
+        
 
 
     def at(self):
@@ -2838,26 +2871,18 @@ class FLSqlCursor(ProjectClass):
                     self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
                     self.d.cursorRelation_.setAskForCancelChanges(True)
 
-            pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
-            self.model().Insert(self.d.buffer_)
+            #pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
+            self.model().Insert(self)
             self.update(False)
-            if not self.d.db_.canSavePoint():
-                if self.d.db_.currentSavePoint_:
-                    self.d.db_.currentSavePoint_.saveInsert(pKN, self.d.buffer_, self)
+
+            self.selection_pk(self.buffer().value(self.buffer().pK()))
 
 
-            if not functionAfter and self.d.activatedCommitActions_:
-                if not savePoint:
-                    savePoint = FLSqlSavePoint(None)
-                savePoint.saveInsert(pKN, self.d.buffer_, self)
-
-
-                if not self.d.persistentFilter_:
-                    self.d.persistentFilter_ = pkWhere
-                else:
-                    if not pkWhere in self.d.persistentFilter_:
-                        self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
-            
+            #if not self.d.persistentFilter_:
+            #    self.d.persistentFilter_ = pkWhere
+            #else:
+            #    if not pkWhere in self.d.persistentFilter_:
+            #        self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
             
             
             
@@ -2901,19 +2926,11 @@ class FLSqlCursor(ProjectClass):
 
 
         elif self.d.modeAccess_ == self.Del:
-            #if not self.d.db_.canSavePoint():
-            #    if self.d.db_.currentSavePoint_:
-            #        self.d.db_.currentSavePoint_.saveDel(pKN, self.d.bufferCopy_, self)
-            
-            #if functionAfter and self.d.activatedCommitActions_:
-            #    if not savePoint:
-            #        savePoint = fllegacy.FLSqlSavePoint.FLSqlSavePoint(None)
-            #    savePoint.saveDel(pKN, self.d.bufferCopy_, self)
+
 
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
-                #self.del__(False)
                 
             self.model().Delete(self)
                 
@@ -2940,9 +2957,12 @@ class FLSqlCursor(ProjectClass):
 
                 return False
 
-        #if savePoint == True:
-        #    del savePoint
-        self.d.modeAccess_ = self.Browse
+        if self.modeAccess() in (self.Del, self.Edit):
+            self.setModeAccess(self.Browse)
+        
+        if self.modeAccess() == self.Insert:
+            self.setModeAccess(self.Edit)
+        
         if updated == True:
             if fieldNameCheck:
                 self.d.buffer_.setGenerated(fieldNameCheck, True)
