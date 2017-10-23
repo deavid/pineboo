@@ -2389,8 +2389,8 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     def seek(self, i, relative = None, emite = None):
 
-        if self.d.modeAccess_ == self.Del:
-            return False
+        #if self.d.modeAccess_ == self.Del:
+        #    return False
 
         b = False
 
@@ -2422,8 +2422,8 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
     def next(self,  emite = True):
-        if self.d.modeAccess_ == self.Del:
-            return False
+        #if self.d.modeAccess_ == self.Del:
+        #    return False
 
         b = self.moveby(1)
 
@@ -2451,8 +2451,8 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
     def prev(self, emite = True):
-        if self.d.modeAccess_ == self.Del:
-            return False
+        #if self.d.modeAccess_ == self.Del:
+        #    return False
 
         b = self.moveby(-1)
 
@@ -2498,8 +2498,8 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
     def first(self,  emite = True):
-        if self.d.modeAccess_ == self.Del:
-            return False
+        #if self.d.modeAccess_ == self.Del:
+        #    return False
 
         b = self.move(0)
 
@@ -2524,8 +2524,8 @@ class FLSqlCursor(ProjectClass):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
     def last(self, emite = True):
-        if self.d.modeAccess_ == self.Del:
-            return False
+        #if self.d.modeAccess_ == self.Del:
+        #    return False
 
         b = self.move(self.d._model.rows-1)
 
@@ -2601,7 +2601,8 @@ class FLSqlCursor(ProjectClass):
             self.model().refresh()
             self.refreshBuffer()
         
-        #self.d._currentregister = -1
+        if self.modeAccess() == self.Del:
+            self.d._currentregister = -1
         self.newBuffer.emit()
 
 
@@ -2931,12 +2932,59 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
+            
+            
+            
+            v = self._prj.call("recordDelBefore%s" % self.d.metadata_.name(), [self], self.context(), False)
+            if v and not isinstance(v ,bool):
+                return False
+            
+            fieldList = self.d.metadata_.fieldListObject()
+            
+            for field in fieldList:
+                
+                fiName = field.name()
+                if not self.buffer().isGenerated(fiName):
+                    continue
+                
+                s = None
+                if not self.buffer().isNull(fiName):
+                    s = self.buffer().value(fiName)
+                
+                
+                if s == None:
+                    continue
+                
+                relationList = field.relationList()
+                if not relationList:
+                    continue
+                else:
+                    for r in relationList:
+                        c = FLSqlCursor(r.foreignTable())
+                        if not c.metadata():
+                            continue
+                        f = c.metadata().field(r.foreignField())
+                        if not f:
+                            continue
+                        if f and f.relationM1() and f.relationM1().deleteCascade():
+                            
+                            c.setForwardOnly(True)
+                            c.select(self.conn().manager().formatAssignValue(r.foreignField(), f, s, True))
+                            while(c.next()):
+                                c.setModeAccess(self.Del)
+                                c.refreshBuffer()
+                                if not c.commitBuffer(False):
+                                    return False
+                                
+            
+            
+            
+            
+            
                 
             self.model().Delete(self)
                 
-                
-                
-                
+            self._prj.call("recordDelAfter%s" % self.d.metadata_.name(), [self], self.context() , False)   
                 
                 
             updated = True
@@ -2946,6 +2994,10 @@ class FLSqlCursor(ProjectClass):
             #if savePoint == True:
             #    del savePoint
             return False
+        
+     
+        
+        
         if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
             #cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.context()
