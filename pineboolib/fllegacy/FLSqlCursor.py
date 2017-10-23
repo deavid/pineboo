@@ -1663,7 +1663,7 @@ class FLSqlCursor(ProjectClass):
                         if not r.checkIn():
                             continue
                         mtd = self.d.db_.manager().metadata(r.foreignTable())
-                        if not mtd:
+                        if not len(mtd.fieldList()):
                             continue
                         f = mtd.field(r.foreignField())
                         if f:
