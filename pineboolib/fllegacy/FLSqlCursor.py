@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators, fllegacy, qsaglobals
+from pineboolib import decorators, fllegacy
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import DefFun
