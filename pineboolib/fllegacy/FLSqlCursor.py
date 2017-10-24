@@ -1663,7 +1663,7 @@ class FLSqlCursor(ProjectClass):
                         if not r.checkIn():
                             continue
                         mtd = self.d.db_.manager().metadata(r.foreignTable())
-                        if not len(mtd.fieldList()):
+                        if not mtd:
                             continue
                         f = mtd.field(r.foreignField())
                         if f:
@@ -2601,7 +2601,7 @@ class FLSqlCursor(ProjectClass):
             self.model().refresh()
             self.refreshBuffer()
         
-        if self.modeAccess() == self.Del:
+        if self.modeAccess() == self.Browse:
             self.d._currentregister = -1
         self.newBuffer.emit()
 
@@ -2933,9 +2933,9 @@ class FLSqlCursor(ProjectClass):
                 if self.d.cursorRelation_.metadata():
                     self.d.cursorRelation_.setAskForCancelChanges(True)
             
-            
-            
-            v = self._prj.call("recordDelBefore%s" % self.d.metadata_.name(), [self], self.context(), False)
+            recordDelBefore = "recordDelBefore%s" % self.metadata().name()
+            cI = self.context()
+            v = self._prj.call(recordDelBefore, [self], cI, False)
             if v and not isinstance(v ,bool):
                 return False
             
@@ -2967,7 +2967,6 @@ class FLSqlCursor(ProjectClass):
                         if not f:
                             continue
                         if f and f.relationM1() and f.relationM1().deleteCascade():
-                            
                             c.setForwardOnly(True)
                             c.select(self.conn().manager().formatAssignValue(r.foreignField(), f, s, True))
                             while(c.next()):
@@ -2984,7 +2983,10 @@ class FLSqlCursor(ProjectClass):
                 
             self.model().Delete(self)
                 
-            self._prj.call("recordDelAfter%s" % self.d.metadata_.name(), [self], self.context() , False)   
+            recordDelAfter = "recordDelAfter%s" % self.metadata().name()
+            cI = self.context()
+            v = self._prj.call(recordDelAfter, [self], cI, False)
+
                 
                 
             updated = True

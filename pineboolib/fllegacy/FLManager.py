@@ -144,8 +144,13 @@ class FLManager(ProjectClass):
             if metadata.name() ==name:
                 return metadata
         
+        new = FLTableMetaData(name)
         
-        self.cacheMetaData_.append(FLTableMetaData(name))
+        if not len(new.fieldList()):
+            return None
+        
+        
+        self.cacheMetaData_.append(new)
         for metadataN in self.cacheMetaData_:
             if metadataN.name() == name:
                 return metadataN
