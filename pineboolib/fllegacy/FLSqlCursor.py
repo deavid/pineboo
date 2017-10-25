@@ -1388,11 +1388,14 @@ class FLSqlCursor(ProjectClass):
         if not self._action.formRecord():
             QtWidgets.QMessageBox.Warning(QtWidgets.QApplication.focusWidget(), FLUtil.tr("Aviso"),FLUtil.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()) ,QtWidgets.QMessageBox.Ok)
             return
-        
-        self._action.openDefaultFormRecord(self)
-        if self.refreshBuffer():
-            self.updateBufferCopy()
 
+        
+        self.refreshBuffer() #Hace doTransaction antes de abrir formulario y crear savepoint
+                 
+        self._action.openDefaultFormRecord(self)
+
+        if self.refreshBuffer():
+            self.updateBufferCopy()   
 
 
 
