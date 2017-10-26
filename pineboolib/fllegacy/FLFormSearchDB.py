@@ -223,6 +223,7 @@ class FLFormSearchDB(FLFormDB):
             return None
         
         self.load() #Extra
+        
         self.inExec_ = True
         self.acceptingRejecting_ = False
         
@@ -324,8 +325,12 @@ class FLFormSearchDB(FLFormDB):
             super(FLFormSearchDB, self).closeEvent(e)
             self.deleteLater()
             
-
-
+    """
+    Invoca a la función "init" del script "masterprocess" asociado al formulario
+    """
+    @QtCore.pyqtSlot()
+    def callInitScript(self):
+        pass
 
 
     """
