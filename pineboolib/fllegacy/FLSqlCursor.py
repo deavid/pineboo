@@ -1583,7 +1583,7 @@ class FLSqlCursor(ProjectClass):
                         tMD = self.d.db_.manager().metadata(r.foreignTable())
                         if not tMD:
                             continue
-                        q = FLSqlQuery(None, self.d.db_.connectionName())
+                        q = FLSqlQuery(None)
                         q.setTablesList(tMD.name())
                         q.setSelect(r.foreignField())
                         q.setFrom(tMD.name())

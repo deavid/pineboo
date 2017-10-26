@@ -25,7 +25,7 @@ class FLSqlQuery(ProjectClass):
         self.connName = None
         self.d = FLSqlQueryPrivate()
         if len(args) <= 1:
-            self.d.db_ = pineboolib.project.conn
+            self.d.db_ = pineboolib.project.conn.useConn()
         else:
             self.d.db_ = pineboolib.project.conn.useConn(args[1])
             self.connName = args[1]
