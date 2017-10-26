@@ -822,9 +822,9 @@ class Expression(ASTPython):
     def generate(self, isolate = True, **kwargs):
         if isolate: yield "expr", "("
         coerce_string_mode = False
-        if self.elem.xpath("OpMath[@type=\"PLUS\"]"):
-            if self.elem.xpath("Constant[@type=\"String\"]"):
-                coerce_string_mode = True
+        #if self.elem.xpath("OpMath[@type=\"PLUS\"]"):
+        #    if self.elem.xpath("Constant[@type=\"String\"]"):
+        #        coerce_string_mode = True
         if coerce_string_mode:
             yield "expr", "ustr("
         for child in self.elem:
