@@ -10,7 +10,6 @@ import traceback, datetime
 class FLSqlQuery(ProjectClass):
     
     countRefQuery = 0
-    connName = None
     """
     Maneja consultas con características específicas para AbanQ, hereda de QSqlQuery.
 
@@ -20,15 +19,11 @@ class FLSqlQuery(ProjectClass):
     @author InfoSiAL S.L.
     """
 
-    def __init__(self, *args):
+    def __init__(self, name = None, connection_name = None):
         super(FLSqlQuery, self).__init__()
-        self.connName = None
-        self.d = FLSqlQueryPrivate()
-        if len(args) <= 1:
-            self.d.db_ = pineboolib.project.conn.useConn()
-        else:
-            self.d.db_ = pineboolib.project.conn.useConn(args[1])
-            self.connName = args[1]
+
+        self.d = FLSqlQueryPrivate(name)
+        self.d.db_ = pineboolib.project.conn.useConn()
             
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
@@ -39,8 +34,8 @@ class FLSqlQuery(ProjectClass):
         
         
         
-        if len(args):
-            retornoQry = pineboolib.project.conn.manager().query(args[0], self)
+        if name:
+            retornoQry = pineboolib.project.conn.manager().query(name, self)
         
         if retornoQry:
             self = retornoQry
@@ -759,9 +754,17 @@ class FLSqlQuery(ProjectClass):
 
 
 class FLSqlQueryPrivate():
+    name_ = None
+    select_ = None
+    from_ = None
+    where_ = None
+    orderBy_ = None
+    parameterDict_ = []
+    groupDict_ = []
+    fieldMetaDataList_ = []
     
-    def __init__(self):
-        self.name_ = None
+    def __init__(self, name = None):
+        self.name_ = name
         self.select_ = None
         self.from_ = None
         self.where_ = None
