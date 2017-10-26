@@ -522,7 +522,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         super(FLSqlCursorPrivate,self).__init__()
         self.metadata_ = None
         self.countRefCursor = 0
-        self._currentRegister = -1
+        self._currentregister = -1
         self.acosCondName_ = None
         self.buffer_ = None
         self.editionStates_ = None

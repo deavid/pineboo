@@ -2507,10 +2507,12 @@ class FLFieldDB(QtWidgets.QWidget):
         c.select(mng.formatAssignValue(field.relationM1().foreignField(), field, v, True))
         #if c.size() <= 0:
         #    return
-
+        
         if c.size() <= 0:
             return
-
+        
+        c.next()
+        
         if not self.actionName_:
             a = c.action()
         else:
