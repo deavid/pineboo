@@ -523,13 +523,14 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             try:
                 print(sql)
                 self._cursor.execute(sql)
+                self.refresh()
             except Exception:
                 print("CursorTableModel.Insert() :: ERROR:" , traceback.format_exc())
                 #conn.rollback()
                 return False
                   
             #conn.commit()    
-            self.refresh()
+            
             return True
         
     def Delete(self, cursor):

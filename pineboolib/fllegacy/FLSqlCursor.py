@@ -43,7 +43,7 @@ class PNBuffer(ProjectClass):
         self.cursor_ = cursor
         self.fieldList_ = []
         self.md5Sum_ = ""
-        campos = self.cursor_.d.db_.manager().metadata(self.cursor_.d.curName_).fieldListObject()
+        campos = self.cursor_.db().manager().metadata(self.cursor_.d.curName_).fieldListObject()
         for campo in campos:
             field = Struct()
             field.name = str(campo.name())
@@ -2604,8 +2604,8 @@ class FLSqlCursor(ProjectClass):
             self.model().refresh()
             self.refreshBuffer()
         
-        if self.modeAccess() == self.Browse:
-            self.d._currentregister = -1
+        #if self.modeAccess() == self.Browse:
+        #    self.d._currentregister = -1
         self.newBuffer.emit()
 
 
