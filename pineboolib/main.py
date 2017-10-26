@@ -219,7 +219,8 @@ class Project(object):
         fn = None
         try:
             fn = eval(function, pineboolib.qsaglobals.__dict__)
-            return fn(*aList)
+            if aList:
+                return fn(*aList)
         except Exception:
             #print("** JS.CALL :: ERROR:", traceback.format_exc().splitlines()[-1])
             if showException:
