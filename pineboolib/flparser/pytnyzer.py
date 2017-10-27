@@ -1091,6 +1091,17 @@ def file_template(ast):
 
 
 def string_template(ast):
+    yield "line", "# -*- coding: utf-8 -*-"
+    yield "line", "from pineboolib import qsatype"
+    yield "line", "from pineboolib.qsaglobals import *"
+    yield "line", "import traceback"
+    yield "line", "sys = SysType()"
+    yield "line", ""
+    yield "line", "class FormInternalObj(qsatype.FormDBWidget):"
+    yield "begin", "class-pass"
+    yield "line", "pass"
+    yield "end", "class-pass"
+    
     sourceclasses = etree.Element("Source")
     for child in ast:
         child.set("withoutself","1")
