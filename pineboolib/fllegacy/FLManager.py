@@ -307,7 +307,7 @@ class FLManager(ProjectClass):
     """
     @decorators.NotImplementedWarn
     def createTable(self, n_or_tmd):
-        return True
+        return None
     
 
     

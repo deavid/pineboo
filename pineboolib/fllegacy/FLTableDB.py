@@ -681,8 +681,9 @@ class FLTableDB(QtWidgets.QWidget):
                     self.setReadOnly(True)
 
 
-                if ownTMD and tMD and not tMD.inCache():
-                    del tMD
+                if ownTMD and tMD:
+                    if not tMD.inCache():
+                        del tMD
 
 
 
