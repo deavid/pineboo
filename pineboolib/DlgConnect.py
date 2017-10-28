@@ -165,7 +165,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.dbProjects_.commit()
         print ("DATOS CARGADOS")
-        #db.close()
+        dbProjects_.close()
         # hasta aqui la modificación 8
 
 # MODIFICACION 9 PARA CONECTOR SQLITE :añado uso botón MOSTRAR TABLA DE REGISTROS-PROYECTOS
@@ -195,8 +195,9 @@ class DlgConnect(QtWidgets.QWidget):
         cursor.execute('''SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos''')
         conectores = cursor.fetchall()
         self.tableWidget.clear()
+        currentRowCount = self.tableWidget.setRowCount(0) #después de borrar, pongo el contador de filas a cero
         self.tableWidget.setHorizontalHeaderLabels(['Name', 'DBname', 'DBType', 'DBHost', 'DBPort', 'Username', 'Password'])
-        currentRowCount = self.tableWidget.rowCount() #necessary even when there are no rows in the table
+        currentRowCount = self.tableWidget.rowCount() #cuento el número de filas TOTAL. Necessary even when there are no rows in the table
         
         self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
@@ -251,6 +252,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         print ("PROYECTO BORRADO")
         self.tableWidget.clear()
+        currentRowCount = self.tableWidget.setRowCount(0) #después de borrar, pongo el contador de filas a cero
         self.ShowTable()
             
 # hasta aqui la modificación 10
@@ -279,11 +281,11 @@ class DlgConnect(QtWidgets.QWidget):
             cursor.execute('''
         INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES (?,?,?,?,?,?,?)''', (name2, dbname2, dbtype2, dbhost2, dbport2, username2, password2))
         self.dbProjects_.commit()
+        self.dbProjects_.close()
         print ("PROYECTO GUARDADO")
-        self.ShowTable()
-        
-
-        #self.dbProjects_.close()
+        self.tableWidget.clear()
+        currentRowCount = self.tableWidget.setRowCount(0) #después de borrar, pongo el contador de filas a cero
+        self.ShowTable()        
 # hasta aqui la modificación 11
 
 # MODIFICACION 12 PARA CONECTOR SQLITE :añado uso botón GUARDAR PROYECTO de EJEMPLO
