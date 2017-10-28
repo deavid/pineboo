@@ -165,7 +165,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.dbProjects_.commit()
         print ("DATOS CARGADOS")
-        dbProjects_.close()
+        self.dbProjects_.close()
         # hasta aqui la modificación 8
 
 # MODIFICACION 9 PARA CONECTOR SQLITE :añado uso botón MOSTRAR TABLA DE REGISTROS-PROYECTOS
