@@ -908,7 +908,8 @@ class FLFieldDB(QtWidgets.QWidget):
         #if v:
         #    print("FLFieldDB(%s).setValue(%s) ---> %s" % (self.fieldName_, v, self.editor_))
         
-            
+        if v == "":
+            v = None  
         
         tMD = self.cursor_.metadata()
         if not tMD:
@@ -976,7 +977,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 doHome = False
                 if not self.editor_.text():
                     doHome = True
-                if v:
+                if not v == None:
                     self.editor_.setText(v)
                 else:
                     self.editor_.setText("")
@@ -988,17 +989,17 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.editor_:
                 return
 
-            if not v:
-                self.editor_.setText("")
-            else:
+            if not v == None:
                 self.editor_.setText(v)
+            else:
+                self.editor_.setText("")
 
 
 
         elif type_ == "double":
             if self.editor_:
                 s = None
-                if v :
+                if not v == None :
                     if self.partDecimal_:
                         s = round(float(v), self.partDecimal_)
                     else:
@@ -1009,16 +1010,16 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "serial":
             if self.editor_:
-                if not v:
-                    self.editor_.setText("0")
-                else:
+                if not v == None:
                     self.editor_.setText(str(v))
+                else:
+                    self.editor_.setText("0")
 
 
         elif type_ == "pixmap":
             if self.editorImg_:
 
-                if not v:
+                if v == None:
                     self.editorImg_.clear()
                     return
                 pix = QtGui.QPixmap(v)
@@ -1033,14 +1034,14 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "date":
             if self.editor_:
-                if not v:
+                if v == None:
                     self.editor_.setDate(QtCore.QDate())
                 else:
                     self.editor_.setDate(v)
 
         elif type_ == "time":
             if self.editor_:
-                if not v:
+                if v == None:
                     self.editor_.setTime(QtCore.QTime())
                 else:
                     self.editor_.setTime(v)
@@ -2507,10 +2508,12 @@ class FLFieldDB(QtWidgets.QWidget):
         c.select(mng.formatAssignValue(field.relationM1().foreignField(), field, v, True))
         #if c.size() <= 0:
         #    return
-
+        
         if c.size() <= 0:
             return
-
+        
+        c.next()
+        
         if not self.actionName_:
             a = c.action()
         else:

@@ -27,14 +27,14 @@ A grosso modo, el proceso de carga es el que sigue:
   de la misma, con su formulario.
 - Si el fichero .py no existe, vamos al QS, lo convertirmos en XML y después a PY
 - Se importa dinámicamente el fichero py
-- Se crea el widget de la pestaña leyendo Qt3 y generando controles Qt4
+- Se crea el widget de la pestaña leyendo Qt3 y generando controles Qt5
 - Se ejecuta el init de la acción
 
 De forma más reciente, se soporta también la llamada a la acción EditRecord que
 hace algo parecido a lo anterior: (este proceso está bastante inacabado)
 
 - Se convierte el QS a PY
-- Se crea el formulario pestaña leyendo Qt3 y generando controles Qt4
+- Se crea el formulario pestaña leyendo Qt3 y generando controles Qt5
 - Importamos dinámicamente el PY y ejecutamos el init.
 
 Aspectos interesantes en los procesos de pineboo
@@ -81,7 +81,7 @@ ventaja de importar dentro es que Python compila a bytecode el código fuente,
 por lo que acelera su ejecución y además se cachea en disco para que la próxima
 vez la importación sea casi instantánea.
 
-Sobre la conversión de Qt3 a Qt4, lo que se hace a groso modo es leer el XML del
+Sobre la conversión de Qt3 a Qt5, lo que se hace a groso modo es leer el XML del
 fichero UI (formato Qt3) y empezamos a seguir sus instrucciones para crear un
 formulario con la misma "receta". El problema es que los "ingredientes" no son
 los mismos en Qt4, por lo que hay que ir traduciendo nombres de propiedad o
@@ -105,7 +105,7 @@ Por mucho que ya traducimos a Python, ahora ese código empieza a buscar funcion
 en FLUtil que no existen, los controles FLTableDB le falta casi toda la funcionalidad,
 las FLSqlQuery no están ni implementadas, etc, etc.
 
-Muchas de esas cosas están en Qt4 mejor resueltas que en Qt3, por lo que a veces
+Muchas de esas cosas están en Qt5 mejor resueltas que en Qt3, por lo que a veces
 con sencillos "wrappers" que emulen el comportamiento antiguo haría que todo
 empezase a funcionar. Pero hay mucho curro de ir función por función y enlazándola
 donde le toca. Además hay que probar mucho código, para ir viendo cómo funciona
@@ -201,7 +201,7 @@ Por eso, cuando veáis el código Python, algunas partes las veréis cambiadas.
 Al principio tendremos que depurar cuidadosamente para estar seguros de
 que estamos ejecutando lo mismo que antes.
 
-Cómo funciona la conversión de Qt3 a Qt4
+Cómo funciona la conversión de Qt3 a Qt5
 ------------------------------------------
 
 Todo empieza con la función loadUi de qt3ui.py. En ella leemos a mano el fichero,

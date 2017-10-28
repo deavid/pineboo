@@ -31,11 +31,6 @@ except ImportError:
     print(traceback.format_exc())
     dependeces.append("python3-ply")
 
-try:
-    import future
-except ImportError:
-    print(traceback.format_exc())
-    dependeces.append("python3-future")
 
 try:
 

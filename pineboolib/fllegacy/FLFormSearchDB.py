@@ -211,8 +211,8 @@ class FLFormSearchDB(FLFormDB):
         if not self.cursor_:
             return None
         
-        if not self.cursor_.isLocked():
-            self.cursor_.setModeAccess(FLSqlCursor.Edit)
+        #if not self.cursor_.isLocked():
+        #    self.cursor_.setModeAccess(FLSqlCursor.Edit)
             
         if self.loop or self.inExec_:
             print("FLFormSearchDB::exec(): Se ha detectado una llamada recursiva")
@@ -223,6 +223,7 @@ class FLFormSearchDB(FLFormDB):
             return None
         
         self.load() #Extra
+        
         self.inExec_ = True
         self.acceptingRejecting_ = False
         
@@ -324,16 +325,13 @@ class FLFormSearchDB(FLFormDB):
             super(FLFormSearchDB, self).closeEvent(e)
             self.deleteLater()
             
-
-
-
-
     """
-    Invoca a la función "init()" del script asociado al formulario
+    Invoca a la función "init" del script "masterprocess" asociado al formulario
     """
     @QtCore.pyqtSlot()
-    def initScript(self):
-        return False
+    def callInitScript(self):
+        pass
+
 
     """
     Redefinida por conveniencia

@@ -161,8 +161,9 @@ class FLQPSQL(object):
         if not self.isOpen():
             print("PSQLDriver::commitTransaction: Database not open")
         
+        cursor = self.conn_.cursor()
         try:
-            self.conn_.commit()
+            cursor.execute("COMMIT TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
             print("PSQLDriver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
@@ -175,8 +176,9 @@ class FLQPSQL(object):
             print("PSQLDriver::rollbackTransaction: Database not open")
         
         
+        cursor = self.conn_.cursor()
         try:
-            self.conn_.rollback()
+            cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
             print("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
@@ -191,7 +193,7 @@ class FLQPSQL(object):
         
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("BEGIN")
+            cursor.execute("BEGIN TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN")
             print("PSQLDriver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())

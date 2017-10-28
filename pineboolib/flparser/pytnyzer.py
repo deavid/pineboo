@@ -1,14 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # ------ Pythonyzer ... reads XML AST created by postparse.py and creates an equivalent Python file.
-from __future__ import print_function
-from __future__ import absolute_import
 from builtins import object
 from optparse import OptionParser
 import os, os.path, random
 from . import flscriptparse
 from lxml import etree
-from future.utils import with_metaclass
 
 
 def id_translate(name):
@@ -41,7 +38,7 @@ class ASTPythonFactory(type):
         ast_class_types.append(cls)
         super(ASTPythonFactory, cls).__init__(name, bases, dct)
 
-class ASTPython(with_metaclass(ASTPythonFactory, object)):
+class ASTPython(object, metaclass=ASTPythonFactory):
     tags = []
     debug_file = None
     generate_depth = 0
@@ -1165,15 +1162,11 @@ def pythonize(filename, destfilename, debugname = None):
         raise
     ast = ast_tree.getroot()
     tpl = string_template
-    template_exist = False
+
     for cls in ast.xpath("Class"):
         tpl = file_template
-        template_exist = True
         break
-    
-    if template_exist == False:
-        tpl = file_template
-    
+
     f1 = open(destfilename,"w")
     write_python_file(f1,ast,tpl)
     f1.close()

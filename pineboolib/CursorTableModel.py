@@ -295,9 +295,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             else:
                 where_filter += " AND " + wfilter
         if not where_filter:
-            where_filter = "1 = 0"
+            where_filter = "1 = 1"
         
         self.where_filter = where_filter
+        
+        #for f in self.where_filters.keys():
+        #    print("Filtro %s --> %s" % (f, self.where_filters[f]))
+        
+        
+        
+        
+        #print("Filtro", where_filter)
+        
         self._cursor = self._cursorConn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # TODO: Convertir esto a un cursor de servidor (hasta 20.000 registros funciona bastante bien)
@@ -489,8 +498,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     Crea una nueva linea en el tableModel
     @param buffer . PNBuffer a añadir
     """
-    def Insert(self, buffer):
+    def Insert(self, cursor):
         #Metemos lineas en la tabla de la bd
+        buffer = cursor.buffer()
         campos = None
         valores = None
         for b in buffer.fieldsList():
@@ -513,13 +523,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             try:
                 print(sql)
                 self._cursor.execute(sql)
+                self.refresh()
             except Exception:
                 print("CursorTableModel.Insert() :: ERROR:" , traceback.format_exc())
                 #conn.rollback()
-                return
+                return False
                   
             #conn.commit()    
-            self.refresh()
+            
+            return True
         
     def Delete(self, cursor):
         pKName = self.tableMetadata().primaryKey()

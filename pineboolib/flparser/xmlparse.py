@@ -1,4 +1,3 @@
-from __future__ import print_function
 from builtins import str
 import xml.parsers.expat
 import sys

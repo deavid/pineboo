@@ -197,11 +197,4 @@ Los ficheros son convertidos a python y guardados junto al fichero QS de cache.
 Por ejemplo, las conversiones de masterarticulos.qs se pueden ver en la ruta
 `tempdata/cache/flfactalma/file.qs/masterarticulos/`.
 
-Cosas que realizar a medio plazo
-----------------------------------------
- - Más API's de Eneboo clonadas
- - Diálogo de conectar que funcione
- - Establecer conexión manual desde consola usando formato URI
- - Apertura de formularios de registro (Browse)
- - Creación de switch "--read-only-mode", donde los commitBuffer y commit sean inocuos.
  

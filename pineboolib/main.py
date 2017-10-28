@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
-from __future__ import unicode_literals
 from builtins import str
 from builtins import object
 import sys,time
@@ -221,7 +219,8 @@ class Project(object):
         fn = None
         try:
             fn = eval(function, pineboolib.qsaglobals.__dict__)
-            return fn(*aList)
+            if aList:
+                return fn(*aList)
         except Exception:
             #print("** JS.CALL :: ERROR:", traceback.format_exc().splitlines()[-1])
             if showException:
