@@ -24,7 +24,7 @@ class MainForm(QtWidgets.QWidget):
         MainForm.debugLevel = q
     
     def load(self):
-        self.ui = uic.loadUi(filedir('forms/mainform.ui'), self)
+        self.ui = uic.loadUi(filedir('plugins/mainForm/Pineboo/mainform.ui'), self)
         
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
@@ -75,7 +75,7 @@ class MainForm(QtWidgets.QWidget):
 
 
 
-    def addAreaTab(self, area):
+    def loadArea(self, area):
         assert area.idarea not in self.areas
         vl = QtWidgets.QWidget()
         vl.layout = QtWidgets.QVBoxLayout() #layout de la pestaña
@@ -93,11 +93,11 @@ class MainForm(QtWidgets.QWidget):
         self.areasTab.addItem(vl, area.descripcion)
 
 
-    def addModuleInTab(self, module):
+    def loadModule(self, module):
         if MainForm.debugLevel > 50: print("- Procesando %s " % module.name)
         #Creamos pestañas de areas y un vBLayout por cada módulo. Despues ahí metemos los actions de cada módulo
         if module.areaid not in self.areas:
-            self.addAreaTab(Struct(idarea=module.areaid, descripcion=module.areaid))
+            self.loadArea(Struct(idarea=module.areaid, descripcion=module.areaid))
 
 
         moduleToolBox = self.toolBoxs[self.areas.index(module.areaid)]

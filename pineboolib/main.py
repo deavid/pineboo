@@ -56,7 +56,7 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self._initModules = []
-        self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s" % self.mainFormName).mainWindow
+        self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
         
 
         self.actions = {}
@@ -369,7 +369,7 @@ class ModuleActions(object):
 
         self.tree = etree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
-        action = XMLAction(None)
+        action = XMLAction(self.prj, None)
         action.mod = self
         action.prj = self.prj
         action.name = self.mod.name
@@ -386,7 +386,7 @@ class ModuleActions(object):
             setattr(qsaglobals,action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % action.name))
 
         for xmlaction in self.root:
-            action =  XMLAction(xmlaction)
+            action =  XMLAction(self.prj, xmlaction)
             action.mod = self
             action.prj = self.prj
             try: name = action.name
@@ -512,8 +512,9 @@ class XMLMainFormAction(XMLStruct):
 class XMLAction(XMLStruct):
     
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, _project, *args, **kwargs):
         super(XMLAction,self).__init__(*args, **kwargs)
+        self.prj = _project
         self.form = self._v("form")
         self.script = self._v("script")
         self.mainform = self._v("mainform")
@@ -544,8 +545,7 @@ class XMLAction(XMLStruct):
     def load(self):
         if self._loaded: return self.mainform_widget
         if Project.debugLevel > 50: print("Loading action %s . . . " % (self.name))
-        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % Project.mainFormName)
-        w = mainForm.mainWindow
+        w = self.prj.main_window
         if not self.mainform_widget:
             self.mainform_widget = FLMainForm(w,self, load = True)
         self._loaded = True
@@ -563,9 +563,8 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > 50: print("Opening default form for Action", self.name)
         self.load()
         # Es necesario importarlo a esta altura, QApplication tiene que ser
-        # ... construido antes que cualquier widget
-        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % Project.mainFormName)
-        w = mainForm.mainWindow
+        # ... construido antes que cualquier widget)
+        w = self.prj.main_window
         #self.mainform_widget.init()
         w.addFormTab(self)
         #self.mainform_widget.show()

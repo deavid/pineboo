@@ -151,7 +151,7 @@ def main():
 
     # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
 
-    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s" % pineboolib.main.Project.mainFormName)
+    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
     #mainForm = getattr(module_, "MainForm")()
         
     #from pineboolib import mainForm
@@ -234,9 +234,9 @@ def main():
         splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
-            main_window.addAreaTab(area)
+            main_window.loadArea(area)
         for k,module in sorted(project.modules.items()):
-            main_window.addModuleInTab(module)
+            main_window.loadModule(module)
         splash.showMessage("Abriendo interfaz ...")
         if options.verbose: print("Abriendo interfaz ...")
         main_window.show()
@@ -254,9 +254,9 @@ def main():
         splash.showMessage("Módulos y pestañas ...")
         if options.verbose: print("Módulos y pestañas ...")
         for k,area in sorted(project.areas.items()):
-            main_window.addAreaTab(area)
+            main_window.loadArea(area)
         for k,module in sorted(project.modules.items()):
-            main_window.addModuleInTab(module)
+            main_window.loadModule(module)
         if options.preload:
             if options.verbose: print("Precarga ...")
             for action in project.actions:
