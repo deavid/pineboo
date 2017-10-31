@@ -814,6 +814,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
             self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
             self.tableRecords_.recordChoosed.connect(self.currentChanged)
+            
 
         self.lineEditSearch.textChanged.connect(self.filterRecords)
         model = self.cursor_.model()
@@ -1451,6 +1452,7 @@ class FLTableDB(QtWidgets.QWidget):
                     self.tableRecords_.setColumnHidden(column, True)
                 else:
                     self.tableRecords_.setColumnHidden(column, False)
+                
                     
             # FIXME FIX: Esto lo he implementado en otro lado manualmente. A elminar, o mover algo de aquel código aquí.
             
@@ -1915,9 +1917,14 @@ class FLTableDB(QtWidgets.QWidget):
         self.filter_ = bFilter
 
 
-    @decorators.NotImplementedWarn
-    def setSortOrder(self, ascending):
-        pass
+    def setSortOrder(self, ascending = True):
+        if ascending:
+            order = Qt.AscendingOrder
+        else:
+            order = Qt.DescendingOrder
+            
+        self.tableRecords_.sortByColumn(0,order)
+        
 
     @decorators.NotImplementedWarn
     def isSortOrderAscending(self):

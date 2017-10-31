@@ -31,6 +31,7 @@ class FLDataTable(QtWidgets.QTableView):
         
         self.pixOk_ = filedir("icons","unlock.png")
         self.pixNo_ = filedir("icons","lock.png")
+        self.paintFieldMtd_ = None
         
         self._v_header = self.verticalHeader()
         self._v_header.setDefaultSectionSize(22)
@@ -41,6 +42,7 @@ class FLDataTable(QtWidgets.QTableView):
         self.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.setAlternatingRowColors(True)
+        self.setSortingEnabled(True)
         
         self.popup_ = popup
         
@@ -158,9 +160,9 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Obtiene la lista con las claves primarias de los registros seleccionados por chequeo
     """
-    @decorators.NotImplementedWarn
+    
     def primarysKeysChecked(self):
-        pass
+        return self.primarysKeysChecked_
 
     """
     Limpia la lista con las claves primarias de los registros seleccionados por chequeo
@@ -172,7 +174,14 @@ class FLDataTable(QtWidgets.QTableView):
     Establece el estado seleccionado por chequeo para un regsitro, indicando el valor de su clave primaria
     """
     def setPrimaryKeyChecked(self, primaryKeyValue, on):
-        return self.primarysKeysChecked_
+        if on:
+            if not primaryKeyValue in self.primarysKeysChecked_:
+                self.primarysKeysChecked_.append(primaryKeyValue)
+                self.primaryKeyToggled.emit(primaryKeyValue, False)
+        else:
+            if primaryKeyValue in self.primarysKeysChecked_:
+                self.primarysKeysChecked_.remove(primaryKeyValue)
+                self.primaryKeyToggled.emit(primaryKeyValue, False)
 
     """
     Ver FLDataTable::showAllPixmaps_
@@ -433,7 +442,8 @@ class FLDataTable(QtWidgets.QTableView):
             
             if self.persistentFilter_:
                 self.cursor_.setFilter(self.persistentFilter_)
-            self.cursor_.refresh() 
+            self.cursor_.refresh()
+            self.selectRow(self.cursor_.at())
             
             
             QtCore.QTimer.singleShot(0, self.show)
