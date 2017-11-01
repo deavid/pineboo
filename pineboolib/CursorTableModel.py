@@ -5,7 +5,9 @@ from pineboolib import decorators
 from pineboolib.qsaglobals import ustr
 import pineboolib
 
-from PyQt5 import QtCore
+from pineboolib.utils import filedir
+
+from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
@@ -125,21 +127,100 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def data(self, index, role):
         #print("Data ", index, role)
         #print("Registros", self.rowCount())
+        #roles
+        #0 QtCore.Qt.DisplayRole
+        #1 QtCore.Qt.DecorationRole
+        #2 QtCore.Qt.EditRole
+        #3 QtCore.Qt.ToolTipRole
+        #4 QtCore.Qt.StatusTipRole
+        #5 QtCore.Qt.WhatThisRole
+        #6 QtCore.Qt.FontRole
+        #7 QtCore.Qt.TextAlignmentRole
+        #8 QtCore.Qt.BackgroundRole
+        #9 QtCore.Qt.ForegroundRole
+        
+        
+        
+        
+        
         row = index.row()
         col = index.column()
+        field = self.metadata().indexFieldObject(col)
+        _type = field.type()
         r = None
+        
+        if r is None:
+            r = [ str(x) for x in self._data[row] ]
+            self._data[row] = r
+        d = r[col]
+        
+        if role == QtCore.Qt.TextAlignmentRole:
+            if _type in ("int","double","uint"):
+                d = QtCore.Qt.AlignRight
+            elif _type in ("bool","unlock","date","time","pixmap"):
+                d = QtCore.Qt.AlignCenter
+            else:
+                d = None
+            
+            return d
+        
+        
         if role == DisplayRole or role == EditRole:
             #r = self._vdata[row]
-            if r is None:
-                r = [ str(x) for x in self._data[row] ]
-                self._data[row] = r
-            d = r[col]
+            if _type == "bool":
+                if d in ("True", "1"):
+                    d = "Sí"
+                else:
+                    d = "No"
+            
+            if _type in ("unlock","pixmap"):
+                #FIXME: Aquí cargaremos imagen en el futuro
+                d = None
+            
+            return d
+        
+        if role == QtCore.Qt.DecorationRole:
+            icon = None
+            if _type == "unlock":
+                
+                if d in ("True","1"):
+                    icon = QtGui.QIcon(filedir("icons","unlock.png"))
+                else:
+                    icon = QtGui.QIcon(filedir("icons","lock.png"))
+            
+            if _type == "pixmap":
+                pass
+                
+                
+            
+            return icon
+                    
+        
+        if role == QtCore.Qt.BackgroundRole:
+            if _type == "bool":
+                if d in ("True", "1"):
+                    d = QtGui.QBrush(QtCore.Qt.green)
+                else:
+                    d = QtGui.QBrush(QtCore.Qt.red)
+            else:
+                d = None
+            
+            return d
+        
+        if role == QtCore.Qt.ForegroundRole:
+            if _type == "bool" and not d in ("True","1"):
+                d = QtGui.QBrush(QtCore.Qt.white)
+            else:
+                d = None
+            
+            return d
+            
             #if row > self.rowsLoaded *0.95 - 200 and time.time() - self.lastFetch> 0.3: self.fetchMore(QtCore.QModelIndex())
             #d = self._vdata[row*1000+col]
             #if type(d) is str:
             #    d = QVariant(d)
             #    self._vdata[row*1000+col] = d
-            return d 
+        return None 
             
 
         return QVariant_invalid
