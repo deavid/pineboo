@@ -387,6 +387,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #for f in self.where_filters.keys():
         #    print("Filtro %s --> %s" % (f, self.where_filters[f]))
         
+        #print("Filtro final", self.where_filter)
         
         
         

@@ -2605,8 +2605,9 @@ class FLSqlCursor(ProjectClass):
         
         if finalFilter:
             self.setFilter(finalFilter)
-            self.model().refresh()
-            self.refreshBuffer()
+        
+        self.model().refresh()
+        self.refreshBuffer()
         
         #if self.modeAccess() == self.Browse:
         #    self.d._currentregister = -1
@@ -2661,6 +2662,13 @@ class FLSqlCursor(ProjectClass):
                 if not relationFilter in finalFilter:
                     finalFilter = "%s AND %s" % (finalFilter, relationFilter)
         
+        if self.filter():
+            if finalFilter and not self.filter() in finalFilter:
+                finalFilter = "%s AND %s" % (finalFilter, self.filter())
+            else:
+                finalFilter = self.filter() 
+            
+        
         return finalFilter
 
 
@@ -2697,7 +2705,9 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def setFilter(self, _filter):
-
+        
+        self.d.filter_ = None
+        
         finalFilter = _filter
         bFilter = self.baseFilter()
         if bFilter:
@@ -2712,10 +2722,8 @@ class FLSqlCursor(ProjectClass):
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
 
         self.d.filter_ = finalFilter
-        if self.d._model and getattr(self.d._model, "where_filters", None):
-            self.d._model.where_filters["filter"] = self.d.filter_
-
-
+        #if self.d._model and getattr(self.d._model, "where_filters", None):
+        self.d._model.where_filters["filter"] = self.d.filter_
 
 
     """

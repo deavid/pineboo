@@ -80,6 +80,8 @@ class FLTableDB(QtWidgets.QWidget):
 
 
     _controlsInit = None
+    
+    tdbFilterBuildWhere_ = None
 
     """
     constructor
@@ -89,6 +91,7 @@ class FLTableDB(QtWidgets.QWidget):
         super(FLTableDB, self).__init__(parent)
         self.topWidget = parent
         self.showAllPixmaps_ = True
+        self.tdbFilterBuildWhere_ = None
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(0, self.loaded)
         
@@ -1475,12 +1478,12 @@ class FLTableDB(QtWidgets.QWidget):
         if refreshData or self.sender():
 
             finalFilter = self.filter_
-            if self.tdbFilterBuildWhere_:
+            if not self.tdbFilterBuildWhere_ == None:
                 if not finalFilter:
                     finalFilter = self.tdbFilterLastWhere_
                 else:
                     finalFilter = "%s and %s" % (finalFilter, self.tdbFilterLastWhere_)
-
+            
             self.tableRecords_.setPersistentFilter(finalFilter)
             self.tableRecords_.model().setShowPixmap(self.showAllPixmaps_)
             self.tableRecords_.refresh()
@@ -1907,17 +1910,22 @@ class FLTableDB(QtWidgets.QWidget):
         vargs.append(bFilter)
 
         if functionQSA:
-            msec_refresh = 800
-            ret = self.cursor_._prj.call(functionQSA, vargs, None)
+            msec_refresh = 200
+            ret = ""
+            try:
+                ret = self.cursor_._prj.call(functionQSA, vargs, None)
+                print("functionQSA:%s:" % functionQSA)
+            except:
+                pass
+            
             if ret:
                 bFilter = ret
-                print("functionQSA:%s:" % functionQSA)
             else:
                 if p == "":
                     bFilter = None
 
 
-        self.refreshDelayed(msec_refresh, (bFilter or refreshData))
+        self.refreshDelayed(msec_refresh, refreshData)
         self.filter_ = bFilter
 
 

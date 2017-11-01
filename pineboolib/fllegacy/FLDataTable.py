@@ -32,6 +32,7 @@ class FLDataTable(QtWidgets.QTableView):
         self.pixOk_ = filedir("icons","unlock.png")
         self.pixNo_ = filedir("icons","lock.png")
         self.paintFieldMtd_ = None
+        self.refreshing_ = False
         
         self._v_header = self.verticalHeader()
         self._v_header.setDefaultSectionSize(22)
@@ -436,18 +437,14 @@ class FLDataTable(QtWidgets.QTableView):
             self.cursor_.refresh()
             
         #if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
-        if self.refreshing_ == False and self.cursor_:
+        if self.refreshing_ == False and self.cursor():
             self.refreshing_ = True
             self.hide()
-            
-            if self.persistentFilter_:
-                self.cursor_.setFilter(self.persistentFilter_)
-            self.cursor_.refresh()
+            self.cursor_.setFilter(self.persistentFilter_)
+            self.cursor().refresh()
             self.selectRow(self.cursor_.at())
-            
-            
-            QtCore.QTimer.singleShot(0, self.show)
-        self.refreshing_ = False
+            self.show()
+            self.refreshing_ = False
     
     
                    
