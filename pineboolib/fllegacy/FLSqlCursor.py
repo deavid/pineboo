@@ -43,7 +43,11 @@ class PNBuffer(ProjectClass):
         self.cursor_ = cursor
         self.fieldList_ = []
         self.md5Sum_ = ""
-        campos = self.cursor_.db().manager().metadata(self.cursor_.d.curName_).fieldListObject()
+        tmd = self.cursor_.db().manager().metadata(self.cursor_.d.curName_)
+        if not tmd:
+            return
+        else:
+            campos = tmd.fieldListObject()
         for campo in campos:
             field = Struct()
             field.name = str(campo.name())
