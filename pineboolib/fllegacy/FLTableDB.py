@@ -1527,7 +1527,6 @@ class FLTableDB(QtWidgets.QWidget):
     @param msec Cantidad de tiempo del lapsus, en milisegundos.
     """
     def refreshDelayed(self, msec = 50, refreshData = True):
-
         if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             return
 
@@ -1889,15 +1888,19 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.cursor_.model():
             return
         bFilter = None
-        p = str(p)
-        refreshData = None
-        if "%" in p:
-            refreshData = True
+        
+        if not p in (None, ""):
+            p = "%s%%" % p
+        
+        refreshData = False
+        #if p.endswith("%"): refreshData = True        
+        
         msec_refresh = 400
         column = self.tableRecords_._h_header.logicalIndex(0)
         field = self.cursor_.model().metadata().indexFieldObject(column)
 
         bFilter = self.cursor_.db().manager().formatAssignValue(field, p, True)
+        
 
         idMod = self.cursor_.db().managerModules().idModuleOfFile(self.cursor_.metadata().name() + ".mtd")
 
