@@ -731,8 +731,13 @@ class FLTableDB(QtWidgets.QWidget):
         sizePolicy.setHeightForWidth(True)
 
         self.dataLayout = QtWidgets.QHBoxLayout() #Contiene tabData y tabFilters
-        self.tabData = QtWidgets.QVBoxLayout() # contiene data
-        self.tabFilter = QtWidgets.QVBoxLayout() #contiene filtros
+        self.tabData = QtWidgets.QGroupBox() # contiene data
+        self.tabFilter = QtWidgets.QGroupBox() #contiene filtros
+        dataL = QtWidgets.QVBoxLayout()
+        filterL = QtWidgets.QVBoxLayout()
+        self.tabData.setLayout(dataL)
+        self.tabFilter.setLayout(filterL)
+        
         self.buttonsLayout = QtWidgets.QVBoxLayout() # Contiene botones lateral (datos, filtros, odf)
         self.masterLayout = QtWidgets.QVBoxLayout() #Contiene todos los layouts
         
@@ -811,7 +816,8 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords_ = FLDataTable(self, "tableRecords")
             self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
             self.setFocusProxy(self.tableRecords_)
-            self.dataLayout.addWidget(self.tableRecords_) #metemos el tablerecord en el datalayout
+            dataL.addWidget(self.tableRecords_) #metemos el tablerecord en el datalayout
+            
             self.lineEditSearch.installEventFilter(self)
             self.tableRecords_.installEventFilter(self)
 
@@ -826,8 +832,9 @@ class FLTableDB(QtWidgets.QWidget):
         model = self.cursor_.model()
 
         #Se añade data, filtros y botonera
-        self.dataLayout.addLayout(self.tabData)
-        self.dataLayout.addLayout(self.tabFilter)
+        self.dataLayout.addWidget(self.tabData)
+        self.dataLayout.addWidget(self.tabFilter)
+        self.tabFilter.hide()
         self.dataLayout.addLayout(self.buttonsLayout)
 
         if model:
@@ -1950,16 +1957,20 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def activeTabData(self, b):
         #if (self.topWidget and not self.tabTable.visibleWidget() == self.tabData):
+        self.tabFilter.hide()
+        self.tabData.show()
         self.refreshTabData()
-        self.tabTable.raiseWidget(self.tabData)
+        #self.tabTable.raiseWidget(self.tabData)
 
     """
     Activa la tabla de filtro
     """
     def activeTabFilter(self, b):
         #if (self.topWidget and not self.tabTable.visibleWidget() == self.tabFilter):
-        self.refreshTabFilter()
-        self.tabTable.raiseWidget(self.tabFilter)
+        self.tabData.hide()
+        self.tabFilter.show()
+        #self.refreshTabFilter()
+        #self.tabTable.raiseWidget(self.tabFilter)
 
     """
     Limpia e inicializa el filtro
