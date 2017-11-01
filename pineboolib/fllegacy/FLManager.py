@@ -418,10 +418,14 @@ class FLManager(ProjectClass):
                 fName = args[0]
             
             #print("%s=%s" % (fName, formatV))
-            if formatV.find("%") > -1:
-                retorno = "%s LIKE %s" % (fName, formatV)
+            if args[1] == "string":
+                if formatV.find("%") > -1:
+                    retorno = "%s LIKE %s" % (fName, formatV)
+                else:
+                    retorno = "%s = %s" % (fName, formatV)
             else:
-                retorno = "%s = %s" % (fName, formatV)  
+                retorno = "%s = %s" % (fName, formatV)
+                
             return retorno              
             
         
