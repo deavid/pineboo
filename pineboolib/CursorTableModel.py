@@ -100,6 +100,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.pendingRows = 0
         self.lastFetch = 0
         self.fetchedRows = 0
+        self._showPixmap = True
         
         if self.USE_THREADS == True:
             self.threadFetcher = threading.Thread(target=self.threadFetch)
@@ -188,7 +189,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 else:
                     icon = QtGui.QIcon(filedir("icons","lock.png"))
             
-            if _type == "pixmap":
+            if _type == "pixmap" and self._showPixmap:
                 pass
                 
                 
@@ -224,6 +225,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
 
         return QVariant_invalid
+    
+    def setShowPixmap(self, show):
+        self._showPixmap = show
     
     def threadFetch(self):
         #ct = threading.current_thread()

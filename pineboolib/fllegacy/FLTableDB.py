@@ -88,8 +88,10 @@ class FLTableDB(QtWidgets.QWidget):
     def __init__(self, parent, name = None):
         super(FLTableDB, self).__init__(parent)
         self.topWidget = parent
+        self.showAllPixmaps_ = True
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(0, self.loaded)
+        
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -504,16 +506,17 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Ver FLTableDB::showAllPixmaps_
     """
-    @decorators.NotImplementedWarn
     def showAllPixmaps(self):
-        return None
+        return self.showAllPixmaps_
 
     """
     Ver FLTableDB::showAllPixmaps_
     """
-    @decorators.NotImplementedWarn
     def setShowAllPixmaps(self, s):
-        pass
+        self.showAllPixmaps_ = s
+        if self.tableRecords_:
+            self.tableRecords_.model().setShowPixmap(self.showAllPixmaps_)
+        
 
     """
     Ver FLTableDB::functionGetColor_
@@ -718,8 +721,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def tableRecords(self):
         if self.tableRecords_:
-            print("ERROR: tableRecords - llamada doble")
-            return
+            #print("ERROR: tableRecords - llamada doble")
+            return self.tableRecords_
 
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed ,QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHeightForWidth(True)
@@ -1479,6 +1482,7 @@ class FLTableDB(QtWidgets.QWidget):
                     finalFilter = "%s and %s" % (finalFilter, self.tdbFilterLastWhere_)
 
             self.tableRecords_.setPersistentFilter(finalFilter)
+            self.tableRecords_.model().setShowPixmap(self.showAllPixmaps_)
             self.tableRecords_.refresh()
 
 
