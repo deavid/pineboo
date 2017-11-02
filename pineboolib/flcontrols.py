@@ -81,6 +81,9 @@ class QComboBox(QtWidgets.QComboBox):
     def currentItem(self, i):
         if i:
             self.setCurrentIndex(i)
+    
+    def insertStringList(self, strl):
+        self.insertItems(len(strl), strl)
 
 class QButtonGroup(QtWidgets.QGroupBox):
     def __getattr__(self, name): return DefFun(self, name)
@@ -143,15 +146,14 @@ class QTable(QtWidgets.QTableWidget):
     currentChanged = QtCore.pyqtSignal(int, int)
     
     def __init__(self, parent = None):
-        if not parent:
-            parent = self.parentWidget()
         super(QTable, self).__init__(parent)
+        if not parent:
+            self.setParent(self.parentWidget())
         
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
     
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
-        print(currentRow, currentColumn, previousRow, previousColumn)
         self.currentChanged.emit(currentRow, currentColumn)
         
     
@@ -164,11 +166,18 @@ class QTable(QtWidgets.QTableWidget):
     def setNumCols(self, n):
         self.setColumnCount(n)
     
+    def setNumRows(self, n):
+        self.setRowCount(n)
+    
     def setReadOnly(self, b):
         if b == True:
             self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         else:
             self.setEditTriggers(QtWidgets.QAbstractItemView.EditTriggers)
+    
+    @decorators.NotImplementedWarn
+    def setColumnReadOnly(self, n, b):
+        pass
     
 
     def selectionMode(self):
@@ -186,13 +195,20 @@ class QTable(QtWidgets.QTableWidget):
         self.setRowCount(numero + 1)
         
     def text(self, row, col):
-        print(row, col)
         return self.item(row , col).text()
         
     
-    def setText(self, sangrado, col, value):
-        self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
+    def setText(self, linea, col, value):
+        #self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
+        self.setItem(linea, col, QtWidgets.QTableWidgetItem(str(value)))
+        
+    @decorators.NotImplementedWarn
+    def adjustColumn(self, k):
+        pass
     
+    @decorators.NotImplementedWarn
+    def setRowReadOnly(self, row, b):
+        pass
     
         
         
