@@ -36,16 +36,17 @@ class FLLineEdit(QtWidgets.QLineEdit):
     lostFocus = QtCore.pyqtSignal()
 
 
-    def __init__(self, parent, name):
+    def __init__(self, parent, name = None):
         super(FLLineEdit,self).__init__(parent)
         self._name = name
-        self._fieldName = parent.fieldName_
-        self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
-        self._partDecimal = parent.partDecimal_
-        self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()         
-        self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-        #self.textChanged.connect(self.controlFormato)
-        self._parent = parent
+        if isinstance(parent.fieldName_, str):
+            self._fieldName = parent.fieldName_
+            self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
+            self._partDecimal = parent.partDecimal_
+            self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()         
+            self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
+            #self.textChanged.connect(self.controlFormato)
+            self._parent = parent
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -3412,12 +3413,16 @@ class FLPixmapView(QtWidgets.QWidget):
 class FLDateEdit(QtWidgets.QDateEdit):
 
     valueChanged = QtCore.pyqtSignal()
+    DMY = "dd-MM-yyyy"
 
     def __init__(self, parent, name):
         super(FLDateEdit,self).__init__(parent)
         self.setDisplayFormat("dd-MM-yyyy")
         self.setMinimumWidth(120)
         self.setMaximumWidth(120)
+    
+    def setOrder(self, order):
+        self.setDisplayFormat(order)
     
     def setDate(self, d = None):
         if d is None:
@@ -3468,10 +3473,12 @@ class FLTimeEdit(QtWidgets.QTimeEdit):
 
 class FLSpinBox(QtWidgets.QSpinBox):
 
-    @decorators.WorkingOnThis
-    def __init__(self, parent = False, name = False):
-        super(FLSpinBox,self).__init__(parent, name)
+    def __init__(self, parent = None):
+        super(FLSpinBox,self).__init__(parent)
         #editor()setAlignment(Qt::AlignRight);
+    
+    def setMaxValue(self, v):
+        self.setMaximum(v)
 
 
 
