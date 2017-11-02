@@ -220,7 +220,7 @@ class FLTableMetaData(ProjectClass):
             return fN
         
         for key in self.d.fieldList_:
-            if key.name()  == str(fN).lower():
+            if key.name().lower()  == fN.lower():
                 return key.alias()
                     
         return None
@@ -230,17 +230,16 @@ class FLTableMetaData(ProjectClass):
 
     @param aN Nombre del alias del campo
     """
-    @decorators.BetaImplementation
     def fieldAliasToName(self, aN):
             
         if not aN:
             return aN
         
-        if self.d.fieldAliasMap_.has_key(aN):
-            return self.d.fieldAliasMap_[aN]
-        else:
-            return aN
+        for key in self.d.fieldList_:
+            if key.alias().lower() == aN.lower():
+                return key.name()
         
+        return None
     
 
     """
