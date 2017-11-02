@@ -347,14 +347,15 @@ class FLManager(ProjectClass):
     @param v Valor que se quiere formatear para el campo indicado
     @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
     """
-    def formatValue(self, *args, **kwargs):
-        if not args[0]:
+    def formatValue(self, fMD_or_type, v, upper = False):
+        
+        if not fMD_or_type:
             return None
         
-        if len(args) == 3:
-            return self.db_.formatValue(args[0], args[1], args[2])
-        else:
-            return self.formatValue(args[0].field(), args[1], args[2])
+        if not isinstance(fMD_or_type, str):
+            return self.formatValue(fMD_or_type.type(), v, upper)
+        
+        return self.db_.formatValue(fMD_or_type, v, upper)
             
         
     
