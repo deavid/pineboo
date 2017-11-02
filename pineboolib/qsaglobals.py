@@ -132,7 +132,7 @@ class SysType(object):
         self._name_user = None
 
     def nameUser(self): 
-        return pineboolib.project.conn.db_userName
+        return pineboolib.project.conn.user()
     
     def interactiveGUI(self):
         return "Pineboo"
