@@ -2478,19 +2478,19 @@ class FLSqlCursor(ProjectClass):
 
     def move(self, row):
         
-        if not getattr(self.d, "_model", None):
+        if not self.model():
             return False
         
         if row < 0: row = -1
-        if row >= self.d._model.rows: row = self.d._model.rows
+        if row >= self.model().rows: row = self.model().rows
         if self.d._currentregister == row: return False
-        topLeft = self.d._model.index(row,0)
-        bottomRight = self.d._model.index(row,self.d._model.cols-1)
+        topLeft = self.model().index(row,0)
+        bottomRight = self.model().index(row,self.model().cols-1)
         new_selection = QtCore.QItemSelection(topLeft, bottomRight)
         self._selection.select(new_selection, QtCore.QItemSelectionModel.ClearAndSelect)
         self.d._currentregister = row
         #self.d._current_changed.emit(self.at())
-        if row < self.d._model.rows and row >= 0: return True
+        if row < self.model().rows and row >= 0: return True
         else: return False
 
     """
@@ -2507,9 +2507,11 @@ class FLSqlCursor(ProjectClass):
     def first(self,  emite = True):
         #if self.d.modeAccess_ == self.Del:
         #    return False
-
-        b = self.move(0)
-
+        if not self.d._currentregister == 0:
+            b = self.move(0)
+        else:
+            b = True
+            
         if b and emite:
             self.d._current_changed.emit(self.at())
 
@@ -2602,6 +2604,7 @@ class FLSqlCursor(ProjectClass):
 
             else:
                 finalFilter = _filter
+        
         
         if finalFilter:
             self.setFilter(finalFilter)
