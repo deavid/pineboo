@@ -621,8 +621,8 @@ class FLCheckBox(QtWidgets.QCheckBox):
     
     row_ = None
     
-    def __init__(self, parent, row = 0, name = 0):
-        super(FLCheckBox, self).__init__(parent, name)
+    def __init__(self, parent, row = 0, name = None):
+        super(FLCheckBox, self).__init__()
         
         self.row_ = row
     
