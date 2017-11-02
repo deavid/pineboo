@@ -139,7 +139,7 @@ class FLFieldMetaData():
     @return La longitud del campo
     """
     def length(self):
-        return self.d.length_
+        return int(self.d.length_)
 
     """
     Obtiene si el campo es calculado.
