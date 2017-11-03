@@ -22,7 +22,7 @@ class FLQPSQL(object):
     lastError_ = None
     
     def __init__(self):
-        self.version_ = "0.3"
+        self.version_ = "0.4"
         self.conn_ = None
         self.name_ = "FLQPSQL"
         self.open_ = False
@@ -248,5 +248,17 @@ class FLQPSQL(object):
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         return cursor.fetchall()  
             
-            
+    
+    def existsTable(self, name):
+        if not self.isOpen():
+            return False
+        
+        t = FLSqlQuery()
+        t.setForwardOnly(True)
+        ok = t.exec_("select relname from pg_class where relname = '%s'" % name)
+        if ok:
+            ok = t.next()
+        
+        del t
+        return ok    
         
