@@ -3,14 +3,16 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from PyQt5 import QtCore
-from pineboolib import decorators
+from pineboolib import decorators, qsatype
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery, FLGroupByQuery
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLAction import FLAction
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import filedir
 from lxml import etree
 import os
+from PyQt5.Qt import QDomDocument
 
 
 """
@@ -52,9 +54,60 @@ class FLManager(ProjectClass):
         self.cacheAction_ = []
         self.cacheMetaDataSys_ = None
         self.listTables_ = None
-        self.dictKeyMetaData_ = None
-        self.initCount_ = 0
+        self.dictKeyMetaData_ = {}
+        #self.initCount_ = 0
         
+        
+        self.initCount_ = self.initCount_ + 1
+        tmpTMD = self.createSystemTable("flmetadata")
+        tmpTMD = self.createSystemTable("flseqs")
+        
+        if not self.db_.dbAux():
+            return
+        
+        q = FLSqlQuery(None, self.db_.dbAux())
+        q.setForwardOnly(True)
+        
+        tmpTMD = self.createSystemTable("flsettings")
+        if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
+            q.exec_("DROP TABLE flsettings CASCADE")
+            tmpTMD = self.createSystemTable("flsettings")
+        
+        if not self.dictKeyMetaData_:
+            self.dictKeyMetaData_ = {}
+            #self.dictKeyMetaData_.setAutoDelete(True)
+        else:
+            self.dictKeyMetaData_.clear()
+        
+        q.exec_("SELECT tabla,xml FROM flmetadata")
+        while q.next():
+            self.dictKeyMetaData_.insert(q.value(0), q.value(1))
+        
+        q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'")
+        if not q.next():
+            q.exec_("DROP TABLE flmetadata CASCADE")
+            tmpTMD = self.createSystemTable("flmetadata")
+            
+            c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
+            for key, value in self.dictKeyMetaData_:
+                buffer = c.primeInsert()
+                buffer.setValue("tabla", key)
+                buffer.setValue("xml", value)
+                c.insert()
+        
+        
+        if not self.cacheMetaData_:
+            self.cacheMetaData_ = {}
+        
+        if not self.cacheAction_:
+            self.cacheAction_ = {}
+        
+        if not self.cacheMetaDataSys_:
+            self.cacheMetaDataSys_ = {}
+            
+            
+        
+            
     """
     destructor
     """
@@ -251,18 +304,38 @@ class FLManager(ProjectClass):
     """
     def existsTable(self,  n, cache = True):
         
-        if cache:
-            modId = self.db_.managerModules().idModuleOfFile(n +".mtd")
-            return os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
+        if not self.db_:
+            return False
+        if not self.db_.dbAux():
+            return False
+        if n == None:
+            return False
+        
+        if cache and self.listTables_:
+            
+            for name in self.listTables_:
+                if name == n:
+                    return True
+            
+            return False
+        else:
+            return self.db_.existsTable(n)
         
         
-        q = FLSqlQuery()
-        sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
-        q.setTablesList(n)
-        q.setSelect("*")
-        q.setFrom(n)
-        q.setWhere("1 = 1 LIMIT 1")
-        return q.exec_()
+        
+        
+        #if cache:
+        #    modId = self.db_.managerModules().idModuleOfFile(n +".mtd")
+        #    return os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
+        
+        
+        #q = FLSqlQuery()
+        #sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
+        #q.setTablesList(n)
+        #q.setSelect("*")
+        #q.setFrom(n)
+        #q.setWhere("1 = 1 LIMIT 1")
+        #return q.exec_()
     
     """
     Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
@@ -294,9 +367,8 @@ class FLManager(ProjectClass):
     @param key Clave sha1 de la vieja estructura
     @return TRUE si la modificación tuvo éxito
     """
-    @decorators.NotImplementedWarn
     def alterTable(self, mtd1 = None, mtd2 = None, key = None):
-        return True
+        return self.db_.alterTable(mtd1, mtd2, key)
     
     """
     Crea una tabla en la base de datos.
@@ -305,9 +377,31 @@ class FLManager(ProjectClass):
     @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
       0 si no se pudo crear la tabla o ya existía
     """
-    @decorators.NotImplementedWarn
     def createTable(self, n_or_tmd):
-        return None
+        util = FLUtil()
+        if n_or_tmd == None:
+            return False
+        
+        if isinstance(n_or_tmd, str):
+            n_or_tmd = self.metadata(n_or_tmd)
+            if not n_or_tmd:
+                return False
+            
+            if self.existsTable(n_or_tmd.name()):
+                self.listTables_.append(n)
+                return n_or_tmd
+            
+            return self.createTable(n_or_tmd)
+        else:
+            if n_or_tmd.isQuery() or self.existsTable(n_or_tmd.name(), False):
+                return n_or_tmd
+            
+            if not self.db_.createTable(n_or_tmd):
+                print("FLManager :", util.tr("No se ha podido crear la tabla ") + n_or_tmd.name())
+                return False
+            
+            return n_or_tmd
+        
     
 
     
@@ -506,18 +600,53 @@ class FLManager(ProjectClass):
 
     @param n Nombre de la tabla.
     @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
-      0 si no se pudo crear la tabla o ya existía
+      False si no se pudo crear la tabla o ya existía
     """
-    @decorators.NotImplementedWarn
     def createSystemTable(self, n):
-        return True
+        util = FLUtil()
+        if not self.existsTable(n):
+            doc = QDomDocument()
+            _path = filedir("..","share","pineboo","tables")
+            dir = qsatype.Dir(_path)
+            _tables = dir.entryList("%s.mtd" % n)
+            
+            for f in _tables:
+                _file = QtCore.QFile("%s/%s" % (_path, f))
+                _file.open(QtCore.QIODevice.ReadOnly)
+                _in = QtCore.QTextStream(_file)
+                _data = _in.readAll()
+                if not util.domDocumentSetContent(doc, _data):
+                    print("FLManager::createSystemTable :", util.tr("Error al cargar los metadatos para la tabla %1").arg(n))
+                    return False
+                else:
+                    docElem = doc.documentElement()
+                    mtd = self.createTable(self.metadata(docElem, True))
+                    return mtd
+                
+                f.close()
+            
+        return False    
+                
+                
+                
+                
+                
+            
+            
     
     """
     Carga en la lista de tablas los nombres de las tablas de la base de datos
     """
-    @decorators.NotImplementedWarn
     def loadTables(self):
-        return True
+        if not self.db_.dbAux():
+            return
+        
+        if not self.listTables_:
+            self.listTables_ = []
+        else:
+            self.listTables_.clear()
+        
+        self.listTables_ = self.db_.dbAux().tables()    
     
     """
     Limpieza la tabla flmetadata, actualiza el cotenido xml con el de los fichero .mtd
@@ -534,7 +663,7 @@ class FLManager(ProjectClass):
     @return TRUE si es una tabla de sistema
     """
     def isSystemTable(self, n):
-        if not n[2:] == "fl":
+        if not n[0:2] == "fl":
             return False
         
         if n == ("flfiles","flmetadata","flmodules","flareas","flserial","flvar","flsettings","flseqs","flupdates"):
