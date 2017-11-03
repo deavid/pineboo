@@ -90,15 +90,20 @@ class Array(object):
     
     def __init__(self, *args):
         self.names_ = []
+        self.dict_ = {}
+        
         if not len(args):
-            self.dict_ = {}
+            return
         elif isinstance(args[0], int) and len(args) == 1:
-            self.dict_ = {} # dimensiones por ahora a cero
+            return
         elif isinstance(args[0], list):
-            self.dict_ = {}
             for field in args[0]:
                 self.names_.append(field)
-                self.dict_[field] = field 
+                self.dict_[field] = field
+                
+        elif isinstance(args[0], str):
+            for f in args:
+                self.__setitem__(f, f)
         else:
             self.dict_ = args
     
@@ -529,16 +534,109 @@ class GroupBox(QtWidgets.QGroupBox):
 
     def add(self, _object):     
         self._layout.addWidget(_object)
+    
+    def __setattr__(self, name, value):
+        if name == "title":
+            self.setTitle(value)
+        else:
+            super(GroupBox, self).__setattr__(name, value)
 
-class CheckBox(QtWidgets.QCheckBox):
-    pass
+class CheckBox(QWidget):
+    _label = None
+    _cb = None
+    
+    def __init__(self):
+        super(CheckBox, self).__init__()
+        
+        self._label = QtWidgets.QLabel(self)
+        self._cb = QtWidgets.QCheckBox(self)
+        spacer = QtWidgets.QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        _lay = QtWidgets.QHBoxLayout()
+        _lay.addWidget(self._cb)
+        _lay.addWidget(self._label)
+        _lay.addSpacerItem(spacer)
+        self.setLayout(_lay)
+    
+    def __setattr__(self, name, value):
+        if name == "text":
+            self._label.setText(value)
+        elif name == "checked":
+            self._cb.setChecked(value)
+        else:   
+            super(CheckBox, self).__setattr__(name, value)
+    
+    def __getattr__(self, name):
+        if name == "checked":
+            return self._cb.isChecked()
+        else:
+            return super(CheckBox, self).__getattr__(name)
 
-class ComboBox(QtWidgets.QComboBox):
-    pass
+class ComboBox(QWidget):
+    
+    _label = None
+    _combo = None
+    
+    def __init__(self):
+        super(ComboBox, self).__init__()
+        
+        self._label = QtWidgets.QLabel(self)
+        self._combo = QtWidgets.QComboBox(self)
+        self._combo.setMinimumHeight(25)
+        _lay = QtWidgets.QHBoxLayout()
+        _lay.addWidget(self._label)
+        _lay.addWidget(self._combo)
+        
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding ,QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHeightForWidth(True)
+        self._combo.setSizePolicy(sizePolicy)
+        
+        self.setLayout(_lay)
+    
+    def __setattr__(self, name, value):
+        if name == "label":
+            self._label.setText(value)
+        elif name == "itemList":
+            self._combo.insertItems(len(value), value)
+        elif name == "currentItem":
+            self._combo.setCurrentText(value)
+        else:   
+            super(ComboBox, self).__setattr__(name, value)
+    
+    def __getattr__(self, name):
+        if name == "currentItem":
+            return self._combo.currentText()
+        else:
+            return super(ComboBox, self).__getattr__(name)
+        
         
 
 class LineEdit(QWidget):
-    pass
+    _label = None
+    _line = None
+    
+    def __init__(self):
+        super(LineEdit, self).__init__()
+        
+        self._label = QtWidgets.QLabel(self)
+        self._line = QtWidgets.QLineEdit(self)
+        _lay = QtWidgets.QHBoxLayout()
+        _lay.addWidget(self._label)
+        _lay.addWidget(self._line)
+        self.setLayout(_lay)
+    
+    def __setattr__(self, name, value):
+        if name == "label":
+            self._label.setText(value)
+        elif name == "text":
+            self._line.setText(value)
+        else:
+            super(LineEdit, self).__setattr__(name, value)
+            
+    def __getattr__(self, name):
+        if name == "text":
+            return self._line.text()
+        else:
+            return super(LineEdit, self).__getattr__(name)
 
 class Dir(object):
     path_ = None
