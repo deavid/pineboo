@@ -30,6 +30,7 @@ class PNConnection(QtCore.QObject):
     stackSavePoints_ = None
     queueSavePoints_ = None
     interactiveGUI_ = None
+    _dbAux = None
     
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias):
         super(PNConnection,self).__init__()
@@ -45,17 +46,20 @@ class PNConnection(QtCore.QObject):
         
         if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):
             self.conn = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
+            self._dbAux = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
+            
         else:
             print("PNConnection.ERROR: No se encontro el driver \'%s\'" % driverAlias)
             sys.exit(0)
-            
-        self._manager = FLManager(self)
-        self._managerModules = FLManagerModules(self.conn)
+        
+
         
         self.transaction_ = 0
         self.stackSavePoints_= []
         self.queueSavePoints_= []
         self.interactiveGUI_ = True
+    
+          
         
     def connectionName(self):
         return self.db_name
@@ -67,9 +71,12 @@ class PNConnection(QtCore.QObject):
         if name == "default":
             return self.conn
         
-        if not name in self.connAux:
-            print("PNConnection::Creando nueva conexión", name)
-            self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password, self.driverSql.nameToAlias(self.driverName()))
+        for k in self.connAux.keys():
+            if k == name:
+                return self.connAux[name]
+            
+        print("PNConnection::Creando nueva conexión", name)
+        self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password, self.driverSql.nameToAlias(self.driverName()))
         
         return self.connAux[name]
         
@@ -81,8 +88,7 @@ class PNConnection(QtCore.QObject):
         return self.conn.cursor()
     
     def conectar(self, db_name, db_host, db_port, db_userName, db_password):
-        conn = self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
-        return conn
+        return self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
     
     def driverName(self):
         return self.driver().driverName()
@@ -109,6 +115,9 @@ class PNConnection(QtCore.QObject):
         return self.conn.seek(offs, whence)
     
     def manager(self):
+        if not self._manager:
+            self._manager = FLManager(self) 
+            
         return self._manager
     
     @decorators.NotImplementedWarn
@@ -119,7 +128,7 @@ class PNConnection(QtCore.QObject):
         return self.conn
     
     def dbAux(self):
-        return self.useConn("dbAux").conn
+        return self._dbAux
     
     def formatValue(self, t, v, upper):
         return self.driverSql.formatValue(t, v, upper)
@@ -274,6 +283,9 @@ class PNConnection(QtCore.QObject):
         return True
     
     def managerModules(self):
+        if not self._managerModules:
+            self._managerModules = FLManagerModules(self.conn)
+            
         return self._managerModules
     
     
@@ -327,7 +339,14 @@ class PNConnection(QtCore.QObject):
         if not self.db():
             return False
         
-        return self.driver().nextSerialVal(table, field)    
+        return self.driver().nextSerialVal(table, field)
+    
+    def existsTable(self, name):
+        if not self.db():
+            return False
+        
+        return self.driver().existsTable( name)
+           
     
     
     
