@@ -46,7 +46,8 @@ class PNConnection(QtCore.QObject):
         
         if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):
             self.conn = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
-            self._dbAux = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
+            self._dbAux = self
+            
             
         else:
             print("PNConnection.ERROR: No se encontro el driver \'%s\'" % driverAlias)
@@ -348,5 +349,21 @@ class PNConnection(QtCore.QObject):
         return self.driver().existsTable( name)
            
     
-    
+    def createTable(self, tmd):
+        if not self.db():
+            return False
+        
+        sql = self.driver().sqlCreateTable(tmd)
+        print("-->", tmd, sql)
+        if not sql:
+            return False
+        
+        q = FLSqlQuery(None, self.dbAux())
+        try:
+            q.exec_(sql)
+        except:
+            print("FLManager : SQL -", sql)
+            return False
+        print(sql)
+        return True  
     
