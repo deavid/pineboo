@@ -141,6 +141,11 @@ class Project(object):
         # Conectar:
 
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.dbserver.type)
+        
+        #Se verifica que existen estas tablas
+        self.conn.createTable(self.conn.manager().createSystemTable("flareas"))
+        self.conn.createTable(self.conn.manager().createSystemTable("flfiles"))
+        
         util = FLUtil()
         util.writeSettingEntry(u"DBA/lastDB",self.dbname)
         self.cur = self.conn.cursor()
