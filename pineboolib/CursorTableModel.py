@@ -90,7 +90,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._data = []
         self._vdata = []
         self._column_hints = []
-        self.cols = len(self.tableMetadata().fieldListObject())
+        self.cols = len(self.tableMetadata().fieldList())
         self.col_aliases = [ str(self.tableMetadata().indexFieldObject(i).alias()) for i in range(self.cols) ]
         self.fetchLock = threading.Lock()
         self.rows = 0
@@ -402,7 +402,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
             return
 
-        for n,field in enumerate(self.tableMetadata().fieldListObject()):
+        for n,field in enumerate(self.tableMetadata().fieldList()):
             #if field.visibleGrid():
             #    sql_fields.append(field.name())
             if field.isPrimaryKey(): self.pkpos.append(n)

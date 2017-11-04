@@ -592,7 +592,11 @@ class FLTableMetaData(ProjectClass):
     @param prefixTable Si es TRUE se añade un prefijo a cada campo con el nombre de la tabla; nombretabla.nombrecampo
     @return Cadena de caracteres con los nombres de los campos separados por comas
     """
-    def fieldList(self, prefixTable = False):
+    def fieldList(self, prefixTable = None):
+        
+        if prefixTable == None:
+            return self.d.fieldList_
+        
         listado = []
         
         cadena = None
@@ -607,9 +611,9 @@ class FLTableMetaData(ProjectClass):
 
         return listado   
     
-    def fieldListObject(self):
-        #print("FiledList count", len(self.d.fieldList_))
-        return self.d.fieldList_
+    #def fieldListObject(self):
+    #    #print("FiledList count", len(self.d.fieldList_))
+    #    return self.d.fieldList_
     
     def indexPos(self, position):
         i = 0

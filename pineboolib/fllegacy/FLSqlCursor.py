@@ -47,7 +47,7 @@ class PNBuffer(ProjectClass):
         if not tmd:
             return
         else:
-            campos = tmd.fieldListObject()
+            campos = tmd.fieldList()
         for campo in campos:
             field = Struct()
             field.name = str(campo.name())
@@ -704,9 +704,8 @@ class FLSqlCursor(ProjectClass):
         self.d.modeAccess_ = FLSqlCursor.Browse
 
         if name:
-            pass #FIXME
-            #if not self.d.db_.manager().existsTable(name):
-                #self.d.metadata_ = self.d.db_.manager().createTable(name)
+            if not self.db().manager().existsTable(name):
+                self.d.metadata_ = self.d.db_.manager().createTable(name)
         else:
             self.d.metadata_ = self.d.db_.manager().metadata(name)
         self.d.cursorRelation_ = cR
