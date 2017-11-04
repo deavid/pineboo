@@ -3,10 +3,12 @@ from PyQt5.QtCore import QTime
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
 from pineboolib.dbschema.schemaupdater import text2bool
-from pineboolib.fllegacy import FLUtil
+from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import auto_qt_translate_text
 import traceback
+from PyQt5.Qt import qWarning, QApplication
+from PyQt5.QtWidgets import QMessageBox
 
 
 
@@ -43,8 +45,8 @@ class FLQPSQL(object):
         try:
             import psycopg2
         except ImportError:
-            print(traceback.format_exc())
-            print("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
+            qWarning(traceback.format_exc())
+            qWarning("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
             sys.exit(0)
         
         conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
@@ -52,8 +54,33 @@ class FLQPSQL(object):
                         db_userName, db_password)
         
         
-        
-        self.conn_ = psycopg2.connect(conninfostr)
+        try:
+            self.conn_ = psycopg2.connect(conninfostr)
+        except psycopg2.OperationalError as e:
+            
+            if "does not exist" in str(e):
+                if QMessageBox.No == QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No):
+                    print("No se crea")
+                    sys.exit(1)
+                else:
+                    conninfostr2 = "dbname=postgres host=%s port=%s user=%s password=%s connect_timeout=5" % (
+                        db_host, db_port,
+                        db_userName, db_password)
+                    try:
+                        tmpConn = psycopg2.connect(conninfostr2)
+                        tmpConn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+                        
+                        cursor = tmpConn.cursor()
+                        cursor.execute("CREATE DATABASE %s" % db_name)
+                        cursor.close()
+                        return self.connect(db_name, db_host, db_port, db_userName, db_password)
+                    except Exception:
+                        qWarning(traceback.format_exc())
+                        print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
+                        sys.exit(1)
+                        
+                    
+            
         #self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a false para que las transacciones funcionen
         self.conn_.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
         
@@ -63,7 +90,7 @@ class FLQPSQL(object):
         try:
             self.conn_.set_client_encoding("UTF8")
         except Exception:
-            print(traceback.format_exc())
+            qWarning(traceback.format_exc())
         
         return self.conn_
      
@@ -71,7 +98,7 @@ class FLQPSQL(object):
     
     def formatValue(self, type_, v, upper):
             
-            util = FLUtil.FLUtil()
+            util = FLUtil()
         
             s = None
             
@@ -97,7 +124,7 @@ class FLQPSQL(object):
                     v = v.upper()
 
                 s = "'%s'" % v
-            #print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
+            #qWarning ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
             return s
 
     def canOverPartition(self):
@@ -109,7 +136,7 @@ class FLQPSQL(object):
         q.setFrom("")
         q.setWhere("")
         if not q.exec():
-            print("not exec sequence")
+            qWarning("not exec sequence")
             return None
         if q.first():
             return q.value(0)
@@ -118,7 +145,7 @@ class FLQPSQL(object):
     
     def savePoint(self, n):
         if not self.isOpen():
-            print("PSQLDriver::savePoint: Database not open")
+            qWarning("PSQLDriver::savePoint: Database not open")
             return False
         
         cursor = self.conn_.cursor()
@@ -126,7 +153,7 @@ class FLQPSQL(object):
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            print("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s" % n, traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s" % n, traceback.format_exc())
             return False
         
         return True 
@@ -136,7 +163,7 @@ class FLQPSQL(object):
     
     def rollbackSavePoint(self, n):
         if not self.isOpen():
-            print("PSQLDriver::rollbackSavePoint: Database not open")
+            qWarning("PSQLDriver::rollbackSavePoint: Database not open")
             return False
         
 
@@ -145,7 +172,7 @@ class FLQPSQL(object):
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            print("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" % n, traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" % n, traceback.format_exc())
             return False
         
         return True
@@ -159,21 +186,21 @@ class FLQPSQL(object):
     
     def commitTransaction(self):
         if not self.isOpen():
-            print("PSQLDriver::commitTransaction: Database not open")
+            qWarning("PSQLDriver::commitTransaction: Database not open")
         
         cursor = self.conn_.cursor()
         try:
             cursor.execute("COMMIT TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            print("PSQLDriver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
             return False
         
         return True
     
     def rollbackTransaction(self):
         if not self.isOpen():
-            print("PSQLDriver::rollbackTransaction: Database not open")
+            qWarning("PSQLDriver::rollbackTransaction: Database not open")
         
         
         cursor = self.conn_.cursor()
@@ -181,7 +208,7 @@ class FLQPSQL(object):
             cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-            print("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
             return False
         
         return True
@@ -189,14 +216,14 @@ class FLQPSQL(object):
 
     def transaction(self):
         if not self.isOpen():
-            print("PSQLDriver::transaction: Database not open")
+            qWarning("PSQLDriver::transaction: Database not open")
         
         cursor = self.conn_.cursor()
         try:
             cursor.execute("BEGIN TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN")
-            print("PSQLDriver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())
             return False
         
         return True
@@ -204,7 +231,7 @@ class FLQPSQL(object):
     def releaseSavePoint(self, n):
         
         if not self.isOpen():
-            print("PSQLDriver::releaseSavePoint: Database not open")
+            qWarning("PSQLDriver::releaseSavePoint: Database not open")
             return False
         
         cursor = self.conn_.cursor()
@@ -212,7 +239,7 @@ class FLQPSQL(object):
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            print("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" % n,  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" % n,  traceback.format_exc())
         
             return False
         
@@ -231,13 +258,13 @@ class FLQPSQL(object):
         try:
             cursor.execute(sql)
         except Exception:
-            print("CursorTableModel.Refresh", traceback.format_exc())
+            qWarning("CursorTableModel.Refresh", traceback.format_exc())
     
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         try:
             cursor.execute("FETCH %d FROM %s" % (number, curname))
         except Exception:
-            print("PSQLDriver.refreshFetch", traceback.format_exc())
+            qWarning("PSQLDriver.refreshFetch", traceback.format_exc())
     
     def useThreads(self):
         return True
@@ -260,5 +287,93 @@ class FLQPSQL(object):
             ok = t.next()
         
         del t
-        return ok    
+        return ok
+    
+    def sqlCreateTable(self, tmd):
+        util = FLUtil()
+        if not tmd:
+            return None
+        
+        primaryKey = None
+        sql = "CREATE TABLE %s (" % tmd.name()
+        seq = None
+        
+        fieldList = tmd.fieldList()
+        
+        unlocks = 0
+        for field in fieldList:
+            if field.type() == "unlock":
+                unlocks = unlocks + 1
+        
+        if unlocks > 1:
+            qWarning("FLManager : " + QApplication.tr("No se ha podido crear la tabla ") + tmd.name())
+            qWarning("FLManager : " + QApplication.tr("Hay más de un campo tipo unlock. Solo puede haber uno."))
+            return None
+        
+        i = 1
+        for field in fieldList:
+            sql = sql + field.name()
+            if field.type() == "int":
+                sql = sql + " INT2"
+            elif field.type() == "uint":
+                sql = sql + " INT4"
+            elif field.type() in ("bool","unlock"):
+                sql = sql + " BOOLEAN"
+            elif field.type() == "double":
+                sql = sql + " FLOAT8"
+            elif field.type() == "time":
+                sql = sql + " TIME"
+            elif field.type() == "date":
+                sql = sql + " DATE"
+            elif field.type() == "pixmap":
+                sql = sql + " TEXT"
+            elif field.type() == "string":
+                sql = sql + " VARCHAR"
+            elif field.type() == "stringlist":
+                sql = sql + " TEXT"
+            elif field.type() == "bytearray":
+                sql = sql + " BYTEA"
+            elif field.type() == "serial":
+                seq = "%s_%s_seq" % (tmd.name(), field.name())
+                q = FLSqlQuery()
+                q.setForwardOnly(True)
+                q.exec_("SELECT relname FROM pg_class WHERE relname='%s'" % seq)
+                if not q.next():
+                    q.exec_("CREATE SEQUENCE %s" % seq)
+                
+                sql = sql + " INT4 DEFAULT NEXTVAL('%s')" % seq
+                del q
+        
+            longitud = field.length()
+            if longitud > 0:
+                sql = sql + "(%s)" % longitud
+            
+            if field.isPrimaryKey():
+                if primaryKey == None:
+                    sql = sql + " PRIMARY KEY"
+                else:
+                    qWarning(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
+                             QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
+                             field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
+                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, use FLCompoundKey para crear claves compuestas."))
+                    return None
+            else:
+                if field.isUnique():
+                    sql = sql + " UNIQUE"
+                if not field.allowNull():
+                    sql = sql + " NOT NULL"
+                else:
+                    sql = sql + " NULL"
+                
+            if not i == len(fieldList):
+                sql = sql + ","
+                i = i + 1
+        
+        sql = sql + ")"
+        
+        return sql
+                
+                
+        
+        
         
