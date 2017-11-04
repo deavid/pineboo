@@ -1037,9 +1037,23 @@ class FLUtil(ProjectClass):
     @param content Contenido XML
     @return FALSE si hubo fallo, TRUE en caso contrario
     """
-    @decorators.NotImplementedWarn
     def domDocumentSetContent(self, doc, content):
-        pass
+        if not content:
+            print("FLUtil :", self.tr("Se ha intentado cargar un fichero XML vacío"))
+            return False
+        
+        ErrMsg = ""
+        errLine = 0
+        errColumn = 0
+        
+        #if not doc.setContent(content, ErrMsg, errLine, errColumn):
+        if not doc.setContent(content):
+           print("FLUtil :", self.tr("Error en fichero XML.\nError : %1\nLinea : %2\nColumna : %3").
+             arg(ErrMsg, str(errLine), str(errColumn)))
+           return False
+        
+        return True
+
     """
     Obtiene la clave SHA1 de una cadena de texto.
 
