@@ -55,9 +55,26 @@ class FLManager(ProjectClass):
         self.cacheMetaDataSys_ = None
         self.listTables_ = None
         self.dictKeyMetaData_ = {}
-        #self.initCount_ = 0
+        self.initCount_ = 0
+        
+        QtCore.QTimer.singleShot(100, self.init)
         
         
+            
+            
+        
+            
+    """
+    destructor
+    """
+    def __del__(self):
+        self.finish()
+        
+
+    """
+    Acciones de inicialización.
+    """
+    def init(self):
         self.initCount_ = self.initCount_ + 1
         tmpTMD = self.createSystemTable("flmetadata")
         tmpTMD = self.createSystemTable("flseqs")
@@ -104,46 +121,6 @@ class FLManager(ProjectClass):
         
         if not self.cacheMetaDataSys_:
             self.cacheMetaDataSys_ = {}
-            
-            
-        
-            
-    """
-    destructor
-    """
-    def __del__(self):
-        self.finish()
-        
-
-    """
-    Acciones de inicialización.
-    """
-    def init(self):
-        self.initCount_ = self.initCount_ + 1
-        tmpTMD = self.createSystemTable('flmetadata')
-        tmpTMD = self.createSystemTable('flseqs')
-        tmpTMP = self.createSystemTable('flsettings')
-        
-        if not self.dictKeyMetaData_:
-            self.dictKeyMetaData_ = []
-        
-        if not self.db_.dbAux():
-            return
-        
-        q = FLSqlQuery
-        q.setSql("SELECT tabla,xml FROM flmetadata")
-        if q.exec_(self.db_.dbAux()):
-            while q.next():
-                self.dictKeyMetaData_[q.value(0)] = q.value(1)
-                
-        if not self.cacheMetaData_:
-            self.cacheMetaData_ = []
-        
-        if not self.cacheAction_:
-            self.cacheAction_ = []
-        
-        if not self.cacheMetaDataSys_:
-            self.cacheMetaDataSys_ = []
             
         
         
