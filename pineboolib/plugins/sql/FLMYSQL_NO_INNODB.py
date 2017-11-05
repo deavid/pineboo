@@ -3,9 +3,14 @@ from PyQt5.QtCore import QTime
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
 from pineboolib.dbschema.schemaupdater import text2bool
-from pineboolib.fllegacy import FLUtil
+from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import auto_qt_translate_text
+import traceback
+from PyQt5.Qt import qWarning, QApplication
+from PyQt5.QtWidgets import QMessageBox
+
+
 
 
 
@@ -56,7 +61,7 @@ class FLMYSQL_NO_INNODB(object):
     
     def formatValue(self, type_, v, upper):
             
-            util = FLUtil.FLUtil()
+            util = FLUtil()
         
             s = None
             
@@ -107,7 +112,7 @@ class FLMYSQL_NO_INNODB(object):
         q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
         q.setFrom("")
         q.setWhere("")
-        if not q.exec():
+        if not q.exec_():
             print("not exec sequence")
             return None
         if q.first():
@@ -136,7 +141,7 @@ class FLMYSQL_NO_INNODB(object):
         q.setSelect(cmd)
         q.setFrom("")
         q.setWhere("")
-        if not q.exec():
+        if not q.exec_():
             self.setLastError("No se pudo deshacer punto de salvaguarda", "rollback to savepoint sv_%s" % n)
             return False
         
@@ -187,7 +192,7 @@ class FLMYSQL_NO_INNODB(object):
         q.setSelect(cmd)
         q.setFrom("")
         q.setWhere("")
-        if not q.exec():
+        if not q.exec_():
             self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
             return False
         
@@ -198,7 +203,30 @@ class FLMYSQL_NO_INNODB(object):
         if leng:
             return "::%s(%s)" % (type_, leng)
         else:
-            return "::%s" % type_       
+            return "::%s" % type_  
+
+    def useThreads(self):
+        return True
+    
+    def useTimer(self):
+        return False      
+    
+    def fetchAll(self, cursor, tablename, where_filter, fields, curname):
+        return cursor.fetchall()    
+
+    def existsTable(self, name):
+        if not self.isOpen():
+            return False
+        
+        t = FLSqlQuery()
+        t.setForwardOnly(True)
+        ok = t.exec_("select relname from pg_class where relname = '%s'" % name)
+        if ok:
+            ok = t.next()
+        
+        del t
+        return ok  
             
+
             
         
