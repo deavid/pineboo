@@ -30,6 +30,24 @@ class DlgConnect(QtWidgets.QWidget):
     database = ""
     ui = None
     dbProjects_ = None
+    
+    def __init__(self):
+        super(DlgConnect, self).__init__()
+        self.ruta = ""
+        self.username = ""
+        self.password = ""
+        self.hostname = ""
+        self.portnumber = ""
+        self.database = ""
+        self.dbProjects_ = None
+        
+    
+    def openDB(self):
+        if self.dbProjects_:
+            self.dbProjects_.close()
+            
+        self.dbProjects_ = sqlite3.connect(filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite') 
+        
         
 
     def load(self):
@@ -45,7 +63,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.pbnSearchFolder.clicked.connect(self.findPathProject)
 
         # MODIFICACION 4 PARA CONECTOR SQLITE : DEFINIMOS LO QUE HACEN LOS BOTONES nuevos 
-        self.ui.pbnCargarDatos.clicked.connect(self.ChargeProject)
+        self.ui.pbnCargarDatos.clicked.connect(self.on_click)
         #self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
         self.ui.pbnBorrarProyecto.clicked.connect(self.DeleteProject)
         self.ui.pbnGuardarProyecto.clicked.connect(self.SaveProject)
@@ -54,58 +72,61 @@ class DlgConnect(QtWidgets.QWidget):
         
         self.ui.leFolderSQLITE.setText(filedir("../projects"))
         
-        self.ShowTable()
+        
 
-        DlgConnect.leName = self.ui.leName
-        DlgConnect.leDBName = self.ui.leDBName
-        DlgConnect.leUserName = self.ui.leUserName
-        DlgConnect.lePassword = self.ui.lePassword
-        DlgConnect.lePort = self.ui.lePort
+        self.leName = self.ui.leName
+        self.leDBName = self.ui.leDBName
+        self.leUserName = self.ui.leUserName
+        self.lePassword = self.ui.lePassword
+        self.lePort = self.ui.lePort
         # MODIFICACION 6 PARA CONECTOR SQLITE : DEFINIMOS los NUEVOS CAMPOS DEL UI:
-        DlgConnect.leFolder = self.ui.leFolderSQLITE
-        #DlgConnect.leDBType = self.ui.leDBType
-        DlgConnect.leHostName = self.ui.leHostName
-        DlgConnect.leFila = self.ui.leFila
+        self.leFolder = self.ui.leFolderSQLITE
+        #self.leDBType = self.ui.leDBType
+        self.leHostName = self.ui.leHostName
+        
         # hasta aqui la modificación 6
-        DlgConnect.cBDrivers = self.ui.cBDrivers
+        self.cBDrivers = self.ui.cBDrivers
         
         DV = PNSqlDrivers()
         list = DV.aliasList()
-        DlgConnect.cBDrivers.addItems(list)
+        self.cBDrivers.addItems(list)
         
         i = 0
-        while i < DlgConnect.cBDrivers.count():
-            if DV.aliasToName(DlgConnect.cBDrivers.itemText(i)) == DV.defaultDriverName:
-                DlgConnect.cBDrivers.setCurrentIndex(i)
+        while i < self.cBDrivers.count():
+            if DV.aliasToName(self.cBDrivers.itemText(i)) == DV.defaultDriverName:
+                self.cBDrivers.setCurrentIndex(i)
                 break
             
             i = i + 1
+        
+        self.openDB()
+        self.ShowTable()
     
     @QtCore.pyqtSlot()
     def conectar(self):
         folder_ =None
         
-        if DlgConnect.leFolder.text():
-            folder_ = DlgConnect.leFolder.text()
+        if self.leFolder.text():
+            folder_ = self.leFolder.text()
         else:
             folder_ = filedir("../projects")
             
-        DlgConnect.ruta = filedir(str(folder_), str(DlgConnect.leName.text()))
-        DlgConnect.username = DlgConnect.leUserName.text()
-        DlgConnect.password = DlgConnect.lePassword.text()
-        DlgConnect.hostname = DlgConnect.leHostName.text()
-        DlgConnect.portnumber = DlgConnect.lePort.text()
-        DlgConnect.database = DlgConnect.leDBName.text()
-        DlgConnect.driveralias = DlgConnect.cBDrivers.currentText()
+        self.ruta = filedir(str(folder_), str(self.leName.text()))
+        self.username = self.leUserName.text()
+        self.password = self.lePassword.text()
+        self.hostname = self.leHostName.text()
+        self.portnumber = self.lePort.text()
+        self.database = self.leDBName.text()
+        self.driveralias = self.cBDrivers.currentText()
 
         """
-        if not DlgConnect.leName.text():
-            DlgConnect.ruta = ""
-        elif not DlgConnect.ruta.endswith(".xml"):
-            DlgConnect.ruta += ".xml"
-        if not os.path.isfile(DlgConnect.ruta) and DlgConnect.leName.text():
-            QtWidgets.QMessageBox.information(self, "AVISO", "El proyecto \n" + DlgConnect.ruta +" no existe")
-            DlgConnect.ruta = None
+        if not self.leName.text():
+            self.ruta = ""
+        elif not self.ruta.endswith(".xml"):
+            self.ruta += ".xml"
+        if not os.path.isfile(self.ruta) and self.leName.text():
+            QtWidgets.QMessageBox.information(self, "AVISO", "El proyecto \n" + self.ruta +" no existe")
+            self.ruta = None
         else:
             self.close()
         """
@@ -116,9 +137,10 @@ class DlgConnect(QtWidgets.QWidget):
     def findPathProject(self):
         filename = QtWidgets.QFileDialog.getExistingDirectory(self, "Seleccione Directorio")
         if filename:
-            DlgConnect.leFolder.setText(str(filename))
+            self.leFolder.setText(str(filename))
             self.ShowTable()
-
+        
+        self.openDB()
         # cambiamos el directorio de trabajo donde guardar la base de datos Sqlite:
         os.chdir(filename)
 
@@ -126,81 +148,42 @@ class DlgConnect(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def ChargeProject(self):
 
-        self.dbProjects_ = sqlite3.connect(filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite') 
-        # cambiamos el directorio de trabajo donde guardar la base de datos Sqlite:
-        #filename = DlgConnect.leFolder
-        #if filename:
-        #    os.chdir(filename)
-
-        for currentQTableWidgetItem in self.tableWidget.selectedItems():
-            DlgConnect.leFila.setText(str(currentQTableWidgetItem.row() + 1))
-            fila = str(self.ui.leFila.text())
-        par = (fila,)
-        #fila = str(self.ui.leFila.text())
-        
-        #ABRIMOS LA BASE DE DATOS:
+        par = self.tableWidget.item(self.tableWidget.currentRow(), 0).text()
         
         cursor = self.dbProjects_.cursor()
         # ELEGIR UNA FILA DE LA TABLA proyectos DE LA BASE DE DATOS:
-        
-        cursor.execute("SELECT * FROM proyectos WHERE id=?", par)
-        for registro in cursor:
-            valor1 = registro[1]
-            valor2 = registro[2]
-            valor3 = registro[3]
-            valor4 = registro[4]
-            valor5 = registro[5]
-            valor6 = registro[6]
-            valor7 = registro[7]
+        cursor.execute("SELECT * FROM proyectos WHERE name = '%s'" % par)
+
+        registro = cursor.fetchone()
         # escribir los campos de la fila ELEGIDA en la zona de "CARGAR DATOS":
-        DlgConnect.leName.setText(str(valor1))
-        DlgConnect.leDBName.setText(str(valor2))
-        id = DlgConnect.cBDrivers.findText(str(valor3))
-        DlgConnect.cBDrivers.setCurrentIndex(id)
-        DlgConnect.leHostName.setText(str(valor4))
-        DlgConnect.lePort.setText(str(valor5))
-        DlgConnect.leUserName.setText(str(valor6))
-        DlgConnect.lePassword.setText(str(valor7))
+        self.leName.setText(str(registro[1]))
+        self.leDBName.setText(str(registro[2]))
+        id = self.cBDrivers.findText(str(registro[3]))
+        self.cBDrivers.setCurrentIndex(id)
+        self.leHostName.setText(str(registro[4]))
+        self.lePort.setText(str(registro[5]))
+        self.leUserName.setText(str(registro[6]))
+        self.lePassword.setText(str(registro[7]))
+        
+        return True
 
-
-        self.dbProjects_.commit()
-        print ("DATOS CARGADOS")
-        self.dbProjects_.close()
         # hasta aqui la modificación 8
 
 # MODIFICACION 9 PARA CONECTOR SQLITE :añado uso botón MOSTRAR TABLA DE REGISTROS-PROYECTOS
     @QtCore.pyqtSlot()
     def ShowTable(self):
-        if self.dbProjects_:
-            self.dbProjects_.close()
-        # DEBUGGING:
-        # pdb.set_trace()
-        # print ("escribe `n´(next) para continuar / `q´(quit) para salir / `c´ para seguir sin debugg")
-        
-        #if not db.open():
-        #    QMessageBox.critical(None, "Cannot open database",
-        #            "Unable to establish a database connection.\n"
-        #            "This example needs SQLite support. Please read the Qt SQL "
-        #            "driver documentation for information how to build it.\n\n"
-        #            "Click Cancel to exit.", QMessageBox.Cancel)
-        #    return False
-        #return True
-
-        # Creamos la conexión con la BASE DE DATOS SQLITE3 DB
-        self.dbProjects_ = sqlite3.connect(filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite')
         cursor = self.dbProjects_.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)
-        ''')
-        cursor.execute('''SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos''')
+        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT UNIQUE, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
+        cursor.execute('SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos')
         conectores = cursor.fetchall()
         self.tableWidget.clear()
-        currentRowCount = self.tableWidget.setRowCount(0) #después de borrar, pongo el contador de filas a cero
         self.tableWidget.setHorizontalHeaderLabels(['Name', 'DBname', 'DBType', 'DBHost', 'DBPort', 'Username', 'Password'])
         currentRowCount = self.tableWidget.rowCount() #cuento el número de filas TOTAL. Necessary even when there are no rows in the table
         
+        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.tableWidget.setAlternatingRowColors(True)
         # escribir el campo 0 de la fila 1:
         for conector in conectores:
             inx = conectores.index(conector)
@@ -214,60 +197,32 @@ class DlgConnect(QtWidgets.QWidget):
             self.tableWidget.setItem(inx, 5, QTableWidgetItem(conector[6]))
             self.tableWidget.setItem(inx, 6, QTableWidgetItem(conector[7]))
 
-        #self.dbProjects_.commit()
-        #self.dbProjects_.close()
         self.tableWidget.doubleClicked.connect(self.on_click)
-        print ("TABLA MOSTRADA")
-# hasta aqui la modificación 9
     
     @QtCore.pyqtSlot()
     def on_click(self):
-        for currentQTableWidgetItem in self.tableWidget.selectedItems():
-            DlgConnect.leFila.setText(str(currentQTableWidgetItem.row() + 1))
-            self.ChargeProject()
+        if self.ChargeProject():
             self.conectar()
             
     
 
-# MODIFICACION 10 PARA CONECTOR SQLITE :añado uso botón BORRAR PROYECTO
     @QtCore.pyqtSlot()
     def DeleteProject(self):
-        if self.dbProjects_:
-            self.dbProjects_.close()
-        # Creamos la conexión con la BASE DE DATOS SQLITE3 DB
-        self.dbProjects_ = sqlite3.connect(filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite')
-        
         cursor = self.dbProjects_.cursor()
+        try:
+            par = self.tableWidget.item(self.tableWidget.currentRow(), 0).text()
+            if par:
+                cursor.execute("DELETE FROM proyectos WHERE name= '%s'" % par)
+                self.dbProjects_.commit()
+        except:
+            pass
         
-        # ELEGIR UNA FILA DE LA TABLA proyectos DE LA BASE DE DATOS:
-        for currentQTableWidgetItem in self.tableWidget.selectedItems():
-            DlgConnect.leFila.setText(str(currentQTableWidgetItem.row() + 1))
-            fila = str(self.ui.leFila.text())
-        par = (fila,)
-        print(par)
-        cursor.execute("DELETE FROM proyectos WHERE id=?", par)
-        #enviamos la orden:
-        self.dbProjects_.commit()
-        self.dbProjects_.close()
-
-        print ("PROYECTO BORRADO")
-        self.tableWidget.clear()
-        currentRowCount = self.tableWidget.setRowCount(0) #después de borrar, pongo el contador de filas a cero
         self.ShowTable()
-            
-# hasta aqui la modificación 10
 
-# MODIFICACION 11 PARA CONECTOR SQLITE :añado uso botón GUARDAR PROYECTO
+
     @QtCore.pyqtSlot()
     def SaveProject(self):
-
-        #db = sqlite3.connect('pinebooconectores.sqlite')
-        cursor = self.dbProjects_.cursor()
-        cursor.execute('''SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos''')
-        conectores1 = cursor.fetchone()
-        # Get a cursor object  para AÑADIR CAMPOS
-        cursor = self.dbProjects_.cursor()
-        #id2 = str(self.ui.leID.text())
+        
         name2 = str(self.ui.leName.text())
         dbname2 = str(self.ui.leDBName.text())
         dbtype2 = self.ui.cBDrivers.currentText()
@@ -276,19 +231,14 @@ class DlgConnect(QtWidgets.QWidget):
         username2 = str(self.ui.leUserName.text())
         password2 = str(self.ui.lePassword.text())
 
-
+        cursor = self.dbProjects_.cursor()
         with self.dbProjects_:
-            cursor.execute('''
-        INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES (?,?,?,?,?,?,?)''', (name2, dbname2, dbtype2, dbhost2, dbport2, username2, password2))
-        self.dbProjects_.commit()
-        self.dbProjects_.close()
-        print ("PROYECTO GUARDADO")
-        self.tableWidget.clear()
-        currentRowCount = self.tableWidget.setRowCount(0) #después de borrar, pongo el contador de filas a cero
-        self.ShowTable()        
-# hasta aqui la modificación 11
+            sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (name2, dbname2, dbtype2, dbhost2, dbport2, username2, password2)
+            cursor.execute(sql)
 
-# MODIFICACION 12 PARA CONECTOR SQLITE :añado uso botón GUARDAR PROYECTO de EJEMPLO
+        self.ShowTable()        
+
+    """
     @QtCore.pyqtSlot()
     def SaveProjectEjemplo(self):
         #db = sqlite3.connect('pinebooconectores.sqlite')
@@ -310,15 +260,15 @@ class DlgConnect(QtWidgets.QWidget):
         self.dbProjects_.commit()
 
         # escribir los campos de la fila ELEGIDA en la zona de "CARGAR DATOS":
-        DlgConnect.leName.setText(str(name1))
-        DlgConnect.leDBName.setText(str(dbname1))
-        #DlgConnect.leDBType.setText(str(dbtype1))
-        DlgConnect.leHostName.setText(str(dbhost1))
-        DlgConnect.lePort.setText(str(dbport1))
-        DlgConnect.leUserName.setText(str(username1))
-        DlgConnect.lePassword.setText(str(password1))
+        self.leName.setText(str(name1))
+        self.leDBName.setText(str(dbname1))
+        #self.leDBType.setText(str(dbtype1))
+        self.leHostName.setText(str(dbhost1))
+        self.lePort.setText(str(dbport1))
+        self.leUserName.setText(str(username1))
+        self.lePassword.setText(str(password1))
         # When we are done working with the DB we need to close the connection:
         #db.close()
         print ("PROYECTO DE EJEMPLO GRABADO y CARGADO")
-
+    """
 # hasta aqui la modificación 12        
