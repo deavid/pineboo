@@ -210,9 +210,13 @@ def main():
     splash.move(frameGm.topLeft())
 
 
+
+    project.run()
+    if project.conn.conn == False:
+        return main()
+    
     splash.showMessage("Iniciando proyecto ...")
     if options.verbose: print("Iniciando proyecto ...")
-    project.run()
 
     splash.showMessage("Creando interfaz ...")
     if options.verbose: print("Creando interfaz ...")

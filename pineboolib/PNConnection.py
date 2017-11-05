@@ -46,6 +46,9 @@ class PNConnection(QtCore.QObject):
         
         if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):
             self.conn = self.conectar(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
+            if self.conn == False:
+                return
+            
             self._dbAux = self
             
             

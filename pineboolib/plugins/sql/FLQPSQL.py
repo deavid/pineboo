@@ -60,8 +60,7 @@ class FLQPSQL(object):
             
             if "does not exist" in str(e):
                 if QMessageBox.No == QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No):
-                    print("No se crea")
-                    sys.exit(1)
+                    return False
                 else:
                     conninfostr2 = "dbname=postgres host=%s port=%s user=%s password=%s connect_timeout=5" % (
                         db_host, db_port,
@@ -76,9 +75,12 @@ class FLQPSQL(object):
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
                         qWarning(traceback.format_exc())
+                        QMessageBox.information(None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
                         print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
-                        sys.exit(1)
-                        
+                        return False
+            else:
+                QMessageBox.information(None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                return False
                     
             
         #self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a false para que las transacciones funcionen
@@ -135,7 +137,7 @@ class FLQPSQL(object):
         q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
         q.setFrom("")
         q.setWhere("")
-        if not q.exec():
+        if not q.exec_():
             qWarning("not exec sequence")
             return None
         if q.first():

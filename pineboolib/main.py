@@ -141,7 +141,9 @@ class Project(object):
         # Conectar:
 
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port, self.dbauth.username, self.dbauth.password, self.dbserver.type)
-        
+        if self.conn.conn == False:
+            return False
+            
         #Se verifica que existen estas tablas
         self.conn.manager().createSystemTable("flareas")
         self.conn.manager().createSystemTable("flfiles")
