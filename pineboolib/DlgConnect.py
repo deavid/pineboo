@@ -64,6 +64,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         # MODIFICACION 4 PARA CONECTOR SQLITE : DEFINIMOS LO QUE HACEN LOS BOTONES nuevos 
         self.ui.pbnCargarDatos.clicked.connect(self.on_click)
+        self.tableWidget.doubleClicked.connect(self.on_click)
         #self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
         self.ui.pbnBorrarProyecto.clicked.connect(self.DeleteProject)
         self.ui.pbnGuardarProyecto.clicked.connect(self.SaveProject)
@@ -172,32 +173,31 @@ class DlgConnect(QtWidgets.QWidget):
 # MODIFICACION 9 PARA CONECTOR SQLITE :añado uso botón MOSTRAR TABLA DE REGISTROS-PROYECTOS
     @QtCore.pyqtSlot()
     def ShowTable(self):
+        self.tableWidget.clear()
         cursor = self.dbProjects_.cursor()
         cursor.execute('CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT UNIQUE, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
         cursor.execute('SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos')
         conectores = cursor.fetchall()
-        self.tableWidget.clear()
         self.tableWidget.setHorizontalHeaderLabels(['Name', 'DBname', 'DBType', 'DBHost', 'DBPort', 'Username', 'Password'])
         currentRowCount = self.tableWidget.rowCount() #cuento el número de filas TOTAL. Necessary even when there are no rows in the table
-        
         self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.tableWidget.setAlternatingRowColors(True)
         # escribir el campo 0 de la fila 1:
+        i = 0
+        self.tableWidget.setRowCount(len(conectores))
         for conector in conectores:
-            inx = conectores.index(conector)
-            self.tableWidget.insertRow(inx)
             # add more if there is more columns in the database.
-            self.tableWidget.setItem(inx, 0, QTableWidgetItem(conector[1]))
-            self.tableWidget.setItem(inx, 1, QTableWidgetItem(conector[2]))
-            self.tableWidget.setItem(inx, 2, QTableWidgetItem(conector[3]))
-            self.tableWidget.setItem(inx, 3, QTableWidgetItem(conector[4]))
-            self.tableWidget.setItem(inx, 4, QTableWidgetItem(conector[5]))
-            self.tableWidget.setItem(inx, 5, QTableWidgetItem(conector[6]))
-            self.tableWidget.setItem(inx, 6, QTableWidgetItem(conector[7]))
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(conector[1]))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(conector[2]))
+            self.tableWidget.setItem(i, 2, QTableWidgetItem(conector[3]))
+            self.tableWidget.setItem(i, 3, QTableWidgetItem(conector[4]))
+            self.tableWidget.setItem(i, 4, QTableWidgetItem(conector[5]))
+            self.tableWidget.setItem(i, 5, QTableWidgetItem(conector[6]))
+            self.tableWidget.setItem(i, 6, QTableWidgetItem(conector[7]))
+            i = i + 1
 
-        self.tableWidget.doubleClicked.connect(self.on_click)
     
     @QtCore.pyqtSlot()
     def on_click(self):
