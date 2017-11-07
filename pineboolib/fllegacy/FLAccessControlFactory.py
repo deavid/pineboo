@@ -84,7 +84,7 @@ class FLAccessControlMainWindow():
         
         it = Qtcore.QdictIterator(self.acosPerms_)
         for i in range(len(it.current())):
-            a = mw.child(if.currentKey(), "QAction")
+            a = mw.child(it.currentKey(), "QAction")
             if a:
                 perm = it
                 if perm == "-w" || perm == "--":
