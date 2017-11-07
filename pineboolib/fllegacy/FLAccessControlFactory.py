@@ -2,6 +2,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLFormDB import FLFormDB
@@ -14,7 +15,7 @@ except NameError:
     # Python 3
     QString = str
 
-class FLAccessControlFactory():
+class FLAccessControlFactory(ProjectClass):
     
     @decorators.BetaImplementation
     def create(self, type_):

@@ -1,5 +1,6 @@
 from PyQt5.Qt import QDomDocument, QProgressDialog
 
+from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLAccessControlFactory import FLAccessControlFactory
