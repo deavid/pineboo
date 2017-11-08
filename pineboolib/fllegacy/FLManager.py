@@ -54,12 +54,12 @@ class FLManager(ProjectClass):
     def __init__(self, db):
         super(FLManager,self).__init__()
         self.db_ = db
-        self.cacheMetaData_ = []
-        self.cacheAction_ = []
-        self.cacheMetaDataSys_ = None
         self.listTables_ = []
         self.dictKeyMetaData_ = {}
         self.initCount_ = 0
+        self.cacheMetaData_ = []
+        self.cacheMetaDataSys_ = []
+        self.cacheAction_ = []
         QtCore.QTimer.singleShot(100, self.init)
         
         
@@ -183,7 +183,6 @@ class FLManager(ProjectClass):
             stream = None
             
             isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
-            
             if not isSysTable:
                 stream = self.db_.managerModules().contentCached("%s.mtd" % key)
                 
@@ -192,14 +191,20 @@ class FLManager(ProjectClass):
                     
                     return False
             
-                if not key:
-                    key = n
+            #    if not key:
+            #        key = n
             
             
-            if self.cacheMetaData_ and not isSysTable:
-                ret = self.cacheMetaData_.find(key)
-            elif self.cacheMetaDataSys_ and isSysTable:
-                ret = self.cacheMetaDataSys_.find(key)
+            if not isSysTable:
+                for fi in self.cacheMetaData_:
+                    if fi.name() == key:
+                        ret = fi
+                        break
+            elif isSysTable:
+                for fi in self.cacheMetaDataSys_:
+                    if fi.name() == key:
+                        ret = fi
+                        break
             
             if not ret:
                 if isSysTable:
@@ -221,15 +226,13 @@ class FLManager(ProjectClass):
                     return False
                 
                 
-                if self.cacheMetaData_ and not isSysTable and not ret.isQuery():
-                    ret.setInCache()
-                    self.cacheMetaData_.insert(key, ret)
-                elif self.cacheMetaDataSys_ and isSysTable:
-                    ret.setInCache()
-                    self.cacheMetaDataSys_.insert(key, ret)
+                if not isSysTable and not ret.isQuery():
+                    self.cacheMetaData_.append(ret)
+                elif isSysTable:
+                    self.cacheMetaDataSys_.append(ret)
             
             else:
-                acl = aqApp.acl()
+                acl = self._prj.acl()
             
             if ret.fieldsNamesUnlock():
                 ret = FLTableMetaData(ret)
@@ -245,29 +248,7 @@ class FLManager(ProjectClass):
                 throwMsgWarning(self.db_, msg)
                     
             return ret
-                    
-        
-        
-        
-            """
-            name = "%s" % n
 
-         
-            for metadata in self.cacheMetaData_:
-                if metadata.name() ==name:
-                    return metadata
-        
-            new = FLTableMetaData(name)
-        
-            if not len(new.fieldList()):
-                return None
-        
-        
-            self.cacheMetaData_.append(new)
-            for metadataN in self.cacheMetaData_:
-                if metadataN.name() == name:
-                    return metadataN
-            """
         else:
             #QDomDoc
             name = None
