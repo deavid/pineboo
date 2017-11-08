@@ -2,8 +2,10 @@
 
 #Completa Si
 
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib import decorators
+from pineboolib.flcontrols import ProjectClass
+
+from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLFieldMetaDataList import FLFieldMetaDataList
 
 
@@ -18,7 +20,7 @@ es decir objetos FLFieldMetaData.
 
 """
 
-class FLCompoundkey():
+class FLCompoundKey(ProjectClass):
     
     """
     Lista de con los metadatos de los campos que componen la clave
@@ -26,6 +28,7 @@ class FLCompoundkey():
     fieldList_ = []
     
     def __init__(self, other = None):
+        super(FLCompoundKey, self).__init__()
         self.fieldList_ = []
         if other:
             self.copy(other)
@@ -67,9 +70,9 @@ class FLCompoundkey():
         return self.fieldList_
 
 
-    @decorators.BetaImplementation
+
     def copy(self, other):
-        if self == other:
+        if self is other:
             return
-        self.fieldList_ = other.fieldList_
+        self.fieldList_ = copy.copy(other.fieldList_)
     
