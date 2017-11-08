@@ -2312,7 +2312,8 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_ = QtWidgets.QTextEdit(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setTabChangesFocus(True)
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7) ,QtWidgets.QSizePolicy.Policy(0))
+            self.editor_.setMinimumHeight(80)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding ,QtWidgets.QSizePolicy.Expanding)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
             #ted.setTexFormat(self.textFormat_)
@@ -2869,17 +2870,17 @@ class FLFieldDB(QtWidgets.QWidget):
                 return
             
             fSN = self.fieldMapValue_.fieldName()
-            field = self.tMD.field(self.fieldName_)
+            field = tMD.field(self.fieldName_)
             fieldSender = tMD.field(fSN)
             
             if not field or not fieldSender:
                 return
             
             if field.relationM1():
-                if not feld.relationM1().foreignTable() == tMD.name():
+                if not field.relationM1().foreignTable() == tMD.name():
                     mng = self.cursor_.db().manager()
                     rt = field.relationM1().foreignTable()
-                    fF = self.fieldMapValue_.foreignTable()
+                    fF = self.fieldMapValue_.foreignField()
                     q = FLSqlQuery(None, self.cursor_.db().connectionName())
                     q.setForwardOnly(True)
                     q.setTablesList(rt)
