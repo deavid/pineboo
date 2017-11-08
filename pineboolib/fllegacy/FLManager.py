@@ -5,7 +5,7 @@ from PyQt5.Qt import QDomDocument, qWarning
 
 from pineboolib import decorators, qsatype
 from pineboolib.flcontrols import ProjectClass
-from pineboolib.utils import filedir
+from pineboolib.utils import filedir, auto_qt_translate_text
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
@@ -118,13 +118,13 @@ class FLManager(ProjectClass):
         
         
         if not self.cacheMetaData_:
-            self.cacheMetaData_ = {}
+            self.cacheMetaData_ = []
         
         if not self.cacheAction_:
-            self.cacheAction_ = {}
+            self.cacheAction_ = []
         
         if not self.cacheMetaDataSys_:
-            self.cacheMetaDataSys_ = {}
+            self.cacheMetaDataSys_ = []
             
         
         
@@ -189,7 +189,7 @@ class FLManager(ProjectClass):
                 stream = self.db_.managerModules().contentCached("%s.mtd" % key)
                 
                 if not stream:
-                    qWarning("FLManager :", util.tr("Error al cargar los metadatos para la tabla %1").arg(n))
+                    qWarning("FLManager : Error al cargar los metadatos para la tabla %s" % n)
                     
                     return False
             
@@ -238,7 +238,7 @@ class FLManager(ProjectClass):
             if acl:
                 acl.process(ret)
                 
-            if not quick and not isSysTable and aqApp.consoleShown() and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
+            if not quick and not isSysTable and self._prj.consoleShown() and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
                 msg = util.tr("La estructura de los metadatos de la tabla '%1' y su "
                   "estructura interna en la base de datos no coinciden. "
                   "Debe regenerar la base de datos.").arg(n)
@@ -299,7 +299,7 @@ class FLManager(ProjectClass):
                         continue
                     
                     if e.tagName() == "alias":
-                        a = e.text()[30:len(e.text()) - 32]
+                        a = auto_qt_translate_text(e.text())
                         a = util.translate("Metadata", a)
                         no = no.nextSibling()
                         continue
@@ -369,10 +369,12 @@ class FLManager(ProjectClass):
             aBy = None
             
             for it in assocs:
-                aWith = it
-                ++it
-                aBy = it
-                tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
+                if not aWith:
+                    aWith = it
+                    continue
+                if not aBy:
+                    aBy = it
+                    tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
             
             if q and not quick:
                 qry = self.query(q, tmd)
@@ -385,8 +387,12 @@ class FLManager(ProjectClass):
                     fieldsEmpty = (not fields)
                 
                     for it in fL:
-                        table = it.section(".", 0, 0)
-                        field = it.section(".", 1, 1)
+                        pos = it.find(".")
+                        if pos > -1:
+                            table = it[:pos]
+                            field = it[:pos]
+                        else:
+                            field = it
                     
                         if not (not fieldsEmpty and table == name and fields.find(field.lower())) == fields.end():
                             continue
@@ -403,7 +409,7 @@ class FLManager(ProjectClass):
                             
                                 newRef = (not isForeignKey)
                                 fmtdAuxName = fmtdAux.name().lower()
-                                if fmtd.find(".") < 0:
+                                if fmtdAuxName.find(".") == -1:
                                     fieldsAux = tmd.fieldsNames().split(",")
                                     if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
                                         if not isForeignKey:
@@ -414,7 +420,7 @@ class FLManager(ProjectClass):
                             
                                 if newRef:
                                     fmtdAux.ref()
-                            
+                                
                                 tmd.addFieldMD(fmtdAux)
                     
                     qry.deleteLater()
@@ -771,7 +777,7 @@ class FLManager(ProjectClass):
         ck = False
         n = None
         a = None
-        ol = []
+        ol = False
         rX = None
         assocBy = None
         assocWith = None
@@ -810,7 +816,7 @@ class FLManager(ProjectClass):
                     continue
                 
                 if e.tagName() == "alias":
-                    a = e.text()[30:len(e.text()) - 32]
+                    a = auto_qt_translate_text(e.text())
                     no = no.nextSibling()
                     continue
                 
@@ -832,7 +838,7 @@ class FLManager(ProjectClass):
                     elif e.text() == "bool":
                         t = "bool"
                     elif e.text() == "double":
-                        t = "bouble"
+                        t = "double"
                     elif e.text() == "time":
                         t = "time"
                     elif e.text() == "date":
@@ -843,6 +849,8 @@ class FLManager(ProjectClass):
                         t = "bytearray"
                     elif e.text() == "string":
                         t = "string"
+                    elif e.text() == "stringlist":
+                        t = "stringlist"
                     elif e.text() == "unlock":
                         t = "unlock"
                     elif e.text() == "serial":
@@ -862,7 +870,7 @@ class FLManager(ProjectClass):
                 
                 if e.tagName() == "default":
                     if e.text().find("QT_TRANSLATE_NOOP") > -1:
-                        dV = e.text()[30:len(e.text()) - 32]
+                        dV = auto_qt_translate_text(e.text())
                     else:
                         dV = e.text()
                     
@@ -899,7 +907,7 @@ class FLManager(ProjectClass):
                     no = no.nextSibling()
                     continue
                 
-                if e.tagName() == "visiblegird":
+                if e.tagName() == "visiblegrid":
                     vG = (e.text() == "true")
                     no = no.nextSibling()
                     continue
@@ -935,12 +943,12 @@ class FLManager(ProjectClass):
                     continue
                 
                 if e.tagName() == "optionslist":
-                    ol = (e.text() == "true")
+                    ol = e.text()
                     no = no.nextSibling()
                     continue
                 
                 if e.tagName() == "searchoptions":
-                    so = (e.text() == "true")
+                    so = e.text()
                     no = no.nextSibling()
                     continue
             
@@ -1034,7 +1042,7 @@ class FLManager(ProjectClass):
                     continue
                 
                 if e.tagName() == "field":
-                    fT = e.text()
+                    fF = e.text()
                     no = no.nextSibling()
                     continue
                 
