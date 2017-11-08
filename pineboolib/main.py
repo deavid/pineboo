@@ -74,7 +74,12 @@ class Project(object):
     """
     def singleFLLarge(self):
         return True
-        
+    
+    """
+    Retorna si hay o no acls cargados
+    """
+    def acl(self):
+        return False
 
     def load_db(self, dbname, host, port, user, passwd, driveralias):
         self.dbserver = DBServer()
@@ -146,6 +151,7 @@ class Project(object):
             
         #Se verifica que existen estas tablas
         self.conn.manager().createSystemTable("flareas")
+        self.conn.manager().createSystemTable("flmodules")
         self.conn.manager().createSystemTable("flfiles")
         
         util = FLUtil()
