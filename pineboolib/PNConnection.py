@@ -370,3 +370,11 @@ class PNConnection(QtCore.QObject):
             return False
         return True  
     
+    def mismatchedTable(self, tablename, tmd):
+        if not self.db():
+            return None
+        
+        return self.driver().mismatchedTable(tablename, tmd, self)
+        
+        
+    
