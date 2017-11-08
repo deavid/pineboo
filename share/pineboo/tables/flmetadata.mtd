@@ -14,7 +14,7 @@
 	
 	<field>
 		<name>xml</name>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Descripción XML")</alias>
+		<alias>QT_TRANSLATE_NOOP("MetaData","DescripciÃ³n XML")</alias>
 		<null>true</null>
 		<pk>false</pk>
 		<type>stringlist</type>

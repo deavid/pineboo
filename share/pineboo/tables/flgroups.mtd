@@ -26,7 +26,7 @@
 	
 	<field>
 		<name>descripcion</name>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Descripción")</alias>
+		<alias>QT_TRANSLATE_NOOP("MetaData","DescripciÃ³n")</alias>
 		<null>true</null>
 		<pk>false</pk>
 		<type>string</type>
