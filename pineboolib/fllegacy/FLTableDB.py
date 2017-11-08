@@ -829,7 +829,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.tableRecords_.installEventFilter(self)
 
         self.setLayout(self.masterLayout)
-        self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+        #self.setTabOrder(self.tableRecords_, self.lineEditSearch)
         self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
         self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
         self.tableRecords_.recordChoosed.connect(self.currentChanged)
