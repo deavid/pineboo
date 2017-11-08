@@ -80,6 +80,10 @@ class Project(object):
     """
     def acl(self):
         return False
+    
+    
+    def consoleShown(self):
+        return True
 
     def load_db(self, dbname, host, port, user, passwd, driveralias):
         self.dbserver = DBServer()
