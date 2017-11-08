@@ -57,10 +57,9 @@ class FLManager(ProjectClass):
         self.cacheMetaData_ = []
         self.cacheAction_ = []
         self.cacheMetaDataSys_ = None
-        self.listTables_ = None
+        self.listTables_ = []
         self.dictKeyMetaData_ = {}
         self.initCount_ = 0
-        
         QtCore.QTimer.singleShot(100, self.init)
         
         
@@ -529,38 +528,40 @@ class FLManager(ProjectClass):
     """
     def existsTable(self,  n, cache = True):
         
-        if not self.db_:
-            return False
-        if not self.db_.dbAux():
-            return False
-        if n == None:
-            return False
+        #if not self.db_:
+        #    return False
         
-        if cache and self.listTables_:
+        #if n == None:
+        #    return False
+        
+        #if cache and self.listTables_:
             
-            for name in self.listTables_:
-                if name == n:
-                    return True
+        #    for name in self.listTables_:
+        #        if name == n:
+        #            return True
             
-            return False
-        else:
-            return self.db_.existsTable(n)
+        #    return False
+        #else:
+        #    return self.db_.existsTable(n)
         
         
-        
-        
+    
         #if cache:
         #    modId = self.db_.managerModules().idModuleOfFile(n +".mtd")
-        #    return os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
-        
-        
-        #q = FLSqlQuery()
-        #sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
-        #q.setTablesList(n)
-        #q.setSelect("*")
-        #q.setFrom(n)
-        #q.setWhere("1 = 1 LIMIT 1")
-        #return q.exec_()
+        #    res = os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
+        #    if res == False:
+        #        res == os.path.exists(filedir("../share/pineboo/tables/%s.mtd" %(n)))
+            
+        #    return res
+                
+        #else:
+        q = FLSqlQuery()
+        sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
+        q.setTablesList(n)
+        q.setSelect("*")
+        q.setFrom(n)
+        q.setWhere("1 = 1 LIMIT 1")
+        return q.exec_()
     
     """
     Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
@@ -608,15 +609,18 @@ class FLManager(ProjectClass):
             return False
         
         if isinstance(n_or_tmd, str):
-            n_or_tmd = self.metadata(n_or_tmd)
-            if not n_or_tmd:
+            tmd = self.metadata(n_or_tmd)
+            if not tmd:
                 return False
             
-            if self.existsTable(n_or_tmd.name()):
-                self.listTables_.append(n)
-                return n_or_tmd
-            
-            return self.createTable(n_or_tmd)
+            if self.existsTable(tmd.name()):
+                self.listTables_.append(n_or_tmd)
+                return tmd
+            else:
+                qWarning("FLMAnager :: No existe tabla %s" % n_or_tmd)
+
+
+            return self.createTable(tmd)
         else:
             if n_or_tmd.isQuery() or self.existsTable(n_or_tmd.name(), False):
                 return n_or_tmd
