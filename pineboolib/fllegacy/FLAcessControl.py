@@ -174,6 +174,7 @@ class FLAccessControl(ProjectClass):
 
     @param e Elemento correspondiente al nodo DOM que se utilizará para definir la regla.
     """
+    @decorators.NotImplementedWarn
     def set(self, e):
         pass
   
@@ -183,6 +184,7 @@ class FLAccessControl(ProjectClass):
 
     @param d Documento DOM/XML donde se insertará el nodo construido a partir de la regla de control de acceso.
     """
+    @decorators.NotImplementedWarn
     def get(self, d):
         pass
     
@@ -194,6 +196,7 @@ class FLAccessControl(ProjectClass):
 
     @param acos Lista de cadenas de texto con los objetos y permisos.
     """
+    @decorators.NotImplementedWarn
     def setAcos(self ,acos):
         pass
   
@@ -205,6 +208,7 @@ class FLAccessControl(ProjectClass):
 
     @return Lista de cadenas de texto con los objetos y permisos.
     """
+    @decorators.NotImplementedWarn
     def getAcos(self):
         pass
 
