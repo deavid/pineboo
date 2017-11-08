@@ -361,20 +361,23 @@ class PNConnection(QtCore.QObject):
         if not sql:
             return False
         
-        q = FLSqlQuery(None, self.dbAux())
+        q = self.cursor()
         try:
-            q.exec_(sql)
-        except Exception:
+            q.execute(sql)
+            q.execute("COMMIT")
+        except:
             qWarning(traceback.format_exc())
-            qWarning("PNConnection.CreateTable : SQL -", sql)
+            q.execute("ROLLBACK")
             return False
-        return True  
+        
+        return True
     
     def mismatchedTable(self, tablename, tmd):
         if not self.db():
             return None
         
         return self.driver().mismatchedTable(tablename, tmd, self)
+    
         
         
     
