@@ -1,25 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from builtins import str
-import os
+
 from PyQt5 import QtWidgets, QtCore, uic
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
 from pineboolib.utils import filedir
 from pineboolib.PNSqlDrivers import PNSqlDrivers
 
-# MODIFICACION 1 PARA CONECTOR SQLITE : Using Python's SQLite Module: self-contained, serverless, zero-configuration and transactional. It is very fast and lightweight, and the entire database is stored in a single disk file.
+from builtins import str
 import sqlite3
+import os, sys
 
-# MODIFICACION 2 PARA CONECTOR SQLITE :añado librerías de conexión con qt5: SÓLO RENOMBRO LOS DE QT4
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-import sys
-
-# MODIFICACION 3 PARA CONECTOR SQLITE :añado debugging modulo PARA VER LOS PASOS: sirve cuando activas esto:
-        # DEBUGGING:
-        # pdb.set_trace()
-        # print ("escribe `n´(next) para continuar / `q´(quit) para salir / `c´ para seguir sin debugg")
-import pdb
 
 class DlgConnect(QtWidgets.QWidget):
     ruta = ""
