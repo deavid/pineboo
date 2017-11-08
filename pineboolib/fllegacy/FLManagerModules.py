@@ -157,9 +157,8 @@ class FLManagerModules(ProjectClass):
     @param pN Ruta y nombre del fichero en el sistema de ficheros
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    def contentFS(self, pN):
-        file_ = open(pN,'r')
-        return file_.read()
+    def contentFS(self, pN):     
+        return str(open(pN,"rb").read(),"ISO-8859-15")
 
     """
     Obtiene el contenido de un fichero, utilizando la caché de memoria y disco.
@@ -196,7 +195,7 @@ class FLManagerModules(ProjectClass):
             data = self.contentFS(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
         else:
             data = self.content(n)
-        return data.encode("UTF-8")
+        return data
 
     """
     Almacena el contenido de un fichero en un módulo dado.
