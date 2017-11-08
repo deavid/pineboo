@@ -711,31 +711,7 @@ class FLTableMetaData(ProjectClass):
         if other == self:
             return
      
-        self.d = copy.copy(other.d)
-        
-        """
-        if od.compoundKey_:
-            self.d.compoundKey_ = od.compoundKey_
-        
-        self.d.clearFieldList()
-        
-        self.d.fieldList_ = od.fieldList_
-        
-        self.d.name_ = od.name_
-        self.d.alias_ = od.alias_
-        self.d.query_ = od.query_
-        self.d.fieldsNames_ = od.fieldsNames_
-        self.d.aliasFieldMap_ = od.aliasFieldMap_
-        self.d.fieldAliasMap_ = od.fieldAliasMap_
-        self.d.fieldsNamesUnlock_ = od.fieldsNamesUnlock_
-        self.d.primaryKey_ = od.primaryKey_
-        self.d.concurWarn_ = od.concurWarn_
-        self.d.detectLocks_ = od.detectLocks_
-
-        #for it2 in od.fieldList_.values():
-        #    if not od.fieldList_[it2].d.associatedFieldName_.isEmpty():
-        #        od.fieldList_[it2].d.associatedField_ = self.field(od.fieldList_[it2].d.associatedFieldName_)
-        """        
+        self.d = copy.copy(other.d)    
     
 
     def indexFieldObject(self, position):
@@ -841,16 +817,18 @@ class FLTableMetaDataPrivate():
   
   
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, n = None, a = None, q = None):
         self.fieldList_ = []
         self.fieldsNamesUnlock_ = []
+        self.aliasFieldMap_ = {}
+        self.fieldAliasMap_ = {}
         #print("Vaciando field list ahora",  len(self.fieldList_))
-        if len(args) == 0:
+        if n == None:
             self.inicializeFLTableMetaDataPrivate()
-        elif len(args) == 1:
-            self.inicializeFLTableMetaDataPrivateS(args[0])
+        elif n and not a and not q:
+            self.inicializeFLTableMetaDataPrivateS(n)
         else:
-            self.inicializeNewFLTableMetaDataPrivate(args[0],args[1],args[2],args[3])    
+            self.inicializeNewFLTableMetaDataPrivate(n, a, q)    
         self.count_ = self.count_ + 1
 
         
@@ -912,12 +890,15 @@ class FLTableMetaDataPrivate():
         if not f:
             return
         
-        alias = str(f.alias())
-        field = str(f.name().lower())
+        alias = f.alias()
+        field = f.name().lower()
         
-        if alias in self.aliasFieldMap_.keys():
-            alias += "(%s)" % str(len(self.aliasFieldMap_) + 1)
-        
+        for aliasF in self.aliasFieldMap_:
+            if aliasF == alias:
+                alias = "%s(%s)" % (alias, str(len(self.aliasFieldMap_) + 1))
+                break
+            
+            
         f.d.alias_ = alias
         
         self.aliasFieldMap_[ alias ] = field
