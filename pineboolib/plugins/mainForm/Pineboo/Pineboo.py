@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
+from PyQt5 import QtCore, QtGui, QtWidgets, uic
 
 from builtins import range
 import traceback
 import os.path
 from binascii import unhexlify
 
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+
 Qt = QtCore.Qt
 
 from pineboolib.utils import filedir, Struct
 
-class MainForm(QtWidgets.QWidget):
+class MainForm(QtWidgets.QMainWindow):
     areas = []
     toolBoxs = []
     tab = 0
@@ -18,6 +19,10 @@ class MainForm(QtWidgets.QWidget):
     areasTab = None
     formTab = None
     debugLevel = 100
+    dockAreas = None
+    dockAreasTab = None
+    dockFavoritos = None
+    dockForm = None
     
     @classmethod
     def setDebugLevel(self, q):
@@ -33,13 +38,38 @@ class MainForm(QtWidgets.QWidget):
         self.move(frameGm.topLeft())
         
         
-        self.areasTab = self.ui.areasTab
+        self.areasTab = QtWidgets.QTabWidget()
+        self.areasTab.setTabPosition(QtWidgets.QTabWidget.West)
+        self.formTab = QtWidgets.QTabWidget()
         try:
             self.areasTab.removeItem = self.areasTab.removeTab
             self.areasTab.addItem = self.areasTab.addTab
         except Exception: pass
-        self.areasTab.removeItem(0) #Borramos tab de ejemplo.
-        self.formTab = self.ui.formTab
+        
+        self.dockAreasTab = QtWidgets.QDockWidget()
+        self.dockAreas = QtWidgets.QDockWidget()
+        self.dockFavoritos = QtWidgets.QDockWidget()
+        self.dockForm = QtWidgets.QDockWidget()
+        
+        self.dockAreasTab.setWidget(self.areasTab)
+        self.dockAreasTab.setMaximumWidth(400)
+        self.dockAreasTab.setMinimumWidth(400)
+        self.dockAreasTab.setMaximumHeight(500)
+
+        
+        
+        
+        self.dockForm.setWidget(self.formTab)
+        
+        
+        
+        self.addDockWidget(Qt.RightDockWidgetArea, self.dockForm)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dockAreasTab)
+        #self.dockAreasTab.show()
+        #self.dockForm.show()
+        
+        #self.areasTab.removeItem(0) #Borramos tab de ejemplo.
+        
         self.formTab.setTabsClosable(True)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.formTab.tabCloseRequested[int].connect(self.closeFormTab)
@@ -54,8 +84,8 @@ class MainForm(QtWidgets.QWidget):
         app_icon.addFile(filedir('icons/pineboo-logo-256.png'), QtCore.QSize(256,256))
         self.setWindowIcon(app_icon)
         
+        
         self.setWindowTitle("Pineboo")
-
 
 
     def closeFormTab(self, numero):
