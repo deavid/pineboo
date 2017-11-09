@@ -583,6 +583,7 @@ class XMLAction(XMLStruct):
         # ... construido antes que cualquier widget)
         w = self.prj.main_window
         #self.mainform_widget.init()
+        self.mainform_widget = FLMainForm(w,self, load = True)    
         w.addFormTab(self)
         #self.mainform_widget.show()
 
