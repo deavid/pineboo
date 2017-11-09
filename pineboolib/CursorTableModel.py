@@ -401,7 +401,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
             
             return
-
+        
+        if not self.tableMetadata():
+            return
+        
         for n,field in enumerate(self.tableMetadata().fieldList()):
             #if field.visibleGrid():
             #    sql_fields.append(field.name())
