@@ -53,7 +53,9 @@ class MainForm(QtWidgets.QWidget):
         app_icon.addFile(filedir('icons/pineboo-logo-128.png'), QtCore.QSize(128,128))
         app_icon.addFile(filedir('icons/pineboo-logo-256.png'), QtCore.QSize(256,256))
         self.setWindowIcon(app_icon)
+        
         self.setWindowTitle("Pineboo")
+
 
 
     def closeFormTab(self, numero):
