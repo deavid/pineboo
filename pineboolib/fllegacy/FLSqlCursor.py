@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
-
-from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators, fllegacy
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.utils import DefFun
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import qWarning
 from PyQt5.QtCore import QVariant, QDate
 
+from pineboolib import decorators, fllegacy
+
+from pineboolib.utils import DefFun, XMLStruct
+from pineboolib.CursorTableModel import CursorTableModel
+from pineboolib.flcontrols import ProjectClass
+
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
-
-from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.utils import XMLStruct
+from pineboolib.fllegacy.FLAction import FLAction
 
-import hashlib, traceback, weakref
-import copy
-from PyQt5.Qt import qWarning
-try:
-    QString = unicode
-except NameError:
+import hashlib, traceback, weakref, copy
+
+
+#try:
+#    QString = unicode
+#except NameError:
     # Python 3
-    QString = str
+#QString = str
 
 class Struct(object):
     pass
@@ -109,14 +109,7 @@ class PNBuffer(ProjectClass):
 
 
     def isGenerated(self, name):
-        curName = self.cursor_.d.curName_
-        field = self.cursor_.d.db_.manager().metadata(curName).field(name)
-        if not field:
-            retorno = True
-        else:
-            retorno = field.generated()
-            
-        return retorno
+        return self.cursor_.metadata().field(name).generated()
 
 
     def clearValues(self, b):
@@ -134,17 +127,16 @@ class PNBuffer(ProjectClass):
 
     def isNull(self, n):
         if isinstance(n, str):
-            for field in  self.fieldList_:
-                if field.name == n:                
-                    if field.value == None:
-                        return True
-                    else:
-                        return False
+            if self.value(n) == None:
+                return True
+            else:
+                return False
+            
         else:
             i = 0
             for field in self.fieldList_:
                 if i == n:
-                    if field.value == None:
+                    if self.value(field.name) == None:
                         return True
                     else:
                         return False
@@ -814,7 +806,8 @@ class FLSqlCursor(ProjectClass):
     @return  Objeto FLAction
     """
     def action(self):
-        return self._action
+        action = FLAction(self._action)
+        return str(action.name())
 
     def actionName(self):
         return self.d.curName_
@@ -2961,7 +2954,7 @@ class FLSqlCursor(ProjectClass):
             if v and not isinstance(v ,bool):
                 return False
             
-            fieldList = self.d.metadata_.fieldListObject()
+            fieldList = self.d.metadata_.fieldList()
             
             for field in fieldList:
                 
