@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
 from pineboolib import decorators
 
+from pineboolib.flcontrols import ProjectClass
 
-class FLAction():
+
+class FLAction(ProjectClass):
 
     """
     Esta clase contiene información de acciones para abrir formularios.
@@ -17,7 +18,7 @@ class FLAction():
     """
     Nombre de la accion
     """
-    name_ = None
+    name = None
 
     """
     Nombre del script asociado al formulario de edición de registros
@@ -60,9 +61,10 @@ class FLAction():
     """
     constructor.
     """
-    def __init__(self):
-        print("Init FLAction")
-        
+    def __init__(self, name = None):
+        super(FLAction, self).__init__()
+        if name:
+            self.setName(name)
     """
     Establece el nombre de la accion
     """
