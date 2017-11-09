@@ -74,7 +74,16 @@ class Project(object):
     """
     def singleFLLarge(self):
         return True
-        
+    
+    """
+    Retorna si hay o no acls cargados
+    """
+    def acl(self):
+        return False
+    
+    
+    def consoleShown(self):
+        return True
 
     def load_db(self, dbname, host, port, user, passwd, driveralias):
         self.dbserver = DBServer()
@@ -146,6 +155,7 @@ class Project(object):
             
         #Se verifica que existen estas tablas
         self.conn.manager().createSystemTable("flareas")
+        self.conn.manager().createSystemTable("flmodules")
         self.conn.manager().createSystemTable("flfiles")
         
         util = FLUtil()
@@ -573,6 +583,7 @@ class XMLAction(XMLStruct):
         # ... construido antes que cualquier widget)
         w = self.prj.main_window
         #self.mainform_widget.init()
+        self.mainform_widget = FLMainForm(w,self, load = True)    
         w.addFormTab(self)
         #self.mainform_widget.show()
 

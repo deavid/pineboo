@@ -2,6 +2,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLFormDB import FLFormDB
@@ -14,7 +15,7 @@ except NameError:
     # Python 3
     QString = str
 
-class FLAccessControlFactory():
+class FLAccessControlFactory(ProjectClass):
     
     @decorators.BetaImplementation
     def create(self, type_):
@@ -84,7 +85,7 @@ class FLAccessControlMainWindow():
         
         it = Qtcore.QdictIterator(self.acosPerms_)
         for i in range(len(it.current())):
-            a = mw.child(if.currentKey(), "QAction")
+            a = mw.child(it.currentKey(), "QAction")
             if a:
                 perm = it
                 if perm == "-w" || perm == "--":

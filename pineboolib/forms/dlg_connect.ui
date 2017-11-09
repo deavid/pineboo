@@ -81,11 +81,6 @@
              </item>
              <item>
               <widget class="QTableWidget" name="tableWidget">
-               <row>
-                <property name="text">
-                 <string>New Row</string>
-                </property>
-               </row>
                <column>
                 <property name="text">
                  <string>1</string>
@@ -126,33 +121,6 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_2">
                <item>
-                <widget class="QLabel" name="label_Fila">
-                 <property name="text">
-                  <string>Fila elegida :</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="leFila">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <spacer name="horizontalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
                 <widget class="QPushButton" name="pbnCargarDatos">
                  <property name="text">
                   <string>Cargar Proyecto</string>
@@ -172,11 +140,6 @@
            </widget>
           </item>
          </layout>
-         <zorder>groupBox</zorder>
-         <zorder>tableWidget</zorder>
-         <zorder>pbnCargarDatos</zorder>
-         <zorder>pbnBorrarProyecto</zorder>
-         <zorder>groupBox_3</zorder>
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
@@ -193,6 +156,12 @@
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
                 <widget class="QLabel" name="lDescription">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Description</string>
                  </property>
@@ -207,6 +176,12 @@
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
                 <widget class="QLabel" name="label_DBName">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Database Name</string>
                  </property>
@@ -221,13 +196,26 @@
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
                 <widget class="QLabel" name="label_8">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Driver SQL</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="cBDrivers"/>
+                <widget class="QComboBox" name="cBDrivers">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -235,6 +223,12 @@
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
                 <widget class="QLabel" name="label_Host">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Host</string>
                  </property>
@@ -249,6 +243,12 @@
               <layout class="QHBoxLayout" name="horizontalLayout_7">
                <item>
                 <widget class="QLabel" name="label_Port">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Port</string>
                  </property>
@@ -263,6 +263,12 @@
               <layout class="QHBoxLayout" name="horizontalLayout_8">
                <item>
                 <widget class="QLabel" name="label_User">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Username</string>
                  </property>
@@ -277,6 +283,12 @@
               <layout class="QHBoxLayout" name="horizontalLayout_9">
                <item>
                 <widget class="QLabel" name="label_Password">
+                 <property name="minimumSize">
+                  <size>
+                   <width>120</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>Password</string>
                  </property>

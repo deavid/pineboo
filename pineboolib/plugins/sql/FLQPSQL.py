@@ -1,6 +1,5 @@
 import sys
 from PyQt5.QtCore import QTime
-from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy.FLUtil import FLUtil
@@ -308,8 +307,8 @@ class FLQPSQL(object):
                 unlocks = unlocks + 1
         
         if unlocks > 1:
-            qWarning("FLManager : " + QApplication.tr("No se ha podido crear la tabla ") + tmd.name())
-            qWarning("FLManager : " + QApplication.tr("Hay más de un campo tipo unlock. Solo puede haber uno."))
+            qWarning(u"FLManager : No se ha podido crear la tabla " +  tmd.name())
+            qWarning(u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
             return None
         
         i = 1
@@ -374,7 +373,21 @@ class FLQPSQL(object):
         sql = sql + ")"
         
         return sql
-                
+    
+    def mismatchedTable(self, table1, tmd_or_table2, db_):
+        if isinstance(tmd_or_table2, str):
+            mtd = db_.manager().metadata(tmd_or_table2, True)
+            if not mtd:
+                return False
+            
+            return False
+            
+            
+            
+            
+        
+        else:
+            return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
                 
         
         

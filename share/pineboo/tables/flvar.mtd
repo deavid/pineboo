@@ -25,7 +25,7 @@
 	
 	<field>
 		<name>idsesion</name>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Identificador de la sesión")</alias>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Identificador de la sesiÃ³n")</alias>
 		<null>false</null>
 		<pk>false</pk>
 		<ck>true</ck>

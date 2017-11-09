@@ -2,22 +2,23 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
+from PyQt5.Qt import QValidator
+
 from pineboolib import decorators
+from pineboolib.utils import DefFun, filedir
+from pineboolib.flcontrols import QComboBox, QTable
+
 from pineboolib.fllegacy.FLDataTable import FLDataTable, FLCheckBox
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-#from pineboolib.qsatype import QDateEdit as QDateEdit
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.flcontrols import QComboBox
 from pineboolib.fllegacy.FLFieldDB import FLLineEdit, FLDoubleValidator,\
     FLUIntValidator, FLIntValidator, FLSpinBox, FLDateEdit, FLTimeEdit
 
-from pineboolib.utils import DefFun, filedir
-from pineboolib.flcontrols import QTable
+
 
 DEBUG = False
 
@@ -829,7 +830,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.tableRecords_.installEventFilter(self)
 
         self.setLayout(self.masterLayout)
-        self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+        #self.setTabOrder(self.tableRecords_, self.lineEditSearch)
         self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
         self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
         self.tableRecords_.recordChoosed.connect(self.currentChanged)
@@ -941,7 +942,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.tdbFilter.setNumCols(5)
             
             _notVisibles = 0
-            for f in tMD.fieldListObject():
+            for f in tMD.fieldList():
                 if not f.visibleGrid():
                     _notVisibles = _notVisibles + 1
                     

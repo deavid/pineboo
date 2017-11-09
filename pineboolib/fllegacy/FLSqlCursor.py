@@ -18,6 +18,7 @@ from pineboolib.utils import XMLStruct
 
 import hashlib, traceback, weakref
 import copy
+from PyQt5.Qt import qWarning
 try:
     QString = unicode
 except NameError:
@@ -705,9 +706,9 @@ class FLSqlCursor(ProjectClass):
 
         if name:
             if not self.db().manager().existsTable(name):
-                self.d.metadata_ = self.d.db_.manager().createTable(name)
+                self.d.metadata_ = self.db().manager().createTable(name)
         else:
-            self.d.metadata_ = self.d.db_.manager().metadata(name)
+            self.d.metadata_ = self.db().manager().metadata(name)
         self.d.cursorRelation_ = cR
         if r: # FLRelationMetaData
             if self.d.relation_ and self.d.relation_.deref():
@@ -782,8 +783,8 @@ class FLSqlCursor(ProjectClass):
     @return Objeto FLTableMetaData con los metadatos de la tabla asociada al cursor
     """
     def metadata(self):
-        #if not self.d.metadata_:
-            #print("FLSqlCursor(%s) Esta devolviendo un metadata vacio" % self.d.curName_)
+        if not self.d.metadata_:
+            qWarning("FLSqlCursor(%s) Esta devolviendo un metadata vacio" % self.curName())
         return self.d.metadata_
 
     """
@@ -1484,7 +1485,7 @@ class FLSqlCursor(ProjectClass):
         if self.d.modeAccess_ == self.Insert or self.d.modeAccess_ == self.Edit:
             if not self.isModifiedBuffer() and self.d.modeAccess_ == self.Edit:
                 return msg
-            fieldList = self.d.metadata_.fieldListObject()
+            fieldList = self.metadata().fieldList()
             checkedCK = False
             
             if not fieldList:
@@ -1602,7 +1603,7 @@ class FLSqlCursor(ProjectClass):
                         if not tMD.inCache():
                             del tMD
                 
-                fieldListCK = self.d.metadata_.fieldListOfCompoundKey(fiName)
+                fieldListCK = self.metadata().fieldListOfCompoundKey(fiName)
                 if fieldListCK and not checkedCK and self.d.modeAccess_ == self.Insert:
                     if fieldListCK:
                         filter = None
@@ -1613,7 +1614,7 @@ class FLSqlCursor(ProjectClass):
                             if filter == None:
                                 filter = self.d.db_.manager().formatAssignValue(fieldCK, sCK, True)
                             else:
-                                filter = "%s AND %s" % (filter, self.d.db_.manager().formatAssignValue(FieldCK, sCK, True))
+                                filter = "%s AND %s" % (filter, self.d.db_.manager().formatAssignValue(fieldCK, sCK, True))
                             if field == None:
                                 field = fieldCK.alias()
                             else:
@@ -1632,13 +1633,13 @@ class FLSqlCursor(ProjectClass):
                         q.exec_()
                         if q.next():
                             #msg = msg + "\n" + fields + FLUtil.tr(" : Requiere valor único, y ya hay otro registro con el valor %1").arg(valuesFields)
-                            msg = msg + "\n" + fields + " : Requiere valor único, y ya hay otro registro con el valor %s" % valuesFields
+                            msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s" % (field, valuesFields)
                         
                         checkedCK = True
                 
         
         elif self.d.modeAccess_ == self.Del:
-            fieldList = self.d.metadata_.fieldListObject()
+            fieldList = self.d.metadata_.fieldList()
             fiName = None
             s = None
             
@@ -2175,6 +2176,8 @@ class FLSqlCursor(ProjectClass):
                 return
             if self.d.cursorRelation_.metadata().primaryKey() == fN and self.d.cursorRelation_.modeAccess() == self.Insert:
                 return
+            
+            
             if not fN or self.d.relation_.foreignField() == fN:
                 self.d.buffer_ = None
                 self.refreshDelayed(500)
@@ -2283,7 +2286,7 @@ class FLSqlCursor(ProjectClass):
                 self.d.buffer_ = PNBuffer(self)
             self.setNotGenerateds()
             
-            fieldList = self.metadata().fieldListObject()
+            fieldList = self.metadata().fieldList()
             if fieldList:
                 for field in fieldList:
                     fiName = field.name()
@@ -2604,10 +2607,12 @@ class FLSqlCursor(ProjectClass):
             else:
                 finalFilter = _filter
         
+        if self.cursorRelation() and self.cursorRelation().modeAccess() == self.Insert:
+            finalFilter = "1 = 0"
         
         if finalFilter:
             self.setFilter(finalFilter)
-        
+             
         self.model().refresh()
         self.refreshBuffer()
         
@@ -2834,7 +2839,7 @@ class FLSqlCursor(ProjectClass):
         fieldNameCheck = None
 
         if self.d.modeAccess_ == self.Edit or self.d.modeAccess_ == self.Insert:
-            fieldList = self.d.metadata_.fieldListObject()
+            fieldList = self.d.metadata_.fieldList()
 
             for field in fieldList:
                 if field.isCheck():

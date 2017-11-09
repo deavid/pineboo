@@ -157,9 +157,8 @@ class FLManagerModules(ProjectClass):
     @param pN Ruta y nombre del fichero en el sistema de ficheros
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    def contentFS(self, pN):
-        file_ = open(pN,'r')
-        return file_.read()
+    def contentFS(self, pN):     
+        return str(open(pN,"rb").read(),"ISO-8859-15")
 
     """
     Obtiene el contenido de un fichero, utilizando la caché de memoria y disco.
@@ -184,15 +183,16 @@ class FLManagerModules(ProjectClass):
             
             
             
-            
-            
+               
             
         data = None
         modId = self._prj.conn.managerModules().idModuleOfFile(n)
         name_ = n[:n.index(".")]
         ext_ = n[n.index(".") + 1:]   
-        if(os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" %(self._prj.dbname, modId, ext_, name_)))):
+        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" %(self._prj.dbname, modId, ext_, name_))):
             data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %(self._prj.dbname, modId, ext_, name_, shaKey, ext_)))
+        elif os.path.exists(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_))):
+            data = self.contentFS(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
         else:
             data = self.content(n)
         return data

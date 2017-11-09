@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
-
-from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib import decorators
-try:
-    from future import standard_library
-    standard_library.install_aliases()
-except ImportError:
-    print("Error al importar la libreria python future. http://python-future.org/")
-    print("Esta librería sirve para que python2 se comporte más parecido a python3.")
-    print("Puede que el programa funcione correctamente sin ella.")
-from builtins import object
-import traceback
+from pineboolib.dbschema import db_postgresql as pginspect
+
+from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+from pineboolib.fllegacy.FLManager import FLManager
 
 from io import StringIO
 from lxml import etree
-from pineboolib.dbschema import db_postgresql as pginspect
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from builtins import object
+import traceback
+
+
+
+
 
 class Struct(object):
     pass
@@ -70,148 +68,6 @@ def getTableObj(tree,root):
     table.fields = []
     table.pk = []
     table.fields_idx = {}
-    for xmlfield in table.xmlroot.xpath("field"):
-        try:
-            field = SchemaFieldStruct()
-            field.name = None
-            field.alias = None
-            field.allowNull = False
-            field.pk = False
-            field.mtd_type = None
-            field.length_ = 0
-            field.calculated = False
-            field.visible = True
-            field.editable = True
-            field.pI = 4
-            field.pD = 0
-            field.iNX = False
-            field.uNI = False
-            field.coun = False
-            field.defValue = None
-            field.oT = False
-            field.rX = None
-            field.vG = True
-            field.gene = False
-            field.iCK = False
-            fks = {}
-            for fieldprop in xmlfield:
-                if fieldprop.text: fks[fieldprop.tag] = fieldprop.text
-                #else: fks[fieldprop.tag] = fieldprop
-                #print("Field Prop: %r:%r" % (fieldprop.tag,fieldprop.text))
-                
-            field.name = fks.get("name")
-            field.alias = fks.get("alias")
-            build_field_type(field, xmlfield, fks)
-            field.length_ = fks.get("length",0)
-            field.allowNull = text2bool(fks.get("null","true"))
-            field.pk = text2bool(fks.get("pk","false"))
-            field.editable = text2bool(fks.get("editable","true"))
-            field.visible = text2bool(fks.get("visible","true"))
-            field.iCK =  text2bool(fks.get("ck","false"))
-            field.defValue = fks.get("default")
-            if field.mtd_type in ("bool", "unlock"):
-                if not field.defValue == None:
-                    if field.defValue == "true":
-                        field.defValue = True
-                    else:
-                        field.defValue = False
-                        
-            field.optionsList = fks.get("optionslist")
-            field.vG = text2bool(fks.get("visiblegrid","true"))
-            field.rX = ""
-            field.pI = fks.get("partI",4)
-            field.pD = fks.get("partD",0)
-            field.calculated = text2bool(fks.get("calculated","false"))
-            field.coun = text2bool(fks.get("counter","false"))
-            
-            # TODO: la lectura insistente con xpath parece ralentizar el parseo de las MTD
-            
-            if field.pk: table.pk.append(field.name)
-            if field.name in table.fields_idx: raise ValueError("La tabla %s tiene el campo %s repetido" % (table.name,field.name))
-            field.number = len(table.fields)
-            table.fields_idx[field.name] = field.number
-            fieldMD = FLFieldMetaData(field.name, field.alias, field.allowNull, field.pk, field.mtd_type, field.length_, field.calculated, field.visible, field.editable, field.pI, field.pD, field.iNX, field.uNI, field.coun, field.defValue, field.oT, field.rX, field.vG, field.gene, field.iCK)
-            relations = xmlfield.xpath("relation")
-            for xmlRelation in relations:
-                rks = {}
-                for rel in xmlRelation:
-                    if rel.text: rks[rel.tag] = rel.text
-                    
-                tableNameR = rks.get("table")
-                fieldRelation = rks.get("field")
-                cardR = rks.get("card")
-                delC = text2bool(rks.get("delC","false"))
-                updC = text2bool(rks.get("updC","false"))
-                checkIn = rks.get("checkIn")
-                if checkIn == None:
-                    checkIn = True
-                relation = FLRelationMetaData(tableNameR, fieldRelation, cardR, delC, updC, checkIn)
-                fieldMD.addRelationMD(relation)
-                
-            associateds = xmlfield.xpath("associated")
-            for xmlAssoc in associateds:
-                aks = {}
-                for assoc in xmlAssoc:
-                    if assoc.text: aks[assoc.tag] = assoc.text
-                aWith = aks.get("with")
-                aBy = aks.get("by")
-                for _field in table.fields:
-                    if _field.name() == aWith:
-                        fieldMD.setAssociatedField(_field , aBy)
-                        break
-                
-                 
-            if field.optionsList:
-                fieldMD.setOptionsList(field.optionsList)
-            
-            table.fields.append(fieldMD)
-                
-                
-            
-            #table.fields.append(fieldMD)
-                
-            #fieldMD.addRelationMD(relation)
-            #print(relationTableNameList_)
-            """
-            fieldMD = FLFieldMetaData(field.name, field.alias, field.allowNull, field.pk, field.mtd_type, field.length_, field.calculated, field.visible, field.editable, field.pI, field.pD, field.iNX, field.uNI, field.coun, field.defValue, field.oT, field.rX, field.vG, field.gene, field.iCK)
-
-            i = 0
-            l = len(relationTableNameList_)
-            l1 = len(relationFieldRelationList_)
-            l2 = len(relationCardList_)
-            while i < l:
-                print("%s.%s->%s de %s ojo (%s,%s) " % (table.name, field.name, i, l, l1, l2))
-                #print("%s.%s --(%s)--> %s.%s" % (table.name, field.name, relationCardList_[i],relationTableNameList_[i], relationFieldRelationList_[i]))
-                if relationDelCList_[i] == "false":
-                    delC = False
-                else:
-                    delC = True
-                
-                if relationupdCList_[i] == "false":
-                    updC = False
-                else:
-                    updC = True
-                
-                if relationCIList_[i] == "false":
-                    cI = False
-                else:
-                    cI = True
-                
-                relation = FLRelationMetaData(relationTableNameList_[i],relationFieldRelationList_[i], relationCardList_[i], delC, updC ,cI)
-                fieldMD.addRelationMD(relation)
-                i = i + 1
-            
-            
-            
-            
-            
-            
-            
-            table.fields.append(fieldMD)
-            """
-        except Exception as e:
-            print("ERROR: procesando tabla %r:" % table.name,  e)
-            print(traceback.format_exc())
     return table
 
 def text2bool(text):

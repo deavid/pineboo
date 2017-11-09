@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 
-#Completa Si
 
-#from pineboolib.fllegacy.FLRelationMetaDataList import FLRelationMetaDataList
 from pineboolib import decorators
+from pineboolib.flcontrols import ProjectClass
+from pineboolib.utils import aqtt
+
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 
-
-#from PyQt4.QtCore import QVariant, QString
-#from PyQt4 import QtCore, QtGui
-from pineboolib.utils import aqtt
 import copy
 
 
 
-class FLFieldMetaData():
+class FLFieldMetaData(ProjectClass):
     """
   @param n Nombre del campo
   @param a Alias del campo, utilizado en etiquetas de los formularios
@@ -47,6 +44,8 @@ class FLFieldMetaData():
 
 
     def __init__(self, *args, **kwargs):
+        super(FLFieldMetaData, self).__init__()
+        
         if len(args) == 1:
             self.inicializeFLFieldMetaData(args[0])
         else:
@@ -86,7 +85,7 @@ class FLFieldMetaData():
 
     @param n Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def setName(self, n):
         self.d.fieldName_ = n 
         
@@ -246,7 +245,7 @@ class FLFieldMetaData():
 
     @return TRUE si el campo es índice, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
+
     def isIndex(self):
         return self.d.isIndex_
 
@@ -255,7 +254,7 @@ class FLFieldMetaData():
 
     @return TRUE si el campo determina registros únicos, FALSE en caso contrario
     """
-    @decorators.BetaImplementation
+
     def isUnique(self):
         return self.d.isUnique_
 
@@ -386,7 +385,7 @@ class FLFieldMetaData():
 
     @return Nombre del campo asociado
     """
-    @decorators.BetaImplementation
+
     def associatedFieldName(self):
         return self.d.associatedFieldName_
 
@@ -416,7 +415,7 @@ class FLFieldMetaData():
     @return Cadena de caracteres que contiene una expresion regular, utilizada como
         mascara para validar los valores introducidos en el campo
     """
-    @decorators.BetaImplementation
+
     def regExpValidator(self):
         return self.d.regExpValidator_
 
@@ -480,11 +479,11 @@ class FLFieldMetaData():
     """
     Ver FLFieldMetaData::fullyCaclulated_
     """
-    @decorators.BetaImplementation
+
     def fullyCalculated(self):
         return self.d.fullyCalculated_
   
-    @decorators.BetaImplementation
+
     def setFullyCalculated(self, c):
         self.d.fullyCalculated_ = c
         if c:
@@ -493,11 +492,11 @@ class FLFieldMetaData():
     """
     Ver FLFieldMetaData::trimmed_
     """
-    @decorators.BetaImplementation
+
     def trimed(self):
         return self.d.trimmed_
     
-    @decorators.BetaImplementation
+
     def setTrimed(self, t):
         self.d.trimmed_ = t
 
@@ -547,7 +546,7 @@ class FLFieldMetaData():
 
     @return lista de las distintas opciones
     """
-    @decorators.BetaImplementation
+
     def searchOptions(self):
         return self.d.searchOptions_
     """
@@ -556,7 +555,7 @@ class FLFieldMetaData():
     @param ol Cadena de texto con la opciones para el campo
           separada por comas, p.e. "opcion1,opcion2,opcion3"
     """
-    @decorators.BetaImplementation
+
     def setSearchOptions(self, ol):
         self.d.searchOptions_ = []
         for dato in ol.split(","):
@@ -568,44 +567,6 @@ class FLFieldMetaData():
             return
         
         self = copy.copy(other)
-        """
-        od = other.d
-        if od.relationM1_:
-            self.d.relationM1_ = od.relationM1_
-        
-        self.d.clearRelationList()
-        
-        if od.relationList_:
-            self.d.relationList_ = od.relationList_
-        
-        self.d.fieldName_ = od.fieldName_
-        self.d.alias_ = od.alias_
-        self.d.allowNull_ = od.allowNull_
-        self.d.isPrimaryKey_ = od.isPrimaryKey_
-        self.d.type_ = od.type_
-        self.d.length_ = od.length_
-        self.d.calculated_ = od.calculated_
-        self.d.fullyCalculated_ = od.fullyCalculated_
-        self.d.trimmed_ = od.trimmed_
-        self.d.visible_ = od.visible_
-        self.d.editable_ = od.editable_
-        self.d.partInteger_ = od.partInteger_
-        self.d.partDecimal_ = od.partDecimal_
-        self.d.isIndex_ = od.isIndex_
-        self.d.isUnique_ = od.isUnique_
-        self.d.contador_ = od.contador_
-        self.d.associatedField_ = od.associatedField_
-        self.d.associatedFieldName_ = od.associatedFieldName_
-        self.d.associatedFieldFilterTo_ = od.associatedFieldFilterTo_
-        self.d.defaultValue_ = od.defaultValue_
-        self.d.optionsList_ = od.optionsList_
-        self.d.outTransaction_ = od.outTransaction_
-        self.d.regExpValidator_ = od.regExpValidator_
-        self.d.visibleGrid_ = od.visibleGrid_
-        self.d.generated_ = od.generated_
-        self.d.isCompoundKey_ = od.isCompoundKey_
-        self.d.hasOptionsList_ = od.hasOptionsList_    
-        """
     
     def formatAssignValue(self,fieldName , value, upper):
         if self.type() in ("", None) or not fieldName:
@@ -910,7 +871,7 @@ class FLFieldMetaDataPrivate():
         if t == "double" and not int(pD) >= 0: 
             self.partDecimal_ = 0
 
-    @decorators.BetaImplementation
+
     def __del_(self):
         self.clearRelationList()
         if self.relationM1_ and self.relationM1_.deref():

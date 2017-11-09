@@ -1,19 +1,23 @@
 # -*- coding: utf-8 -*-
-
-from pineboolib.flcontrols import ProjectClass
-from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from PyQt5 import QtCore
+from PyQt5.Qt import QDomDocument, qWarning
+
+
 from pineboolib import decorators, qsatype
+from pineboolib.flcontrols import ProjectClass
+from pineboolib.utils import filedir, auto_qt_translate_text
+
+from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
+from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from pineboolib.fllegacy.FLCompoundKey import FLCompoundKey
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery, FLGroupByQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLAction import FLAction
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.utils import filedir
+
 from lxml import etree
 import os
-from PyQt5.Qt import QDomDocument
-
 
 """
 Esta clase sirve como administrador de la base de datos.
@@ -50,13 +54,12 @@ class FLManager(ProjectClass):
     def __init__(self, db):
         super(FLManager,self).__init__()
         self.db_ = db
-        self.cacheMetaData_ = []
-        self.cacheAction_ = []
-        self.cacheMetaDataSys_ = None
-        self.listTables_ = None
+        self.listTables_ = []
         self.dictKeyMetaData_ = {}
         self.initCount_ = 0
-        
+        self.cacheMetaData_ = []
+        self.cacheMetaDataSys_ = []
+        self.cacheAction_ = []
         QtCore.QTimer.singleShot(100, self.init)
         
         
@@ -114,13 +117,13 @@ class FLManager(ProjectClass):
         
         
         if not self.cacheMetaData_:
-            self.cacheMetaData_ = {}
+            self.cacheMetaData_ = []
         
         if not self.cacheAction_:
-            self.cacheAction_ = {}
+            self.cacheAction_ = []
         
         if not self.cacheMetaDataSys_:
-            self.cacheMetaDataSys_ = {}
+            self.cacheMetaDataSys_ = []
             
         
         
@@ -164,29 +167,254 @@ class FLManager(ProjectClass):
 
     def metadata(self, n, quick = False):
         
+        util = FLUtil()
+        
         if not n:
             return None
-
-        name = "%s" % n
-
-         
-        for metadata in self.cacheMetaData_:
-            if metadata.name() ==name:
-                return metadata
         
-        new = FLTableMetaData(name)
-        
-        if not len(new.fieldList()):
-            return None
-        
-        
-        self.cacheMetaData_.append(new)
-        for metadataN in self.cacheMetaData_:
-            if metadataN.name() == name:
-                return metadataN
+        if isinstance(n , str):
             
-        
+            if not n or not self.db_.dbAux():
+                return False
+            
+            ret = False
+            acl = False
+            key = n
+            stream = None
+            
+            isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
+            if not isSysTable:
+                stream = self.db_.managerModules().contentCached("%s.mtd" % key)
                 
+                if not stream:
+                    qWarning("FLManager : Error al cargar los metadatos para la tabla %s" % n)
+                    
+                    return False
+            
+            #    if not key:
+            #        key = n
+            
+            
+            if not isSysTable:
+                for fi in self.cacheMetaData_:
+                    if fi.name() == key:
+                        ret = fi
+                        break
+            elif isSysTable:
+                for fi in self.cacheMetaDataSys_:
+                    if fi.name() == key:
+                        ret = fi
+                        break
+            
+            if not ret:
+                if isSysTable:
+                    stream = self.db_.managerModules().contentCached("%s.mtd" % n)
+                    
+                    if not stream:
+                        qWarning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        
+                        return False
+                
+                doc = QDomDocument(n)
+                if not util.domDocumentSetContent(doc, stream):
+                    qWarning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                    return False
+                
+                docElem = doc.documentElement()
+                ret = self.metadata(docElem, quick)
+                if not ret:
+                    return False
+                
+                
+                if not isSysTable and not ret.isQuery():
+                    self.cacheMetaData_.append(ret)
+                elif isSysTable:
+                    self.cacheMetaDataSys_.append(ret)
+            
+            else:
+                acl = self._prj.acl()
+            
+            if ret.fieldsNamesUnlock():
+                ret = FLTableMetaData(ret)
+            
+            if acl:
+                acl.process(ret)
+                
+            if not quick and not isSysTable and self._prj.consoleShown() and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
+                msg = util.tr("La estructura de los metadatos de la tabla '%1' y su "
+                  "estructura interna en la base de datos no coinciden. "
+                  "Debe regenerar la base de datos.").arg(n)
+                
+                throwMsgWarning(self.db_, msg)
+                    
+            return ret
+
+        else:
+            #QDomDoc
+            name = None
+            q = None
+            a = None
+            ftsfun = None
+            v = True
+            ed = True
+            cw = False
+            dl = False
+            
+            no = n.firstChild()
+            while not no.isNull():
+                e = no.toElement()
+                if not e.isNull():
+                    if e.tagName() == "field":
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "name":
+                        name = e.text()
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "query":
+                        q = e.text()
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "alias":
+                        a = auto_qt_translate_text(e.text())
+                        a = util.translate("Metadata", a)
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "visible":
+                        v = (e.text() == "true")
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "editable":
+                        ed = (e.text() == "true")
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "concurWarn":
+                        cw = (e.text() == "true")
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "detectLocks":
+                        dl = (e.text() == "true")
+                        no = no.nextSibling()
+                        continue
+                    
+                    if e.tagName() == "FTSFunction":
+                        ftsfun = (e.text() == "true")
+                        no = no.nextSibling()
+                        continue
+                
+                
+                no = no.nextSibling()
+            tmd = FLTableMetaData(name, a, q)
+            cK = None
+            assocs = []
+            tmd.setFTSFunction(ftsfun)
+            tmd.setConcurWarn(cw)
+            tmd.setDetectLocks(dl)
+            no = n.firstChild()
+            
+            while not no.isNull():
+                e = no.toElement()
+                if not e.isNull():
+                    if e.tagName() == "field":
+                        f = self.metadataField(e, v, ed)
+                        if not tmd:
+                            tmd = FLTableMetaData(name, a, q)
+                        tmd.addFieldMD(f)
+                        if f.isCompoundKey():
+                            if not cK:
+                                cK = FLCompoundKey()
+                            cK.addFieldMD(f)
+                        
+                        if f.associatedFieldName():
+                            assocs.append(f.associatedFieldName())
+                            assocs.append(f.associatedFieldFilterTo())
+                            assocs.append(f.name())
+                        
+                        no = no.nextSibling()
+                        continue
+                
+                no = no.nextSibling()
+            
+            
+            
+            tmd.setCompoundKey(cK)
+            aWith = None
+            aBy = None
+            
+            for it in assocs:
+                if not aWith:
+                    aWith = it
+                    continue
+                if not aBy:
+                    aBy = it
+                    tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
+            
+            if q and not quick:
+                qry = self.query(q, tmd)
+            
+                if qry:
+                    fL = qry.fieldList()
+                    table = None
+                    field = None
+                    fields = tmd.fieldsNames().split(",")
+                    fieldsEmpty = (not fields)
+                
+                    for it in fL:
+                        pos = it.find(".")
+                        if pos > -1:
+                            table = it[:pos]
+                            field = it[:pos]
+                        else:
+                            field = it
+                    
+                        if not (not fieldsEmpty and table == name and fields.find(field.lower())) == fields.end():
+                            continue
+                    
+                        mtdAux = self.metadata(table, True)
+                        if mtdAux:
+                            fmtdAux = mtdAux.field(field)
+                            if mtdAux:
+                                isForeignKey = False
+                                if fmtdAux.isPrimaryKey() and not table == name:
+                                    fmtdAux = FLFieldMetaData(fmtdAux)
+                                    fmtdAux.setIsprimaryKey(False)
+                                    fmtdAux.setEditable(False)
+                            
+                                newRef = (not isForeignKey)
+                                fmtdAuxName = fmtdAux.name().lower()
+                                if fmtdAuxName.find(".") == -1:
+                                    fieldsAux = tmd.fieldsNames().split(",")
+                                    if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
+                                        if not isForeignKey:
+                                            fmdtAux = FLFieldMetaData(fmtdAux)
+                                    
+                                        fmtdAux.setName("%s.%s" % (tambe, field))
+                                        newRef = False
+                            
+                                if newRef:
+                                    fmtdAux.ref()
+                                
+                                tmd.addFieldMD(fmtdAux)
+                    
+                    qry.deleteLater()
+        
+            acl = self._prj.acl()
+            if acl:
+                acl.process(tmd)
+            
+            return tmd
+                
+                
+                
+            
+            
             
 
     
@@ -281,38 +509,40 @@ class FLManager(ProjectClass):
     """
     def existsTable(self,  n, cache = True):
         
-        if not self.db_:
-            return False
-        if not self.db_.dbAux():
-            return False
-        if n == None:
-            return False
+        #if not self.db_:
+        #    return False
         
-        if cache and self.listTables_:
+        #if n == None:
+        #    return False
+        
+        #if cache and self.listTables_:
             
-            for name in self.listTables_:
-                if name == n:
-                    return True
+        #    for name in self.listTables_:
+        #        if name == n:
+        #            return True
             
-            return False
-        else:
-            return self.db_.existsTable(n)
+        #    return False
+        #else:
+        #    return self.db_.existsTable(n)
         
         
-        
-        
+    
         #if cache:
         #    modId = self.db_.managerModules().idModuleOfFile(n +".mtd")
-        #    return os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
-        
-        
-        #q = FLSqlQuery()
-        #sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
-        #q.setTablesList(n)
-        #q.setSelect("*")
-        #q.setFrom(n)
-        #q.setWhere("1 = 1 LIMIT 1")
-        #return q.exec_()
+        #    res = os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
+        #    if res == False:
+        #        res == os.path.exists(filedir("../share/pineboo/tables/%s.mtd" %(n)))
+            
+        #    return res
+                
+        #else:
+        q = FLSqlQuery()
+        sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
+        q.setTablesList(n)
+        q.setSelect("*")
+        q.setFrom(n)
+        q.setWhere("1 = 1 LIMIT 1")
+        return q.exec_()
     
     """
     Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
@@ -360,15 +590,18 @@ class FLManager(ProjectClass):
             return False
         
         if isinstance(n_or_tmd, str):
-            n_or_tmd = self.metadata(n_or_tmd)
-            if not n_or_tmd:
+            tmd = self.metadata(n_or_tmd)
+            if not tmd:
                 return False
             
-            if self.existsTable(n_or_tmd.name()):
-                self.listTables_.append(n)
-                return n_or_tmd
-            
-            return self.createTable(n_or_tmd)
+            if self.existsTable(tmd.name()):
+                self.listTables_.append(n_or_tmd)
+                return tmd
+            else:
+                qWarning("FLMAnager :: No existe tabla %s" % n_or_tmd)
+
+
+            return self.createTable(tmd)
         else:
             if n_or_tmd.isQuery() or self.existsTable(n_or_tmd.name(), False):
                 return n_or_tmd
@@ -520,9 +753,244 @@ class FLManager(ProjectClass):
     @param ed Valor utilizado por defecto para la propiedad editable
     @return Objeto FLFieldMetaData que contiene la descripción del campo
     """
-    @decorators.NotImplementedWarn
     def metadataField(self, field, v = True, ed = True):
-        return True
+        if not field:
+            return None
+        
+        util = FLUtil()
+        
+        ck = False
+        n = None
+        a = None
+        ol = False
+        rX = None
+        assocBy = None
+        assocWith = None
+        so = None
+        
+        aN = True
+        iPK = True
+        c = False
+        iNX = False
+        uNI = False
+        coun = False
+        oT = False
+        vG = True
+        fullCalc = False
+        trimm = False
+        
+        t = -1
+        l = 0
+        pI = 4
+        pD = 0
+        
+        dV = None
+        
+        no = field.firstChild()
+        
+        while not no.isNull():
+            e = no.toElement()
+            if not e.isNull():
+                if e.tagName() in ("relation","associated"):
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "name":
+                    n = e.text()
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "alias":
+                    a = auto_qt_translate_text(e.text())
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "null":
+                    aN = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "pk":
+                    iPK = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "type":
+                    if e.text() == "int":
+                        t = "int"
+                    elif e.text() == "uint":
+                        t = "uint"
+                    elif e.text() == "bool":
+                        t = "bool"
+                    elif e.text() == "double":
+                        t = "double"
+                    elif e.text() == "time":
+                        t = "time"
+                    elif e.text() == "date":
+                        t = "date"
+                    elif e.text() == "pixmap":
+                        t = "pixmap"
+                    elif e.text() == "bytearray":
+                        t = "bytearray"
+                    elif e.text() == "string":
+                        t = "string"
+                    elif e.text() == "stringlist":
+                        t = "stringlist"
+                    elif e.text() == "unlock":
+                        t = "unlock"
+                    elif e.text() == "serial":
+                        t = "serial"
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "length":
+                    l = int(e.text())
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "regexp":
+                    rX = e.text()
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "default":
+                    if e.text().find("QT_TRANSLATE_NOOP") > -1:
+                        dV = auto_qt_translate_text(e.text())
+                    else:
+                        dV = e.text()
+                    
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "outtransaction":
+                    oT = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "counter":
+                    coun = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "calculated":
+                    c = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "fullycalculated":
+                    fullCalc = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "trimmed":
+                    trimm = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "visible":
+                    v = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "visiblegrid":
+                    vG = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "editable":
+                    ed = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "partI":
+                    pI = int(e.text())
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "partD":
+                    pD = int(e.text())
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "index":
+                    iNX = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "unique":
+                    uNI = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "ck":
+                    ck = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "optionslist":
+                    ol = e.text()
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "searchoptions":
+                    so = e.text()
+                    no = no.nextSibling()
+                    continue
+            
+            no = no.nextSibling()
+        
+        f = FLFieldMetaData(n, util.translate("Metadata", a), aN, iPK, t, l, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
+        f.setFullyCalculated(fullCalc)
+        f.setTrimed(trimm)
+        
+        if ol:
+            f.setOptionsList(ol)
+        if not so == None:
+            f.setSearchOptions(so)
+        
+        no = field.firstChild()
+        
+        while not no.isNull():
+            e = no.toElement()
+            if not e.isNull():
+                if e.tagName() == "relation":
+                    f.addRelationMD(self.metadataRelation(e))
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "associated":
+                    noas = e.firstChild()
+                    while not noas.isNull():
+                        eas = noas.toElement()
+                        if not eas.isNull():
+                            if eas.tagName() == "with":
+                                assocWith = eas.text()
+                                noas = noas.nextSibling()
+                                continue
+                            
+                            if eas.tagName() == "by":
+                                assocBy = eas.text()
+                                noas = noas.nextSibling()
+                                continue
+                        
+                        noas = noas.nextSibling()
+                    
+                    no = no.nextSibling()
+                    continue
+            
+            no = no.nextSibling()
+        
+        
+        if assocWith and assocBy:
+            f.setAssociatedField(assocWith, assocBy)
+        
+        return f
+            
+            
+                
+                
+                
+            
     
     """
     Crea un objeto FLRelationMetaData a partir de un elemento XML.
@@ -535,10 +1003,60 @@ class FLManager(ProjectClass):
     @param relation Elemento XML con la descripción de la relación
     @return Objeto FLRelationMetaData que contiene la descripción de la relación
     """
-    @decorators.NotImplementedWarn
+
     def metadataRelation(self, relation):
-        return True
-    
+        if not relation:
+            return False
+        
+        fT = ""
+        fF = ""
+        rC = FLRelationMetaData.RELATION_M1
+        dC = False
+        uC = False
+        cI = False
+        
+        no = relation.firstChild()
+        
+        while not no.isNull():
+            e = no.toElement()
+            if not e.isNull():
+                
+                if e.tagName() == "table":
+                    fT = e.text()
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "field":
+                    fF = e.text()
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "card":
+                    if e.text() == "1M":
+                        rC = FLRelationMetaData.RELATION_1M
+                    
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "delC":
+                    dC = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "updC":
+                    uC = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "checkIn":
+                    cI = (e.text() == "true")
+                    no = no.nextSibling()
+                    continue
+                
+            no = no.nextSibling()
+        
+        return FLRelationMetaData(fT, fF, rC, dC, uC, cI)
+                
     """
     Crea un objeto FLParameterQuery a partir de un elemento XML.
 
@@ -588,7 +1106,8 @@ class FLManager(ProjectClass):
             _tables = dir.entryList("%s.mtd" % n)
             
             for f in _tables:
-                _file = QtCore.QFile("%s/%s" % (_path, f))
+                path = "%s/%s" % (_path, f)
+                _file = QtCore.QFile(path)
                 _file.open(QtCore.QIODevice.ReadOnly)
                 _in = QtCore.QTextStream(_file)
                 _data = _in.readAll()
@@ -597,6 +1116,7 @@ class FLManager(ProjectClass):
                     return False
                 else:
                     docElem = doc.documentElement()
+
                     mtd = self.createTable(self.metadata(docElem, True))
                     return mtd
                 
@@ -643,7 +1163,7 @@ class FLManager(ProjectClass):
         if not n[0:2] == "fl":
             return False
         
-        if n == ("flfiles","flmetadata","flmodules","flareas","flserial","flvar","flsettings","flseqs","flupdates"):
+        if n in ("flfiles","flmetadata","flmodules","flareas","flserial","flvar","flsettings","flseqs","flupdates"):
             return True
         
         return False

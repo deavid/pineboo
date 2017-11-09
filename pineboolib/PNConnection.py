@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
-
-from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators, PNSqlDrivers
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.Qt import qWarning
 from PyQt5 import QtCore,QtWidgets
-import psycopg2
-import traceback, sys
+
+from pineboolib import decorators, PNSqlDrivers
+from pineboolib.flcontrols import ProjectClass
+
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from PyQt5.QtWidgets import QMessageBox
 
+import traceback, sys
 
 
 class PNConnection(QtCore.QObject):
@@ -357,16 +358,26 @@ class PNConnection(QtCore.QObject):
             return False
         
         sql = self.driver().sqlCreateTable(tmd)
-        print("-->", tmd, sql)
         if not sql:
             return False
         
-        q = FLSqlQuery(None, self.dbAux())
+        q = self.cursor()
         try:
-            q.exec_(sql)
+            q.execute(sql)
+            q.execute("COMMIT")
         except:
-            print("FLManager : SQL -", sql)
+            qWarning(traceback.format_exc())
+            q.execute("ROLLBACK")
             return False
-        print(sql)
-        return True  
+        
+        return True
+    
+    def mismatchedTable(self, tablename, tmd):
+        if not self.db():
+            return None
+        
+        return self.driver().mismatchedTable(tablename, tmd, self)
+    
+        
+        
     

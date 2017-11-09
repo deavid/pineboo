@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-#Completa Si
-
 from pineboolib import decorators
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.fllegacy.FLCompoundKey import FLCompoundkey
 from pineboolib.flcontrols import ProjectClass
+
+from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from pineboolib.fllegacy.FLCompoundKey import FLCompoundKey
+
 import copy
-#from PyQt4.QtCore import QString, QVariant
+
 
 """
 Mantiene la definicion de una tabla.
@@ -35,18 +35,18 @@ class FLTableMetaData(ProjectClass):
     @param q (Opcional) Nombre de la consulta de la que define sus metadatos
     """
   
-    def __init__(self, *args, **kwargs):
+    def __init__(self, n, a = None, q = None):
         super(FLTableMetaData,self).__init__()
         #tmp = None
                 
-        if len(args) == 1:
-            if isinstance(args[0],str):
+        if not a and not q:
+            if isinstance(n,str):
                 #print("FLTableMetaData(%s).init()" % args[0])
-                self.inicializeFLTableMetaDataP(args[0])  
+                self.inicializeFLTableMetaDataP(n)  
             else:
-                self.inicializeFLTableMetaData(args[0])
+                self.inicializeFLTableMetaData(n)
         else:
-            self.inicializeNewFLTableMetaData( *args, **kwargs)    
+            self.inicializeNewFLTableMetaData(n, a, q)    
         
         
     def inicializeFLTableMetaData(self, other):
@@ -54,14 +54,13 @@ class FLTableMetaData(ProjectClass):
         self.copy(other)
         
                                            
-    @decorators.BetaImplementation
     def inicializeNewFLTableMetaData(self, n, a, q = None):
         self.d = FLTableMetaDataPrivate(n, a, q)
     
         
     def inicializeFLTableMetaDataP(self, name):
         self.d = FLTableMetaDataPrivate(name)
-        self.d.compoundKey_ = FLCompoundkey()
+        self.d.compoundKey_ = FLCompoundKey()
         
         
         try:
@@ -101,7 +100,7 @@ class FLTableMetaData(ProjectClass):
 
     @param n Nombre de la tabla
     """
-    @decorators.BetaImplementation
+
     def setName(self, n):
         #QObject::setName(n);
         self.d.name_ = n
@@ -112,7 +111,7 @@ class FLTableMetaData(ProjectClass):
 
     @param a Alias
     """
-    @decorators.BetaImplementation
+
     def setAlias(self, a):
         self.d.alias_ = a
 
@@ -155,7 +154,7 @@ class FLTableMetaData(ProjectClass):
 
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
-    @decorators.BetaImplementation
+
     def addFieldMD(self, f):
         if not f:
             return
@@ -174,7 +173,7 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo a eliminar
     """
-    @decorators.BetaImplementation
+
     def removeFieldMD(self, fN):
         if fN.isEmpty():
             return
@@ -187,7 +186,7 @@ class FLTableMetaData(ProjectClass):
 
     @param cK Objeto FLCompoundKey con la descripción de la clave compuesta
     """
-    @decorators.BetaImplementation
+
     def setCompoundKey(self, cK):
         self.d.compoundKey_ = cK
 
@@ -298,7 +297,7 @@ class FLTableMetaData(ProjectClass):
     @param fN Nombre del campo
     @author Andrés Otón Urbano (baxas@eresmas.com)
     """
-    @decorators.BetaImplementation
+
     def fieldIsCounter(self, fN):
         if fN.isEmpty():
             return False
@@ -320,7 +319,7 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def fieldAllowNull(self, fN):
         if fN.isEmpty():
             return False
@@ -342,7 +341,7 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def fieldIsUnique(self, fN):
         if fN.isEmpty():
             return False
@@ -368,7 +367,7 @@ class FLTableMetaData(ProjectClass):
     @return El nombre de la tabla relacionada M1, si hay relacion para el campo, o una cadena
       vacia sin el campo no está relacionado
     """
-    @decorators.BetaImplementation
+
     def fieldTableM1(self, fN):
         if fN.isEmpty():
             return False
@@ -393,7 +392,7 @@ class FLTableMetaData(ProjectClass):
         con otro campo de otra tabla
     @return El nombre del campo foráneo relacionado con el indicado
     """
-    @decorators.BetaImplementation
+
     def fieldForeignFieldM1(self, fN):
         if fN.isEmpty():
             return False
@@ -472,7 +471,7 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def fieldPartInteger(self, fN):
         if fN.isEmpty():
             return
@@ -495,7 +494,7 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def fieldPartDecimal(self, fN):
         if fN.isEmpty():
             return
@@ -519,7 +518,7 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def fieldCalculated(self, fN):
         if fN.isEmpty():
             return
@@ -542,7 +541,7 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def fieldVisible(self, fN):
 
         if fN.isEmpty():
@@ -638,8 +637,9 @@ class FLTableMetaData(ProjectClass):
       que el campo consultado no pertenezca a ninguna clave compuesta devuelve 0
     """
     def fieldListOfCompoundKey(self, fN):
-        if self.d.compoundKey_ and self.d.compoundKey_.hasField(fN):
-            return self.d.compoundKey_.fieldList()
+        if self.d.compoundKey_:
+            if self.d.compoundKey_.hasField(fN):
+                return self.d.compoundKey_.fieldList()
         return None
 
     """
@@ -659,14 +659,14 @@ class FLTableMetaData(ProjectClass):
     """
     @return El indicador FLTableMetaData::concurWarn_
     """
-    @decorators.BetaImplementation
+
     def concurWarn(self):
         return self.d.concurWarn_
 
     """
     Establece el indicador FLTableMetaData::concurWarn_
     """
-    @decorators.BetaImplementation
+
     def setConcurWarn(self, b = True):
         self.d.concurWarn_ = b
 
@@ -680,18 +680,18 @@ class FLTableMetaData(ProjectClass):
     """
     Establece el indicador FLTableMetaData::detectLocks_
     """
-    @decorators.BetaImplementation
+
     def setDetectLocks(self, b = True):
         self.d.detectLocks_ = b
 
     """
     Establece el nombre de función a llamar para Full Text Search
     """
-    @decorators.BetaImplementation
+
     def FTSFunction(self):
         return self.d.ftsfun_
     
-    @decorators.BetaImplementation
+
     def setFTSFunction(self, ftsfun):
         self.d.ftsfun_ = ftsfun
 
@@ -712,31 +712,7 @@ class FLTableMetaData(ProjectClass):
         if other == self:
             return
      
-        self.d = copy.copy(other.d)
-        
-        """
-        if od.compoundKey_:
-            self.d.compoundKey_ = od.compoundKey_
-        
-        self.d.clearFieldList()
-        
-        self.d.fieldList_ = od.fieldList_
-        
-        self.d.name_ = od.name_
-        self.d.alias_ = od.alias_
-        self.d.query_ = od.query_
-        self.d.fieldsNames_ = od.fieldsNames_
-        self.d.aliasFieldMap_ = od.aliasFieldMap_
-        self.d.fieldAliasMap_ = od.fieldAliasMap_
-        self.d.fieldsNamesUnlock_ = od.fieldsNamesUnlock_
-        self.d.primaryKey_ = od.primaryKey_
-        self.d.concurWarn_ = od.concurWarn_
-        self.d.detectLocks_ = od.detectLocks_
-
-        #for it2 in od.fieldList_.values():
-        #    if not od.fieldList_[it2].d.associatedFieldName_.isEmpty():
-        #        od.fieldList_[it2].d.associatedField_ = self.field(od.fieldList_[it2].d.associatedFieldName_)
-        """        
+        self.d = copy.copy(other.d)    
     
 
     def indexFieldObject(self, position):
@@ -842,16 +818,18 @@ class FLTableMetaDataPrivate():
   
   
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, n = None, a = None, q = None):
         self.fieldList_ = []
         self.fieldsNamesUnlock_ = []
+        self.aliasFieldMap_ = {}
+        self.fieldAliasMap_ = {}
         #print("Vaciando field list ahora",  len(self.fieldList_))
-        if len(args) == 0:
+        if n == None:
             self.inicializeFLTableMetaDataPrivate()
-        elif len(args) == 1:
-            self.inicializeFLTableMetaDataPrivateS(args[0])
+        elif n and not a and not q:
+            self.inicializeFLTableMetaDataPrivateS(n)
         else:
-            self.inicializeNewFLTableMetaDataPrivate(args[0],args[1],args[2],args[3])    
+            self.inicializeNewFLTableMetaDataPrivate(n, a, q)    
         self.count_ = self.count_ + 1
 
         
@@ -884,7 +862,7 @@ class FLTableMetaDataPrivate():
 
     @param n Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def addFieldName(self, n):
         self.fieldsNames_.append(n.lower())
 
@@ -893,7 +871,7 @@ class FLTableMetaDataPrivate():
 
     @param n Nombre del campo
     """
-    @decorators.BetaImplementation
+
     def removeFieldName(self, n):
         
         if self.fieldsNames_:
@@ -908,17 +886,20 @@ class FLTableMetaDataPrivate():
 
     @param  f   Campo objeto cuyo alias se desea formatear
     """
-    @decorators.BetaImplementation
+
     def formatAlias(self,  f):
         if not f:
             return
         
-        alias = str(f.alias())
-        field = str(f.name().lower())
+        alias = f.alias()
+        field = f.name().lower()
         
-        if self.aliasFieldMap_.has_key(alias):
-            alias += "(%s)" % str(len(self.aliasFieldMap_) + 1)
-        
+        for aliasF in self.aliasFieldMap_:
+            if aliasF == alias:
+                alias = "%s(%s)" % (alias, str(len(self.aliasFieldMap_) + 1))
+                break
+            
+            
         f.d.alias_ = alias
         
         self.aliasFieldMap_[ alias ] = field
