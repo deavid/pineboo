@@ -18,7 +18,7 @@ class FLAction(ProjectClass):
     """
     Nombre de la accion
     """
-    name = None
+    name_ = None
 
     """
     Nombre del script asociado al formulario de edición de registros
@@ -61,10 +61,20 @@ class FLAction(ProjectClass):
     """
     constructor.
     """
-    def __init__(self, name = None):
+    def __init__(self, action = None):
         super(FLAction, self).__init__()
-        if name:
-            self.setName(name)
+        if action:
+            if isinstance(action, str):
+                self.setName(action)
+            else:
+                self.setName(action.name)
+                self.setScriptForm(action.mainscript)
+                self.setScriptFormRecord(action.script)
+                self.setForm(action.mainform)
+                self.setFormRecord(action.form)
+                self.setCaption(action.alias)
+                
+    
     """
     Establece el nombre de la accion
     """
@@ -75,13 +85,13 @@ class FLAction(ProjectClass):
     Establece el nombre del script asociado al formulario de edición de registros
     """
     def setScriptFormRecord(self, s):
-        self.scriptFormRecord_ = s + ".qs"
+        self.scriptFormRecord_ = "%s.qs" % s
 
     """
     Establece el nombre del script asociado al formulario maestro
     """
     def setScriptForm(self, s):
-        self.scriptForm_ = s + ".qs"
+        self.scriptForm_ = "%s.qs" % s
     
     """
     Establece el nombre de la tabla origen del formulario maestro
@@ -93,17 +103,16 @@ class FLAction(ProjectClass):
     Establece el nombre del formulario maestro
     """
     def setForm(self, f):
-        self.form_ = f + ".ui"
+        self.form_ = "%s.ui" % f
 
     """
     Establece el nombre del formulario de edición de registros
     """
     def setFormRecord(self, f):
-        self.formRecord_ = f + ".ui"
+        self.formRecord_ = "%s.ui" % f
     """
     Establece el texto de la barra de título del formulario maestro
     """
-    @decorators.NotImplementedWarn
     def setCaption(self, c):
         self.caption_ = c
 
