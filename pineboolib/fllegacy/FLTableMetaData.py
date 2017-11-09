@@ -637,8 +637,9 @@ class FLTableMetaData(ProjectClass):
       que el campo consultado no pertenezca a ninguna clave compuesta devuelve 0
     """
     def fieldListOfCompoundKey(self, fN):
-        if self.d.compoundKey_ and self.d.compoundKey_.hasField(fN):
-            return self.d.compoundKey_.fieldList()
+        if self.d.compoundKey_:
+            if self.d.compoundKey_.hasField(fN):
+                return self.d.compoundKey_.fieldList()
         return None
 
     """

@@ -1603,7 +1603,7 @@ class FLSqlCursor(ProjectClass):
                         if not tMD.inCache():
                             del tMD
                 
-                fieldListCK = self.d.metadata_.fieldListOfCompoundKey(fiName)
+                fieldListCK = self.metadata().fieldListOfCompoundKey(fiName)
                 if fieldListCK and not checkedCK and self.d.modeAccess_ == self.Insert:
                     if fieldListCK:
                         filter = None
@@ -1614,7 +1614,7 @@ class FLSqlCursor(ProjectClass):
                             if filter == None:
                                 filter = self.d.db_.manager().formatAssignValue(fieldCK, sCK, True)
                             else:
-                                filter = "%s AND %s" % (filter, self.d.db_.manager().formatAssignValue(FieldCK, sCK, True))
+                                filter = "%s AND %s" % (filter, self.d.db_.manager().formatAssignValue(fieldCK, sCK, True))
                             if field == None:
                                 field = fieldCK.alias()
                             else:
@@ -1633,13 +1633,13 @@ class FLSqlCursor(ProjectClass):
                         q.exec_()
                         if q.next():
                             #msg = msg + "\n" + fields + FLUtil.tr(" : Requiere valor único, y ya hay otro registro con el valor %1").arg(valuesFields)
-                            msg = msg + "\n" + fields + " : Requiere valor único, y ya hay otro registro con el valor %s" % valuesFields
+                            msg = msg + "\n%s : Requiere valor único, y ya hay otro registro con el valor %s" % (field, valuesFields)
                         
                         checkedCK = True
                 
         
         elif self.d.modeAccess_ == self.Del:
-            fieldList = self.d.metadata_.fieldListObject()
+            fieldList = self.d.metadata_.fieldList()
             fiName = None
             s = None
             

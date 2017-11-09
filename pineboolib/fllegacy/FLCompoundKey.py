@@ -56,7 +56,7 @@ class FLCompoundKey(ProjectClass):
     """
     def hasField(self, fN):
         for i in self.fieldList_:
-            if i == str(fN):
+            if i.name() == str(fN):
                 return True
         
         return False
