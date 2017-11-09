@@ -2501,7 +2501,7 @@ class FLFieldDB(QtWidgets.QWidget):
         a = None
         
         v = self.cursor_.valueBuffer(field.name())
-        if not v or ( fMD and self.cursor_.bufferIsNull(fMD.name())):
+        if v == None or ( fMD and self.cursor_.bufferIsNull(fMD.name())):
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtWidgets.QMessageBox.Ok)
             return
 
@@ -2562,8 +2562,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 print("FLFieldDB : El campo asociado debe tener una relación M1")
                 return
             v = self.cursor_.valueBuffer(fMD.name())
-            if not v or self.cursor_.bufferIsNull(fMD.name()):
-                QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", str("Debe indicar un valor para", fMD.alias()))
+            if v == None or self.cursor_.bufferIsNull(fMD.name()):
+                QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", "Debe indicar un valor para %s" % fMD.alias())
                 return
 
             mng = self.cursor_.db().manager()
