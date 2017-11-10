@@ -354,7 +354,8 @@ class FLManager(ProjectClass):
                     continue
                 if not aBy:
                     aBy = it
-                    tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
+                    continue
+                tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
             
             if q and not quick:
                 qry = self.query(q, tmd)
@@ -1013,7 +1014,7 @@ class FLManager(ProjectClass):
         rC = FLRelationMetaData.RELATION_M1
         dC = False
         uC = False
-        cI = False
+        cI = True
         
         no = relation.firstChild()
         
