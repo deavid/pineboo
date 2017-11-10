@@ -46,23 +46,29 @@ class FLTableMetaData(ProjectClass):
             else:
                 self.inicializeFLTableMetaData(n)
         else:
-            self.inicializeNewFLTableMetaData(n, a, q)    
+            self.inicializeNewFLTableMetaData(n, a, q)
+        
+        
         
         
     def inicializeFLTableMetaData(self, other):
         self.d = FLTableMetaDataPrivate()
+        self.d.fieldsNames_ = [] 
         self.copy(other)
         
                                            
     def inicializeNewFLTableMetaData(self, n, a, q = None):
         self.d = FLTableMetaDataPrivate(n, a, q)
+        self.d.fieldsNames_ = [] 
     
         
     def inicializeFLTableMetaDataP(self, name):
         self.d = FLTableMetaDataPrivate(name)
         self.d.compoundKey_ = FLCompoundKey()
+        self.d.fieldsNames_ = [] 
         
         
+        """
         try:
             table = self._prj.tables[name]
         except:
@@ -80,7 +86,7 @@ class FLTableMetaData(ProjectClass):
             
             if field.type() == FLFieldMetaData.Unlock:
                 self.d.fieldsNamesUnlock_.append(field.name())
-
+        """
     """
     destructor
     """   
