@@ -102,7 +102,7 @@ class PNBuffer(ProjectClass):
                 #if field.type_ == "date":
                 #    self.setValue(field.name,"2000-01-01" )
                 #else:
-                self.setValue(name, None)
+                self.setValue(name, None, True, True)
                 return True
         
         return False
@@ -160,7 +160,7 @@ class PNBuffer(ProjectClass):
                 return None
 
 
-    def setValue(self, name, value, mark_ = True):
+    def setValue(self, name, value, mark_ = True, interno = False):
         if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
         
