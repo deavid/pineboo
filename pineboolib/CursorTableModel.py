@@ -97,6 +97,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.rowsLoaded = 0
         self.where_filters = {}
         self.where_filters["main-filter"] = None
+        self.where_filters["filter"] = None
         self.pendingRows = 0
         self.lastFetch = 0
         self.fetchedRows = 0

@@ -2599,8 +2599,8 @@ class FLSqlCursor(ProjectClass):
 
             else:
                 finalFilter = _filter
-        
-        if self.cursorRelation() and self.cursorRelation().modeAccess() == self.Insert:
+            
+        if self.cursorRelation() and self.cursorRelation().modeAccess() == self.Insert and not self.curFilter():
             finalFilter = "1 = 0"
         
         if finalFilter:
@@ -2720,10 +2720,8 @@ class FLSqlCursor(ProjectClass):
 
         if finalFilter and self.d.persistentFilter_ and not self.d.persistentFilter_ in finalFilter:
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
-
-        self.d.filter_ = finalFilter
-        #if self.d._model and getattr(self.d._model, "where_filters", None):
-        self.d._model.where_filters["filter"] = self.d.filter_
+        
+        self.d._model.where_filters["filter"] = finalFilter
 
 
     """
