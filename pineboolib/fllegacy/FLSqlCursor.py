@@ -76,7 +76,7 @@ class PNBuffer(ProjectClass):
                 else:
                     field.value = False
             
-            elif self.cursor_.d._model.value(row , field.name) == "None":
+            elif self.cursor_.d._model.value(row , field.name) in ("None",""):
                 field.value = None
                     
             else:
@@ -127,16 +127,18 @@ class PNBuffer(ProjectClass):
 
     def isNull(self, n):
         if isinstance(n, str):
-            if self.value(n) == None:
-                return True
-            else:
-                return False
+            for field in self.fieldList_:
+                if field.name == n:
+                    if field.value == None:
+                        return True
+                    else:
+                        return False
             
         else:
             i = 0
             for field in self.fieldList_:
                 if i == n:
-                    if self.value(field.name) == None:
+                    if field.value == None:
                         return True
                     else:
                         return False
@@ -1493,11 +1495,9 @@ class FLSqlCursor(ProjectClass):
                 s = None
                 if not self.d.buffer_.isNull(fiName):
                     s = self.d.buffer_.value(fiName)
-                    if not str(s):
-                        s = None
                 
                 fMD = field.associatedField()
-                if fMD and s and not s == None:
+                if fMD and not s == None:
                     if not field.relationM1():
                         #msg = msg + "\n" + (FLUtil.tr("FLSqlCursor : Error en metadatos, el campo %1 tiene un campo asociado pero no existe relación muchos a uno").arg(self.d.metadata_.name()) + ":" + fiName)
                         msg = msg + "\n" + "FLSqlCursor : Error en metadatos, el campo %s tiene un campo asociado pero no existe relación muchos a uno:%s" % (self.d.metadata_.name(), fiName)
@@ -1515,7 +1515,6 @@ class FLSqlCursor(ProjectClass):
                         ss = self.d.buffer_.value(fmdName)
                         #if not ss:
                             #ss = None
-                    
                     if ss:
                         filter = "%s AND %s" % (self.d.db_.manager().formatAssignValue(field.associatedFieldFilterTo(), fMD, ss, True), self.d.db_.manager().formatAssignValue(field.relationM1().foreignField(), field,s , True))
                         q = FLSqlQuery(None, self.d.db_.connectionName())
@@ -2581,7 +2580,6 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def select(self, _filter = None, sort = None ): #sort = QtCore.QSqlIndex()
-
         if not self.d.metadata_:
             return False
         
