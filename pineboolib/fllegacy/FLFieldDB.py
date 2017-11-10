@@ -1844,8 +1844,11 @@ class FLFieldDB(QtWidgets.QWidget):
                 pass
 
 
-            self.cursorAux = self.cursor_
-            curName = self.cursor_.metadata().name()
+            self.cursorAux = self.cursor()
+            if not self.cursor().metadata():
+                return
+            
+            curName = self.cursor().metadata().name()
             
             rMD = tMD.relation(self.fieldRelation_, self.foreignField_, curName)
             if not rMD:
