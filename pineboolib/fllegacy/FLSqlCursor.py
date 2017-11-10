@@ -2172,7 +2172,7 @@ class FLSqlCursor(ProjectClass):
             
             if not fN or self.d.relation_.foreignField() == fN:
                 self.d.buffer_ = None
-                self.refreshDelayed(500)
+                self.refreshDelayed(100)
         else:
             self.select()
             pos = self.atFrom()
@@ -2194,7 +2194,9 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def refreshDelayed(self, msec = 50):
-
+        if not self.d.buffer_ == None:
+            return
+        
         if not self._refreshDelayedTimer:
             time = QtCore.QTimer()
             time.singleShot(msec, self.refreshDelayed)
@@ -2580,7 +2582,7 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def select(self, _filter = None, sort = None ): #sort = QtCore.QSqlIndex()
-        if not self.d.metadata_:
+        if not self.metadata():
             return False
         
         
