@@ -103,8 +103,8 @@ class FLQPSQL(object):
         
             s = None
             
-            if v == None:
-                v = ""
+            #if v == None:
+            #    v = ""
             # TODO: psycopg2.mogrify ???
 
             if type_ == "bool" or type_ == "unlock":
