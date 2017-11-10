@@ -2568,11 +2568,10 @@ class FLFieldDB(QtWidgets.QWidget):
 
             mng = self.cursor_.db().manager()
             c = FLSqlCursor(field.relationM1().foreignTable())
-            c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
+            #c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
 
-            if c.size() > 0:
-                c.next()
-
+            #if c.size() > 0:
+            #    c.next()
             if not self.actionName_:
                 a = mng.action(field.relationM1().foreignTable())
             else:
@@ -2580,10 +2579,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 a.setTable(field.relationM1().foreignField())
             
             
-            
             f = FLFormSearchDB(c, a.name(), None)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
-
+            f.setFilter(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
         else:
             mng = self.cursor_.db().manager()
             if not self.actionName_:
@@ -2628,6 +2626,7 @@ class FLFieldDB(QtWidgets.QWidget):
             c.deletelater()
         if v:
             #self.setValue("")
+            print("FIELDNAME", self.fieldName_, v)
             self.setValue(v)
         
 
