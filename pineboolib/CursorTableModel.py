@@ -377,7 +377,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if not wfilter: continue
             if not where_filter:
                 where_filter = wfilter
-            else:
+            elif not wfilter in where_filter:
                 where_filter += " AND " + wfilter
         if not where_filter:
             where_filter = "1 = 1"
