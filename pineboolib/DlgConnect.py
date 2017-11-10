@@ -51,11 +51,11 @@ class DlgConnect(QtWidgets.QWidget):
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
         
-        self.ui.pbnStart.clicked.connect(self.conectar)
+        self.ui.pbnStart.clicked.connect(self.on_click)
         self.ui.pbnSearchFolder.clicked.connect(self.findPathProject)
 
         # MODIFICACION 4 PARA CONECTOR SQLITE : DEFINIMOS LO QUE HACEN LOS BOTONES nuevos 
-        self.ui.pbnCargarDatos.clicked.connect(self.on_click)
+        self.ui.pbnCargarDatos.clicked.connect(self.ChargeProject)
         self.tableWidget.doubleClicked.connect(self.on_click)
         #self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
         self.ui.pbnBorrarProyecto.clicked.connect(self.DeleteProject)
