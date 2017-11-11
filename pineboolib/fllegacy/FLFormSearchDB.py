@@ -64,7 +64,7 @@ class FLFormSearchDB(FLFormDB):
              
             
             self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
-            action = self.cursor_.action()
+            action = self.cursor_._action
             self.accepted_ = False
 
         elif isinstance(args[0], FLSqlCursor):
@@ -77,7 +77,7 @@ class FLFormSearchDB(FLFormDB):
                 name = args[1]
             
             self.cursor_ = args[0]
-            action = self.cursor_.action()
+            action = self.cursor_._action
             
         
         elif len(args) == 2:

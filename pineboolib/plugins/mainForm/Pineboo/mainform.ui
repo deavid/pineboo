@@ -13,200 +13,91 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_4">
-   <item>
-    <widget class="QMenuBar" name="menubar">
-     <property name="defaultUp">
-      <bool>false</bool>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>413</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="defaultUp">
+    <bool>false</bool>
+   </property>
+   <property name="nativeMenuBar">
+    <bool>false</bool>
+   </property>
+   <widget class="QMenu" name="menuPineboo">
+    <property name="title">
+     <string>Pineboo</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionSalir"/>
+   </widget>
+   <widget class="QMenu" name="menuConfiguracion">
+    <property name="title">
+     <string>Configuración</string>
+    </property>
+    <addaction name="actionEstilo"/>
+    <addaction name="actionTipografia"/>
+   </widget>
+   <widget class="QMenu" name="menuVentanas">
+    <property name="title">
+     <string>Ventana</string>
+    </property>
+    <widget class="QMenu" name="menuVistas">
+     <property name="title">
+      <string>Vistas</string>
      </property>
-     <property name="nativeMenuBar">
-      <bool>false</bool>
-     </property>
-     <widget class="QMenu" name="menuPineboo">
-      <property name="title">
-       <string>Pineboo</string>
-      </property>
-      <addaction name="separator"/>
-      <addaction name="actionSalir"/>
-     </widget>
-     <widget class="QMenu" name="menuConfiguracion">
-      <property name="title">
-       <string>Configuración</string>
-      </property>
-      <addaction name="actionEstilo"/>
-      <addaction name="actionTipografia"/>
-     </widget>
-     <widget class="QMenu" name="menuVentanas">
-      <property name="title">
-       <string>Ventana</string>
-      </property>
-      <widget class="QMenu" name="menuVistas">
-       <property name="title">
-        <string>Vistas</string>
-       </property>
-       <addaction name="actionFavoritos"/>
-       <addaction name="actionModulos"/>
-       <addaction name="separator"/>
-       <addaction name="actionAlinear"/>
-      </widget>
-      <addaction name="menuVistas"/>
-     </widget>
-     <widget class="QMenu" name="menuAyuda">
-      <property name="title">
-       <string>Ayuda</string>
-      </property>
-      <addaction name="actionAcerda_de_Pineboo"/>
-      <addaction name="actionAcerca_de_Qt"/>
-     </widget>
-     <addaction name="menuPineboo"/>
-     <addaction name="menuConfiguracion"/>
-     <addaction name="menuVentanas"/>
-     <addaction name="menuAyuda"/>
+     <addaction name="actionFavoritos"/>
+     <addaction name="actionModulos"/>
+     <addaction name="separator"/>
+     <addaction name="actionAlinear"/>
     </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item>
-        <widget class="QDockWidget" name="dockWidget">
-         <property name="windowTitle">
-          <string>Favoritos</string>
-         </property>
-         <widget class="QWidget" name="dockWidgetContents">
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="0">
-            <widget class="QListView" name="listView"/>
-           </item>
-          </layout>
-          <zorder>dockAreas</zorder>
-          <zorder>listView</zorder>
-         </widget>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDockWidget" name="dockAreas">
-         <property name="floating">
-          <bool>false</bool>
-         </property>
-         <property name="features">
-          <set>QDockWidget::AllDockWidgetFeatures</set>
-         </property>
-         <property name="windowTitle">
-          <string>Módulos</string>
-         </property>
-         <widget class="QWidget" name="dockWidgetContents_2">
-          <layout class="QVBoxLayout" name="verticalLayout">
-           <item>
-            <widget class="QTabWidget" name="areasTab">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-               <horstretch>7</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>180</width>
-               <height>250</height>
-              </size>
-             </property>
-             <property name="font">
-              <font>
-               <family>Noto Sans</family>
-               <pointsize>8</pointsize>
-              </font>
-             </property>
-             <property name="focusPolicy">
-              <enum>Qt::NoFocus</enum>
-             </property>
-             <property name="tabPosition">
-              <enum>QTabWidget::West</enum>
-             </property>
-             <property name="tabShape">
-              <enum>QTabWidget::Rounded</enum>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>8</width>
-               <height>8</height>
-              </size>
-             </property>
-             <property name="elideMode">
-              <enum>Qt::ElideLeft</enum>
-             </property>
-             <property name="documentMode">
-              <bool>true</bool>
-             </property>
-             <widget class="QWidget" name="areasTabPage1">
-              <attribute name="title">
-               <string/>
-              </attribute>
-              <layout class="QVBoxLayout" name="verticalLayout_2">
-               <property name="spacing">
-                <number>1</number>
-               </property>
-               <property name="sizeConstraint">
-                <enum>QLayout::SetNoConstraint</enum>
-               </property>
-               <property name="leftMargin">
-                <number>1</number>
-               </property>
-               <property name="topMargin">
-                <number>1</number>
-               </property>
-               <property name="rightMargin">
-                <number>1</number>
-               </property>
-               <property name="bottomMargin">
-                <number>1</number>
-               </property>
-              </layout>
-             </widget>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QTabWidget" name="formTab">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-         <horstretch>20</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <family>Noto Sans</family>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="tab_4">
-        <attribute name="title">
-         <string>Tab</string>
-        </attribute>
-       </widget>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QStatusBar" name="statusbar"/>
-   </item>
-  </layout>
+    <addaction name="menuVistas"/>
+   </widget>
+   <widget class="QMenu" name="menuAyuda">
+    <property name="title">
+     <string>Ayuda</string>
+    </property>
+    <addaction name="actionAcerda_de_Pineboo"/>
+    <addaction name="actionAcerca_de_Qt"/>
+   </widget>
+   <addaction name="menuPineboo"/>
+   <addaction name="menuConfiguracion"/>
+   <addaction name="menuVentanas"/>
+   <addaction name="menuAyuda"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>569</y>
+     <width>20</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
   <action name="actionSalir">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset theme="exit"/>
+    <iconset theme="exit">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Salir</string>
@@ -267,11 +158,6 @@
     <string>Alinear</string>
    </property>
   </action>
-  <zorder>centralwidget</zorder>
-  <zorder>menubar</zorder>
-  <zorder>dockAreas</zorder>
-  <zorder>dockWidget</zorder>
-  <zorder>statusbar</zorder>
  </widget>
  <resources/>
  <connections>
@@ -280,6 +166,22 @@
    <signal>toggled(bool)</signal>
    <receiver>Form</receiver>
    <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAcerca_de_Qt</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>Form</receiver>
+   <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

@@ -103,8 +103,8 @@ class FLQPSQL(object):
         
             s = None
             
-            if v == None:
-                v = ""
+            #if v == None:
+            #    v = ""
             # TODO: psycopg2.mogrify ???
 
             if type_ == "bool" or type_ == "unlock":
@@ -154,7 +154,7 @@ class FLQPSQL(object):
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s" % n, traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s " % (n, traceback.format_exc()))
             return False
         
         return True 
@@ -173,7 +173,7 @@ class FLQPSQL(object):
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" % n, traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s" % (n, traceback.format_exc()))
             return False
         
         return True
@@ -194,7 +194,7 @@ class FLQPSQL(object):
             cursor.execute("COMMIT TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            qWarning("PSQLDriver:: No se pudo aceptar la transacción COMMIT",  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo aceptar la transacción COMMIT\n %s" %  traceback.format_exc())
             return False
         
         return True
@@ -209,7 +209,7 @@ class FLQPSQL(object):
             cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-            qWarning("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK",  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK\n %s" %  traceback.format_exc())
             return False
         
         return True
@@ -224,7 +224,7 @@ class FLQPSQL(object):
             cursor.execute("BEGIN TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN")
-            qWarning("PSQLDriver:: No se pudo crear la transacción BEGIN",  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo crear la transacción BEGIN\n %s" %  traceback.format_exc())
             return False
         
         return True
@@ -240,7 +240,7 @@ class FLQPSQL(object):
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" % n,  traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (n,  traceback.format_exc()))
         
             return False
         
@@ -259,13 +259,13 @@ class FLQPSQL(object):
         try:
             cursor.execute(sql)
         except Exception:
-            qWarning("CursorTableModel.Refresh", traceback.format_exc())
+            qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
     
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         try:
             cursor.execute("FETCH %d FROM %s" % (number, curname))
         except Exception:
-            qWarning("PSQLDriver.refreshFetch", traceback.format_exc())
+            qWarning("PSQLDriver.refreshFetch\n %s" % traceback.format_exc())
     
     def useThreads(self):
         return True

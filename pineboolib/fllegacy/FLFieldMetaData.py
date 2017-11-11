@@ -398,6 +398,13 @@ class FLFieldMetaData(ProjectClass):
     def defaultValue(self):
         if self.d.defaultValue_ in (None,"null"):
             self.d.defaultValue_ = None
+        
+        if self.d.type_ == "bool":
+            if self.d.defaultValue_ == "true":
+                self.d.defaultValue_ = True
+            else:
+                self.d.defaultValue_ = False
+        
         return self.d.defaultValue_
 
     """

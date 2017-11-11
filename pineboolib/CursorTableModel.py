@@ -97,6 +97,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.rowsLoaded = 0
         self.where_filters = {}
         self.where_filters["main-filter"] = None
+        self.where_filters["filter"] = None
         self.pendingRows = 0
         self.lastFetch = 0
         self.fetchedRows = 0
@@ -377,7 +378,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if not wfilter: continue
             if not where_filter:
                 where_filter = wfilter
-            else:
+            elif not wfilter in where_filter:
                 where_filter += " AND " + wfilter
         if not where_filter:
             where_filter = "1 = 1"
@@ -401,7 +402,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
             
             return
-
+        
+        if not self.tableMetadata():
+            return
+        
         for n,field in enumerate(self.tableMetadata().fieldList()):
             #if field.visibleGrid():
             #    sql_fields.append(field.name())

@@ -326,7 +326,7 @@ class FormDBWidget(QtWidgets.QWidget):
             ret = None
         else:
             if ret is None:
-                qWarning("WARN: No se encontró el control %r" % childName)
+                qWarning("WARN: No se encontro el control %s" % childName)
         #else:
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
         return ret

@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
-
-from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators, fllegacy
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.utils import DefFun
-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import qWarning
 from PyQt5.QtCore import QVariant, QDate
 
+from pineboolib import decorators, fllegacy
+
+from pineboolib.utils import DefFun, XMLStruct
+from pineboolib.CursorTableModel import CursorTableModel
+from pineboolib.flcontrols import ProjectClass
+
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
-
-from pineboolib.CursorTableModel import CursorTableModel
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.utils import XMLStruct
+from pineboolib.fllegacy.FLAction import FLAction
 
-import hashlib, traceback, weakref
-import copy
-from PyQt5.Qt import qWarning
-try:
-    QString = unicode
-except NameError:
+import hashlib, traceback, weakref, copy
+
+
+#try:
+#    QString = unicode
+#except NameError:
     # Python 3
-    QString = str
+#QString = str
 
 class Struct(object):
     pass
@@ -76,7 +76,7 @@ class PNBuffer(ProjectClass):
                 else:
                     field.value = False
             
-            elif self.cursor_.d._model.value(row , field.name) == "None":
+            elif self.cursor_.d._model.value(row , field.name) in ("None",""):
                 field.value = None
                     
             else:
@@ -102,21 +102,14 @@ class PNBuffer(ProjectClass):
                 #if field.type_ == "date":
                 #    self.setValue(field.name,"2000-01-01" )
                 #else:
-                self.setValue(name, None)
+                self.setValue(name, None, True, True)
                 return True
         
         return False
 
 
     def isGenerated(self, name):
-        curName = self.cursor_.d.curName_
-        field = self.cursor_.d.db_.manager().metadata(curName).field(name)
-        if not field:
-            retorno = True
-        else:
-            retorno = field.generated()
-            
-        return retorno
+        return self.cursor_.metadata().field(name).generated()
 
 
     def clearValues(self, b):
@@ -134,12 +127,13 @@ class PNBuffer(ProjectClass):
 
     def isNull(self, n):
         if isinstance(n, str):
-            for field in  self.fieldList_:
-                if field.name == n:                
+            for field in self.fieldList_:
+                if field.name == n:
                     if field.value == None:
                         return True
                     else:
                         return False
+            
         else:
             i = 0
             for field in self.fieldList_:
@@ -166,7 +160,10 @@ class PNBuffer(ProjectClass):
                 return None
 
 
-    def setValue(self, name, value, mark_ = True):
+    def setValue(self, name, value, mark_ = True, interno = False):
+        #if not interno:
+        #    print("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
+        
         if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
         
@@ -234,6 +231,25 @@ class PNBuffer(ProjectClass):
         
             
         return value
+    
+    def hasChanged(self, name, value):
+        for field in  self.fieldList_:
+            if field.name == name and not field.value == None:
+                actual = field.value
+                new = value
+                type = field.type_
+                if type in ("string","stringlist"):
+                    return not (actual == new )
+                elif type in ("int","uint"):
+                    return not (int(actual) == int(new))
+                elif type == "double":
+                    return not (float(actual) == float(new))
+                else:
+                    return True
+        
+        #qWarning("PNBuffer.realChanged(%s): No existe el campo." % name)
+        return True
+        
             
             
                 
@@ -814,7 +830,8 @@ class FLSqlCursor(ProjectClass):
     @return  Objeto FLAction
     """
     def action(self):
-        return self._action
+        action = FLAction(self._action)
+        return str(action.name())
 
     def actionName(self):
         return self.d.curName_
@@ -965,11 +982,14 @@ class FLSqlCursor(ProjectClass):
     """
     
     def setValueBuffer(self, fN, v):
-        #if not self.d.buffer_ or not fN or not self.d.metadata_:
-            #return
+        if not self.buffer() or not fN or not self.metadata():
+            return
         
-        if not self.d.buffer_:  # Si no lo pongo malo....
-            self.primeUpdate()
+        if not self.buffer().hasChanged(fN, v):
+            return
+        
+        #if not self.d.buffer_:  # Si no lo pongo malo....
+        #    self.primeUpdate()
         
         if not fN or not self.d.metadata_:
             return
@@ -1003,7 +1023,8 @@ class FLSqlCursor(ProjectClass):
         
         else:
             self.d.buffer_.setValue(fN, vv)
-            
+        
+        #print("bufferChanged.emit(%s)" % fN)  
         self.bufferChanged.emit(fN)
 
     """
@@ -1500,11 +1521,9 @@ class FLSqlCursor(ProjectClass):
                 s = None
                 if not self.d.buffer_.isNull(fiName):
                     s = self.d.buffer_.value(fiName)
-                    if not str(s):
-                        s = None
                 
                 fMD = field.associatedField()
-                if fMD and s and not s == None:
+                if fMD and not s == None:
                     if not field.relationM1():
                         #msg = msg + "\n" + (FLUtil.tr("FLSqlCursor : Error en metadatos, el campo %1 tiene un campo asociado pero no existe relación muchos a uno").arg(self.d.metadata_.name()) + ":" + fiName)
                         msg = msg + "\n" + "FLSqlCursor : Error en metadatos, el campo %s tiene un campo asociado pero no existe relación muchos a uno:%s" % (self.d.metadata_.name(), fiName)
@@ -1522,7 +1541,6 @@ class FLSqlCursor(ProjectClass):
                         ss = self.d.buffer_.value(fmdName)
                         #if not ss:
                             #ss = None
-                    
                     if ss:
                         filter = "%s AND %s" % (self.d.db_.manager().formatAssignValue(field.associatedFieldFilterTo(), fMD, ss, True), self.d.db_.manager().formatAssignValue(field.relationM1().foreignField(), field,s , True))
                         q = FLSqlQuery(None, self.d.db_.connectionName())
@@ -2015,7 +2033,7 @@ class FLSqlCursor(ProjectClass):
 
     def setNull(self, name):
         if self.d.buffer_.setNull(name):
-            self.newBuffer.emit()
+            self.bufferChanged.emit(name)
 
     """
     Para obtener la base de datos sobre la que trabaja
@@ -2180,16 +2198,17 @@ class FLSqlCursor(ProjectClass):
             
             if not fN or self.d.relation_.foreignField() == fN:
                 self.d.buffer_ = None
-                self.refreshDelayed(500)
+                self.refreshDelayed(100)
+                return
         else:
             self.select()
             pos = self.atFrom()
             if pos > self.size():
                 pos = self.size() - 1
 
-            if not self.seek(pos, False, True):
-                self.d.buffer_ = None
-                self.newBuffer.emit()
+            #if not self.seek(pos, False, True):
+            #    self.d.buffer_ = None
+            #    self.newBuffer.emit()
 
 
     """
@@ -2202,7 +2221,9 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def refreshDelayed(self, msec = 50):
-
+        if not self.d.buffer_ == None:
+            return
+        
         if not self._refreshDelayedTimer:
             time = QtCore.QTimer()
             time.singleShot(msec, self.refreshDelayed)
@@ -2588,8 +2609,7 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def select(self, _filter = None, sort = None ): #sort = QtCore.QSqlIndex()
-
-        if not self.d.metadata_:
+        if not self.metadata():
             return False
         
         
@@ -2606,8 +2626,8 @@ class FLSqlCursor(ProjectClass):
 
             else:
                 finalFilter = _filter
-        
-        if self.cursorRelation() and self.cursorRelation().modeAccess() == self.Insert:
+            
+        if self.cursorRelation() and self.cursorRelation().modeAccess() == self.Insert and not self.curFilter():
             finalFilter = "1 = 0"
         
         if finalFilter:
@@ -2727,10 +2747,8 @@ class FLSqlCursor(ProjectClass):
 
         if finalFilter and self.d.persistentFilter_ and not self.d.persistentFilter_ in finalFilter:
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
-
-        self.d.filter_ = finalFilter
-        #if self.d._model and getattr(self.d._model, "where_filters", None):
-        self.d._model.where_filters["filter"] = self.d.filter_
+        
+        self.d._model.where_filters["filter"] = finalFilter
 
 
     """
@@ -2896,7 +2914,7 @@ class FLSqlCursor(ProjectClass):
 
             #pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
             self.model().Insert(self)
-            self.update(False)
+            #self.update(False)
 
             self.selection_pk(self.buffer().value(self.buffer().pK()))
 
@@ -2961,7 +2979,7 @@ class FLSqlCursor(ProjectClass):
             if v and not isinstance(v ,bool):
                 return False
             
-            fieldList = self.d.metadata_.fieldListObject()
+            fieldList = self.d.metadata_.fieldList()
             
             for field in fieldList:
                 

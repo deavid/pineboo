@@ -1844,8 +1844,11 @@ class FLFieldDB(QtWidgets.QWidget):
                 pass
 
 
-            self.cursorAux = self.cursor_
-            curName = self.cursor_.metadata().name()
+            self.cursorAux = self.cursor()
+            if not self.cursor().metadata():
+                return
+            
+            curName = self.cursor().metadata().name()
             
             rMD = tMD.relation(self.fieldRelation_, self.foreignField_, curName)
             if not rMD:
@@ -2501,7 +2504,7 @@ class FLFieldDB(QtWidgets.QWidget):
         a = None
         
         v = self.cursor_.valueBuffer(field.name())
-        if not v or ( fMD and self.cursor_.bufferIsNull(fMD.name())):
+        if v == None or ( fMD and self.cursor_.bufferIsNull(fMD.name())):
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtWidgets.QMessageBox.Ok)
             return
 
@@ -2562,17 +2565,16 @@ class FLFieldDB(QtWidgets.QWidget):
                 print("FLFieldDB : El campo asociado debe tener una relación M1")
                 return
             v = self.cursor_.valueBuffer(fMD.name())
-            if not v or self.cursor_.bufferIsNull(fMD.name()):
-                QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", str("Debe indicar un valor para", fMD.alias()))
+            if v == None or self.cursor_.bufferIsNull(fMD.name()):
+                QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso", "Debe indicar un valor para %s" % fMD.alias())
                 return
 
             mng = self.cursor_.db().manager()
             c = FLSqlCursor(field.relationM1().foreignTable())
-            c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
+            #c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
 
-            if c.size() > 0:
-                c.next()
-
+            #if c.size() > 0:
+            #    c.next()
             if not self.actionName_:
                 a = mng.action(field.relationM1().foreignTable())
             else:
@@ -2580,10 +2582,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 a.setTable(field.relationM1().foreignField())
             
             
-            
             f = FLFormSearchDB(c, a.name(), None)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
-
+            f.setFilter(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
         else:
             mng = self.cursor_.db().manager()
             if not self.actionName_:
