@@ -60,7 +60,8 @@ class DlgConnect(QtWidgets.QWidget):
         #self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
         self.ui.pbnBorrarProyecto.clicked.connect(self.DeleteProject)
         self.ui.pbnGuardarProyecto.clicked.connect(self.SaveProject)
-        #self.ui.pbnProyecto_Ejemplo.clicked.connect(self.SaveProjectEjemplo)
+        self.ui.pbnProyecto_Ejemplo.clicked.connect(self.SaveProjectExample)
+        self.ui.pbnEnebooImportButton.clicked.connect(self.SaveEnebooImport)
         # hasta aqui la modificación 4
         
         self.ui.leFolderSQLITE.setText(filedir("../projects"))
@@ -230,9 +231,8 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.ShowTable()        
 
-    """
     @QtCore.pyqtSlot()
-    def SaveProjectEjemplo(self):
+    def SaveProjectExample(self):
         #db = sqlite3.connect('pinebooconectores.sqlite')
         # Get a cursor object para CREAR la tabla "proyectos"
         cursor = self.dbProjects_.cursor()
@@ -241,15 +241,19 @@ class DlgConnect(QtWidgets.QWidget):
         self.dbProjects_.commit()
         # Get a cursor object  para AÑADIR CAMPOS DE EJEMPLO:
         cursor = self.dbProjects_.cursor()
-        name1 = ''
+        name1 = 'Empresa de Ejemplo'
         dbname1 = 'eneboobase'
-        dbtype1 = 'QPSQL'
+        dbtype1 = 'PostgreSQL'
         dbhost1 = 'localhost'
         dbport1 = '5432'
         username1 = 'postgres'
         password1 = 'postgres'
-        cursor.execute('''INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES (?,?,?,?,?,?,?)''', (name1, dbname1, dbtype1, dbhost1, dbport1, username1, password1))
-        self.dbProjects_.commit()
+        cursor = self.dbProjects_.cursor()
+        with self.dbProjects_:
+            sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (name1, dbname1, dbtype1, dbhost1, dbport1, username1, password1)
+            cursor.execute(sql)
+
+        self.ShowTable()
 
         # escribir los campos de la fila ELEGIDA en la zona de "CARGAR DATOS":
         self.leName.setText(str(name1))
@@ -262,5 +266,8 @@ class DlgConnect(QtWidgets.QWidget):
         # When we are done working with the DB we need to close the connection:
         #db.close()
         print ("PROYECTO DE EJEMPLO GRABADO y CARGADO")
-    """
-# hasta aqui la modificación 12        
+
+    @QtCore.pyqtSlot()
+    def SaveEnebooImport(self):
+        print ("Conexiones de Eneboo IMPORTADAS")
+      
