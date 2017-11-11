@@ -399,11 +399,8 @@ class FLFieldMetaData(ProjectClass):
         if self.d.defaultValue_ in (None,"null"):
             self.d.defaultValue_ = None
         
-        if self.d.type_ == "bool":
-            if self.d.defaultValue_ == "true":
-                self.d.defaultValue_ = True
-            else:
-                self.d.defaultValue_ = False
+        if self.d.type_ in ("bool","unlock") and isinstance(self.d.defaultValue_, str):
+            return (self.d.defaultValue_ == "true")
         
         return self.d.defaultValue_
 
