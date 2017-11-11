@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 
 from pineboolib.utils import filedir
 from pineboolib.PNSqlDrivers import PNSqlDrivers
+from pineboolib.fllegacy import FLUtil
 
 from builtins import str
 import sqlite3
@@ -269,5 +270,83 @@ class DlgConnect(QtWidgets.QWidget):
 
     @QtCore.pyqtSlot()
     def SaveEnebooImport(self):
+        """  
+        Este codigo es para reutilizar la configuracion del mismo equipo con Eneboo
+        Para conseguir la contraseña del fichero en texto plano:
+        password + username+ port+ hostname + db + lastDB
+        print config.get('DBA', 'passwordusuario5432localhostPostgresSQLapertus')
+        
+
+        from os.path import expanduser
+        HOME = expanduser("~")
+        import configparser
+        config = configparser.ConfigParser()
+        config.read( HOME + '/.qt/eneboorc')
+
+        A = config['DBA']['db']
+        B = config['DBA']['hostname']
+        C = config['DBA']['lastDB']
+        D = config['DBA']['username']
+        E = config['DBA']['port']
+        F = config['DBA']['rememberPasswd']
+
+        print (A)
+
+        
+        # Get a cursor object para CREAR la tabla "proyectos"
+        cursor = self.dbProjects_.cursor()
+        cursor.execute('''CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)
+''')
+        self.dbProjects_.commit()
+
+        # ABRO BUCLE PARA GRABAR VARIAS EMPRESAS DE ENEBOO
+        currentRowCount = self.tableWidget.rowCount() #cuento el número de filas TOTAL ACTUAL (ANTES DE TRAER LAS DE ENEBOO).
+        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.tableWidget.setAlternatingRowColors(True)
+        # escribir A PARTIR DE LA FILA EXISTENTE:
+        i = currentRowCount + 1
+        self.tableWidget.setRowCount(len(conectores))
+        for conector in conectores:
+            # add more if there is more columns in the database.        
+            # Get a cursor object  para AÑADIR CAMPOS:
+
+            # PASO-1: COPIAR LOS DATOS DE ENEBOO
+            cursor = self.dbProjects_.cursor()
+            nameE = FLUtil.readSettingEntry('Empresa de Ejemplo')
+            dbnameE = FLUtil.readSettingEntry()
+            dbtypeE = FLUtil.readSettingEntry('PostgreSQL')
+            dbhostE = FLUtil.readSettingEntry('localhost')
+            dbportE = FLUtil.readSettingEntry('5432')
+            usernameE = FLUtil.readSettingEntry('postgres')
+            passwordE = FLUtil.readSettingEntry('postgres')
+
+            # PASO-2: GRABAR LOS DATOS EN LA BASE DE DATOS PINEBOOCONECTORES
+            cursor = self.dbProjects_.cursor()
+            with self.dbProjects_:
+                sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (nameE, dbnameE, dbtypeE, dbhostE, dbportE, usernameE, passwordE)
+                cursor.execute(sql)
+            self.ShowTable()
+
+            # PASO-3: ESCRIBIR LOS DATOS DE ESA EMPRESA EN la zona de "CARGAR DATOS":
+            self.leName.setText(str(nameE))
+            self.leDBName.setText(str(dbnameE))
+            #self.leDBType.setText(str(dbtypeE))
+            self.leHostName.setText(str(dbhostE))
+            self.lePort.setText(str(dbportE))
+            self.leUserName.setText(str(usernameE))
+            self.lePassword.setText(str(passwordE))
+            self.tableWidget.setItem(i, 0, QTableWidgetItem(conector[1]))
+            self.tableWidget.setItem(i, 1, QTableWidgetItem(conector[2]))
+            self.tableWidget.setItem(i, 2, QTableWidgetItem(conector[3]))
+            self.tableWidget.setItem(i, 3, QTableWidgetItem(conector[4]))
+            self.tableWidget.setItem(i, 4, QTableWidgetItem(conector[5]))
+            self.tableWidget.setItem(i, 5, QTableWidgetItem(conector[6]))
+            self.tableWidget.setItem(i, 6, QTableWidgetItem(conector[7]))
+
+            i = i + 1
+
+"""
         print ("Conexiones de Eneboo IMPORTADAS")
       
