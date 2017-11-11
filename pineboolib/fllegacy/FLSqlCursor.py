@@ -2033,7 +2033,7 @@ class FLSqlCursor(ProjectClass):
 
     def setNull(self, name):
         if self.d.buffer_.setNull(name):
-            self.newBuffer.emit()
+            self.bufferChanged.emit(name)
 
     """
     Para obtener la base de datos sobre la que trabaja
@@ -2199,15 +2199,16 @@ class FLSqlCursor(ProjectClass):
             if not fN or self.d.relation_.foreignField() == fN:
                 self.d.buffer_ = None
                 self.refreshDelayed(100)
+                return
         else:
             self.select()
             pos = self.atFrom()
             if pos > self.size():
                 pos = self.size() - 1
 
-            if not self.seek(pos, False, True):
-                self.d.buffer_ = None
-                self.newBuffer.emit()
+            #if not self.seek(pos, False, True):
+            #    self.d.buffer_ = None
+            #    self.newBuffer.emit()
 
 
     """
@@ -2913,7 +2914,7 @@ class FLSqlCursor(ProjectClass):
 
             #pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
             self.model().Insert(self)
-            self.update(False)
+            #self.update(False)
 
             self.selection_pk(self.buffer().value(self.buffer().pK()))
 
