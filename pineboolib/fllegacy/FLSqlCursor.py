@@ -65,6 +65,7 @@ class PNBuffer(ProjectClass):
             field.type_ = field.metadata.type()
             field.modified = False
             field.originalValue = None
+            field.generated = campo.generated()
 
             self.line_ = None
             self.fieldList_.append(field)
@@ -82,7 +83,7 @@ class PNBuffer(ProjectClass):
     def primeUpdate(self, row = None):
         
         if self.inicialized_:
-            qWarning("(%s)PNBuffer. Se inicializa nuevamente el cursor" % self.cursor())
+            qWarning("(%s)PNBuffer. Se inicializa nuevamente el cursor" % self.cursor().curName())
         
         if row < 0 or row == None:
             row = self.cursor().currentRegister()
@@ -146,7 +147,7 @@ class PNBuffer(ProjectClass):
     @return bool (True es generado, False no es generado) 
     """
     def isGenerated(self, name):
-        return self.cursor().metadata().field(name).generated()
+        return self.field(name).generated
     
         """
     Setea que es generado un campo.
@@ -154,7 +155,9 @@ class PNBuffer(ProjectClass):
     @param value. True o False si el campo es generado
     """
     def setGenerated(self, f, value):
-        self.cursor().metadata().field(f.name).setGenerated(value)
+        if not isinstance(f, str):
+            f = f.name()
+        self.field(f).generated = value
 
     """
     Setea todos los valores a None y marca field.modified a True
@@ -194,9 +197,9 @@ class PNBuffer(ProjectClass):
     """
     def value(self, n):
         field = self.field(n)
-        ret = self.convertToType(field.value, field.type_)
-        #print("---->retornando",ret , type(ret), field.value)
-        return ret
+        #ret = self.convertToType(field.value, field.type_)
+        #print("---->retornando",ret , type(ret), field.value, field.name)
+        return field.value
 
 
     """
@@ -206,18 +209,17 @@ class PNBuffer(ProjectClass):
     @param mark_. Si True comprueba que ha cambiado respecto al valor asignado en primeUpdate y si ha cambiado lo marca como modificado (Por defecto a True)  
     """
     def setValue(self, name, value, mark_ = True):
-        #if not interno:
-        #    print("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
+        #print("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
         
-        if value and not isinstance(value, (int, float, str, datetime.time, datetime.date)):
+        if not value == None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
         
         field = self.field(name)
         if field == None:
             return False
         
-        if field.type_ in ("bool","unlock"):
-            value = (value == "true")
+        #if field.type_ in ("bool","unlock") and isinstance(value , str):
+        #    value = (value == "true")
                 
         if self.hasChanged(field.name, value):
                     #if not value == None:
@@ -244,46 +246,42 @@ class PNBuffer(ProjectClass):
     @param type_. tipo de campo a convertir_
     @return valor en tipo valido
     """
-    def convertToType(self, value, type_):
-        
-        if value in (u"None", None):
-            if type_ in ("bool","unlock"):
-                return False
-            elif type_ in ("int", "uint", "serial"):
-                return 0
-            elif type_ == "double":
-                return 0.00
-            elif type_ in ("string","pixmap","stringlist"):
-                return ""
-        
-        else:
-            if type_ in ("bool","unlock") and not isinstance(value, bool):
-                return (str(value) == "True")
-            elif type_ in ("int", "uint", "serial") and not isinstance( value, int):
-                return int(value)
-            elif type_ == "double" and not isinstance( value, float):
-                return float(value)
-            elif type_ in ("string","pixmap","stringlist") and not isinstance( value, str):
-                return str(value)
-            
-            elif type_ == "date" and not isinstance(value, str): 
-                 fv = value
-                 if isinstance(fv, QDate):
-                     return fv.toString("yyyy-MM-dd")
-                 else:
-                     return fv.strftime('%Y-%m-%d')
-                 
-            elif type_ == "date" and value == "null":
-                return None
-            
-            elif type_ == "time" and not isinstance(value, str): 
-                 fv = value
-                 return fv.strftime('%H:%M:%S')
-               
-            
-        
-            
-        return value
+    #def convertToType(self, value, type_):
+    #    
+    #    if value in (u"None", None):
+    #        if type_ in ("bool","unlock"):
+    #            value = False
+    #        elif type_ in ("int", "uint", "serial"):
+    #            value = 0
+    #        elif type_ == "double":
+    #            value = 0.00
+    #        elif type_ in ("string","pixmap","stringlist"):
+    #            value = ""
+    #    
+    #    else:
+    #        if type_ in ("bool","unlock") and isinstance(value, str):
+    #            value = (value == "true")
+    #        elif type_ in ("int", "uint", "serial") and not isinstance( value, int):
+    #            value =  int(value)
+    #        elif type_ == "double" and not isinstance( value, float):
+    #            value = float(value)
+    #        elif type_ in ("string","pixmap","stringlist") and not isinstance( value, str):
+    #            value = str(value)
+    #        
+    #        elif type_ == "date" and not isinstance(value, str): 
+    #             fv = value
+    #             if isinstance(fv, QDate):
+    #                 value = fv.toString("yyyy-MM-dd")
+    #             else:
+    #                 value = fv.strftime('%Y-%m-%d')
+    #             
+    #        elif type_ == "date" and value == "null":
+    #            value = None
+    #        
+    #        elif type_ == "time" and not isinstance(value, str): 
+    #             fv = value
+    #             value = fv.strftime('%H:%M:%S')      
+    #    return value
     
     """
     Comprueba si un campo tiene valor diferente. Esto es especialmente util para los número con decimales
