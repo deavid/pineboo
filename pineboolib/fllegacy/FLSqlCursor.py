@@ -161,6 +161,9 @@ class PNBuffer(ProjectClass):
 
 
     def setValue(self, name, value, mark_ = True, interno = False):
+        #if not interno:
+        #    print("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
+        
         if value and not isinstance(value, (int, float, str)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
         
@@ -228,6 +231,25 @@ class PNBuffer(ProjectClass):
         
             
         return value
+    
+    def hasChanged(self, name, value):
+        for field in  self.fieldList_:
+            if field.name == name and not field.value == None:
+                actual = field.value
+                new = value
+                type = field.type_
+                if type in ("string","stringlist"):
+                    return not (actual == new )
+                elif type in ("int","uint"):
+                    return not (int(actual) == int(new))
+                elif type == "double":
+                    return not (float(actual) == float(new))
+                else:
+                    return True
+        
+        #qWarning("PNBuffer.realChanged(%s): No existe el campo." % name)
+        return True
+        
             
             
                 
@@ -960,11 +982,14 @@ class FLSqlCursor(ProjectClass):
     """
     
     def setValueBuffer(self, fN, v):
-        #if not self.d.buffer_ or not fN or not self.d.metadata_:
-            #return
+        if not self.buffer() or not fN or not self.metadata():
+            return
         
-        if not self.d.buffer_:  # Si no lo pongo malo....
-            self.primeUpdate()
+        if not self.buffer().hasChanged(fN, v):
+            return
+        
+        #if not self.d.buffer_:  # Si no lo pongo malo....
+        #    self.primeUpdate()
         
         if not fN or not self.d.metadata_:
             return
@@ -998,7 +1023,8 @@ class FLSqlCursor(ProjectClass):
         
         else:
             self.d.buffer_.setValue(fN, vv)
-            
+        
+        #print("bufferChanged.emit(%s)" % fN)  
         self.bufferChanged.emit(fN)
 
     """
