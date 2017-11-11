@@ -16,7 +16,7 @@ from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLAction import FLAction
 
-import hashlib, traceback, weakref, copy
+import hashlib, traceback, weakref, copy, datetime
 
 
 #try:
@@ -29,7 +29,15 @@ class Struct(object):
     pass
 
 
-
+################################################################################
+################################################################################
+#######                                                                  #######
+#######                                                                  #######
+#######                           PNBuffer                               #######
+#######                                                                  #######
+#######                                                                  #######
+################################################################################
+################################################################################
 
 
 class PNBuffer(ProjectClass):
@@ -38,13 +46,13 @@ class PNBuffer(ProjectClass):
     cursor_ = None
     clearValues_ = False
     line_ = None
+    inicialized_ = False
 
     def __init__(self, cursor):
         super(PNBuffer,self).__init__()
         self.cursor_ = cursor
         self.fieldList_ = []
-        self.md5Sum_ = ""
-        tmd = self.cursor_.db().manager().metadata(self.cursor_.d.curName_)
+        tmd = self.cursor().metadata()
         if not tmd:
             return
         else:
@@ -61,57 +69,97 @@ class PNBuffer(ProjectClass):
             self.line_ = None
             self.fieldList_.append(field)
 
+    """
+    Retorna el numero de campos que componen el buffer
+    @return int
+    """
     def count(self):
-        return len(self.fieldList_)
-
+        return len(self.fieldsList())
+    """
+    Actualización inicial de los campos del buffer
+    @param row = Linea del cursor
+    """
     def primeUpdate(self, row = None):
-        if row < 0:
-            row = self.cursor_.d._currentregister
         
-        for field in self.fieldList_:
+        if self.inicialized_:
+            qWarning("(%s)PNBuffer. Se inicializa nuevamente el cursor" % self.cursor())
+        
+        if row < 0 or row == None:
+            row = self.cursor().currentRegister()
+        
+        for field in self.fieldsList():
             
             if field.type_ == "unlock" or field.type_ == "bool":
-                if self.cursor_.d._model.value(row , field.name) in ("True", True, 1):
-                    field.value = True
-                else:
-                    field.value = False
+                field.value = (self.cursor().model().value(row , field.name) in ("True", True, 1))
+                #    field.value = True
+                #else:
+                #    field.value = False
             
-            elif self.cursor_.d._model.value(row , field.name) in ("None",""):
+            elif self.cursor().model().value(row , field.name) in ("None",""):
                 field.value = None
                     
             else:
-                field.value = self.cursor_.d._model.value(row , field.name)
-            
+                field.value = self.cursor().model().value(row , field.name)
+            #val = self.cursor().model().value(row , field.name)
+            #if val == "None":
+            #    val = None
+            #self.setValue(field.name, val)
             
             field.originalValue = copy.copy(field.value)
-            self.cursor_.bufferChanged.emit(field.name)
+            #self.cursor().bufferChanged.emit(field.name)
             
-        self.line_ = self.cursor_.d._currentregister
+        self.setRow(self.cursor().currentRegister())
+        self.inicialized_ = True
         
-
+    
+    """
+    Borra los valores de todos los campos del buffer
+    """
     def primeDelete(self):
-        for field in self.fieldList_:
-            field.value = None
+        for field in self.fieldList():
+            self.setNull(field.name)
 
+    """
+    Indica la linea del cursor a la que hace referencia el buffer
+    @return int
+    """
     def row(self):
         return self.line_
+    
+    """
+    Setea la linea del cursor a la que se supone hace referencia el buffer
+    @param l = registro del cursor
+    """
+    def setRow(self, l):
+        self.line_ = l
 
+    """
+    Setea a None el campo especificado
+    @param name = Nombre del campo
+    """
     def setNull(self, name):
-        for field in  self.fieldList_:
-            if field.name == str(name):
-                #if field.type_ == "date":
-                #    self.setValue(field.name,"2000-01-01" )
-                #else:
-                self.setValue(name, None, True, True)
-                return True
-        
-        return False
+        field = self.field(name)
+        return self.setValue(name, None)
 
-
+    """
+    Indica si el campo es generado o no
+    @return bool (True es generado, False no es generado) 
+    """
     def isGenerated(self, name):
-        return self.cursor_.metadata().field(name).generated()
+        return self.cursor().metadata().field(name).generated()
+    
+        """
+    Setea que es generado un campo.
+    @param f. FLFieldMetadata campo a marcar
+    @param value. True o False si el campo es generado
+    """
+    def setGenerated(self, f, value):
+        self.cursor().metadata().field(f.name).setGenerated(value)
 
-
+    """
+    Setea todos los valores a None y marca field.modified a True
+    @param b bool (True, False no hace nada)
+    """
     def clearValues(self, b):
         if b:
             for field in  self.fieldList_:
@@ -119,98 +167,103 @@ class PNBuffer(ProjectClass):
                 field.modified = False
 
 
+    """
+    Indica si el buffer no se ha iniciado 
+    @return bool True está iniciado, False no está iniciado
+    """
     def isEmpty(self):
-        if len(self.fieldList_) <= 0:
-            return True
-        else:
-            return False
+        return self.inicialized_
 
+    """
+    Indica si un valor esta vacío
+    @param n (str,int) del campo a comprobar si está vacío
+    @return bool (True vacío, False contiene valores)
+    """
     def isNull(self, n):
-        if isinstance(n, str):
-            for field in self.fieldList_:
-                if field.name == n:
-                    if field.value == None:
-                        return True
-                    else:
-                        return False
-            
-        else:
-            i = 0
-            for field in self.fieldList_:
-                if i == n:
-                    if field.value == None:
-                        return True
-                    else:
-                        return False
-                i = i + 1
-
-
-        return True
-
-    def value(self, n):
+        field = self.field(n)
         
-        if not str(n).isdigit():
-            for field in  self.fieldList_:
-                if field.name.lower() == str(n).lower():
-                    return self.convertToType(field.value, field.type_)
-        else:
-            try:
-                return self.convertToType(self.fieldList_[n].value, self.fieldList_[n].type_)
-            except Exception:
-                return None
+        if field == None:
+            return True
+        
+        return (field.value == None)
+
+    """
+    Retorna el valor de un campo
+    @param n (str,int) del campo a recoger valor
+    @return valor del campo
+    """
+    def value(self, n):
+        field = self.field(n)
+        ret = self.convertToType(field.value, field.type_)
+        #print("---->retornando",ret , type(ret), field.value)
+        return ret
 
 
-    def setValue(self, name, value, mark_ = True, interno = False):
+    """
+    Setea el valor de un campo del buffer
+    @param name. Nombre del campo
+    @param value. Valor a asignar al campo
+    @param mark_. Si True comprueba que ha cambiado respecto al valor asignado en primeUpdate y si ha cambiado lo marca como modificado (Por defecto a True)  
+    """
+    def setValue(self, name, value, mark_ = True):
         #if not interno:
         #    print("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
         
-        if value and not isinstance(value, (int, float, str)):
+        if value and not isinstance(value, (int, float, str, datetime.time, datetime.date)):
             raise ValueError("No se admite el tipo %r , en setValue %r" % (type(value) ,value))
         
-        for field in  self.fieldList_:
-            if field.name == str(name):
-                if field.type_ in ("bool","unlock"):
-                    if value == "false":
-                        value = False
-                    elif value == "true":
-                        value = True
-                        
-                    value = str(value)
-                if not field.value == value:
+        field = self.field(name)
+        if field == None:
+            return False
+        
+        if field.type_ in ("bool","unlock"):
+            value = (value == "true")
+                
+        if self.hasChanged(field.name, value):
+                    #if not value == None:
+                    #    value = str(value)
                     
-                    if field.type_ == "date" and value == None: #Evitamos poner un date a None
-                        return
+            if field.type_ == "date" and value == None: #Evitamos poner un date a None
+                pass
+            else:
+                field.value = value
                     
-                    field.value = value
-                    if mark_:
-                        if not field.value == field.originalValue:
-                            field.modified = True
-                        else:
-                            field.modified = False
+            if mark_:
+                if not field.value == field.originalValue:
+                    field.modified = True
+                else:
+                    field.modified = False
                     #self.setMd5Sum(value)
-                    return
+        
+        return True
 
 
+    """
+    Convierte un valor del buffer en su tipo de dato válido
+    @param value. Valor a convertir
+    @param type_. tipo de campo a convertir_
+    @return valor en tipo valido
+    """
     def convertToType(self, value, type_):
         
         if value in (u"None", None):
             if type_ in ("bool","unlock"):
                 return False
-            elif type_ in ("int", "uint"):
-                return int(0)
+            elif type_ in ("int", "uint", "serial"):
+                return 0
             elif type_ == "double":
-                return float(0.00)
+                return 0.00
             elif type_ in ("string","pixmap","stringlist"):
                 return ""
         
         else:
-            if type_ in ("bool","unlock"):
+            if type_ in ("bool","unlock") and not isinstance(value, bool):
                 return (str(value) == "True")
-            elif type_ in ("int", "uint", "serial"):
+            elif type_ in ("int", "uint", "serial") and not isinstance( value, int):
                 return int(value)
-            elif type_ == "double":
+            elif type_ == "double" and not isinstance( value, float):
                 return float(value)
-            elif type_ in ("string","pixmap","stringlist"):
+            elif type_ in ("string","pixmap","stringlist") and not isinstance( value, str):
                 return str(value)
             
             elif type_ == "date" and not isinstance(value, str): 
@@ -232,106 +285,102 @@ class PNBuffer(ProjectClass):
             
         return value
     
+    """
+    Comprueba si un campo tiene valor diferente. Esto es especialmente util para los número con decimales
+    @return True si ha cambiado, False si es el mismo valor
+    """
+    
     def hasChanged(self, name, value):
-        for field in  self.fieldList_:
-            if field.name == name and not field.value == None:
-                actual = field.value
-                new = value
-                type = field.type_
-                if type in ("string","stringlist"):
-                    return not (actual == new )
-                elif type in ("int","uint"):
-                    return not (int(actual) == int(new))
-                elif type == "double":
-                    return not (float(actual) == float(new))
-                else:
-                    return True
+        field = self.field(name)
+        if field.value == None or value == None:
+            return True
         
-        #qWarning("PNBuffer.realChanged(%s): No existe el campo." % name)
+        if field.name == name:
+            actual = field.value
+            new = value
+            type = field.type_
+            if type in ("string","stringlist"):
+                return not (actual == new )
+            elif type in ("int","uint"):
+                return not (int(actual) == int(new))
+            elif type == "double":
+                return not (float(actual) == float(new))
+            else:
+                return True
+        
         return True
-        
-            
-            
-                
-        
-        
-        """
-
-        if fltype == "int":
-            _type = value.toInt()
-        elif fltype == "serial" or fltype == "uint":
-            _type = value.toUInt()
-        elif fltype == "bool" or fltype == "unlock":
-            _type = value.toBool()
-        elif fltype == "double":
-            _type = value.toDouble()
-        elif fltype ==  "time":
-            _type = value.toTime()
-        elif fltype == "date":
-            _type = value.toDate()
-        elif fltype == "string" or fltype == "pixmap" or fltype == "stringList":
-            _type = value.toString()
-        elif fltype == "bytearray":
-            _type = value.toByteArray()
-        """
-        #print("Retornando =", value)
-
-        #return value
-
-    def setGenerated(self, name, value):
-        for field in self.fieldList_:
-            if field.name == name:
-                self.cursor_.d.db_.manager().metadata(self.cursor_.d.curName_).field(name).setGenerated(True)
-                return
 
     """
-    Calcula el md5 de todos los valores contenidos en el buffer concatenando el md5 de un valor con el nombre del siguiente y calculando el nuevo md5
+    Indica al cursor que pertenecemos
+    @return Cursor al que pertenecemos
     """
-    def setMd5Sum(self, value):
-        value = str(value)
-        cadena = "%s_%s" % (self.md5Sum_, value)
-        tmp = hashlib.md5(value.encode()).hexdigest()
-        self.md5Sum_ = tmp
-
-    def md5Sum(self):
-        return self.md5Sum_
-
+    def cursor(self):
+        return self.cursor_
+            
+    
+    """
+    Retorna los campos del buffer modificados desde original
+    @return array Lista de campos modificados
+    """
     def modifiedFields(self):
         lista = []
-        for f in self.fieldList_:
-            if f.modified:
+        for f in self.fieldsList():
+            if f.modified == True:
                 lista.append(f.name)
 
         return lista
     
+    """
+    Setea todos los campos como no modificados
+    """
     def setNoModifiedFields(self):
-        for f in self.fieldList_:
+        for f in self.fieldsList():
             if f.modified:
                 f.modified = False
 
-
+    """
+    Indica que campo del buffer es clave primaria
+    @return Nombre del campo que es clave primaria
+    """    
     def pK(self):
-        for f in self.fieldList_:
+        for f in self.fieldsList():
             if f.metadata.isPrimaryKey():
                 return f.name
 
         print("PNBuffer.pk(): No se ha encontrado clave Primaria")
 
+    
+    """
+    Indica la posicion del buffer de un campo determinado
+    @param name
+    @return Posición del campo a buscar
+    """
     def indexField(self, name):
         i = 0
-        for f in self.fieldList_:
+        for f in self.fieldsList():
             if f.name == name:
                 return i
 
             i = i + 1
 
+    
     def fieldsList(self):
         return self.fieldList_
     
-    def field(self, name):
-        for f in self.fieldList_:
-            if f.name == name:
-                return f
+    def field(self, n):
+        if isinstance(n , str):
+            for f in self.fieldsList():
+                if f.name.lower() == n.lower():
+                    return f
+        else:
+            i = 0
+            for f in self.fieldsList():
+                if i == n:
+                    return f
+                
+                i = i + 1
+        
+        return None
 
 ################################################################################
 ################################################################################
