@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Connect</string>
+   <string>Ventana de Inicio del ERP PINEBOO</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../icons/pineboo-logo-16.png</normaloff>../icons/pineboo-logo-16.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -24,24 +28,11 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QGroupBox" name="groupBox">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="title">
-         <string/>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="conectar">
          <attribute name="title">
           <string>Conectar</string>
          </attribute>
@@ -141,9 +132,9 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="tab_2">
+        <widget class="QWidget" name="detalles">
          <attribute name="title">
-          <string>Conexión rápida</string>
+          <string>Detalles de conexión</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0">
@@ -314,6 +305,24 @@
            </widget>
           </item>
          </layout>
+        </widget>
+        <widget class="QWidget" name="otros">
+         <attribute name="title">
+          <string>Otras opciones</string>
+         </attribute>
+         <widget class="QPushButton" name="EnebooImportButton">
+          <property name="geometry">
+           <rect>
+            <x>40</x>
+            <y>40</y>
+            <width>221</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Eneboo: importar conexiones</string>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
