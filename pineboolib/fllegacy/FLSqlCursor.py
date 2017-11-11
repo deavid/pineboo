@@ -3429,9 +3429,9 @@ class FLSqlCursor(ProjectClass):
     que no pertenecen a la tabla principal
     """
     def setNotGenerateds(self):
-        if not self.d.metadata_ or not self.d.isQuery_ or not self.d.buffer_:
-            for f in self.d.metadata_.fieldList():
-                    self.d.buffer_.setGenerated(f, False)
+        if self.metadata() and self.d.isQuery_ and self.buffer():
+            for f in self.metadata().fieldList():
+                    self.buffer().setGenerated(f, False)
                  
     """
     Uso interno
