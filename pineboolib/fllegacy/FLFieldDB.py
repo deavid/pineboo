@@ -1390,15 +1390,16 @@ class FLFieldDB(QtWidgets.QWidget):
             except:
                 pass
             s = None
-            if not v is None:
+            if not v == None:
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
             elif nulo:
                 self.editor_.setText(field.defaultValue())
-            else:
-                self.editor_.setText("0.00")
-
+            
             self.editor_.textChanged.connect(self.updateValue)
+            
+            if v == None and not nulo:
+                self.editor_.setText("0.00")
 
 
         elif type_ == "string":
@@ -1437,12 +1438,15 @@ class FLFieldDB(QtWidgets.QWidget):
             except:
                 pass
             #s = None
-            if not v is None:
+            if not v == None:
                 self.editor_.setText(str(v))
             elif not nulo:
                     self.editor_.setText(field.defaultValue())
                     
             self.editor_.textChanged.connect(self.updateValue)
+            
+            if v == None and not nulo:
+                self.editor_.setText("0")
 
         elif type_ == "int":
             try:
@@ -1450,12 +1454,15 @@ class FLFieldDB(QtWidgets.QWidget):
             except:
                 pass
             
-            if not v is None:
+            if not v == None:
                 self.editor_.setText(str(v))
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
                 
             self.editor_.textChanged.connect(self.updateValue)
+            
+            if v == None and not nulo:
+                self.editor_.setText("0")
 
         elif type_ == "serial":
             try:
