@@ -1245,6 +1245,8 @@ class FLManager(ProjectClass):
     @return Valor de gran tamaño almacenado
     """
     def fetchLargeValue(self, refKey):
+        if refKey == None:
+            return None
         if not refKey[0:3] == "RK@":
             return None
         q = FLSqlQuery()
@@ -1268,8 +1270,6 @@ class FLManager(ProjectClass):
             v = v.split('","')
                 #print(v)
             return v
-        
-        return None
     
     """
     Uso interno. Indica el número de veces que se ha llamado a FLManager::init().
