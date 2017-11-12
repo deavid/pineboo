@@ -10,6 +10,7 @@ import traceback, datetime
 class FLSqlQuery(ProjectClass):
     
     countRefQuery = 0
+    invalidTables = False
     """
     Maneja consultas con características específicas para AbanQ, hereda de QSqlQuery.
 
@@ -23,17 +24,18 @@ class FLSqlQuery(ProjectClass):
         super(FLSqlQuery, self).__init__()
 
         self.d = FLSqlQueryPrivate(name)
-        self.d.db_ = pineboolib.project.conn.useConn()
+        self.d.db_ = self._prj.conn.useConn()
             
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
         self._posicion = None
         self._datos = None
         self._cursor = None
+        self.invalidTablesList = False
+        
+        
+        
         retornoQry = None
-        
-        
-        
         if name:
             retornoQry = pineboolib.project.conn.manager().query(name, self)
         
@@ -59,6 +61,10 @@ class FLSqlQuery(ProjectClass):
     Ejecuta la consulta
     """
     def exec(self, sql = None):
+        
+        if self.invalidTablesList == True:
+            return False
+        
         if not sql:
             sql = self.sql()
 
@@ -514,6 +520,10 @@ class FLSqlQuery(ProjectClass):
     def setTablesList(self, tl):
         self.d.tablesList_ = []
         for tabla in tl.split(","):
+            
+            if not self._prj.conn.manager().metadata(tabla):
+                self.invalidTablesList = True
+                
             self.d.tablesList_.append(tabla)
 
     """
