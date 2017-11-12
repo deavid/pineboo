@@ -175,7 +175,7 @@ class FLManager(ProjectClass):
         if isinstance(n , str):
             
             if not n or not self.db_.dbAux():
-                return False
+                return None
             
             ret = False
             acl = False
@@ -189,7 +189,7 @@ class FLManager(ProjectClass):
                 if not stream:
                     qWarning("FLManager : Error al cargar los metadatos para la tabla %s" % n)
                     
-                    return False
+                    return None
             
             #    if not key:
             #        key = n
@@ -213,17 +213,17 @@ class FLManager(ProjectClass):
                     if not stream:
                         qWarning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                         
-                        return False
+                        return None
                 
                 doc = QDomDocument(n)
                 if not util.domDocumentSetContent(doc, stream):
                     qWarning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
-                    return False
+                    return None
                 
                 docElem = doc.documentElement()
                 ret = self.metadata(docElem, quick)
                 if not ret:
-                    return False
+                    return None
                 
                 
                 if not isSysTable and not ret.isQuery():
