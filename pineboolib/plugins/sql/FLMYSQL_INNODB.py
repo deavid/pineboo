@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 
 
-class FLMYSQL_NO_INNODB(object):
+class FLMYSQL_INNODB(object):
     
     version_ = None
     conn_ = None
@@ -26,10 +26,10 @@ class FLMYSQL_NO_INNODB(object):
     def __init__(self):
         self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "FLMYSQL"
+        self.name_ = "FLMYSQL_INNODB"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "MySQL"
+        self.alias_ = "MySQL_INNODB (EN OBRAS)"
     
     def version(self):
         return self.version_
