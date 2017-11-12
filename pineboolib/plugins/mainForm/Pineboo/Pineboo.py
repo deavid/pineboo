@@ -64,6 +64,7 @@ class MainForm(QtWidgets.QMainWindow):
         
         
         self.addDockWidget(Qt.RightDockWidgetArea, self.dockForm)
+        self.dockForm.setMaximumWidth(950)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dockAreasTab)
         #self.dockAreasTab.show()
         #self.dockForm.show()
