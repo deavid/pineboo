@@ -197,9 +197,22 @@ class PNBuffer(ProjectClass):
     """
     def value(self, n):
         field = self.field(n)
+        
+        v = field.value
+        if field.value == None:
+            v = None
+        else:
+            if field.type_ in ("str", "pixmap", "time", "date"):
+                v = str(field.value)
+        
+            if field.type_ in ("int, uint"):
+                v = int(field.value)
+        
+            if field.type_ == "double":
+                v = float(field.value)
         #ret = self.convertToType(field.value, field.type_)
         #print("---->retornando",ret , type(ret), field.value, field.name)
-        return field.value
+        return v
 
 
     """
