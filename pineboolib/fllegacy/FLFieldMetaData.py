@@ -573,30 +573,38 @@ class FLFieldMetaData(ProjectClass):
         self = copy.copy(other)
     
     def formatAssignValue(self,fieldName , value, upper):
-        if self.type() in ("", None) or not fieldName:
+        if value == None or not fieldName:
             return "1 = 1"
         
         isText = False
-        if isinstance(value, str):
+        #if isinstance(value, str):
+        if self.type() in ("string, time, date, pixmap"):
             isText = True
         
-        formatV = ""
-        if isinstance(value, (int, float)):
-            formatV = str(value)
-        else: 
-            formatV = "'" + str(value) + "'"
+        formatV = None
+        
+        if isText:
+            formatV = "'%s'" % value
+        else:
+            formatV = value
+        
+        
+        #if isinstance(value, (int, float)):
+            #formatV = str(value)
+        #else: 
+            #formatV = "'" + str(value) + "'"
         
         #print("FORMATV es %s, %s y value era %s" % (formatV, type(formatV), value.toString()))
                  
-        if not formatV:
-            return "1 = 1"
+        #if formatV == None:
+        #    return "1 = 1"
         
         if upper and isText:
-            fName =str("upper(" + fieldName + ")")
+            fName ="upper(%s)" % fieldName
         else:
-            fName = str(fieldName)
+            fName = fieldName
         
-        return str(fName + " = " + formatV)
+        return "%s = %s" % (fName, formatV)
         
         
         
