@@ -61,7 +61,7 @@ class DlgConnect(QtWidgets.QWidget):
         #self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
         self.ui.pbnBorrarProyecto.clicked.connect(self.DeleteProject)
         self.ui.pbnGuardarProyecto.clicked.connect(self.SaveProject)
-        self.ui.pbnProyecto_Ejemplo.clicked.connect(self.SaveProjectExample)
+        self.ui.pbnProyectoEjemplo.clicked.connect(self.SaveProjectExample)
         self.ui.pbnEnebooImportButton.clicked.connect(self.SaveEnebooImport)
         # hasta aqui la modificación 4
         

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Ventana de Inicio del ERP PINEBOO</string>
+   <string>PINEBOO ERP LOGIN</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -310,19 +310,35 @@
          <attribute name="title">
           <string>Otras opciones</string>
          </attribute>
-         <widget class="QPushButton" name="EnebooImportButton">
-          <property name="geometry">
-           <rect>
-            <x>40</x>
-            <y>40</y>
-            <width>221</width>
-            <height>41</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Eneboo: importar conexiones</string>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QPushButton" name="pbnEnebooImportButton">
+            <property name="text">
+             <string>Importar conexiones</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbnProyectoEjemplo">
+            <property name="text">
+             <string>Crear empresa de ejemplo</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>274</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
@@ -344,7 +360,7 @@
       </size>
      </property>
      <property name="text">
-      <string>Start Pineboo</string>
+      <string>Iniciar</string>
      </property>
      <property name="default">
       <bool>true</bool>
