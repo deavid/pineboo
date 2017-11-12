@@ -1332,14 +1332,14 @@ class FLFieldDB(QtWidgets.QWidget):
                     if not where:
                         where = filterAc
                     else:
-                        where += str(" AND " + filterAc)
+                        where += " AND %s" % filterAc
 
                 #if not self.filter_:
                 #    q.setWhere(where)
                 #else:
                 #    q.setWhere(str(self.filter_ + " AND " + where))
                 if self.filter_:
-                    where = str(self.filter_ + " AND " + where)
+                    where = "%s AND %s" % (self.filter_, where)
                     
                 q.setWhere(where)
                 if q.exec_() and q.next():
@@ -2906,7 +2906,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         if not where:
                             where = filterAc
                         else:
-                            where = "% AND %s" % (where, filterAc)
+                            where = "%s AND %s" % (where, filterAc)
                     
                     if not self.filter_:
                         q.setWhere(where)
@@ -3125,12 +3125,12 @@ class FLFieldDB(QtWidgets.QWidget):
                                     if where.isEmpty():
                                         where = filterAc
                                     else:
-                                        where += " AND " + filterAc
+                                        where = "%s AND %s" % ( where, filterAc)
 
                                 if not self.filter_:
                                     q.setWhere(where)
                                 else:
-                                    q.setWhere(self.filter_ + " AND " + where)
+                                    q.setWhere("%s AND %s" % (self.filter_ + where))
 
                                 #print("where tipo", type(where))
                                 #print("Consulta = %s" % q.sql())
