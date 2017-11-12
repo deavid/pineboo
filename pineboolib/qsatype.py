@@ -649,9 +649,13 @@ class Dir(object):
     def entryList(self, patron):
         p = os.walk(self.path_)
         retorno = []
-        for file in os.listdir(self.path_):
-            if fnmatch.fnmatch(file, patron):
-                retorno.append(file)
+        try:
+            for file in os.listdir(self.path_):
+                if fnmatch.fnmatch(file, patron):
+                    retorno.append(file)
+        except:
+            pass
+        
         return retorno
 
 class File(QtCore.QFile):
