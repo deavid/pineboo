@@ -212,7 +212,7 @@ class PNBuffer(ProjectClass):
             if field.type_ in ("str", "pixmap", "time", "date"):
                 v = str(field.value)
         
-            if field.type_ in ("int, uint"):
+            if field.type_ in ("int, uint","serial"):
                 v = int(field.value)
         
             if field.type_ == "double":
