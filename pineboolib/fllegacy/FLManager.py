@@ -141,9 +141,11 @@ class FLManager(ProjectClass):
     """
     Acciones de finalización.
     """
-    @decorators.NotImplementedWarn
     def finish(self):
-        return True
+        self.dictKeyMetaData_ = {}
+        self.listTables_ = []
+        self.cacheMetaData_ = []
+        self.cacheAction_ = []
     
     """
     Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
