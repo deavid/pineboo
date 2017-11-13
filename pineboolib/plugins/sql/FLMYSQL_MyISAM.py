@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import QMessageBox
 
 
 
-class FLMYSQL_NO_INNODB(object):
+class FLMYSQL_MyISAM(object):
     
     version_ = None
     conn_ = None
@@ -26,10 +26,10 @@ class FLMYSQL_NO_INNODB(object):
     def __init__(self):
         self.version_ = "0.2"
         self.conn_ = None
-        self.name_ = "FLMYSQL"
+        self.name_ = "FLMYSQL_MyISAM"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "MySQL"
+        self.alias_ = "MySQL_MyISAM (EN OBRAS)"
     
     def version(self):
         return self.version_
@@ -226,6 +226,105 @@ class FLMYSQL_NO_INNODB(object):
         
         del t
         return ok  
+    
+    def sqlCreateTable(self, tmd):
+        util = FLUtil()
+        if not tmd:
+            return None
+        
+        primaryKey = None
+        sql = "CREATE TABLE %s (" % tmd.name()
+        seq = None
+        
+        fieldList = tmd.fieldList()
+        
+        unlocks = 0
+        for field in fieldList:
+            if field.type() == "unlock":
+                unlocks = unlocks + 1
+        
+        if unlocks > 1:
+            qWarning(u"FLManager : No se ha podido crear la tabla " +  tmd.name())
+            qWarning(u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
+            return None
+        
+        i = 1
+        for field in fieldList:
+            sql = sql + field.name()
+            if field.type() == "int":
+                sql = sql + " INT2"
+            elif field.type() == "uint":
+                sql = sql + " INT4"
+            elif field.type() in ("bool","unlock"):
+                sql = sql + " BOOLEAN"
+            elif field.type() == "double":
+                sql = sql + " FLOAT8"
+            elif field.type() == "time":
+                sql = sql + " TIME"
+            elif field.type() == "date":
+                sql = sql + " DATE"
+            elif field.type() == "pixmap":
+                sql = sql + " TEXT"
+            elif field.type() == "string":
+                sql = sql + " VARCHAR"
+            elif field.type() == "stringlist":
+                sql = sql + " TEXT"
+            elif field.type() == "bytearray":
+                sql = sql + " BYTEA"
+            elif field.type() == "serial":
+                seq = "%s_%s_seq" % (tmd.name(), field.name())
+                q = FLSqlQuery()
+                q.setForwardOnly(True)
+                q.exec_("SELECT relname FROM pg_class WHERE relname='%s'" % seq)
+                if not q.next():
+                    q.exec_("CREATE SEQUENCE %s" % seq)
+                
+                sql = sql + " INT4 DEFAULT NEXTVAL('%s')" % seq
+                del q
+        
+            longitud = field.length()
+            if longitud > 0:
+                sql = sql + "(%s)" % longitud
+            
+            if field.isPrimaryKey():
+                if primaryKey == None:
+                    sql = sql + " PRIMARY KEY"
+                else:
+                    qWarning(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
+                             QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
+                             field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
+                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, use FLCompoundKey para crear claves compuestas."))
+                    return None
+            else:
+                if field.isUnique():
+                    sql = sql + " UNIQUE"
+                if not field.allowNull():
+                    sql = sql + " NOT NULL"
+                else:
+                    sql = sql + " NULL"
+                
+            if not i == len(fieldList):
+                sql = sql + ","
+                i = i + 1
+        
+        sql = sql + ")"
+        
+        return sql
+    
+    def mismatchedTable(self, table1, tmd_or_table2, db_):
+        if isinstance(tmd_or_table2, str):
+            mtd = db_.manager().metadata(tmd_or_table2, True)
+            if not mtd:
+                return False
+            
+            return False
+            
+            
+            
+            
+        
+        else:
+            return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
             
 
             
