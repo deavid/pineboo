@@ -80,10 +80,17 @@ class PNBuffer(ProjectClass):
     Actualización inicial de los campos del buffer
     @param row = Linea del cursor
     """
-    def primeUpdate(self, row = None):
-        
+    
+    def primeInsert(self, row = None):
         if self.inicialized_:
             qWarning("(%s)PNBuffer. Se inicializa nuevamente el cursor" % self.cursor().curName())
+            
+        self.primeUpdate(row)
+        self.inicialized_ = True
+    
+    
+    def primeUpdate(self, row = None):
+        
         
         if row < 0 or row == None:
             row = self.cursor().currentRegister()
@@ -110,7 +117,7 @@ class PNBuffer(ProjectClass):
             #self.cursor().bufferChanged.emit(field.name)
             
         self.setRow(self.cursor().currentRegister())
-        self.inicialized_ = True
+
         
     
     """
@@ -2258,7 +2265,7 @@ class FLSqlCursor(ProjectClass):
             
             if not fN or self.d.relation_.foreignField() == fN:
                 self.d.buffer_ = None
-                self.refreshDelayed(100)
+                self.refreshDelayed()
                 return
         else:
             self.select()
@@ -2315,19 +2322,16 @@ class FLSqlCursor(ProjectClass):
 
 
     def primeInsert(self):
-         return PNBuffer(self)
+        if not self.buffer():
+            self.d.buffer_ = PNBuffer(self)
+        
+        self.buffer().primeInsert()
 
 
     def primeUpdate(self):
-        if not self.d.buffer_:
+        if not self.buffer():
             self.d.buffer_ = PNBuffer(self)
-            
-        
-        #if not self.baseFilter() or not self.d._currentregister == None:
-        #    self.d.buffer_.primeUpdate(self.at())
-        #    return
-        
-        self.d.buffer_.primeUpdate(self.at())
+        self.buffer().primeUpdate(self.at())
 
 
     def editBuffer(self, b = None):
@@ -2484,7 +2488,7 @@ class FLSqlCursor(ProjectClass):
 
         b = False
 
-        if not self.d.buffer_:
+        if self.buffer():
             b = True
 
 
@@ -2694,6 +2698,9 @@ class FLSqlCursor(ProjectClass):
             self.setFilter(finalFilter)
              
         self.model().refresh()
+        if self.cursorRelation() and self.modeAccess() == self.Browse:
+            self.d._currentregister = self.atFrom()
+            
         self.refreshBuffer()
         
         #if self.modeAccess() == self.Browse:
