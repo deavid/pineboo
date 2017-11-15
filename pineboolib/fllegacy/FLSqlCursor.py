@@ -196,7 +196,6 @@ class PNBuffer(ProjectClass):
             return True
         
         if field.type_ in ("bool","unlock"):
-            print("FIELD", field.name, field.value, self.value(field.name), not (self.value(field.name) in (True, False)))
             return not (self.value(field.name) in (True, False))
         
         return self.value(field.name) == None
