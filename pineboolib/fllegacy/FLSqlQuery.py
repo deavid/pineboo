@@ -32,6 +32,9 @@ class FLSqlQuery(ProjectClass):
         self._datos = None
         self._cursor = None
         self.invalidTablesList = False
+        self.d.select_ = None
+        self.d.fieldList_ = []
+        self.d.fieldMetaDataList_ = []
         
         
         
@@ -209,6 +212,10 @@ class FLSqlQuery(ProjectClass):
     
     def setSelect(self, s, sep = ","):
         self.d.select_ = s
+        
+        if isinstance(s, str) and sep in s:
+            s = s.replace(" ", "")
+            s = s.split(sep)
         #self.d.select_ = s.strip_whitespace()
         #self.d.select_ = self.d.select_.simplifyWhiteSpace()
         
@@ -219,16 +226,15 @@ class FLSqlQuery(ProjectClass):
             return
         
         #fieldListAux = s.split(sep)
-        for f in s:
-            f = str(f).strip()
+        #for f in s:
+        #    f = str(f).strip()
             
         
         table = None
         field = None
         self.d.fieldList_.clear()
         
-        if isinstance(s, str):
-            s = s.split(sep)
+
         
         for f in s:
             try:
