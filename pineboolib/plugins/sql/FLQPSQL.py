@@ -116,8 +116,11 @@ class FLQPSQL(object):
             elif type_ == "time":
                 s = "'%s'" % v
 
-            elif type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "serial":
-                s = v
+            elif type_ in ("uint","int","double","serial"):
+                if v == None:
+                    s = 0
+                else:
+                    s = v
 
             else:
                 v = auto_qt_translate_text(v)
