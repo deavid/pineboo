@@ -214,13 +214,22 @@ class PNBuffer(ProjectClass):
             v = None
         else:
             if field.type_ in ("str", "pixmap", "time", "date"):
-                v = str(field.value)
+                try:
+                    v = str(field.value)
+                except:
+                    v = ""
         
-            if field.type_ in ("int, uint","serial"):
-                v = int(field.value)
+            if field.type_ in ("int","uint","serial"):
+                try:
+                    v = int(field.value)
+                except:
+                    v = 0
         
             if field.type_ == "double":
-                v = float(field.value)
+                try:
+                    v = float(field.value)
+                except:
+                    v = 0.0
             
         if field.type_ in ("bool","unlock"):
             v = field.value in (True,"true")
@@ -317,19 +326,21 @@ class PNBuffer(ProjectClass):
     
     def hasChanged(self, name, value):
         field = self.field(name)
-        if field.value == None or value == None:
+        if value in (None,"None"):
             return True
         
         if field.name == name:
+            type = field.type_ 
             actual = field.value
-            new = value
-            type = field.type_
+            if actual in (None,"None"):
+                return True
+            
             if type in ("string","stringlist"):
-                return not (actual == new )
-            elif type in ("int","uint"):
-                return not (int(actual) == int(new))
+                return not (actual == value )
+            elif type in ("int","uint","serial"):
+                return not (int(actual) == int(value))
             elif type == "double":
-                return not (float(actual) == float(new))
+                return not (float(actual) == float(value))
             else:
                 return True
         
