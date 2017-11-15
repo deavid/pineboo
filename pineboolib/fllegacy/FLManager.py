@@ -202,7 +202,7 @@ class FLManager(ProjectClass):
                     if fi.name() == key:
                         ret = fi
                         break
-            elif isSysTable:
+            else:
                 for fi in self.cacheMetaDataSys_:
                     if fi.name() == key:
                         ret = fi
@@ -1163,6 +1163,7 @@ class FLManager(ProjectClass):
     @return TRUE si es una tabla de sistema
     """
     def isSystemTable(self, n):
+
         if not n[0:2] == "fl":
             return False
         

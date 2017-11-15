@@ -170,7 +170,13 @@ class FLManagerModules(ProjectClass):
     @return QString con el contenido del fichero o vacía en caso de error.
     """
     def contentCached(self, n, shaKey = None):
-        if not shaKey:
+        
+        data = None
+        modId = None
+        name_ = n[:n.index(".")]
+        ext_ = n[n.index(".") + 1:]
+        
+        if not shaKey and not self._prj.conn.manager().isSystemTable(name_):
             query = "SELECT sha FROM flfiles WHERE nombre='%s'" % n
             cursor = self.db_.cursor()
             try:
@@ -182,19 +188,21 @@ class FLManagerModules(ProjectClass):
                 shaKey = contenido[0]          
             
             
-            
-               
-            
-        data = None
-        modId = self._prj.conn.managerModules().idModuleOfFile(n)
-        name_ = n[:n.index(".")]
-        ext_ = n[n.index(".") + 1:]   
+                     
+
+        
+        if self._prj.conn.manager().isSystemTable(name_):
+            modId = "sys"
+        else:
+            modId = self._prj.conn.managerModules().idModuleOfFile(n)  
         if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" %(self._prj.dbname, modId, ext_, name_))):
             data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %(self._prj.dbname, modId, ext_, name_, shaKey, ext_)))
         elif os.path.exists(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_))):
             data = self.contentFS(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
         else:
             data = self.content(n)
+        
+        
         return data
 
     """
@@ -415,6 +423,9 @@ class FLManagerModules(ProjectClass):
     @return Identificador del módulo al que pertenece el fichero
     """
     def  idModuleOfFile(self, n):
+        if not isinstance(n , str):
+            n = n.toString()
+        
         query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
         cursor = self.db_.cursor()
         try:
