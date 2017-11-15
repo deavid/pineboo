@@ -195,7 +195,11 @@ class PNBuffer(ProjectClass):
         if field == None:
             return True
         
-        return (field.value == None)
+        if field.type_ in ("bool","unlock"):
+            print("FIELD", field.name, field.value, self.value(field.name), not (self.value(field.name) in (True, False)))
+            return not (self.value(field.name) in (True, False))
+        
+        return self.value(field.name) == None
 
     """
     Retorna el valor de un campo
@@ -217,6 +221,9 @@ class PNBuffer(ProjectClass):
         
             if field.type_ == "double":
                 v = float(field.value)
+            
+        if field.type_ in ("bool","unlock"):
+            v = field.value in (True,"true")
         #ret = self.convertToType(field.value, field.type_)
         #print("---->retornando",ret , type(ret), field.value, field.name)
         return v
