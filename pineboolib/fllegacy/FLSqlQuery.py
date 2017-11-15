@@ -213,13 +213,16 @@ class FLSqlQuery(ProjectClass):
     def setSelect(self, s, sep = ","):
         self.d.select_ = s
         
+        
         if isinstance(s, str) and sep in s:
             s = s.replace(" ", "")
             s = s.split(sep)
+        
+        
         #self.d.select_ = s.strip_whitespace()
         #self.d.select_ = self.d.select_.simplifyWhiteSpace()
         
-        if not isinstance(s, list) and not "*" in s:
+        if not isinstance(s, list) and not "*" == s:
             self.d.fieldList_.clear()
             self.d.fieldList_.append(s)
 
@@ -234,7 +237,7 @@ class FLSqlQuery(ProjectClass):
         field = None
         self.d.fieldList_.clear()
         
-
+        
         
         for f in s:
             try:
@@ -254,7 +257,8 @@ class FLSqlQuery(ProjectClass):
                 self.d.fieldList_.append(f)
             
         
-        self.d.select_ = ",".join(self.d.fieldList_)
+            self.d.select_ = ",".join(self.d.fieldList_)
+        
         
         
 
