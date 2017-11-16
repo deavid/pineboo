@@ -20,7 +20,7 @@ Es posible que exista más de una versión de Pineboo, cada una con distintas ap
 y tecnologías. Actualmente, en el momento de escribir esta documentación, solo existe una.
 
 El nombre de Pineboo viene de Pico-eneboo, y hace referencia que es un proyecto de 
-investigación, pensado más como una pequeña utilidad que como un programa real.
+investigación
 
 
 Aproximaciones existentes
@@ -48,18 +48,20 @@ Alcance actual de Pineboo
 Pineboo es capaz de conectarse a cualquier base de datos de Eneboo y realizar
 las siguientes tareas:
 
- - Listar los módulos
- - Listar las acciones posibles para un módulo
- - Iniciar el OpenDefaultForm() para una acción dada
+ - Funcionamientos habituales de las acciones
+ - Trabajos normales de cursor (afterCommit, beforeCommit, ...)
+ - Transacciones plenamente operativas sobre postgres
+ - Impresión con jasperPluging configurado
 
-Al iniciar una acción, el formulario es convertido al vuelo a Qt4 (con errores) y  
+
+Al iniciar una acción, el formulario es convertido al vuelo a Qt5 (con errores) y  
 el script QS es convertido a Python y ejecutado (con muchos más errores). Se 
 lanza el init() automáticamente.
 
 Las referencias entre módulos (flfacturac.iface.XYZ) funcionan con carga de módulo
 retrasada.
 
-La API de QSA y Eneboo está apenas empezada. En su mayoría la API existente son
+La API de QSA y Eneboo está en desarrollo. En la API aún existente son
 funciones y clases "fake", que desde el script, parece que funcionen pero no 
 realizan ningún trabajo. Esto permite ejecutar los scripts, pero no opera correctamente.
 
@@ -72,12 +74,6 @@ mande, sino otro inesperado. Un script podría de forma inadvertida borrar regis
 por fallos en la API implementada. Y aquí nadie se hace responsable de esto.
 
 Lo mejor es usarlo en bases de datos de desarrollo para evitar problemas.
-
-Actualmente, en el momento de escribir esta documentación, Pineboo no puede
-permutar la base de datos, porque carece de las API's para ello.
-
-No obstante esto podría cambiar en el futuro y estar la documentación 
-desactualizada.
 
 
 Cómo poner en marcha Pineboo
@@ -177,24 +173,21 @@ Hay que tener en cuenta que la API de FLSqlCursor está implementada parcialment
 La mayoría de señales no se envían aún y muchas de las funciones aún no tienen
 implementación.
 
-FLTableDB tiene una implementación mínima. Sólo se enlaza con el cursor por defecto
-y poco más. Esto es suficiente para ejecutar muchos de los ejemplos.
+FLTableDB tiene una implementación a medio completar. Sólo se enlaza con el cursor por defecto
+y más. Esto es suficiente para ejecutar muchos de los ejemplos.
 
 El resto de objetos de Eneboo no existen o tienen una implementación "hueca", es 
 decir, los métodos llegan a existir, pero no hacen nada.
 
 Los formularios con convertidos al vuelo, y aún requiere este proceso de muchos
-retoques. Las características más usadas funcionan, pero la gran mayoría de cosas
+retoques. Las características más usadas funcionan, pero muchas de las cosas
 que se pueden hacer en un formulario de Eneboo aún no son intepretadas correctamente.
-No obstante, debería ser suficiente para ejecutar muchos de los formularios master
-que existen.
 
 Para ejecutar los scripts se usan tres capas de compatibilidad: flcontrols, qsaglobals
-y qsatypes. En algunos casos no está aún claro cómo debería comportarse por ejemplo
-un Array. 
+y qsatypes. 
 
 Los ficheros son convertidos a python y guardados junto al fichero QS de cache.
 Por ejemplo, las conversiones de masterarticulos.qs se pueden ver en la ruta
-`tempdata/cache/flfactalma/file.qs/masterarticulos/`.
+`tempdata/cache/nombre_bd/flfactalma/file.qs/masterarticulos/`.
 
  
