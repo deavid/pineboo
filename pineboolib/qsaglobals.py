@@ -14,7 +14,7 @@ from pineboolib.flcontrols import ProjectClass
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
-from PyQt5.Qt import QMainWindow, QDate, QTextStream
+from PyQt5.Qt import QMainWindow, QDate, QTextStream, qWarning
 
 class File(object):
     
@@ -157,6 +157,16 @@ class SysType(object):
     
     def mainWidget(self):
         return pineboolib.project.main_window.ui
+    
+    def __getattr__(self, name):
+        obj = eval("sys.widget.%s" % name, pineboolib.qsaglobals.__dict__)
+        if obj:
+           return obj
+        else:
+           qWarning("No se encuentra sys.%s" % name) 
+        
+    
+        
         
 
        
