@@ -884,7 +884,8 @@ class FLSqlCursor(ProjectClass):
     """
     def metadata(self):
         if not self.d.metadata_:
-            qWarning("FLSqlCursor(%s) Esta devolviendo un metadata vacio" % self.curName())
+            #qWarning("FLSqlCursor(%s) Esta devolviendo un metadata vacio" % self.curName())
+            return None
         return self.d.metadata_
 
     """
