@@ -2983,8 +2983,8 @@ class FLSqlCursor(ProjectClass):
                 if v and not isinstance(v ,bool):
                     return False
 
-        if not self.checkIntegrity():
-            return False
+        #if not self.checkIntegrity():
+        #    return False
 
         pKN = self.d.metadata_.primaryKey()
         updated = False
