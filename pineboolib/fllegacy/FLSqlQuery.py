@@ -453,13 +453,16 @@ class FLSqlQuery(ProjectClass):
             pos = n
             name = self.posToFieldName(pos)
             
-            
+        
         
         if raw:
             return self.d.db_.fetchLargeValue(self._row[pos])
         else:
             
-            retorno = self._row[pos]
+            try:
+                retorno = self._row[pos]
+            except:
+                retorno = None
             
             if not type(retorno) in (str, int, bool, float, datetime.date) and not retorno == None:
                 print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" % (name, type(retorno), retorno))
