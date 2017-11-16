@@ -1499,12 +1499,11 @@ class FLSqlCursor(ProjectClass):
             return
 
         
-        self.refreshBuffer() #Hace doTransaction antes de abrir formulario y crear savepoint
-                 
-        self._action.openDefaultFormRecord(self)
+        if self.refreshBuffer(): #Hace doTransaction antes de abrir formulario y crear savepoint
+            self._action.openDefaultFormRecord(self)
 
-        if self.refreshBuffer():
-            self.updateBufferCopy()   
+            if self.refreshBuffer():
+                self.updateBufferCopy()   
 
 
 
@@ -2985,7 +2984,7 @@ class FLSqlCursor(ProjectClass):
                     return False
 
         if not self.checkIntegrity():
-            return
+            return False
 
         pKN = self.d.metadata_.primaryKey()
         updated = False
