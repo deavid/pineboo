@@ -892,7 +892,6 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.BetaImplementation
     def sqlInsert(self, t, fL, vL, connName="default"):
         
         if not len(fL) == len(vL):
@@ -922,7 +921,6 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.BetaImplementation
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
@@ -956,7 +954,6 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.BetaImplementation
     def sqlDelete(self, t, w, connName="default"):
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
