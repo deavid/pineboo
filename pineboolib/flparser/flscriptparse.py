@@ -40,13 +40,14 @@ def cnvrt(val):
 
 precedence = (
     ('nonassoc', 'EQUALS', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
+    ('nonassoc', 'MATHEXPRESSION'),
+    ('nonassoc', 'TERNARY'),
     ('left','LOR', 'LAND'),
-    ('left', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'EQQ', 'NEQ'),
+    ('right', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'EQQ', 'NEQ'),
     ('right', 'LNOT'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE', 'MOD'),
     ('left', 'OR', 'AND', 'XOR', 'LSHIFT', 'RSHIFT'),
-
 )
 seen_tokens = []
 tokelines =  {}
@@ -57,11 +58,17 @@ def p_parse(token):
 
     lexspan = list(token.lexspan(0))
     data = str(token.lexer.lexdata[lexspan[0]:lexspan[1]])
+    context = [
+    str(token.lexer.lexdata[lexspan[0]-32:lexspan[0]]),
+    str(token.lexer.lexdata[lexspan[0]:lexspan[1]]),
+    str(token.lexer.lexdata[lexspan[1]:lexspan[1]+32]),
+    ]
     if len(lexspan) == 2:
         fromline = token.lineno(0)
         global endoffile
         endoffile = fromline, lexspan, token.slice[0]
-        #print fromline, lexspan, token.slice[0]
+    #print(repr(token.slice), context, lexspan)
+
     token[0] = { "00-toktype": str(token.slice[0]), "02-size" : lexspan,  "50-contents" :  [ { "01-type": s.type, "99-value" : s.value} for s in token.slice[1:] ] }
     numelems = len([ s for s in token.slice[1:] if s.type != 'empty' and s.value is not None ])
 
@@ -95,8 +102,8 @@ def p_parse(token):
         tokelines[lexspan[0]] = token.lexer.lineno
     global last_lexspan
     last_lexspan = lexspan
-    
-    
+
+
 
 
 
@@ -171,17 +178,18 @@ p_parse.__doc__ =     '''
 
     dictobject_value_elem : exprval COLON expression
 
-    base_expression     : exprval
+    base_expression     : ternary_operator
                         | inlinestoreinstruction
-                        | base_expression mathoperator base_expression
-                        | base_expression cmp_symbol base_expression
-                        | base_expression boolcmp_symbol base_expression
                         | parentheses
                         | unary_operator
                         | new_operator
-                        | ternary_operator
-                        | dictobject_value
                         | typeof_operator
+                        | dictobject_value
+                        | exprval
+                        | base_expression mathoperator base_expression      %prec MATHEXPRESSION
+                        | base_expression cmp_symbol base_expression        %prec MATHEXPRESSION
+                        | base_expression boolcmp_symbol base_expression    %prec MATHEXPRESSION
+
 
 
 
@@ -198,8 +206,6 @@ p_parse.__doc__ =     '''
 
     typeof_operator     : TYPEOF variable
                         | TYPEOF base_expression
-
-    ternary_operator    : base_expression CONDITIONAL1 base_expression COLON base_expression
 
     expression  : base_expression
                 | funcdeclaration_anon
@@ -494,6 +500,8 @@ p_parse.__doc__ =     '''
 
     trycatch    : TRY statement_block CATCH LPAREN optid RPAREN statement_block
 
+    ternary_operator    : base_expression CONDITIONAL1 base_expression COLON base_expression %prec TERNARY
+
     empty :
     '''
 
@@ -504,6 +512,9 @@ p_parse.__doc__ =     '''
 
 parser = yacc.yacc(method='LALR',debug=0,
       optimize = 1, write_tables = 1, debugfile = '/tmp/yaccdebug.txt',outputdir='/tmp/')
+
+#parser = yacc.yacc(method='LALR',debug=1,
+#      optimize = 0, write_tables = 0, debugfile = 'yaccdebug.txt',outputdir='.')
 
 #profile.run("yacc.yacc(method='LALR')")
 

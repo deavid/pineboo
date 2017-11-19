@@ -30,7 +30,7 @@ tokens = reserved + token_literals + [
     # Operators (+,-,*,/,%,|,&,~,^,<<,>>, ||, &&, !, <, <=, >, >=, ==, !=)
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MOD',
     'OR', 'AND',
-    'CONDITIONAL1','AT',
+    'AT',
     #'NOT',
     'XOR', 'LSHIFT', 'RSHIFT',
     'LOR', 'LAND', 'LNOT',
@@ -47,6 +47,7 @@ tokens = reserved + token_literals + [
 #    'ARROW',
 
     # Conditional operator (?)
+    'CONDITIONAL1',
 #    'CONDOP',
 
     # Delimeters ( ) [ ] { } , . ; :
@@ -204,8 +205,3 @@ def t_error(t):
 lexer = lex.lex(debug=False,optimize=1)
 if __name__ == "__main__":
     lex.runmain(lexer)
-
-
-
-
-

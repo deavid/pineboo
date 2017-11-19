@@ -4,7 +4,7 @@
 from builtins import object
 from optparse import OptionParser
 import os, os.path, random
-from . import flscriptparse
+import flscriptparse
 from lxml import etree
 
 
@@ -48,7 +48,7 @@ class ASTPython(object, metaclass=ASTPythonFactory):
 
     def __init__(self, elem):
         self.elem = elem
-        if self.debug_file: 
+        if self.debug_file:
             self.internal_generate = self.generate
             self.generate = self._generate
 
@@ -61,10 +61,10 @@ class ASTPython(object, metaclass=ASTPythonFactory):
         if retlen > 0:
             sp = " " * (splen - 1) + "<" + "-" * retlen
         else:
-            sp = " " * splen 
+            sp = " " * splen
         cname = self.__class__.__name__
         self.debug_file.write("%04d" % ASTPython.numline + sp + cname + ": " + text + "\n");
-        
+
     def polish(self): return self
 
     def generate(self, **kwargs):
@@ -72,14 +72,14 @@ class ASTPython(object, metaclass=ASTPythonFactory):
     def _generate(self, **kwargs):
         self.debug("begin-gen")
         ASTPython.generate_depth += 1
-        self.generate_depth = ASTPython.generate_depth 
+        self.generate_depth = ASTPython.generate_depth
         for dtype, data in self.internal_generate(**kwargs):
             self.debug("%s: %r" % (dtype, data))
             yield dtype, data
         ASTPython.generate_depth -= 1
         self.debug("end-gen")
-            
-        
+
+
 
 
 class Source(ASTPython):
@@ -131,7 +131,7 @@ class Function(ASTPython):
             # Anonima:
             name = "_"
         withoutself = self.elem.get("withoutself")
-        
+
         returns = self.elem.get("returns",None)
         parent = self.elem.getparent()
         grandparent = None
@@ -205,8 +205,8 @@ class FunctionCall(ASTPython):
                 yield "debug", etree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
-        
-        
+
+
         yield "expr", "%s(%s)" % (name,", ".join(arguments))
 
 class If(ASTPython):
@@ -380,13 +380,13 @@ class For(ASTPython):
         yield "line", "continue"
         yield "end", "block-while_pass"
         yield "line", "while_pass = False"
-         
+
         for source in self.elem.xpath("Source"):
             for obj in parse_ast(source).generate(include_pass=False): yield obj
             if incr_lines:
                 for line in incr_lines:
                     yield "line", line
-                
+
             yield "line", "while_pass = True"
             yield "line", "try:"
             yield "begin", "block-error-catch" # Si es por ejemplo un charAt y hace out of index nos saca del while
@@ -486,7 +486,7 @@ class Switch(ASTPython):
 
 class With(ASTPython):
     python_keywords = ["select","select", "first","next","prev","last","setValueBuffer","setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess","commitBuffer","commit","refreshBuffer","setNull"]
-        
+
     def generate(self, **kwargs):
         key = "%02x" % random.randint(0,255)
         name = "w%s_obj" % key
@@ -514,10 +514,10 @@ class With(ASTPython):
                 elif obj[1].find(".") == -1 and obj[1].find(t) > -1:
                     obj_ = (obj[0],obj[1].replace(t, "%s.%s" % (" ".join(var_expr), t)))
                     break
-                
+
             if not obj_:
                 obj_ = obj
-                
+
             yield obj_
         #yield "line", "del %s" % name
         yield "line"," #WITH_END"
@@ -533,13 +533,13 @@ class Variable(ASTPython):
             yield "expr", "="
             expr = 0
             for dtype, data in parse_ast(value).generate(isolate = False):
-                
+
                 #if self.elem.get("type",None) == "Array" and data == "[]":
                 if data == "[]":
                     yield "expr", "qsatype.Array()"
                     expr += 1
                     continue
-                
+
                 if dtype == "expr": expr += 1
                 yield dtype, data
             if expr == 0:
@@ -563,8 +563,8 @@ class Variable(ASTPython):
                     yield "expr", "None"
                 else:
                     yield "expr", "qsatype.%s()" % dtype
-                
-        
+
+
         #if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
 
 class InstructionUpdate(ASTPython):
@@ -753,10 +753,10 @@ class Member(ASTPython):
                         part2 = arguments[idx+1:]
                     except IndexError:
                         part2 = [] # Para los que son últimos y no tienen parte adicional
-                    if member == "toString()": 
+                    if member == "toString()":
                         arguments = ["parseString(%s)" % ".".join(part1)] + part2
                     #    arguments = ["str(%s)" % (".".join(part1))] + part2
-                    elif member == "isEmpty()": 
+                    elif member == "isEmpty()":
                         arguments = ["%s == None" % (".".join(part1))] + part2
                     elif member == "left":
                         value = arg[5:]
@@ -778,9 +778,9 @@ class Member(ASTPython):
                         value = arg[7:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
-                        
-                        
-                        
+
+
+
                     else:
                         if ".".join(part1):
                             arguments = ["%s.%s" % (".".join(part1), arg)] + part2
@@ -818,7 +818,7 @@ class Value(ASTPython):
         if isolate: yield "expr", ")"
 
 class Expression(ASTPython):
-    tags = ["base_expression"]
+    tags = ["base_expression", "math_expression"]
     def generate(self, isolate = True, **kwargs):
         if isolate: yield "expr", "("
         coerce_string_mode = False
@@ -1101,7 +1101,7 @@ def string_template(ast):
     yield "begin", "class-pass"
     yield "line", "pass"
     yield "end", "class-pass"
-    
+
     sourceclasses = etree.Element("Source")
     for child in ast:
         child.set("withoutself","1")
@@ -1126,7 +1126,7 @@ def write_python_file(fobj, ast, tpl=file_template):
             try: lines_since_last_indent = numline - last_line_for_indent[len(indent)]
             except KeyError: lines_since_last_indent = 0
             if lines_since_last_indent > 4:
-                ASTPython.numline += 1                
+                ASTPython.numline += 1
                 fobj.write((len(indent)*indent_text) + "\n")
             last_line_for_indent[len(indent)] = numline
         if dtype == "debug":
@@ -1181,8 +1181,8 @@ def pythonize(filename, destfilename, debugname = None):
     f1 = open(destfilename,"w")
     write_python_file(f1,ast,tpl)
     f1.close()
-    
-    
+
+
 def main():
     parser = OptionParser()
     parser.add_option("-q", "--quiet",

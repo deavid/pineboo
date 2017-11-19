@@ -5,7 +5,7 @@ from optparse import OptionParser
 import os, os.path, sys
 import imp, traceback
 from lxml import etree
-    
+
 
 try:
     from pineboolib.flparser import flscriptparse
@@ -534,7 +534,7 @@ def execute(options, args):
             print(traceback.format_exc())
 
         if execpython:
-          options.exec_python = execpython 
+          options.exec_python = execpython
           if options.verbose: print("Pass 3 - Test PY file load . . .")
           options.topython = False
           try:
@@ -542,29 +542,29 @@ def execute(options, args):
           except Exception:
               print("Error al ejecutar Python:");
               print(traceback.format_exc())
-          
+
         print("Done.")
 
     elif options.exec_python:
-        from . import qsatype
+        import qsatype
         for filename in args:
             realpath = os.path.realpath(filename)
             path, name = os.path.split(realpath)
             if not os.path.exists(realpath):
                 print("Fichero no existe: %s" % name)
                 continue
-              
+
             mod = Module(name, path)
             if not mod.loadModule():
                 print("Error cargando modulo %s" % name)
 
     elif options.topython:
-        from .pytnyzer import pythonize
+        from pytnyzer import pythonize
         import io
         if options.cache:
             args = [ x for x in args if not os.path.exists((x+".py").replace(".qs.xml.py",".qs.py"))
                         or os.path.getmtime(x) > os.path.getctime((x+".py").replace(".qs.xml.py",".qs.py")) ]
-            
+
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
@@ -586,15 +586,15 @@ def execute(options, args):
             except Exception:
                 print("Error al pythonificar %r:" % filename)
                 print(traceback.format_exc())
-            sys.stdout = old_stderr 
+            sys.stdout = old_stderr
             text = stream.getvalue()
             if len(text) > 2:
                 print("%s: " % bname + ("\n%s: " % bname).join(text.splitlines()))
-                
+
 
     else:
         if options.cache:
-            args = [ x for x in args if not os.path.exists(x+".xml") 
+            args = [ x for x in args if not os.path.exists(x+".xml")
                         or os.path.getmtime(x) > os.path.getctime(x+".xml")]
         nfs = len(args)
         for nf, filename in enumerate(args):
@@ -617,14 +617,14 @@ def execute(options, args):
             if options.toxml == False:
                 # Si no se quiere guardar resultado, no hace falta calcular mas
                 continue
-            
+
             tree_data = None
             try:
                 tree_data = flscriptparse.calctree(prog, alias_mode = 0)
             except Exception:
                 print("Error al convertir a XML %r:" % bname)
                 print("\n".join(traceback.format_exc().splitlines()[-7:]))
-            
+
             if not tree_data:
                 print("No se pudo parsear %-35s          \n" % (repr(filename)))
                 continue
