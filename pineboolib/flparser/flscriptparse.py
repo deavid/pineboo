@@ -40,14 +40,14 @@ def cnvrt(val):
 
 precedence = (
     ('nonassoc', 'EQUALS', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
+    ('nonassoc', 'MATHEXPRESSION'),
+    ('nonassoc', 'TERNARY'),
     ('left','LOR', 'LAND'),
     ('right', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'EQQ', 'NEQ'),
     ('right', 'LNOT'),
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES', 'DIVIDE', 'MOD'),
     ('left', 'OR', 'AND', 'XOR', 'LSHIFT', 'RSHIFT'),
-    ('left', 'MATHEXPRESSION'),
-    ('left', 'TERNARY')
 )
 seen_tokens = []
 tokelines =  {}
@@ -178,10 +178,6 @@ p_parse.__doc__ =     '''
 
     dictobject_value_elem : exprval COLON expression
 
-    math_expression     : base_expression mathoperator base_expression      %prec MATHEXPRESSION
-                        | base_expression cmp_symbol base_expression        %prec MATHEXPRESSION
-                        | base_expression boolcmp_symbol base_expression    %prec MATHEXPRESSION
-
     base_expression     : ternary_operator
                         | inlinestoreinstruction
                         | parentheses
@@ -190,7 +186,9 @@ p_parse.__doc__ =     '''
                         | typeof_operator
                         | dictobject_value
                         | exprval
-                        | math_expression
+                        | base_expression mathoperator base_expression      %prec MATHEXPRESSION
+                        | base_expression cmp_symbol base_expression        %prec MATHEXPRESSION
+                        | base_expression boolcmp_symbol base_expression    %prec MATHEXPRESSION
 
 
 
