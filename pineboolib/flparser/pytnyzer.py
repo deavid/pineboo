@@ -4,7 +4,7 @@
 from builtins import object
 from optparse import OptionParser
 import os, os.path, random
-import flscriptparse
+from . import flscriptparse
 from lxml import etree
 
 
