@@ -91,7 +91,6 @@ class PNBuffer(ProjectClass):
     
     def primeUpdate(self, row = None):
         
-        
         if row < 0 or row == None:
             row = self.cursor().currentRegister()
         
@@ -1102,7 +1101,7 @@ class FLSqlCursor(ProjectClass):
             if pK:
                 pKV = self.d.buffer_.value(pK)
                 q = FLSqlQuery(None, self.d.db_.dbAux())
-                q.exec_("UPDATE %s SET %s = %s WHERE %s" % (self.d.metadata_.name(), fN, self.d.db_.manager().formatvalue(type, vv), self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pK, pKV))))
+                q.exec_("UPDATE %s SET %s = %s WHERE %s" % (self.metadata().name(), fN, self.db().manager().formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
             else:
                 FLUtil.tr("FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
         
@@ -1866,14 +1865,13 @@ class FLSqlCursor(ProjectClass):
     """
     
     def setUnLock(self, fN, v):
-        if self.d.metadata_ or not self.d.modeAccess_ == self.browse:
+        if not self.metadata() or not self.modeAccess() == self.Browse:
             return
-        
-        if not self.d.metadata_.fieldType(fN) == FLFieldMetaData.Unlock:
+        if not self.metadata().fieldType(fN) == FLFieldMetaData.Unlock:
             print("FLSqlCursor::setUnLock sólo permite modificar campos del tipo Unlock")
             return
-
         self.d.buffer_ = self.primeUpdate()
+        self.setModeAccess(self.Edit)
         self.d.buffer_.setValue(fN, v)
         self.update()
         self.refreshBuffer()
@@ -2348,8 +2346,9 @@ class FLSqlCursor(ProjectClass):
     def primeUpdate(self):
         if not self.buffer():
             self.d.buffer_ = PNBuffer(self)
-        self.buffer().primeUpdate(self.at())
 
+        self.buffer().primeUpdate(self.at())
+        return self.buffer()
 
     def editBuffer(self, b = None):
         #if not self.d.buffer_:
@@ -3500,7 +3499,7 @@ class FLSqlCursor(ProjectClass):
     """
     Actualiza tableModel con el buffer
     """
-    def update(self, notify):
+    def update(self, notify = True):
         print("FLSqlCursor.update --- BEGIN")
         if self.modeAccess() == FLSqlCursor.Edit:
             # solo los campos modified
