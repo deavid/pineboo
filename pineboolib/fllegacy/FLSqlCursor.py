@@ -2660,18 +2660,19 @@ class FLSqlCursor(ProjectClass):
     def __del__(self, invalidate = True):
         #print("FLSqlCursor(%s). Eliminando cursor" % self.curName(), self)
         delMtd = None
-        if self.d.metadata_ and not self.d.metadata_.inCache():
-            delMtd = True
+        if self.metadata():
+            if not self.metadata().inCache():
+                delMtd = True
         
         msg = None
-        mtd = self.d.metadata_
+        mtd = self.metadata()
         
         if self.d.transactionsOpened_:
             print("FLSqlCursor(%s).Transacciones abiertas!! %s" %(self.curName(), self.d.transactionsOpened_))
         if len(self.d.transactionsOpened_) > 0: #FIXME: Pongo que tiene que haber mas de una trasaccion abierta
             t = self.curName()
-            if self.d.metadata_:
-                t = self.d.metadata_.name()
+            if self.metadata():
+                t = self.metadata().name()
                 msg = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlCursor::~SqlCursor: %s\n" % t
             self.rollbackOpened(-1, msg)
         
