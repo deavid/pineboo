@@ -1642,10 +1642,7 @@ class FLTableDB(QtWidgets.QWidget):
             relationLock = self.cursor_.cursorRelation().isLocked()
         
         
-        if w and self.cursor().isLocked() or self.browseOnly() or self.onlyTable() or self.editOnly() or relationLock:
-            
-            
-            
+        if w and self.browseOnly() or self.onlyTable() or self.editOnly() or relationLock:
             w.setDisabled(True)
             return
 
