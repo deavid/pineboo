@@ -2,6 +2,7 @@
 
 from PyQt5 import QtCore
 
+from pineboolib.utils import filedir
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
@@ -12,11 +13,13 @@ class FLTranslator(ProjectClass):
     sysTrans_ = False
     AQ_DISKCACHE_FILEPATH = None #FIXME
     AQ_DISKCACHE_DIRPATH = None #FIXME
+    idM_ = None
     
     
     def __init__(self, parent=None, name=None, multiLang= False, sysTrans=False):
         super(FLTranslator, self).__init__()
         #QtCore.QTranslator(parent ? parent : qApp, name)
+        self.idM_ = name[0:len(name) -3]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
     
@@ -32,7 +35,7 @@ class FLTranslator(ProjectClass):
     @decorators.NotImplementedWarn
     def loadTsContent(self, key):
         return None
-        tsFile = self.AQ_DISKCACHE_FILEPATH(key)
+        tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s" %(self.db_.db_name, self.idM_, key))
         qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         
         if QtCore.QFile.exist(qmFile):
