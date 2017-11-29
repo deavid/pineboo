@@ -49,7 +49,6 @@ class FLTranslations(ProjectClass):
 
     @decorators.BetaImplementation
     def lrelease( self, tsInputFile, qmOutputFile, stripped = True):
-        util = FLUtil()
         verbose = False
         metTranslations = False
         tor = None
@@ -71,7 +70,7 @@ class FLTranslations(ProjectClass):
         
         else:
             modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
-            key = util.sqlSelect("flfiles","sha","nombre ='%s'" % tsInputFile)
+            key = self.db_.managerModules().shaOfFile(tsInputFile)
             dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %(self.db_.db_name, modId, key))
             tagMap = fullText
             #TODO: hay que cargar todo el contenido del fichero en un diccionario

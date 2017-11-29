@@ -2,24 +2,20 @@
 
 from PyQt5 import QtCore
 
+from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
 
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
-
-class FLTranslator():
+class FLTranslator(ProjectClass):
     
     mulTiLang_ = False
     sysTrans_ = False
     AQ_DISKCACHE_FILEPATH = None #FIXME
     AQ_DISKCACHE_DIRPATH = None #FIXME
     
-    @decorators.BetaImplementation
-    def __init_(self, parent=None, name=None, multiLang= False, sysTrans=False):
+    
+    def __init__(self, parent=None, name=None, multiLang= False, sysTrans=False):
+        super(FLTranslator, self).__init__()
         #QtCore.QTranslator(parent ? parent : qApp, name)
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
@@ -33,10 +29,11 @@ class FLTranslator():
     @param key Clave sha1 que identifica al fichero en la caché de disco
     @return  TRUE si la operación tuvo éxito
     """
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def loadTsContent(self, key):
-        tsFile = QString(self.AQ_DISKCACHE_FILEPATH(key))
-        qmFile = QString(self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm")
+        return None
+        tsFile = self.AQ_DISKCACHE_FILEPATH(key)
+        qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         
         if QtCore.QFile.exist(qmFile):
             if tsFile.isEmpty():
