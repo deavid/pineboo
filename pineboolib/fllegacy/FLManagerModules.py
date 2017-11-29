@@ -1,6 +1,7 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, qt3ui
 from pineboolib.utils import filedir
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 import os
 
 """
@@ -384,9 +385,19 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero
     @return Clave sh asociada al ficheros
     """
-    @decorators.NotImplementedWarn
     def shaOfFile(self, n):
-        return None
+        if self._prj.conn.dbAux() and not n[:3] == "sys" and not self._prj.conn.manager().isSystemTable(n):
+            formatVal = self._prj.conn.manager().formatAssignValue("nombre", "string", n, True)
+            q = FLSqlQuery(None, self._prj.conn.dbAux())
+            q.setForwardOnly(True)
+            q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
+            if q.next():
+                return str(q.value(0))
+            return None
+        
+        else:
+            return None
+        
 
     """
     Carga en el diccionario de claves las claves sha1 de los ficheros
