@@ -2,7 +2,7 @@
 
 from PyQt5 import QtCore
 
-from pineboolib.fllegacy import FLTranslations
+from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
 
 try:
@@ -42,7 +42,7 @@ class FLTranslator():
             if tsFile.isEmpty():
                 return False
             
-            trans = FLTranslations
+            trans = FLTranslations()
             
             trans.lrelease(tsFile,qmFile, not self.mulTiLang_)
         

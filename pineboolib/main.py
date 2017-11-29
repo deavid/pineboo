@@ -17,6 +17,8 @@ import importlib
 
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.FLTranslator import FLTranslator
+from PyQt5.Qt import QTextCodec
 if __name__ == "__main__":
     sys.path.append('..')
 
@@ -45,6 +47,10 @@ class Project(object):
     mainFormName = "Pineboo"
     _initModules = None
     main_window = None
+    translators = None
+    multiLangEnabled_ = False
+    multiLangId_ = QtCore.QLocale().name()[:2].upper()
+    translator_ = None
     
     def __init__(self):
         self.tree = None
@@ -63,6 +69,9 @@ class Project(object):
         self.tables = {}
         self.files = {}
         self.cur = None
+    
+    def __del__(self):
+        self.writeState()
         
     def setDebugLevel(self, q):
         Project.debugLevel = q
@@ -218,6 +227,10 @@ class Project(object):
                 self.modules[idmodulo].add_project_file(fileobj)
         
         
+        self.loadTranslations()
+        self.readState()
+        
+        
 
 
     def saveGeometryForm(self, name, geo):
@@ -228,6 +241,15 @@ class Project(object):
     def loadGeometryForm(self, name):
         name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
+    
+    @decorators.NotImplementedWarn
+    def readState(self):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def writeState(self):
+        pass
+        
 
     def call(self, function, aList , objectContext , showException = True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
@@ -249,6 +271,78 @@ class Project(object):
 
 
         return None
+    
+    @decorators.BetaImplementation
+    def loadTranslations(self):
+        translatorsCopy = None
+        if self.translators:
+            translatorsCopy = copy.copy(self.translators)
+            for it in translatorsCopy:
+                self.removeTranslator(it)
+        
+        lang = QtCore.QLocale().name()[:2]
+        for module in self.modules.keys():
+            self.loadTranslationFromModule(module, lang)
+        
+        if translatorsCopy:
+            for it in translatorsCopy:
+                item = it
+                if item.sysTrans_:
+                    self.installTranslator(item)
+                else:
+                    item.deletelater()
+    
+    @decorators.BetaImplementation
+    def trMulti(self, s, l):
+        backMultiEnabled = self.multiLangEnabled_
+        ret = self.translate("%s_MULTILANG" % l.upper(). s)
+        self.multiLangEnabled_ = backMultiEnabled
+        return ret
+    
+    @decorators.BetaImplementation
+    def setMultiLang(self, enable, langid):
+        self.multiLangEnabled_ = enable
+        if enable and langid:
+            self.multiLangId_ = langid.upper()
+    
+    
+    
+    @decorators.BetaImplementation
+    def loadTranslationFromModule(self, idM, lang):
+        self.installTranslator(self.createModTranslator(idM, lang, True))
+        self.installTranslator(self.createModTranslator(idM, "mutliLang"))
+    
+    @decorators.NotImplementedWarn
+    def installTranslator(self, tr):
+        #Aquí cargamos las traducciones, pueden ser varias, osea que se carga en un diccionario (key = lang, value = struct de traducción)
+        pass
+    
+    
+    @decorators.NotImplementedWarn
+    def translate(self, context, sourceText, comment, encoding):
+        pass            
+    
+    @decorators.NotImplementedWarn
+    def createSysTranslator(self, lang, loadDefault):
+        pass
+    
+    @decorators.BetaImplementation
+    def createModTranslator(self, idM, lang, loadDefault = False):
+        fileTs = "%s.%s.ts" % (idM, lang)
+        key = self.conn.managerModules().shaOfFile(fileTs)
+        ok = (not key == None)
+        
+        if ok:
+            tor = FLTranslator(None, "%s_%s" % (idM, lang), lang == "multilang")
+            
+            if tor.loadTsContent(key):
+                return tor
+        
+        return self.createModTranslator(idM, "es") if loadDefault else None
+            
+        
+        
+    
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):
