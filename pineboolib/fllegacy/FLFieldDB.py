@@ -201,6 +201,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         if texto is None:
             if self._tipo == "string":
                 texto = ""
+            
             elif self._tipo == "double":
                 d = 0
                 texto = "0."
@@ -3256,31 +3257,29 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
     def validate(self, input_, i):
         return super(FLDoubleValidator, self).validate(input_, i)
-        """
-        if input_.isEmpty():
+        if not input_:
             return QtGui.QValidator.Acceptable
 
-        input_.replace(",", ".")
+        input_ = input_.replace(",", ".")
 
         state = QtGui.QDoubleValidator.validate(self,input_, i)
 
-        if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
-            s = str(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QDoubleValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+        if state in (QtGui.QValidator.Invalid, QtGui.QValidator.Intermediate):
+            s = input_[1:len(input_) -1]
+            if input_[1] == "-" and (QtGui.QDoubleValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or not s):
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
         else:
             state = QtGui.QValidator.Acceptable
 
-        if (QtWidgets.QApplication.instance().commaSeparator() == ","):
-            input_.replace(".", ",")
+        if QtCore.QLocale().decimalPoint() == ",":
+            input_ = input_.replace(".", ",")
         else:
-            input_.replace(",", ".")
+            input_ = input_.replace(",", ".")
 
         return state
-        """
-
+        
 
 
 class FLIntValidator(QtGui.QIntValidator):
