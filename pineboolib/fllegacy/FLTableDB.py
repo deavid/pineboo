@@ -154,6 +154,9 @@ class FLTableDB(QtWidgets.QWidget):
         self._loaded = True
 
         self.initCursor()
+        self.tableRecords()
+        self.setTableRecordsCursor()
+        
         if DEBUG: print("**FLTableDB::name: %r cursor: %r" % (self.objectName(), self.cursor_.d.nameCursor_))
         
     def setName(self, name):
