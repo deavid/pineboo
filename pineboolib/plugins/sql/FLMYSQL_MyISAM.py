@@ -24,7 +24,7 @@ class FLMYSQL_MyISAM(object):
     lastError_ = None
     
     def __init__(self):
-        self.version_ = "0.2"
+        self.version_ = "0.3"
         self.conn_ = None
         self.name_ = "FLMYSQL_MyISAM"
         self.open_ = False
@@ -93,59 +93,52 @@ class FLMYSQL_MyISAM(object):
     def canOverPartition(self):
         return True
     
-    @decorators.BetaImplementation
-    def hasFeature(self, value):
-        
-        if value == "Transactions":
-            return  True
-        
-        
-        
-        if getattr(self.conn_, value, None):
-            return True
-        else:
-            return False
-    
-    
     def nextSerialVal(self, table, field):
         q = FLSqlQuery()
         q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
         q.setFrom("")
         q.setWhere("")
         if not q.exec_():
-            print("not exec sequence")
+            qWarning("not exec sequence")
             return None
         if q.first():
             return q.value(0)
         else:
             return None
     
-    @decorators.NotImplementedWarn
-    def savePoint(self, number):
-        pass
+    def savePoint(self, n):
+        if not self.isOpen():
+            qWarning("%s::savePoint: Database not open" % self.name_)
+            return False
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
+            qWarning("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s " % (n, traceback.format_exc()))
+            return False
+        
+        return True 
     
     def canSavePoint(self):
         return True
     
     def rollbackSavePoint(self, n):
-        if not self.canSavePoint():
-            return False
-        
         if not self.isOpen():
-            print("PSQLDriver::rollbackSavePoint: Database not open")
+            qWarning("%s::rollbackSavePoint: Database not open" % self.name_)
             return False
         
-        cmd = ("rollback to savepoint sv_%s" % n)
 
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec_():
-            self.setLastError("No se pudo deshacer punto de salvaguarda", "rollback to savepoint sv_%s" % n)
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            qWarning("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s" % (self.name_, n, traceback.format_exc()))
             return False
         
-        return True 
+        return True
     
     def setLastError(self, text, command):
         self.lastError_ = "%s (%s)" % (text, command)
@@ -156,44 +149,61 @@ class FLMYSQL_MyISAM(object):
     
     def commitTransaction(self):
         if not self.isOpen():
-            print("PSQLDriver::commitTransaction: Database not open")
+            qWarning("%s::commitTransaction: Database not open" % self.name_)
         
-        if not self.conn_.commit():
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("COMMIT TRANSACTION")
+        except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
+            qWarning("%s:: No se pudo aceptar la transacción COMMIT\n %s" %  (self.name_, traceback.format_exc()))
             return False
         
         return True
     
     def rollbackTransaction(self):
         if not self.isOpen():
-            print("PSQLDriver::commitTransaction: Database not open")
+            qWarning("%s::rollbackTransaction: Database not open" % self.name_)
         
-        if not self.conn_.rollback():
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("ROLLBACK TRANSACTION")
+        except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
+            qWarning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s" %  (self.name_, traceback.format_exc()))
             return False
         
         return True
     
-    @decorators.BetaImplementation
+
     def transaction(self):
+        if not self.isOpen():
+            qWarning("%s::transaction: Database not open" % self.name_)
+        
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("BEGIN TRANSACTION")
+        except Exception:
+            self.setLastError("No se pudo crear la transacción", "BEGIN")
+            qWarning("%s:: No se pudo crear la transacción BEGIN\n %s" %  (self.name_, traceback.format_exc()))
+            return False
+        
         return True
     
     def releaseSavePoint(self, n):
-        if not self.canSavePoint():
-            return False
         
         if not self.isOpen():
-            print("PSQLDriver::releaseSavePoint: Database not open")
+            qWarning("%s::releaseSavePoint: Database not open" % self.name_)
             return False
         
-        cmd = ("release savepoint sv_%s" % n)
-
-        q = FLSqlQuery()
-        q.setSelect(cmd)
-        q.setFrom("")
-        q.setWhere("")
-        if not q.exec_():
-            self.setLastError("No se pudo release a punto de salvaguarda", "release savepoint sv_%s" % n)
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
+        except Exception:
+            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
+            qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (n,  traceback.format_exc()))
+        
             return False
         
         return True 
@@ -203,8 +213,28 @@ class FLMYSQL_MyISAM(object):
         if leng:
             return "::%s(%s)" % (type_, leng)
         else:
-            return "::%s" % type_  
-
+            return "::%s" % type_
+    
+    
+    def refreshQuery(self, curname, fields, table, where, cursor, conn):
+        #sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (curname , fields , table, where) <-- postgres
+        sql = "SELECT %s FROM %s WHERE %s " % (fields , table, where)
+        try:
+            cursor.execute(sql)
+        except Exception:
+            qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
+    
+    def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
+        try:
+            sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where_filter)
+            #self.declare[curname].fetchmany(number)
+            #cursor.execute("FETCH %d FROM %s" % (number, curname)) <--postgres
+            cursor.execute(sql)
+            #print("refreshFetch", cursor, curname)
+            cursor.fetchmany(number)
+        except Exception:
+            qWarning("%s.refreshFetch\n %s" % (self.name_, traceback.format_exc()))
+    
     def useThreads(self):
         return True
     
@@ -212,8 +242,9 @@ class FLMYSQL_MyISAM(object):
         return False      
     
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
-        return cursor.fetchall()    
-
+        return cursor.fetchall()  
+            
+    
     def existsTable(self, name):
         if not self.isOpen():
             return False
@@ -225,7 +256,7 @@ class FLMYSQL_MyISAM(object):
             ok = t.next()
         
         del t
-        return ok  
+        return ok
     
     def sqlCreateTable(self, tmd):
         util = FLUtil()
@@ -325,7 +356,3 @@ class FLMYSQL_MyISAM(object):
         
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
-            
-
-            
-        
