@@ -544,7 +544,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     @param row. Columna afectada
     @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
     """
-    @decorators.BetaImplementation
+
     def setValuesDict(self, row, update_dict):
 
         if DEBUG: print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
