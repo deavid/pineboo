@@ -1267,7 +1267,6 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN = None):
-        #print("refrescando", self.fieldName_)
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
             print("FLField.refresh() Cancelado")
             return
@@ -1281,7 +1280,6 @@ class FLFieldDB(QtWidgets.QWidget):
             
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
-            
             #if self.cursor_.cursorRelation():
                 #print(1)
                 #if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
@@ -1596,6 +1594,7 @@ class FLFieldDB(QtWidgets.QWidget):
             elif self.editorImg_:
                 self.editorImg_.hide()
             self.setDisabled(True)
+            
 
 
 
@@ -1645,7 +1644,6 @@ class FLFieldDB(QtWidgets.QWidget):
         
         elif type_ == "string":
             doHome = False
-            
             if ol:
                 if str(v) == self.editor_.currentText():
                     return
@@ -1678,7 +1676,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if not ol and doHome:
                 self.editor_.home(False)
             
-                self.editor_.textChanged.connect(self.updateValue)
+            self.editor_.textChanged.connect(self.updateValue)
         
         elif type_ == "uint" or type_ == "int" or type_ == "serial":
             if v == self.editor_.text():

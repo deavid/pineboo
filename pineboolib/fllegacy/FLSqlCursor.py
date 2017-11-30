@@ -256,6 +256,7 @@ class PNBuffer(ProjectClass):
         #    value = (value == "true")
                 
         if self.hasChanged(field.name, value):
+            
                     #if not value == None:
                     #    value = str(value)
                     
@@ -270,6 +271,7 @@ class PNBuffer(ProjectClass):
                 else:
                     field.modified = False
                     #self.setMd5Sum(value)
+            
         
         return True
 
@@ -1108,7 +1110,7 @@ class FLSqlCursor(ProjectClass):
         else:
             self.d.buffer_.setValue(fN, vv)
         
-        #print("bufferChanged.emit(%s)" % fN)  
+        print("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))  
         self.bufferChanged.emit(fN)
 
     """
@@ -2329,7 +2331,7 @@ class FLSqlCursor(ProjectClass):
         else:
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 v = self.valueBuffer(self.d.relation_.field())
-                if not self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()) == v:
+                if not self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()) == v and not self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()) == None:
                     self.d.cursorRelation_.setValueBuffer(self.d.relation_.foreignField(), v)
 
 
@@ -2711,9 +2713,11 @@ class FLSqlCursor(ProjectClass):
         if self.cursorRelation() and self.cursorRelation().modeAccess() == self.Insert and not self.curFilter():
             finalFilter = "1 = 0"
         
+        
         if finalFilter:
             self.setFilter(finalFilter)
-             
+        
+        print(self.curName())     
         self.model().refresh()
         if self.cursorRelation() and self.modeAccess() == self.Browse:
             self.d._currentregister = self.atFrom()
@@ -2742,7 +2746,6 @@ class FLSqlCursor(ProjectClass):
     """
     @QtCore.pyqtSlot()
     def baseFilter(self):
-        #print("basefilter", self.curName())
         relationFilter = None
         finalFilter = ""
 
@@ -2750,8 +2753,9 @@ class FLSqlCursor(ProjectClass):
 
             fgValue = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
             field = self.d.metadata_.field(self.d.relation_.field())
-            #if not fgValue:
-            #    fgValue = ""
+            
+            if fgValue == None:
+                fgValue = ""
 
             if field and not fgValue == None:
                 relationFilter = self.d.db_.manager().formatAssignValue(field, fgValue, True)
@@ -3152,7 +3156,7 @@ class FLSqlCursor(ProjectClass):
 
         if updated == True and emite == True:
             self.cursorUpdated.emit()
-
+           
         self.bufferCommited.emit()
         return True
 
