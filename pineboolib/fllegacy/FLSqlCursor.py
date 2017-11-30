@@ -845,9 +845,11 @@ class FLSqlCursor(ProjectClass):
         if cR and r:
             try:
                 cR.bufferChanged.disconnect(self.refresh)
+                cR.d._current_changed.disconnect(self.refresh)
             except:
                 pass
             cR.bufferChanged.connect(self.refresh)
+            cR.d._current_changed.connect(self.refresh)
             try:
                 cR.newBuffer.disconnect(self.clearPersistentFilter)
             except:
@@ -1110,7 +1112,7 @@ class FLSqlCursor(ProjectClass):
         else:
             self.d.buffer_.setValue(fN, vv)
         
-        print("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))  
+        #print("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))  
         self.bufferChanged.emit(fN)
 
     """
@@ -2716,8 +2718,7 @@ class FLSqlCursor(ProjectClass):
         
         if finalFilter:
             self.setFilter(finalFilter)
-        
-        print(self.curName())     
+             
         self.model().refresh()
         if self.cursorRelation() and self.modeAccess() == self.Browse:
             self.d._currentregister = self.atFrom()
