@@ -115,10 +115,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.refresh()
 
 
-    #def metadata(self):
-        #print("CursorTableModel: METADATA: " + self._table.name)
-    #    return self._metadata
-
     def canFetchMore(self,index):
         return self.canFetchMore
         ret = self.rows > self.rowsLoaded
