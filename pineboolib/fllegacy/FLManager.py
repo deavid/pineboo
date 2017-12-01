@@ -357,6 +357,8 @@ class FLManager(ProjectClass):
                 if not aBy:
                     aBy = it
                     continue
+                if not tmd.field(it):
+                    continue
                 tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
             
             if q and not quick:

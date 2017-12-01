@@ -2169,6 +2169,10 @@ class FLSqlCursor(ProjectClass):
             return None
 
         fieldBy = field.associatedFieldFilterTo()
+        
+        if not self.buffer():
+            return 
+        
         if not tableMD.field(fieldBy) or self.d.buffer_.isNull(fieldAc.name()):
             #if ownTMD and not tableMD.inCache():
                 #del tableMD
