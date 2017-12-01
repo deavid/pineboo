@@ -232,20 +232,18 @@ class FLsqlite(object):
     
     
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
+        if not curname in self.cursorsArray_.keys():
+            self.cursorsArray_[curname] = cursor
         sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where)
-        #print(sql, where)
-        #return "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (declare , fields , table, where)
-        cursor.execute(sql)
-        #self.declare[curname] = cursor
+        try:
+            self.cursorsArray_[curname].execute(sql)
+        except Exception:
+            qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
 
     
     def refreshFetch(self, number, curname, table, cursor, fields, where):
         try:
-            sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where)
-            #self.declare[curname].fetchmany(number)
-            cursor.execute(sql)
-            #print("refreshFetch", cursor, curname)
-            cursor.fetchmany(number)
+            self.cursorsArray_[curname].fetchmany(number)
         except Exception:
             print("SQL3Driver:: refreshFetch",  traceback.format_exc())
             
@@ -257,14 +255,7 @@ class FLsqlite(object):
     
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         try:
-            sql = "SELECT %s FROM %s WHERE %s" % (fields, tablename, where_filter)
-            #print("SQL-->", sql)
-            cursor.execute(sql)
-            #return self.declare[curname].fetchall()
-            #print("refreshAll", cursor, curname)
-            return cursor.fetchall()
-        
-        
+            return self.cursorsArray_[curname].fetchall()
         except Exception:
             print("SQL3Driver:: fetchAll",  traceback.format_exc())
             return []
