@@ -22,6 +22,8 @@ class FLMYSQL_MyISAM(object):
     alias_ = None
     errorList = None
     lastError_ = None
+    cursorsArray_ = None
+    noInnoDB = None
     
     def __init__(self):
         self.version_ = "0.3"
@@ -30,6 +32,8 @@ class FLMYSQL_MyISAM(object):
         self.open_ = False
         self.errorList = []
         self.alias_ = "MySQL_MyISAM (EN OBRAS)"
+        self.cursorsArray_ = {}
+        self.noInnoDB = True
     
     def version(self):
         return self.version_
@@ -53,6 +57,7 @@ class FLMYSQL_MyISAM(object):
         
         if self.conn_:
             self.open_ = True
+            self.conn_.autocommit(True)
 
         
         return self.conn_
@@ -94,6 +99,7 @@ class FLMYSQL_MyISAM(object):
         return True
     
     def nextSerialVal(self, table, field):
+        """
         q = FLSqlQuery()
         q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
         q.setFrom("")
@@ -105,7 +111,111 @@ class FLMYSQL_MyISAM(object):
             return q.value(0)
         else:
             return None
-    
+        """
+        if not self.isOpen():
+            qWarning("%s::beginTransaction: Database not open" % self.name_)
+            return None
+        
+        if not self.noInnoDB and self.transaction():
+            self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
+            return None
+        
+        res = None
+        row = None
+        max = 0
+        curMax = 0
+        updateQry = False
+        
+        strQry = "SELECT MAX(%s) FROM %s" % (field, table)
+        cursor = self.conn_.cursor()
+        
+        try:
+            result = cursor.execute(strQry)
+        except Exception:
+            qWarning("%s:: No se pudo crear la transacción BEGIN\n %s" %  (self.name_, traceback.format_exc()))
+            self.rollbackTransaction()
+            return
+        
+        for max_ in result:
+            res = max_
+        
+        if res:
+            row = cursor._fetch_row(res)
+            if row:
+                max = int(row[0])
+        
+        strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
+        try:
+            result = cursor.execute(strQry)
+        except Exception:
+            qWarning("%s:: La consulta a la base de datos ha fallado" %  (self.name_, traceback.format_exc()))
+            self.rollbackTransaction()
+            return
+        
+        for curMax_ in result:
+            res = curMax_
+        
+        if res:
+            updateQry = (len(res) > 0)
+            if updateQry:
+                row = cursor._fetch_row(res)
+                if row:
+                    curMax = int(row[0])
+        
+        strQry = None
+        if updateQry:
+            if max > curMax:
+                strQry ="UPDATE flseq SET seq=%s WHERE tabla = '%s' AND campo = '%s'" % (max + 1, table, field)
+        else:            
+            strQry ="INSERT INTO flseq (tabla, campo, seq) VALUES('%s','%s',%s)" % (table, field, max + 1)
+        
+        if strQry:
+            try:
+                result = cursor.execute(strQry)
+            except Exception:
+                qWarning("%s:: La consulta a la base de datos ha fallado" %  (self.name_, traceback.format_exc()))
+                if not self.noInnoDB:
+                    self.rollbackTransaction()
+                
+                return                    
+        
+        strQry = "UPDATE flseq SET seq= LAST INSERT_ID(seq+1) WHERE tabla = '%s' and campo = '%s'" % (table, field)       
+        try:
+            result = cursor.execute(strQry)
+        except Exception:
+            qWarning("%s:: La consulta a la base de datos ha fallado" %  (self.name_, traceback.format_exc()))
+            if not self.noInnoDB:
+                self.rollbackTransaction()
+                
+            return  
+        
+        strQry = "SELECT LAST_INSERT_ID()"       
+        try:
+            result = cursor.execute(strQry)
+        except Exception:
+            qWarning("%s:: La consulta a la base de datos ha fallado" %  (self.name_, traceback.format_exc()))
+            if not self.noInnoDB:
+                self.rollbackTransaction()
+                
+            return
+        
+        for r in result:
+            res = r
+        
+        if res:
+            row = cursor._fetch_row(res)
+            if row:
+                ret = int(row[0])  
+        
+        if not self.noInnoDB and self.commitTransaction():
+            qWarning("%s:: No se puede aceptar la transacción" % self.name_)
+            return
+        
+        return ret
+               
+                
+         
+        
     def savePoint(self, n):
         if not self.isOpen():
             qWarning("%s::savePoint: Database not open" % self.name_)
@@ -183,9 +293,9 @@ class FLMYSQL_MyISAM(object):
         
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("BEGIN TRANSACTION")
+            cursor.execute("START TRANSACTION")
         except Exception:
-            self.setLastError("No se pudo crear la transacción", "BEGIN")
+            self.setLastError("No se pudo crear la transacción", "BEGIN WORK")
             qWarning("%s:: No se pudo crear la transacción BEGIN\n %s" %  (self.name_, traceback.format_exc()))
             return False
         
@@ -217,21 +327,18 @@ class FLMYSQL_MyISAM(object):
     
     
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
-        #sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (curname , fields , table, where) <-- postgres
+        if not curname in self.cursorsArray_.keys():
+            self.cursorsArray_[curname] = cursor
+            
         sql = "SELECT %s FROM %s WHERE %s " % (fields , table, where)
         try:
-            cursor.execute(sql)
+            self.cursorsArray_[curname].execute(sql)
         except Exception:
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
     
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         try:
-            sql = "SELECT %s FROM %s WHERE %s" % (fields , table, where_filter)
-            #self.declare[curname].fetchmany(number)
-            #cursor.execute("FETCH %d FROM %s" % (number, curname)) <--postgres
-            cursor.execute(sql)
-            #print("refreshFetch", cursor, curname)
-            cursor.fetchmany(number)
+            self.cursorsArray_[curname].fetchmany(number)   
         except Exception:
             qWarning("%s.refreshFetch\n %s" % (self.name_, traceback.format_exc()))
     
@@ -239,10 +346,10 @@ class FLMYSQL_MyISAM(object):
         return True
     
     def useTimer(self):
-        return False      
+        return False    
     
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
-        return cursor.fetchall()  
+        return list(self.cursorsArray_[curname])
             
     
     def existsTable(self, name):
