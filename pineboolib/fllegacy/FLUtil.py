@@ -375,8 +375,7 @@ class FLUtil(ProjectClass):
         dia_ = None
         mes_ = None
         ano_ = None
-        
-        array_ = f.split("-")
+        array_ = str(f).split("-")
         if len(array_) == 3:
             ano_ = array_[0]
             mes_ = array_[1]
