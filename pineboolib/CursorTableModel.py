@@ -594,7 +594,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         for b in buffer.fieldsList():
             value = None
             if buffer.value(b.name) == None:
-                value = buffer.cursor_.d.db_.manager().metadata(buffer.cursor_.d.curName_).field(b.name).defaultValue()
+                value = cursor.metadata().field(b.name).defaultValue()
             else:
                 value = buffer.value(b.name)
             if not value == None: # si el campo se rellena o hay valor default
