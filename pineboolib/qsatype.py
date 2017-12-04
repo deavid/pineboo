@@ -353,6 +353,12 @@ class FormDBWidget(QtWidgets.QWidget):
     def isNull(self, name):
         return self.cursor().isNull(name)
     
+    def table(self):
+        return self.cursor().table()
+    
+    def cursorRelation(self):
+        return self.cursor().cursorRelation()
+    
     
     
     
@@ -371,10 +377,14 @@ class Date(object):
     date_ = None
     time_ = None
     
-    def __init__(self):
+    def __init__(self, date_ = None):
         super(Date, self).__init__()
-        self.date_ = QtCore.QDate.currentDate()
-        self.time_ = QtCore.QTime.currentTime()
+        if not date_:
+            self.date_ = QtCore.QDate.currentDate()
+            self.time_ = QtCore.QTime.currentTime()
+        else:
+            self.date_ = date_
+            self.time_ = "00:00:00"
     
     def toString(self, *args, **kwargs):
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"),self.date_.toString("MM"),self.date_.toString("yyyy"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
@@ -642,7 +652,7 @@ class Dir(object):
     path_ = None
     home = None 
     
-    def __init__(self, path):
+    def __init__(self, path = None):
         self.path_ = path
         self.home = filedir("..")
     
@@ -657,6 +667,9 @@ class Dir(object):
             pass
         
         return retorno
+    
+    def fileExists(self, name):
+        return os.path.exists(name)
 
 class File(QtCore.QFile):
     fichero = None
