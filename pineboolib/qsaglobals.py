@@ -147,6 +147,9 @@ class SysType(object):
         util = FLUtil()
         return util.getOS()
     
+    def nameBD(self):
+        return pineboolib.project.conn.database()
+    
     
     def setCaptionMainWidget(self, value):
        self.mainWidget().setWindowTitle("Pineboo - %s" % value)
