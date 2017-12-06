@@ -1,0 +1,136 @@
+/***************************************************************************
+                      mastermandatoscli.qs  -  description
+                             -------------------
+    begin                : vie ene 10 2014
+    copyright            : (C) 2014 by InfoSiAL S.L.
+    email                : mail@infosial.com
+ ***************************************************************************/
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
+/** @file */
+
+/** @class_declaration interna */
+////////////////////////////////////////////////////////////////////////////
+//// DECLARACION ///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////
+//// INTERNA /////////////////////////////////////////////////////
+class interna {
+	var ctx;
+	function interna( context ) { this.ctx = context; }
+	function init() { this.ctx.interna_init(); }
+}
+//// INTERNA /////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+/** @class_declaration oficial */
+//////////////////////////////////////////////////////////////////
+//// OFICIAL /////////////////////////////////////////////////////
+class oficial extends interna {
+    function oficial( context ) { interna( context ); } 
+		function imprimir() {
+				return this.ctx.oficial_imprimir();
+		}
+}
+//// OFICIAL /////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+
+/** @class_declaration head */
+/////////////////////////////////////////////////////////////////
+//// DESARROLLO /////////////////////////////////////////////////
+class head extends oficial {
+    function head( context ) { oficial ( context ); }
+}
+//// DESARROLLO /////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/** @class_declaration ifaceCtx */
+/////////////////////////////////////////////////////////////////
+//// INTERFACE  /////////////////////////////////////////////////
+class ifaceCtx extends head {
+    function ifaceCtx( context ) { head( context ); }
+}
+
+const iface = new ifaceCtx( this );
+//// INTERFACE  /////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/** @class_definition interna */
+////////////////////////////////////////////////////////////////////////////
+//// DEFINICION ////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////
+//// INTERNA /////////////////////////////////////////////////////
+function interna_init()
+{
+	var _i = this.iface;
+	
+	connect(this.child("toolButtonPrint"), "clicked()", _i, "imprimir");
+}
+//// INTERNA /////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/** @class_definition oficial */
+//////////////////////////////////////////////////////////////////
+//// OFICIAL /////////////////////////////////////////////////////
+
+function oficial_imprimir()
+{
+	var _i = this.iface;
+	var cursor = this.cursor();
+	
+	var tipoInforme = cursor.valueBuffer("tipo");
+	
+	if(!tipoInforme || tipoInforme == "") {
+		return false;
+	}
+	
+	var idMandato = cursor.valueBuffer("idmandato");
+	var curImprimir = new FLSqlCursor("i_mandatoscli");
+	curImprimir.setModeAccess(curImprimir.Insert);
+	curImprimir.refreshBuffer();
+	curImprimir.setValueBuffer("descripcion", "temp");
+	curImprimir.setValueBuffer("i_mandatoscli_idmandato", idMandato);
+	
+	var nombreInforme;
+		
+	switch (tipoInforme) {
+		case "B2B": {
+			nombreInforme = "i_mandatoscli_sepab2b";
+			break;
+		}
+		case "CORE1*":
+		case "CORE": {
+			nombreInforme = "i_mandatoscli_sepa";
+			break;
+		}
+		default: {
+			return false;
+		}
+	}
+	
+	var idEmpresa = flfactppal.iface.pub_valorDefectoEmpresa("id");
+	
+	flfactinfo.iface.pub_lanzarInforme(curImprimir, nombreInforme, "", "", false, false, "empresa.id = " + idEmpresa);
+	
+	return true;
+}
+
+//// OFICIAL /////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+
+/** @class_definition head */
+/////////////////////////////////////////////////////////////////
+//// DESARROLLO /////////////////////////////////////////////////
+
+//// DESARROLLO /////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////

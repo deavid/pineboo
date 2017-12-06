@@ -1,0 +1,354 @@
+<!DOCTYPE TMD>
+<TMD>
+	<name>co_modelo031</name>
+	<!--Modelo 031 Liquidación de iva de importación -->
+	
+	<alias>QT_TRANSLATE_NOOP("MetaData","Modelo 031")</alias>
+
+	<field>
+		<name>idmodelo</name>
+		<!--Identificador interno de la tabla-->
+		<alias>QT_TRANSLATE_NOOP("MetaData","ID")</alias>
+		<null>false</null>
+		<pk>true</pk>
+		<type>serial</type>
+		<visiblegrid>false</visiblegrid>
+	</field>
+	
+	<field>
+		<name>codejercicio</name>
+		<!--Ejercicio al que corresponde el período del modelo a generar-->
+		<alias>QT_TRANSLATE_NOOP("MetaData","Ejercicio")</alias>
+		<null>false</null>
+		<pk>false</pk>
+		<type>string</type>
+		<length>4</length>
+		
+		<relation>
+			<table>ejercicios</table>
+			<field>codejercicio</field>
+			<card>M1</card>
+		</relation>
+	</field>
+        
+        <field>
+                <name>fecha</name>
+                <!--Fecha de emisión del modelo-->
+                <alias>QT_TRANSLATE_NOOP("MetaData","Fecha Emisión")</alias>
+                <null>false</null>
+                <pk>false</pk>
+                <type>date</type>
+        </field>
+        
+        <field>
+                <name>fechav</name>
+                <!--Fecha de emisión del modelo-->
+                <alias>QT_TRANSLATE_NOOP("MetaData","Fecha Vencimiento")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>date</type>
+        </field>
+        
+        <field>
+                <name>numreferencia</name>
+                <!--Número identificativo de la declaración-->
+                <alias>QT_TRANSLATE_NOOP("MetaData","Nº Referencia DUA")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>20</length>
+        </field>
+        
+        <field>
+                <name>numjustificante</name>
+                <!--Número identificativo de la declaración-->
+                <alias>QT_TRANSLATE_NOOP("MetaData","Justificante")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>13</length>
+        </field>
+        
+        <field>
+            <name>cuotaimport</name>
+            <alias>QT_TRANSLATE_NOOP("MetaData","Cuota iva de Importación")</alias>
+            <null>true</null>
+            <pk>false</pk>
+            <type>double</type>
+            <partI>10</partI>
+            <partD>2</partD>
+            <default>0</default>
+        </field>
+	
+        <field>
+                <name>estado</name>
+                <!--Estado del modelo-->        
+                <alias>QT_TRANSLATE_NOOP("MetaData","Estado")</alias>
+                <null>false</null>
+                <pk>false</pk>
+                <optionslist>Emitido,Cerrado,Pagado</optionslist>
+                <editable>false</editable>
+                <default>Emitido</default>
+                <type>string</type>
+                <length>20</length>
+        </field>
+    
+	<field>
+		<name>cifnif</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","N.I.F")</alias>
+		<null>false</null>
+		<pk>false</pk>
+		<type>string</type>
+		<length>9</length>
+	</field>
+
+	<field>
+		<name>apellidosnombrers</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Apellidos y nombre ó razón social")</alias>
+		<null>false</null>
+		<pk>false</pk>
+		<type>string</type>
+		<length>40</length>
+	</field>
+        
+        <field>
+                <name>codtipovia</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Tipo vía")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>2</length>
+                <default>CL</default>
+                <relation>
+                    <table>co_tiposvia</table>
+                    <field>codtipovia</field>
+                    <card>M1</card>
+                </relation>
+        </field>
+        
+        <field>
+                <name>nombrevia</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Nombre de la Vía Pública")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>17</length>
+        </field>
+    
+        <field>
+                <name>numero</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Nº")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>4</length>
+        </field>
+        
+        <field>
+                <name>escalera</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Esc.")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>2</length>
+        </field>
+       
+        <field>
+                <name>piso</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Piso")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>2</length>
+        </field>
+        
+        <field>
+                <name>puerta</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Pta.")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>2</length>
+        </field>
+        
+        <field>
+                <name>codpos</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Código postal")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>5</length>
+        </field>
+        
+        <field>
+                <name>municipio</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Municipio")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>20</length>
+        </field>
+        
+        <field>
+                <name>idprovincia</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>uint</type>
+                <visiblegrid>false</visiblegrid>
+                <relation>
+                    <table>provincias</table>
+                    <field>idprovincia</field>
+                    <card>M1</card>
+                </relation>
+        </field>
+        
+        <field>
+                <name>codprovincia</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Cod. provincia")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>2</length>
+        </field>
+        
+        <field>
+                <name>provincia</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Provincia")</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>15</length>
+        </field>
+    
+        <field>
+                <name>cifnifrepres</name>
+                 <!--Nif del representante legal del declarante-->
+                <alias>QT_TRANSLATE_NOOP("MetaData",N.I.F representante)</alias>
+                <null>true</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>20</length>
+        </field>
+
+        <field>
+                <name>apellidosnombrersrepres</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Apellidos y nombre ó razón social")</alias>
+                <null>false</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>100</length>
+        </field>
+        
+        <field>
+                <name>concepto</name>
+                <alias>QT_TRANSLATE_NOOP("MetaData","Concepto")</alias>
+                <null>false</null>
+                <pk>false</pk>
+                <type>string</type>
+                <length>100</length>
+        </field>
+        
+        <field>
+            <name>idfacturaimport</name>
+            <!--Identificador de la factura de importación-->        
+            <alias>QT_TRANSLATE_NOOP("MetaData","Factura de Importación")</alias>
+            <null>true</null>
+            <pk>false</pk>
+            <type>uint</type>
+            <visiblegrid>false</visiblegrid>
+            <editable>false</editable>
+        </field>
+    
+        <field>
+            <name>codfacturaimport</name>
+            <!--Código de la factura de importación-->        
+            <alias>QT_TRANSLATE_NOOP("MetaData","")</alias>
+            <null>true</null>
+            <pk>false</pk>
+            <type>string</type>
+            <length>12</length>
+            <editable>false</editable>
+        </field>
+        
+        <field>
+            <name>tipobienes</name>
+            <!--Determina si el tipo de bienes de la importación es corriente o de inversión para actualizar la casilla de iva-->        
+            <alias>QT_TRANSLATE_NOOP("MetaData","Tipo de Bien")</alias>
+            <null>false</null>
+            <pk>false</pk>
+            <optionslist>Corrientes,De Inversión,Indefinido</optionslist>
+            <default>Corrientes</default>
+            <type>string</type>
+            <length>20</length>
+        </field>
+        
+        <field>
+            <name>baseimport</name>
+            <alias>QT_TRANSLATE_NOOP("MetaData","Base")</alias>
+            <null>true</null>
+            <pk>false</pk>
+            <type>double</type>
+            <partI>10</partI>
+            <partD>2</partD>
+            <default>0</default>
+        </field>
+        
+        <field>
+            <name>tipoivaimport</name>
+            <alias>QT_TRANSLATE_NOOP("MetaData","%I.V.A.")</alias>
+            <null>true</null>
+            <pk>false</pk>
+            <type>double</type>
+            <partI>3</partI>
+            <partD>2</partD>
+            <default>0</default>
+        </field>
+        
+        <field>
+            <name>idfacturarepres</name>
+            <!--Identificador de la factura de representante -->        
+            <alias>QT_TRANSLATE_NOOP("MetaData","Factura de Transitario")</alias>
+            <null>true</null>
+            <pk>false</pk>
+            <type>uint</type>
+            <visiblegrid>false</visiblegrid>
+            <editable>false</editable>
+        </field>
+        
+        <field>
+            <name>idasiento</name>
+            <!-- Código del asiento generado por la emisión del modelo-->        
+            <alias>QT_TRANSLATE_NOOP("MetaData","Asiento")</alias>
+            <null>true</null>
+            <pk>false</pk>
+            <type>uint</type>
+            <visiblegrid>false</visiblegrid>
+            <relation>
+                <table>co_asientos</table>
+                <field>idasiento</field>
+                <card>M1</card>
+            </relation>
+        </field>
+	
+        <field>
+            <name>nogenerarasiento</name>
+            <!--Si la validación del pago o devolución va a generar un asiento contable-->        
+            <alias>QT_TRANSLATE_NOOP("MetaData","Ignorar contabilidad")</alias>
+            <null>false</null>
+            <pk>false</pk>
+            <type>bool</type>
+            <default>false</default>
+        </field>
+        
+        <field>
+            <name>cerrado</name>
+            <!--Indica si el modelo esta cerrado para regenerar el asiento -->
+            <alias>QT_TRANSLATE_NOOP("MetaData","Cerrado")</alias>
+            <null>false</null>
+            <pk>false</pk>
+            <type>bool</type>
+            <default>false</default>
+            <visiblegrid>false</visiblegrid>
+        </field>
+</TMD>
