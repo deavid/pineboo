@@ -269,7 +269,7 @@ class FLQPSQL(object):
     
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         try:
-            cursor.execute("FETCH %d FROM %s" % (number, curname))
+            cursor.execute("FETCH %d FROM %s" % (number, str(curname)))
         except Exception:
             qWarning("PSQLDriver.refreshFetch\n %s" % traceback.format_exc())
     
@@ -380,6 +380,7 @@ class FLQPSQL(object):
         
         return sql
     
+    @decorators.NotImplementedWarn
     def mismatchedTable(self, table1, tmd_or_table2, db_):
         if isinstance(tmd_or_table2, str):
             mtd = db_.manager().metadata(tmd_or_table2, True)
@@ -394,7 +395,35 @@ class FLQPSQL(object):
         
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
-                
+    
+    
+    
+    
+    def tables(self, typeName = None):
+        tl = []
+        if not self.isOpen():
+            return tl
+        
+        t = FLSqlQuery()
+        t.setForwardOnly(True)
+        
+        if not typeName or typeName == "Tables":
+            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
+            while t.next():
+                tl.append(str(t.value(0)))
+        
+        if not typeName or typeName == "Views":
+            t.exec_("select relname from pg_class where ( relkind = 'v' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
+            while t.next():
+                tl.append(str(t.value(0)))
+        if not typeName or typeName == "SystemTables":
+            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND relname like 'pg_%' ) ")
+            while t.next():
+                tl.append(str(t.value(0)))
+        
+        
+        del t
+        return tl
         
         
         
