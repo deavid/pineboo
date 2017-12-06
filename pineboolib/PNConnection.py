@@ -74,7 +74,7 @@ class PNConnection(QtCore.QObject):
     """
     def useConn(self, name = "default"):
         if name == "default":
-            return self.conn
+            return self
         
         for k in self.connAux.keys():
             if k == name:
@@ -85,6 +85,11 @@ class PNConnection(QtCore.QObject):
         
         return self.connAux[name]
         
+    def tables(self):
+        return self.driver().tables()
+    
+    def database(self, name):
+        return self.useConn(name)
     
     def driver(self):
         return self.driverSql.driver()
@@ -107,7 +112,7 @@ class PNConnection(QtCore.QObject):
     def port(self):
         return self.db_port
     
-    def database(self):
+    def databaseName(self):
         return self.db_name
     
     def user(self):
