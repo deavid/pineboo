@@ -149,7 +149,7 @@ class SysType(object):
         return util.getOS()
     
     def nameBD(self):
-        return pineboolib.project.conn.database()
+        return pineboolib.project.conn.databaseName()
     
     
     def setCaptionMainWidget(self, value):
@@ -182,6 +182,10 @@ class SysType(object):
     @decorators.NotImplementedWarn
     def reinit(self):
         pass
+    
+    def cleanupMetaData(self, connName = "default"):
+        pineboolib.project.conn.database(connName).manager().cleanupMetaData()
+        
         
         
     
