@@ -217,15 +217,19 @@ class FLFormDB(QtWidgets.QDialog):
             try:
                 timer = QtCore.QTimer(self)
                 if self.loaded:
-                    timer.singleShot(250, self.iface.init)
-                    return True
+                    if self.iface:
+                        timer.singleShot(250, self.iface.init)
+                        return True
+                    elif self.script.FormInternalObj:
+                        timer.singleShot(250, self.script..FormInternalObj.init)
+                        return True
                 else:
                     timer.singleShot(250,self.initScript)
             except Exception:
                 return False
                 
 
-    def load_script(self,scriptname):
+    def load_script(self,scriptname = None):
         #Si ya esta cargado se reusa...
         if getattr(self.action, "script",None):
             self.script = self.action.script
@@ -663,9 +667,12 @@ class FLFormDB(QtWidgets.QDialog):
     """
     Une la interfaz de script al objeto del formulario
     """
-    @decorators.NotImplementedWarn
     def bindIface(self):
-        pass
+        
+        if self.iface:
+            self.oldFormObj = self.iface
+        
+        self.load_script()
         
         
 
@@ -786,5 +793,11 @@ class FLFormDB(QtWidgets.QDialog):
     @decorators.NotImplementedWarn
     def child(self, childName):
         return False
+    
+    def __getattr__(self, name):
+        if self.script.FormInternalObj:
+            return getattr(self.script.FormInternalObj, name)
+        else:
+            qWarning("No se encuentra el atributo %s" % name)
 
 
