@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
-from PyQt5.Qt import QDomDocument, qWarning
+from PyQt5.Qt import QDomDocument, qWarning, QApplication
 
 
 from pineboolib import decorators, qsatype
@@ -1154,9 +1154,52 @@ class FLManager(ProjectClass):
     Limpieza la tabla flmetadata, actualiza el cotenido xml con el de los fichero .mtd
     actualmente cargados
     """
-    @decorators.NotImplementedWarn
     def cleanupMetaData(self):
-        return True
+        util = FLUtil()
+        if not self.existsTable("flfiles") or not self.existsTable("flmetadata"):
+            return
+        
+        q = FLSqlQuery(None, self.db_.dbAux())
+        c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
+        buffer = None
+        table = ""
+        
+        q.setForwardOnly(True)
+        c.setForwardOnly(True)
+        
+        if not self.dictKeyMetaData_:
+            self.dictKeyMetaData_ = {}
+        else:
+            self.dictKeyMetaData_.clear()
+            
+        self.loadTables()
+        self.db_.managerModules().loadKeyFiles()
+        self.db_.managerModules().loadAllIdModules()
+        self.db_.managerModules().loadIdAreas()
+        
+        q.exec_("SELECT tabla, xml FROM flmetadata")
+        while q.next():
+            self.dictKeyMetaData_[str(q.value(0))] = str(q.value(1))
+            
+            q.exec_("SELECT nombre, sha FROM flfiles WHERE nombre LIKE '%.mtd'")
+            while q.next():
+                table = str(q.value(0))
+                table = table.replace(".mtd", "")
+                if not self.existsTable(table):
+                    self.createTable(table)
+                
+                tmd = self.metadata(table)
+                if not tmd:
+                    qWarning("FLManager::cleanupMetaDAta " + QApplication.tr("No se ha podido crear los metadatatos para la tabla %1").arg(table))
+                
+                c.select("tabla='%s'" % table)
+                if c.next():
+                    buffer = c.primeUpdate()
+                    buffer.setValue("xml", str(q.value(1)))
+                    c.update()
+                
+                self.dictKeyMetaData_[table] = str(q.value(1))    
+                    
     
     """
     Para saber si la tabla dada es una tabla de sistema.
