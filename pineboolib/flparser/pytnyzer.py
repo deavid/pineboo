@@ -1106,18 +1106,29 @@ def string_template(ast):
     yield "line", "import traceback"
     yield "line", "sys = SysType()"
     yield "line", ""
-    yield "line", "class FormInternalObj(qsatype.FormDBWidget):"
-    yield "begin", "class-pass"
-    yield "line", "pass"
-    yield "end", "class-pass"
-
     sourceclasses = etree.Element("Source")
+    for cls in ast.xpath("Class"):
+        sourceclasses.append(cls)
+
+    mainclass = etree.SubElement(sourceclasses,"Class",name="FormInternalObj",extends="qsatype.FormDBWidget")
+    mainsource = etree.SubElement(mainclass,"Source")
+
+
+    constructor = etree.SubElement(mainsource,"Function",name="_class_init")
+    args = etree.SubElement(constructor,"Arguments")
+    csource = etree.SubElement(constructor,"Source")
+
     for child in ast:
-        child.set("withoutself","1")
-        sourceclasses.append(child)
+        if child.tag != "Function":
+            child.set("constructor","1")
+            csource.append(child)
+        else:
+            mainsource.append(child)
 
     for dtype, data in parse_ast(sourceclasses).generate():
         yield dtype, data
+    yield "line", ""
+    yield "line", "form = None"
 
 def write_python_file(fobj, ast, tpl=file_template):
     indent = []
