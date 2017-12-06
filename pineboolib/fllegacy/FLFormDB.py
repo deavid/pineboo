@@ -221,7 +221,7 @@ class FLFormDB(QtWidgets.QDialog):
                         timer.singleShot(250, self.iface.init)
                         return True
                     elif self.script.FormInternalObj:
-                        timer.singleShot(250, self.script..FormInternalObj.init)
+                        timer.singleShot(250, self.script.FormInternalObj.init)
                         return True
                 else:
                     timer.singleShot(250,self.initScript)
