@@ -11,6 +11,7 @@ import traceback
 import pineboolib
 from pineboolib import flcontrols, decorators
 from pineboolib.flcontrols import ProjectClass
+from pineboolib.utils import filedir
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
@@ -161,12 +162,18 @@ class SysType(object):
     def mainWidget(self):
         return pineboolib.project.main_window.ui
     
+    def installPrefix(self):
+        return filedir("..")
+    
     def __getattr__(self, name):
         obj = eval("sys.widget.%s" % name, pineboolib.qsaglobals.__dict__)
         if obj:
            return obj
         else:
-           qWarning("No se encuentra sys.%s" % name) 
+           qWarning("No se encuentra sys.%s" % name)
+    
+    def version(self):
+        return pineboolib.project.version
         
     
         

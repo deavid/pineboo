@@ -6,6 +6,7 @@ from lxml import etree
 from io import StringIO
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QDomDocument as FLDomDocument
 
 # Cargar toda la API de Qt para que sea visible.
 from PyQt5.QtGui import *
@@ -186,6 +187,8 @@ def FLReportViewer():
     return FLReportViewer_Legacy.FLReportViewer()
 
 
+
+"""
 class FLDomDocument(object):
     
     parser = None
@@ -208,13 +211,13 @@ class FLDomDocument(object):
             return True
         except:
             return False
-    
+        
     def namedItem(self, name):
         return u"<%s" % name in self.string_
 
     def toString(self, value = None):
         return self.string_
-    
+""" 
     
         
     
@@ -383,8 +386,8 @@ class Date(object):
             self.date_ = QtCore.QDate.currentDate()
             self.time_ = QtCore.QTime.currentTime()
         else:
-            self.date_ = date_
-            self.time_ = "00:00:00"
+            self.date_ = QtCore.QDate(date_)
+            self.time_ = QtCore.QTime("00:00:00")
     
     def toString(self, *args, **kwargs):
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"),self.date_.toString("MM"),self.date_.toString("yyyy"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
@@ -648,7 +651,7 @@ class LineEdit(QWidget):
         else:
             return super(LineEdit, self).__getattr__(name)
 
-class Dir(object):
+class Dir_Class(object):
     path_ = None
     home = None 
     
@@ -670,6 +673,12 @@ class Dir(object):
     
     def fileExists(self, name):
         return os.path.exists(name)
+    
+    @decorators.Incomplete
+    def cleanDirPath(self, name):
+        return name
+
+Dir = Dir_Class()
 
 class File(QtCore.QFile):
     fichero = None
@@ -694,6 +703,9 @@ class File(QtCore.QFile):
         #encodig = text.property("encoding")
         out_ = QTextStream(self)
         out_ << text
+    
+    def path(self):
+        return self.fichero
         
    
     
