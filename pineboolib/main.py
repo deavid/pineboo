@@ -45,6 +45,7 @@ class Project(object):
     conn = None # Almacena la conexión principal a la base de datos
     debugLevel = 100
     mainFormName = "Pineboo"
+    version = "0.3"
     _initModules = None
     main_window = None
     translators = None
@@ -166,6 +167,11 @@ class Project(object):
         self.conn.manager().createSystemTable("flareas")
         self.conn.manager().createSystemTable("flmodules")
         self.conn.manager().createSystemTable("flfiles")
+        self.conn.manager().createSystemTable("flgroups")
+        self.conn.manager().createSystemTable("fllarge")
+        self.conn.manager().createSystemTable("flserial")
+        self.conn.manager().createSystemTable("flusers")
+        self.conn.manager().createSystemTable("flvar")
         
         util = FLUtil()
         util.writeSettingEntry(u"DBA/lastDB",self.dbname)
