@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import qWarning
 
 from pineboolib.utils import filedir
 from pineboolib import decorators
@@ -174,7 +175,10 @@ class FLFormDB(QtWidgets.QDialog):
         if not self._scriptForm and getattr(action,"scriptform", None):
             self._scriptForm = action.scriptform
         
-        self.setWindowTitle(action.alias)
+        if not getattr( action, "alias", None):
+            qWarning("FLFormDB::Cargando un action XML")
+        else:
+            self.setWindowTitle(action.alias)
         
         self.loaded = False
         self.idMDI_ = self.action.name
