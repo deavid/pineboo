@@ -676,21 +676,23 @@ class Dir_Class(object):
     
     @decorators.Incomplete
     def cleanDirPath(self, name):
-        return name
+        return str(name)
 
 Dir = Dir_Class()
 
 class File(QtCore.QFile):
     fichero = None
     mode = None
+    path = None
         
     ReadOnly = QIODevice.ReadOnly
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
     
     def __init__(self, rutaFichero):
-        self.fichero = rutaFichero
+        self.fichero = str(rutaFichero)
         super(File, self).__init__(rutaFichero)
+        self.path = os.path.dirname(self.fichero)
     
     #def open(self, mode):
     #    super(File, self).open(self.fichero, mode)
@@ -704,9 +706,7 @@ class File(QtCore.QFile):
         out_ = QTextStream(self)
         out_ << text
     
-    def path(self):
-        return self.fichero
         
-   
+    
     
         

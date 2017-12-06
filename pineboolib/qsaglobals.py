@@ -174,6 +174,15 @@ class SysType(object):
     
     def version(self):
         return pineboolib.project.version
+    
+    @decorators.NotImplementedWarn
+    def processEvents(self):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def reinit(self):
+        pass
+        
         
     
         
