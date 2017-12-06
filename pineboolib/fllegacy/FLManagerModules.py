@@ -24,6 +24,18 @@ de AbanQ.
 @author InfoSiAL S.L.
 """
 
+
+class FLInfoMod(object):
+    idModulo = None
+    idArea = None
+    descripcion = None
+    version = None
+    icono = None
+    areaDescripcion = None
+    
+
+
+
 class FLManagerModules(ProjectClass):
     
     """
@@ -402,23 +414,78 @@ class FLManagerModules(ProjectClass):
     """
     Carga en el diccionario de claves las claves sha1 de los ficheros
     """
-    @decorators.NotImplementedWarn
     def loadKeyFiles(self):
-        pass
+        
+        self.dictKeyFiles = {}
+        self.dictModFiles = {}
+        q = FLSqlQuery(None, self._prj.conn.dbAux())
+        q.setForwardOnly(True)
+        q.exec_("SELECT nombre, sha, idmodulo FROM flfiles")
+        name = None
+        while q.next():
+            name = str(q.value(0))
+            self.dictKeyFiles[name] = str(q.value(1))
+            self.dictModFiles[name.upper()] = str(q.value(2))
+                
 
     """
     Carga la lista de todos los identificadores de módulos
     """
-    @decorators.NotImplementedWarn
     def loadAllIdModules(self):
-        pass
+        if not self._prj.conn.dbAux():
+            return
+        
+        self.listAllIdModules_ = []
+        self.listAllIdModules_.append("sys")
+        
+        self.dictInfoMods = {}
+        
+        q = FLSqlQuery(None, self._prj.conn.dbAux())
+        q.setForwardOnly(True)
+        q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion FROM flmodules left join flareas on flmodules.idarea = flareas.idarea" )
+        
+        sysModuleFound = False
+        while q.next():
+            infoMod = FLInfoMod()
+            infoMod.idModulo = str(q.value(0))
+            infoMod.idArea = str(q.value(1))
+            infoMod.descripcion = str(q.value(2))
+            infoMod.version = str(q.value(3))
+            infoMod.icono = str(q.value(4))
+            infoMod.areaDescripcion = str(q.value(5))
+            self.dictInfoMods[infoMod.idModulo.upper()] = infoMod
+            
+            if not infoMod.idModulo == "sys":
+                self.listAllIdModules_.append(infoMod.idModulo)
+            else:
+                sysModuleFound = True
+        
+        if not sysModuleFound:
+            infoMod = FLInfoMod()
+            infoMod.idModulo = "sys"
+            infoMod.idArea = "sys"
+            infoMod.descripcion = "Administracion"
+            infoMod.version = "0.0"
+            infoMod.icono = self.contentFS("%s/%s" % (filedir("../share/pineboo"), "/sys.xpm"))
+            infoMod.areaDescripcion = "Sistema"
+            self.dictInfoMods[infoMod.idModulo.upper()] = infoMod
 
     """
     Carga la lista de todos los identificadores de areas
     """
-    @decorators.NotImplementedWarn
     def loadIdAreas(self):
-        pass
+        if not self._prj.conn.dbAux():
+            return
+        
+        self.listIdAreas_ = []
+        q = FLSqlQuery(None, self._prj.conn.dbAux())
+        q.setForwardOnly(True)
+        q.exec_("SELECT idarea from flareas WHERE idarea <> 'sys'")
+        while q.next():
+            self.listIdAreas_.append(str(q.value(0)))
+        
+        self.listIdAreas_.append("sys")
+            
   
     """
     Comprueba las firmas para un modulo dado
