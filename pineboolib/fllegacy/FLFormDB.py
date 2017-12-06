@@ -782,5 +782,9 @@ class FLFormDB(QtWidgets.QDialog):
     def initMainWidget(self, w = None):
         if not self.showed:
             self.show()
+    
+    @decorators.NotImplementedWarn
+    def child(self, childName):
+        return False
 
 
