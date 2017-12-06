@@ -893,6 +893,9 @@ class FLUtil(ProjectClass):
     """
     def sqlInsert(self, t, fL, vL, connName="default"):
         
+        fL = fL.split(",")
+        vL = vL.split(",")
+        
         if not len(fL) == len(vL):
             return False
         
@@ -900,12 +903,15 @@ class FLUtil(ProjectClass):
         c.setModeAccess(FLSqlCursor.Insert)
         c.refreshBuffer()
         
-        for f,v in (fL,vL):
-            if v == None:
+        i = 0
+        for f in fL:
+            if vL[i] == None:
                 c.bufferSetNull(f)
             else:
-                c.setValueBuffer(f,v)
-        
+                c.setValueBuffer(f,vL[i])
+                
+            i = i + 1
+            
         return c.commitBuffer()
         
         
@@ -1109,9 +1115,9 @@ class FLUtil(ProjectClass):
 
     @return Código de idioma del sistema
     """
-    @decorators.NotImplementedWarn
+
     def getIdioma(self):
-        pass
+        return QtCore.QLocale().name()[:2]
 
     """
     Devuelve el sistema operativo sobre el que se ejecuta el programa
