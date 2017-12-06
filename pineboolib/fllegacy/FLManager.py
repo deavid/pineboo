@@ -542,7 +542,7 @@ class FLManager(ProjectClass):
                 
         #else:
         q = FLSqlQuery()
-        sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
+        #sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
         q.setTablesList(n)
         q.setSelect("*")
         q.setFrom(n)
@@ -1107,7 +1107,7 @@ class FLManager(ProjectClass):
         if not self.existsTable(n):
             doc = QDomDocument()
             _path = filedir("..","share","pineboo","tables")
-            dir = qsatype.Dir(_path)
+            dir = qsatype.Dir_Class(_path)
             _tables = dir.entryList("%s.mtd" % n)
             
             for f in _tables:

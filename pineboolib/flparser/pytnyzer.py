@@ -25,6 +25,7 @@ def id_translate(name):
     if name == "endsWith": name = "endswith"
     if name == "lastIndexOf": name = "rfind"
     if name == "File": name = "qsatype.File"
+    if name == "Dir": name = "qsatype.Dir"
     if name == "findRev": name = "find"
     if name == "toLowerCase": name = "lower"
     if name == "Process": name = "qsatype.Process"
