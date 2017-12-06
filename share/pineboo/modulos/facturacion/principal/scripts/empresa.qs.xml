@@ -1,0 +1,1944 @@
+<Source>
+  <Class name="interna">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="ctx" type="Object"/>
+      </DeclarationBlock>
+      <Function name="interna">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionUpdate>
+            <Member>
+              <Identifier name="this"/>
+              <Identifier name="ctx"/>
+            </Member>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Identifier name="context"/>
+            </Value>
+          </InstructionUpdate>
+        </Source>
+      </Function>
+      <Function name="main">
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="this"/>
+              <Identifier name="ctx"/>
+              <FunctionCall name="interna_main"/>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </Function>
+      <Function name="init">
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="this"/>
+              <Identifier name="ctx"/>
+              <FunctionCall name="interna_init"/>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </Function>
+      <Function name="validateForm" returns="Boolean">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="interna_validateForm"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="oficial" extends="interna">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="pbnCambiarEjercicioActual" type="Object"/>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="bloqueoProvincia" type="Boolean"/>
+      </DeclarationBlock>
+      <Function name="oficial">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="interna">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+      <Function name="pbnCambiarEjercicioActual_clicked">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="oficial_pbnCambiarEjercicioActual_clicked"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+      <Function name="mostrarEjercicioActual">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="oficial_mostrarEjercicioActual"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+      <Function name="cambiarEjercicioActual" returns="Boolean">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="oficial_cambiarEjercicioActual"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+      <Function name="bufferChanged">
+        <Arguments>
+          <Variable name="fN" type="String"/>
+        </Arguments>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="oficial_bufferChanged">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="fN"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="navegador" extends="oficial">
+    <Source>
+      <Function name="navegador">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="oficial">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+      <Function name="init">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="navegador_init"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+      <Function name="cambiarNavegador">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="navegador_cambiarNavegador"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="envioMail" extends="navegador">
+    <Source>
+      <Function name="envioMail">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="navegador">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+      <Function name="init">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="envioMail_init"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+      <Function name="cambiarClienteCorreo">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="envioMail_cambiarClienteCorreo"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+      <Function name="cambiarNombreCorreo">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="envioMail_cambiarNombreCorreo"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+      <Function name="cambiarDirIntermedia">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="ctx"/>
+                <FunctionCall name="envioMail_cambiarDirIntermedia"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="head" extends="envioMail">
+    <Source>
+      <Function name="head">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="envioMail">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <Class name="ifaceCtx" extends="head">
+    <Source>
+      <Function name="ifaceCtx">
+        <Arguments>
+          <Variable name="context"/>
+        </Arguments>
+        <Source>
+          <InstructionCall>
+            <FunctionCall name="head">
+              <CallArguments>
+                <Value>
+                  <Identifier name="context"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </InstructionCall>
+        </Source>
+      </Function>
+      <Function name="pub_cambiarEjercicioActual" returns="Boolean">
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <FunctionCall name="cambiarEjercicioActual"/>
+              </Member>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </Function>
+    </Source>
+  </Class>
+  <DeclarationBlock mode="CONST">
+    <Variable name="iface">
+      <Value>
+        <New>
+          <FunctionCall name="ifaceCtx">
+            <CallArguments>
+              <Value>
+                <Identifier name="this"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </New>
+      </Value>
+    </Variable>
+  </DeclarationBlock>
+  <Function name="interna_init">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor" type="FLSqlCursor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <Identifier name="iface"/>
+          <Identifier name="pbnCambiarEjercicioActual"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="this"/>
+            <FunctionCall name="child">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="pbnCambiarEjercicioActual"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <Identifier name="iface"/>
+          <Identifier name="bloqueoProvincia"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Identifier name="false"/>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="iface"/>
+                <Identifier name="pbnCambiarEjercicioActual"/>
+              </Member>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="clicked()"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="iface.pbnCambiarEjercicioActual_clicked"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Identifier name="cursor"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="bufferChanged(QString)"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="iface.bufferChanged"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="flfactppal"/>
+                <Identifier name="iface"/>
+                <FunctionCall name="pub_ejercicioActual"/>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="flfactppal"/>
+              <Identifier name="iface"/>
+              <FunctionCall name="pub_cambiarEjercicioActual">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="this"/>
+                      <FunctionCall name="cursor"/>
+                      <FunctionCall name="valueBuffer">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="codejercicio"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+      <InstructionCall>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="fdbCodEjercicio"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <FunctionCall name="close"/>
+        </Member>
+      </InstructionCall>
+      <InstructionCall>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="fdbNombreEjercicio"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <FunctionCall name="close"/>
+        </Member>
+      </InstructionCall>
+      <InstructionCall>
+        <Member>
+          <Identifier name="this"/>
+          <Identifier name="iface"/>
+          <FunctionCall name="mostrarEjercicioActual"/>
+        </Member>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="interna_main">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="f" type="Object">
+          <Value>
+            <New>
+              <FunctionCall name="FLFormSearchDB">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="empresa"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor" type="FLSqlCursor">
+          <Value>
+            <Member>
+              <Identifier name="f"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <Member>
+          <Identifier name="cursor"/>
+          <FunctionCall name="select"/>
+        </Member>
+      </InstructionCall>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="cursor"/>
+                <FunctionCall name="first"/>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="cursor"/>
+              <FunctionCall name="setModeAccess">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="cursor"/>
+                      <Identifier name="Insert"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+        <Else>
+          <Source>
+            <InstructionCall>
+              <Member>
+                <Identifier name="cursor"/>
+                <FunctionCall name="setModeAccess">
+                  <CallArguments>
+                    <Value>
+                      <Member>
+                        <Identifier name="cursor"/>
+                        <Identifier name="Edit"/>
+                      </Member>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </InstructionCall>
+          </Source>
+        </Else>
+      </If>
+      <InstructionCall>
+        <Member>
+          <Identifier name="f"/>
+          <FunctionCall name="setMainWidget"/>
+        </Member>
+      </InstructionCall>
+      <If>
+        <Condition>
+          <Expression>
+            <Member>
+              <Identifier name="cursor"/>
+              <FunctionCall name="modeAccess"/>
+            </Member>
+            <Compare type="EQ"/>
+            <Member>
+              <Identifier name="cursor"/>
+              <Identifier name="Insert"/>
+            </Member>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="f"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="pushButtonCancel"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+              <FunctionCall name="setDisabled">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="true"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+      <InstructionCall>
+        <Member>
+          <Identifier name="cursor"/>
+          <FunctionCall name="refreshBuffer"/>
+        </Member>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="commitOk" type="Boolean">
+          <Value>
+            <Identifier name="false"/>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="acpt" type="Boolean"/>
+      </DeclarationBlock>
+      <InstructionCall>
+        <Member>
+          <Identifier name="cursor"/>
+          <FunctionCall name="transaction">
+            <CallArguments>
+              <Value>
+                <Identifier name="false"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <While>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Identifier name="commitOk"/>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionUpdate>
+            <Identifier name="acpt"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Identifier name="false"/>
+            </Value>
+          </InstructionUpdate>
+          <InstructionCall>
+            <Member>
+              <Identifier name="f"/>
+              <FunctionCall name="exec">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="nombre"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionUpdate>
+            <Identifier name="acpt"/>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Member>
+                <Identifier name="f"/>
+                <FunctionCall name="accepted"/>
+              </Member>
+            </Value>
+          </InstructionUpdate>
+          <If>
+            <Condition>
+              <Value>
+                <OpUnary type="LNOT">
+                  <Identifier name="acpt"/>
+                </OpUnary>
+              </Value>
+            </Condition>
+            <Source>
+              <If>
+                <Condition>
+                  <Value>
+                    <Member>
+                      <Identifier name="cursor"/>
+                      <FunctionCall name="rollback"/>
+                    </Member>
+                  </Value>
+                </Condition>
+                <Source>
+                  <InstructionUpdate>
+                    <Identifier name="commitOk"/>
+                    <OpUpdate type="EQUALS"/>
+                    <Value>
+                      <Identifier name="true"/>
+                    </Value>
+                  </InstructionUpdate>
+                </Source>
+              </If>
+            </Source>
+            <Else>
+              <Source>
+                <If>
+                  <Condition>
+                    <Value>
+                      <Member>
+                        <Identifier name="cursor"/>
+                        <FunctionCall name="commitBuffer"/>
+                      </Member>
+                    </Value>
+                  </Condition>
+                  <Source>
+                    <InstructionCall>
+                      <Member>
+                        <Identifier name="cursor"/>
+                        <FunctionCall name="commit"/>
+                      </Member>
+                    </InstructionCall>
+                    <InstructionUpdate>
+                      <Identifier name="commitOk"/>
+                      <OpUpdate type="EQUALS"/>
+                      <Value>
+                        <Identifier name="true"/>
+                      </Value>
+                    </InstructionUpdate>
+                  </Source>
+                </If>
+              </Source>
+            </Else>
+          </If>
+        </Source>
+      </While>
+    </Source>
+  </Function>
+  <Function name="interna_validateForm" returns="Boolean">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Expression>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="sys"/>
+                <FunctionCall name="isLoadedModule">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="flcontppal"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+            <Compare type="LAND"/>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+              <FunctionCall name="valueBuffer">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="contintegrada"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+            <Compare type="EQ"/>
+            <Identifier name="true"/>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="MessageBox"/>
+              <FunctionCall name="warning">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="No puede activarse la contabilidad integrada si no est&#225; cargado el m&#243;dulo principal de Contabilidad"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="Ok"/>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="NoButton"/>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="NoButton"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="false"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Identifier name="true"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="oficial_pbnCambiarEjercicioActual_clicked">
+    <Source>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="this"/>
+                <Identifier name="iface"/>
+                <FunctionCall name="cambiarEjercicioActual"/>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN"/>
+        </Source>
+      </If>
+      <InstructionCall>
+        <Member>
+          <Identifier name="this"/>
+          <Identifier name="iface"/>
+          <FunctionCall name="mostrarEjercicioActual"/>
+        </Member>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="oficial_cambiarEjercicioActual" returns="Boolean">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="f" type="Object">
+          <Value>
+            <New>
+              <FunctionCall name="FLFormSearchDB">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="ejercicios"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionCall>
+        <Member>
+          <Identifier name="f"/>
+          <FunctionCall name="setMainWidget"/>
+        </Member>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="codEjercicio" type="String">
+          <Value>
+            <Member>
+              <Identifier name="f"/>
+              <FunctionCall name="exec">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="codejercicio"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Identifier name="codEjercicio"/>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN">
+            <Value>
+              <Identifier name="false"/>
+            </Value>
+          </InstructionFlow>
+        </Source>
+      </If>
+      <DeclarationBlock mode="VAR">
+        <Variable name="ok" type="Boolean">
+          <Value>
+            <Member>
+              <Identifier name="flfactppal"/>
+              <Identifier name="iface"/>
+              <FunctionCall name="pub_cambiarEjercicioActual">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="codEjercicio"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionFlow type="RETURN">
+        <Value>
+          <Identifier name="ok"/>
+        </Value>
+      </InstructionFlow>
+    </Source>
+  </Function>
+  <Function name="oficial_mostrarEjercicioActual">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="codEjercicio" type="String">
+          <Value>
+            <Member>
+              <Identifier name="flfactppal"/>
+              <Identifier name="iface"/>
+              <FunctionCall name="pub_ejercicioActual"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="nombreEjercicio" type="String">
+          <Value>
+            <Member>
+              <Identifier name="util"/>
+              <FunctionCall name="sqlSelect">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="ejercicios"/>
+                  </Value>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="nombre"/>
+                  </Value>
+                  <Expression>
+                    <Constant delim="&quot;" type="String" value="codejercicio='"/>
+                    <OpMath type="PLUS"/>
+                    <Identifier name="codEjercicio"/>
+                    <OpMath type="PLUS"/>
+                    <Constant delim="&quot;" type="String" value="'"/>
+                  </Expression>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <TryCatch>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="sys"/>
+              <FunctionCall name="setCaptionMainWidget">
+                <CallArguments>
+                  <Value>
+                    <Identifier name="nombreEjercicio"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionUpdate>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="lblValEjercicioActual"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+              <Identifier name="text"/>
+            </Member>
+            <OpUpdate type="EQUALS"/>
+            <Expression>
+              <Identifier name="codEjercicio"/>
+              <OpMath type="PLUS"/>
+              <Constant delim="&quot;" type="String" value=" - "/>
+              <OpMath type="PLUS"/>
+              <Identifier name="nombreEjercicio"/>
+            </Expression>
+          </InstructionUpdate>
+          <InstructionUpdate>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="lblEjercicioActual"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+              <Identifier name="text"/>
+            </Member>
+            <OpUpdate type="EQUALS"/>
+            <Expression>
+              <Member>
+                <Identifier name="util"/>
+                <FunctionCall name="translate">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="scripts"/>
+                    </Value>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="Ejercicio actual para "/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+              <OpMath type="PLUS"/>
+              <Member>
+                <Identifier name="sys"/>
+                <FunctionCall name="nameUser"/>
+              </Member>
+              <OpMath type="PLUS"/>
+              <Constant delim="&quot;" type="String" value=":"/>
+            </Expression>
+          </InstructionUpdate>
+        </Source>
+        <Identifier name="e"/>
+        <Source/>
+      </TryCatch>
+    </Source>
+  </Function>
+  <Function name="oficial_bufferChanged">
+    <Arguments>
+      <Variable name="fN" type="String"/>
+    </Arguments>
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <Identifier name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="cursor" type="FLSqlCursor">
+          <Value>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="cursor"/>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <Switch>
+        <Condition>
+          <Value>
+            <Identifier name="fN"/>
+          </Value>
+        </Condition>
+        <Case>
+          <Value>
+            <Constant delim="&quot;" type="String" value="provincia"/>
+          </Value>
+          <Source>
+            <If>
+              <Condition>
+                <Value>
+                  <OpUnary type="LNOT">
+                    <Member>
+                      <Identifier name="this"/>
+                      <Identifier name="iface"/>
+                      <Identifier name="bloqueoProvincia"/>
+                    </Member>
+                  </OpUnary>
+                </Value>
+              </Condition>
+              <Source>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="this"/>
+                    <Identifier name="iface"/>
+                    <Identifier name="bloqueoProvincia"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Identifier name="true"/>
+                  </Value>
+                </InstructionUpdate>
+                <InstructionCall>
+                  <Member>
+                    <Identifier name="flfactppal"/>
+                    <Identifier name="iface"/>
+                    <FunctionCall name="pub_obtenerProvincia">
+                      <CallArguments>
+                        <Value>
+                          <Identifier name="this"/>
+                        </Value>
+                      </CallArguments>
+                    </FunctionCall>
+                  </Member>
+                </InstructionCall>
+                <InstructionUpdate>
+                  <Member>
+                    <Identifier name="this"/>
+                    <Identifier name="iface"/>
+                    <Identifier name="bloqueoProvincia"/>
+                  </Member>
+                  <OpUpdate type="EQUALS"/>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </InstructionUpdate>
+              </Source>
+            </If>
+            <InstructionFlow type="BREAK"/>
+          </Source>
+        </Case>
+      </Switch>
+    </Source>
+  </Function>
+  <Function name="navegador_init">
+    <Source>
+      <InstructionCall>
+        <Member>
+          <Identifier name="this"/>
+          <Identifier name="iface"/>
+          <FunctionCall name="__init"/>
+        </Member>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblNombreNavegador"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="util"/>
+            <FunctionCall name="readSettingEntry">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="scripts/flfactinfo/nombrenavegador"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <FunctionCall name="child">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="pbnCambiarNavegador"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="clicked()"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="iface.cambiarNavegador"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="navegador_cambiarNavegador">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="nombreNavegador" type="String">
+          <Value>
+            <Member>
+              <Identifier name="Input"/>
+              <FunctionCall name="getText">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Nombre del navegador o ruta de acceso:"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Identifier name="nombreNavegador"/>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN"/>
+        </Source>
+      </If>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblNombreNavegador"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Identifier name="nombreNavegador"/>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <Member>
+          <Identifier name="util"/>
+          <FunctionCall name="writeSettingEntry">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="scripts/flfactinfo/nombrenavegador"/>
+              </Value>
+              <Value>
+                <Identifier name="nombreNavegador"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="envioMail_init">
+    <Source>
+      <InstructionCall>
+        <Member>
+          <Identifier name="this"/>
+          <Identifier name="iface"/>
+          <FunctionCall name="__init"/>
+        </Member>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblClienteCorreo"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="util"/>
+            <FunctionCall name="readSettingEntry">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="scripts/flfactinfo/clientecorreo"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblNombreCorreo"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="util"/>
+            <FunctionCall name="readSettingEntry">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="scripts/flfactinfo/nombrecorreo"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblDirIntermedia"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Member>
+            <Identifier name="util"/>
+            <FunctionCall name="readSettingEntry">
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="scripts/flfactinfo/dirCorreo"/>
+                </Value>
+              </CallArguments>
+            </FunctionCall>
+          </Member>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <FunctionCall name="child">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="pbnCambiarClienteCorreo"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="clicked()"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="iface.cambiarClienteCorreo"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <FunctionCall name="child">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="pbnCambiarNombreCorreo"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="clicked()"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="iface.cambiarNombreCorreo"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+      <InstructionCall>
+        <FunctionCall name="connect">
+          <CallArguments>
+            <Value>
+              <Member>
+                <Identifier name="this"/>
+                <FunctionCall name="child">
+                  <CallArguments>
+                    <Value>
+                      <Constant delim="&quot;" type="String" value="pbnCambiarDirIntermedia"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="clicked()"/>
+            </Value>
+            <Value>
+              <Identifier name="this"/>
+            </Value>
+            <Value>
+              <Constant delim="&quot;" type="String" value="iface.cambiarDirIntermedia"/>
+            </Value>
+          </CallArguments>
+        </FunctionCall>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="envioMail_cambiarClienteCorreo">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="opciones" type="Array">
+          <Value>
+            <Constant>
+              <CallArguments>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="KMail"/>
+                </Value>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="Thunderbird"/>
+                </Value>
+                <Value>
+                  <Constant delim="&quot;" type="String" value="Outlook"/>
+                </Value>
+              </CallArguments>
+            </Constant>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="codClienteCorreo" type="String">
+          <Value>
+            <Member>
+              <Identifier name="Input"/>
+              <FunctionCall name="getItem">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Cliente de correo:"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Identifier name="opciones"/>
+                  </Value>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="KMail"/>
+                  </Value>
+                  <Value>
+                    <Identifier name="false"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Identifier name="codClienteCorreo"/>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN"/>
+        </Source>
+      </If>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblClienteCorreo"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Identifier name="codClienteCorreo"/>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <Member>
+          <Identifier name="util"/>
+          <FunctionCall name="writeSettingEntry">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="scripts/flfactinfo/clientecorreo"/>
+              </Value>
+              <Value>
+                <Identifier name="codClienteCorreo"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+      <DeclarationBlock mode="VAR">
+        <Variable name="nombreCorreo">
+          <Value>
+            <Constant delim="&quot;" type="String" value=""/>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <Switch>
+        <Condition>
+          <Value>
+            <Identifier name="codClienteCorreo"/>
+          </Value>
+        </Condition>
+        <Case>
+          <Value>
+            <Constant delim="&quot;" type="String" value="KMail"/>
+          </Value>
+          <Source>
+            <InstructionUpdate>
+              <Identifier name="nombreCorreo"/>
+              <OpUpdate type="EQUALS"/>
+              <Value>
+                <Constant delim="&quot;" type="String" value="kmail"/>
+              </Value>
+            </InstructionUpdate>
+            <InstructionFlow type="BREAK"/>
+          </Source>
+        </Case>
+        <Case>
+          <Value>
+            <Constant delim="&quot;" type="String" value="Thunderbird"/>
+          </Value>
+          <Source>
+            <InstructionUpdate>
+              <Identifier name="nombreCorreo"/>
+              <OpUpdate type="EQUALS"/>
+              <Value>
+                <Constant delim="&quot;" type="String" value="thunderbird"/>
+              </Value>
+            </InstructionUpdate>
+            <InstructionFlow type="BREAK"/>
+          </Source>
+        </Case>
+        <Case>
+          <Value>
+            <Constant delim="&quot;" type="String" value="Outlook"/>
+          </Value>
+          <Source>
+            <InstructionUpdate>
+              <Identifier name="nombreCorreo"/>
+              <OpUpdate type="EQUALS"/>
+              <Value>
+                <Constant delim="&quot;" type="String" value="outlook.exe"/>
+              </Value>
+            </InstructionUpdate>
+            <InstructionFlow type="BREAK"/>
+          </Source>
+        </Case>
+      </Switch>
+      <If>
+        <Condition>
+          <Expression>
+            <Identifier name="nombreCorreo"/>
+            <Compare type="NE"/>
+            <Constant delim="&quot;" type="String" value=""/>
+          </Expression>
+        </Condition>
+        <Source>
+          <InstructionUpdate>
+            <Member>
+              <Identifier name="this"/>
+              <FunctionCall name="child">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="lblNombreCorreo"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+              <Identifier name="text"/>
+            </Member>
+            <OpUpdate type="EQUALS"/>
+            <Value>
+              <Identifier name="nombreCorreo"/>
+            </Value>
+          </InstructionUpdate>
+          <InstructionCall>
+            <Member>
+              <Identifier name="util"/>
+              <FunctionCall name="writeSettingEntry">
+                <CallArguments>
+                  <Value>
+                    <Constant delim="&quot;" type="String" value="scripts/flfactinfo/nombrecorreo"/>
+                  </Value>
+                  <Value>
+                    <Identifier name="nombreCorreo"/>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+        </Source>
+      </If>
+    </Source>
+  </Function>
+  <Function name="envioMail_cambiarNombreCorreo">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="nombreCorreo" type="String">
+          <Value>
+            <Member>
+              <Identifier name="Input"/>
+              <FunctionCall name="getText">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Ejecutable para correo:"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Identifier name="nombreCorreo"/>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionFlow type="RETURN"/>
+        </Source>
+      </If>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblNombreCorreo"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Identifier name="nombreCorreo"/>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <Member>
+          <Identifier name="util"/>
+          <FunctionCall name="writeSettingEntry">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="scripts/flfactinfo/nombrecorreo"/>
+              </Value>
+              <Value>
+                <Identifier name="nombreCorreo"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+    </Source>
+  </Function>
+  <Function name="envioMail_cambiarDirIntermedia">
+    <Source>
+      <DeclarationBlock mode="VAR">
+        <Variable name="util" type="FLUtil">
+          <Value>
+            <New>
+              <FunctionCall name="FLUtil"/>
+            </New>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <DeclarationBlock mode="VAR">
+        <Variable name="ruta" type="String">
+          <Value>
+            <Member>
+              <Identifier name="FileDialog"/>
+              <FunctionCall name="getExistingDirectory">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value=""/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="RUTA INTERMEDIA"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </Value>
+        </Variable>
+      </DeclarationBlock>
+      <If>
+        <Condition>
+          <Value>
+            <OpUnary type="LNOT">
+              <Member>
+                <Identifier name="File"/>
+                <FunctionCall name="isDir">
+                  <CallArguments>
+                    <Value>
+                      <Identifier name="ruta"/>
+                    </Value>
+                  </CallArguments>
+                </FunctionCall>
+              </Member>
+            </OpUnary>
+          </Value>
+        </Condition>
+        <Source>
+          <InstructionCall>
+            <Member>
+              <Identifier name="MessageBox"/>
+              <FunctionCall name="information">
+                <CallArguments>
+                  <Value>
+                    <Member>
+                      <Identifier name="util"/>
+                      <FunctionCall name="translate">
+                        <CallArguments>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="scripts"/>
+                          </Value>
+                          <Value>
+                            <Constant delim="&quot;" type="String" value="Ruta err&#195;&#179;nea"/>
+                          </Value>
+                        </CallArguments>
+                      </FunctionCall>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="Ok"/>
+                    </Member>
+                  </Value>
+                  <Value>
+                    <Member>
+                      <Identifier name="MessageBox"/>
+                      <Identifier name="NoButton"/>
+                    </Member>
+                  </Value>
+                </CallArguments>
+              </FunctionCall>
+            </Member>
+          </InstructionCall>
+          <InstructionFlow type="RETURN"/>
+        </Source>
+      </If>
+      <InstructionUpdate>
+        <Member>
+          <Identifier name="this"/>
+          <FunctionCall name="child">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="lblDirIntermedia"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+          <Identifier name="text"/>
+        </Member>
+        <OpUpdate type="EQUALS"/>
+        <Value>
+          <Identifier name="ruta"/>
+        </Value>
+      </InstructionUpdate>
+      <InstructionCall>
+        <Member>
+          <Identifier name="util"/>
+          <FunctionCall name="writeSettingEntry">
+            <CallArguments>
+              <Value>
+                <Constant delim="&quot;" type="String" value="scripts/flfactinfo/dirCorreo"/>
+              </Value>
+              <Value>
+                <Identifier name="ruta"/>
+              </Value>
+            </CallArguments>
+          </FunctionCall>
+        </Member>
+      </InstructionCall>
+    </Source>
+  </Function>
+</Source>
