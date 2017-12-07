@@ -678,7 +678,7 @@ class Dir_Class(object):
     def cleanDirPath(self, name):
         return str(name)
 
-Dir = Dir_Class()
+Dir = Dir_Class
 
 class File(QtCore.QFile):
     fichero = None
