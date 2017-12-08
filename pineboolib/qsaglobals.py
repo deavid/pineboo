@@ -185,6 +185,10 @@ class SysType(object):
     
     def cleanupMetaData(self, connName = "default"):
         pineboolib.project.conn.database(connName).manager().cleanupMetaData()
+    
+    def updateAreas(self):
+        pineboolib.project.initToolBox()
+        
         
         
         

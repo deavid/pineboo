@@ -345,6 +345,10 @@ class Project(object):
                 return tor
         
         return self.createModTranslator(idM, "es") if loadDefault else None
+    
+    @decorators.NotImplementedWarn
+    def initToolBox(self):
+        pass
             
         
         
