@@ -664,13 +664,14 @@ class LineEdit(QWidget):
 
 class Dir_Class(object):
     path_ = None
-    home = None 
+    home = None
+    Files = "*.*"
     
     def __init__(self, path = None):
         self.path_ = path
         self.home = filedir("..")
     
-    def entryList(self, patron):
+    def entryList(self, patron, type_ = None):
         p = os.walk(self.path_)
         retorno = []
         try:
@@ -685,7 +686,6 @@ class Dir_Class(object):
     def fileExists(self, name):
         return os.path.exists(name)
     
-    @decorators.Incomplete
     def cleanDirPath(name):
         return str(name)
 
@@ -709,6 +709,11 @@ class File(QtCore.QFile):
     #    super(File, self).open(self.fichero, mode)
     
     def read(self):
+        if isinstance(self, str):
+                f = File(self)
+                f.open(File.ReadOnly)
+                return f.read()
+                
         in_ = QTextStream(self)
         return in_.readAll()
     
