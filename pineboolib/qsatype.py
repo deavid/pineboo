@@ -313,7 +313,7 @@ class FormDBWidget(QtWidgets.QWidget):
         try:
             parent = self
             ret = None
-            while parent or not ret:
+            while parent and not ret:
                 ret = parent.findChild(QtWidgets.QWidget, childName)
                 if not ret:
                     parent = parent.parentWidget()
