@@ -603,8 +603,6 @@ class FLFormDB(QtWidgets.QDialog):
         if self.iface:
             self.oldFormObj = self.iface
         
-        self.load_script()
-        
         
 
     """
@@ -726,9 +724,9 @@ class FLFormDB(QtWidgets.QDialog):
         return False
     
     def __getattr__(self, name):
-        if self.script.FormInternalObj:
+        if getattr(self.script, "FormInternalObj", None):
             return getattr(self.script.FormInternalObj, name)
         else:
-            qWarning("No se encuentra el atributo %s" % name)
+            qWarning("%s:No se encuentra el atributo %s" % (self.formClassName(),name))
 
 
