@@ -655,9 +655,23 @@ class FLUtil(ProjectClass):
         con las tres o cuatro primeras linea del fichero no vacías
     @return TRUE si es un fichero soportado, FALSE en caso contrario
     """
-    @decorators.NotImplementedWarn
     def isFLDefFile(self, head):
-        pass
+        if head.find("<!DOCTYPE UI>") == 0:
+            return True
+        if head.find("<!DOCTYPE QRY>") == 0:
+            return True
+        if head.find("<!DOCTYPE KugarTemplate") == 0:
+            return True
+        if head.find("<!DOCTYPE TMD>") == 0:
+            return True
+        if head.find("<!DOCTYPE TS>") == 0:
+            return True
+        if head.find("<ACTIONS>") == 0:
+            return True
+        if head.find("<jasperReport") == 0:
+            return True
+        
+        return False
 
     """
     Suma dias a una fecha.
