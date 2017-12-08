@@ -714,7 +714,7 @@ class XMLAction(XMLStruct):
             prj_ = parent.prj
             
         #Si ya esta cargado se reusa...
-        if getattr(self, "script",None):
+        if getattr(self, "script",None) and parent_:
             parent.script = self.script
             #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
             parent.widget = parent.script.form
@@ -781,9 +781,10 @@ class XMLAction(XMLStruct):
             
         
         parent.script.form = parent.script.FormInternalObj(action_, prj_, parent_)
-        parent.widget = parent.script.form
-        if getattr(parent.widget,"iface",None):
-            parent.iface = parent.widget.iface
+        if parent_:
+            parent.widget = parent.script.form
+            if getattr(parent.widget,"iface",None):
+                parent.iface = parent.widget.iface
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)
