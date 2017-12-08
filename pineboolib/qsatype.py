@@ -284,6 +284,8 @@ class FormDBWidget(QtWidgets.QWidget):
         self._prj = project
         try:
             self._class_init()
+            timer = QtCore.QTimer(self)
+            timer.singleShot(250, self.init)
         except:
             pass
         
@@ -317,7 +319,7 @@ class FormDBWidget(QtWidgets.QWidget):
                 ret = parent.findChild(QtWidgets.QWidget, childName)
                 if not ret:
                     parent = parent.parentWidget()
-                    
+                
                      
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
