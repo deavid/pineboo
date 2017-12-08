@@ -311,9 +311,12 @@ class FormDBWidget(QtWidgets.QWidget):
             
     def child(self, childName):
         try:
-            ret = self.findChild(QtWidgets.QWidget, childName)
-            if not ret:
-                ret = self.parentWidget().findChild(QtWidgets.QWidget, childName)
+            parent = self
+            ret = None
+            while parent or not ret:
+                ret = parent.findChild(QtWidgets.QWidget, childName)
+                if not ret:
+                    parent = parent.parentWidget()
                     
                      
         except RuntimeError as rte:
@@ -675,7 +678,7 @@ class Dir_Class(object):
         return os.path.exists(name)
     
     @decorators.Incomplete
-    def cleanDirPath(self, name):
+    def cleanDirPath(name):
         return str(name)
 
 Dir = Dir_Class
