@@ -704,22 +704,45 @@ class XMLAction(XMLStruct):
             self.script.form.iface.main()
 
     def load_script(self, scriptname, parent= None):
+        parent_ = parent
+        if parent == None:
+            parent = self
+            action_ = self
+            prj_ = self.prj
+        else:
+            action_ = parent.action
+            prj_ = parent.prj
+            
+        #Si ya esta cargado se reusa...
+        if getattr(self, "script",None):
+            parent.script = self.script
+            #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            parent.widget = parent.script.form
+            if getattr(parent.widget,"iface",None):
+                parent.iface = parent.widget.iface
+            return
         
                         # import aqui para evitar dependencia ciclica
         import pineboolib.emptyscript
         python_script_path = None
-        self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
-
-        script_path_qs = self.prj.path(scriptname+".qs")
-        script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
+        parent.script = pineboolib.emptyscript # primero default, luego sobreescribimos
         
-        overload_pyfile = os.path.join(self.prj.tmpdir,"overloadpy",scriptname+".py")
+        if scriptname is None:
+            parent.script.form = parent.script.FormInternalObj(action = action_, project = prj_, parent = parent)
+            parent.widget = parent.script.form
+            parent.iface = parent.widget.iface
+            return 
+
+        script_path_qs = prj_.path(scriptname+".qs")
+        script_path_py = prj_.path(scriptname+".py") or prj_.path(scriptname+".qs.py")
+        
+        overload_pyfile = os.path.join(parent.prj.tmpdir,"overloadpy",scriptname+".py")
         if os.path.isfile(overload_pyfile):
             print("WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
             try:
-                self.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
+                parent.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
             except Exception as e:
-                print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
+                print("ERROR al cargar script OVERLOADPY para la accion %r:" % action_.name, e)
                 print(traceback.format_exc(),"---")
             
         elif script_path_py:
@@ -727,10 +750,10 @@ class XMLAction(XMLStruct):
             print("Loading script PY %s . . . " % scriptname)
             if not os.path.isfile(script_path): raise IOError
             try:
-                print("Cargando %s : %s " % (scriptname,script_path.replace(self.prj.tmpdir,"tempdata")))
-                self.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
+                print("Cargando %s : %s " % (scriptname,script_path.replace(parent.prj.tmpdir,"tempdata")))
+                parent.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
             except Exception as e:
-                print("ERROR al cargar script PY para la accion %r:" % self.action.name, e)
+                print("ERROR al cargar script PY para la accion %r:" % action_.name, e)
                 print(traceback.format_exc(),"---")
             
         elif script_path_qs:
@@ -749,15 +772,18 @@ class XMLAction(XMLStruct):
                 raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             try:
                 print("Cargando %s : %s " % (scriptname,python_script_path.replace(self.prj.tmpdir,"tempdata")))
-                self.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
+                parent.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
                 #self.script = imp.load_source(scriptname,python_script_path)
                 #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
-                print("ERROR al cargar script QS para la accion %r:" % self.name, e)
+                print("ERROR al cargar script QS para la accion %r:" % action_.name, e)
                 print(traceback.format_exc(),"---")
             
         
-        self.script.form = self.script.FormInternalObj(self, self.prj, parent)
+        parent.script.form = parent.script.FormInternalObj(action_, prj_, parent_)
+        parent.widget = parent.script.form
+        if getattr(parent.widget,"iface",None):
+            parent.iface = parent.widget.iface
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)

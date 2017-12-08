@@ -196,7 +196,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.iface = None
         try: script = self._scriptForm or None
         except AttributeError: script = None
-        self.load_script(script)
+        self.action.load_script(script, self)
         #self.resize(550,350)
         self.layout.insertWidget(0,self.widget)
         self.layout.setSpacing(1)
@@ -229,75 +229,6 @@ class FLFormDB(QtWidgets.QDialog):
                 return False
                 
 
-    def load_script(self,scriptname = None):
-        #Si ya esta cargado se reusa...
-        if getattr(self.action, "script",None):
-            self.script = self.action.script
-            #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
-            self.widget = self.script.form
-            if getattr(self.widget,"iface",None):
-                self.iface = self.widget.iface
-            return
-        
-        
-        import pineboolib.emptyscript
-        python_script_path = None
-        self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
-        if scriptname is None:
-            self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
-            self.widget = self.script.form
-            self.iface = self.widget.iface
-            return 
-        script_path_qs = self.prj.path(scriptname+".qs")
-        script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
-        
-        overload_pyfile = os.path.join(self.prj.tmpdir,"overloadpy",scriptname+".py")
-        if os.path.isfile(overload_pyfile):
-            print("WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
-            try:
-                self.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
-            except Exception as e:
-                print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
-                print(traceback.format_exc(),"---")
-            
-        elif script_path_py:
-            script_path = script_path_py
-            print("Loading script PY %s . . . " % scriptname)
-            if not os.path.isfile(script_path): raise IOError
-            try:
-                print("Cargando %s : %s " % (scriptname,script_path.replace(self.prj.tmpdir,"tempdata")))
-                self.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
-            except Exception as e:
-                print("ERROR al cargar script PY para la accion %r:" % self.action.name, e)
-                print(traceback.format_exc(),"---")
-            
-        elif script_path_qs:
-            script_path = script_path_qs
-            print("Loading script QS %s . . . " % scriptname)
-            # Intentar convertirlo a Python primero con flscriptparser2
-            if not os.path.isfile(script_path): raise IOError
-            python_script_path = (script_path+".xml.py").replace(".qs.xml.py",".qs.py")
-            if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-                print("Convirtiendo a Python . . .")
-                #ret = subprocess.call(["flscriptparser2", "--full",script_path])
-                from pineboolib.flparser import postparse
-                postparse.pythonify(script_path)
-
-            if not os.path.isfile(python_script_path):
-                raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
-            try:
-                print("Cargando %s : %s " % (scriptname,python_script_path.replace(self.prj.tmpdir,"tempdata")))
-                self.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
-                #self.script = imp.load_source(scriptname,python_script_path)
-                #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
-            except Exception as e:
-                print("ERROR al cargar script QS para la accion %r:" % self.action.name, e)
-                print(traceback.format_exc(),"---")
-
-        self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
-        self.widget = self.script.form
-        if getattr(self.widget,"iface",None):
-            self.iface = self.widget.iface
         
 
 
