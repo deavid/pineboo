@@ -527,7 +527,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         update_set_txt = ", ".join(update_set)
         sql = """UPDATE %s SET %s WHERE %s RETURNING *""" % (self.metadata().name(), update_set_txt, where_filter)
-        print("MODIFYING SQL :: ", sql)
+        #print("MODIFYING SQL :: ", sql)
         self._cursor.execute(sql)
         returning_fields = [ x[0] for x in self._cursor.description ]
 
@@ -609,7 +609,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
             #conn = self._cursorConn.db()
             try:
-                print(sql)
+                #print(sql)
                 self._cursor.execute(sql)
                 self.refresh()
             except Exception:
