@@ -274,7 +274,7 @@ def main():
             splash.showMessage("Abriendo interfaz ...")
             if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
-            project.call("sys.widget.init()", [], None, True)
+            project.call("sys.widget._class_init()", [], None, True)
             splash.showMessage("Listo ...")
             QtCore.QTimer.singleShot(2000, splash.hide)
             
