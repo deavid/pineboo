@@ -23,7 +23,7 @@ class FLQPSQL(object):
     lastError_ = None
     
     def __init__(self):
-        self.version_ = "0.4"
+        self.version_ = "0.5"
         self.conn_ = None
         self.name_ = "FLQPSQL"
         self.open_ = False
@@ -346,7 +346,11 @@ class FLQPSQL(object):
                 q.setForwardOnly(True)
                 q.exec_("SELECT relname FROM pg_class WHERE relname='%s'" % seq)
                 if not q.next():
-                    q.exec_("CREATE SEQUENCE %s" % seq)
+                    cursor = self.conn_.cursor()
+                    #self.transaction()
+                    cursor.execute("CREATE SEQUENCE %s" % seq)
+                    #self.commitTransaction()
+                    
                 
                 sql = sql + " INT4 DEFAULT NEXTVAL('%s')" % seq
                 del q

@@ -365,16 +365,15 @@ class PNConnection(QtCore.QObject):
         sql = self.driver().sqlCreateTable(tmd)
         if not sql:
             return False
-        
+        self.transaction()
         q = self.cursor()
         try:
             q.execute(sql)
-            q.execute("COMMIT")
         except:
             qWarning(traceback.format_exc())
-            q.execute("ROLLBACK")
+            self.rollbackTransaction()
             return False
-        
+        self.commitTransaction()
         return True
     
     def mismatchedTable(self, tablename, tmd):
