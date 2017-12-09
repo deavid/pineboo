@@ -514,40 +514,15 @@ class FLManager(ProjectClass):
     """
     def existsTable(self,  n, cache = True):
         
-        #if not self.db_:
-        #    return False
+        sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
+        cursor = self._prj.conn.cursor()
+        try:
+            cursor.execute(sql_query)
+        except:
+            return False
         
-        #if n == None:
-        #    return False
-        
-        #if cache and self.listTables_:
-            
-        #    for name in self.listTables_:
-        #        if name == n:
-        #            return True
-            
-        #    return False
-        #else:
-        #    return self.db_.existsTable(n)
-        
-        
-    
-        #if cache:
-        #    modId = self.db_.managerModules().idModuleOfFile(n +".mtd")
-        #    res = os.path.exists(filedir("../tempdata/cache/%s/%s/file.mtd/%s" %(self.db_.db_name, modId, n)))
-        #    if res == False:
-        #        res == os.path.exists(filedir("../share/pineboo/tables/%s.mtd" %(n)))
-            
-        #    return res
-                
-        #else:
-        q = FLSqlQuery()
-        #sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
-        q.setTablesList(n)
-        q.setSelect("*")
-        q.setFrom(n)
-        q.setWhere("1 = 1 LIMIT 1")
-        return q.exec_()
+        return True
+
     
     """
     Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
