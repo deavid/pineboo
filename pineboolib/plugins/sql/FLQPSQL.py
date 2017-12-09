@@ -428,6 +428,15 @@ class FLQPSQL(object):
         
         del t
         return tl
+    
+    def normalizeValue(self, text):
+        ret = ""
+        for c in text:
+            if c == "'":
+                c = "''"
+            ret = ret + c
+        
+        return ret
         
         
         

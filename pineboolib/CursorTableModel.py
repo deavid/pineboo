@@ -521,7 +521,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             type_ = self.metadata().field(key).type()
             #if type_ == "string" or type_ == "pixmap" or type_ == "stringlist" or type_ == "time" or type_ == "date":
                 #value = str("'" + value + "'")
+            if type_ in ("string","stringlist"):
+                value = self._prj.conn.normalizeValue(value)
             value = self._prj.conn.manager().formatValue(type_, value, False)
+            
             #update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
             update_set.append("%s = %s" % (key, value))
 
@@ -598,6 +601,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             else:
                 value = buffer.value(b.name)
             if not value == None: # si el campo se rellena o hay valor default
+                if b.type_ in ("string","stringlist"):
+                    value = self._prj.conn.normalizeValue(value)
                 value = self._prj.conn.manager().formatValue(b.type_, value, False)
                 if not campos:
                     campos = b.name

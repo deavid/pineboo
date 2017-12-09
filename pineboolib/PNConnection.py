@@ -383,5 +383,11 @@ class PNConnection(QtCore.QObject):
         return self.driver().mismatchedTable(tablename, tmd, self)
     
         
+    
+    def normalizeValue(self, text):
+        if getattr(self.driver(), "normalizeValue",None):
+            return self.driver().normalizeValue(text)
         
+        qWarning("PNConnection: El driver %s no dispone de normalizeValue(text)" % self.driverName())
+        return text   
     
