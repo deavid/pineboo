@@ -164,14 +164,8 @@ class Project(object):
             return False
             
         #Se verifica que existen estas tablas
-        self.conn.manager().createSystemTable("flareas")
-        self.conn.manager().createSystemTable("flmodules")
-        self.conn.manager().createSystemTable("flfiles")
-        self.conn.manager().createSystemTable("flgroups")
-        self.conn.manager().createSystemTable("fllarge")
-        self.conn.manager().createSystemTable("flserial")
-        self.conn.manager().createSystemTable("flusers")
-        self.conn.manager().createSystemTable("flvar")
+        for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar"):
+            self.conn.manager().createSystemTable(table)
         
         util = FLUtil()
         util.writeSettingEntry(u"DBA/lastDB",self.dbname)
