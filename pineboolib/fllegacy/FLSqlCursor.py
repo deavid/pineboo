@@ -1092,7 +1092,7 @@ class FLSqlCursor(ProjectClass):
         vv = v
         
         if vv and type_ == "pixmap":
-           
+            vv = self.d.db_.normalizeValue(vv)
             largeValue = self.d.db_.manager().storeLargeValue(self.d.metadata_, vv)
             if largeValue:
                 vv = largeValue
