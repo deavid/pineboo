@@ -671,7 +671,6 @@ class XMLAction(XMLStruct):
                 )
             )
         
-        self.initModule(self.name)
         return self.mainform_widget
 
     def openDefaultForm(self):
@@ -681,6 +680,7 @@ class XMLAction(XMLStruct):
         # ... construido antes que cualquier widget)
         w = self.prj.main_window
         #self.mainform_widget.init()
+        self.initModule(self.name)
         self.mainform_widget = FLMainForm(w,self, load = True)    
         w.addFormTab(self)
         #self.mainform_widget.show()
