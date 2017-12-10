@@ -698,6 +698,7 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
         
         self.load_script(self.scriptform, None)
+        self.initModule(self.name)
         if getattr(self.script.form,"iface",None):
             self.script.form.iface.main()
 
