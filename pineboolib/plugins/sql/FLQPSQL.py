@@ -107,7 +107,7 @@ class FLQPSQL(object):
             #    v = ""
             # TODO: psycopg2.mogrify ???
             if type_ == "pixmap" and v.find("'") > -1:
-                v = v.replace("'","ç")
+                v = self.normalizeValue(v)
                 
 
             if type_ == "bool" or type_ == "unlock":
