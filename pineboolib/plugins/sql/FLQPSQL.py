@@ -348,7 +348,10 @@ class FLQPSQL(object):
                 if not q.next():
                     cursor = self.conn_.cursor()
                     #self.transaction()
-                    cursor.execute("CREATE SEQUENCE %s" % seq)
+                    try:
+                        cursor.execute("CREATE SEQUENCE %s" % seq)
+                    except Exception:
+                        print("FLQPSQL::sqlCreateTable:\n", traceback.format_exc())
                     #self.commitTransaction()
                     
                 
