@@ -806,7 +806,7 @@ class FLUtil(ProjectClass):
         found = self.readDBSettingEntry(key)
         cursor = self._prj.conn.cursor()
         if not found:   
-            sql = "INSERT INTO flsettings (flkey, valor) VALUES (%s, %s)" % ( key, value)
+            sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % ( key, value)
         else:
             sql = "UPDATE flsettings SET valor = '%s' WHERE %s" % ( value, where)
         try:
