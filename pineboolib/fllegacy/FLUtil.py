@@ -787,7 +787,7 @@ class FLUtil(ProjectClass):
         q.setFrom("flsettings")
         q.setWhere("flkey = '%s'" % key)
         q.setTablesList("flsettings")
-        if q.exec() and q.first():
+        if q.exec_() and q.first():
             return q.value(0)
         
         return None
@@ -802,19 +802,22 @@ class FLUtil(ProjectClass):
     """
     def writeDBSettingEntry(self, key, value):
         result = False
-        where = "flkey='%s'" % key
-        found = self.sqlSelect("flsettings", "valor", where, "flsettings")
+        where = "flkey = '%s'" % key
+        found = self.readDBSettingEntry(key)
         cursor = self._prj.conn.cursor()
         if not found:   
-            sql = "INSERT INTO %s (flkey, valor) VALUES (%s, %s)" % ("flsettings", key, value)
+            sql = "INSERT INTO flsettings (flkey, valor) VALUES (%s, %s)" % ( key, value)
         else:
-            sql = "UPDATE %s SET valor = '%s' WHERE %s" % ("flsettings", value, where)
+            sql = "UPDATE flsettings SET valor = '%s' WHERE %s" % ( value, where)
         try:
             cursor.execute(sql)
-            cursor.close()
-        except:
+            
+        except Exception:
+            print(traceback.format_exc())
+            cursor.rollback()
             return False
         
+        cursor.close()
         return True
         
     """
