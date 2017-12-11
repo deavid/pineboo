@@ -188,6 +188,8 @@ def main():
             #elif connection_window.database:
             if connection_window.database:
                 print("Cargando credenciales")
+                project.deleteCache = connection_window.deleteCache
+                project.parseProject = connection_window.parseProject
                 project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password, connection_window.driveralias)
             
             

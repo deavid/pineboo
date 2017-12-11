@@ -18,7 +18,7 @@ import importlib
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
-from PyQt5.Qt import QTextCodec
+from PyQt5.Qt import QTextCodec, qWarning
 if __name__ == "__main__":
     sys.path.append('..')
 
@@ -64,6 +64,8 @@ class Project(object):
         self.parser = None
         self._initModules = []
         self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
+        self.deleteCache = False
+        self.parseProject = False
         
 
         self.actions = {}
@@ -90,6 +92,7 @@ class Project(object):
     """
     def acl(self):
         return False
+            
     
     
     def consoleShown(self):
@@ -154,6 +157,20 @@ class Project(object):
     def run(self):
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
+        if self.deleteCache and not not os.path.exists(self.dir("cache/%s" % self.dbname)):
+            print("DEVELOP: DeleteCache Activado\nBorrando %s" % self.dir("cache/%s" % self.dbname))
+            for root, dirs, files in os.walk(self.dir("cache/%s" % self.dbname), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            #borrando de share
+            for root, dirs, files in os.walk(self.dir("../share/pineboo"), topdown=False):
+                for name in files:
+                    if name.endswith("qs.py") or name.endswith("qs.py.debug") or name.endswith("qs.xml"):
+                        os.remove(os.path.join(root, name))
+            
+            
         if not os.path.exists(self.dir("cache")):
             os.makedirs(self.dir("cache"))
             
@@ -192,13 +209,15 @@ class Project(object):
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files: print("WARN: file %s already loaded, overwritting..." % nombre)
-            self.files[nombre] = fileobj
+            self.files[nombre] = fileobj                
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey+"\n")
             if os.path.exists(self.dir("cache" ,fileobj.filekey)): continue
             fileobjdir = os.path.dirname(self.dir("cache" ,fileobj.filekey))
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
+            
+                
             cur2 = self.conn.cursor()
             sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue("string",idmodulo,False), self.conn.driver().formatValue("string",nombre,False), self.conn.driver().formatValue("string",sha,False))
             cur2.execute(sql)
@@ -215,6 +234,9 @@ class Project(object):
                     txt = contenido.encode("ISO-8859-15","replace")
 
                 f2.write(txt)
+            
+            if self.parseProject and nombre.endswith(".qs"):
+                self.parseScript(self.dir("cache" ,fileobj.filekey))
         tiempo_fin = time.time()
         if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
         
@@ -222,10 +244,12 @@ class Project(object):
         idmodulo = 'sys'
         for root, dirs, files in os.walk(filedir("..","share","pineboo")):
             for nombre in files:
-                fileobj = File(self, idmodulo, nombre, basedir = root)
-                self.files[nombre] = fileobj
-                self.modules[idmodulo].add_project_file(fileobj)
+                if root.find("modulos") == -1:
+                    fileobj = File(self, idmodulo, nombre, basedir = root)
+                    self.files[nombre] = fileobj
+                    self.modules[idmodulo].add_project_file(fileobj)
         
+            
         
         self.loadTranslations()
         self.readState()
@@ -343,6 +367,22 @@ class Project(object):
     @decorators.NotImplementedWarn
     def initToolBox(self):
         pass
+    
+    def parseScript(self, scriptname):
+        # Intentar convertirlo a Python primero con flscriptparser2
+        if not os.path.isfile(scriptname): raise IOError
+        python_script_path = (scriptname+".xml.py").replace(".qs.xml.py",".qs.py")
+        if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
+            print("Convirtiendo a Python . . .", scriptname)
+            #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+            from pineboolib.flparser import postparse
+            try: 
+                postparse.pythonify(scriptname)
+            except:
+                qWarning("WARN: El fichero %s no se ha podido convertir" % scriptname)
+
+        #if not os.path.isfile(python_script_path):
+        #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             
         
         
@@ -784,6 +824,7 @@ class XMLAction(XMLStruct):
             parent.widget = parent.script.form
             if getattr(parent.widget,"iface",None):
                 parent.iface = parent.widget.iface
+    
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)
