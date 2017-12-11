@@ -36,12 +36,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     rowsLoaded = 0
     where_filters = {}
     _table = None
+    _metadata = None
     
     def __init__(self, action, project, conn, *args):
         super(CursorTableModel,self).__init__(*args)
         from pineboolib.qsaglobals import aqtt
         
-
+        self._metadata = None
         self.rowsLoaded = 0
         self.where_filters = {}
         self._cursorConn = conn
