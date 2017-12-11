@@ -850,6 +850,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         if model:
             for column in range(model.columnCount()):
+                if model.metadata() == None:
+                    return 
                 field = model.metadata().indexFieldObject(column)
                 if not field.visibleGrid():
                     self.tableRecords_.setColumnHidden(column, True)
