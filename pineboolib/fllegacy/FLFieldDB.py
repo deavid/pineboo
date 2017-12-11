@@ -3432,17 +3432,20 @@ class FLDateEdit(QtWidgets.QDateEdit):
         self.setDisplayFormat(order)
     
     def setDate(self, d = None):
-        if d is None:
-            d = str("01-01-2000")
-        
+        if d in (None, "NAN"):
+            d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         if isinstance(d, str):
             if "T" in d:
                 d = d[:d.find("T")]
+        
+        if isinstance(d, datetime.date):
+            d = QtCore.QDate.fromString(str(d),"yyyy-MM-dd")
         
         if not isinstance(d, QtCore.QDate):
             date = QtCore.QDate.fromString(d,"dd-MM-yyyy")
         else:
             date = d
+        
         super(FLDateEdit, self).setDate(date)
         self.setStyleSheet('color: black')    
         
