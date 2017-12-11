@@ -49,10 +49,14 @@ class FLSettings(ProjectClass):
         ret = self.s.value(key)
         return float(ret)
     
-    @decorators.BetaImplementation
     def readBoolEntry(self, key, _def = False, retOk = False):
         ret = self.s.value(key)
-        return bool(ret)
+        if isinstance(ret, str):
+            ret = ret == "true"
+        if ret == None:
+            ret = _def
+        
+        return ret
         
     def writeEntry(self, key, value):
         self.s.setValue(key, value)
