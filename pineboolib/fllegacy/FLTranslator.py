@@ -7,6 +7,8 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
 
+import os
+
 class FLTranslator(ProjectClass):
     
     mulTiLang_ = False
@@ -14,12 +16,14 @@ class FLTranslator(ProjectClass):
     AQ_DISKCACHE_FILEPATH = None #FIXME
     AQ_DISKCACHE_DIRPATH = None #FIXME
     idM_ = None
+    lang_ = None
     
     
     def __init__(self, parent=None, name=None, multiLang= False, sysTrans=False):
         super(FLTranslator, self).__init__()
         #QtCore.QTranslator(parent ? parent : qApp, name)
         self.idM_ = name[0:len(name) -3]
+        self.lang_ = name[len(name) -2:]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
     
@@ -32,21 +36,20 @@ class FLTranslator(ProjectClass):
     @param key Clave sha1 que identifica al fichero en la caché de disco
     @return  TRUE si la operación tuvo éxito
     """
-    @decorators.NotImplementedWarn
     def loadTsContent(self, key):
-        return None
-        tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s" %(self.db_.db_name, self.idM_, key))
-        qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
+        tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %(self._prj.conn.db_name, self.idM_, self.idM_, self.lang_, key))
+        #qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
+        qmFile = "%s.qm" % tsFile
         
-        if QtCore.QFile.exist(qmFile):
-            if tsFile.isEmpty():
+        if os.path.exists(qmFile):
+            if tsFile in (None, ""):
                 return False
             
-            trans = FLTranslations()
+        trans = FLTranslations()
             
-            trans.lrelease(tsFile,qmFile, not self.mulTiLang_)
-        
-        return QtCore.QTranslator.load(qmFile)
+        trans.lrelease("%s.ts" % tsFile , qmFile, not self.mulTiLang_)
+            
+        return QtCore.QTranslator().load(qmFile)
     
     @decorators.BetaImplementation
     def findMessage(self, context, sourceText, comment=None):

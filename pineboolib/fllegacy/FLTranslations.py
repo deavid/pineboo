@@ -1,43 +1,50 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
-from PyQt5.Qt import qWarning, QTranslator, QFile, QTextStream, QDir
+from PyQt5.Qt import qWarning, QTranslator, QFile, QTextStream, QDir,\
+    QApplication, qApp
 
 from pineboolib import decorators
 from pineboolib.fllegacy import FLUtil
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.utils import filedir
+from subprocess import call
+import os
 
 
 class FLTranslations(ProjectClass):
   
     TML = None
+    qmFileName = None
     
     def __init__(self):
-        super(FLTRanslations, self).__init__()
-    
-    @decorators.BetaImplementation  
+        super(FLTranslations, self).__init__()
+     
     def loadTsFile( self, tor, tsFileName, verbose):
         qmFileName = tsFileName
         qmFileName = qmFileName.replace(".ts", "")
-        qmFileName = "%n.qm" % qmFileName
+        qmFileName = "%s.qm" % qmFileName
+        dir_ = tsFileName[0:len(tsFileName) - 44]
+        fileName_ = tsFileName[len(tsFileName) - 43:]
         
-        ok = tor.load(tsFileName)
+        try:
+            if not os.path.exists(qmFileName):
+                tor.load(tsFileName)
+        except:
+            print("lrelease warning: For some reason, I cannot load '%s'" % tsFileName)
+            return False
         
-        if not ok:
-            print("lrelease warning: For some reason, I cannot laod '%s'" % tsFileName)
-        
-        return ok 
+        return True 
     
-    @decorators.BetaImplementation   
+     
     def releaseMetaTranslator( self, tor, qmFileName, verbose, stripped):
         if verbose:
-            print("Updating '%s'..." % qmFileName)
+            print("Checking '%s'..." % qmFileName)
         
-        if not tor.release(qmFileName, verbose, stripped if QTranslator.Stripped else QTranslator.Everything):
+        if not os.path.exists(qmFileName):
             print("lrelease warning: For some reason, i cannot save '%s'" % qmFileName)
         
     
-    @decorators.BetaImplementation
+    
     def releaseTsFile( self, tsFileName, verbose, stripped):
         tor = None
         if self.loadTsFile(tor, tsFileName, verbose):
@@ -47,11 +54,10 @@ class FLTranslations(ProjectClass):
             self.releaseMetaTranslator(tor, qmFileName, verbose, stripped)
             
 
-    @decorators.BetaImplementation
     def lrelease( self, tsInputFile, qmOutputFile, stripped = True):
         verbose = False
         metTranslations = False
-        tor = None
+        tor = metaTranslator()
         
         f = QFile(tsInputFile)
         if not f.open(QtCore.QIODevice.ReadOnly):
@@ -63,15 +69,15 @@ class FLTranslations(ProjectClass):
         f.close()
         
         if fullText.find("<!DOCTYPE TS>") >= 0:
-            if qmOutputFile.isEmpty():
+            if qmOutputFile == None:
                 self.releaseTsFile(tsInputFile, verbose, stripped)
             else:
-                self.loadTsFile(tor, tsFileName, verbose)
+                self.loadTsFile(tor, tsInputFile, verbose)
         
         else:
             modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
             key = self.db_.managerModules().shaOfFile(tsInputFile)
-            dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %(self.db_.db_name, modId, key))
+            dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %(self._prj.conn.db_name, modId, key))
             tagMap = fullText
             #TODO: hay que cargar todo el contenido del fichero en un diccionario
             for key, value in tagMap:
@@ -86,16 +92,21 @@ class FLTranslations(ProjectClass):
                 print("lrelease warning: Met no 'TRANSLATIONS' entry in project file '%s'" %tsInputFile)
                 
             
-            if qmOutputFile:
-                self.releaseMetaTranslator(tor, qmOutputFile, verbose, stripped)
+        if qmOutputFile:
+            self.releaseMetaTranslator(tor, qmOutputFile, verbose, stripped)
             
     
     
     
+class metaTranslator(object):
+    
+    def load(self, filename):
+           return call(["lrelease", filename])
+        
     
     
     
-    
+            
     
 """    
 ****************************************************************************

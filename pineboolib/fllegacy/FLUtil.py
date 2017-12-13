@@ -4,6 +4,7 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 #from PyQt4.QtCore import QString
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import qApp
 import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -444,14 +445,13 @@ class FLUtil(ProjectClass):
     Se hace una llamada a la función tr() de la clase QObject para hacer la traducción.
     Se utiliza para traducciones desde fuera de objetos QObject
 
-    @param contexto Contexto en el que se encuentra la cadena, generalmente se refiere a la clase en la que está definida
+    @param group Contexto en el que se encuentra la cadena, generalmente se refiere a la clase en la que está definida
     @param s Cadena de texto a traducir
     @return Devuelve la cadena traducida al idioma local
     """
     
     def translate(self, group, string):
-        return str(string)
-        # return qApp->translate(contexto, s);
+        return qApp.translate(group, string)
 
     """
     Devuelve si el numero de tarjeta de Credito es valido.

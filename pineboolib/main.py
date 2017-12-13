@@ -18,7 +18,7 @@ import importlib
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
-from PyQt5.Qt import QTextCodec, qWarning
+from PyQt5.Qt import QTextCodec, qWarning, qApp, QApplication
 if __name__ == "__main__":
     sys.path.append('..')
 
@@ -296,7 +296,6 @@ class Project(object):
 
         return None
     
-    @decorators.BetaImplementation
     def loadTranslations(self):
         translatorsCopy = None
         if self.translators:
@@ -331,15 +330,9 @@ class Project(object):
     
     
     
-    @decorators.BetaImplementation
     def loadTranslationFromModule(self, idM, lang):
-        self.installTranslator(self.createModTranslator(idM, lang, True))
-        self.installTranslator(self.createModTranslator(idM, "mutliLang"))
-    
-    @decorators.NotImplementedWarn
-    def installTranslator(self, tr):
-        #Aquí cargamos las traducciones, pueden ser varias, osea que se carga en un diccionario (key = lang, value = struct de traducción)
-        pass
+        qApp.installTranslator(self.createModTranslator(idM, lang, True))
+        qApp.installTranslator(self.createModTranslator(idM, "mutliLang"))
     
     
     @decorators.NotImplementedWarn
@@ -350,7 +343,6 @@ class Project(object):
     def createSysTranslator(self, lang, loadDefault):
         pass
     
-    @decorators.BetaImplementation
     def createModTranslator(self, idM, lang, loadDefault = False):
         fileTs = "%s.%s.ts" % (idM, lang)
         key = self.conn.managerModules().shaOfFile(fileTs)
