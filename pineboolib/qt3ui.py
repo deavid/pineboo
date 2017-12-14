@@ -370,11 +370,14 @@ def _loadVariant(variant):
         p = QtGui.QFont()
         for c in variant:
             value = c.text.strip()
-            bv = b(value)
+            bv = False
+            if not c.tag in ("family","pointsize"):
+                bv = b(value)
             try:
                 if c.tag == "bold": p.setBold(bv)
                 elif c.tag == "italic": p.setItalic(bv)
                 elif c.tag == "family": p.setFamily(value)
+                elif c.tag == "pointsize": p.setPointSize(int(value))
                 else: print("unknown font style type", repr(c.tag))
             except Exception as e:
                 if Options.DEBUG_LEVEL > 50: print(e)
@@ -394,13 +397,31 @@ def _loadVariant(variant):
     
     if variant.tag == "enum":
         v = None
-        libs = [Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy]
+        libs = [Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
         for lib in libs:
             v = getattr(lib, text, None)
             if v is not None: return v          
         if text == "GroupBoxPanel": return QtWidgets.QFrame.StyledPanel
         if text == "Single": return QtWidgets.QAbstractItemView.SingleSelection
         if text == "FollowStyle": return "QtWidgets.QTableView {selection-background-color: red;}"
+        
+    
+    if variant.tag == "color":
+        c = QtGui.QColor()
+        red_ = 0
+        green_ = 0
+        blue_ = 0
+        for color in variant:
+            if color.tag == "red":
+                red_ = int(color.text.strip())
+            elif color.tag == "green":
+                green_ = int(color.text.strip())
+            elif color.tag == "blue":
+                blue_ = int(color.text.strip())
+        
+        c.setRgb(red_, green_, blue_)
+        return c
+        
         
 
     if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown variant:", etree.tostring(variant))
