@@ -332,7 +332,7 @@ class Project(object):
     
     def loadTranslationFromModule(self, idM, lang):
         self.installTranslator(self.createModTranslator(idM, lang, True))
-        self.installTranslator(self.createModTranslator(idM, "mutliLang"))
+        #self.installTranslator(self.createModTranslator(idM, "mutliLang"))
     
     def installTranslator(self, tor):
         if not tor:
@@ -350,7 +350,7 @@ class Project(object):
         key = self.conn.managerModules().shaOfFile(fileTs)
         ok = (not key == None)
         
-        if ok:
+        if ok or idM == "sys":
             tor = FLTranslator(self, "%s_%s" % (idM, lang), lang == "multilang")
             
             if tor.loadTsContent(key):

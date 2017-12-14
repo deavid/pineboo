@@ -37,7 +37,10 @@ class FLTranslator(QTranslator):
     @return  TRUE si la operación tuvo éxito
     """
     def loadTsContent(self, key):
-        tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %(self._prj.conn.db_name, self.idM_, self.idM_, self.lang_, key))
+        if self.idM_ == "sys":
+            tsFile = filedir("../share/pineboo/translations/%s.%s" %(self.idM_, self.lang_))
+        else: 
+            tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %(self._prj.conn.db_name, self.idM_, self.idM_, self.lang_, key))
         #qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         qmFile = "%s.qm" % tsFile
         
@@ -46,7 +49,6 @@ class FLTranslator(QTranslator):
                 return False
             
         trans = FLTranslations()
-            
         trans.lrelease("%s.ts" % tsFile , qmFile, not self.mulTiLang_)
         return self.load(qmFile)
     
