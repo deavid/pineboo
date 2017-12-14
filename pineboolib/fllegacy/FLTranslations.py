@@ -122,7 +122,13 @@ class FLTranslate(ProjectClass):
             self.context_ = context
     
     def arg(self, value):
-        self.context_ = self.context_.replace("%" + str(self.pos_), str(value))
+        if isinstance(value, list):
+            for f in value:
+                self.context_ = self.context_.replace("%" + str(self.pos_), str(f))
+                self.pos_ = self.pos_ + 1
+        else:
+            self.context_ = self.context_.replace("%" + str(self.pos_), str(value))
+            
         return FLTranslate(self.group_, self.context_, False, self.pos_ + 1)
     
     
