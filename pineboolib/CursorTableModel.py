@@ -532,7 +532,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         update_set_txt = ", ".join(update_set)
         sql = """UPDATE %s SET %s WHERE %s RETURNING *""" % (self.metadata().name(), update_set_txt, where_filter)
         #print("MODIFYING SQL :: ", sql)
-        self._cursor.execute(sql)
+        try:
+            self._cursor.execute(sql)
+        except Exception:
+            print("ERROR: CursorTableModel.Update", traceback.format_exc())
+            #self._cursor.execute("ROLLBACK")
+            return 
+        
         returning_fields = [ x[0] for x in self._cursor.description ]
 
         for orow in self._cursor:
@@ -620,7 +626,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self.refresh()
             except Exception:
                 print("CursorTableModel.Insert() :: ERROR:" , traceback.format_exc())
-                #conn.rollback()
+                #self._cursor.execute("ROLLBACK")
                 return False
                   
             #conn.commit()    
@@ -637,7 +643,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self._cursor.execute(sql)         
         except Exception:
             print("CursorTableModel.Delete() :: ERROR:" , traceback.format_exc())
-            conn.rollback()
+            #self._cursor.execute("ROLLBACK")
             return
         
         #conn.commit()   

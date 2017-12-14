@@ -515,10 +515,11 @@ class FLManager(ProjectClass):
     def existsTable(self,  n, cache = True):
         
         sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
-        cursor = self._prj.conn.cursor()
+        cursor = self._prj.conn.useConn("dbAux").cursor() #Al usar dbAux no bloquea sql si falla
         try:
             cursor.execute(sql_query)
         except:
+            cursor.close()
             return False
         
         return True

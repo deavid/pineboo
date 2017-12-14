@@ -2,7 +2,7 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, qt3ui
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-import os
+import os, traceback
 
 """
 Gestor de módulos.
@@ -142,7 +142,10 @@ class FLManagerModules(ProjectClass):
         cursor = self.db_.cursor()
         try:
             cursor.execute(query)
-        except:
+        except Exception:
+            print("ERROR: FLManagerModules.content", traceback.format_exc())
+            #cursor.execute("ROLLBACK")
+            cursor.close()
             return None
         
         for contenido in cursor:
@@ -194,7 +197,10 @@ class FLManagerModules(ProjectClass):
             cursor = self.db_.cursor()
             try:
                 cursor.execute(query)
-            except:
+            except Exception:
+                print("ERROR: FLManagerModules.contentCached", traceback.format_exc())
+                #cursor.execute("ROLLBACK")
+                cursor.close()
                 return None
         
             for contenido in cursor:
@@ -508,7 +514,10 @@ class FLManagerModules(ProjectClass):
         cursor = self.db_.cursor()
         try:
             cursor.execute(query)
-        except:
+        except Exception:
+            print("ERROR: FLManagerModules.idModuleOfFile", traceback.format_exc())
+            #cursor.execute("ROLLBACK")
+            cursor.close()
             return None
         
         for idmodulo in cursor:

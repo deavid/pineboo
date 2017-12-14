@@ -69,7 +69,13 @@ class FLQPSQL(object):
                         tmpConn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
                         
                         cursor = tmpConn.cursor()
-                        cursor.execute("CREATE DATABASE %s" % db_name)
+                        try:
+                            cursor.execute("CREATE DATABASE %s" % db_name)
+                        except Exception:
+                            print("ERROR: FLPSQL.connect", traceback.format_exc())
+                            cursor.execute("ROLLBACK")
+                            cursor.close()
+                            return False
                         cursor.close()
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
