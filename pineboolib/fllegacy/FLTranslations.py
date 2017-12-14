@@ -100,6 +100,7 @@ class FLTranslations(ProjectClass):
     
 class metaTranslator(object):
     
+    #TODO: Esto en producción seria necesario hacerlo desde el programa.
     def load(self, filename):
            return call(["lrelease", filename])
         

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import qWarning
+from PyQt5.Qt import qWarning, qApp
 from PyQt5.QtCore import QVariant, QDate
 
 from pineboolib import decorators, fllegacy
@@ -1464,12 +1464,12 @@ class FLSqlCursor(ProjectClass):
         util = FLUtil()
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
             if not self.size():
-                QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), util.tr("Aviso"), util.tr("No hay ningún registro seleccionado"))
+                QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"))
                 return
             self.first()
 
         if m == self.Del:
-            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), util.tr("Aviso"), util.tr("El registro activo será borrado. ¿ Está seguro ?"),QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No)
+            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), self.tr("Aviso"), self.tr("El registro activo será borrado. ¿ Está seguro ?"),QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No)
             if res == QtWidgets.QMessageBox.No:
                 return
             
@@ -1501,7 +1501,7 @@ class FLSqlCursor(ProjectClass):
             return
 
         if not self._action.formRecord():
-            QtWidgets.QMessageBox.Warning(QtWidgets.QApplication.focusWidget(), FLUtil.tr("Aviso"),FLUtil.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()) ,QtWidgets.QMessageBox.Ok)
+            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(),self.tr("Aviso"),self.tr("No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()))
             return
 
         
