@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
+from PyQt5 import QtCore, Qt
 from PyQt5.Qt import qWarning, QTranslator, QFile, QTextStream, QDir,\
     QApplication, qApp
 
@@ -106,7 +106,28 @@ class metaTranslator(object):
     
     
     
-            
+class FLTranslate(ProjectClass):
+    
+    group_ = None
+    context_ = None
+    pos_ = 0
+    
+    def __init__(self, group, context , translate = True, pos = 1):
+        super(FLTranslate, self).__init__()
+        self.pos_ = pos
+        self.group_ = group
+        if translate:
+            self.context_ = qApp.translate(group, context)
+        else:
+            self.context_ = context
+    
+    def arg(self, value):
+        self.context_ = self.context_.replace("%" + str(self.pos_), str(value))
+        return FLTranslate(self.group_, self.context_, False, self.pos_ + 1)
+    
+    
+    def __str__(self):
+        return self.context_        
     
 """    
 ****************************************************************************

@@ -67,7 +67,7 @@ class Project(object):
         self.deleteCache = False
         self.parseProject = False
         
-
+        self.translator_ = []
         self.actions = {}
         self.tables = {}
         self.files = {}
@@ -331,13 +331,15 @@ class Project(object):
     
     
     def loadTranslationFromModule(self, idM, lang):
-        qApp.installTranslator(self.createModTranslator(idM, lang, True))
-        qApp.installTranslator(self.createModTranslator(idM, "mutliLang"))
+        self.installTranslator(self.createModTranslator(idM, lang, True))
+        self.installTranslator(self.createModTranslator(idM, "mutliLang"))
     
-    
-    @decorators.NotImplementedWarn
-    def translate(self, context, sourceText, comment, encoding):
-        pass            
+    def installTranslator(self, tor):
+        if not tor:
+            return
+        else:
+            qApp.installTranslator(tor)
+            self.translator_.append(tor)           
     
     @decorators.NotImplementedWarn
     def createSysTranslator(self, lang, loadDefault):
@@ -349,7 +351,7 @@ class Project(object):
         ok = (not key == None)
         
         if ok:
-            tor = FLTranslator(None, "%s_%s" % (idM, lang), lang == "multilang")
+            tor = FLTranslator(self, "%s_%s" % (idM, lang), lang == "multilang")
             
             if tor.loadTsContent(key):
                 return tor

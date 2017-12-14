@@ -3,13 +3,13 @@
 from PyQt5 import QtCore
 
 from pineboolib.utils import filedir
-from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
 
 import os
+from PyQt5.Qt import QTranslator
 
-class FLTranslator(ProjectClass):
+class FLTranslator(QTranslator):
     
     mulTiLang_ = False
     sysTrans_ = False
@@ -21,7 +21,7 @@ class FLTranslator(ProjectClass):
     
     def __init__(self, parent=None, name=None, multiLang= False, sysTrans=False):
         super(FLTranslator, self).__init__()
-        #QtCore.QTranslator(parent ? parent : qApp, name)
+        self._prj = parent
         self.idM_ = name[0:len(name) -3]
         self.lang_ = name[len(name) -2:]
         self.mulTiLang_ = multiLang
@@ -48,8 +48,7 @@ class FLTranslator(ProjectClass):
         trans = FLTranslations()
             
         trans.lrelease("%s.ts" % tsFile , qmFile, not self.mulTiLang_)
-            
-        return QtCore.QTranslator().load(qmFile)
+        return self.load(qmFile)
     
     @decorators.BetaImplementation
     def findMessage(self, context, sourceText, comment=None):
