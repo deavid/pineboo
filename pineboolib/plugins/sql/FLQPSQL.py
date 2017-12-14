@@ -389,6 +389,7 @@ class FLQPSQL(object):
     
     @decorators.NotImplementedWarn
     def mismatchedTable(self, table1, tmd_or_table2, db_):
+        return False
         if isinstance(tmd_or_table2, str):
             mtd = db_.manager().metadata(tmd_or_table2, True)
             if not mtd:
