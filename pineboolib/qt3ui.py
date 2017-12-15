@@ -12,6 +12,7 @@ from pineboolib.fllegacy import FLFieldDB
 
 import zlib
 from PyQt5.QtWidgets import QGroupBox
+from PyQt5.Qt import QPalette
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -131,6 +132,8 @@ def loadWidget(xml, widget=None, parent=None):
             set_fn = widget.layout.setSpacing
         elif pname == "margin":
             set_fn = widget.setContentsMargins
+        elif pname == "paletteBackgroundColor":
+            set_fn = widget.setPalette
         else:
             set_fn = getattr(widget, setpname, None)
         if set_fn is None:
@@ -149,10 +152,14 @@ def loadWidget(xml, widget=None, parent=None):
             try:
                 value = loadVariant(xmlprop)
             except:
-                value = 0
-                
+                value = 0      
             value = QtCore.QMargins(value, value, value, value)
-            
+        
+        elif pname == "paletteBackgroundColor":
+            Pal = QPalette()
+            Pal.setColor(QPalette.Background, loadVariant(xmlprop))
+            value = Pal
+            #FIXME: Aparentemente no se refleja
         else:
             value = loadVariant(xmlprop)
 
