@@ -305,7 +305,7 @@ class MessageBox(QMessageBox):
             title = "Critical"
         #title = unicode(title,"UTF-8")
         #text = unicode(text,"UTF-8")
-        msg = QMessageBox(icon, title, text)
+        msg = QMessageBox(icon, str(title), str(text))
         msg.addButton(button0)
         if button1: msg.addButton(button1)
         if button2: msg.addButton(button2)
