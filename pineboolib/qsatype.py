@@ -341,8 +341,8 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def cursor(self):
         
-        if self.cursor_:
-            return self.cursor_
+        #if self.cursor_:
+        #    return self.cursor_
         
         cursor = None
         parent = self
@@ -354,7 +354,8 @@ class FormDBWidget(QtWidgets.QWidget):
         if cursor:
             self.cursor_ = cursor
         else:
-            self.cursor_ = FLSqlCursor(self._action.name)
+            if not self.cursor_:
+                self.cursor_ = FLSqlCursor(self._action.name)
         
         return self.cursor_
     
