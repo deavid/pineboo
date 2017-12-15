@@ -1,0 +1,346 @@
+0007Source: begin-gen
+0007 Class: begin-gen
+0007  Class: line: 'class interna(object):'
+0007<-Source: line: 'class interna(object):'
+0008  Class: begin: 'block-class-interna'
+0008<-Source: begin: 'block-class-interna'
+0008  Source: begin-gen
+0008   DeclarationBlock: begin-gen
+0008    Variable: begin-gen
+0008     Variable: expr: 'ctx'
+0008     Variable: expr: '='
+0008     Variable: expr: 'qsatype.Object()'
+0008    Variable: end-gen
+0008    DeclarationBlock: line: 'ctx = qsatype.Object()'
+0008  <-Source: line: 'ctx = qsatype.Object()'
+0008 <--Class: line: 'ctx = qsatype.Object()'
+0008<---Source: line: 'ctx = qsatype.Object()'
+0009   DeclarationBlock: end-gen
+0009   Function: begin-gen
+0009    Variable: begin-gen
+0009     Variable: expr: 'context'
+0009    Variable: end-gen
+0009    Function: line: 'def __init__(self, context = None):'
+0009  <-Source: line: 'def __init__(self, context = None):'
+0009 <--Class: line: 'def __init__(self, context = None):'
+0009<---Source: line: 'def __init__(self, context = None):'
+0010    Function: begin: 'block-def-__init__'
+0010  <-Source: begin: 'block-def-__init__'
+0010 <--Class: begin: 'block-def-__init__'
+0010<---Source: begin: 'block-def-__init__'
+0010    Source: begin-gen
+0010     InstructionUpdate: begin-gen
+0010      Member: begin-gen
+0010       Identifier: begin-gen
+0010        Identifier: expr: 'self'
+0010       Identifier: end-gen
+0010       Identifier: begin-gen
+0010        Identifier: expr: 'ctx'
+0010       Identifier: end-gen
+0010       Member: expr: 'self.ctx'
+0010      Member: end-gen
+0010      OpUpdate: begin-gen
+0010       OpUpdate: expr: '='
+0010      OpUpdate: end-gen
+0010      Value: begin-gen
+0010       Identifier: begin-gen
+0010        Identifier: expr: 'context'
+0010      <-Value: expr: 'context'
+0010       Identifier: end-gen
+0010      Value: end-gen
+0010      InstructionUpdate: line: 'self.ctx = context'
+0010    <-Source: line: 'self.ctx = context'
+0010   <--Function: line: 'self.ctx = context'
+0010  <---Source: line: 'self.ctx = context'
+0010 <----Class: line: 'self.ctx = context'
+0010<-----Source: line: 'self.ctx = context'
+0011     InstructionUpdate: end-gen
+0011    Source: end-gen
+0011    Function: end: 'block-def-__init__'
+0011  <-Source: end: 'block-def-__init__'
+0011 <--Class: end: 'block-def-__init__'
+0011<---Source: end: 'block-def-__init__'
+0012   Function: end-gen
+0012   Function: begin-gen
+0012    Function: line: 'def init(self):'
+0012  <-Source: line: 'def init(self):'
+0012 <--Class: line: 'def init(self):'
+0012<---Source: line: 'def init(self):'
+0013    Function: begin: 'block-def-init'
+0013  <-Source: begin: 'block-def-init'
+0013 <--Class: begin: 'block-def-init'
+0013<---Source: begin: 'block-def-init'
+0013    Source: begin-gen
+0013     InstructionCall: begin-gen
+0013      Member: begin-gen
+0013       Identifier: begin-gen
+0013        Identifier: expr: 'self'
+0013       Identifier: end-gen
+0013       Identifier: begin-gen
+0013        Identifier: expr: 'ctx'
+0013       Identifier: end-gen
+0013       FunctionCall: begin-gen
+0013        FunctionCall: expr: 'interna_init()'
+0013       FunctionCall: end-gen
+0013       Member: expr: 'self.ctx.interna_init()'
+0013      Member: end-gen
+0013      InstructionCall: line: 'self.ctx.interna_init()'
+0013    <-Source: line: 'self.ctx.interna_init()'
+0013   <--Function: line: 'self.ctx.interna_init()'
+0013  <---Source: line: 'self.ctx.interna_init()'
+0013 <----Class: line: 'self.ctx.interna_init()'
+0013<-----Source: line: 'self.ctx.interna_init()'
+0014     InstructionCall: end-gen
+0014    Source: end-gen
+0014    Function: end: 'block-def-init'
+0014  <-Source: end: 'block-def-init'
+0014 <--Class: end: 'block-def-init'
+0014<---Source: end: 'block-def-init'
+0015   Function: end-gen
+0015  Source: end-gen
+0015  Class: end: 'block-class-interna'
+0015<-Source: end: 'block-class-interna'
+0016 Class: end-gen
+0016 Class: begin-gen
+0016  Class: line: 'class oficial(interna):'
+0016<-Source: line: 'class oficial(interna):'
+0017  Class: begin: 'block-class-oficial'
+0017<-Source: begin: 'block-class-oficial'
+0017  Source: begin-gen
+0017   Function: begin-gen
+0017    Variable: begin-gen
+0017     Variable: expr: 'context'
+0017    Variable: end-gen
+0017    Function: line: 'def __init__(self, context = None):'
+0017  <-Source: line: 'def __init__(self, context = None):'
+0017 <--Class: line: 'def __init__(self, context = None):'
+0017<---Source: line: 'def __init__(self, context = None):'
+0018    Function: begin: 'block-def-__init__'
+0018  <-Source: begin: 'block-def-__init__'
+0018 <--Class: begin: 'block-def-__init__'
+0018<---Source: begin: 'block-def-__init__'
+0018    Source: begin-gen
+0018     InstructionCall: begin-gen
+0018      FunctionCall: begin-gen
+0018       Value: begin-gen
+0018        Identifier: begin-gen
+0018         Identifier: expr: 'context'
+0018       <-Value: expr: 'context'
+0018        Identifier: end-gen
+0018       Value: end-gen
+0018       FunctionCall: expr: 'super(oficial, self).__init__(context)'
+0018      FunctionCall: end-gen
+0018      InstructionCall: line: 'super(oficial, self).__init__(context)'
+0018    <-Source: line: 'super(oficial, self).__init__(context)'
+0018   <--Function: line: 'super(oficial, self).__init__(context)'
+0018  <---Source: line: 'super(oficial, self).__init__(context)'
+0018 <----Class: line: 'super(oficial, self).__init__(context)'
+0018<-----Source: line: 'super(oficial, self).__init__(context)'
+0019     InstructionCall: end-gen
+0019    Source: end-gen
+0019    Function: end: 'block-def-__init__'
+0019  <-Source: end: 'block-def-__init__'
+0019 <--Class: end: 'block-def-__init__'
+0019<---Source: end: 'block-def-__init__'
+0020   Function: end-gen
+0020  Source: end-gen
+0020  Class: end: 'block-class-oficial'
+0020<-Source: end: 'block-class-oficial'
+0021 Class: end-gen
+0021 Class: begin-gen
+0021  Class: line: 'class head(oficial):'
+0021<-Source: line: 'class head(oficial):'
+0022  Class: begin: 'block-class-head'
+0022<-Source: begin: 'block-class-head'
+0022  Source: begin-gen
+0022   Function: begin-gen
+0022    Variable: begin-gen
+0022     Variable: expr: 'context'
+0022    Variable: end-gen
+0022    Function: line: 'def __init__(self, context = None):'
+0022  <-Source: line: 'def __init__(self, context = None):'
+0022 <--Class: line: 'def __init__(self, context = None):'
+0022<---Source: line: 'def __init__(self, context = None):'
+0023    Function: begin: 'block-def-__init__'
+0023  <-Source: begin: 'block-def-__init__'
+0023 <--Class: begin: 'block-def-__init__'
+0023<---Source: begin: 'block-def-__init__'
+0023    Source: begin-gen
+0023     InstructionCall: begin-gen
+0023      FunctionCall: begin-gen
+0023       Value: begin-gen
+0023        Identifier: begin-gen
+0023         Identifier: expr: 'context'
+0023       <-Value: expr: 'context'
+0023        Identifier: end-gen
+0023       Value: end-gen
+0023       FunctionCall: expr: 'super(head, self).__init__(context)'
+0023      FunctionCall: end-gen
+0023      InstructionCall: line: 'super(head, self).__init__(context)'
+0023    <-Source: line: 'super(head, self).__init__(context)'
+0023   <--Function: line: 'super(head, self).__init__(context)'
+0023  <---Source: line: 'super(head, self).__init__(context)'
+0023 <----Class: line: 'super(head, self).__init__(context)'
+0023<-----Source: line: 'super(head, self).__init__(context)'
+0024     InstructionCall: end-gen
+0024    Source: end-gen
+0024    Function: end: 'block-def-__init__'
+0024  <-Source: end: 'block-def-__init__'
+0024 <--Class: end: 'block-def-__init__'
+0024<---Source: end: 'block-def-__init__'
+0025   Function: end-gen
+0025  Source: end-gen
+0025  Class: end: 'block-class-head'
+0025<-Source: end: 'block-class-head'
+0026 Class: end-gen
+0026 Class: begin-gen
+0026  Class: line: 'class ifaceCtx(head):'
+0026<-Source: line: 'class ifaceCtx(head):'
+0027  Class: begin: 'block-class-ifaceCtx'
+0027<-Source: begin: 'block-class-ifaceCtx'
+0027  Source: begin-gen
+0027   Function: begin-gen
+0027    Variable: begin-gen
+0027     Variable: expr: 'context'
+0027    Variable: end-gen
+0027    Function: line: 'def __init__(self, context = None):'
+0027  <-Source: line: 'def __init__(self, context = None):'
+0027 <--Class: line: 'def __init__(self, context = None):'
+0027<---Source: line: 'def __init__(self, context = None):'
+0028    Function: begin: 'block-def-__init__'
+0028  <-Source: begin: 'block-def-__init__'
+0028 <--Class: begin: 'block-def-__init__'
+0028<---Source: begin: 'block-def-__init__'
+0028    Source: begin-gen
+0028     InstructionCall: begin-gen
+0028      FunctionCall: begin-gen
+0028       Value: begin-gen
+0028        Identifier: begin-gen
+0028         Identifier: expr: 'context'
+0028       <-Value: expr: 'context'
+0028        Identifier: end-gen
+0028       Value: end-gen
+0028       FunctionCall: expr: 'super(ifaceCtx, self).__init__(context)'
+0028      FunctionCall: end-gen
+0028      InstructionCall: line: 'super(ifaceCtx, self).__init__(context)'
+0028    <-Source: line: 'super(ifaceCtx, self).__init__(context)'
+0028   <--Function: line: 'super(ifaceCtx, self).__init__(context)'
+0028  <---Source: line: 'super(ifaceCtx, self).__init__(context)'
+0028 <----Class: line: 'super(ifaceCtx, self).__init__(context)'
+0028<-----Source: line: 'super(ifaceCtx, self).__init__(context)'
+0029     InstructionCall: end-gen
+0029    Source: end-gen
+0029    Function: end: 'block-def-__init__'
+0029  <-Source: end: 'block-def-__init__'
+0029 <--Class: end: 'block-def-__init__'
+0029<---Source: end: 'block-def-__init__'
+0030   Function: end-gen
+0030  Source: end-gen
+0030  Class: end: 'block-class-ifaceCtx'
+0030<-Source: end: 'block-class-ifaceCtx'
+0031 Class: end-gen
+0031 Class: begin-gen
+0031  Class: line: 'class FormInternalObj(qsatype.FormDBWidget):'
+0031<-Source: line: 'class FormInternalObj(qsatype.FormDBWidget):'
+0032  Class: begin: 'block-class-FormInternalObj'
+0032<-Source: begin: 'block-class-FormInternalObj'
+0032  Source: begin-gen
+0032   Function: begin-gen
+0032    Function: line: 'def _class_init(self):'
+0032  <-Source: line: 'def _class_init(self):'
+0032 <--Class: line: 'def _class_init(self):'
+0032<---Source: line: 'def _class_init(self):'
+0033    Function: begin: 'block-def-_class_init'
+0033  <-Source: begin: 'block-def-_class_init'
+0033 <--Class: begin: 'block-def-_class_init'
+0033<---Source: begin: 'block-def-_class_init'
+0033    Source: begin-gen
+0033     DeclarationBlock: begin-gen
+0033      Variable: begin-gen
+0033       Variable: expr: 'iface'
+0033       Variable: expr: '='
+0033       Value: begin-gen
+0033        New: begin-gen
+0033         FunctionCall: begin-gen
+0033          Value: begin-gen
+0033           Identifier: begin-gen
+0033            Identifier: expr: 'self'
+0033          <-Value: expr: 'self'
+0033           Identifier: end-gen
+0033          Value: end-gen
+0033          FunctionCall: expr: 'ifaceCtx(self)'
+0033        <-New: expr: 'ifaceCtx(self)'
+0033       <--Value: expr: 'ifaceCtx(self)'
+0033      <---Variable: expr: 'ifaceCtx(self)'
+0033         FunctionCall: end-gen
+0033        New: end-gen
+0033       Value: end-gen
+0033      Variable: end-gen
+0033      DeclarationBlock: line: 'self.iface = ifaceCtx(self)'
+0033    <-Source: line: 'self.iface = ifaceCtx(self)'
+0033   <--Function: line: 'self.iface = ifaceCtx(self)'
+0033  <---Source: line: 'self.iface = ifaceCtx(self)'
+0033 <----Class: line: 'self.iface = ifaceCtx(self)'
+0033<-----Source: line: 'self.iface = ifaceCtx(self)'
+0034     DeclarationBlock: end-gen
+0034    Source: end-gen
+0034    Function: end: 'block-def-_class_init'
+0034  <-Source: end: 'block-def-_class_init'
+0034 <--Class: end: 'block-def-_class_init'
+0034<---Source: end: 'block-def-_class_init'
+0035   Function: end-gen
+0035   Function: begin-gen
+0035    Function: line: 'def interna_init(self):'
+0035  <-Source: line: 'def interna_init(self):'
+0035 <--Class: line: 'def interna_init(self):'
+0035<---Source: line: 'def interna_init(self):'
+0036    Function: begin: 'block-def-interna_init'
+0036  <-Source: begin: 'block-def-interna_init'
+0036 <--Class: begin: 'block-def-interna_init'
+0036<---Source: begin: 'block-def-interna_init'
+0036    Source: begin-gen
+0036     InstructionCall: begin-gen
+0036      Member: begin-gen
+0036       Identifier: begin-gen
+0036        Identifier: expr: 'self'
+0036       Identifier: end-gen
+0036       FunctionCall: begin-gen
+0036        Value: begin-gen
+0036         Constant: begin-gen
+0036          Constant: ctype: 'String' -> 'tableDBRecords'
+0036          Constant: expr: 'u"tableDBRecords"'
+0036        <-Value: expr: 'u"tableDBRecords"'
+0036         Constant: end-gen
+0036        Value: end-gen
+0036        FunctionCall: expr: 'child(u"tableDBRecords")'
+0036       FunctionCall: end-gen
+0036       FunctionCall: begin-gen
+0036        Value: begin-gen
+0036         Constant: begin-gen
+0036          Constant: ctype: 'String' -> 'nombre'
+0036          Constant: expr: 'u"nombre"'
+0036        <-Value: expr: 'u"nombre"'
+0036         Constant: end-gen
+0036        Value: end-gen
+0036        FunctionCall: expr: 'putFirstCol(u"nombre")'
+0036       FunctionCall: end-gen
+0036       Member: expr: 'self.child(u"tableDBRecords").putFirstCol(u"nombre")'
+0036      Member: end-gen
+0036      InstructionCall: line: 'self.child(u"tableDBRecords").putFirstCol(u"nombre")'
+0036    <-Source: line: 'self.child(u"tableDBRecords").putFirstCol(u"nombre")'
+0036   <--Function: line: 'self.child(u"tableDBRecords").putFirstCol(u"nombre")'
+0036  <---Source: line: 'self.child(u"tableDBRecords").putFirstCol(u"nombre")'
+0036 <----Class: line: 'self.child(u"tableDBRecords").putFirstCol(u"nombre")'
+0036<-----Source: line: 'self.child(u"tableDBRecords").putFirstCol(u"nombre")'
+0037     InstructionCall: end-gen
+0037    Source: end-gen
+0037    Function: end: 'block-def-interna_init'
+0037  <-Source: end: 'block-def-interna_init'
+0037 <--Class: end: 'block-def-interna_init'
+0037<---Source: end: 'block-def-interna_init'
+0038   Function: end-gen
+0038  Source: end-gen
+0038  Class: end: 'block-class-FormInternalObj'
+0038<-Source: end: 'block-class-FormInternalObj'
+0039 Class: end-gen
+0039Source: end-gen

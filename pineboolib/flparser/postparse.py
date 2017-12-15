@@ -559,7 +559,7 @@ def execute(options, args):
                 print("Error cargando modulo %s" % name)
 
     elif options.topython:
-        from pytnyzer import pythonize
+        from .pytnyzer import pythonize
         import io
         if options.cache:
             args = [ x for x in args if not os.path.exists((x+".py").replace(".qs.xml.py",".qs.py"))

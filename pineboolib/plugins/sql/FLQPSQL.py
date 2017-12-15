@@ -23,7 +23,7 @@ class FLQPSQL(object):
     lastError_ = None
     
     def __init__(self):
-        self.version_ = "0.4"
+        self.version_ = "0.5"
         self.conn_ = None
         self.name_ = "FLQPSQL"
         self.open_ = False
@@ -69,7 +69,13 @@ class FLQPSQL(object):
                         tmpConn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
                         
                         cursor = tmpConn.cursor()
-                        cursor.execute("CREATE DATABASE %s" % db_name)
+                        try:
+                            cursor.execute("CREATE DATABASE %s" % db_name)
+                        except Exception:
+                            print("ERROR: FLPSQL.connect", traceback.format_exc())
+                            cursor.execute("ROLLBACK")
+                            cursor.close()
+                            return False
                         cursor.close()
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
@@ -106,6 +112,9 @@ class FLQPSQL(object):
             #if v == None:
             #    v = ""
             # TODO: psycopg2.mogrify ???
+            if type_ == "pixmap" and v.find("'") > -1:
+                v = self.normalizeValue(v)
+                
 
             if type_ == "bool" or type_ == "unlock":
                 s = text2bool(v)
@@ -266,7 +275,7 @@ class FLQPSQL(object):
     
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         try:
-            cursor.execute("FETCH %d FROM %s" % (number, curname))
+            cursor.execute("FETCH %d FROM %s" % (number, str(curname)))
         except Exception:
             qWarning("PSQLDriver.refreshFetch\n %s" % traceback.format_exc())
     
@@ -343,7 +352,14 @@ class FLQPSQL(object):
                 q.setForwardOnly(True)
                 q.exec_("SELECT relname FROM pg_class WHERE relname='%s'" % seq)
                 if not q.next():
-                    q.exec_("CREATE SEQUENCE %s" % seq)
+                    cursor = self.conn_.cursor()
+                    #self.transaction()
+                    try:
+                        cursor.execute("CREATE SEQUENCE %s" % seq)
+                    except Exception:
+                        print("FLQPSQL::sqlCreateTable:\n", traceback.format_exc())
+                    #self.commitTransaction()
+                    
                 
                 sql = sql + " INT4 DEFAULT NEXTVAL('%s')" % seq
                 del q
@@ -377,7 +393,9 @@ class FLQPSQL(object):
         
         return sql
     
+    @decorators.NotImplementedWarn
     def mismatchedTable(self, table1, tmd_or_table2, db_):
+        return False
         if isinstance(tmd_or_table2, str):
             mtd = db_.manager().metadata(tmd_or_table2, True)
             if not mtd:
@@ -391,7 +409,44 @@ class FLQPSQL(object):
         
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
-                
+    
+    
+    
+    
+    def tables(self, typeName = None):
+        tl = []
+        if not self.isOpen():
+            return tl
+        
+        t = FLSqlQuery()
+        t.setForwardOnly(True)
+        
+        if not typeName or typeName == "Tables":
+            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
+            while t.next():
+                tl.append(str(t.value(0)))
+        
+        if not typeName or typeName == "Views":
+            t.exec_("select relname from pg_class where ( relkind = 'v' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
+            while t.next():
+                tl.append(str(t.value(0)))
+        if not typeName or typeName == "SystemTables":
+            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND relname like 'pg_%' ) ")
+            while t.next():
+                tl.append(str(t.value(0)))
+        
+        
+        del t
+        return tl
+    
+    def normalizeValue(self, text):
+        ret = ""
+        for c in text:
+            if c == "'":
+                c = "''"
+            ret = ret + c
+        
+        return ret
         
         
         

@@ -201,6 +201,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         if texto is None:
             if self._tipo == "string":
                 texto = ""
+            
             elif self._tipo == "double":
                 d = 0
                 texto = "0."
@@ -1267,7 +1268,6 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN = None):
-        #print("refrescando", self.fieldName_)
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
             print("FLField.refresh() Cancelado")
             return
@@ -1281,7 +1281,6 @@ class FLFieldDB(QtWidgets.QWidget):
             
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
-            
             #if self.cursor_.cursorRelation():
                 #print(1)
                 #if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
@@ -1596,6 +1595,7 @@ class FLFieldDB(QtWidgets.QWidget):
             elif self.editorImg_:
                 self.editorImg_.hide()
             self.setDisabled(True)
+            
 
 
 
@@ -1645,7 +1645,6 @@ class FLFieldDB(QtWidgets.QWidget):
         
         elif type_ == "string":
             doHome = False
-            
             if ol:
                 if str(v) == self.editor_.currentText():
                     return
@@ -1678,7 +1677,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if not ol and doHome:
                 self.editor_.home(False)
             
-                self.editor_.textChanged.connect(self.updateValue)
+            self.editor_.textChanged.connect(self.updateValue)
         
         elif type_ == "uint" or type_ == "int" or type_ == "serial":
             if v == self.editor_.text():
@@ -3258,31 +3257,29 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
     def validate(self, input_, i):
         return super(FLDoubleValidator, self).validate(input_, i)
-        """
-        if input_.isEmpty():
+        if not input_:
             return QtGui.QValidator.Acceptable
 
-        input_.replace(",", ".")
+        input_ = input_.replace(",", ".")
 
         state = QtGui.QDoubleValidator.validate(self,input_, i)
 
-        if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
-            s = str(input_.right(input_.length() - 1))
-            if input_.left(1) == "-" and (QtGui.QDoubleValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or s.isEmpty()):
+        if state in (QtGui.QValidator.Invalid, QtGui.QValidator.Intermediate):
+            s = input_[1:len(input_) -1]
+            if input_[1] == "-" and (QtGui.QDoubleValidator.validate(self, s, i) == QtGui.QValidator.Acceptable or not s):
                 state = QtGui.QValidator.Acceptable
             else:
                 state = QtGui.QValidator.Invalid
         else:
             state = QtGui.QValidator.Acceptable
 
-        if (QtWidgets.QApplication.instance().commaSeparator() == ","):
-            input_.replace(".", ",")
+        if QtCore.QLocale().decimalPoint() == ",":
+            input_ = input_.replace(".", ",")
         else:
-            input_.replace(",", ".")
+            input_ = input_.replace(",", ".")
 
         return state
-        """
-
+        
 
 
 class FLIntValidator(QtGui.QIntValidator):
@@ -3435,17 +3432,20 @@ class FLDateEdit(QtWidgets.QDateEdit):
         self.setDisplayFormat(order)
     
     def setDate(self, d = None):
-        if d is None:
-            d = str("01-01-2000")
-        
+        if d in (None, "NAN"):
+            d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         if isinstance(d, str):
             if "T" in d:
                 d = d[:d.find("T")]
+        
+        if isinstance(d, datetime.date):
+            d = QtCore.QDate.fromString(str(d),"yyyy-MM-dd")
         
         if not isinstance(d, QtCore.QDate):
             date = QtCore.QDate.fromString(d,"dd-MM-yyyy")
         else:
             date = d
+        
         super(FLDateEdit, self).setDate(date)
         self.setStyleSheet('color: black')    
         

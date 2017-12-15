@@ -48,7 +48,9 @@ class QCheckBox(QtWidgets.QCheckBox):
     def checked(self, v):
         if not v:
             v = False
-        self.setCheckState(v)
+        if isinstance(v, str):
+            v = (v == "true")
+        self.setChecked(v)
 
 class QLabel(QtWidgets.QLabel):
     

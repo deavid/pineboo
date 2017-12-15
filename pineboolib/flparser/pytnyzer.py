@@ -4,7 +4,7 @@
 from builtins import object
 from optparse import OptionParser
 import os, os.path, random
-import flscriptparse
+from . import flscriptparse
 from lxml import etree
 
 
@@ -25,6 +25,7 @@ def id_translate(name):
     if name == "endsWith": name = "endswith"
     if name == "lastIndexOf": name = "rfind"
     if name == "File": name = "qsatype.File"
+    if name == "Dir": name = "qsatype.Dir"
     if name == "findRev": name = "find"
     if name == "toLowerCase": name = "lower"
     if name == "Process": name = "qsatype.Process"
@@ -485,7 +486,9 @@ class Switch(ASTPython):
         # yield "line", "assert( %s )" % name_pr2
 
 class With(ASTPython):
-    python_keywords = ["select","select", "first","next","prev","last","setValueBuffer","setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess","commitBuffer","commit","refreshBuffer","setNull"]
+    python_keywords = ["select","select", "first","next","prev","last","setValueBuffer",
+    "setTablesList","setSelect","setFrom","setWhere","setForwardOnly","setModeAccess",
+    "commitBuffer","commit","refreshBuffer","setNull","setUnLock"]
 
     def generate(self, **kwargs):
         key = "%02x" % random.randint(0,255)
@@ -768,8 +771,14 @@ class Member(ASTPython):
                         arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1),".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        value = value[:len(value) - 1]
-                        arguments = ["%s[(%s):]" % (".".join(part1), value)] + part2
+                        if value.find(",") > -1 and value.find(")") < value.find(","):
+                            value = value[0:len(value) - 1]
+                            v0 = value[0:value.find(",")]
+                            v1 = value[value.find(",") + 1:]
+                            arguments = ["%s[%s:%s + %s]" % (".".join(part1), v0, v0, v1)] + part2
+                        else:
+                            value = value[:len(value) - 1]
+                            arguments = ["%s[(%s):]" % (".".join(part1), value)] + part2
                     elif member == "length":
                         value = arg[7:]
                         value = value[:len(value) - 1]
@@ -1097,18 +1106,29 @@ def string_template(ast):
     yield "line", "import traceback"
     yield "line", "sys = SysType()"
     yield "line", ""
-    yield "line", "class FormInternalObj(qsatype.FormDBWidget):"
-    yield "begin", "class-pass"
-    yield "line", "pass"
-    yield "end", "class-pass"
-
     sourceclasses = etree.Element("Source")
+    for cls in ast.xpath("Class"):
+        sourceclasses.append(cls)
+
+    mainclass = etree.SubElement(sourceclasses,"Class",name="FormInternalObj",extends="qsatype.FormDBWidget")
+    mainsource = etree.SubElement(mainclass,"Source")
+
+
+    constructor = etree.SubElement(mainsource,"Function",name="_class_init")
+    args = etree.SubElement(constructor,"Arguments")
+    csource = etree.SubElement(constructor,"Source")
+
     for child in ast:
-        child.set("withoutself","1")
-        sourceclasses.append(child)
+        if child.tag != "Function":
+            child.set("constructor","1")
+            csource.append(child)
+        else:
+            mainsource.append(child)
 
     for dtype, data in parse_ast(sourceclasses).generate():
         yield dtype, data
+    yield "line", ""
+    yield "line", "form = None"
 
 def write_python_file(fobj, ast, tpl=file_template):
     indent = []

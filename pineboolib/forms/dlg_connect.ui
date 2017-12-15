@@ -310,7 +310,7 @@
          <attribute name="title">
           <string>Otras opciones</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
            <widget class="QPushButton" name="pbnEnebooImportButton">
             <property name="text">
@@ -337,6 +337,42 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox">
+            <property name="title">
+             <string>Desarrollo</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QCheckBox" name="cBDeleteCache">
+               <property name="text">
+                <string>Eliminar cache al iniciar.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="cBParseProject">
+               <property name="text">
+                <string>Convertir todo el proyecto al iniciar.</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
           </item>
          </layout>
         </widget>

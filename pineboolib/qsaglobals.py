@@ -11,10 +11,11 @@ import traceback
 import pineboolib
 from pineboolib import flcontrols, decorators
 from pineboolib.flcontrols import ProjectClass
+from pineboolib.utils import filedir
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
-from PyQt5.Qt import QMainWindow, QDate, QTextStream
+from PyQt5.Qt import QMainWindow, QDate, QTextStream, qWarning
 
 class File(object):
     
@@ -147,6 +148,9 @@ class SysType(object):
         util = FLUtil()
         return util.getOS()
     
+    def nameBD(self):
+        return pineboolib.project.conn.databaseName()
+    
     
     def setCaptionMainWidget(self, value):
        self.mainWidget().setWindowTitle("Pineboo - %s" % value)
@@ -157,6 +161,39 @@ class SysType(object):
     
     def mainWidget(self):
         return pineboolib.project.main_window.ui
+    
+    def installPrefix(self):
+        return filedir("..")
+    
+    def __getattr__(self, name):
+        obj = eval("sys.widget.%s" % name, pineboolib.qsaglobals.__dict__)
+        if obj:
+           return obj
+        else:
+           qWarning("No se encuentra sys.%s" % name)
+    
+    def version(self):
+        return pineboolib.project.version
+    
+    @decorators.NotImplementedWarn
+    def processEvents(self):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def reinit(self):
+        pass
+    
+    def cleanupMetaData(self, connName = "default"):
+        pineboolib.project.conn.database(connName).manager().cleanupMetaData()
+    
+    def updateAreas(self):
+        pineboolib.project.initToolBox()
+        
+        
+        
+        
+    
+        
         
 
        

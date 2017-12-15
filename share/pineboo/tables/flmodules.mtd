@@ -1,7 +1,7 @@
 <!DOCTYPE TMD>
 <TMD>
 	<name>flmodules</name>
-	<alias>QT_TRANSLATE_NOOP("MetaData","M贸dulos")</alias>
+	<alias>QT_TRANSLATE_NOOP("MetaData","M骴ulos")</alias>
 
 	<field>
 		<name>bloqueo</name>
@@ -14,7 +14,7 @@
 
 	<field>
 		<name>idmodulo</name>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Id. del M贸dulo")</alias>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Id. del M骴ulo")</alias>
 		<null>false</null>
 		<pk>true</pk>
 		<type>string</type>
@@ -29,7 +29,7 @@
 
 	<field>
 		<name>idarea</name>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Id. del 脕rea")</alias>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Id. del 羠ea")</alias>
 		<null>false</null>
 		<pk>false</pk>
 		<type>string</type>
@@ -45,7 +45,7 @@
 
 	<field>
 		<name>descripcion</name>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Descripci贸n")</alias>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Descripci髇")</alias>
 		<null>false</null>
 		<pk>false</pk>
 		<type>string</type>
@@ -54,7 +54,7 @@
 
 	<field>
 		<name>version</name>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Versi贸n")</alias>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Versi髇")</alias>
 		<null>false</null>
 		<pk>false</pk>
 		<type>string</type>

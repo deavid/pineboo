@@ -387,7 +387,9 @@ class FLFormSearchDB(FLFormDB):
     def show(self):
         self.exec_()
 
-
+    
+    def child(self, childName):
+        return self.findChild(QtWidgets.QWidget, childName)
 
 
 

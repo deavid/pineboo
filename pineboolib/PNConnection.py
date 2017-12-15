@@ -74,7 +74,7 @@ class PNConnection(QtCore.QObject):
     """
     def useConn(self, name = "default"):
         if name == "default":
-            return self.conn
+            return self
         
         for k in self.connAux.keys():
             if k == name:
@@ -85,6 +85,14 @@ class PNConnection(QtCore.QObject):
         
         return self.connAux[name]
         
+    def tables(self):
+        return self.driver().tables()
+    
+    def database(self, name = None):
+        if name == None:
+            return self.db_name
+        
+        return self.useConn(name)
     
     def driver(self):
         return self.driverSql.driver()
@@ -106,9 +114,6 @@ class PNConnection(QtCore.QObject):
     
     def port(self):
         return self.db_port
-    
-    def database(self):
-        return self.db_name
     
     def user(self):
         return self.db_userName
@@ -360,16 +365,15 @@ class PNConnection(QtCore.QObject):
         sql = self.driver().sqlCreateTable(tmd)
         if not sql:
             return False
-        
+        self.transaction()
         q = self.cursor()
         try:
             q.execute(sql)
-            q.execute("COMMIT")
         except:
             qWarning(traceback.format_exc())
-            q.execute("ROLLBACK")
+            self.rollbackTransaction()
             return False
-        
+        self.commitTransaction()
         return True
     
     def mismatchedTable(self, tablename, tmd):
@@ -379,5 +383,11 @@ class PNConnection(QtCore.QObject):
         return self.driver().mismatchedTable(tablename, tmd, self)
     
         
+    
+    def normalizeValue(self, text):
+        if getattr(self.driver(), "normalizeValue",None):
+            return self.driver().normalizeValue(text)
         
+        qWarning("PNConnection: El driver %s no dispone de normalizeValue(text)" % self.driverName())
+        return text   
     

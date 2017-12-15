@@ -10,7 +10,6 @@ from pineboolib.utils import filedir
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import traceback
 
 import threading
@@ -37,12 +36,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     rowsLoaded = 0
     where_filters = {}
     _table = None
+    _metadata = None
     
     def __init__(self, action, project, conn, *args):
         super(CursorTableModel,self).__init__(*args)
         from pineboolib.qsaglobals import aqtt
         
-
+        self._metadata = None
         self.rowsLoaded = 0
         self.where_filters = {}
         self._cursorConn = conn
@@ -86,12 +86,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             #if field.visible_grid:
             #self.sql_fields.append(field.name())
             #self.field_metaData.append(field)
-        #    self.tableMetadata().addField(field)
+        #    self.metadata().addField(field)
         self._data = []
         self._vdata = []
         self._column_hints = []
-        self.cols = len(self.tableMetadata().fieldList())
-        self.col_aliases = [ str(self.tableMetadata().indexFieldObject(i).alias()) for i in range(self.cols) ]
+        self.cols = len(self.metadata().fieldList())
+        self.col_aliases = [ str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols) ]
         self.fetchLock = threading.Lock()
         self.rows = 0
         self.rowsLoaded = 0
@@ -115,10 +115,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.canFetchMore = True         
         self.refresh()
 
-
-    def metadata(self):
-        #print("CursorTableModel: METADATA: " + self._table.name)
-        return self._metadata
 
     def canFetchMore(self,index):
         return self.canFetchMore
@@ -233,10 +229,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def threadFetch(self):
         #ct = threading.current_thread()
         #print("Thread: FETCH (INIT)")
+        if not self.metadata():
+            return
+        
         tiempo_inicial = time.time()
         #sql = """FETCH %d FROM %s""" % (2000,self._curname)
         #conn = self._cursorConn.db()
-        self.refreshFetch(2000,self._curname, self.tableMetadata().name(), self._cursor)
+        self.refreshFetch(2000,self._curname, self.metadata().name(), self._cursor)
         #try: 
         #    self._cursor.execute(sql)
         #except Exception:
@@ -288,17 +287,16 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if torow < fromrow: return
         
         #print("QUERY:", sql)
-
+        
         if self.fetchedRows <= torow and self.canFetchMore: 
             
             if self.USE_THREADS == True and self.threadFetcher.is_alive(): self.threadFetcher.join()
             
             if tablename == None:
-                tablename = self.tableMetadata().name()
+                tablename = self.metadata().name()
             
             if where_filter == None:
                 where_filter = self.where_filter
-            
             c_all = self._prj.conn.driver().fetchAll(self._cursor, tablename, where_filter, ", ".join(self.sql_fields), self._curname)
             newrows = len(c_all) #self._cursor.rowcount
             from_rows = self.rows
@@ -386,9 +384,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.where_filter = where_filter
         
         #for f in self.where_filters.keys():
-        #    print("Filtro %s --> %s" % (f, self.where_filters[f]))
+        #    print("Filtro (%s).%s --> %s" % (self._action.table , f, self.where_filters[f]))
         
-        #print("Filtro final", self.where_filter)
+        #print("Filtro final(%s) --> %s" % (self._action.table , self.where_filter))
         
         
         
@@ -403,10 +401,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
             return
         
-        if not self.tableMetadata():
+        if not self.metadata():
             return
         
-        for n,field in enumerate(self.tableMetadata().fieldList()):
+        for n,field in enumerate(self.metadata().fieldList()):
             #if field.visibleGrid():
             #    sql_fields.append(field.name())
             if field.isPrimaryKey(): self.pkpos.append(n)
@@ -415,10 +413,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.sql_fields.append(field.name())
         self._curname = "cur_" + self._table.name + "_%08d" % (next(self.CURSOR_COUNT))
         
-        self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields),self.tableMetadata().name(), where_filter, self._cursor, self._cursorConn.db())
+        self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields),self.metadata().name(), where_filter, self._cursor, self._cursorConn.db())
         
             
-        self.refreshFetch(1000,self._curname, self.tableMetadata().name(), self._cursor)
+        self.refreshFetch(1000,self._curname, self.metadata().name(), self._cursor)
 
         self.rows = 0
         self.canFetchMore = True
@@ -429,7 +427,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #self.threadFetcher = threading.Thread(target=self.threadFetch)
         #self.threadFetcherStop = threading.Event()
         #self.threadFetcher.start()
-        self.fetchMore(parent, self.tableMetadata().name(),where_filter)
+        self.fetchMore(parent, self.metadata().name(),where_filter)
+        #print("%s:: rows: %s" % (self._curname, self.rows))
     
     def refreshFetch(self, number, curname, tablename, cursor):
         self._prj.conn.driver().refreshFetch(number, curname, tablename, cursor, ", ".join(self.sql_fields), self.where_filter)
@@ -509,9 +508,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             raise AssertionError("Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.value(row, self.pK()), pKValue))
 
         self.setValuesDict(row, dict_update)
-        pkey_name = self.tableMetadata().primaryKey()
+        pkey_name = self.metadata().primaryKey()
         # TODO: la conversion de mogrify de bytes a STR va a dar problemas con los acentos...
-        typePK_ = self.tableMetadata().field(self.tableMetadata().primaryKey()).type()
+        typePK_ = self.metadata().field(self.metadata().primaryKey()).type()
         pKValue = self._prj.conn.manager().formatValue(typePK_, pKValue, False)
         #if typePK_ == "string" or typePK_ == "pixmap" or typePK_ == "stringlist" or typePK_ == "time" or typePK_ == "date":
             #pKValue = str("'" + pKValue + "'")
@@ -520,17 +519,26 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         update_set = []
 
         for key, value in dict_update.items():
-            type_ = self.tableMetadata().field(key).type()
+            type_ = self.metadata().field(key).type()
             #if type_ == "string" or type_ == "pixmap" or type_ == "stringlist" or type_ == "time" or type_ == "date":
                 #value = str("'" + value + "'")
+            if type_ in ("string","stringlist"):
+                value = self._prj.conn.normalizeValue(value)
             value = self._prj.conn.manager().formatValue(type_, value, False)
+            
             #update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
             update_set.append("%s = %s" % (key, value))
 
         update_set_txt = ", ".join(update_set)
-        sql = """UPDATE %s SET %s WHERE %s RETURNING *""" % (self.tableMetadata().name(), update_set_txt, where_filter)
-        print("MODIFYING SQL :: ", sql)
-        self._cursor.execute(sql)
+        sql = """UPDATE %s SET %s WHERE %s RETURNING *""" % (self.metadata().name(), update_set_txt, where_filter)
+        #print("MODIFYING SQL :: ", sql)
+        try:
+            self._cursor.execute(sql)
+        except Exception:
+            print("ERROR: CursorTableModel.Update", traceback.format_exc())
+            #self._cursor.execute("ROLLBACK")
+            return 
+        
         returning_fields = [ x[0] for x in self._cursor.description ]
 
         for orow in self._cursor:
@@ -544,7 +552,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     @param row. Columna afectada
     @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
     """
-    @decorators.BetaImplementation
+
     def setValuesDict(self, row, update_dict):
 
         if DEBUG: print("CursorTableModel.setValuesDict(row %s) = %r" % (row, update_dict))
@@ -596,10 +604,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         for b in buffer.fieldsList():
             value = None
             if buffer.value(b.name) == None:
-                value = buffer.cursor_.d.db_.manager().metadata(buffer.cursor_.d.curName_).field(b.name).defaultValue()
+                value = cursor.metadata().field(b.name).defaultValue()
             else:
                 value = buffer.value(b.name)
             if not value == None: # si el campo se rellena o hay valor default
+                if b.type_ in ("string","stringlist"):
+                    value = self._prj.conn.normalizeValue(value)
                 value = self._prj.conn.manager().formatValue(b.type_, value, False)
                 if not campos:
                     campos = b.name
@@ -611,12 +621,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
             #conn = self._cursorConn.db()
             try:
-                print(sql)
+                #print(sql)
                 self._cursor.execute(sql)
                 self.refresh()
             except Exception:
                 print("CursorTableModel.Insert() :: ERROR:" , traceback.format_exc())
-                #conn.rollback()
+                #self._cursor.execute("ROLLBACK")
                 return False
                   
             #conn.commit()    
@@ -624,16 +634,16 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return True
         
     def Delete(self, cursor):
-        pKName = self.tableMetadata().primaryKey()
-        typePK = self.tableMetadata().field(pKName).type()
-        tableName = self.tableMetadata().name()
+        pKName = self.metadata().primaryKey()
+        typePK = self.metadata().field(pKName).type()
+        tableName = self.metadata().name()
         sql = "DELETE FROM %s WHERE %s = %s" % (tableName , pKName , self._prj.conn.manager().formatValue(typePK , self.value(cursor.d._currentregister, pKName), False))
         #conn = self._cursorConn.db()
         try:
             self._cursor.execute(sql)         
         except Exception:
             print("CursorTableModel.Delete() :: ERROR:" , traceback.format_exc())
-            conn.rollback()
+            #self._cursor.execute("ROLLBACK")
             return
         
         #conn.commit()   
@@ -668,11 +678,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
 
     def pK(self): #devuelve el nombre del campo pk
-        return self.tableMetadata().primaryKey()
+        return self.metadata().primaryKey()
         #return self._pk
 
     def fieldType(self, fieldName): # devuelve el tipo de campo
-        field = self.tableMetadata().field(fieldName)
+        field = self.metadata().field(fieldName)
         if field:
             return field.type()
         else:
@@ -691,7 +701,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         """
     def alias(self, fieldName):
-        return self.tableMetadata().field(fieldName).alias()
+        return self.metadata().field(fieldName).alias()
         """
         value = None
         try:
@@ -726,7 +736,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return QAbstractTableModel_headerData(self, section, orientation, role)
 
     def fieldMetadata(self, fieldName):
-        return self.tableMetadata().field(fieldName)
+        return self.metadata().field(fieldName)
         """
         try:
             pos = self.field_metaData(fieldName)
@@ -735,8 +745,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return False
             #print("CursorTableModel: %s.%s no hay datos" % ( self._table.name, fieldName ))
         """
-    def tableMetadata(self):
-        return self._prj.conn.manager().metadata(self._table.name)
+    def metadata(self):
+        return self._metadata
 
 
 

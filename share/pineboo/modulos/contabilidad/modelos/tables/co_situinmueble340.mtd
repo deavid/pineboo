@@ -1,0 +1,36 @@
+<!DOCTYPE TMD>
+<TMD>
+	<name>co_situinmueble340</name>
+	<!--Situación de inmueble-->
+	
+	<alias>QT_TRANSLATE_NOOP("MetaData","Situación de inmueble")</alias>
+
+	<field>
+		<name>codsituinmueble</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Código")</alias>
+		<null>false</null>
+		<pk>true</pk>
+		<type>string</type>
+		<length>1</length>
+		<relation>
+			<table>co_inmueble</table>
+			<field>situacion</field>
+			<card>1M</card>
+		</relation>
+		<relation>
+			<table>co_facturasemi340</table>
+			<field>codsituinmueble</field>
+			<card>1M</card>
+		</relation>
+	</field>
+	
+	<field>
+		<name>descripcion</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Descripcion")</alias>
+		<null>false</null>
+		<pk>false</pk>
+		<type>string</type>
+		<length>200</length>
+	</field>
+
+</TMD>

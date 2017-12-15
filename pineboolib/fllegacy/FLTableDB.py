@@ -154,6 +154,9 @@ class FLTableDB(QtWidgets.QWidget):
         self._loaded = True
 
         self.initCursor()
+        self.tableRecords()
+        self.setTableRecordsCursor()
+        
         if DEBUG: print("**FLTableDB::name: %r cursor: %r" % (self.objectName(), self.cursor_.d.nameCursor_))
         
     def setName(self, name):
@@ -847,6 +850,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         if model:
             for column in range(model.columnCount()):
+                if model.metadata() == None:
+                    return 
                 field = model.metadata().indexFieldObject(column)
                 if not field.visibleGrid():
                     self.tableRecords_.setColumnHidden(column, True)
@@ -1642,10 +1647,7 @@ class FLTableDB(QtWidgets.QWidget):
             relationLock = self.cursor_.cursorRelation().isLocked()
         
         
-        if w and self.cursor().isLocked() or self.browseOnly() or self.onlyTable() or self.editOnly() or relationLock:
-            
-            
-            
+        if w and self.browseOnly() or self.onlyTable() or self.editOnly() or relationLock:
             w.setDisabled(True)
             return
 

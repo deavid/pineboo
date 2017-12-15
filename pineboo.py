@@ -188,6 +188,8 @@ def main():
             #elif connection_window.database:
             if connection_window.database:
                 print("Cargando credenciales")
+                project.deleteCache = connection_window.deleteCache
+                project.parseProject = connection_window.parseProject
                 project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password, connection_window.driveralias)
             
             
@@ -274,7 +276,7 @@ def main():
             splash.showMessage("Abriendo interfaz ...")
             if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
-            project.call("sys.widget.init()", [], None, True)
+            project.call("sys.widget._class_init()", [], None, True)
             splash.showMessage("Listo ...")
             QtCore.QTimer.singleShot(2000, splash.hide)
             

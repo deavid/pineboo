@@ -4,6 +4,7 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 #from PyQt4.QtCore import QString
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import qApp
 import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -375,8 +376,7 @@ class FLUtil(ProjectClass):
         dia_ = None
         mes_ = None
         ano_ = None
-        
-        array_ = f.split("-")
+        array_ = str(f).split("-")
         if len(array_) == 3:
             ano_ = array_[0]
             mes_ = array_[1]
@@ -445,14 +445,14 @@ class FLUtil(ProjectClass):
     Se hace una llamada a la función tr() de la clase QObject para hacer la traducción.
     Se utiliza para traducciones desde fuera de objetos QObject
 
-    @param contexto Contexto en el que se encuentra la cadena, generalmente se refiere a la clase en la que está definida
+    @param group Contexto en el que se encuentra la cadena, generalmente se refiere a la clase en la que está definida
     @param s Cadena de texto a traducir
     @return Devuelve la cadena traducida al idioma local
     """
     
     def translate(self, group, string):
-        return str(string)
-        # return qApp->translate(contexto, s);
+        from pineboolib.fllegacy.FLTranslations import FLTranslate
+        return FLTranslate(group, string)
 
     """
     Devuelve si el numero de tarjeta de Credito es valido.
@@ -656,9 +656,23 @@ class FLUtil(ProjectClass):
         con las tres o cuatro primeras linea del fichero no vacías
     @return TRUE si es un fichero soportado, FALSE en caso contrario
     """
-    @decorators.NotImplementedWarn
     def isFLDefFile(self, head):
-        pass
+        if head.find("<!DOCTYPE UI>") == 0:
+            return True
+        if head.find("<!DOCTYPE QRY>") == 0:
+            return True
+        if head.find("<!DOCTYPE KugarTemplate") == 0:
+            return True
+        if head.find("<!DOCTYPE TMD>") == 0:
+            return True
+        if head.find("<!DOCTYPE TS>") == 0:
+            return True
+        if head.find("<ACTIONS>") == 0:
+            return True
+        if head.find("<jasperReport") == 0:
+            return True
+        
+        return False
 
     """
     Suma dias a una fecha.
@@ -774,7 +788,7 @@ class FLUtil(ProjectClass):
         q.setFrom("flsettings")
         q.setWhere("flkey = '%s'" % key)
         q.setTablesList("flsettings")
-        if q.exec() and q.first():
+        if q.exec_() and q.first():
             return q.value(0)
         
         return None
@@ -789,19 +803,22 @@ class FLUtil(ProjectClass):
     """
     def writeDBSettingEntry(self, key, value):
         result = False
-        where = "flkey='%s'" % key
-        found = self.sqlSelect("flsettings", "valor", where, "flsettings")
+        where = "flkey = '%s'" % key
+        found = self.readDBSettingEntry(key)
         cursor = self._prj.conn.cursor()
         if not found:   
-            sql = "INSERT INTO %s (flkey, valor) VALUES (%s, %s)" % ("flsettings", key, value)
+            sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % ( key, value)
         else:
-            sql = "UPDATE %s SET valor = '%s' WHERE %s" % ("flsettings", value, where)
+            sql = "UPDATE flsettings SET valor = '%s' WHERE %s" % ( value, where)
         try:
             cursor.execute(sql)
-            cursor.close()
-        except:
+            
+        except Exception:
+            print(traceback.format_exc())
+            cursor.rollback()
             return False
         
+        cursor.close()
         return True
         
     """
@@ -892,8 +909,10 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.BetaImplementation
     def sqlInsert(self, t, fL, vL, connName="default"):
+        
+        fL = fL.split(",")
+        vL = vL.split(",")
         
         if not len(fL) == len(vL):
             return False
@@ -902,12 +921,15 @@ class FLUtil(ProjectClass):
         c.setModeAccess(FLSqlCursor.Insert)
         c.refreshBuffer()
         
-        for f,v in (fL,vL):
-            if v == None:
+        i = 0
+        for f in fL:
+            if vL[i] == None:
                 c.bufferSetNull(f)
             else:
-                c.setValueBuffer(f,v)
-        
+                c.setValueBuffer(f,vL[i])
+                
+            i = i + 1
+            
         return c.commitBuffer()
         
         
@@ -922,7 +944,6 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.BetaImplementation
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
@@ -956,7 +977,6 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
-    @decorators.BetaImplementation
     def sqlDelete(self, t, w, connName="default"):
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
@@ -1113,9 +1133,9 @@ class FLUtil(ProjectClass):
 
     @return Código de idioma del sistema
     """
-    @decorators.NotImplementedWarn
+
     def getIdioma(self):
-        pass
+        return QtCore.QLocale().name()[:2]
 
     """
     Devuelve el sistema operativo sobre el que se ejecuta el programa

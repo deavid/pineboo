@@ -2,25 +2,28 @@
 
 from PyQt5 import QtCore
 
-from pineboolib.fllegacy import FLTranslations
+from pineboolib.utils import filedir
+from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
 
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
+import os
+from PyQt5.Qt import QTranslator
 
-class FLTranslator():
+class FLTranslator(QTranslator):
     
     mulTiLang_ = False
     sysTrans_ = False
     AQ_DISKCACHE_FILEPATH = None #FIXME
     AQ_DISKCACHE_DIRPATH = None #FIXME
+    idM_ = None
+    lang_ = None
     
-    @decorators.BetaImplementation
-    def __init_(self, parent=None, name=None, multiLang= False, sysTrans=False):
-        #QtCore.QTranslator(parent ? parent : qApp, name)
+    
+    def __init__(self, parent=None, name=None, multiLang= False, sysTrans=False):
+        super(FLTranslator, self).__init__()
+        self._prj = parent
+        self.idM_ = name[0:len(name) -3]
+        self.lang_ = name[len(name) -2:]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
     
@@ -33,20 +36,21 @@ class FLTranslator():
     @param key Clave sha1 que identifica al fichero en la caché de disco
     @return  TRUE si la operación tuvo éxito
     """
-    @decorators.BetaImplementation
     def loadTsContent(self, key):
-        tsFile = QString(self.AQ_DISKCACHE_FILEPATH(key))
-        qmFile = QString(self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm")
+        if self.idM_ == "sys":
+            tsFile = filedir("../share/pineboo/translations/%s.%s" %(self.idM_, self.lang_))
+        else: 
+            tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %(self._prj.conn.db_name, self.idM_, self.idM_, self.lang_, key))
+        #qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
+        qmFile = "%s.qm" % tsFile
         
-        if QtCore.QFile.exist(qmFile):
-            if tsFile.isEmpty():
+        if os.path.exists(qmFile):
+            if tsFile in (None, ""):
                 return False
             
-            trans = FLTranslations
-            
-            trans.lrelease(tsFile,qmFile, not self.mulTiLang_)
-        
-        return QtCore.QTranslator.load(qmFile)
+        trans = FLTranslations()
+        trans.lrelease("%s.ts" % tsFile , qmFile, not self.mulTiLang_)
+        return self.load(qmFile)
     
     @decorators.BetaImplementation
     def findMessage(self, context, sourceText, comment=None):

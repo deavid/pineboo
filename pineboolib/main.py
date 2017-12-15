@@ -17,6 +17,8 @@ import importlib
 
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.FLTranslator import FLTranslator
+from PyQt5.Qt import QTextCodec, qWarning, qApp, QApplication
 if __name__ == "__main__":
     sys.path.append('..')
 
@@ -43,8 +45,13 @@ class Project(object):
     conn = None # Almacena la conexión principal a la base de datos
     debugLevel = 100
     mainFormName = "Pineboo"
+    version = "0.3"
     _initModules = None
     main_window = None
+    translators = None
+    multiLangEnabled_ = False
+    multiLangId_ = QtCore.QLocale().name()[:2].upper()
+    translator_ = None
     
     def __init__(self):
         self.tree = None
@@ -57,12 +64,17 @@ class Project(object):
         self.parser = None
         self._initModules = []
         self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
+        self.deleteCache = False
+        self.parseProject = False
         
-
+        self.translator_ = []
         self.actions = {}
         self.tables = {}
         self.files = {}
         self.cur = None
+    
+    def __del__(self):
+        self.writeState()
         
     def setDebugLevel(self, q):
         Project.debugLevel = q
@@ -80,6 +92,7 @@ class Project(object):
     """
     def acl(self):
         return False
+            
     
     
     def consoleShown(self):
@@ -144,6 +157,20 @@ class Project(object):
     def run(self):
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
+        if self.deleteCache and not not os.path.exists(self.dir("cache/%s" % self.dbname)):
+            print("DEVELOP: DeleteCache Activado\nBorrando %s" % self.dir("cache/%s" % self.dbname))
+            for root, dirs, files in os.walk(self.dir("cache/%s" % self.dbname), topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+                for name in dirs:
+                    os.rmdir(os.path.join(root, name))
+            #borrando de share
+            for root, dirs, files in os.walk(self.dir("../share/pineboo"), topdown=False):
+                for name in files:
+                    if name.endswith("qs.py") or name.endswith("qs.py.debug") or name.endswith("qs.xml"):
+                        os.remove(os.path.join(root, name))
+            
+            
         if not os.path.exists(self.dir("cache")):
             os.makedirs(self.dir("cache"))
             
@@ -154,9 +181,8 @@ class Project(object):
             return False
             
         #Se verifica que existen estas tablas
-        self.conn.manager().createSystemTable("flareas")
-        self.conn.manager().createSystemTable("flmodules")
-        self.conn.manager().createSystemTable("flfiles")
+        for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar"):
+            self.conn.manager().createSystemTable(table)
         
         util = FLUtil()
         util.writeSettingEntry(u"DBA/lastDB",self.dbname)
@@ -183,13 +209,15 @@ class Project(object):
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files: print("WARN: file %s already loaded, overwritting..." % nombre)
-            self.files[nombre] = fileobj
+            self.files[nombre] = fileobj                
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey+"\n")
             if os.path.exists(self.dir("cache" ,fileobj.filekey)): continue
             fileobjdir = os.path.dirname(self.dir("cache" ,fileobj.filekey))
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
+            
+                
             cur2 = self.conn.cursor()
             sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue("string",idmodulo,False), self.conn.driver().formatValue("string",nombre,False), self.conn.driver().formatValue("string",sha,False))
             cur2.execute(sql)
@@ -206,6 +234,9 @@ class Project(object):
                     txt = contenido.encode("ISO-8859-15","replace")
 
                 f2.write(txt)
+            
+            if self.parseProject and nombre.endswith(".qs"):
+                self.parseScript(self.dir("cache" ,fileobj.filekey))
         tiempo_fin = time.time()
         if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
         
@@ -213,9 +244,15 @@ class Project(object):
         idmodulo = 'sys'
         for root, dirs, files in os.walk(filedir("..","share","pineboo")):
             for nombre in files:
-                fileobj = File(self, idmodulo, nombre, basedir = root)
-                self.files[nombre] = fileobj
-                self.modules[idmodulo].add_project_file(fileobj)
+                if root.find("modulos") == -1:
+                    fileobj = File(self, idmodulo, nombre, basedir = root)
+                    self.files[nombre] = fileobj
+                    self.modules[idmodulo].add_project_file(fileobj)
+        
+            
+        
+        self.loadTranslations()
+        self.readState()
         
         
 
@@ -228,6 +265,15 @@ class Project(object):
     def loadGeometryForm(self, name):
         name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
+    
+    @decorators.NotImplementedWarn
+    def readState(self):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def writeState(self):
+        pass
+        
 
     def call(self, function, aList , objectContext , showException = True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
@@ -249,6 +295,92 @@ class Project(object):
 
 
         return None
+    
+    def loadTranslations(self):
+        translatorsCopy = None
+        if self.translators:
+            translatorsCopy = copy.copy(self.translators)
+            for it in translatorsCopy:
+                self.removeTranslator(it)
+        
+        lang = QtCore.QLocale().name()[:2]
+        for module in self.modules.keys():
+            self.loadTranslationFromModule(module, lang)
+        
+        if translatorsCopy:
+            for it in translatorsCopy:
+                item = it
+                if item.sysTrans_:
+                    self.installTranslator(item)
+                else:
+                    item.deletelater()
+    
+    @decorators.BetaImplementation
+    def trMulti(self, s, l):
+        backMultiEnabled = self.multiLangEnabled_
+        ret = self.translate("%s_MULTILANG" % l.upper(). s)
+        self.multiLangEnabled_ = backMultiEnabled
+        return ret
+    
+    @decorators.BetaImplementation
+    def setMultiLang(self, enable, langid):
+        self.multiLangEnabled_ = enable
+        if enable and langid:
+            self.multiLangId_ = langid.upper()
+    
+    
+    
+    def loadTranslationFromModule(self, idM, lang):
+        self.installTranslator(self.createModTranslator(idM, lang, True))
+        #self.installTranslator(self.createModTranslator(idM, "mutliLang"))
+    
+    def installTranslator(self, tor):
+        if not tor:
+            return
+        else:
+            qApp.installTranslator(tor)
+            self.translator_.append(tor)           
+    
+    @decorators.NotImplementedWarn
+    def createSysTranslator(self, lang, loadDefault):
+        pass
+    
+    def createModTranslator(self, idM, lang, loadDefault = False):
+        fileTs = "%s.%s.ts" % (idM, lang)
+        key = self.conn.managerModules().shaOfFile(fileTs)
+        ok = (not key == None)
+        
+        if ok or idM == "sys":
+            tor = FLTranslator(self, "%s_%s" % (idM, lang), lang == "multilang")
+            
+            if tor.loadTsContent(key):
+                return tor
+        
+        return self.createModTranslator(idM, "es") if loadDefault else None
+    
+    @decorators.NotImplementedWarn
+    def initToolBox(self):
+        pass
+    
+    def parseScript(self, scriptname):
+        # Intentar convertirlo a Python primero con flscriptparser2
+        if not os.path.isfile(scriptname): raise IOError
+        python_script_path = (scriptname+".xml.py").replace(".qs.xml.py",".qs.py")
+        if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
+            print("Convirtiendo a Python . . .", scriptname)
+            #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+            from pineboolib.flparser import postparse
+            try: 
+                postparse.pythonify(scriptname)
+            except:
+                qWarning("WARN: El fichero %s no se ha podido convertir" % scriptname)
+
+        #if not os.path.isfile(python_script_path):
+        #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
+            
+        
+        
+    
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):
@@ -573,7 +705,6 @@ class XMLAction(XMLStruct):
                 )
             )
         
-        self.initModule(self.name)
         return self.mainform_widget
 
     def openDefaultForm(self):
@@ -583,6 +714,7 @@ class XMLAction(XMLStruct):
         # ... construido antes que cualquier widget)
         w = self.prj.main_window
         #self.mainform_widget.init()
+        self.initModule(self.name)
         self.mainform_widget = FLMainForm(w,self, load = True)    
         w.addFormTab(self)
         #self.mainform_widget.show()
@@ -600,26 +732,50 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
         
         self.load_script(self.scriptform, None)
+        self.initModule(self.name)
         if getattr(self.script.form,"iface",None):
             self.script.form.iface.main()
 
     def load_script(self, scriptname, parent= None):
+        parent_ = parent
+        if parent == None:
+            parent = self
+            action_ = self
+            prj_ = self.prj
+        else:
+            action_ = parent.action
+            prj_ = parent.prj
+            
+        #Si ya esta cargado se reusa...
+        if getattr(self, "script",None) and parent_:
+            parent.script = self.script
+            #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            parent.widget = parent.script.form
+            if getattr(parent.widget,"iface",None):
+                parent.iface = parent.widget.iface
+            return
         
                         # import aqui para evitar dependencia ciclica
         import pineboolib.emptyscript
         python_script_path = None
-        self.script = pineboolib.emptyscript # primero default, luego sobreescribimos
-
-        script_path_qs = self.prj.path(scriptname+".qs")
-        script_path_py = self.prj.path(scriptname+".py") or self.prj.path(scriptname+".qs.py")
+        parent.script = pineboolib.emptyscript # primero default, luego sobreescribimos
         
-        overload_pyfile = os.path.join(self.prj.tmpdir,"overloadpy",scriptname+".py")
+        if scriptname is None:
+            parent.script.form = parent.script.FormInternalObj(action = action_, project = prj_, parent = parent)
+            parent.widget = parent.script.form
+            parent.iface = parent.widget.iface
+            return 
+
+        script_path_qs = prj_.path(scriptname+".qs")
+        script_path_py = prj_.path(scriptname+".py") or prj_.path(scriptname+".qs.py")
+        
+        overload_pyfile = os.path.join(parent.prj.tmpdir,"overloadpy",scriptname+".py")
         if os.path.isfile(overload_pyfile):
             print("WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
             try:
-                self.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
+                parent.script = importlib.machinery.SourceFileLoader(scriptname,overload_pyfile).load_module()
             except Exception as e:
-                print("ERROR al cargar script OVERLOADPY para la accion %r:" % self.action.name, e)
+                print("ERROR al cargar script OVERLOADPY para la accion %r:" % action_.name, e)
                 print(traceback.format_exc(),"---")
             
         elif script_path_py:
@@ -627,10 +783,10 @@ class XMLAction(XMLStruct):
             print("Loading script PY %s . . . " % scriptname)
             if not os.path.isfile(script_path): raise IOError
             try:
-                print("Cargando %s : %s " % (scriptname,script_path.replace(self.prj.tmpdir,"tempdata")))
-                self.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
+                print("Cargando %s : %s " % (scriptname,script_path.replace(parent.prj.tmpdir,"tempdata")))
+                parent.script = importlib.machinery.SourceFileLoader(scriptname,script_path).load_module()
             except Exception as e:
-                print("ERROR al cargar script PY para la accion %r:" % self.action.name, e)
+                print("ERROR al cargar script PY para la accion %r:" % action_.name, e)
                 print(traceback.format_exc(),"---")
             
         elif script_path_qs:
@@ -649,15 +805,20 @@ class XMLAction(XMLStruct):
                 raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             try:
                 print("Cargando %s : %s " % (scriptname,python_script_path.replace(self.prj.tmpdir,"tempdata")))
-                self.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
+                parent.script = importlib.machinery.SourceFileLoader(scriptname,python_script_path).load_module()
                 #self.script = imp.load_source(scriptname,python_script_path)
                 #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
-                print("ERROR al cargar script QS para la accion %r:" % self.name, e)
+                print("ERROR al cargar script QS para la accion %r:" % action_.name, e)
                 print(traceback.format_exc(),"---")
             
         
-        self.script.form = self.script.FormInternalObj(self, self.prj, parent)
+        parent.script.form = parent.script.FormInternalObj(action_, prj_, parent_)
+        if parent_:
+            parent.widget = parent.script.form
+            if getattr(parent.widget,"iface",None):
+                parent.iface = parent.widget.iface
+    
 
     def unknownSlot(self):
         print("Executing unknown script for Action", self.name)

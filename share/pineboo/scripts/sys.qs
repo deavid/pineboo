@@ -31,8 +31,8 @@ function init() {
     if (!curFiles.size()) {
       var continuar = MessageBox.warning(util.translate("scripts", "No hay módulos cargados en esta base de datos,\nEneboo puede cargar automáticamente la base de módulos\nde Facturación y Financiera incluidos en la instalación.\n\n¿Desea cargar ahora estos módulos base?\n"), MessageBox.Yes, MessageBox.No);
       if (continuar == MessageBox.Yes) {
-        var dirModsFact = sys.installPrefix() + "/share/eneboo/modulos/facturacion/";
-        var dirModsCont = sys.installPrefix() + "/share/eneboo/modulos/contabilidad/";
+        var dirModsFact = sys.installPrefix() + "/share/pineboo/modulos/facturacion/";
+        var dirModsCont = sys.installPrefix() + "/share/pineboo/modulos/contabilidad/";
         formflreloadbatch.iface.pub_cargarModulo(Dir.cleanDirPath(dirModsFact + "principal/flfactppal.mod"));
         while (formRecordflmodules.child("log"))
         sys.processEvents();
@@ -1109,7 +1109,7 @@ function testObj(container, component)
   }
   var c = container.child(component);
   if (!c || c == undefined) {
-    debug(component + " no exitse");
+    debug(component + " no existe");
     return false;
   }
   return c;

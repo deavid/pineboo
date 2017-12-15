@@ -29,13 +29,12 @@ class PNSqlDrivers(ProjectClass):
             print("Seleccionado driver por defecto", self.defaultDriverName)
             driverName = self.defaultDriverName
             
-        print("Cargando driver", driverName)
         module_ = importlib.import_module("pineboolib.plugins.sql.%s" % driverName)
         self.driver_ = getattr(module_, driverName)()
         
         if self.driver_:
             #self.driverName = driverName
-            print("Driver cargado",self.driver().driverName(), self.driver().version())
+            print("PNSqlDrivers::Driver %s v%s" % (self.driver().driverName(), self.driver().version()))
             return True
         else:
             return False

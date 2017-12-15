@@ -6,6 +6,7 @@ from lxml import etree
 from io import StringIO
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QDomDocument as FLDomDocument
 
 # Cargar toda la API de Qt para que sea visible.
 from PyQt5.QtGui import *
@@ -186,6 +187,8 @@ def FLReportViewer():
     return FLReportViewer_Legacy.FLReportViewer()
 
 
+
+"""
 class FLDomDocument(object):
     
     parser = None
@@ -208,13 +211,13 @@ class FLDomDocument(object):
             return True
         except:
             return False
-    
+        
     def namedItem(self, name):
         return u"<%s" % name in self.string_
 
     def toString(self, value = None):
         return self.string_
-    
+""" 
     
         
     
@@ -281,6 +284,8 @@ class FormDBWidget(QtWidgets.QWidget):
         self._prj = project
         try:
             self._class_init()
+            timer = QtCore.QTimer(self)
+            timer.singleShot(250, self.init)
         except:
             pass
         
@@ -308,10 +313,13 @@ class FormDBWidget(QtWidgets.QWidget):
             
     def child(self, childName):
         try:
-            ret = self.findChild(QtWidgets.QWidget, childName)
-            if not ret:
-                ret = self.parentWidget().findChild(QtWidgets.QWidget, childName)
-                    
+            parent = self
+            ret = None
+            while parent and not ret:
+                ret = parent.findChild(QtWidgets.QWidget, childName)
+                if not ret:
+                    parent = parent.parentWidget()
+                
                      
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
@@ -333,13 +341,19 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def cursor(self):
         
-        if self.parentWidget() and not self.cursor_:
-            cursor = getattr(self.parentWidget(),"cursor_", None)
-
-            if cursor:
-                self.cursor_ = cursor
+        if self.cursor_:
+            return self.cursor_
         
-        if not self.cursor_:
+        cursor = None
+        parent = self
+        
+        while not cursor and parent:
+            parent = parent.parent()
+            cursor = getattr(parent, "cursor_", None)
+                
+        if cursor:
+            self.cursor_ = cursor
+        else:
             self.cursor_ = FLSqlCursor(self._action.name)
         
         return self.cursor_
@@ -352,6 +366,12 @@ class FormDBWidget(QtWidgets.QWidget):
     
     def isNull(self, name):
         return self.cursor().isNull(name)
+    
+    def table(self):
+        return self.cursor().table()
+    
+    def cursorRelation(self):
+        return self.cursor().cursorRelation()
     
     
     
@@ -371,10 +391,14 @@ class Date(object):
     date_ = None
     time_ = None
     
-    def __init__(self):
+    def __init__(self, date_ = None):
         super(Date, self).__init__()
-        self.date_ = QtCore.QDate.currentDate()
-        self.time_ = QtCore.QTime.currentTime()
+        if not date_:
+            self.date_ = QtCore.QDate.currentDate()
+            self.time_ = QtCore.QTime.currentTime()
+        else:
+            self.date_ = QtCore.QDate(date_)
+            self.time_ = QtCore.QTime("00:00:00")
     
     def toString(self, *args, **kwargs):
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"),self.date_.toString("MM"),self.date_.toString("yyyy"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
@@ -638,15 +662,16 @@ class LineEdit(QWidget):
         else:
             return super(LineEdit, self).__getattr__(name)
 
-class Dir(object):
+class Dir_Class(object):
     path_ = None
-    home = None 
+    home = None
+    Files = "*.*"
     
-    def __init__(self, path):
+    def __init__(self, path = None):
         self.path_ = path
         self.home = filedir("..")
     
-    def entryList(self, patron):
+    def entryList(self, patron, type_ = None):
         p = os.walk(self.path_)
         retorno = []
         try:
@@ -657,23 +682,38 @@ class Dir(object):
             pass
         
         return retorno
+    
+    def fileExists(self, name):
+        return os.path.exists(name)
+    
+    def cleanDirPath(name):
+        return str(name)
+
+Dir = Dir_Class
 
 class File(QtCore.QFile):
     fichero = None
     mode = None
+    path = None
         
     ReadOnly = QIODevice.ReadOnly
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
     
     def __init__(self, rutaFichero):
-        self.fichero = rutaFichero
+        self.fichero = str(rutaFichero)
         super(File, self).__init__(rutaFichero)
+        self.path = os.path.dirname(self.fichero)
     
     #def open(self, mode):
     #    super(File, self).open(self.fichero, mode)
     
     def read(self):
+        if isinstance(self, str):
+                f = File(self)
+                f.open(File.ReadOnly)
+                return f.read()
+                
         in_ = QTextStream(self)
         return in_.readAll()
     
@@ -681,7 +721,8 @@ class File(QtCore.QFile):
         #encodig = text.property("encoding")
         out_ = QTextStream(self)
         out_ << text
+    
         
-   
+    
     
         
