@@ -12,7 +12,7 @@ from pineboolib.fllegacy import FLFieldDB
 
 import zlib
 from PyQt5.QtWidgets import QGroupBox
-from PyQt5.Qt import QPalette
+from PyQt5.Qt import QPalette, QSpacerItem
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -185,17 +185,36 @@ def loadWidget(xml, widget=None, parent=None):
                 elif mode == "grid":
                     widget.layout.addWidget(new_widget, row, col)
             elif c.tag == "spacer":
-                properties = {}
+                sH = None
+                sV = None
+                hPolicy = None
+                vPolicy = None
+                orient_ = None
+                policy_ = None
+                
                 for p in c.xpath("property"):
-                    k, v = loadProperty(p)
-                    properties[k] = v
-                if mode == "box":
-                    widget.layout.addStretch()
-                elif mode == "grid":
-                    if properties["orientation"] == "Horizontal":
-                        widget.layout.columnStretch(col)
-                    else:
-                        widget.layout.rowStretch(row)
+                    pname, value = loadProperty(p)
+                    if pname == "sizeHint":
+                        sH = value.width()
+                        sV = value.height()
+                    elif pname == "orientation":
+                        if value == 0:
+                            orient_ = 0
+                        else:
+                            orient_ = 1
+                    elif pname == "sizeType":
+                        policy_ = QtWidgets.QSizePolicy.Policy(value)
+                        
+                if orient_ == 0:
+                    vPolicy = policy_
+                    hPolicy = QtWidgets.QSizePolicy.Fixed
+                else:
+                    vPolicy = QtWidgets.QSizePolicy.Fixed
+                    hPolicy = policy_
+                        
+                new_spacer = QSpacerItem(sH,sV, hPolicy, vPolicy)
+                widget.layout.addItem(new_spacer)
+                    
             else:
                 if Options.DEBUG_LEVEL > 50: print("qt3ui: Unknown layout xml tag", repr(c.tag))
 
