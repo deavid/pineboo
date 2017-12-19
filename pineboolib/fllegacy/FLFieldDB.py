@@ -350,6 +350,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.textLabelDB.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textLabelDB.setLineWidth(0)
         self.textLabelDB.setTextFormat(QtCore.Qt.PlainText)
+        self.textLabelDB.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         
         self.fieldAlias_ = None
         self.actionName_ = None
@@ -2003,6 +2004,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 #self.editor_.setAutoCompletion(True)
+                self.editor_.setSizePolicy(QtWidgets.QSizePolicy.Minimum ,QtWidgets.QSizePolicy.Fixed)
                 self.editor_.setMinimumSize(22, 22)
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 #if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
@@ -2240,7 +2242,7 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "date":
             self.editor_ = FLDateEdit(self, "editor")
             self.editor_.setFont(QtWidgets.QApplication.font())
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7) ,QtWidgets.QSizePolicy.Policy(0))
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum ,QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
             self.FLWidgetFieldDBLayout.insertWidget(1, self.editor_)
@@ -2294,7 +2296,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_ = FLTimeEdit(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             #self.editor_.setAutoAdvance(True)
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7) ,QtWidgets.QSizePolicy.Policy(0))
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum ,QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
