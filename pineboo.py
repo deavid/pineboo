@@ -12,6 +12,12 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 dependeces = []
 
+
+if sys.version_info[0] < 3:
+    print("Tienes que usar Python 3 o superior.")
+    sys.exit(32)
+    
+
 try:
     from lxml import etree
 except ImportError:
