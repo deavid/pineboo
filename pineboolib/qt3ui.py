@@ -187,8 +187,8 @@ def loadWidget(xml, widget=None, parent=None):
             elif c.tag == "spacer":
                 sH = None
                 sV = None
-                hPolicy = None
-                vPolicy = None
+                hPolicy = QtWidgets.QSizePolicy.Fixed
+                vPolicy = QtWidgets.QSizePolicy.Fixed
                 orient_ = None
                 policy_ = None
                 
@@ -207,9 +207,7 @@ def loadWidget(xml, widget=None, parent=None):
                         
                 if orient_ == 0:
                     vPolicy = policy_
-                    hPolicy = QtWidgets.QSizePolicy.Fixed
                 else:
-                    vPolicy = QtWidgets.QSizePolicy.Fixed
                     hPolicy = policy_
                         
                 new_spacer = QSpacerItem(sH,sV, hPolicy, vPolicy)
