@@ -15,7 +15,7 @@ from pineboolib.utils import filedir
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
-from PyQt5.Qt import QMainWindow, QDate, QTextStream, qWarning
+from PyQt5.Qt import QMainWindow, QDate, QTextStream, qWarning, QDateEdit
 
 class File(object):
     
@@ -242,11 +242,15 @@ def connect(sender, signal, receiver, slot):
             #sg_name = sg_name.replace("(QString)", "")
             #sg_name = sg_name.replace("(int)", "")
             #sg_name = sg_name.replace("(int, int)", "")
+            if isinstance(sender, QDateEdit):
+                if "valueChanged" in signal:
+                    signal = signal.replace("valueChanged","dateChanged")
             
             if signal.find("(") > -1:
                 sg_name = signal[:signal.find("(")]
             else:
                 sg_name = signal
+            
                 
             try:
                getattr(sender, sg_name).disconnect(remote_fn)
