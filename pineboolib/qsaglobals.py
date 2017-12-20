@@ -188,6 +188,10 @@ class SysType(object):
     
     def updateAreas(self):
         pineboolib.project.initToolBox()
+    
+    @decorators.NotImplementedWarn
+    def isDebuggerMode(self):
+        return False
         
         
         
