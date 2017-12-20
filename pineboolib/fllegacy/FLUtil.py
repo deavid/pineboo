@@ -682,6 +682,10 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de dias
     """
     def addDays(self, fecha, offset):
+        from pineboolib.qsatype import Date
+        if isinstance(fecha, Date):
+            fecha = fecha.date_
+        
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
@@ -696,6 +700,10 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de meses
     """
     def addMonths(self, fecha, offset):
+        from pineboolib.qsatype import Date
+        if isinstance(fecha, Date):
+            fecha = fecha.date_
+            
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
@@ -710,6 +718,10 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de años
     """
     def addYears(self, fecha, offset):
+        from pineboolib.qsatype import Date
+        if isinstance(fecha, Date):
+            fecha = fecha.date_
+            
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
