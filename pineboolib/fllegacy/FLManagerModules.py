@@ -319,18 +319,21 @@ class FLManagerModules(ProjectClass):
     @param idA Identificador del área de la que se quiere obtener la lista módulos
     @return Lista de identificadores de módulos
     """
-    @decorators.NotImplementedWarn
     def listIdModules(self, idA):
-        return None
+        list_ = []
+        for name, mod in self.dictInfoMods:
+            if self.dictInfoMods[name].idArea == idA:
+                list_.append(name)
+        
+        return list_
 
     """
     Obtiene la lista de identificadores de todos los módulos cargados en el sistema.
 
     @return Lista de identificadores de módulos
     """
-    @decorators.NotImplementedWarn
     def listAllIdModules(self):
-        pass
+        return self.listAllIdModules_
 
     """
     Obtiene la descripción de un área a partir de su identificador.
