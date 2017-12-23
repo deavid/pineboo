@@ -139,7 +139,7 @@ class SysType(object):
         return "Pineboo"
     
     def isLoadedModule(self, modulename):
-        return modulename in pineboolib.project.modules
+        return modulename in pineboolib.project.conn.managerModules().listAllIdModules()
     
     def translate(self, text):
         return text
