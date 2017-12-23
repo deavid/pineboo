@@ -132,8 +132,8 @@ def loadWidget(xml, widget=None, parent=None):
             set_fn = widget.layout.setSpacing
         elif pname == "margin":
             set_fn = widget.setContentsMargins
-        elif pname == "paletteBackgroundColor":
-            set_fn = widget.setPalette
+        elif pname in ("paletteBackgroundColor","paletteForegroundColor"):
+            set_fn = widget.setStyleSheet
         else:
             set_fn = getattr(widget, setpname, None)
         if set_fn is None:
@@ -156,10 +156,10 @@ def loadWidget(xml, widget=None, parent=None):
             value = QtCore.QMargins(value, value, value, value)
         
         elif pname == "paletteBackgroundColor":
-            Pal = QPalette()
-            Pal.setColor(QPalette.Background, loadVariant(xmlprop))
-            value = Pal
-            #FIXME: Aparentemente no se refleja
+            value = 'background-color:' + loadVariant(xmlprop).name()
+            
+        elif pname == "paletteForegroundColor":
+            value = 'color:' + loadVariant(xmlprop).name()
         else:
             value = loadVariant(xmlprop)
 
