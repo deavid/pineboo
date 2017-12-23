@@ -440,6 +440,9 @@ class FLQPSQL(object):
         return tl
     
     def normalizeValue(self, text):
+        if text == None:
+            return ""
+        
         ret = ""
         for c in text:
             if c == "'":
