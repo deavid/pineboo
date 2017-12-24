@@ -260,10 +260,10 @@ class PNBuffer(ProjectClass):
                     #if not value == None:
                     #    value = str(value)
                     
-            if field.type_ == "date" and value == None: #Evitamos poner un date a None
-                pass
-            else:
-                field.value = value
+            #if field.type_ == "date" and value == None: #Evitamos poner un date a None
+            #    pass
+            #else:
+            field.value = value
                     
             if mark_:
                 if not field.value == field.originalValue:

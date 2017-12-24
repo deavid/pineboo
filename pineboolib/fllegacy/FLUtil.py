@@ -339,6 +339,10 @@ class FLUtil(ProjectClass):
         dia_ = None
         mes_ = None
         ano_ = None
+        
+        if not f:
+            return None
+        
         f = str(f)
         
         if f.find("T") > -1:

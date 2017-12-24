@@ -120,7 +120,11 @@ class FLQPSQL(object):
                 s = text2bool(v)
 
             elif type_ == "date":
-                s = "'%s'" % util.dateDMAtoAMD(v)
+                val = util.dateDMAtoAMD(v)
+                if val == None:
+                    s = "Null"
+                else:
+                    s = "'%s'" % val 
                 
             elif type_ == "time":
                 s = "'%s'" % v
