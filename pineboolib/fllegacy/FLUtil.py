@@ -1024,7 +1024,7 @@ class FLUtil(ProjectClass):
     @param tS Número total de pasos a realizar
     """
     def createProgressDialog(self, title, steps, id_ = "default"):
-        pd_widget = QtWidgets.QProgressDialog(title, self.translate("scripts","Cancelar"),0,steps)
+        pd_widget = QtWidgets.QProgressDialog(str(title), str(self.translate("scripts","Cancelar")),0,steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
 
     """
@@ -1052,7 +1052,7 @@ class FLUtil(ProjectClass):
     """
     def setLabelText(self, l, id_ = "default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
-        pd_widget.setLabelText(l)
+        pd_widget.setLabelText(str(l))
 
     """
     Establece el número total de pasos del diálogo
