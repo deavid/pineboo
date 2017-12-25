@@ -8,6 +8,7 @@ from pineboolib.utils import auto_qt_translate_text
 import traceback
 from PyQt5.Qt import qWarning, QApplication
 from PyQt5.QtWidgets import QMessageBox
+from distutils.log import info
 
 
 
@@ -405,8 +406,26 @@ class FLQPSQL(object):
             if not mtd:
                 return False
             
-            return False
+            recInfoMtd = self.recordInfo(tmd_or_table2)
+            recInfoBD = self.recordInfo2(table1)
+            recMtd = recInfoMtd.toRecord()
+            recBd = recInfoBD.toRecord()
+            fieldBd = None
+            mismatch = False
             
+        
+            for fieldMtd in recMtd:
+                fieldBd = recBd.field(fieldMtd.name())
+                if fieldBd:
+                    if self.notEqualsFields(FieldBd, fieldMtd, recInfoBD.find(fieldMtd.name()), recInfoMtd.find(fieldMtd.name()), mtd.field(fieldMtd.name())):
+                        mismatch = True
+                        break
+                else:
+                    mismatch = True
+                    break
+                
+            
+            return mismatch    
             
             
             
@@ -414,7 +433,31 @@ class FLQPSQL(object):
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
     
+    def recordInfo2(self, tablename):
+        if not self.isOpen():
+            return False
+        info = []
+        stmt = "select pg_attribute.attname, pg_attribute.atttypid, pg_attribute.attnotnull, pg_attribute.attlen, pg_attribute.atttypmod, pg_attrdef.adsrc from pg_class, pg_attribute left join pg_attrdef on (pg_attrdef.adrelid = pg_attribute.attrelid and pg_attrdef.adnum = pg_attribute.attnum) where lower(pg_class.relname) = '%s' and pg_attribute.attnum > 0 and pg_attribute.attrelid = pg_class.oid and pg_attribute.attisdropped = false order by pg_attribute.attnum" % tablename.lower()
+        
+        query = FLSqlQuery()
+        query.setForwardOnly(True)
+        query.exec(stmt)
+        while query.next():
+            len = int(query.value(3))
+            precision = int(query.value(4))
+            if len == -1 and precision > -1:
+                len = precision - 4
+                precision = -1
+            
+            defVal = str(query.value(5))
+            if defVal and defVal[0] == "'":
+                defVal = defVal[1:len(defVal) - 2]
+                info.append([str(query.value(0)), query.value(1), query.value(2), len , precision, defVal, int(query.value(1))])
+                 
+        
     
+    
+        return info
     
     
     def tables(self, typeName = None):
