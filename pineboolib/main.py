@@ -202,12 +202,21 @@ class Project(object):
         self.modules["sys"] = Module(self,"sys","sys","Administración",None)#Añadimos módulo sistema(falta icono)
 
         # Descargar proyecto . . .
+        
+        
+        self.cur.execute(""" SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
+        size_ = len(self.cur.fetchall())
         self.cur.execute(""" SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"),"w")
         self.files = {}
         tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")): raise AssertionError
+        if self.parseProject:
+            progressDialog = util.createProgressDialog("Pineboo", size_)
+            p = 0
         for idmodulo, nombre, sha in self.cur:
+            util.setProgress((p * 100) / size_)
+            util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files: print("WARN: file %s already loaded, overwritting..." % nombre)
@@ -239,7 +248,10 @@ class Project(object):
             
             if self.parseProject and nombre.endswith(".qs"):
                 self.parseScript(self.dir("cache" ,fileobj.filekey))
+            
+            p = p + 1
         tiempo_fin = time.time()
+        
         if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
         
         # Cargar el núcleo común del proyecto
@@ -250,9 +262,11 @@ class Project(object):
                     fileobj = File(self, idmodulo, nombre, basedir = root)
                     self.files[nombre] = fileobj
                     self.modules[idmodulo].add_project_file(fileobj)
+                    if self.parseProject and nombre.endswith(".qs"):
+                        self.parseScript(self.dir(root, nombre))
         
             
-        
+        util.destroyProgressDialog()
         self.loadTranslations()
         self.readState()
         self.acl_ = FLAccessControlLists()
