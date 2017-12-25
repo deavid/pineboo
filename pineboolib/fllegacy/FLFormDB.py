@@ -717,6 +717,9 @@ class FLFormDB(QtWidgets.QDialog):
     """
     def initMainWidget(self, w = None):
         if not self.showed:
+            acl = self.prj.acl()
+            if acl:
+                acl.process(self)
             self.show()
     
     @decorators.NotImplementedWarn
