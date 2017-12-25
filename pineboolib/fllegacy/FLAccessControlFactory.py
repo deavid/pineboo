@@ -88,7 +88,7 @@ class FLAccessControlMainWindow():
             a = mw.child(it.currentKey(), "QAction")
             if a:
                 perm = it
-                if perm == "-w" || perm == "--":
+                if perm in ("-w","--"):
                     a.setVisible(False)
                 
             
@@ -225,7 +225,7 @@ class FLAccessControlTable():
             field = it.current()
             maskFieldPerm = maskPerm
             ++it
-            if hasAcos and  (fieldPermPtr = self.acosPerms_[field.name()]):
+            if hasAcos and fieldPermPtr == self.acosPerms_[field.name()]:
                 fieldPerm = fieldPermPtr
                 maskFieldPerm = 0
                 

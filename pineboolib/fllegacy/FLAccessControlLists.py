@@ -35,6 +35,8 @@ class FLAccessControlLists(ProjectClass):
     """
   
     def __init__(self):
+        super(FLAccessControlLists, self).__init__()
+        
         self.name_ = None
         self.accessControlList_ = {}
 
@@ -65,11 +67,11 @@ class FLAccessControlLists(ProjectClass):
     
     @param  aclXml  Contenido XML con la definición de la lista de control de acceso.
     """
-    def init(self, aclXml = None):
+    def init_(self, aclXml = False):
       
         util = FLUtil()
-        if not aclXml:
-            self.init(self.database().managerModules().content("acl.xml"))
+        if aclXml == False:
+            self.init_(self._prj.conn.managerModules().content("acl.xml"))
             return
       
         doc = QDomDocument("ACL")
@@ -79,7 +81,7 @@ class FLAccessControlLists(ProjectClass):
             self.accessControlList_ = {}
         
         if not util.domDocumentSetContent(doc, aclXml):
-            qWarning("FLAccessControlList : " + util.tr("Lista de control de acceso vacia o errónea"))
+            print("FLAccessControlList : " + util.tr("Lista de control de acceso vacia o errónea"))
             return
         
         self.accessControlList_ = {}

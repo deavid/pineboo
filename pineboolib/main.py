@@ -18,6 +18,7 @@ import importlib
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
+from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 from PyQt5.Qt import QTextCodec, qWarning, qApp, QApplication
 if __name__ == "__main__":
     sys.path.append('..')
@@ -52,6 +53,7 @@ class Project(object):
     multiLangEnabled_ = False
     multiLangId_ = QtCore.QLocale().name()[:2].upper()
     translator_ = None
+    acl_ = None
     
     def __init__(self):
         self.tree = None
@@ -91,7 +93,7 @@ class Project(object):
     Retorna si hay o no acls cargados
     """
     def acl(self):
-        return False
+        return self.acl_ == None
             
     
     
@@ -253,6 +255,8 @@ class Project(object):
         
         self.loadTranslations()
         self.readState()
+        self.acl_ = FLAccessControlLists()
+        self.acl_.init_()
         
         
 
@@ -378,7 +382,11 @@ class Project(object):
         #if not os.path.isfile(python_script_path):
         #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             
-        
+    def reinitP(self):
+        if self.acl_:
+            self.acl_.init_()
+            
+        project.call("sys.widget.init()", [], None, True)
         
     
 
