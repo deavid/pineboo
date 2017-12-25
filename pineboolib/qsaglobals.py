@@ -139,7 +139,7 @@ class SysType(object):
         return "Pineboo"
     
     def isLoadedModule(self, modulename):
-        return modulename in pineboolib.project.modules
+        return modulename in pineboolib.project.conn.managerModules().listAllIdModules()
     
     def translate(self, text):
         return text
@@ -224,8 +224,8 @@ def connect(sender, signal, receiver, slot):
         try:
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
-            sl_name = signal.replace("()","")
-            
+            # Quito cualquier texto entre parentesis
+            sl_name = re.sub(' *\(.*\)', '', signal)    
             try:
                 getattr(sender, sl_name).disconnect(proxy_fn(weak_fn, weak_receiver, slot))
             except:
@@ -242,18 +242,12 @@ def connect(sender, signal, receiver, slot):
         remote_fn = getattr(remote_obj, m.group(2), None)
         if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
-            #sg_name = signal.replace("()", "")
-            #sg_name = sg_name.replace("(QString)", "")
-            #sg_name = sg_name.replace("(int)", "")
-            #sg_name = sg_name.replace("(int, int)", "")
             if isinstance(sender, QDateEdit):
                 if "valueChanged" in signal:
                     signal = signal.replace("valueChanged","dateChanged")
             
-            if signal.find("(") > -1:
-                sg_name = signal[:signal.find("(")]
-            else:
-                sg_name = signal
+            # Quito cualquier texto entre parentesis
+            sg_name = re.sub(' *\(.*\)', '', signal)
             
                 
             try:

@@ -526,7 +526,7 @@ class Dialog(QtWidgets.QDialog):
     def __init__(self, title, f, desc=None):
         #FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
-        self.setWindowTitle(title)
+        self.setWindowTitle(str(title))
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
@@ -544,9 +544,9 @@ class Dialog(QtWidgets.QDialog):
 
     def exec_(self):
         if (self.OKButtonText):
-            self.OKButton.setText(self.OKButtonText)
+            self.OKButton.setText(str(self.OKButtonText))
         if (self.cancelButtonText):
-            self.cancelButton.setText(self.cancelButtonText)
+            self.cancelButton.setText(str(self.cancelButtonText))
         self._layout.addWidget(self.buttonBox)
 
         return super(Dialog, self).exec_()
@@ -562,7 +562,7 @@ class GroupBox(QtWidgets.QGroupBox):
     
     def __setattr__(self, name, value):
         if name == "title":
-            self.setTitle(value)
+            self.setTitle(str(value))
         else:
             super(GroupBox, self).__setattr__(name, value)
 
@@ -584,7 +584,7 @@ class CheckBox(QWidget):
     
     def __setattr__(self, name, value):
         if name == "text":
-            self._label.setText(value)
+            self._label.setText(str(value))
         elif name == "checked":
             self._cb.setChecked(value)
         else:   
@@ -619,11 +619,11 @@ class ComboBox(QWidget):
     
     def __setattr__(self, name, value):
         if name == "label":
-            self._label.setText(value)
+            self._label.setText(str(value))
         elif name == "itemList":
             self._combo.insertItems(len(value), value)
         elif name == "currentItem":
-            self._combo.setCurrentText(value)
+            self._combo.setCurrentText(str(value))
         else:   
             super(ComboBox, self).__setattr__(name, value)
     
@@ -651,9 +651,9 @@ class LineEdit(QWidget):
     
     def __setattr__(self, name, value):
         if name == "label":
-            self._label.setText(value)
+            self._label.setText(str(value))
         elif name == "text":
-            self._line.setText(value)
+            self._line.setText(str(value))
         else:
             super(LineEdit, self).__setattr__(name, value)
             

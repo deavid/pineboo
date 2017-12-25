@@ -120,7 +120,11 @@ class FLQPSQL(object):
                 s = text2bool(v)
 
             elif type_ == "date":
-                s = "'%s'" % util.dateDMAtoAMD(v)
+                val = util.dateDMAtoAMD(v)
+                if val == None:
+                    s = "Null"
+                else:
+                    s = "'%s'" % val 
                 
             elif type_ == "time":
                 s = "'%s'" % v
@@ -440,6 +444,9 @@ class FLQPSQL(object):
         return tl
     
     def normalizeValue(self, text):
+        if text == None:
+            return ""
+        
         ret = ""
         for c in text:
             if c == "'":

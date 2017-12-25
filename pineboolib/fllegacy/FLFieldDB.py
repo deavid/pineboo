@@ -314,7 +314,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.maxPixImages_ is None:
             self.maxPixImages_ = 600
 
-        self.topWidget_ = self.parentWidget()
+        self.topWidget_ = parent
         #self._parent = parent
 
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
