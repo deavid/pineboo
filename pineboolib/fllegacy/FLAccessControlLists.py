@@ -85,12 +85,12 @@ class FLAccessControlLists(ProjectClass):
             return
         
         self.accessControlList_ = {}
-        self.accessControlList_.setAutoDelete(True)
+        #self.accessControlList_.setAutoDelete(True)
         
         docElem = doc.documentElement()
         no = docElem.firstChild()
         
-        while no:
+        while not no.isNull():
             e = no.toElement()
             if e:
                 if e.tagName() == "name":
@@ -99,14 +99,16 @@ class FLAccessControlLists(ProjectClass):
                     continue
             
 
-                ac =  FLAccessControlFactory.create(e.tagName())
+                ac =  FLAccessControlFactory().create(e.tagName())
                 if ac:
                     ac.set(e)
-                    self.accessControlList_.replace("%s::%s::%s" % (ac.type(), ac.name(), ac.user()), ac)
+                    self.accessControlList_["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac
                     no = no.nextSibling()
                     continue
             
             no = no.nextSibling()
+        
+            
             
 
     """

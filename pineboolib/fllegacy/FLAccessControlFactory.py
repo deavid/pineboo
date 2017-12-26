@@ -5,9 +5,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
+from pineboolib.fllegacy.FLAccessControl import FLAccessControl
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
+from PyQt5.Qt import qApp
 
 try:
     QString = unicode
@@ -17,9 +19,12 @@ except NameError:
 
 class FLAccessControlFactory(ProjectClass):
     
+    def __init__(self):
+        super(FLAccessControlFactory, self).__init__()
+    
     @decorators.BetaImplementation
     def create(self, type_):
-        if type_.isEmpty():
+        if type_ == None:
             return False
         
         if type_ == "mainwindow":
@@ -45,10 +50,13 @@ class FLAccessControlFactory(ProjectClass):
         return QString("")
     
         
-class FLAccessControlMainWindow():
+class FLAccessControlMainWindow(FLAccessControl):
 
     acosPerms_ = None
     perm_ = None
+    
+    def __init__(self):
+        super(FLAccessControlForm, self).__init__()
     
     """
   Dado un objeto general (tipo QObject) de alto nivel, identifica si existe un controlador que puede controlar
@@ -97,23 +105,29 @@ class FLAccessControlMainWindow():
         print("FLAccessControlMainWindow::setFromObject %s" %   FLUtil.translate(self,"app","No implementado todavía."))
     
 
-class FLAccessControlForm():
+class FLAccessControlForm(FLAccessControl):
     
-    pal = QtGui.QPalette
+    pal = None
     acosPerms_ = None
     perm_ = None
     
     @decorators.BetaImplementation
-    def __init__(self, obj):
-        cg = QtGui.QcolorGroup()
-        bd = QtGui.Qcolor(QApplication.palette().color(QtGui.QPalette.Active, QtGui.QColourGroup.Background))
-        cg.setColor(QtGui.QColourGroup.Foreground, bg)
-        cg.setColor(QtGui.QColourGroup.Text, bg)
-        cg.setColor(QtGui.QColourGroup.ButtonText, bg)
-        cg.setColor(QtGui.QColourGroup.Base, bg)
-        cg.setColor(QtGui.QColourGroup.Background, bg)
-        self.pal.setDisabled(cg)
-    
+    def __init__(self):
+        super(FLAccessControlForm, self).__init__()
+        self.pal = QtGui.QPalette()
+        #cg = QtGui.QPalette()
+        bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))
+        #cg.setColor(QtGui.QPalette.Foreground, bg)
+        #cg.setColor(QtGui.QPalette.Text, bg)
+        #cg.setColor(QtGui.QPalette.ButtonText, bg)
+        #cg.setColor(QtGui.QPalette.Base, bg)
+        #cg.setColor(QtGui.QPalette.Background, bg)
+        #self.pal.setColor(QtGui.QPalette.Disabled, cg)
+        self.pal.setColor(QtGui.QPalette.Foreground, bg)
+        self.pal.setColor(QtGui.QPalette.Text, bg)
+        self.pal.setColor(QtGui.QPalette.ButtonText, bg)
+        self.pal.setColor(QtGui.QPalette.Base, bg)
+        self.pal.setColor(QtGui.QPalette.Background, bg)
     """
   @return El tipo del que se encarga; "form".
     """
@@ -182,7 +196,10 @@ class FLAccessControlForm():
         print("FLAccessControlform::setFromObject %s" % FLUtil.translate(self,"app","No implementado todavía."))
         
                    
-class FLAccessControlTable():
+class FLAccessControlTable(FLAccessControl):
+    
+    def __init__(self):
+        super(FLAccessControlForm, self).__init__()
     
     @decorators.BetaImplementation
     def type(self):

@@ -174,9 +174,41 @@ class FLAccessControl(ProjectClass):
 
     @param e Elemento correspondiente al nodo DOM que se utilizará para definir la regla.
     """
-    @decorators.NotImplementedWarn
+
     def set(self, e):
-        pass
+        if not e:
+            return
+        
+        if self.acosPerms_:
+            self.acosPerms_.clear()
+            del self.acosPerms_
+        
+        self.acosPerms_ = {}
+        
+        self.perm_ = e.attribute("perm")
+        
+        no = e.firstChild()
+        
+        while not no.isNull():
+            e = no.toElement()
+            if not e.isNull():
+                if e.tagName() == "name":
+                    self.name_ = e.text()
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "user":
+                    self.user_ = e.text()
+                    no = no.nextSibling()
+                    continue
+                
+                if e.tagName() == "aco":
+                    self.acosPerms_[e.text()] = e.attribute("perm")
+                    no = no.nextSibling()
+                    continue
+            
+            no = no.nextSibling()
+                    
   
     """
     A partir del contenido de la regla de control de acceso crea un nodo DOM que se insertará como
@@ -184,9 +216,32 @@ class FLAccessControl(ProjectClass):
 
     @param d Documento DOM/XML donde se insertará el nodo construido a partir de la regla de control de acceso.
     """
-    @decorators.NotImplementedWarn
     def get(self, d):
-        pass
+        if not self.type() or not d:
+            return
+        
+        root = d.fisrtChild().toElement()
+        e = d.createElement(self.type())
+        e.setAttribute("perm", self.perm_)
+        root.appendChild(e)
+        
+        name = d.createElement("name")
+        e.appendChild(name)
+        n = d.createTextNone(self.name_)
+        name.appendChild(n)
+        
+        user = d.createElement("user")
+        e.appendChild(user)
+        u = d.createTextNone(self.user_)
+        user.appendChild(u)
+        
+        if self.acosPerms_:
+            for key,value in self.acosPerms_:
+                aco = d.createElement("aco")
+                aco.setAttribute("perm", value)
+                e.appendChild(aco)
+                t = d.createTextNone(key)
+                aco.appendChild(t)
     
     """
     Establece la lista de ACOs a partir de una lista de cadenas de texto.
@@ -196,9 +251,21 @@ class FLAccessControl(ProjectClass):
 
     @param acos Lista de cadenas de texto con los objetos y permisos.
     """
-    @decorators.NotImplementedWarn
     def setAcos(self ,acos):
-        pass
+        if not acos:
+            return
+        
+        if self.acosPerms_:
+            self.acosPerms_.clear()
+            del self.acosPerms_
+        
+        self.acosPerms_ = {}
+        
+        nameAcos = None
+        for it in acos.values():
+            nameAcos = it
+            self.acosPerms_.replace(nameAcos, str(it))
+        
   
     """
     Obtiene una lista de cadenas de texto correspondiente a la lista de ACOs establecida
@@ -208,37 +275,15 @@ class FLAccessControl(ProjectClass):
 
     @return Lista de cadenas de texto con los objetos y permisos.
     """
-    @decorators.NotImplementedWarn
     def getAcos(self):
-        pass
-
-    """
-    Procesa un objeto dado aplicando la regla de control de acceso.
-
-    Este método es virtual puro, y deberá definirse en cada una de las
-    clases derivadas que se encargan de control de acceso de un tipo de
-    objeto específico. Por lo tanto, qué se tiene que hacer y cómo se debe
-    hacer con la información de la regla de control de acceso con respecto
-    a un tipo de objeto de alto nivel concreto queda en el ámbito de la clase
-    derivada que se encarga de ese tipo de objeto.
-
-    @param obj Puntero general al objeto a procesar. Debe ser o heredar de la clase QObject.
-    """
-    @decorators.NotImplementedWarn
-    def processObject(self, obj):
-        pass
-    
-
-    """
-    Define la regla de control de acceso a partir de las propiedades de un objeto concreto.
-
-    Las clases derivadas para cada uno de los tipos de objetos deberá implementar cómo se define la
-    regla de control a partir de las propiedades del objeto específico.
-
-    @param  obj Puntero general al objeto a procesar. Debe ser o heredar de la clase QObject.
-    """
-    @decorators.NotImplementedWarn
-    def setFromObject(self, obj):
-        pass
+        acos = ""
+        
+        if self.acosPerms_:
+            for key,value in self.acosPerms_:
+                acos << key
+                acos << value
+        
+        return acos
+        
 
 #endif
