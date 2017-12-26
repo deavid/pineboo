@@ -236,9 +236,9 @@ class FLAccessControl(ProjectClass):
         user.appendChild(u)
         
         if self.acosPerms_:
-            for key,value in self.acosPerms_:
+            for key in self.acosPerms_.keys():
                 aco = d.createElement("aco")
-                aco.setAttribute("perm", value)
+                aco.setAttribute("perm", self.acosPerms_[key])
                 e.appendChild(aco)
                 t = d.createTextNone(key)
                 aco.appendChild(t)
@@ -276,12 +276,13 @@ class FLAccessControl(ProjectClass):
     @return Lista de cadenas de texto con los objetos y permisos.
     """
     def getAcos(self):
-        acos = ""
+        acos = []
         
         if self.acosPerms_:
-            for key,value in self.acosPerms_:
-                acos << key
-                acos << value
+            
+            for key in self.acosPerms_.keys():
+                acos.append(key)
+                acos.append(self.acosPerms_[key])
         
         return acos
         

@@ -213,6 +213,10 @@ class FLFormRecordDB(FLFormDB):
             self.loadControls()
         else:
             self.setCaptionWidget("No hay metadatos")
+        
+        acl = self.prj.acl()
+        if acl:
+            acl.process(self)
 
 
 

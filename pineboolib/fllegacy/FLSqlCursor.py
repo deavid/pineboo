@@ -14,6 +14,7 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from pineboolib.fllegacy.FLAccessControlFactory import FLAccessControlFactory
 from pineboolib.fllegacy.FLAction import FLAction
 
 import hashlib, traceback, weakref, copy, datetime
@@ -669,7 +670,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
     def doAcl(self):
         if not self.acTable_:
-            self.acTable_ = FLAccessControlFactory.create("table")
+            self.acTable_ = FLAccessControlFactory().create("table")
             self.acTable_.setFromObject(self.metadata_)
             self.acosBackupTable_ = self.acTable_.getAcos()
             self.acPermBackupTable_ = self.acTable_.perm()
@@ -815,6 +816,7 @@ class FLSqlCursor(ProjectClass):
         super(FLSqlCursor,self).__init__()
         self._valid = False
         self.d = FLSqlCursorPrivate()
+        self.d.cursor_ = self
         self.d.nameCursor_ = "%s_%s" % (name, QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
         if connectionName_or_db == None:
@@ -2352,7 +2354,7 @@ class FLSqlCursor(ProjectClass):
             #if not self.seek(pos, False, True):
             #    self.d.buffer_ = None
             #    self.newBuffer.emit()
-
+        self.afterSeek()
 
     """
     Actualiza el conjunto de registros con un retraso.

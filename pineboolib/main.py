@@ -93,7 +93,7 @@ class Project(object):
     Retorna si hay o no acls cargados
     """
     def acl(self):
-        return self.acl_ == None
+        return self.acl_
             
     
     

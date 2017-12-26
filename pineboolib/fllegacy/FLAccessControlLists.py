@@ -102,6 +102,7 @@ class FLAccessControlLists(ProjectClass):
                 ac =  FLAccessControlFactory().create(e.tagName())
                 if ac:
                     ac.set(e)
+                    print("******************", ac.type(), ac.name(), ac.user(), ac)
                     self.accessControlList_["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac
                     no = no.nextSibling()
                     continue
@@ -123,17 +124,16 @@ class FLAccessControlLists(ProjectClass):
         if not self.accessControlList_:
             return
         
-        type = FLAccessControlFactory.type(obj)
+        type = FLAccessControlFactory().type(obj)
         name = obj.name()
-        user = self.database().user()
-        
+        user = self._prj.conn.user()
         if not type or not name or not user:
             return
         
-        ac = self.accessControlList_["%s::%s::%s" % (type, name, user)]
-        
-        if ac:
-            ac.processObject(obj)
+        if "%s::%s::%s" % (type, name, user) in self.accessControlList_.keys():
+            ac = self.accessControlList_["%s::%s::%s" % (type, name, user)]
+            if ac:
+                ac.processObject(obj)
     
     """
     Crea un nuevo fichero "acl.xml" y lo almacena sustituyendo el anterior, en el caso de que exista.
