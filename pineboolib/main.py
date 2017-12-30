@@ -265,8 +265,11 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(self.dir(root, nombre))
         
-            
-        util.destroyProgressDialog()
+        try:    
+            util.destroyProgressDialog()
+        except:
+            pass
+        
         self.loadTranslations()
         self.readState()
         self.acl_ = FLAccessControlLists()
