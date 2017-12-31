@@ -55,7 +55,7 @@ class FLFieldMetaData(ProjectClass):
             
     
     def inicializeFLFieldMetaData(self, other):
-        self.d = FLFieldMetaDataPrivate()
+        #self.d = FLFieldMetaDataPrivate()
         self.copy(other)
         
                                            
@@ -567,7 +567,7 @@ class FLFieldMetaData(ProjectClass):
   
   
     def copy(self, other):
-        if other == self:
+        if other is self:
             return
         
         self = copy.copy(other)
@@ -611,7 +611,7 @@ class FLFieldMetaData(ProjectClass):
                 
                
     
-class FLFieldMetaDataPrivate():
+class FLFieldMetaDataPrivate(object):
     """
     Nombre del campo en la tabla
     """
