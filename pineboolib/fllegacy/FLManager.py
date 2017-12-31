@@ -368,19 +368,23 @@ class FLManager(ProjectClass):
                     fL = qry.fieldList()
                     table = None
                     field = None
-                    fields = tmd.fieldsNames().split(",")
+                    fields = tmd.fieldsNames()
+                    #.split(",")
                     fieldsEmpty = (not fields)
                 
                     for it in fL:
                         pos = it.find(".")
                         if pos > -1:
                             table = it[:pos]
-                            field = it[:pos]
+                            field = it[pos + 1:]
                         else:
                             field = it
                     
-                        if not (not fieldsEmpty and table == name and fields.find(field.lower())) == fields.end():
+                        #if not (not fieldsEmpty and table == name and fields.find(field.lower())) == fields.end():
+                        if not fieldsEmpty and table == name and not (field.lower() in fields):
                             continue
+
+                        print("tabla " + table + " campo " + field + " name " + name);
                     
                         mtdAux = self.metadata(table, True)
                         if mtdAux:
@@ -395,16 +399,18 @@ class FLManager(ProjectClass):
                                 newRef = (not isForeignKey)
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
-                                    fieldsAux = tmd.fieldsNames().split(",")
-                                    if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
+                                    #fieldsAux = tmd.fieldsNames().split(",")
+                                    fieldsAux = tmd.fieldsNames()
+                                    #if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
+                                    if fmtdAuxName not in fieldsAux:
                                         if not isForeignKey:
                                             fmdtAux = FLFieldMetaData(fmtdAux)
                                     
                                         fmtdAux.setName("%s.%s" % (tambe, field))
                                         newRef = False
                             
-                                if newRef:
-                                    fmtdAux.ref()
+                                #if newRef:
+                                #    fmtdAux.ref()
                                 
                                 tmd.addFieldMD(fmtdAux)
                     
@@ -451,15 +457,16 @@ class FLManager(ProjectClass):
             remove_blank_text=True,
             )
         
-        
+        q = FLSqlQuery(parent, self.db_.connectionName())
+
         root_ = etree.fromstring(qry_, parser_)
-        parent.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
-        parent.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
-        parent.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
+        q.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
+        q.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
+        q.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
         orderBy_ = None
         try:
             orderBy_ = root_.xpath("order/text()")[0].strip(' \t\n\r')
-            parent.setOrderBy(orderBy_)
+            q.setOrderBy(orderBy_)
         except:
             a = 1
             
@@ -471,11 +478,11 @@ class FLManager(ProjectClass):
             gr = groupXml_[i]
             if float(gr.xpath("level/text()")[0].strip(' \t\n\r')) == i:
                 #print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                parent.addGroup(FLGroupByQuery(i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
+                q.addGroup(FLGroupByQuery(i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
                 i = i + 1
         
         
-        return parent
+        return q
     
     """
     Obtiene la definición de una acción a partir de su nombre.
