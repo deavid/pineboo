@@ -11,7 +11,7 @@ import copy
 
 
 
-class FLFieldMetaData(ProjectClass):
+class FLFieldMetaData(object):
     """
   @param n Nombre del campo
   @param a Alias del campo, utilizado en etiquetas de los formularios
@@ -44,7 +44,6 @@ class FLFieldMetaData(ProjectClass):
 
 
     def __init__(self, *args, **kwargs):
-        super(FLFieldMetaData, self).__init__()
         
         if len(args) == 1:
             self.inicializeFLFieldMetaData(args[0])
