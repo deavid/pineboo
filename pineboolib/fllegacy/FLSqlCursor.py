@@ -922,8 +922,11 @@ class FLSqlCursor(ProjectClass):
         return self.d.db_
 
     def table(self):
-        return self.metadata().name()
-
+        m = self.metadata()
+        if m:
+            return m.name()
+        else:
+            return None
 
     def __getattr__(self, name): return DefFun(self, name)
 

@@ -211,9 +211,9 @@ class Project(object):
         self.files = {}
         tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")): raise AssertionError
-        if self.parseProject:
-            progressDialog = util.createProgressDialog("Pineboo", size_)
-            p = 0
+        # if self.parseProject:
+        progressDialog = util.createProgressDialog("Pineboo", size_)
+        p = 0
         for idmodulo, nombre, sha in self.cur:
             util.setProgress((p * 100) / size_)
             util.setLabelText("Convirtiendo %s." % nombre)
