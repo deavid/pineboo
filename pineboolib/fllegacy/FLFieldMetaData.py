@@ -54,7 +54,7 @@ class FLFieldMetaData(object):
             
     
     def inicializeFLFieldMetaData(self, other):
-        #self.d = FLFieldMetaDataPrivate()
+        self.d = FLFieldMetaDataPrivate()
         self.copy(other)
         
                                            
@@ -568,8 +568,46 @@ class FLFieldMetaData(object):
     def copy(self, other):
         if other is self:
             return
+
+        od = other.d
+
+        if od.relationM1_:
+            self.d.relationM1_ = od.relationM1_
+
+        self.d.clearRelationList()
+
+        if od.relationList_:
+            for r in od.relationList_:
+                self.d.relationList_.append(r)
+
+        self.d.fieldName_ = od.fieldName_
+        self.d.alias_ = od.alias_
+        self.d.allowNull_ = od.allowNull_
+        self.d.isPrimaryKey_ = od.isPrimaryKey_
+        self.d.type_ = od.type_
+        self.d.calculated_ = od.calculated_
+        self.d.fullyCalculated_ = od.fullyCalculated_
+        self.d.trimmed_ = od.trimmed_
+        self.d.visible_ = od.visible_
+        self.d.editable_ = od.editable_
+        self.d.partDecimal_ = od.partDecimal_
+        self.d.partInteger_ = od.partInteger_
+        self.d.isIndex_ = od.isIndex_
+        self.d.isUnique_ = od.isUnique_
+        self.d.contador_ = od.contador_
+        self.d.associatedField_ = od.associatedField_
+        self.d.associatedFieldName_ = od.associatedFieldName_
+        self.d.associatedFieldFilterTo_ = od.associatedFieldFilterTo_
+        self.d.defaultValue_ = od.defaultValue_
+        self.d.optionsList_ = od.optionsList_
+        self.d.outTransaction_ = od.outTransaction_
+        self.d.regExpValidator_ = od.regExpValidator_
+        self.d.visibleGrid_ = od.visibleGrid_
+        self.d.generated_ = od.generated_
+        self.d.isCompoundKey_ = od.isCompoundKey_
+        self.d.hasOptionsList_ = od.hasOptionsList_
         
-        self = copy.copy(other)
+        #self = copy.deepcopy(other)
     
     def formatAssignValue(self,fieldName , value, upper):
         if value == None or not fieldName:
