@@ -90,9 +90,15 @@ class PNConnection(QtCore.QObject):
     
     def database(self, name = None):
         if name == None:
-            return self.db_name
+            return self.DBName()
         
         return self.useConn(name)
+    
+    def DBName(self):
+        try:
+            return self.driver().DBName()
+        except:
+            return self.db_name
     
     def driver(self):
         return self.driverSql.driver()
@@ -390,4 +396,11 @@ class PNConnection(QtCore.QObject):
         
         qWarning("PNConnection: El driver %s no dispone de normalizeValue(text)" % self.driverName())
         return text   
+    
+    def queryUpdate(self, name, update, filter):
+        if not self.db():
+            return None
+        
+        return self.driver().queryUpdate(name, update, filter)
+        
     

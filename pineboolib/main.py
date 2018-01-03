@@ -482,11 +482,7 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
         
-        db_name = None
-        if self.prj.dbname.endswith("s3db"):
-            db_name= self.prj.dbname[self.prj.dbname.rfind("/") + 1:-5]
-        else:
-            db_name = self.prj.dbname
+        db_name = self.prj.conn.DBName()
         
         
         if self.sha:

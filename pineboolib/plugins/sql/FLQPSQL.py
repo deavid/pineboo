@@ -498,5 +498,7 @@ class FLQPSQL(object):
         
         return ret
         
-        
+    
+    def queryUpdate(self, name, update, filter):
+        return """UPDATE %s SET %s WHERE %s RETURNING *""" % (name, update, filter)
         

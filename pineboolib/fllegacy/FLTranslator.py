@@ -40,7 +40,7 @@ class FLTranslator(QTranslator):
         if self.idM_ == "sys":
             tsFile = filedir("../share/pineboo/translations/%s.%s" %(self.idM_, self.lang_))
         else: 
-            tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %(self._prj.conn.db_name, self.idM_, self.idM_, self.lang_, key))
+            tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %(self._prj.conn.database(), self.idM_, self.idM_, self.lang_, key))
         #qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         qmFile = "%s.qm" % tsFile
         
