@@ -43,6 +43,7 @@ class PNConnection(QtCore.QObject):
         self.db_userName = db_userName
         self.db_password = db_password
         self.driverSql = PNSqlDrivers.PNSqlDrivers()
+        self.driverSql.db_ = self
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
         
         if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):

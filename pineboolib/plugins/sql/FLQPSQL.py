@@ -22,6 +22,7 @@ class FLQPSQL(object):
     alias_ = None
     errorList = None
     lastError_ = None
+    db_ = None
     
     def __init__(self):
         self.version_ = "0.5"

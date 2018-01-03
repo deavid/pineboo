@@ -1,6 +1,5 @@
 import os, sys
 from PyQt5.QtCore import QTime
-from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators 
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy import FLUtil
@@ -8,6 +7,7 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import auto_qt_translate_text
 from pineboolib.fllegacy.FLUtil import FLUtil
 import traceback
+from PyQt5.Qt import QDomDocument
 
 
 
@@ -25,6 +25,7 @@ class FLsqlite(object):
     db_filename = None
     sql = None
     rowsFetched = None
+    db_ = None
     
     def __init__(self):
         self.version_ = "0.5"
@@ -69,7 +70,6 @@ class FLsqlite(object):
         if self.conn_:
             self.open_ = True
         
-        #self.conn_.text_factory = os.fsdecode
         self.conn_.text_factory = lambda x: str(x, 'latin1')
         self.db_filename = db_name
         
@@ -126,14 +126,14 @@ class FLsqlite(object):
     
     def nextSerialVal(self, table, field):
         q = FLSqlQuery()
-        q.setSelect(u"nextval('" + table + "_" + field + "_seq')")
-        q.setFrom("")
-        q.setWhere("")
+        q.setSelect("max(%s)" % field)
+        q.setFrom(table)
+        q.setWhere("1 = 1")
         if not q.exec():
             print("not exec sequence")
             return None
         if q.first():
-            return q.value(0)
+            return int(q.value(0)) + 1
         else:
             return None
     
@@ -292,7 +292,7 @@ class FLsqlite(object):
         
         t = FLSqlQuery()
         t.setForwardOnly(True)
-        ok = t.exec_("select relname from pg_class where relname = '%s'" % name)
+        ok = t.exec_("SELECT * FROM %s WHERE 1 = 1 LIMIT 1" % name)
         if ok:
             ok = t.next()
         
@@ -324,17 +324,17 @@ class FLsqlite(object):
         for field in fieldList:
             sql = sql + field.name()
             if field.type() == "int":
-                sql = sql + " INT2"
+                sql = sql + " INTEGER"
             elif field.type() == "uint":
-                sql = sql + " INT4"
+                sql = sql + " INTEGER"
             elif field.type() in ("bool","unlock"):
                 sql = sql + " BOOLEAN"
             elif field.type() == "double":
-                sql = sql + " FLOAT8"
+                sql = sql + " FLOAT"
             elif field.type() == "time":
-                sql = sql + " TIME"
+                sql = sql + " VARCHAR(20)"
             elif field.type() == "date":
-                sql = sql + " DATE"
+                sql = sql + " VARCHAR(20)"
             elif field.type() == "pixmap":
                 sql = sql + " TEXT"
             elif field.type() == "string":
@@ -342,24 +342,11 @@ class FLsqlite(object):
             elif field.type() == "stringlist":
                 sql = sql + " TEXT"
             elif field.type() == "bytearray":
-                sql = sql + " BYTEA"
+                sql = sql + " CLOB"
             elif field.type() == "serial":
-                seq = "%s_%s_seq" % (tmd.name(), field.name())
-                q = FLSqlQuery()
-                q.setForwardOnly(True)
-                q.exec_("SELECT relname FROM pg_class WHERE relname='%s'" % seq)
-                if not q.next():
-                    cursor = self.conn_.cursor()
-                    #self.transaction()
-                    try:
-                        cursor.execute("CREATE SEQUENCE %s" % seq)
-                    except Exception:
-                        print("FLQPSQL::sqlCreateTable:\n", traceback.format_exc())
-                    #self.commitTransaction()
-                    
-                
-                sql = sql + " INT4 DEFAULT NEXTVAL('%s')" % seq
-                del q
+                sql = sql + " INTEGER"
+                if not field.isPrimaryKey():
+                    sql = sql + " PRIMARY KEY"
         
             longitud = field.length()
             if longitud > 0:
@@ -387,6 +374,12 @@ class FLsqlite(object):
                 i = i + 1
         
         sql = sql + ")"
+        
+        createIndex = "CREATE INDEX %s_pkey ON %s (%s)" % (tmd.name(), tmd.name(), tmd.primaryKey())
+        
+        q = FLSqlQuery()
+        q.setForwardOnly(True)
+        q.exec_(createIndex)
         
         return sql
     
@@ -427,29 +420,69 @@ class FLsqlite(object):
     
     def recordInfo2(self, tablename):
         if not self.isOpen():
-            return False
-        info = []
-        stmt = "select pg_attribute.attname, pg_attribute.atttypid, pg_attribute.attnotnull, pg_attribute.attlen, pg_attribute.atttypmod, pg_attrdef.adsrc from pg_class, pg_attribute left join pg_attrdef on (pg_attrdef.adrelid = pg_attribute.attrelid and pg_attrdef.adnum = pg_attribute.attnum) where lower(pg_class.relname) = '%s' and pg_attribute.attnum > 0 and pg_attribute.attrelid = pg_class.oid and pg_attribute.attisdropped = false order by pg_attribute.attnum" % tablename.lower()
+            return None
         
-        query = FLSqlQuery()
-        query.setForwardOnly(True)
-        query.exec(stmt)
-        while query.next():
-            len = int(query.value(3))
-            precision = int(query.value(4))
-            if len == -1 and precision > -1:
-                len = precision - 4
-                precision = -1
+        q = FLSqlQuery()
+        q.setForwardOnly(True)
+        q.exec_("SELECT * FROM %s LIMIT 1" % tablename)
+        return self.recordInfo(q)
+    
+    def recordInfo(self, tablename_or_query):
+        if isinstance(tablename_or_query, str):
+            tablename = tablename_or_query
+            if not self.isOpen():
+                return None
+            info = []
             
-            defVal = str(query.value(5))
-            if defVal and defVal[0] == "'":
-                defVal = defVal[1:len(defVal) - 2]
-                info.append([str(query.value(0)), query.value(1), query.value(2), len , precision, defVal, int(query.value(1))])
-                 
+            doc = QDomDocument(tablename)
+            stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
+            util = FLUtil()
+            if not util.domDocumentSetContent(doc, stream):
+                print("FLManager : " + qApp.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
+            
+                return self.recordInfo2(tablename)
+            
+            docElem = doc.documentElement()
+            mtd = self.db_.manager().metadata(docElem, True)
+            if not mtd:
+                return self.recordInfo2(tablename)
+            fL = mtd.fieldList()
+            if not fl:
+                del mtd
+                return self.recordInfo2(tablename)
+            
+            for f in mtd.fieldsNames():
+                field = mtd.field(f)
+                info.append([field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue()])
+                
+            
+            del mtd
+            return info
         
-    
-    
-        return info
+        #else:
+        """
+        QSqlRecordInfo SqliteDriver::recordInfo(const QSqlQuery &query) const
+        {
+          if (query.isActive() && query.driver() == this) {
+        QSqlRecordInfo info;
+        const SqliteResult *result = static_cast<const SqliteResult *>(query.result());
+        Dataset *ds = result->dataSet;
+    for (int i = 0; i < ds->fieldCount(); ++i) {
+      QString fName(ds->fieldName(i));
+      fType type = ds->fv(fName).get_fType();
+      info.append(QSqlFieldInfo(fName, qDecodeSqliteType(type)));
+    }
+    return info;
+  }
+  return QSqlRecordInfo();
+}
+        """
+            
+        
+            
+                
+            
+        
     
     
     def tables(self, typeName = None):
@@ -460,20 +493,20 @@ class FLsqlite(object):
         t = FLSqlQuery()
         t.setForwardOnly(True)
         
-        if not typeName or typeName == "Tables":
-            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
-            while t.next():
-                tl.append(str(t.value(0)))
+        if typeName == "Tables" and typeName == "Views":
+            t.exec_("SELECT name FROM sqlite_master WHERE type='table' OR type='view'")
+        elif not typeName or typeName == "Tables":
+            t.exec_("SELECT name FROM sqlite_master WHERE type='table'")
+        elif not typeName or typeName == "Views":
+            t.exec_("SELECT name FROM sqlite_master WHERE type='view'")
         
-        if not typeName or typeName == "Views":
-            t.exec_("select relname from pg_class where ( relkind = 'v' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
-            while t.next():
-                tl.append(str(t.value(0)))
+        while t.next():
+            tl.append(str(t.value(0)))        
+        
         if not typeName or typeName == "SystemTables":
-            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND relname like 'pg_%' ) ")
-            while t.next():
-                tl.append(str(t.value(0)))
-        
+            tl.append("sqlite_master")
+ 
+
         
         del t
         return tl
@@ -486,12 +519,14 @@ class FLsqlite(object):
         for c in text:
             if c == "'":
                 c = "''"
-            ret = ret + c
             
+            ret = ret + c
+        
         return ret
     
     
     def queryUpdate(self, name, update, filter):
-        return "UPDATE %s SET %s WHERE %s" % (name, update, filter)
+        sql = "UPDATE %s SET %s WHERE %s" % (name, update, filter)
+        return sql
         
         
