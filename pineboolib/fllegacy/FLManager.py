@@ -243,10 +243,7 @@ class FLManager(ProjectClass):
                 acl.process(ret)
                 
             if not quick and not isSysTable and self._prj.consoleShown() and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
-                msg = util.tr("La estructura de los metadatos de la tabla '%1' y su "
-                  "estructura interna en la base de datos no coinciden. "
-                  "Debe regenerar la base de datos.").arg(n)
-                
+                msg = util.transtalate("application", "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\nDebe regenerar la base de datos.").arg(n)
                 throwMsgWarning(self.db_, msg)
                     
             return ret
