@@ -97,13 +97,13 @@ class PNBuffer(ProjectClass):
         
         for field in self.fieldsList():
             
-            if field.type_ == "unlock" or field.type_ == "bool":
-                field.value = (self.cursor().model().value(row , field.name) in ("True", True, 1))
+            if field.type_ in ("unlock","bool"):
+                field.value = (self.cursor().model().value(row , field.name) in ("True", True, 1, "1"))
                 #    field.value = True
                 #else:
                 #    field.value = False
             
-            elif self.cursor().model().value(row , field.name) in ("None",""):
+            elif self.cursor().model().value(row , field.name) in ("None","", None):
                 field.value = None
                     
             else:
@@ -233,7 +233,7 @@ class PNBuffer(ProjectClass):
         if field.type_ in ("bool","unlock"):
             v = field.value in (True,"true")
         #ret = self.convertToType(field.value, field.type_)
-        #print("---->retornando",ret , type(ret), field.value, field.name)
+        #print("---->retornando",v , type(v), field.value, field.name)
         return v
 
 
