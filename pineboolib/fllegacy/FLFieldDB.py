@@ -1008,6 +1008,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     else:
                         s = round(float(v), field.partDecimal())
                     self.editor_.setText(str(s))
+                else:
+                    self.editor_.setText("")
 
 
 
@@ -1393,13 +1395,13 @@ class FLFieldDB(QtWidgets.QWidget):
             if not v == None:
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
-            elif nulo:
+            elif not nulo:
                 self.editor_.setText(field.defaultValue())
             
             self.editor_.textChanged.connect(self.updateValue)
             
-            if v == None and not nulo:
-                self.editor_.setText("0.00")
+            #if v == None and not nulo:
+            #    self.editor_.setText("0.00")
 
 
         elif type_ == "string":
