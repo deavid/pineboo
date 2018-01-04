@@ -390,7 +390,7 @@ class FLManager(ProjectClass):
                                 isForeignKey = False
                                 if fmtdAux.isPrimaryKey() and not table == name:
                                     fmtdAux = FLFieldMetaData(fmtdAux)
-                                    fmtdAux.setIsprimaryKey(False)
+                                    fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
                             
                                 newRef = (not isForeignKey)
@@ -403,7 +403,7 @@ class FLManager(ProjectClass):
                                         if not isForeignKey:
                                             fmdtAux = FLFieldMetaData(fmtdAux)
                                     
-                                        fmtdAux.setName("%s.%s" % (tambe, field))
+                                        fmtdAux.setName("%s.%s" % (table, field))
                                         newRef = False
                             
                                 #if newRef:
