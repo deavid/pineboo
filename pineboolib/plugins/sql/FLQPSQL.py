@@ -8,7 +8,6 @@ from pineboolib.utils import auto_qt_translate_text
 import traceback
 from PyQt5.Qt import qWarning, QApplication
 from PyQt5.QtWidgets import QMessageBox
-from distutils.log import info
 
 
 
@@ -502,4 +501,200 @@ class FLQPSQL(object):
     
     def queryUpdate(self, name, update, filter):
         return """UPDATE %s SET %s WHERE %s RETURNING *""" % (name, update, filter)
+    
+    
+    
+    def alterTable2(self, mtd1, mtd2, key, force = False):
+        util = FLUtil()
+        
+        oldMTD = None
+        newMTD = None
+        doc = QDomDocument("doc")
+        docElem = None
+        
+        if not util.docDocumentSetContect(doc, mtd1):
+            print("FLManager::alterTable : " + qApp.tr("Error al cargar los metadatos."))
+        else:
+            docElem = doc.documentElement()
+            oldMTD = self.db_.manager().metadata(docElem, True)
+        
+        if oldMTD and oldMTD.isQuery():
+            return True
+
+        if not util.docDocumentSetContect(doc, mtd2):
+            print("FLManager::alterTable : " + qApp.tr("Error al cargar los metadatos."))
+            return False
+        else:
+            docElem = doc.documentElement()
+            newMTD = self.db_.manager().metadata(docElem, True)
+        
+        if not oldMTD:
+            oldMTD = newMTD
+            
+        if not oldMTD.name() == newMTD.name():
+            print("FLManager::alterTable : " + qApp.tr("Los nombres de las tablas nueva y vieja difieren."))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        oldPK = oldMTD.primaryKey()
+        newPK = newMTD.primaryKey()
+        
+        if not oldPK == newPK:
+            print("FLManager::alterTable : " + qApp.tr("Los nombres de las claves primarias difieren."))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        if not self.db_.manager().checkMetaData(oldMTD, newMTD):
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return True
+        
+        if not self.db_.manager().existsTable(oldMTD.name()):
+            print("FLManager::alterTable : " + qApp.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        
+        fieldList = oldMTD.fieldList()
+        oldField = None
+        
+        if not fieldList:
+            print("FLManager::alterTable : " + qApp.tr("Los antiguos metadatos no tienen campos."))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+        
+        if not self.db_.dbAux():
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        self.db_.dbAux().transaction()
+        
+        if key and len(key) == 40:
+            c = FLSqlCursor("flfiles", True, self.db_.dbAux())
+            c.setForwardOnly(True)
+            c.setFilter("nombre = '%s.mtd'" % renameOld)
+            c.select()
+            if not c.next():
+                buffer = c.primeInsert()
+                buffer.setValue("nombre", "%s.mtd" % renameOld)
+                buffer.setValue("contenido", mtd1)
+                buffer.setValue("sha", key)
+                c.insert()
+        
+        q = FLSqlQuery("", self.db_.dbAux())
+        constraintName = "%s_pkey" % oldMTD.name()
+        
+        if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+            print("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(oldMTD.name()))
+            self.db_.dbAux().rollback()
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        fieldsNamesOld = []
+        for it in fieldList:
+            if newMTD.field(it.name()):
+                fieldsNamesOld.append(it.name())
+            
+            if it.isUnique():
+                constraintName = "%s_%s_key" % (oldMTD.name(), it.name())
+                if constraintExist(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+                    print("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.")
+                 .arg(oldMTD.name(), oldField.name()))
+                    self.db_.dbAux().rollback()
+                    if oldMTD and not oldMTD == newMTD:
+                        del oldMTD
+                    if newMTD:
+                        del newMTD
+            
+                    return False
+        
+        
+                    
+            
+            
+            
+            
+            
+        if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
+            print("FLManager::alterTable : " + qApp.tr("No se ha podido renombrar la tabla antigua."))
+            
+            self.db_.dbAux().rollback()
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        if not self.db_.manager().createTable(newMTD):
+            self.db_.dbAux().rollback()
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+
+        v = None
+        ok = False
+        
+        if not force and not fieldsNamesOld:
+            if not ok:
+                self.db_.dbAux().rollback()
+                if oldMTD and not oldMTD == newMTD:
+                    del oldMTD
+                if newMTD:
+                    del newMTD
+            
+            return self.alterTable2(mtd1, mtd2, key, True)        
+
+
+
+        if not ok:       
+            oldCursor = FLSqlCursor(renameOld, True, self.db_.dbAux())
+            oldCursor.setModeAccess(oldCursor.Browse)
+            newCursor = FLSqlCursor(newMTD.name(), True, self.db_.dbAux())
+            newCursor.setMode(newCursor.Insert)
+        
+        
+
+        
+            oldCursor.select()
+            totalSteps = oldCursor.size()
+            progress = QProgressDialog(qApp.tr("Reestructurando registros para %1...").arg(newMTD.alias()),qApp.tr("Cancelar"),0, totalSteps)
+            progress.setLabelText(qApp.tr("Tabla modificada"))
+        
+        #TODO:
+        
+        return True    
         
