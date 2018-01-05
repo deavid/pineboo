@@ -535,11 +535,11 @@ class Dialog(QtWidgets.QDialog):
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
         self.buttonBox = QtWidgets.QDialogButtonBox()
-        self.OKButton = QtWidgets.QPushButton("&Aceptar")
+        self.okButton = QtWidgets.QPushButton("&Aceptar")
         self.cancelButton = QtWidgets.QPushButton("&Cancelar")
-        self.buttonBox.addButton(self.OKButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
-        self.OKButton.clicked.connect(self.accept)
+        self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
         self._tab = QTabWidget()
         self._layout.addWidget(self._tab)
@@ -549,8 +549,8 @@ class Dialog(QtWidgets.QDialog):
         self._layout.addWidget(_object)
 
     def exec_(self):
-        if (self.OKButtonText):
-            self.OKButton.setText(str(self.OKButtonText))
+        if (self.okButtonText):
+            self.okButton.setText(str(self.okButtonText))
         if (self.cancelButtonText):
             self.cancelButton.setText(str(self.cancelButtonText))
         self._layout.addWidget(self.buttonBox)
