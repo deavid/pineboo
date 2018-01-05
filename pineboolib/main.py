@@ -756,6 +756,8 @@ class XMLAction(XMLStruct):
         self.initModule(self.name)
         if getattr(self.script.form,"iface",None):
             self.script.form.iface.main()
+        else:
+            self.script.form.main()
 
     def load_script(self, scriptname, parent= None):
         parent_ = parent
