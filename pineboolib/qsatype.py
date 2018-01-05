@@ -6,7 +6,7 @@ from lxml import etree
 from io import StringIO
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QDomDocument as FLDomDocument
+from PyQt5.Qt import QDomDocument as FLDomDocument, QTabWidget, QTextEdit
 
 # Cargar toda la API de Qt para que sea visible.
 from PyQt5.QtGui import *
@@ -522,11 +522,15 @@ class Dialog(QtWidgets.QDialog):
     cancelButtonText = None
     OKButton = None
     cancelButton = None
+    _tab = None
 
-    def __init__(self, title, f, desc=None):
+    def __init__(self, title = None, f = None, desc=None):
         #FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
-        self.setWindowTitle(str(title))
+        
+        if title:
+            self.setWindowTitle(str(title))
+            
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
@@ -537,6 +541,8 @@ class Dialog(QtWidgets.QDialog):
         self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
         self.OKButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
+        self._tab = QTabWidget()
+        self._layout.addWidget(self._tab)
 
 
     def add(self, _object):
@@ -550,6 +556,15 @@ class Dialog(QtWidgets.QDialog):
         self._layout.addWidget(self.buttonBox)
 
         return super(Dialog, self).exec_()
+    
+    def newTab(self,name):
+        self._tab.addTab(QtWidgets.QWidget(), str(name))
+    
+    def __getattr__(self, name):
+        if name == "caption":
+            name = self.setWindowTitle
+
+        return getattr(super(Dialog, self), name)
 
 class GroupBox(QtWidgets.QGroupBox):
     def __init__(self):
@@ -692,6 +707,10 @@ class Dir_Class(object):
 
 Dir = Dir_Class
 
+class TextEdit(QTextEdit):
+    pass
+
+
 class File(QtCore.QFile):
     fichero = None
     mode = None
@@ -702,6 +721,8 @@ class File(QtCore.QFile):
     ReadWrite = QIODevice.ReadWrite
     
     def __init__(self, rutaFichero):
+        if isinstance(rutaFichero, tuple):
+            rutaFichero = rutaFichero[0]
         self.fichero = str(rutaFichero)
         super(File, self).__init__(rutaFichero)
         self.path = os.path.dirname(self.fichero)
