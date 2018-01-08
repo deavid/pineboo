@@ -10,6 +10,8 @@ from optparse import OptionParser
 import signal, importlib
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+import pineboo_fastcgi
+
 dependeces = []
 
 
@@ -66,6 +68,8 @@ import pineboolib.DlgConnect
 import pineboolib
 import pineboolib.main
 #pineboolib.main.main()
+
+path_socket = None
 
 
 def translate_connstring(connstring):
@@ -137,9 +141,9 @@ def main():
                       action="store_true", dest="preload", default=False,
                       help="Load everything. Then exit. (Populates Pineboo cache)")
     
-    parser.add_option("--fcgi",
-                      action="store_true", dest="fcgi", default=False,
-                      help="Start in fastcgi mode")
+    parser.add_option("--fcgiSocket",
+                      dest="fcgiSocket",
+                      help="Start in fastcgi mode", metavar="FCGISOCKET")
     
     
     
@@ -192,7 +196,12 @@ def main():
         user, passwd,driver_alias, host, port, dbname = translate_connstring(options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
     
-    if options.verbose: print("Iniciando en modo FastCGI ...")
+    if options.fcgiSocket:
+        pineboo_fastcgi.path_socket = options.fcgiSocket
+    
+    if options.verbose:
+        
+        print("Iniciando en modo FastCGI ...")
     project.run()
     if options.verbose: print("Cargando Módulos")
     for k,module in sorted(project.modules.items()):
@@ -211,8 +220,9 @@ class parser(object):
          self.prj = prj
  
     def call(self, env):
-        fn = eval(env[0], pineboolib.qsaglobals.__dict__)
-        aList = env[1:]
+        #fn = eval(env[0], pineboolib.qsaglobals.__dict__)
+        fn = eval("flfactppal.fcgiProcessRequest", pineboolib.qsaglobals.__dict__)
+        aList = env
         if aList:
             return fn(aList)
         
@@ -220,12 +230,13 @@ class parser(object):
      
      
  
- 
-app = parser(main())       
+        
     
     
 if __name__ == "__main__":
-    WSGIServer(app, bindAddress='/path/to/fcgi.sock').run()
+    app = parser(main())
+    print("Ruta socket", pineboo_fastcgi.path_socket)
+    WSGIServer(app, bindAddress=pineboo_fastcgi.path_socket).run()
     #gc.collect()
     print("Closing Pineboo...")
     if ret: sys.exit(ret)
