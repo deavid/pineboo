@@ -1,6 +1,6 @@
 from enum import Enum
 
-from PyQt4.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
