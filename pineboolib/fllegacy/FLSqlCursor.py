@@ -877,21 +877,23 @@ class FLSqlCursor(ProjectClass):
 
         self.fieldsNamesUnlock_ = self.d.metadata_.fieldsNamesUnlock()
 
+        
         self.d.isQuery_ = self.metadata().isQuery()
         if (name[len(name)-3:]) == "sys" or self.db().manager().isSystemTable(name):
             self.d.isSysTable_ = True
         else:
             self.d.isSysTable_ = False
 
-        if self.d.isQuery_:
-            qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
-            self.d.query_ = qry.sql()
-            if qry and self.d.query_:
-                self.exec_(self.d.query_)
-            if qry:
-                self.qry.deleteLater()
-        else:
-            self.setName(self.metadata().name(), autopopulate)
+        # if self.d.isQuery_:
+        #     qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
+        #     self.d.query_ = qry.sql()
+        #     if qry and self.d.query_:
+        #         self.exec_(self.d.query_)
+        #     if qry:
+        #         self.qry.deleteLater()
+        # else:
+        #     self.setName(self.metadata().name(), autopopulate)
+        self.setName(self.metadata().name(), autopopulate)
 
         self.d.modeAccess_ = self.Browse
         if cR and r:
@@ -2172,6 +2174,10 @@ class FLSqlCursor(ProjectClass):
     """
     @decorators.NotImplementedWarn
     def exec_(self, query):
+        #if query:
+        #    print("ejecutando consulta " + query)
+        #    QSqlQuery.exec(self, query)
+
         return True
 
     def setNull(self, name):
