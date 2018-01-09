@@ -98,6 +98,42 @@ class MLabelObject(ProjectClass, MReportObject):
         return self.text_
 
     @decorators.BetaImplementation
+    def getChangeHeight(self):
+        return self.changeHeight_
+
+    @decorators.BetaImplementation
+    def setAdjustFontSize(self, a):
+        self.adjustFontSize_ = a
+
+    @decorators.BetaImplementation
+    def setHorizontalAlignment(self, a):
+        self.hAlignment_ = a
+
+    @decorators.BetaImplementation
+    def setVerticalAlignment(self, a):
+        self.vAlignment_ = a
+
+    @decorators.BetaImplementation
+    def setWordWrap(self, wr):
+        self.wordWrap_ = wr
+
+    @decorators.BetaImplementation
+    def setPaintFunction(self, pf):
+        self.paintFunction_ = pf
+
+    @decorators.BetaImplementation
+    def setLabelFunction(self, lf):
+        self.labelFunction_ = lf
+
+    @decorators.BetaImplementation
+    def setChangeHeight(self, ch):
+        self.changeHeight_ = ch
+
+    @decorators.BetaImplementation
+    def setDomNodeData(self, dnd):
+        self.domNodeData_ = dnd
+
+    @decorators.BetaImplementation
     def setPixmap(self, pix):
         if not self.paintFunction_:
             if self.pixmap_:
