@@ -458,6 +458,8 @@ class FLManager(ProjectClass):
         q.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
         q.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
         q.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
+        q.setTablesList(root_.xpath("tables/text()")[0].strip(' \t\n\r'))
+        
         orderBy_ = None
         try:
             orderBy_ = root_.xpath("order/text()")[0].strip(' \t\n\r')
@@ -676,7 +678,7 @@ class FLManager(ProjectClass):
                     fL = qry.fieldList()
                     
                     for f in fL:
-                        print("fieldName = " + f)
+                        #print("fieldName = " + f)
 
                         fieldSection = None
                         pos = f.find(".")

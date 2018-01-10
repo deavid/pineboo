@@ -1,0 +1,48 @@
+
+apt-get install libapache2-mod-fastcgi
+a2enmod fastcgi
+
+
+
+<VirtualHost *:80>
+    ServerName test
+
+    DocumentRoot /var/www/html
+    <Directory />
+        Options +FollowSymLinks +ExecCGI
+        AllowOverride All
+    </Directory>
+
+
+
+    FastCGIExternalServer /var/www/eneboo.fcgi -socket /tmp/eneboo-fastcgi.socket
+</VirtualHost>
+
+
+/etc/init.d/apache2 restart
+
+
+
+
+Apache:
+* libapache2-mod-fastcgi
+- a2enmod fastcgi
+- modificar /etc/apache2/apache2.conf:
+  FastCGIExternalServer /var/www/eneboo.fcgi -socket /tmp/eneboo-fastcgi.socket (al final).
+-service apache2 restart
+
+Adicionalmente he añadido en /var/www/.htaccess (pero no es necesario)
+AddHandler fastcgi-script .fcgi
+
+
+Al realizar la llamada:
+
+http://127.0.0.1/eneboo.fcgi?flfactppal.valorDefectoEmpresa:codpago
+
+CONT
+
+http://127.0.0.1/eneboo.fcgi?flfactppal.ejercicioActual
+
+2014
+
+Saludos

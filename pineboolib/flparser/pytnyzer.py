@@ -771,7 +771,7 @@ class Member(ASTPython):
                         arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1),".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        if value.find(",") > -1 and value.find(")") < value.find(","):
+                        if value.find(",") > -1 and value.find(")") > value.find(","):
                             value = value[0:len(value) - 1]
                             v0 = value[0:value.find(",")]
                             v1 = value[value.find(",") + 1:]

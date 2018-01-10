@@ -696,6 +696,9 @@ class XMLAction(XMLStruct):
 
     def loadRecord(self, cursor = None):
         #if self.formrecord_widget is None:
+        if not getattr(self, "formrecord", None):
+            if Project.debugLevel > 50: print("Record action %s is not defined. Canceled !" % (self.name))
+            return None
         if Project.debugLevel > 50: print("Loading record action %s . . . " % (self.name))
         parent_or_cursor =  cursor # Sin padre, ya que es ventana propia
         self.formrecord_widget = FLFormRecordDB(parent_or_cursor,self, load = True)
@@ -747,7 +750,8 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > -50: print("Opening default formRecord for Action", self.name)
         w = self.loadRecord(cursor)
         #w.init()
-        w.show()
+        if w:
+            w.show()
 
     def execDefaultScript(self):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
@@ -756,6 +760,8 @@ class XMLAction(XMLStruct):
         self.initModule(self.name)
         if getattr(self.script.form,"iface",None):
             self.script.form.iface.main()
+        else:
+            self.script.form.main()
 
     def load_script(self, scriptname, parent= None):
         parent_ = parent

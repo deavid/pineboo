@@ -402,20 +402,38 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if not self.metadata():
             return
         
+        if self._table.query_table:
+            qry = self._prj.conn.manager().query(self.metadata().query())
+            from_ = qry.from_()
+        else:
+            from_ = self.metadata().name()
+        
         for n,field in enumerate(self.metadata().fieldList()):
             #if field.visibleGrid():
             #    sql_fields.append(field.name())
             if field.isPrimaryKey(): self.pkpos.append(n)
             if field.isCompoundKey(): self.ckpos.append(n)
-
-            self.sql_fields.append(field.name())
+            
+            if self._table.query_table:
+                found = False
+                #print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
+                for table in qry.tablesList():
+                    if self._prj.conn.manager().metadata(table).field(field.name()):
+                        self.sql_fields.append("%s.%s" % (table, field.name()))
+                        found = True
+                        break
+                if not found: #Omito los campos que aparentemente no existen
+                    print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (field.name(), self._table.name, qry.tablesList()))
+                    #self.sql_fields.append(field.name())
+                    
+                       
+            else:
+                self.sql_fields.append(field.name())
+            
+            
         self._curname = "cur_" + self._table.name + "_%08d" % (next(self.CURSOR_COUNT))
         
-        if self._table.query_table:
-            qry = self._prj.conn.manager().query(self.metadata().query())
-            self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields), qry.from_(), where_filter, self._cursor, self._cursorConn.db())
-        else:
-            self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields), self.metadata().name(), where_filter, self._cursor, self._cursorConn.db())
+        self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields), from_, where_filter, self._cursor, self._cursorConn.db())
         
             
         self.refreshFetch(1000,self._curname, self.metadata().name(), self._cursor)
@@ -460,13 +478,23 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def value(self, row, fieldName):
         if row == None : return None
         if row < 0 or row >= self.rows: return None
-        col = self.metadata().indexPos(fieldName)
+        col = None
+        if not self._table.query_table:
+            col = self.metadata().indexPos(fieldName)
+        else:
+            for x,fQ in enumerate(self.sql_fields): #Comparo con los campos de la qry, por si hay algun hueco que no se detectaria con indexPos
+                if fieldName == fQ[fQ.find(".") + 1:]:
+                    col = x
+                    break
+                
+            if not col: return None
+            
         campo = self._data[row][col]
 
         type_ = self.metadata().field(fieldName).type()
         
         if type_ in ("serial", "uint", "int"):
-            if not campo == None and not campo == "None":
+            if not campo in (None,"None"):
                 campo = int(campo)
         """
         if self.metadata().field(fieldname).type() == "pixmap":

@@ -27,7 +27,18 @@ class File(object):
 class FileDialog(QtWidgets.QFileDialog):
     
     #def __init__(self):
-        #super(FileDialog, self).__init__()    
+        #super(FileDialog, self).__init__()
+    def getOpenFileName(*args):
+        obj = None
+        parent = QtWidgets.QApplication.activeModalWidget()
+        if len(args) == 2:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]))
+        elif len(args) == 3:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]))
+        elif len(args) == 4:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]), str(args[3]))
+        
+        return obj       
     
     def getExistingDirectory(basedir):
         return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)

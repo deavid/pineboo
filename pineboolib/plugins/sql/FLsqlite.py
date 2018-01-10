@@ -8,7 +8,8 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import auto_qt_translate_text
 from pineboolib.fllegacy.FLUtil import FLUtil
 import traceback
-from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate
+from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate,\
+    QRegExp
 
 
 
@@ -27,6 +28,7 @@ class FLsqlite(object):
     sql = None
     rowsFetched = None
     db_ = None
+    parseFromLatin = None # True por defecto, convierte los datos de entrada y salida a UTF-8 desde Latin1
     
     def __init__(self):
         self.version_ = "0.5"
@@ -40,6 +42,7 @@ class FLsqlite(object):
         self.sql = None
         self.rowsFetched = {}
         self.db_ = None
+        self.parseFromLatin = False
     
     def version(self):
         return self.version_
@@ -72,7 +75,8 @@ class FLsqlite(object):
         if self.conn_:
             self.open_ = True
         
-        self.conn_.text_factory = lambda x: str(x, 'latin1')
+        if self.parseFromLatin:
+            self.conn_.text_factory = lambda x: str(x, 'latin1')
         
         return self.conn_
      
@@ -429,11 +433,19 @@ class FLsqlite(object):
     def notEqualsFields(self, field1, field2):
         ret = False
         try:
+            if not field1[2] == field2[2] and not field2[6]:
+                ret = True 
+            
+            
             if field1[1] == "stringlist" and not field2[1] in ("stringlist","pixmap"):
                 ret = True
             
-            elif field1[1] == "string" and not field2[1] in ("string","time","date"):
-                ret = True
+            elif field1[1] == "string" and (not field2[1] in ("string","time","date") or not field1[3] == field2[3]):
+                if field2[1] in ("time","date") and field1[3] == 20:
+                    ret = False
+                else:
+                    ret = True
+                    
             elif field1[1] == "uint" and not field2[1] in ("int","uint","serial"):
                 ret = True
             elif field1[1] == "bool" and not field2[1] in ("bool","unlock"):
@@ -441,7 +453,8 @@ class FLsqlite(object):
             elif field1[1] == "double" and not field2[1] == "double":
                 ret = True    
                 
-        
+            if ret:
+                print(field1, field2)
         except Exception:
             print(traceback.format_exc())
         return ret
@@ -488,7 +501,7 @@ class FLsqlite(object):
             
             for f in mtd.fieldsNames():
                 field = mtd.field(f)
-                info.append([field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue()])
+                info.append([field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()])
                 
             
             del mtd
@@ -498,7 +511,12 @@ class FLsqlite(object):
             for columns in tablename_or_query:
                 fName = columns[1]
                 fType = columns[2]
-                info.append([fName, self.decodeSqlType(fType)])
+                fSize = 0
+                fAllowNull = (columns[3] == 0)
+                if fType.find("VARCHAR(") > -1:
+                    fSize = int(fType[fType.find("(") + 1: len(fType) -1])
+                    
+                info.append([fName, self.decodeSqlType(fType), not fAllowNull, fSize])
             
             return info
     
@@ -737,33 +755,6 @@ class FLsqlite(object):
         
         return True        
         
-                
-            
-            
-        
-        
-            
-            
-            
-        
-            
-            
-            
-            
-            
-        
-        
-            
-        
-        
-                
-        
-            
-        
-        
-            
-        
-    
     
     def tables(self, typeName = None):
         tl = []
@@ -802,11 +793,75 @@ class FLsqlite(object):
             
             ret = ret + c
         
+        if self.parseFromLatin:  
+            ret = ret # Estoy hay qye arreglarlo si alguien quiere trabajar con latin1
+        
         return ret
     
     
     def queryUpdate(self, name, update, filter):
         sql = "UPDATE %s SET %s WHERE %s" % (name, update, filter)
         return sql
+    
+    
+    def Mr_Proper(self):
+        util = FLUtil()
+        self.db_.dbAux().transaction()
+        rx = QRegExp("^.*[\\d][\\d][\\d][\\d].[\\d][\\d].*[\\d][\\d]$")
+        rx2 = QRegExp("^.*alteredtable[\\d][\\d][\\d][\\d].*$")
+        qry = FLSqlQuery(None, self.db_.dbAux())
+        qry2 = FLSqlQuery(None, self.db_.dbAux())
+        steps = 0
+        item = ""
+        
+        rx3 = QRegExp("^.*\\d{6,9}$")
+        listOldBks = rx3 in self.tables("")
+        
+        qry.exec_("select nombre from flfiles")
+        util.createProgressDialog(util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5)
+        while qry.next():
+            item = qey.value(0)
+            if item.find(rx) > -1 or item.find(rx2) > -1:
+                util.setLabelText(util.tr("Borrando regisro %1").arg(item))
+                qry2.exec_("delete from flfiles where nombre = '%s'" % item)
+                if item.find("alteredtable") > -1:
+                    if item.replace(".mtd","") in self.tables(""):
+                        util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                        qry2.exec_("drop table %s" % (item.replace(".mtd", "")))
+            
+            steps = steps + 1
+            util.setProgress(steps)
+        
+        for item in listOldBks:
+            if item in self.tables(""):
+                util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                qry2.exec_("drop table %s" % item)
+                
+            
+            
+            steps = steps + 1
+            util.setProgress(steps)
+        
+        
+        util.setLabelText(util.tr("Inicializando cachés"))
+        steps = steps + 1
+        util.setProgress(steps)
+        
+        qry.exec_("delete from flmetadata")
+        qry.exec_("delete from flvar")
+        self.db_.manager().cleanupMetaData()
+        self.db_.dbAux().commit()
+        
+        util.setLabelText(util.tr("Vacunando base de datos"))
+        steps = steps + 1
+        util.setProgress(steps)
+        qry2.exec_("vacuum")
+        steps = steps + 1
+        util.setProgress(steps)
+        util.destryProgressDialog()
+        
+                    
+                
+            
 
         
