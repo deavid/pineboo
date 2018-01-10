@@ -416,8 +416,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             
             if self._table.query_table:
                 found = False
-                #print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
                 for table in qry.tablesList():
+                    #print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
                     if self._prj.conn.manager().metadata(table).field(field.name()):
                         self.sql_fields.append("%s.%s" % (table, field.name()))
                         found = True

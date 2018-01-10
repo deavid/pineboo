@@ -377,8 +377,10 @@ class FLManager(ProjectClass):
                         else:
                             field = it
                     
-                        #if not (not fieldsEmpty and table == name and fields.find(field.lower())) == fields.end():
-                        if not fieldsEmpty and table == name and not (field.lower() in fields):
+                        #if not (not fieldsEmpty and table == name and fields.find(field.lower())) != fields.end():
+                        #print("Tabla %s nombre %s campo %s buscando en %s" % (table, name, field, fields))
+                        #if not fieldsEmpty and table == name and (field.lower() in fields): Asi esta en Eneboo, pero incluye campos repetidos
+                        if not fieldsEmpty and (field.lower() in fields):
                             continue
 
                         mtdAux = self.metadata(table, True)
@@ -401,7 +403,7 @@ class FLManager(ProjectClass):
                                         if not isForeignKey:
                                             fmdtAux = FLFieldMetaData(fmtdAux)
                                     
-                                        fmtdAux.setName("%s.%s" % (table, field))
+                                        #fmtdAux.setName("%s.%s" % (table, field))
                                         newRef = False
                             
                                 #if newRef:
