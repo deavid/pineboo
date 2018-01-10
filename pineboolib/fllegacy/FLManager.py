@@ -381,8 +381,6 @@ class FLManager(ProjectClass):
                         if not fieldsEmpty and table == name and not (field.lower() in fields):
                             continue
 
-                        print("tabla " + table + " campo " + field + " name " + name);
-                    
                         mtdAux = self.metadata(table, True)
                         if mtdAux:
                             fmtdAux = mtdAux.field(field)
@@ -678,13 +676,26 @@ class FLManager(ProjectClass):
                     fL = qry.fieldList()
                     
                     for f in fL:
-                        prefixTable = f.section('.', 0, 0)
-                        if f.section('.', 1, 1) == fieldName:
+                        print("fieldName = " + f)
+
+                        fieldSection = None
+                        pos = f.find(".")
+                        if pos > -1:
+                            prefixTable = f[:pos]
+                            fieldSection = f[pos + 1:]
+                        else:
+                            fieldSection = it
+
+
+                        #prefixTable = f.section('.', 0, 0)
+                        #if f.section('.', 1, 1) == fieldName:
+                        if fieldSection == fieldName:
                             break
                     
                     qry.deleteLater()
                     
-                fieldName.prepend(prefixTable + ".")
+                #fieldName.prepend(prefixTable + ".")
+                fieldName = prefixTable + "." + fieldName
                       
             return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])    
                 
