@@ -249,7 +249,7 @@ class FLSqlQuery(ProjectClass):
             if field == "*":
                 mtd = self.d.db_.manager().metadata(table, True)
                 if mtd:
-                    self.d.fieldList_ = mtd.fieldList(True).split(',')
+                    self.d.fieldList_ = mtd.fieldList(True)
                     if not mtd.inCache():
                         del mtd
                 
