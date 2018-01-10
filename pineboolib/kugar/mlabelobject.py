@@ -1,14 +1,15 @@
 from enum import Enum
 
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QDomDocument as FLDomDocument
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
-from pineboolib.fllegacy.FLUtil import FLUtil
-
 from pineboolib.kugar.mreportobject import MReportObject
+
+from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 
 
@@ -62,8 +63,7 @@ class MLabelObject(ProjectClass, MReportObject):
     @decorators.BetaImplementation
     def setText(self, txt):
         if not self.labelFunction_:
-            # if aqApp.multiLangEnabled() and txt: #FIXME
-            if txt:
+            if QtWidgets.QApplication.multiLangEnabled() and txt:
                 self.text_ = txt.decode("utf8")
                 if self.text_ == txt:
                     self.text_ = FLUtil.translate(self, "app", txt)
@@ -77,13 +77,11 @@ class MLabelObject(ProjectClass, MReportObject):
                 dni = FLDomDocument(self.domNodeData_)
                 argList.append(dni)
 
-            # QVariant v(aqApp->call(labelFunction, l, 0).variant()); #FIXME
             v = self.labelFunction_(*argList)
             if v:
                 txtFun = str(v)
 
-                # if aqApp.multiLangEnabled() and txtFun: #FIXME
-                if txtFun:
+                if QtWidgets.QApplication.multiLangEnabled() and txtFun:
                     self.text_ = txtFun.decode("utf8")
                     if self.text_ == txtFun:
                         self.text_ = FLUtil.translate(self, "app", txtFun)
@@ -161,7 +159,6 @@ class MLabelObject(ProjectClass, MReportObject):
                 dni = FLDomDocument(self.domNodeData_)
                 argList.append(dni)
 
-        # QSArgument v = aqApp->call(paintFunction, l, 0); #FIXME
         v = self.paintFunction_(*argList)
         tp = type(v)
 

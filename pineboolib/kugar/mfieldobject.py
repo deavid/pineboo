@@ -1,5 +1,6 @@
 from enum import Enum
 
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
@@ -55,8 +56,7 @@ class MFieldObject(ProjectClass, MLabelObject):
         regexp = Qt.QRegExp("[0-9][0-9](-|//)[0-9][0-9](-|//)[0-9][0-9][0-9][0-9]")
 
         if self.dataType_ == self.DataType.String:
-            # if aqApp.multiLangEnabled() and txt: #FIXME
-            if txt:
+            if QtWidgets.QApplication.multiLangEnabled() and txt:
                 self.text_ = txt.decode("utf8")
                 if self.text_ == txt:
                     self.text_ = FLUtil.translate(self, "app", txt)
