@@ -33,11 +33,11 @@ except ImportError:
 #    dependeces.append("python3-psycopg2")
 
 
-try:
-    import ply
-except ImportError:
-    print(traceback.format_exc())
-    dependeces.append("python3-ply")
+#try:
+#    import ply
+#except ImportError:
+#    print(traceback.format_exc())
+#    dependeces.append("python3-ply")
 
 try:
     import flup
@@ -47,7 +47,7 @@ except ImportError:
 
 try:
 
-    from PyQt5 import QtGui, QtCore, uic, QtWidgets
+    from PyQt5 import QtCore
 except ImportError:
     print(traceback.format_exc())
     dependeces.append("python3-pyqt5")
@@ -144,47 +144,47 @@ def main():
     parser.add_option("--fcgiSocket",
                       dest="fcgiSocket",
                       help="Start in fastcgi mode", metavar="FCGISOCKET")
-    
-    
-    
-    app = QtWidgets.QApplication(sys.argv)
+
+    parser.add_option("--fcgiCall",
+                      dest="fcgiCall",
+                      help="Call the especified function", metavar="FCGICALL")
     
     (options, args) = parser.parse_args()
     
-    noto_fonts = [
-        "NotoSans-BoldItalic.ttf",
-        "NotoSans-Bold.ttf",
-        "NotoSans-Italic.ttf",
-        "NotoSans-Regular.ttf",
-    ]
-    for fontfile in noto_fonts:
-        QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
+    pineboo_fastcgi.fcgiCall = "flfactppal.fcgiProcessRequest"
+    #noto_fonts = [
+    #    "NotoSans-BoldItalic.ttf",
+    #    "NotoSans-Bold.ttf",
+    #    "NotoSans-Italic.ttf",
+    #    "NotoSans-Regular.ttf",
+    #]
+    #for fontfile in noto_fonts:
+    #    QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
     
                                                
-    QtWidgets.QApplication.setStyle("QtCurve")
-    font = QtGui.QFont('Noto Sans',9)
-    font.setBold(False)
-    font.setItalic(False)
-    QtWidgets.QApplication.setFont(font)
-        
+    #QtWidgets.QCoreApplication.setStyle("QtCurve")
+    #font = QtGui.QFont('Noto Sans',9)
+    #font.setBold(False)
+    #font.setItalic(False)
+    #QtWidgets.QCoreApplication.setFont(font)
     pineboolib.no_python_cache = options.no_python_cache
+    
 
     # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
 
-    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
+    #mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
     #mainForm = getattr(module_, "MainForm")()
         
     #from pineboolib import mainForm
 
-    project = pineboolib.main.Project()
-    
+    project = pineboolib.main.Project(True)
     
     if options.verbose:
         project.setDebugLevel(100)
-        mainForm.MainForm.setDebugLevel(100)
+        #mainForm.MainForm.setDebugLevel(100)
     else:
         project.setDebugLevel(0)
-        mainForm.MainForm.setDebugLevel(0)
+        #mainForm.MainForm.setDebugLevel(0)
     if options.project:
         if not options.project.endswith(".xml"):
             options.project += ".xml"
@@ -198,16 +198,26 @@ def main():
     
     if options.fcgiSocket:
         pineboo_fastcgi.path_socket = options.fcgiSocket
+        if os.path.exists(options.fcgiSocket):
+            os.remove(options.fcgiSocket)
+        
+        if options.fcgiCall:
+            pineboo_fastcgi.fcgiCall = options.fcgiCall
+        
+        
+        
+        
     
     if options.verbose:
         
         print("Iniciando en modo FastCGI ...")
+        print("Función de entrada", pineboo_fastcgi.fcgiCall)
     project.run()
     if options.verbose: print("Cargando Módulos")
     for k,module in sorted(project.modules.items()):
-        module.load()
+        module.load(True)
         
-    project.call("sys.widget._class_init()", [], None, True)
+    #project.call("sys.widget._class_init()", [], None, True)
     
     return project
  
@@ -217,26 +227,35 @@ class parser(object):
     prj = None
      
     def __init__(self, prj):
-         self.prj = prj
+        self.prj = prj
  
-    def call(self, env):
-        #fn = eval(env[0], pineboolib.qsaglobals.__dict__)
-        fn = eval("flfactppal.fcgiProcessRequest", pineboolib.qsaglobals.__dict__)
-        aList = env
-        if aList:
-            return fn(aList)
+    def call(self, environ, start_response):
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        fn = None
+        try:
+            import pineboolib.qsaglobals
+            fn = eval(pineboo_fastcgi.fcgiCall, pineboolib.qsaglobals.__dict__)
+        except:
+            print("No se encuentra la función buscada")
+            print(pineboo_fastcgi.fcgiCall,environ["QUERY_STRING"], pineboolib.qsaglobals.__dict__)
+            retorno_ = ('''<html><head><title>Hello World!</title></head><body><h1>Hello world!</h1></body></html>''')
+            pass
         
-     
-     
-     
- 
+        aList = environ["QUERY_STRING"]
+        if aList and fn:
+            retorno_ = fn(aList)
         
+        return retorno_
+
+    
+          
+    
     
     
 if __name__ == "__main__":
-    app = parser(main())
+    par_ = parser(main())
     print("Ruta socket", pineboo_fastcgi.path_socket)
-    WSGIServer(app, bindAddress=pineboo_fastcgi.path_socket).run()
+    WSGIServer(par_.call, bindAddress= pineboo_fastcgi.path_socket).run()
     #gc.collect()
     print("Closing Pineboo...")
     if ret: sys.exit(ret)

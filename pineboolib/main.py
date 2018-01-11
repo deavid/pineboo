@@ -54,8 +54,12 @@ class Project(object):
     multiLangId_ = QtCore.QLocale().name()[:2].upper()
     translator_ = None
     acl_ = None
+    fcgiMode = False
     
-    def __init__(self):
+    def __init__(self, fcgiMode = False):
+        if fcgiMode:
+           self.fcgiMode = True 
+           
         self.tree = None
         self.root = None
         self.dbserver = None
@@ -65,7 +69,8 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self._initModules = []
-        self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
+        if not self.fcgiMode:
+            self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
         self.deleteCache = False
         self.parseProject = False
         
@@ -209,14 +214,17 @@ class Project(object):
         self.cur.execute(""" SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"),"w")
         self.files = {}
-        tiempo_ini = time.time()
+        if not self.fcgiMode:
+            tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")): raise AssertionError
         # if self.parseProject:
-        progressDialog = util.createProgressDialog("Pineboo", size_)
+        if not self.fcgiMode:
+            progressDialog = util.createProgressDialog("Pineboo", size_)
         p = 0
         for idmodulo, nombre, sha in self.cur:
-            util.setProgress((p * 100) / size_)
-            util.setLabelText("Convirtiendo %s." % nombre)
+            if not self.fcgiMode:
+                util.setProgress((p * 100) / size_)
+                util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files: print("WARN: file %s already loaded, overwritting..." % nombre)
@@ -250,9 +258,10 @@ class Project(object):
                 self.parseScript(self.dir("cache" ,fileobj.filekey))
             
             p = p + 1
-        tiempo_fin = time.time()
+        if not self.fcgiMode:
+            tiempo_fin = time.time()
         
-        if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
+            if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
         
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
@@ -265,13 +274,14 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(self.dir(root, nombre))
         
-        try:    
-            util.destroyProgressDialog()
-        except:
-            pass
+        if not self.fcgiMode:
+            try:    
+                util.destroyProgressDialog()
+            except:
+                pass
         
-        self.loadTranslations()
-        self.readState()
+            self.loadTranslations()
+            self.readState()
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
         
@@ -418,11 +428,15 @@ class Module(object):
         self.tables = {}
         self.loaded = False
         self.path = self.prj.path
+        self.fcgiMode = False
 
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
 
-    def load(self):
+    def load(self, fcgiMode = False):
+        if fcgiMode:
+            self.fcgiMode = True
+            
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
@@ -435,8 +449,9 @@ class Module(object):
         try:
             self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
-            self.mainform = MainForm(self, pathui)
-            self.mainform.load()
+            if not self.fcgiMode:
+                self.mainform = MainForm(self, pathui)
+                self.mainform.load()
         except Exception as e:
             print("ERROR al cargar modulo %r:" % self.name, e)
             print(traceback.format_exc(),"---")
@@ -615,18 +630,19 @@ class MainForm(object):
         self.root = self.tree.getroot()
         self.actions = {}
         self.pixmaps = {}
-        for image in self.root.xpath("images/image[@name]"):
-            name = image.get("name")
-            xmldata = image.xpath("data")[0]
-            img_format = xmldata.get("format")
-            data = unhexlify(xmldata.text.strip())
-            if img_format == "XPM.GZ":
-                data = zlib.decompress(data,15)
-                img_format = "XPM"
-            pixmap = QtGui.QPixmap()
-            pixmap.loadFromData(data, img_format)
-            icon = QtGui.QIcon(pixmap)
-            self.pixmaps[name] = icon
+        if not self.prj.fcgiMode:
+            for image in self.root.xpath("images/image[@name]"):
+                name = image.get("name")
+                xmldata = image.xpath("data")[0]
+                img_format = xmldata.get("format")
+                data = unhexlify(xmldata.text.strip())
+                if img_format == "XPM.GZ":
+                    data = zlib.decompress(data,15)
+                    img_format = "XPM"
+                pixmap = QtGui.QPixmap()
+                pixmap.loadFromData(data, img_format)
+                icon = QtGui.QIcon(pixmap)
+                self.pixmaps[name] = icon
 
 
         for xmlaction in self.root.xpath("actions//action"):
@@ -640,8 +656,9 @@ class MainForm(object):
                 try:
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
-                    print("main.Mainform: Error al intentar decodificar icono de accion. No existe.")
-                    print(e)
+                    if not self.prj.fcgiMode:
+                        print("main.Mainform: Error al intentar decodificar icono de accion. No existe.")
+                        print(e)
             else:
                 action.iconSet = None
             #if iconSet:
