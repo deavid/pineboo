@@ -71,11 +71,12 @@ class MLabelObject(ProjectClass, MReportObject):
                 self.text_ = txt
         else:
             dni = 0
-            argList = [txt]
+            argList = Qt.QSArgumentList()
+            argList << txt
 
             if self.domNodeData_ and not self.domNodeData_.isNull():
                 dni = FLDomDocument(self.domNodeData_)
-                argList.append(dni)
+                argList << dni
 
             v = self.labelFunction_(*argList)
             if v:
@@ -153,11 +154,12 @@ class MLabelObject(ProjectClass, MReportObject):
     def draw(self, p):
         if not self.paintFunction_:
             dni = 0
-            argList = [self.text_]
+            argList = Qt.QSArgumentList()
+            argList << self.text_
 
             if self.domNodeData_ and not self.domNodeData_.isNull():
                 dni = FLDomDocument(self.domNodeData_)
-                argList.append(dni)
+                argList << dni
 
         v = self.paintFunction_(*argList)
         tp = type(v)
