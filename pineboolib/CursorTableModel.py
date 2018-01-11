@@ -66,6 +66,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             raise AssertionError
         
         self.sql_fields = []
+        self.sql_fields_omited = []
         self.field_aliases = []
         self.field_type = []
         self.field_metaData = []
@@ -422,9 +423,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                         self.sql_fields.append("%s.%s" % (table, field.name()))
                         found = True
                         break
-                if not found: #Omito los campos que aparentemente no existen
-                    print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (field.name(), self._table.name, qry.tablesList()))
-                    #self.sql_fields.append(field.name())
+                if not found and not field.name() in self.sql_fields_omited: #Omito los campos que aparentemente no existen
+                    if self._prj.debugLevel > 50:
+                        print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (field.name(), self._table.name, qry.tablesList()))
+                    self.sql_fields_omited.append(field.name())
                     
                        
             else:
