@@ -89,7 +89,7 @@ class MFieldObject(ProjectClass, MLabelObject):
 
                 if ret == -1:
                     year = txt[:4]
-                    day = txt[2:]
+                    day = txt[-2:]
                     month = txt[5:7]
 
                     if int(year) != 0 and int(month) != 0 and int(day) != 0:
@@ -190,7 +190,7 @@ class MFieldObject(ProjectClass, MLabelObject):
         else:
             offset = 0
 
-        pos = self.text_.find(".")
+        pos = self.text_.rfind(".")
         if pos == -1:
             pos = len(self.text_)
         else:
