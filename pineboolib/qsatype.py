@@ -20,6 +20,7 @@ from pineboolib.flcontrols import FLTable, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
+from pineboolib.fllegacy import FLFieldDB as FLFieldDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
@@ -335,6 +336,20 @@ class FormDBWidget(QtWidgets.QWidget):
         else:
             if ret is None:
                 qWarning("WARN: No se encontro el control %s" % childName)
+        
+        #Para inicializar los controles si se llaman desde qsa antes de mostrar el formulario.
+        if isinstance(ret, FLFieldDB_Legacy.FLFieldDB):
+            if not ret.cursor():
+                ret.initCursor()
+            if not ret.editor_ and not ret.editorImg_:
+                ret.initEditor()
+        
+        if isinstance(ret, FLTableDB_Legacy.FLTableDB):
+            if not ret.tableRecords_:
+                ret.tableRecords()
+                ret.setTableRecordsCursor()
+        
+        
         #else:
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
         return ret
