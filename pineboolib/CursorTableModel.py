@@ -394,11 +394,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._cursor = self._cursorConn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # TODO: Convertir esto a un cursor de servidor (hasta 20.000 registros funciona bastante bien)
-        if self._table.query_table:
+        #if self._table.query_table:
             # FIXME: Como no tenemos soporte para Queries, desactivamos el refresh.
-            print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
-            
-            return
+            #print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
+            #return
         
         if not self.metadata():
             return
@@ -412,7 +411,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.sql_fields.append(field.name())
         self._curname = "cur_" + self._table.name + "_%08d" % (next(self.CURSOR_COUNT))
         
-        self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields),self.metadata().name(), where_filter, self._cursor, self._cursorConn.db())
+        if self._table.query_table:
+            qry = self._prj.conn.manager().query(self.metadata().query())
+            self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields), qry.from_(), where_filter, self._cursor, self._cursorConn.db())
+        else:
+            self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields), self.metadata().name(), where_filter, self._cursor, self._cursorConn.db())
         
             
         self.refreshFetch(1000,self._curname, self.metadata().name(), self._cursor)
