@@ -71,11 +71,12 @@ class MLabelObject(ProjectClass, MReportObject):
                 self.text_ = txt
         else:
             dni = 0
-            argList = [txt]
+            argList = Qt.QSArgumentList()
+            argList << txt
 
             if self.domNodeData_ and not self.domNodeData_.isNull():
                 dni = FLDomDocument(self.domNodeData_)
-                argList.append(dni)
+                argList << dni
 
             v = self.labelFunction_(*argList)
             if v:
@@ -153,11 +154,12 @@ class MLabelObject(ProjectClass, MReportObject):
     def draw(self, p):
         if not self.paintFunction_:
             dni = 0
-            argList = [self.text_]
+            argList = Qt.QSArgumentList()
+            argList << self.text_
 
             if self.domNodeData_ and not self.domNodeData_.isNull():
                 dni = FLDomDocument(self.domNodeData_)
-                argList.append(dni)
+                argList << dni
 
         v = self.paintFunction_(*argList)
         tp = type(v)
@@ -181,9 +183,10 @@ class MLabelObject(ProjectClass, MReportObject):
             return self.height_ if self.changeHeight_ else 0
 
         if False:
-            # Parte if MAC #FIXME
+            # MAC #FIXME
             pass
         else:
+            # LINUX/WIN32
             originalHeight = self.height_
 
             tf = 0
@@ -302,7 +305,7 @@ class MLabelObject(ProjectClass, MReportObject):
                 p.painter().save(self.name())
                 p.painter().scale(float(self.width_) / float(self.pixmap_.width()), float(self.height_) / float(self.pixmap_.height()))
             else:
-                # qWarning("MLabelObject::drawPixmap : width and/or height are not valid"); #FIXME
+                Qt.qWarning("MLabelObject::drawPixmap : width and/or height are not valid")
                 return False
 
             p.painter().drawPixmap(0, 0, pixmap)
