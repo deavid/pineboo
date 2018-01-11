@@ -219,7 +219,11 @@ def proxy_fn(wf, wr, slot):
         if not f: return None
         r = wr()
         if not r: return None
-        print("Weak connect: receiver: %r:%r" % (r, slot))
+
+        # Apaño para conectar los clicked()
+        if args == (False,):
+            return f()
+
         return f(*args, **kwargs)
     return fn
 

@@ -28,6 +28,7 @@ def id_translate(name):
     if name == "Dir": name = "qsatype.Dir"
     if name == "findRev": name = "find"
     if name == "toLowerCase": name = "lower"
+    if name == "toUpperCase": name = "upper"
     if name == "Process": name = "qsatype.Process"
     return name
 
@@ -745,7 +746,8 @@ class Member(ASTPython):
             "left" ,
             "right" ,
             "mid" ,
-            "charAt"
+            "charAt" , 
+            "charCodeAt"
         ]
         for member in replace_members:
             for idx,arg in enumerate(arguments):
@@ -787,8 +789,10 @@ class Member(ASTPython):
                         value = arg[7:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
-
-
+                    elif member == "charCodeAt":
+                        value = arg[11:]
+                        value = value[:len(value) - 1]
+                        arguments = ["ord(%s[%s])" % (".".join(part1), value)] + part2
 
                     else:
                         if ".".join(part1):
