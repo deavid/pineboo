@@ -20,11 +20,11 @@ class MCalcObject(ProjectClass, MFieldObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MCalcObject, self).__init__()
-
-        if isinstance(args[0], MCalcObject):
+        if len(args) and isinstance(args[0], MCalcObject):
             self.copy(args[0])
         else:
+            super(MCalcObject, self).__init__()
+
             self.calcType_ = self.CalculationType.Count
             self.calcFunction_ = None
             self.drawAtHeader_ = None

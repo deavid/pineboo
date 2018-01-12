@@ -137,11 +137,13 @@ class MReportEngine(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MReportEngine, self).__init__(*args)
+        if len(args) > 1 and isinstance(args[0], MReportEngine):
+            super(MReportEngine, self).__init__(args[1])
 
-        if isinstance(args[0], MReportEngine):
             self.copy(args[0])
         else:
+            super(MReportEngine, self).__init__(args[0])
+
             self.pageSize_ = self.PageSize.A4
             self.pageOrientation_ = self.PageOrientation.Portrait
             self.topMargin_ = 0

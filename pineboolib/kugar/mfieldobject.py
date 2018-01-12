@@ -28,11 +28,11 @@ class MFieldObject(ProjectClass, MLabelObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MFieldObject, self).__init__()
-
-        if isinstance(args[0], MFieldObject):
+        if len(args) and isinstance(args[0], MFieldObject):
             self.copy(args[0])
         else:
+            super(MFieldObject, self).__init__()
+
             self.fieldName_ = ""
             self.dataType_ = self.DataType.String
             self.format_ = MUtil.DateFormatType.MDY_SLASH

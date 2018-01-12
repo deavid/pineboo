@@ -10,11 +10,11 @@ class MPageCollection(ProjectClass):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MPageCollection, self).__init__()
-
         if isinstance(args[0], MPageCollection):
             self.copy(args[0])
         else:
+            super(MPageCollection, self).__init__(*args)
+
             self.pages_ = Qt.QPtrList()
             self.pages_.setAutoDelete(True)
             self.size_ = MReportEngine.PageSize.Letter

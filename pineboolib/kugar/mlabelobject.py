@@ -34,11 +34,11 @@ class MLabelObject(ProjectClass, MReportObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MLabelObject, self).__init__()
-
-        if isinstance(args[0], MLabelObject):
+        if len(args) and isinstance(args[0], MLabelObject):
             self.copy(args[0])
         else:
+            super(MLabelObject, self).__init__()
+
             self.text_ = ""
 
             self.fontFamily_ = "times"

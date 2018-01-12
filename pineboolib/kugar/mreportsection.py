@@ -18,7 +18,7 @@ class MReportSection(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MReportSection, self).__init__(*args)
+        super(MReportSection, self).__init__()
 
         if isinstance(args[0], MReportSection):
             self.copy(args[0])

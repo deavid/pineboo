@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 
 from PyQt5.QtCore import Qt
@@ -138,4 +139,4 @@ class MUtil(ProjectClass):
 
     @decorators.BetaImplementation
     def stdDeviation(self, values):
-        return sqrt(self.variance(values))
+        return math.sqrt(self.variance(values))

@@ -20,11 +20,11 @@ class MLineObject(ProjectClass):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MLineObject, self).__init__()
-
-        if isinstance(args[0], MLineObject):
+        if len(args) and isinstance(args[0], MLineObject):
             self.copy(args[0])
         else:
+            super(MLineObject, self).__init__()
+
             self.xpos1_ = 0
             self.ypos1_ = 0
             self.xpos2_ = 0
