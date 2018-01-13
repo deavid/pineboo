@@ -31,11 +31,11 @@ except ImportError:
 #    dependeces.append("python3-psycopg2")
 
 
-#try:
-#    import ply
-#except ImportError:
-#    print(traceback.format_exc())
-#    dependeces.append("python3-ply")
+try:
+    import ply
+except ImportError:
+    print(traceback.format_exc())
+    dependeces.append("python3-ply")
 
 
 try:
@@ -189,7 +189,7 @@ def main():
         
         #from pineboolib import mainForm
 
-    project = pineboolib.main.Project(not DGI.useDesktop())
+    project = pineboolib.main.Project(DGI)
     
     
     if options.verbose:

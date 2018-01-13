@@ -272,12 +272,17 @@ def check_gc_referrers(typename, w_obj, name):
     threading.Thread(target = checkfn).start()
     
 
+
 class FormDBWidget(QtWidgets.QWidget):
 
     closed =  QtCore.pyqtSignal()
     cursor_ = None
     
     def __init__(self, action, project, parent = None):
+        if not action.prj._DGI.useDesktop():
+            self._class_init()
+            return
+        
         super(FormDBWidget, self).__init__(parent)
         self._action = action
         self.cursor_ = None

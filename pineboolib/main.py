@@ -54,12 +54,10 @@ class Project(object):
     multiLangId_ = QtCore.QLocale().name()[:2].upper()
     translator_ = None
     acl_ = None
-    fcgiMode = False
+    _DGI = None
     
-    def __init__(self, fcgiMode = False):
-        if fcgiMode:
-           self.fcgiMode = True 
-           
+    def __init__(self, DGI):
+        self._DGI = DGI   
         self.tree = None
         self.root = None
         self.dbserver = None
@@ -69,7 +67,7 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self._initModules = []
-        if not self.fcgiMode:
+        if self._DGI.useDesktop():
             self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
         self.deleteCache = False
         self.parseProject = False
@@ -214,15 +212,15 @@ class Project(object):
         self.cur.execute(""" SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"),"w")
         self.files = {}
-        if not self.fcgiMode:
+        if self._DGI.useDesktop():
             tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")): raise AssertionError
         # if self.parseProject:
-        if not self.fcgiMode:
+        if self._DGI.useDesktop():
             progressDialog = util.createProgressDialog("Pineboo", size_)
         p = 0
         for idmodulo, nombre, sha in self.cur:
-            if not self.fcgiMode:
+            if self._DGI.useDesktop():
                 util.setProgress((p * 100) / size_)
                 util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules: continue # I
@@ -258,7 +256,7 @@ class Project(object):
                 self.parseScript(self.dir("cache" ,fileobj.filekey))
             
             p = p + 1
-        if not self.fcgiMode:
+        if self._DGI.useDesktop():
             tiempo_fin = time.time()
         
             if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
@@ -274,7 +272,7 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(self.dir(root, nombre))
         
-        if not self.fcgiMode:
+        if self._DGI.useDesktop():
             try:    
                 util.destroyProgressDialog()
             except:
@@ -630,7 +628,7 @@ class MainForm(object):
         self.root = self.tree.getroot()
         self.actions = {}
         self.pixmaps = {}
-        if not self.prj.fcgiMode:
+        if self.prj._DGI.useDesktop():
             for image in self.root.xpath("images/image[@name]"):
                 name = image.get("name")
                 xmldata = image.xpath("data")[0]
@@ -737,7 +735,18 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > 50: print("Loading action %s . . . " % (self.name))
         w = self.prj.main_window
         if not self.mainform_widget:
-            self.mainform_widget = FLMainForm(w,self, load = True)
+            if self.prj._DGI.useDesktop():
+                self.mainform_widget = FLMainForm(w,self, load = True)
+            else:
+                from pineboolib.utils import Struct
+                self.mainform_widget = Struct()
+                self.mainform_widget.action = self
+                self.mainform_widget.prj = self.prj
+                try:
+                    self.load_script(getattr(self,"scriptform", None), self.mainform_widget)
+                except Exception:
+                    print(traceback.format_exc(),"---")
+                
         self._loaded = True
         if Project.debugLevel > 50: print("End of action load %s (iface:%s ; widget:%s)"
               % (self.name,
@@ -745,7 +754,6 @@ class XMLAction(XMLStruct):
                 repr(self.mainform_widget.widget)
                 )
             )
-        
         return self.mainform_widget
 
     def openDefaultForm(self):
