@@ -72,16 +72,15 @@ class parser(object):
     def call(self, environ, start_response):
         start_response('200 OK', [('Content-Type', 'text/html')])
         fn = None
-        print("FCGI:INFO: Processing '%s' ..." % environ["QUERY_STRING"])
         try:
             import pineboolib.qsaglobals
             fn = eval(self._callScript , pineboolib.qsaglobals.__dict__)
         except:
             print("No se encuentra la función buscada")
-            print(self._callScript ,environ["QUERY_STRING"], pineboolib.qsaglobals.__dict__)
+            print(self._callScript ,environ["QUERY_STRING"])
             retorno_ = ('''<html><head><title>Hello World!</title></head><body><h1>Hello world!</h1></body></html>''')
             pass
-        
+        print("FCGI:INFO: Processing '%s' ..." % environ["QUERY_STRING"])
         aList = environ["QUERY_STRING"]
         if aList and fn:
             retorno_ = fn(aList)

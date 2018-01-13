@@ -33,7 +33,7 @@ a2enmod fastcgi
 
 Iniciamos pineboo (carga el proyecto projects/p.xml, con --load p):
 
-sudo -u www-data ./pineboo.py --dgi fcgi --dgi_parameter "flfactppal.valorDefectoEmpresa:/tmp/pineboo-fastcgi.socket" --load p
+sudo -u www-data ./pineboo.py --dgi fcgi --dgi_parameter "flfactppal.iface.valorDefectoEmpresa:/tmp/pineboo-fastcgi.socket" --load p
 
 Opciones para dgi_parameter:
 
@@ -43,7 +43,7 @@ Opciones para dgi_parameter:
 
 
 
-También podemos cargar sin pasar parámetros: (Se cargarian los valores por defecto /tmp/pineboo-fastcgi.socket y flfactppal.fcgiProcessRequest
+También podemos cargar sin pasar parámetros: (Se cargarian los valores por defecto /tmp/pineboo-fastcgi.socket y flfactppal.iface.fcgiProcessRequest
 
 sudo -u www-data ./pineboo.py --dgi fcgi --load p
 
