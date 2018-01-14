@@ -30,22 +30,18 @@ class dgi_fcgi(dgi_schema):
         super(dgi_fcgi, self).__init__() #desktopEnabled y mlDefault a True
         self._name = "fcgi"
         self._alias = "FastCGI"
-        self._fcgiCall = "flfactppal.fcgiProcessRequest"
+        self._fcgiCall = "flfactppal.iface.fcgiProcessRequest"
         self._fcgiSocket = "/tmp/pineboo-fastcgi.socket"
-        self._desktopEnabled = False
-        self._mLDefault = False
-        print("")
-        print("=============================================")
-        print("                 FAST-CGI MODE               ")
-        print("=============================================")
-        print("")
-        print("")
+        self.setUseDesktop(False)
+        self.setUseMLDefault(False)
+        self.showInitBanner()
+
         
     
     def alternativeMain(self, main_):
         print("=============================================")
-        print("FCGI:INFO: Listen socket", self._fcgiSocket)
-        print("FCGI:INFO: Send queries to", self._fcgiCall)
+        print("FCGI:INFO: Listening socket", self._fcgiSocket)
+        print("FCGI:INFO: Sending queries to", self._fcgiCall)
         par_ = parser(main_, self._fcgiCall)
         WSGIServer(par_.call, bindAddress= self._fcgiSocket).run()
     
