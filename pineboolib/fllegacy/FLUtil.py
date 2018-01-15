@@ -24,7 +24,6 @@ class FLUtil(ProjectClass):
                    'setecientos','ochocientos','novecientos']
 
 
-
     """
     Clase con métodos, herramientas y utiles necesarios para ciertas operaciones.
 
@@ -821,7 +820,7 @@ class FLUtil(ProjectClass):
         result = False
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
-        cursor = self._prj.conn.cursor()
+        cursor = pineboolib.project.conn.cursor()
         if not found:   
             sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % ( key, value)
         else:
@@ -836,7 +835,8 @@ class FLUtil(ProjectClass):
         
         cursor.close()
         return True
-        
+
+      
     """
     Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -848,7 +848,8 @@ class FLUtil(ProjectClass):
     """
     def roundFieldValue(self, n, table, field):
 
-        tmd = self._prj.conn.manager().metadata(table)
+        #tmd = self._prj.conn.manager().metadata(table)
+        tmd = pineboolib.project.conn.manager().metadata(table)
         if not tmd:
             return 0
         fmd = tmd.field(field)
@@ -1222,7 +1223,7 @@ class FLUtil(ProjectClass):
     """
 
     def execSql(self, sql, connName = "default"):
-        conn_ = self._prj.conn.useConn(connName)
+        conn_ = pineboolib.project.conn.useConn(connName)
         cur = conn_.cursor()
         try:
             cur.execute(sql)
