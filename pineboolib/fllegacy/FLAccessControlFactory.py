@@ -56,7 +56,7 @@ class FLAccessControlMainWindow(FLAccessControl):
     perm_ = None
     
     def __init__(self):
-        super(FLAccessControlForm, self).__init__()
+        super(FLAccessControlMainWindow, self).__init__()
     
     """
   Dado un objeto general (tipo QObject) de alto nivel, identifica si existe un controlador que puede controlar

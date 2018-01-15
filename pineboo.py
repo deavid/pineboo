@@ -10,7 +10,7 @@ from optparse import OptionParser
 import signal, importlib, pineboo
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-dependeces = []
+dependences = []
 
 
 if sys.version_info[0] < 3:
@@ -22,7 +22,7 @@ try:
     from lxml import etree
 except ImportError:
     print(traceback.format_exc())
-    dependeces.append("python3-lxml")
+    dependences.append("python3-lxml")
  
 #try:
 #    import psycopg2
@@ -35,7 +35,7 @@ try:
     import ply
 except ImportError:
     print(traceback.format_exc())
-    dependeces.append("python3-ply")
+    dependences.append("python3-ply")
 
 
 try:
@@ -43,12 +43,12 @@ try:
     from PyQt5 import QtGui, QtCore, uic, QtWidgets
 except ImportError:
     print(traceback.format_exc())
-    dependeces.append("python3-pyqt5")
+    dependences.append("python3-pyqt5")
 
-if len(dependeces) > 0:
+if len(dependences) > 0:
     print()
     print("HINT: Dependencias incumplidas:")
-    for dep in dependeces:
+    for dep in dependences:
         print("HINT: Instale el paquete %s e intente de nuevo" % dep)
     print()
     sys.exit(32)
