@@ -2065,7 +2065,7 @@ class FLSqlCursor(ProjectClass):
                 qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
                 if qry:
                     sqlPriKey = "%s.%s" % (self.d.metadata_.name(), pKN)
-                    sqlFrom = qry.From()
+                    sqlFrom = qry.from_()
                     sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
                     qry.deleteLater()
                 else:

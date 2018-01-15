@@ -377,8 +377,10 @@ class FLManager(ProjectClass):
                         else:
                             field = it
                     
-                        #if not (not fieldsEmpty and table == name and fields.find(field.lower())) == fields.end():
-                        if not fieldsEmpty and table == name and not (field.lower() in fields):
+                        #if not (not fieldsEmpty and table == name and fields.find(field.lower())) != fields.end():
+                        #print("Tabla %s nombre %s campo %s buscando en %s" % (table, name, field, fields))
+                        #if not fieldsEmpty and table == name and (field.lower() in fields): Asi esta en Eneboo, pero incluye campos repetidos
+                        if not fieldsEmpty and (field.lower() in fields):
                             continue
 
                         mtdAux = self.metadata(table, True)
@@ -401,7 +403,7 @@ class FLManager(ProjectClass):
                                         if not isForeignKey:
                                             fmdtAux = FLFieldMetaData(fmtdAux)
                                     
-                                        fmtdAux.setName("%s.%s" % (table, field))
+                                        #fmtdAux.setName("%s.%s" % (table, field))
                                         newRef = False
                             
                                 #if newRef:
@@ -458,6 +460,8 @@ class FLManager(ProjectClass):
         q.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
         q.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
         q.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
+        q.setTablesList(root_.xpath("tables/text()")[0].strip(' \t\n\r'))
+        
         orderBy_ = None
         try:
             orderBy_ = root_.xpath("order/text()")[0].strip(' \t\n\r')
@@ -676,7 +680,7 @@ class FLManager(ProjectClass):
                     fL = qry.fieldList()
                     
                     for f in fL:
-                        print("fieldName = " + f)
+                        #print("fieldName = " + f)
 
                         fieldSection = None
                         pos = f.find(".")

@@ -3,7 +3,7 @@
 # ------ Pythonyzer ... reads XML AST created by postparse.py and creates an equivalent Python file.
 from builtins import object
 from optparse import OptionParser
-import os, os.path, random
+import os, os.path, random, re
 from . import flscriptparse
 from lxml import etree
 
@@ -28,6 +28,7 @@ def id_translate(name):
     if name == "Dir": name = "qsatype.Dir"
     if name == "findRev": name = "find"
     if name == "toLowerCase": name = "lower"
+    if name == "toUpperCase": name = "upper"
     if name == "Process": name = "qsatype.Process"
     return name
 
@@ -745,7 +746,9 @@ class Member(ASTPython):
             "left" ,
             "right" ,
             "mid" ,
-            "charAt"
+            "charAt" , 
+            "charCodeAt",
+            "arg"
         ]
         for member in replace_members:
             for idx,arg in enumerate(arguments):
@@ -771,7 +774,7 @@ class Member(ASTPython):
                         arguments = ["%s[(len(%s) - (%s)):]" % (".".join(part1),".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        if value.find(",") > -1 and value.find(")") < value.find(","):
+                        if value.find(",") > -1 and value.find(")") > value.find(","):
                             value = value[0:len(value) - 1]
                             v0 = value[0:value.find(",")]
                             v1 = value[value.find(",") + 1:]
@@ -787,8 +790,25 @@ class Member(ASTPython):
                         value = arg[7:]
                         value = value[:len(value) - 1]
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
-
-
+                    elif member == "charCodeAt":
+                        value = arg[11:]
+                        value = value[:len(value) - 1]
+                        arguments = ["ord(%s[%s])" % (".".join(part1), value)] + part2
+                    elif member == "arg":
+                        value = arg[4:]
+                        value = value[:len(value) - 1]
+                        sPart1 = ".".join(part1);
+                        strValue = "str(" + value + ")";
+                        if sPart1.find(strValue) > -1:
+                            arguments = [sPart1]
+                        else:
+                            sPart2 = "";
+                            if len(part2) > 0:
+                                for i in range(len(part2)):
+                                    part2[i] = str(part2[i]).replace("arg", "str")
+                                sPart2 = ", " + ", ".join(part2)
+                            sPart1 = re.sub(r"%\d", "%s", sPart1)
+                            arguments = ["%s %% (str(%s" % (sPart1, value + ")" + sPart2 + ")")]
 
                     else:
                         if ".".join(part1):
