@@ -1129,6 +1129,11 @@ class FLSqlCursor(ProjectClass):
     def setValueBuffer(self, fN, v):
         if not self.buffer() or not fN or not self.metadata():
             return
+
+        field = self.metadata().field(fN)
+        if not field:
+            print("FLSqlCursor::setValueBuffer() : No existe el campo %s:%s" % (self.curName(), fN))
+            return
         
         if not self.buffer().hasChanged(fN, v):
             return
