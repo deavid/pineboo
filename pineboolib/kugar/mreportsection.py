@@ -18,7 +18,6 @@ class MReportSection(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MReportSection, self).__init__(*args)
 
         if isinstance(args[0], MReportSection):
             self.copy(args[0])
@@ -112,13 +111,13 @@ class MReportSection(ProjectClass, QObject):
                 if values2:
                     value = values2[i]
                 self.calculateField(field, 0, value, record, fillRecord)
-            else if calcType == MCalcObject.CalculationType.CallFunction:
+            elif calcType == MCalcObject.CalculationType.CallFunction:
                 self.calculateField(field, 0, value, record, fillRecord)
             else:
                 if values:
                     self.calculateField(field, values.at(i), value, record, fillRecord)
 
-            i++
+            i = i + 1
             field = self.calculatedFields_.next()
 
     @decorators.BetaImplementation
@@ -141,36 +140,36 @@ class MReportSection(ProjectClass, QObject):
     def calculateField(self, field, values, values2, record, fillRecord):
         calcType = field.getCalculationType()
 
-        if calcType = MCalcObject.CalculationType.Count:
+        if calcType == MCalcObject.CalculationType.Count:
             if values:
                 field.setText(int(MUtil.count(values)))
                 if record and fillRecord:
                     record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
-        elif calcType = MCalcObject.CalculationType.Sum:
+        elif calcType == MCalcObject.CalculationType.Sum:
             if values:
                 field.setText(int(MUtil.sum(values), 'f'))
                 if record and fillRecord:
                     record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
-        elif calcType = MCalcObject.CalculationType.Average:
+        elif calcType == MCalcObject.CalculationType.Average:
             if values:
                 field.setText(int(MUtil.average(values), 'f'))
                 if record and fillRecord:
                     record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
-        elif calcType = MCalcObject.CalculationType.Variance:
+        elif calcType == MCalcObject.CalculationType.Variance:
             if values:
                 field.setText(int(MUtil.variance(values), 'f'))
                 if record and fillRecord:
                     record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
-        elif calcType = MCalcObject.CalculationType.StandardDeviation:
+        elif calcType == MCalcObject.CalculationType.StandardDeviation:
             if values:
                 field.setText(int(MUtil.stdDeviation(values), 'f'))
                 if record and fillRecord:
                     record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
-        elif calcType = MCalcObject.CalculationType.NoOperation:
+        elif calcType == MCalcObject.CalculationType.NoOperation:
             field.setText(values2)
             if fillRecord and values2 != "":
                 record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
-        elif calcType = MCalcObject.CalculationType.CallFunction:
+        elif calcType == MCalcObject.CalculationType.CallFunction:
             if record and field.getCalculationFunction() != "":
                 dni = FLDomNodeInterface(record)
                 argList = Qt.QSArgumentList()

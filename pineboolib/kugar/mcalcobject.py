@@ -1,13 +1,12 @@
 from enum import Enum
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mfieldobject import MFieldObject
 from pineboolib.kugar.mreportobject import MReportObject
 
 
-class MCalcObject(ProjectClass, MFieldObject):
+class MCalcObject(MFieldObject):
 
     class CalculationType(Enum):
         Count = 0
@@ -20,11 +19,11 @@ class MCalcObject(ProjectClass, MFieldObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MCalcObject, self).__init__()
-
-        if isinstance(args[0], MCalcObject):
+        if len(args) and isinstance(args[0], MCalcObject):
             self.copy(args[0])
         else:
+            super(MCalcObject, self).__init__()
+
             self.calcType_ = self.CalculationType.Count
             self.calcFunction_ = None
             self.drawAtHeader_ = None

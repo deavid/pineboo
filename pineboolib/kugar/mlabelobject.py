@@ -5,15 +5,14 @@ from PyQt5.QtCore import Qt
 from PyQt5.Qt import QDomDocument as FLDomDocument
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mreportobject import MReportObject
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 
 
-class MLabelObject(ProjectClass, MReportObject):
+class MLabelObject(MReportObject):
 
     class FontWeight(Enum):
         Light = 25
@@ -34,11 +33,11 @@ class MLabelObject(ProjectClass, MReportObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MLabelObject, self).__init__()
-
-        if isinstance(args[0], MLabelObject):
+        if len(args) and isinstance(args[0], MLabelObject):
             self.copy(args[0])
         else:
+            super(MLabelObject, self).__init__()
+
             self.text_ = ""
 
             self.fontFamily_ = "times"

@@ -1,6 +1,7 @@
 from enum import Enum
 
-from PyQt4.QtCore import Qt
+from PyQt5.QtCore import Qt
+from PyQt5.QtCore.Qt import QObject
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -10,7 +11,7 @@ from pineboolib.fllegacy.FLPicture import FLPicture
 from pineboolib.kugar.mpagecollection import MPageCollection
 
 
-class FLReportPages(ProjectClass):
+class FLReportPages(ProjectClass, QObject):
 
     class PageOrientation(Enum):
         Portrait = 0
@@ -72,37 +73,37 @@ class FLReportPages(ProjectClass):
     def getCurrentPage(self):
         if self.pages_:
             return FLPicture(self.pages_.getCurrentPage(), self)
-        return False
+        return 0
 
     @decorators.BetaImplementation
     def getFirstPage(self):
         if self.pages_:
             return FLPicture(self.pages_.getFirstPage(), self)
-        return False
+        return 0
 
     @decorators.BetaImplementation
     def getPreviousPage(self):
         if self.pages_:
             return FLPicture(self.pages_.getPreviousPage(), self)
-        return False
+        return 0
 
     @decorators.BetaImplementation
     def getNextPage(self):
         if self.pages_:
             return FLPicture(self.pages_.getNextPage(), self)
-        return False
+        return 0
 
     @decorators.BetaImplementation
     def getLastPage(self):
         if self.pages_:
             return FLPicture(self.pages_.getLastPage(), self)
-        return False
+        return 0
 
     @decorators.BetaImplementation
     def getPageAt(self, i):
         if self.pages_:
             return FLPicture(self.pages_.getPageAt(i), self)
-        return False
+        return 0
 
     @decorators.BetaImplementation
     def clearPages(self):

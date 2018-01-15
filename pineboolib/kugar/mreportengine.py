@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QObject
 from PyQt5.Qt import QPaintDevice
-from PyQt5.Qt import QMap
+# from PyQt5.Qt import QMap
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -13,24 +13,24 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib.kugar.mreportsection import MReportSection
 from pineboolib.kugar.mpagecollection import MPageCollection
 from pineboolib.kugar.mlabelobject import MLabelObject
-from pineboolib.kugar.mlabelobject import MFieldObject
-from pineboolib.kugar.mlabelobject import MLineObject
-from pineboolib.kugar.mlabelobject import MCalcObject
-from pineboolib.kugar.mlabelobject import MSpecialObject
+from pineboolib.kugar.mfieldobject import MFieldObject
+from pineboolib.kugar.mlineobject import MLineObject
+from pineboolib.kugar.mcalcobject import MCalcObject
+from pineboolib.kugar.mspecialobject import MSpecialObject
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLStylePainter import FLStylePainter
-from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
-from pineboolib.fllegacy.FLDiskCache import FLDiskCache
+# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+# from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
+# from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 
-from pineboolib.fllegacy.AQOdsGenerator import AQOdsGenerator
-from pineboolib.fllegacy.AQOdsSpreadSheet import AQOdsSpreadSheet
-from pineboolib.fllegacy.AQOdsSheet import AQOdsSheet
-from pineboolib.fllegacy.AQOdsRow import AQOdsRow
-from pineboolib.fllegacy.AQOdsColor import AQOdsColor
-from pineboolib.fllegacy.AQOdsStyle import AQOdsStyle
-from pineboolib.fllegacy.AQOdsImage import AQOdsImage
-from pineboolib.fllegacy.AQOdsCentimeters import AQOdsCentimeters
+# from pineboolib.fllegacy.AQOdsGenerator import AQOdsGenerator
+# from pineboolib.fllegacy.AQOdsSpreadSheet import AQOdsSpreadSheet
+# from pineboolib.fllegacy.AQOdsSheet import AQOdsSheet
+# from pineboolib.fllegacy.AQOdsRow import AQOdsRow
+# from pineboolib.fllegacy.AQOdsColor import AQOdsColor
+# from pineboolib.fllegacy.AQOdsStyle import AQOdsStyle
+# from pineboolib.fllegacy.AQOdsImage import AQOdsImage
+# from pineboolib.fllegacy.AQOdsCentimeters import AQOdsCentimeters
 
 
 class MReportEngine(ProjectClass, QObject):
@@ -132,16 +132,19 @@ class MReportEngine(ProjectClass, QObject):
             self.bgColor_ = Qt.QColor()
             self.tf_ = Qt.Q_INT16
 
-    class AQPaintItemMap(ProjectClass, QMap):
+    # class AQPaintItemMap(ProjectClass, QMap):
+    class AQPaintItemMap(ProjectClass):
         pass
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MReportEngine, self).__init__(*args)
+        if len(args) > 1 and isinstance(args[0], MReportEngine):
+            super(MReportEngine, self).__init__(args[1])
 
-        if isinstance(args[0], MReportEngine):
             self.copy(args[0])
         else:
+            super(MReportEngine, self).__init__(args[0])
+
             self.pageSize_ = self.PageSize.A4
             self.pageOrientation_ = self.PageOrientation.Portrait
             self.topMargin_ = 0
@@ -326,7 +329,7 @@ class MReportEngine(ProjectClass, QObject):
                 tempattr = attr.namedItem("Template")
                 tempname = tempattr.nodeValue()
                 if not tempname.isNull():
-                    self.preferedTemplate(tempname).emit()
+                    self.preferedTemplate.emit(tempname)
                     break
             n = n.nextSibling()
 
@@ -538,7 +541,7 @@ class MReportEngine(ProjectClass, QObject):
             # if ((chkRow = (nrecords / 4) % 40) == 0) #FIXME
             chkRow = (nrecords / 4) % 40
             if chkRow == 0:
-                self.signalRenderStatus(nrecords / 4).emit()
+                self.signalRenderStatus.emit(nrecords / 4)
             if self.cancelRender_:
                 return False
 
@@ -785,7 +788,7 @@ class MReportEngine(ProjectClass, QObject):
             it = aqmap.begin()
             while it != aqmap.end():
                 if (step % relSteps) == 0:
-                    self.signalRenderStatus((step / relSteps) % rowCount).emit()
+                    self.signalRenderStatus.emit((step / relSteps) % rowCount)
                 if self.cancelRender_:
                     return
 
@@ -900,7 +903,7 @@ class MReportEngine(ProjectClass, QObject):
         # sys.openUrl(fileName) #FIXME
         sys.openUrl(fileName)
 
-        self.signalRenderStatus(rowCount).emit()
+        self.signalRenderStatus.emit(rowCount)
 
     @decorators.BetaImplementation
     def renderReport(self, initRow, initCol, pages, flags):
@@ -911,7 +914,7 @@ class MReportEngine(ProjectClass, QObject):
         self.currRecord_ = 0
         self.p_.setStyleName(self.styleName_)
 
-        self.signalRenderStatus(1).emit()
+        self.signalRenderStatus.emit(1)
 
         currentPage = 0
         currentPageCopy = 0
@@ -964,7 +967,7 @@ class MReportEngine(ProjectClass, QObject):
 
         self.fillRecords_ = False
 
-        self.signalRenderStatus(rowCount / 2).emit()
+        self.signalRenderStatus.emit(rowCount / 2)
 
         return pages
 
@@ -1087,7 +1090,7 @@ class MReportEngine(ProjectClass, QObject):
                     # if ((chkRow = (nrecords / 2) % 20) == 0) #FIXME
                     chkRow = (currRecord / 2) % 20
                     if chkRow == 0:
-                        self.signalRenderStatus(currRecord / 2).emit()
+                        self.signalRenderStatus.emit(currRecord / 2)
                     if self.cancelRender_:
                         lblCancel = MLabelObject()
                         lblCancel.setFont("Arial", 20, MLabelObject.FontWeight.Bold, False)
@@ -1175,7 +1178,7 @@ class MReportEngine(ProjectClass, QObject):
                     # if ((chkRow = (nrecords / 2) % 20) == 0) #FIXME
                     chkRow = (currRecord / 2) % 20
                     if chkRow == 0:
-                        self.signalRenderStatus(currRecord / 2).emit()
+                        self.signalRenderStatus.emit(currRecord / 2)
 
                     fields = record.attributes()
                     self.reserveSzieForCalcFields(fields, level)
@@ -1217,7 +1220,7 @@ class MReportEngine(ProjectClass, QObject):
         csvData = ""
         nRecord = 0
         self.updateCsvData(0, nRecord, csvData)
-        self.signalRenderStatus(len(self.records_) / 2).emit()
+        self.signalRenderStatus.emit(len(self.records_) / 2)
         return csvData
 
     @decorators.BetaImplementation
@@ -1340,7 +1343,7 @@ class MReportEngine(ProjectClass, QObject):
             if calcIdx != -1:
                 vsize = self.grandTotal_[calcIdx].size()
                 self.grandTotal_[calcIdx].resize(vsize + 1)
-                self.grandTotal_[calcIdx].at(vsize) = float(detailValue)
+                self.grandTotal_[calcIdx][vsize] = float(detailValue)
 
             j = level
             while j >= 0:
@@ -1354,7 +1357,7 @@ class MReportEngine(ProjectClass, QObject):
 
                 vsize = self.gDTFooters_[j][calcIdx].size()
                 self.gDTFooters_[j][calcIdx].resize(vsize + 1)
-                self.gDTFooters_[j][calcIdx].at(vsize) = float(detailValue)
+                self.gDTFooters_[j][calcIdx][vsize] = float(detailValue)
 
                 j = j - 1
 

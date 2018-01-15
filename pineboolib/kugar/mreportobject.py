@@ -6,7 +6,7 @@ from PyQt5.Qt import QObject
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
-from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 
 
 class MReportObject(ProjectClass, QObject):
@@ -28,11 +28,11 @@ class MReportObject(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MReportObject, self).__init__(*args)
-
-        if isinstance(args[0], MReportObject):
+        if len(args) and isinstance(args[0], MReportObject):
             self.copy(args[0])
         else:
+            super(MReportObject, self).__init__()
+
             self.xpos_ = 0
             self.ypos_ = 0
             self.width_ = 40
