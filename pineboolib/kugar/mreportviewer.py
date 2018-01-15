@@ -11,9 +11,8 @@ from pineboolib.kugar.mpagecollection import MPageCollection
 from pineboolib.kugar.mpagedisplay import MPageDisplay
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLApplication import FLApplication
-from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
-from pineboolib.fllegacy.FLDiskCache import FLDiskCache
+# from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
+# from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 
 
 class MReportViewer(ProjectClass, QWidget):
@@ -48,7 +47,7 @@ class MReportViewer(ProjectClass, QWidget):
         self.scroller_ = Qt.QScrollView(self)
         self.rptEngine_ = 0
         self.report_ = MPageCollection(self)
-        self.p_ = FLApplication.palette()
+        self.p_ = QtWidgets.QApplication.palette()
         self.g_ = self.p_.active()
         self.scroller_.viewport().setBackgroundColor(self.g_.mid())
         self.display_ = MPageDisplay(self.scroller_.viewport())

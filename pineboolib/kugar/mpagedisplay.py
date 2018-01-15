@@ -5,11 +5,11 @@ from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
 
-class MPageDisplayObject(ProjectClass, QWidget):
+class MPageDisplay(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MPageDisplayObject, self).__init__(*args)
+        super(MPageDisplay, self).__init__(*args)
 
         self.buffer_ = Qt.QPixmap()
         self.buffer_.resize(1, 1)

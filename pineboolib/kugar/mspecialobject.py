@@ -3,14 +3,13 @@ from enum import Enum
 from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mreportobject import MReportObject
 from pineboolib.kugar.mlabelobject import MLabelObject
 from pineboolib.kugar.mutil import MUtil
 
 
-class MSpecialObject(ProjectClass, MLabelObject):
+class MSpecialObject(MLabelObject):
 
     class SpecialType(Enum):
         Date = 0

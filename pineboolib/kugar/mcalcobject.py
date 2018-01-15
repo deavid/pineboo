@@ -1,13 +1,12 @@
 from enum import Enum
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mfieldobject import MFieldObject
 from pineboolib.kugar.mreportobject import MReportObject
 
 
-class MCalcObject(ProjectClass, MFieldObject):
+class MCalcObject(MFieldObject):
 
     class CalculationType(Enum):
         Count = 0

@@ -6,7 +6,7 @@ from PyQt5.Qt import QObject
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
-from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 
 
 class MReportObject(ProjectClass, QObject):

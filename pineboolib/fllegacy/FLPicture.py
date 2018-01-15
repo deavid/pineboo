@@ -1,7 +1,7 @@
 from enum import Enum
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtCore.Qt import QObject
+from PyQt5.QtCore import QObject
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -71,16 +71,16 @@ class FLPicture(ProjectClass, QObject):
         LTR = 2
 
     class FLAlignment(Enum):
-        AlignAuto = Qt.AlignAuto,
-        AlignLeft = Qt.AlignLeft,
-        AlignRight = Qt.AlignRight,
-        AlignHCenter = Qt.AlignHCenter,
-        AlignJustify = Qt.AlignJustify,
-        AlignTop = Qt.AlignTop,
-        AlignBottom = Qt.AlignBottom,
-        AlignVCenter = Qt.AlignVCenter,
-        AlignCenter = Qt.AlignCenter,
-        AlignHorizontal_Mask = Qt.AlignHorizontal_Mask,
+        AlignAuto = 0  # FIXME
+        AlignLeft = Qt.AlignLeft
+        AlignRight = Qt.AlignRight
+        AlignHCenter = Qt.AlignHCenter
+        AlignJustify = Qt.AlignJustify
+        AlignTop = Qt.AlignTop
+        AlignBottom = Qt.AlignBottom
+        AlignVCenter = Qt.AlignVCenter
+        AlignCenter = Qt.AlignCenter
+        AlignHorizontal_Mask = Qt.AlignHorizontal_Mask
         AlignVertical_Mask = Qt.AlignVertical_Mask
 
     class FLPicturePrivate(ProjectClass):

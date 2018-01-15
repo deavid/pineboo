@@ -3,8 +3,6 @@ from PyQt5.QtCore import Qt
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
-from pineboolib.kugar.mreportengine import MReportEngine
-
 
 class MPageCollection(ProjectClass):
 
@@ -13,6 +11,8 @@ class MPageCollection(ProjectClass):
         if isinstance(args[0], MPageCollection):
             self.copy(args[0])
         else:
+            from pineboolib.kugar.mreportengine import MReportEngine
+
             super(MPageCollection, self).__init__(*args)
 
             self.pages_ = Qt.QPtrList()
