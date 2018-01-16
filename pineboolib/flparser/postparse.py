@@ -603,6 +603,7 @@ def execute(options, args):
             if options.verbose: sys.stdout.flush();
             try:
                 filecontent = open(filename,"r", encoding="latin-1").read()
+                filecontent = flscriptparse.cleanNoPython(filecontent)
             except Exception as e:
                 print("Error: No se pudo abrir fichero %-35s          \n" % (repr(filename)), e)
                 continue
