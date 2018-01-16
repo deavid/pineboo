@@ -11,8 +11,8 @@ from pineboolib.kugar.mpagecollection import MPageCollection
 from pineboolib.kugar.mpagedisplay import MPageDisplay
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-# from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
-# from pineboolib.fllegacy.FLDiskCache import FLDiskCache
+from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
+from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 
 
 class MReportViewer(ProjectClass, QWidget):

@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from pineboolib import decorators
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-# from pineboolib.fllegacy.FLCodBar import FLCodBar
+from pineboolib.fllegacy.FLCodBar import FLCodBar
 
 from pineboolib.kugar.mreportobject import MReportObject
 from pineboolib.kugar.mlabelobject import MLabelObject

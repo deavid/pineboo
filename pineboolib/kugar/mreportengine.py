@@ -19,9 +19,9 @@ from pineboolib.kugar.mcalcobject import MCalcObject
 from pineboolib.kugar.mspecialobject import MSpecialObject
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
-# from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
-# from pineboolib.fllegacy.FLDiskCache import FLDiskCache
+from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
+from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 
 # from pineboolib.fllegacy.AQOdsGenerator import AQOdsGenerator
 # from pineboolib.fllegacy.AQOdsSpreadSheet import AQOdsSpreadSheet

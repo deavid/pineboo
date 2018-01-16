@@ -11,9 +11,9 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPicture import FLPicture
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 # from pineboolib.fllegacy.FLWidgetReportViewer import FLWidgetReportViewer
-# from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
+from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
 
 
