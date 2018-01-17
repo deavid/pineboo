@@ -52,7 +52,8 @@ class MFieldObject(MLabelObject):
         day = None
         year = None
         val = None
-        regexp = Qt.QRegExp("[0-9][0-9](-|//)[0-9][0-9](-|//)[0-9][0-9][0-9][0-9]")
+        regexp = Qt.QRegExp(
+            "[0-9][0-9](-|//)[0-9][0-9](-|//)[0-9][0-9][0-9][0-9]")
 
         if self.dataType_ == self.DataType.String:
             if QtWidgets.QApplication.multiLangEnabled() and txt:
@@ -126,7 +127,8 @@ class MFieldObject(MLabelObject):
                     self.pixmap_ = False
         elif self.dataType_ == self.DataType.Codbar:
             if txt and not self.paintFunction_:
-                cb = FLCodBar(txt, self.codbarType_, 10, 1, 0, 0, True, Qt.black, Qt.white, self.codbarRes_)
+                cb = FLCodBar(txt, self.codbarType_, 10, 1, 0, 0,
+                              True, Qt.black, Qt.white, self.codbarRes_)
                 if not self.pixmap_:
                     self.pixmap_ = Qt.QPixmap()
                 if not cb.pixmap().isNull():

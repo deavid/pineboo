@@ -5,7 +5,7 @@
 # ----------------------------------------------------------------------
 
 #import sys
-#sys.path.insert(0,"../..")
+# sys.path.insert(0,"../..")
 
 import ply.lex as lex
 from ply.lex import TOKEN
@@ -19,11 +19,11 @@ reserved = [
     #'STRUCT',
     'SWITCH',
     'WHILE', 'CLASS', 'VAR', 'FUNCTION',
-    'EXTENDS', 'NEW','WITH','TRY','CATCH','THROW', 'DELETE', 'TYPEOF'
-    ]
+    'EXTENDS', 'NEW', 'WITH', 'TRY', 'CATCH', 'THROW', 'DELETE', 'TYPEOF'
+]
 token_literals = [
     # Literals (identifier, integer constant, float constant, string constant, char const)
-    'ID', 'ICONST', 'FCONST', 'SCONST', 'CCONST' #, 'RXCONST'
+    'ID', 'ICONST', 'FCONST', 'SCONST', 'CCONST'  # , 'RXCONST'
 ]
 tokens = reserved + token_literals + [
 
@@ -38,17 +38,17 @@ tokens = reserved + token_literals + [
 
     # Assignment (=, *=, /=, %=, +=, -=, <<=, >>=, &=, ^=, |=)
     'EQUALS', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL',
-#    'LSHIFTEQUAL','RSHIFTEQUAL', 'ANDEQUAL', 'XOREQUAL', 'OREQUAL',
+    #    'LSHIFTEQUAL','RSHIFTEQUAL', 'ANDEQUAL', 'XOREQUAL', 'OREQUAL',
 
     # Increment/decrement (++,--)
     'PLUSPLUS', 'MINUSMINUS',
 
     # Structure dereference (->)
-#    'ARROW',
+    #    'ARROW',
 
     # Conditional operator (?)
     'CONDITIONAL1',
-#    'CONDOP',
+    #    'CONDOP',
 
     # Delimeters ( ) [ ] { } , . ; :
     'LPAREN', 'RPAREN',
@@ -57,61 +57,64 @@ tokens = reserved + token_literals + [
     'COMMA', 'PERIOD', 'SEMI', 'COLON',
 
     # Ellipsis (...)
-#    'ELLIPSIS',
+    #    'ELLIPSIS',
     'DOCSTRINGOPEN',
- #   'COMMENTOPEN',
+    #   'COMMENTOPEN',
     'COMMENTCLOSE',
     'DOLLAR',
     'SQOUTE',
     'DQOUTE',
     'BACKSLASH',
-    ]
+]
 
 # Completely ignored characters
-t_ignore           = ' \r\t\x0c'
+t_ignore = ' \r\t\x0c'
 
 # Newlines
+
+
 @TOKEN(r'\n+')
 def t_NEWLINE(t):
     t.lexer.lineno += t.value.count("\n")
 
+
 # Operators
-t_BACKSLASH       = '\\\\'
-t_DOLLAR             = r'\$'
-t_SQOUTE             = '\''
-t_DQOUTE             = '"'
-t_PLUS             = r'\+'
-t_MINUS            = r'-'
-t_TIMES            = r'\*'
-t_DIVIDE           = r'/'
-t_MOD              = r'%'
-t_OR               = r'\|'
-t_AND              = r'&'
+t_BACKSLASH = '\\\\'
+t_DOLLAR = r'\$'
+t_SQOUTE = '\''
+t_DQOUTE = '"'
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_TIMES = r'\*'
+t_DIVIDE = r'/'
+t_MOD = r'%'
+t_OR = r'\|'
+t_AND = r'&'
 #t_NOT              = r'~'
-t_XOR              = r'\^'
-t_LSHIFT           = r'<<'
-t_RSHIFT           = r'>>'
-t_LOR              = r'\|\|'
-t_LAND             = r'&&'
-t_LNOT             = r'!'
-t_LT               = r'<'
-t_GT               = r'>'
-t_LE               = r'<='
-t_GE               = r'>='
-t_EQ               = r'=='
-t_NE               = r'!='
-t_EQQ               = r'==='
-t_NEQ               = r'!=='
-t_CONDITIONAL1      = r'\?'
+t_XOR = r'\^'
+t_LSHIFT = r'<<'
+t_RSHIFT = r'>>'
+t_LOR = r'\|\|'
+t_LAND = r'&&'
+t_LNOT = r'!'
+t_LT = r'<'
+t_GT = r'>'
+t_LE = r'<='
+t_GE = r'>='
+t_EQ = r'=='
+t_NE = r'!='
+t_EQQ = r'==='
+t_NEQ = r'!=='
+t_CONDITIONAL1 = r'\?'
 
 # Assignment operators
 
-t_EQUALS           = r'='
-t_TIMESEQUAL       = r'\*='
-t_DIVEQUAL         = r'/='
-t_MODEQUAL         = r'%='
-t_PLUSEQUAL        = r'\+='
-t_MINUSEQUAL       = r'-='
+t_EQUALS = r'='
+t_TIMESEQUAL = r'\*='
+t_DIVEQUAL = r'/='
+t_MODEQUAL = r'%='
+t_PLUSEQUAL = r'\+='
+t_MINUSEQUAL = r'-='
 """
 t_LSHIFTEQUAL      = r'<<='
 t_RSHIFTEQUAL      = r'>>='
@@ -121,8 +124,8 @@ t_XOREQUAL         = r'^='
 """
 
 # Increment/decrement
-t_PLUSPLUS         = r'\+\+'
-t_MINUSMINUS       = r'--'
+t_PLUSPLUS = r'\+\+'
+t_MINUSMINUS = r'--'
 
 # ->
 #t_ARROW            = r'->'
@@ -132,29 +135,28 @@ t_MINUSMINUS       = r'--'
 
 
 # Delimeters
-t_LPAREN           = r'\('
-t_RPAREN           = r'\)'
-t_LBRACKET         = r'\['
-t_RBRACKET         = r'\]'
-t_LBRACE           = r'\{'
-t_RBRACE           = r'\}'
-t_COMMA            = r','
-t_PERIOD           = r'\.'
-t_SEMI             = r';'
-t_COLON            = r':'
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+t_LBRACKET = r'\['
+t_RBRACKET = r'\]'
+t_LBRACE = r'\{'
+t_RBRACE = r'\}'
+t_COMMA = r','
+t_PERIOD = r'\.'
+t_SEMI = r';'
+t_COLON = r':'
 #t_ELLIPSIS         = r'\.\.\.'
-t_AT               = r'@'
+t_AT = r'@'
 # Identifiers and reserved words
 
-reserved_map = { }
+reserved_map = {}
 for r in reserved:
     reserved_map[r.lower()] = r
 
 
-
 @TOKEN(r'[A-Za-z_]+[\w_]*')
 def t_ID(t):
-    t.type = reserved_map.get(t.value,"ID")
+    t.type = reserved_map.get(t.value, "ID")
     return t
 
 
@@ -175,6 +177,8 @@ t_CCONST = r'\'([^\'\\\n]|(\\.)|\\\n)*?\''
 #t_RXCONST = r'/[^/ ]+/g?'
 
 # Comments
+
+
 @TOKEN(r'(/\*( |\*\*)(.|\n)*?\*/)|(//.*)')
 def t_comment(t):
     t.lexer.lineno += t.value.count('\n')
@@ -182,10 +186,11 @@ def t_comment(t):
 
 @TOKEN(r'/\*\*[ ]+')
 def t_DOCSTRINGOPEN(t):
-    return t;
+    return t
+
 
 #t_COMMENTOPEN      = r'/\*'
-t_COMMENTCLOSE     = r'\*/'
+t_COMMENTCLOSE = r'\*/'
 
 
 # Preprocessor directive (ignored)
@@ -202,6 +207,6 @@ def t_error(t):
 # TODO: Cada vez que se cambia este fichero, se tiene que lanzar sin el "-OO" de python para acelerar. Construye entonces
 # ..... el fichero de cache que subimos a git, y se relee desde ahí las siguientes veces con el -OO.
 # ..... Si da problemas, hay que volver a optimize=0 y/o eliminar lextab.py
-lexer = lex.lex(debug=False,optimize=1)
+lexer = lex.lex(debug=False, optimize=1)
 if __name__ == "__main__":
     lex.runmain(lexer)

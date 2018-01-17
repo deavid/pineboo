@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os, fnmatch, re
-import datetime, weakref
+import os
+import fnmatch
+import re
+import datetime
+import weakref
 from lxml import etree
 from io import StringIO
 
@@ -31,69 +34,74 @@ import traceback
 from PyQt5.Qt import QWidget
 from sys import stderr
 
+
 class StructMyDict(dict):
 
-     def __getattr__(self, name):
-         try:
-             return self[name]
-         except KeyError as e:
-             raise AttributeError(e)
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError as e:
+            raise AttributeError(e)
 
-     def __setattr__(self, name, value):
-         self[name] = value
-         
+    def __setattr__(self, name, value):
+        self[name] = value
+
+
 def Function(args, source):
     # Leer código QS embebido en Source
-    # asumir que es una funcion anónima, tal que: 
+    # asumir que es una funcion anónima, tal que:
     #  -> function($args) { source }
     # compilar la funcion y devolver el puntero
     qs_source = """
 function anon(%s) {
     %s
-} """ % (args,source)
+} """ % (args, source)
     print("Compilando QS en línea: ", qs_source)
     from pineboolib.flparser import flscriptparse
     from pineboolib.flparser import postparse
     from pineboolib.flparser.pytnyzer import write_python_file, string_template
     import io
     prog = flscriptparse.parse(qs_source)
-    tree_data = flscriptparse.calctree(prog, alias_mode = 0)
+    tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = postparse.post_parse(tree_data)
     tpl = string_template
-    
+
     f1 = io.StringIO()
 
-    write_python_file(f1,ast,tpl)
+    write_python_file(f1, ast, tpl)
     pyprog = f1.getvalue()
     print("Resultado: ", pyprog)
     glob = {}
     loc = {}
     exec(pyprog, glob, loc)
     # ... y lo peor es que funciona. W-T-F.
-    
+
     return loc["anon"]
 
+
 def Object(x=None):
-    if x is None: x = {}
+    if x is None:
+        x = {}
     return StructMyDict(x)
 
-#def Array(x=None):
-    #try:
-        #if x is None: return {}
-        #else: return list(x)
-    #except TypeError:
-        #return [x]
-        
+# def Array(x=None):
+    # try:
+    # if x is None: return {}
+    # else: return list(x)
+    # except TypeError:
+    # return [x]
+
+
 class Array(object):
-    
+
     dict_ = None
     key_ = None
     names_ = None
-    
+
     def __init__(self, *args):
         self.names_ = []
         self.dict_ = {}
-        
+
         if not len(args):
             return
         elif isinstance(args[0], int) and len(args) == 1:
@@ -102,72 +110,72 @@ class Array(object):
             for field in args[0]:
                 self.names_.append(field)
                 self.dict_[field] = field
-                
+
         elif isinstance(args[0], str):
             for f in args:
                 self.__setitem__(f, f)
         else:
             self.dict_ = args
-    
+
     def __setitem__(self, key, value):
-        #if isinstance(key, int):
+        # if isinstance(key, int):
             #key = str(key)
         if not key in self.names_:
             self.names_.append(key)
-            
+
         self.dict_[key] = value
-        
-            
-        
+
     def __getitem__(self, key):
         if isinstance(key, int):
-           return self.dict_[self.names_[key]]
+            return self.dict_[self.names_[key]]
         else:
             #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
             return self.dict_[key]
-    
+
     def __getattr__(self, k):
-        if k == 'length': 
+        if k == 'length':
             return len(self.dict_)
         else:
             return self.dict_[k]
-    
+
     def __len__(self):
         len_ = 0
-        
+
         for l in self.dict_:
             len_ = len_ + 1
-            
-        return len_
-        
-    
-    
-    
 
-       
+        return len_
+
 
 def Boolean(x=False): return bool(x)
 
+
 def FLSqlQuery(*args):
-    #if not args: return None
+    # if not args: return None
     query_ = FLSqlQuery_Legacy.FLSqlQuery(*args)
-        
-        
+
     return query_
+
 
 def FLUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
 
+
 def AQUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
 
+
 def FLSqlCursor(action=None):
-    if action is None: return None
+    if action is None:
+        return None
     return FLSqlCursor_Legacy.FLSqlCursor(action)
 
+
 def FLTableDB(*args):
-    if not args: return None
+    if not args:
+        return None
     return FLTableDB_Legacy.FLTableDB(*args)
+
 
 FLListViewItem = QtWidgets.QListView
 QTable = FLTable
@@ -175,7 +183,6 @@ Color = QtGui.QColor
 QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
 
-                    
 
 @decorators.NotImplementedWarn
 def FLPosPrinter(*args, **kwargs):
@@ -183,10 +190,10 @@ def FLPosPrinter(*args, **kwargs):
         pass
     return flposprinter()
 
+
 @decorators.BetaImplementation
 def FLReportViewer():
     return FLReportViewer_Legacy.FLReportViewer()
-
 
 
 """
@@ -218,71 +225,76 @@ class FLDomDocument(object):
 
     def toString(self, value = None):
         return self.string_
-""" 
-    
-        
-    
-        
+"""
+
 
 @decorators.NotImplementedWarn
 def FLCodBar(*args, **kwargs):
     class flcodbar:
         def nameToType(self, name):
             return name
+
         def pixmapError(self):
             return QtGui.QPixmap()
+
         def pixmap(self):
             return QtGui.QPixmap()
+
         def validBarcode(self):
             return None
     return flcodbar()
+
 
 def print_stack(maxsize=1):
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
 
+
 def check_gc_referrers(typename, w_obj, name):
-    import threading, time
+    import threading
+    import time
+
     def checkfn():
         import gc
         time.sleep(2)
         gc.collect()
         obj = w_obj()
-        if not obj: return
+        if not obj:
+            return
         # TODO: Si ves el mensaje a continuación significa que "algo" ha dejado
         # ..... alguna referencia a un formulario (o similar) que impide que se destruya
         # ..... cuando se deja de usar. Causando que los connects no se destruyan tampoco
         # ..... y que se llamen referenciando al código antiguo y fallando.
-        print("HINT: Objetos referenciando %r::%r (%r) :" % (typename, obj, name))
-        for ref in gc.get_referrers(obj):           
-            if isinstance(ref, dict): 
+        print("HINT: Objetos referenciando %r::%r (%r) :" %
+              (typename, obj, name))
+        for ref in gc.get_referrers(obj):
+            if isinstance(ref, dict):
                 x = []
-                for k,v in ref.items():
+                for k, v in ref.items():
                     if v is obj:
                         k = "(**)" + k
-                        x.insert(0,k)
+                        x.insert(0, k)
                     else:
-                        x.append(k)    
+                        x.append(k)
                 print(" - ", repr(x[:48]))
             else:
-                if "<frame" in str(repr(ref)): continue
+                if "<frame" in str(repr(ref)):
+                    continue
                 print(" - ", repr(ref))
 
-        
-    threading.Thread(target = checkfn).start()
-    
+    threading.Thread(target=checkfn).start()
 
 
 class FormDBWidget(QtWidgets.QWidget):
 
-    closed =  QtCore.pyqtSignal()
+    closed = QtCore.pyqtSignal()
     cursor_ = None
-    
-    def __init__(self, action, project, parent = None):
+
+    def __init__(self, action, project, parent=None):
         if not action.prj._DGI.useDesktop():
             self._class_init()
             return
-        
+
         super(FormDBWidget, self).__init__(parent)
         self._action = action
         self.cursor_ = None
@@ -294,29 +306,30 @@ class FormDBWidget(QtWidgets.QWidget):
             timer.singleShot(250, self.init)
         except:
             pass
-        
+
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
-        
 
     def _class_init(self):
         pass
-    
+
     def closeEvent(self, event):
         can_exit = True
         print("FormDBWidget: closeEvent para accion %r" % self._action.name)
-        check_gc_referrers("FormDBWidget:"+self.__class__.__name__, weakref.ref(self), self._action.name)
+        check_gc_referrers("FormDBWidget:" + self.__class__.__name__,
+                           weakref.ref(self), self._action.name)
         if hasattr(self, 'iface'):
-            check_gc_referrers("FormDBWidget.iface:"+self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
-            del self.iface.ctx 
-            del self.iface 
-        
+            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
+                               weakref.ref(self.iface), self._action.name)
+            del self.iface.ctx
+            del self.iface
+
         if can_exit:
             self.closed.emit()
-            event.accept() # let the window close
+            event.accept()  # let the window close
         else:
             event.ignore()
-            
+
     def child(self, childName):
         try:
             parent = self
@@ -325,80 +338,77 @@ class FormDBWidget(QtWidgets.QWidget):
                 ret = parent.findChild(QtWidgets.QWidget, childName)
                 if not ret:
                     parent = parent.parentWidget()
-                
-                     
+
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
-            print("ERROR: Al buscar el control %r encontramos el error %r" % (childName,rte))
+            print("ERROR: Al buscar el control %r encontramos el error %r" %
+                  (childName, rte))
             print_stack(8)
             import gc
             gc.collect()
-            print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" % (self, self._action.name, gc.get_referrers(self)))
+            print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
+                  (self, self._action.name, gc.get_referrers(self)))
             if hasattr(self, 'iface'):
-                print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (self.iface, gc.get_referrers(self.iface)))
+                print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (
+                    self.iface, gc.get_referrers(self.iface)))
             ret = None
         else:
             if ret is None:
                 qWarning("WARN: No se encontro el control %s" % childName)
-        
-        #Para inicializar los controles si se llaman desde qsa antes de mostrar el formulario.
+
+        # Para inicializar los controles si se llaman desde qsa antes de mostrar el formulario.
         if isinstance(ret, FLFieldDB_Legacy.FLFieldDB):
             if not ret.cursor():
                 ret.initCursor()
             if not ret.editor_ and not ret.editorImg_:
                 ret.initEditor()
-        
+
         if isinstance(ret, FLTableDB_Legacy.FLTableDB):
             if not ret.tableRecords_:
                 ret.tableRecords()
                 ret.setTableRecordsCursor()
-        
-        
-        #else:
+
+        # else:
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
         return ret
 
     def cursor(self):
-        
-        #if self.cursor_:
+
+        # if self.cursor_:
         #    return self.cursor_
-        
+
         cursor = None
         parent = self
-        
+
         while not cursor and parent:
             parent = parent.parent()
             cursor = getattr(parent, "cursor_", None)
-                
+
         if cursor:
             self.cursor_ = cursor
         else:
             if not self.cursor_:
                 self.cursor_ = FLSqlCursor(self._action.name)
-        
+
         return self.cursor_
-    
+
     """
     FIX: Cuando usamos this como cursor
     """
+
     def valueBuffer(self, name):
         return self.cursor().valueBuffer(name)
-    
+
     def isNull(self, name):
         return self.cursor().isNull(name)
-    
+
     def table(self):
         return self.cursor().table()
-    
+
     def cursorRelation(self):
         return self.cursor().cursorRelation()
-    
-    
-    
-    
-    
-    
+
 
 def FLFormSearchDB(name):
     widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
@@ -407,12 +417,13 @@ def FLFormSearchDB(name):
     widget.cursor_.setContext(widget.iface)
     return widget
 
+
 class Date(object):
-    
+
     date_ = None
     time_ = None
-    
-    def __init__(self, date_ = None):
+
+    def __init__(self, date_=None):
         super(Date, self).__init__()
         if not date_:
             self.date_ = QtCore.QDate.currentDate()
@@ -420,39 +431,40 @@ class Date(object):
         else:
             self.date_ = QtCore.QDate(date_)
             self.time_ = QtCore.QTime("00:00:00")
-    
+
     def toString(self, *args, **kwargs):
-        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"),self.date_.toString("MM"),self.date_.toString("yyyy"),self.time_.toString("hh"),self.time_.toString("mm"),self.time_.toString("ss"))
+        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"), self.date_.toString("MM"), self.date_.toString(
+            "yyyy"), self.time_.toString("hh"), self.time_.toString("mm"), self.time_.toString("ss"))
         return texto
-    
+
     def getYear(self):
         return self.date_.year()
-    
+
     def getMonth(self):
         return self.date_.month()
-    
+
     def getDay(self):
         return self.date_.day()
-    
+
     def getHours(self):
         return self.time_.hour()
-    
+
     def getMinutes(self):
         return self.time_.minute()
-    
+
     def getSeconds(self):
         return self.time_.second()
-    
+
     def getMilliseconds(self):
         return self.time_.msec()
 
 
 class Process(QtCore.QProcess):
-    
+
     running = None
     stderr = None
     stdout = None
-    
+
     def __init__(self, *args):
         super(Process, self).__init__()
         self.readyReadStandardOutput.connect(self.stdoutReady)
@@ -463,36 +475,34 @@ class Process(QtCore.QProcess):
             self.setProgram(args[0])
             argumentos = args[1:]
             self.setArguments(argumentos)
-        
-        
+
     def start(self):
         self.running = True
         super(Process, self).start()
-    
+
     def stop(self):
         self.running = False
         super(Process, self).stop()
-    
+
     def writeToStdin(self, stdin_):
         stdin_as_bytes = stdin_.encode('utf-8')
         self.writeData(stdin_as_bytes)
-        #self.closeWriteChannel()
-    
+        # self.closeWriteChannel()
+
     def stdoutReady(self):
         self.stdout = str(self.readAllStandardOutput())
-    
+
     def stderrReady(self):
         self.stderr = str(self.readAllStandardError())
-        
-    
+
     def __setattr__(self, name, value):
         if name == "workingDirectory":
             self.setWorkingDirectory(value)
         else:
             super(Process, self).__setattr__(name, value)
-    
-    def execute(comando): 
-           
+
+    def execute(comando):
+
         pro = QtCore.QProcess()
         array = comando.split(" ")
         programa = array[0]
@@ -503,22 +513,14 @@ class Process(QtCore.QProcess):
         pro.waitForFinished(30000)
         Process.stdout = pro.readAllStandardOutput()
         Process.stderr = pro.readAllStandardError()
-        
-        
-        
-
-           
-            
-
 
 
 class RadioButton(QtWidgets.QRadioButton):
-    
-    
+
     def __ini__(self):
         super(RadioButton, self).__init__()
         self.setChecked(False)
-    
+
     def __setattr__(self, name, value):
         if name == "text":
             self.setText(value)
@@ -530,9 +532,6 @@ class RadioButton(QtWidgets.QRadioButton):
     def __getattr__(self, name):
         if name == "checked":
             return self.isChecked()
-        
-    
-        
 
 
 class Dialog(QtWidgets.QDialog):
@@ -544,26 +543,27 @@ class Dialog(QtWidgets.QDialog):
     cancelButton = None
     _tab = None
 
-    def __init__(self, title = None, f = None, desc=None):
-        #FIXME: f no lo uso , es qt.windowsflg
+    def __init__(self, title=None, f=None, desc=None):
+        # FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
-        
+
         if title:
             self.setWindowTitle(str(title))
-            
+
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
         self.buttonBox = QtWidgets.QDialogButtonBox()
         self.okButton = QtWidgets.QPushButton("&Aceptar")
         self.cancelButton = QtWidgets.QPushButton("&Cancelar")
-        self.buttonBox.addButton(self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
-        self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
+        self.buttonBox.addButton(
+            self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(
+            self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
         self._tab = QTabWidget()
         self._layout.addWidget(self._tab)
-
 
     def add(self, _object):
         self._layout.addWidget(_object)
@@ -576,15 +576,16 @@ class Dialog(QtWidgets.QDialog):
         self._layout.addWidget(self.buttonBox)
 
         return super(Dialog, self).exec_()
-    
-    def newTab(self,name):
+
+    def newTab(self, name):
         self._tab.addTab(QtWidgets.QWidget(), str(name))
-    
+
     def __getattr__(self, name):
         if name == "caption":
             name = self.setWindowTitle
 
         return getattr(super(Dialog, self), name)
+
 
 class GroupBox(QtWidgets.QGroupBox):
     def __init__(self):
@@ -592,66 +593,70 @@ class GroupBox(QtWidgets.QGroupBox):
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
 
-    def add(self, _object):     
+    def add(self, _object):
         self._layout.addWidget(_object)
-    
+
     def __setattr__(self, name, value):
         if name == "title":
             self.setTitle(str(value))
         else:
             super(GroupBox, self).__setattr__(name, value)
 
+
 class CheckBox(QWidget):
     _label = None
     _cb = None
-    
+
     def __init__(self):
         super(CheckBox, self).__init__()
-        
+
         self._label = QtWidgets.QLabel(self)
         self._cb = QtWidgets.QCheckBox(self)
-        spacer = QtWidgets.QSpacerItem(1,1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacer = QtWidgets.QSpacerItem(
+            1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         _lay = QtWidgets.QHBoxLayout()
         _lay.addWidget(self._cb)
         _lay.addWidget(self._label)
         _lay.addSpacerItem(spacer)
         self.setLayout(_lay)
-    
+
     def __setattr__(self, name, value):
         if name == "text":
             self._label.setText(str(value))
         elif name == "checked":
             self._cb.setChecked(value)
-        else:   
+        else:
             super(CheckBox, self).__setattr__(name, value)
-    
+
     def __getattr__(self, name):
         if name == "checked":
             return self._cb.isChecked()
         else:
             return super(CheckBox, self).__getattr__(name)
 
+
 class ComboBox(QWidget):
-    
+
     _label = None
     _combo = None
-    
+
     def __init__(self):
         super(ComboBox, self).__init__()
-        
+
         self._label = QtWidgets.QLabel(self)
         self._combo = QtWidgets.QComboBox(self)
         self._combo.setMinimumHeight(25)
         _lay = QtWidgets.QHBoxLayout()
         _lay.addWidget(self._label)
         _lay.addWidget(self._combo)
-        
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding ,QtWidgets.QSizePolicy.Fixed)
+
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHeightForWidth(True)
         self._combo.setSizePolicy(sizePolicy)
-        
+
         self.setLayout(_lay)
-    
+
     def __setattr__(self, name, value):
         if name == "label":
             self._label.setText(str(value))
@@ -659,31 +664,30 @@ class ComboBox(QWidget):
             self._combo.insertItems(len(value), value)
         elif name == "currentItem":
             self._combo.setCurrentText(str(value))
-        else:   
+        else:
             super(ComboBox, self).__setattr__(name, value)
-    
+
     def __getattr__(self, name):
         if name == "currentItem":
             return self._combo.currentText()
         else:
             return super(ComboBox, self).__getattr__(name)
-        
-        
+
 
 class LineEdit(QWidget):
     _label = None
     _line = None
-    
+
     def __init__(self):
         super(LineEdit, self).__init__()
-        
+
         self._label = QtWidgets.QLabel(self)
         self._line = QtWidgets.QLineEdit(self)
         _lay = QtWidgets.QHBoxLayout()
         _lay.addWidget(self._label)
         _lay.addWidget(self._line)
         self.setLayout(_lay)
-    
+
     def __setattr__(self, name, value):
         if name == "label":
             self._label.setText(str(value))
@@ -691,23 +695,24 @@ class LineEdit(QWidget):
             self._line.setText(str(value))
         else:
             super(LineEdit, self).__setattr__(name, value)
-            
+
     def __getattr__(self, name):
         if name == "text":
             return self._line.text()
         else:
             return super(LineEdit, self).__getattr__(name)
 
+
 class Dir_Class(object):
     path_ = None
     home = None
     Files = "*.*"
-    
-    def __init__(self, path = None):
+
+    def __init__(self, path=None):
         self.path_ = path
         self.home = filedir("..")
-    
-    def entryList(self, patron, type_ = None):
+
+    def entryList(self, patron, type_=None):
         p = os.walk(self.path_)
         retorno = []
         try:
@@ -716,16 +721,18 @@ class Dir_Class(object):
                     retorno.append(file)
         except:
             pass
-        
+
         return retorno
-    
+
     def fileExists(self, name):
         return os.path.exists(name)
-    
+
     def cleanDirPath(name):
         return str(name)
 
+
 Dir = Dir_Class
+
 
 class TextEdit(QTextEdit):
     pass
@@ -735,36 +742,31 @@ class File(QtCore.QFile):
     fichero = None
     mode = None
     path = None
-        
+
     ReadOnly = QIODevice.ReadOnly
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
-    
+
     def __init__(self, rutaFichero):
         if isinstance(rutaFichero, tuple):
             rutaFichero = rutaFichero[0]
         self.fichero = str(rutaFichero)
         super(File, self).__init__(rutaFichero)
         self.path = os.path.dirname(self.fichero)
-    
-    #def open(self, mode):
+
+    # def open(self, mode):
     #    super(File, self).open(self.fichero, mode)
-    
+
     def read(self):
         if isinstance(self, str):
-                f = File(self)
-                f.open(File.ReadOnly)
-                return f.read()
-                
+            f = File(self)
+            f.open(File.ReadOnly)
+            return f.read()
+
         in_ = QTextStream(self)
         return in_.readAll()
-    
+
     def write(self, text):
         #encodig = text.property("encoding")
         out_ = QTextStream(self)
         out_ << text
-    
-        
-    
-    
-        

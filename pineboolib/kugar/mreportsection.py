@@ -93,7 +93,8 @@ class MReportSection(ProjectClass, QObject):
             fieldType = field.getDataType()
 
             if fieldType != MFieldObject.DataType.Date and fieldType != MFieldObject.DataType.Pixmap and fieldType != MFieldObject.DataType.CodBar:
-                record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
+                record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                "_" + field.getFieldName(), field.getText())
 
     @decorators.BetaImplementation
     def setCalcFieldData(self, values, values2, record, fillRecord):
@@ -115,7 +116,8 @@ class MReportSection(ProjectClass, QObject):
                 self.calculateField(field, 0, value, record, fillRecord)
             else:
                 if values:
-                    self.calculateField(field, values.at(i), value, record, fillRecord)
+                    self.calculateField(field, values.at(
+                        i), value, record, fillRecord)
 
             i = i + 1
             field = self.calculatedFields_.next()
@@ -132,7 +134,8 @@ class MReportSection(ProjectClass, QObject):
             grandTotalIndex = field.getSectionIndex()
 
             if grandTotalIndex != -1:
-                self.calculateField(field, values.at(grandTotalIndex), "", record, fillRecord)
+                self.calculateField(field, values.at(
+                    grandTotalIndex), "", record, fillRecord)
 
             field = self.calculatedFields_.next()
 
@@ -144,31 +147,37 @@ class MReportSection(ProjectClass, QObject):
             if values:
                 field.setText(int(MUtil.count(values)))
                 if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
+                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                    "_" + field.getFieldName(), field.getText())
         elif calcType == MCalcObject.CalculationType.Sum:
             if values:
                 field.setText(int(MUtil.sum(values), 'f'))
                 if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
+                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                    "_" + field.getFieldName(), field.getText())
         elif calcType == MCalcObject.CalculationType.Average:
             if values:
                 field.setText(int(MUtil.average(values), 'f'))
                 if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
+                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                    "_" + field.getFieldName(), field.getText())
         elif calcType == MCalcObject.CalculationType.Variance:
             if values:
                 field.setText(int(MUtil.variance(values), 'f'))
                 if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
+                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                    "_" + field.getFieldName(), field.getText())
         elif calcType == MCalcObject.CalculationType.StandardDeviation:
             if values:
                 field.setText(int(MUtil.stdDeviation(values), 'f'))
                 if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
+                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                    "_" + field.getFieldName(), field.getText())
         elif calcType == MCalcObject.CalculationType.NoOperation:
             field.setText(values2)
             if fillRecord and values2 != "":
-                record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getFieldName(), field.getText())
+                record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                "_" + field.getFieldName(), field.getText())
         elif calcType == MCalcObject.CalculationType.CallFunction:
             if record and field.getCalculationFunction() != "":
                 dni = FLDomNodeInterface(record)
@@ -182,7 +191,8 @@ class MReportSection(ProjectClass, QObject):
                     field.setText(str(v))
 
                     if fillRecord and field.getDataType() != MCalcObject.CalculationType.Pixmap:
-                        record.toElement().setAttribute(self.strIdSec_ + int(self.level_) + "_" + field.getCalculationFunction(), field.getText())
+                        record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
+                                                        "_" + field.getCalculationFunction(), field.getText())
                 del dni
 
         if record:
@@ -264,9 +274,11 @@ class MReportSection(ProjectClass, QObject):
         while calcField != 0:
             if calcField.getDrawAtHeader():
                 if calcField.getObjectId():
-                    calcField.setName("_##H{}-Calc.{}-{}".format(self.idSec_, calcField.fieldName_, calcField.getObjectId()))
+                    calcField.setName(
+                        "_##H{}-Calc.{}-{}".format(self.idSec_, calcField.fieldName_, calcField.getObjectId()))
                 else:
-                    calcField.setName("_##H{}-Calc.{}-{}".format(self.idSec_, calcField.fieldName_, countObj))
+                    calcField.setName(
+                        "_##H{}-Calc.{}-{}".format(self.idSec_, calcField.fieldName_, countObj))
                     countObj = countObj + 1
             p.beginMark(calcField.getX(), calcField.getY(), calcField)
             calcField.draw(p)
@@ -298,7 +310,8 @@ class MReportSection(ProjectClass, QObject):
         line = self.lines_.first()
         while line != 0:
             if line.getObjectId():
-                line.setName("_##Line{}-{}".format(self.idSec_, line.getObjectId()))
+                line.setName(
+                    "_##Line{}-{}".format(self.idSec_, line.getObjectId()))
             else:
                 line.setName("_##Line{}-{}".format(self.idSec_, countObj))
                 countObj = countObj + 1
@@ -311,7 +324,8 @@ class MReportSection(ProjectClass, QObject):
         label = self.labels_.first()
         while label != 0:
             if label.getObjectId():
-                label.setName("_##Label{}-{}".format(self.idSec_, label.getObjectId()))
+                label.setName(
+                    "_##Label{}-{}".format(self.idSec_, label.getObjectId()))
             else:
                 label.setName("_##Label{}-{}".format(self.idSec_, countObj))
                 countObj = countObj + 1
@@ -328,11 +342,14 @@ class MReportSection(ProjectClass, QObject):
         calcfield = self.calculatedFields_.first()
         while calcfield != 0:
             if calcfield.getObjectId():
-                calcfield.setName("_##{}-Calc.{}-{}".format(self.idSec_, calcfield.fieldName_, calcfield.getObjectId()))
+                calcfield.setName("_##{}-Calc.{}-{}".format(self.idSec_,
+                                                            calcfield.fieldName_, calcfield.getObjectId()))
             else:
-                calcfield.setName("_##{}-Calc.{}-{}".format(self.idSec_, calcfield.fieldName_, countObj))
+                calcfield.setName(
+                    "_##{}-Calc.{}-{}".format(self.idSec_, calcfield.fieldName_, countObj))
                 countObj = countObj + 1
-            yObjectPos = newHeight - calcfield.getHeight() if calcfield.getDrawAtBottom() else calcfield.getY()
+            yObjectPos = newHeight - \
+                calcfield.getHeight() if calcfield.getDrawAtBottom() else calcfield.getY()
             p.beginMark(calcfield.getX(), yObjectPos, calcfield)
             modifiedHeight = calcfield.draw(p)
             p.endMark()
@@ -345,11 +362,14 @@ class MReportSection(ProjectClass, QObject):
         special = self.specialFields_.first()
         while special != 0:
             if special.getObjectId():
-                special.setName("_##SpecialField{}-{}".format(self.idSec_, special.getObjectId()))
+                special.setName(
+                    "_##SpecialField{}-{}".format(self.idSec_, special.getObjectId()))
             else:
-                special.setName("_##SpecialField{}-{}".format(self.idSec_, countObj))
+                special.setName(
+                    "_##SpecialField{}-{}".format(self.idSec_, countObj))
                 countObj = countObj + 1
-            yObjectPos = newHeight - special.getHeight() if special.getDrawAtBottom() else special.getY()
+            yObjectPos = newHeight - \
+                special.getHeight() if special.getDrawAtBottom() else special.getY()
             p.beginMark(special.getX(), yObjectPos, special)
 
             spType = special.getType()
@@ -366,9 +386,11 @@ class MReportSection(ProjectClass, QObject):
         field = self.fields_.first()
         while field != 0:
             if field.getObjectId():
-                field.setName("_##{}.{}-{}".format(self.idSec_, field.fieldName_, field.getObjectId()))
+                field.setName("_##{}.{}-{}".format(self.idSec_,
+                                                   field.fieldName_, field.getObjectId()))
             else:
-                field.setName("_##{}.{}-{}".format(self.idSec_, field.fieldName_, countObj))
+                field.setName("_##{}.{}-{}".format(self.idSec_,
+                                                   field.fieldName_, countObj))
                 countObj = countObj + 1
             yObjectPos = newHeight - field.getHeight() if field.getDrawAtBottom() else field.getY()
             p.beginMark(field.getX(), yObjectPos, field)

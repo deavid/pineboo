@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#Completa Si
+# Completa Si
 
 
 class FLFieldMetaDataList():
     """
     Lista de campos
     """
-    #typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
+    # typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
     FLFieldMetaDataList = {}
