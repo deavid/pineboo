@@ -537,16 +537,15 @@ class RadioButton(QtWidgets.QRadioButton):
 class Dialog(QtWidgets.QDialog):
     _layout = None
     buttonBox = None
-    OKButtonText = None
+    okButtonText = None
     cancelButtonText = None
-    OKButton = None
+    okButton = None
     cancelButton = None
     _tab = None
 
     def __init__(self, title=None, f=None, desc=None):
         # FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
-
         if title:
             self.setWindowTitle(str(title))
 
@@ -564,12 +563,14 @@ class Dialog(QtWidgets.QDialog):
         self.cancelButton.clicked.connect(self.reject)
         self._tab = QTabWidget()
         self._layout.addWidget(self._tab)
+        self.oKButtonText = None
+        self.cancelButtonText = None
 
     def add(self, _object):
         self._layout.addWidget(_object)
 
     def exec_(self):
-        if (self.okButtonText):
+        if self.okButtonText:
             self.okButton.setText(str(self.okButtonText))
         if (self.cancelButtonText):
             self.cancelButton.setText(str(self.cancelButtonText))
