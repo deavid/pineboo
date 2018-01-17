@@ -109,7 +109,8 @@ class MReportViewer(ProjectClass, QWidget):
         if displayReport is None:
             flags = append
         else:
-            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(MReportViewer.RenderReportFlags.Display if displayReport else 0)
+            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(
+                MReportViewer.RenderReportFlags.Display if displayReport else 0)
 
         append = flags & MReportViewer.RenderReportFlags.Append
         displayReport = flags & MReportViewer.RenderReportFlags.Display
@@ -125,7 +126,8 @@ class MReportViewer(ProjectClass, QWidget):
             self.progress_.deleteLater()
             self.progress_ = 0
 
-        self.report_ = self.rptEngine_.renderReport(initRow, initCol, self.report_, flags)
+        self.report_ = self.rptEngine_.renderReport(
+            initRow, initCol, self.report_, flags)
         self.insertChild(self.report_)
 
         if displayReport:
@@ -225,7 +227,8 @@ class MReportViewer(ProjectClass, QWidget):
         if not gsOk:
             m = Qt.QMessageBox(
                 FLUtil.translate(self, "app", "Falta Ghostscript"),
-                FLUtil.translate(self, "app", "Para poder exportar a PDF debe instalar Ghostscript (http://www.ghostscript.com) y añadir\nel directorio de instalación a la ruta de búsqueda de programas\ndel sistema (PATH).\n\n"),
+                FLUtil.translate(
+                    self, "app", "Para poder exportar a PDF debe instalar Ghostscript (http://www.ghostscript.com) y añadir\nel directorio de instalación a la ruta de búsqueda de programas\ndel sistema (PATH).\n\n"),
                 Qt.QMessageBox.Critical,
                 Qt.QMessageBox.Ok,
                 Qt.QMessageBox.NoButton,
@@ -353,7 +356,8 @@ class MReportViewer(ProjectClass, QWidget):
             Qt.QMessageBox.critical(
                 self,
                 "Kugar",
-                FLUtil.translate(self, "app", "No hay páginas en el\ninforme para."),
+                FLUtil.translate(
+                    self, "app", "No hay páginas en el\ninforme para."),
                 Qt.QMessageBox.Ok,
                 Qt.QMessageBox.NoButton,
                 Qt.QMessageBox.NoButton
@@ -418,7 +422,8 @@ class MReportViewer(ProjectClass, QWidget):
                     QtWidgets.QApplication.processEvents()
 
                     if printRev:
-                        self.report_.setCurrentPage(i if printCnt == 1 else (printCnt - 1) - i)
+                        self.report_.setCurrentPage(
+                            i if printCnt == 1 else (printCnt - 1) - i)
                     else:
                         self.report_.setCurrentPage(i)
 
@@ -462,7 +467,8 @@ class MReportViewer(ProjectClass, QWidget):
             Qt.QMessageBox.critical(
                 self,
                 "Kugar",
-                FLUtil.translate(self, "app", "No hay páginas en el\ninforme para."),
+                FLUtil.translate(
+                    self, "app", "No hay páginas en el\ninforme para."),
                 Qt.QMessageBox.Ok,
                 Qt.QMessageBox.NoButton,
                 Qt.QMessageBox.NoButton
@@ -487,7 +493,8 @@ class MReportViewer(ProjectClass, QWidget):
 
         printNow = True
         if not self.printerName_ or self.printerName_ == "":
-            printNow = self.printer_.setup(QtWidgets.QApplication.focusWidget())
+            printNow = self.printer_.setup(
+                QtWidgets.QApplication.focusWidget())
 
         if printNow:
             painter = Qt.QPainter()
@@ -534,7 +541,8 @@ class MReportViewer(ProjectClass, QWidget):
                         QtWidgets.QApplication.processEvents()
 
                         if printRev:
-                            self.report_.setCurrentPage(i if printCnt == 1 else (printCnt - 1) - i)
+                            self.report_.setCurrentPage(
+                                i if printCnt == 1 else (printCnt - 1) - i)
                         else:
                             self.report_.setCurrentPage(i)
 
@@ -671,7 +679,8 @@ class MReportViewer(ProjectClass, QWidget):
 
         if self.rptEngine_:
             self.rptEngine_.destroyed.disconnect(self.setReportEngine)
-            self.rptEngine_.signalRenderStatus.disconnect(self.slotRenderProgress)
+            self.rptEngine_.signalRenderStatus.disconnect(
+                self.slotRenderProgress)
             self.rptEngine_.preferedTemplate.disconnect(self.preferedTemplate)
 
         self.rptEngine_ = r

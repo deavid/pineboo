@@ -2,8 +2,10 @@
 
 from builtins import object
 
+
 class DbStruct(object):
     pass
+
 
 def get_oids(conn):
     cur = conn.cursor()
@@ -22,6 +24,7 @@ def get_oids(conn):
         obj.namespace = namespace
         obj.name = relname
         yield obj
+
 
 def get_relname_oid(conn, relname):
     """
@@ -43,6 +46,7 @@ def get_relname_oid(conn, relname):
         obj.namespace = namespace
         obj.name = relname
         return obj
+
 
 def get_oid_info(conn, obj):
     """
@@ -68,7 +72,7 @@ def get_oid_info(conn, obj):
         return obj
 
 
-def get_table_columns(conn,obj):
+def get_table_columns(conn, obj):
     """
         Obtiene las columnas de una tabla
     """
@@ -95,7 +99,8 @@ def get_table_columns(conn,obj):
         field.number = number
         yield field
 
-def get_index_columns(conn,obj):
+
+def get_index_columns(conn, obj):
     """
         Obtiene las columnas de una tabla
     """
@@ -106,9 +111,10 @@ def get_index_columns(conn,obj):
         WHERE a.attrelid = %s AND a.attnum > 0 AND NOT a.attisdropped
         ORDER BY a.attnum
         """, [obj.oid])
-    return [ name for (name,)  in cur ]
+    return [name for (name,) in cur]
 
-def get_table_indexes(conn,obj):
+
+def get_table_indexes(conn, obj):
     """
         Obtiene los indices de una tabla
     """
@@ -133,7 +139,8 @@ def get_table_indexes(conn,obj):
         index.columns = get_index_columns(conn, index)
         yield index
 
-def get_table_parents(conn,obj):
+
+def get_table_parents(conn, obj):
     """
         Obtiene las tablas padres de una tabla (tablas de las que hereda una tabla)
     """
@@ -151,4 +158,3 @@ def get_table_parents(conn,obj):
         obj.namespace = namespace
         obj.name = relname
         yield obj
-

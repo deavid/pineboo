@@ -22,8 +22,8 @@ los metadatos de una consulta, ver FLTableMetaData::query().
 @author InfoSiAL S.L.
 """
 
-class FLTableMetaData(ProjectClass):
 
+class FLTableMetaData(ProjectClass):
 
     d = None
 
@@ -34,40 +34,34 @@ class FLTableMetaData(ProjectClass):
     @param a Alias de la tabla, utilizado en formularios
     @param q (Opcional) Nombre de la consulta de la que define sus metadatos
     """
-  
-    def __init__(self, n, a = None, q = None):
-        super(FLTableMetaData,self).__init__()
+
+    def __init__(self, n, a=None, q=None):
+        super(FLTableMetaData, self).__init__()
         #tmp = None
-                
+
         if not a and not q:
-            if isinstance(n,str):
+            if isinstance(n, str):
                 #print("FLTableMetaData(%s).init()" % args[0])
-                self.inicializeFLTableMetaDataP(n)  
+                self.inicializeFLTableMetaDataP(n)
             else:
                 self.inicializeFLTableMetaData(n)
         else:
             self.inicializeNewFLTableMetaData(n, a, q)
-        
-        
-        
-        
+
     def inicializeFLTableMetaData(self, other):
         self.d = FLTableMetaDataPrivate()
-        self.d.fieldsNames_ = [] 
+        self.d.fieldsNames_ = []
         self.copy(other)
-        
-                                           
-    def inicializeNewFLTableMetaData(self, n, a, q = None):
+
+    def inicializeNewFLTableMetaData(self, n, a, q=None):
         self.d = FLTableMetaDataPrivate(n, a, q)
-        self.d.fieldsNames_ = [] 
-    
-        
+        self.d.fieldsNames_ = []
+
     def inicializeFLTableMetaDataP(self, name):
         self.d = FLTableMetaDataPrivate(name)
         self.d.compoundKey_ = FLCompoundKey()
-        self.d.fieldsNames_ = [] 
-        
-        
+        self.d.fieldsNames_ = []
+
         """
         try:
             table = self._prj.tables[name]
@@ -89,18 +83,20 @@ class FLTableMetaData(ProjectClass):
         """
     """
     destructor
-    """   
+    """
+
     def __del__(self):
         self.d = None
-    
+
     """
     Obtiene el nombre de la tabla
 
     @return El nombre de la tabla que se describe
     """
+
     def name(self):
         return self.d.name_
-    
+
     """
     Establece el nombre de la tabla
 
@@ -108,9 +104,8 @@ class FLTableMetaData(ProjectClass):
     """
 
     def setName(self, n):
-        #QObject::setName(n);
+        # QObject::setName(n);
         self.d.name_ = n
-        
 
     """
     Establece el alias
@@ -126,12 +121,14 @@ class FLTableMetaData(ProjectClass):
 
     @param q Nombre de la consulta
     """
+
     def setQuery(self, q):
         self.d.query_ = q
 
     """
     Obtiene el alias asociado a la tabla
     """
+
     def alias(self):
         return self.d.alias_
 
@@ -143,12 +140,14 @@ class FLTableMetaData(ProjectClass):
     el nombre de la tabla correponderá a la tabla principal de la consulta
     cuando esta referencie a varias tablas.
     """
+
     def query(self):
         return self.d.query_
 
     """
     Obtiene si define los metadatos de una consulta
     """
+
     def isQuery(self):
         if self.d.query_:
             return True
@@ -166,7 +165,7 @@ class FLTableMetaData(ProjectClass):
             return
         if not f.metadata():
             f.setMetadata(self)
-        self.d.fieldList_.append(f) 
+        self.d.fieldList_.append(f)
         self.d.addFieldName(f.name())
         self.d.formatAlias(f)
         if f.type() == FLFieldMetaData.Unlock:
@@ -183,10 +182,10 @@ class FLTableMetaData(ProjectClass):
     def removeFieldMD(self, fN):
         if fN.isEmpty():
             return
-        
+
         self.d.fieldList_[fN.lower()].clear()
         self.d.removeFieldName(fN)
-                    
+
     """
     Establece la clave compuesta de esta tabla.
 
@@ -201,18 +200,19 @@ class FLTableMetaData(ProjectClass):
 
     @param prefixTable Si es TRUE se añade un prefijo con el nombre de la tabla; nombretabla.nombrecampo
     """
-    def primaryKey(self, prefixTable = False):
+
+    def primaryKey(self, prefixTable=False):
         if not self.d.primaryKey_:
             return None
-        
+
         if "." in self.d.primaryKey_:
             return self.d.primaryKey_
-        
+
         if prefixTable:
             return str("%s.%s" % (self.d.name_, self.d.primaryKey_))
         else:
             return str(self.d.primaryKey_)
-  
+
     """
     Obtiene el alias de un campo a partir de su nombre.
 
@@ -220,38 +220,39 @@ class FLTableMetaData(ProjectClass):
     """
 
     def fieldNameToAlias(self, fN):
-        
+
         if not fN:
             return fN
-        
+
         for key in self.d.fieldList_:
-            if key.name().lower()  == fN.lower():
+            if key.name().lower() == fN.lower():
                 return key.alias()
-                    
+
         return None
-    
+
     """
     Obtiene el nombre de un campo a partir de su alias.
 
     @param aN Nombre del alias del campo
     """
+
     def fieldAliasToName(self, aN):
-            
+
         if not aN:
             return aN
-        
+
         for key in self.d.fieldList_:
             if key.alias().lower() == aN.lower():
                 return key.name()
-        
+
         return None
-    
 
     """
     Obtiene el tipo de un campo a partir de su nombre.
 
     @param fN Nombre del campo
     """
+
     def fieldType(self, fN):
         if not fN:
             return None
@@ -259,15 +260,15 @@ class FLTableMetaData(ProjectClass):
         for f in self.d.fieldList_:
             if f.name() == fN.lower():
                 return f.type()
-        
-        return None
 
+        return None
 
     """
     Obtiene si un campo es clave primaria partir de su nombre.
 
     @param fN Nombre del campo
     """
+
     def fieldIsPrimaryKey(self, fN):
         if not fN:
             return None
@@ -275,7 +276,7 @@ class FLTableMetaData(ProjectClass):
         for f in self.d.fieldList_:
             if f.name() == fN.lower():
                 return f.pK()
-        
+
         return None
 
     """
@@ -283,18 +284,19 @@ class FLTableMetaData(ProjectClass):
 
     @param fN Nombre del campo
     """
+
     def fieldIsIndex(self, fN):
         if not fN:
             return None
-        
+
         i = 0
-        
+
         for f in self.d.fieldList_:
             if f.name() == str(fN).lower():
                 return i
-            
+
             i = i + 1
-        
+
         return None
 
     """
@@ -307,17 +309,17 @@ class FLTableMetaData(ProjectClass):
     def fieldIsCounter(self, fN):
         if fN.isEmpty():
             return False
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-        
+
         if field:
             return field.d.contador_
-        
+
         return False
 
     """
@@ -329,17 +331,17 @@ class FLTableMetaData(ProjectClass):
     def fieldAllowNull(self, fN):
         if fN.isEmpty():
             return False
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-        
+
         if field:
             return field.d.allowNull_
-        
+
         return False
 
     """
@@ -351,17 +353,17 @@ class FLTableMetaData(ProjectClass):
     def fieldIsUnique(self, fN):
         if fN.isEmpty():
             return False
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-        
+
         if field:
             return field.d.isUnique_
-        
+
         return False
 
     """
@@ -377,17 +379,17 @@ class FLTableMetaData(ProjectClass):
     def fieldTableM1(self, fN):
         if fN.isEmpty():
             return False
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-        
+
         if field and field.d.relationM1_:
             return field.d.relationM1_.foreignTable()
-        
+
         return None
 
     """
@@ -402,18 +404,18 @@ class FLTableMetaData(ProjectClass):
     def fieldForeignFieldM1(self, fN):
         if fN.isEmpty():
             return False
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-        
+
         if field and field.d.relationM1_:
             return field.d.relationM1_.foreignField()
-        
-        return None      
+
+        return None
 
     """
     Obtiene el objeto relación que definen dos campos.
@@ -424,30 +426,30 @@ class FLTableMetaData(ProjectClass):
     @return Devuelve un objeto FLRelationMetaData con la información de la relación, siempre y
       cuando esta exista. Si no existe devuelve False
     """
+
     def relation(self, fN, fFN, fTN):
         if not fN:
             return False
-        
+
         field = None
-        
+
         for f in self.d.fieldList_:
             if f.name() == str(fN).lower():
                 field = f
                 break
-            
+
         if field:
             if field.d.relationM1_ and field.d.relationM1_.foreignField() == str(fFN).lower() and field.d.relationM1_.foreignTable() == str(fTN).lower():
                 return field.d.relationM1_
-            
+
             relationList = field.d.relationList_
-            
+
             if relationList:
                 for itR in relationList:
                     if itR.foreignField() == str(fFN).lower() and itR.foreignTable() == str(fTN).lower():
                         return itR
-            
+
             return False
-   
 
     """
     Obtiene la longitud de un campo a partir de su nombre.
@@ -458,20 +460,19 @@ class FLTableMetaData(ProjectClass):
     def fieldLength(self, fN):
         if not fN:
             return
-        
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == str(fN).lower():
                 field = f
                 break
-            
+
         if field:
             return field.length()
-        
+
         return
-        
+
     """
     Obtiene el número de dígitos de la parte entera de un campo a partir de su nombre.
 
@@ -481,18 +482,17 @@ class FLTableMetaData(ProjectClass):
     def fieldPartInteger(self, fN):
         if fN.isEmpty():
             return
-        
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-            
+
         if field:
-            return field.d.partInteger_ 
-        
+            return field.d.partInteger_
+
         return
 
     """
@@ -504,20 +504,18 @@ class FLTableMetaData(ProjectClass):
     def fieldPartDecimal(self, fN):
         if fN.isEmpty():
             return
-        
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-            
+
         if field:
-            return field.d.partDecimal_ 
-        
+            return field.d.partDecimal_
+
         return
-        
 
     """
     Obtiene si un campo es calculado.
@@ -528,19 +526,18 @@ class FLTableMetaData(ProjectClass):
     def fieldCalculated(self, fN):
         if fN.isEmpty():
             return
-        
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-            
+
         if field:
-            return field.d.calculated_ 
-        
-        return False       
+            return field.d.calculated_
+
+        return False
 
     """
     Obtiene si un campo es visible.
@@ -552,43 +549,42 @@ class FLTableMetaData(ProjectClass):
 
         if fN.isEmpty():
             return
-        
-        
+
         field = None
-        
+
         for f in self.d.fieldName_:
             if f.name() == fN.lower():
                 field = f
                 break
-            
+
         if field:
-            return field.d.visible_ 
-        
-        return False   
-        
+            return field.d.visible_
+
+        return False
 
     """ Obtiene los metadatos de un campo.
 
     @param fN Nombre del campo
     @return Un objeto FLFieldMetaData con lainformación o metadatos de un campo dado
     """
+
     def field(self, fN):
         if not fN:
             return
-        
+
         for f in self.d.fieldList_:
             #print("comprobando ", f.name())
             if f.name() == str(fN).lower():
                 return f
-        
-        return None      
+
+        return None
 
     """
     Para obtener la lista de definiciones de campos.
 
     @return Objeto con la lista de deficiones de campos de la tabla
     """
-    #def fieldList(self):
+    # def fieldList(self):
     #    return self.d.fieldList_
 
     """
@@ -597,41 +593,39 @@ class FLTableMetaData(ProjectClass):
     @param prefixTable Si es TRUE se añade un prefijo a cada campo con el nombre de la tabla; nombretabla.nombrecampo
     @return Cadena de caracteres con los nombres de los campos separados por comas
     """
-    def fieldList(self, prefixTable = None):
-        
+
+    def fieldList(self, prefixTable=None):
+
         if prefixTable == None:
             return self.d.fieldList_
-        
+
         listado = []
-        
+
         cadena = None
-        
+
         if prefixTable == True:
             cadena = "%s." % self.name()
         else:
             cadena = ""
-        
+
         for field in self.d.fieldList_:
             listado.append("%s%s" % (cadena, field.name()))
 
-        return listado   
-    
-    #def fieldListObject(self):
+        return listado
+
+    # def fieldListObject(self):
     #    #print("FiledList count", len(self.d.fieldList_))
     #    return self.d.fieldList_
-    
+
     def indexPos(self, position):
         i = 0
         for field in self.d.fieldList_:
             if field.name() == position:
                 return i
             i = i + 1
-        
-        print("FLTableMetaData.indexPos(%s) No encontrado" % position)    
+
+        print("FLTableMetaData.indexPos(%s) No encontrado" % position)
         return None
-    
- 
-        
 
     """
     Obtiene la lista de campos de una clave compuesta, a partir del nombre de
@@ -642,6 +636,7 @@ class FLTableMetaData(ProjectClass):
       que forman dicha clave compuesta, incluido el campo consultado. En el caso
       que el campo consultado no pertenezca a ninguna clave compuesta devuelve 0
     """
+
     def fieldListOfCompoundKey(self, fN):
         if self.d.compoundKey_:
             if self.d.compoundKey_.hasField(fN):
@@ -654,12 +649,14 @@ class FLTableMetaData(ProjectClass):
     El orden de los campos de izquierda a derecha es el correspondiente al orden en que
     se han añadido con el método addFieldMD() o addFieldName()
     """
+
     def fieldsNames(self):
         return self.d.fieldsNames_
 
     """
     Lista de nombres de campos de la tabla que son del tipo FLFieldMetaData::Unlock
     """
+
     def fieldsNamesUnlock(self):
         return self.d.fieldsNamesUnlock_
     """
@@ -673,7 +670,7 @@ class FLTableMetaData(ProjectClass):
     Establece el indicador FLTableMetaData::concurWarn_
     """
 
-    def setConcurWarn(self, b = True):
+    def setConcurWarn(self, b=True):
         self.d.concurWarn_ = b
 
     """
@@ -687,7 +684,7 @@ class FLTableMetaData(ProjectClass):
     Establece el indicador FLTableMetaData::detectLocks_
     """
 
-    def setDetectLocks(self, b = True):
+    def setDetectLocks(self, b=True):
         self.d.detectLocks_ = b
 
     """
@@ -696,7 +693,6 @@ class FLTableMetaData(ProjectClass):
 
     def FTSFunction(self):
         return self.d.ftsfun_
-    
 
     def setFTSFunction(self, ftsfun):
         self.d.ftsfun_ = ftsfun
@@ -704,42 +700,38 @@ class FLTableMetaData(ProjectClass):
     """
     Indica si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
-    def inCache(self):
-        return self.d.inCache_
 
+    def inCache(self):
+        return self.d and self.d.inCache_
 
     """
     Establece si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
-    def setInCache(self, b = True):
+
+    def setInCache(self, b=True):
         self.d.inCache_ = b
 
     def copy(self, other):
         if other == self:
             return
-     
-        self.d = copy.copy(other.d)    
-    
+
+        self.d = copy.copy(other.d)
 
     def indexFieldObject(self, position):
         i = -1
         for field in self.d.fieldList_:
             i = i + 1
             if position == i:
-                #print("FLTableMetaData.indexField(%s) = %s" % (position, field.name())) 
-                return field 
-            
-        
-        print("FLTableMetaData.indexField(%s) Posicion %s de %s no encontrado" % (self.d.name_, position, i) )    
+                #print("FLTableMetaData.indexField(%s) = %s" % (position, field.name()))
+                return field
+
+        print("FLTableMetaData.indexField(%s) Posicion %s de %s no encontrado" % (
+            self.d.name_, position, i))
         return None
-
-
-
 
 
 class FLTableMetaDataPrivate():
 
-    
     """
     Nombre de la tabla
     """
@@ -806,25 +798,20 @@ class FLTableMetaDataPrivate():
     Ver también FLSqlDatabase::detectRisksLocks
     """
     detectLocks_ = None
-  
+
     """
     Indica el nombre de función a llamar para la búsqueda con Full Text Search
     """
     ftsfun_ = None
-  
+
     """
     Indica si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
     inCache_ = None
-    
-    count_ = 0
-  
-  
-  
-  
-  
 
-    def __init__(self, n = None, a = None, q = None):
+    count_ = 0
+
+    def __init__(self, n=None, a=None, q=None):
         self.fieldList_ = []
         self.fieldsNamesUnlock_ = []
         self.aliasFieldMap_ = {}
@@ -835,33 +822,25 @@ class FLTableMetaDataPrivate():
         elif n and not a and not q:
             self.inicializeFLTableMetaDataPrivateS(n)
         else:
-            self.inicializeNewFLTableMetaDataPrivate(n, a, q)    
+            self.inicializeNewFLTableMetaDataPrivate(n, a, q)
         self.count_ = self.count_ + 1
 
-        
-         
     def inicializeFLTableMetaDataPrivate(self):
         self.compoundKey_ = None
         self.inCache = False
-        
 
-                    
-                    
-    def inicializeNewFLTableMetaDataPrivate(self, n, a, q = None):
+    def inicializeNewFLTableMetaDataPrivate(self, n, a, q=None):
         self.name_ = n.lower()
-        self.alias_ = a 
+        self.alias_ = a
         self.compoundKey_ = 0
         self.query_ = q
         self.concurWarn_ = False
         self.detectLocks_ = False
         self.inCache_ = False
-    
-    def inicializeFLTableMetaDataPrivateS(self,name):
+
+    def inicializeFLTableMetaDataPrivateS(self, name):
         self.name_ = str(name)
         self.alias_ = self.name_
-        
-        
-        
 
     """
     Añade el nombre de un campo a la cadena de nombres de campos, ver fieldsNames()
@@ -879,7 +858,7 @@ class FLTableMetaDataPrivate():
     """
 
     def removeFieldName(self, n):
-        
+
         if self.fieldsNames_:
             oldFN = self.fieldsNames_
             self.fieldsNames_ = []
@@ -896,27 +875,27 @@ class FLTableMetaDataPrivate():
     def formatAlias(self,  f):
         if not f:
             return
-        
+
         alias = f.alias()
         field = f.name().lower()
-        
+
         for aliasF in self.aliasFieldMap_:
             if aliasF == alias:
                 alias = "%s(%s)" % (alias, str(len(self.aliasFieldMap_) + 1))
                 break
-            
-            
+
         f.d.alias_ = alias
-        
-        self.aliasFieldMap_[ alias ] = field
-        self.fieldAliasMap_[ field ] = alias
+
+        self.aliasFieldMap_[alias] = field
+        self.fieldAliasMap_[field] = alias
 
     """
     Limpia la lista de definiciones de campos
     """
+
     def clearFieldList(self):
         self.fieldList_ = []
         self.fieldsNames_ = []
 
 
-#endif
+# endif

@@ -15,7 +15,6 @@ except NameError:
     QString = str
 
 
-
 """
 Clase para manejar distintas conexiones a bases de datos.
 
@@ -34,7 +33,8 @@ class FLSqlConnections():
     @decorators.BetaImplementation
     def addDatabase(self, *args, **kwargs):
         if isinstance(args[0], QString):
-            self.addDatabase1(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7])
+            self.addDatabase1(args[0], args[1], args[2],
+                              args[3], args[4], args[5], args[6], args[7])
         elif len(args) < 2:
             self.addDatabase2(args[0])
         else:
@@ -65,7 +65,8 @@ class FLSqlConnections():
         db = FLSqlDatabase()
         if not db.loadDriver(db.driverAliastoDriverName(driverAlias), connectionName):
             del db
-            print("FLSqlConnections::addDatabase : Driver no cargado %s" % driverAlias)
+            print("FLSqlConnections::addDatabase : Driver no cargado %s" %
+                  driverAlias)
             return False
 
         if not db.connectDB(nameDB, user, password, host, port, connectionName, connectOptions):
@@ -142,7 +143,8 @@ class FLSqlConnections():
         ret = self.d.dictDB.get(connectionName)
 
         if not ret:
-            print(FLUtil.translate("FLSqlConnections::database : No existe la conexión '%s', se devuelve la conexión por defecto 'default'" % connectionName))
+            print(FLUtil.translate(
+                "FLSqlConnections::database : No existe la conexión '%s', se devuelve la conexión por defecto 'default'" % connectionName))
 
             if not self.d.defaultDB:
                 self.addDatabase(FLSqlDatabase())
@@ -164,9 +166,9 @@ class FLSqlConnections():
     def dictDatabases(self):
         if self.d and self.d.dictDB:
             return self.d.dictDB
-        
+
         return None
-    #private:
+    # private:
 
     """
     Privado
@@ -175,14 +177,13 @@ class FLSqlConnections():
 
 
 class FLSqlConnectionsPrivate():
-    
+
     @decorators.BetaImplementation
     def __init__(self, *args, **kwargs):
         self.defaultDB = None
         self.dictDB = {}
-    
+
     @decorators.BetaImplementation
     def __del__(self):
         self.defaultDB = None
         self.dictDB.clear()
-    

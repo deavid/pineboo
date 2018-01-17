@@ -3,14 +3,14 @@
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice,
 #    this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -46,14 +46,14 @@ def run(args):
 # Parse the command line.
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-sysroot', help="do not build the sysroot",
-        action='store_true')
+                    action='store_true')
 parser.add_argument('--sources',
-        help="the directory containing the source packages", metavar="DIR")
+                    help="the directory containing the source packages", metavar="DIR")
 parser.add_argument('--target', help="the target platform", default='')
 parser.add_argument('--quiet', help="disable progress messages",
-        action='store_true')
+                    action='store_true')
 parser.add_argument('--verbose', help="enable verbose progress messages",
-        action='store_true')
+                    action='store_true')
 cmd_line_args = parser.parse_args()
 build_sysroot = not cmd_line_args.no_sysroot
 sources = cmd_line_args.sources
@@ -106,7 +106,7 @@ if build_sysroot:
 
 # Build the demo.
 run(['pyqtdeploy-build', '--target', target, '--sysroot', sysroot_dir,
-            '--build-dir', build_dir, 'pyqt-pineboo.pdy'])
+     '--build-dir', build_dir, 'pyqt-pineboo.pdy'])
 
 # Run qmake.  Use the qmake left by pyqtdeploy-sysroot.
 os.chdir(build_dir)
@@ -124,8 +124,8 @@ else:
     if target.startswith('android'):
         run([make, 'INSTALL_ROOT=deploy', 'install'])
         run([os.path.join(host_bin_dir, 'androiddeployqt'), '--input',
-                'android-libpyqt-pineboo.so-deployment-settings.json', '--output',
-                'deploy'])
+             'android-libpyqt-pineboo.so-deployment-settings.json', '--output',
+             'deploy'])
 
 # Tell the user where the demo is.
 if target.startswith('android'):
@@ -139,7 +139,9 @@ Run Xcode to build the app and run it in the simulator or deploy it to a
 device.""".format(build_dir))
 
 elif target.startswith('win') or sys.platform == 'win32':
-    print("The Pineboo executable can be found in the '{0}' directory.".format(os.path.join(build_dir, 'release')))
+    print("The Pineboo executable can be found in the '{0}' directory.".format(
+        os.path.join(build_dir, 'release')))
 
 else:
-    print("The Pineboo executable can be found in the '{0}' directory.".format(build_dir))
+    print("The Pineboo executable can be found in the '{0}' directory.".format(
+        build_dir))

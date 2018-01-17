@@ -9,20 +9,23 @@ import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
-import platform, hashlib, traceback
+import platform
+import hashlib
+import traceback
 import datetime
+
 
 class FLUtil(ProjectClass):
 
     progress_dialog_stack = []
-    vecUnidades = ['','uno','dos','tres','cuatro','cinco','seis', 'siete','ocho','nueve','diez','once','doce','trece',
-                   'catorce','quince','dieciseis','diecisiete','dieciocho','diecinueve','veinte','veintiun','veintidos',
-                   'veintitres','veinticuatro','veinticinco','veintiseis','veintisiete','veintiocho','veintinueve']
+    vecUnidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece',
+                   'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiun', 'veintidos',
+                   'veintitres', 'veinticuatro', 'veinticinco', 'veintiseis', 'veintisiete', 'veintiocho', 'veintinueve']
 
-    vecDecenas = ['','','','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa']
-    vecCentenas = ['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos',
-                   'setecientos','ochocientos','novecientos']
-
+    vecDecenas = ['', '', '', 'treinta', 'cuarenta',
+                  'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa']
+    vecCentenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos',
+                   'setecientos', 'ochocientos', 'novecientos']
 
     """
     Clase con métodos, herramientas y utiles necesarios para ciertas operaciones.
@@ -37,7 +40,6 @@ class FLUtil(ProjectClass):
     """
 
     def __getattr__(self, name): return DefFun(self, name)
-
     """
     Obtiene la parte entera de un número.
 
@@ -47,6 +49,7 @@ class FLUtil(ProjectClass):
     @param n Número del que obtener la parte entera. Debe ser positivo
     @return La parte entera del número, que puede ser cero
     """
+
     def partInteger(self, n):
         i, d = divmod(n, 1)
         return int(i)
@@ -59,6 +62,7 @@ class FLUtil(ProjectClass):
     @param n Número del que obtener la parte decimal. Debe ser positivo
     @return La parte decimal del número, que puede ser cero
     """
+
     def partDecimal(self, n):
         i, d = divmod(n, 1)
         d = d * 100
@@ -69,6 +73,7 @@ class FLUtil(ProjectClass):
 
     @param n Número a tratar. Debe ser positivo
     """
+
     def unidades(self, n):
         if n > 0:
             return self.vecUnidades[n]
@@ -88,6 +93,7 @@ class FLUtil(ProjectClass):
 
     @param n Número a tratar. Debe ser positivo
     """
+
     def centenamillar(self, n):
         buffer = ""
 
@@ -101,12 +107,12 @@ class FLUtil(ProjectClass):
 
         return buffer
 
-
     """
     Enunciado de las decenas de un número.
 
     @param n Número a tratar. Debe ser positivo
     """
+
     def decenas(self, n):
         buffer = ""
 
@@ -118,7 +124,6 @@ class FLUtil(ProjectClass):
                 buffer = buffer + " y "
                 buffer = buffer + self.unidades(n % 10)
 
-
         return buffer
 
     """
@@ -126,6 +131,7 @@ class FLUtil(ProjectClass):
 
     @param n Número a tratar. Debe ser positivo
     """
+
     def centenas(self, n):
         buffer = ""
         if n == 100:
@@ -136,7 +142,7 @@ class FLUtil(ProjectClass):
         else:
             buffer = buffer + self.vecCentenas[self.partInteger(n / 100)]
             buffer = buffer + " "
-            buffer = buffer + self.decenas( n % 100)
+            buffer = buffer + self.decenas(n % 100)
 
         return buffer
 
@@ -145,29 +151,29 @@ class FLUtil(ProjectClass):
 
     @param n Número a tratar. Debe ser positivo
     """
+
     def unidadesmillar(self, n):
         buffer = ""
         if n < 1000:
             buffer = ""
 
-        if n/1000 == 1:
+        if n / 1000 == 1:
             buffer = "mil "
 
-        if n/1000 > 1:
+        if n / 1000 > 1:
             buffer = self.unidades(n / 1000)
             buffer = buffer + " mil "
 
-        buffer = buffer + self.centenas( n % 1000)
+        buffer = buffer + self.centenas(n % 1000)
 
         return buffer
-
-
 
     """
     Enunciado de las decenas de millar de un número.
 
     @param n Número a tratar. Debe ser positivo
     """
+
     def decenasmillar(self, n):
         buffer = ""
         if n < 10000:
@@ -176,7 +182,7 @@ class FLUtil(ProjectClass):
 
         buffer = self.decenas(n / 1000)
         buffer = buffer + " mil "
-        buffer = buffer + self.centenas( n % 10000)
+        buffer = buffer + self.centenas(n % 10000)
         return buffer
 
     """
@@ -189,6 +195,7 @@ class FLUtil(ProjectClass):
     @param n Número a transladar a su forma hablada. Debe ser positivo
     @return Cadena de texto con su expresión hablada
     """
+
     def enLetra(self, n):
         buffer = ""
         if n > 1000000000:
@@ -266,6 +273,7 @@ class FLUtil(ProjectClass):
     @param n Numero de D.N.I
     @return Caracter asociado al núemro de D.N.I
     """
+
     def letraDni(self, n):
         letras = "TRWAGMYFPDXBNJZSQVHLCKE"
         return letras[n % 23]
@@ -277,6 +285,7 @@ class FLUtil(ProjectClass):
     @param tabla. Nombre de la tabla
     @return Lista de campos
     """
+
     def nombreCampos(self, tablename):
         campos = pineboolib.project.conn.manager().metadata(tablename).fieldsNames()
         return [len(campos)] + campos
@@ -301,31 +310,27 @@ class FLUtil(ProjectClass):
     """
 
     def calcularDC(self, n):
-        Tabla = [6,3,7,9,10,5,8,4,2,1]
-        
+        Tabla = [6, 3, 7, 9, 10, 5, 8, 4, 2, 1]
+
         DC = None
         Suma = 0
         nDigitos = len(n) - 1
-        
+
         ct = 1
-        
+
         while ct <= len(n):
             Suma = Suma + (Tabla[nDigitos] * (int(n[ct - 1]) - 0))
             nDigitos = nDigitos - 1
             ct = ct + 1
-        
-        DC = 11 - (Suma  % 11)
+
+        DC = 11 - (Suma % 11)
         if DC == 11:
             DC = 0
         elif DC == 10:
             DC = 1
-        
+
         char = chr(DC + 48)
         return char
-    
-            
-        
-        
 
     """
     Convierte fechas del tipo DD-MM-AAAA, DD/MM/AAAA o
@@ -334,19 +339,20 @@ class FLUtil(ProjectClass):
     @param  f Cadena de texto con la fecha a transformar
     @return Cadena de texto con la fecha transformada
     """
+
     def dateDMAtoAMD(self, f):
         dia_ = None
         mes_ = None
         ano_ = None
-        
+
         if not f:
             return None
-        
+
         f = str(f)
-        
+
         if f.find("T") > -1:
             f = f[:f.find("T")]
-        
+
         array_ = f.split("-")
         if len(array_) == 3:
             dia_ = array_[0]
@@ -362,8 +368,7 @@ class FLUtil(ProjectClass):
                 dia_ = f[0:2]
                 mes_ = f[2:2]
                 ano_ = f[4:4]
-         
-            
+
         retorno = "%s-%s-%s" % (ano_, mes_, dia_)
         return retorno
 
@@ -374,7 +379,7 @@ class FLUtil(ProjectClass):
     @param  f Cadena de texto con la fecha a transformar
     @return Cadena de texto con la fecha transformada
     """
-    
+
     def dateAMDtoDMA(self, f):
         dia_ = None
         mes_ = None
@@ -394,8 +399,7 @@ class FLUtil(ProjectClass):
                 ano_ = f[0:4]
                 mes_ = f[4:2]
                 dia_ = f[6:2]
-         
-            
+
         retorno = "%s-%s-%s" % (dia_, mes_, ano_)
         return retorno
     """
@@ -452,10 +456,10 @@ class FLUtil(ProjectClass):
     @param s Cadena de texto a traducir
     @return Devuelve la cadena traducida al idioma local
     """
-    
+
     def translate(self, group, string):
         from pineboolib.fllegacy.FLTranslations import FLTranslate
-        return FLTranslate(group, string)
+        return str(FLTranslate(group, string))
 
     """
     Devuelve si el numero de tarjeta de Credito es valido.
@@ -509,6 +513,7 @@ class FLUtil(ProjectClass):
     @return Qvariant con el numero siguiente.
     @author Andrés Otón Urbano.
     """
+
     def nextCounter(self, *args, **kwargs):
         if len(args) == 2:
             name = args[0]
@@ -555,13 +560,12 @@ class FLUtil(ProjectClass):
                 numero = int(q.value(0))
                 numero = numero + 1
 
-
             if type_ == "string":
                 cadena = str(numero)
-                
+
                 if len(cadena) < _len:
                     relleno = None
-                    relleno = cadena.rjust(_len , '0')
+                    relleno = cadena.rjust(_len, '0')
                     cadena = relleno
 
                 return cadena
@@ -594,8 +598,10 @@ class FLUtil(ProjectClass):
             _len = field.length() - len(serie)
             cadena = None
 
-            where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (name, field.length(), name, len(serie), serie)
-            select = "substring(%s FROM %d) as %s" % (name, len(serie) + 1, name)
+            where = "length(%s)=%d AND substring(%s FROM 1 for %d) = '%s'" % (
+                name, field.length(), name, len(serie), serie)
+            select = "substring(%s FROM %d) as %s" % (
+                name, len(serie) + 1, name)
             q = FLSqlQuery(None, cursor_.db().connectionName())
             q.setForwardOnly(True)
             q.setTablesList(tMD.name())
@@ -659,6 +665,7 @@ class FLUtil(ProjectClass):
         con las tres o cuatro primeras linea del fichero no vacías
     @return TRUE si es un fichero soportado, FALSE en caso contrario
     """
+
     def isFLDefFile(self, head):
         if head.find("<!DOCTYPE UI>") == 0:
             return True
@@ -674,7 +681,7 @@ class FLUtil(ProjectClass):
             return True
         if head.find("<jasperReport") == 0:
             return True
-        
+
         return False
 
     """
@@ -684,15 +691,17 @@ class FLUtil(ProjectClass):
     @param offset Numero de dias que sumar. Si es negativo resta dias
     @return Fecha con el desplazamiento de dias
     """
+
     def addDays(self, fecha, offset):
         from pineboolib.qsatype import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
-        
+
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
+            fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
+            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" %
+                  type(fecha))
         return fecha.addDays(offset).toString("yyyy-MM-dd")
 
     """
@@ -702,15 +711,17 @@ class FLUtil(ProjectClass):
     @param offset Numero de meses que sumar. Si es negativo resta meses
     @return Fecha con el desplazamiento de meses
     """
+
     def addMonths(self, fecha, offset):
         from pineboolib.qsatype import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
-            
+
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
+            fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
+            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" %
+                  type(fecha))
         return fecha.addMonths(offset).toString("yyyy-MM-dd")
 
     """
@@ -720,15 +731,17 @@ class FLUtil(ProjectClass):
     @param offset Numero de años que sumar. Si es negativo resta años
     @return Fecha con el desplazamiento de años
     """
+
     def addYears(self, fecha, offset):
         from pineboolib.qsatype import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
-            
+
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
+            fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" % type(fecha))
+            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" %
+                  type(fecha))
         return fecha.addYears(offset).toString("yyyy-MM-dd")
 
     """
@@ -751,8 +764,10 @@ class FLUtil(ProjectClass):
 
     @return Cadena que contiene el número formateado
     """
+
     def buildNumber(self, v, tipo, partDecimal):
-        if not v: v= 0
+        if not v:
+            v = 0
         d = float(v) * 10**partDecimal
         d = round(d)
         d = d / 10**partDecimal
@@ -788,8 +803,9 @@ class FLUtil(ProjectClass):
 
     @return Indicador de si la escritura del settings se realiza correctamente
     """
+
     def writeSettingEntry(self, key, value):
-        FLSettings().writeEntry( key, value)
+        FLSettings().writeEntry(key, value)
     """
     Lee el valor de un setting en la tabla flsettings
 
@@ -797,6 +813,7 @@ class FLUtil(ProjectClass):
 
     @return Valor del setting
     """
+
     def readDBSettingEntry(self, key):
         q = FLSqlQuery()
         q.setSelect("valor")
@@ -805,7 +822,7 @@ class FLUtil(ProjectClass):
         q.setTablesList("flsettings")
         if q.exec_() and q.first():
             return q.value(0)
-        
+
         return None
 
     """
@@ -816,27 +833,29 @@ class FLUtil(ProjectClass):
 
     @return Indicador de si la escritura del settings se realiza correctamente
     """
+
     def writeDBSettingEntry(self, key, value):
         result = False
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
         cursor = pineboolib.project.conn.cursor()
-        if not found:   
-            sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % ( key, value)
+        if not found:
+            sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % (
+                key, value)
         else:
-            sql = "UPDATE flsettings SET valor = '%s' WHERE %s" % ( value, where)
+            sql = "UPDATE flsettings SET valor = '%s' WHERE %s" % (
+                value, where)
         try:
             cursor.execute(sql)
-            
+
         except Exception:
             print(traceback.format_exc())
             cursor.rollback()
             return False
-        
+
         cursor.close()
         return True
 
-      
     """
     Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -846,6 +865,7 @@ class FLUtil(ProjectClass):
 
     @return Número redondeado
     """
+
     def roundFieldValue(self, n, table, field):
 
         #tmd = self._prj.conn.manager().metadata(table)
@@ -874,13 +894,12 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Valor resultante de la query o falso si no encuentra nada.
     """
-    
+
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
-        
+
         if w == None or w == "":
             return False
-        
-        
+
         q = FLSqlQuery(None, connName)
         if tL:
             q.setTablesList(tL)
@@ -890,7 +909,7 @@ class FLUtil(ProjectClass):
         q.setSelect(s)
         q.setFrom(f)
         q.setWhere(w)
-        #q.setForwardOnly(True)
+        # q.setForwardOnly(True)
         if not q.exec():
             return False
 
@@ -926,30 +945,29 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
+
     def sqlInsert(self, t, fL, vL, connName="default"):
-        
+
         fL = fL.split(",")
         vL = vL.split(",")
-        
+
         if not len(fL) == len(vL):
             return False
-        
+
         c = FLSqlCursor(t, True, connName)
         c.setModeAccess(FLSqlCursor.Insert)
         c.refreshBuffer()
-        
+
         i = 0
         for f in fL:
             if vL[i] == None:
                 c.bufferSetNull(f)
             else:
-                c.setValueBuffer(f,vL[i])
-                
+                c.setValueBuffer(f, vL[i])
+
             i = i + 1
-            
+
         return c.commitBuffer()
-        
-        
 
     """
     Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
@@ -961,6 +979,7 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
+
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
@@ -973,7 +992,7 @@ class FLUtil(ProjectClass):
         while c.next():
             c.setModeAccess(FLSqlCursor.Edit)
             c.refreshBuffer()
-            
+
             if isinstance(fL, list):
                 i = 0
                 for f in fL:
@@ -981,7 +1000,7 @@ class FLUtil(ProjectClass):
                     i = i + 1
             else:
                 c.setValueBuffer(fL, vL)
-                
+
             if not c.commitBuffer():
                 return False
 
@@ -994,6 +1013,7 @@ class FLUtil(ProjectClass):
     @param connName Nombre de la conexion
     @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
     """
+
     def sqlDelete(self, t, w, connName="default"):
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
@@ -1024,14 +1044,17 @@ class FLUtil(ProjectClass):
     @param l Label del diálogo
     @param tS Número total de pasos a realizar
     """
-    def createProgressDialog(self, title, steps, id_ = "default"):
-        pd_widget = QtWidgets.QProgressDialog(str(title), str(self.translate("scripts","Cancelar")),0,steps)
+
+    def createProgressDialog(self, title, steps, id_="default"):
+        pd_widget = QtWidgets.QProgressDialog(str(title), str(
+            self.translate("scripts", "Cancelar")), 0, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
 
     """
     Destruye el diálogo de progreso
     """
-    def destroyProgressDialog(self, id_ = "default"):
+
+    def destroyProgressDialog(self, id_="default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
         del self.__class__.progress_dialog_stack[-1]
         pd_widget.hide()
@@ -1042,7 +1065,8 @@ class FLUtil(ProjectClass):
 
     @param p Grado de progreso
     """
-    def setProgress(self, step_number, id_ = "default"):
+
+    def setProgress(self, step_number, id_="default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setValue(step_number)
 
@@ -1051,7 +1075,8 @@ class FLUtil(ProjectClass):
 
     @param l Etiqueta
     """
-    def setLabelText(self, l, id_ = "default"):
+
+    def setLabelText(self, l, id_="default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setLabelText(str(l))
 
@@ -1060,7 +1085,8 @@ class FLUtil(ProjectClass):
 
     @param ts Número total de pasos
     """
-    def setTotalSteps(self, tS, id_ = "default"):
+
+    def setTotalSteps(self, tS, id_="default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setTotalSteps(tS)
 
@@ -1074,21 +1100,23 @@ class FLUtil(ProjectClass):
     @param content Contenido XML
     @return FALSE si hubo fallo, TRUE en caso contrario
     """
+
     def domDocumentSetContent(self, doc, content):
         if not content:
-            print("FLUtil :", self.tr("Se ha intentado cargar un fichero XML vacío"))
+            print("FLUtil :", self.tr(
+                "Se ha intentado cargar un fichero XML vacío"))
             return False
-        
+
         ErrMsg = ""
         errLine = 0
         errColumn = 0
-        
-        #if not doc.setContent(content, ErrMsg, errLine, errColumn):
+
+        # if not doc.setContent(content, ErrMsg, errLine, errColumn):
         if not doc.setContent(content):
-           print("FLUtil :", self.tr("Error en fichero XML.\nError : %1\nLinea : %2\nColumna : %3").
-             arg(ErrMsg, str(errLine), str(errColumn)))
-           return False
-        
+            print("FLUtil :", self.tr("Error en fichero XML.\nError : %1\nLinea : %2\nColumna : %3").
+                  arg(ErrMsg, str(errLine), str(errColumn)))
+            return False
+
         return True
 
     """
@@ -1099,13 +1127,13 @@ class FLUtil(ProjectClass):
     """
 
     def sha1(self, str_):
-        sha_ = hashlib.new("sha1",str_.encode())
+        sha_ = hashlib.new("sha1", str_.encode())
         st = "%s" % sha_.hexdigest()
         st = st.upper()
         return st
-    
+
     @decorators.NotImplementedWarn
-    def usha1(self, data,_len):
+    def usha1(self, data, _len):
         pass
 
     """
@@ -1159,16 +1187,16 @@ class FLUtil(ProjectClass):
 
     @return Código del sistema operativo (WIN32, LINUX, MACX)
     """
+
     def getOS(self):
         if platform.system() == "Windows":
-            return "WIN32"    
+            return "WIN32"
         elif platform.system() == "Linux" or platform.system() == "Linux2":
             return "LINUX"
         elif platform.system() == "Darwin":
             return "MACX"
         else:
             return platform.system()
-        
 
     """
     Esta función convierte una cadena que es una serie de letras en su correspondiente valor numerico.
@@ -1215,14 +1243,14 @@ class FLUtil(ProjectClass):
     @return Lista de los nombres de los ficheros encontrados
     """
     @decorators.NotImplementedWarn
-    def findFiles(self, paths, filter_ = "*", breakOnFirstMatch = False):
+    def findFiles(self, paths, filter_="*", breakOnFirstMatch=False):
         pass
 
     """
     Uso interno
     """
 
-    def execSql(self, sql, connName = "default"):
+    def execSql(self, sql, connName="default"):
         conn_ = pineboolib.project.conn.useConn(connName)
         cur = conn_.cursor()
         try:

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-#Completa Si
+# Completa Si
 
 
 class FLRelationMetaDataList():
     """
     Lista de relaciones
     """
-    #typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
+    # typedef QDict<FLFieldMetaData> FLFieldMetaDataList;
     FLRelationMetaDataList = []

@@ -54,18 +54,21 @@ class FLReportViewer(ProjectClass):
             else:
                 parent.layout().add(self)
         else:
-            self.autoClose_ = bool(FLUtil.readSettingEntry("rptViewer/autoClose", "false"))
+            self.autoClose_ = bool(FLUtil.readSettingEntry(
+                "rptViewer/autoClose", "false"))
             self.chkAutoClose.setChecked(self.autoClose_)
 
         self.rptViewer_ = MReportViewer(self)
-        self.setReportEngine(FLReportEngine(self) if rptEngine == 0 else rptEngine)
+        self.setReportEngine(FLReportEngine(
+            self) if rptEngine == 0 else rptEngine)
 
         self.setFont(QtWidgets.QApplication.font())
         self.setFocusPolicy(Qt.QWidget.FocusPolicy.StrongFocus)
 
         self.lePara.setText(str(FLUtil.readSettingEntry("email/to")))
         self.leDe.setText(str(FLUtil.readSettingEntry("email/from")))
-        self.leMailServer.setText(str(FLUtil.readSettingEntry("email/mailserver")))
+        self.leMailServer.setText(
+            str(FLUtil.readSettingEntry("email/mailserver")))
 
         self.initCentralWidget_ = self.centralWidget()
 
@@ -77,8 +80,10 @@ class FLReportViewer(ProjectClass):
         self.initCentralWidget.hide()
 
         if not self.embedInParent_:
-            self.spnResolution.setValue(int(FLUtil.readDBSettingEntry("rptViewer/dpi", str(self.rptViewer_.resolution()))))
-            self.spnPixel.setValue(float(FLUtil.readDBSettingEntry("rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
+            self.spnResolution.setValue(int(FLUtil.readDBSettingEntry(
+                "rptViewer/dpi", str(self.rptViewer_.resolution()))))
+            self.spnPixel.setValue(float(FLUtil.readDBSettingEntry(
+                "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
 
@@ -189,7 +194,8 @@ class FLReportViewer(ProjectClass):
         if displayReport is None:
             flags = append
         else:
-            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(MReportViewer.RenderReportFlags.Display if displayReport else 0)
+            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(
+                MReportViewer.RenderReportFlags.Display if displayReport else 0)
 
         if not self.rptEngine_:
             return False
@@ -244,7 +250,8 @@ class FLReportViewer(ProjectClass):
         q = Qt.QMessageBox.question(
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            FLUtil.translate(
+                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -265,7 +272,8 @@ class FLReportViewer(ProjectClass):
             Qt.QMessageBox.critical(
                 self,
                 FLUtil.translate(self, "app", "Error abriendo fichero"),
-                FLUtil.translate(self, "app", "No se pudo abrir el fichero {} para escribir: {}").arg(fileName, QtWidgets.QApplication.translate("QFile", file.errorString()))
+                FLUtil.translate(self, "app", "No se pudo abrir el fichero {} para escribir: {}").arg(
+                    fileName, QtWidgets.QApplication.translate("QFile", file.errorString()))
             )
 
     @decorators.BetaImplementation
@@ -290,7 +298,8 @@ class FLReportViewer(ProjectClass):
         q = Qt.QMessageBox.question(
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            FLUtil.translate(
+                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -324,7 +333,8 @@ class FLReportViewer(ProjectClass):
         q = Qt.QMessageBox.question(
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            FLUtil.translate(
+                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -349,7 +359,8 @@ class FLReportViewer(ProjectClass):
         self.smtpClient_.setMailServer(self.leMailServer.text())
         self.smtpClient_.setTo(self.lePara.text())
         self.smtpClient_.setFrom(self.leDe.text())
-        self.smtpClient_.setSubject(name if self.leAsunto.text() == "" else self.leAsunto.text())
+        self.smtpClient_.setSubject(
+            name if self.leAsunto.text() == "" else self.leAsunto.text())
         self.smtpClient_.setBody(self.leCuerpo.text() + "\n\n")
 
         html = "<html><body><a href=\"http://abanq.org/\">"
@@ -363,7 +374,8 @@ class FLReportViewer(ProjectClass):
         if show:
             self.rptViewer_.hide()
             self.setCentralWidget(self.initCentralWidget_)
-            self.leDocumento.setText("doc-" + str(Qt.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
+            self.leDocumento.setText(
+                "doc-" + str(Qt.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
             self.frEMail.show()
             self.initCentralWidget_.show()
         else:
@@ -391,8 +403,10 @@ class FLReportViewer(ProjectClass):
 
             q = Qt.QMessageBox.question(
                 self,
-                FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-                FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                FLUtil.translate(
+                    self, "app", "Sobreescribir {}").format(fileName),
+                FLUtil.translate(
+                    self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
                 FLUtil.translate(self, "app", "&Sí"),
                 FLUtil.translate(self, "app", "&No"),
                 "",
