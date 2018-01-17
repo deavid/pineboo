@@ -455,7 +455,7 @@ class FLUtil(ProjectClass):
     
     def translate(self, group, string):
         from pineboolib.fllegacy.FLTranslations import FLTranslate
-        return FLTranslate(group, string)
+        return str(FLTranslate(group, string))
 
     """
     Devuelve si el numero de tarjeta de Credito es valido.

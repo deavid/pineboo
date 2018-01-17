@@ -705,7 +705,7 @@ class FLTableMetaData(ProjectClass):
     Indica si lo metadatos están en caché (FLManager::cacheMetaData_)
     """
     def inCache(self):
-        return self.d.inCache_
+        return self.d and self.d.inCache_
 
 
     """

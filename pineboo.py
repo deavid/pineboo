@@ -6,6 +6,7 @@
     y configura el programa adecuadamente.
 """
 import sys, re, traceback, os, gc
+import linecache
 from optparse import OptionParser
 import signal, importlib, pineboo
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -16,14 +17,14 @@ dependences = []
 if sys.version_info[0] < 3:
     print("Tienes que usar Python 3 o superior.")
     sys.exit(32)
-    
+
 
 try:
     from lxml import etree
 except ImportError:
     print(traceback.format_exc())
     dependences.append("python3-lxml")
- 
+
 #try:
 #    import psycopg2
 #except ImportError:
@@ -121,6 +122,9 @@ def main():
     parser.add_option("-q", "--quiet",
                       action="store_false", dest="verbose", default=True,
                       help="don't print status messages to stdout")
+    parser.add_option("--trace-debug",
+                      action="store_true", dest="trace_debug", default=False,
+                      help="Write lots of trace information to stdout")
     parser.add_option("-a", "--action", dest="action",
                       help="load action", metavar="ACTION")
     parser.add_option("--no-python-cache",
@@ -132,38 +136,38 @@ def main():
     parser.add_option("--dgi",
                       dest="dgi",
                       help="Change the gdi mode by default", metavar="DGI")
-    
+
     parser.add_option("--dgi_parameter",
                       dest="dgi_parameter",
                       help="Change the gdi mode by default", metavar="DGIPARAMETER")
-    
-    
+
+
     (options, args) = parser.parse_args()
-    
+
     pineboolib.no_python_cache = options.no_python_cache
-    
-    
+
+
     dgiName_ = "qt"
     if options.dgi:
         dgiName_ = options.dgi
-    
 
-       
-    DGI = getattr(importlib.import_module("pineboolib.plugins.dgi.dgi_%s" % dgiName_),"dgi_%s" % dgiName_,None)() 
+
+
+    DGI = getattr(importlib.import_module("pineboolib.plugins.dgi.dgi_%s" % dgiName_),"dgi_%s" % dgiName_,None)()
     pineboo.DGI = DGI
 
     if options.verbose:
         print("DGI used:", dgiName_)
-    
+
     if options.dgi_parameter:
         DGI.setParameter(options.dgi_parameter)
-    
-    
+
+
     if DGI.useDesktop():
         app = QtWidgets.QApplication(sys.argv)
-    
-    
-    
+
+
+
         noto_fonts = [
             "NotoSans-BoldItalic.ttf",
             "NotoSans-Bold.ttf",
@@ -172,26 +176,26 @@ def main():
         ]
         for fontfile in noto_fonts:
             QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
-    
-                                               
+
+
         QtWidgets.QApplication.setStyle("QtCurve")
         font = QtGui.QFont('Noto Sans',9)
         font.setBold(False)
         font.setItalic(False)
         QtWidgets.QApplication.setFont(font)
-        
-    
+
+
 
         # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
 
         mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
         #mainForm = getattr(module_, "MainForm")()
-        
+
         #from pineboolib import mainForm
 
     project = pineboolib.main.Project(DGI)
-    
-    
+
+
     if options.verbose:
         project.setDebugLevel(100)
         if DGI.useDesktop():
@@ -216,7 +220,7 @@ def main():
             connection_window.load()
             connection_window.show()
             ret = app.exec_()
-            if connection_window.close():    
+            if connection_window.close():
                 #if connection_window.ruta:
                 #    prjpath = connection_window.ruta
                 #    print("Cargando desde ruta %r " % prjpath)
@@ -227,10 +231,10 @@ def main():
                     project.deleteCache = connection_window.deleteCache
                     project.parseProject = connection_window.parseProject
                     project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password, connection_window.driveralias)
-            
-            
-            
-            
+
+
+
+
             if not connection_window.ruta and not connection_window.database:
                 sys.exit(ret)
 
@@ -241,26 +245,28 @@ def main():
         splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
         splash.setMask(splash_pix.mask())
         splash.show()
-    
+
         frameGm = splash.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
         centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         splash.move(frameGm.topLeft())
 
+    if options.trace_debug:
+        sys.settrace(traceit)
 
 
     project.run()
     if project.conn.conn == False:
         return main()
-    
+
     if DGI.useDesktop():
         splash.showMessage("Iniciando proyecto ...")
     if options.verbose: print("Iniciando proyecto ...")
 
     if DGI.useDesktop():
         splash.showMessage("Creando interfaz ...")
-        
+
         if options.verbose: print("Creando interfaz ...")
         if options.action:
             objaction = None
@@ -276,7 +282,7 @@ def main():
 
             main_window = mainForm.mainWindow
             main_window.load()
-        
+
             splash.showMessage("Módulos y pestañas ...")
             if options.verbose: print("Módulos y pestañas ...")
             for k,area in sorted(project.areas.items()):
@@ -289,7 +295,7 @@ def main():
             project.call("sys.widget.init()", [], None, True)
             objaction.openDefaultForm()
             splash.hide()
-        
+
             ret = app.exec_()
             mainForm.mainWindow = None
             return ret
@@ -319,30 +325,49 @@ def main():
                 project.call("sys.widget._class_init()", [], None, True)
                 splash.showMessage("Listo ...")
                 QtCore.QTimer.singleShot(2000, splash.hide)
-            
+
             ret = app.exec_()
             mainForm.mainWindow = None
             del main_window
             del project
             return ret
-    
+
     else:
 
         if options.verbose: print("Cargando Módulos")
         for k,module in sorted(project.modules.items()):
             module.load(True)
-    
-    
+
+
+def traceit(frame, event, arg):
+    if event != "line":
+        return traceit
+    try:
+        lineno = frame.f_lineno
+        filename = frame.f_globals["__file__"]
+        if "pineboo" not in filename:
+            return traceit
+        if (filename.endswith(".pyc") or
+            filename.endswith(".pyo")):
+            filename = filename[:-1]
+        name = frame.f_globals["__name__"]
+        line = linecache.getline(filename, lineno)
+        print("%s:%s: %s" % (name, lineno, line.rstrip()))
+    except:
+        pass
+    return traceit
+
+
 if __name__ == "__main__":
     
     ret = main()
     if pineboo.DGI.useMLDefault():
         gc.collect()
         print("Closing Pineboo...")
-        if ret: 
+        if ret:
             sys.exit(ret)
-        else: 
+        else:
             sys.exit(0)
-    
+
     else:
         pineboo.DGI.alternativeMain(ret)
