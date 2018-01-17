@@ -139,7 +139,7 @@ Run Xcode to build the app and run it in the simulator or deploy it to a
 device.""".format(build_dir))
 
 elif target.startswith('win') or sys.platform == 'win32':
-    print("The pyqt-demo executable can be found in the '{0}' directory.".format(os.path.join(build_dir, 'release')))
+    print("The Pineboo executable can be found in the '{0}' directory.".format(os.path.join(build_dir, 'release')))
 
 else:
-    print("The pyqt-demo executable can be found in the '{0}' directory.".format(build_dir))
+    print("The Pineboo executable can be found in the '{0}' directory.".format(build_dir))
