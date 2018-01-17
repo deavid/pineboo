@@ -9,7 +9,7 @@ from pineboolib import decorators
 from pineboolib.kugar.mreportobject import MReportObject
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 
 
 class MLabelObject(MReportObject):

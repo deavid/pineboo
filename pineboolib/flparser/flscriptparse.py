@@ -11,6 +11,7 @@ import pprint
 import sys
 import math
 import hashlib
+import re
 import ply.yacc as yacc
 import ply.lex as lex
 
@@ -30,6 +31,9 @@ reserv += list(flex.reserved)
 
 endoffile = None
 
+
+def cleanNoPython(data):
+    return re.sub(r'\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*', '', data, flags=re.DOTALL)
 
 def cnvrt(val):
     val = str(val)
@@ -861,6 +865,7 @@ def main():
             sys.stderr.write("Loading %s ..." % fs[-1])
             sys.stderr.flush()
             data = open(filename).read()
+            data = cleanNoPython(data)
             sys.stderr.write(" parsing ...")
             sys.stderr.flush()
             prog = parse(data)

@@ -1,7 +1,7 @@
 from enum import Enum
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtCore.Qt import QObject
+from PyQt5.Qt import QObject
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass

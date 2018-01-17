@@ -6,14 +6,13 @@ from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mreportviewer import MReportViewer
 
-# from pineboolib.fllegacy.AQConfig import AQConfig  # FIXME
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPicture import FLPicture
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 # from pineboolib.fllegacy.FLWidgetReportViewer import FLWidgetReportViewer
-# from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
+from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
 
 
@@ -317,7 +316,7 @@ class FLReportViewer(ProjectClass):
         t = self.leDocumento.text()
         name = "informe.pdf" if not t or t == "" else t
         fileName = Qt.QFileDialog.getSaveFileName(
-            AQConfig.AQ_USRHOME + "/" + name + ".pdf",
+            AQ_USRHOME + "/" + name + ".pdf",
             FLUtil.translate(self, "app", "Fichero PDF a enviar (*.pdf)"),
             self,
             FLUtil.translate(self, "app", "Exportar a PDF para enviar"),

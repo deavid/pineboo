@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from pineboolib import decorators
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-# from pineboolib.fllegacy.FLCodBar import FLCodBar
+from pineboolib.fllegacy.FLCodBar import FLCodBar
 
 from pineboolib.kugar.mreportobject import MReportObject
 from pineboolib.kugar.mlabelobject import MLabelObject
@@ -139,7 +139,7 @@ class MFieldObject(MLabelObject):
                 if self.pixmap_:
                     self.pixmap_ = False
         elif self.dataType_ == self.DataType.Bool:
-            if txt.toUpper() == "FALSE" or txt.toUpper() == "F":
+            if txt.upper() == "FALSE" or txt.upper() == "F":
                 self.text_ = FLUtil.translate(self, "app", "No")
             else:
                 self.text_ = FLUtil.translate(self, "app", "Sí")
