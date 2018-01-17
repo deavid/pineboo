@@ -124,7 +124,7 @@ else:
     if target.startswith('android'):
         run([make, 'INSTALL_ROOT=deploy', 'install'])
         run([os.path.join(host_bin_dir, 'androiddeployqt'), '--input',
-                'android-libpyqt-demo.so-deployment-settings.json', '--output',
+                'android-libpyqt-pineboo.so-deployment-settings.json', '--output',
                 'deploy'])
 
 # Tell the user where the demo is.
