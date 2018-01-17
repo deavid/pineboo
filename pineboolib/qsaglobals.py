@@ -15,7 +15,7 @@ from pineboolib.utils import filedir
 
 import weakref
 from pineboolib.utils import aqtt, auto_qt_translate_text
-from PyQt5.Qt import QMainWindow, QDate, QTextStream, qWarning
+from PyQt5.Qt import QMainWindow, QDate, QTextStream, qWarning, QDateEdit
 
 class File(object):
     
@@ -27,7 +27,18 @@ class File(object):
 class FileDialog(QtWidgets.QFileDialog):
     
     #def __init__(self):
-        #super(FileDialog, self).__init__()    
+        #super(FileDialog, self).__init__()
+    def getOpenFileName(*args):
+        obj = None
+        parent = QtWidgets.QApplication.activeModalWidget()
+        if len(args) == 2:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]))
+        elif len(args) == 3:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]))
+        elif len(args) == 4:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]), str(args[3]))
+        
+        return obj       
     
     def getExistingDirectory(basedir):
         return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
@@ -139,7 +150,7 @@ class SysType(object):
         return "Pineboo"
     
     def isLoadedModule(self, modulename):
-        return modulename in pineboolib.project.modules
+        return modulename in pineboolib.project.conn.managerModules().listAllIdModules()
     
     def translate(self, text):
         return text
@@ -188,6 +199,10 @@ class SysType(object):
     
     def updateAreas(self):
         pineboolib.project.initToolBox()
+    
+    @decorators.NotImplementedWarn
+    def isDebuggerMode(self):
+        return False
         
         
         
@@ -204,7 +219,11 @@ def proxy_fn(wf, wr, slot):
         if not f: return None
         r = wr()
         if not r: return None
-        print("Weak connect: receiver: %r:%r" % (r, slot))
+
+        # Apaño para conectar los clicked()
+        if args == (False,):
+            return f()
+
         return f(*args, **kwargs)
     return fn
 
@@ -220,8 +239,8 @@ def connect(sender, signal, receiver, slot):
         try:
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
-            sl_name = signal.replace("()","")
-            
+            # Quito cualquier texto entre parentesis
+            sl_name = re.sub(' *\(.*\)', '', signal)    
             try:
                 getattr(sender, sl_name).disconnect(proxy_fn(weak_fn, weak_receiver, slot))
             except:
@@ -238,15 +257,13 @@ def connect(sender, signal, receiver, slot):
         remote_fn = getattr(remote_obj, m.group(2), None)
         if remote_fn is None: raise AttributeError("Object %s not found on %s" % (remote_fn, remote_obj))
         try:
-            #sg_name = signal.replace("()", "")
-            #sg_name = sg_name.replace("(QString)", "")
-            #sg_name = sg_name.replace("(int)", "")
-            #sg_name = sg_name.replace("(int, int)", "")
+            if isinstance(sender, QDateEdit):
+                if "valueChanged" in signal:
+                    signal = signal.replace("valueChanged","dateChanged")
             
-            if signal.find("(") > -1:
-                sg_name = signal[:signal.find("(")]
-            else:
-                sg_name = signal
+            # Quito cualquier texto entre parentesis
+            sg_name = re.sub(' *\(.*\)', '', signal)
+            
                 
             try:
                getattr(sender, sg_name).disconnect(remote_fn)
@@ -305,7 +322,7 @@ class MessageBox(QMessageBox):
             title = "Critical"
         #title = unicode(title,"UTF-8")
         #text = unicode(text,"UTF-8")
-        msg = QMessageBox(icon, title, text)
+        msg = QMessageBox(icon, str(title), str(text))
         msg.addButton(button0)
         if button1: msg.addButton(button1)
         if button2: msg.addButton(button2)

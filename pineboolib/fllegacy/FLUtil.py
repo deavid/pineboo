@@ -24,7 +24,6 @@ class FLUtil(ProjectClass):
                    'setecientos','ochocientos','novecientos']
 
 
-
     """
     Clase con métodos, herramientas y utiles necesarios para ciertas operaciones.
 
@@ -339,6 +338,10 @@ class FLUtil(ProjectClass):
         dia_ = None
         mes_ = None
         ano_ = None
+        
+        if not f:
+            return None
+        
         f = str(f)
         
         if f.find("T") > -1:
@@ -682,6 +685,10 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de dias
     """
     def addDays(self, fecha, offset):
+        from pineboolib.qsatype import Date
+        if isinstance(fecha, Date):
+            fecha = fecha.date_
+        
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
@@ -696,6 +703,10 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de meses
     """
     def addMonths(self, fecha, offset):
+        from pineboolib.qsatype import Date
+        if isinstance(fecha, Date):
+            fecha = fecha.date_
+            
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
@@ -710,6 +721,10 @@ class FLUtil(ProjectClass):
     @return Fecha con el desplazamiento de años
     """
     def addYears(self, fecha, offset):
+        from pineboolib.qsatype import Date
+        if isinstance(fecha, Date):
+            fecha = fecha.date_
+            
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha,"yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
@@ -805,7 +820,7 @@ class FLUtil(ProjectClass):
         result = False
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
-        cursor = self._prj.conn.cursor()
+        cursor = pineboolib.project.conn.cursor()
         if not found:   
             sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % ( key, value)
         else:
@@ -820,7 +835,8 @@ class FLUtil(ProjectClass):
         
         cursor.close()
         return True
-        
+
+      
     """
     Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -832,7 +848,8 @@ class FLUtil(ProjectClass):
     """
     def roundFieldValue(self, n, table, field):
 
-        tmd = self._prj.conn.manager().metadata(table)
+        #tmd = self._prj.conn.manager().metadata(table)
+        tmd = pineboolib.project.conn.manager().metadata(table)
         if not tmd:
             return 0
         fmd = tmd.field(field)
@@ -1008,7 +1025,7 @@ class FLUtil(ProjectClass):
     @param tS Número total de pasos a realizar
     """
     def createProgressDialog(self, title, steps, id_ = "default"):
-        pd_widget = QtWidgets.QProgressDialog(title, self.translate("scripts","Cancelar"),0,steps)
+        pd_widget = QtWidgets.QProgressDialog(str(title), str(self.translate("scripts","Cancelar")),0,steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
 
     """
@@ -1036,7 +1053,7 @@ class FLUtil(ProjectClass):
     """
     def setLabelText(self, l, id_ = "default"):
         pd_widget = self.__class__.progress_dialog_stack[-1]
-        pd_widget.setLabelText(l)
+        pd_widget.setLabelText(str(l))
 
     """
     Establece el número total de pasos del diálogo
@@ -1206,7 +1223,7 @@ class FLUtil(ProjectClass):
     """
 
     def execSql(self, sql, connName = "default"):
-        conn_ = self._prj.conn.useConn(connName)
+        conn_ = pineboolib.project.conn.useConn(connName)
         cur = conn_.cursor()
         try:
             cur.execute(sql)

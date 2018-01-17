@@ -314,7 +314,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.maxPixImages_ is None:
             self.maxPixImages_ = 600
 
-        self.topWidget_ = self.parentWidget()
+        self.topWidget_ = parent
         #self._parent = parent
 
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
@@ -350,6 +350,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.textLabelDB.setFrameShadow(QtWidgets.QFrame.Plain)
         self.textLabelDB.setLineWidth(0)
         self.textLabelDB.setTextFormat(QtCore.Qt.PlainText)
+        self.textLabelDB.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         
         self.fieldAlias_ = None
         self.actionName_ = None
@@ -1007,6 +1008,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     else:
                         s = round(float(v), field.partDecimal())
                     self.editor_.setText(str(s))
+                else:
+                    self.editor_.setText("")
 
 
 
@@ -1392,13 +1395,13 @@ class FLFieldDB(QtWidgets.QWidget):
             if not v == None:
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
-            elif nulo:
+            elif not nulo:
                 self.editor_.setText(field.defaultValue())
             
             self.editor_.textChanged.connect(self.updateValue)
             
-            if v == None and not nulo:
-                self.editor_.setText("0.00")
+            #if v == None and not nulo:
+            #    self.editor_.setText("0.00")
 
 
         elif type_ == "string":
@@ -2003,6 +2006,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 #self.editor_.setAutoCompletion(True)
+                self.editor_.setSizePolicy(QtWidgets.QSizePolicy.Minimum ,QtWidgets.QSizePolicy.Fixed)
                 self.editor_.setMinimumSize(22, 22)
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 #if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
@@ -2240,7 +2244,7 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "date":
             self.editor_ = FLDateEdit(self, "editor")
             self.editor_.setFont(QtWidgets.QApplication.font())
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7) ,QtWidgets.QSizePolicy.Policy(0))
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum ,QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
             self.FLWidgetFieldDBLayout.insertWidget(1, self.editor_)
@@ -2294,7 +2298,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_ = FLTimeEdit(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             #self.editor_.setAutoAdvance(True)
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy(7) ,QtWidgets.QSizePolicy.Policy(0))
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum ,QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
@@ -3432,11 +3436,17 @@ class FLDateEdit(QtWidgets.QDateEdit):
         self.setDisplayFormat(order)
     
     def setDate(self, d = None):
+        from pineboolib.qsatype import Date
+        
         if d in (None, "NAN"):
             d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         if isinstance(d, str):
             if "T" in d:
                 d = d[:d.find("T")]
+        
+        
+        if isinstance(d, Date):
+            d = d.date_
         
         if isinstance(d, datetime.date):
             d = QtCore.QDate.fromString(str(d),"yyyy-MM-dd")

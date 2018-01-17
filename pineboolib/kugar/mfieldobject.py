@@ -1,19 +1,19 @@
 from enum import Enum
 
-from PyQt4.QtCore import Qt
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLCodBar import FLCodBar
+# from pineboolib.fllegacy.FLCodBar import FLCodBar
 
 from pineboolib.kugar.mreportobject import MReportObject
 from pineboolib.kugar.mlabelobject import MLabelObject
 from pineboolib.kugar.mutil import MUtil
 
 
-class MFieldObject(ProjectClass, MLabelObject):
+class MFieldObject(MLabelObject):
 
     class DataType(Enum):
         String = 0
@@ -27,11 +27,11 @@ class MFieldObject(ProjectClass, MLabelObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MFieldObject, self).__init__()
-
-        if isinstance(args[0], MFieldObject):
+        if len(args) and isinstance(args[0], MFieldObject):
             self.copy(args[0])
         else:
+            super(MFieldObject, self).__init__()
+
             self.fieldName_ = ""
             self.dataType_ = self.DataType.String
             self.format_ = MUtil.DateFormatType.MDY_SLASH
@@ -55,8 +55,7 @@ class MFieldObject(ProjectClass, MLabelObject):
         regexp = Qt.QRegExp("[0-9][0-9](-|//)[0-9][0-9](-|//)[0-9][0-9][0-9][0-9]")
 
         if self.dataType_ == self.DataType.String:
-            # if aqApp.multiLangEnabled() and txt: #FIXME
-            if txt:
+            if QtWidgets.QApplication.multiLangEnabled() and txt:
                 self.text_ = txt.decode("utf8")
                 if self.text_ == txt:
                     self.text_ = FLUtil.translate(self, "app", txt)
@@ -89,7 +88,7 @@ class MFieldObject(ProjectClass, MLabelObject):
 
                 if ret == -1:
                     year = txt[:4]
-                    day = txt[2:]
+                    day = txt[-2:]
                     month = txt[5:7]
 
                     if int(year) != 0 and int(month) != 0 and int(day) != 0:
@@ -190,7 +189,7 @@ class MFieldObject(ProjectClass, MLabelObject):
         else:
             offset = 0
 
-        pos = self.text_.find(".")
+        pos = self.text_.rfind(".")
         if pos == -1:
             pos = len(self.text_)
         else:

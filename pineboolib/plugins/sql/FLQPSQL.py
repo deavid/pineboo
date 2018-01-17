@@ -4,9 +4,10 @@ from pineboolib import decorators
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import auto_qt_translate_text
 import traceback
-from PyQt5.Qt import qWarning, QApplication
+from PyQt5.Qt import qWarning, QApplication, qApp, QDomDocument, QRegExp
 from PyQt5.QtWidgets import QMessageBox
 
 
@@ -21,6 +22,7 @@ class FLQPSQL(object):
     alias_ = None
     errorList = None
     lastError_ = None
+    db_ = None
     
     def __init__(self):
         self.version_ = "0.5"
@@ -120,7 +122,11 @@ class FLQPSQL(object):
                 s = text2bool(v)
 
             elif type_ == "date":
-                s = "'%s'" % util.dateDMAtoAMD(v)
+                val = util.dateDMAtoAMD(v)
+                if val == None:
+                    s = "Null"
+                else:
+                    s = "'%s'" % val 
                 
             elif type_ == "time":
                 s = "'%s'" % v
@@ -393,16 +399,39 @@ class FLQPSQL(object):
         
         return sql
     
-    @decorators.NotImplementedWarn
-    def mismatchedTable(self, table1, tmd_or_table2, db_):
-        return False
+    def mismatchedTable(self, table1, tmd_or_table2, db_ = None):
+        
+        if db_ == None:
+            db_ = self.db_
+        
         if isinstance(tmd_or_table2, str):
             mtd = db_.manager().metadata(tmd_or_table2, True)
             if not mtd:
                 return False
             
-            return False
+            mismatch = False
+            try:
+                recMtd = self.recordInfo(tmd_or_table2)
+                recBd = self.recordInfo2(table1)
+                fieldBd = None
+                for fieldMtd in recMtd:
+                    fieldBd = None
+                    found = False
+                    for field in recBd:
+                        if field[0] == fieldMtd[0]:
+                            found = True
+                            if self.notEqualsFields(field, fieldMtd):
+                                mismatch = True
+                            break
+                    
+                    if not found:
+                        mismatch = True
+                        break
+
+            except Exception:
+                print(traceback.format_exc())
             
+            return mismatch    
             
             
             
@@ -410,7 +439,127 @@ class FLQPSQL(object):
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
     
+    def recordInfo2(self, tablename):
+        if not self.isOpen():
+            return False
+        info = []
+        stmt = "select pg_attribute.attname, pg_attribute.atttypid, pg_attribute.attnotnull, pg_attribute.attlen, pg_attribute.atttypmod, pg_attrdef.adsrc from pg_class, pg_attribute left join pg_attrdef on (pg_attrdef.adrelid = pg_attribute.attrelid and pg_attrdef.adnum = pg_attribute.attnum) where lower(pg_class.relname) = '%s' and pg_attribute.attnum > 0 and pg_attribute.attrelid = pg_class.oid and pg_attribute.attisdropped = false order by pg_attribute.attnum" % tablename.lower()
+        cursor = self.conn_.cursor()
+        cursor.execute(stmt)
+        rows = cursor.fetchall()     
+        for row in rows:
+            len = row[3]
+            precision = row[4]
+            name = row[0]
+            type = row[1]
+            allowNull = row[2]
+            defVal = row[5]
+            
+            if len == -1 and precision and precision > -1:
+                len = precision - 4
+                precision = -1
+            
+            if len == -1:
+                len = 0
+            
+            if precision == -1:
+                precision = 0
+            
+            
+            if defVal and defVal[0] == "'":
+                defVal = defVal[1:len(defVal) - 2]
+            
+            info.append([name, self.decodeSqlType(type), allowNull, len , precision, defVal])
+                 
+        
     
+        return info
+    
+    def decodeSqlType(self, type):
+        ret = type
+        
+        if type == 16:
+            ret = "bool"
+        elif type == 23:
+            ret = "uint"
+        elif type == 25:
+            ret = "stringlist"
+        elif type == 701:
+            ret = "double"
+        elif type == 1082:
+            ret = "date"
+        elif type == 1083:
+            ret = "time"
+        elif type == 1043:
+            ret = "string"
+        
+        
+        return ret
+        
+    
+    
+    def recordInfo(self, tablename_or_query):
+        if not self.isOpen():
+            return None
+        
+        info = []
+        
+        if isinstance(tablename_or_query, str):
+            tablename = tablename_or_query
+
+            
+            doc = QDomDocument(tablename)
+            stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
+            util = FLUtil()
+            if not util.domDocumentSetContent(doc, stream):
+                print("FLManager : " + qApp.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
+            
+                return self.recordInfo2(tablename)
+            
+            docElem = doc.documentElement()
+            mtd = self.db_.manager().metadata(docElem, True)
+            if not mtd:
+                return self.recordInfo2(tablename)
+            fL = mtd.fieldList()
+            if not fL:
+                del mtd
+                return self.recordInfo2(tablename)
+            
+            for f in mtd.fieldsNames():
+                field = mtd.field(f)
+                info.append([field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()])
+                
+            
+            del mtd
+            
+        
+        return info
+    
+    def notEqualsFields(self, field1, field2):
+        ret = False
+        try:
+            if not field1[2] == field2[2] and not field2[6]:
+                ret = True 
+            
+            
+            if field1[1] == "stringlist" and not field2[1] in ("stringlist","pixmap"):
+                ret = True
+            
+            elif field1[1] == "string" and (not field2[1] in ("string","time","date") or not field1[3] == field2[3]):
+                ret = True
+            elif field1[1] == "uint" and not field2[1] in ("int","uint","serial"):
+                ret = True
+            elif field1[1] == "bool" and not field2[1] in ("bool","unlock"):
+                ret = True
+            elif field1[1] == "double" and not field2[1] == "double":
+                ret = True    
+                
+        
+        except Exception:
+            print(traceback.format_exc())
+            
+        return ret
+        
     
     
     def tables(self, typeName = None):
@@ -440,6 +589,9 @@ class FLQPSQL(object):
         return tl
     
     def normalizeValue(self, text):
+        if text == None:
+            return ""
+        
         ret = ""
         for c in text:
             if c == "'":
@@ -447,6 +599,637 @@ class FLQPSQL(object):
             ret = ret + c
         
         return ret
+    
+    
+    
+    def hasCheckColumn(self, mtd):
+        fieldList = mtd.fieldList()
+        if not fieldList:
+            return False
+        
+        for field in fieldList:
+            if field.isCheck() or field.name().endswith("_check_column"):
+                return True
+        
+        return False
+    
+    def constraintExists(self, name):
+        sql = "SELECT constraint_name FROM information_schema.table_constraints where constraint_name='%s'" % name
+        
+        q = FLSqlQuery(None, self.db_.dbAux())
+
+        return (q.exec_(sql) and q.size() > 0)
+        
+        
+        
+        
+        
+    
+        
+    
+    def queryUpdate(self, name, update, filter):
+        return """UPDATE %s SET %s WHERE %s RETURNING *""" % (name, update, filter)
+    
+    
+    def alterTable(self, mtd1, mtd2 = None, key = None):
+        
+        if mtd2 == None:
+            return self.alterTable3(mtd1)
+        else:
+            return self.alterTable2(mtd1, mtd2, key)
+    
+    def alterTable3(self, newMTD):
+        if self.hasCheckColumn(newMTD):
+            return False
+        
+        oldMTD = newMTD
+        fieldList = oldMTD.fieldList()
+        
+        renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+        
+        self.db_.dbAux().transaction()
+        
+        q = FLSqlQuery(None, self.db_.dbAux())
+        
+        constraintName= "%s_key" % oldMTD.name()
+        
+        if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+            self.db_.dbAux().rollback()
+            return False
+        
+        for oldField in fieldList:
+            if oldField.isCheck():
+                return False
+            if oldField.isUnique():
+                constraintName = "%s_%s_key" % (oldMTD.name(), oldField.name())
+                if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+                    self.db_.dbAux().rollback()
+                    return False
+        
+        
+        if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
+            self.db_.dbAux().rollback()
+            return False
+        
+        if not self.db_.manager().createTable(newMTD):
+            self.db_.dbAux().rollback()
+            return False
+        
+        oldCursor = FLSqlCursor(renameOld, True, self.db_.dbAux())
+        oldCursor.setModeAccess(oldCursor.Browse)
+        oldCursor.select()
+        
+        fieldList = newMTD.fieldList()
+        
+        if not fieldList:
+            self.db_.dbAux().rollback()
+            return False
+        
+        oldCursor.select()
+        totalSteps = oldCursor.size()
+        progress = QProgressDialog(qApp.tr("Reestructurando registros para %1...").arg(newMTD.alias()),qApp.tr("Cancelar"),0, totalSteps)
+        progress.setLabelText(qApp.tr("Tabla modificada"))
+        
+        step = 0
+        newBuffer = None
+        newField = None
+        listRecords = []
+        newBufferInfo = self.recordInfo2(newMTD.name())
+        oldFieldsList = {}
+        newFieldsList = {}
+        defValues = {}
+        v = None
+        
+        for newField in fieldList:
+            oldField = oldMTD.field(newField.name())
+            defValues[str(step)] = None
+            if not oldField or not oldCursor.field(oldField.name()):
+                if not oldField:
+                    oldField = newField
+                if not newField.type() == "serial":
+                    v = newField.defaultValue()
+                    defValues[str(step)] = v
+            
+            newFieldsList[str(step)] = newField
+            oldFieldsList[str(step)] = oldField
+            step = step + 1
+        
+        ok = True
+        while oldCursor.next():
+            newBuffer = newBufferInfo
+            
+            for reg in defValues.keys():
+                newField = newFieldsList[reg]
+                oldField = oldFieldsList[reg]
+                if defValues[reg]:
+                    v = defValues[reg]
+                else:
+                    v = oldCursor.value(newField.name())
+                    if (not oldField.allowNull or not newField.allowNull()) and not v and not newField.type() == "serial":
+                        defVal = newField.defaultValue()
+                        if not defVal == None:
+                            v = defVal
+                    
+                    if not v == None and not newBuffer.field(newField.name()).type() == newField.type():
+                        print("FLManager::alterTable : " + qApp.tr("Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
+                
+        
+        
+        
+        
+        
+            
+                    
+        
+                    if not v == None and newField.type() == "string" and newField.length() > 0:
+                        v = str(v)[0:newField.length()]
+        
+        
+                    if (not oldField.allowNull() or not newField.allowNull()) and v == None:
+                        if oldField.type() == "serial":
+                            v = int(self.nextSerialVal(newMTD.name(), newField.name()))
+                        elif oldField.type() in ("int","uint","bool","unlock"):
+                            v = 0
+                        elif oldField.type() == "double":
+                            v = 0.0
+                        elif oldField.type() == "time":
+                            v = QTime().currentTime()
+                        elif oldField.type() == "date":
+                            v = QDate().currentDate()
+                        else:
+                            v = "NULL"[0:newField.length()]
+                
+                    newBuffer.setValue(newField.name(), v)
+            
+                listRecords.append(newBuffer)
+                
+            #if not self.insertMulti(newMTD.name(), listRecords):
+            #    ok = False
+            #    listRecords.clear()
+            #    break
+                
+            #listRecords.clear()
+            
+        if len(listRecords) > 0:
+            if not self.insertMulti(newMTD.name(), listRecords):
+                ok = False
+            listRecords.clear()
+                        
+        
+        if ok:
+            self.db_.dbAux().commit()
+        else:
+            self.db_.dbAux().rollback()
+            return False
+        
+        
+        if force and ok:
+            q.exec_("DROP TABLE %s CASCADE" % renameOld)   
+        return True    
+    
+    def alterTable2(self, mtd1, mtd2, key, force = False):        
+        
+        util = FLUtil()
+        
+        oldMTD = None
+        newMTD = None
+        doc = QDomDocument("doc")
+        docElem = None
+        
+        if not util.docDocumentSetContect(doc, mtd1):
+            print("FLManager::alterTable : " + qApp.tr("Error al cargar los metadatos."))
+        else:
+            docElem = doc.documentElement()
+            oldMTD = self.db_.manager().metadata(docElem, True)
+        
+        if oldMTD and oldMTD.isQuery():
+            return True
+
+        if not util.docDocumentSetContect(doc, mtd2):
+            print("FLManager::alterTable : " + qApp.tr("Error al cargar los metadatos."))
+            return False
+        else:
+            docElem = doc.documentElement()
+            newMTD = self.db_.manager().metadata(docElem, True)
+        
+        if not oldMTD:
+            oldMTD = newMTD
+            
+        if not oldMTD.name() == newMTD.name():
+            print("FLManager::alterTable : " + qApp.tr("Los nombres de las tablas nueva y vieja difieren."))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        oldPK = oldMTD.primaryKey()
+        newPK = newMTD.primaryKey()
+        
+        if not oldPK == newPK:
+            print("FLManager::alterTable : " + qApp.tr("Los nombres de las claves primarias difieren."))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        if not self.db_.manager().checkMetaData(oldMTD, newMTD):
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return True
+        
+        if not self.db_.manager().existsTable(oldMTD.name()):
+            print("FLManager::alterTable : " + qApp.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        
+        fieldList = oldMTD.fieldList()
+        oldField = None
+        
+        if not fieldList:
+            print("FLManager::alterTable : " + qApp.tr("Los antiguos metadatos no tienen campos."))
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+        
+        if not self.db_.dbAux():
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        self.db_.dbAux().transaction()
+        
+        if key and len(key) == 40:
+            c = FLSqlCursor("flfiles", True, self.db_.dbAux())
+            c.setForwardOnly(True)
+            c.setFilter("nombre = '%s.mtd'" % renameOld)
+            c.select()
+            if not c.next():
+                buffer = c.primeInsert()
+                buffer.setValue("nombre", "%s.mtd" % renameOld)
+                buffer.setValue("contenido", mtd1)
+                buffer.setValue("sha", key)
+                c.insert()
+        
+        q = FLSqlQuery("", self.db_.dbAux())
+        constraintName = "%s_pkey" % oldMTD.name()
+        
+        if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+            print("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(oldMTD.name()))
+            self.db_.dbAux().rollback()
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        fieldsNamesOld = []
+        for it in fieldList:
+            if newMTD.field(it.name()):
+                fieldsNamesOld.append(it.name())
+            
+            if it.isUnique():
+                constraintName = "%s_%s_key" % (oldMTD.name(), it.name())
+                if constraintExist(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+                    print("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.")
+                 .arg(oldMTD.name(), oldField.name()))
+                    self.db_.dbAux().rollback()
+                    if oldMTD and not oldMTD == newMTD:
+                        del oldMTD
+                    if newMTD:
+                        del newMTD
+            
+                    return False
+        
+        
+                    
+            
+            
+            
+            
+            
+        if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
+            print("FLManager::alterTable : " + qApp.tr("No se ha podido renombrar la tabla antigua."))
+            
+            self.db_.dbAux().rollback()
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+        if not self.db_.manager().createTable(newMTD):
+            self.db_.dbAux().rollback()
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return False
+        
+
+        v = None
+        ok = False
+        
+        if not force and not fieldsNamesOld:
+            self.db_.dbAux().rollback()
+            if oldMTD and not oldMTD == newMTD:
+                del oldMTD
+            if newMTD:
+                del newMTD
+            
+            return self.alterTable2(mtd1, mtd2, key, True)
+             
+
+
+
+              
+        oldCursor = FLSqlCursor(renameOld, True, self.db_.dbAux())
+        oldCursor.setModeAccess(oldCursor.Browse)
+        newCursor = FLSqlCursor(newMTD.name(), True, self.db_.dbAux())
+        newCursor.setMode(newCursor.Insert)
+        
+        
+
+        
+        oldCursor.select()
+        totalSteps = oldCursor.size()
+        progress = QProgressDialog(qApp.tr("Reestructurando registros para %1...").arg(newMTD.alias()),qApp.tr("Cancelar"),0, totalSteps)
+        progress.setLabelText(qApp.tr("Tabla modificada"))
+        
+        step = 0
+        newBuffer = None
+        newField = None
+        listRecords = []
+        newBufferInfo = self.recordInfo2(newMTD.name())
+        oldFieldsList = {}
+        newFieldsList = {}
+        defValues = {}
+        v = None
+        
+        for newField in fieldList:
+            oldField = oldMTD.field(newField.name())
+            defValues[str(step)] = None
+            if not oldField or not oldCursor.field(oldField.name()):
+                if not oldField:
+                    oldField = newField
+                if not newField.type() == "serial":
+                    v = newField.defaultValue()
+                    defValues[str(step)] = v
+            
+            newFieldsList[str(step)] = newField
+            oldFieldsList[str(step)] = oldField
+            step = step + 1
+        
+        step = 0
+        ok = True
+        while oldCursor.next():
+            newBuffer = newBufferInfo
+            
+            for reg in defValues.keys():
+                newField = newFieldsList[reg]
+                oldField = oldFieldsList[reg]
+                if defValues[reg]:
+                    v = defValues[reg]
+                else:
+                    v = oldCursor.value(newField.name())
+                    if (not oldField.allowNull or not newField.allowNull()) and not v and not newField.type() == "serial":
+                        defVal = newField.defaultValue()
+                        if not defVal == None:
+                            v = defVal
+                    
+                    if not v == None and not newBuffer.field(newField.name()).type() == newField.type():
+                        print("FLManager::alterTable : " + qApp.tr("Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
+                
+                if not v == None and newField.type() == "string" and newField.length() > 0:
+                    v = str(v)[0:newField.length()]
+                
+                if (not oldField.allowNull() or not newField.allowNull()) and v == None:
+                    if oldField.type() == "serial":
+                        v = int(self.nextSerialVal(newMTD.name(), newField.name()))
+                    elif oldField.type() in ("int","uint","bool","unlock"):
+                        v = 0
+                    elif oldField.type() == "double":
+                        v = 0.0
+                    elif oldField.type() == "time":
+                        v = QTime().currentTime()
+                    elif oldField.type() == "date":
+                        v = QDate().currentDate()
+                    else:
+                        v = "NULL"[0:newField.length()]
+                
+                newBuffer.setValue(newField.name(), v)
+            
+            listRecords.append(newBuffer)
+                
+            if not self.insertMulti(newMTD.name(), listRecords):
+                ok = False
+                listRecords.clear()
+                break
+                
+            listRecords.clear()
+            
+        if len(listRecords) > 0:
+            if not self.insertMulti(newMTD.name(), listRecords):
+                ok = False
+            listRecords.clear()
+        
+        progress.setProgress(totalSteps)
+        
+        if oldMTD and not oldMTD == newMTD:
+            del oldMTD   
+                
+        
+        if newMTD:
+            del newMTD
+                        
+        
+        if ok:
+            self.db_.dbAux().commit()
+        else:
+            self.db_.dbAux().rollback()
+            return False
+        
+                        
+                    
+                
+            
+        
+        if force and ok:
+            q.exec_("DROP TABLE %s CASCADE" % renameOld)   
+        
+
+        
+        return True
+    
+    def insertMulti(self, tableName, records):
+        k = len(records)
+        
+        if k == 0:
+            return None
+    
+        fList = []
+        for rec in records:
+            for f in rec.fieldsList():
+                field = rec.field(f)
+                if rec.isGenerated(field):
+                    fList.append(field.name)
+                    vList.append(self.formatvalue(field.type_, field.value, False))
+
+        
+        sql = "INSERT INTO (%s) values (%s)" % (fList.split(","), vList.split(","))
+                    
+           
+    
+    def Mr_Proper(self):
+        util = FLUtil()
+        self.db_.dbAux().transaction()
+        
+        qry = FLSqlQuery(None, self.db_.dbAux())
+        qry2 = FLSqlQuery(None, self.db_.dbAux())
+        steps = 0
+        
+        rx = QRegExp("^.*\\d{6,9}$") 
+        listOldBks = rx in self.tables("")
+        qry.exec_("select nombre from flfiles where nombre similar to"
+           "'%[[:digit:]][[:digit:]][[:digit:]][[:digit:]]-[[:digit:]][[:digit:]]%:[[:digit:]][[:digit:]]%' or nombre similar to"
+           "'%alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]]%' or (bloqueo='f' and nombre like '%.mtd')")
+        
+        util.createProgressDialog(util.tr("Borrando backups"), len(listOldBks) + qry.size() + 2)
+        while qry.next():
+            item = qry.value(0)
+            util.setLabelText(util.tr("Borrando registro %1").arg(item))
+            qry2.exec_("DELETE FROM flfiles WERE nombre ='%s'" % item)
+            if item.find("alteredtable") > -1:
+                if self.existsTable(item.replace(".mtd","")):
+                    util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                    qry2.exec_("DROP TABLE %s CASCADE" % item.replace(".mtd",""))
+            
+            steps = steps + 1
+            util.setProgress(steps)
+        
+        
+        for item in listOldBks:
+            if self.existsTable(item):
+                util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                qry2.exec_("DROP TABLE %s CASCADE" % item)
+            
+            steps = steps + 1
+            util.setProgress(steps)
+        
+        util.setLabelText(util.tr("Inicializando cachés"))
+        steps = steps + 1
+        util.setProgress(steps)
+        qry.exec_("DELETE FROM flmetadata")
+        qry.exec_("DELETE FROM flvar")
+        self.db_.manager().cleanupMetaData()
+        self.db_.commit()
+        util.destroyProgressDialog()
+        
+        steps = 0
+        qry.exec_("select tablename from pg_tables where schemaname='public'")
+        util.createProgressDialog(util.tr("Comprobando base de datos"), qry.size())
+        while qry.next():
+            item = qry.value(0)
+            util.setLabelText(util.tr("Comprobando tabla %1").arg(item))
+            
+            mustAlter = self.mismatchedTable(item, item)
+            if mustAlter:
+                conte = self.db_.managerModules().content("%s.mtd" % item)
+                if conte:
+                    msg = util.tr("La estructura de los metadatos de la tabla '%1' y su "
+                      "estructura interna en la base de datos no coinciden. "
+                      "Intentando regenerarla.").arg(item)
+                    
+                    print(msg)
+                    self.alterTable2(conte, conte, None, True)
+            
+            steps = steps + 1
+            util.setProgress(steps)
+        
+        self.db_.dbAux().transaction()
+        steps = 0
+        sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
+        sqlQuery = FLSqlQuery(None, self.db_.dbAux())
+        if sqlQuery.exec_("select relname from pg_class where ( relkind = 'r' ) "
+                    "and ( relname !~ '^Inv' ) " "and ( relname !~ '^pg_' ) and ( relname !~ '^sql_' )"):
+            
+            util.setTotalSteps(sqlQuery.size())
+            while sqlQuery.next():
+                item = sqlQuery.value(0)
+                steps = steps + 1
+                util.setProgress(steps)
+                util.setLabelText(util.tr("Creando índices para %1").arg(item))
+                mtd = self.db_.manager().metadata(item)
+                fL = mtd.fieldList()
+                if not mtd or not fL:
+                    continue
+                for it in fL:
+                    if not it or not it.type() == "pixmap":
+                        continue
+                    cur = FLSqlCursor(item, True, self.db_.dbAux())
+                    cur.select("%s not like 'RK@%'" % it.name())
+                    while cur.next():
+                        v = cur.value(it.name())
+                        if v == None:
+                            continue
+                        
+                        v = self.db_.manager().storeLargeValue(mtd, v)
+                        if v:
+                            buf = cur.primeUpdate()
+                            buf.setValue(it.name(), v)
+                            cur.update(False)
+                
+                sqlCursor.setName(item, True)
+        
+        
+        self.db_.dbAux().commit()
+        
+        steps = 0
+        qry.exec_("select tablename from pg_tables where schemaname='public'")
+        util.createProgressDialog(util.tr("Analizando base de datos"), qry.size())
+        while qry.next():
+            item = qry.value(0)
+            util.setLabelText(util.tr("Analizando tabla %1").arg(item))
+            qry2.exec_("vacuum analyze %s" % item)
+            steps = steps + 1
+            util.setProgress(steps)
+        
+        util.destroyProgressDialog()
+        
+            
+            
+                    
+                    
+            
+                    
+        
+        
+        
+        
+        
+        
         
         
         

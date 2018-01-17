@@ -1,20 +1,20 @@
-from PyQt4.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
-
-from pineboolib.kugar.mreportengine import MReportEngine
 
 
 class MPageCollection(ProjectClass):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(MPageCollection, self).__init__()
-
         if isinstance(args[0], MPageCollection):
             self.copy(args[0])
         else:
+            from pineboolib.kugar.mreportengine import MReportEngine
+
+            super(MPageCollection, self).__init__(*args)
+
             self.pages_ = Qt.QPtrList()
             self.pages_.setAutoDelete(True)
             self.size_ = MReportEngine.PageSize.Letter

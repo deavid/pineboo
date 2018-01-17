@@ -5,9 +5,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
+from pineboolib.fllegacy.FLAccessControl import FLAccessControl
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
+from PyQt5.Qt import qApp
 
 try:
     QString = unicode
@@ -17,9 +19,12 @@ except NameError:
 
 class FLAccessControlFactory(ProjectClass):
     
+    def __init__(self):
+        super(FLAccessControlFactory, self).__init__()
+    
     @decorators.BetaImplementation
     def create(self, type_):
-        if type_.isEmpty():
+        if type_ == None:
             return False
         
         if type_ == "mainwindow":
@@ -35,20 +40,23 @@ class FLAccessControlFactory(ProjectClass):
         if not obj:
             print("NO OBJ")
         
-        if obj == QtWidgets.QMainWindow:
+        if isinstance(obj, QtWidgets.QMainWindow):
             return "mainwindow"
-        if obj == FLTableMetaData:
+        if isinstance(obj, FLTableMetaData):
             return "table"
-        if obj == FLFormDB:
+        if isinstance(obj, FLFormDB):
             return "form"
         
         return QString("")
     
         
-class FLAccessControlMainWindow():
+class FLAccessControlMainWindow(FLAccessControl):
 
     acosPerms_ = None
     perm_ = None
+    
+    def __init__(self):
+        super(FLAccessControlMainWindow, self).__init__()
     
     """
   Dado un objeto general (tipo QObject) de alto nivel, identifica si existe un controlador que puede controlar
@@ -88,7 +96,7 @@ class FLAccessControlMainWindow():
             a = mw.child(it.currentKey(), "QAction")
             if a:
                 perm = it
-                if perm == "-w" || perm == "--":
+                if perm in ("-w","--"):
                     a.setVisible(False)
                 
             
@@ -97,23 +105,29 @@ class FLAccessControlMainWindow():
         print("FLAccessControlMainWindow::setFromObject %s" %   FLUtil.translate(self,"app","No implementado todavía."))
     
 
-class FLAccessControlForm():
+class FLAccessControlForm(FLAccessControl):
     
-    pal = QtGui.QPalette
+    pal = None
     acosPerms_ = None
     perm_ = None
     
     @decorators.BetaImplementation
-    def __init__(self, obj):
-        cg = QtGui.QcolorGroup()
-        bd = QtGui.Qcolor(QApplication.palette().color(QtGui.QPalette.Active, QtGui.QColourGroup.Background))
-        cg.setColor(QtGui.QColourGroup.Foreground, bg)
-        cg.setColor(QtGui.QColourGroup.Text, bg)
-        cg.setColor(QtGui.QColourGroup.ButtonText, bg)
-        cg.setColor(QtGui.QColourGroup.Base, bg)
-        cg.setColor(QtGui.QColourGroup.Background, bg)
-        self.pal.setDisabled(cg)
-    
+    def __init__(self):
+        super(FLAccessControlForm, self).__init__()
+        self.pal = QtGui.QPalette()
+        #cg = QtGui.QPalette()
+        bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))
+        #cg.setColor(QtGui.QPalette.Foreground, bg)
+        #cg.setColor(QtGui.QPalette.Text, bg)
+        #cg.setColor(QtGui.QPalette.ButtonText, bg)
+        #cg.setColor(QtGui.QPalette.Base, bg)
+        #cg.setColor(QtGui.QPalette.Background, bg)
+        #self.pal.setColor(QtGui.QPalette.Disabled, cg)
+        self.pal.setColor(QtGui.QPalette.Foreground, bg)
+        self.pal.setColor(QtGui.QPalette.Text, bg)
+        self.pal.setColor(QtGui.QPalette.ButtonText, bg)
+        self.pal.setColor(QtGui.QPalette.Base, bg)
+        self.pal.setColor(QtGui.QPalette.Background, bg)
     """
   @return El tipo del que se encarga; "form".
     """
@@ -138,104 +152,99 @@ class FLAccessControlForm():
   Esto permite que cualquier componente de un formulario de AbanQ ( FLFormDB,
   FLFormRecordDB y FLFormSearchDB) se pueda hacer no visible o no editable a conveniencia.
     """
-    @decorators.BetaImplementation
     def processObject(self, obj):
-        fm = FLForm(obj)
+        fm = obj
         if not fm or not self.acosPerms_:
             return
         
-        if not self.perm_.isEmpty():
-            l = QtCore.QObjectList(fm.queryList("QWidget"))
-            ito = QtCore.QObjectListIt(l)
-            w = None
-            while not ito.current() == 0:
-                w = ito.current()
-                ++ito
+        if self.perm_:
+            list_ = fm.children()
+            
+            for w in list_:
                 if self.acosPerms_[w.name()]:
                     continue
-                if self.perm_ == "w" or self.perm_ == "--":
-                    w.setPallete(pal)
+                
+                if self.perm_ in ("-w","--"):
+                    w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()
                     continue
+                
                 if self.perm_ == "r-":
                     w.setDisabled(True)
                 
-            del l
-        
-        it = self.acosPerms_
-        
-        for i in range(it.current()):
-            w = QtWidgets.QWidget(fm.child(it.currentKey(), "QWidget"))
+        for it in self.acosPerms_.keys():
+            w = fm.findChild(QtWidgets.QWidget, it)
             if w:
-                perm = QString(it)
-                if perm == "-w" or perm == "--":
-                    w.setPalette(pal)
+                perm = self.acosPerms_[it]
+                if perm in ("-w","--"):
+                    w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()
                     continue
+                
                 if perm == "r-":
                     w.setDisabled(True)
+            
+            else:
+                print("WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
+
                     
     @decorators.BetaImplementation
     def setFromObject(self, object):
         print("FLAccessControlform::setFromObject %s" % FLUtil.translate(self,"app","No implementado todavía."))
         
                    
-class FLAccessControlTable():
+class FLAccessControlTable(FLAccessControl):
     
-    @decorators.BetaImplementation
+    def __init__(self):
+        super(FLAccessControlTable, self).__init__()
+    
+    
     def type(self):
         return "table"
     
-    @decorators.BetaImplementation
+    
     def processObject(self, obj):
-        if not obj or obj.aqWasDeleted():
+        if not obj:
             return
         
-        tm = FLTableMetaData(obj)
-        if not tm:
-            return
+        tm = obj        
         
         maskPerm = 0
-        hasAcos = bool(self.acosPerms_ and not self.acosPerms_.isEmpty())
+        hasAcos = True if self.acosPerms_ else False
         
-        if not self.perm_.isEmpty():
-            if self.perm_.left(1) == "r":
-                maskPerm |= 2
-            if self.perm_.right(1) == "w":
-                maskPerm |= 1
+        if self.perm_:
+            if self.perm_[0] == "r":
+                maskPerm = maskPerm + 2
+            if self.perm_[1] == "w":
+                maskPerm = maskPerm + 1
         elif hasAcos:
             maskPerm = 8
         else:
             return
         
         fieldPerm = ""
-        fieldPermPtr = ""
         maskFieldPerm = 0
         
-        fL = FLFieldMetaDataList(tm.fieldList())
+        fL = tm.fieldList()
         if not fL:
             return
         
         field = None
-        it = QtCore.QDictIterator(fL)
-        
-        while not it.current() == 0:
-            field = it.current()
+        for it in fL:
+            field = it
             maskFieldPerm = maskPerm
-            ++it
-            if hasAcos and  (fieldPermPtr = self.acosPerms_[field.name()]):
-                fieldPerm = fieldPermPtr
+            if hasAcos and (field.name() in self.acosPerms_.keys()):
+                fieldPerm = self.acosPerms_[field.name()]
                 maskFieldPerm = 0
+                if fieldPerm[0] == "r":
+                    maskFieldPerm  = maskFieldPerm + 2
                 
-                if fieldPerm.lef(1) == "r":
-                    maskFieldPerm |= 2
-                
-                if fieldPerm.right(1) == "w":
-                    maskFieldPerm |= 1
+                if fieldPerm[1] == "w":
+                    maskFieldPerm  = maskFieldPerm + 1
             
-            if maskFieldPrem == 0:
+            if maskFieldPerm == 0:
                 field.setVisible(False)
                 field.setEditable(False)
             elif maskFieldPerm == 1:
@@ -248,7 +257,7 @@ class FLAccessControlTable():
                 field.setVisible(True)
                 field.setEditable(True)
     
-    @decorators.BetaImplementation
+
     def setFromObject(self, obj):
         tm = obj 
         if not tm:
@@ -256,30 +265,25 @@ class FLAccessControlTable():
         
         if self.acosPerms_:
             self.acosPerms_.clear()
-            self.acosPerms_ = None
+            del self.acosPerms_
         
-        self.acosPerms_ = QtCore.QDict(31)
-        self.acosPerms_.setAutoDelete(True)
+        self.acosPerms_ = {}
+        #self.acosPerms_.setAutoDelete(True)
         
-        fL = FLTableMetaData(tm.fieldList())
+        fL = tm.fieldList()
         if not fL:
             return
         
-        field = FLFieldMetaData()
-        permW = QtCore.Qchar()
-        permR = QtCore.Qchar()
-        it = QtCore.QDictIterator(fL)
-        
-        while not it.current() == 0:
-            field = it.current()
-            ++it
+        permW = None
+        permR = None
+        for it in fL:
             permR = '-'
             permW = '-'
-            if field.visible():
+            if it.visible():
                 permR = 'r'
-            if field.editable():
+            if it.editable():
                 permW = 'w'
-            self.acosPerms_.replace(field.name(), QString(permR + permW))
+            self.acosPerms_[it.name()] =  "%s%s" % (permR, permW)
   
     
            

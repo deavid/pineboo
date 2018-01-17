@@ -35,6 +35,8 @@ class FLAccessControlLists(ProjectClass):
     """
   
     def __init__(self):
+        super(FLAccessControlLists, self).__init__()
+        
         self.name_ = None
         self.accessControlList_ = {}
 
@@ -65,11 +67,11 @@ class FLAccessControlLists(ProjectClass):
     
     @param  aclXml  Contenido XML con la definición de la lista de control de acceso.
     """
-    def init(self, aclXml = None):
+    def init_(self, aclXml = False):
       
         util = FLUtil()
-        if not aclXml:
-            self.init(self.database().managerModules().content("acl.xml"))
+        if aclXml == False:
+            self.init_(self._prj.conn.managerModules().content("acl.xml"))
             return
       
         doc = QDomDocument("ACL")
@@ -79,16 +81,16 @@ class FLAccessControlLists(ProjectClass):
             self.accessControlList_ = {}
         
         if not util.domDocumentSetContent(doc, aclXml):
-            qWarning("FLAccessControlList : " + util.tr("Lista de control de acceso vacia o errónea"))
+            print("FLAccessControlList : " + util.tr("Lista de control de acceso vacia o errónea"))
             return
         
         self.accessControlList_ = {}
-        self.accessControlList_.setAutoDelete(True)
+        #self.accessControlList_.setAutoDelete(True)
         
         docElem = doc.documentElement()
         no = docElem.firstChild()
         
-        while no:
+        while not no.isNull():
             e = no.toElement()
             if e:
                 if e.tagName() == "name":
@@ -97,14 +99,17 @@ class FLAccessControlLists(ProjectClass):
                     continue
             
 
-                ac =  FLAccessControlFactory.create(e.tagName())
+                ac =  FLAccessControlFactory().create(e.tagName())
                 if ac:
                     ac.set(e)
-                    self.accessControlList_.replace("%s::%s::%s" % (ac.type(), ac.name(), ac.user()), ac)
+                    print("******************", ac.type(), ac.name(), ac.user(), ac)
+                    self.accessControlList_["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac
                     no = no.nextSibling()
                     continue
             
             no = no.nextSibling()
+        
+            
             
 
     """
@@ -119,17 +124,16 @@ class FLAccessControlLists(ProjectClass):
         if not self.accessControlList_:
             return
         
-        type = FLAccessControlFactory.type(obj)
+        type = FLAccessControlFactory().type(obj)
         name = obj.name()
-        user = self.database().user()
-        
+        user = self._prj.conn.user()
         if not type or not name or not user:
             return
         
-        ac = self.accessControlList_["%s::%s::%s" % (type, name, user)]
-        
-        if ac:
-            ac.processObject(obj)
+        if "%s::%s::%s" % (type, name, user) in self.accessControlList_.keys():
+            ac = self.accessControlList_["%s::%s::%s" % (type, name, user)]
+            if ac:
+                ac.processObject(obj)
     
     """
     Crea un nuevo fichero "acl.xml" y lo almacena sustituyendo el anterior, en el caso de que exista.

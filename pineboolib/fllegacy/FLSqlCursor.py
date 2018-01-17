@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import qWarning, qApp
+from PyQt5.Qt import qWarning, qApp, QRegExp
 from PyQt5.QtCore import QVariant, QDate
 
 from pineboolib import decorators, fllegacy
@@ -14,6 +14,7 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+from pineboolib.fllegacy.FLAccessControlFactory import FLAccessControlFactory
 from pineboolib.fllegacy.FLAction import FLAction
 
 import hashlib, traceback, weakref, copy, datetime
@@ -96,13 +97,13 @@ class PNBuffer(ProjectClass):
         
         for field in self.fieldsList():
             
-            if field.type_ == "unlock" or field.type_ == "bool":
-                field.value = (self.cursor().model().value(row , field.name) in ("True", True, 1))
+            if field.type_ in ("unlock","bool"):
+                field.value = (self.cursor().model().value(row , field.name) in ("True", True, 1, "1"))
                 #    field.value = True
                 #else:
                 #    field.value = False
             
-            elif self.cursor().model().value(row , field.name) in ("None",""):
+            elif self.cursor().model().value(row , field.name) in ("None","", None):
                 field.value = None
                     
             else:
@@ -232,7 +233,7 @@ class PNBuffer(ProjectClass):
         if field.type_ in ("bool","unlock"):
             v = field.value in (True,"true")
         #ret = self.convertToType(field.value, field.type_)
-        #print("---->retornando",ret , type(ret), field.value, field.name)
+        #print("---->retornando",v , type(v), field.value, field.name)
         return v
 
 
@@ -260,10 +261,10 @@ class PNBuffer(ProjectClass):
                     #if not value == None:
                     #    value = str(value)
                     
-            if field.type_ == "date" and value == None: #Evitamos poner un date a None
-                pass
-            else:
-                field.value = value
+            #if field.type_ == "date" and value == None: #Evitamos poner un date a None
+            #    pass
+            #else:
+            field.value = value
                     
             if mark_:
                 if not field.value == field.originalValue:
@@ -593,12 +594,12 @@ class FLSqlCursorPrivate(QtCore.QObject):
     acosCond_ = None
     acosCondVal_ = None
     lastAt_ = None
-    aclDone_ = None
+    aclDone_ = False
     fieldsNamesUnlock_ = None
-    idAc_ = None
-    idAcos_ = None
-    idCond_ = None
-    id_ = None
+    idAc_ = 0
+    idAcos_ = 0
+    idCond_ = 0
+    id_ = "000"
 
     """ Uso interno """
     isQuery_ = None
@@ -636,13 +637,17 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self.askForCancelChanges_ = True
         self.transactionsOpened_ = []
         self.cursorRelation_ = None
-
+        self.idAc_ = 0
+        self.idAcos_ = 0
+        self.idCond_ = 0
+        self.id_ = "000"
+        self.aclDone_ = False
 
 
     def __del__(self):
 
-        #if self.metadata_:
-        #    self.undoAcl() #En un futuro FIXME
+        if self.metadata_:
+            self.undoAcl()
 
         if self.bufferCopy_:
             del self.bufferCopy_
@@ -663,13 +668,59 @@ class FLSqlCursorPrivate(QtCore.QObject):
         if self.transactionsOpened_:
             del self.transactionsOpened_
 
-    @decorators.NotImplementedWarn
     def doAcl(self):
-        return True
+        if not self.acTable_:
+            self.acTable_ = FLAccessControlFactory().create("table")
+            self.acTable_.setFromObject(self.metadata_)
+            self.acosBackupTable_ = self.acTable_.getAcos()
+            self.acPermBackupTable_ = self.acTable_.perm()
+            self.acTable_.clear()
+        
+        if self.modeAccess_ == FLSqlCursor.Insert or (not self.lastAt_ == -1 and self.lastAt_ == self.cursor_.at()):
+            return
+        
+        if not self.acosCondName_ == None:
+            condTrue_ = False
+            
+            if self.acosCond_ == FLSqlCursor.Value:
+                conTrue_ = (self.cursor_.value(self.acosCondName_) == self.acosCondVal_)
+            elif self.acosCond_ == FLSqlCursor.RegExp:
+                condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(str(self.cursor_.value(self.acosCondName_))))
+            elif self.acosCond_ == FLSqlCursor.Function:
+                fn = eval(self.acosCondName_, pineboolib.qsaglobals.__dict__)
+                condTrue_ =  fn(self.cursor_) == self.acosCondVal_ 
+        
+            if condTrue_:
+                if not self.acTable_.name() == self.id_:
+                    self.acTable_.clear()
+                    self.acTable_.setName(self.id_)
+                    self.acTable_.setPerm(self.acPermTable_)
+                    self.acTable_.setAcos(self.acosTable_)
+                    self.acTable_.processObject(self.metadata_)
+                    self.aclDone_ = True
+                
+                return
+            
+            elif self.cursor_.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
+                if not self.acTable_.name() == self.id_:
+                    self.acTable_.clear()
+                    self.acTable_.setName(self.id_)
+                    self.acTable_.setPerm("r-")
+                    self.acTable_.processObject(self.metadata_)
+                    self.aclDone_ = True
+                
+                return
+            
+        self.undoAcl()
+        
 
-    @decorators.NotImplementedWarn
     def undoAcl(self):
-        return True
+        if self.acTable_ and self.aclDone_:
+            self.aclDone_ = False
+            self.acTable_.clear()
+            self.acTable_.setPerm(self.acPermBackupTable_)
+            self.acTable_.setAcos(self.acosBackupTable_)
+            self.acTable_.processObject(self.metadata_)
 
     @decorators.NotImplementedWarn
     def needUpdate(self):
@@ -765,6 +816,7 @@ class FLSqlCursor(ProjectClass):
         super(FLSqlCursor,self).__init__()
         self._valid = False
         self.d = FLSqlCursorPrivate()
+        self.d.cursor_ = self
         self.d.nameCursor_ = "%s_%s" % (name, QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
         if connectionName_or_db == None:
@@ -825,21 +877,23 @@ class FLSqlCursor(ProjectClass):
 
         self.fieldsNamesUnlock_ = self.d.metadata_.fieldsNamesUnlock()
 
+        
         self.d.isQuery_ = self.metadata().isQuery()
         if (name[len(name)-3:]) == "sys" or self.db().manager().isSystemTable(name):
             self.d.isSysTable_ = True
         else:
             self.d.isSysTable_ = False
 
-        if self.d.isQuery_:
-            qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
-            self.d.query_ = qry.sql()
-            if qry and self.d.query_:
-                self.exec_(self.d.query_)
-            if qry:
-                self.qry.deleteLater()
-        else:
-            self.setName(self.metadata().name(), autopopulate)
+        # if self.d.isQuery_:
+        #     qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
+        #     self.d.query_ = qry.sql()
+        #     if qry and self.d.query_:
+        #         self.exec_(self.d.query_)
+        #     if qry:
+        #         self.qry.deleteLater()
+        # else:
+        #     self.setName(self.metadata().name(), autopopulate)
+        self.setName(self.metadata().name(), autopopulate)
 
         self.d.modeAccess_ = self.Browse
         if cR and r:
@@ -870,8 +924,11 @@ class FLSqlCursor(ProjectClass):
         return self.d.db_
 
     def table(self):
-        return self.metadata().name()
-
+        m = self.metadata()
+        if m:
+            return m.name()
+        else:
+            return None
 
     def __getattr__(self, name): return DefFun(self, name)
 
@@ -1071,6 +1128,11 @@ class FLSqlCursor(ProjectClass):
     
     def setValueBuffer(self, fN, v):
         if not self.buffer() or not fN or not self.metadata():
+            return
+
+        field = self.metadata().field(fN)
+        if not field:
+            print("FLSqlCursor::setValueBuffer() : No existe el campo %s:%s" % (self.curName(), fN))
             return
         
         if not self.buffer().hasChanged(fN, v):
@@ -2008,7 +2070,7 @@ class FLSqlCursor(ProjectClass):
                 qry = self.d.db_.manager().query(self.d.metadata_.query(), self)
                 if qry:
                     sqlPriKey = "%s.%s" % (self.d.metadata_.name(), pKN)
-                    sqlFrom = qry.From()
+                    sqlFrom = qry.from_()
                     sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
                     qry.deleteLater()
                 else:
@@ -2117,6 +2179,10 @@ class FLSqlCursor(ProjectClass):
     """
     @decorators.NotImplementedWarn
     def exec_(self, query):
+        #if query:
+        #    print("ejecutando consulta " + query)
+        #    QSqlQuery.exec(self, query)
+
         return True
 
     def setNull(self, name):
@@ -2209,6 +2275,7 @@ class FLSqlCursor(ProjectClass):
     Redefinicion del método afterSeek() de QSqlCursor.
     """
     def afterSeek(self):
+        self.d.doAcl()
         return True
 
     def model(self):
@@ -2301,7 +2368,7 @@ class FLSqlCursor(ProjectClass):
             #if not self.seek(pos, False, True):
             #    self.d.buffer_ = None
             #    self.newBuffer.emit()
-
+        self.afterSeek()
 
     """
     Actualiza el conjunto de registros con un retraso.
@@ -2431,7 +2498,7 @@ class FLSqlCursor(ProjectClass):
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
 
-            #self.d.undoAcl() FIXME
+            self.d.undoAcl()
             self.updateBufferCopy()
             self.newBuffer.emit()
 
@@ -3351,9 +3418,11 @@ class FLSqlCursor(ProjectClass):
     @param  ac Permiso global; p.e.: "r-", "-w"
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def setAcTable(self, ac):
-        return True
+        self.d.idAc_ = self.d.idAc_ + 1
+        self.d.id_ = "%s%s%s" % (self.d.idAc_, self.d.idAcos_, self.d.idCond_)
+        self.d.acPermTable_ = ac
+        
 
     """
     Establece la lista de control de acceso (ACOs) para los campos de la tabla, , ver FLSqlCursor::setAcosCondition().
@@ -3367,9 +3436,10 @@ class FLSqlCursor(ProjectClass):
     @param acos Lista de cadenas de texto con los nombre de campos y permisos.
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def setAcosTable(self, acos):
-        return True
+        self.d.idAcos_ = self.d.idAcos_ + 1
+        self.d.id_ = "%s%s%s" % (self.d.idAc_, self.d.idAcos_, self.d.idCond_)
+        self.d.acosTable_ = acos
 
     """
     Establece la condicion que se debe cumplir para aplicar el control de acceso.
@@ -3396,9 +3466,12 @@ class FLSqlCursor(ProjectClass):
     @param  condVal   Valor que hace que la condicion sea cierta
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def setAcosCondition(self, condName, cond, condVal):
-        return True
+        self.d.idCond_ = self.d.idCond_ + 1
+        self.d.id_ = "%s%s%s" % (self.d.idAc_, self.d.idAcos_, self.d.idCond_)
+        self.d.acosCondName_ = condName
+        self.d.acosCond_ = cond
+        self.d.acosCondVal_ = condVal
 
     """
     Comprueba si hay una colisión de campos editados por dos sesiones simultáneamente.

@@ -43,6 +43,7 @@ class PNConnection(QtCore.QObject):
         self.db_userName = db_userName
         self.db_password = db_password
         self.driverSql = PNSqlDrivers.PNSqlDrivers()
+        
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
         
         if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):
@@ -63,6 +64,8 @@ class PNConnection(QtCore.QObject):
         self.stackSavePoints_= []
         self.queueSavePoints_= []
         self.interactiveGUI_ = True
+        
+        self.driver().db_ = self
     
           
         
@@ -90,9 +93,15 @@ class PNConnection(QtCore.QObject):
     
     def database(self, name = None):
         if name == None:
-            return self.db_name
+            return self.DBName()
         
         return self.useConn(name)
+    
+    def DBName(self):
+        try:
+            return self.driver().DBName()
+        except:
+            return self.db_name
     
     def driver(self):
         return self.driverSql.driver()
@@ -390,4 +399,11 @@ class PNConnection(QtCore.QObject):
         
         qWarning("PNConnection: El driver %s no dispone de normalizeValue(text)" % self.driverName())
         return text   
+    
+    def queryUpdate(self, name, update, filter):
+        if not self.db():
+            return None
+        
+        return self.driver().queryUpdate(name, update, filter)
+        
     

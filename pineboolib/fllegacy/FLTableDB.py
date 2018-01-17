@@ -154,8 +154,6 @@ class FLTableDB(QtWidgets.QWidget):
         self._loaded = True
 
         self.initCursor()
-        self.tableRecords()
-        self.setTableRecordsCursor()
         
         if DEBUG: print("**FLTableDB::name: %r cursor: %r" % (self.objectName(), self.cursor_.d.nameCursor_))
         
@@ -736,7 +734,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     def createTableRecors(self):
         
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed ,QtWidgets.QSizePolicy.Fixed)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum ,QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHeightForWidth(True)
         
         sizePolicyClean = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding ,QtWidgets.QSizePolicy.Fixed)

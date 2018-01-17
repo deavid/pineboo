@@ -6,7 +6,7 @@ from lxml import etree
 from io import StringIO
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QDomDocument as FLDomDocument
+from PyQt5.Qt import QDomDocument as FLDomDocument, QTabWidget, QTextEdit
 
 # Cargar toda la API de Qt para que sea visible.
 from PyQt5.QtGui import *
@@ -20,6 +20,7 @@ from pineboolib.flcontrols import FLTable, QLineEdit
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
+from pineboolib.fllegacy import FLFieldDB as FLFieldDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
@@ -271,12 +272,17 @@ def check_gc_referrers(typename, w_obj, name):
     threading.Thread(target = checkfn).start()
     
 
+
 class FormDBWidget(QtWidgets.QWidget):
 
     closed =  QtCore.pyqtSignal()
     cursor_ = None
     
     def __init__(self, action, project, parent = None):
+        if not action.prj._DGI.useDesktop():
+            self._class_init()
+            return
+        
         super(FormDBWidget, self).__init__(parent)
         self._action = action
         self.cursor_ = None
@@ -335,14 +341,28 @@ class FormDBWidget(QtWidgets.QWidget):
         else:
             if ret is None:
                 qWarning("WARN: No se encontro el control %s" % childName)
+        
+        #Para inicializar los controles si se llaman desde qsa antes de mostrar el formulario.
+        if isinstance(ret, FLFieldDB_Legacy.FLFieldDB):
+            if not ret.cursor():
+                ret.initCursor()
+            if not ret.editor_ and not ret.editorImg_:
+                ret.initEditor()
+        
+        if isinstance(ret, FLTableDB_Legacy.FLTableDB):
+            if not ret.tableRecords_:
+                ret.tableRecords()
+                ret.setTableRecordsCursor()
+        
+        
         #else:
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
         return ret
 
     def cursor(self):
         
-        if self.cursor_:
-            return self.cursor_
+        #if self.cursor_:
+        #    return self.cursor_
         
         cursor = None
         parent = self
@@ -354,7 +374,8 @@ class FormDBWidget(QtWidgets.QWidget):
         if cursor:
             self.cursor_ = cursor
         else:
-            self.cursor_ = FLSqlCursor(self._action.name)
+            if not self.cursor_:
+                self.cursor_ = FLSqlCursor(self._action.name)
         
         return self.cursor_
     
@@ -521,34 +542,49 @@ class Dialog(QtWidgets.QDialog):
     cancelButtonText = None
     OKButton = None
     cancelButton = None
+    _tab = None
 
-    def __init__(self, title, f, desc=None):
+    def __init__(self, title = None, f = None, desc=None):
         #FIXME: f no lo uso , es qt.windowsflg
         super(Dialog, self).__init__()
-        self.setWindowTitle(title)
+        
+        if title:
+            self.setWindowTitle(str(title))
+            
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
         self.buttonBox = QtWidgets.QDialogButtonBox()
-        self.OKButton = QtWidgets.QPushButton("&Aceptar")
+        self.okButton = QtWidgets.QPushButton("&Aceptar")
         self.cancelButton = QtWidgets.QPushButton("&Cancelar")
-        self.buttonBox.addButton(self.OKButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton(self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
-        self.OKButton.clicked.connect(self.accept)
+        self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
+        self._tab = QTabWidget()
+        self._layout.addWidget(self._tab)
 
 
     def add(self, _object):
         self._layout.addWidget(_object)
 
     def exec_(self):
-        if (self.OKButtonText):
-            self.OKButton.setText(self.OKButtonText)
+        if (self.okButtonText):
+            self.okButton.setText(str(self.okButtonText))
         if (self.cancelButtonText):
-            self.cancelButton.setText(self.cancelButtonText)
+            self.cancelButton.setText(str(self.cancelButtonText))
         self._layout.addWidget(self.buttonBox)
 
         return super(Dialog, self).exec_()
+    
+    def newTab(self,name):
+        self._tab.addTab(QtWidgets.QWidget(), str(name))
+    
+    def __getattr__(self, name):
+        if name == "caption":
+            name = self.setWindowTitle
+
+        return getattr(super(Dialog, self), name)
 
 class GroupBox(QtWidgets.QGroupBox):
     def __init__(self):
@@ -561,7 +597,7 @@ class GroupBox(QtWidgets.QGroupBox):
     
     def __setattr__(self, name, value):
         if name == "title":
-            self.setTitle(value)
+            self.setTitle(str(value))
         else:
             super(GroupBox, self).__setattr__(name, value)
 
@@ -583,7 +619,7 @@ class CheckBox(QWidget):
     
     def __setattr__(self, name, value):
         if name == "text":
-            self._label.setText(value)
+            self._label.setText(str(value))
         elif name == "checked":
             self._cb.setChecked(value)
         else:   
@@ -618,11 +654,11 @@ class ComboBox(QWidget):
     
     def __setattr__(self, name, value):
         if name == "label":
-            self._label.setText(value)
+            self._label.setText(str(value))
         elif name == "itemList":
             self._combo.insertItems(len(value), value)
         elif name == "currentItem":
-            self._combo.setCurrentText(value)
+            self._combo.setCurrentText(str(value))
         else:   
             super(ComboBox, self).__setattr__(name, value)
     
@@ -650,9 +686,9 @@ class LineEdit(QWidget):
     
     def __setattr__(self, name, value):
         if name == "label":
-            self._label.setText(value)
+            self._label.setText(str(value))
         elif name == "text":
-            self._line.setText(value)
+            self._line.setText(str(value))
         else:
             super(LineEdit, self).__setattr__(name, value)
             
@@ -691,6 +727,10 @@ class Dir_Class(object):
 
 Dir = Dir_Class
 
+class TextEdit(QTextEdit):
+    pass
+
+
 class File(QtCore.QFile):
     fichero = None
     mode = None
@@ -701,6 +741,8 @@ class File(QtCore.QFile):
     ReadWrite = QIODevice.ReadWrite
     
     def __init__(self, rutaFichero):
+        if isinstance(rutaFichero, tuple):
+            rutaFichero = rutaFichero[0]
         self.fichero = str(rutaFichero)
         super(File, self).__init__(rutaFichero)
         self.path = os.path.dirname(self.fichero)

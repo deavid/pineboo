@@ -7,16 +7,22 @@
 """
 import sys, re, traceback, os, gc
 from optparse import OptionParser
-import signal, importlib
+import signal, importlib, pineboo
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-dependeces = []
+dependences = []
+
+
+if sys.version_info[0] < 3:
+    print("Tienes que usar Python 3 o superior.")
+    sys.exit(32)
+    
 
 try:
     from lxml import etree
 except ImportError:
     print(traceback.format_exc())
-    dependeces.append("python3-lxml")
+    dependences.append("python3-lxml")
  
 #try:
 #    import psycopg2
@@ -29,7 +35,7 @@ try:
     import ply
 except ImportError:
     print(traceback.format_exc())
-    dependeces.append("python3-ply")
+    dependences.append("python3-ply")
 
 
 try:
@@ -37,12 +43,12 @@ try:
     from PyQt5 import QtGui, QtCore, uic, QtWidgets
 except ImportError:
     print(traceback.format_exc())
-    dependeces.append("python3-pyqt5")
+    dependences.append("python3-pyqt5")
 
-if len(dependeces) > 0:
+if len(dependences) > 0:
     print()
     print("HINT: Dependencias incumplidas:")
-    for dep in dependeces:
+    for dep in dependences:
         print("HINT: Instale el paquete %s e intente de nuevo" % dep)
     print()
     sys.exit(32)
@@ -123,48 +129,77 @@ def main():
     parser.add_option("--preload",
                       action="store_true", dest="preload", default=False,
                       help="Load everything. Then exit. (Populates Pineboo cache)")
-
+    parser.add_option("--dgi",
+                      dest="dgi",
+                      help="Change the gdi mode by default", metavar="DGI")
     
+    parser.add_option("--dgi_parameter",
+                      dest="dgi_parameter",
+                      help="Change the gdi mode by default", metavar="DGIPARAMETER")
     
-    
-    app = QtWidgets.QApplication(sys.argv)
     
     (options, args) = parser.parse_args()
     
-    noto_fonts = [
-        "NotoSans-BoldItalic.ttf",
-        "NotoSans-Bold.ttf",
-        "NotoSans-Italic.ttf",
-        "NotoSans-Regular.ttf",
-    ]
-    for fontfile in noto_fonts:
-        QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
+    pineboolib.no_python_cache = options.no_python_cache
+    
+    
+    dgiName_ = "qt"
+    if options.dgi:
+        dgiName_ = options.dgi
+    
+
+       
+    DGI = getattr(importlib.import_module("pineboolib.plugins.dgi.dgi_%s" % dgiName_),"dgi_%s" % dgiName_,None)() 
+    pineboo.DGI = DGI
+
+    if options.verbose:
+        print("DGI used:", dgiName_)
+    
+    if options.dgi_parameter:
+        DGI.setParameter(options.dgi_parameter)
+    
+    
+    if DGI.useDesktop():
+        app = QtWidgets.QApplication(sys.argv)
+    
+    
+    
+        noto_fonts = [
+            "NotoSans-BoldItalic.ttf",
+            "NotoSans-Bold.ttf",
+            "NotoSans-Italic.ttf",
+            "NotoSans-Regular.ttf",
+        ]
+        for fontfile in noto_fonts:
+            QtGui.QFontDatabase.addApplicationFont(filedir("fonts/Noto_Sans", fontfile))
     
                                                
-    QtWidgets.QApplication.setStyle("QtCurve")
-    font = QtGui.QFont('Noto Sans',9)
-    font.setBold(False)
-    font.setItalic(False)
-    QtWidgets.QApplication.setFont(font)
+        QtWidgets.QApplication.setStyle("QtCurve")
+        font = QtGui.QFont('Noto Sans',9)
+        font.setBold(False)
+        font.setItalic(False)
+        QtWidgets.QApplication.setFont(font)
         
-    pineboolib.no_python_cache = options.no_python_cache
+    
 
-    # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
+        # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
 
-    mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
-    #mainForm = getattr(module_, "MainForm")()
+        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
+        #mainForm = getattr(module_, "MainForm")()
         
-    #from pineboolib import mainForm
+        #from pineboolib import mainForm
 
-    project = pineboolib.main.Project()
+    project = pineboolib.main.Project(DGI)
     
     
     if options.verbose:
         project.setDebugLevel(100)
-        mainForm.MainForm.setDebugLevel(100)
+        if DGI.useDesktop():
+            mainForm.MainForm.setDebugLevel(100)
     else:
         project.setDebugLevel(0)
-        mainForm.MainForm.setDebugLevel(0)
+        if DGI.useDesktop():
+            mainForm.MainForm.setDebugLevel(0)
     if options.project:
         if not options.project.endswith(".xml"):
             options.project += ".xml"
@@ -176,40 +211,42 @@ def main():
         user, passwd,driver_alias, host, port, dbname = translate_connstring(options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
     else:
-        connection_window = pineboolib.DlgConnect.DlgConnect()
-        connection_window.load()
-        connection_window.show()
-        ret = app.exec_()
-        if connection_window.close():    
-            #if connection_window.ruta:
-            #    prjpath = connection_window.ruta
-            #    print("Cargando desde ruta %r " % prjpath)
-            #    project.load(prjpath)
-            #elif connection_window.database:
-            if connection_window.database:
-                print("Cargando credenciales")
-                project.deleteCache = connection_window.deleteCache
-                project.parseProject = connection_window.parseProject
-                project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password, connection_window.driveralias)
+        if DGI.useDesktop():
+            connection_window = pineboolib.DlgConnect.DlgConnect()
+            connection_window.load()
+            connection_window.show()
+            ret = app.exec_()
+            if connection_window.close():    
+                #if connection_window.ruta:
+                #    prjpath = connection_window.ruta
+                #    print("Cargando desde ruta %r " % prjpath)
+                #    project.load(prjpath)
+                #elif connection_window.database:
+                if connection_window.database:
+                    print("Cargando credenciales")
+                    project.deleteCache = connection_window.deleteCache
+                    project.parseProject = connection_window.parseProject
+                    project.load_db(connection_window.database,connection_window.hostname,connection_window.portnumber,connection_window.username,connection_window.password, connection_window.driveralias)
             
             
             
             
-        if not connection_window.ruta and not connection_window.database:
-            sys.exit(ret)
+            if not connection_window.ruta and not connection_window.database:
+                sys.exit(ret)
 
         #Cargando spashscreen
     # Create and display the splash screen
-    splash_pix = QtGui.QPixmap(filedir("../share/splashscreen/splash_%s.png" % project.dbname))
-    splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
-    splash.setMask(splash_pix.mask())
-    splash.show()
+    if DGI.useDesktop():
+        splash_pix = QtGui.QPixmap(filedir("../share/splashscreen/splash_%s.png" % project.dbname))
+        splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+        splash.setMask(splash_pix.mask())
+        splash.show()
     
-    frameGm = splash.frameGeometry()
-    screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
-    centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
-    frameGm.moveCenter(centerPoint)
-    splash.move(frameGm.topLeft())
+        frameGm = splash.frameGeometry()
+        screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
+        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        splash.move(frameGm.topLeft())
 
 
 
@@ -217,80 +254,95 @@ def main():
     if project.conn.conn == False:
         return main()
     
-    splash.showMessage("Iniciando proyecto ...")
+    if DGI.useDesktop():
+        splash.showMessage("Iniciando proyecto ...")
     if options.verbose: print("Iniciando proyecto ...")
 
-    splash.showMessage("Creando interfaz ...")
-    if options.verbose: print("Creando interfaz ...")
-    if options.action:
-        objaction = None
-        for k, module in list(project.modules.items()):
-            try:
-                if not module.load(): continue
-            except Exception as err:
-                print("ERROR:", err.__class__.__name__, str(err))
-                continue
-            if options.action in module.actions:
-                objaction = module.actions[options.action]
-        if objaction is None: raise ValueError("Action name %s not found" % options.action)
-
-        main_window = mainForm.mainWindow
-        main_window.load()
+    if DGI.useDesktop():
+        splash.showMessage("Creando interfaz ...")
         
-        splash.showMessage("Módulos y pestañas ...")
-        if options.verbose: print("Módulos y pestañas ...")
-        for k,area in sorted(project.areas.items()):
-            main_window.loadArea(area)
-        for k,module in sorted(project.modules.items()):
-            main_window.loadModule(module)
-        splash.showMessage("Abriendo interfaz ...")
-        if options.verbose: print("Abriendo interfaz ...")
-        main_window.show()
-        project.call("sys.widget.init()", [], None, True)
-        objaction.openDefaultForm()
-        splash.hide()
-        
-        ret = app.exec_()
-        mainForm.mainWindow = None
-        return ret
-    else:
-        main_window = mainForm.mainWindow
-        main_window.load()
-        ret = 0
-        splash.showMessage("Módulos y pestañas ...")
-        if options.verbose: print("Módulos y pestañas ...")
-        for k,area in sorted(project.areas.items()):
-            main_window.loadArea(area)
-        for k,module in sorted(project.modules.items()):
-            main_window.loadModule(module)
-        if options.preload:
-            if options.verbose: print("Precarga ...")
-            for action in project.actions:
-                if options.verbose: print("* * * Cargando acción %s . . . " % action)
+        if options.verbose: print("Creando interfaz ...")
+        if options.action:
+            objaction = None
+            for k, module in list(project.modules.items()):
                 try:
-                    project.actions[action].load()
-                except Exception:
-                    print(traceback.format_exc())
-                    project.conn.conn.rollback()
-        else:
+                    if not module.load(): continue
+                except Exception as err:
+                    print("ERROR:", err.__class__.__name__, str(err))
+                    continue
+                if options.action in module.actions:
+                    objaction = module.actions[options.action]
+            if objaction is None: raise ValueError("Action name %s not found" % options.action)
+
+            main_window = mainForm.mainWindow
+            main_window.load()
+        
+            splash.showMessage("Módulos y pestañas ...")
+            if options.verbose: print("Módulos y pestañas ...")
+            for k,area in sorted(project.areas.items()):
+                main_window.loadArea(area)
+            for k,module in sorted(project.modules.items()):
+                main_window.loadModule(module)
             splash.showMessage("Abriendo interfaz ...")
             if options.verbose: print("Abriendo interfaz ...")
             main_window.show()
-            project.call("sys.widget._class_init()", [], None, True)
-            splash.showMessage("Listo ...")
-            QtCore.QTimer.singleShot(2000, splash.hide)
+            project.call("sys.widget.init()", [], None, True)
+            objaction.openDefaultForm()
+            splash.hide()
+        
+            ret = app.exec_()
+            mainForm.mainWindow = None
+            return ret
+        else:
+            main_window = mainForm.mainWindow
+            main_window.load()
+            ret = 0
+            splash.showMessage("Módulos y pestañas ...")
+            if options.verbose: print("Módulos y pestañas ...")
+            for k,area in sorted(project.areas.items()):
+                main_window.loadArea(area)
+            for k,module in sorted(project.modules.items()):
+                main_window.loadModule(module)
+            if options.preload:
+                if options.verbose: print("Precarga ...")
+                for action in project.actions:
+                    if options.verbose: print("* * * Cargando acción %s . . . " % action)
+                    try:
+                        project.actions[action].load()
+                    except Exception:
+                        print(traceback.format_exc())
+                        project.conn.conn.rollback()
+            else:
+                splash.showMessage("Abriendo interfaz ...")
+                if options.verbose: print("Abriendo interfaz ...")
+                main_window.show()
+                project.call("sys.widget._class_init()", [], None, True)
+                splash.showMessage("Listo ...")
+                QtCore.QTimer.singleShot(2000, splash.hide)
             
-        ret = app.exec_()
-        mainForm.mainWindow = None
-        del main_window
-        del project
-        return ret
+            ret = app.exec_()
+            mainForm.mainWindow = None
+            del main_window
+            del project
+            return ret
+    
+    else:
+
+        if options.verbose: print("Cargando Módulos")
+        for k,module in sorted(project.modules.items()):
+            module.load(True)
     
     
 if __name__ == "__main__":
+    
     ret = main()
-    gc.collect()
-    print("Closing Pineboo...")
-    if ret: sys.exit(ret)
-    else: sys.exit(0)
-
+    if pineboo.DGI.useMLDefault():
+        gc.collect()
+        print("Closing Pineboo...")
+        if ret: 
+            sys.exit(ret)
+        else: 
+            sys.exit(0)
+    
+    else:
+        pineboo.DGI.alternativeMain(ret)

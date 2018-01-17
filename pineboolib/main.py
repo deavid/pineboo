@@ -18,6 +18,7 @@ import importlib
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
+from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 from PyQt5.Qt import QTextCodec, qWarning, qApp, QApplication
 if __name__ == "__main__":
     sys.path.append('..')
@@ -52,8 +53,11 @@ class Project(object):
     multiLangEnabled_ = False
     multiLangId_ = QtCore.QLocale().name()[:2].upper()
     translator_ = None
+    acl_ = None
+    _DGI = None
     
-    def __init__(self):
+    def __init__(self, DGI):
+        self._DGI = DGI   
         self.tree = None
         self.root = None
         self.dbserver = None
@@ -63,7 +67,8 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self._initModules = []
-        self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
+        if self._DGI.useDesktop():
+            self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (self.mainFormName, self.mainFormName)).mainWindow
         self.deleteCache = False
         self.parseProject = False
         
@@ -91,7 +96,7 @@ class Project(object):
     Retorna si hay o no acls cargados
     """
     def acl(self):
-        return False
+        return self.acl_
             
     
     
@@ -200,12 +205,24 @@ class Project(object):
         self.modules["sys"] = Module(self,"sys","sys","Administración",None)#Añadimos módulo sistema(falta icono)
 
         # Descargar proyecto . . .
+        
+        
+        self.cur.execute(""" SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
+        size_ = len(self.cur.fetchall())
         self.cur.execute(""" SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"),"w")
         self.files = {}
-        tiempo_ini = time.time()
+        if self._DGI.useDesktop():
+            tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")): raise AssertionError
+        # if self.parseProject:
+        if self._DGI.useDesktop():
+            progressDialog = util.createProgressDialog("Pineboo", size_)
+        p = 0
         for idmodulo, nombre, sha in self.cur:
+            if self._DGI.useDesktop():
+                util.setProgress((p * 100) / size_)
+                util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules: continue # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files: print("WARN: file %s already loaded, overwritting..." % nombre)
@@ -237,8 +254,12 @@ class Project(object):
             
             if self.parseProject and nombre.endswith(".qs"):
                 self.parseScript(self.dir("cache" ,fileobj.filekey))
-        tiempo_fin = time.time()
-        if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
+            
+            p = p + 1
+        if self._DGI.useDesktop():
+            tiempo_fin = time.time()
+        
+            if Project.debugLevel > 50: print("Descarga del proyecto completo a disco duro: %.3fs" % (tiempo_fin - tiempo_ini))
         
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
@@ -248,11 +269,19 @@ class Project(object):
                     fileobj = File(self, idmodulo, nombre, basedir = root)
                     self.files[nombre] = fileobj
                     self.modules[idmodulo].add_project_file(fileobj)
+                    if self.parseProject and nombre.endswith(".qs"):
+                        self.parseScript(self.dir(root, nombre))
         
-            
+        if self._DGI.useDesktop():
+            try:    
+                util.destroyProgressDialog()
+            except:
+                pass
         
-        self.loadTranslations()
-        self.readState()
+            self.loadTranslations()
+            self.readState()
+        self.acl_ = FLAccessControlLists()
+        self.acl_.init_()
         
         
 
@@ -378,7 +407,11 @@ class Project(object):
         #if not os.path.isfile(python_script_path):
         #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
             
-        
+    def reinitP(self):
+        if self.acl_:
+            self.acl_.init_()
+            
+        project.call("sys.widget.init()", [], None, True)
         
     
 
@@ -393,11 +426,15 @@ class Module(object):
         self.tables = {}
         self.loaded = False
         self.path = self.prj.path
+        self.fcgiMode = False
 
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
 
-    def load(self):
+    def load(self, fcgiMode = False):
+        if fcgiMode:
+            self.fcgiMode = True
+            
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
@@ -410,8 +447,9 @@ class Module(object):
         try:
             self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
-            self.mainform = MainForm(self, pathui)
-            self.mainform.load()
+            if not self.fcgiMode:
+                self.mainform = MainForm(self, pathui)
+                self.mainform.load()
         except Exception as e:
             print("ERROR al cargar modulo %r:" % self.name, e)
             print(traceback.format_exc(),"---")
@@ -457,11 +495,7 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
         
-        db_name = None
-        if self.prj.dbname.endswith("s3db"):
-            db_name= self.prj.dbname[self.prj.dbname.rfind("/") + 1:-5]
-        else:
-            db_name = self.prj.dbname
+        db_name = self.prj.conn.DBName()
         
         
         if self.sha:
@@ -594,18 +628,19 @@ class MainForm(object):
         self.root = self.tree.getroot()
         self.actions = {}
         self.pixmaps = {}
-        for image in self.root.xpath("images/image[@name]"):
-            name = image.get("name")
-            xmldata = image.xpath("data")[0]
-            img_format = xmldata.get("format")
-            data = unhexlify(xmldata.text.strip())
-            if img_format == "XPM.GZ":
-                data = zlib.decompress(data,15)
-                img_format = "XPM"
-            pixmap = QtGui.QPixmap()
-            pixmap.loadFromData(data, img_format)
-            icon = QtGui.QIcon(pixmap)
-            self.pixmaps[name] = icon
+        if self.prj._DGI.useDesktop():
+            for image in self.root.xpath("images/image[@name]"):
+                name = image.get("name")
+                xmldata = image.xpath("data")[0]
+                img_format = xmldata.get("format")
+                data = unhexlify(xmldata.text.strip())
+                if img_format == "XPM.GZ":
+                    data = zlib.decompress(data,15)
+                    img_format = "XPM"
+                pixmap = QtGui.QPixmap()
+                pixmap.loadFromData(data, img_format)
+                icon = QtGui.QIcon(pixmap)
+                self.pixmaps[name] = icon
 
 
         for xmlaction in self.root.xpath("actions//action"):
@@ -619,8 +654,9 @@ class MainForm(object):
                 try:
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
-                    print("main.Mainform: Error al intentar decodificar icono de accion. No existe.")
-                    print(e)
+                    if not self.prj.fcgiMode:
+                        print("main.Mainform: Error al intentar decodificar icono de accion. No existe.")
+                        print(e)
             else:
                 action.iconSet = None
             #if iconSet:
@@ -675,6 +711,9 @@ class XMLAction(XMLStruct):
 
     def loadRecord(self, cursor = None):
         #if self.formrecord_widget is None:
+        if not getattr(self, "formrecord", None):
+            if Project.debugLevel > 50: print("Record action %s is not defined. Canceled !" % (self.name))
+            return None
         if Project.debugLevel > 50: print("Loading record action %s . . . " % (self.name))
         parent_or_cursor =  cursor # Sin padre, ya que es ventana propia
         self.formrecord_widget = FLFormRecordDB(parent_or_cursor,self, load = True)
@@ -696,7 +735,18 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > 50: print("Loading action %s . . . " % (self.name))
         w = self.prj.main_window
         if not self.mainform_widget:
-            self.mainform_widget = FLMainForm(w,self, load = True)
+            if self.prj._DGI.useDesktop():
+                self.mainform_widget = FLMainForm(w,self, load = True)
+            else:
+                from pineboolib.utils import Struct
+                self.mainform_widget = Struct()
+                self.mainform_widget.action = self
+                self.mainform_widget.prj = self.prj
+                try:
+                    self.load_script(getattr(self,"scriptform", None), self.mainform_widget)
+                except Exception:
+                    print(traceback.format_exc(),"---")
+                
         self._loaded = True
         if Project.debugLevel > 50: print("End of action load %s (iface:%s ; widget:%s)"
               % (self.name,
@@ -704,7 +754,6 @@ class XMLAction(XMLStruct):
                 repr(self.mainform_widget.widget)
                 )
             )
-        
         return self.mainform_widget
 
     def openDefaultForm(self):
@@ -726,7 +775,8 @@ class XMLAction(XMLStruct):
         if Project.debugLevel > -50: print("Opening default formRecord for Action", self.name)
         w = self.loadRecord(cursor)
         #w.init()
-        w.show()
+        if w:
+            w.show()
 
     def execDefaultScript(self):
         if Project.debugLevel > 50: print("Executing default script for Action", self.name)
@@ -735,6 +785,8 @@ class XMLAction(XMLStruct):
         self.initModule(self.name)
         if getattr(self.script.form,"iface",None):
             self.script.form.iface.main()
+        else:
+            self.script.form.main()
 
     def load_script(self, scriptname, parent= None):
         parent_ = parent

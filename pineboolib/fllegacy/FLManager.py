@@ -243,10 +243,7 @@ class FLManager(ProjectClass):
                 acl.process(ret)
                 
             if not quick and not isSysTable and self._prj.consoleShown() and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
-                msg = util.tr("La estructura de los metadatos de la tabla '%1' y su "
-                  "estructura interna en la base de datos no coinciden. "
-                  "Debe regenerar la base de datos.").arg(n)
-                
+                msg = util.transtalate("application", "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\nDebe regenerar la base de datos.").arg(n)
                 throwMsgWarning(self.db_, msg)
                     
             return ret
@@ -368,20 +365,24 @@ class FLManager(ProjectClass):
                     fL = qry.fieldList()
                     table = None
                     field = None
-                    fields = tmd.fieldsNames().split(",")
+                    fields = tmd.fieldsNames()
+                    #.split(",")
                     fieldsEmpty = (not fields)
                 
                     for it in fL:
                         pos = it.find(".")
                         if pos > -1:
                             table = it[:pos]
-                            field = it[:pos]
+                            field = it[pos + 1:]
                         else:
                             field = it
                     
-                        if not (not fieldsEmpty and table == name and fields.find(field.lower())) == fields.end():
+                        #if not (not fieldsEmpty and table == name and fields.find(field.lower())) != fields.end():
+                        #print("Tabla %s nombre %s campo %s buscando en %s" % (table, name, field, fields))
+                        #if not fieldsEmpty and table == name and (field.lower() in fields): Asi esta en Eneboo, pero incluye campos repetidos
+                        if not fieldsEmpty and (field.lower() in fields):
                             continue
-                    
+
                         mtdAux = self.metadata(table, True)
                         if mtdAux:
                             fmtdAux = mtdAux.field(field)
@@ -389,22 +390,24 @@ class FLManager(ProjectClass):
                                 isForeignKey = False
                                 if fmtdAux.isPrimaryKey() and not table == name:
                                     fmtdAux = FLFieldMetaData(fmtdAux)
-                                    fmtdAux.setIsprimaryKey(False)
+                                    fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
                             
                                 newRef = (not isForeignKey)
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
-                                    fieldsAux = tmd.fieldsNames().split(",")
-                                    if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
+                                    #fieldsAux = tmd.fieldsNames().split(",")
+                                    fieldsAux = tmd.fieldsNames()
+                                    #if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
+                                    if fmtdAuxName not in fieldsAux:
                                         if not isForeignKey:
                                             fmdtAux = FLFieldMetaData(fmtdAux)
                                     
-                                        fmtdAux.setName("%s.%s" % (tambe, field))
+                                        #fmtdAux.setName("%s.%s" % (table, field))
                                         newRef = False
                             
-                                if newRef:
-                                    fmtdAux.ref()
+                                #if newRef:
+                                #    fmtdAux.ref()
                                 
                                 tmd.addFieldMD(fmtdAux)
                     
@@ -451,15 +454,18 @@ class FLManager(ProjectClass):
             remove_blank_text=True,
             )
         
-        
+        q = FLSqlQuery(parent, self.db_.connectionName())
+
         root_ = etree.fromstring(qry_, parser_)
-        parent.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
-        parent.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
-        parent.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
+        q.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
+        q.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
+        q.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
+        q.setTablesList(root_.xpath("tables/text()")[0].strip(' \t\n\r'))
+        
         orderBy_ = None
         try:
             orderBy_ = root_.xpath("order/text()")[0].strip(' \t\n\r')
-            parent.setOrderBy(orderBy_)
+            q.setOrderBy(orderBy_)
         except:
             a = 1
             
@@ -471,11 +477,11 @@ class FLManager(ProjectClass):
             gr = groupXml_[i]
             if float(gr.xpath("level/text()")[0].strip(' \t\n\r')) == i:
                 #print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                parent.addGroup(FLGroupByQuery(i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
+                q.addGroup(FLGroupByQuery(i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
                 i = i + 1
         
         
-        return parent
+        return q
     
     """
     Obtiene la definición de una acción a partir de su nombre.
@@ -674,13 +680,26 @@ class FLManager(ProjectClass):
                     fL = qry.fieldList()
                     
                     for f in fL:
-                        prefixTable = f.section('.', 0, 0)
-                        if f.section('.', 1, 1) == fieldName:
+                        #print("fieldName = " + f)
+
+                        fieldSection = None
+                        pos = f.find(".")
+                        if pos > -1:
+                            prefixTable = f[:pos]
+                            fieldSection = f[pos + 1:]
+                        else:
+                            fieldSection = it
+
+
+                        #prefixTable = f.section('.', 0, 0)
+                        #if f.section('.', 1, 1) == fieldName:
+                        if fieldSection == fieldName:
                             break
                     
                     qry.deleteLater()
                     
-                fieldName.prepend(prefixTable + ".")
+                #fieldName.prepend(prefixTable + ".")
+                fieldName = prefixTable + "." + fieldName
                       
             return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])    
                 

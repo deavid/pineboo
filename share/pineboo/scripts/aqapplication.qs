@@ -1,3 +1,4 @@
+var form = this;
 /***************************************************************************
                              aqapplication.qs
                             -------------------
@@ -28,8 +29,8 @@ class DockListView
     if (mainWindow == undefined)
       return;
 
-    var w = this.w_ = new QDockWindow(AQS.InDock, mainWindow.w_, name);
-
+    this.w_ = new QDockWindow(AQS.InDock, mainWindow.w_, name);
+    var w = this.w_;
     this.lw_ = new QListView(w, name + "ListView");
     this.lw_.addColumn("");
     this.lw_.addColumn("");
@@ -62,6 +63,9 @@ class DockListView
     settings.writeEntry(key + "y", w.y);
     settings.writeEntry(key + "width", w.width);
     settings.writeEntry(key + "height", w.height);
+    settings.writeEntry(key + "offset", w.offset);
+    var area = w.area();
+    settings.writeEntry(key + "index", area ? area.findDockWindow(w) : -1);
   }
 
   function readState()
@@ -76,6 +80,13 @@ class DockListView
       w.undock();
       w.move(settings.readNumEntry(key + "x", w.x),
              settings.readNumEntry(key + "y", w.y));
+    }
+    w.offset = settings.readNumEntry(key + "offset", w.offset);
+    var index = settings.readNumEntry(key + "index", -1);
+    if (index != -1) {
+      var area = w.area();
+      if (area)
+        area.moveDockWindow(w, index);
     }
     var width = settings.readNumEntry(key + "width", w.width);
     var height = settings.readNumEntry(key + "height", w.height);
@@ -127,6 +138,13 @@ class DockListView
     while (!node.isNull()) {
       var className = node.attribute("class");
       if (node.tagName() == "object" && className.startsWith("Action")) {
+        if (node.attribute("visible") == "false") {
+          node = reverse
+                 ? node.previousSibling().toElement()
+                 : node.nextSibling().toElement();
+          continue;
+        }
+
         if (node.attribute("usesDropDown") == "false") {
           this.buildListView(parentItem, node, ag, reverse);
           node = reverse
@@ -148,6 +166,8 @@ class DockListView
             thisItem.setText(1, actionName);
         }
         thisItem.setText(0, node.attribute("menuText").replace("&", ""));
+        if (node.attribute("enabled") == "false")
+          thisItem.setEnabled(false);
         this.buildListView(thisItem, node, ag, reverse);
       }
       node = reverse
@@ -170,6 +190,7 @@ class MainWindow
   var dckRec_;
   var dckMar_;
   var tw_;
+  var twCorner_;
   var actSigMap_;
   var initializedMods_;
   var mainWidgets_;
@@ -202,9 +223,32 @@ class MainWindow
       }
 
       case AQS.Close: {
-        if (aqApp.mainWidget() != undefined &&
-            o.isEqual(aqApp.mainWidget()))
-          return !this.exit();
+        if (aqApp.mainWidget() != undefined && 
+            o.isEqual(aqApp.mainWidget())) {
+          this.w_.setDisabled(true);
+          var ret = this.exit();
+          if (!ret)
+            this.w_.setDisabled(false);
+          return true;
+        }
+        if (o.rtti() == "FormDB")
+          this.formClosed(o);
+        break;
+      }
+
+      case AQS.WindowStateChange: {
+        if (sys.isNebulaBuild() && o.isEqual(this.w_)) {
+          if (this.w_.minimized) {
+            this.w_.showNormal();
+            this.w_.showFullScreen();
+            return true;
+          }
+          if (!this.w_.fullScreen) {
+            this.w_.showFullScreen();
+            return true;
+          }
+        }
+        break;
       }
     }
 
@@ -215,19 +259,24 @@ class MainWindow
   {
     var mng = aqApp.db().managerModules();
     this.w_ = mng.createUI(uiFile);
-    this.w_.name = "abanqMainWindow";
+    this.w_.name = "container";
   }
 
   function exit()
   {
-    this.writeState();
-
-    return (MessageBox.Yes ==
-            MessageBox.information(
-              sys.translate("¿Quiere salir de la aplicación?"),
-              MessageBox.Yes, MessageBox.No,
+    var res = MessageBox.information(
+                sys.translate("¿Quiere salir de la aplicación?"),
+                MessageBox.Yes, MessageBox.No,
               MessageBox.NoButton, "Eneboo"
-            ));
+              );
+    var doExit = (MessageBox.Yes == res);
+    if (doExit) {
+      this.writeState();
+      this.w_.removeEventFilter(this.w_);
+      aqApp.generalExit(false);
+      this.removeAllPages();
+    }
+    return doExit;
   }
 
   function writeState()
@@ -277,7 +326,7 @@ class MainWindow
   {
     var w = this.w_;
     var action;
-
+    var moduleName;
     this.dckMod_.readState();
     this.dckRec_.readState();
     this.dckMar_.readState();
@@ -285,14 +334,22 @@ class MainWindow
     var settings = new AQSettings;
     var key = "MainWindow/";
 
-    var maximized = settings.readBoolEntry(key + "maximized");
-    if (!maximized) {
-      w.move(settings.readNumEntry(key + "x"),
-             settings.readNumEntry(key + "y"));
-      w.resize(settings.readNumEntry(key + "width", w.width),
-               settings.readNumEntry(key + "height", w.height));
-    } else
-      w.showMaximized();
+    if (!sys.isNebulaBuild()) {
+      var maximized = settings.readBoolEntry(key + "maximized");
+      if (!maximized) {
+        var x = settings.readNumEntry(key + "x");
+        var y = settings.readNumEntry(key + "y");
+        if (sys.osName() == "MACX" && y < 20)
+          y = 20;
+        w.move(x, y);
+        w.resize(settings.readNumEntry(key + "width", w.width),
+                 settings.readNumEntry(key + "height", w.height));
+      } else
+        w.showMaximized();
+    } else {
+      w.showFullScreen();
+      aqApp.setProxyDesktop(w);
+    }
 
     if (this.agMenu_ != undefined) {
       key += aqApp.db().database() + "/";
@@ -304,7 +361,18 @@ class MainWindow
       for (var i = 0; i < openActions.length; ++i)
                 {
                  action = this.agMenu_.child(openActions[i], "QAction");
-               this.addForm(openActions[i],action.iconSet().pixmap());
+                 if (!action)
+                 	continue;
+				 moduleName = aqApp.db().managerModules().idModuleOfFile(action.name + ".ui");
+                 if (moduleName != undefined && moduleName != "")
+                	{
+                	this.initModule(moduleName);
+               		this.addForm(openActions[i],action.iconSet().pixmap());
+               		}
+               	else
+               		{
+			this.addForm(openActions[i],action.iconSet().pixmap());
+               		}
                  }
       var idx = settings.readNumEntry(key + "currentPageIndex");
       if (idx >= 0 && idx < tw.count)
@@ -333,6 +401,7 @@ class MainWindow
     this.initTabWidget();
     this.initHelpMenu();
     this.initConfigMenu();
+    this.initTextLabels();
     this.initDocks();
     this.initEventFilter();
   }
@@ -346,6 +415,9 @@ class MainWindow
     connect(this.actSigMap_, "mapped(const QString&)",
             this.app_, "triggerAction()");
     this.tw_ = w.child("tabWidget", "QTabWidget");
+    this.twCorner_ = this.tw_.child("tabWidgetCorner", "QToolButton");
+    connect(this.twCorner_, "clicked()", this, "removeCurrentPage()");
+    this.agMenu_ = w.child("abanqActionGroup", "QActionGroup");
     this.dckMod_ = new DockListView;
     this.dckMod_.initFromWidget(w.child("abanqDockModules", "QDockWindow"));
     this.dckRec_ = new DockListView;
@@ -360,7 +432,10 @@ class MainWindow
     var w = this.w_;
 
     w.eventFilterFunction = "aqAppScript.mainWindow_.eventFilter";
-    w.allowedEvents = [ AQS.ContextMenu, AQS.Close ];
+    if (!sys.isNebulaBuild())
+      w.allowedEvents = [ AQS.ContextMenu, AQS.Close ];
+    else
+      w.allowedEvents = [ AQS.ContextMenu, AQS.Close, AQS.WindowStateChange ];
     w.installEventFilter(w);
 
     this.dckMod_.w_.installEventFilter(w);
@@ -376,7 +451,7 @@ class MainWindow
       aqApp.name = module;
       mwi.show();
     }
-    if (!(module in this.initializedMods_) ||
+    if (!(module in this.initializedMods_) || 
         this.initializedMods_[module] != true) {
       this.initializedMods_[module] = true;
       aqApp.call("init", module);
@@ -385,48 +460,60 @@ class MainWindow
     mng.setActiveIdModule(module);
   }
 
-  function addForm(actionName,Pixmap)
+  function removeCurrentPage()
+  {
+    var page = this.tw_.currentPage();
+    if (page == undefined)
+      return;
+    if (page.rtti() == "FormDB")
+      page.close();
+  }
+
+  function removeAllPages()
   {
     var tw = this.tw_;
+
+    if (tw.count > 0) 
+    	this.twCorner_.hide();
+    	
+    for (var i = 0; i < tw.count; ++i) {
+      var page = tw.page(i);
+      if (page.rtti() == "FormDB")
+        page.close();
+    }
+  }
+
+  function formClosed(fm)
+  {
+    if (this.tw_.count == 1 && this.twCorner_ != undefined)
+      this.twCorner_.hide();
+  }
+
+  function addForm(actionName)
+  {
+    var tw = this.tw_;
+
+    for (var i = 0; i < tw.count; ++i) {
+      if (tw.page(i).idMDI() == actionName) {
+        tw.page(i).close();
+      }
+    }
+
     var fm = new AQFormDB(actionName, tw, 0);
 
     fm.setMainWidget();
     if (fm.mainWidget() == undefined)
       return;
 
-var idx = undefined;
-var texto = undefined;
-var visible = false; 
-if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName]; 
-    if(texto == undefined)
-                   {
-                    for (var i = 0; i < tw.count; ++i) if (tw.tabLabel(tw.page(i)) == fm.caption) texto = fm.caption + " (bís)"; 
-                   if (texto == undefined) texto = fm.caption; 
-                   }
-                   else 
-                     { 
-                      texto = this.ListaTabs_[actionName];
-                        for (var i = 0; i < tw.count; ++i)
-                                           {
-                       if (tw.tabLabel(tw.page(i)) == texto) 
-                                                    {
-                                                    this.ListaTabs_[actionName] = texto;
-                                                    visible = true;
-                                                    idx = i;
-                                                    }
-                                           }
-                        
-                    }
-   if (!visible) 
-         {
-         tw.addTab(fm,new QIconSet(iconSet16x16(new QPixmap(Pixmap))), texto);
-         idx = tw.indexOf(fm);
-         fm.setIdMDI(actionName);
-         fm.show();
-         this.ListaTabs_[actionName]=texto;
-         } 
-   tw.setCurrentPage(idx);  // llamamos a nuestra pestaña
-}
+    tw.addTab(fm, this.agMenu_.child(actionName).iconSet(), fm.caption);
+    fm.setIdMDI(actionName);
+    fm.show();
+    var idx = tw.indexOf(fm);
+    tw.setCurrentPage(idx);
+    fm.installEventFilter(this.w_);
+    if (tw.count == 1 && this.twCorner_ != undefined)
+      this.twCorner_.show();
+  }
 
   function addRecent(action)
   {
@@ -486,7 +573,7 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
 
   function removeMarkFromItem(item, pos)
   {
-    if (item == undefined || this.agMar_ == undefined ||
+    if (item == undefined || this.agMar_ == undefined || 
         this.dckMar_.lw_.childCount == 0)
       return false;
     if (item.text(1).isEmpty())
@@ -512,6 +599,9 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
     var abanqMenu = w.child("abanqMenu");
     abanqMenu.clear();
     this.agMenu_.addTo(abanqMenu);
+
+    aqApp.setMainWidget(w);
+
     this.dckMod_.update(this.agMenu_);
     this.dckRec_.update(this.agRec_);
     this.dckMar_.update(this.agMar_);
@@ -519,12 +609,28 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
     connect(w.child("aboutQtAction"), "activated()", aqApp, "aboutQt()");
     connect(w.child("aboutAbanQAction"), "activated()", aqApp, "aboutAbanQ()");
     connect(w.child("fontAction"), "activated()", aqApp, "chooseFont()");
+    connect(w.child("styleAction"), "activated()", aqApp, "showStyles()");
     connect(w.child("helpIndexAction"), "activated()", aqApp, "helpIndex()");
+    connect(w.child("urlEnebooAction"), "activated()", aqApp, "urlEneboo()");
   }
 
   function updateActionGroup()
   {
     var w = this.w_;
+
+    if (this.agMenu_ != undefined) {
+      var list = new AQObjectQueryList(this.agMenu_, "QAction", "",
+                                       true, true);
+      var obj;
+      obj = list.current()
+      while (obj != undefined) {
+        this.agMenu_.removeChild(obj);
+        list.next();
+	obj = list.current()
+      }
+      w.removeChild(this.agMenu_);
+      this.agMenu_ = undefined;
+    }
 
     var agm = new QActionGroup(w, "abanqActionGroup");
     this.agMenu_ = agm;
@@ -533,27 +639,18 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
     var mng = aqApp.db().managerModules();
     var areas = mng.listIdAreas();
 
-    var pg = new QProgressBar(mng.listAllIdModules().length, w, "pgBar",
-                              AQS.WType_Popup | AQS.WType_Modal);
-    pg.setCenterIndicator(false);
-    pg.setPercentageVisible(false);
-    pg.show();
-    if (!w.visible) {
-      var dw = aqApp.desktop();
-      pg.move((dw.width / 2) - (pg.width / 2),
-              (dw.height / 2) - (pg.height / 2));
-    } else
-      pg.move(w.width / 2, w.height / 2);
-
     for (var i = 0; i < areas.length; ++i) {
       var ag = new QActionGroup(agm);
       ag.name = areas[i];
+      if (!sys.isDebuggerEnabled() && ag.name == "sys") break;
       ag.menuText = ag.text = mng.idAreaToDescription(ag.name);
       ag.usesDropDown = true;
       ag.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("folder.png")));
 
       var modules = mng.listIdModules(ag.name);
       for (var j = 0; j < modules.length; ++j) {
+        if (modules[j] == "sys" && sys.isUserBuild())
+          continue;
         var ac = new QActionGroup(ag);
         ac.name = modules[j];
         if (sys.isQuickBuild()) {
@@ -576,70 +673,70 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
 
         connect(ac, "activated()", this.actSigMap_, "map()");
         this.actSigMap_.setMapping(ac, "activated():initModule():" + ac.name);
-        pg.setProgress(pg.progress() + 1);
         if (ac.name == "sys" && ag.name == "sys")
           {
             if (sys.isDebuggerMode())
               {
-                var wb = new QAction(ag);
-                wb.name = "runWorkBench";
-                wb.menuText = sys.translate("QSA Work Bench");
-                wb.setIconSet(new QIconSet(this.iconSet16x16(AQS.Pixmap_fromMimeSource("bug.png"))));
-                connect(wb, "activated()", this.actSigMap_, "map()");
-				this.actSigMap_.setMapping(wb, "activated():runWorkBench():" + wb.name);
+    		
+      var staticLoad = new QAction(ag);
+      staticLoad.name = "staticLoaderSetupAction";
+      staticLoad.menuText = sys.translate("Configurar carga estática");
+      staticLoad.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("folder_update.png")));
+      connect(staticLoad, "activated()", this.actSigMap_, "map()");
+      this.actSigMap_.setMapping(staticLoad, "activated():staticLoaderSetup():" + staticLoad.name);
+
+      var reInit = new QAction(ag);
+      reInit.name = "reinitAction";
+      reInit.menuText = sys.translate("Recargar scripts");
+      reInit.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("reload.png")));
+      connect(reInit, "activated()", this.actSigMap_, "map()");
+      this.actSigMap_.setMapping(reInit, "activated():reinit():" + reInit.name);
+      
+
+
+
               }
-
-    var load = new QAction(ac);
-    load.name = "loadAbanQPackageAction";
-    load.menuText = sys.translate("Cargar Paquete de &Módulos");
-    load.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("load.png")));
-    connect(load, "activated()", this.actSigMap_, "map()");
-    this.actSigMap_.setMapping(load, "activated():loadModules():" + load.name);
-              
-   // var exportMod = new QAction(ac);
-   // exportMod.name = "exportModulesAction";
-   // exportMod.menuText = sys.translate("E&xportar Módulos a Disco");
-   // exportMod.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("export.png")));
-   // connect(exportMod, "activated()", this.actSigMap_, "map()");
-   // this.actSigMap_.setMapping(exportMod, "activated():exportModules():" + exportMod.name);
-
-   // var importMod = new QAction(ac);
-   // importMod.name = "importModulesAction";
-   // importMod.menuText = sys.translate("&Importar Módulos desde Disco");
-   // importMod.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("import.png")));
-   // connect(importMod, "activated()", this.actSigMap_, "map()");
-   // this.actSigMap_.setMapping(importMod, "activated():importModules():" + importMod.name);
-    
-   // var update = new QAction(ac);
-   // update.name = "updateAbanQAction";
-   // update.menuText = sys.translate("Act&ualización y Soporte");
-   // update.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("settings.png")));
-   // connect(update, "activated()", this.actSigMap_, "map()");
-   // this.actSigMap_.setMapping(update, "activated():updateAbanQ():" + update.name);
-
-           }
+            }
       }
-    }
+   }           
+   
+    var shConsole = new QAction(agm);
+    shConsole.name = "shConsoleAction";
+    shConsole.menuText = sys.translate("Mostrar Consola de mensajes");
+    shConsole.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("consola.png")));
+    connect(shConsole, "activated()", this.actSigMap_, "map()");
+    this.actSigMap_.setMapping(shConsole, "activated():shConsole():" + shConsole.name);
 
     agm.addSeparator();
 
     var exit = new QAction(agm);
     exit.name = "exitAction";
     exit.menuText = sys.translate("&Salir");
+    exit.accel = sys.translate("Ctrl+Q");
     exit.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("exit.png")));
     connect(exit, "activated()", this.actSigMap_, "map()");
     this.actSigMap_.setMapping(exit, "activated():exit():" + exit.name);
-
-    pg.close();
-    pg.deleteLater();
   }
 
   function initTabWidget()
   {
     var w = this.w_;
 
-    var tw = this.tw_ = w.child("tabWidget", "QTabWidget");
+     
+    this.tw_ = w.child("tabWidget", "QTabWidget");
+    var tw = this.tw_
     tw.removePage(tw.page(0));
+
+    
+    this.twCorner_ = new QToolButton(tw, "tabWidgetCorner");
+    var tb = this.twCorner_
+    tb.autoRaise = false;
+    tb.setFixedSize(16, 16);
+    tb.setIconSet(this.iconSet16x16(AQS.Pixmap_fromMimeSource("fileclose.png")));
+    connect(tb, "clicked()", this, "removeCurrentPage()");
+    tw.setCornerWidget(tb, AQS.TopRight);
+    AQS.ToolTip_add(tb, sys.translate("Cerrar pestaña"));
+    tb.hide();
   }
 
   function initHelpMenu()
@@ -663,6 +760,12 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
       this.iconSet16x16(AQS.Pixmap_fromMimeSource("help_index.png"))
     );
     connect(helpIndex, "activated()", aqApp, "helpIndex()");
+    
+    var urlEneboo = w.child("urlEnebooAction");
+    urlEneboo.setIconSet(
+      this.iconSet16x16(AQS.Pixmap_fromMimeSource("icono_abanq.png"))
+    );
+    connect(urlEneboo, "activated()", aqApp, "urlEneboo()");
   }
 
   function initConfigMenu()
@@ -672,7 +775,27 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
     var font = w.child("fontAction");
     font.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("font.png")));
     connect(font, "activated()", aqApp, "chooseFont()");
+
+    var style = w.child("styleAction");
+    style.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("estilo.png")));
+    connect(style, "activated()", aqApp, "showStyles()");
   }
+
+    function initTextLabels()
+    {
+    var w = this.w_;
+    var tL = w.child("tLabel");
+    var tL2 = w.child("tLabel2");
+    var texto = AQUtil.sqlSelect("flsettings", "valor", "flkey='verticalName'");
+    if (texto)
+    tL.text = texto;
+    if (AQUtil.sqlSelect("flsettings", "valor", "flkey='PosInfo'") != "true")
+    	{
+    	tL2.text = sys.nameUser()+"@"+sys.nameBD();
+    	if (sys.osName() == "MACX") 
+        tL2.text +="     ";
+    	}
+    }
 
   function initDocks()
   {
@@ -730,39 +853,59 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
   function widgetActions(uiFile, parent)
   {
     var mng = aqApp.db().managerModules();
-    var w = mng.createUI(uiFile);
+    var doc = new QDomDocument;
+    if (!doc.setContent(mng.contentCached(uiFile)))
+      return undefined;
 
+    var w = mng.createUI(uiFile);
     if (w == undefined || !w.inherits("QMainWindow")) {
       if (w != undefined)
         this.mainWidgets_[w.name] = w;
       return undefined;
     }
 
-    var doc = new QDomDocument;
-    if (!doc.setContent(mng.contentCached(uiFile)))
-      return undefined;
+    w.name = parent.name;
+    aqApp.setMainWidget(w);
+    if (sys.isNebulaBuild())
+      w.show();
+    w.hide();
+
+    var settings = new AQSettings;
+    var reduced = settings.readBoolEntry("ebcomportamiento/ActionsMenuRed");
+
     var root = doc.documentElement().toElement();
 
     var ag = new QActionGroup(parent);
     ag.name = parent.name + "Actions";
     ag.menuText = ag.text = sys.translate("Acciones");
 
-    var bars = root.namedItem("toolbars").toElement();
-    addActions(bars, ag, w);
+    if (!reduced) {
+      var bars = root.namedItem("toolbars").toElement();
+      addActions(bars, ag, w);
+    }
 
     var menu = root.namedItem("menubar").toElement();
     var items = menu.elementsByTagName("item");
     if (items.length() > 0) {
-      ag.addSeparator();
-      var menuAg = new QActionGroup(ag);
-      menuAg.name = ag.name + "More";
-      menuAg.menuText = menuAg.text = sys.translate("Más");
-      menuAg.usesDropDown = true;
-      menuAg.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("plus.png")));
+
+      var menuAg, subMenuAg;
+      if (!reduced) {
+        ag.addSeparator();
+        menuAg = new QActionGroup(ag);
+        menuAg.name = ag.name + "More";
+        menuAg.menuText = menuAg.text = sys.translate("Más");
+        menuAg.usesDropDown = true;
+        menuAg.setIconSet(new QIconSet(AQS.Pixmap_fromMimeSource("plus.png")));
+      }
 
       for (var i = 0; i < items.length(); ++i) {
         var itn = items.item(i).toElement();
-        var subMenuAg = new QActionGroup(menuAg);
+        if (itn.parentNode().toElement().tagName() == "item")
+          continue;
+        if (!reduced)
+          subMenuAg = new QActionGroup(menuAg);
+        else
+          subMenuAg = new QActionGroup(ag);
         subMenuAg.menuText = sys.toUnicode(itn.attribute("text"), "UTF-8");
         subMenuAg.usesDropDown = true;
         addActions(itn, subMenuAg, w);
@@ -782,6 +925,9 @@ if ((actionName in this.ListaTabs_)) texto = ListaTabs_[actionName];
         this.actSigMap_.setMapping(ac, signal + ":" + slot + ":" + ac.name);
       }
     }
+
+    aqApp.setMainWidget(undefined);
+    w.close();
 
     return ag;
   }
@@ -810,11 +956,10 @@ function initScript()
   var mw = this.mainWindow_;
   mw.createUi("mainwindow.ui");
   mw.init();
-  aqApp.setMainWidget(mw.w_);
   mw.updateMenuAndDocks();
   mw.initModule("sys");
-  mw.readState();
   mw.show();
+  mw.readState();
 }
 
 function reinitScript()
@@ -822,14 +967,14 @@ function reinitScript()
   var mainWid = (this.mainWindow_.w_ == undefined)
                 ? aqApp.mainWidget()
                 : this.mainWindow_.w_;
-  if (mainWid == undefined ||
-      mainWid.name != "abanqMainWindow" ||
+  if (mainWid == undefined || 
+      mainWid.name != "container" || 
       mainWid.isEqual(this.mainWindow_.w_))
     return;
   var mw = this.mainWindow_;
   mw.initFromWidget(mainWid);
   mw.writeState();
-  aqApp.setMainWidget(mw.w_);
+  mw.removeAllPages();
   mw.updateMenuAndDocks();
   mw.initModule("sys");
   mw.readState();
@@ -853,6 +998,8 @@ function triggerAction(signature)
 
   switch (sgt[0]) {
     case "activated()":
+      if (!ac.visible || !ac.enabled)
+        ok = false;
       break;
 
     default:
@@ -895,15 +1042,35 @@ function triggerAction(signature)
       if (ok)
         sys.importModules();
       break;
-      
+
     case "updateAbanQ()":
       if (ok)
         sys.updateAbanQ();
       break;
 
-	    case "runWorkBench()":
+    case "dumpDatabase()":
       if (ok)
-        sys.openQSWorkbench();
+        sys.dumpDatabase();
+      break;
+
+    case "staticLoaderSetup()":
+      if (ok)
+        aqApp.staticLoaderSetup();
+      break;
+
+    case "reinit()":
+      if (ok)
+        sys.reinit();
+      break;
+
+    case "mrProper()":
+      if (ok)
+        sys.Mr_Proper();
+      break;
+
+    case "shConsole()":
+      if (ok)
+        aqApp.showConsole();
       break;
 
     case "exit()":
@@ -917,3 +1084,4 @@ function triggerAction(signature)
       break;
   }
 }
+

@@ -205,7 +205,9 @@ class FLFormDB(QtWidgets.QDialog):
         
         if self._uiName:
             self.prj.conn.managerModules().createUI(self._uiName, None, self)
+        
         self.loaded = True
+        
         
 
     """
@@ -513,6 +515,10 @@ class FLFormDB(QtWidgets.QDialog):
     """
     def initForm(self):
         
+        acl = self.prj.acl()
+        if acl:
+            acl.process(self)
+        
         self.loadControls()
         """ 
         if self.cursor_ and self.cursor_.metadata():
@@ -591,6 +597,9 @@ class FLFormDB(QtWidgets.QDialog):
     """
     def formName(self):
         return "form%s" % self.idMDI_
+    
+    def name(self):
+        return self.formName()
     
     def geoName(self):
         return self.formName()
