@@ -8,3 +8,4 @@ share/pineboo/scripts/*.qs.py.debug
 .project
 .pydevproject
 .settings/
+src/*
