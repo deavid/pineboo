@@ -1,4 +1,4 @@
 #!/bin/bash
 
-./build-pineboo-binaries.py
+python3 ./build-pineboo-binaries.py
 
