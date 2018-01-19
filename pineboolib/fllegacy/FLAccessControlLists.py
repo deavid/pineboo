@@ -1,4 +1,4 @@
-from PyQt5.Qt import QDomDocument, QProgressDialog
+from PyQt5.QtXml import QDomDocument
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLUtil import FLUtil
