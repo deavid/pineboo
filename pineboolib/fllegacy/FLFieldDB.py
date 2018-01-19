@@ -362,7 +362,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.pushButtonDB.setMaximumSize(24, 24)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(
-            filedir("icons", "flfielddb.png")))
+            filedir("../share/icons", "flfielddb.png")))
         self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
         self.pushButtonDB.clicked.connect(self.searchValue)
 
@@ -2102,7 +2102,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux3_.setMinimumSize(22, 22)
                     self.pbAux3_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux3_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-open.png")))
+                        filedir("../share/icons", "gtk-open.png")))
                     self.pbAux3_.setText("")
                     self.pbAux3_.setToolTip("Abrir fichero de imagen")
                     self.pbAux3_.setWhatsThis("Abrir fichero de imagen")
@@ -2135,7 +2135,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux4_.setMinimumSize(22, 22)
                     self.pbAux4_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux4_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-paste.png")))
+                        filedir("../share/icons", "gtk-paste.png")))
                     self.pbAux4_.setText("")
                     self.pbAux4_.setToolTip(
                         "Pegar imagen desde el portapapeles")
@@ -2156,7 +2156,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux_.setMinimumSize(22, 22)
                     self.pbAux_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-clear.png")))
+                        filedir("../share/icons", "gtk-clear.png")))
                     self.pbAux_.setText("")
                     self.pbAux_.setToolTip("Borrar imagen")
                     self.pbAux_.setWhatsThis("Borrar imagen")
@@ -2181,7 +2181,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux2_.setMinimumSize(22, 22)
                     self.pbAux2_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux2_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-save.png")))
+                        filedir("../share/icons", "gtk-save.png")))
                     self.pbAux2_.setText("")
                     self.pbAux2_.setToolTip("Guardar imagen como...")
                     self.pbAux2_.setWhatsThis("Guardar imagen como...")
@@ -2223,7 +2223,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     #self.pbAux_.setMinimumSize(25, 25)
                     #self.pbAux_.setMaximumSize(25, 25)
                     # self.pbAux_.setFocusPolicy(Qt.NoFocus)
-                    # self.pbAux_.setIcon(QtGui.QIcon(filedir("icons","date.png")))
+                    # self.pbAux_.setIcon(QtGui.QIcon(filedir("../share/icons","date.png")))
                     # self.pbAux_.setText("")
                     #self.pbAux_.setToolTip("Seleccionar fecha (F2)")
                     #self.pbAux_.setWhatsThis("Seleccionar fecha (F2)")

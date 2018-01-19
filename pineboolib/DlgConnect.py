@@ -45,7 +45,7 @@ class DlgConnect(QtWidgets.QWidget):
             filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite')
 
     def load(self):
-        self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
+        self.ui = uic.loadUi(filedir('../share/forms/dlg_connect.ui'), self)
 
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(

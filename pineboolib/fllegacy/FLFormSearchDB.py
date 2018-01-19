@@ -143,7 +143,7 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.setMaximumSize(pbSize)
         self.pushButtonAccept.setMinimumSize(pbSize)
         self.pushButtonAccept.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-save.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
         # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
         self.pushButtonAccept.setFocus()
         self.pushButtonAccept.setWhatsThis(
@@ -163,7 +163,7 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-stop.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
         # pushButtonCancel->setAccel(Esc); FIXME
         self.pushButtonCancel.setWhatsThis(

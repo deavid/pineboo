@@ -183,9 +183,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if _type == "unlock":
 
                 if d in ("True", "1"):
-                    icon = QtGui.QIcon(filedir("icons", "unlock.png"))
+                    icon = QtGui.QIcon(filedir("../share/icons", "unlock.png"))
                 else:
-                    icon = QtGui.QIcon(filedir("icons", "lock.png"))
+                    icon = QtGui.QIcon(filedir("../share/icons", "lock.png"))
 
             if _type == "pixmap" and self._showPixmap:
                 pass

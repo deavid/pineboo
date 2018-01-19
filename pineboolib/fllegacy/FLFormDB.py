@@ -355,7 +355,7 @@ class FLFormDB(QtWidgets.QDialog):
         #pbSize = Qt.QSize(22,22)
 
             wt = QtWidgets.QToolButton.whatsThis()
-            wt.setIcon(QtGui.QIcon(filedir("icons", "gtk-find.png")))
+            wt.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-find.png")))
             self.layoutButtons.addWidget(wt)
             wt.show()
 
@@ -581,7 +581,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-stop.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.pushButtonCancel.setFocus()
         self.pushButtonCancel.setWhatsThis("Aceptar y cerrar formulario (Esc)")

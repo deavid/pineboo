@@ -31,7 +31,21 @@ def filedir(*path):
             Filedir devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
             Es útil para especificar rutas a recursos del programa.
     """
-    return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
+    ruta_ = os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
+    
+    """
+    Esto es para cuando está compilado, para poder acceder a ficheros fuera del ejecutable
+    """
+    if ruta_.find(":/") > -1:
+        print("Ruta original", ruta_)
+        #if ruta_.find(":/tempdata") > -1 or ruta_.find(":/projects") > -1:
+        #    ruta_ = ruta_.replace(":","")
+        #else:
+        #    ruta_ = ruta_[ruta_.find(":"):]
+        ruta_ = ruta_.replace(":/","")
+        print("Ruta corregida", ruta_)
+        
+    return ruta_
 
 
 def one(x, default=None):

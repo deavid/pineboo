@@ -269,7 +269,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonFirst = QtWidgets.QToolButton()
                 self.pushButtonFirst.setObjectName("pushButtonFirst")
                 self.pushButtonFirst.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-goto-first-ltr.png")))
+                    filedir("../share/icons", "gtk-goto-first-ltr.png")))
                 self.pushButtonFirst.clicked.connect(self.firstRecord)
                 self.pushButtonFirst.setSizePolicy(sizePolicy)
                 self.pushButtonFirst.setMaximumSize(pbSize)
@@ -287,7 +287,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonPrevious = QtWidgets.QToolButton()
                 self.pushButtonPrevious.setObjectName("pushButtonPrevious")
                 self.pushButtonPrevious.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-go-back-ltr.png")))
+                    filedir("../share/icons", "gtk-go-back-ltr.png")))
                 self.pushButtonPrevious.clicked.connect(self.previousRecord)
                 self.pushButtonPrevious.setSizePolicy(sizePolicy)
                 self.pushButtonPrevious.setMaximumSize(pbSize)
@@ -305,7 +305,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonNext = QtWidgets.QToolButton()
                 self.pushButtonNext.setObjectName("pushButtonNext")
                 self.pushButtonNext.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-go-back-rtl.png")))
+                    filedir("../share/icons", "gtk-go-back-rtl.png")))
                 self.pushButtonNext.clicked.connect(self.nextRecord)
                 self.pushButtonNext.setSizePolicy(sizePolicy)
                 self.pushButtonNext.setMaximumSize(pbSize)
@@ -323,7 +323,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonLast = QtWidgets.QToolButton()
                 self.pushButtonLast.setObjectName("pushButtonLast")
                 self.pushButtonLast.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-goto-last-ltr.png")))
+                    filedir("../share/icons", "gtk-goto-last-ltr.png")))
                 self.pushButtonLast.clicked.connect(self.lastRecord)
                 self.pushButtonLast.setSizePolicy(sizePolicy)
                 self.pushButtonLast.setMaximumSize(pbSize)
@@ -350,7 +350,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonAcceptContinue.setMaximumSize(pbSize)
                 self.pushButtonAcceptContinue.setMinimumSize(pbSize)
                 self.pushButtonAcceptContinue.setIcon(
-                    QtGui.QIcon(filedir("icons", "gtk-refresh.png")))
+                    QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
                 # pushButtonAcceptContinue->setAccel(QKeySequence(Qt::Key_F9)); FIXME
                 self.pushButtonAcceptContinue.setWhatsThis(
                     "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
@@ -370,7 +370,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonAccept.setMaximumSize(pbSize)
             self.pushButtonAccept.setMinimumSize(pbSize)
             self.pushButtonAccept.setIcon(
-                QtGui.QIcon(filedir("icons", "gtk-save.png")))
+                QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
             # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
             self.pushButtonAccept.setWhatsThis(
                 "Aceptar los cambios y cerrar formulario (F10)")
@@ -394,7 +394,7 @@ class FLFormRecordDB(FLFormDB):
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-stop.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
             # pushButtonCancel->setAccel(4096); FIXME
@@ -420,7 +420,7 @@ class FLFormRecordDB(FLFormDB):
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         #self.toolButtonAccept = QtGui.QToolButton()
-        # self.toolButtonAccept.setIcon(QtGui.QIcon(filedir("icons","gtk-add.png")))
+        # self.toolButtonAccept.setIcon(QtGui.QIcon(filedir("../share/icons","gtk-add.png")))
         # self.toolButtonAccept.clicked.connect(self.validateForm)
         # self.bottomToolbar.layout.addWidget(self.toolButtonAccept)
 

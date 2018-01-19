@@ -29,8 +29,8 @@ class FLDataTable(QtWidgets.QTableView):
         if not name:
             self.setName("FLDataTable")
 
-        self.pixOk_ = filedir("icons", "unlock.png")
-        self.pixNo_ = filedir("icons", "lock.png")
+        self.pixOk_ = filedir("../share/icons", "unlock.png")
+        self.pixNo_ = filedir("../share/icons", "lock.png")
         self.paintFieldMtd_ = None
         self.refreshing_ = False
 
