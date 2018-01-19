@@ -306,16 +306,17 @@ class Project(object):
             function = function[:-2]
 
         aFunction = function.split(".")
-        funModule = self.modules[aFunction[0]];
-        if not funModule:
+        if not aFunction[0] in self.modules:
             if Project.debugLevel > 50: print("No existe el módulo %s" % (aFunction[0]))
-            # todo Procesar llamadas a form formRecord
             return False
 
-        funAction = funModule.actions[aFunction[0]];
-        if not funAction:
+        funModule = self.modules[aFunction[0]];
+
+        if not aFunction[0] in funModule.actions:
             if Project.debugLevel > 50: print("No existe la acción %s en el módulo %s" % (aFunction[0], aFunction[0]))
             return False            
+
+        funAction = funModule.actions[aFunction[0]];
 
         if aFunction[1] == "iface":
             mW = funAction.load()
