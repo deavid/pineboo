@@ -22,6 +22,7 @@ from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
+from pineboolib.fllegacy import AQObjects 
 
 from pineboolib.utils import filedir
 
@@ -160,9 +161,13 @@ def FLUtil(*args):
 def AQUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
 
-def FLSqlCursor(action=None):
+
+def AQSql(*args):
+    return AQObjects.AQSql(*args)
+
+def FLSqlCursor(action = None, cN = None):
     if action is None: return None
-    return FLSqlCursor_Legacy.FLSqlCursor(action)
+    return FLSqlCursor_Legacy.FLSqlCursor(action, True, cN)
 
 def FLTableDB(*args):
     if not args: return None

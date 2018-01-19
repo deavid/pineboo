@@ -825,7 +825,7 @@ class FLSqlCursor(ProjectClass):
         #elif isinstance(connectionName_or_db, QString) or isinstance(connectionName_or_db, str):
         elif isinstance(connectionName_or_db, str):
             #print("Init2 ")
-            self.d.db_ = self._prj.conn
+            self.d.db_ = self._prj.conn.useConn(connectionName_or_db)
         else:
             #print("Init3", connectionName_or_db)
             self.d.db_ = connectionName_or_db

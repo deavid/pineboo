@@ -203,7 +203,15 @@ class SysType(object):
     @decorators.NotImplementedWarn
     def isDebuggerMode(self):
         return False
-        
+
+    def nameDriver(self, connName = "default"):
+        return pineboolib.project.conn.database(connName).driverName()
+
+    def addDatabase(self, connName = "default"):
+        return pineboolib.project.conn.useConn(connName)()
+
+    def removeDatabase(self, connName = "default"):
+        return pineboolib.project.conn.removeConn(connName)    
         
         
         
@@ -407,6 +415,7 @@ class qsa:
 from pineboolib.fllegacy.FLUtil import FLUtil
 AQUtil = FLUtil() # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil() # <- para cuando QS erróneo usa util sin definirla
+from pineboolib.fllegacy.AQObjects import AQSql
 
 Insert = 0
 Edit = 1
