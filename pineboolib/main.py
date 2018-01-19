@@ -78,6 +78,8 @@ class Project(object):
         self.tables = {}
         self.files = {}
         self.cur = None
+        if not self._DGI.localDesktop():
+            self._DGI.extraProjectInit()
 
     def __del__(self):
         self.writeState()

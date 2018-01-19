@@ -230,7 +230,7 @@ def main():
             options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
     else:
-        if DGI.useDesktop():
+        if DGI.useDesktop() and DGI.localDesktop():
             connection_window = pineboolib.DlgConnect.DlgConnect()
             connection_window.load()
             connection_window.show()
@@ -253,7 +253,7 @@ def main():
 
         # Cargando spashscreen
     # Create and display the splash screen
-    if DGI.useDesktop():
+    if DGI.useDesktop() and DGI.localDesktop():
         splash_pix = QtGui.QPixmap(
             filedir("../share/splashscreen/splash_%s.png" % project.dbname))
         splash = QtWidgets.QSplashScreen(
@@ -275,13 +275,14 @@ def main():
     if project.conn.conn == False:
         return main()
 
-    if DGI.useDesktop():
+    if DGI.useDesktop() and DGI.localDesktop():
         splash.showMessage("Iniciando proyecto ...")
     if options.verbose:
         print("Iniciando proyecto ...")
 
     if DGI.useDesktop():
-        splash.showMessage("Creando interfaz ...")
+        if DGI.localDesktop():
+            splash.showMessage("Creando interfaz ...")
 
         if options.verbose:
             print("Creando interfaz ...")
@@ -301,8 +302,9 @@ def main():
 
             main_window = mainForm.mainWindow
             main_window.load()
-
-            splash.showMessage("Módulos y pestañas ...")
+            
+            if DGI.localDesktop():
+                splash.showMessage("Módulos y pestañas ...")
             if options.verbose:
                 print("Módulos y pestañas ...")
             for k, area in sorted(project.areas.items()):
@@ -324,7 +326,8 @@ def main():
             main_window = mainForm.mainWindow
             main_window.load()
             ret = 0
-            splash.showMessage("Módulos y pestañas ...")
+            if DGI.localDesktop():
+                splash.showMessage("Módulos y pestañas ...")
             if options.verbose:
                 print("Módulos y pestañas ...")
             for k, area in sorted(project.areas.items()):
@@ -343,13 +346,15 @@ def main():
                         print(traceback.format_exc())
                         project.conn.conn.rollback()
             else:
-                splash.showMessage("Abriendo interfaz ...")
+                if DGI.localDesktop():
+                    splash.showMessage("Abriendo interfaz ...")
                 if options.verbose:
                     print("Abriendo interfaz ...")
                 main_window.show()
                 project.call("sys.widget._class_init()", [], None, True)
-                splash.showMessage("Listo ...")
-                QtCore.QTimer.singleShot(2000, splash.hide)
+                if DGI.localDesktop():
+                    splash.showMessage("Listo ...")
+                    QtCore.QTimer.singleShot(2000, splash.hide)
 
             ret = app.exec_()
             mainForm.mainWindow = None
