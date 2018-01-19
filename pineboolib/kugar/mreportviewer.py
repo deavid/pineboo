@@ -30,8 +30,8 @@ class MReportViewer(ProjectClass, QWidget):
         PrintColor = 1
 
     @decorators.BetaImplementation
-    def __init__(self, *args):
-        super(MReportViewer, self).__init__(*args)
+    def __init__(self, parent=0, name=0):
+        super(MReportViewer, self).__init__(parent, name)
 
         self.progress_ = 0
         self.totalSteps_ = 0
@@ -104,7 +104,7 @@ class MReportViewer(ProjectClass, QWidget):
         return self.rptEngine_.setReportTemplate(tpl) if self.rptEngine_ else False
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow, initCol, append, displayReport=None):
+    def renderReport(self, initRow=0, initCol=0, append=False, displayReport=None):
         flags = None
         if displayReport is None:
             flags = append
@@ -673,7 +673,7 @@ class MReportViewer(ProjectClass, QWidget):
         return self.scroller_.sizeHint()
 
     @decorators.BetaImplementation
-    def setReportEngine(self, r):
+    def setReportEngine(self, r=0):
         if self.rptEngine_ == r:
             return
 

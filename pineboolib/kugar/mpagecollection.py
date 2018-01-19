@@ -8,12 +8,12 @@ class MPageCollection(ProjectClass):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        if isinstance(args[0], MPageCollection):
+        if len(args) and isinstance(args[0], MPageCollection):
             self.copy(args[0])
         else:
             from pineboolib.kugar.mreportengine import MReportEngine
 
-            super(MPageCollection, self).__init__(*args)
+            super(MPageCollection, self).__init__(*args if len(args) else 0)
 
             self.pages_ = Qt.QPtrList()
             self.pages_.setAutoDelete(True)

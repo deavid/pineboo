@@ -345,7 +345,7 @@ class FLStylePainter(ProjectClass):
             # return talign #FIXME?
 
         @decorators.BetaImplementation
-        def parseLen(self, string, ok, horiz):
+        def parseLen(self, string, ok=False, horiz=True):
             reg = Qt.QRegExp("([+-]?\\d*\\.*\\d*[Ee]?[+-]?\\d*)(em|ex|px|%|pt|pc|cm|mm|in|)$")
             if reg.search(string) == -1:
                 Qt.qWarning("FLStylePainterPrivate::parseLen: couldn't parse " + string)
@@ -385,7 +385,7 @@ class FLStylePainter(ProjectClass):
             return dbl
 
         @decorators.BetaImplementation
-        def lenToInt(self, aqmap, attr, aqdef):
+        def lenToInt(self, aqmap, attr, aqdef=0):
             if aqmap.contains(attr):
                 ok = None
                 dbl = self.parseLen(aqmap.namedItem(attr).nodeValue(), ok)
@@ -395,7 +395,7 @@ class FLStylePainter(ProjectClass):
             return aqdef
 
         @decorators.BetaImplementation
-        def lenToDouble(self, aqmap, attr, aqdef):
+        def lenToDouble(self, aqmap, attr, aqdef=0):
             if aqmap.contains(attr):
                 ok = None
                 dbl = self.parseLen(aqmap.namedItem(attr).nodeValue(), ok)
@@ -1071,7 +1071,7 @@ class FLStylePainter(ProjectClass):
             self.d_.transStack_.pop_back()
 
     @decorators.BetaImplementation
-    def drawPixmap(self, pixmap, sx, sy, sw, sh, obj):
+    def drawPixmap(self, pixmap, sx=0, sy=0, sw=-1, sh=-1, obj=0):
         self.d_.errCode_ = self.ErrCode.NoError
 
         if not self.d_.styleName_ or self.d_.styleName_ == "":

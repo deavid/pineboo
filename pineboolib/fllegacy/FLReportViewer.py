@@ -19,8 +19,8 @@ from pineboolib.fllegacy.FLReportEngine import FLReportEngine
 # class FLReportViewer(ProjectClass, FLWidgetReportViewer):
 class FLReportViewer(ProjectClass):
 
-    def __init__(self, parent, name, embedInParent, rptEngine):
-        pParam = 0 if parent and embedInParent else Qt.WStyle_Customize | Qt.WStyle_Maximize | Qt.WStyle_Title | Qt.WStyle_NormalBorder | Qt.WStyle_Dialog | Qt.WShowModal | Qt.WStyle_SysMenu
+    def __init__(self, parent=0, name=0, embedInParent=False, rptEngine=0):
+        pParam = 0 if parent and embedInParent else 0 | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | 0 | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
 
         super(FLReportViewer, self).__init__(parent, name, pParam)
 
@@ -95,7 +95,7 @@ class FLReportViewer(ProjectClass):
         return self.rptEngine_
 
     @decorators.BetaImplementation
-    def setReportEngine(self, r):
+    def setReportEngine(self, r=0):
         if self.rptEngine_ == r:
             return
 
@@ -519,7 +519,7 @@ class FLReportViewer(ProjectClass):
         return False
 
     @decorators.BetaImplementation
-    def setReportTemplate(self, t, style):
+    def setReportTemplate(self, t, style=""):
         if isinstance(t, Qt.QDomNode):
             self.xmlTemplate_ = t
             self.template_ = ""
@@ -773,7 +773,7 @@ class FLReportViewer(ProjectClass):
         return self.rptViewer_.colorMode()
 
     @decorators.BetaImplementation
-    def disableSlotsPrintExports(self, disablePrints, disableExports):
+    def disableSlotsPrintExports(self, disablePrints=True, disableExports=True):
         self.slotsPrintDisabled_ = disablePrints
         self.slotsExportedDisabled_ = disableExports
 
