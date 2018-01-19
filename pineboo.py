@@ -192,7 +192,7 @@ def main():
         ]
         for fontfile in noto_fonts:
             QtGui.QFontDatabase.addApplicationFont(
-                filedir("fonts/Noto_Sans", fontfile))
+                filedir("../share/fonts/Noto_Sans", fontfile))
 
         QtWidgets.QApplication.setStyle("QtCurve")
         font = QtGui.QFont('Noto Sans', 9)
