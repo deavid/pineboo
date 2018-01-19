@@ -31,17 +31,25 @@ class dgi_jsonrpc(dgi_schema):
         self._name = "jsonrpc"
         self._alias = "JSON-RPC"
         self.setUseDesktop(True)
-        self.setUseMLDefault(False)
-        self.setLocalForms(False)
+        self.setUseMLDefault(True)
+        self.setLocalDesktop(False)
         self.showInitBanner()
+        self._listenSocket = "/tmp/pineboo-JSONRPC.socket"
 
-    def alternativeMain(self, main_):
-        pass
+    def extraProyectInit(self):
+        print("=============================================")
+        print("============ EXTRA PROJECT INIT =============")
+        print("=============================================")
+        print("JSON-RPC:INFO: Listening socket", self._listenSocket)
+        par_ = parser()
+        WSGIServer(par_.query, bindAddress=self._fcgiSocket).run()
+        print("End load extraProjectInit")
 
     def setParameter(self, param):
-        if param.find(":") > -1:
-            p = param.split(":")
-            self._fcgiCall = p[0]
-            self._fcgiSocket = p[1]
-        else:
-            self._fcgiCall = param
+        self._listenSocket = param
+
+class parser(object):
+
+    def query(self, environ, start_response):
+        start_response('200 OK', [('Content-Type', 'text/html')])
+        print("FCGI:INFO: Processing '%s' ..." % environ["QUERY_STRING"])

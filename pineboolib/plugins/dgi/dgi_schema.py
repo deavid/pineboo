@@ -7,12 +7,12 @@ class dgi_schema(object):
     _mLDefault = False
     _name = None
     _alias = None
-    _localForms = False
+    _localDesktop = True
 
     def __init__(self):
         self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
-        self._mLDefault = True
-        self._localForms = True
+        self.setUseMLDefault(True)
+        self.setLocalDesktop(True)
         self._name = "dgi_shema"
         self._alias = "Default Schema"
 
@@ -26,11 +26,11 @@ class dgi_schema(object):
     def setUseDesktop(self, val):
         self._desktopEnabled = val
 
-    def localForms(self):  # Indica si son ventanas locales o remotas a traves de algún parser
-        return self._localForms
+    def localDesktop(self):  # Indica si son ventanas locales o remotas a traves de algún parser
+        return self._localDesktop
 
-    def setLocalForms(self, val):
-        self._localForms = val
+    def setLocalDesktop(self, val):
+        self._localDesktop = val
 
     def setUseMLDefault(self, val):
         self._mLDefault = val
@@ -39,6 +39,9 @@ class dgi_schema(object):
         return self._mLDefault
 
     def setParameter(self, param):  # Se puede pasar un parametro al dgi
+        pass
+    
+    def extraProjectInit(self):
         pass
 
     def showInitBanner(self):
