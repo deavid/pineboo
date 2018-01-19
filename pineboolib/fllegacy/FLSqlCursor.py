@@ -3058,7 +3058,7 @@ class FLSqlCursor(ProjectClass):
 
             if functionBefore:
                 cI = self.context()
-                v = self._prj.call(functionBefore, [self], cI, False)
+                v = self._prj.call(functionBefore, [self], cI, True)
                 if v and not isinstance(v ,bool):
                     return False
 
