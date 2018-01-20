@@ -243,18 +243,26 @@ def connect(sender, signal, receiver, slot):
     m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
     if slot.endswith("()"): slot = slot[:-2]
     remote_fn = getattr(receiver, slot, None)
+
+    sl_name = re.sub(' *\(.*\)', '', signal)
+    oSignal = getattr(sender, sl_name, None)
+    if not oSignal and sender.__class__.__name__ == "FormInternalObj":
+        oSignal = getattr(sender.parent(), sl_name, None)
+
+    if not oSignal:
+        print("ERROR: No existe la señal %s para la clase %s" % (signal, sender.__class__.__name__))
+        return
+
     if remote_fn:
         try:
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
-            # Quito cualquier texto entre parentesis
-            sl_name = re.sub(' *\(.*\)', '', signal)    
             try:
-                getattr(sender, sl_name).disconnect(proxy_fn(weak_fn, weak_receiver, slot))
+                oSignal.disconnect(proxy_fn(weak_fn, weak_receiver, slot))
             except:
                 pass
-            
-            getattr(sender, sl_name).connect(proxy_fn(weak_fn, weak_receiver, slot))
+
+            oSignal.connect(proxy_fn(weak_fn, weak_receiver, slot))
         except RuntimeError as e:
             print("ERROR Connecting:", sender, QtCore.SIGNAL(signal), remote_fn)
             print("ERROR %s : %s" % (e.__class__.__name__, str(e)))

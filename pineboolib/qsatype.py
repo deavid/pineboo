@@ -280,11 +280,13 @@ class FormDBWidget(QtWidgets.QWidget):
 
     closed =  QtCore.pyqtSignal()
     cursor_ = None
+    parent_ = None
     
     def __init__(self, action, project, parent = None):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
         self.cursor_ = None
+        self.parent_ = parent
         #self.cursor_ = FLSqlCursor(action.name)
         self._prj = project
         try:
@@ -297,6 +299,9 @@ class FormDBWidget(QtWidgets.QWidget):
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
         
+
+    def parent(self):
+        return self.parent_
 
     def _class_init(self):
         pass

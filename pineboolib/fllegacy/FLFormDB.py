@@ -503,7 +503,7 @@ class FLFormDB(QtWidgets.QDialog):
         if not self.initScript():
             return
         
-    
+        print("Emitiendo formReady")
         if not self.isClosing_:
             QtCore.QTimer(self).singleShot(0, self.emitFormReady)
         
