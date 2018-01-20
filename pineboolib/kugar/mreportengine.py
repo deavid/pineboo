@@ -140,11 +140,11 @@ class MReportEngine(ProjectClass, QObject):
     @decorators.BetaImplementation
     def __init__(self, *args):
         if len(args) > 1 and isinstance(args[0], MReportEngine):
-            super(MReportEngine, self).__init__(args[1])
+            super(MReportEngine, self).__init__(args[1] or 0)
 
             self.copy(args[0])
         else:
-            super(MReportEngine, self).__init__(args[0])
+            super(MReportEngine, self).__init__(args[0] or 0)
 
             self.pageSize_ = self.PageSize.A4
             self.pageOrientation_ = self.PageOrientation.Portrait
@@ -920,7 +920,7 @@ class MReportEngine(ProjectClass, QObject):
         self.signalRenderStatus.emit(rowCount)
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow, initCol, pages, flags):
+    def renderReport(self, initRow=0, initCol=0, pages=0, flags=RenderReportFlags.Display):
         self.fillRecords_ = flags & MReportEngine.RenderReportFlags.FillRecords
         pageBreak = flags & MReportEngine.RenderReportFlags.PageBreak
         append = flags & MReportEngine.RenderReportFlags.Append
@@ -988,7 +988,7 @@ class MReportEngine(ProjectClass, QObject):
         return pages
 
     @decorators.BetaImplementation
-    def startPage(self, pages, levelAddOn):
+    def startPage(self, pages, levelAddOn=-1):
         self.currY_ = self.topMargin_
         self.currX_ = self.leftMargin_
 
@@ -1014,7 +1014,7 @@ class MReportEngine(ProjectClass, QObject):
         self.drawPageFooter(pages)
 
     @decorators.BetaImplementation
-    def newPage(self, pages, levelAddOn):
+    def newPage(self, pages, levelAddOn=-1):
         self.drawPageFooter(pages)
 
         self.p_.painter().end()
@@ -1069,7 +1069,7 @@ class MReportEngine(ProjectClass, QObject):
             self.currY_ = self.currY_ + sectionHeight
 
     @decorators.BetaImplementation
-    def drawDetail(self, pages, level, currRecord, initRow, initCol):
+    def drawDetail(self, pages, level, currRecord, initRow=0, initCol=0):
         self.currRecord_ = currRecord
 
         detail = self.findDetail(level)
@@ -1371,7 +1371,7 @@ class MReportEngine(ProjectClass, QObject):
             j = j - 1
 
     @decorators.BetaImplementation
-    def setFieldValues(self, fields, level, detail, ptrRecord, noTotal):
+    def setFieldValues(self, fields, level, detail, ptrRecord, noTotal=False):
         for i in range(detail.getFieldCount()):
             detailValue = fields.namedItem(detail.getFieldName(i)).nodeValue
             detail.setFieldData(i, detailValue, ptrRecord, self.fillRecords_)
@@ -1402,7 +1402,7 @@ class MReportEngine(ProjectClass, QObject):
                 j = j - 1
 
     @decorators.BetaImplementation
-    def drawDetailFooter(self, pages, level, gDT, gDTS):
+    def drawDetailFooter(self, pages, level, gDT=0, gDTS=0):
         footer = self.findDetailFooter(level)
         header = self.findDetailHeader(level)
 
@@ -1467,7 +1467,7 @@ class MReportEngine(ProjectClass, QObject):
             self.currY_ = self.currY_ + sectionHeight
 
     @decorators.BetaImplementation
-    def drawAddOnHeader(self, pages, level, gDT, gDTS):
+    def drawAddOnHeader(self, pages, level, gDT, gDTS=0):
         header = self.findAddOnHeader(level)
 
         if header:

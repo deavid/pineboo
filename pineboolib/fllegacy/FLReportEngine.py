@@ -225,7 +225,7 @@ class FLReportEngine(MReportEngine):
         super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow, initCol, fillRecords, pages):
+    def renderReport(self, initRow=0, initCol=0, fillRecords=False, pages=0):
         pgc = super(FLReportEngine, self).renderReport(
             initRow,
             initCol,

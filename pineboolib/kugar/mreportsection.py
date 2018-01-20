@@ -6,6 +6,10 @@ from PyQt5.Qt import QObject
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
+from pineboolib.kugar.mutil import MUtil
+from pineboolib.kugar.mfieldobject import MFieldObject
+from pineboolib.kugar.mcalcobject import MCalcObject
+
 idSecGlob_ = 0
 
 
@@ -19,10 +23,10 @@ class MReportSection(ProjectClass, QObject):
     @decorators.BetaImplementation
     def __init__(self, *args):
 
-        if isinstance(args[0], MReportSection):
+        if len(args) and isinstance(args[0], MReportSection):
             self.copy(args[0])
         else:
-            self.strIdSec_ = args[0]
+            self.strIdSec_ = args[0] if len(args) else ""
             self.idSec_ = idSecGlob_
             self.height_ = 1
             self.width_ = 584
@@ -86,7 +90,7 @@ class MReportSection(ProjectClass, QObject):
         field.setSectionIndex(self.fields_.at())
 
     @decorators.BetaImplementation
-    def setFieldData(self, idx, data, record, fillRecord):
+    def setFieldData(self, idx, data, record=0, fillRecord=False):
         field = self.fields_.at()
         field.setText(data)
         if record and fillRecord:
@@ -97,7 +101,7 @@ class MReportSection(ProjectClass, QObject):
                                                 "_" + field.getFieldName(), field.getText())
 
     @decorators.BetaImplementation
-    def setCalcFieldData(self, values, values2, record, fillRecord):
+    def setCalcFieldData(self, values=0, values2=0, record=0, fillRecord=False):
         i = 0
         value = ""
 
@@ -123,9 +127,7 @@ class MReportSection(ProjectClass, QObject):
             field = self.calculatedFields_.next()
 
     @decorators.BetaImplementation
-    def setCalcFieldDataGT(self, values, record, fillRecord):
-        value = ""
-
+    def setCalcFieldDataGT(self, values, record=0, fillRecord=False):
         field = self.calculatedFields_.first()
         while field != 0:
             if not field.getFromGrandTotal() and self.level_ > -1:
@@ -140,7 +142,7 @@ class MReportSection(ProjectClass, QObject):
             field = self.calculatedFields_.next()
 
     @decorators.BetaImplementation
-    def calculateField(self, field, values, values2, record, fillRecord):
+    def calculateField(self, field, values, values2="", record=0, fillRecord=False):
         calcType = field.getCalculationType()
 
         if calcType == MCalcObject.CalculationType.Count:
