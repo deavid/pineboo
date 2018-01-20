@@ -449,19 +449,19 @@ class FLQPSQL(object):
         cursor.execute(stmt)
         rows = cursor.fetchall()
         for row in rows:
-            len = row[3]
+            len_ = row[3]
             precision = row[4]
             name = row[0]
-            type = row[1]
+            type_ = row[1]
             allowNull = row[2]
             defVal = row[5]
 
-            if len == -1 and precision and precision > -1:
-                len = precision - 4
+            if len_ == -1 and precision and precision > -1:
+                len_ = precision - 4
                 precision = -1
 
-            if len == -1:
-                len = 0
+            if len_ == -1:
+                len_ = 0
 
             if precision == -1:
                 precision = 0
@@ -469,27 +469,27 @@ class FLQPSQL(object):
             if defVal and defVal[0] == "'":
                 defVal = defVal[1:len(defVal) - 2]
 
-            info.append([name, self.decodeSqlType(type),
-                         allowNull, len, precision, defVal])
+            info.append([name, self.decodeSqlType(type_),
+                         allowNull, len_, precision, defVal])
 
         return info
 
-    def decodeSqlType(self, type):
-        ret = type
+    def decodeSqlType(self, type_):
+        ret = type_
 
-        if type == 16:
+        if type_ == 16:
             ret = "bool"
-        elif type == 23:
+        elif type_ == 23:
             ret = "uint"
-        elif type == 25:
+        elif type_ == 25:
             ret = "stringlist"
-        elif type == 701:
+        elif type_ == 701:
             ret = "double"
-        elif type == 1082:
+        elif type_ == 1082:
             ret = "date"
-        elif type == 1083:
+        elif type_ == 1083:
             ret = "time"
-        elif type == 1043:
+        elif type_ == 1043:
             ret = "string"
 
         return ret
