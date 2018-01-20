@@ -113,6 +113,7 @@ def main():
         todos los objetos.
     """
     # TODO: Refactorizar función en otras más pequeñas
+ 
     parser = OptionParser()
     parser.add_option("-l", "--load", dest="project",
                       help="load projects/PROJECT.xml and run it", metavar="PROJECT")
