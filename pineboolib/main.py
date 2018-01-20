@@ -320,19 +320,53 @@ class Project(object):
             print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" %
                   (function, aList, objectContext))
         import pineboolib.qsaglobals
-        fn = None
+
+        # Tipicamente flfactalma.iface.beforeCommit_articulos()
+        if function[-2:] == "()":
+            function = function[:-2]
+
+        aFunction = function.split(".")
+        if not aFunction[0] in self.modules:
+            if Project.debugLevel > 50: print("No existe el módulo %s" % (aFunction[0]))
+            return False
+
+        funModule = self.modules[aFunction[0]];
+
+        if not aFunction[0] in funModule.actions:
+            if Project.debugLevel > 50: print("No existe la acción %s en el módulo %s" % (aFunction[0], aFunction[0]))
+            return False            
+
+        funAction = funModule.actions[aFunction[0]];
+
+        if aFunction[1] == "iface":
+            mW = funAction.load()
+            funScript = mW.iface;
+        elif aFunction[1] == "widget":
+            funScript = funAction.formrecord_widget;
+        else:
+            return False
+
+        if not funScript:
+            if Project.debugLevel > 50: print("No existe el script para la acción %s en el módulo %s" % (aFunction[0], aFunction[0]))
+            return False            
+
+        fn = getattr(funScript, aFunction[2], False);
+        if not fn:
+            if Project.debugLevel > 50: print("No existe la función %s en %s" % (aFunction[2], function))
+            return True
+
+        #fn = None
         try:
-            fn = eval(function, pineboolib.qsaglobals.__dict__)
+            #fn = eval(function, pineboolib.qsaglobals.__dict__)
             if aList:
                 return fn(*aList)
+            else:
+                return fn()
+
         except Exception:
-            #print("** JS.CALL :: ERROR:", traceback.format_exc().splitlines()[-1])
+            #print("** JS.CALL :: ERROR:", traceback.format_exc())
             if showException:
                 print("** JS.CALL :: ERROR:", traceback.format_exc())
-        # Hay que resolver la llamada a funcion "function" dentro de qsaglobals
-        # y buscar la resolución de los objetos separando por puntos.
-
-        # la llamada aqui tipica es "flfactalma.beforeCommit_articulos"
 
         return None
 
@@ -838,7 +872,10 @@ class XMLAction(XMLStruct):
         else:
             self.script.form.main()
 
-    def load_script(self, scriptname, parent=None):
+
+    def load_script(self, scriptname, parent= None):
+        print("Cargando script " + scriptname + " de " + str(parent) + " accion "+ self.name)
+        
         parent_ = parent
         if parent == None:
             parent = self
