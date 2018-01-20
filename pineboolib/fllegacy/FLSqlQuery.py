@@ -24,7 +24,7 @@ class FLSqlQuery(ProjectClass):
         super(FLSqlQuery, self).__init__()
 
         self.d = FLSqlQueryPrivate(name)
-        self.d.db_ = self._prj.conn.useConn()
+        self.d.db_ = self._prj.conn.useConn(connection_name)
             
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
@@ -64,7 +64,6 @@ class FLSqlQuery(ProjectClass):
     Ejecuta la consulta
     """
     def exec(self, sql = None):
-        
         if self.invalidTablesList == True:
             return False
         
@@ -87,12 +86,13 @@ class FLSqlQuery(ProjectClass):
             micursor.execute(sql)
             self._cursor=micursor
         except Exception:
+        
             print(traceback.format_exc())
             #conn.rollback()
             return False
         #conn.commit()
         
-            
+        
         return True 
     
     @classmethod
@@ -122,7 +122,7 @@ class FLSqlQuery(ProjectClass):
             self._datos=self._cursor.fetchall()
     
     
-    def  exec_(self, conn = None, sql = None):
+    def exec_(self, conn = None, sql = None):
         if conn:
             self.d.db_ = conn
         return self.exec(sql)
