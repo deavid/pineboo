@@ -37,14 +37,8 @@ def filedir(*path):
     Esto es para cuando está compilado, para poder acceder a ficheros fuera del ejecutable
     """
     if ruta_.find(":/") > -1:
-        print("Ruta original", ruta_)
-        #if ruta_.find(":/tempdata") > -1 or ruta_.find(":/projects") > -1:
-        #    ruta_ = ruta_.replace(":","")
-        #else:
-        #    ruta_ = ruta_[ruta_.find(":"):]
         ruta_ = ruta_.replace(":/","")
-        print("Ruta corregida", ruta_)
-        
+
     return ruta_
 
 
