@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-#Completa Si
+# Completa Si
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLFieldMetaDataList import FLFieldMetaDataList
-
 
 
 """
@@ -20,22 +19,20 @@ es decir objetos FLFieldMetaData.
 
 """
 
+
 class FLCompoundKey(ProjectClass):
-    
+
     """
     Lista de con los metadatos de los campos que componen la clave
     """
     fieldList_ = []
-    
-    def __init__(self, other = None):
+
+    def __init__(self, other=None):
         super(FLCompoundKey, self).__init__()
         self.fieldList_ = []
         if other:
             self.copy(other)
-        
-    
-    
-      
+
     def __del__(self):
         self.fieldList_ = None
 
@@ -44,9 +41,9 @@ class FLCompoundKey(ProjectClass):
 
     @param f Objeto FLFieldMetaData con la descripción del campo a añadir
     """
+
     def addFieldMD(self, f):
         self.fieldList_.append(f)
-        
 
     """
     Obtiene si una campo pertenece a la clave compuesta.
@@ -54,11 +51,12 @@ class FLCompoundKey(ProjectClass):
     @param fN Nombre del campo del que se desea saber si pertenece o no a la clave compuesta
     @return TRUE si el campo forma parte de la clave compuesta, FALSE en caso contrario
     """
+
     def hasField(self, fN):
         for i in self.fieldList_:
             if i.name() == str(fN):
                 return True
-        
+
         return False
 
     """
@@ -66,13 +64,11 @@ class FLCompoundKey(ProjectClass):
 
     @return Objeto con la lista de deficiones de campos de la clave compuesta
     """
+
     def fieldList(self):
         return self.fieldList_
-
-
 
     def copy(self, other):
         if self is other:
             return
         self.fieldList_ = copy.copy(other.fieldList_)
-    

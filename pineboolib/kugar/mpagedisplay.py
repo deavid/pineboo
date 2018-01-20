@@ -8,8 +8,8 @@ from pineboolib.flcontrols import ProjectClass
 class MPageDisplay(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
-    def __init__(self, *args):
-        super(MPageDisplay, self).__init__(*args)
+    def __init__(self, parent=0, name=0):
+        super(MPageDisplay, self).__init__(parent, name)
 
         self.buffer_ = Qt.QPixmap()
         self.buffer_.resize(1, 1)

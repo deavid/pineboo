@@ -57,6 +57,8 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 
 @author InfoSiAL S.L.
 """
+
+
 class FLAccessControl(ProjectClass):
 
     """
@@ -71,7 +73,7 @@ class FLAccessControl(ProjectClass):
     Almacena el permiso general de la regla de control de acceso.
     """
     perm_ = None
-    
+
     """
     Diccionario de permisos específicos de los ACOs (Access Control Objects)
     hijos o pertenecientes al objeto de alto nivel. El diccionario almacena la
@@ -79,18 +81,18 @@ class FLAccessControl(ProjectClass):
     y el permiso a aplicar.
     """
     acosPerms_ = []
-    
+
     """
     Constructor
     """
-    
+
     def __ini__(self):
         pass
-    
+
     """
     Destructor
     """
-    
+
     def __del__(self):
         pass
 
@@ -99,6 +101,7 @@ class FLAccessControl(ProjectClass):
 
     @return Cadena de texto con el nombre del objeto.
     """
+
     def name(self):
         return self.name_
 
@@ -107,15 +110,16 @@ class FLAccessControl(ProjectClass):
 
     @return Cadena de texto con el nombre (login) del usuario.
     """
+
     def user(self):
         return self.user_
-
 
     """
     Obtiene el permiso general.
 
     @return Cadena de texto que identifica el permiso a aplicar.
     """
+
     def perm(self):
         return self.perm_
 
@@ -124,14 +128,16 @@ class FLAccessControl(ProjectClass):
 
     @param n Nombre del objeto.
     """
+
     def setName(self, n):
-     self.name_ = n
+        self.name_ = n
 
     """
     Establece el nombre del usuario de la base de datos.
 
     @param u Nombre (login) del usuario.
     """
+
     def setUser(self, u):
         self.user_ = u
 
@@ -140,12 +146,14 @@ class FLAccessControl(ProjectClass):
 
     @param p Cadena de texto con el identificador del permiso.
     """
+
     def setPerm(self, p):
         self.perm_ = p
 
     """
     Limpia la regla vaciándola y liberando todos los recursos
     """
+
     def clear(self):
         self.name_ = None
         self.user_ = None
@@ -154,8 +162,6 @@ class FLAccessControl(ProjectClass):
             self.acosPerms_.clear()
             del self.acosPerms_
             self.acosPerms_ = []
-
-        
 
     """
     Devuelve una constante de texto que identifica el tipo.
@@ -166,6 +172,7 @@ class FLAccessControl(ProjectClass):
 
     @return Cadena de texto que identifica al tipo de objeto general de la regla, p.e.: "table".
     """
+
     def type(self):
         return None
 
@@ -178,17 +185,17 @@ class FLAccessControl(ProjectClass):
     def set(self, e):
         if not e:
             return
-        
+
         if self.acosPerms_:
             self.acosPerms_.clear()
             del self.acosPerms_
-        
+
         self.acosPerms_ = {}
-        
+
         self.perm_ = e.attribute("perm")
-        
+
         no = e.firstChild()
-        
+
         while not no.isNull():
             e = no.toElement()
             if not e.isNull():
@@ -196,45 +203,45 @@ class FLAccessControl(ProjectClass):
                     self.name_ = e.text()
                     no = no.nextSibling()
                     continue
-                
+
                 if e.tagName() == "user":
                     self.user_ = e.text()
                     no = no.nextSibling()
                     continue
-                
+
                 if e.tagName() == "aco":
                     self.acosPerms_[e.text()] = e.attribute("perm")
                     no = no.nextSibling()
                     continue
-            
+
             no = no.nextSibling()
-                    
-  
+
     """
     A partir del contenido de la regla de control de acceso crea un nodo DOM que se insertará como
     hijo del primer nodo de un documento DOM/XML.
 
     @param d Documento DOM/XML donde se insertará el nodo construido a partir de la regla de control de acceso.
     """
+
     def get(self, d):
         if not self.type() or not d:
             return
-        
+
         root = d.fisrtChild().toElement()
         e = d.createElement(self.type())
         e.setAttribute("perm", self.perm_)
         root.appendChild(e)
-        
+
         name = d.createElement("name")
         e.appendChild(name)
         n = d.createTextNone(self.name_)
         name.appendChild(n)
-        
+
         user = d.createElement("user")
         e.appendChild(user)
         u = d.createTextNone(self.user_)
         user.appendChild(u)
-        
+
         if self.acosPerms_:
             for key in self.acosPerms_.keys():
                 aco = d.createElement("aco")
@@ -242,7 +249,7 @@ class FLAccessControl(ProjectClass):
                 e.appendChild(aco)
                 t = d.createTextNone(key)
                 aco.appendChild(t)
-    
+
     """
     Establece la lista de ACOs a partir de una lista de cadenas de texto.
 
@@ -251,22 +258,22 @@ class FLAccessControl(ProjectClass):
 
     @param acos Lista de cadenas de texto con los objetos y permisos.
     """
-    def setAcos(self ,acos):
+
+    def setAcos(self, acos):
         if not acos:
             return
-        
+
         if self.acosPerms_:
             self.acosPerms_.clear()
             del self.acosPerms_
-        
+
         self.acosPerms_ = {}
-        
+
         nameAcos = None
         for it in acos.values():
             nameAcos = it
             self.acosPerms_.replace(nameAcos, str(it))
-        
-  
+
     """
     Obtiene una lista de cadenas de texto correspondiente a la lista de ACOs establecida
 
@@ -275,16 +282,17 @@ class FLAccessControl(ProjectClass):
 
     @return Lista de cadenas de texto con los objetos y permisos.
     """
+
     def getAcos(self):
         acos = []
-        
+
         if self.acosPerms_:
-            
+
             for key in self.acosPerms_.keys():
                 acos.append(key)
                 acos.append(self.acosPerms_[key])
-        
-        return acos
-        
 
-#endif
+        return acos
+
+
+# endif

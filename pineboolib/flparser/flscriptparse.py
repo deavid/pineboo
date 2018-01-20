@@ -8,8 +8,10 @@ from builtins import range
 # -----------------------------------------------------------------------------
 from optparse import OptionParser
 import pprint
-import sys, math
+import sys
+import math
 import hashlib
+import re
 import ply.yacc as yacc
 import ply.lex as lex
 
@@ -24,25 +26,31 @@ except ImportError:
 tokens = flex.tokens
 start = "source"
 
-reserv=['nonassoc']
-reserv+=list(flex.reserved)
+reserv = ['nonassoc']
+reserv += list(flex.reserved)
 
 endoffile = None
 
+
+def cleanNoPython(data):
+    return re.sub(r'\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*', '', data, flags=re.DOTALL)
+
 def cnvrt(val):
     val = str(val)
-    val = val.replace('&','&amp;')
-    val = val.replace('"','&quot;')
-    val = val.replace("'",'&apos;')
-    val = val.replace("<",'&lt;')
-    val = val.replace(">",'&gt;')
+    val = val.replace('&', '&amp;')
+    val = val.replace('"', '&quot;')
+    val = val.replace("'", '&apos;')
+    val = val.replace("<", '&lt;')
+    val = val.replace(">", '&gt;')
     return val
 
+
 precedence = (
-    ('nonassoc', 'EQUALS', 'TIMESEQUAL', 'DIVEQUAL', 'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
+    ('nonassoc', 'EQUALS', 'TIMESEQUAL', 'DIVEQUAL',
+     'MODEQUAL', 'PLUSEQUAL', 'MINUSEQUAL'),
     ('nonassoc', 'MATHEXPRESSION'),
     ('nonassoc', 'TERNARY'),
-    ('left','LOR', 'LAND'),
+    ('left', 'LOR', 'LAND'),
     ('right', 'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'EQQ', 'NEQ'),
     ('right', 'LNOT'),
     ('left', 'PLUS', 'MINUS'),
@@ -50,8 +58,9 @@ precedence = (
     ('left', 'OR', 'AND', 'XOR', 'LSHIFT', 'RSHIFT'),
 )
 seen_tokens = []
-tokelines =  {}
+tokelines = {}
 last_lexspan = None
+
 
 def p_parse(token):
     global input_data
@@ -59,9 +68,9 @@ def p_parse(token):
     lexspan = list(token.lexspan(0))
     data = str(token.lexer.lexdata[lexspan[0]:lexspan[1]])
     context = [
-    str(token.lexer.lexdata[lexspan[0]-32:lexspan[0]]),
-    str(token.lexer.lexdata[lexspan[0]:lexspan[1]]),
-    str(token.lexer.lexdata[lexspan[1]:lexspan[1]+32]),
+        str(token.lexer.lexdata[lexspan[0] - 32:lexspan[0]]),
+        str(token.lexer.lexdata[lexspan[0]:lexspan[1]]),
+        str(token.lexer.lexdata[lexspan[1]:lexspan[1] + 32]),
     ]
     if len(lexspan) == 2:
         fromline = token.lineno(0)
@@ -69,33 +78,37 @@ def p_parse(token):
         endoffile = fromline, lexspan, token.slice[0]
     #print(repr(token.slice), context, lexspan)
 
-    token[0] = { "00-toktype": str(token.slice[0]), "02-size" : lexspan,  "50-contents" :  [ { "01-type": s.type, "99-value" : s.value} for s in token.slice[1:] ] }
-    numelems = len([ s for s in token.slice[1:] if s.type != 'empty' and s.value is not None ])
+    token[0] = {"00-toktype": str(token.slice[0]), "02-size": lexspan,  "50-contents":  [
+        {"01-type": s.type, "99-value": s.value} for s in token.slice[1:]]}
+    numelems = len([s for s in token.slice[1:] if s.type !=
+                    'empty' and s.value is not None])
 
     rspan = lexspan[0]
-    if str(token.slice[0]) == 'empty' or numelems == 0: token[0] = None
+    if str(token.slice[0]) == 'empty' or numelems == 0:
+        token[0] = None
     else:
         rvalues = []
-        for n,s in enumerate(token.slice[1:]):
+        for n, s in enumerate(token.slice[1:]):
             if s.type != 'empty' and s.value is not None:
                 val = None
-                if isinstance(s.value,str):
-                    val = token.lexspan(n+1)[0] + len(s.value) - 1
+                if isinstance(s.value, str):
+                    val = token.lexspan(n + 1)[0] + len(s.value) - 1
                 else:
-                    val = token.lexspan(n+1)[1]
+                    val = token.lexspan(n + 1)[1]
                 rvalues.append(val)
         rspan = max(rvalues)
     lexspan[1] = rspan
 
-    #if str(token.slice[0]) == 'regexbody':
+    # if str(token.slice[0]) == 'regexbody':
     #    token[0] = { "00-toktype": str(token.slice[0]) , "02-size" : lexspan,  "50-contents" :  input_data[lexspan[0]:lexspan[1]+1] }
 
-    #if str(token.slice[0]) == 'regex':
+    # if str(token.slice[0]) == 'regex':
     #    print "\r\n",str(token.slice[0]) ,":" , input_data[lexspan[0]:lexspan[1]+1]
     #    print "      " + "\n      ".join([ "%s(%r): %r" % (s.type, token.lexspan(n+1), s.value) for n,s in enumerate(token.slice[1:]) ])
     global seen_tokens, last_ok_token
     last_ok_token = token
-    seen_tokens.append((str(token.slice[0]), token.lineno(0),input_data[lexspan[0]:lexspan[1]+1] ))
+    seen_tokens.append((str(token.slice[0]), token.lineno(
+        0), input_data[lexspan[0]:lexspan[1] + 1]))
     global ok_count
     ok_count += 1
     if lexspan[0] not in tokelines:
@@ -104,39 +117,40 @@ def p_parse(token):
     last_lexspan = lexspan
 
 
-
-
-
 last_ok_token = None
 error_count = 0
 last_error_token = None
 last_error_line = -1
 ok_count = 0
 
+
 def p_error(t):
     global error_count
     global ok_count
     global last_error_token
-    global last_error_line, seen_tokens , last_ok_token
-    debug = False # Poner a True para toneladas de debug.
+    global last_error_line, seen_tokens, last_ok_token
+    debug = False  # Poner a True para toneladas de debug.
     # if error_count == 0: print
     if t is not None:
-        if last_error_token is None or t.lexpos != getattr(last_error_token,"lexpos",None):
-            if abs(last_error_line -  t.lineno) > 4 and ok_count > 1 and error_count < 4:
+        if last_error_token is None or t.lexpos != getattr(last_error_token, "lexpos", None):
+            if abs(last_error_line - t.lineno) > 4 and ok_count > 1 and error_count < 4:
                 error_count += 1
-                try: print_context(t)
-                except Exception: pass
+                try:
+                    print_context(t)
+                except Exception:
+                    pass
                 if debug == True:
-                    error_count += 20 # no imprimir mas de un error en debug.
+                    error_count += 20  # no imprimir mas de un error en debug.
                     print
                     for tokname, tokln, tokdata in seen_tokens[-32:]:
-                        if tokln ==  t.lineno:
+                        if tokln == t.lineno:
                             print(tokname, tokdata)
                     print(repr(last_ok_token[0]))
                     for s in last_ok_token.slice[:]:
-                        print(">>>" ,  s.lineno, repr(s), pprint.pformat(s.value,depth=3))
+                        print(">>>",  s.lineno, repr(s),
+                              pprint.pformat(s.value, depth=3))
                 last_error_line = t.lineno
-            elif abs(last_error_line -  t.lineno) > 1 and ok_count > 1:
+            elif abs(last_error_line - t.lineno) > 1 and ok_count > 1:
                 last_error_line = t.lineno
             parser.errok()
             ok_count = 0
@@ -162,7 +176,8 @@ def p_error(t):
     last_error_token = t
     return t
 
-p_parse.__doc__ =     '''
+
+p_parse.__doc__ = '''
     exprval : constant
             | variable
             | funccall
@@ -506,50 +521,52 @@ p_parse.__doc__ =     '''
     '''
 
 
-
 # Build the grammar
 
 
-parser = yacc.yacc(method='LALR',debug=0,
-      optimize = 1, write_tables = 1, debugfile = '/tmp/yaccdebug.txt',outputdir='/tmp/')
+parser = yacc.yacc(method='LALR', debug=0,
+                   optimize=1, write_tables=1, debugfile='/tmp/yaccdebug.txt', outputdir='/tmp/')
 
-#parser = yacc.yacc(method='LALR',debug=1,
+# parser = yacc.yacc(method='LALR',debug=1,
 #      optimize = 0, write_tables = 0, debugfile = 'yaccdebug.txt',outputdir='.')
 
-#profile.run("yacc.yacc(method='LALR')")
+# profile.run("yacc.yacc(method='LALR')")
 
 global input_data
 
+
 def print_context(token):
     global input_data
-    if token is None: return
-    last_cr = input_data.rfind('\n',0,token.lexpos)
-    next_cr = input_data.find('\n',token.lexpos)
+    if token is None:
+        return
+    last_cr = input_data.rfind('\n', 0, token.lexpos)
+    next_cr = input_data.find('\n', token.lexpos)
     column = (token.lexpos - last_cr)
     column1 = (token.lexpos - last_cr)
     while column1 < 16:
         column1 = (token.lexpos - last_cr)
-        last_cr = input_data.rfind('\n',0,last_cr-1)
+        last_cr = input_data.rfind('\n', 0, last_cr - 1)
 
-    print(input_data[last_cr:next_cr].replace("\t"," "))
-    print((" " * (column-1)) + "^", column, "#ERROR#" , token)
+    print(input_data[last_cr:next_cr].replace("\t", " "))
+    print((" " * (column - 1)) + "^", column, "#ERROR#", token)
 
 
 def my_tokenfunc(*args, **kwargs):
     #print("Call token:" ,args, kwargs)
     ret = lex.lexer.token(*args, **kwargs)
-    #print "Return (",args, kwargs,") = " , ret
+    # print "Return (",args, kwargs,") = " , ret
     return ret
 
 
-def print_tokentree(token, depth = 0):
-    print("  " * depth, token.__class__ , "=" , token)
+def print_tokentree(token, depth=0):
+    print("  " * depth, token.__class__, "=", token)
 
     if str(token.__class__) == "ply.yacc.YaccProduction":
         print(token.lexer)
         for tk in token.slice:
-            if tk.value == token: continue
-            print("  " * (depth+1), tk.type, end=' ')
+            if tk.value == token:
+                continue
+            print("  " * (depth + 1), tk.type, end=' ')
             try:
                 print(tk.lexpos, end=' ')
                 print(tk.endlexpos, end=' ')
@@ -557,10 +574,11 @@ def print_tokentree(token, depth = 0):
                 pass
             print()
 
-            print_tokentree(tk.value, depth +1)
+            print_tokentree(tk.value, depth + 1)
 
-def calctree(obj, depth = 0, num = [], otype = "source", alias_mode = 1):
-    #if depth > 5: return
+
+def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
+    # if depth > 5: return
     source_data = [
         'source',
         'source_element',
@@ -579,13 +597,13 @@ def calctree(obj, depth = 0, num = [], otype = "source", alias_mode = 1):
         ctype_alias = {}
     elif alias_mode == 1:
         ctype_alias = {
-            "member_var" : "member",
-            "member_call" : "member",
-            "variable_1" : "variable",
-            "funccall_1" : "funccall",
-            "flowinstruction" : "instruction",
-            "storeequalinstruction" : "instruction",
-            "vardecl" : "vardeclaration",
+            "member_var": "member",
+            "member_call": "member",
+            "variable_1": "variable",
+            "funccall_1": "funccall",
+            "flowinstruction": "instruction",
+            "storeequalinstruction": "instruction",
+            "vardecl": "vardeclaration",
             #"vardecl_list" : "vardeclaration",
 
         }
@@ -594,9 +612,9 @@ def calctree(obj, depth = 0, num = [], otype = "source", alias_mode = 1):
 
     if otype in ctype_alias:
         otype = ctype_alias[otype]
-    #print " " * depth , obj['02-size']
-    for n,content in enumerate(obj['50-contents']):
-        if not isinstance(content,dict):
+    # print " " * depth , obj['02-size']
+    for n, content in enumerate(obj['50-contents']):
+        if not isinstance(content, dict):
             print("ERROR: content is not a dict!:", repr(content))
             print(".. obj:", repr(obj))
             raise TypeError("content is not a dict")
@@ -605,32 +623,34 @@ def calctree(obj, depth = 0, num = [], otype = "source", alias_mode = 1):
         value = content['99-value']
         if ctype in ctype_alias:
             ctype = ctype_alias[ctype]
-        #if ctype in source_data:
+        # if ctype in source_data:
         #    if depth == 0: print "--"
         #    print_tree(value,depth,num)
         #    continue
-        #print " " * depth , "%s:" % ".".join(num+[str(n)]), ctype,
+        # print " " * depth , "%s:" % ".".join(num+[str(n)]), ctype,
 
         if type(value) is dict:
-            #print "*"
+            # print "*"
             if depth < 600:
                 try:
-                    tree_obj = calctree(value,depth+1,num+[str(n)], ctype, alias_mode=alias_mode)
+                    tree_obj = calctree(
+                        value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
                 except Exception:
-                    print("ERROR: trying to calculate member %d on:" % n, repr(obj))
+                    print("ERROR: trying to calculate member %d on:" %
+                          n, repr(obj))
             else:
                 tree_obj = None
             if type(tree_obj) is dict:
-                if (tree_obj['has_data'] or alias_mode == 0) and ctype != otype :
-                    contentlist.append([ctype,tree_obj])
+                if (tree_obj['has_data'] or alias_mode == 0) and ctype != otype:
+                    contentlist.append([ctype, tree_obj])
                     has_objects += 1
                 else:
-                    contentlist+=tree_obj["content"]
+                    contentlist += tree_obj["content"]
                     has_data += tree_obj["has_data"]
                     has_objects += tree_obj["has_objects"]
         else:
-            #print "=", repr(value)
-            contentlist.append([ctype,value])
+            # print "=", repr(value)
+            contentlist.append([ctype, value])
             has_data += 1
 
     final_obj['content'] = contentlist
@@ -642,7 +662,9 @@ def calctree(obj, depth = 0, num = [], otype = "source", alias_mode = 1):
 
 hashes = []
 ranges = []
-def printtree(tree, depth = 0, otype = "source", mode = None, output = sys.stdout):
+
+
+def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
     global hashes, ranges
     if depth == 0:
         hashes = []
@@ -650,9 +672,9 @@ def printtree(tree, depth = 0, otype = "source", mode = None, output = sys.stdou
 
     sep = "    "
     marginblocks = {
-        "classdeclaration" : 1,
-        "funcdeclaration" : 1,
-        "statement_block" : 1,
+        "classdeclaration": 1,
+        "funcdeclaration": 1,
+        "statement_block": 1,
         #"instruction" : 1,
     }
     closingtokens = [
@@ -666,67 +688,71 @@ def printtree(tree, depth = 0, otype = "source", mode = None, output = sys.stdou
     lines = []
     l = 0
 
-
     for ctype, value in tree['content']:
         if nuevalinea and ctype in closingtokens:
             nuevalinea = False
 
         if nuevalinea:
-            for i in range(int(math.ceil(l/2.0))):
+            for i in range(int(math.ceil(l / 2.0))):
                 lines.append(sep * depth)
             nuevalinea = False
 
         if type(value) is dict and ctype == otype:
-            tname,tlines,trange = printtree(value, depth, ctype)
+            tname, tlines, trange = printtree(value, depth, ctype)
             if name == "" and tname:
                 name = tname
 
             lines += tlines
         elif type(value) is dict:
             l = 0
-            if ctype in marginblocks: l = marginblocks[ctype]
+            if ctype in marginblocks:
+                l = marginblocks[ctype]
 
-            for i in range(int(math.floor(l/2.0))):
+            for i in range(int(math.floor(l / 2.0))):
                 lines.append(sep * depth)
-            tname,tlines,trange = printtree(value, depth+1, ctype)
+            tname, tlines, trange = printtree(value, depth + 1, ctype)
             # lines.append(sep * depth + "<!-- %d -->" % (len("".join(tlines))))
 
             if value['has_data'] > 0 and value['has_objects'] == 0 and False:
                 # Do it inline!
-                if value['has_data']==1 and tname:
-                    lines.append(sep * depth + "<%s id=\"%s\" />" % (ctype,tname))
+                if value['has_data'] == 1 and tname:
+                    lines.append(sep * depth + "<%s id=\"%s\" />" %
+                                 (ctype, tname))
                 else:
-                    txt = "".join([ x.strip() for x in tlines])
-                    lines.append(sep * depth + "<%s>%s</%s>" % (ctype,txt,ctype))
+                    txt = "".join([x.strip() for x in tlines])
+                    lines.append(sep * depth + "<%s>%s</%s>" %
+                                 (ctype, txt, ctype))
             else:
                 attrs = []
                 if tname:
-                    attrs.append(("id",tname))
+                    attrs.append(("id", tname))
 
-                txtinline = "".join([ line.strip() for line in tlines ])
+                txtinline = "".join([line.strip() for line in tlines])
 
-                #if len(tlines)>1:
+                # if len(tlines)>1:
                 txthash = hashlib.sha1(txtinline).hexdigest()[:16]
-                #hashes.append(("depth:",depth,"hash:",txthash,"element:",ctype+":"+tname))
-                hashes.append((txthash,ctype+":"+tname+"(%d)"% len(txtinline)))
-                ranges.append([depth,txthash]+trange+[ctype+":"+tname,len(txtinline)])
+                # hashes.append(("depth:",depth,"hash:",txthash,"element:",ctype+":"+tname))
+                hashes.append(
+                    (txthash, ctype + ":" + tname + "(%d)" % len(txtinline)))
+                ranges.append([depth, txthash] + trange +
+                              [ctype + ":" + tname, len(txtinline)])
                 #,"start:",trange[0],"end:",trange[1]))
-                #attrs.append(("start",trange[0]))
-                #attrs.append(("end",trange[1]))
-                #attrs.append(("hash",txthash))
+                # attrs.append(("start",trange[0]))
+                # attrs.append(("end",trange[1]))
+                # attrs.append(("hash",txthash))
 
-                txtattrs=""
+                txtattrs = ""
                 for name1, val1 in attrs:
-                    txtattrs+=" %s=\"%s\"" % (name1,cnvrt(val1))
+                    txtattrs += " %s=\"%s\"" % (name1, cnvrt(val1))
 
-                lines.append(sep * depth + "<%s%s>" % (ctype,txtattrs))
+                lines.append(sep * depth + "<%s%s>" % (ctype, txtattrs))
                 if depth > 50:
-                    lines.append(sep * (depth+1) + "...")
+                    lines.append(sep * (depth + 1) + "...")
                 else:
-                    if len(txtinline)<80:
-                        lines.append(sep * (depth+1) + txtinline)
+                    if len(txtinline) < 80:
+                        lines.append(sep * (depth + 1) + txtinline)
                     else:
-                        lines+=tlines
+                        lines += tlines
                 if txtattrs:
                     txtattrs = "<!--%s -->" % txtattrs
                 lines.append(sep * depth + "</%s>" % (ctype))
@@ -736,15 +762,15 @@ def printtree(tree, depth = 0, otype = "source", mode = None, output = sys.stdou
             if ctype == "ID" and name == "":
                 name = value
             if ctype in flex.token_literals:
-                lines.append(sep * depth +   "<%s value=\"%s\" />" % (ctype,cnvrt(value)))
+                lines.append(sep * depth + "<%s value=\"%s\" />" %
+                             (ctype, cnvrt(value)))
             else:
-                lines.append(sep * depth +  "<%s />" % (ctype))
-
+                lines.append(sep * depth + "<%s />" % (ctype))
 
     if mode == "hash":
-        #print "\n".join(lines)
+        # print "\n".join(lines)
         for row in sorted(ranges):
-            output.write("\t".join([ str(x) for x in row]))
+            output.write("\t".join([str(x) for x in row]))
             output.write("\n")
             output.flush()
     if mode == "xml":
@@ -756,7 +782,6 @@ def printtree(tree, depth = 0, otype = "source", mode = None, output = sys.stdou
     return name, lines, tree['range']
 
 
-
 def parse(data):
     global input_data
     global error_count
@@ -766,10 +791,11 @@ def parse(data):
     input_data = data
     flex.lexer.lineno = 1
     error_count = 0
-    p = parser.parse(data, debug = 0, tracking = 1, tokenfunc = my_tokenfunc)
+    p = parser.parse(data, debug=0, tracking=1, tokenfunc=my_tokenfunc)
     if error_count > 0:
         print("ERRORS (%d)" % error_count)
-    if p is None: return p
+    if p is None:
+        return p
     try:
         p["error_count"] = error_count
     except Exception as e:
@@ -784,49 +810,46 @@ def parse(data):
 def main():
     global start
     parser = OptionParser()
-    #parser.add_option("-f", "--file", dest="filename",
+    # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
-    parser.add_option("-O", "--output", dest="output", default = "none",
-                          help="Set output TYPE: xml|hash", metavar="TYPE")
-    parser.add_option("--start", dest="start", default = None,
-                          help="Set start block", metavar="STMT")
+    parser.add_option("-O", "--output", dest="output", default="none",
+                      help="Set output TYPE: xml|hash", metavar="TYPE")
+    parser.add_option("--start", dest="start", default=None,
+                      help="Set start block", metavar="STMT")
     parser.add_option("-q", "--quiet",
-                    action="store_false", dest="verbose", default=True,
-                    help="don't print status messages to stdout")
+                      action="store_false", dest="verbose", default=True,
+                      help="don't print status messages to stdout")
 
     parser.add_option("--optdebug",
-                    action="store_true", dest="optdebug", default=False,
-                    help="debug optparse module")
+                      action="store_true", dest="optdebug", default=False,
+                      help="debug optparse module")
 
     parser.add_option("--debug",
-                    action="store_true", dest="debug", default=False,
-                    help="prints lots of useless messages")
-
+                      action="store_true", dest="debug", default=False,
+                      help="prints lots of useless messages")
 
     (options, args) = parser.parse_args()
     if options.optdebug:
         print(options, args)
     if options.start:
         start = options.start
-        print("Start setted to:" , start)
-
-
-
+        print("Start setted to:", start)
 
     def do_it():
-        if options.output == "none": return
+        if options.output == "none":
+            return
         tree_data = calctree(prog)
         if options.output == "hash":
-            printtree(tree_data, mode = "hash")
+            printtree(tree_data, mode="hash")
         elif options.output == "xml":
-            printtree(tree_data, mode = "xml")
+            printtree(tree_data, mode="xml")
         elif options.output == "file":
-            f1_hash = open(filename+".hash","w")
-            printtree(tree_data, mode = "hash", output = f1_hash)
+            f1_hash = open(filename + ".hash", "w")
+            printtree(tree_data, mode="hash", output=f1_hash)
             f1_hash.close()
 
-            f1_xml = open(filename+".xml","w")
-            printtree(tree_data, mode = "xml", output = f1_xml)
+            f1_xml = open(filename + ".xml", "w")
+            printtree(tree_data, mode="xml", output=f1_xml)
             f1_xml.close()
         elif options.output == "yaml":
             import yaml
@@ -836,23 +859,24 @@ def main():
             print("Unknown outputmode", options.output)
 
     prog = "$$$"
-    if len(args) > 0 :
+    if len(args) > 0:
         for filename in args:
             fs = filename.split("/")
             sys.stderr.write("Loading %s ..." % fs[-1])
             sys.stderr.flush()
             data = open(filename).read()
+            data = cleanNoPython(data)
             sys.stderr.write(" parsing ...")
             sys.stderr.flush()
             prog = parse(data)
             sys.stderr.write(" formatting ...")
             sys.stderr.flush()
-            if prog: do_it()
+            if prog:
+                do_it()
             sys.stderr.write(" Done.\n")
             sys.stderr.flush()
 
     else:
-
 
         line = ""
         while 1:
@@ -862,7 +886,7 @@ def main():
                     comm = line1[1:].split(" ")
                     if comm[0] == "setstart":
                         start = comm[1]
-                        print("Start setted to:" , start)
+                        print("Start setted to:", start)
                     if comm[0] == "parse":
                         print()
                         prog = parse(line)
@@ -870,7 +894,7 @@ def main():
                 else:
                     line += line1
             except EOFError:
-                break;
+                break
             line += "\n"
         print()
         prog = parse(line)
@@ -880,23 +904,15 @@ def main():
 
     print yaml.dump(tree_data)
     """
-    #print_tokentree(prog)
+    # print_tokentree(prog)
 
-
-
-
-    #for varName in prog.byDefName:
+    # for varName in prog.byDefName:
     #    var = prog.byDefName[varName]
     #    print "%-15s / %-15s > " % var.type  , varName
 
-
     #import tests.ifaceclass
-    #tests.ifaceclass.do_test(prog)
+    # tests.ifaceclass.do_test(prog)
 
 
-
-
-
-
-
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()

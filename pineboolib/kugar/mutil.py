@@ -60,17 +60,21 @@ class MUtil(ProjectClass):
         elif dformat == MUtil.DateFormatType.MMDDY_DASH:
             string = "{}-{}-{}".format(month, day, year)
         elif dformat == MUtil.DateFormatType.MDYYYY_SLASH:
-            string = "{}/{}/{}".format(value.month(), value.day(), value.year())
+            string = "{}/{}/{}".format(value.month(),
+                                       value.day(), value.year())
         elif dformat == MUtil.DateFormatType.MDYYYY_DASH:
-            string = "{}-{}-{}".format(value.month(), value.day(), value.year())
+            string = "{}-{}-{}".format(value.month(),
+                                       value.day(), value.year())
         elif dformat == MUtil.DateFormatType.MMDDYYYY_SLASH:
             string = "{}/{}/{}".format(month, day, value.year())
         elif dformat == MUtil.DateFormatType.MMDDYYYY_DASH:
             string = "{}-{}-{}".format(month, day, value.year())
         elif dformat == MUtil.DateFormatType.YYYYMD_SLASH:
-            string = "{}/{}/{}".format(value.year(), value.month(), value.day())
+            string = "{}/{}/{}".format(value.year(),
+                                       value.month(), value.day())
         elif dformat == MUtil.DateFormatType.YYYYMD_DASH:
-            string = "{}-{}-{}".format(value.year(), value.month(), value.day())
+            string = "{}-{}-{}".format(value.year(),
+                                       value.month(), value.day())
         elif dformat == MUtil.DateFormatType.DDMMYY_PERIOD:
             string = "{}.{}.{}".format(day, month, year)
         elif dformat == MUtil.DateFormatType.DDMMYYYY_PERIOD:
@@ -84,9 +88,11 @@ class MUtil(ProjectClass):
         elif dformat == MUtil.DateFormatType.DDMMY_DASH:
             string = "{}-{}-{}".format(day, month, year)
         elif dformat == MUtil.DateFormatType.DMYYYY_SLASH:
-            string = "{}/{}/{}".format(value.day(), value.month(), value.year())
+            string = "{}/{}/{}".format(value.day(),
+                                       value.month(), value.year())
         elif dformat == MUtil.DateFormatType.DMYYYY_DASH:
-            string = "{}-{}-{}".format(value.day(), value.month(), value.year())
+            string = "{}-{}-{}".format(value.day(),
+                                       value.month(), value.year())
         elif dformat == MUtil.DateFormatType.DDMMYYYY_SLASH:
             string = "{}/{}/{}".format(day, month, value.year())
         elif dformat == MUtil.DateFormatType.DDMMYYYY_DASH:

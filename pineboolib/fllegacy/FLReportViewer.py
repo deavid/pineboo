@@ -6,22 +6,21 @@ from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mreportviewer import MReportViewer
 
-# from pineboolib.fllegacy.AQConfig import AQConfig  # FIXME
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPicture import FLPicture
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 # from pineboolib.fllegacy.FLWidgetReportViewer import FLWidgetReportViewer
-# from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
+from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
 
 
 # class FLReportViewer(ProjectClass, FLWidgetReportViewer):
 class FLReportViewer(ProjectClass):
 
-    def __init__(self, parent, name, embedInParent, rptEngine):
-        pParam = 0 if parent and embedInParent else Qt.WStyle_Customize | Qt.WStyle_Maximize | Qt.WStyle_Title | Qt.WStyle_NormalBorder | Qt.WStyle_Dialog | Qt.WShowModal | Qt.WStyle_SysMenu
+    def __init__(self, parent=0, name=0, embedInParent=False, rptEngine=0):
+        pParam = 0 if parent and embedInParent else 0 | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | 0 | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
 
         super(FLReportViewer, self).__init__(parent, name, pParam)
 
@@ -54,18 +53,21 @@ class FLReportViewer(ProjectClass):
             else:
                 parent.layout().add(self)
         else:
-            self.autoClose_ = bool(FLUtil.readSettingEntry("rptViewer/autoClose", "false"))
+            self.autoClose_ = bool(FLUtil.readSettingEntry(
+                "rptViewer/autoClose", "false"))
             self.chkAutoClose.setChecked(self.autoClose_)
 
         self.rptViewer_ = MReportViewer(self)
-        self.setReportEngine(FLReportEngine(self) if rptEngine == 0 else rptEngine)
+        self.setReportEngine(FLReportEngine(
+            self) if rptEngine == 0 else rptEngine)
 
         self.setFont(QtWidgets.QApplication.font())
         self.setFocusPolicy(Qt.QWidget.FocusPolicy.StrongFocus)
 
         self.lePara.setText(str(FLUtil.readSettingEntry("email/to")))
         self.leDe.setText(str(FLUtil.readSettingEntry("email/from")))
-        self.leMailServer.setText(str(FLUtil.readSettingEntry("email/mailserver")))
+        self.leMailServer.setText(
+            str(FLUtil.readSettingEntry("email/mailserver")))
 
         self.initCentralWidget_ = self.centralWidget()
 
@@ -77,8 +79,10 @@ class FLReportViewer(ProjectClass):
         self.initCentralWidget.hide()
 
         if not self.embedInParent_:
-            self.spnResolution.setValue(int(FLUtil.readDBSettingEntry("rptViewer/dpi", str(self.rptViewer_.resolution()))))
-            self.spnPixel.setValue(float(FLUtil.readDBSettingEntry("rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
+            self.spnResolution.setValue(int(FLUtil.readDBSettingEntry(
+                "rptViewer/dpi", str(self.rptViewer_.resolution()))))
+            self.spnPixel.setValue(float(FLUtil.readDBSettingEntry(
+                "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
 
@@ -91,7 +95,7 @@ class FLReportViewer(ProjectClass):
         return self.rptEngine_
 
     @decorators.BetaImplementation
-    def setReportEngine(self, r):
+    def setReportEngine(self, r=0):
         if self.rptEngine_ == r:
             return
 
@@ -189,7 +193,8 @@ class FLReportViewer(ProjectClass):
         if displayReport is None:
             flags = append
         else:
-            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(MReportViewer.RenderReportFlags.Display if displayReport else 0)
+            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(
+                MReportViewer.RenderReportFlags.Display if displayReport else 0)
 
         if not self.rptEngine_:
             return False
@@ -244,7 +249,8 @@ class FLReportViewer(ProjectClass):
         q = Qt.QMessageBox.question(
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            FLUtil.translate(
+                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -265,7 +271,8 @@ class FLReportViewer(ProjectClass):
             Qt.QMessageBox.critical(
                 self,
                 FLUtil.translate(self, "app", "Error abriendo fichero"),
-                FLUtil.translate(self, "app", "No se pudo abrir el fichero {} para escribir: {}").arg(fileName, QtWidgets.QApplication.translate("QFile", file.errorString()))
+                FLUtil.translate(self, "app", "No se pudo abrir el fichero {} para escribir: {}").arg(
+                    fileName, QtWidgets.QApplication.translate("QFile", file.errorString()))
             )
 
     @decorators.BetaImplementation
@@ -290,7 +297,8 @@ class FLReportViewer(ProjectClass):
         q = Qt.QMessageBox.question(
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            FLUtil.translate(
+                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -308,7 +316,7 @@ class FLReportViewer(ProjectClass):
         t = self.leDocumento.text()
         name = "informe.pdf" if not t or t == "" else t
         fileName = Qt.QFileDialog.getSaveFileName(
-            AQConfig.AQ_USRHOME + "/" + name + ".pdf",
+            AQ_USRHOME + "/" + name + ".pdf",
             FLUtil.translate(self, "app", "Fichero PDF a enviar (*.pdf)"),
             self,
             FLUtil.translate(self, "app", "Exportar a PDF para enviar"),
@@ -324,7 +332,8 @@ class FLReportViewer(ProjectClass):
         q = Qt.QMessageBox.question(
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+            FLUtil.translate(
+                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -349,7 +358,8 @@ class FLReportViewer(ProjectClass):
         self.smtpClient_.setMailServer(self.leMailServer.text())
         self.smtpClient_.setTo(self.lePara.text())
         self.smtpClient_.setFrom(self.leDe.text())
-        self.smtpClient_.setSubject(name if self.leAsunto.text() == "" else self.leAsunto.text())
+        self.smtpClient_.setSubject(
+            name if self.leAsunto.text() == "" else self.leAsunto.text())
         self.smtpClient_.setBody(self.leCuerpo.text() + "\n\n")
 
         html = "<html><body><a href=\"http://abanq.org/\">"
@@ -363,7 +373,8 @@ class FLReportViewer(ProjectClass):
         if show:
             self.rptViewer_.hide()
             self.setCentralWidget(self.initCentralWidget_)
-            self.leDocumento.setText("doc-" + str(Qt.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
+            self.leDocumento.setText(
+                "doc-" + str(Qt.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
             self.frEMail.show()
             self.initCentralWidget_.show()
         else:
@@ -391,8 +402,10 @@ class FLReportViewer(ProjectClass):
 
             q = Qt.QMessageBox.question(
                 self,
-                FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-                FLUtil.translate(self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                FLUtil.translate(
+                    self, "app", "Sobreescribir {}").format(fileName),
+                FLUtil.translate(
+                    self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
                 FLUtil.translate(self, "app", "&Sí"),
                 FLUtil.translate(self, "app", "&No"),
                 "",
@@ -506,7 +519,7 @@ class FLReportViewer(ProjectClass):
         return False
 
     @decorators.BetaImplementation
-    def setReportTemplate(self, t, style):
+    def setReportTemplate(self, t, style=""):
         if isinstance(t, Qt.QDomNode):
             self.xmlTemplate_ = t
             self.template_ = ""
@@ -760,7 +773,7 @@ class FLReportViewer(ProjectClass):
         return self.rptViewer_.colorMode()
 
     @decorators.BetaImplementation
-    def disableSlotsPrintExports(self, disablePrints, disableExports):
+    def disableSlotsPrintExports(self, disablePrints=True, disableExports=True):
         self.slotsPrintDisabled_ = disablePrints
         self.slotsExportedDisabled_ = disableExports
 

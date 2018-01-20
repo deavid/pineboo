@@ -3,12 +3,12 @@ from pineboolib import decorators
 from PyQt5 import QtGui, QtWidgets
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import pineboolib
-import traceback, datetime
-
+import traceback
+import datetime
 
 
 class FLSqlQuery(ProjectClass):
-    
+
     countRefQuery = 0
     invalidTables = False
     """
@@ -20,7 +20,7 @@ class FLSqlQuery(ProjectClass):
     @author InfoSiAL S.L.
     """
 
-    def __init__(self, name = None, connection_name = None):
+    def __init__(self, name=None, connection_name=None):
         super(FLSqlQuery, self).__init__()
 
         self.d = FLSqlQueryPrivate(name)
@@ -35,77 +35,69 @@ class FLSqlQuery(ProjectClass):
         self.d.select_ = None
         self.d.fieldList_ = []
         self.d.fieldMetaDataList_ = []
-        
-        
-        
+
         retornoQry = None
         if name:
             retornoQry = pineboolib.project.conn.manager().query(name, self)
-        
+
         if retornoQry:
             self = retornoQry
 
-            
-
-
     def __del__(self):
         try:
-            del self.d                        
+            del self.d
             del self._datos
             self._cursor.close()
             del self._cursor
         except:
             pass
-        
+
         self.countRefQuery = self.countRefQuery - 1
-        
-    
+
     """
     Ejecuta la consulta
     """
     def exec(self, sql = None):
         if self.invalidTablesList == True:
             return False
-        
+
         if not sql:
             sql = self.sql()
 
-        
         if not sql:
             return False
-        
+
         """
         En algunas consultas va con ';' , esto lo limpio 
         """
-        sql = sql.replace(";","")
-        
-        #micursor=self.__damecursor()
+        sql = sql.replace(";", "")
+
+        # micursor=self.__damecursor()
         conn = self.__dameConn()
         micursor = conn.cursor()
         try:
             micursor.execute(sql)
-            self._cursor=micursor
+            self._cursor = micursor
         except Exception:
         
             print(traceback.format_exc())
-            #conn.rollback()
+            # conn.rollback()
             return False
+
         #conn.commit()
-        
-        
         return True 
     
     @classmethod
     def __damecursor(self):
-        if getattr(self.d,"db_", None):
+        if getattr(self.d, "db_", None):
             cursor = self.d.db_.cursor()
         else:
             cursor = pineboolib.project.conn.cursor()
         return cursor
-    
+
     def __dameConn(self):
         from pineboolib.PNConnection import PNConnection
-        if getattr(self.d,"db_", None):
+        if getattr(self.d, "db_", None):
             if isinstance(self.d.db_, PNConnection):
                 conn = self.d.db_.conn
             else:
@@ -113,8 +105,7 @@ class FLSqlQuery(ProjectClass):
         else:
             conn = pineboolib.project.conn.conn
         return conn
-        
-    
+
     def __cargarDatos(self):
         if self._datos:
             pass
@@ -132,10 +123,11 @@ class FLSqlQuery(ProjectClass):
 
     @param p Objeto FLParameterQuery con la descripción del parámetro a añadir
     """
+
     def addParameter(self, p):
         if not self.d.parameterDict_:
             self.d.parameterDict_ = {}
-        
+
         if p:
             self.d.parameterDict_.insert(p.name(), p)
 
@@ -143,11 +135,12 @@ class FLSqlQuery(ProjectClass):
     Añade la descripción de un grupo al diccionario de grupos.
 
     @param g Objeto FLGroupByQuery con la descripción del grupo a añadir
-    """  
+    """
+
     def addGroup(self, g):
         if not self.d.groupDict_:
             self.d.groupDict_ = {}
-        
+
         if g:
             self.d.groupDict_[g.level()] = g.field()
 
@@ -156,7 +149,6 @@ class FLSqlQuery(ProjectClass):
     """
     FLParameterQueryDict = {}
 
-    
     """
     Tipo de datos diccionaro de grupos
     """
@@ -167,34 +159,40 @@ class FLSqlQuery(ProjectClass):
 
     @param n Nombre de la consulta
     """
+
     def setName(self, n):
         self.d.name_ = n
-  
+
     """
     Para obtener el nombre de la consulta
     """
+
     def name(self):
         return self.d.name_
     """
     Para obtener la parte SELECT de la sentencia SQL de la consulta
     """
+
     def select(self):
         return self.d.select_
     """
     Para obtener la parte FROM de la sentencia SQL de la consulta
     """
+
     def from_(self):
         return self.d.from_
 
     """
     Para obtener la parte WHERE de la sentencia SQL de la consulta
     """
+
     def where(self):
         return self.d.where_
 
     """
     Para obtener la parte ORDER BY de la sentencia SQL de la consulta
     """
+
     def orderBy(self):
         return self.d.orderBy_
 
@@ -209,58 +207,49 @@ class FLSqlQuery(ProjectClass):
     @param  sep Cadena utilizada como separador en la lista de campos. Por defecto
               se utiliza la coma.
     """
-    
-    def setSelect(self, s, sep = ","):
+
+    def setSelect(self, s, sep=","):
         self.d.select_ = s
-        
-        
+
         if isinstance(s, str) and sep in s:
             s = s.replace(" ", "")
             s = s.split(sep)
-        
-        
+
         #self.d.select_ = s.strip_whitespace()
         #self.d.select_ = self.d.select_.simplifyWhiteSpace()
-        
+
         if not isinstance(s, list) and not "*" == s:
             self.d.fieldList_.clear()
             self.d.fieldList_.append(s)
 
             return
-        
+
         #fieldListAux = s.split(sep)
-        #for f in s:
+        # for f in s:
         #    f = str(f).strip()
-            
-        
+
         table = None
         field = None
         self.d.fieldList_.clear()
-        
-        
-        
+
         for f in s:
             try:
                 table = f[:f.index(".")]
                 field = f[f.index(".") + 1:]
             except:
                 pass
-            
+
             if field == "*":
                 mtd = self.d.db_.manager().metadata(table, True)
                 if mtd:
                     self.d.fieldList_ = mtd.fieldList(True)
                     if not mtd.inCache():
                         del mtd
-                
+
             else:
                 self.d.fieldList_.append(f)
-            
-        
+
             self.d.select_ = ",".join(self.d.fieldList_)
-        
-        
-        
 
     """
     Para establecer la parte FROM de la sentencia SQL de la consulta.
@@ -268,6 +257,7 @@ class FLSqlQuery(ProjectClass):
     @param f Cadena de texto con la parte FROM de la sentencia SQL que
            genera la consulta
     """
+
     def setFrom(self, f):
         self.d.from_ = f
         #self.d.from_ = f.strip_whitespace()
@@ -279,7 +269,7 @@ class FLSqlQuery(ProjectClass):
     @param s Cadena de texto con la parte WHERE de la sentencia SQL que
         genera la consulta
     """
-    
+
     def setWhere(self, w):
         self.d.where_ = w
         #self.d.where_ = w.strip_whitespace()
@@ -291,7 +281,7 @@ class FLSqlQuery(ProjectClass):
     @param s Cadena de texto con la parte ORDER BY de la sentencia SQL que
            genera la consulta
     """
-    
+
     def setOrderBy(self, w):
         self.d.orderBy_ = w
         #self.d.orderBy_ = w.strip_whitespace()
@@ -306,24 +296,25 @@ class FLSqlQuery(ProjectClass):
 
     @return Cadena de texto con la sentencia completa SQL que genera la consulta
     """
+
     def sql(self):
-        #for tableName in self.d.tablesList_:
+        # for tableName in self.d.tablesList_:
         #    if not self.d.db_.manager().existsTable(tableName) and not self.d.db_.manager().createTable(tableName):
         #        return
-        
+
         res = None
-        
+
         if not self.d.select_:
             return False
-        
-        
+
         if not self.d.from_:
             res = "SELECT %s" % self.d.select_
         elif not self.d.where_:
             res = "SELECT %s FROM %s" % (self.d.select_, self.d.from_)
         else:
-            res = "SELECT %s FROM %s WHERE %s" % (self.d.select_, self.d.from_, self.d.where_)
-        
+            res = "SELECT %s FROM %s WHERE %s" % (
+                self.d.select_, self.d.from_, self.d.where_)
+
         if self.d.groupDict_ and not self.d.orderBy_:
             res = res + " ORDER BY "
             initGD = None
@@ -335,32 +326,32 @@ class FLSqlQuery(ProjectClass):
                     initGD = True
                 else:
                     res = res + ", " + gD
-                
+
                 i = i + 1
-            
-        
+
         elif self.d.orderBy_:
-           res = res + " ORDER BY " + self.d.orderBy_ 
-        
+            res = res + " ORDER BY " + self.d.orderBy_
+
         if self.d.parameterDict_:
             for pD in self.d.parameterDict_:
                 v = pD.value()
-                
+
                 if not v:
                     ok = True
-                    v = QtWidgets.QInputDialog.getText(QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD.alias(),None , None)
-                
-                res = res.replace(pD.key(), self.d.db_.manager().formatValue(pD.type(), v))
-        
+                    v = QtWidgets.QInputDialog.getText(
+                        QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD.alias(), None, None)
+
+                res = res.replace(
+                    pD.key(), self.d.db_.manager().formatValue(pD.type(), v))
+
         return res
-                    
-            
 
     """
     Para obtener los parametros de la consulta.
 
     @return Diccionario de parámetros
     """
+
     def parameterDict(self):
         return self.d.parameterDict_
 
@@ -369,15 +360,17 @@ class FLSqlQuery(ProjectClass):
 
     @return Diccionario de niveles de agrupamiento
     """
+
     def groupDict(self):
         return self.d.groupDict_
-  
+
     """
     Para obtener la lista de nombres de los campos.
 
     @return Lista de cadenas de texto con los nombres de los campos de la
           consulta
     """
+
     def fieldList(self):
         return self.d.fieldList_
 
@@ -393,11 +386,11 @@ class FLSqlQuery(ProjectClass):
 
     @param gd Diccionario de parámetros
     """
-    
+
     def setGroupDict(self, gd):
         if not gd:
-            return 
-        
+            return
+
         self.d.groupDict_ = []
         self.d.groupDict_ = gd
 
@@ -413,11 +406,11 @@ class FLSqlQuery(ProjectClass):
 
     @param pd Diccionario de parámetros
     """
-    
+
     def setParameterDict(self, pd):
         if not pd:
             return
-        
+
         self.d.parameterDict_ = []
         self.d.parameterDict_ = pd
 
@@ -442,36 +435,34 @@ class FLSqlQuery(ProjectClass):
              (ver FLManager::storeLargeValue()) devuelve el valor de esa referencia,
              en vez de contenido al que apunta esa referencia
     """
-    def value(self, n, raw = False):
+
+    def value(self, n, raw=False):
         pos = None
         name = None
-        
+
         if isinstance(n, str):
-            pos=self.fieldNameToPos(n)
+            pos = self.fieldNameToPos(n)
             name = n
         else:
             pos = n
             name = self.posToFieldName(pos)
-            
-        
-        
+
         if raw:
             return self.d.db_.fetchLargeValue(self._row[pos])
         else:
-            
+
             try:
                 retorno = self._row[pos]
             except:
                 retorno = None
-            
+
             if not type(retorno) in (str, int, bool, float, datetime.date) and not retorno == None:
-                print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" % (name, type(retorno), retorno))
-                retorno = float(retorno)      
-            
-             
+                print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" %
+                      (name, type(retorno), retorno))
+                retorno = float(retorno)
+
             return retorno
-  
-        
+
     """
     Indica si un campo de la consulta es nulo o no
 
@@ -481,10 +472,10 @@ class FLSqlQuery(ProjectClass):
 
     @param n Nombre del campo de la consulta
     """
-    def isNull(self,n):
-        i=self.self.fieldNameToPos(n)
-        return (self._row[i]==None)
 
+    def isNull(self, n):
+        i = self.self.fieldNameToPos(n)
+        return (self._row[i] == None)
 
     """
     Devuelve el nombre de campo, dada su posicion en la consulta.
@@ -494,10 +485,11 @@ class FLSqlQuery(ProjectClass):
     @return Nombre del campo correspondiente. Si no existe el campo devuelve
       QString::null
     """
+
     def posToFieldName(self, p):
         if p < 0 or p >= len(self.d.fieldList_):
             return None
-        
+
         return self.d.fieldList_[p]
 
     """
@@ -506,13 +498,14 @@ class FLSqlQuery(ProjectClass):
     @param n Nombre del campo
     @return Posicion del campo en la consulta. Si no existe el campo devuelve -1
     """
+
     def fieldNameToPos(self, n):
         i = 0
         for field in self.d.fieldList_:
             if field.lower() == n.lower():
                 return i
             i = i + 1
-        
+
         return False
 
     """
@@ -521,6 +514,7 @@ class FLSqlQuery(ProjectClass):
     @return Lista de nombres de las tablas que entran a formar parte de la
         consulta
     """
+
     def tablesList(self):
         return self.d.tablesList_
 
@@ -530,13 +524,14 @@ class FLSqlQuery(ProjectClass):
     @param tl Cadena de texto con los nombres de las tablas
         separados por comas, p.e. "tabla1,tabla2,tabla3"
     """
+
     def setTablesList(self, tl):
         self.d.tablesList_ = []
         for tabla in tl.split(","):
-            
+
             if not self._prj.conn.manager().metadata(tabla):
                 self.invalidTablesList = True
-                
+
             self.d.tablesList_.append(tabla)
 
     """
@@ -545,6 +540,7 @@ class FLSqlQuery(ProjectClass):
     @param name Nombre del parámetro
     @param v Valor para el parámetros
     """
+
     def setValueParam(self, name, v):
         if self.d.parameterDict_:
             self.d.parameterDict_[name] = v
@@ -554,15 +550,17 @@ class FLSqlQuery(ProjectClass):
 
     @param name Nombre del parámetro.
     """
+
     def valueParam(self, name):
         if self.d.parameterDict_:
             return self.d.parameterDict_[name]
         else:
             return None
-  
+
     """
     Redefinicion del método size() de QSqlQuery
     """
+
     def size(self):
         self.__cargarDatos()
         if self._datos:
@@ -570,12 +568,12 @@ class FLSqlQuery(ProjectClass):
         else:
             return 0
 
-
     """
     Para obtener la lista de definiciones de campos de la consulta
 
     @return Objeto con la lista de deficiones de campos de la consulta
     """
+
     def fieldMetaDataList(self):
         if not self.d.fieldMetaDataList_:
             self.d.fieldMetaDataList_ = FLTableMetaData()
@@ -590,41 +588,40 @@ class FLSqlQuery(ProjectClass):
             fd = mtd.field(field)
             if fd:
                 self.d.fieldMetaDataList_.insert(field.lower(), fd)
-            
+
             if not mtd.inCache():
                 del mtd
-        
+
         return self.d.fieldMetaDataList_
-    
 
     countRefQuery = 0
 
     """
     Para obtener la base de datos sobre la que trabaja
     """
+
     def db(self):
         return self.d.db_
-
 
     """
     Privado
     """
     d = None
-    
+
     _posicion = None
 
     @decorators.NotImplementedWarn
     def isValid(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def isActive(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def at(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def lastQuery(self):
         pass
@@ -636,105 +633,104 @@ class FLSqlQuery(ProjectClass):
     @decorators.NotImplementedWarn
     def lastError(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def isSelect(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def QSqlQuery_size(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def driver(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def result(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def isForwardOnly(self):
         pass
-    
+
     @decorators.Deprecated
     def setForwardOnly(self, forward):
-        pass #No hace nada
+        pass  # No hace nada
 
-    
     @decorators.NotImplementedWarn
     def QSqlQuery_value(self, i):
         pass
 
     @decorators.NotImplementedWarn
-    def seek(self, i, relative = False):
+    def seek(self, i, relative=False):
         pass
-  
+
     def next(self):
         if not self._cursor:
             return False
-                
+
         if self._posicion is None:
-            self._posicion=0            
+            self._posicion = 0
         else:
-            self._posicion+=1
+            self._posicion += 1
         if self._datos:
-            if self._posicion>=len(self._datos):
+            if self._posicion >= len(self._datos):
                 return False
-            self._row=self._datos[self._posicion]
-            return True 
+            self._row = self._datos[self._posicion]
+            return True
         else:
             try:
-                self._row=self._cursor.fetchone()
-                if self._row==None:
+                self._row = self._cursor.fetchone()
+                if self._row == None:
                     return False
                 else:
-                    return  True
+                    return True
             except Exception:
                 print(traceback.format_exc())
-                return False 
-    
+                return False
+
     def prev(self):
         if not self._cursor:
             return False
-        
-        self._posicion-=1
+
+        self._posicion -= 1
         if self._datos:
-            if self._posicion<0:
+            if self._posicion < 0:
                 return False
-            self._row=self._datos[self._posicion]
-            return True 
+            self._row = self._datos[self._posicion]
+            return True
         else:
-            return False 
+            return False
 
     def first(self):
         if not self._cursor:
             return False
-        
-        self._posicion=0
+
+        self._posicion = 0
         if self._datos:
-            self._row==self._datos[0]
-            return True 
+            self._row == self._datos[0]
+            return True
         else:
             try:
-                self._row=self._cursor.fetchone()
-                if self._row==None:
+                self._row = self._cursor.fetchone()
+                if self._row == None:
                     return False
                 else:
-                    return  True
+                    return True
             except:
                 return False
 
     def last(self):
         if not self._cursor:
             return False
-        
+
         if self._datos:
-            self._posicion=len(self._datos)-1
-            self._row=self._datos[self._posicion]
+            self._posicion = len(self._datos) - 1
+            self._row = self._datos[self._posicion]
         else:
             return False
-    
+
     @decorators.NotImplementedWarn
     def prepare(self, query):
         pass
@@ -750,30 +746,14 @@ class FLSqlQuery(ProjectClass):
     @decorators.NotImplementedWarn
     def boundValue(self, *args):
         pass
-    
-    
+
     @decorators.NotImplementedWarn
     def boundValues(self):
         pass
-    
+
     @decorators.NotImplementedWarn
     def executedQuery(self):
         pass
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class FLSqlQueryPrivate():
@@ -785,8 +765,8 @@ class FLSqlQueryPrivate():
     parameterDict_ = []
     groupDict_ = []
     fieldMetaDataList_ = []
-    
-    def __init__(self, name = None):
+
+    def __init__(self, name=None):
         self.name_ = name
         self.select_ = None
         self.from_ = None
@@ -796,7 +776,7 @@ class FLSqlQueryPrivate():
         self.groupDict_ = []
         self.fieldMetaDataList_ = []
         self.db_ = None
-    
+
     def __del__(self):
         self.parameterDict_ = None
         self.groupDict_ = None
@@ -858,18 +838,19 @@ class FLSqlQueryPrivate():
     """
     db_ = None
 
+
 class FLGroupByQuery(ProjectClass):
-    
+
     level_ = None
     field_ = None
-    
+
     def __init__(self, n, v):
         super(FLGroupByQuery, self).__init__()
         self.level_ = n
         self.field_ = v
-    
+
     def level(self):
         return self.level_
-    
+
     def field(self):
         return self.field_

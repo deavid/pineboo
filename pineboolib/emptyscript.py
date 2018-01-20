@@ -3,8 +3,10 @@
 from pineboolib import qsatype
 import traceback
 
+
 class interna(object):
     ctx = qsatype.Object()
+
     def __init__(self, context=None):
         self.ctx = context
 
@@ -34,7 +36,6 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def interna_init(self):
         pass
-
 
 
 form = None

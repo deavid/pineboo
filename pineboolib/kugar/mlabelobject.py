@@ -9,7 +9,7 @@ from pineboolib import decorators
 from pineboolib.kugar.mreportobject import MReportObject
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-# from pineboolib.fllegacy.FLStylePainter import FLStylePainter
+from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 
 
 class MLabelObject(MReportObject):
@@ -244,7 +244,8 @@ class MLabelObject(MReportObject):
                     restore = True
 
                 if self.adjustFontSize_ and not self.wordWrap_ and not self.changeHeight_:
-                    factor = float(self.width_) / float(p.painter().fontMetrics().width(self.text_))
+                    factor = float(
+                        self.width_) / float(p.painter().fontMetrics().width(self.text_))
                     if factor < 1.0:
                         f = p.painter().font()
                         f.setPointSizeFloat(f.pointSizeFloat() * factor)
@@ -302,9 +303,11 @@ class MLabelObject(MReportObject):
             if self.width_ > 0 and self.height_ > 0:
                 # p.painter().save(Qt.QObject.name())
                 p.painter().save(self.name())
-                p.painter().scale(float(self.width_) / float(self.pixmap_.width()), float(self.height_) / float(self.pixmap_.height()))
+                p.painter().scale(float(self.width_) / float(self.pixmap_.width()),
+                                  float(self.height_) / float(self.pixmap_.height()))
             else:
-                Qt.qWarning("MLabelObject::drawPixmap : width and/or height are not valid")
+                Qt.qWarning(
+                    "MLabelObject::drawPixmap : width and/or height are not valid")
                 return False
 
             p.painter().drawPixmap(0, 0, pixmap)

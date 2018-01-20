@@ -1,3 +1,10 @@
+flup para python3
+
+sudo -H pip3 install flup==1.0.3.dev20161029 #OJO la versión 1.0.2 es para python2
+
+
+
+Configuración apache2
 
 apt-get install libapache2-mod-fastcgi
 a2enmod fastcgi
@@ -5,7 +12,7 @@ a2enmod fastcgi
 
 
 <VirtualHost *:80>
-    ServerName test
+    #ServerName test
 
     DocumentRoot /var/www/html
     <Directory />
@@ -15,7 +22,7 @@ a2enmod fastcgi
 
 
 
-    FastCGIExternalServer /var/www/eneboo.fcgi -socket /tmp/eneboo-fastcgi.socket
+    FastCGIExternalServer /var/www/html/pineboo.fcgi -socket /tmp/pineboo-fastcgi.socket
 </VirtualHost>
 
 
@@ -24,25 +31,33 @@ a2enmod fastcgi
 
 
 
-Apache:
-* libapache2-mod-fastcgi
-- a2enmod fastcgi
-- modificar /etc/apache2/apache2.conf:
-  FastCGIExternalServer /var/www/eneboo.fcgi -socket /tmp/eneboo-fastcgi.socket (al final).
--service apache2 restart
+Iniciamos pineboo (carga el proyecto projects/p.xml, con --load p):
 
-Adicionalmente he añadido en /var/www/.htaccess (pero no es necesario)
-AddHandler fastcgi-script .fcgi
+sudo -u www-data ./pineboo.py --dgi fcgi --dgi_parameter "flfactppal.iface.valorDefectoEmpresa:/tmp/pineboo-fastcgi.socket" --load p
+
+Opciones para dgi_parameter:
+
+--dgi_parameter "flfactppal.valorDefectoEmpresa:/tmp/mysocket.socket" //Separado por :
+
+--dgi_parameter "flfactppal.valorDefectoEmpresa" // Por defecto usa /tmp/pineboo-fastcgi.socket
+
+
+
+También podemos cargar sin pasar parámetros: (Se cargarian los valores por defecto /tmp/pineboo-fastcgi.socket y flfactppal.iface.fcgiProcessRequest
+
+sudo -u www-data ./pineboo.py --dgi fcgi --load p
+
+
+
 
 
 Al realizar la llamada:
 
-http://127.0.0.1/eneboo.fcgi?flfactppal.valorDefectoEmpresa:codpago
+http://127.0.0.1/pineboo.fcgi?codpago
 
 CONT
 
-http://127.0.0.1/eneboo.fcgi?flfactppal.ejercicioActual
 
-2014
 
-Saludos
+
+

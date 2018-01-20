@@ -120,20 +120,28 @@ class FLPicture(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
-        super(FLPicture, self).__init__(*args)
-        self.d_ = 0
-
-        if isinstance(args[0], FLPicture):
+        if len(args) and isinstance(args[0], FLPicture):
+            super(FLPicture, self).__init__(0)
             otherPic = args[0]
             if otherPic and otherPic != self and otherPic.d_ and otherPic.d_.pic_:
                 self.d_ = self.FLPicturePrivate()
                 self.d_.pic_ = otherPic.d_.pic_
 
-        elif isinstance(args[0], Qt.QPicture):
+        elif len(args) and isinstance(args[0], Qt.QPicture):
+            if len(args) == 1:
+                super(FLPicture, self).__init__(0)
+            elif len(args) == 3:
+                super(FLPicture, self).__init__(args[1], args[2])
             self.setPicture(args[0])
 
         elif len(args) > 1 and isinstance(args[1], Qt.QPainter):
             self.d_.setPainter(args[1])
+            super(FLPicture, self).__init__(args[2], args[3])
+
+        else:
+            super(FLPicture, self).__init__(args[0], args[1])
+
+        self.d_ = 0
 
     @decorators.BetaImplementation
     def PIC_NEW_D(self):
@@ -167,12 +175,12 @@ class FLPicture(ProjectClass, QObject):
         return self.d_ and self.d_.pic_.isNull()
 
     @decorators.BetaImplementation
-    def load(self, fileName, fformat):
+    def load(self, fileName, fformat=0):
         self.PIC_NEW_D()
         self.d_.pic_.load(fileName, fformat)
 
     @decorators.BetaImplementation
-    def save(self, fileName, fformat):
+    def save(self, fileName, fformat=0):
         if not self.d_:
             return False
         return self.d_.pic_.save(fileName, fformat)
@@ -242,13 +250,13 @@ class FLPicture(ProjectClass, QObject):
         self.d_.pte_.setFont(font)
 
     @decorators.BetaImplementation
-    def setPen(self, color, width, style):
+    def setPen(self, color, width=0, style=FLPenStyle.SolidLine):
         if not self.PIC_CHK_D():
             return None
         self.d_.pte_.setPen(Qt.QPen(color, width, style))
 
     @decorators.BetaImplementation
-    def setBrush(self, color, style):
+    def setBrush(self, color, style=FLBrushStyle.SolidPattern):
         if not self.PIC_CHK_D():
             return None
         self.d_.pte_.setBrush(Qt.QBrush(color, style))

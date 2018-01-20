@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-#Completada Si
+# Completada Si
 from PyQt5 import QtCore
 
 from pineboolib import decorators, fllegacy
@@ -20,10 +20,9 @@ filtro del cursor,
 nombre del cursor (de la tabla),
 cursor asociado.
 """
-class opInfo():
-    
-    
 
+
+class opInfo():
 
     primaryKey = None
     op = None
@@ -35,44 +34,39 @@ class opInfo():
     cursor = None
     autoDelete_ = None
 
-
-    def __init__(self,*args,**kwargs):
+    def __init__(self, *args, **kwargs):
         if len(args) > 0:
 
             self.opInfo2(*args)
-            
+
         else:
 
             self.opInfo1()
-        
+
         self.setAutoDelete(False)
-        
-        
-           
+
     def opInfo1(self):
-        return 
-    
-    
-    def opInfo2(self, pK, o, b, a, s, f, n, c ): # * c:
+        return
+
+    def opInfo2(self, pK, o, b, a, s, f, n, c):  # * c:
         self.primaryKey = pK
-        self.op = o 
+        self.op = o
         self.buffer = b
-        self.at = a 
+        self.at = a
         self.sort = s
-        self.filter = f 
-        self.name = n 
-        self.cursor = c 
-        
-        #c.destroyed.connect(self.cursorDestroyed())
-    
+        self.filter = f
+        self.name = n
+        self.cursor = c
+
+        # c.destroyed.connect(self.cursorDestroyed())
+
     def __del__(self):
         pass
-        
+
     #@QtCore.pyqtSlot()
-    #def cursorDestroyed(self):
+    # def cursorDestroyed(self):
     #    self.cursor = None
-        
-    
+
     def setAutoDelete(self, b):
         self.autoDelete_ = b
 
@@ -118,6 +112,8 @@ class opInfo():
 
     @author InfoSiAL S.L.
     """
+
+
 class FLSqlSavePoint():
 
     """
@@ -138,32 +134,32 @@ class FLSqlSavePoint():
     @param id Identificador para el punto de salvaguarda.
     """
 
-    def __init__(self, _id = None):
-        
+    def __init__(self, _id=None):
+
         self.opInfos.append(opInfo())
         self.opInfos[0].setAutoDelete(True)
-        
+
         if _id:
             self.id_ = _id
         else:
             self.id_ = self.opInfos[0]
-        
+
         self.countRefSavePoint = self.countRefSavePoint + 1
     """
     destructor.
     """
-    
+
     def __del__(self):
         if self.opInfos:
             self.opInfos = []
-        
+
         self.countRefSavePoint = self.countRefSavePoint - 1
 
     """
     Establece el identificador del punto de salvaguarda.
     """
 
-    def setId(self, id_ ):
+    def setId(self, id_):
         self.id_ = id_
 
     """
@@ -179,7 +175,7 @@ class FLSqlSavePoint():
     Todas las operaciones almacenadas son eliminadas, por lo tanto, despues de
     invocar a este método ya no se podrán deshacer.
     """
-    
+
     def clear(self):
         self.opInfos.clear()
     """
@@ -187,7 +183,7 @@ class FLSqlSavePoint():
     """
     @decorators.BetaImplementation
     def undo(self):
-        
+
         while self.opInfos:
             opInf = self.opInfos.pop()
             if opInf.op == 0:
@@ -209,7 +205,8 @@ class FLSqlSavePoint():
     def saveInsert(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
             return
-        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+        self.opInfos.append(opInfo(primaryKey, 0, buffer, cursor.at(
+        ), cursor.sort(), cursor.filter(), cursor.name, cursor))
     """
     Guarda el buffer con el contenido del registro a editar.
 
@@ -217,11 +214,13 @@ class FLSqlSavePoint():
     @param buffer buffer con el contenido del registro.
     @param cursor Cursor asociado.
     """
-    def saveEdit( self, primaryKey, buffer, cursor):
+
+    def saveEdit(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
-            return 
-        
-        self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
+            return
+
+        self.opInfos.append(opInfo(primaryKey, 1, buffer, cursor.at(
+        ), cursor.sort(), cursor.filter(), cursor.name, cursor))
     """
     Guarda el buffer con el contenido del registro a borrar.
 
@@ -230,11 +229,11 @@ class FLSqlSavePoint():
     @param cursor Cursor asociado.
     """
     @decorators.BetaImplementation
-    def saveDel(self, primaryKey, buffer, cursor ):
+    def saveDel(self, primaryKey, buffer, cursor):
         if not cursor or not buffer:
-            return 
-        self.opInfos.append( opInfo(primaryKey, 2, buffer, cursor.at(), cursor.sort(), cursor.filter(), cursor.name, cursor))
-
+            return
+        self.opInfos.append(opInfo(primaryKey, 2, buffer, cursor.at(
+        ), cursor.sort(), cursor.filter(), cursor.name, cursor))
 
     """
     Deshace una operacion de insertar.
@@ -249,23 +248,25 @@ class FLSqlSavePoint():
             cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
-        
+
         if not cursor_:
             return
-        
+
         if opInf.buffer.contains(opInf.primaryKey) and not opInf.buffer.isNull(opInf.primaryKey):
-            valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey)) #FIXME
-            ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
+            valuePrimaryKey = str(
+                opInf.buffer.value(opInf.primaryKey))  # FIXME
+            ok = cursor_.select(opInf.primaryKey + "='" +
+                                valuePrimaryKey + "'")
             if ok and cursor_.next():
                 cursor_.primeDelete()
                 del cursor_
-        
+
         if not owner:
             cursor_.select(opInf.filter, opInf.sort)
             cursor_.seek(opInf.at)
         else:
             del cursor_
-  
+
     """
     Deshace una operacion de editar.
 
@@ -279,7 +280,7 @@ class FLSqlSavePoint():
             cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
-        
+
         if not cursor_:
             return
         valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey))
@@ -288,13 +289,13 @@ class FLSqlSavePoint():
             buf = cursor_.primeUpdate()
             buf = opInf.buffer
             cursor_.update()
-        
+
         if not owner:
             cursor_.select(opInf.filter, opInf.sort)
             cursor_.seek(opInf.at)
         else:
             del cursor_
-            
+
     """
     Deshace una operacion de borrar.
 
@@ -308,16 +309,16 @@ class FLSqlSavePoint():
             cursor_ = fllegacy.FLSqlCursor.FLSqlCursor(opInf.name)
             cursor_.setForwardOnly(True)
             owner = True
-        
+
         if not cursor_:
             return
-        
+
         buf = cursor_.primeInsert()
         buf = opInf.buffer
         cursor_.insert()
-        
+
         if not owner:
             cursor_.select(opInf.filter, opInf.sort)
             cursor_.seek(opInf.at)
         else:
-            del cursor_                             
+            del cursor_

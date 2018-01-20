@@ -2,7 +2,8 @@ from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, qt3ui
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-import os, traceback
+import os
+import traceback
 
 """
 Gestor de módulos.
@@ -32,12 +33,10 @@ class FLInfoMod(object):
     version = None
     icono = None
     areaDescripcion = None
-    
-
 
 
 class FLManagerModules(ProjectClass):
-    
+
     """
     Mantiene el identificador del area a la que pertenece el módulo activo.
     """
@@ -82,13 +81,13 @@ class FLManagerModules(ProjectClass):
     Base de datos a utilizar por el manejador
     """
     db_ = None
-    
+
     """
     Uso interno.
     Informacion para la carga estatica desde el disco local
     """
     staticBdInfo_ = None
-    
+
     rootDir_ = None
     scriptsDir_ = None
     tablesDir_ = None
@@ -96,22 +95,22 @@ class FLManagerModules(ProjectClass):
     reportsDir_ = None
     queriesDir_ = None
     transDir_ = None
-    
+
     """
     constructor
     """
-    def __init__(self, db = None):
-        super(FLManagerModules ,self).__init__()
+
+    def __init__(self, db=None):
+        super(FLManagerModules, self).__init__()
         if db:
             self.db_ = db
-
 
     """
     destructor
     """
+
     def __del__(self):
         self.finish()
-        
 
     """
     Acciones de inicialización del sistema de módulos.
@@ -137,6 +136,7 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero.
     @return QString con el contenido del fichero o vacía en caso de error.
     """
+
     def content(self, n):
         query = "SELECT contenido FROM flfiles WHERE nombre='%s'" % n
         cursor = self.db_.cursor()
@@ -144,10 +144,10 @@ class FLManagerModules(ProjectClass):
             cursor.execute(query)
         except Exception:
             print("ERROR: FLManagerModules.content", traceback.format_exc())
-            #cursor.execute("ROLLBACK")
+            # cursor.execute("ROLLBACK")
             cursor.close()
             return None
-        
+
         for contenido in cursor:
             return contenido[0]
 
@@ -162,7 +162,7 @@ class FLManagerModules(ProjectClass):
     @decorators.NotImplementedWarn
     def byteCodeToStr(self, n):
         return None
-    
+
     @decorators.NotImplementedWarn
     def contentCode(self, n):
         return None
@@ -173,8 +173,9 @@ class FLManagerModules(ProjectClass):
     @param pN Ruta y nombre del fichero en el sistema de ficheros
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    def contentFS(self, pN):     
-        return str(open(pN,"rb").read(),"ISO-8859-15")
+
+    def contentFS(self, pN):
+        return str(open(pN, "rb").read(), "ISO-8859-15")
 
     """
     Obtiene el contenido de un fichero, utilizando la caché de memoria y disco.
@@ -185,43 +186,42 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero.
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    def contentCached(self, n, shaKey = None):
-        
+
+    def contentCached(self, n, shaKey=None):
+
         data = None
         modId = None
         name_ = n[:n.index(".")]
         ext_ = n[n.index(".") + 1:]
-        
+
         if not shaKey and not self._prj.conn.manager().isSystemTable(name_):
             query = "SELECT sha FROM flfiles WHERE nombre='%s'" % n
             cursor = self.db_.cursor()
             try:
                 cursor.execute(query)
             except Exception:
-                print("ERROR: FLManagerModules.contentCached", traceback.format_exc())
-                #cursor.execute("ROLLBACK")
+                print("ERROR: FLManagerModules.contentCached",
+                      traceback.format_exc())
+                # cursor.execute("ROLLBACK")
                 cursor.close()
                 return None
-        
-            for contenido in cursor:
-                shaKey = contenido[0]          
-            
-            
-                     
 
-        
+            for contenido in cursor:
+                shaKey = contenido[0]
+
         if self._prj.conn.manager().isSystemTable(name_):
             modId = "sys"
         else:
-            modId = self._prj.conn.managerModules().idModuleOfFile(n)  
-        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" %(self._prj.dbname, modId, ext_, name_))):
-            data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %(self._prj.dbname, modId, ext_, name_, shaKey, ext_)))
+            modId = self._prj.conn.managerModules().idModuleOfFile(n)
+        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" % (self._prj.dbname, modId, ext_, name_))):
+            data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %
+                                          (self._prj.dbname, modId, ext_, name_, shaKey, ext_)))
         elif os.path.exists(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_))):
-            data = self.contentFS(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
+            data = self.contentFS(
+                filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
         else:
             data = self.content(n)
-        
-        
+
         return data
 
     """
@@ -244,14 +244,13 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero que contiene la descricpción del formulario.
     @return QWidget correspondiente al formulario construido.
     """
-    def createUI(self, n, connector = None, parent = None, name = None):
-        
-        
-            if not ".ui" in n:
-                n = n +".ui"
-            form_path = parent.prj.path(n)
-            qt3ui.loadUi(form_path, parent.widget)
-        
+
+    def createUI(self, n, connector=None, parent=None, name=None):
+
+        if not ".ui" in n:
+            n = n + ".ui"
+        form_path = parent.prj.path(n)
+        qt3ui.loadUi(form_path, parent.widget)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
@@ -262,7 +261,7 @@ class FLManagerModules(ProjectClass):
     @return QWidget correspondiente al formulario construido.
     """
     @decorators.NotImplementedWarn
-    def createForm(self, a, connector = None, parent = None, name = None):
+    def createForm(self, a, connector=None, parent=None, name=None):
         return None
 
     """
@@ -270,9 +269,8 @@ class FLManagerModules(ProjectClass):
     la descripción de interfaz del formulario de edición de registros.
     """
     @decorators.NotImplementedWarn
-    def createFormRecord( self, a, connector = None, parent = None, name = None):
+    def createFormRecord(self, a, connector=None, parent=None, name=None):
         return None
-        
 
     """
     Para establecer el módulo activo.
@@ -291,18 +289,18 @@ class FLManagerModules(ProjectClass):
 
     @return Identificador del area
     """
+
     def activeIdArea(self):
         return self.activeIdArea_
-  
 
     """
     Para obtener el módulo activo.
 
     @return Identificador del módulo
     """
+
     def activeIdModule(self):
         return self.activeIdModule_
-
 
     """
     Obtiene la lista de identificadores de area cargadas en el sistema.
@@ -319,12 +317,13 @@ class FLManagerModules(ProjectClass):
     @param idA Identificador del área de la que se quiere obtener la lista módulos
     @return Lista de identificadores de módulos
     """
+
     def listIdModules(self, idA):
         list_ = []
         for name, mod in self.dictInfoMods:
             if self.dictInfoMods[name].idArea == idA:
                 list_.append(name)
-        
+
         return list_
 
     """
@@ -332,6 +331,7 @@ class FLManagerModules(ProjectClass):
 
     @return Lista de identificadores de módulos
     """
+
     def listAllIdModules(self):
         return self.listAllIdModules_
 
@@ -406,6 +406,7 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero
     @return Clave sh asociada al ficheros
     """
+
     def shaOfFile(self, n):
         if self._prj.conn.dbAux() and not n[:3] == "sys" and not self._prj.conn.manager().isSystemTable(n):
             formatVal = self._prj.conn.manager().formatAssignValue("nombre", "string", n, True)
@@ -415,16 +416,16 @@ class FLManagerModules(ProjectClass):
             if q.next():
                 return str(q.value(0))
             return None
-        
+
         else:
             return None
-        
 
     """
     Carga en el diccionario de claves las claves sha1 de los ficheros
     """
+
     def loadKeyFiles(self):
-        
+
         self.dictKeyFiles = {}
         self.dictModFiles = {}
         q = FLSqlQuery(None, self._prj.conn.dbAux())
@@ -435,24 +436,24 @@ class FLManagerModules(ProjectClass):
             name = str(q.value(0))
             self.dictKeyFiles[name] = str(q.value(1))
             self.dictModFiles[name.upper()] = str(q.value(2))
-                
 
     """
     Carga la lista de todos los identificadores de módulos
     """
+
     def loadAllIdModules(self):
         if not self._prj.conn.dbAux():
             return
-        
+
         self.listAllIdModules_ = []
         self.listAllIdModules_.append("sys")
-        
+
         self.dictInfoMods = {}
-        
+
         q = FLSqlQuery(None, self._prj.conn.dbAux())
         q.setForwardOnly(True)
-        q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion FROM flmodules left join flareas on flmodules.idarea = flareas.idarea" )
-        
+        q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion FROM flmodules left join flareas on flmodules.idarea = flareas.idarea")
+
         sysModuleFound = False
         while q.next():
             infoMod = FLInfoMod()
@@ -463,39 +464,40 @@ class FLManagerModules(ProjectClass):
             infoMod.icono = str(q.value(4))
             infoMod.areaDescripcion = str(q.value(5))
             self.dictInfoMods[infoMod.idModulo.upper()] = infoMod
-            
+
             if not infoMod.idModulo == "sys":
                 self.listAllIdModules_.append(infoMod.idModulo)
             else:
                 sysModuleFound = True
-        
+
         if not sysModuleFound:
             infoMod = FLInfoMod()
             infoMod.idModulo = "sys"
             infoMod.idArea = "sys"
             infoMod.descripcion = "Administracion"
             infoMod.version = "0.0"
-            infoMod.icono = self.contentFS("%s/%s" % (filedir("../share/pineboo"), "/sys.xpm"))
+            infoMod.icono = self.contentFS(
+                "%s/%s" % (filedir("../share/pineboo"), "/sys.xpm"))
             infoMod.areaDescripcion = "Sistema"
             self.dictInfoMods[infoMod.idModulo.upper()] = infoMod
 
     """
     Carga la lista de todos los identificadores de areas
     """
+
     def loadIdAreas(self):
         if not self._prj.conn.dbAux():
             return
-        
+
         self.listIdAreas_ = []
         q = FLSqlQuery(None, self._prj.conn.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT idarea from flareas WHERE idarea <> 'sys'")
         while q.next():
             self.listIdAreas_.append(str(q.value(0)))
-        
+
         self.listIdAreas_.append("sys")
-            
-  
+
     """
     Comprueba las firmas para un modulo dado
     """
@@ -509,20 +511,22 @@ class FLManagerModules(ProjectClass):
     @param n Nombre del fichero incluida la extensión
     @return Identificador del módulo al que pertenece el fichero
     """
-    def  idModuleOfFile(self, n):
-        if not isinstance(n , str):
+
+    def idModuleOfFile(self, n):
+        if not isinstance(n, str):
             n = n.toString()
-        
+
         query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
         cursor = self.db_.cursor()
         try:
             cursor.execute(query)
         except Exception:
-            print("ERROR: FLManagerModules.idModuleOfFile", traceback.format_exc())
-            #cursor.execute("ROLLBACK")
+            print("ERROR: FLManagerModules.idModuleOfFile",
+                  traceback.format_exc())
+            # cursor.execute("ROLLBACK")
             cursor.close()
             return None
-        
+
         for idmodulo in cursor:
             return idmodulo[0]
     """
@@ -535,9 +539,9 @@ class FLManagerModules(ProjectClass):
     """
     Lee el estado del sistema de módulos
     """
+
     def readState(self):
         pass
-
 
     """
     Uso interno.
@@ -555,7 +559,5 @@ class FLManagerModules(ProjectClass):
     Muestra cuadro de dialogo para configurar la carga estatica desde el disco local
     """
     @decorators.NotImplementedWarn
-    def  staticLoaderSetup(self):
+    def staticLoaderSetup(self):
         pass
-
-
