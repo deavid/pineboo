@@ -31,7 +31,8 @@ class MReportViewer(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
     def __init__(self, parent=0, name=0):
-        super(MReportViewer, self).__init__(parent, name)
+        ProjectClass.__init__(self)
+        QWidget.__init__(self, parent)
 
         self.progress_ = 0
         self.totalSteps_ = 0
