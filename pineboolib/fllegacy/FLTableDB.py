@@ -15,8 +15,10 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFieldDB import FLLineEdit, FLDoubleValidator,\
-    FLUIntValidator, FLIntValidator, FLSpinBox, FLDateEdit, FLTimeEdit
+from pineboolib.fllegacy.FLFieldDB import FLDoubleValidator,\
+    FLUIntValidator, FLIntValidator
+
+import pineboolib
 
 
 DEBUG = False
@@ -624,7 +626,7 @@ class FLTableDB(QtWidgets.QWidget):
             if k.text() == "'" or k.text() == "\\":
                 return True
 
-        if isinstance(obj, FLDataTable) or isinstance(obj, QtWidgets.QLineEdit):
+        if isinstance(obj, FLDataTable) or isinstance(obj, pineboolib.project.resolveDGIObject("FLLineEdit")):
             return False
         else:
             return super(FLTableDB, self).eventFilter(obj, ev)
@@ -1017,7 +1019,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                             editor_.insertStringList(olTranslated)
                         else:
-                            editor_ = FLLineEdit(self)
+                            editor_ = pineboolib.project.resolveDGIObject("FLLineEdit")(self)
 
                             if type == "double":
                                 editor_.setValidator(FLDoubleValidator(
@@ -1042,14 +1044,14 @@ class FLTableDB(QtWidgets.QWidget):
                                     editor_.setAlignment(Qt.AlignLeft)
 
                     if type == "serial":
-                        editor_ = FLSpinBox()
+                        editor_ = pineboolib.project.resolveDGIObject("FLSpinBox")()
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
                     if type == "pixmap":
                         self.tdbFilter.setRowReadOnly(i, True)
 
                     if type == "date":
-                        editor_ = FLDateEdit(self, _label)
+                        editor_ = pineboolib.project.resolveDGIObject("FLDateEdit")(self, _label)
                         editor_.setOrder(FLDateEdit.DMY)
                         editor_.setAutoAdvance(True)
                         editor_.setSeparator("-")
@@ -1057,7 +1059,7 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_.setDate(da.currentDate())
 
                     if type == "time":
-                        editor_ = FLTimeEdit(self)
+                        editor_ = pineboolib.project.resolveDGIObject("FLTimeEdit")(self)
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 
@@ -1201,7 +1203,7 @@ class FLTableDB(QtWidgets.QWidget):
                     arg2 = editorOp1.value()
                     arg4 = editorOp2.value()
                 else:
-                    editorOp1 = FLSpinBox(self.tdbFilter.cellWidget(i, 2))
+                    editorOp1 = pineboolib.project.resolveDGIObject("FLSpinBox")(self.tdbFilter.cellWidget(i, 2))
                     arg2 = editorOp1.value()
 
             if type == "date":
