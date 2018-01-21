@@ -177,9 +177,14 @@ def main():
     dgiName_ = "qt"
     if options.dgi:
         dgiName_ = options.dgi
-
-    DGI = getattr(importlib.import_module(
-        "pineboolib.plugins.dgi.dgi_%s" % dgiName_), "dgi_%s" % dgiName_, None)()
+    
+    try:
+        DGI = getattr(importlib.import_module(
+            "pineboolib.plugins.dgi.dgi_%s" % dgiName_), "dgi_%s" % dgiName_, None)()
+    except:
+        print(" No se ha encontrado el esquema dgi", dgiName_)
+        sys.exit(32)
+        
     pineboo.DGI = DGI
 
     if options.verbose:
@@ -189,28 +194,30 @@ def main():
         DGI.setParameter(options.dgi_parameter)
 
     if DGI.useDesktop():
-        app = QtWidgets.QApplication(sys.argv)
+        if DGI.localDesktop():
+            app = QtWidgets.QApplication(sys.argv)
 
-        noto_fonts = [
-            "NotoSans-BoldItalic.ttf",
-            "NotoSans-Bold.ttf",
-            "NotoSans-Italic.ttf",
-            "NotoSans-Regular.ttf",
-        ]
-        for fontfile in noto_fonts:
-            QtGui.QFontDatabase.addApplicationFont(
-                filedir("../share/fonts/Noto_Sans", fontfile))
+            noto_fonts = [
+                "NotoSans-BoldItalic.ttf",
+                "NotoSans-Bold.ttf",
+                "NotoSans-Italic.ttf",
+                "NotoSans-Regular.ttf",
+                ]
+            for fontfile in noto_fonts:
+                QtGui.QFontDatabase.addApplicationFont(
+                    filedir("../share/fonts/Noto_Sans", fontfile))
 
-        QtWidgets.QApplication.setStyle("QtCurve")
-        font = QtGui.QFont('Noto Sans', 9)
-        font.setBold(False)
-        font.setItalic(False)
-        QtWidgets.QApplication.setFont(font)
+            QtWidgets.QApplication.setStyle("QtCurve")
+            font = QtGui.QFont('Noto Sans', 9)
+            font.setBold(False)
+            font.setItalic(False)
+            QtWidgets.QApplication.setFont(font)
 
-        # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
-
-        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-            pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
+            # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
+            mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
+                pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
+        else:
+            mainForm = DGI.mainForm()
         # mainForm = getattr(module_, "MainForm")()
 
         # from pineboolib import mainForm
@@ -365,8 +372,12 @@ def main():
                 if DGI.localDesktop():
                     splash.showMessage("Listo ...")
                     QtCore.QTimer.singleShot(2000, splash.hide)
+            
+            if DGI.localDesktop():
+                ret = app.exec_()
+            else:
+                ret = DGI.exec_()
 
-            ret = app.exec_()
             mainForm.mainWindow = None
             del main_window
             del project
