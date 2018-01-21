@@ -459,7 +459,13 @@ class Project(object):
             self.acl_.init_()
 
         project.call("sys.widget.init()", [], None, True)
-
+    
+    def resolveDGIObject(self, name):
+        obj_ = getattr(self._DGI, name)
+        if obj_:
+            return obj_
+        
+        print("WARN: Project.resolveSDIObject no puede encontra el objeto %s en %s" % (name, self._DGI.alias()))
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):

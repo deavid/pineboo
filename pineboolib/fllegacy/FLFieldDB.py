@@ -16,224 +16,13 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
-import datetime
+import datetime, pineboolib
 
 
 DEBUG = False
 
 
-class FLLineEdit(QtWidgets.QLineEdit):
 
-    _tipo = None
-    _partDecimal = 0
-    _partInteger = 0
-    _maxValue = None
-    autoSelect = True
-    _name = None
-    _longitudMax = None
-    _parent = None
-
-    lostFocus = QtCore.pyqtSignal()
-
-    def __init__(self, parent, name=None):
-        super(FLLineEdit, self).__init__(parent)
-        self._name = name
-        if isinstance(parent.fieldName_, str):
-            self._fieldName = parent.fieldName_
-            self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
-            self._partDecimal = parent.partDecimal_
-            self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
-            self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-            # self.textChanged.connect(self.controlFormato)
-            self._parent = parent
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
-    def controlFormato(self):
-        texto = str(super(FLLineEdit, self).text())
-        denegarCambio_ = False
-        denegarCambioEnteros_ = False
-        cambiarComa_ = False
-        decimales_ = None
-        posComa_ = -1
-
-        if texto == "" or texto == None:
-            return
-        """
-        if self._tipo == "int" or self._tipo == "uint":
-            if not texto is None:
-                try:
-                    float(decimales_)
-                except:
-                        denegarCambio_ = True
-            
-            texto = texto.replace(",",".")
-            try:
-                posComa_ = texto.index(".")
-            except:
-                if posComa_ > -1:
-                    denegarCambio_ = True
-            
-        """
-        if self._tipo == "string":
-            if len(texto) > int(self._longitudMax):
-                denegarCambio_ = True
-
-        if self._tipo == "double":
-
-            texto_old = texto
-            if (QtCore.QLocale().decimalPoint() == ","):
-                texto = texto.replace(".", ",")
-            else:
-                texto = texto.replace(",", ".")
-
-            if not texto_old == texto:
-                cambiarComa_ = True
-
-            try:
-                posComa_ = texto.index(".")
-                #print("Coma encontrada en pos", posComa_, denegarCambio_)
-            except:
-                #print("Coma no encontrada", denegarCambio_)
-                a = 1
-
-            if posComa_ > -1:
-                decimales_ = texto[posComa_ + 1:]
-
-                if len(decimales_) > int(self._partDecimal):
-                    #print("Parte decimal (%s) se pasa de %s" % (decimales_ , self._partDecimal))
-                    denegarCambio_ = True
-
-            enteros_ = texto
-
-            if posComa_ > -1:
-                enteros_ = texto[:posComa_]
-
-            #print("enteros ...", enteros_)
-            if len(enteros_) > int(self._partInteger):
-                #print("Parte entera (%s) se pasa de %s" % (enteros_ , self._partInteger))
-                denegarCambioEnteros_ = True
-
-            #print("Decimales =", decimales_ , type(decimales_))
-            if not decimales_ is None:
-                try:
-                    float(decimales_)
-                except:
-                    #print("Decimal esta mal", decimales_, len(decimales_))
-                    if len(decimales_) > 0:
-                        denegarCambio_ = True
-
-            #print("Enteros =", enteros_, type(enteros_))
-            try:
-                float(enteros_)
-            except:
-                #print("Entero esta mal")
-                denegarCambioEnteros_ = True
-            # if not decimales_.isdecimal():
-                #denegarCambio_ = True
-
-            # if not enteros_.isdecimal():
-                #denegarCambioEnteros_ = True
-
-        #print("Procesado final", texto, denegarCambio_)
-
-        if denegarCambio_ == True:
-            texto = texto[0:len(texto) - 1]
-            super(FLLineEdit, self).setText(texto)
-
-        if denegarCambioEnteros_ == True and not decimales_ == None:
-            texto = "%s%s%s" % (
-                enteros_[0:len(enteros_) - 1], QtCore.QLocale().decimalPoint(), decimales_)
-            super(FLLineEdit, self).setText(texto)
-        elif denegarCambioEnteros_ == True and decimales_ == None:
-            texto = enteros_[0:len(enteros_) - 1]
-            super(FLLineEdit, self).setText(texto)
-
-        if cambiarComa_ == True:
-            super(FLLineEdit, self).setText(texto)
-
-    def setText(self, texto, b=True):
-        if self._maxValue:
-            if self._maxValue < int(texto):
-                texto = self._maxValue
-
-        texto = str(texto)
-
-        # Miramos si le falta digitos a la parte decimal ...
-        if self._tipo == "double" and len(texto) > 0:
-            if texto == "0":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
-
-            i = None
-            l = len(texto) - 1
-            try:
-                i = texto.index(".")
-            except:
-                pass
-
-            if i:
-                #print("Posicion de . (%s) de %s en %s" % (i, l, texto))
-                f = (i + self._partDecimal) - l
-                #print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
-                while f > 0:
-                    texto = texto + "0"
-                    f = f - 1
-
-        super(FLLineEdit, self).setText(texto)
-        self.textChanged.emit(texto)
-
-    def text(self):
-        texto = str(super(FLLineEdit, self).text())
-
-        if texto is "":
-            texto = None
-
-        if texto is None:
-            if self._tipo == "string":
-                texto = ""
-
-            elif self._tipo == "double":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
-
-        return str(texto)
-
-    """
-    Especifica un valor máximo para el text (numérico)
-    """
-
-    def setMaxValue(self, value):
-        self._maxValue = value
-
-    """
-    def focusInEvent(self, *f):
-        print("focus in!! ---> ", f)
-        if self._tipo == "double" or self._tipo == "int" or self._tipo == "Uint":
-            self.blockSignals(True)
-            s = self.text()
-            super(FLLineEdit,self).setText(s)
-            self.blockSignals(False)
-        if self.autoSelect and self.selectedText().isEmpty() and not self.isReadOnly():
-            self.selectAll()
-
-        QtGui.QLineEdit.focusInEvent(f)
-
-    def focusOutEvent(self, f):
-        print("Adios --->", f)
-        if self._tipo == "double" or self._tipo == "int" or self._tipo == "Uint":
-            self.setText(self.text())
-
-        super(FLLineEdit,self).focusOutEvent(self, f)
-
-    """
 
 
 class FLFieldDB(QtWidgets.QWidget):
@@ -633,7 +422,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 else:
                     timer.singleShot(0, self.autoCompletionUpdateValue)
                     return True
-            if isinstance(obj, FLLineEdit):
+            if isinstance(obj, pineboolib.project.resolveDGIObject("FLLineEdit")):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed()
                     return True
@@ -682,7 +471,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         isNull = False
-
+        
         """
         if data is None:
             if not self.cursor_:
@@ -768,8 +557,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     return
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
-
-        elif isinstance(self.editor_, FLLineEdit):
+            
+        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLLineEdit")):
 
             data = self.editor_.text()
             if not self.cursor_.bufferIsNull(self.fieldName_):
@@ -1032,7 +821,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if type_ == "double" or type_ == "int" or type_ == "uint" or type_ == "string" or type_ == "stringlist":
             if self.editor_:
                 ed_ = self.editor_
-                if isinstance(ed_, FLLineEdit):
+                if isinstance(ed_, pineboolib.project.resolveDGIObject("FLLineEdit")):
                     v = ed_.text()
 
         elif type_ == "serial":
@@ -1962,7 +1751,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.activated.connect(self.updateValue)
 
             else:
-                self.editor_ = FLLineEdit(self, "editor")
+                self.editor_ = pineboolib.project.resolveDGIObject("FLLineEdit")(self,"editor")
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 self.editor_.setMinimumSize(22, 22)
                 self.editor_._tipo = type_
@@ -2054,7 +1843,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
 
         elif type_ == "serial":
-            self.editor_ = FLLineEdit(self, "editor")
+            self.editor_ = pineboolib.project.resolveDGIObject("FLLineEdit")(self, "editor")
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setMaxValue(pow(10, field.partInteger()) - 1)
             sizePolicy = QtWidgets.QSizePolicy(

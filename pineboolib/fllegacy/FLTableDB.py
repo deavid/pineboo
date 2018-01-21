@@ -15,7 +15,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFieldDB import FLLineEdit, FLDoubleValidator,\
+from pineboolib.fllegacy.FLFieldDB import FLDoubleValidator,\
     FLUIntValidator, FLIntValidator, FLSpinBox, FLDateEdit, FLTimeEdit
 
 
@@ -1015,7 +1015,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                             editor_.insertStringList(olTranslated)
                         else:
-                            editor_ = FLLineEdit(self)
+                            editor_ = pineboolib.project.resolveDGIObject("FLLineEdit")(self)
 
                             if type == "double":
                                 editor_.setValidator(FLDoubleValidator(
