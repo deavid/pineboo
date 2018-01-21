@@ -140,8 +140,8 @@ class FLFieldDB(QtWidgets.QWidget):
         self.FLWidgetFieldDBLayout.addWidget(self.textLabelDB)
 
         self.pushButtonDB = pineboolib.project.resolveDGIObject("QPushButton")()
-
-        self.setFocusProxy(self.pushButtonDB)
+        if pineboolib.project._DGI.localDesktop():
+            self.setFocusProxy(self.pushButtonDB)
         # self.pushButtonDB.setFlat(True)
         PBSizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)

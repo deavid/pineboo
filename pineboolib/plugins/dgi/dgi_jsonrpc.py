@@ -2,15 +2,17 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
-from flup.server.fcgi import WSGIServer
+from PyQt5 import QtCore
+import traceback, sys
+#from flup.server.fcgi import WSGIServer
 
 dependences = []
 
-try:
-    import flup
-except ImportError:
-    print(traceback.format_exc())
-    dependences.append("flup-py3")
+#try:
+#    import flup
+#except ImportError:
+#    print(traceback.format_exc())
+#    dependences.append("flup-py3")
 
 
 if len(dependences) > 0:
@@ -29,7 +31,7 @@ class dgi_jsonrpc(dgi_schema):
     _fcgiSocket = None
 
     def __init__(self):
-        super(dgi_fcgi, self).__init__()  # desktopEnabled y mlDefault a True
+        super(dgi_jsonrpc, self).__init__()  # desktopEnabled y mlDefault a True
         self._name = "jsonrpc"
         self._alias = "JSON-RPC"
         self.setUseDesktop(True)
@@ -45,7 +47,7 @@ class dgi_jsonrpc(dgi_schema):
         print("=============================================")
         print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         par_ = parser()
-        WSGIServer(par_.query, bindAddress=self._fcgiSocket).run()
+        #WSGIServer(par_.query, bindAddress=self._fcgiSocket).run()
         print("End load extraProjectInit")
 
     def setParameter(self, param):
@@ -65,6 +67,7 @@ class parser(object):
         
 
 class PushButton(object):
+    
     
     def __getattr__(self, name):
         print("Pushbutton necesita", name)
