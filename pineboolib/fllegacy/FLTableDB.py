@@ -1019,7 +1019,8 @@ class FLTableDB(QtWidgets.QWidget):
 
                             editor_.insertStringList(olTranslated)
                         else:
-                            editor_ = pineboolib.project.resolveDGIObject("FLLineEdit")(self)
+                            editor_ = pineboolib.project.resolveDGIObject(
+                                "FLLineEdit")(self)
 
                             if type == "double":
                                 editor_.setValidator(FLDoubleValidator(
@@ -1044,14 +1045,16 @@ class FLTableDB(QtWidgets.QWidget):
                                     editor_.setAlignment(Qt.AlignLeft)
 
                     if type == "serial":
-                        editor_ = pineboolib.project.resolveDGIObject("FLSpinBox")()
+                        editor_ = pineboolib.project.resolveDGIObject(
+                            "FLSpinBox")()
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
                     if type == "pixmap":
                         self.tdbFilter.setRowReadOnly(i, True)
 
                     if type == "date":
-                        editor_ = pineboolib.project.resolveDGIObject("FLDateEdit")(self, _label)
+                        editor_ = pineboolib.project.resolveDGIObject(
+                            "FLDateEdit")(self, _label)
                         editor_.setOrder(FLDateEdit.DMY)
                         editor_.setAutoAdvance(True)
                         editor_.setSeparator("-")
@@ -1059,7 +1062,8 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_.setDate(da.currentDate())
 
                     if type == "time":
-                        editor_ = pineboolib.project.resolveDGIObject("FLTimeEdit")(self)
+                        editor_ = pineboolib.project.resolveDGIObject(
+                            "FLTimeEdit")(self)
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 
@@ -1203,7 +1207,8 @@ class FLTableDB(QtWidgets.QWidget):
                     arg2 = editorOp1.value()
                     arg4 = editorOp2.value()
                 else:
-                    editorOp1 = pineboolib.project.resolveDGIObject("FLSpinBox")(self.tdbFilter.cellWidget(i, 2))
+                    editorOp1 = pineboolib.project.resolveDGIObject(
+                        "FLSpinBox")(self.tdbFilter.cellWidget(i, 2))
                     arg2 = editorOp1.value()
 
             if type == "date":

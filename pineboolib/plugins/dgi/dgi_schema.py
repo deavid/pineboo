@@ -1,6 +1,7 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
 
+
 class dgi_schema(object):
 
     _desktopEnabled = False
@@ -16,11 +17,10 @@ class dgi_schema(object):
         self._name = "dgi_shema"
         self._alias = "Default Schema"
         self.loadReferences()
-        
-    
+
     def name(self):
         return self._name
-    
+
     def alias(self):
         return self._alias
 
@@ -59,22 +59,20 @@ class dgi_schema(object):
         print("=============================================")
         print("")
         print("")
-    
+
     def loadReferences(self):
         self.FLLineEdit = FLLineEdit
         self.FLDateEdit = FLDateEdit
         self.FLTimeEdit = FLTimeEdit
         self.FLPixmapView = FLPixmapView
         self.FLSpinBox = FLSpinBox
-        
+
         self.QPushButton = QtWidgets.QPushButton
         self.QLineEdit = QtWidgets.QLineEdit
         self.QComboBox = QtWidgets.QComboBox
         self.QCheckBox = QtWidgets.QCheckBox
         self.QTextEdit = QtWidgets.QTextEdit
-        
-        
-    
+
 
 class FLLineEdit(QtWidgets.QLineEdit):
 
@@ -288,6 +286,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         super(FLLineEdit,self).focusOutEvent(self, f)
 
     """
+
 
 class FLPixmapView(QtWidgets.QWidget):
     frame_ = None

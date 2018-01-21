@@ -3,14 +3,15 @@
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
 from PyQt5 import QtCore
-import traceback, sys
+import traceback
+import sys
 #from flup.server.fcgi import WSGIServer
 
 dependences = []
 
-#try:
+# try:
 #    import flup
-#except ImportError:
+# except ImportError:
 #    print(traceback.format_exc())
 #    dependences.append("flup-py3")
 
@@ -25,13 +26,15 @@ if len(dependences) > 0:
 
 arrayControles = {}
 
+
 class dgi_jsonrpc(dgi_schema):
 
     _fcgiCall = None
     _fcgiSocket = None
 
     def __init__(self):
-        super(dgi_jsonrpc, self).__init__()  # desktopEnabled y mlDefault a True
+        # desktopEnabled y mlDefault a True
+        super(dgi_jsonrpc, self).__init__()
         self._name = "jsonrpc"
         self._alias = "JSON-RPC"
         self.setUseDesktop(True)
@@ -52,7 +55,7 @@ class dgi_jsonrpc(dgi_schema):
 
     def setParameter(self, param):
         self._listenSocket = param
-    
+
     def loadReferences(self):
         self.FLLineEdit = FLLineEdit
         self.QPushButton = PushButton
@@ -65,20 +68,18 @@ class parser(object):
         start_response('200 OK', [('Content-Type', 'text/html')])
         print("FCGI:INFO: Processing '%s' ..." % environ["QUERY_STRING"])
 
-        
 
 class PushButton(object):
-    
-    
+
     def __getattr__(self, name):
         print("Pushbutton necesita", name)
 
 
 class LineEdit(object):
-    
+
     def __getattr__(self, name):
         print("LineEdit necesita", name)
-        
+
 
 class FLLineEdit(object):
 
@@ -97,7 +98,7 @@ class FLLineEdit(object):
     def __init__(self, parent, name=None):
         if self.name:
             self._name = name
-            
+
         if isinstance(parent.fieldName_, str):
             self._fieldName = parent.fieldName_
             self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
@@ -113,10 +114,9 @@ class FLLineEdit(object):
     def controlFormato(self):
         pass
 
-
     def setText(self, texto, b=True):
-        push(self,texto)
-        
+        push(self, texto)
+
     def text(self):
         return pull(self, "text")
 
@@ -126,4 +126,3 @@ class FLLineEdit(object):
 
     def setMaxValue(self, value):
         self._maxValue = value
-

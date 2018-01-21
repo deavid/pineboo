@@ -775,7 +775,8 @@ class File(QtCore.QFile):
     def write(self, text):
         # encoding = text.property("encoding")
         out_ = QTextStream(self)
-        raise NotImplementedError("File:: out_ << text not a valid Python operator")
+        raise NotImplementedError(
+            "File:: out_ << text not a valid Python operator")
         # out_ << text
 
 
@@ -784,4 +785,4 @@ class QString(str):
         if length is not None:
             return self[start:]
         else:
-            return self[start:start+length]
+            return self[start:start + length]
