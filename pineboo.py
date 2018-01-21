@@ -155,6 +155,9 @@ def main():
     parser.add_option("--preload",
                       action="store_true", dest="preload", default=False,
                       help="Load everything. Then exit. (Populates Pineboo cache)")
+    parser.add_option("--force-load",
+                      dest="forceload", default=None, metavar="ACTION",
+                      help="Preload actions containing string ACTION without caching. Useful to debug pythonyzer")
     parser.add_option("--dgi",
                       dest="dgi",
                       help="Change the gdi mode by default", metavar="DGI")
@@ -164,6 +167,10 @@ def main():
                       help="Change the gdi mode by default", metavar="DGIPARAMETER")
 
     (options, args) = parser.parse_args()
+
+    if options.forceload:
+        options.no_python_cache = True
+        options.preload = True
 
     pineboolib.no_python_cache = options.no_python_cache
 
@@ -204,9 +211,9 @@ def main():
 
         mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
             pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
-        #mainForm = getattr(module_, "MainForm")()
+        # mainForm = getattr(module_, "MainForm")()
 
-        #from pineboolib import mainForm
+        # from pineboolib import mainForm
 
     project = pineboolib.main.Project(DGI)
 
@@ -272,7 +279,7 @@ def main():
         sys.settrace(traceit)
 
     project.run()
-    if project.conn.conn == False:
+    if project.conn.conn is False:
         return main()
 
     if DGI.useDesktop() and DGI.localDesktop():
@@ -338,6 +345,8 @@ def main():
                 if options.verbose:
                     print("Precarga ...")
                 for action in project.actions:
+                    if options.forceload and action not in options.forceload:
+                        continue
                     if options.verbose:
                         print("* * * Cargando acción %s . . . " % action)
                     try:
@@ -345,6 +354,7 @@ def main():
                     except Exception:
                         print(traceback.format_exc())
                         project.conn.conn.rollback()
+                sys.exit(0)
             else:
                 if DGI.localDesktop():
                     splash.showMessage("Abriendo interfaz ...")
@@ -384,7 +394,7 @@ def traceit(frame, event, arg):
         name = frame.f_globals["__name__"]
         line = linecache.getline(filename, lineno)
         print("%s:%s: %s" % (name, lineno, line.rstrip()))
-    except:
+    except Exception:
         pass
     return traceit
 
