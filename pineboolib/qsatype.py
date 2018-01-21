@@ -203,16 +203,16 @@ def FLReportViewer():
 
 """
 class FLDomDocument(object):
-    
+
     parser = None
     tree = None
     root_ = None
     string_ = None
-    
+
     def __init__(self):
         self.parser = etree.XMLParser(recover=True, encoding='utf-8')
         self.string_ = None
-        
+
 
     def setContent(self, value):
         try:
@@ -224,7 +224,7 @@ class FLDomDocument(object):
             return True
         except:
             return False
-        
+
     def namedItem(self, name):
         return u"<%s" % name in self.string_
 
@@ -773,6 +773,15 @@ class File(QtCore.QFile):
         return in_.readAll()
 
     def write(self, text):
-        #encodig = text.property("encoding")
+        # encoding = text.property("encoding")
         out_ = QTextStream(self)
-        out_ << text
+        raise NotImplementedError("File:: out_ << text not a valid Python operator")
+        # out_ << text
+
+
+class QString(str):
+    def mid(self, start, length=None):
+        if length is not None:
+            return self[start:]
+        else:
+            return self[start:start+length]
