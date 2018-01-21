@@ -334,7 +334,7 @@ class Project(object):
 
         if not aFunction[0] in funModule.actions:
             if Project.debugLevel > 50: print("No existe la acción %s en el módulo %s" % (aFunction[0], aFunction[0]))
-            return False            
+            return False
 
         funAction = funModule.actions[aFunction[0]];
 
@@ -348,7 +348,7 @@ class Project(object):
 
         if not funScript:
             if Project.debugLevel > 50: print("No existe el script para la acción %s en el módulo %s" % (aFunction[0], aFunction[0]))
-            return False            
+            return False
 
         fn = getattr(funScript, aFunction[2], False);
         if not fn:
@@ -874,8 +874,8 @@ class XMLAction(XMLStruct):
 
 
     def load_script(self, scriptname, parent= None):
-        print("Cargando script " + scriptname + " de " + str(parent) + " accion "+ self.name)
-        
+        print("Cargando script " + str(scriptname) + " de " + str(parent) + " accion "+ str(self.name))
+
         parent_ = parent
         if parent == None:
             parent = self

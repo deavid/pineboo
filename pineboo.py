@@ -397,7 +397,7 @@ if __name__ == "__main__":
     # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
     # dé un segfault, aunque el resultado no sea siempre correcto:
     sys.excepthook = traceback.print_exception
-    
+
     ret = main()
     if pineboo.DGI.useMLDefault():
         gc.collect()
