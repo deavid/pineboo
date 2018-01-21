@@ -257,7 +257,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
             int(nlB) >= maxB and
             int(nlC) >= maxC
         ):
-                break
+            break
         lineaA = " "
         sAB = cAB = lineaA = " "
         sAC = cAC = lineaC = " "

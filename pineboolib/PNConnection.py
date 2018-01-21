@@ -34,10 +34,10 @@ class PNConnection(QtCore.QObject):
     interactiveGUI_ = None
     _dbAux = None
     name = None
-    
-    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name = None):
-        super(PNConnection,self).__init__()
-        
+
+    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
+        super(PNConnection, self).__init__()
+
         self.connAux = {}
         self.name = name
         self.db_name = db_name
@@ -85,18 +85,19 @@ class PNConnection(QtCore.QObject):
                 return self.connAux[name]
 
         print("PNConnection::Creando nueva conexión", name)
-        
-        self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
-        
+
+        self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
+                                          self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
+
         return self.connAux[name]
 
     @decorators.NotImplementedWarn
-    def removeConn(self, name = "default"):
+    def removeConn(self, name="default"):
         return True
 
     def isOpen(self):
         return self.driver().isOpen()
-        
+
     def tables(self):
         return self.driver().tables()
 

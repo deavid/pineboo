@@ -32,12 +32,12 @@ def filedir(*path):
             Es útil para especificar rutas a recursos del programa.
     """
     ruta_ = os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
-    
+
     """
     Esto es para cuando está compilado, para poder acceder a ficheros fuera del ejecutable
     """
     if ruta_.find(":/") > -1:
-        ruta_ = ruta_.replace(":/","")
+        ruta_ = ruta_.replace(":/", "")
 
     return ruta_
 

@@ -35,6 +35,7 @@ endoffile = None
 def cleanNoPython(data):
     return re.sub(r'\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*', '', data, flags=re.DOTALL)
 
+
 def cnvrt(val):
     val = str(val)
     val = val.replace('&', '&amp;')

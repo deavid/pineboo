@@ -2,6 +2,7 @@ from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 import pineboolib
 
+
 class AQSql(ProjectClass):
     """
     Obtiene la base de datos de una conexion.
@@ -9,9 +10,8 @@ class AQSql(ProjectClass):
     @param connectionNmae Nombre de la conexion
     @return La base de datos correspondiente al nombre de conexion indicado
     """
-    def database(connectionName = "default"):
+    def database(connectionName="default"):
         return pineboolib.project.conn.useConn(connectionName)
-
 
 
 """

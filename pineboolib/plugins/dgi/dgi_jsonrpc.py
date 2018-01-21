@@ -48,6 +48,7 @@ class dgi_jsonrpc(dgi_schema):
     def setParameter(self, param):
         self._listenSocket = param
 
+
 class parser(object):
 
     def query(self, environ, start_response):

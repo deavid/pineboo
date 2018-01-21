@@ -40,7 +40,7 @@ class dgi_schema(object):
 
     def setParameter(self, param):  # Se puede pasar un parametro al dgi
         pass
-    
+
     def extraProjectInit(self):
         pass
 

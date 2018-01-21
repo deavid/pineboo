@@ -756,7 +756,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbData.setSizePolicy(sizePolicy)
         self.pbData.setMinimumSize(22, 22)
         self.pbData.setFocusPolicy(Qt.NoFocus)
-        self.pbData.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-data.png")))
+        self.pbData.setIcon(QtGui.QIcon(
+            filedir("../share/icons", "fltable-data.png")))
         self.pbData.setText("")
         self.pbData.setToolTip("Mostrar registros")
         self.pbData.setWhatsThis("Mostrar registros")
@@ -779,7 +780,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbOdf.setSizePolicy(sizePolicy)
         self.pbOdf.setMinimumSize(22, 22)
         self.pbOdf.setFocusPolicy(Qt.NoFocus)
-        self.pbOdf.setIcon(QtGui.QIcon(filedir("../share/icons", "fltable-odf.png")))
+        self.pbOdf.setIcon(QtGui.QIcon(
+            filedir("../share/icons", "fltable-odf.png")))
         self.pbOdf.setText("")
         self.pbOdf.setToolTip("Exportar a hoja de cálculo")
         self.pbOdf.setWhatsThis("Exportar a hoja de cálculo")
