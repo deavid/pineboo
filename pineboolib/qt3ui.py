@@ -34,7 +34,11 @@ def loadUi(path, widget, parent=None):
         encoding="UTF-8",
         remove_blank_text=True,
     )
-    tree = etree.parse(path, parser)
+    try:
+        tree = etree.parse(path, parser)
+    except Exception as e:
+        print("Qt3Ui: Unable to read UI: %r" % path)
+        raise
     root = tree.getroot()
     ICONS = {}
     widget.hide()

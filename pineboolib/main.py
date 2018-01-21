@@ -5,9 +5,9 @@ from builtins import object
 import sys
 import time
 import imp
-#import os.path
+# import os.path
 import os
-#import re,subprocess
+# import re,subprocess
 import traceback
 from lxml import etree
 from binascii import unhexlify
@@ -185,7 +185,7 @@ class Project(object):
 
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port,
                                  self.dbauth.username, self.dbauth.password, self.dbserver.type)
-        if self.conn.conn == False:
+        if self.conn.conn is False:
             return False
 
         # Se verifica que existen estas tablas
@@ -315,11 +315,11 @@ class Project(object):
         pass
 
     def call(self, function, aList, objectContext, showException=True):
+        import pineboolib.qsaglobals
         # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
         if Project.debugLevel > 50:
             print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" %
                   (function, aList, objectContext))
-        import pineboolib.qsaglobals
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
@@ -355,23 +355,23 @@ class Project(object):
                       (aFunction[0], aFunction[0]))
             return False
 
-        fn = getattr(funScript, aFunction[2], False)
-        if not fn:
+        fn = getattr(funScript, aFunction[2], None)
+        if fn is None:
             if Project.debugLevel > 50:
                 print("No existe la función %s en %s" %
                       (aFunction[2], function))
             return True
 
-        #fn = None
+        # fn = None
         try:
-            #fn = eval(function, pineboolib.qsaglobals.__dict__)
+            # fn = eval(function, pineboolib.qsaglobals.__dict__)
             if aList:
                 return fn(*aList)
             else:
                 return fn()
 
         except Exception:
-            #print("** JS.CALL :: ERROR:", traceback.format_exc())
+            # print("** JS.CALL :: ERROR:", traceback.format_exc())
             if showException:
                 print("** JS.CALL :: ERROR:", traceback.format_exc())
 
@@ -411,7 +411,7 @@ class Project(object):
 
     def loadTranslationFromModule(self, idM, lang):
         self.installTranslator(self.createModTranslator(idM, lang, True))
-        #self.installTranslator(self.createModTranslator(idM, "mutliLang"))
+        # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
 
     def installTranslator(self, tor):
         if not tor:
@@ -427,9 +427,8 @@ class Project(object):
     def createModTranslator(self, idM, lang, loadDefault=False):
         fileTs = "%s.%s.ts" % (idM, lang)
         key = self.conn.managerModules().shaOfFile(fileTs)
-        ok = (not key == None)
 
-        if ok or idM == "sys":
+        if key is not None or idM == "sys":
             tor = FLTranslator(self, "%s_%s" %
                                (idM, lang), lang == "multilang")
 
@@ -450,13 +449,13 @@ class Project(object):
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             print("Convirtiendo a Python . . .", scriptname)
-            #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+            # ret = subprocess.call(["flscriptparser2", "--full",script_path])
             from pineboolib.flparser import postparse
             try:
                 postparse.pythonify(scriptname)
-            except:
-                qWarning("WARN: El fichero %s no se ha podido convertir" %
-                         scriptname)
+            except Exception as e:
+                qWarning("WARN: El fichero %s no se ha podido convertir: %s" %
+                         (scriptname, e))
 
         # if not os.path.isfile(python_script_path):
         #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
@@ -815,6 +814,14 @@ class XMLAction(XMLStruct):
         return self.formrecord_widget
 
     def load(self):
+        try:
+            return self._load()
+        except Exception as e:
+            print("ERROR: Loading action %s: %s" % (self.name, e))
+            print(traceback.format_exc())
+            return None
+
+    def _load(self):
         if self._loaded:
             return self.mainform_widget
         if Project.debugLevel > 50:
