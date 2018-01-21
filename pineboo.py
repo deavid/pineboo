@@ -302,7 +302,7 @@ def main():
 
             main_window = mainForm.mainWindow
             main_window.load()
-            
+
             if DGI.localDesktop():
                 splash.showMessage("Módulos y pestañas ...")
             if options.verbose:
@@ -390,7 +390,14 @@ def traceit(frame, event, arg):
 
 
 if __name__ == "__main__":
-
+    # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
+    # no es capturada dentro de la misma; el programa falla con SegFault.
+    # Aunque esto no debería ocurrir, y se debería prevenir lo máximo posible
+    # es bastante incómodo y genera problemas graves para detectar el problema.
+    # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
+    # dé un segfault, aunque el resultado no sea siempre correcto:
+    sys.excepthook = traceback.print_exception
+    
     ret = main()
     if pineboo.DGI.useMLDefault():
         gc.collect()
