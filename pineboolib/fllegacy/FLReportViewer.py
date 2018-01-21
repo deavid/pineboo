@@ -20,10 +20,14 @@ from pineboolib.fllegacy.FLReportEngine import FLReportEngine
 class FLReportViewer(ProjectClass):
 
     def __init__(self, parent=0, name=0, embedInParent=False, rptEngine=0):
-        pParam = 0 if parent and embedInParent else 0 | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | 0 | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
-
-        super(FLReportViewer, self).__init__(parent, name, pParam)
-
+        if parent and embedInParent:
+            pParam = Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
+        else:
+            pParam = 0
+        # super(FLReportViewer, self).__init__(parent, name, pParam)
+        super(FLReportViewer, self).__init__()
+        print("FLReportViewer:: skipped because kugar is not working on Pineboo")
+        return
         self.loop_ = False
         self.reportPrinted_ = False
         self.rptViewer_ = 0
@@ -55,7 +59,7 @@ class FLReportViewer(ProjectClass):
         else:
             self.autoClose_ = bool(FLUtil.readSettingEntry(
                 "rptViewer/autoClose", "false"))
-            self.chkAutoClose.setChecked(self.autoClose_)
+            # FIXME: self.chkAutoClose.setChecked(self.autoClose_)
 
         self.rptViewer_ = MReportViewer(self)
         self.setReportEngine(FLReportEngine(
@@ -85,6 +89,11 @@ class FLReportViewer(ProjectClass):
                 "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
+
+    @decorators.NotImplementedWarn
+    def setName(self, name):
+        # Emulacion, este código no funciona:
+        self.name = name
 
     @decorators.BetaImplementation
     def rptViewer(self):
