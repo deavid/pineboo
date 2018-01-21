@@ -62,6 +62,17 @@ class dgi_schema(object):
     
     def loadReferences(self):
         self.FLLineEdit = FLLineEdit
+        self.FLDateEdit = FLDateEdit
+        self.FLTimeEdit = FLTimeEdit
+        self.FLPixmapView = FLPixmapView
+        self.FLSpinBox = FLSpinBox
+        
+        self.QPushButton = QtWidgets.QPushButton
+        self.QLineEdit = QtWidgets.QLineEdit
+        self.QComboBox = QtWidgets.QComboBox
+        self.QCheckBox = QtWidgets.QCheckBox
+        self.QTextEdit = QtWidgets.QTextEdit
+        
         
     
 
@@ -277,3 +288,157 @@ class FLLineEdit(QtWidgets.QLineEdit):
         super(FLLineEdit,self).focusOutEvent(self, f)
 
     """
+
+class FLPixmapView(QtWidgets.QWidget):
+    frame_ = None
+    scrollView = None
+    autoScaled_ = None
+    path_ = None
+    pixmap_ = None
+    pixmapView_ = None
+    lay_ = None
+    gB_ = None
+
+    def __init__(self, parent):
+        super(FLPixmapView, self).__init__(parent)
+        self.scrollView = QtWidgets.QScrollArea(parent)
+        self.autoScaled_ = False
+        self.lay_ = QtWidgets.QHBoxLayout(self)
+        self.pixmap_ = QtGui.QPixmap()
+        self.pixmapView_ = QtWidgets.QLabel(self)
+        self.lay_.addWidget(self.pixmapView_)
+
+    def setPixmap(self, pix):
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        self.pixmap_ = pix
+        if not self.autoScaled_:
+            self.resize(self.pixmap_.size().width(),
+                        self.pixmap_.size().height())
+        self.pixmapView_.clear()
+        self.pixmapView_.setPixmap(self.pixmap_)
+        self.repaint()
+        QtWidgets.QApplication.restoreOverrideCursor()
+
+    def drawContents(self, p, cx, cy, cw, ch):
+        p.setBrush(QtGui.QPalette.Background)
+        p.drawRect(cx, cy, cw, ch)
+        if self.autoScaled_:
+            newWidth = self.width() - 2
+            newHeight = self.height() - 2
+
+            if not self.pixmapWiev_ is None and self.pixmapView_.width() == newWidth and self.pixmapView_.height() == newHeight:
+                return
+
+            img = self.pixmap_
+            if img.width() > newWidth or img.height() > newHeight:
+                self.pixmapView_.convertFromImage(img.scaled(
+                    newWidth, newHeight, QtCore.Qt.KeepAspectRatio))
+            else:
+                self.pixmapView_.convertFromImage(img)
+
+            if not self.pixmapView_ is None:
+                p.drawPixmap((self.width() / 2) - (self.pixmapView_.width() / 2),
+                             (self.height() / 2) - (self.pixmapView_.height() / 2), self.pixmapView_)
+            elif not self.pixmap_ is None:
+                p.drawPixmap((self.width() / 2) - (self.pixmap_.width() / 2),
+                             (self.height() / 2) - (self.pixmap_.height() / 2), self.pixmap_)
+
+    def previewUrl(self, url):
+        u = QtCore.QUrl(url)
+        if u.isLocalFile():
+            path = u.path()
+
+        if not path == self.path_:
+            self.path_ = path
+            img = QtGui.QImage(self.path_)
+
+            if img is None:
+                return
+
+            pix = QtGui.QPixmap()
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+            pix.convertFromImage(img)
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+            if not pix is None:
+                self.setPixmap(pix)
+
+    def clear(self):
+        self.pixmapView_.clear()
+
+    def pixmap(self):
+        return self.pixmap_
+
+    def setAutoScaled(self, autoScaled):
+        self.autoScaled_ = autoScaled
+
+
+class FLDateEdit(QtWidgets.QDateEdit):
+
+    valueChanged = QtCore.pyqtSignal()
+    DMY = "dd-MM-yyyy"
+
+    def __init__(self, parent, name):
+        super(FLDateEdit, self).__init__(parent)
+        self.setDisplayFormat("dd-MM-yyyy")
+        self.setMinimumWidth(120)
+        self.setMaximumWidth(120)
+
+    def setOrder(self, order):
+        self.setDisplayFormat(order)
+
+    def setDate(self, d=None):
+        from pineboolib.qsatype import Date
+
+        if d in (None, "NAN"):
+            d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
+        if isinstance(d, str):
+            if "T" in d:
+                d = d[:d.find("T")]
+
+        if isinstance(d, Date):
+            d = d.date_
+
+        if isinstance(d, datetime.date):
+            d = QtCore.QDate.fromString(str(d), "yyyy-MM-dd")
+
+        if not isinstance(d, QtCore.QDate):
+            date = QtCore.QDate.fromString(d, "dd-MM-yyyy")
+        else:
+            date = d
+
+        super(FLDateEdit, self).setDate(date)
+        self.setStyleSheet('color: black')
+
+    def __getattr__(self, name):
+        return DefFun(self, name)
+
+
+class FLTimeEdit(QtWidgets.QTimeEdit):
+
+    def __init__(self, parent):
+        super(FLTimeEdit, self).__init__(parent)
+        self.setDisplayFormat("hh:mm:ss")
+        self.setMinimumWidth(90)
+        self.setMaximumWidth(90)
+
+    def setTime(self, v):
+        if isinstance(v, str):
+            v = v.split(':')
+            time = QtCore.QTime(int(v[0]), int(v[1]), int(v[2]))
+        else:
+            time = v
+        super(FLTimeEdit, self).setTime(time)
+
+    def __getattr__(self, name):
+        return DefFun(self, name)
+
+
+class FLSpinBox(QtWidgets.QSpinBox):
+
+    def __init__(self, parent=None):
+        super(FLSpinBox, self).__init__(parent)
+        # editor()setAlignment(Qt::AlignRight);
+
+    def setMaxValue(self, v):
+        self.setMaximum(v)
