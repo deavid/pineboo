@@ -755,6 +755,7 @@ class InstructionFlow(ASTPython):
 class Member(ASTPython):
     def generate(self, **kwargs):
         arguments = []
+        arg_expr = []
         funs = None
         for n, arg in enumerate(self.elem):
             expr = []
@@ -764,11 +765,14 @@ class Member(ASTPython):
                 else:
                     yield dtype, data
             if len(expr) == 0:
-                arguments.append("unknownarg")
+                txtarg = "unknownarg"
                 yield "debug", "Argument %d not understood" % n
                 yield "debug", etree.tostring(arg)
             else:
-                arguments.append(" ".join(expr))
+                txtarg = " ".join(expr)
+            arguments.append(txtarg)
+            arg_expr.append(expr)
+
         # Lectura del self.iface.__init
         if len(arguments) >= 3 and arguments[0:2] == ["self", "iface"] and arguments[2].startswith("__"):
             # From: self.iface.__function()
@@ -812,7 +816,7 @@ class Member(ASTPython):
         for member in replace_members:
             for idx, arg in enumerate(arguments):
                 if member == arg or arg.startswith(member + "("):
-
+                    expr = arg_expr[idx]
                     part1 = arguments[:idx]
                     try:
                         part2 = arguments[idx + 1:]
@@ -836,6 +840,8 @@ class Member(ASTPython):
                             "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
+                        arguments[idx-1] = "QString(%s)" % arguments[idx-1]
+                        """ print("###### ARG:", arguments, value, expr)
                         if value.find(",") > -1 and value.find(")") > value.find(","):
                             value = value[0:len(value) - 1]
                             v0 = value[0:value.find(",")]
@@ -846,6 +852,7 @@ class Member(ASTPython):
                             value = value[:len(value) - 1]
                             arguments = ["%s[(%s):]" %
                                          (".".join(part1), value)] + part2
+                        """
                     elif member == "length":
                         value = arg[7:]
                         value = value[:len(value) - 1]
