@@ -5,10 +5,6 @@ from PyQt5.Qt import qWarning
 
 from pineboolib.utils import filedir
 from pineboolib import decorators
-import os.path
-import traceback
-#import imp
-import importlib
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -154,8 +150,8 @@ class FLFormDB(QtWidgets.QDialog):
         try:
             assert (self.__class__, action) not in self.known_instances
         except AssertionError:
-            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),)
-                  + "Puede que se estén perdiendo datos!")
+            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
+                  "Puede que se estén perdiendo datos!")
         self.known_instances[(self.__class__, action)] = self
 
         self.action = action
@@ -352,7 +348,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.layout.addWidget(w)
             self.layoutButtons = QtWidgets.QHBoxLayout()
 
-        #pbSize = Qt.QSize(22,22)
+            # pbSize = Qt.QSize(22,22)
 
             wt = QtWidgets.QToolButton.whatsThis()
             wt.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-find.png")))
@@ -644,8 +640,8 @@ class FLFormDB(QtWidgets.QDialog):
                     if fdb.autoComFrame_.isvisible():
                         fdb.autoComFrame_.hide()
                         return
-                except:
-                    pass
+                except Exception:
+                    print("closeEvent: Error al ocultar el frame")
 
         self.setCursor(None)
         self.closed.emit()

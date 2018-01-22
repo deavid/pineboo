@@ -12,6 +12,10 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
 
 
+class FLDomNodeInterface():
+    pass
+
+
 class FLReportEngine(MReportEngine):
 
     class FLReportEnginePrivate(ProjectClass):
