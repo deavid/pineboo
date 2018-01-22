@@ -756,7 +756,7 @@ class MainForm(object):
         self.toolbar = []
         for toolbar_action in self.root.xpath("toolbars//action"):
             self.toolbar.append(toolbar_action.get("name"))
-        #self.ui = WMainForm()
+        # self.ui = WMainForm()
         # self.ui.load(self.path)
         # self.ui.show()
 

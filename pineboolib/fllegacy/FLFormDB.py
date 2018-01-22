@@ -518,7 +518,7 @@ class FLFormDB(QtWidgets.QDialog):
             acl.process(self)
 
         self.loadControls()
-        """ 
+        """
         if self.cursor_ and self.cursor_.metadata():
             caption = None
             if self.action_:
@@ -526,24 +526,24 @@ class FLFormDB(QtWidgets.QDialog):
                 caption = self.action_.name
                 if self.action.description:
                     self.setWhatsThis(self.action_.description)
-                
+
                 self.idMDI_ = self.action_.name
-            
+
             if not caption:
                 caption = self.cursor_.metadata().alias()
-            
+
             self.setCaptionWidget(caption)
-            
+
             #self.bindIface()
             #self.setCursor(self.cursor_)
-            
-            
-            
-        
+
+
+
+
         else:
-       
-            self.setCaptionWidget("No hay metadatos")     
-                  
+
+            self.setCaptionWidget("No hay metadatos")
+
         """
 
     def loadControls(self):
