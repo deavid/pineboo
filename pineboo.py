@@ -147,6 +147,9 @@ def main():
     parser.add_option("--trace-debug",
                       action="store_true", dest="trace_debug", default=False,
                       help="Write lots of trace information to stdout")
+    parser.add_option("--trace-signals",
+                      action="store_true", dest="trace_signals", default=False,
+                      help="Wrap up every signal, connect and emit, and give useful tracebacks")
     parser.add_option("-a", "--action", dest="action",
                       help="load action", metavar="ACTION")
     parser.add_option("--no-python-cache",
@@ -216,7 +219,10 @@ def main():
         # from pineboolib import mainForm
 
     project = pineboolib.main.Project(DGI)
-
+    if options.trace_signals:
+        print("WARN: --trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
+        print("WARN: ... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
+        monkey_patch_connect()
     if options.verbose:
         project.setDebugLevel(100)
         if DGI.useDesktop():
@@ -399,6 +405,61 @@ def traceit(frame, event, arg):
     return traceit
 
 
+def monkey_patch_connect():
+    class BoundSignal():
+        _CONNECT = QtCore.pyqtBoundSignal.connect
+        _EMIT = QtCore.pyqtBoundSignal.emit
+        _LAST_EMITTED_SIGNAL = {}
+
+        def slot_decorator(self, slot, connect_stack):
+            selfid = repr(self)
+
+            def decorated_slot(*args):
+                ret = None
+                if len(args) == 1 and args[0] is False:
+                    args = []
+                try:
+                    # print("Calling slot: %r %r" % (slot, args))
+                    ret = slot(*args)
+                except Exception:
+                    print("Unhandled exception in slot %r (%r): %r" % (slot, self, args))
+                    print("-- Connection --")
+                    print(traceback.format_list(connect_stack)[-2].rstrip())
+                    last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(selfid, None)
+                    if last_emit_stack:
+                        print("-- Last signal emmitted --")
+                        print(traceback.format_list(last_emit_stack)[-2].rstrip())
+                    print("-- Slot traceback --")
+                    print(traceback.format_exc())
+                return ret
+            return decorated_slot
+
+        def connect(self, slot, type_=0, no_receiver_check=False):
+            """
+                slot is either a Python callable or another signal.
+                type is a Qt.ConnectionType. (default Qt.AutoConnection = 0)
+                no_receiver_check is True to disable the check that the receiver's C++
+                instance still exists when the signal is emitted.
+            """
+            clname = getattr(getattr(slot, "__class__", {}), "__name__", "not a class")
+            # print("Connect: %s -> %s" % (type(self), slot))
+            if clname == "method":
+                stack = traceback.extract_stack()
+                newslot = BoundSignal.slot_decorator(self, slot, stack)
+            else:
+                newslot = slot
+            return BoundSignal._CONNECT(self, newslot, type_, no_receiver_check)
+
+        def emit(self, *args):
+            # print("Emit: %s :: %r" % (self, args))
+            stack = traceback.extract_stack()
+            # print(traceback.format_list(stack)[-2].rstrip())
+            BoundSignal._LAST_EMITTED_SIGNAL[repr(self)] = stack
+            return BoundSignal._EMIT(self, *args)
+    QtCore.pyqtBoundSignal.connect = BoundSignal.connect
+    QtCore.pyqtBoundSignal.emit = BoundSignal.emit
+
+
 if __name__ == "__main__":
     # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
     # no es capturada dentro de la misma; el programa falla con SegFault.
@@ -407,7 +468,6 @@ if __name__ == "__main__":
     # Agregamos sys.excepthook para controlar esto y hacer que PyQt5 no nos
     # dé un segfault, aunque el resultado no sea siempre correcto:
     sys.excepthook = traceback.print_exception
-
     ret = main()
     if pineboo.DGI.useMLDefault():
         gc.collect()
