@@ -28,6 +28,7 @@ from PyQt5.Qt import QWidget
 # Cargar toda la API de Qt para que sea visible.
 from PyQt5.QtGui import *  # noqa
 from PyQt5.QtCore import *  # noqa
+from PyQt5.QtXml import QDomDocument
 
 
 class StructMyDict(dict):
@@ -178,10 +179,12 @@ def FLTableDB(*args):
 
 
 FLListViewItem = QtWidgets.QListView
+FLDomDocument = QDomDocument
 QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
+
 
 
 @decorators.NotImplementedWarn
