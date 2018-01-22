@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from pineboolib import qsatype
-import traceback
 
 
 class interna(object):

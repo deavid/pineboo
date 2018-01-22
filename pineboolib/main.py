@@ -2,12 +2,9 @@
 
 from builtins import str
 from builtins import object
-import sys
 import time
-import imp
-# import os.path
 import os
-# import re,subprocess
+import logging
 import traceback
 from lxml import etree
 from binascii import unhexlify
@@ -20,9 +17,13 @@ from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
-from PyQt5.Qt import QTextCodec, qWarning, qApp, QApplication
-if __name__ == "__main__":
-    sys.path.append('..')
+from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib import qt3ui
+from pineboolib.PNConnection import PNConnection
+from pineboolib.dbschema.schemaupdater import parseTable
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
+from PyQt5.Qt import qWarning, qApp
 
 import pineboolib.emptyscript
 from pineboolib import decorators
@@ -43,6 +44,7 @@ class DBAuth(XMLStruct):
 
 
 class Project(object):
+    logger = logging.getLogger("main.Project")
     conn = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     mainFormName = "Pineboo"
@@ -230,7 +232,7 @@ class Project(object):
             raise AssertionError
         # if self.parseProject:
         if self._DGI.useDesktop() and self._DGI.localDesktop():
-            progressDialog = util.createProgressDialog("Pineboo", size_)
+            util.createProgressDialog("Pineboo", size_)
         p = 0
         for idmodulo, nombre, sha in self.cur:
             if self._DGI.useDesktop() and self._DGI.localDesktop():
@@ -259,11 +261,11 @@ class Project(object):
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
                 txt = ""
                 try:
-                    #txt = contenido.decode("UTF-8").encode("ISO-8859-15")
+                    # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
                     txt = contenido.encode("ISO-8859-15")
                 except Exception:
                     print("Error al decodificar", idmodulo, nombre)
-                    #txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
+                    # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
                     txt = contenido.encode("ISO-8859-15", "replace")
 
                 f2.write(txt)
@@ -293,8 +295,8 @@ class Project(object):
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             try:
                 util.destroyProgressDialog()
-            except:
-                pass
+            except Exception as e:
+                self.logger.error(e)
 
             self.loadTranslations()
             self.readState()
@@ -318,7 +320,6 @@ class Project(object):
         pass
 
     def call(self, function, aList, objectContext, showException=True):
-        import pineboolib.qsaglobals
         # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
         if Project.debugLevel > 50:
             print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" %
@@ -382,10 +383,10 @@ class Project(object):
 
     def loadTranslations(self):
         translatorsCopy = None
-        if self.translators:
-            translatorsCopy = copy.copy(self.translators)
-            for it in translatorsCopy:
-                self.removeTranslator(it)
+        # if self.translators:
+        #     translatorsCopy = copy.copy(self.translators)
+        #     for it in translatorsCopy:
+        #         self.removeTranslator(it)
 
         lang = QtCore.QLocale().name()[:2]
         for module in self.modules.keys():
@@ -467,7 +468,7 @@ class Project(object):
         if self.acl_:
             self.acl_.init_()
 
-        project.call("sys.widget.init()", [], None, True)
+        self.call("sys.widget.init()", [], None, True)
 
     def resolveDGIObject(self, name):
         obj_ = getattr(self._DGI, name)
@@ -628,13 +629,13 @@ class ModuleActions(object):
         action.prj = self.prj
         action.name = self.mod.name
         action.alias = self.mod.name
-        #action.form = self.mod.name
+        # action.form = self.mod.name
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals, action.name):
-            #print("INFO: No se sobreescribe variable de entorno", action.name)
+            # print("INFO: No se sobreescribe variable de entorno", action.name)
             pass
         else:
             setattr(qsaglobals, action.name, DelayedObjectProxyLoader(
@@ -649,7 +650,7 @@ class ModuleActions(object):
             except AttributeError:
                 name = "unnamed"
             self.prj.actions[name] = action
-            #print(":::" , self.mod.name, name)
+            # print(":::" , self.mod.name, name)
             if name != "unnamed":
                 if hasattr(qsaglobals, "form" + name):
                     if Project.debugLevel > 150:
@@ -669,9 +670,11 @@ class ModuleActions(object):
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
                         action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
 
-    def __contains__(self, k): return k in self.prj.actions
+    def __contains__(self, k):
+        return k in self.prj.actions
 
-    def __getitem__(self, k): return self.prj.actions[k]
+    def __getitem__(self, k):
+        return self.prj.actions[k]
 
     def __setitem__(self, k, v):
         raise NotImplementedError("Actions are not writable!")
@@ -702,12 +705,9 @@ class MainForm(object):
                     remove_blank_text=True,
                 )
                 self.tree = etree.parse(self.path, self.parser)
-                print(traceback.format_exc())
-                print(
-                    "Formulario %r se cargó con codificación ISO (UTF8 falló)" % self.path)
-            except etree.XMLSyntaxError as e:
-                print(
-                    "Error cargando UI después de intentar con UTF8 y ISO", self.path, e)
+                self.logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", self.path)
+            except etree.XMLSyntaxError:
+                self.logger.exception("Error cargando UI después de intentar con UTF8 y ISO", self.path)
 
         self.root = self.tree.getroot()
         self.actions = {}
@@ -814,7 +814,7 @@ class XMLAction(XMLStruct):
         self.formrecord_widget = FLFormRecordDB(
             parent_or_cursor, self, load=True)
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
-        #self._record_loaded = True
+        # self._record_loaded = True
         if self.mainform_widget:
             if Project.debugLevel > 50:
                 print("End of record action load %s (iface:%s ; widget:%s)"
@@ -905,7 +905,7 @@ class XMLAction(XMLStruct):
               str(parent) + " accion " + str(self.name))
 
         parent_ = parent
-        if parent == None:
+        if parent is None:
             parent = self
             action_ = self
             prj_ = self.prj
@@ -916,7 +916,7 @@ class XMLAction(XMLStruct):
         # Si ya esta cargado se reusa...
         if getattr(self, "script", None) and parent_:
             parent.script = self.script
-            #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            # self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
             parent.widget = parent.script.form
             if getattr(parent.widget, "iface", None):
                 parent.iface = parent.widget.iface
@@ -977,7 +977,7 @@ class XMLAction(XMLStruct):
                 script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
                 print("Convirtiendo a Python . . .")
-                #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                # ret = subprocess.call(["flscriptparser2", "--full",script_path])
                 from pineboolib.flparser import postparse
                 postparse.pythonify(script_path)
 
@@ -989,8 +989,8 @@ class XMLAction(XMLStruct):
                                              python_script_path.replace(self.prj.tmpdir, "tempdata")))
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, python_script_path).load_module()
-                #self.script = imp.load_source(scriptname,python_script_path)
-                #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+                # self.script = imp.load_source(scriptname,python_script_path)
+                # self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
                 print("ERROR al cargar script QS para la accion %r:" %
                       action_.name, e)
@@ -1016,22 +1016,12 @@ class XMLAction(XMLStruct):
         moduleName = self.prj.actions[name].mod.moduleName
         if moduleName in (None, "sys"):
             return
-        if not moduleName in self.prj._initModules:
+        if moduleName not in self.prj._initModules:
             self.prj._initModules.append(moduleName)
             self.prj.call("%s.iface.init()" % moduleName, [], None, False)
             return
 
 
-from pineboolib.fllegacy.FLFormDB import FLFormDB
-
-
 class FLMainForm(FLFormDB):
     """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """
     pass
-
-
-from pineboolib import qt3ui
-from pineboolib.PNConnection import PNConnection
-from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB

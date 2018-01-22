@@ -4,20 +4,17 @@ from PyQt5.Qt import qWarning
 from PyQt5 import QtCore, QtWidgets
 
 from pineboolib import decorators, PNSqlDrivers
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLManager import FLManager
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
-from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
-import traceback
 import sys
+import logging
 
 
 class PNConnection(QtCore.QObject):
-
+    logger = logging.getLogger("PNConnection")
     db_name = None
     db_host = None
     db_port = None
@@ -102,7 +99,7 @@ class PNConnection(QtCore.QObject):
         return self.driver().tables()
 
     def database(self, name=None):
-        if name == None:
+        if name is None:
             return self.DBName()
 
         return self.useConn(name)
@@ -110,7 +107,8 @@ class PNConnection(QtCore.QObject):
     def DBName(self):
         try:
             return self.driver().DBName()
-        except:
+        except Exception as e:
+            self.logger.warn("DBName: %s", e)
             return self.db_name
 
     def driver(self):
@@ -162,9 +160,6 @@ class PNConnection(QtCore.QObject):
     def formatValue(self, t, v, upper):
         return self.driverSql.formatValue(t, v, upper)
 
-    def nextSerialVal(self, table, field):
-        self.driverSql.nextSerialVal(table, field)
-
     def canSavePoint(self):
         return True
 
@@ -201,9 +196,12 @@ class PNConnection(QtCore.QObject):
 
         cancel = False
         if self.interactiveGUI() and (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
-            #res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios", "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes, [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
-            res = QtWidgets.QMessageBox.information(QtWidgets.QApplication.focusWidget(
-            ), "Cancelar Cambios", "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes, QMessageBox.No)
+            # res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios", "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes, [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
+            res = QtWidgets.QMessageBox.information(
+                QtWidgets.QApplication.focusWidget(),
+                "Cancelar Cambios",
+                "Todos los cambios se cancelarán.¿Está seguro?",
+                QMessageBox.Yes, QMessageBox.No)
             if res == QMessageBox.No:
                 return False
             cancel = True
@@ -233,7 +231,7 @@ class PNConnection(QtCore.QObject):
                     cur.select()
 
                 return True
-            except:
+            except Exception:
                 print(
                     "FLSqlDatabase::doRollback : Fallo al intentar deshacer transacción")
                 return False
@@ -283,8 +281,8 @@ class PNConnection(QtCore.QObject):
                 # aqApp.emitTransactionEnd(cur)
 
                 return True
-            except:
-                print("PNConnect::doCommit : Fallo al intentar terminar transacción")
+            except Exception as e:
+                self.logger.warn("doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
             print("Liberando punto de salvaguarda %s..." % self.transaction_)
@@ -376,8 +374,8 @@ class PNConnection(QtCore.QObject):
         q = self.cursor()
         try:
             q.execute(sql)
-        except:
-            qWarning(traceback.format_exc())
+        except Exception as e:
+            self.logger.exception("createTable: Error happened executing sql: %s...", sql[:80])
             self.rollbackTransaction()
             return False
         self.commitTransaction()
