@@ -1,9 +1,8 @@
 # # -*- coding: utf-8 -*-
-
+from PyQt5.QtCore import QObject, QVariant
 import os
 import os.path
 import re
-
 DEBUG = False
 
 
@@ -85,7 +84,7 @@ class XMLStruct(Struct):
                 try:
                     setattr(self, key, text)
                     self._attrs.append(key)
-                except:
+                except Exception:
                     print("utils.XMLStruct: Omitiendo",
                           self.__name__, key, text)
 

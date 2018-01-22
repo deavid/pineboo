@@ -3,18 +3,26 @@
 from builtins import object
 import re
 import os.path
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 
 import traceback
 import pineboolib
-from pineboolib import flcontrols, decorators
-from pineboolib.flcontrols import ProjectClass
+from pineboolib import decorators
 from pineboolib.utils import filedir
 
 import weakref
-from pineboolib.utils import aqtt, auto_qt_translate_text
-from PyQt5.Qt import QMainWindow, QDate, QTextStream, qWarning, QDateEdit
+from PyQt5.Qt import qWarning, QDateEdit
+
+from pineboolib.fllegacy.FLUtil import FLUtil
+
+AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
+util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
+
+Insert = 0
+Edit = 1
+Del = 2
+Browse = 3
 
 
 class File(object):
@@ -27,7 +35,8 @@ class File(object):
 class FileDialog(QtWidgets.QFileDialog):
 
     # def __init__(self):
-        #super(FileDialog, self).__init__()
+    #    super(FileDialog, self).__init__()
+
     def getOpenFileName(*args):
         obj = None
         parent = QtWidgets.QApplication.activeModalWidget()
@@ -55,42 +64,42 @@ def parseFloat(x):
 
 """
 class parseString(object):
-    
+
     obj_ = None
     length = None
-    
+
     def __init__(self, objeto):
         try:
             self.obj_ = objeto.toString()
-        except:
+        except Exception:
             self.obj_ = str(objeto)
-        
+
         self.length = len(self.obj_)
-            
+
     def __str__(self):
         return self.obj_
-    
+
     def __getitem__(self, key):
         return self.obj_.__getitem__(key)
-    
-    
-                
+
+
+
     def charAt(self, pos):
         try:
             return self.obj_[pos]
-        except:
+        except Exception:
             return False
-    
+
     def substring(self, ini, fin):
-        return self.obj_[ini: fin]    
-    
+        return self.obj_[ini: fin]
+
  """
 
 
 def parseString(objeto):
     try:
         return objeto.toString()
-    except:
+    except Exception:
         return str(objeto)
 
 
@@ -124,7 +133,7 @@ def ustr1(t):
     if isinstance(t, float):
         try:
             t = int(t)
-        except:
+        except Exception:
             pass
 
     # if isinstance(t, QtCore.QString): return str(t)
@@ -257,7 +266,7 @@ def connect(sender, signal, receiver, slot):
             try:
                 getattr(sender, sl_name).disconnect(
                     proxy_fn(weak_fn, weak_receiver, slot))
-            except:
+            except Exception:
                 pass
 
             getattr(sender, sl_name).connect(
@@ -286,7 +295,7 @@ def connect(sender, signal, receiver, slot):
 
             try:
                 getattr(sender, sg_name).disconnect(remote_fn)
-            except:
+            except Exception:
                 pass
 
             getattr(sender, sg_name).connect(remote_fn)
@@ -300,7 +309,7 @@ def connect(sender, signal, receiver, slot):
 
             try:
                 sender.signal.disconnect(receiver.slot)
-            except:
+            except Exception:
                 pass
 
             sender.signal.connect(receiver.slot)
@@ -340,8 +349,8 @@ class MessageBox(QMessageBox):
         elif typename == "critical":
             icon = QMessageBox.Critical
             title = "Critical"
-        #title = unicode(title,"UTF-8")
-        #text = unicode(text,"UTF-8")
+        # title = unicode(title,"UTF-8")
+        # text = unicode(text,"UTF-8")
         msg = QMessageBox(icon, str(title), str(text))
         msg.addButton(button0)
         if button1:
@@ -351,16 +360,20 @@ class MessageBox(QMessageBox):
         return msg.exec_()
 
     @classmethod
-    def question(cls, *args): return cls.msgbox("question", *args)
+    def question(cls, *args):
+        return cls.msgbox("question", *args)
 
     @classmethod
-    def information(cls, *args): return cls.msgbox("question", *args)
+    def information(cls, *args):
+        return cls.msgbox("question", *args)
 
     @classmethod
-    def warning(cls, *args): return cls.msgbox("warning", *args)
+    def warning(cls, *args):
+        return cls.msgbox("warning", *args)
 
     @classmethod
-    def critical(cls, *args): return cls.msgbox("critical", *args)
+    def critical(cls, *args):
+        return cls.msgbox("critical", *args)
 
 
 class Input(object):
@@ -441,17 +454,6 @@ class qsa:
                 print(traceback.format_exc(4))
 
 
-from pineboolib.fllegacy.FLUtil import FLUtil
-
-AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
-util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
-from pineboolib.fllegacy.AQObjects import AQSql
-
-Insert = 0
-Edit = 1
-Del = 2
-Browse = 3
-
 # -------------------------- FORBIDDEN FRUIT ----------------------------------
 # Esto de aquí es debido a que en Python3 decidieron que era mejor abandonar
 # QString en favor de los strings de python3. Por lo tanto ahora el código QS
@@ -467,5 +469,5 @@ Browse = 3
 # más opción. (Es más, si consigo parchear el python para que no imprima "left"
 # quitaré esta librería demoníaca)
 
-#from forbiddenfruit import curse
-#curse(str, "left", lambda self, n: self[:n])
+# from forbiddenfruit import curse
+# curse(str, "left", lambda self, n: self[:n])

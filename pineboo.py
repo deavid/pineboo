@@ -47,7 +47,7 @@ except ImportError:
 
 try:
 
-    from PyQt5 import QtGui, QtCore, uic, QtWidgets
+    from PyQt5 import QtGui, QtCore, QtWidgets
 except ImportError:
     print(traceback.format_exc())
     dependences.append("python3-pyqt5")
@@ -59,13 +59,6 @@ if len(dependences) > 0:
         print("HINT: Instale el paquete %s e intente de nuevo" % dep)
     print()
     sys.exit(32)
-
-from pineboolib.utils import filedir
-import pineboolib.DlgConnect
-
-import pineboolib
-import pineboolib.main
-# pineboolib.main.main()
 
 
 def translate_connstring(connstring):
@@ -135,6 +128,12 @@ def main():
         Programa principal. Gestión de las opciones y la ayuda, así como inicializar
         todos los objetos.
     """
+    from pineboolib.utils import filedir
+    import pineboolib.DlgConnect
+
+    import pineboolib
+    import pineboolib.main
+
     # TODO: Refactorizar función en otras más pequeñas
     parser = OptionParser()
     parser.add_option("-l", "--load", dest="project",
@@ -180,14 +179,14 @@ def main():
     dgiName_ = "qt"
     if options.dgi:
         dgiName_ = options.dgi
-    
+
     try:
         DGI = getattr(importlib.import_module(
             "pineboolib.plugins.dgi.dgi_%s" % dgiName_), "dgi_%s" % dgiName_, None)()
-    except:
+    except Exception:
         print(" No se ha encontrado el esquema dgi", dgiName_)
         sys.exit(32)
-        
+
     pineboo.DGI = DGI
 
     if options.verbose:
@@ -378,7 +377,7 @@ def main():
                 if DGI.localDesktop():
                     splash.showMessage("Listo ...")
                     QtCore.QTimer.singleShot(2000, splash.hide)
-            
+
             if DGI.localDesktop():
                 ret = app.exec_()
             else:
