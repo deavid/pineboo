@@ -68,8 +68,11 @@ class Project(object):
         self.parser = None
         self._initModules = []
         if self._DGI.useDesktop():
-            self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-                self.mainFormName, self.mainFormName)).mainWindow
+            if self._DGI.localDesktop():
+                self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
+                    self.mainFormName, self.mainFormName)).mainWindow
+            else:
+                self.main_window = self._DGI.mainForm().mainWindow
         self.deleteCache = False
         self.parseProject = False
 
@@ -221,16 +224,16 @@ class Project(object):
             """ SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"), "w")
         self.files = {}
-        if self._DGI.useDesktop():
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")):
             raise AssertionError
         # if self.parseProject:
-        if self._DGI.useDesktop():
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
             progressDialog = util.createProgressDialog("Pineboo", size_)
         p = 0
         for idmodulo, nombre, sha in self.cur:
-            if self._DGI.useDesktop():
+            if self._DGI.useDesktop() and self._DGI.localDesktop():
                 util.setProgress((p * 100) / size_)
                 util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules:
@@ -269,7 +272,7 @@ class Project(object):
                 self.parseScript(self.dir("cache", fileobj.filekey))
 
             p = p + 1
-        if self._DGI.useDesktop():
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
 
             if Project.debugLevel > 50:
@@ -287,7 +290,7 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(self.dir(root, nombre))
 
-        if self._DGI.useDesktop():
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
             try:
                 util.destroyProgressDialog()
             except:
@@ -718,10 +721,13 @@ class MainForm(object):
                 if img_format == "XPM.GZ":
                     data = zlib.decompress(data, 15)
                     img_format = "XPM"
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(data, img_format)
-                icon = QtGui.QIcon(pixmap)
-                self.pixmaps[name] = icon
+                if self.prj._DGI.localDesktop():
+                    pixmap = QtGui.QPixmap()
+                    pixmap.loadFromData(data, img_format)
+                    icon = QtGui.QIcon(pixmap)
+                    self.pixmaps[name] = icon
+                else:
+                    self.pixmaps[name] = data
 
         for xmlaction in self.root.xpath("actions//action"):
             action = XMLMainFormAction(xmlaction)

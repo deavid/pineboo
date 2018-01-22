@@ -1,5 +1,6 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
+import datetime
 
 
 class dgi_schema(object):
@@ -59,6 +60,9 @@ class dgi_schema(object):
         print("=============================================")
         print("")
         print("")
+    
+    def mainForm(self):
+        pass
 
     def loadReferences(self):
         self.FLLineEdit = FLLineEdit

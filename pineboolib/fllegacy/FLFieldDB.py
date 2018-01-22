@@ -151,7 +151,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(
             filedir("../share/icons", "flfielddb.png")))
-        self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
+        #self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
         self.pushButtonDB.clicked.connect(self.searchValue)
 
         self.timer_1 = QtCore.QTimer(self)
@@ -1207,7 +1207,7 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "pixmap":
             if not self.editorImg_:
                 self.editorImg_ = pineboolib.project.resolveDGIObject(
-                    "FLPixmapView")()
+                    "FLPixmapView")(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
                 self.editorImg_.setMaximumSize(self.maximumSize())
@@ -1843,6 +1843,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
+            self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
 
         elif type_ == "serial":
