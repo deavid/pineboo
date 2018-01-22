@@ -230,8 +230,9 @@ class FLDataTable(QtWidgets.QTableView):
     def eventFilter(self, *args, **kwargs):
         return super(FLDataTable, self).eventFilter(*args, **kwargs)
 
-    def dataChanged(self, topLeft, bottomRight):
-        # return super(FLDataTable, self).dataChanged(topLeft, bottomRight)
+    def dataChanged(self, *args, **kwargs):
+        return super(FLDataTable, self).dataChanged(*args, **kwargs)
+        # Código antiguo
         from pineboolib.CursorTableModel import CursorTableModel
         model = self.model()
         if isinstance(model, CursorTableModel):

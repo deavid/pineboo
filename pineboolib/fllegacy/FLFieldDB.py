@@ -1150,10 +1150,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "string":
             doHome = False
-            try:
-                self.editor_.textChanged.disconnect(self.updateValue)
-            except Exception:
-                self.logger.exception("Error al desconectar señal textChanged")
+            if not ol:
+                try:
+                    self.editor_.textChanged.disconnect(self.updateValue)
+                except Exception:
+                    self.logger.exception("Error al desconectar señal textChanged")
 
             if v:
                 if ol:
@@ -1498,12 +1499,11 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.setChecked(v)
             self.editor_.toggled.connect(self.updateValue)
 
-    """
-    Inicia el cursor segun este campo sea de la tabla origen o de
-    una tabla relacionada
-    """
-
     def initCursor(self):
+        """
+        Inicia el cursor segun este campo sea de la tabla origen o de
+        una tabla relacionada
+        """
 
         if self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
             self.cursorBackup_ = self.cursor_
@@ -1572,13 +1572,13 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.cursor_.newBuffer.disconnect(self.refresh)
-            except Exception:
-                self.logger.exception("Error al desconectar señal")
+            except TypeError:
+                pass
 
             try:
                 self.cursor_.bufferChanged.disconnect(self.refreshQuick)
-            except Exception:
-                self.logger.exception("Error al desconectar señal")
+            except TypeError:
+                pass
 
             self.cursorAux = self.cursor()
             if not self.cursor().metadata():
@@ -1632,8 +1632,6 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.cursor_.newBuffer.connect(self.refresh)
                 self.cursor_.bufferChanged.connect(self.refreshQuick)
                 self.cursorAux = False
-                if tMD and not tMD.inCache():
-                    del tMD
                 return
             else:
                 if self.showed:
@@ -1661,8 +1659,6 @@ class FLFieldDB(QtWidgets.QWidget):
             self.cursorAuxInit = True
             # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldName_)) #FIXME
             # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_)) #FIXME
-            if tMD and not tMD.inCache():
-                del tMD
 
     """
     Crea e inicia el editor apropiado para editar el tipo de datos
