@@ -47,16 +47,6 @@ class FLDataTable(QtWidgets.QTableView):
 
         self.popup_ = popup
 
-    def dataChanged(self, topLeft, bottomRight):
-        from pineboolib.CursorTableModel import CursorTableModel
-        model = self.model()
-        if isinstance(model, CursorTableModel):
-            for col, width in enumerate(model._column_hints):
-                self.setColumnWidth(col, width)
-                self._h_header.resizeSection(col, width)
-            self._h_header.setSectionResizeMode(
-                QtWidgets.QHeaderView.Interactive)
-
     """
     desctructor
     """
@@ -176,7 +166,7 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setPrimaryKeyChecked(self, primaryKeyValue, on):
         if on:
-            if not primaryKeyValue in self.primarysKeysChecked_:
+            if primaryKeyValue not in self.primarysKeysChecked_:
                 self.primarysKeysChecked_.append(primaryKeyValue)
                 self.primaryKeyToggled.emit(primaryKeyValue, False)
         else:
@@ -240,8 +230,16 @@ class FLDataTable(QtWidgets.QTableView):
     def eventFilter(self, *args, **kwargs):
         return super(FLDataTable, self).eventFilter(*args, **kwargs)
 
-    def dataChanged(self, *args, **kwargs):
-        return super(FLDataTable, self).dataChanged(*args, **kwargs)
+    def dataChanged(self, topLeft, bottomRight):
+        # return super(FLDataTable, self).dataChanged(topLeft, bottomRight)
+        from pineboolib.CursorTableModel import CursorTableModel
+        model = self.model()
+        if isinstance(model, CursorTableModel):
+            for col, width in enumerate(model._column_hints):
+                self.setColumnWidth(col, width)
+                self._h_header.resizeSection(col, width)
+            self._h_header.setSectionResizeMode(
+                QtWidgets.QHeaderView.Interactive)
 
     """
     Redefinido por conveniencia para pintar la celda
@@ -254,7 +252,7 @@ class FLDataTable(QtWidgets.QTableView):
     Redefinido por conveniencia para pintar el campo
     """
     @decorators.NotImplementedWarn
-    def paintField(self, p, field,  cr, selected):
+    def paintField(self, p, field, cr, selected):
         pass
 
     """
@@ -434,7 +432,7 @@ class FLDataTable(QtWidgets.QTableView):
             self.cursor_.refresh()
 
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
-        if self.refreshing_ == False and self.cursor():
+        if not self.refreshing_ and self.cursor():
             self.refreshing_ = True
             self.hide()
             self.cursor_.setFilter(self.persistentFilter_)
@@ -453,7 +451,7 @@ class FLDataTable(QtWidgets.QTableView):
         if self.rowSelected > -1:
             if not self.isUpdatesEnabled() or not self.viewport().isUpdaesEnabled():
                 return
-            
+
             cw = self.columnWidth(self.colSelected)
             margin = self.visibleHeight() / 2
             y = self.rowPos(self.rowSelected) + self.rowHeight(self.rowSelected) / 2
@@ -461,7 +459,7 @@ class FLDataTable(QtWidgets.QTableView):
                 self.ensureVisible(self.columnPos(self.colSelected) + cw /2, y, cw /2, margin)
             else:
                 self.ensureVisible(self.columnPos(self.colSelected), y, None, margin)
-  
+
     """
     """
     Foco rápido sin refrescos para optimizar
@@ -623,7 +621,7 @@ class FLCheckBox(QtWidgets.QCheckBox):
             bu = QtGui.QBrush(QtCore.Qt.green)
             p.fillRect(0, 0, wrect.width() - 1, wrect.height() - 1, bu)
 
-        #irect = QtGui.QStyle.visualRect(Qt_LayoutDirection, QRect, QRect)
+        # irect = QtGui.QStyle.visualRect(Qt_LayoutDirection, QRect, QRect)
         irect = QtWidgets.QStyle().visualRect(self.layoutDirection(), rect, self.rect())
         p.fillRect(irect, QtCore.Qt.white)
         p.drawRect(irect)

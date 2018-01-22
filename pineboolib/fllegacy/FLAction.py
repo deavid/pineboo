@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
-
 from pineboolib.flcontrols import ProjectClass
 
 

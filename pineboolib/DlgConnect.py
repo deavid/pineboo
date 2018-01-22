@@ -4,7 +4,7 @@
 from PyQt5 import QtWidgets, QtCore, uic
 # from PyQt5.QtWidgets import *
 # from PyQt5.QtGui import *
-from PyQt5.QtGui import QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem
 from pineboolib.utils import filedir
 from pineboolib.PNSqlDrivers import PNSqlDrivers
 from pineboolib.fllegacy.FLSettings import FLSettings

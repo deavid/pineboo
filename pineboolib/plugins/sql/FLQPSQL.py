@@ -28,6 +28,7 @@ class FLQPSQL(object):
         self.open_ = False
         self.errorList = []
         self.alias_ = "PostgreSQL"
+        self._dbname = None
 
     def version(self):
         return self.version_
@@ -38,8 +39,11 @@ class FLQPSQL(object):
     def isOpen(self):
         return self.open_
 
-    def connect(self, db_name, db_host, db_port, db_userName, db_password):
+    def DBName(self):
+        return self._dbname
 
+    def connect(self, db_name, db_host, db_port, db_userName, db_password):
+        self._dbname = db_name
         try:
             import psycopg2
         except ImportError:

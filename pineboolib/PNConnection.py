@@ -108,7 +108,7 @@ class PNConnection(QtCore.QObject):
         try:
             return self.driver().DBName()
         except Exception as e:
-            self.logger.warn("DBName: %s", e)
+            self.logger.debug("DBName: %s", e)
             return self.db_name
 
     def driver(self):

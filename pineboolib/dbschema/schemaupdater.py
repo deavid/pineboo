@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
 from pineboolib.dbschema import db_postgresql as pginspect
-
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
-from pineboolib.fllegacy.FLManager import FLManager
 
 from io import StringIO
 from lxml import etree
