@@ -490,15 +490,11 @@ class Module(object):
         self.tables = {}
         self.loaded = False
         self.path = self.prj.path
-        self.fcgiMode = False
 
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
 
-    def load(self, fcgiMode=False):
-        if fcgiMode:
-            self.fcgiMode = True
-
+    def load(self):
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
@@ -507,11 +503,12 @@ class Module(object):
         if pathui is None:
             print("ERROR: modulo %r: fichero UI no existe" % (self.name))
             return False
-        tiempo_1 = time.time()
+        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+            tiempo_1 = time.time()
         try:
             self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
-            if not self.fcgiMode:
+            if self.prj._DGI.useDesktop():
                 self.mainform = MainForm(self, pathui)
                 self.mainform.load()
         except Exception as e:
@@ -522,7 +519,8 @@ class Module(object):
         # TODO: Load Main Script:
         self.mainscript = None
         # /-----------------------
-        tiempo_2 = time.time()
+        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+            tiempo_2 = time.time()
 
         for tablefile in self.files:
             if not tablefile.endswith(".mtd"):
@@ -541,11 +539,13 @@ class Module(object):
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
-        tiempo_3 = time.time()
-        if tiempo_3 - tiempo_1 > 0.2:
-            if Project.debugLevel > 50:
-                print("Carga del modulo %s : %.3fs ,  %.3fs" %
-                      (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
+        
+        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+            tiempo_3 = time.time()
+            if tiempo_3 - tiempo_1 > 0.2:
+                if Project.debugLevel > 50:
+                    print("Carga del modulo %s : %.3fs ,  %.3fs" %
+                          (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
 
         self.loaded = True
         return True
@@ -750,6 +750,8 @@ class MainForm(object):
             #    for images in self.root.xpath("images/image[@name='%s']" % iconSet):
             #        print("*****", iconSet, images)
             self.actions[action.name] = action
+            if not self.prj._DGI.localDesktop():
+                self.prj._DGI.mainForm().mainWindow.loadAction(xmlaction)
 
             # Asignamos slot a action
             for slots in self.root.xpath("connections//connection"):
@@ -758,10 +760,14 @@ class MainForm(object):
                     action.slot = slot._v("slot")
                     action.slot = action.slot.replace('(', '')
                     action.slot = action.slot.replace(')', '')
+                if not self.prj._DGI.localDesktop():
+                    self.prj._DGI.mainForm().mainWindow.loadConnection(slots)
 
         self.toolbar = []
         for toolbar_action in self.root.xpath("toolbars//action"):
             self.toolbar.append(toolbar_action.get("name"))
+            if self.prj._DGI.localDesktop():
+                self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action)
         # self.ui = WMainForm()
         # self.ui.load(self.path)
         # self.ui.show()

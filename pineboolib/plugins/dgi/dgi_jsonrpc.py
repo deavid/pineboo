@@ -2,11 +2,15 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
+import pineboolib
+
 from PyQt5 import QtCore
 
 from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
 from json import dumps
+
+from lxml import etree
 
 from flup.server.fcgi import WSGIServer
 
@@ -73,7 +77,7 @@ class dgi_jsonrpc(dgi_schema):
         return self._mainForm
     
     def exec_(self):
-        self._par = parser()
+        self._par = parser(self._mainForm)
         self.launchServer()
     
     def launchServer(self):
@@ -89,15 +93,22 @@ class mainForm(object):
     def __init__(self):
         self.mainWindow = mainWindow()
         self.MainForm = MainForm()
+    
+    def runAction(self, name):
+        self.mainWindow._actionsConnects[name].run()
 
 class mainWindow():
     
     areas_ = {}
     modules_ = {}
+    _actionsConnects = {}
+    _json = []
     
     def __init__(self):
         self.areas_ = {}
         self.modules_ = {}
+        self._json = []
+        self._actionsConnects = {}
     
     def load(self):
         pass
@@ -127,13 +138,29 @@ class mainWindow():
             print("WARN: Ignorando modulo %r por fallo al cargar" %
                   (module.name))
             return False
+        
+        for key in module.mainform.toolbar:
+            action = module.mainform.actions[key]
+            self._actionsConnects[action.name] = action
+        
     
     def show(self):
-        #Preparamos el comando a enviar
-        pass
+        print("Enviando ....")
+    
+    def loadAction(self, xml_action):
+        self.addToJson(xml_action)
+    
+    def loadConnection(self, xml_connection):
+        self.addToJson(xml_connection)
+    
+    def loadToolBarsAction(self, xml_tb_actions):
+        self.addToJson(xml_tb_actions)
     
     
-    
+    def addToJson(self, xml):
+        _json = xml2json.data(fromstring(etree.tostring(xml, pretty_print=True)))
+        _jsonStr = dumps(_json, sort_keys=True, indent=2)
+        self._json.append(_jsonStr)
         
         
           
@@ -146,10 +173,30 @@ class MainForm(object):
 
 
 class parser(object):
+    
+    _mainForm = None
+    
+    def __init__(self, mainForm):
+        self._mainForm = mainForm
 
     def query(self, environ, start_response):
+        _received = environ["QUERY_STRING"]
         start_response('200 OK', [('Content-Type', 'text/html')])
-        print("FCGI:INFO: Processing '%s' ..." % environ["QUERY_STRING"])
+        print("FCGI:INFO: Processing '%s' ..." % _received)
+        if _received == "mainWindow":
+            return self._mainForm.mainWindow._json
+        elif _received[0:7] == "action:":
+            try:
+                _action = _received[7:]
+                print("Loading action", _action)
+                self._mainForm.runAction(_action)
+                    
+                    
+                return "OK!"
+            except Exception:
+                print(traceback.format_exc())
+        else:
+            return "Nada que mostrar :("
 
 
 class PushButton(object):
