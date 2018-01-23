@@ -173,7 +173,9 @@ class DlgConnect(QtWidgets.QWidget):
     def ShowTable(self):
         self.tableWidget.clear()
         cursor = self.dbProjects_.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT UNIQUE, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
+        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos ('
+                       'id INTEGER PRIMARY KEY, name TEXT UNIQUE, dbname TEXT, '
+                       'dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
         cursor.execute(
             'SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos')
         conectores = cursor.fetchall()
@@ -307,8 +309,8 @@ class DlgConnect(QtWidgets.QWidget):
 
         # Get a cursor object para CREAR la tabla "proyectos"
         cursor = self.dbProjects_.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)
-''')
+        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos ('
+                'id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
         self.dbProjects_.commit()
 
         # ABRO BUCLE PARA GRABAR VARIAS EMPRESAS DE ENEBOO
@@ -337,7 +339,8 @@ class DlgConnect(QtWidgets.QWidget):
             # PASO-2: GRABAR LOS DATOS EN LA BASE DE DATOS PINEBOOCONECTORES
             cursor = self.dbProjects_.cursor()
             with self.dbProjects_:
-                sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (nameE, dbnameE, dbtypeE, dbhostE, dbportE, usernameE, passwordE)
+                sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password)"
+                    " VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (nameE, dbnameE, dbtypeE, dbhostE, dbportE, usernameE, passwordE)
                 cursor.execute(sql)
             self.ShowTable()
 

@@ -239,8 +239,9 @@ class FLTableDB(QtWidgets.QWidget):
                 rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_,
                                          FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
                 fMD.addRelationMD(rMD)
-                print("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, pero sin embargo se han indicado los campos de relación( %s, %s )" % (
-                    curName, self.tableName_, self.fieldRelation_, self.foreignField_))
+                print("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, "
+                      "pero sin embargo se han indicado los campos de relación( %s, %s )"
+                      % (curName, self.tableName_, self.fieldRelation_, self.foreignField_))
                 print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" %
                       (curName, self.foreignField_, self.tableName_, self.fieldRelation_))
             else:
@@ -997,8 +998,10 @@ class FLTableDB(QtWidgets.QWidget):
                     condList = [util.tr("Todos"), util.tr("Igual a Valor"), util.tr(
                         "Distinto de Valor"), util.tr("Vacío"), util.tr("No Vacío")]
                     if not type == "bool":
-                        condList = [util.tr("Todos"), util.tr("Igual a Valor"), util.tr("Distinto de Valor"), util.tr("Vacío"), util.tr("No Vacío"), util.tr(
-                            "Contiene Valor"), util.tr("Empieza por Valor"), util.tr("Acaba por Valor"), util.tr("Mayor que Valor"), util.tr("Menor que Valor"), util.tr("Desde - Hasta")]
+                        condList = [
+                            util.tr("Todos"), util.tr("Igual a Valor"), util.tr("Distinto de Valor"), util.tr("Vacío"),
+                            util.tr("No Vacío"), util.tr("Contiene Valor"), util.tr("Empieza por Valor"), util.tr("Acaba por Valor"),
+                            util.tr("Mayor que Valor"), util.tr("Menor que Valor"), util.tr("Desde - Hasta")]
                     cond.insertStringList(condList)
                     self.tdbFilter.setCellWidget(_linea, 1, cond)
 
@@ -1636,7 +1639,8 @@ class FLTableDB(QtWidgets.QWidget):
     def insertRecord(self, unknown=None):
 
         w = self.sender()
-        # if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        # if (w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation()
+        #      and self.cursor_.cursorRelation().isLocked()))):
         relationLock = False
 
         if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
@@ -1656,7 +1660,8 @@ class FLTableDB(QtWidgets.QWidget):
     def editRecord(self, unknown=None):
         w = self.sender()
 
-        # if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        # if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation()
+        #       and self.cursor_.cursorRelation().isLocked())):
         relationLock = False
 
         if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
@@ -1688,7 +1693,8 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot(bool)
     def deleteRecord(self, unknown):
         w = self.sender()
-        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqInsertOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqInsertOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or
+                  (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)
             return
 
@@ -1701,7 +1707,8 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def copyRecord(self):
         w = self.sender()
-        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
+        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (
+                self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)
             return
 

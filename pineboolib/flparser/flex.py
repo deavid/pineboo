@@ -1,12 +1,3 @@
-# ----------------------------------------------------------------------
-# clex.py
-#
-# A lexer for ANSI C.
-# ----------------------------------------------------------------------
-
-#import sys
-# sys.path.insert(0,"../..")
-
 import ply.lex as lex
 from ply.lex import TOKEN
 
@@ -16,7 +7,6 @@ reserved = [
     'BREAK', 'CASE', 'CONST', 'STATIC', 'CONTINUE', 'DEFAULT', 'DO',
     'ELSE', 'FOR', 'IF', 'IN',
     'RETURN',
-    #'STRUCT',
     'SWITCH',
     'WHILE', 'CLASS', 'VAR', 'FUNCTION',
     'EXTENDS', 'NEW', 'WITH', 'TRY', 'CATCH', 'THROW', 'DELETE', 'TYPEOF'
@@ -31,7 +21,6 @@ tokens = reserved + token_literals + [
     'PLUS', 'MINUS', 'TIMES', 'DIVIDE', 'MOD',
     'OR', 'AND',
     'AT',
-    #'NOT',
     'XOR', 'LSHIFT', 'RSHIFT',
     'LOR', 'LAND', 'LNOT',
     'LT', 'LE', 'GT', 'GE', 'EQ', 'NE', 'EQQ', 'NEQ',
@@ -90,7 +79,7 @@ t_DIVIDE = r'/'
 t_MOD = r'%'
 t_OR = r'\|'
 t_AND = r'&'
-#t_NOT              = r'~'
+# t_NOT              = r'~'
 t_XOR = r'\^'
 t_LSHIFT = r'<<'
 t_RSHIFT = r'>>'
@@ -128,10 +117,10 @@ t_PLUSPLUS = r'\+\+'
 t_MINUSMINUS = r'--'
 
 # ->
-#t_ARROW            = r'->'
+# t_ARROW            = r'->'
 
 # ?
-#t_CONDOP           = r'\?'
+# t_CONDOP           = r'\?'
 
 
 # Delimeters
@@ -145,7 +134,7 @@ t_COMMA = r','
 t_PERIOD = r'\.'
 t_SEMI = r';'
 t_COLON = r':'
-#t_ELLIPSIS         = r'\.\.\.'
+# t_ELLIPSIS         = r'\.\.\.'
 t_AT = r'@'
 # Identifiers and reserved words
 
@@ -158,7 +147,6 @@ for r in reserved:
 def t_ID(t):
     t.type = reserved_map.get(t.value, "ID")
     return t
-
 
 
 # Integer literal
@@ -174,7 +162,7 @@ t_SCONST = r'\"([^\"\\\n]|(\\.)|\\\n)*?\"'
 t_CCONST = r'\'([^\'\\\n]|(\\.)|\\\n)*?\''
 
 # REGEX constant
-#t_RXCONST = r'/[^/ ]+/g?'
+# t_RXCONST = r'/[^/ ]+/g?'
 
 # Comments
 
@@ -189,7 +177,7 @@ def t_DOCSTRINGOPEN(t):
     return t
 
 
-#t_COMMENTOPEN      = r'/\*'
+# t_COMMENTOPEN      = r'/\*'
 t_COMMENTCLOSE = r'\*/'
 
 

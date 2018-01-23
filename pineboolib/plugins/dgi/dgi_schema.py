@@ -1,5 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, QtGui
+from pineboolib.utils import DefFun
 import datetime
 
 
@@ -60,7 +61,7 @@ class dgi_schema(object):
         print("=============================================")
         print("")
         print("")
-    
+
     def mainForm(self):
         pass
 
@@ -114,7 +115,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         decimales_ = None
         posComa_ = -1
 
-        if texto == "" or texto == None:
+        if texto == "" or texto is None:
             return
         """
         if self._tipo == "int" or self._tipo == "uint":
@@ -123,14 +124,14 @@ class FLLineEdit(QtWidgets.QLineEdit):
                     float(decimales_)
                 except:
                         denegarCambio_ = True
-            
+
             texto = texto.replace(",",".")
             try:
                 posComa_ = texto.index(".")
             except:
                 if posComa_ > -1:
                     denegarCambio_ = True
-            
+
         """
         if self._tipo == "string":
             if len(texto) > int(self._longitudMax):
@@ -149,16 +150,16 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
             try:
                 posComa_ = texto.index(".")
-                #print("Coma encontrada en pos", posComa_, denegarCambio_)
-            except:
-                #print("Coma no encontrada", denegarCambio_)
-                a = 1
+                # print("Coma encontrada en pos", posComa_, denegarCambio_)
+            except Exception:
+                # print("Coma no encontrada", denegarCambio_)
+                pass
 
             if posComa_ > -1:
                 decimales_ = texto[posComa_ + 1:]
 
                 if len(decimales_) > int(self._partDecimal):
-                    #print("Parte decimal (%s) se pasa de %s" % (decimales_ , self._partDecimal))
+                    # print("Parte decimal (%s) se pasa de %s" % (decimales_ , self._partDecimal))
                     denegarCambio_ = True
 
             enteros_ = texto
@@ -166,47 +167,47 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if posComa_ > -1:
                 enteros_ = texto[:posComa_]
 
-            #print("enteros ...", enteros_)
+            # print("enteros ...", enteros_)
             if len(enteros_) > int(self._partInteger):
-                #print("Parte entera (%s) se pasa de %s" % (enteros_ , self._partInteger))
+                # print("Parte entera (%s) se pasa de %s" % (enteros_ , self._partInteger))
                 denegarCambioEnteros_ = True
 
-            #print("Decimales =", decimales_ , type(decimales_))
-            if not decimales_ is None:
+            # print("Decimales =", decimales_ , type(decimales_))
+            if decimales_ is not None:
                 try:
                     float(decimales_)
-                except:
-                    #print("Decimal esta mal", decimales_, len(decimales_))
+                except Exception:
+                    # print("Decimal esta mal", decimales_, len(decimales_))
                     if len(decimales_) > 0:
                         denegarCambio_ = True
 
-            #print("Enteros =", enteros_, type(enteros_))
+            # print("Enteros =", enteros_, type(enteros_))
             try:
                 float(enteros_)
-            except:
-                #print("Entero esta mal")
+            except Exception:
+                # print("Entero esta mal")
                 denegarCambioEnteros_ = True
             # if not decimales_.isdecimal():
-                #denegarCambio_ = True
+                # denegarCambio_ = True
 
             # if not enteros_.isdecimal():
-                #denegarCambioEnteros_ = True
+                # denegarCambioEnteros_ = True
 
-        #print("Procesado final", texto, denegarCambio_)
+        # print("Procesado final", texto, denegarCambio_)
 
-        if denegarCambio_ == True:
+        if denegarCambio_:
             texto = texto[0:len(texto) - 1]
             super(FLLineEdit, self).setText(texto)
 
-        if denegarCambioEnteros_ == True and not decimales_ == None:
+        if denegarCambioEnteros_ and decimales_ is not None:
             texto = "%s%s%s" % (
                 enteros_[0:len(enteros_) - 1], QtCore.QLocale().decimalPoint(), decimales_)
             super(FLLineEdit, self).setText(texto)
-        elif denegarCambioEnteros_ == True and decimales_ == None:
+        elif denegarCambioEnteros_ and decimales_ is None:
             texto = enteros_[0:len(enteros_) - 1]
             super(FLLineEdit, self).setText(texto)
 
-        if cambiarComa_ == True:
+        if cambiarComa_:
             super(FLLineEdit, self).setText(texto)
 
     def setText(self, texto, b=True):
@@ -229,13 +230,13 @@ class FLLineEdit(QtWidgets.QLineEdit):
             l = len(texto) - 1
             try:
                 i = texto.index(".")
-            except:
+            except Exception:
                 pass
 
             if i:
-                #print("Posicion de . (%s) de %s en %s" % (i, l, texto))
+                # print("Posicion de . (%s) de %s en %s" % (i, l, texto))
                 f = (i + self._partDecimal) - l
-                #print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
+                # print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
                 while f > 0:
                     texto = texto + "0"
                     f = f - 1
@@ -329,7 +330,7 @@ class FLPixmapView(QtWidgets.QWidget):
             newWidth = self.width() - 2
             newHeight = self.height() - 2
 
-            if not self.pixmapWiev_ is None and self.pixmapView_.width() == newWidth and self.pixmapView_.height() == newHeight:
+            if self.pixmapWiev_ is not None and self.pixmapView_.width() == newWidth and self.pixmapView_.height() == newHeight:
                 return
 
             img = self.pixmap_
@@ -339,10 +340,10 @@ class FLPixmapView(QtWidgets.QWidget):
             else:
                 self.pixmapView_.convertFromImage(img)
 
-            if not self.pixmapView_ is None:
+            if self.pixmapView_ is not None:
                 p.drawPixmap((self.width() / 2) - (self.pixmapView_.width() / 2),
                              (self.height() / 2) - (self.pixmapView_.height() / 2), self.pixmapView_)
-            elif not self.pixmap_ is None:
+            elif self.pixmap_ is not None:
                 p.drawPixmap((self.width() / 2) - (self.pixmap_.width() / 2),
                              (self.height() / 2) - (self.pixmap_.height() / 2), self.pixmap_)
 
@@ -363,7 +364,7 @@ class FLPixmapView(QtWidgets.QWidget):
             pix.convertFromImage(img)
             QtWidgets.QApplication.restoreOverrideCursor()
 
-            if not pix is None:
+            if pix is not None:
                 self.setPixmap(pix)
 
     def clear(self):

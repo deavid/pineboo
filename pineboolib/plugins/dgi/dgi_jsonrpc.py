@@ -2,14 +2,12 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
-import pineboolib
 
 from PyQt5 import QtCore
 
 from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
 from json import dumps
-
 from lxml import etree
 
 from werkzeug.wrappers import Request, Response
@@ -93,7 +91,6 @@ class dgi_jsonrpc(dgi_schema):
 
     def extraProjectInit(self):
         pass
-        
 
     def setParameter(self, param):
         self._listenSocket = param
@@ -102,17 +99,16 @@ class dgi_jsonrpc(dgi_schema):
         self.FLLineEdit = FLLineEdit
         self.QPushButton = PushButton
         self.QLineEdit = LineEdit
-    
-    
+
     def mainForm(self):
         if not self._mainForm:
             self._mainForm = mainForm()
         return self._mainForm
-    
+
     def exec_(self):
         self._par = parser(self._mainForm)
         self.launchServer()
-    
+
     def launchServer(self):
         run_simple('localhost', 4000, self._par.receive)
         #print("JSON-RPC:INFO: Listening socket", self._listenSocket)
@@ -120,10 +116,10 @@ class dgi_jsonrpc(dgi_schema):
 
 
 class mainForm(object):
-    
+
     mainWindow = None
     MainForm = None
-    
+
     def __init__(self):
         self.mainWindow = mainWindow()
         self.MainForm = MainForm()
@@ -138,9 +134,8 @@ class mainForm(object):
         except Exception:
             print(traceback.format_exc())
             return False
-        
-        
-    
+
+
     def runAction(self, name):
         try:
             self.mainWindow._actionsConnects[name].run()
@@ -149,14 +144,16 @@ class mainForm(object):
             print(traceback.format_exc())
             return False
 
+
 class mainWindow():
-    
+
     areas_ = {}
     modules_ = {}
     _actionsConnects = {}
     _actions = {}
     _toolBarActions = []
     _images = {}
+
 
     def __init__(self):
         self.areas_ = {}
@@ -165,41 +162,40 @@ class mainWindow():
         self._actions = {}
         self._toolBarActions = []
         self._images = {}
-    
+
     def load(self):
         pass
-        #Aquí se genera el json con las acciones disponibles
-    
+        # Aquí se genera el json con las acciones disponibles
+
     def loadArea(self, area):
         self.areas_[area.idarea] = area.descripcion
-    
+
     def loadModule(self, module):
         if module.areaid not in self.areas_.keys():
             self.loadArea(Struct(idarea=module.areaid,
                                  descripcion=module.areaid))
-        
+
         module_ = Struct()
         module_.areaid = module.areaid
         module_.description = module.description
         module_.name = module.name
-          
+
         self.modules_[module_.name] = module_
-        
+
         self.moduleLoad(module)
-    
+
     def moduleLoad(self, module):
-        if module.loaded == False:
+        if not module.loaded:
             module.load()
-        if module.loaded == False:
+        if not module.loaded:
             print("WARN: Ignorando modulo %r por fallo al cargar" %
                   (module.name))
             return False
-        
+
         for key in module.mainform.toolbar:
             action = module.mainform.actions[key]
             self._actionsConnects[action.name] = action
-        
-    
+
     def show(self):
         pass
     
@@ -273,27 +269,15 @@ class mainWindow():
         
         
         return False
-                
-                    
-        
-        
-        
-        
-        
-           
-          
 
 class MainForm(object):
-    
     def setDebugLevel(self, number):
-        pass    
-        
+        pass
 
 """
 class parser(object):
-    
     _mainForm = None
-    
+
     def __init__(self, mainForm):
         self._mainForm = mainForm
 
@@ -323,13 +307,11 @@ class parser(object):
 """
 
 class PushButton(object):
-
     def __getattr__(self, name):
         print("Pushbutton necesita", name)
 
 
 class LineEdit(object):
-
     def __getattr__(self, name):
         print("LineEdit necesita", name)
 
@@ -361,17 +343,17 @@ class FLLineEdit(object):
             # self.textChanged.connect(self.controlFormato)
             self._parent = parent
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
+    # def __getattr__(self, name):
+    #     return DefFun(self, name)
 
     def controlFormato(self):
         pass
 
-    def setText(self, texto, b=True):
-        push(self, texto)
-
-    def text(self):
-        return pull(self, "text")
+    # def setText(self, texto, b=True):
+    #     push(self, texto)
+    #
+    # def text(self):
+    #     return pull(self, "text")
 
     """
     Especifica un valor máximo para el text (numérico)

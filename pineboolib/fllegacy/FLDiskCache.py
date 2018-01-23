@@ -3,6 +3,8 @@ from PyQt5.QtCore import Qt
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
+AQ_USRHOME = "."  # FIXME
+
 
 class FLDiskCache(ProjectClass):
 

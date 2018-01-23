@@ -17,9 +17,7 @@ import importlib
 import pineboo
 import logging
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-
 dependences = []
-
 
 if sys.version_info[0] < 3:
     print("Tienes que usar Python 3 o superior.")
@@ -204,8 +202,7 @@ def main():
 
     disable_loggers = [
         "PyQt5.uic.uiparser",
-        "PyQt5.uic.properties",
-        ]
+        "PyQt5.uic.properties"]
     for loggername in disable_loggers:
         logger = logging.getLogger(loggername)
         logger.setLevel(logging.WARN)
@@ -224,8 +221,7 @@ def main():
                 "NotoSans-BoldItalic.ttf",
                 "NotoSans-Bold.ttf",
                 "NotoSans-Italic.ttf",
-                "NotoSans-Regular.ttf",
-                ]
+                "NotoSans-Regular.ttf"]
             for fontfile in noto_fonts:
                 QtGui.QFontDatabase.addApplicationFont(
                     filedir("../share/fonts/Noto_Sans", fontfile))

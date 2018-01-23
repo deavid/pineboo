@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-
-from builtins import range
 import traceback
-import os.path
-from binascii import unhexlify
-
-
-Qt = QtCore.Qt
-
 from pineboolib.utils import filedir, Struct
+Qt = QtCore.Qt
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -155,9 +148,9 @@ class MainForm(QtWidgets.QMainWindow):
             print(traceback.format_exc(), "---")
 
     def moduleLoad(self, vBLayout, module):
-        if module.loaded == False:
+        if not module.loaded:
             module.load()
-        if module.loaded == False:
+        if not module.loaded:
             print("WARN: Ignorando modulo %r por fallo al cargar" %
                   (module.name))
             return False

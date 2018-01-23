@@ -9,3 +9,4 @@ share/pineboo/scripts/*.qs.py.debug
 .pydevproject
 .settings/
 src/*
+__pycache__

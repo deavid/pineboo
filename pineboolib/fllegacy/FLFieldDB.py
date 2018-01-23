@@ -1126,7 +1126,9 @@ class FLFieldDB(QtWidgets.QWidget):
             print("FLFieldDB:: refresh fN:%r fieldName:%r v:%s" %
                   (fN, self.fieldName_, repr(v)[:64]))
 
-        if self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or (modeAcces == FLSqlCursor.Edit and (field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or not field.editable() or modeAcces == FLSqlCursor.Browse:
+        if (self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or
+                (modeAcces == FLSqlCursor.Edit and (field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or
+                not field.editable() or modeAcces == FLSqlCursor.Browse):
             fDis = True
 
         self.setDisabled(fDis)
@@ -1602,8 +1604,9 @@ class FLFieldDB(QtWidgets.QWidget):
                         curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
 
                     fMD.addRelationMD(rMD)
-                    print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, pero sin embargo se han indicado los campos de relación( %s, %s)" % (
-                        curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
+                    print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
+                          "pero sin embargo se han indicado los campos de relación( %s, %s)"
+                          % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
                     print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" %
                           (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
                 else:

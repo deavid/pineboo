@@ -1,6 +1,6 @@
 import sys
-from PyQt5.QtCore import QTime
-from pineboolib import decorators
+from PyQt5.QtCore import QTime, QDate, QDateTime
+from PyQt5.QtWidgets import QProgressDialog
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -60,7 +60,10 @@ class FLQPSQL(object):
         except psycopg2.OperationalError as e:
 
             if "does not exist" in str(e):
-                if QMessageBox.No == QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No):
+                ret = QMessageBox.warning(None, "Pineboo",
+                                          "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
+                                          QMessageBox.Ok | QMessageBox.No)
+                if ret == QMessageBox.No:
                     return False
                 else:
                     conninfostr2 = "dbname=postgres host=%s port=%s user=%s password=%s connect_timeout=5" % (
@@ -125,7 +128,7 @@ class FLQPSQL(object):
 
         elif type_ == "date":
             val = util.dateDMAtoAMD(v)
-            if val == None:
+            if val is None:
                 s = "Null"
             else:
                 s = "'%s'" % val
@@ -134,18 +137,18 @@ class FLQPSQL(object):
             s = "'%s'" % v
 
         elif type_ in ("uint", "int", "double", "serial"):
-            if v == None:
+            if v is None:
                 s = 0
             else:
                 s = v
 
         else:
             v = auto_qt_translate_text(v)
-            if upper == True and type_ == "string":
+            if upper and type_ == "string":
                 v = v.upper()
 
             s = "'%s'" % v
-        #qWarning ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
+        # qWarning ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
         return s
 
     def canOverPartition(self):
@@ -265,7 +268,7 @@ class FLQPSQL(object):
             self.setLastError(
                 "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
             qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (
-                n,  traceback.format_exc()))
+                n, traceback.format_exc()))
 
             return False
 
@@ -315,7 +318,7 @@ class FLQPSQL(object):
         return ok
 
     def sqlCreateTable(self, tmd):
-        util = FLUtil()
+        # util = FLUtil()
         if not tmd:
             return None
 
@@ -382,13 +385,14 @@ class FLQPSQL(object):
                 sql = sql + "(%s)" % longitud
 
             if field.isPrimaryKey():
-                if primaryKey == None:
+                if primaryKey is None:
                     sql = sql + " PRIMARY KEY"
                 else:
                     qWarning(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
                              QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
                              field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
-                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, use FLCompoundKey para crear claves compuestas."))
+                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
+                                             "use FLCompoundKey para crear claves compuestas."))
                     return None
             else:
                 if field.isUnique():
@@ -408,7 +412,7 @@ class FLQPSQL(object):
 
     def mismatchedTable(self, table1, tmd_or_table2, db_=None):
 
-        if db_ == None:
+        if db_ is None:
             db_ = self.db_
 
         if isinstance(tmd_or_table2, str):
@@ -420,9 +424,9 @@ class FLQPSQL(object):
             try:
                 recMtd = self.recordInfo(tmd_or_table2)
                 recBd = self.recordInfo2(table1)
-                fieldBd = None
+                # fieldBd = None
                 for fieldMtd in recMtd:
-                    fieldBd = None
+                    # fieldBd = None
                     found = False
                     for field in recBd:
                         if field[0] == fieldMtd[0]:
@@ -447,8 +451,12 @@ class FLQPSQL(object):
         if not self.isOpen():
             return False
         info = []
-        stmt = "select pg_attribute.attname, pg_attribute.atttypid, pg_attribute.attnotnull, pg_attribute.attlen, pg_attribute.atttypmod, pg_attrdef.adsrc from pg_class, pg_attribute left join pg_attrdef on (pg_attrdef.adrelid = pg_attribute.attrelid and pg_attrdef.adnum = pg_attribute.attnum) where lower(pg_class.relname) = '%s' and pg_attribute.attnum > 0 and pg_attribute.attrelid = pg_class.oid and pg_attribute.attisdropped = false order by pg_attribute.attnum" % tablename.lower(
-        )
+        stmt = (
+            "select pg_attribute.attname, pg_attribute.atttypid, pg_attribute.attnotnull, pg_attribute.attlen, pg_attribute.atttypmod, "
+            "pg_attrdef.adsrc from pg_class, pg_attribute "
+            "left join pg_attrdef on (pg_attrdef.adrelid = pg_attribute.attrelid and pg_attrdef.adnum = pg_attribute.attnum)"
+            " where lower(pg_class.relname) = '%s' and pg_attribute.attnum > 0 and pg_attribute.attrelid = pg_class.oid "
+            "and pg_attribute.attisdropped = false order by pg_attribute.attnum" % tablename.lower())
         cursor = self.conn_.cursor()
         cursor.execute(stmt)
         rows = cursor.fetchall()
@@ -611,7 +619,7 @@ class FLQPSQL(object):
 
     def alterTable(self, mtd1, mtd2=None, key=None):
 
-        if mtd2 == None:
+        if mtd2 is None:
             return self.alterTable3(mtd1)
         else:
             return self.alterTable2(mtd1, mtd2, key)
@@ -706,17 +714,17 @@ class FLQPSQL(object):
                     v = oldCursor.value(newField.name())
                     if (not oldField.allowNull or not newField.allowNull()) and not v and not newField.type() == "serial":
                         defVal = newField.defaultValue()
-                        if not defVal == None:
+                        if defVal is not None:
                             v = defVal
 
-                    if not v == None and not newBuffer.field(newField.name()).type() == newField.type():
+                    if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
                         print("FLManager::alterTable : " + qApp.tr(
                             "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
 
-                    if not v == None and newField.type() == "string" and newField.length() > 0:
+                    if v is not None and newField.type() == "string" and newField.length() > 0:
                         v = str(v)[0:newField.length()]
 
-                    if (not oldField.allowNull() or not newField.allowNull()) and v == None:
+                    if (not oldField.allowNull() or not newField.allowNull()) and v is None:
                         if oldField.type() == "serial":
                             v = int(self.nextSerialVal(
                                 newMTD.name(), newField.name()))
@@ -753,6 +761,7 @@ class FLQPSQL(object):
             self.db_.dbAux().rollback()
             return False
 
+        force = False  # FIXME
         if force and ok:
             q.exec_("DROP TABLE %s CASCADE" % renameOld)
         return True
@@ -886,7 +895,7 @@ class FLQPSQL(object):
 
             if it.isUnique():
                 constraintName = "%s_%s_key" % (oldMTD.name(), it.name())
-                if constraintExist(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
+                if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
                     print("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.")
                           .arg(oldMTD.name(), oldField.name()))
                     self.db_.dbAux().rollback()
@@ -979,17 +988,17 @@ class FLQPSQL(object):
                     v = oldCursor.value(newField.name())
                     if (not oldField.allowNull or not newField.allowNull()) and not v and not newField.type() == "serial":
                         defVal = newField.defaultValue()
-                        if not defVal == None:
+                        if defVal is not None:
                             v = defVal
 
-                    if not v == None and not newBuffer.field(newField.name()).type() == newField.type():
+                    if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
                         print("FLManager::alterTable : " + qApp.tr(
                             "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
 
-                if not v == None and newField.type() == "string" and newField.length() > 0:
+                if v is not None and newField.type() == "string" and newField.length() > 0:
                     v = str(v)[0:newField.length()]
 
-                if (not oldField.allowNull() or not newField.allowNull()) and v == None:
+                if (not oldField.allowNull() or not newField.allowNull()) and v is None:
                     if oldField.type() == "serial":
                         v = int(self.nextSerialVal(
                             newMTD.name(), newField.name()))
@@ -1046,6 +1055,7 @@ class FLQPSQL(object):
             return None
 
         fList = []
+        vList = []
         for rec in records:
             for f in rec.fieldsList():
                 field = rec.field(f)
@@ -1056,6 +1066,7 @@ class FLQPSQL(object):
 
         sql = "INSERT INTO (%s) values (%s)" % (
             fList.split(","), vList.split(","))
+        return sql  # FIXME
 
     def Mr_Proper(self):
         util = FLUtil()
@@ -1149,7 +1160,7 @@ class FLQPSQL(object):
                     cur.select("%s not like 'RK@%'" % it.name())
                     while cur.next():
                         v = cur.value(it.name())
-                        if v == None:
+                        if v is None:
                             continue
 
                         v = self.db_.manager().storeLargeValue(mtd, v)

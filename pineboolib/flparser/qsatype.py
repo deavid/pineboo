@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from builtins import object
-import os
-
 
 class Object(object):
     pass
