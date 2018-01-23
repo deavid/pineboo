@@ -186,7 +186,6 @@ QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
 
 
-
 @decorators.NotImplementedWarn
 def FLPosPrinter(*args, **kwargs):
     class flposprinter:
