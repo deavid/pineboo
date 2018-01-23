@@ -721,6 +721,7 @@ class MainForm(object):
                 if img_format == "XPM.GZ":
                     data = zlib.decompress(data, 15)
                     img_format = "XPM"
+                
                 if self.prj._DGI.localDesktop():
                     pixmap = QtGui.QPixmap()
                     pixmap.loadFromData(data, img_format)
@@ -740,7 +741,7 @@ class MainForm(object):
                 try:
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
-                    if not self.prj.fcgiMode:
+                    if self.prj._DGI.useDesktop():
                         print(
                             "main.Mainform: Error al intentar decodificar icono de accion. No existe.")
                         print(e)
@@ -751,7 +752,7 @@ class MainForm(object):
             #        print("*****", iconSet, images)
             self.actions[action.name] = action
             if not self.prj._DGI.localDesktop():
-                self.prj._DGI.mainForm().mainWindow.loadAction(xmlaction)
+                self.prj._DGI.mainForm().mainWindow.loadAction(action)
 
             # Asignamos slot a action
             for slots in self.root.xpath("connections//connection"):
@@ -761,13 +762,13 @@ class MainForm(object):
                     action.slot = action.slot.replace('(', '')
                     action.slot = action.slot.replace(')', '')
                 if not self.prj._DGI.localDesktop():
-                    self.prj._DGI.mainForm().mainWindow.loadConnection(slots)
+                    self.prj._DGI.mainForm().mainWindow.loadConnection(action)
 
         self.toolbar = []
         for toolbar_action in self.root.xpath("toolbars//action"):
             self.toolbar.append(toolbar_action.get("name"))
-            if self.prj._DGI.localDesktop():
-                self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action)
+            if not self.prj._DGI.localDesktop():
+                self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
         # self.ui = WMainForm()
         # self.ui.load(self.path)
         # self.ui.show()

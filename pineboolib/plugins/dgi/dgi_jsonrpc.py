@@ -12,37 +12,71 @@ from json import dumps
 
 from lxml import etree
 
-from flup.server.fcgi import WSGIServer
+from werkzeug.wrappers import Request, Response
+from werkzeug.serving import run_simple
+
+from jsonrpc import JSONRPCResponseManager, dispatcher
+
 
 
 import traceback
 import sys
-#from flup.server.fcgi import WSGIServer
-
-dependences = []
-
-# try:
-#    import flup
-# except ImportError:
-#    print(traceback.format_exc())
-#    dependences.append("flup-py3")
 
 
-if len(dependences) > 0:
-    print()
-    print("HINT: Dependencias incumplidas:")
-    for dep in dependences:
-        print("HINT: Instale el paquete %s e intente de nuevo" % dep)
-    print()
-    sys.exit(32)
+
+
+
+
+class parser(object):
+    
+    _mainForm = None
+    
+    def __init__(self, mainForm):
+        self._mainForm = mainForm
+    
+    @Request.application
+    def receive(self, request):
+        response = None
+        try:
+            response = JSONRPCResponseManager.handle(
+                request.data, dispatcher)
+        except Exception:
+            response = "Not Found"
+            
+        return Response(response.json, mimetype='application/json')
+
+
+
+    
+
+    @dispatcher.add_method   
+    def mainWindow(*args):
+        if not args:
+            return "needArguments"
+        obj_ = getattr(pineboolib.project.main_window,"json_%s" % args[0],None)
+        if obj_:
+            return obj_(args)
+        else:
+            print("No existe mainWindow.json_%s" % args[0])
+            return "notFound"
+
+    @dispatcher.add_method   
+    def mainForm(*args):
+        if not args:
+            return "needArguments"
+        try:
+            obj_ = pineboolib.project._DGI.mainForm()
+            return obj_.json_process(args)
+        except Exception:
+            print(traceback.format_exc())
+            return "notFound"
 
 arrayControles = {}
 
 
-class dgi_jsonrpc(dgi_schema):
 
-    _fcgiCall = None
-    _fcgiSocket = None
+
+class dgi_jsonrpc(dgi_schema):
     _par = None
 
     def __init__(self):
@@ -54,7 +88,6 @@ class dgi_jsonrpc(dgi_schema):
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
         self.showInitBanner()
-        self._listenSocket = "/tmp/pineboo-JSONRPC.socket"
         self.loadReferences()
         self._mainForm = None
 
@@ -81,8 +114,9 @@ class dgi_jsonrpc(dgi_schema):
         self.launchServer()
     
     def launchServer(self):
-        print("JSON-RPC:INFO: Listening socket", self._listenSocket)
-        WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
+        run_simple('localhost', 4000, self._par.receive)
+        #print("JSON-RPC:INFO: Listening socket", self._listenSocket)
+        #WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
 
 
 class mainForm(object):
@@ -94,21 +128,43 @@ class mainForm(object):
         self.mainWindow = mainWindow()
         self.MainForm = MainForm()
     
+    def json_process(self, args):
+        try:
+            _action = args[0]
+        
+            if _action == "launch":
+                print("Lanzando", args[1])
+                return self.runAction(args[1])
+        except Exception:
+            print(traceback.format_exc())
+            return False
+        
+        
+    
     def runAction(self, name):
-        self.mainWindow._actionsConnects[name].run()
+        try:
+            self.mainWindow._actionsConnects[name].run()
+            return True
+        except Exception:
+            print(traceback.format_exc())
+            return False
 
 class mainWindow():
     
     areas_ = {}
     modules_ = {}
     _actionsConnects = {}
-    _json = []
-    
+    _actions = {}
+    _toolBarActions = []
+    _images = {}
+
     def __init__(self):
         self.areas_ = {}
         self.modules_ = {}
-        self._json = []
         self._actionsConnects = {}
+        self._actions = {}
+        self._toolBarActions = []
+        self._images = {}
     
     def load(self):
         pass
@@ -145,24 +201,86 @@ class mainWindow():
         
     
     def show(self):
-        print("Enviando ....")
+        pass
     
-    def loadAction(self, xml_action):
-        self.addToJson(xml_action)
     
-    def loadConnection(self, xml_connection):
-        self.addToJson(xml_connection)
+    def loadAction(self, action):
+        self._actions[action.name] = action
     
-    def loadToolBarsAction(self, xml_tb_actions):
-        self.addToJson(xml_tb_actions)
+    def loadConnection(self, action):
+        self._actions[action.name] = action
     
+    def loadToolBarsAction(self, name):
+        self._toolBarActions.append(name)
     
     def addToJson(self, xml):
         _json = xml2json.data(fromstring(etree.tostring(xml, pretty_print=True)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
-        self._json.append(_jsonStr)
+        return _jsonStr
+    
+    def json_areas(self, *args):
+        return self.areas_
+        
+    def json_modules(self, args):
+        _area = None
+        if len(args) > 1:
+            _area = args[1]
+        
+        modulesS = []
+            
+        for modu in self.modules_.keys():
+            if _area:
+                if self.modules_[modu].areaid == _area:
+                    modulesS.append(self.modules_[modu].name)
+                    modulesS.append(self.modules_[modu].description)
+                    modulesS.append(self.modules_[modu].areaid)
+            else:
+                modulesS.append(self.modules_[modu].name)
+                modulesS.append(self.modules_[modu].description)
+                modulesS.append(self.modules_[modu].areaid)
+                    
+            
+        
+        return modulesS
+    
+    def json_actions(self, args):
+        _module = None
+        _ret = []
+        if len(args) > 1:
+            _module = args[1]
+        
+        include = True
+        for ac in self._actions.keys():
+            _mod = self._actions[ac].mod
+            if _module:
+                include = False
+                if _mod.name == _module:
+                    include = True
+            
+            
+            if include:
+                _ret.append(_mod.name)
+                _ret.append(self._actions[ac].name)
+                _ret.append(self._actions[ac].iconSet)
+                _ret.append(self._actions[ac].slot)
+        
+        return _ret
+    
+    def json_image(self, name):
+        for _ac in self._actions.keys():
+            if name[1] == self._actions[_ac].iconSet:
+                return str(self._actions[_ac].icon)
         
         
+        return False
+                
+                    
+        
+        
+        
+        
+        
+           
           
 
 class MainForm(object):
@@ -171,7 +289,7 @@ class MainForm(object):
         pass    
         
 
-
+"""
 class parser(object):
     
     _mainForm = None
@@ -182,22 +300,27 @@ class parser(object):
     def query(self, environ, start_response):
         _received = environ["QUERY_STRING"]
         start_response('200 OK', [('Content-Type', 'text/html')])
-        print("FCGI:INFO: Processing '%s' ..." % _received)
-        if _received == "mainWindow":
-            return self._mainForm.mainWindow._json
-        elif _received[0:7] == "action:":
-            try:
-                _action = _received[7:]
-                print("Loading action", _action)
-                self._mainForm.runAction(_action)
-                    
-                    
-                return "OK!"
-            except Exception:
-                print(traceback.format_exc())
-        else:
-            return "Nada que mostrar :("
-
+        print("JSON-RPC:INFO: Processing '%s' ..." % _received)
+        #if _received == "mainWindow":
+        #    return self._mainForm.mainWindow._json
+        #elif _received[0:7] == "action:":
+        #    try:
+        #        _action = _received[7:]
+        #        print("Loading action", _action)
+        #        self._mainForm.runAction(_action)
+        #            
+        #            
+        #        return "OK!"
+        #    except Exception:
+        #        print(traceback.format_exc())
+        retorno = self.proccess_rpc(_received)
+        print("_________>", retorno)
+        return retorno
+    
+    def proccess_rpc(self, json_data):
+        return json_data
+        
+"""
 
 class PushButton(object):
 
