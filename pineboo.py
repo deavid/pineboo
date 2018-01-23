@@ -189,6 +189,7 @@ def main():
             "pineboolib.plugins.dgi.dgi_%s" % dgiName_), "dgi_%s" % dgiName_, None)()
     except Exception:
         print(" No se ha encontrado el esquema dgi", dgiName_)
+        print(traceback.format_exc())
         sys.exit(32)
 
     pineboo.DGI = DGI
