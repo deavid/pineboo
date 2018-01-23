@@ -6,7 +6,6 @@ import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 import platform
 import hashlib
 import traceback
@@ -946,6 +945,7 @@ class FLUtil(ProjectClass):
     """
 
     def sqlInsert(self, t, fL, vL, connName="default"):
+        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
         fL = fL.split(",")
         vL = vL.split(",")

@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtCore import QTime, QDate, QDateTime
-from PyQt5.QtGui import QProgressDialog
+from PyQt5.QtWidgets import QProgressDialog
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
