@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.fllegacy.FLFormDB import FLFormDB
-import traceback
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import filedir
@@ -199,7 +198,9 @@ class FLFormRecordDB(FLFormDB):
             if not caption:
                 caption = self.cursor_.metadata().alias()
 
-            if self.cursor_.modeAccess() == FLSqlCursor.Insert or self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
+            if (self.cursor_.modeAccess() == FLSqlCursor.Insert or
+                    self.cursor_.modeAccess() == FLSqlCursor.Edit or
+                    self.cursor_.modeAccess() == FLSqlCursor.Browse):
                 self.cursor_.transaction()
                 self.initTransLevel = self.cursor_.transactionLevel()
                 self.setCaptionWidget(caption)
@@ -385,7 +386,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonCancel.setObjectName("pushButtonCancel")
             try:
                 self.cursor_.autocommit.connect(self.disablePushButtonCancel)
-            except:
+            except Exception:
                 pass
 
             self.pushButtonCancel.clicked.connect(self.reject)
@@ -419,7 +420,7 @@ class FLFormRecordDB(FLFormDB):
 
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
-        #self.toolButtonAccept = QtGui.QToolButton()
+        # self.toolButtonAccept = QtGui.QToolButton()
         # self.toolButtonAccept.setIcon(QtGui.QIcon(filedir("../share/icons","gtk-add.png")))
         # self.toolButtonAccept.clicked.connect(self.validateForm)
         # self.bottomToolbar.layout.addWidget(self.toolButtonAccept)
@@ -532,10 +533,16 @@ class FLFormRecordDB(FLFormDB):
                 if q.exec_() and q.next():
                     i = 0
                     for field in colFields:
-                        msg = "El campo '%s' con valor '%s' ha sido modificado\npor otro usuario con el valor '%s'" % (
-                            mtd.fieldNameToAlias(field), self.cursor_.valueBuffer(field), q.value(i))
-                        res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso de concurrencia", "\n\n ¿ Desea realmente modificar este campo ?\n\nSí : Ignora el cambio del otro usuario y utiliza el valor que acaba de introducir\nNo : Respeta el cambio del otro usuario e ignora el valor que ha introducido\nCancelar : Cancela el guardado del registro y vuelve a la edición del registro\n\n",
-                                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape)
+                        # msg = "El campo '%s' con valor '%s' ha sido modificado\npor otro usuario con el valor '%s'" % (
+                        #    mtd.fieldNameToAlias(field), self.cursor_.valueBuffer(field), q.value(i))
+                        res = QtWidgets.QMessageBox.warning(
+                            QtWidgets.QApplication.focusWidget(),
+                            "Aviso de concurrencia", "\n\n ¿ Desea realmente modificar este campo ?\n\n"
+                            "Sí : Ignora el cambio del otro usuario y utiliza el valor que acaba de introducir\n"
+                            "No : Respeta el cambio del otro usuario e ignora el valor que ha introducido\n"
+                            "Cancelar : Cancela el guardado del registro y vuelve a la edición del registro\n\n",
+                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.No,
+                            QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape)
                         if res == QtWidgets.QMessageBox.Cancel:
                             return False
 

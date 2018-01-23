@@ -14,16 +14,17 @@ from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 # from pineboolib.fllegacy.FLWidgetReportViewer import FLWidgetReportViewer
 from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
+AQ_USRHOME = "."  # FIXME
 
 
 # class FLReportViewer(ProjectClass, FLWidgetReportViewer):
 class FLReportViewer(ProjectClass):
 
     def __init__(self, parent=0, name=0, embedInParent=False, rptEngine=0):
-        if parent and embedInParent:
-            pParam = Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
-        else:
-            pParam = 0
+        # if parent and embedInParent:
+        #     pParam = Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
+        # else:
+        #     pParam = 0
         # super(FLReportViewer, self).__init__(parent, name, pParam)
         super(FLReportViewer, self).__init__()
         print("FLReportViewer:: skipped because kugar is not working on Pineboo")

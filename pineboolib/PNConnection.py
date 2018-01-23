@@ -195,8 +195,12 @@ class PNConnection(QtCore.QObject):
             return False
 
         cancel = False
-        if self.interactiveGUI() and (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
-            # res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios", "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes, [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
+        if (self.interactiveGUI() and
+           (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and
+           cur.isModifiedBuffer() and cur.d.askForCancelChanges_):
+            # res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios",
+            #                "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes,
+            #                [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
             res = QtWidgets.QMessageBox.information(
                 QtWidgets.QApplication.focusWidget(),
                 "Cancelar Cambios",
