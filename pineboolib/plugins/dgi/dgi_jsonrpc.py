@@ -2,6 +2,7 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
+import pineboolib
 
 from PyQt5 import QtCore
 
