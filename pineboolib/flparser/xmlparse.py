@@ -1,6 +1,5 @@
 from builtins import str
 import xml.parsers.expat
-import sys
 from optparse import OptionParser
 import re
 
@@ -35,7 +34,7 @@ def start_element(name, attrs):
 
 
 def end_element(name):
-    global elements, show_end, lstelements,  lasttextdata
+    global elements, show_end, lstelements, lasttextdata
     lasttextdata = ""
     if show_end:
         # print "/".join(elements) + "/"
@@ -48,10 +47,10 @@ def end_element(name):
 
 def char_data(data):
     global elements, show_end, lstelements, lasttextdata
-    #data = data.strip()
+    # data = data.strip()
     lasttextdata += data
     if lasttextdata.strip():
-        #show_end = True
+        # show_end = True
         lstelements.pop()
         lstelements.append("/".join(elements) + "(%s)" %
                            repr(lasttextdata.strip()))
@@ -158,7 +157,7 @@ def main():
             "vbox",
             "grid",
         ]
-        r1 = re.compile("/widget")
+        # r1 = re.compile("/widget")
         for fname in args:
             p = xml.parsers.expat.ParserCreate()
 

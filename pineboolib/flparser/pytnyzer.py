@@ -1,13 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 # ------ Pythonyzer ... reads XML AST created by postparse.py and creates an equivalent Python file.
-from builtins import object
 from optparse import OptionParser
 import os
 import os.path
 import random
 import re
-from . import flscriptparse
 from lxml import etree
 
 
@@ -69,8 +67,8 @@ class ASTPython(object, metaclass=ASTPythonFactory):
     numline = 0
 
     @classmethod
-    def can_process_tag(
-        self, tagname): return self.__name__ == tagname or tagname in self.tags
+    def can_process_tag(self, tagname):
+        return self.__name__ == tagname or tagname in self.tags
 
     def __init__(self, elem):
         self.elem = elem
@@ -93,7 +91,8 @@ class ASTPython(object, metaclass=ASTPythonFactory):
         self.debug_file.write("%04d" % ASTPython.numline +
                               sp + cname + ": " + text + "\n")
 
-    def polish(self): return self
+    def polish(self):
+        return self
 
     def generate(self, **kwargs):
         yield "debug", "* not-known-seq * " + etree.tounicode(self.elem)
@@ -162,7 +161,7 @@ class Function(ASTPython):
             name = "_"
         withoutself = self.elem.get("withoutself")
 
-        returns = self.elem.get("returns", None)
+        # returns = self.elem.get("returns", None)
         parent = self.elem.getparent()
         grandparent = None
         if parent is not None:
@@ -209,7 +208,7 @@ class FunctionCall(ASTPython):
     def generate(self, **kwargs):
         name = id_translate(self.elem.get("name"))
         parent = self.elem.getparent()
-        data_ = None
+        # data_ = None
         if parent.tag == "InstructionCall":
             classes = parent.xpath("ancestor::Class")
             if classes:
@@ -227,7 +226,7 @@ class FunctionCall(ASTPython):
         for n, arg in enumerate(self.elem.xpath("CallArguments/*")):
             expr = []
             for dtype, data in parse_ast(arg).generate(isolate=False):
-                data_ = data
+                # data_ = data
                 if dtype == "expr":
                     expr.append(data)
                 else:
@@ -540,8 +539,8 @@ class With(ASTPython):
                        "commitBuffer", "commit", "refreshBuffer", "setNull", "setUnLock"]
 
     def generate(self, **kwargs):
-        key = "%02x" % random.randint(0, 255)
-        name = "w%s_obj" % key
+        # key = "%02x" % random.randint(0, 255)
+        # name = "w%s_obj" % key
         # yield "debug", "WITH: %s" % key
         variable, source = [obj for obj in self.elem]
         var_expr = []
@@ -552,8 +551,7 @@ class With(ASTPython):
                 yield dtype, data
         if len(var_expr) == 0:
             var_expr.append("None")
-            yield "debug", "Expression %d not understood" % n
-            yield "debug", etree.tostring(arg)
+            yield "debug", "Expression not understood"
 
         # yield "line", "%s = %s #WITH" % (name, " ".join(var_expr))
         yield "line", " #WITH_START"
@@ -579,7 +577,7 @@ class With(ASTPython):
 class Variable(ASTPython):
     def generate(self, force_value=False, **kwargs):
         name = self.elem.get("name")
-        #if name.startswith("colorFun"): print(name)
+        # if name.startswith("colorFun"): print(name)
         yield "expr", id_translate(name)
         values = 0
         for value in self.elem.xpath("Value|Expression"):
@@ -602,7 +600,7 @@ class Variable(ASTPython):
 
         dtype = self.elem.get("type", None)
 
-        if (values == 0) and force_value == True:
+        if (values == 0) and force_value:
             yield "expr", "="
             if dtype is None:
                 yield "expr", "None"
@@ -1185,7 +1183,7 @@ class OpMath(ASTPython):
 
 class DeclarationBlock(ASTPython):
     def generate(self, **kwargs):
-        mode = self.elem.get("mode")
+        # mode = self.elem.get("mode")
         is_constructor = self.elem.get("constructor")
         # if mode == "CONST": yield "debug", "Const Declaration:"
         for var in self.elem:
@@ -1205,7 +1203,8 @@ class DeclarationBlock(ASTPython):
 # ----- keep this one at the end.
 class Unknown(ASTPython):
     @classmethod
-    def can_process_tag(self, tagname): return True
+    def can_process_tag(self, tagname):
+        return True
 # -----------------
 
 
@@ -1241,7 +1240,7 @@ def file_template(ast):
     mainsource = etree.SubElement(mainclass, "Source")
 
     constructor = etree.SubElement(mainsource, "Function", name="_class_init")
-    args = etree.SubElement(constructor, "Arguments")
+    # args = etree.SubElement(constructor, "Arguments")
     csource = etree.SubElement(constructor, "Source")
 
     for child in ast:
@@ -1273,7 +1272,7 @@ def string_template(ast):
     mainsource = etree.SubElement(mainclass, "Source")
 
     constructor = etree.SubElement(mainsource, "Function", name="_class_init")
-    args = etree.SubElement(constructor, "Arguments")
+    # args = etree.SubElement(constructor, "Arguments")
     csource = etree.SubElement(constructor, "Source")
 
     for child in ast:
@@ -1314,7 +1313,7 @@ def write_python_file(fobj, ast, tpl=file_template):
             last_line_for_indent[len(indent)] = numline
         if dtype == "debug":
             line = "# DEBUG:: " + data
-            #print(numline, line)
+            # print(numline, line)
         if dtype == "expr":
             line = "# EXPR??:: " + data
         if dtype == "line+1":
@@ -1350,7 +1349,7 @@ def write_python_file(fobj, ast, tpl=file_template):
 
 
 def pythonize(filename, destfilename, debugname=None):
-    bname = os.path.basename(filename)
+    # bname = os.path.basename(filename)
     ASTPython.debug_file = open(debugname, "w") if debugname else None
     parser = etree.XMLParser(remove_blank_text=True)
     try:
@@ -1393,6 +1392,7 @@ def main():
         print(options, args)
 
     for filename in args:
+        bname = os.path.basename(filename)
         if options.storepath:
             destname = os.path.join(options.storepath, bname + ".py")
         else:

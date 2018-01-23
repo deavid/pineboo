@@ -1,11 +1,12 @@
 from enum import Enum
 from datetime import datetime
+import sys
+import math
 
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QObject
 from PyQt5.Qt import QPaintDevice
-# from PyQt5.Qt import QMap
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -31,6 +32,9 @@ from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 # from pineboolib.fllegacy.AQOdsStyle import AQOdsStyle
 # from pineboolib.fllegacy.AQOdsImage import AQOdsImage
 # from pineboolib.fllegacy.AQOdsCentimeters import AQOdsCentimeters
+AQOdsGenerator = AQOdsSpreadSheet = AQOdsSheet = None  # FIXME
+AQOdsRow = AQOdsColor = AQOdsStyle = None  # FIXME
+AQOdsImage = AQOdsCentimeters = QPrinter = None  # FIXME
 
 
 class MReportEngine(ProjectClass, QObject):
@@ -1026,7 +1030,8 @@ class MReportEngine(ProjectClass, QObject):
         if self.rHeader_.getHeight() == 0:
             return
 
-        if (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and self.currPage_ == 1) or (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        if (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
+                self.currPage_ == 1) or (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
             self.rHeader_.setPageNumber(self.currPage_)
             self.rHeader_.setReportDate(self.currDate_)
             sectionHeight = self.rHeader_.getHeight()
@@ -1042,7 +1047,8 @@ class MReportEngine(ProjectClass, QObject):
         if (self.currY_ + self.pHeader_.getHeight()) > self.currHeight_:
             self.newPage(pages)
 
-        if (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and self.currPage_ == 1) or (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        if (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
+                self.currPage_ == 1) or (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
             self.pHeader_.setPageNumber(self.currPage_)
             self.pHeader_.setReportDate(self.currDate_)
             sectionHeight = self.pHeader_.getHeight()
@@ -1060,7 +1066,8 @@ class MReportEngine(ProjectClass, QObject):
 
         self.pFooter_.setCalcFieldData()
 
-        if (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.FirstPage and self.currPage_ == 1) or (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        if (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
+                self.currPage_ == 1) or (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
             self.pFooter_.setPageNumber(self.currPage_)
             self.pFooter_.setReportDate(self.currDate_)
             sectionHeight = self.pFooter_.getHeight()
@@ -1538,7 +1545,8 @@ class MReportEngine(ProjectClass, QObject):
         if (self.currY_ + self.rFooter_.getHeight()) > self.currHeight_:
             self.newPage(pages)
 
-        if self.rFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage or self.rFooter_.printFrequency() == MReportSection.PrintFrequency.LastPage:
+        if self.rFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage or \
+                self.rFooter_.printFrequency() == MReportSection.PrintFrequency.LastPage:
             self.rFooter_.setCalcFieldData(self.grandTotal_)
 
             self.rFooter_.setPageNumber(self.currPage_)
@@ -1630,7 +1638,7 @@ class MReportEngine(ProjectClass, QObject):
         childCount = len(children)
 
         for i in range(childCount):
-            child = children.item(j)
+            child = children.item(i)
 
             if child.nodeType() == Qt.QDomNode.NodeType.ElementNode:
                 if child.nodeName() == "Line":
@@ -1713,15 +1721,15 @@ class MReportEngine(ProjectClass, QObject):
         if not cols:
             cols = "1"
 
-        width = ceil((self.pageWidth_ - self.rightMargin_ -
-                      self.leftMargin_) / float(cols))
+        width = math.ceil((self.pageWidth_ - self.rightMargin_ -
+                           self.leftMargin_) / float(cols))
         section.setWidth(width)
 
         children = report.childNodes()
         childCount = len(children)
 
         for i in range(childCount):
-            child = children.item(j)
+            child = children.item(i)
 
             if child.nodeType() == Qt.QDomNode.NodeType.ElementNode:
                 if child.nodeName() == "Line":
@@ -1862,12 +1870,12 @@ class MReportEngine(ProjectClass, QObject):
         field.setCodBarRes(res if res > 0 else 72)
         field.setBlankZero(int(attr.namedItem("BlankZero").nodeValue()))
 
-        tmp = attr.namedItem("NegValueColor").nodeValue()
-        field.setNegValueColor(
-            int(tmp[find:]),
-            int(tmp[find + 1:leng - findRev - find - 1]),
-            int(tmp[-(leng - findRev - 1):])
-        )
+        # tmp = attr.namedItem("NegValueColor").nodeValue()
+        # field.setNegValueColor(
+        #     int(tmp[find:]),
+        #     int(tmp[find + 1:leng - findRev - find - 1]),
+        #     int(tmp[-(leng - findRev - 1):])
+        # )
         self.setLabelAttributes(field, attr)
 
     @decorators.BetaImplementation
@@ -1930,8 +1938,7 @@ class MReportEngine(ProjectClass, QObject):
 
         detail = temp.first()
         while detail:
-            new_detail = MReportSection()
-            new_detail = detail
+            MReportSection()  # FIXME
             self.details_.append(detail)
             detail = temp.next()
 

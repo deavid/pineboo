@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-
-from builtins import str
-from builtins import object
 import time
 import os
 import logging
@@ -539,7 +536,7 @@ class Module(object):
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
-        
+
         if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
             tiempo_3 = time.time()
             if tiempo_3 - tiempo_1 > 0.2:

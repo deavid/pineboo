@@ -13,6 +13,16 @@ from pineboolib.kugar.mcalcobject import MCalcObject
 idSecGlob_ = 0
 
 
+class FLDomNodeInterface:
+    # FIXME
+    pass
+
+
+class MSpecialObject:
+    # FIXME
+    pass
+
+
 class MReportSection(ProjectClass, QObject):
 
     class PrintFrequency(Enum):
@@ -99,32 +109,6 @@ class MReportSection(ProjectClass, QObject):
             if fieldType != MFieldObject.DataType.Date and fieldType != MFieldObject.DataType.Pixmap and fieldType != MFieldObject.DataType.CodBar:
                 record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
                                                 "_" + field.getFieldName(), field.getText())
-
-    @decorators.BetaImplementation
-    def setCalcFieldData(self, values=0, values2=0, record=0, fillRecord=False):
-        i = 0
-        value = ""
-
-        field = self.calculatedFields_.first()
-        while field != 0:
-            if field.getFromGrandTotal():
-                continue
-
-            calcType = field.getCalculationType()
-
-            if calcType == MCalcObject.CalculationType.NoOperation:
-                if values2:
-                    value = values2[i]
-                self.calculateField(field, 0, value, record, fillRecord)
-            elif calcType == MCalcObject.CalculationType.CallFunction:
-                self.calculateField(field, 0, value, record, fillRecord)
-            else:
-                if values:
-                    self.calculateField(field, values.at(
-                        i), value, record, fillRecord)
-
-            i = i + 1
-            field = self.calculatedFields_.next()
 
     @decorators.BetaImplementation
     def setCalcFieldDataGT(self, values, record=0, fillRecord=False):
@@ -429,7 +413,35 @@ class MReportSection(ProjectClass, QObject):
             field = self.fields_.next()
 
     @decorators.BetaImplementation
-    def getHeight(self, p):
+    def resetIdSecGlob(self):
+        self.idSecGlob_ = 0
+
+    @decorators.BetaImplementation
+    def copy(self, mrs):
+        self.clear()
+
+        self.strIdSec_ = mrs.strIdSec_
+        self.idSec_ = mrs.idSec_
+
+        self.height_ = mrs.height_
+        self.frequency_ = mrs.frequency_
+
+        self.lines_ = mrs.lines_
+        self.labels_ = mrs.labels_
+        self.specialFields_ = mrs.specialFields_
+        self.calculatedFields_ = mrs.calculatedFields_
+        self.fields_ = mrs.fields_
+
+    @decorators.BetaImplementation
+    def setIdSec(self, id):
+        self.idSec_ = id
+
+    @decorators.BetaImplementation
+    def idSec(self):
+        return self.idSec_
+
+    @decorators.BetaImplementation
+    def _getHeight_oldImplementation(self, p):
         modifiedHeight = 0
         newHeight = self.height_
 
@@ -459,34 +471,6 @@ class MReportSection(ProjectClass, QObject):
             field = self.fields_.next()
 
         return newHeight
-
-    @decorators.BetaImplementation
-    def resetIdSecGlob(self):
-        idSecGlob_ = 0
-
-    @decorators.BetaImplementation
-    def copy(self, mrs):
-        self.clear()
-
-        self.strIdSec_ = mrs.strIdSec_
-        self.idSec_ = mrs.idSec_
-
-        self.height_ = mrs.height_
-        self.frequency_ = mrs.frequency_
-
-        self.lines_ = mrs.lines_
-        self.labels_ = mrs.labels_
-        self.specialFields_ = mrs.specialFields_
-        self.calculatedFields_ = mrs.calculatedFields_
-        self.fields_ = mrs.fields_
-
-    @decorators.BetaImplementation
-    def setIdSec(self, id):
-        self.idSec_ = id
-
-    @decorators.BetaImplementation
-    def idSec(self):
-        return self.idSec_
 
     @decorators.BetaImplementation
     def getHeight(self):
@@ -603,6 +587,32 @@ class MReportSection(ProjectClass, QObject):
     @decorators.BetaImplementation
     def setCalcFieldData(self, idx, data):
         self.calculatedFields_.at(idx).setText(data)
+
+    @decorators.BetaImplementation
+    def setCalcFieldData__2(self, values=0, values2=0, record=0, fillRecord=False):
+        i = 0
+        value = ""
+
+        field = self.calculatedFields_.first()
+        while field != 0:
+            if field.getFromGrandTotal():
+                continue
+
+            calcType = field.getCalculationType()
+
+            if calcType == MCalcObject.CalculationType.NoOperation:
+                if values2:
+                    value = values2[i]
+                self.calculateField(field, 0, value, record, fillRecord)
+            elif calcType == MCalcObject.CalculationType.CallFunction:
+                self.calculateField(field, 0, value, record, fillRecord)
+            else:
+                if values:
+                    self.calculateField(field, values.at(
+                        i), value, record, fillRecord)
+
+            i = i + 1
+            field = self.calculatedFields_.next()
 
     @decorators.BetaImplementation
     def getField(self, idx):

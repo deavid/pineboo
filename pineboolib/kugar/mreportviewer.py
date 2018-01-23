@@ -229,7 +229,9 @@ class MReportViewer(ProjectClass, QWidget):
             m = Qt.QMessageBox(
                 FLUtil.translate(self, "app", "Falta Ghostscript"),
                 FLUtil.translate(
-                    self, "app", "Para poder exportar a PDF debe instalar Ghostscript (http://www.ghostscript.com) y añadir\nel directorio de instalación a la ruta de búsqueda de programas\ndel sistema (PATH).\n\n"),
+                    self, "app",
+                    "Para poder exportar a PDF debe instalar Ghostscript (http://www.ghostscript.com) y añadir\n"
+                    "el directorio de instalación a la ruta de búsqueda de programas\ndel sistema (PATH).\n\n"),
                 Qt.QMessageBox.Critical,
                 Qt.QMessageBox.Ok,
                 Qt.QMessageBox.NoButton,
