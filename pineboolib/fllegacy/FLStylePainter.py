@@ -2,7 +2,6 @@ import math
 from enum import Enum
 
 from PyQt5.QtCore import Qt
-
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
@@ -335,12 +334,13 @@ class FLStylePainter(ProjectClass):
                     w = Qt.QFont.Black
                 font.setWeight(w)
             elif prop == "text-anchor":
-                if val == "middle":
-                    talign = Qt.AlignHCenter
-                elif val == "end":
-                    talign = Qt.AlignRight
-                else:
-                    talign = Qt.AlignLeft
+                # if val == "middle":
+                #     talign = Qt.AlignHCenter
+                # elif val == "end":
+                #     talign = Qt.AlignRight
+                # else:
+                #     talign = Qt.AlignLeft
+                pass
             elif prop == "clip-path":
                 if val.startswith("url(#"):
                     clipName = val[5:6]

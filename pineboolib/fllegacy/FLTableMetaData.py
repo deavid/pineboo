@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
@@ -37,11 +36,11 @@ class FLTableMetaData(ProjectClass):
 
     def __init__(self, n, a=None, q=None):
         super(FLTableMetaData, self).__init__()
-        #tmp = None
+        # tmp = None
 
         if not a and not q:
             if isinstance(n, str):
-                #print("FLTableMetaData(%s).init()" % args[0])
+                # print("FLTableMetaData(%s).init()" % args[0])
                 self.inicializeFLTableMetaDataP(n)
             else:
                 self.inicializeFLTableMetaData(n)
@@ -67,17 +66,17 @@ class FLTableMetaData(ProjectClass):
             table = self._prj.tables[name]
         except:
             return None
-        
+
         for field in table.fields:
             field.setMetadata(self)
             if field.isCompoundKey():
                 self.d.compoundKey_.addFieldMD(field)
             if field.isPrimaryKey():
                 self.d.primaryKey_ = field.name()
-                
+
             self.d.fieldList_.append(field)
             self.d.fieldsNames_.append(field.name())
-            
+
             if field.type() == FLFieldMetaData.Unlock:
                 self.d.fieldsNamesUnlock_.append(field.name())
         """
@@ -573,7 +572,7 @@ class FLTableMetaData(ProjectClass):
             return
 
         for f in self.d.fieldList_:
-            #print("comprobando ", f.name())
+            # print("comprobando ", f.name())
             if f.name() == str(fN).lower():
                 return f
 
@@ -596,14 +595,14 @@ class FLTableMetaData(ProjectClass):
 
     def fieldList(self, prefixTable=None):
 
-        if prefixTable == None:
+        if prefixTable is None:
             return self.d.fieldList_
 
         listado = []
 
         cadena = None
 
-        if prefixTable == True:
+        if prefixTable:
             cadena = "%s." % self.name()
         else:
             cadena = ""
@@ -722,7 +721,7 @@ class FLTableMetaData(ProjectClass):
         for field in self.d.fieldList_:
             i = i + 1
             if position == i:
-                #print("FLTableMetaData.indexField(%s) = %s" % (position, field.name()))
+                # print("FLTableMetaData.indexField(%s) = %s" % (position, field.name()))
                 return field
 
         print("FLTableMetaData.indexField(%s) Posicion %s de %s no encontrado" % (
@@ -816,8 +815,8 @@ class FLTableMetaDataPrivate():
         self.fieldsNamesUnlock_ = []
         self.aliasFieldMap_ = {}
         self.fieldAliasMap_ = {}
-        #print("Vaciando field list ahora",  len(self.fieldList_))
-        if n == None:
+        # print("Vaciando field list ahora",  len(self.fieldList_))
+        if n is None:
             self.inicializeFLTableMetaDataPrivate()
         elif n and not a and not q:
             self.inicializeFLTableMetaDataPrivateS(n)
@@ -872,7 +871,7 @@ class FLTableMetaDataPrivate():
     @param  f   Campo objeto cuyo alias se desea formatear
     """
 
-    def formatAlias(self,  f):
+    def formatAlias(self, f):
         if not f:
             return
 

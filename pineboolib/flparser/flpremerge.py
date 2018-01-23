@@ -4,8 +4,6 @@ from past.utils import old_div
 from builtins import object
 import os
 import os.path
-import sys
-import math
 from optparse import OptionParser
 import difflib
 import re
@@ -97,18 +95,18 @@ class processedFile(object):
                 while linenum < len(linePosChar) and linePosChar[linenum + 1] <= bdesde:
                     linenum += 1
                 startline = linenum
-                linesize = linePosChar[startline] - linePosChar[startline - 1]
-                curpos = bdesde - linePosChar[startline - 1]
+                # linesize = linePosChar[startline] - linePosChar[startline - 1]
+                # curpos = bdesde - linePosChar[startline - 1]
                 # if curpos != linesize: print "****", linesize, curpos
 
                 while linenum < len(linePosChar) and linePosChar[linenum + 1] <= bhasta:
                     linenum += 1
                 endline = linenum
-                #while startline > 1 and linePosChar[startline-1]-bdesde >=-2: startline-=1
+                # while startline > 1 and linePosChar[startline-1]-bdesde >=-2: startline-=1
 
                 # print linePosChar[startline-1]-bdesde, linePosChar[startline]-bdesde, linePosChar[startline+1]-bdesde
 
-                #print (startline, endline), "BLOCK", (linePosChar[startline], linePosChar[endline]), (bdesde , bhasta), (bhasta-bdesde)+1
+                # print (startline, endline), "BLOCK", (linePosChar[startline], linePosChar[endline]), (bdesde , bhasta), (bhasta-bdesde)+1
 
                 # print "<<<<"
                 mode = ""
@@ -196,19 +194,19 @@ class processedFile(object):
                 # print ">>>>"
             if desde is None:
                 break
-            initline = linenum
+            # initline = linenum
             while linenum < len(linePosChar) and linePosChar[linenum + 1] < desde + 2:
                 linenum += 1
             startline = linenum
             while linenum < len(linePosChar) and linePosChar[linenum] < hasta + 1:
                 linenum += 1
-            #linenum += 1
+            # linenum += 1
             endline = linenum
             if linePosChar[startline] - desde != 0 or linePosChar[endline] - hasta < 1 or linePosChar[endline] - hasta > 2:
-                print(linePosChar[startline] - desde,  linePosChar[endline -
-                                                                   1] - hasta, linePosChar[endline] - hasta, bl_name)
+                print(linePosChar[startline] - desde,
+                      linePosChar[endline - 1] - hasta, linePosChar[endline] - hasta, bl_name)
             name = bl_name
-            #print (startline, endline), name, (linePosChar[startline], linePosChar[endline]), pk, (hasta-desde)+1
+            # print (startline, endline), name, (linePosChar[startline], linePosChar[endline]), pk, (hasta-desde)+1
             self.computedBlocks.append((startline, endline, name))
             fout.write("%d\t%d\t%s\n" % (startline, endline, name))
             # print "%s" % name
@@ -269,7 +267,7 @@ def main():
             # print "File:", file1
             pf = processedFile(file1, debug=options.debug)
             pfiles.append(pf)
-        #pfA = pfiles[0]
+        # pfA = pfiles[0]
         # for pfB in pfiles[1:]:
         #    feq = FindEquivalences(pfA, pfB)
 
@@ -330,7 +328,7 @@ class FindEquivalences(object):
                         for n, line in enumerate(lines):
                             if line[0] != " ":
                                 modifiedlines.append(n)
-                        ml = 0
+                        # ml = 0
                         omit = []
                         Context = 3
                         n = 0
@@ -425,12 +423,12 @@ class FindEquivalences(object):
                     sz1a, sz1b = self.pfA.idxtree[pA]
                     sz1 = sz1b - sz1a + 1
                     lev2 = 1.0 + old_div(sz1, float(sz2))
-                    #lev2 = 2**(len(pkA) - len(pA))
-                    #lev2_list = [ pC for pC in self.pfA.idxtree if len(pC) >= len(pA) and pC[:len(pA)] == pA ]
-                    #lev2_plist = set([])
+                    # lev2 = 2**(len(pkA) - len(pA))
+                    # lev2_list = [ pC for pC in self.pfA.idxtree if len(pC) >= len(pA) and pC[:len(pA)] == pA ]
+                    # lev2_plist = set([])
                     # for l in lev2_list:
                     #    lev2_plist |= set(tree_parents(l)[1:])
-                    #lev2 = len(set(lev2_list) - set(lev2_plist))
+                    # lev2 = len(set(lev2_list) - set(lev2_plist))
 
                     pEq = (pB, old_div(float(punt), lev2))
                     if pA not in self.parent_equivalences:
@@ -469,8 +467,8 @@ class FindEquivalences(object):
                     t = 0
                 t *= 10.0
                 punt *= t
-                #if nameA[0] != nameB[0]: punt /=3.0
-                #if nameA[1] != nameB[1]: punt /=1.0+len(nameA[1]) / 40.0+len(nameB[1]) / 40.0
+                # if nameA[0] != nameB[0]: punt /=3.0
+                # if nameA[1] != nameB[1]: punt /=1.0+len(nameA[1]) / 40.0+len(nameB[1]) / 40.0
                 if punt >= 0.50:
                     rcount.append((round(punt * 100), key))
 
@@ -575,7 +573,7 @@ def process(filename):
         treebydepth[td].append(k)
     nitems = 0
     maxitems = 0
-    maxd = 0
+    # maxd = 0
     hashes = {}
     list_hashes = []
 
@@ -588,7 +586,7 @@ def process(filename):
         elif nitems * 2 < maxitems:
             break
         # print "Depth:", d, "(%d items)" % nitems
-        maxd = d
+        # maxd = d
         for k in idx:
             # print ".".join([str(x) for x in k])
             pk = idxtree[k]

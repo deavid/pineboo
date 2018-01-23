@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, Qt
-from PyQt5.Qt import qWarning, QTranslator, QFile, QTextStream, QDir,\
-    QApplication, qApp
-
-from pineboolib import decorators
-from pineboolib.fllegacy import FLUtil
+from PyQt5 import QtCore
+from PyQt5.Qt import QFile, QTextStream, qApp
 from pineboolib.flcontrols import ProjectClass
-from pineboolib.utils import filedir
+# from pineboolib.utils import filedir
 from subprocess import call
 import os
 
@@ -23,13 +19,13 @@ class FLTranslations(ProjectClass):
         qmFileName = tsFileName
         qmFileName = qmFileName.replace(".ts", "")
         qmFileName = "%s.qm" % qmFileName
-        dir_ = tsFileName[0:len(tsFileName) - 44]
-        fileName_ = tsFileName[len(tsFileName) - 43:]
+        # dir_ = tsFileName[0:len(tsFileName) - 44]
+        # fileName_ = tsFileName[len(tsFileName) - 43:]
 
         try:
             if not os.path.exists(qmFileName):
                 tor.load(tsFileName)
-        except:
+        except Exception:
             print("lrelease warning: For some reason, I cannot load '%s'" %
                   tsFileName)
             return False
@@ -67,16 +63,16 @@ class FLTranslations(ProjectClass):
         f.close()
 
         if fullText.find("<!DOCTYPE TS>") >= 0:
-            if qmOutputFile == None:
+            if qmOutputFile is None:
                 self.releaseTsFile(tsInputFile, verbose, stripped)
             else:
                 self.loadTsFile(tor, tsInputFile, verbose)
 
         else:
-            modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
+            # modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
             key = self.db_.managerModules().shaOfFile(tsInputFile)
-            dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %
-                          (self._prj.conn.db_name, modId, key))
+            # dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %
+            #               (self._prj.conn.db_name, modId, key))
             tagMap = fullText
             # TODO: hay que cargar todo el contenido del fichero en un diccionario
             for key, value in tagMap:
@@ -131,29 +127,3 @@ class FLTranslate(ProjectClass):
 
     def __str__(self):
         return self.context_
-
-
-"""    
-****************************************************************************
-**
-** Copyright (C) 1992-2007 Trolltech ASA. All rights reserved.
-**
-** This file is part of the Qt Linguist of the Qt Toolkit.
-**
-** This file may be used under the terms of the GNU General Public
-** License version 2.0 as published by the Free Software Foundation
-** and appearing in the file LICENSE.GPL included in the packaging of
-** this file.  Please review the following information to ensure GNU
-** General Public Licensing requirements will be met:
-** http://www.trolltech.com/products/qt/opensource.html
-**
-** If you are unsure which license is appropriate for your use, please
-** review the following information:
-** http://www.trolltech.com/products/qt/licensing.html or contact the
-** sales department at sales@trolltech.com.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
-****************************************************************************
-"""

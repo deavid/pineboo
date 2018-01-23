@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Completada Si
-from PyQt5 import QtCore, QtGui, QtWidgets
-# from pineboolib.fllegacy.FLUtil import FLUtil
+from PyQt5 import QtCore, QtWidgets
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
@@ -334,7 +333,7 @@ class FLSqlDatabase():
     """
     @decorators.BetaImplementation
     def canRegenTables(self):
-        if not self.driverName_ is None or not self.dbAux_:
+        if self.driverName_ is not None or not self.dbAux_:
             return False
 
         dr = self.dbAux_.driver()
@@ -971,9 +970,12 @@ class FLSqlDatabase():
             return False
 
         cancel = False
-        if self.interactiveGUI() and (cur.d.modeAccess() == FLSqlCursor.INSERT or cur.d.modeAccess_ == FLSqlCursor.EDIT) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
-            res = QtWidgets.QMessageBox.information(self, FLUtil.translate("app", "Cancelar cambios"), FLUtil.translate("app", "Todos los cambios efectuados se cancelarán.¿Está seguro?"),
-                                                    QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape)
+        if (self.interactiveGUI() and (cur.d.modeAccess() == FLSqlCursor.INSERT or cur.d.modeAccess_ == FLSqlCursor.EDIT) and
+                cur.isModifiedBuffer() and cur.d.askForCancelChanges_):
+            res = QtWidgets.QMessageBox.information(
+                self, FLUtil.translate("app", "Cancelar cambios"),
+                FLUtil.translate("app", "Todos los cambios efectuados se cancelarán.¿Está seguro?"),
+                QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape)
             if res == QtWidgets.QMessageBox.No:
                 return False
             cancel = True
@@ -1061,7 +1063,13 @@ class FLSqlDatabase():
     def finishInternal(self):
         if self.transaction_ > 0:
             if self.lastActiveCursor_:
-                text = "Se han detectado transacciones no finalizadas en la última operación.\nSe van a cancelar las transacciones pendientes.\nLos últimos datos introducidos no han sido guardados, por favor\nrevise sus últimas acciones y repita las operaciones que no\nse han guardado.\nSqlDatabase::finishInternal: %s\n" % self.lastActiveCursor_.d.curName_
+                text = (
+                    "Se han detectado transacciones no finalizadas en la última operación.\n"
+                    "Se van a cancelar las transacciones pendientes.\n"
+                    "Los últimos datos introducidos no han sido guardados, por favor\n"
+                    "revise sus últimas acciones y repita las operaciones que no\n"
+                    "se han guardado.\n"
+                    "SqlDatabase::finishInternal: %s\n" % self.lastActiveCursor_.d.curName_)
                 self.lastActiveCursor_.rollbackOpened(-1, text)
 
             if self.db_ and self.transaction_ > 0:
