@@ -29,11 +29,6 @@ mediante objetos FLTableMetaData de una tabla dada.
 
 @author InfoSiAL S.L.
 """
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
 
 
 class FLManager(ProjectClass):
@@ -76,8 +71,8 @@ class FLManager(ProjectClass):
 
     def init(self):
         self.initCount_ = self.initCount_ + 1
-        tmpTMD = self.createSystemTable("flmetadata")
-        tmpTMD = self.createSystemTable("flseqs")
+        self.createSystemTable("flmetadata")
+        self.createSystemTable("flseqs")
 
         if not self.db_.dbAux():
             return
@@ -85,10 +80,10 @@ class FLManager(ProjectClass):
         q = FLSqlQuery(None, self.db_.dbAux())
         q.setForwardOnly(True)
 
-        tmpTMD = self.createSystemTable("flsettings")
+        self.createSystemTable("flsettings")
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
             q.exec_("DROP TABLE flsettings CASCADE")
-            tmpTMD = self.createSystemTable("flsettings")
+            self.createSystemTable("flsettings")
 
         if not self.dictKeyMetaData_:
             self.dictKeyMetaData_ = {}
@@ -103,7 +98,7 @@ class FLManager(ProjectClass):
         q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'")
         if not q.next():
             q.exec_("DROP TABLE flmetadata CASCADE")
-            tmpTMD = self.createSystemTable("flmetadata")
+            self.createSystemTable("flmetadata")
 
             c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
             for key, value in self.dictKeyMetaData_:
@@ -379,7 +374,7 @@ class FLManager(ProjectClass):
                                     fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
 
-                                newRef = (not isForeignKey)
+                                # newRef = (not isForeignKey)
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
                                     # fieldsAux = tmd.fieldsNames().split(",")
@@ -387,10 +382,9 @@ class FLManager(ProjectClass):
                                     # if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
                                     if fmtdAuxName not in fieldsAux:
                                         if not isForeignKey:
-                                            fmdtAux = FLFieldMetaData(fmtdAux)
+                                            FLFieldMetaData(fmtdAux)
 
                                         # fmtdAux.setName("%s.%s" % (table, field))
-                                        newRef = False
 
                                 # if newRef:
                                 #    fmtdAux.ref()
@@ -498,7 +492,7 @@ class FLManager(ProjectClass):
     @return TRUE si existe la tabla, FALSE en caso contrario
     """
 
-    def existsTable(self,  n, cache=True):
+    def existsTable(self, n, cache=True):
 
         sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
         # Al usar dbAux no bloquea sql si falla
@@ -675,7 +669,7 @@ class FLManager(ProjectClass):
 
             return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])
 
-        elif isinstance(args[1], FLFieldMetaData) and (isinstance(args[0], str) or isinstance(args[0], QString)):
+        elif isinstance(args[1], FLFieldMetaData) and isinstance(args[0], str):
             return self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
 
         elif isinstance(args[0], FLFieldMetaData) and len(args) == 2:

@@ -2,7 +2,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.Qt import QValidator
 
 from pineboolib import decorators
 from pineboolib.utils import DefFun, filedir
@@ -107,14 +106,14 @@ class FLTableDB(QtWidgets.QWidget):
     def loaded(self):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
-        #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
+        # print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
         parent_cursor = None
         while True:  # Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             if isinstance(self.topWidget.parentWidget(), FLFormSearchDB):
                 self.topWidget = self.topWidget.parentWidget()
             try:
                 parent_cursor = self.topWidget.cursor()
-            except:
+            except Exception:
                 pass
             if not isinstance(parent_cursor, FLSqlCursor):
                 parent_cursor = None
@@ -277,7 +276,7 @@ class FLTableDB(QtWidgets.QWidget):
             if self.showed:
                 try:
                     self.cursorAux.newBuffer.disconnect(self.refresh)
-                except:
+                except Exception:
                     pass
 
             self.cursorAux.newBuffer.connect(self.refresh)
@@ -836,7 +835,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.tableRecords_.installEventFilter(self)
 
         self.setLayout(self.masterLayout)
-        #self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+        # self.setTabOrder(self.tableRecords_, self.lineEditSearch)
         self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
         self.setTabOrder(self.comboBoxFieldToSearch,
                          self.comboBoxFieldToSearch2)
@@ -853,7 +852,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         if model:
             for column in range(model.columnCount()):
-                if model.metadata() == None:
+                if model.metadata() is None:
                     return
                 field = model.metadata().indexFieldObject(column)
                 if not field.visibleGrid():
@@ -900,7 +899,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.tableRecords_.setFLSqlCursor(self.cursor_)
         try:
             self.tableRecords_.doubleClicked.disconnect(self.chooseRecord)
-        except:
+        except Exception:
             pass
         self.tableRecords_.doubleClicked.connect(self.chooseRecord)
 
@@ -1012,7 +1011,7 @@ class FLTableDB(QtWidgets.QWidget):
                             olTranslated = []
                             olNoTranslated = field.optionsList()
                             # print(field.optionsList())
-                            #countOl = olNoTranslated.count()
+                            # countOl = olNoTranslated.count()
                             for z in olNoTranslated:
                                 olTranslated.append(
                                     util.translate("Metadata", z))
@@ -1055,7 +1054,7 @@ class FLTableDB(QtWidgets.QWidget):
                     if type == "date":
                         editor_ = pineboolib.project.resolveDGIObject(
                             "FLDateEdit")(self, _label)
-                        editor_.setOrder(FLDateEdit.DMY)
+                        # editor_.setOrder(FLDateEdit.DMY) # FIXME
                         editor_.setAutoAdvance(True)
                         editor_.setSeparator("-")
                         da = QtCore.QDate()
@@ -1110,9 +1109,8 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.topWidget_:
             return None
 
-        util = FLUtil()
         rCount = self.tdbFilter.numRows()
-        #rCount = self.cursor_.model().columnCount()
+        # rCount = self.cursor_.model().columnCount()
         if not rCount or not self.cursor_:
             return None
 
@@ -1161,7 +1159,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                     qField = None
                     for qField in list:
-                        if qFiled.endswith(".%s" % fieldName):
+                        if qField.endswith(".%s" % fieldName):
                             break
 
                     fieldName = qField
@@ -1583,7 +1581,7 @@ class FLTableDB(QtWidgets.QWidget):
         if self.initSearch_:
             try:
                 self.lineEditSearch.textChanged.disconnect(self.filterRecords)
-            except:
+            except Exception:
                 pass
             self.lineEditSearch.setText(self.initSearch_)
             self.lineEditSearch.textChanged.connect(self.filterRecords)
@@ -1764,10 +1762,7 @@ class FLTableDB(QtWidgets.QWidget):
             se ha llamado o no, desde el combo principal de búsqueda y filtrado
     """
     @decorators.BetaImplementation
-    def moveCol(self, from_,  to, firstSearch=True):
-
-        _oldFirst = None
-
+    def moveCol(self, from_, to, firstSearch=True):
         if from_ < 0 or to < 0:
             return
 
@@ -1786,7 +1781,7 @@ class FLTableDB(QtWidgets.QWidget):
             try:
                 self.comboBoxFieldToSearch.currentIndexChanged.disconnect(
                     self.putFirstCol)
-            except:
+            except Exception:
                 pass
 
             self.comboBoxFieldToSearch.setCurrentIndex(from_)
@@ -1797,7 +1792,7 @@ class FLTableDB(QtWidgets.QWidget):
             try:
                 self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(
                     self.putSecondCol)
-            except:
+            except Exception:
                 pass
             # Falta mejorar
             if self.comboBoxFieldToSearch.currentIndex() == self.comboBoxFieldToSearch2.currentIndex():
@@ -1810,7 +1805,7 @@ class FLTableDB(QtWidgets.QWidget):
             try:
                 self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(
                     self.putSecondCol)
-            except:
+            except Exception:
                 pass
             self.comboBoxFieldToSearch2.setCurrentIndex(from_)
             self.comboBoxFieldToSearch2.currentIndexChanged.connect(
@@ -1820,7 +1815,7 @@ class FLTableDB(QtWidgets.QWidget):
                 try:
                     self.comboBoxFieldToSearch.currentIndexChanged.disconnect(
                         self.putFirstCol)
-                except:
+                except Exception:
                     pass
                 if self.comboBoxFieldToSearch.currentIndex() == self.comboBoxFieldToSearch2.currentIndex():
                     self.comboBoxFieldToSearch.setCurrentIndex(
@@ -1837,7 +1832,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.refresh(False, True)
             try:
                 self.lineEditSearch.textChanged.disconnect(self.filterRecords)
-            except:
+            except Exception:
                 pass
             self.lineEditSearch.setText(textSearch)
             self.lineEditSearch.textChanged.connect(self.filterRecords)
@@ -1886,11 +1881,11 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.cursor_:
             return
 
-        fN = self.sortField_.name()
+        # fN = self.sortField_.name()
         textSearch.replace("%", "")
 
-        if not "'" in textSearch and not "\\" in textSearch:
-            sql = self.cursor_.executedQuery() + " LIMIT 1"
+        # if "'" not in textSearch and "\\" not in textSearch:
+        #     sql = self.cursor_.executedQuery() + " LIMIT 1"
         """
             #QSqlQuery qry(sql, cursor_->db()->db()); #FIXME
             if (qry.first()) {
@@ -1972,11 +1967,11 @@ class FLTableDB(QtWidgets.QWidget):
             return
         bFilter = None
 
-        if not p in (None, ""):
+        if p:
             p = "%s%%" % p
 
         refreshData = False
-        #if p.endswith("%"): refreshData = True
+        # if p.endswith("%"): refreshData = True
 
         msec_refresh = 400
         column = self.tableRecords_._h_header.logicalIndex(0)
@@ -2001,7 +1996,7 @@ class FLTableDB(QtWidgets.QWidget):
             try:
                 ret = self.cursor_._prj.call(functionQSA, vargs, None)
                 print("functionQSA:%s:" % functionQSA)
-            except:
+            except Exception:
                 pass
 
             if ret:

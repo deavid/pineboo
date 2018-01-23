@@ -15,6 +15,7 @@ from optparse import OptionParser
 import signal
 import importlib
 import pineboo
+import logging
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 dependences = []
@@ -26,7 +27,7 @@ if sys.version_info[0] < 3:
 
 
 try:
-    from lxml import etree
+    from lxml import etree  # noqa
 except ImportError:
     print(traceback.format_exc())
     dependences.append("python3-lxml")
@@ -39,7 +40,7 @@ except ImportError:
 
 
 try:
-    import ply
+    import ply  # noqa
 except ImportError:
     print(traceback.format_exc())
     dependences.append("python3-ply")
@@ -146,6 +147,9 @@ def main():
     parser.add_option("--trace-debug",
                       action="store_true", dest="trace_debug", default=False,
                       help="Write lots of trace information to stdout")
+    parser.add_option("--log-time",
+                      action="store_true", dest="log_time", default=False,
+                      help="Add timestamp to logs")
     parser.add_option("--trace-signals",
                       action="store_true", dest="trace_signals", default=False,
                       help="Wrap up every signal, connect and emit, and give useful tracebacks")
@@ -188,6 +192,22 @@ def main():
         sys.exit(32)
 
     pineboo.DGI = DGI
+    debug_level = logging.WARN
+    log_format = '%(name)s:%(levelname)s: %(message)s'
+    if options.verbose:
+        debug_level = logging.DEBUG
+    if options.log_time:
+        log_format = '%(asctime)s - %(name)s:%(levelname)s: %(message)s'
+
+    logging.basicConfig(format=log_format, level=debug_level)
+
+    disable_loggers = [
+        "PyQt5.uic.uiparser",
+        "PyQt5.uic.properties",
+        ]
+    for loggername in disable_loggers:
+        logger = logging.getLogger(loggername)
+        logger.setLevel(logging.WARN)
 
     if options.verbose:
         print("DGI used:", dgiName_)
