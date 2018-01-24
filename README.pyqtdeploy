@@ -13,11 +13,7 @@ https://www.openssl.org/source/openssl-1.0.2n.tar.gz
 https://download.qt.io/archive/qt/5.9/5.9.3/single/qt-everywhere-opensource-src-5.9.3.tar.xz.mirrorlist
 https://sourceforge.net/projects/pyqt/files/sip/sip-4.19.6/sip-4.19.6.tar.gz/download
 https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.9.2/PyQt5_gpl-5.9.2.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQt3D/PyQt3D-5.9.2/PyQt3D_gpl-5.9.2.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQtChart/PyQtChart-5.9.2/PyQtChart_gpl-5.9.2.tar.gz/download
 https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-5.9.2/PyQtDataVisualization_gpl-5.9.2.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQtPurchasing/PyQtPurchasing-5.9.2/PyQtPurchasing_gpl-5.9.2.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/QScintilla/QScintilla-2.10.2/QScintilla_gpl-2.10.2.tar.gz/download
 
 sudo apt-get install libbz2-dev
 sudo apt-get install libsqlite3-dev
