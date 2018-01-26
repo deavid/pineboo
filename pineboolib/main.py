@@ -679,6 +679,8 @@ class ModuleActions(object):
 
 
 class MainForm(object):
+    logger = logging.getLogger("main.MainForm")
+    
     def __init__(self, module, path):
         self.mod = module
         self.prj = module.prj

@@ -236,6 +236,7 @@ def create_app(DGI):
             pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
     else:
         mainForm = DGI.mainForm()
+        app = None
     # mainForm = getattr(module_, "MainForm")()
     # from pineboolib import mainForm
     return app, mainForm
