@@ -1564,8 +1564,8 @@ class FLSqlCursor(ProjectClass):
         if self.refreshBuffer():  # Hace doTransaction antes de abrir formulario y crear savepoint
             self._action.openDefaultFormRecord(self)
 
-            if self.refreshBuffer():
-                self.updateBufferCopy()
+            if m != self.Insert and self.refreshBuffer():
+                 self.updateBufferCopy()
 
     def isNull(self, fN):
         return self.d.buffer_.isNull(fN)

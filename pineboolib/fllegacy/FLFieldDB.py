@@ -366,12 +366,9 @@ class FLFieldDB(QtWidgets.QWidget):
         self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
         self.pushButtonDB.clicked.connect(self.searchValue)
 
-        self.timer_1 = QtCore.QTimer(self)
-        self.timer_1.singleShot(120, self.loaded)
-
     def __getattr__(self, name): return DefFun(self, name)
 
-    def loaded(self):
+    def load(self):
         self._loaded = True
         while True:  # Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             parent = getattr(self.topWidget_, "cursor", None)()
@@ -386,7 +383,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if self.topWidget_:
             self.cursor_ = self.topWidget_.cursor()
-            #print("Hay topWidget en %s", self)
+            # print("Hay topWidget en %s", self)
         if DEBUG:
             if self.cursor_:
                 print("*** FLFieldDB::loaded: cursor: %r name: %r at:%r" %
@@ -3005,11 +3002,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def showWidget(self):
-        if not self._loaded:  # Esperamos a que la carga se realice
-            timer = QtCore.QTimer(self)
-            timer.singleShot(15, self.showWidget)
-            return
-        else:
+        if self._loaded:
             if not self.showed:
                 if self.topWidget_:
                     self.showed = True

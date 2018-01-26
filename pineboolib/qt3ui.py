@@ -265,7 +265,7 @@ def loadWidget(xml, widget=None, parent=None):
             widget.layout.setContentsMargins(3, 3, 3, 3)
 
             layouts_pending_process += [(c, "box")]
-            #process_layout_box(c, mode="box")
+            # process_layout_box(c, mode="box")
             continue
         if c.tag == "hbox":
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
@@ -278,7 +278,7 @@ def loadWidget(xml, widget=None, parent=None):
             widget.layout.setSpacing(3)
             widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "box")]
-            #process_layout_box(c, mode="box")
+            # process_layout_box(c, mode="box")
             continue
         if c.tag == "grid":
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
@@ -291,7 +291,7 @@ def loadWidget(xml, widget=None, parent=None):
             widget.layout.setSpacing(3)
             widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "grid")]
-            #process_layout_box(c, mode="grid")
+            # process_layout_box(c, mode="grid")
             continue
         if c.tag == "item":
             prop1 = {}
@@ -306,7 +306,7 @@ def loadWidget(xml, widget=None, parent=None):
             attrs = getattr(widget, "_attrs", None)
             if attrs is not None:
                 attrs[k] = v
-                #print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
+                # print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
             else:
                 print("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
                       (k, v), widget.__class__, repr(c.tag))
@@ -350,6 +350,20 @@ def loadWidget(xml, widget=None, parent=None):
         f.setBold(False)
         f.setItalic(False)
         new_widget.setFont(f)
+
+
+"""
+Llama al método load de los FLTableDB de un widget
+
+@param w Widget que contiene los FLTableDB
+"""
+
+
+def loadFLTableDBs(w):
+    for table_db in w.findChildren(FLTableDB.FLTableDB):
+        table_db.load()
+    for field_db in w.findChildren(FLFieldDB.FLFieldDB):
+        field_db.load()
 
 
 def loadIcon(xml):

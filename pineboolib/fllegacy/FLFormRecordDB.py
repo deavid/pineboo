@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.fllegacy.FLFormDB import FLFormDB
+
 import traceback
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
@@ -120,12 +121,13 @@ class FLFormRecordDB(FLFormDB):
             parent = parent_or_cursor
         else:
             parent = None
-        super(FLFormRecordDB, self).__init__(parent, action, load)
-
-        self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         if isinstance(parent_or_cursor, FLSqlCursor):
             self.setCursor(parent_or_cursor)
+
+        super(FLFormRecordDB, self).__init__(parent, action, load)
+
+        self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.name_ = action.name
         if self.cursor_:
@@ -142,7 +144,8 @@ class FLFormRecordDB(FLFormDB):
                 print("*** FLFormRecordDB::__init__ -> Sin cursor??")
             self.initialModeAccess = FLSqlCursor.Browse
 
-        self.initForm()
+        if self.loaded:
+            self.prj.conn.managerModules().loadFLTableDBs(self)
 
     def loaded(self):
         return self.loaded
@@ -184,7 +187,9 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def initForm(self):
+
         if self.cursor_ and self.cursor_.metadata():
+
             caption = None
             if self.action_:
                 self.cursor_.setAction(self.action_)
@@ -194,7 +199,7 @@ class FLFormRecordDB(FLFormDB):
                 self.idMDI_ = self.action_.name
 
             # self.bindIface()
-            self.setCursor(self.cursor_)
+            # self.setCursor(self.cursor_)
 
             if not caption:
                 caption = self.cursor_.metadata().alias()
@@ -220,7 +225,6 @@ class FLFormRecordDB(FLFormDB):
 
     # Al no usar setMainWidget cargo la botonera aqui
     def loadControls(self):
-
         if self.pushButtonAcceptContinue:
             self.pushButtonAcceptContinue.hide()
 

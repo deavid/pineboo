@@ -83,7 +83,7 @@ class FLFormSearchDB(FLFormDB):
         if not parent:
             parent = QtWidgets.QApplication.activeModalWidget()
 
-        super(FLFormSearchDB, self).__init__(parent, action)
+        super(FLFormSearchDB, self).__init__(parent, action, load=True)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         if not name:

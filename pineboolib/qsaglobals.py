@@ -212,20 +212,14 @@ class SysType(object):
     def isDebuggerMode(self):
         return False
 
-    def nameDriver(self, connName = "default"):
+    def nameDriver(self, connName="default"):
         return pineboolib.project.conn.database(connName).driverName()
 
-    def addDatabase(self, connName = "default"):
+    def addDatabase(self, connName="default"):
         return pineboolib.project.conn.useConn(connName)()
 
-    def removeDatabase(self, connName = "default"):
-        return pineboolib.project.conn.removeConn(connName)    
-        
-        
-        
-    
-        
-        
+    def removeDatabase(self, connName="default"):
+        return pineboolib.project.conn.removeConn(connName)
 
 
 def proxy_fn(wf, wr, slot):
@@ -246,7 +240,7 @@ def proxy_fn(wf, wr, slot):
 
 
 def connect(sender, signal, receiver, slot):
-    # print "Connect::", sender, signal, receiver, slot
+    # print("Connect::", sender, signal, receiver, slot)
     if sender is None:
         print("Connect Error::", sender, signal, receiver, slot)
         return False

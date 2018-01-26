@@ -19,6 +19,7 @@ import importlib
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
+from pineboolib.fllegacy.FLTableDB import FLTableDB
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 from PyQt5.Qt import QTextCodec, qWarning, qApp, QApplication
 if __name__ == "__main__":
@@ -793,7 +794,7 @@ class XMLAction(XMLStruct):
         self.formrecord_widget = FLFormRecordDB(
             parent_or_cursor, self, load=True)
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
-        #self._record_loaded = True
+        # self._record_loaded = True
         if self.mainform_widget:
             if Project.debugLevel > 50:
                 print("End of record action load %s (iface:%s ; widget:%s)"
@@ -814,7 +815,7 @@ class XMLAction(XMLStruct):
         w = self.prj.main_window
         if not self.mainform_widget:
             if self.prj._DGI.useDesktop():
-                self.mainform_widget = FLMainForm(w, self, load=True)
+                self.mainform_widget = FLMainForm(w, self, load=False)
             else:
                 from pineboolib.utils import Struct
                 self.mainform_widget = Struct()

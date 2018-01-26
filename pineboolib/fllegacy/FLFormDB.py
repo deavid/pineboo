@@ -121,7 +121,7 @@ class FLFormDB(QtWidgets.QDialog):
     """
     Emite señal formulari listo. Ver FLFormDB::formReady()
     """
-    emitFormReady = QtCore.pyqtSignal()
+    formReady = QtCore.pyqtSignal()
 
     """
     Uso interno
@@ -183,15 +183,6 @@ class FLFormDB(QtWidgets.QDialog):
         self.loaded = False
         self.idMDI_ = self.action.name
 
-        if load:
-            self.load()
-
-        self.initForm()
-
-    def load(self):
-        if self.loaded:
-            return
-        print("Loading form %s . . . " % self._uiName)
         self.script = None
         self.iface = None
         try:
@@ -199,6 +190,15 @@ class FLFormDB(QtWidgets.QDialog):
         except AttributeError:
             script = None
         self.action.load_script(script, self)
+
+        if load:
+            self.load()
+            self.initForm()
+
+    def load(self):
+        if self.loaded:
+            return
+
         # self.resize(550,350)
         self.layout.insertWidget(0, self.widget)
         self.layout.setSpacing(1)
@@ -217,16 +217,15 @@ class FLFormDB(QtWidgets.QDialog):
     def initScript(self):
         if self.iface:
             try:
-                timer = QtCore.QTimer(self)
                 if self.loaded:
                     if self.iface:
-                        timer.singleShot(250, self.iface.init)
+                        self.iface.init()
                         return True
                     elif self.script.FormInternalObj:
-                        timer.singleShot(250, self.script.FormInternalObj.init)
+                        self.script.FormInternalObj.init()
                         return True
                 else:
-                    timer.singleShot(250, self.initScript)
+                    self.initScript()
             except Exception:
                 return False
 
@@ -502,9 +501,8 @@ class FLFormDB(QtWidgets.QDialog):
         if not self.initScript():
             return
         
-        print("Emitiendo formReady")
         if not self.isClosing_:
-            QtCore.QTimer(self).singleShot(0, self.emitFormReady)
+            QtCore.QTimer(self).singleShot(0, self.formReady)
 
     # protected_:
 
@@ -513,12 +511,15 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def initForm(self):
-
         acl = self.prj.acl()
         if acl:
             acl.process(self)
 
         self.loadControls()
+
+        if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
+            self.prj.conn.managerModules().loadFLTableDBs(self)
+
         """ 
         if self.cursor_ and self.cursor_.metadata():
             caption = None
@@ -669,19 +670,19 @@ class FLFormDB(QtWidgets.QDialog):
     def showEvent(self, e):
         if not self.showed:
             self.showed = True
-        v = None
-        if self.cursor_ and self.iface:
-            try:
-                v = self.iface.preloadMainFilter()
-            except Exception:
-                pass
+            v = None
+            if self.cursor_ and self.iface:
+                try:
+                    v = self.iface.preloadMainFilter()
+                except Exception:
+                    pass
 
-            if v:
-                self.cursor_.setMainFilter(v, False)
+                if v:
+                    self.cursor_.setMainFilter(v, False)
 
-        self.initMainWidget()
-        self.callInitScript()
-        if not self.isIfaceBind():
+            self.initMainWidget()
+            self.callInitScript()
+
             self.bindIface()
 
         size = self.prj.loadGeometryForm(self.geoName())

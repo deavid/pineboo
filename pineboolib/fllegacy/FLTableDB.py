@@ -97,15 +97,15 @@ class FLTableDB(QtWidgets.QWidget):
         self.autoSortColumn_ = True
         self.tabFilterLoaded = False
         self.timer_1 = QtCore.QTimer(self)
-        self.timer_1.singleShot(0, self.loaded)
+        self._name = name
 
     def __getattr__(self, name):
         return DefFun(self, name)
 
-    def loaded(self):
+    def load(self):
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
-        #print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
+        # print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
         parent_cursor = None
         while True:  # Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             if isinstance(self.topWidget.parentWidget(), FLFormSearchDB):
@@ -141,10 +141,10 @@ class FLTableDB(QtWidgets.QWidget):
         # ...... esta doble carga provoca el error y deja en el formulario el cursor original.
 
         self.mapCondType = []
-        self.showWidget()
-        self._loaded = True
 
         self.initCursor()
+        self._loaded = True
+        self.showWidget()
 
         if DEBUG:
             print("**FLTableDB::name: %r cursor: %r" %
@@ -642,89 +642,85 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def showWidget(self):
-        if not self._loaded:  # Esperamos a que la carga se realice
-            timer = QtCore.QTimer(self)
-            timer.singleShot(30, self.showWidget)
+        if not self._loaded:
             return
-        else:
-            if not self.showed and self.cursor_ and self.tableRecords_:
-                if not self.topWidget:
-                    self.initFakeEditor()
-                    self.showed = True
+            
+        if not self.showed and self.cursor_ and self.tableRecords_:
+            if not self.topWidget:
+                self.initFakeEditor()
+                self.showed = True
+                return
+
+            tMD = None
+            ownTMD = None
+            if self.tableName_:
+                if not self.cursor_.db().manager().existsTable(self.tableName_):
+                    ownTMD = True
+                    tMD = self.cursor_.db().manager().createTable(self.tableName_)
+                else:
+                    ownTMD = True
+                    tMD = self.cursor_.db().manager().metadata(self.tableName_)
+
+                if not tMD:
                     return
 
-                tMD = None
-                ownTMD = None
-                if self.tableName_:
-                    if not self.cursor_.db().manager().existsTable(self.tableName_):
-                        ownTMD = True
-                        tMD = self.cursor_.db().manager().createTable(self.tableName_)
+            if not self.cursorAux:
+                if self.initSearch_:
+                    self.refresh(True, True)
+                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+                else:
+                    self.refresh(True)
+                    if self.tableRecords_.numRows() <= 0:
+                        self.refresh(False, True)
                     else:
-                        ownTMD = True
-                        tMD = self.cursor_.db().manager().metadata(self.tableName_)
+                        self.refreshDelayed()
 
-                    if not tMD:
-                        return
+                if not isinstance(self.topWidget, FLFormRecordDB):
+                    self.lineEditSearch.setFocus()
 
-                if not self.cursorAux:
-                    if self.initSearch_:
-                        self.refresh(True, True)
-                        QtCore.QTimer.singleShot(
-                            0, self.tableRecords_.ensureRowSelectedVisible)
-                    else:
-                        self.refresh(True)
-                        if self.tableRecords_.numRows() <= 0:
-                            self.refresh(False, True)
-                        else:
-                            self.refreshDelayed()
-
-                    if not isinstance(self.topWidget, FLFormRecordDB):
-                        self.lineEditSearch.setFocus()
-
-                if self.cursorAux:
-                    if isinstance(self.topWidget, FLFormRecordDB) and self.cursorAux.modeAccess() == FLSqlCursor.Browse:
-                        self.cursor_.setEdition(False)
-                        self.setReadOnly(True)
-
-                    if self.initSearch_:
-                        self.refresh(True, True)
-                        QtCore.QTimer.singleShot(
-                            0, self.tableRecords_.ensureRowSelectedVisible)
-                    else:
-                        self.refresh(True)
-                        if self.tableRecords_.numRows() <= 0:
-                            self.refresh(False, True)
-                        else:
-                            self.refreshDelayed()
-
-                elif isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess() == FLSqlCursor.Browse and (tMD and not tMD.isQuery()):
+            if self.cursorAux:
+                if isinstance(self.topWidget, FLFormRecordDB) and self.cursorAux.modeAccess() == FLSqlCursor.Browse:
                     self.cursor_.setEdition(False)
                     self.setReadOnly(True)
 
-                if ownTMD and tMD:
-                    if not tMD.inCache():
-                        del tMD
+                if self.initSearch_:
+                    self.refresh(True, True)
+                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+                else:
+                    self.refresh(True)
+                    if self.tableRecords_.numRows() <= 0:
+                        self.refresh(False, True)
+                    else:
+                        self.refreshDelayed()
 
-            if not self.tableRecords_:
-                if not self.tableName_:
-                    if not self.cursor_:
-                        self.initCursor()
-                        QtCore.QTimer.singleShot(50, self.showWidget)
-                        return
-                    self.tableRecords()
-                    self.setTableRecordsCursor()
+            elif isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess() == FLSqlCursor.Browse and (tMD and not tMD.isQuery()):
+                self.cursor_.setEdition(False)
+                self.setReadOnly(True)
+
+            if ownTMD and tMD:
+                if not tMD.inCache():
+                    del tMD
+
+        if not self.tableRecords_:
+            if not self.tableName_:
+                if not self.cursor_:
+                    self.initCursor()
                     self.showWidget()
-                elif self.tableName_:
-                    if not self.cursor_:
-                        self.initCursor()
-                        QtCore.QTimer.singleShot(50, self.showWidget)
-                        return
+                    return
+                self.tableRecords()
+                self.setTableRecordsCursor()
+                self.showWidget()
+            elif self.tableName_:
+                if not self.cursor_:
+                    self.initCursor()
+                    self.showWidget()
+                    return
 
-                    if self.tableName_ == self.cursor_.curName():
-                        self.tableRecords()
-                        if self.cursor_.model():
-                            self.setTableRecordsCursor()
-                            self.showWidget()
+                if self.tableName_ == self.cursor_.curName():
+                    self.tableRecords()
+                    if self.cursor_.model():
+                        self.setTableRecordsCursor()
+                        self.showWidget()
 
     """
     Crear self.tableRecords_

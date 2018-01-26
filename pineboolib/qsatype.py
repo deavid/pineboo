@@ -306,8 +306,9 @@ class FormDBWidget(QtWidgets.QWidget):
         self._prj = project
         try:
             self._class_init()
-            timer = QtCore.QTimer(self)
-            timer.singleShot(250, self.init)
+            # timer = QtCore.QTimer(self)
+            # timer.singleShot(250, self.init)
+            self.init()
         except:
             pass
 

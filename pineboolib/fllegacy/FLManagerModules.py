@@ -253,6 +253,13 @@ class FLManagerModules(ProjectClass):
         qt3ui.loadUi(form_path, parent.widget)
 
     """
+    Llama al método load de los FLTableDB de un widget
+    @param w Widget que contiene los FLTableDB
+    """
+    def loadFLTableDBs(self, w):
+        qt3ui.loadFLTableDBs(w)        
+
+    """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
 
     Utiliza el método FLManagerModules::createUI() para obtener el formulario construido.
