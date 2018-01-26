@@ -17,7 +17,7 @@ from pineboolib.fllegacy.FLAction import FLAction
 from pineboolib.fllegacy.FLUtil import FLUtil
 
 from lxml import etree
-import os
+# import os
 
 """
 Esta clase sirve como administrador de la base de datos.
@@ -29,11 +29,6 @@ mediante objetos FLTableMetaData de una tabla dada.
 
 @author InfoSiAL S.L.
 """
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
 
 
 class FLManager(ProjectClass):
@@ -76,8 +71,8 @@ class FLManager(ProjectClass):
 
     def init(self):
         self.initCount_ = self.initCount_ + 1
-        tmpTMD = self.createSystemTable("flmetadata")
-        tmpTMD = self.createSystemTable("flseqs")
+        self.createSystemTable("flmetadata")
+        self.createSystemTable("flseqs")
 
         if not self.db_.dbAux():
             return
@@ -85,10 +80,10 @@ class FLManager(ProjectClass):
         q = FLSqlQuery(None, self.db_.dbAux())
         q.setForwardOnly(True)
 
-        tmpTMD = self.createSystemTable("flsettings")
+        self.createSystemTable("flsettings")
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
             q.exec_("DROP TABLE flsettings CASCADE")
-            tmpTMD = self.createSystemTable("flsettings")
+            self.createSystemTable("flsettings")
 
         if not self.dictKeyMetaData_:
             self.dictKeyMetaData_ = {}
@@ -103,7 +98,7 @@ class FLManager(ProjectClass):
         q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'")
         if not q.next():
             q.exec_("DROP TABLE flmetadata CASCADE")
-            tmpTMD = self.createSystemTable("flmetadata")
+            self.createSystemTable("flmetadata")
 
             c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
             for key, value in self.dictKeyMetaData_:
@@ -228,9 +223,12 @@ class FLManager(ProjectClass):
                 acl.process(ret)
 
             if not quick and not isSysTable and self._prj.consoleShown() and not ret.isQuery() and self.db_.mismatchedTable(n, ret):
-                msg = util.transtalate(
-                    "application", "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\nDebe regenerar la base de datos.").arg(n)
-                throwMsgWarning(self.db_, msg)
+                msg = util.translate(
+                    "application",
+                    "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
+                    "Debe regenerar la base de datos.").replace("%1", n)
+                print(msg)
+                # throwMsgWarning(self.db_, msg)
 
             return ret
 
@@ -349,7 +347,7 @@ class FLManager(ProjectClass):
                     table = None
                     field = None
                     fields = tmd.fieldsNames()
-                    #.split(",")
+                    # .split(",")
                     fieldsEmpty = (not fields)
 
                     for it in fL:
@@ -361,7 +359,7 @@ class FLManager(ProjectClass):
                             field = it
 
                         # if not (not fieldsEmpty and table == name and fields.find(field.lower())) != fields.end():
-                        #print("Tabla %s nombre %s campo %s buscando en %s" % (table, name, field, fields))
+                        # print("Tabla %s nombre %s campo %s buscando en %s" % (table, name, field, fields))
                         # if not fieldsEmpty and table == name and (field.lower() in fields): Asi esta en Eneboo, pero incluye campos repetidos
                         if not fieldsEmpty and (field.lower() in fields):
                             continue
@@ -376,18 +374,17 @@ class FLManager(ProjectClass):
                                     fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
 
-                                newRef = (not isForeignKey)
+                                # newRef = (not isForeignKey)
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
-                                    #fieldsAux = tmd.fieldsNames().split(",")
+                                    # fieldsAux = tmd.fieldsNames().split(",")
                                     fieldsAux = tmd.fieldsNames()
                                     # if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
                                     if fmtdAuxName not in fieldsAux:
                                         if not isForeignKey:
-                                            fmdtAux = FLFieldMetaData(fmtdAux)
+                                            FLFieldMetaData(fmtdAux)
 
-                                        #fmtdAux.setName("%s.%s" % (table, field))
-                                        newRef = False
+                                        # fmtdAux.setName("%s.%s" % (table, field))
 
                                 # if newRef:
                                 #    fmtdAux.ref()
@@ -443,16 +440,16 @@ class FLManager(ProjectClass):
         try:
             orderBy_ = root_.xpath("order/text()")[0].strip(' \t\n\r')
             q.setOrderBy(orderBy_)
-        except:
-            a = 1
+        except Exception:
+            pass
 
         groupXml_ = root_.xpath("group")
-        group_ = []
+        # group_ = []
         i = 0
         while i < len(groupXml_):
             gr = groupXml_[i]
             if float(gr.xpath("level/text()")[0].strip(' \t\n\r')) == i:
-                #print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
+                # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
                 q.addGroup(FLGroupByQuery(i, gr.xpath(
                     "field/text()")[0].strip(' \t\n\r')))
                 i = i + 1
@@ -495,14 +492,14 @@ class FLManager(ProjectClass):
     @return TRUE si existe la tabla, FALSE en caso contrario
     """
 
-    def existsTable(self,  n, cache=True):
+    def existsTable(self, n, cache=True):
 
         sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
         # Al usar dbAux no bloquea sql si falla
         cursor = self._prj.conn.useConn("dbAux").cursor()
         try:
             cursor.execute(sql_query)
-        except:
+        except Exception:
             cursor.close()
             return False
 
@@ -552,7 +549,7 @@ class FLManager(ProjectClass):
 
     def createTable(self, n_or_tmd):
         util = FLUtil()
-        if n_or_tmd == None:
+        if n_or_tmd is None:
             return False
 
         if isinstance(n_or_tmd, str):
@@ -624,13 +621,12 @@ class FLManager(ProjectClass):
         return self.db_.formatValue(fMD_or_type, v, upper)
 
     def formatAssignValue(self, *args, **kwargs):
-
         if not args[0]:
-            #print("FLManager.formatAssignValue(). Primer argumento vacio %s" % args[0])
+            # print("FLManager.formatAssignValue(). Primer argumento vacio %s" % args[0])
             return "1 = 1"
 
-        #print("tipo 0", type(args[0]))
-        #print("tipo 1", type(args[1]))
+        # print("tipo 0", type(args[0]))
+        # print("tipo 1", type(args[1]))
         # print("tipo 2", type(args[2]))]
 
         if isinstance(args[0], FLFieldMetaData) and len(args) == 3:
@@ -643,7 +639,7 @@ class FLManager(ProjectClass):
                 return self.formatAssignValue(mtd.primaryKey(True), fMD.type(), args[1], args[2])
 
             fieldName = fMD.name()
-            if mtd.isQuery() and not "." in fieldName:
+            if mtd.isQuery() and "." not in fieldName:
                 prefixTable = mtd.name()
                 qry = self.query(mtd.query())
 
@@ -651,7 +647,7 @@ class FLManager(ProjectClass):
                     fL = qry.fieldList()
 
                     for f in fL:
-                        #print("fieldName = " + f)
+                        # print("fieldName = " + f)
 
                         fieldSection = None
                         pos = f.find(".")
@@ -659,27 +655,27 @@ class FLManager(ProjectClass):
                             prefixTable = f[:pos]
                             fieldSection = f[pos + 1:]
                         else:
-                            fieldSection = it
+                            fieldSection = f
 
-                        #prefixTable = f.section('.', 0, 0)
+                        # prefixTable = f.section('.', 0, 0)
                         # if f.section('.', 1, 1) == fieldName:
                         if fieldSection == fieldName:
                             break
 
                     qry.deleteLater()
 
-                #fieldName.prepend(prefixTable + ".")
+                # fieldName.prepend(prefixTable + ".")
                 fieldName = prefixTable + "." + fieldName
 
             return self.formatAssignValue(fieldName, args[0].type(), args[1], args[2])
 
-        elif isinstance(args[1], FLFieldMetaData) and (isinstance(args[0], str) or isinstance(args[0], QString)):
+        elif isinstance(args[1], FLFieldMetaData) and isinstance(args[0], str):
             return self.formatAssignValue(args[0], args[1].type(), args[2], args[3])
 
         elif isinstance(args[0], FLFieldMetaData) and len(args) == 2:
             return self.formatAssignValue(args[0].name(), args[0], args[1], False)
         else:
-            if args[1] == None:
+            if args[1] is None:
                 return "1 = 1"
 
             formatV = self.formatValue(args[1], args[2], args[3])
@@ -691,7 +687,7 @@ class FLManager(ProjectClass):
             else:
                 fName = args[0]
 
-            #print("%s=%s" % (fName, formatV))
+            # print("%s=%s" % (fName, formatV))
             if args[1] == "string":
                 if formatV.find("%") > -1:
                     retorno = "%s LIKE %s" % (fName, formatV)
@@ -911,7 +907,7 @@ class FLManager(ProjectClass):
 
         if ol:
             f.setOptionsList(ol)
-        if not so == None:
+        if so is not None:
             f.setSearchOptions(so)
 
         no = field.firstChild()
@@ -1106,7 +1102,7 @@ class FLManager(ProjectClass):
     """
 
     def cleanupMetaData(self):
-        util = FLUtil()
+        # util = FLUtil()
         if not self.existsTable("flfiles") or not self.existsTable("flmetadata"):
             return
 
@@ -1251,7 +1247,7 @@ class FLManager(ProjectClass):
     """
 
     def fetchLargeValue(self, refKey):
-        if refKey == None:
+        if refKey is None:
             return None
         if not refKey[0:3] == "RK@":
             return None
@@ -1266,13 +1262,13 @@ class FLManager(ProjectClass):
             if v.find("{"):
                 v = v[v.find("{") + 3:]
                 v = v[:v.find("};") + 1]
-                #v = v.replace("\t", "")
+                # v = v.replace("\t", "")
                 v = v.replace("\n", "")
-                #v = v.replace("\",", ",")
-                #v = v.replace(",\"", ",")
+                # v = v.replace("\",", ",")
+                # v = v.replace(",\"", ",")
                 v = v.replace("\t", "    ")
-                #v = v.replace("\n\"", "")
-                #v = v.split(",")
+                # v = v.replace("\n\"", "")
+                # v = v.split(",")
             v = v.split('","')
             # print(v)
             return v

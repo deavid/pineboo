@@ -2,9 +2,9 @@
 
 
 from PyQt5 import QtWidgets, QtCore, uic
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-
+# from PyQt5.QtWidgets import *
+# from PyQt5.QtGui import *
+from PyQt5.QtWidgets import QTableWidgetItem
 from pineboolib.utils import filedir
 from pineboolib.PNSqlDrivers import PNSqlDrivers
 from pineboolib.fllegacy.FLSettings import FLSettings
@@ -12,7 +12,6 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 from builtins import str
 import sqlite3
 import os
-import sys
 
 
 class DlgConnect(QtWidgets.QWidget):
@@ -45,7 +44,7 @@ class DlgConnect(QtWidgets.QWidget):
             filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite')
 
     def load(self):
-        self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
+        self.ui = uic.loadUi(filedir('../share/forms/dlg_connect.ui'), self)
 
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(
@@ -58,13 +57,13 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.pbnSearchFolder.clicked.connect(self.findPathProject)
 
         # MODIFICACION 4 PARA CONECTOR SQLITE : DEFINIMOS LO QUE HACEN LOS BOTONES nuevos
-        self.ui.pbnCargarDatos.clicked.connect(self.ChargeProject)
+        self.ui.pbnCargarDatos.clicked.connect(self.loadProject)
         self.tableWidget.doubleClicked.connect(self.on_click)
         # self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
-        self.ui.pbnBorrarProyecto.clicked.connect(self.DeleteProject)
-        self.ui.pbnGuardarProyecto.clicked.connect(self.SaveProject)
-        self.ui.pbnProyectoEjemplo.clicked.connect(self.SaveProjectExample)
-        self.ui.pbnEnebooImportButton.clicked.connect(self.SaveEnebooImport)
+        self.ui.pbnBorrarProyecto.clicked.connect(self.deleteProject)
+        self.ui.pbnGuardarProyecto.clicked.connect(self.saveProject)
+        self.ui.pbnProyectoEjemplo.clicked.connect(self.saveProjectExample)
+        self.ui.pbnEnebooImportButton.clicked.connect(self.saveEnebooImport)
         # hasta aqui la modificación 4
 
         self.ui.leFolderSQLITE.setText(filedir("../projects"))
@@ -76,7 +75,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.lePort = self.ui.lePort
         # MODIFICACION 6 PARA CONECTOR SQLITE : DEFINIMOS los NUEVOS CAMPOS DEL UI:
         self.leFolder = self.ui.leFolderSQLITE
-        #self.leDBType = self.ui.leDBType
+        # self.leDBType = self.ui.leDBType
         self.leHostName = self.ui.leHostName
 
         # hasta aqui la modificación 6
@@ -142,9 +141,9 @@ class DlgConnect(QtWidgets.QWidget):
         # cambiamos el directorio de trabajo donde guardar la base de datos Sqlite:
         os.chdir(filename)
 
-# MODIFICACION 8 PARA CONECTOR SQLITE :añado uso botón CARGAR PROYECTO
+    # MODIFICACION 8 PARA CONECTOR SQLITE :añado uso botón CARGAR PROYECTO
     @QtCore.pyqtSlot()
-    def ChargeProject(self):
+    def loadProject(self):
         if not self.tableWidget.item(self.tableWidget.currentRow(), 0):
             return False
 
@@ -174,14 +173,16 @@ class DlgConnect(QtWidgets.QWidget):
     def ShowTable(self):
         self.tableWidget.clear()
         cursor = self.dbProjects_.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT UNIQUE, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
+        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos ('
+                       'id INTEGER PRIMARY KEY, name TEXT UNIQUE, dbname TEXT, '
+                       'dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
         cursor.execute(
             'SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos')
         conectores = cursor.fetchall()
         self.tableWidget.setHorizontalHeaderLabels(
             ['Name', 'DBname', 'DBType', 'DBHost', 'DBPort', 'Username', 'Password'])
         # cuento el número de filas TOTAL. Necessary even when there are no rows in the table
-        currentRowCount = self.tableWidget.rowCount()
+        self.tableWidget.rowCount()
         self.tableWidget.setEditTriggers(
             QtWidgets.QAbstractItemView.NoEditTriggers)
         self.tableWidget.setSelectionMode(
@@ -205,11 +206,11 @@ class DlgConnect(QtWidgets.QWidget):
 
     @QtCore.pyqtSlot()
     def on_click(self):
-        if self.ChargeProject():
+        if self.loadProject():
             self.conectar()
 
     @QtCore.pyqtSlot()
-    def DeleteProject(self):
+    def deleteProject(self):
         cursor = self.dbProjects_.cursor()
         try:
             par = self.tableWidget.item(
@@ -217,13 +218,13 @@ class DlgConnect(QtWidgets.QWidget):
             if par:
                 cursor.execute("DELETE FROM proyectos WHERE name= '%s'" % par)
                 self.dbProjects_.commit()
-        except:
-            pass
+        except Exception:
+            self.logger.exception("Error inesperado al borrar proyecto")
 
         self.ShowTable()
 
     @QtCore.pyqtSlot()
-    def SaveProject(self):
+    def saveProject(self):
 
         name2 = str(self.ui.leName.text())
         dbname2 = str(self.ui.leDBName.text())
@@ -242,12 +243,14 @@ class DlgConnect(QtWidgets.QWidget):
         self.ShowTable()
 
     @QtCore.pyqtSlot()
-    def SaveProjectExample(self):
-        #db = sqlite3.connect('pinebooconectores.sqlite')
+    def saveProjectExample(self):
+        # db = sqlite3.connect('pinebooconectores.sqlite')
         # Get a cursor object para CREAR la tabla "proyectos"
         cursor = self.dbProjects_.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)
-''')
+        cursor.execute("CREATE TABLE IF NOT EXISTS proyectos("
+                       "id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, "
+                       "dbtype TEXT, dbhost TEXT, dbport TEXT, "
+                       "username TEXT, password TEXT)")
         self.dbProjects_.commit()
         # Get a cursor object  para AÑADIR CAMPOS DE EJEMPLO:
         cursor = self.dbProjects_.cursor()
@@ -260,8 +263,9 @@ class DlgConnect(QtWidgets.QWidget):
         password1 = 'postgres'
         cursor = self.dbProjects_.cursor()
         with self.dbProjects_:
-            sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (
-                name1, dbname1, dbtype1, dbhost1, dbport1, username1, password1)
+            sql = ("INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password)"
+                   " VALUES ('%s','%s','%s','%s','%s','%s','%s')"
+                   % (name1, dbname1, dbtype1, dbhost1, dbport1, username1, password1))
             cursor.execute(sql)
 
         self.ShowTable()
@@ -279,8 +283,8 @@ class DlgConnect(QtWidgets.QWidget):
         print("PROYECTO DE EJEMPLO GRABADO y CARGADO")
 
     @QtCore.pyqtSlot()
-    def SaveEnebooImport(self):
-        """  
+    def saveEnebooImport(self):
+        """
         Este codigo es para reutilizar la configuracion del mismo equipo con Eneboo
         Para conseguir la contraseña del fichero en texto plano:
         password + username+ port+ hostname + db + lastDB
@@ -305,8 +309,8 @@ class DlgConnect(QtWidgets.QWidget):
 
         # Get a cursor object para CREAR la tabla "proyectos"
         cursor = self.dbProjects_.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS proyectos(id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)
-''')
+        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos ('
+                'id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
         self.dbProjects_.commit()
 
         # ABRO BUCLE PARA GRABAR VARIAS EMPRESAS DE ENEBOO
@@ -319,7 +323,7 @@ class DlgConnect(QtWidgets.QWidget):
         i = currentRowCount + 1
         self.tableWidget.setRowCount(len(conectores))
         for conector in conectores:
-            # add more if there is more columns in the database.        
+            # add more if there is more columns in the database.
             # Get a cursor object  para AÑADIR CAMPOS:
 
             # PASO-1: COPIAR LOS DATOS DE ENEBOO
@@ -335,7 +339,8 @@ class DlgConnect(QtWidgets.QWidget):
             # PASO-2: GRABAR LOS DATOS EN LA BASE DE DATOS PINEBOOCONECTORES
             cursor = self.dbProjects_.cursor()
             with self.dbProjects_:
-                sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (nameE, dbnameE, dbtypeE, dbhostE, dbportE, usernameE, passwordE)
+                sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password)"
+                    " VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (nameE, dbnameE, dbtypeE, dbhostE, dbportE, usernameE, passwordE)
                 cursor.execute(sql)
             self.ShowTable()
 

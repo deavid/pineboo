@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.fllegacy.FLFormDB import FLFormDB
+<<<<<<< HEAD
 
 import traceback
+=======
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import filedir
@@ -204,7 +207,9 @@ class FLFormRecordDB(FLFormDB):
             if not caption:
                 caption = self.cursor_.metadata().alias()
 
-            if self.cursor_.modeAccess() == FLSqlCursor.Insert or self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
+            if (self.cursor_.modeAccess() == FLSqlCursor.Insert or
+                    self.cursor_.modeAccess() == FLSqlCursor.Edit or
+                    self.cursor_.modeAccess() == FLSqlCursor.Browse):
                 self.cursor_.transaction()
                 self.initTransLevel = self.cursor_.transactionLevel()
                 self.setCaptionWidget(caption)
@@ -273,7 +278,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonFirst = QtWidgets.QToolButton()
                 self.pushButtonFirst.setObjectName("pushButtonFirst")
                 self.pushButtonFirst.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-goto-first-ltr.png")))
+                    filedir("../share/icons", "gtk-goto-first-ltr.png")))
                 self.pushButtonFirst.clicked.connect(self.firstRecord)
                 self.pushButtonFirst.setSizePolicy(sizePolicy)
                 self.pushButtonFirst.setMaximumSize(pbSize)
@@ -291,7 +296,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonPrevious = QtWidgets.QToolButton()
                 self.pushButtonPrevious.setObjectName("pushButtonPrevious")
                 self.pushButtonPrevious.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-go-back-ltr.png")))
+                    filedir("../share/icons", "gtk-go-back-ltr.png")))
                 self.pushButtonPrevious.clicked.connect(self.previousRecord)
                 self.pushButtonPrevious.setSizePolicy(sizePolicy)
                 self.pushButtonPrevious.setMaximumSize(pbSize)
@@ -309,7 +314,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonNext = QtWidgets.QToolButton()
                 self.pushButtonNext.setObjectName("pushButtonNext")
                 self.pushButtonNext.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-go-back-rtl.png")))
+                    filedir("../share/icons", "gtk-go-back-rtl.png")))
                 self.pushButtonNext.clicked.connect(self.nextRecord)
                 self.pushButtonNext.setSizePolicy(sizePolicy)
                 self.pushButtonNext.setMaximumSize(pbSize)
@@ -327,7 +332,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonLast = QtWidgets.QToolButton()
                 self.pushButtonLast.setObjectName("pushButtonLast")
                 self.pushButtonLast.setIcon(QtGui.QIcon(
-                    filedir("icons", "gtk-goto-last-ltr.png")))
+                    filedir("../share/icons", "gtk-goto-last-ltr.png")))
                 self.pushButtonLast.clicked.connect(self.lastRecord)
                 self.pushButtonLast.setSizePolicy(sizePolicy)
                 self.pushButtonLast.setMaximumSize(pbSize)
@@ -354,7 +359,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonAcceptContinue.setMaximumSize(pbSize)
                 self.pushButtonAcceptContinue.setMinimumSize(pbSize)
                 self.pushButtonAcceptContinue.setIcon(
-                    QtGui.QIcon(filedir("icons", "gtk-refresh.png")))
+                    QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
                 # pushButtonAcceptContinue->setAccel(QKeySequence(Qt::Key_F9)); FIXME
                 self.pushButtonAcceptContinue.setWhatsThis(
                     "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
@@ -374,7 +379,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonAccept.setMaximumSize(pbSize)
             self.pushButtonAccept.setMinimumSize(pbSize)
             self.pushButtonAccept.setIcon(
-                QtGui.QIcon(filedir("icons", "gtk-save.png")))
+                QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
             # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
             self.pushButtonAccept.setWhatsThis(
                 "Aceptar los cambios y cerrar formulario (F10)")
@@ -389,7 +394,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonCancel.setObjectName("pushButtonCancel")
             try:
                 self.cursor_.autocommit.connect(self.disablePushButtonCancel)
-            except:
+            except Exception:
                 pass
 
             self.pushButtonCancel.clicked.connect(self.reject)
@@ -398,7 +403,7 @@ class FLFormRecordDB(FLFormDB):
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-stop.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
             # pushButtonCancel->setAccel(4096); FIXME
@@ -423,8 +428,8 @@ class FLFormRecordDB(FLFormDB):
 
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
-        #self.toolButtonAccept = QtGui.QToolButton()
-        # self.toolButtonAccept.setIcon(QtGui.QIcon(filedir("icons","gtk-add.png")))
+        # self.toolButtonAccept = QtGui.QToolButton()
+        # self.toolButtonAccept.setIcon(QtGui.QIcon(filedir("../share/icons","gtk-add.png")))
         # self.toolButtonAccept.clicked.connect(self.validateForm)
         # self.bottomToolbar.layout.addWidget(self.toolButtonAccept)
 
@@ -536,10 +541,16 @@ class FLFormRecordDB(FLFormDB):
                 if q.exec_() and q.next():
                     i = 0
                     for field in colFields:
-                        msg = "El campo '%s' con valor '%s' ha sido modificado\npor otro usuario con el valor '%s'" % (
-                            mtd.fieldNameToAlias(field), self.cursor_.valueBuffer(field), q.value(i))
-                        res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), "Aviso de concurrencia", "\n\n ¿ Desea realmente modificar este campo ?\n\nSí : Ignora el cambio del otro usuario y utiliza el valor que acaba de introducir\nNo : Respeta el cambio del otro usuario e ignora el valor que ha introducido\nCancelar : Cancela el guardado del registro y vuelve a la edición del registro\n\n",
-                                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape)
+                        # msg = "El campo '%s' con valor '%s' ha sido modificado\npor otro usuario con el valor '%s'" % (
+                        #    mtd.fieldNameToAlias(field), self.cursor_.valueBuffer(field), q.value(i))
+                        res = QtWidgets.QMessageBox.warning(
+                            QtWidgets.QApplication.focusWidget(),
+                            "Aviso de concurrencia", "\n\n ¿ Desea realmente modificar este campo ?\n\n"
+                            "Sí : Ignora el cambio del otro usuario y utiliza el valor que acaba de introducir\n"
+                            "No : Respeta el cambio del otro usuario e ignora el valor que ha introducido\n"
+                            "Cancelar : Cancela el guardado del registro y vuelve a la edición del registro\n\n",
+                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Default, QtWidgets.QMessageBox.No,
+                            QtWidgets.QMessageBox.Cancel | QtWidgets.QMessageBox.Escape)
                         if res == QtWidgets.QMessageBox.Cancel:
                             return False
 

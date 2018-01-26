@@ -120,7 +120,8 @@ def get_table_indexes(conn, obj):
     """
     cur = conn.cursor()
     cur.execute("""
-        SELECT c2.oid, c2.relname, i.indisprimary, i.indisunique, i.indisclustered, i.indisvalid, pg_catalog.pg_get_indexdef(i.indexrelid, 0, true), c2.reltablespace
+        SELECT c2.oid, c2.relname, i.indisprimary, i.indisunique, i.indisclustered, i.indisvalid,
+                pg_catalog.pg_get_indexdef(i.indexrelid, 0, true), c2.reltablespace
         FROM pg_catalog.pg_class c, pg_catalog.pg_class c2, pg_catalog.pg_index i
         WHERE c.oid = %s AND c.oid = i.indrelid AND i.indexrelid = c2.oid
         ORDER BY i.indisprimary DESC, i.indisunique DESC, c2.relname

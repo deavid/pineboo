@@ -4,15 +4,14 @@ from builtins import str
 from binascii import unhexlify
 
 from lxml import etree
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib import flcontrols
 from pineboolib.fllegacy import FLTableDB
 from pineboolib.fllegacy import FLFieldDB
 
 import zlib
-from PyQt5.QtWidgets import QGroupBox
-from PyQt5.Qt import QPalette, QSpacerItem
+from PyQt5.Qt import QSpacerItem
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -34,7 +33,11 @@ def loadUi(path, widget, parent=None):
         encoding="UTF-8",
         remove_blank_text=True,
     )
-    tree = etree.parse(path, parser)
+    try:
+        tree = etree.parse(path, parser)
+    except Exception as e:
+        print("Qt3Ui: Unable to read UI: %r" % path)
+        raise
     root = tree.getroot()
     ICONS = {}
     widget.hide()
@@ -63,8 +66,8 @@ def loadUi(path, widget, parent=None):
         sl_name = sl_name.replace("(bool)", "")
         sl_name = sl_name.replace("(const QString&)", "")
 
-        #print("SG_NAME", sg_name)
-        #print("SL_NAME", sl_name)
+        # print("SG_NAME", sg_name)
+        # print("SL_NAME", sl_name)
 
         if sender_name == formname:
             sender = widget
@@ -170,7 +173,7 @@ def loadWidget(xml, widget=None, parent=None):
         elif pname == "margin":
             try:
                 value = loadVariant(xmlprop)
-            except:
+            except Exception:
                 value = 0
             value = QtCore.QMargins(value, value, value, value)
 
@@ -464,7 +467,7 @@ def _loadVariant(variant):
         for c in variant:
             value = c.text.strip()
             bv = False
-            if not c.tag in ("family", "pointsize"):
+            if c.tag not in ("family", "pointsize"):
                 bv = b(value)
             try:
                 if c.tag == "bold":

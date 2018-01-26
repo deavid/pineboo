@@ -1,16 +1,18 @@
 import os
 import sys
 from PyQt5.QtCore import QTime
-from pineboolib import decorators
-from pineboolib.dbschema.schemaupdater import text2bool
-from pineboolib.fllegacy import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import auto_qt_translate_text
 from pineboolib.fllegacy.FLUtil import FLUtil
 import traceback
-from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate,\
-    QRegExp
+from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate, QRegExp
+
+
+class QApplication:
+    @staticmethod
+    def tr(text, *args):
+        return text
 
 
 class FLsqlite(object):
@@ -94,7 +96,7 @@ class FLsqlite(object):
                 else:
                     s = 0
             elif isinstance(v, bool):
-                if v == True:
+                if v:
                     s = 1
                 else:
                     s = 0
@@ -109,18 +111,18 @@ class FLsqlite(object):
                 s = ""
 
         elif type_ in ("uint", "int", "double", "serial"):
-            if v == None:
+            if v:
                 s = 0
             else:
                 s = v
 
         else:
             v = auto_qt_translate_text(v)
-            if upper == True and type_ == "string":
+            if upper and type_ == "string":
                 v = v.upper()
-                #v = v.encode("UTF-8")
+                # v = v.encode("UTF-8")
             s = "'%s'" % v
-        #print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
+        # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
         return s
 
     def DBName(self):
@@ -134,7 +136,7 @@ class FLsqlite(object):
         q.setSelect("max(%s)" % field)
         q.setFrom(table)
         q.setWhere("1 = 1")
-        if not q.exec():
+        if not q.exec():  # FIXME: exec es palabra reservada
             print("not exec sequence")
             return None
         if q.first():
@@ -243,7 +245,7 @@ class FLsqlite(object):
             self.setLastError(
                 "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
             print("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" %
-                  n,  traceback.format_exc())
+                  n, traceback.format_exc())
 
             return False
 
@@ -264,7 +266,7 @@ class FLsqlite(object):
             rows = cursor.fetchmany(number)
             return rows
         except Exception:
-            print("SQL3Driver:: refreshFetch",  traceback.format_exc())
+            print("SQL3Driver:: refreshFetch", traceback.format_exc())
 
     def useThreads(self):
         return False
@@ -273,7 +275,7 @@ class FLsqlite(object):
         return True
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
-        if not curname in self.rowsFetched.keys():
+        if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
 
         try:
@@ -290,7 +292,7 @@ class FLsqlite(object):
                 self.rowsFetched[curname] = i
             return rowsF
         except Exception:
-            print("SQL3Driver:: fetchAll",  traceback.format_exc())
+            print("SQL3Driver:: fetchAll", traceback.format_exc())
             return []
 
     def existsTable(self, name):
@@ -307,13 +309,11 @@ class FLsqlite(object):
         return ok
 
     def sqlCreateTable(self, tmd):
-        util = FLUtil()
         if not tmd:
             return None
 
         primaryKey = None
         sql = "CREATE TABLE %s (" % tmd.name()
-        seq = None
 
         fieldList = tmd.fieldList()
 
@@ -323,8 +323,8 @@ class FLsqlite(object):
                 unlocks = unlocks + 1
 
         if unlocks > 1:
-            qWarning(u"FLManager : No se ha podido crear la tabla " + tmd.name())
-            qWarning(
+            print(u"FLManager : No se ha podido crear la tabla " + tmd.name())
+            print(
                 u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
             return None
 
@@ -361,13 +361,14 @@ class FLsqlite(object):
                 sql = sql + "(%s)" % longitud
 
             if field.isPrimaryKey():
-                if primaryKey == None:
+                if primaryKey is None:
                     sql = sql + " PRIMARY KEY"
                 else:
-                    qWarning(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
-                             QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
-                             field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
-                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, use FLCompoundKey para crear claves compuestas."))
+                    print(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
+                          QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
+                          field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
+                          QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
+                                          "use FLCompoundKey para crear claves compuestas."))
                     return None
             else:
                 if field.isUnique():
@@ -400,11 +401,11 @@ class FLsqlite(object):
 
             recMtd = self.recordInfo(tmd_or_table2)
             recBd = self.recordInfo2(table1)
-            fieldBd = None
+            # fieldBd = None
             mismatch = False
             try:
                 for fieldMtd in recMtd:
-                    fieldBd = None
+                    # fieldBd = None
                     found = False
                     for field in recBd:
                         if field[0] == fieldMtd[0]:
@@ -457,7 +458,6 @@ class FLsqlite(object):
         if not self.isOpen():
             return None
 
-        q = None
         sql = "PRAGMA table_info('%s')" % tablename
         conn = self.conn_
         cursor = conn.execute(sql)
@@ -671,7 +671,7 @@ class FLsqlite(object):
 
         step = 0
         newBuffer = None
-        sequence = ""
+        # sequence = ""
         fieldList = newMTD.fieldList()
         newField = None
 
@@ -702,16 +702,16 @@ class FLsqlite(object):
 
                 else:
                     v = oldCursor.value(newField.name())
-                    if (not oldField.allowNull() or not newField.allowNull()) and (v == None):
+                    if (not oldField.allowNull() or not newField.allowNull()) and (v is None):
                         defVal = newField.defaultValue()
-                        if not defVal == None:
+                        if defVal is not None:
                             v = defVal
 
                     if not newBuffer.field(newField.name()).type() == newField.type():
                         print("FLManager::alterTable : " + qApp.tr("Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.")
                               .arg(newField.name()))
 
-                if not oldField.allowNull() or not newField.allowNull() and not v == None:
+                if not oldField.allowNull() or not newField.allowNull() and v is not None:
                     if oldField.type() in ("int", "serial", "uint", "bool", "unlock"):
                         v = 0
                     elif oldField.type() == "double":
@@ -771,7 +771,7 @@ class FLsqlite(object):
         return tl
 
     def normalizeValue(self, text):
-        if text == None:
+        if text is None:
             return ""
 
         ret = ""
@@ -782,7 +782,7 @@ class FLsqlite(object):
             ret = ret + c
 
         if self.parseFromLatin:
-            ret = ret  # Estoy hay qye arreglarlo si alguien quiere trabajar con latin1
+            ret = ret  # Estoy hay que arreglarlo si alguien quiere trabajar con latin1
 
         return ret
 
@@ -807,7 +807,7 @@ class FLsqlite(object):
         util.createProgressDialog(
             util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5)
         while qry.next():
-            item = qey.value(0)
+            item = qry.value(0)
             if item.find(rx) > -1 or item.find(rx2) > -1:
                 util.setLabelText(util.tr("Borrando regisro %1").arg(item))
                 qry2.exec_("delete from flfiles where nombre = '%s'" % item)

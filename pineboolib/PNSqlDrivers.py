@@ -25,7 +25,7 @@ class PNSqlDrivers(ProjectClass):
         self.defaultDriverName = "FLQPSQL"
 
     def loadDriver(self, driverName):
-        if driverName == None:
+        if driverName is None:
             print("Seleccionado driver por defecto", self.defaultDriverName)
             driverName = self.defaultDriverName
 
@@ -34,7 +34,7 @@ class PNSqlDrivers(ProjectClass):
         self.driver_ = getattr(module_, driverName)()
 
         if self.driver_:
-            #self.driverName = driverName
+            # self.driverName = driverName
             print("PNSqlDrivers::Driver %s v%s" %
                   (self.driver().driverName(), self.driver().version()))
             return True

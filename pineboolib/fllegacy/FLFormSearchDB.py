@@ -2,7 +2,6 @@
 
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib import decorators
 from pineboolib.utils import DefFun
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.utils import filedir
@@ -51,7 +50,7 @@ class FLFormSearchDB(FLFormDB):
         action = None
 
         if isinstance(args[0], str):
-            #@param actionName Nombre de la acción asociada al formulario
+            # @param actionName Nombre de la acción asociada al formulario
 
             if len(args) == 2:
                 parent = args[1]
@@ -63,8 +62,8 @@ class FLFormSearchDB(FLFormDB):
             self.accepted_ = False
 
         elif isinstance(args[0], FLSqlCursor):
-            #@param cursor Objeto FLSqlCursor para asignar a este formulario
-            #@param actionName Nombre de la acción asociada al formulario
+            # @param cursor Objeto FLSqlCursor para asignar a este formulario
+            # @param actionName Nombre de la acción asociada al formulario
 
             if len(args) == 3:
                 parent = args[2]
@@ -143,7 +142,7 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.setMaximumSize(pbSize)
         self.pushButtonAccept.setMinimumSize(pbSize)
         self.pushButtonAccept.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-save.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
         # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
         self.pushButtonAccept.setFocus()
         self.pushButtonAccept.setWhatsThis(
@@ -163,7 +162,7 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-stop.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
         # pushButtonCancel->setAccel(Esc); FIXME
         self.pushButtonCancel.setWhatsThis(
@@ -293,7 +292,7 @@ class FLFormSearchDB(FLFormDB):
                 if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
                     fdb.autoComFrame_.hide()
                     return
-            except:
+            except Exception:
                 pass
 
         if self.cursor_ and self.pushButtonCancel:
@@ -344,7 +343,7 @@ class FLFormSearchDB(FLFormDB):
         if self.cursor_:
             try:
                 self.cursor_.recordChoosed.disconnect(self.accept)
-            except:
+            except Exception:
                 pass
         self.acceptingRejecting_ = True
         self.accepted_ = True
@@ -361,7 +360,7 @@ class FLFormSearchDB(FLFormDB):
         if self.cursor_:
             try:
                 self.cursor_.recordChoosed.disconnect(self.accept)
-            except:
+            except Exception:
                 pass
         self.acceptingRejecting_ = True
         self.hide()

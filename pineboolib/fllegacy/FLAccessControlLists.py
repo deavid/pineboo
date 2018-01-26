@@ -1,4 +1,4 @@
-from PyQt5.Qt import QDomDocument, QProgressDialog
+from PyQt5.QtXml import QDomDocument
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLUtil import FLUtil
@@ -62,16 +62,15 @@ class FLAccessControlLists(ProjectClass):
 
     Si el fichero "acl.xml" no se puede leer, la lista de control de acceso queda vacía y
     no se procesará ningún control de acceso sobre ningún objeto.
-    
+
     @param  aclXml  Contenido XML con la definición de la lista de control de acceso.
     """
 
-    def init_(self, aclXml=False):
+    def init_(self, aclXml=None):
 
         util = FLUtil()
-        if aclXml == False:
-            self.init_(self._prj.conn.managerModules().content("acl.xml"))
-            return
+        if aclXml is None:
+            aclXml = self._prj.conn.managerModules().content("acl.xml")
 
         doc = QDomDocument("ACL")
         if self.accessControlList_:
@@ -211,7 +210,7 @@ class FLAccessControlLists(ProjectClass):
         if not iduser or not q or not d:
             return
 
-        ac = FLAccesccControlFactory.create(str(q.value(1)))
+        ac = FLAccessControlFactory.create(str(q.value(1)))
 
         if ac:
             ac.setName(str(q.value(2)))

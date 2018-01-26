@@ -74,10 +74,12 @@ class TagObject(object, metaclass=TagObjectFactory):
     promote_child_if_alone = False
 
     @classmethod
-    def tagname(self, tagname): return self.__name__
+    def tagname(self, tagname):
+        return self.__name__
 
     @classmethod
-    def can_process_tag(self, tagname): return tagname in self.tags
+    def can_process_tag(self, tagname):
+        return tagname in self.tags
 
     def __init__(self, tagname):
         self.astname = tagname
@@ -478,10 +480,12 @@ class Unknown(TagObject):
     set_child_argn = False
 
     @classmethod
-    def tagname(self, tagname): return tagname
+    def tagname(self, tagname):
+        return tagname
 
     @classmethod
-    def can_process_tag(self, tagname): return True
+    def can_process_tag(self, tagname):
+        return True
 # -----------------
 
 
@@ -527,7 +531,7 @@ class Module(object):
         fp = None
         try:
             description = ('.py', 'U', imp.PY_SOURCE)
-            #description = ('.pyc', 'U', PY_COMPILED)
+            # description = ('.pyc', 'U', PY_COMPILED)
             pathname = os.path.join(self.path, self.name)
             fp = open(pathname)
             name = self.name[:self.name.find(".")]
@@ -642,7 +646,7 @@ def execute(options, args):
         print("Done.")
 
     elif options.exec_python:
-        import qsatype
+        # import qsatype
         for filename in args:
             realpath = os.path.realpath(filename)
             path, name = os.path.split(realpath)
@@ -658,8 +662,8 @@ def execute(options, args):
         from .pytnyzer import pythonize
         import io
         if options.cache:
-            args = [x for x in args if not os.path.exists((x + ".py").replace(".qs.xml.py", ".qs.py"))
-                    or os.path.getmtime(x) > os.path.getctime((x + ".py").replace(".qs.xml.py", ".qs.py"))]
+            args = [x for x in args if not os.path.exists((x + ".py").replace(".qs.xml.py", ".qs.py")) or
+                    os.path.getmtime(x) > os.path.getctime((x + ".py").replace(".qs.xml.py", ".qs.py"))]
 
         nfs = len(args)
         for nf, filename in enumerate(args):
@@ -693,8 +697,8 @@ def execute(options, args):
 
     else:
         if options.cache:
-            args = [x for x in args if not os.path.exists(x + ".xml")
-                    or os.path.getmtime(x) > os.path.getctime(x + ".xml")]
+            args = [x for x in args if not os.path.exists(x + ".xml") or
+                    os.path.getmtime(x) > os.path.getctime(x + ".xml")]
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
@@ -704,7 +708,7 @@ def execute(options, args):
             if options.verbose:
                 sys.stdout.flush()
             try:
-                filecontent = open(filename,"r", encoding="latin-1").read()
+                filecontent = open(filename, "r", encoding="latin-1").read()
                 filecontent = flscriptparse.cleanNoPython(filecontent)
             except Exception as e:
                 print("Error: No se pudo abrir fichero %-35s          \n" %
@@ -720,7 +724,7 @@ def execute(options, args):
                 print("Encontramos %d errores parseando: %-35s          \n" %
                       (prog["error_count"], repr(filename)))
                 continue
-            if options.toxml == False:
+            if not options.toxml:
                 # Si no se quiere guardar resultado, no hace falta calcular mas
                 continue
 

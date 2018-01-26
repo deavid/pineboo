@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Completada Si
-from PyQt5 import QtCore
-
 from pineboolib import decorators, fllegacy
-import pineboolib
 
 
 """
@@ -63,7 +60,7 @@ class opInfo():
     def __del__(self):
         pass
 
-    #@QtCore.pyqtSlot()
+    # @QtCore.pyqtSlot()
     # def cursorDestroyed(self):
     #    self.cursor = None
 
@@ -128,8 +125,8 @@ class FLSqlSavePoint():
     countRefSavePoint = 0
     """
     constructor.
-    
-    
+
+
 
     @param id Identificador para el punto de salvaguarda.
     """
@@ -286,8 +283,9 @@ class FLSqlSavePoint():
         valuePrimaryKey = str(opInf.buffer.value(opInf.primaryKey))
         ok = cursor_.select(opInf.primaryKey + "='" + valuePrimaryKey + "'")
         if ok and cursor_.next():
-            buf = cursor_.primeUpdate()
-            buf = opInf.buffer
+            # buf = cursor_.primeUpdate()
+            # buf = opInf.buffer
+            cursor_.primeUpdate()
             cursor_.update()
 
         if not owner:
@@ -313,8 +311,9 @@ class FLSqlSavePoint():
         if not cursor_:
             return
 
-        buf = cursor_.primeInsert()
-        buf = opInf.buffer
+        # buf = cursor_.primeInsert()
+        # buf = opInf.buffer
+        cursor_.primeInsert()
         cursor_.insert()
 
         if not owner:

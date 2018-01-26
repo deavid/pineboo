@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
-
 # Completa Si
-
-from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
-
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.fllegacy.FLFieldMetaDataList import FLFieldMetaDataList
-
 
 """
 Clase para definir claves compuestas.
@@ -71,4 +64,4 @@ class FLCompoundKey(ProjectClass):
     def copy(self, other):
         if self is other:
             return
-        self.fieldList_ = copy.copy(other.fieldList_)
+        self.fieldList_ = other.fieldList_[:]

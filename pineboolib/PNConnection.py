@@ -4,20 +4,17 @@ from PyQt5.Qt import qWarning
 from PyQt5 import QtCore, QtWidgets
 
 from pineboolib import decorators, PNSqlDrivers
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLManager import FLManager
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
-from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
-import traceback
 import sys
+import logging
 
 
 class PNConnection(QtCore.QObject):
-
+    logger = logging.getLogger("PNConnection")
     db_name = None
     db_host = None
     db_port = None
@@ -34,10 +31,17 @@ class PNConnection(QtCore.QObject):
     interactiveGUI_ = None
     _dbAux = None
     name = None
+<<<<<<< HEAD
     
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name = None):
         super(PNConnection,self).__init__()
         
+=======
+
+    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
+        super(PNConnection, self).__init__()
+
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         self.connAux = {}
         self.name = name
         self.db_name = db_name
@@ -52,7 +56,7 @@ class PNConnection(QtCore.QObject):
         if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):
             self.conn = self.conectar(
                 self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
-            if self.conn == False:
+            if self.conn is False:
                 return
 
             self._dbAux = self
@@ -71,7 +75,11 @@ class PNConnection(QtCore.QObject):
 
     def connectionName(self):
         return self.name
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
     """
     Permite seleccionar una conexion que no es la default, Si no existe la crea
     """
@@ -85,22 +93,33 @@ class PNConnection(QtCore.QObject):
                 return self.connAux[name]
 
         print("PNConnection::Creando nueva conexión", name)
+<<<<<<< HEAD
         self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
         
+=======
+
+        self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
+                                          self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
+
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         return self.connAux[name]
 
     @decorators.NotImplementedWarn
-    def removeConn(self, name = "default"):
+    def removeConn(self, name="default"):
         return True
 
     def isOpen(self):
         return self.driver().isOpen()
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
     def tables(self):
         return self.driver().tables()
 
     def database(self, name=None):
-        if name == None:
+        if name is None:
             return self.DBName()
 
         return self.useConn(name)
@@ -108,7 +127,8 @@ class PNConnection(QtCore.QObject):
     def DBName(self):
         try:
             return self.driver().DBName()
-        except:
+        except Exception as e:
+            self.logger.debug("DBName: %s", e)
             return self.db_name
 
     def driver(self):
@@ -160,9 +180,6 @@ class PNConnection(QtCore.QObject):
     def formatValue(self, t, v, upper):
         return self.driverSql.formatValue(t, v, upper)
 
-    def nextSerialVal(self, table, field):
-        self.driverSql.nextSerialVal(table, field)
-
     def canSavePoint(self):
         return True
 
@@ -198,10 +215,17 @@ class PNConnection(QtCore.QObject):
             return False
 
         cancel = False
-        if self.interactiveGUI() and (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
-            #res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios", "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes, [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
-            res = QtWidgets.QMessageBox.information(QtWidgets.QApplication.focusWidget(
-            ), "Cancelar Cambios", "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes, QMessageBox.No)
+        if (self.interactiveGUI() and
+           (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and
+           cur.isModifiedBuffer() and cur.d.askForCancelChanges_):
+            # res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios",
+            #                "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes,
+            #                [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
+            res = QtWidgets.QMessageBox.information(
+                QtWidgets.QApplication.focusWidget(),
+                "Cancelar Cambios",
+                "Todos los cambios se cancelarán.¿Está seguro?",
+                QMessageBox.Yes, QMessageBox.No)
             if res == QMessageBox.No:
                 return False
             cancel = True
@@ -231,7 +255,7 @@ class PNConnection(QtCore.QObject):
                     cur.select()
 
                 return True
-            except:
+            except Exception:
                 print(
                     "FLSqlDatabase::doRollback : Fallo al intentar deshacer transacción")
                 return False
@@ -281,8 +305,8 @@ class PNConnection(QtCore.QObject):
                 # aqApp.emitTransactionEnd(cur)
 
                 return True
-            except:
-                print("PNConnect::doCommit : Fallo al intentar terminar transacción")
+            except Exception as e:
+                self.logger.warn("doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
             print("Liberando punto de salvaguarda %s..." % self.transaction_)
@@ -374,8 +398,8 @@ class PNConnection(QtCore.QObject):
         q = self.cursor()
         try:
             q.execute(sql)
-        except:
-            qWarning(traceback.format_exc())
+        except Exception as e:
+            self.logger.exception("createTable: Error happened executing sql: %s...", sql[:80])
             self.rollbackTransaction()
             return False
         self.commitTransaction()

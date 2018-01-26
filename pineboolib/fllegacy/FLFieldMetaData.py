@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
-
-
-from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 from pineboolib.utils import aqtt
-
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
-
-import copy
 
 
 class FLFieldMetaData(object):
@@ -53,7 +46,9 @@ class FLFieldMetaData(object):
         self.d = FLFieldMetaDataPrivate()
         self.copy(other)
 
-    def inicializeNewFLFieldMetaData(self, n, a, aN, isPrimaryKey, t, l=0, c=False, v=True, ed=True, pI=4, pD=0, iNX=False, uNI=False, coun=False, defValue=None, oT=False, rX=None, vG=True, gen=True, iCK=False):
+    def inicializeNewFLFieldMetaData(
+            self, n, a, aN, isPrimaryKey, t, l=0, c=False, v=True, ed=True, pI=4, pD=0,
+            iNX=False, uNI=False, coun=False, defValue=None, oT=False, rX=None, vG=True, gen=True, iCK=False):
         self.d = FLFieldMetaDataPrivate(
             n, a, aN, isPrimaryKey, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK)
 
@@ -291,7 +286,7 @@ class FLFieldMetaData(object):
     def addRelationMD(self, r):
 
         isRelM1 = False
-        #print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
+        # print("FLFieldMetadata(%s).addRelationMD(card %s)" % (self.name(), r.cardinality()))
         if r.cardinality() == FLRelationMetaData.RELATION_M1:
             isRelM1 = True
         if isRelM1 and self.d.relationM1_:
@@ -540,7 +535,7 @@ class FLFieldMetaData(object):
     def flDecodeType(self, fltype_):
 
         _type = None
-        #print("Decode", fltype)
+        # print("Decode", fltype)
 
         if fltype_ == "int":
             _type = "int"
@@ -559,7 +554,7 @@ class FLFieldMetaData(object):
         elif fltype_ == "bytearray":
             _type = "bytearray"
 
-        #print("Return", _type)
+        # print("Return", _type)
         return _type
     """
     Devuelve diferentes opciones de búsqueda para este campo.
@@ -623,10 +618,10 @@ class FLFieldMetaData(object):
         self.d.isCompoundKey_ = od.isCompoundKey_
         self.d.hasOptionsList_ = od.hasOptionsList_
 
-        #self = copy.deepcopy(other)
+        # self = copy.deepcopy(other)
 
     def formatAssignValue(self, fieldName, value, upper):
-        if value == None or not fieldName:
+        if value is None or not fieldName:
             return "1 = 1"
 
         isText = False
@@ -642,11 +637,11 @@ class FLFieldMetaData(object):
             formatV = value
 
         # if isinstance(value, (int, float)):
-            #formatV = str(value)
+            # formatV = str(value)
         # else:
-            #formatV = "'" + str(value) + "'"
+            # formatV = "'" + str(value) + "'"
 
-        #print("FORMATV es %s, %s y value era %s" % (formatV, type(formatV), value.toString()))
+        # print("FORMATV es %s, %s y value era %s" % (formatV, type(formatV), value.toString()))
 
         # if formatV == None:
         #    return "1 = 1"
@@ -915,13 +910,13 @@ class FLFieldMetaDataPrivate(object):
             self.partInteger_ = 0
         if int(pD) < 0:
             self.partDecimal_ = 0
-        #print("Tipo ", t)
+        # print("Tipo ", t)
 
         if not t == "string" and not int(l) == 0:
             self.length_ = 0
 
         # if not t == "int" and not t == "uint" and t == "double" and not int(pI) == 0:
-            #self.partInteger_ = 0
+            # self.partInteger_ = 0
 
         if t == "double" and not int(pD) >= 0:
             self.partDecimal_ = 0

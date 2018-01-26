@@ -12,6 +12,10 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
 
 
+class FLDomNodeInterface():
+    pass
+
+
 class FLReportEngine(MReportEngine):
 
     class FLReportEnginePrivate(ProjectClass):
@@ -97,7 +101,8 @@ class FLReportEngine(MReportEngine):
                 it = Qt.QStringList(self.qFieldList_.end())
                 while i >= 0:
                     it = it - 1
-                    fmtd = self.qFieldMtdList_.find(it.section('.', 1, 1).lower())
+                    fmtd = self.qFieldMtdList_.find(
+                        it.section('.', 1, 1).lower())
                     if fmtd:
                         if fmtd.type() == Qt.QPixmap:
                             self.qImgFields_.push(i)
@@ -256,7 +261,8 @@ class FLReportEngine(MReportEngine):
                 dVal = float(sVal)
                 if not dVal:
                     dVal = 0
-                decimals = self.d_.qFieldMtdList_.find(it.section('.', 1, 1).lower()).partDecimal()
+                decimals = self.d_.qFieldMtdList_.find(
+                    it.section('.', 1, 1).lower()).partDecimal()
                 ita.setNodeValue(FLUtil.formatoMiles(round(dVal, decimals)))
 
                 it = it + 1

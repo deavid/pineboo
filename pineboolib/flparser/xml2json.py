@@ -1,10 +1,8 @@
 #!/usr/bin/python
-
-from builtins import object
 try:
     from json import dumps as json_dumps
     from json import loads as json_loads
-except:
+except ImportError:
     from json import write as json_dumps
     from json import read as json_loads
 
@@ -83,8 +81,8 @@ class xmlElement(object):
             tdata = ""
             ttype = ""
 
-        #v = [depth,tagname,attrs,ttype,tdata]
-        #vt1 = json_dumps(v)
+        # v = [depth,tagname,attrs,ttype,tdata]
+        # vt1 = json_dumps(v)
         vt2 = "%d)%s" % (depth, tagname)
         if attrs:
             vt2 += "\tattrs:" + json_dumps(attrs)
@@ -209,7 +207,7 @@ class JSON_Reverter(JSON_Base):
             ttype = "text"
             attrs = {}
 
-            #self.foutput.write("%d\t%s\n" % (depth, tag))
+            # self.foutput.write("%d\t%s\n" % (depth, tag))
             for field in fields[1:]:
                 tpos = field.find(":")
                 if tpos == -1:
@@ -242,51 +240,51 @@ class JSON_Reverter(JSON_Base):
 
 """
     Possible Format:
-    
+
     List-per-tag:
     [ depth, tagname, attrs, ttype, tdata ]
-    
+
     depth: 0,1,2,3,4...N
-    
+
     tagname: \w+ -> ElementTag
     tagname: !\w+ -> DoctypeTag
     tagname: ?\w+ -> XmlDeclTag (always: xml) (attrs = version, encoding?, standalone?)
     tagname: #\w+ -> CommentTag (always: comment) (attrs = []) (tdata = comment)
-    
+
     attrs: dict { attr : val , attr2 : val2 }
-    
+
     ttype: text|cdata|mixed -multiline?
-    
+
     tdata: raw text + cdata combined.
-    
-    
+
+
     Problems:
     * Handling C-DATA
     * Handling multiline texts
     * Handling tabs and spaces at the start of each line of multiline text
     * Handling comments
-    
+
     Non-treated:
-    * NameSpaces 
+    * NameSpaces
         <edi:price xmlns:edi='http://ecommerce.example.org/schema' units='Euro'>32.18</edi:price>
-        
+
     * Entity Declarations
         <!ENTITY name PUBLIC "public_ID" "URI">
-        
+
     * Element Declarations
         <!ELEMENT author (#PCDATA)>
-        
+
     * Notation Declarations
         <!NOTATION name PUBLIC "public_ID" "URI">
-        
+
     * Attribute List Delcarations
-        <!ATTLIST title 
+        <!ATTLIST title
              edition (CDATA) #REQUIRED
              type (paper|cloth|hard)"paper">
-    
-    
-    
-    
+
+
+
+
     Example 1: AbanQ UI (UTF-8)
         StartDoctypeDeclHandler: 'UI' None None 0
         EndDoctypeDeclHandler:
@@ -299,12 +297,18 @@ class JSON_Reverter(JSON_Base):
     Example 2: JasperReports JRXML (UTF-8)
         XmlDeclHandler: '1.0' 'UTF-8' -1
         Unhandled data: '\n'
-        StartElementHandler: 'jasperReport' {u'xmlns': u'http://jasperreports.sourceforge.net/jasperreports', u'name': u'report1', u'language': u'groovy', u'pageWidth': u'842', u'columnWidth': u'802', u'topMargin': u'20', u'rightMargin': u'20', u'bottomMargin': u'20', u'xmlns:xsi': u'http://www.w3.org/2001/XMLSchema-instance', u'leftMargin': u'20', u'xsi:schemaLocation': u'http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd', u'pageHeight': u'595', u'orientation': u'Landscape'}
+        StartElementHandler: 'jasperReport' {u'xmlns': u'http://jasperreports.sourceforge.net/jasperreports',
+            u'name': u'report1', u'language': u'groovy', u'pageWidth': u'842', u'columnWidth': u'802',
+            u'topMargin': u'20', u'rightMargin': u'20', u'bottomMargin': u'20', u'xmlns:xsi': u'http://www.w3.org/2001/XMLSchema-instance',
+            u'leftMargin': u'20',
+            u'xsi:schemaLocation': u'http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd',
+            u'pageHeight': u'595', u'orientation': u'Landscape'}
         CharacterDataHandler: '\n'
         CharacterDataHandler: '\t'
-        StartElementHandler: 'style' {u'fontName': u'Times New Roman', u'name': u'Title', u'isBold': u'false', u'forecolor': u'#FFFFFF', u'fontSize': u'50', u'isDefault': u'false', u'pdfFontName': u'Times-Bold'}
-        EndElementHandler: 'style'    
-    
+        StartElementHandler: 'style' {u'fontName': u'Times New Roman', u'name': u'Title', u'isBold': u'false', u'forecolor': u'#FFFFFF',
+            u'fontSize': u'50', u'isDefault': u'false', u'pdfFontName': u'Times-Bold'}
+        EndElementHandler: 'style'
+
     Example 3: AbanQ Actions XML (ISO-8859-1)
         StartElementHandler: 'ACTIONS' {}
         CharacterDataHandler: '\n'
@@ -322,7 +326,7 @@ class JSON_Reverter(JSON_Base):
         EndElementHandler: 'description'
         CharacterDataHandler: '\n'
         CharacterDataHandler: '        '
-    
+
     Example 4: AbanQ Tables MTD (ISO-8859-1)
         StartDoctypeDeclHandler: 'TMD' None None 0
         EndDoctypeDeclHandler:
@@ -341,7 +345,7 @@ class JSON_Reverter(JSON_Base):
         EndElementHandler: 'alias'
         CharacterDataHandler: '\n'
         CharacterDataHandler: '    '
-        
+
     Example 5: AbanQ Report QRY (ISO-8859-1)
         StartDoctypeDeclHandler: 'QRY' None None 0
         EndDoctypeDeclHandler:
@@ -355,24 +359,25 @@ class JSON_Reverter(JSON_Base):
         CharacterDataHandler: '\n'
         CharacterDataHandler: '\n'
         CharacterDataHandler: '\t'
-        
+
     Example 6: AbanQ Report KUT (ISO-8859-1)
         XmlDeclHandler: '1.0' 'UTF-8' -1
         Unhandled data: '\n'
         StartDoctypeDeclHandler: 'KugarTemplate' 'kugartemplate.dtd' None 0
         EndDoctypeDeclHandler:
         Unhandled data: '\n'
-        StartElementHandler: 'KugarTemplate' {u'TopMargin': u'50', u'PageSize': u'0', u'RightMargin': u'30', u'PageOrientation': u'0', u'BottomMargin': u'50', u'LeftMargin': u'30'}
+        StartElementHandler: 'KugarTemplate' {u'TopMargin': u'50', u'PageSize': u'0', u'RightMargin': u'30', u'PageOrientation': u'0',
+            u'BottomMargin': u'50', u'LeftMargin': u'30'}
         CharacterDataHandler: '\n'
         StartElementHandler: 'Detail' {u'Level': u'0', u'Height': u'0'}
         EndElementHandler: 'Detail'
         CharacterDataHandler: '\n'
         CharacterDataHandler: '\n'
         CharacterDataHandler: ' '
-    
-    
 
-    
+
+
+
 """
 
 
@@ -570,7 +575,7 @@ def autodetectXmlEncoding(rawtext):
     except ImportError:
         print("python-chardet library is not installed. Assuming input file is UTF-8.")
     # encoding=
-    #UTF-8, UTF-16, ISO-8859-1
+    # UTF-8, UTF-16, ISO-8859-1
 
 
 def main():

@@ -9,235 +9,34 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import DefFun, filedir, aqtt
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
-#from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 import datetime
+import pineboolib
+import logging
 
 
 DEBUG = False
 
 
-class FLLineEdit(QtWidgets.QLineEdit):
+class FLNotImplemented():
+    def __init__(self, *args, **kwargs):
+        raise Exception("Not implemented")
 
-    _tipo = None
-    _partDecimal = 0
-    _partInteger = 0
-    _maxValue = None
-    autoSelect = True
-    _name = None
-    _longitudMax = None
-    _parent = None
 
-    lostFocus = QtCore.pyqtSignal()
+class FLSpinBox(FLNotImplemented):
+    pass
 
-    def __init__(self, parent, name=None):
-        super(FLLineEdit, self).__init__(parent)
-        self._name = name
-        if isinstance(parent.fieldName_, str):
-            self._fieldName = parent.fieldName_
-            self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
-            self._partDecimal = parent.partDecimal_
-            self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
-            self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-            # self.textChanged.connect(self.controlFormato)
-            self._parent = parent
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
-    def controlFormato(self):
-        texto = str(super(FLLineEdit, self).text())
-        denegarCambio_ = False
-        denegarCambioEnteros_ = False
-        cambiarComa_ = False
-        decimales_ = None
-        posComa_ = -1
-
-        if texto == "" or texto == None:
-            return
-        """
-        if self._tipo == "int" or self._tipo == "uint":
-            if not texto is None:
-                try:
-                    float(decimales_)
-                except:
-                        denegarCambio_ = True
-            
-            texto = texto.replace(",",".")
-            try:
-                posComa_ = texto.index(".")
-            except:
-                if posComa_ > -1:
-                    denegarCambio_ = True
-            
-        """
-        if self._tipo == "string":
-            if len(texto) > int(self._longitudMax):
-                denegarCambio_ = True
-
-        if self._tipo == "double":
-
-            texto_old = texto
-            if (QtCore.QLocale().decimalPoint() == ","):
-                texto = texto.replace(".", ",")
-            else:
-                texto = texto.replace(",", ".")
-
-            if not texto_old == texto:
-                cambiarComa_ = True
-
-            try:
-                posComa_ = texto.index(".")
-                #print("Coma encontrada en pos", posComa_, denegarCambio_)
-            except:
-                #print("Coma no encontrada", denegarCambio_)
-                a = 1
-
-            if posComa_ > -1:
-                decimales_ = texto[posComa_ + 1:]
-
-                if len(decimales_) > int(self._partDecimal):
-                    #print("Parte decimal (%s) se pasa de %s" % (decimales_ , self._partDecimal))
-                    denegarCambio_ = True
-
-            enteros_ = texto
-
-            if posComa_ > -1:
-                enteros_ = texto[:posComa_]
-
-            #print("enteros ...", enteros_)
-            if len(enteros_) > int(self._partInteger):
-                #print("Parte entera (%s) se pasa de %s" % (enteros_ , self._partInteger))
-                denegarCambioEnteros_ = True
-
-            #print("Decimales =", decimales_ , type(decimales_))
-            if not decimales_ is None:
-                try:
-                    float(decimales_)
-                except:
-                    #print("Decimal esta mal", decimales_, len(decimales_))
-                    if len(decimales_) > 0:
-                        denegarCambio_ = True
-
-            #print("Enteros =", enteros_, type(enteros_))
-            try:
-                float(enteros_)
-            except:
-                #print("Entero esta mal")
-                denegarCambioEnteros_ = True
-            # if not decimales_.isdecimal():
-                #denegarCambio_ = True
-
-            # if not enteros_.isdecimal():
-                #denegarCambioEnteros_ = True
-
-        #print("Procesado final", texto, denegarCambio_)
-
-        if denegarCambio_ == True:
-            texto = texto[0:len(texto) - 1]
-            super(FLLineEdit, self).setText(texto)
-
-        if denegarCambioEnteros_ == True and not decimales_ == None:
-            texto = "%s%s%s" % (
-                enteros_[0:len(enteros_) - 1], QtCore.QLocale().decimalPoint(), decimales_)
-            super(FLLineEdit, self).setText(texto)
-        elif denegarCambioEnteros_ == True and decimales_ == None:
-            texto = enteros_[0:len(enteros_) - 1]
-            super(FLLineEdit, self).setText(texto)
-
-        if cambiarComa_ == True:
-            super(FLLineEdit, self).setText(texto)
-
-    def setText(self, texto, b=True):
-        if self._maxValue:
-            if self._maxValue < int(texto):
-                texto = self._maxValue
-
-        texto = str(texto)
-
-        # Miramos si le falta digitos a la parte decimal ...
-        if self._tipo == "double" and len(texto) > 0:
-            if texto == "0":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
-
-            i = None
-            l = len(texto) - 1
-            try:
-                i = texto.index(".")
-            except:
-                pass
-
-            if i:
-                #print("Posicion de . (%s) de %s en %s" % (i, l, texto))
-                f = (i + self._partDecimal) - l
-                #print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
-                while f > 0:
-                    texto = texto + "0"
-                    f = f - 1
-
-        super(FLLineEdit, self).setText(texto)
-        self.textChanged.emit(texto)
-
-    def text(self):
-        texto = str(super(FLLineEdit, self).text())
-
-        if texto is "":
-            texto = None
-
-        if texto is None:
-            if self._tipo == "string":
-                texto = ""
-
-            elif self._tipo == "double":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
-
-        return str(texto)
-
-    """
-    Especifica un valor máximo para el text (numérico)
-    """
-
-    def setMaxValue(self, value):
-        self._maxValue = value
-
-    """
-    def focusInEvent(self, *f):
-        print("focus in!! ---> ", f)
-        if self._tipo == "double" or self._tipo == "int" or self._tipo == "Uint":
-            self.blockSignals(True)
-            s = self.text()
-            super(FLLineEdit,self).setText(s)
-            self.blockSignals(False)
-        if self.autoSelect and self.selectedText().isEmpty() and not self.isReadOnly():
-            self.selectAll()
-
-        QtGui.QLineEdit.focusInEvent(f)
-
-    def focusOutEvent(self, f):
-        print("Adios --->", f)
-        if self._tipo == "double" or self._tipo == "int" or self._tipo == "Uint":
-            self.setText(self.text())
-
-        super(FLLineEdit,self).focusOutEvent(self, f)
-
-    """
+class FLPixmapView(FLNotImplemented):
+    pass
 
 
 class FLFieldDB(QtWidgets.QWidget):
-
+    logger = logging.getLogger("FLFieldDB")
     _loaded = False
     _parent = None
 
@@ -305,7 +104,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.maxPixImages_ = 600
 
         self.topWidget_ = parent
-        #self._parent = parent
+        # self._parent = parent
 
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
         self.FLLayoutH.setContentsMargins(0, 0, 0, 0)
@@ -350,9 +149,10 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.FLWidgetFieldDBLayout.addWidget(self.textLabelDB)
 
-        self.pushButtonDB = QtWidgets.QPushButton()
-
-        self.setFocusProxy(self.pushButtonDB)
+        self.pushButtonDB = pineboolib.project.resolveDGIObject(
+            "QPushButton")()
+        if pineboolib.project._DGI.localDesktop():
+            self.setFocusProxy(self.pushButtonDB)
         # self.pushButtonDB.setFlat(True)
         PBSizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
@@ -362,11 +162,19 @@ class FLFieldDB(QtWidgets.QWidget):
         self.pushButtonDB.setMaximumSize(24, 24)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(
-            filedir("icons", "flfielddb.png")))
-        self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
+            filedir("../share/icons", "flfielddb.png")))
+        # self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
         self.pushButtonDB.clicked.connect(self.searchValue)
 
+<<<<<<< HEAD
     def __getattr__(self, name): return DefFun(self, name)
+=======
+        self.timer_1 = QtCore.QTimer(self)
+        self.timer_1.singleShot(120, self.loaded)
+
+    def __getattr__(self, name):
+        return DefFun(self, name)
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
 
     def load(self):
         self._loaded = True
@@ -536,7 +344,7 @@ class FLFieldDB(QtWidgets.QWidget):
     def setTextFormat(self, f):
         self.textFormat_ = f
         ted = self.editor_
-        if isinstance(ted, QtWidgets.QTextEdit):
+        if isinstance(ted, pineboolib.project.resolveDGIObject("QTextEdit")):
             ted.setTextFormat(self.textFormat_)
 
     """
@@ -545,7 +353,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def textFormat(self):
         ted = self.editor_
-        if isinstance(ted, QtWidgets.QTextEdit):
+        if isinstance(ted, pineboolib.project.resolveDGIObject("QTextEdit")):
             return ted.textFormat()
         return self.textFormat_
 
@@ -557,7 +365,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setEchoMode(self, m):
         led = self.editor_
-        if isinstance(led, QtWidgets.QLineEdit):
+        if isinstance(led, pineboolib.project.resolveDGIObject("QLineEdit")):
             led.setEchoMode(m)
 
     """
@@ -566,9 +374,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def echoMode(self):
         led = self.editor_
-        if isinstance(led, QtWidgets.QLineEdit):
+        if isinstance(led, pineboolib.project.resolveDGIObject("QLineEdit")):
             return led.echoMode()
-        return QtWidgets.QLineEdit.Normal
+        return pineboolib.project.resolveDGIObject("QLineEdit").Normal
 
     """
     Filtro de eventos
@@ -594,7 +402,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.releaseKeyboard()
                 if self.autoComPopup_:
                     self.autoComPopup_.releaseKeyboard()
-                #<-- WIN
+                # <-- WIN
 
                 self.autoComFrame_.hide()
                 if self.editor_ and k.key() == Qt.Key_Backspace:
@@ -630,7 +438,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 else:
                     timer.singleShot(0, self.autoCompletionUpdateValue)
                     return True
-            if isinstance(obj, FLLineEdit):
+            if isinstance(obj, pineboolib.project.resolveDGIObject("FLLineEdit")):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed()
                     return True
@@ -672,9 +480,9 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     @QtCore.pyqtSlot()
     def updateValue(self, data=None):
-        #print("Update Value", type(data), type(self.editor_))
+        # print("Update Value", type(data), type(self.editor_))
         # if isinstance(data, QString): #Para quitar en el futuro
-            #data = str(data)
+        #   data = str(data)
         if not self.cursor_:
             return
 
@@ -689,15 +497,15 @@ class FLFieldDB(QtWidgets.QWidget):
             print("Tipo ...", type(data))
             if isinstance(data, FLLineEdit):
                 t = self.editor_.text()
-            
+
             elif isinstance(data, QtGui.QTextEdit):
                 t = str(self.editor_.toPlainText())
-            
+
             elif isinstance(data, FLDateEdit):
                 t = str(self.editor_.date().toString(Qt.ISODate))
-            
+
             #else:
-                #return     
+                #return
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if t == self.cursor_.valueBuffer(self.fieldName_):
@@ -712,7 +520,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.cursor_.setValueBuffer(self.fieldName_, t)
 
         """
-        if isinstance(self.editor_, FLDateEdit):
+        if isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLDateEdit")):
             data = str(self.editor_.date().toString("yyyy-MM-dd"))
 
             if not data:
@@ -731,7 +539,7 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, FLTimeEdit):
+        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLTimeEdit")):
             data = str(self.editor_.time().toString("hh:mm:ss"))
 
             if not data:
@@ -758,7 +566,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, QtWidgets.QTextEdit):
+        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("QTextEdit")):
             data = str(self.editor_.toPlainText())
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if self.cursor_.valueBuffer(self.fieldName_) == data:
@@ -766,7 +574,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, FLLineEdit):
+        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLLineEdit")):
 
             data = self.editor_.text()
             if not self.cursor_.bufferIsNull(self.fieldName_):
@@ -790,7 +598,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        """    
+        """
         elif isinstance(self.editor_, str) or isinstance(data, int):
             tMD = self.cursor_.metadata()
             if not tMD:
@@ -820,10 +628,10 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.cursor.setValueBuffer(self.fieldName_, s[1:])
                     self.cursor_.bufferChanged.connect(self.refreshQuick)
                     return
-            
+
             if self.editor_ and (field.type() == "double" or field.type() == "int" or field.type() == "uint"):
                 s = self.editor_.text()
-            
+
             if s:
                 self.cursor_.setValueBuffer(self.fieldName_, s)
             else:
@@ -872,7 +680,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         type_ = field.type()
-        #v = QVariant(cv)
+        # v = QVariant(cv)
         if field.hasOptionsList():
             idxItem = -1
             if type_ == "string":
@@ -927,7 +735,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 doHome = False
                 if not self.editor_.text():
                     doHome = True
-                if not v == None:
+                if v is not None:
                     self.editor_.setText(v)
                 else:
                     self.editor_.setText("")
@@ -939,7 +747,7 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.editor_:
                 return
 
-            if not v == None:
+            if v is not None:
                 self.editor_.setText(v)
             else:
                 self.editor_.setText("")
@@ -947,7 +755,7 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "double":
             if self.editor_:
                 s = None
-                if not v == None:
+                if v is not None:
                     if self.partDecimal_:
                         s = round(float(v), self.partDecimal_)
                     else:
@@ -958,7 +766,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "serial":
             if self.editor_:
-                if not v == None:
+                if v is not None:
                     self.editor_.setText(str(v))
                 else:
                     self.editor_.setText("0")
@@ -966,14 +774,14 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "pixmap":
             if self.editorImg_:
 
-                if v == None:
+                if v is None:
                     self.editorImg_.clear()
                     return
                 pix = QtGui.QPixmap(v)
                 # if not QtGui.QPixmapCache().find(cs.left(100), pix):
-                #print("FLFieldDB(%s) :: La imagen no se ha cargado correctamente" % self.fieldName_)
+                # print("FLFieldDB(%s) :: La imagen no se ha cargado correctamente" % self.fieldName_)
                 #    QtGui.QPixmapCache().insert(cs.left(100), pix)
-                #print("PIX =", pix)
+                # print("PIX =", pix)
                 if pix:
                     self.editorImg_.setPixmap(pix)
                 else:
@@ -981,20 +789,20 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "date":
             if self.editor_:
-                if v == None:
+                if v is None:
                     self.editor_.setDate(QtCore.QDate())
                 else:
                     self.editor_.setDate(v)
 
         elif type_ == "time":
             if self.editor_:
-                if v == None:
+                if v is None:
                     self.editor_.setTime(QtCore.QTime())
                 else:
                     self.editor_.setTime(v)
 
         elif type == "bool":
-            if self.editor_ and not v == None:
+            if self.editor_ and v is not None:
                 self.editor_.setChecked(v)
 
     """
@@ -1021,7 +829,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return v
 
         type_ = field.type()
-        #fltype = FLFieldMetaData.flDecodeType(type_)
+        # fltype = FLFieldMetaData.flDecodeType(type_)
         if self.cursor_.bufferIsNull(self.fieldName_):
             if type_ == "double" or type_ == "int" or type_ == "uint":
                 return 0
@@ -1029,7 +837,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if type_ == "double" or type_ == "int" or type_ == "uint" or type_ == "string" or type_ == "stringlist":
             if self.editor_:
                 ed_ = self.editor_
-                if isinstance(ed_, FLLineEdit):
+                if isinstance(ed_, pineboolib.project.resolveDGIObject("FLLineEdit")):
                     v = ed_.text()
 
         elif type_ == "serial":
@@ -1230,8 +1038,8 @@ class FLFieldDB(QtWidgets.QWidget):
             # ... el problema es, que posiblemente el cursorRelation entrega información
             # ... errónea, y aunque comentar el código soluciona esto, seguramente esconde
             # ... otros errores en el cursorRelation. Pendiente de investigar más.
-            #v = None
-            #if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
+            # v = None
+            # if DEBUG: print("FLFieldDB: valueBuffer padre vacío.")
 
         else:
             if not self.cursorAux and fN.lower() == self.fieldRelation_.lower():
@@ -1317,12 +1125,14 @@ class FLFieldDB(QtWidgets.QWidget):
         fDis = False
 
         # if isinstance(v , QString): #Para quitar
-        #v = str(v)
+        # v = str(v)
         if DEBUG:
             print("FLFieldDB:: refresh fN:%r fieldName:%r v:%s" %
                   (fN, self.fieldName_, repr(v)[:64]))
 
-        if self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or (modeAcces == FLSqlCursor.Edit and (field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or not field.editable() or modeAcces == FLSqlCursor.Browse:
+        if (self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or
+                (modeAcces == FLSqlCursor.Edit and (field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or
+                not field.editable() or modeAcces == FLSqlCursor.Browse):
             fDis = True
 
         self.setDisabled(fDis)
@@ -1330,10 +1140,10 @@ class FLFieldDB(QtWidgets.QWidget):
         if type_ == "double":
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal textChanged")
             s = None
-            if not v == None:
+            if v is not None:
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
             elif not nulo:
@@ -1346,10 +1156,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "string":
             doHome = False
-            try:
-                self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            if not ol:
+                try:
+                    self.editor_.textChanged.disconnect(self.updateValue)
+                except Exception:
+                    self.logger.exception("Error al desconectar señal textChanged")
 
             if v:
                 if ol:
@@ -1375,47 +1186,48 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "uint":
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
-            #s = None
-            if not v == None:
+            except Exception:
+                self.logger.exception("Error al desconectar señal textChanged")
+            # s = None
+            if v is not None:
                 self.editor_.setText(str(v))
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
 
             self.editor_.textChanged.connect(self.updateValue)
 
-            if v == None and not nulo:
+            if v is None and not nulo:
                 self.editor_.setText("0")
 
         elif type_ == "int":
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal textChanged")
 
-            if not v == None:
+            if v is not None:
                 self.editor_.setText(str(v))
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
 
             self.editor_.textChanged.connect(self.updateValue)
 
-            if v == None and not nulo:
+            if v is None and not nulo:
                 self.editor_.setText("0")
 
         elif type_ == "serial":
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal textChanged")
             self.editor_.setText(str(0))
 
             self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "pixmap":
             if not self.editorImg_:
-                self.editorImg_ = FLPixmapView(self)
+                self.editorImg_ = pineboolib.project.resolveDGIObject(
+                    "FLPixmapView")(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
                 self.editorImg_.setMaximumSize(self.maximumSize())
@@ -1432,18 +1244,18 @@ class FLFieldDB(QtWidgets.QWidget):
                 # else:
             # if modeAcces == FLSqlCursor.Browse:
             if field.visible():
-                #cs = QString()
+                # cs = QString()
                 if not v:
                     self.editorImg_.clear()
                     return
-                    #cs = v.toString()
+                    # cs = v.toString()
                 # if cs.isEmpty():
                 #    self.editorImg_.clear()
                 #    return
                 pix = QtGui.QPixmap(v)
                 # if not QtGui.QPixmapCache.find(cs.left(100), pix):
                 # pix.loadFromData()
-                #QtGui.QPixmapCache.insert(cs.left(100), pix)
+                # QtGui.QPixmapCache.insert(cs.left(100), pix)
 
                 if pix:
                     self.editorImg_.setPixmap(pix)
@@ -1464,8 +1276,8 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 try:
                     self.editor_.dateChanged.disconnect(self.updateValue)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal textChanged")
 
                 if v:
                     util = FLUtil()
@@ -1486,10 +1298,10 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 try:
                     self.editor_.timeChanged.disconnect(self.updateValue)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal timeChanged")
 
-                if not v is None:
+                if v is not None:
                     self.editor_.setTime(v)
 
                 self.editor_.timeChanged.connect(self.updateValue)
@@ -1497,9 +1309,9 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "stringlist":
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
-            if not v is None:
+            except Exception:
+                self.logger.exception("Error al desconectar señal timeChanged")
+            if v is not None:
                 self.editor_.setText(v)
             else:
                 self.editor_.setText(field.defaultValue())
@@ -1508,15 +1320,15 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "bool":
             try:
                 self.editor_.toggled.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal toggled")
 
-            if not v == None:
+            if v is not None:
 
                 self.editor_.setChecked(v)
             else:
                 dV = field.defaultValue()
-                if not dV == None:
+                if dV is not None:
                     self.editor_.setChecked(dV)
 
             self.editor_.toggled.connect(self.updateValue)
@@ -1555,7 +1367,6 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.partDecimal_ == -1:
             self.partDecimal_ = field.partDecimal()
 
-        partDecimal = self.partDecimal_
         ol = field.hasOptionsList()
 
         if type_ == "double":
@@ -1564,8 +1375,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal textChanged")
 
             if not nulo:
                 self.editor_.setText(v, False)
@@ -1586,8 +1397,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal textChanged")
 
             if v:
                 if ol:
@@ -1613,8 +1424,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 return
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal textChanged")
 
             if not nulo:
                 self.editor_.setText(v)
@@ -1623,7 +1434,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "pixmap":
             if not self.editorImg_:
-                self.editorImg_ = FLPixmapView(self)
+                self.editorImg_ = pineboolib.project.resolveDGIObject(
+                    "FLPixmapView")(self)
                 self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
                 self.editorImg_.setMaximumSize(self.maximumSize())
@@ -1652,8 +1464,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.editor_.valueChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal valueChanged")
             self.editor_.setDate(v)
             self.editor_.valueChanged.connect(self.updateValue)
 
@@ -1663,8 +1475,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.editor_.timeChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal")
 
             self.editor_.setTime(v)
             self.editor_.timeChanged.connect(self.updateValue)
@@ -1675,8 +1487,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal")
 
             self.editor_.setText(v)
             self.editor_.textChanged.connect(self.updateValue)
@@ -1687,43 +1499,42 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.editor_.toggled.disconnect(self.updateValue)
-            except:
-                pass
+            except Exception:
+                self.logger.exception("Error al desconectar señal")
 
             self.editor_.setChecked(v)
             self.editor_.toggled.connect(self.updateValue)
 
-    """
-    Inicia el cursor segun este campo sea de la tabla origen o de
-    una tabla relacionada
-    """
-
     def initCursor(self):
+        """
+        Inicia el cursor segun este campo sea de la tabla origen o de
+        una tabla relacionada
+        """
 
         if self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
             self.cursorBackup_ = self.cursor_
             if self.cursor_:
                 self.cursor_ = FLSqlCursor(self.tableName_)
-                #FIXME: self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), 0, 0, self)
+                # FIXME: self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), 0, 0, self)
             else:
                 if not self.topWidget_:
                     return
                 self.cursor_ = FLSqlCursor(self.tableName_)
-                #FIXME: self.cursor_ = FLSqlCursor(self.tableName_, True, FLSqlConnections.database().connectionName(), 0, 0, self)
+                # FIXME: self.cursor_ = FLSqlCursor(self.tableName_, True, FLSqlConnections.database().connectionName(), 0, 0, self)
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
             if self.showed:
                 try:
                     self.cursor_.cursorUpdated.disconnect(self.refresh)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
             self.cursor_.cursorUpdated.connect(self.refresh)
             return
         else:
             if self.cursorBackup_:
                 try:
                     self.cursor_.cursorUpdated.disconnect(self.refresh)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
                 self.cursor_ = self.cursorBackup_
                 self.cursorBackup_ = False
 
@@ -1735,29 +1546,29 @@ class FLFieldDB(QtWidgets.QWidget):
                 if self.showed:
                     try:
                         self.cursor_.bufferChanged.disconnect(self.refresh)
-                    except:
-                        pass
+                    except Exception:
+                        self.logger.exception("Error al desconectar señal")
                 self.cursor_.bufferChanged.connect(self.refresh)
 
             if self.showed:
                 try:
                     self.cursor_.newBuffer.disconnect(self.refresh)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
 
                 try:
                     self.cursor_.bufferChanged.disconnect(self.refreshQuick)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
 
             self.cursor_.newBuffer.connect(self.refresh)
             self.cursor_.bufferChanged.connect(self.refreshQuick)
             return
 
         if not self.cursorAux:
-            #print("No tengo cursor Auxiliar", self.tableName_)
-            if not self.cursorAuxInit is None:
-                #print("Inicializando cursorauxiliar", self.tableName_)
+            # print("No tengo cursor Auxiliar", self.tableName_)
+            if self.cursorAuxInit is not None:
+                # print("Inicializando cursorauxiliar", self.tableName_)
                 return
 
             tMD = self.cursor_.db().manager().metadata(self.tableName_)
@@ -1767,12 +1578,12 @@ class FLFieldDB(QtWidgets.QWidget):
 
             try:
                 self.cursor_.newBuffer.disconnect(self.refresh)
-            except:
+            except TypeError:
                 pass
 
             try:
                 self.cursor_.bufferChanged.disconnect(self.refreshQuick)
-            except:
+            except TypeError:
                 pass
 
             self.cursorAux = self.cursor()
@@ -1797,8 +1608,9 @@ class FLFieldDB(QtWidgets.QWidget):
                         curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
 
                     fMD.addRelationMD(rMD)
-                    print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, pero sin embargo se han indicado los campos de relación( %s, %s)" % (
-                        curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
+                    print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
+                          "pero sin embargo se han indicado los campos de relación( %s, %s)"
+                          % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
                     print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" %
                           (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
                 else:
@@ -1807,7 +1619,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     # pass
 
             if self.tableName_:
-                #self.cursor_ = FLSqlCursor(self.tableName_)
+                # self.cursor_ = FLSqlCursor(self.tableName_)
                 self.cursor_ = FLSqlCursor(
                     self.tableName_, False, self.cursor_.connectionName(), self.cursorAux, rMD, self)
             if not self.cursor_:
@@ -1815,40 +1627,38 @@ class FLFieldDB(QtWidgets.QWidget):
                 if self.showed:
                     try:
                         self.cursor_.newBuffer.disconnect(self.refresh)
-                    except:
-                        pass
+                    except Exception:
+                        self.logger.exception("Error al desconectar señal")
 
                     try:
                         self.cursor_.bufferChanged.disconnect(
                             self.refreshQuick)
-                    except:
-                        pass
+                    except Exception:
+                        self.logger.exception("Error al desconectar señal")
 
                 self.cursor_.newBuffer.connect(self.refresh)
                 self.cursor_.bufferChanged.connect(self.refreshQuick)
                 self.cursorAux = False
-                if tMD and not tMD.inCache():
-                    del tMD
                 return
             else:
                 if self.showed:
                     try:
                         self.cursor_.newBuffer.disconnect(self.setNoShowed)
-                    except:
-                        pass
+                    except Exception:
+                        self.logger.exception("Error al desconectar señal")
                 self.cursor_.newBuffer.connect(self.setNoShowed)
 
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
             if self.showed:
                 try:
                     self.cursor_.newBuffer.disconnect(self.refresh)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
 
                 try:
                     self.cursor_.bufferChanged.disconnect(self.refreshQuick)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
 
             self.cursor_.newBuffer.connect(self.refresh)
             self.cursor_.bufferChanged.connect(self.refreshQuick)
@@ -1856,8 +1666,6 @@ class FLFieldDB(QtWidgets.QWidget):
             self.cursorAuxInit = True
             # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldName_)) #FIXME
             # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_)) #FIXME
-            if tMD and not tMD.inCache():
-                del tMD
 
     """
     Crea e inicia el editor apropiado para editar el tipo de datos
@@ -1866,7 +1674,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def initEditor(self):
-        #print("Inicializando editor", self.fieldName_)
+        # print("Inicializando editor", self.fieldName_)
         if not self.cursor_:
             return
 
@@ -1887,7 +1695,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         type_ = field.type()
-        len = field.length()
+        # len_ = field.length()
         partInteger = field.partInteger()
         partDecimal = None
         if type_ == "double":
@@ -1897,7 +1705,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 partDecimal = field.partDecimal()
                 self.partDecimal_ = field.partDecimal()
 
-        #rX = field.regExpValidator()
+        # rX = field.regExpValidator()
         ol = field.hasOptionsList()
 
         rt = None
@@ -1931,7 +1739,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
-                self.editor_ = QtWidgets.QComboBox()
+                self.editor_ = pineboolib.project.resolveDGIObject(
+                    "QComboBox")()
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 # self.editor_.setAutoCompletion(True)
@@ -1941,8 +1750,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 # if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                 # if not field.allowNull():
-                #self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
-                #self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
+                # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+                # self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
 
                 olTranslated = []
                 olNoTranslated = field.optionsList()
@@ -1954,19 +1763,20 @@ class FLFieldDB(QtWidgets.QWidget):
                 if self.showed:
                     try:
                         self.editor_.activated.disconnect(self.updateValue)
-                    except:
-                        pass
+                    except Exception:
+                        self.logger.exception("Error al desconectar señal")
                 self.editor_.activated.connect(self.updateValue)
 
             else:
-                self.editor_ = FLLineEdit(self, "editor")
+                self.editor_ = pineboolib.project.resolveDGIObject(
+                    "FLLineEdit")(self, "editor")
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 self.editor_.setMinimumSize(22, 22)
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull() and field.editable() and not (type_ == "time" or type_ == "date"):
-                        #self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
+                        # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                         self.editor_.setStyleSheet(
                             'background-color:' + self.notNullColor().name())
                     self.editor_.installEventFilter(self)
@@ -1987,8 +1797,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     else:
                         # self.editor_.setMaxLength(len) FIXME
                         # if not rX.isEmpty():
-                            #r = rX
-                            #self.editor_.setValidator(QtGui.QRegExpValidator(r, self.editor_))
+                            # r = rX
+                            # self.editor_.setValidator(QtGui.QRegExpValidator(r, self.editor_))
 
                         self.editor_.setAlignment(Qt.AlignLeft)
 
@@ -2015,8 +1825,8 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.editor_.textChanged.disconnect(self.updateValue)
                         self.editor_.textChanged.disconnect(
                             self.emitTextChanged)
-                    except:
-                        a = 1
+                    except Exception:
+                        self.logger.exception("Error al desconectar señal")
 
                 self.editor_.lostFocus.connect(self.emitLostFocus)
                 self.editor_.textChanged.connect(self.updateValue)
@@ -2029,8 +1839,8 @@ class FLFieldDB(QtWidgets.QWidget):
                                 self.pushButtonDB.animateClick())
                             self.labelClicked.disconnect(
                                 self.openFormRecordRelation)
-                        except:
-                            a = 1
+                        except Exception:
+                            self.logger.exception("Error al desconectar señal")
 
                     self.keyF2Pressed.connect(
                         self.pushButtonDB.animateClick)  # FIXME
@@ -2040,7 +1850,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     tlf.setUnderline(True)
                     self.textLabelDB.setFont(tlf)
                     cB = QtGui.QColor(Qt.darkBlue)
-                    #self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
+                    # self.textLabelDB.palette().setColor(self.textLabelDB.foregroundRole(), cB)
                     self.textLabelDB.setStyleSheet('color:' + cB.name())
                     self.textLabelDB.setCursor(Qt.PointingHandCursor)
 
@@ -2048,10 +1858,12 @@ class FLFieldDB(QtWidgets.QWidget):
                 QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
+            self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
 
         elif type_ == "serial":
-            self.editor_ = FLLineEdit(self, "editor")
+            self.editor_ = pineboolib.project.resolveDGIObject(
+                "FLLineEdit")(self, "editor")
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setMaxValue(pow(10, field.partInteger()) - 1)
             sizePolicy = QtWidgets.QSizePolicy(
@@ -2067,8 +1879,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.showed:
                 try:
                     self.editor_.textChanged.disconnect(self.updateValue)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
             self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "pixmap":
@@ -2076,7 +1888,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not self.editorImg_:
                     self.FLWidgetFieldDBLayout.setDirection(
                         QtWidgets.QBoxLayout.Down)
-                    self.editorImg_ = FLPixmapView(self)
+                    self.editorImg_ = pineboolib.project.resolveDGIObject(
+                        "FLPixmapView")(self)
                     self.editorImg_.setFocusPolicy(Qt.NoFocus)
                     self.editorImg_.setSizePolicy(self.sizePolicy())
                     self.editorImg_.setMaximumSize(self.maximumSize())
@@ -2094,12 +1907,13 @@ class FLFieldDB(QtWidgets.QWidget):
                     spcBut = QtWidgets.QSpacerItem(
                         20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
                     self.lytButtons.addItem(spcBut)
-                    self.pbAux3_ = QtWidgets.QPushButton(self)
+                    self.pbAux3_ = pineboolib.project.resolveDGIObject(
+                        "QPushButton")(self)
                     self.pbAux3_.setSizePolicy(sizePolicy)
                     self.pbAux3_.setMinimumSize(22, 22)
                     self.pbAux3_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux3_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-open.png")))
+                        filedir("../share/icons", "gtk-open.png")))
                     self.pbAux3_.setText("")
                     self.pbAux3_.setToolTip("Abrir fichero de imagen")
                     self.pbAux3_.setWhatsThis("Abrir fichero de imagen")
@@ -2107,32 +1921,33 @@ class FLFieldDB(QtWidgets.QWidget):
                     if self.showed:
                         try:
                             self.pbAux3_.clicked.disconnect(self.searchPixmap)
-                        except:
-                            pass
+                        except Exception:
+                            self.logger.exception("Error al desconectar señal")
                     self.pbAux3_.clicked.connect(self.searchPixmap)
                     if not hasPushButtonDB:
                         if self.showed:
                             try:
                                 self.KeyF2Pressed.disconnect(
                                     self.pbAux3_.animateClick)
-                            except:
-                                pass
+                            except Exception:
+                                self.logger.exception("Error al desconectar señal")
                         try:
                             self.KeyF2Pressed.connect(
                                 self.pbAux3_.animateClick)
-                        except:
-                            pass
+                        except Exception:
+                            self.logger.exception("Error al desconectar señal")
 
                         self.pbAux3_.setFocusPolicy(Qt.StrongFocus)
                         self.pbAux3_.installEventFilter(self)
 
                 if not self.pbAux4_:
-                    self.pbAux4_ = QtWidgets.QPushButton(self)
+                    self.pbAux4_ = pineboolib.project.resolveDGIObject(
+                        "QPushButton")(self)
                     self.pbAux4_.setSizePolicy(sizePolicy)
                     self.pbAux4_.setMinimumSize(22, 22)
                     self.pbAux4_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux4_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-paste.png")))
+                        filedir("../share/icons", "gtk-paste.png")))
                     self.pbAux4_.setText("")
                     self.pbAux4_.setToolTip(
                         "Pegar imagen desde el portapapeles")
@@ -2143,17 +1958,18 @@ class FLFieldDB(QtWidgets.QWidget):
                         try:
                             self.pbAux4_.clicked.disconnect(
                                 self.setPixmapFromClipboard)
-                        except:
-                            pass
+                        except Exception:
+                            self.logger.exception("Error al desconectar señal")
                     self.pbAux4_.clicked.connect(self.setPixmapFromClipboard)
 
                 if not self.pbAux_:
-                    self.pbAux_ = QtWidgets.QPushButton(self)
+                    self.pbAux_ = pineboolib.project.resolveDGIObject(
+                        "QPushButton")(self)
                     self.pbAux_.setSizePolicy(sizePolicy)
                     self.pbAux_.setMinimumSize(22, 22)
                     self.pbAux_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-clear.png")))
+                        filedir("../share/icons", "gtk-clear.png")))
                     self.pbAux_.setText("")
                     self.pbAux_.setToolTip("Borrar imagen")
                     self.pbAux_.setWhatsThis("Borrar imagen")
@@ -2161,12 +1977,13 @@ class FLFieldDB(QtWidgets.QWidget):
                     if self.showed:
                         try:
                             self.pbAux_.clicked.disconnect(self.clearPixmap)
-                        except:
-                            pass
+                        except Exception:
+                            self.logger.exception("Error al desconectar señal")
                     self.pbAux_.clicked.connect(self.clearPixmap)
 
                 if not self.pbAux2_:
-                    self.pbAux2_ = QtWidgets.QPushButton(self)
+                    self.pbAux2_ = pineboolib.project.resolveDGIObject(
+                        "QPushButton")(self)
                     savepixmap_ = QtWidgets.QMenu(self.pbAux2_)
                     savepixmap_.addAction("JPG")
                     savepixmap_.addAction("XPM")
@@ -2178,7 +1995,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux2_.setMinimumSize(22, 22)
                     self.pbAux2_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux2_.setIcon(QtGui.QIcon(
-                        filedir("icons", "gtk-save.png")))
+                        filedir("../share/icons", "gtk-save.png")))
                     self.pbAux2_.setText("")
                     self.pbAux2_.setToolTip("Guardar imagen como...")
                     self.pbAux2_.setWhatsThis("Guardar imagen como...")
@@ -2186,8 +2003,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     if self.showed:
                         try:
                             savepixmap_.triggered.disconnect(self.savePixmap)
-                        except:
-                            pass
+                        except Exception:
+                            self.logger.exception("Error al desconectar señal")
                     savepixmap_.triggered.connect(self.savePixmap)
 
                     if hasPushButtonDB:
@@ -2196,7 +2013,8 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.pushButtonDB.setDisabled(True)
 
         elif type_ == "date":
-            self.editor_ = FLDateEdit(self, "editor")
+            self.editor_ = pineboolib.project.resolveDGIObject(
+                "FLDateEdit")(self, "editor")
             self.editor_.setFont(QtWidgets.QApplication.font())
             sizePolicy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
@@ -2212,33 +2030,32 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                 # if not self.pbAux_:
-                    #self.pbAux_ = QtGui.QPushButton(self)
-                    # self.pbAux_.setFlat(True)
-                    #sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
-                    # sizePolicy.setHeightForWidth(True)
-                    # self.pbAux_.setSizePolicy(sizePolicy)
-                    #self.pbAux_.setMinimumSize(25, 25)
-                    #self.pbAux_.setMaximumSize(25, 25)
-                    # self.pbAux_.setFocusPolicy(Qt.NoFocus)
-                    # self.pbAux_.setIcon(QtGui.QIcon(filedir("icons","date.png")))
-                    # self.pbAux_.setText("")
-                    #self.pbAux_.setToolTip("Seleccionar fecha (F2)")
-                    #self.pbAux_.setWhatsThis("Seleccionar fecha (F2)")
-                    # self.lytButtons.addWidget(self.pbAux_) FIXME
-                    # self.FLWidgetFieldDBLayout.addWidget(self.pbAux_)
-                    # if self.showed:
-                        # self.pbAux_.clicked.disconnect(self.toggleDatePicker)
-                        # self.KeyF2Pressed_.disconnect(self.pbAux_.animateClick)
-
-                    # self.pbAux_.clicked.connect(self.toggleDatePicker)
-                    # self.keyF2Pressed_.connect(self.pbAux_.animateClick) #FIXME
+                #    #self.pbAux_ = QtGui.QPushButton(self)
+                #    # self.pbAux_.setFlat(True)
+                #    #sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Policy(7) ,QtGui.QSizePolicy.Policy(0))
+                #    # sizePolicy.setHeightForWidth(True)
+                #    # self.pbAux_.setSizePolicy(sizePolicy)
+                #    #self.pbAux_.setMinimumSize(25, 25)
+                #    #self.pbAux_.setMaximumSize(25, 25)
+                #    # self.pbAux_.setFocusPolicy(Qt.NoFocus)
+                #    # self.pbAux_.setIcon(QtGui.QIcon(filedir("../share/icons","date.png")))
+                #    # self.pbAux_.setText("")
+                #    #self.pbAux_.setToolTip("Seleccionar fecha (F2)")
+                #    #self.pbAux_.setWhatsThis("Seleccionar fecha (F2)")
+                #    # self.lytButtons.addWidget(self.pbAux_) FIXME
+                #    # self.FLWidgetFieldDBLayout.addWidget(self.pbAux_)
+                #    # if self.showed:
+                #        # self.pbAux_.clicked.disconnect(self.toggleDatePicker)
+                #        # self.KeyF2Pressed_.disconnect(self.pbAux_.animateClick)
+                #    # self.pbAux_.clicked.connect(self.toggleDatePicker)
+                #    # self.keyF2Pressed_.connect(self.pbAux_.animateClick) #FIXME
                 self.editor_.setCalendarPopup(True)
 
             if self.showed:
                 try:
                     self.editor_.dateChanged.disconnect(self.updateValue)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
 
             self.editor_.dateChanged.connect(self.updateValue)
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
@@ -2250,7 +2067,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.setDate(defVal.toDate())
 
         elif type_ == "time":
-            self.editor_ = FLTimeEdit(self)
+            self.editor_ = pineboolib.project.resolveDGIObject(
+                "FLTimeEdit")(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             # self.editor_.setAutoAdvance(True)
             sizePolicy = QtWidgets.QSizePolicy(
@@ -2263,8 +2081,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.showed:
                 try:
                     self.editor_.timeChanged.disconnect(self.updateValue)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
 
             self.editor_.timeChanged.connect(self.updateValue)
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and not field.allowNull():
@@ -2277,7 +2095,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "stringlist":
 
-            self.editor_ = QtWidgets.QTextEdit(self)
+            self.editor_ = pineboolib.project.resolveDGIObject(
+                "QTextEdit")(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setTabChangesFocus(True)
             self.editor_.setMinimumHeight(120)
@@ -2301,8 +2120,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.showed:
                 try:
                     self.editor_.textChanged.disconnect(self.updateValue)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -2321,7 +2140,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.setWhatsThis("Completado automático desactivado")
 
         elif type_ == "bool":
-            self.editor_ = QtWidgets.QCheckBox(self)
+            self.editor_ = pineboolib.project.resolveDGIObject(
+                "QCheckBox")(self)
             # self.editor_.setName("editor")
             self.editor_.setText(tMD.fieldNameToAlias(self.fieldName_))
             self.editor_.setFont(QtWidgets.QApplication.font())
@@ -2338,8 +2158,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.showed:
                 try:
                     self.editor_.toggled.disconnect(self.updateValue)
-                except:
-                    pass
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
             self.editor_.toggled.connect(self.updateValue)
 
         if self.editor_:
@@ -2366,7 +2186,7 @@ class FLFieldDB(QtWidgets.QWidget):
         else:
             self.setShowEditor(self.showEditor_)
 
-        if not self._refreshLaterEditor == False:
+        if self._refreshLaterEditor:
             self.refresh(self._refreshLaterEditor)
             self._refreshLaterEditor = False
 
@@ -2446,7 +2266,7 @@ class FLFieldDB(QtWidgets.QWidget):
         a = None
 
         v = self.cursor_.valueBuffer(field.name())
-        if v == None or (fMD and self.cursor_.bufferIsNull(fMD.name())):
+        if v is None or (fMD and self.cursor_.bufferIsNull(fMD.name())):
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(
             ), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtWidgets.QMessageBox.Ok)
             return
@@ -2454,7 +2274,7 @@ class FLFieldDB(QtWidgets.QWidget):
         mng = FLManager(self.cursor_.db().manager())
         c = FLSqlCursor(field.relationM1().foreignTable(),
                         True, self.cursor_.db().connectionName())
-        #c = FLSqlCursor(field.relationM1().foreignTable())
+        # c = FLSqlCursor(field.relationM1().foreignTable())
         c.select(mng.formatAssignValue(
             field.relationM1().foreignField(), field, v, True))
         # if c.size() <= 0:
@@ -2508,14 +2328,14 @@ class FLFieldDB(QtWidgets.QWidget):
                 print("FLFieldDB : El campo asociado debe tener una relación M1")
                 return
             v = self.cursor_.valueBuffer(fMD.name())
-            if v == None or self.cursor_.bufferIsNull(fMD.name()):
+            if v is None or self.cursor_.bufferIsNull(fMD.name()):
                 QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(
                 ), "Aviso", "Debe indicar un valor para %s" % fMD.alias())
                 return
 
             mng = self.cursor_.db().manager()
             c = FLSqlCursor(field.relationM1().foreignTable())
-            #c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
+            # c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
 
             # if c.size() > 0:
             #    c.next()
@@ -2541,7 +2361,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     return
                 a.setTable(field.relationM1().foreignTable())
             c = FLSqlCursor(a.table())
-            #f = FLFormSearchDB(c, a.name(), self.topWidget_)
+            # f = FLFormSearchDB(c, a.name(), self.topWidget_)
             f = FLFormSearchDB(c, c.action(), None)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
 
@@ -2892,7 +2712,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def setEnabled(self, enable):
-        #print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
+        # print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
         if self.editor_:
             if hasattr(self.editor_, "setReadOnly"):
                 tMD = self.cursor_.metadata()
@@ -2930,7 +2750,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     for w in self.children():
                         if not w.testAttribute(Qt.WA_ForceDisabled):
                             le = w
-                            if isinstance(le, QtWidgets.QLineEdit):
+                            if isinstance(le, pineboolib.project.resolveDGIObject("QLineEdit")):
                                 allowNull = True
                                 tMD = self.cursor_.metadata()
                                 if tMD:
@@ -2966,7 +2786,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                     if self.children():
                         for w in self.children():
-                            if isinstance(w, QtWidgets.QLineEdit):
+                            if isinstance(w, pineboolib.project.resolveDGIObject("QLineEdit")):
                                 le = w
                                 if le:
                                     le.setDisabled(False)
@@ -3011,7 +2831,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.firstRefresh = True
 
                     # if self.cursorAux:
-                        #print("Cursor auxiliar a ", self.tableName_)
+                        # print("Cursor auxiliar a ", self.tableName_)
                     if self.cursorAux and self.cursor_ and self.cursor_.bufferIsNull(self.fieldName_):
 
                         if not self.cursorAux.bufferIsNull(self.foreignField_):
@@ -3020,7 +2840,7 @@ class FLFieldDB(QtWidgets.QWidget):
                             if tMD:
                                 v = self.cursorAux.valueBuffer(
                                     self.foreignField_)
-                                #print("El valor de %s.%s es %s" % (tMD.name(), self.foreignField_, v))
+                                # print("El valor de %s.%s es %s" % (tMD.name(), self.foreignField_, v))
 
                                 # FIXME q = FLSqlQuery(False, self.cursor_.db().connectionName())
                                 q = FLSqlQuery()
@@ -3034,7 +2854,7 @@ class FLFieldDB(QtWidgets.QWidget):
                                     self.foreignField_, tMD)
 
                                 if filterAc:
-                                    #print("FilterAC == ", filterAc)
+                                    # print("FilterAC == ", filterAc)
                                     if where.isEmpty():
                                         where = filterAc
                                     else:
@@ -3046,8 +2866,8 @@ class FLFieldDB(QtWidgets.QWidget):
                                     q.setWhere("%s AND %s" %
                                                (self.filter_ + where))
 
-                                #print("where tipo", type(where))
-                                #print("Consulta = %s" % q.sql())
+                                # print("where tipo", type(where))
+                                # print("Consulta = %s" % q.sql())
                                 if q.exec_() and q.first():
                                     value = q.value(0)
                                     if isinstance(value, str):
@@ -3088,7 +2908,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.fieldAlias_ = self.fieldName_
 
         if not self.editor_:
-            self.editor_ = QtWidgets.QLineEdit()
+            self.editor_ = pineboolib.project.resolveDGIObject("QLineEdit")()
             self.editor_.setSizePolicy(
                 QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
             self.textLabelDB.setSizePolicy(
@@ -3225,158 +3045,3 @@ class FLUIntValidator(QtGui.QDoubleValidator):
         return state
         """
         return super(FLUIntValidator, self).validate(input_, i)
-
-
-class FLPixmapView(QtWidgets.QWidget):
-    frame_ = None
-    scrollView = None
-    autoScaled_ = None
-    path_ = None
-    pixmap_ = None
-    pixmapView_ = None
-    lay_ = None
-    gB_ = None
-
-    def __init__(self, parent):
-        super(FLPixmapView, self).__init__(parent)
-        self.scrollView = QtWidgets.QScrollArea(parent)
-        self.autoScaled_ = False
-        self.lay_ = QtWidgets.QHBoxLayout(self)
-        self.pixmap_ = QtGui.QPixmap()
-        self.pixmapView_ = QtWidgets.QLabel(self)
-        self.lay_.addWidget(self.pixmapView_)
-
-    def setPixmap(self, pix):
-        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-        self.pixmap_ = pix
-        if not self.autoScaled_:
-            self.resize(self.pixmap_.size().width(),
-                        self.pixmap_.size().height())
-        self.pixmapView_.clear()
-        self.pixmapView_.setPixmap(self.pixmap_)
-        self.repaint()
-        QtWidgets.QApplication.restoreOverrideCursor()
-
-    def drawContents(self, p, cx, cy, cw, ch):
-        p.setBrush(QtGui.QPalette.Background)
-        p.drawRect(cx, cy, cw, ch)
-        if self.autoScaled_:
-            newWidth = self.width() - 2
-            newHeight = self.height() - 2
-
-            if not self.pixmapWiev_ is None and self.pixmapView_.width() == newWidth and self.pixmapView_.height() == newHeight:
-                return
-
-            img = self.pixmap_
-            if img.width() > newWidth or img.height() > newHeight:
-                self.pixmapView_.convertFromImage(img.scaled(
-                    newWidth, newHeight, QtCore.Qt.KeepAspectRatio))
-            else:
-                self.pixmapView_.convertFromImage(img)
-
-            if not self.pixmapView_ is None:
-                p.drawPixmap((self.width() / 2) - (self.pixmapView_.width() / 2),
-                             (self.height() / 2) - (self.pixmapView_.height() / 2), self.pixmapView_)
-            elif not self.pixmap_ is None:
-                p.drawPixmap((self.width() / 2) - (self.pixmap_.width() / 2),
-                             (self.height() / 2) - (self.pixmap_.height() / 2), self.pixmap_)
-
-    def previewUrl(self, url):
-        u = QtCore.QUrl(url)
-        if u.isLocalFile():
-            path = u.path()
-
-        if not path == self.path_:
-            self.path_ = path
-            img = QtGui.QImage(self.path_)
-
-            if img is None:
-                return
-
-            pix = QtGui.QPixmap()
-            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-            pix.convertFromImage(img)
-            QtWidgets.QApplication.restoreOverrideCursor()
-
-            if not pix is None:
-                self.setPixmap(pix)
-
-    def clear(self):
-        self.pixmapView_.clear()
-
-    def pixmap(self):
-        return self.pixmap_
-
-    def setAutoScaled(self, autoScaled):
-        self.autoScaled_ = autoScaled
-
-
-class FLDateEdit(QtWidgets.QDateEdit):
-
-    valueChanged = QtCore.pyqtSignal()
-    DMY = "dd-MM-yyyy"
-
-    def __init__(self, parent, name):
-        super(FLDateEdit, self).__init__(parent)
-        self.setDisplayFormat("dd-MM-yyyy")
-        self.setMinimumWidth(120)
-        self.setMaximumWidth(120)
-
-    def setOrder(self, order):
-        self.setDisplayFormat(order)
-
-    def setDate(self, d=None):
-        from pineboolib.qsatype import Date
-
-        if d in (None, "NAN"):
-            d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
-        if isinstance(d, str):
-            if "T" in d:
-                d = d[:d.find("T")]
-
-        if isinstance(d, Date):
-            d = d.date_
-
-        if isinstance(d, datetime.date):
-            d = QtCore.QDate.fromString(str(d), "yyyy-MM-dd")
-
-        if not isinstance(d, QtCore.QDate):
-            date = QtCore.QDate.fromString(d, "dd-MM-yyyy")
-        else:
-            date = d
-
-        super(FLDateEdit, self).setDate(date)
-        self.setStyleSheet('color: black')
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
-
-class FLTimeEdit(QtWidgets.QTimeEdit):
-
-    def __init__(self, parent):
-        super(FLTimeEdit, self).__init__(parent)
-        self.setDisplayFormat("hh:mm:ss")
-        self.setMinimumWidth(90)
-        self.setMaximumWidth(90)
-
-    def setTime(self, v):
-        if isinstance(v, str):
-            v = v.split(':')
-            time = QtCore.QTime(int(v[0]), int(v[1]), int(v[2]))
-        else:
-            time = v
-        super(FLTimeEdit, self).setTime(time)
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
-
-class FLSpinBox(QtWidgets.QSpinBox):
-
-    def __init__(self, parent=None):
-        super(FLSpinBox, self).__init__(parent)
-        # editor()setAlignment(Qt::AlignRight);
-
-    def setMaxValue(self, v):
-        self.setMaximum(v)

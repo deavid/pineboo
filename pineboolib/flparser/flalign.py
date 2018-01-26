@@ -1,9 +1,5 @@
-from builtins import next
-from builtins import object
 import os
 import os.path
-import sys
-import math
 from optparse import OptionParser
 import difflib
 import re
@@ -152,7 +148,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
             linefrom,
             linetext
         )
-        #ConflictMode = False
+        # ConflictMode = False
         if len(ConflictMode):
             if linetext[0] != "#":
                 ConflictMode.pop()
@@ -257,7 +253,7 @@ def appliedDiff(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
             int(nlB) >= maxB and
             int(nlC) >= maxC
         ):
-                break
+            break
         lineaA = " "
         sAB = cAB = lineaA = " "
         sAC = cAC = lineaC = " "
@@ -433,7 +429,7 @@ def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
         text = "".join(
             F[Fwhich].lines[int(linebegin):int(lineend)]
         )
-        #text = text.replace("\t","        ")
+        # text = text.replace("\t","        ")
         sline = line.split(":")
         if sline[0] == "classdeclaration":
             if len(classlist):
@@ -510,13 +506,13 @@ def main():
     B = pfiles[1]
     C = pfiles[2]
 
-    #addedAB, deletedAB = A.diffTo(B)
-    #addedAC, deletedAC = A.diffTo(C)
+    # addedAB, deletedAB = A.diffTo(B)
+    # addedAC, deletedAC = A.diffTo(C)
     is_debug = options.debug
     writeAlignedFile(C, A, B, swap=True, debug=is_debug)
     writeAlignedFile(B, A, C, debug=is_debug)
     writeAlignedFile(B, A, C, prefer="A", debug=is_debug)
-    #writeAlignedFile(A, A, C)
+    # writeAlignedFile(A, A, C)
 
 
 if __name__ == "__main__":

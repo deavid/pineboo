@@ -1,9 +1,8 @@
 # # -*- coding: utf-8 -*-
-
+from PyQt5.QtCore import QObject, QVariant
 import os
 import os.path
 import re
-
 DEBUG = False
 
 
@@ -31,7 +30,15 @@ def filedir(*path):
             Filedir devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
             Es útil para especificar rutas a recursos del programa.
     """
-    return os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
+    ruta_ = os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
+
+    """
+    Esto es para cuando está compilado, para poder acceder a ficheros fuera del ejecutable
+    """
+    if ruta_.find(":/") > -1:
+        ruta_ = ruta_.replace(":/", "")
+
+    return ruta_
 
 
 def one(x, default=None):
@@ -77,7 +84,7 @@ class XMLStruct(Struct):
                 try:
                     setattr(self, key, text)
                     self._attrs.append(key)
-                except:
+                except Exception:
                     print("utils.XMLStruct: Omitiendo",
                           self.__name__, key, text)
 

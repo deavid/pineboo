@@ -5,10 +5,6 @@ from PyQt5.Qt import qWarning
 
 from pineboolib.utils import filedir
 from pineboolib import decorators
-import os.path
-import traceback
-#import imp
-import importlib
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -154,8 +150,8 @@ class FLFormDB(QtWidgets.QDialog):
         try:
             assert (self.__class__, action) not in self.known_instances
         except AssertionError:
-            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),)
-                  + "Puede que se estén perdiendo datos!")
+            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
+                  "Puede que se estén perdiendo datos!")
         self.known_instances[(self.__class__, action)] = self
 
         self.action = action
@@ -351,10 +347,10 @@ class FLFormDB(QtWidgets.QDialog):
             self.layout.addWidget(w)
             self.layoutButtons = QtWidgets.QHBoxLayout()
 
-        #pbSize = Qt.QSize(22,22)
+            # pbSize = Qt.QSize(22,22)
 
             wt = QtWidgets.QToolButton.whatsThis()
-            wt.setIcon(QtGui.QIcon(filedir("icons", "gtk-find.png")))
+            wt.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-find.png")))
             self.layoutButtons.addWidget(wt)
             wt.show()
 
@@ -516,11 +512,15 @@ class FLFormDB(QtWidgets.QDialog):
             acl.process(self)
 
         self.loadControls()
+<<<<<<< HEAD
 
         if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
             self.prj.conn.managerModules().loadFLTableDBs(self)
 
         """ 
+=======
+        """
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         if self.cursor_ and self.cursor_.metadata():
             caption = None
             if self.action_:
@@ -528,24 +528,24 @@ class FLFormDB(QtWidgets.QDialog):
                 caption = self.action_.name
                 if self.action.description:
                     self.setWhatsThis(self.action_.description)
-                
+
                 self.idMDI_ = self.action_.name
-            
+
             if not caption:
                 caption = self.cursor_.metadata().alias()
-            
+
             self.setCaptionWidget(caption)
-            
+
             #self.bindIface()
             #self.setCursor(self.cursor_)
-            
-            
-            
-        
+
+
+
+
         else:
-       
-            self.setCaptionWidget("No hay metadatos")     
-                  
+
+            self.setCaptionWidget("No hay metadatos")
+
         """
 
     def loadControls(self):
@@ -583,7 +583,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
-            QtGui.QIcon(filedir("icons", "gtk-stop.png")))
+            QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.pushButtonCancel.setFocus()
         self.pushButtonCancel.setWhatsThis("Aceptar y cerrar formulario (Esc)")
@@ -646,8 +646,8 @@ class FLFormDB(QtWidgets.QDialog):
                     if fdb.autoComFrame_.isvisible():
                         fdb.autoComFrame_.hide()
                         return
-                except:
-                    pass
+                except Exception:
+                    print("closeEvent: Error al ocultar el frame")
 
         self.setCursor(None)
         self.closed.emit()

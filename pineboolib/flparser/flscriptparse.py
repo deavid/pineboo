@@ -17,10 +17,10 @@ import ply.lex as lex
 
 try:
     from pineboolib.flparser import flex
-    from pineboolib.flparser.flclasses import *
+    # from pineboolib.flparser.flclasses import *
 except ImportError:
     import flex
-    from flclasses import *
+    # from flclasses import *
 
 # Get the token map
 tokens = flex.tokens
@@ -34,6 +34,7 @@ endoffile = None
 
 def cleanNoPython(data):
     return re.sub(r'\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*', '', data, flags=re.DOTALL)
+
 
 def cnvrt(val):
     val = str(val)
@@ -66,19 +67,19 @@ def p_parse(token):
     global input_data
 
     lexspan = list(token.lexspan(0))
-    data = str(token.lexer.lexdata[lexspan[0]:lexspan[1]])
-    context = [
-        str(token.lexer.lexdata[lexspan[0] - 32:lexspan[0]]),
-        str(token.lexer.lexdata[lexspan[0]:lexspan[1]]),
-        str(token.lexer.lexdata[lexspan[1]:lexspan[1] + 32]),
-    ]
+    # data = str(token.lexer.lexdata[lexspan[0]:lexspan[1]])
+    # context = [
+    #     str(token.lexer.lexdata[lexspan[0] - 32:lexspan[0]]),
+    #     str(token.lexer.lexdata[lexspan[0]:lexspan[1]]),
+    #     str(token.lexer.lexdata[lexspan[1]:lexspan[1] + 32]),
+    # ]
     if len(lexspan) == 2:
         fromline = token.lineno(0)
         global endoffile
         endoffile = fromline, lexspan, token.slice[0]
-    #print(repr(token.slice), context, lexspan)
+    # print(repr(token.slice), context, lexspan)
 
-    token[0] = {"00-toktype": str(token.slice[0]), "02-size": lexspan,  "50-contents":  [
+    token[0] = {"00-toktype": str(token.slice[0]), "02-size": lexspan, "50-contents": [
         {"01-type": s.type, "99-value": s.value} for s in token.slice[1:]]}
     numelems = len([s for s in token.slice[1:] if s.type !=
                     'empty' and s.value is not None])
@@ -139,15 +140,15 @@ def p_error(t):
                     print_context(t)
                 except Exception:
                     pass
-                if debug == True:
+                if debug:
                     error_count += 20  # no imprimir mas de un error en debug.
-                    print
+                    print()
                     for tokname, tokln, tokdata in seen_tokens[-32:]:
                         if tokln == t.lineno:
                             print(tokname, tokdata)
                     print(repr(last_ok_token[0]))
                     for s in last_ok_token.slice[:]:
-                        print(">>>",  s.lineno, repr(s),
+                        print(">>>", s.lineno, repr(s),
                               pprint.pformat(s.value, depth=3))
                 last_error_line = t.lineno
             elif abs(last_error_line - t.lineno) > 1 and ok_count > 1:
@@ -447,7 +448,7 @@ p_parse.__doc__ = '''
               | EQUALS
               | OR
               | SCONST
-	      | SEMI
+              | SEMI
               | error
 
     regexflags : ID
@@ -552,7 +553,7 @@ def print_context(token):
 
 
 def my_tokenfunc(*args, **kwargs):
-    #print("Call token:" ,args, kwargs)
+    # print("Call token:" ,args, kwargs)
     ret = lex.lexer.token(*args, **kwargs)
     # print "Return (",args, kwargs,") = " , ret
     return ret
@@ -570,7 +571,7 @@ def print_tokentree(token, depth=0):
             try:
                 print(tk.lexpos, end=' ')
                 print(tk.endlexpos, end=' ')
-            except:
+            except Exception:
                 pass
             print()
 
@@ -579,14 +580,14 @@ def print_tokentree(token, depth=0):
 
 def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
     # if depth > 5: return
-    source_data = [
-        'source',
-        'source_element',
-        'statement_list',
-        'statement',
-        'classdeclarationsource',
-        'vardecl_list',
-    ]
+    # source_data = [
+    #     'source',
+    #     'source_element',
+    #     'statement_list',
+    #     'statement',
+    #     'classdeclarationsource',
+    #     'vardecl_list',
+    # ]
     final_obj = {}
     final_obj['range'] = obj['02-size']
     has_data = 0
@@ -604,7 +605,7 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
             "flowinstruction": "instruction",
             "storeequalinstruction": "instruction",
             "vardecl": "vardeclaration",
-            #"vardecl_list" : "vardeclaration",
+            # "vardecl_list" : "vardeclaration",
 
         }
     else:
@@ -675,7 +676,7 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
         "classdeclaration": 1,
         "funcdeclaration": 1,
         "statement_block": 1,
-        #"instruction" : 1,
+        # "instruction" : 1,
     }
     closingtokens = [
         "RBRACE",
@@ -736,7 +737,7 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
                     (txthash, ctype + ":" + tname + "(%d)" % len(txtinline)))
                 ranges.append([depth, txthash] + trange +
                               [ctype + ":" + tname, len(txtinline)])
-                #,"start:",trange[0],"end:",trange[1]))
+                # ,"start:",trange[0],"end:",trange[1]))
                 # attrs.append(("start",trange[0]))
                 # attrs.append(("end",trange[1]))
                 # attrs.append(("hash",txthash))
@@ -910,7 +911,7 @@ def main():
     #    var = prog.byDefName[varName]
     #    print "%-15s / %-15s > " % var.type  , varName
 
-    #import tests.ifaceclass
+    # import tests.ifaceclass
     # tests.ifaceclass.do_test(prog)
 
 

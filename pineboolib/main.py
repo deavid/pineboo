@@ -1,13 +1,7 @@
 # -*- coding: utf-8 -*-
-
-from builtins import str
-from builtins import object
-import sys
 import time
-import imp
-#import os.path
 import os
-#import re,subprocess
+import logging
 import traceback
 from lxml import etree
 from binascii import unhexlify
@@ -21,9 +15,13 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLTableDB import FLTableDB
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
-from PyQt5.Qt import QTextCodec, qWarning, qApp, QApplication
-if __name__ == "__main__":
-    sys.path.append('..')
+from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib import qt3ui
+from pineboolib.PNConnection import PNConnection
+from pineboolib.dbschema.schemaupdater import parseTable
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
+from PyQt5.Qt import qWarning, qApp
 
 import pineboolib.emptyscript
 from pineboolib import decorators
@@ -44,6 +42,7 @@ class DBAuth(XMLStruct):
 
 
 class Project(object):
+    logger = logging.getLogger("main.Project")
     conn = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     mainFormName = "Pineboo"
@@ -69,8 +68,11 @@ class Project(object):
         self.parser = None
         self._initModules = []
         if self._DGI.useDesktop():
-            self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-                self.mainFormName, self.mainFormName)).mainWindow
+            if self._DGI.localDesktop():
+                self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
+                    self.mainFormName, self.mainFormName)).mainWindow
+            else:
+                self.main_window = self._DGI.mainForm().mainWindow
         self.deleteCache = False
         self.parseProject = False
 
@@ -186,7 +188,7 @@ class Project(object):
 
         self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port,
                                  self.dbauth.username, self.dbauth.password, self.dbserver.type)
-        if self.conn.conn == False:
+        if self.conn.conn is False:
             return False
 
         # Se verifica que existen estas tablas
@@ -222,16 +224,16 @@ class Project(object):
             """ SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
         f1 = open(self.dir("project.txt"), "w")
         self.files = {}
-        if self._DGI.useDesktop():
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_ini = time.time()
         if not os.path.exists(self.dir("cache")):
             raise AssertionError
         # if self.parseProject:
-        if self._DGI.useDesktop():
-            progressDialog = util.createProgressDialog("Pineboo", size_)
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
+            util.createProgressDialog("Pineboo", size_)
         p = 0
         for idmodulo, nombre, sha in self.cur:
-            if self._DGI.useDesktop():
+            if self._DGI.useDesktop() and self._DGI.localDesktop():
                 util.setProgress((p * 100) / size_)
                 util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules:
@@ -257,11 +259,11 @@ class Project(object):
                 # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
                 txt = ""
                 try:
-                    #txt = contenido.decode("UTF-8").encode("ISO-8859-15")
+                    # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
                     txt = contenido.encode("ISO-8859-15")
                 except Exception:
                     print("Error al decodificar", idmodulo, nombre)
-                    #txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
+                    # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
                     txt = contenido.encode("ISO-8859-15", "replace")
 
                 f2.write(txt)
@@ -270,7 +272,7 @@ class Project(object):
                 self.parseScript(self.dir("cache", fileobj.filekey))
 
             p = p + 1
-        if self._DGI.useDesktop():
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
 
             if Project.debugLevel > 50:
@@ -288,11 +290,11 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(self.dir(root, nombre))
 
-        if self._DGI.useDesktop():
+        if self._DGI.useDesktop() and self._DGI.localDesktop():
             try:
                 util.destroyProgressDialog()
-            except:
-                pass
+            except Exception as e:
+                self.logger.error(e)
 
             self.loadTranslations()
             self.readState()
@@ -320,7 +322,6 @@ class Project(object):
         if Project.debugLevel > 50:
             print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" %
                   (function, aList, objectContext))
-        import pineboolib.qsaglobals
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
@@ -328,54 +329,65 @@ class Project(object):
 
         aFunction = function.split(".")
         if not aFunction[0] in self.modules:
-            if Project.debugLevel > 50: print("No existe el módulo %s" % (aFunction[0]))
+            if Project.debugLevel > 50:
+                print("No existe el módulo %s" % (aFunction[0]))
             return False
 
-        funModule = self.modules[aFunction[0]];
+        funModule = self.modules[aFunction[0]]
 
         if not aFunction[0] in funModule.actions:
-            if Project.debugLevel > 50: print("No existe la acción %s en el módulo %s" % (aFunction[0], aFunction[0]))
-            return False            
+            if Project.debugLevel > 50:
+                print("No existe la acción %s en el módulo %s" %
+                      (aFunction[0], aFunction[0]))
+            return False
 
-        funAction = funModule.actions[aFunction[0]];
+        funAction = funModule.actions[aFunction[0]]
 
         if aFunction[1] == "iface":
             mW = funAction.load()
-            funScript = mW.iface;
+            funScript = mW.iface
         elif aFunction[1] == "widget":
-            funScript = funAction.formrecord_widget;
+            funScript = funAction.formrecord_widget
         else:
             return False
 
         if not funScript:
-            if Project.debugLevel > 50: print("No existe el script para la acción %s en el módulo %s" % (aFunction[0], aFunction[0]))
-            return False            
+            if Project.debugLevel > 50:
+                print("No existe el script para la acción %s en el módulo %s" %
+                      (aFunction[0], aFunction[0]))
+            return False
 
-        fn = getattr(funScript, aFunction[2], False);
-        if not fn:
-            if Project.debugLevel > 50: print("No existe la función %s en %s" % (aFunction[2], function))
+        fn = getattr(funScript, aFunction[2], None)
+        if fn is None:
+            if Project.debugLevel > 50:
+                print("No existe la función %s en %s" %
+                      (aFunction[2], function))
             return True
 
-        #fn = None
+        # fn = None
         try:
-            #fn = eval(function, pineboolib.qsaglobals.__dict__)
+            # fn = eval(function, pineboolib.qsaglobals.__dict__)
             if aList:
                 return fn(*aList)
             else:
                 return fn()
 
         except Exception:
-            #print("** JS.CALL :: ERROR:", traceback.format_exc())
+            # print("** JS.CALL :: ERROR:", traceback.format_exc())
             if showException:
                 print("** JS.CALL :: ERROR:", traceback.format_exc())
+<<<<<<< HEAD
+=======
+
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         return None
 
     def loadTranslations(self):
         translatorsCopy = None
-        if self.translators:
-            translatorsCopy = copy.copy(self.translators)
-            for it in translatorsCopy:
-                self.removeTranslator(it)
+        # if self.translators:
+        #     translatorsCopy = copy.copy(self.translators)
+        #     for it in translatorsCopy:
+        #         self.removeTranslator(it)
 
         lang = QtCore.QLocale().name()[:2]
         for module in self.modules.keys():
@@ -404,7 +416,7 @@ class Project(object):
 
     def loadTranslationFromModule(self, idM, lang):
         self.installTranslator(self.createModTranslator(idM, lang, True))
-        #self.installTranslator(self.createModTranslator(idM, "mutliLang"))
+        # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
 
     def installTranslator(self, tor):
         if not tor:
@@ -420,9 +432,8 @@ class Project(object):
     def createModTranslator(self, idM, lang, loadDefault=False):
         fileTs = "%s.%s.ts" % (idM, lang)
         key = self.conn.managerModules().shaOfFile(fileTs)
-        ok = (not key == None)
 
-        if ok or idM == "sys":
+        if key is not None or idM == "sys":
             tor = FLTranslator(self, "%s_%s" %
                                (idM, lang), lang == "multilang")
 
@@ -443,13 +454,13 @@ class Project(object):
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             print("Convirtiendo a Python . . .", scriptname)
-            #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+            # ret = subprocess.call(["flscriptparser2", "--full",script_path])
             from pineboolib.flparser import postparse
             try:
                 postparse.pythonify(scriptname)
-            except:
-                qWarning("WARN: El fichero %s no se ha podido convertir" %
-                         scriptname)
+            except Exception as e:
+                qWarning("WARN: El fichero %s no se ha podido convertir: %s" %
+                         (scriptname, e))
 
         # if not os.path.isfile(python_script_path):
         #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
@@ -458,7 +469,15 @@ class Project(object):
         if self.acl_:
             self.acl_.init_()
 
-        project.call("sys.widget.init()", [], None, True)
+        self.call("sys.widget.init()", [], None, True)
+
+    def resolveDGIObject(self, name):
+        obj_ = getattr(self._DGI, name)
+        if obj_:
+            return obj_
+
+        print("WARN: Project.resolveSDIObject no puede encontra el objeto %s en %s" % (
+            name, self._DGI.alias()))
 
 
 class Module(object):
@@ -472,15 +491,11 @@ class Module(object):
         self.tables = {}
         self.loaded = False
         self.path = self.prj.path
-        self.fcgiMode = False
 
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
 
-    def load(self, fcgiMode=False):
-        if fcgiMode:
-            self.fcgiMode = True
-
+    def load(self):
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
@@ -489,11 +504,12 @@ class Module(object):
         if pathui is None:
             print("ERROR: modulo %r: fichero UI no existe" % (self.name))
             return False
-        tiempo_1 = time.time()
+        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+            tiempo_1 = time.time()
         try:
             self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
-            if not self.fcgiMode:
+            if self.prj._DGI.useDesktop():
                 self.mainform = MainForm(self, pathui)
                 self.mainform.load()
         except Exception as e:
@@ -504,7 +520,8 @@ class Module(object):
         # TODO: Load Main Script:
         self.mainscript = None
         # /-----------------------
-        tiempo_2 = time.time()
+        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+            tiempo_2 = time.time()
 
         for tablefile in self.files:
             if not tablefile.endswith(".mtd"):
@@ -523,11 +540,13 @@ class Module(object):
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
-        tiempo_3 = time.time()
-        if tiempo_3 - tiempo_1 > 0.2:
-            if Project.debugLevel > 50:
-                print("Carga del modulo %s : %.3fs ,  %.3fs" %
-                      (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
+
+        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+            tiempo_3 = time.time()
+            if tiempo_3 - tiempo_1 > 0.2:
+                if Project.debugLevel > 50:
+                    print("Carga del modulo %s : %.3fs ,  %.3fs" %
+                          (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
 
         self.loaded = True
         return True
@@ -611,13 +630,13 @@ class ModuleActions(object):
         action.prj = self.prj
         action.name = self.mod.name
         action.alias = self.mod.name
-        #action.form = self.mod.name
+        # action.form = self.mod.name
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals, action.name):
-            #print("INFO: No se sobreescribe variable de entorno", action.name)
+            # print("INFO: No se sobreescribe variable de entorno", action.name)
             pass
         else:
             setattr(qsaglobals, action.name, DelayedObjectProxyLoader(
@@ -632,7 +651,7 @@ class ModuleActions(object):
             except AttributeError:
                 name = "unnamed"
             self.prj.actions[name] = action
-            #print(":::" , self.mod.name, name)
+            # print(":::" , self.mod.name, name)
             if name != "unnamed":
                 if hasattr(qsaglobals, "form" + name):
                     if Project.debugLevel > 150:
@@ -652,9 +671,11 @@ class ModuleActions(object):
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
                         action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
 
-    def __contains__(self, k): return k in self.prj.actions
+    def __contains__(self, k):
+        return k in self.prj.actions
 
-    def __getitem__(self, k): return self.prj.actions[k]
+    def __getitem__(self, k):
+        return self.prj.actions[k]
 
     def __setitem__(self, k, v):
         raise NotImplementedError("Actions are not writable!")
@@ -662,6 +683,8 @@ class ModuleActions(object):
 
 
 class MainForm(object):
+    logger = logging.getLogger("main.MainForm")
+    
     def __init__(self, module, path):
         self.mod = module
         self.prj = module.prj
@@ -685,12 +708,9 @@ class MainForm(object):
                     remove_blank_text=True,
                 )
                 self.tree = etree.parse(self.path, self.parser)
-                print(traceback.format_exc())
-                print(
-                    "Formulario %r se cargó con codificación ISO (UTF8 falló)" % self.path)
-            except etree.XMLSyntaxError as e:
-                print(
-                    "Error cargando UI después de intentar con UTF8 y ISO", self.path, e)
+                self.logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", self.path)
+            except etree.XMLSyntaxError:
+                self.logger.exception("Error cargando UI después de intentar con UTF8 y ISO", self.path)
 
         self.root = self.tree.getroot()
         self.actions = {}
@@ -704,10 +724,14 @@ class MainForm(object):
                 if img_format == "XPM.GZ":
                     data = zlib.decompress(data, 15)
                     img_format = "XPM"
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(data, img_format)
-                icon = QtGui.QIcon(pixmap)
-                self.pixmaps[name] = icon
+                
+                if self.prj._DGI.localDesktop():
+                    pixmap = QtGui.QPixmap()
+                    pixmap.loadFromData(data, img_format)
+                    icon = QtGui.QIcon(pixmap)
+                    self.pixmaps[name] = icon
+                else:
+                    self.pixmaps[name] = data
 
         for xmlaction in self.root.xpath("actions//action"):
             action = XMLMainFormAction(xmlaction)
@@ -720,7 +744,7 @@ class MainForm(object):
                 try:
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
-                    if not self.prj.fcgiMode:
+                    if self.prj._DGI.useDesktop():
                         print(
                             "main.Mainform: Error al intentar decodificar icono de accion. No existe.")
                         print(e)
@@ -730,6 +754,8 @@ class MainForm(object):
             #    for images in self.root.xpath("images/image[@name='%s']" % iconSet):
             #        print("*****", iconSet, images)
             self.actions[action.name] = action
+            if not self.prj._DGI.localDesktop():
+                self.prj._DGI.mainForm().mainWindow.loadAction(action)
 
             # Asignamos slot a action
             for slots in self.root.xpath("connections//connection"):
@@ -738,11 +764,15 @@ class MainForm(object):
                     action.slot = slot._v("slot")
                     action.slot = action.slot.replace('(', '')
                     action.slot = action.slot.replace(')', '')
+                if not self.prj._DGI.localDesktop():
+                    self.prj._DGI.mainForm().mainWindow.loadConnection(action)
 
         self.toolbar = []
         for toolbar_action in self.root.xpath("toolbars//action"):
             self.toolbar.append(toolbar_action.get("name"))
-        #self.ui = WMainForm()
+            if not self.prj._DGI.localDesktop():
+                self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
+        # self.ui = WMainForm()
         # self.ui.load(self.path)
         # self.ui.show()
 
@@ -808,6 +838,14 @@ class XMLAction(XMLStruct):
         return self.formrecord_widget
 
     def load(self):
+        try:
+            return self._load()
+        except Exception as e:
+            print("ERROR: Loading action %s: %s" % (self.name, e))
+            print(traceback.format_exc())
+            return None
+
+    def _load(self):
         if self._loaded:
             return self.mainform_widget
         if Project.debugLevel > 50:
@@ -872,9 +910,16 @@ class XMLAction(XMLStruct):
         else:
             self.script.form.main()
 
+<<<<<<< HEAD
     def load_script(self, scriptname, parent = None):
+=======
+    def load_script(self, scriptname, parent=None):
+        print("Cargando script " + str(scriptname) + " de " +
+              str(parent) + " accion " + str(self.name))
+
+>>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         parent_ = parent
-        if parent == None:
+        if parent is None:
             parent = self
             action_ = self
             prj_ = self.prj
@@ -885,7 +930,7 @@ class XMLAction(XMLStruct):
         # Si ya esta cargado se reusa...
         if getattr(self, "script", None) and parent_:
             parent.script = self.script
-            #self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
+            # self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
             parent.widget = parent.script.form
             if getattr(parent.widget, "iface", None):
                 parent.iface = parent.widget.iface
@@ -946,7 +991,7 @@ class XMLAction(XMLStruct):
                 script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
                 print("Convirtiendo a Python . . .")
-                #ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                # ret = subprocess.call(["flscriptparser2", "--full",script_path])
                 from pineboolib.flparser import postparse
                 postparse.pythonify(script_path)
 
@@ -958,8 +1003,8 @@ class XMLAction(XMLStruct):
                                              python_script_path.replace(self.prj.tmpdir, "tempdata")))
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, python_script_path).load_module()
-                #self.script = imp.load_source(scriptname,python_script_path)
-                #self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
+                # self.script = imp.load_source(scriptname,python_script_path)
+                # self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
                 print("ERROR al cargar script QS para la accion %r:" %
                       action_.name, e)
@@ -985,22 +1030,12 @@ class XMLAction(XMLStruct):
         moduleName = self.prj.actions[name].mod.moduleName
         if moduleName in (None, "sys"):
             return
-        if not moduleName in self.prj._initModules:
+        if moduleName not in self.prj._initModules:
             self.prj._initModules.append(moduleName)
             self.prj.call("%s.iface.init()" % moduleName, [], None, False)
             return
 
 
-from pineboolib.fllegacy.FLFormDB import FLFormDB
-
-
 class FLMainForm(FLFormDB):
     """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """
     pass
-
-
-from pineboolib import qt3ui
-from pineboolib.PNConnection import PNConnection
-from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
