@@ -14,6 +14,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
+from pineboolib.fllegacy.FLFormDB import FLFormDB
 import datetime
 import pineboolib
 import logging
@@ -26,13 +27,6 @@ class FLNotImplemented():
     def __init__(self, *args, **kwargs):
         raise Exception("Not implemented")
 
-
-class FLSpinBox(FLNotImplemented):
-    pass
-
-
-class FLPixmapView(FLNotImplemented):
-    pass
 
 
 class FLFieldDB(QtWidgets.QWidget):
@@ -176,7 +170,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self._loaded = True
         while True:  # Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
             parent = getattr(self.topWidget_, "cursor", None)()
-            if parent and isinstance(parent, FLSqlCursor):
+            if parent and isinstance(parent, FLSqlCursor) and isinstance(self.topWidget_, FLFormDB):
                 break
             new_parent = self.topWidget_.parentWidget()
             if new_parent is None:
@@ -189,7 +183,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.cursor_ = self.topWidget_.cursor()
             # print("Hay topWidget en %s", self)
         if DEBUG:
-            if self.cursor_:
+            if self.cursor_ and self.cursor_.d.buffer_:
                 print("*** FLFieldDB::loaded: cursor: %r name: %r at:%r" %
                       (self.cursor_, self.cursor_.curName(), self.cursor_.at()))
                 cur_values = [
@@ -588,7 +582,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, str(data))
 
-        elif isinstance(self.editorImg_, FLPixmapView):
+        elif isinstance(self.editorImg_, pineboolib.project.resolveDGIObject(
+                    "FLPixmapView")):
             if data == self.cursor_.valueBuffer(self.fieldName_):
                 return
 
@@ -839,7 +834,7 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "serial":
             if self.editor_:
                 ed_ = self.editor_
-                if isinstance(ed_, FLSpinBox):
+                if isinstance(ed_, pineboolib.project.resolveDGIObject("FLSpinBox")):
                     v = ed_.value()
 
         elif type_ == "pixmap":
