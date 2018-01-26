@@ -620,14 +620,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             else:
                 value = buffer.value(b.name)
 
-<<<<<<< HEAD
-            if not value == None: # si el campo se rellena o hay valor default
-                if b.type_ in ("string","stringlist") and isinstance(value, str):
-=======
             if value is not None:  # si el campo se rellena o hay valor default
                 if b.type_ in ("string", "stringlist") and isinstance(value, str):
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
                     value = self._prj.conn.normalizeValue(value)
                     
                 value = self._prj.conn.manager().formatValue(b.type_, value, False)

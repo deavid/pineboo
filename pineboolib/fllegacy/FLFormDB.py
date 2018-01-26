@@ -512,15 +512,11 @@ class FLFormDB(QtWidgets.QDialog):
             acl.process(self)
 
         self.loadControls()
-<<<<<<< HEAD
 
         if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
             self.prj.conn.managerModules().loadFLTableDBs(self)
 
-        """ 
-=======
         """
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         if self.cursor_ and self.cursor_.metadata():
             caption = None
             if self.action_:

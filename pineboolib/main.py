@@ -376,10 +376,7 @@ class Project(object):
             # print("** JS.CALL :: ERROR:", traceback.format_exc())
             if showException:
                 print("** JS.CALL :: ERROR:", traceback.format_exc())
-<<<<<<< HEAD
-=======
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         return None
 
     def loadTranslations(self):
@@ -910,14 +907,10 @@ class XMLAction(XMLStruct):
         else:
             self.script.form.main()
 
-<<<<<<< HEAD
-    def load_script(self, scriptname, parent = None):
-=======
     def load_script(self, scriptname, parent=None):
         print("Cargando script " + str(scriptname) + " de " +
               str(parent) + " accion " + str(self.name))
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         parent_ = parent
         if parent is None:
             parent = self

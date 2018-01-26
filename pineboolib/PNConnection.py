@@ -31,17 +31,11 @@ class PNConnection(QtCore.QObject):
     interactiveGUI_ = None
     _dbAux = None
     name = None
-<<<<<<< HEAD
-    
-    def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name = None):
-        super(PNConnection,self).__init__()
-        
-=======
+
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
         super(PNConnection, self).__init__()
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         self.connAux = {}
         self.name = name
         self.db_name = db_name
@@ -75,11 +69,7 @@ class PNConnection(QtCore.QObject):
 
     def connectionName(self):
         return self.name
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
     """
     Permite seleccionar una conexion que no es la default, Si no existe la crea
     """
@@ -93,15 +83,10 @@ class PNConnection(QtCore.QObject):
                 return self.connAux[name]
 
         print("PNConnection::Creando nueva conexión", name)
-<<<<<<< HEAD
-        self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
-        
-=======
 
         self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
                                           self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         return self.connAux[name]
 
     @decorators.NotImplementedWarn
@@ -110,11 +95,7 @@ class PNConnection(QtCore.QObject):
 
     def isOpen(self):
         return self.driver().isOpen()
-<<<<<<< HEAD
-        
-=======
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
     def tables(self):
         return self.driver().tables()
 

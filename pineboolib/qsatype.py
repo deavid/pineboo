@@ -161,15 +161,6 @@ def FLUtil(*args):
 def AQUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
 
-<<<<<<< HEAD
-def AQSql(*args):
-    return AQObjects.AQSql(*args)
-
-def FLSqlCursor(action = None, cN = None):
-    if action is None:
-        return None
-    return FLSqlCursor_Legacy.FLSqlCursor(action, True, cN)
-=======
 
 def AQSql(*args):
     return AQObjects.AQSql(*args)
@@ -180,7 +171,6 @@ def FLSqlCursor(action=None, cN=None):
         return None
     return FLSqlCursor_Legacy.FLSqlCursor(action, True, cN)
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
 
 def FLTableDB(*args):
     if not args:
@@ -311,27 +301,15 @@ class FormDBWidget(QtWidgets.QWidget):
         super(FormDBWidget, self).__init__(parent)
         self._action = action
         self.cursor_ = None
-<<<<<<< HEAD
         self.parent_ = parent
-        #self.cursor_ = FLSqlCursor(action.name)
         self._prj = project
         try:
             self._class_init()
             # timer = QtCore.QTimer(self)
             # timer.singleShot(250, self.init)
             self.init()
-        except:
-            pass
-=======
-        # self.cursor_ = FLSqlCursor(action.name)
-        self._prj = project
-        try:
-            self._class_init()
-            timer = QtCore.QTimer(self)
-            timer.singleShot(250, self.init)
         except Exception as e:
             print("FormDBWidget.__init__:", e)
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
 
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)

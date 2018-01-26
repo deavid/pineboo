@@ -166,15 +166,11 @@ class FLFieldDB(QtWidgets.QWidget):
         # self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
         self.pushButtonDB.clicked.connect(self.searchValue)
 
-<<<<<<< HEAD
-    def __getattr__(self, name): return DefFun(self, name)
-=======
         self.timer_1 = QtCore.QTimer(self)
         self.timer_1.singleShot(120, self.loaded)
 
     def __getattr__(self, name):
         return DefFun(self, name)
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
 
     def load(self):
         self._loaded = True

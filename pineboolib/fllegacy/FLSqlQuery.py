@@ -25,11 +25,7 @@ class FLSqlQuery(ProjectClass):
 
         self.d = FLSqlQueryPrivate(name)
         self.d.db_ = self._prj.conn.useConn(connection_name)
-<<<<<<< HEAD
-            
-=======
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
         self._posicion = None
@@ -61,14 +57,9 @@ class FLSqlQuery(ProjectClass):
     """
     Ejecuta la consulta
     """
-<<<<<<< HEAD
-    def exec(self, sql = None):
-        if self.invalidTablesList == True:
-=======
 
     def exec_(self, sql=None):
         if self.invalidTablesList:
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
             return False
 
         if not sql:
@@ -93,19 +84,12 @@ class FLSqlQuery(ProjectClass):
             print(traceback.format_exc())
             # conn.rollback()
             return False
-<<<<<<< HEAD
-
-        #conn.commit()
-        return True 
-    
-=======
         # conn.commit()
 
         return True
 
     exec = exec_  # FIXME: En python no se puede llamar una variable "exec".
 
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
     @classmethod
     def __damecursor(self):
         if getattr(self.d, "db_", None):
@@ -129,16 +113,9 @@ class FLSqlQuery(ProjectClass):
         if self._datos:
             pass
         else:
-<<<<<<< HEAD
-            self._datos=self._cursor.fetchall()
-    
-    
-    def exec_(self, conn = None, sql = None):
-=======
             self._datos = self._cursor.fetchall()
 
     def exec_(self, conn=None, sql=None):
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
         if conn:
             self.d.db_ = conn
         return self.exec(sql)

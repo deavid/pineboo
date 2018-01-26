@@ -15,6 +15,7 @@ import weakref
 from PyQt5.Qt import qWarning, QDateEdit
 
 from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.AQObjects import AQSql
 
 AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
@@ -272,14 +273,9 @@ def connect(sender, signal, receiver, slot):
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
             try:
-<<<<<<< HEAD
-                oSignal.disconnect(proxy_fn(weak_fn, weak_receiver, slot))
-            except:
-=======
                 getattr(sender, sl_name).disconnect(
                     proxy_fn(weak_fn, weak_receiver, slot))
             except Exception:
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
                 pass
 
             oSignal.connect(proxy_fn(weak_fn, weak_receiver, slot))
@@ -466,19 +462,6 @@ class qsa:
                 print(traceback.format_exc(4))
 
 
-<<<<<<< HEAD
-from pineboolib.fllegacy.FLUtil import FLUtil
-AQUtil = FLUtil() # A falta de crear AQUtil, usamos la versión anterior
-util = FLUtil() # <- para cuando QS erróneo usa util sin definirla
-from pineboolib.fllegacy.AQObjects import AQSql
-
-Insert = 0
-Edit = 1
-Del = 2
-Browse = 3
-
-=======
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
 # -------------------------- FORBIDDEN FRUIT ----------------------------------
 # Esto de aquí es debido a que en Python3 decidieron que era mejor abandonar
 # QString en favor de los strings de python3. Por lo tanto ahora el código QS

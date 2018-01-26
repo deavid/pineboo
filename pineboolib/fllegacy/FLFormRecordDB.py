@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.fllegacy.FLFormDB import FLFormDB
-<<<<<<< HEAD
-
-import traceback
-=======
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import filedir

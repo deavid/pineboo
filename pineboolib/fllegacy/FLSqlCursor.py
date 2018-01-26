@@ -1169,13 +1169,9 @@ class FLSqlCursor(ProjectClass):
             if pK:
                 pKV = self.d.buffer_.value(pK)
                 q = FLSqlQuery(None, self.d.db_.dbAux())
-<<<<<<< HEAD
-                q.exec_(None, "UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager().formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
-=======
 
                 q.exec_(None, "UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
                 ).formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
             else:
                 FLUtil.tr(
                     "FLSqlCursor : No se puede actualizar el campo fuera de transaccion, porque no existe clave primaria")
@@ -3064,11 +3060,7 @@ class FLSqlCursor(ProjectClass):
             if functionBefore:
                 cI = self.context()
                 v = self._prj.call(functionBefore, [self], cI, True)
-<<<<<<< HEAD
-                if v and not isinstance(v ,bool):
-=======
                 if v and not isinstance(v, bool):
->>>>>>> 607ecae31939c10f229d9ff3f86e12a3ca33ffdf
                     return False
 
         # if not self.checkIntegrity():
