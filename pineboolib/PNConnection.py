@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""Defines the PNConnection class.
+
+"""
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.Qt import qWarning
 from PyQt5 import QtCore, QtWidgets
@@ -14,6 +17,8 @@ import logging
 
 
 class PNConnection(QtCore.QObject):
+    """Wrapper for database cursors which are used to emulate FLSqlCursor."""
+
     logger = logging.getLogger("PNConnection")
     db_name = None
     db_host = None
@@ -31,7 +36,6 @@ class PNConnection(QtCore.QObject):
     interactiveGUI_ = None
     _dbAux = None
     name = None
-
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
         super(PNConnection, self).__init__()
@@ -68,13 +72,14 @@ class PNConnection(QtCore.QObject):
         self.driver().db_ = self
 
     def connectionName(self):
+        """Get the current connection name for this cursor."""
         return self.name
 
-    """
-    Permite seleccionar una conexion que no es la default, Si no existe la crea
-    """
-
     def useConn(self, name="default"):
+        """Select another connection which can be not the default one.
+
+        Permite seleccionar una conexion que no es la default, Si no existe la crea
+        """
         if name == "default":
             return self
 

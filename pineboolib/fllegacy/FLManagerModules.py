@@ -258,7 +258,7 @@ class FLManagerModules(ProjectClass):
     @param w Widget que contiene los FLTableDB
     """
     def loadFLTableDBs(self, w):
-        qt3ui.loadFLTableDBs(w)        
+        qt3ui.loadFLTableDBs(w)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.

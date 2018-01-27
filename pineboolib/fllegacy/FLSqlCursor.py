@@ -1566,7 +1566,7 @@ class FLSqlCursor(ProjectClass):
             self._action.openDefaultFormRecord(self)
 
             if m != self.Insert and self.refreshBuffer():
-                 self.updateBufferCopy()
+                self.updateBufferCopy()
 
     def isNull(self, fN):
         return self.d.buffer_.isNull(fN)

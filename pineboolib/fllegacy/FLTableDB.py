@@ -646,7 +646,7 @@ class FLTableDB(QtWidgets.QWidget):
     def showWidget(self):
         if not self._loaded:
             return
-            
+
         if not self.showed and self.cursor_ and self.tableRecords_:
             if not self.topWidget:
                 self.initFakeEditor()

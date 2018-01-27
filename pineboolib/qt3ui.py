@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from builtins import str
 from binascii import unhexlify
 
@@ -28,9 +27,6 @@ class Options:
 #      una nueva clase.
 
 def loadUi(path, widget, parent=None):
-    
-     
-        
     global ICONS
     parser = etree.XMLParser(
         ns_clean=True,
@@ -44,13 +40,13 @@ def loadUi(path, widget, parent=None):
         raise
     root = tree.getroot()
     ICONS = {}
-    
+
     if parent is None:
         parent = widget
-        
+
     if pineboolib.project._DGI.localDesktop():
         widget.hide()
-        
+
         for xmlimage in root.xpath("images/image"):
             loadIcon(xmlimage)
 
@@ -120,7 +116,7 @@ def loadUi(path, widget, parent=None):
                       signal_name, receiver, slot_name)
             if Options.DEBUG_LEVEL > 50:
                 print("Error:", e.__class__.__name__, e)
-    
+
     if not pineboolib.project._DGI.localDesktop():
         pineboolib.project._DGI.loadUI(path, widget)
         pineboolib.project._DGI.showWidget(widget)
@@ -131,7 +127,7 @@ def loadUi(path, widget, parent=None):
 def createWidget(classname, parent=None):
     if not pineboolib.project._DGI.localDesktop():
         return pineboolib.project._DGI.createWidget(classname, parent)
-    
+
     cls = getattr(flcontrols, classname, None) or \
         getattr(QtWidgets, classname, None) or \
         getattr(FLTableDB, classname, None) or \
@@ -360,7 +356,7 @@ def loadWidget(xml, widget=None, parent=None):
         if Options.DEBUG_LEVEL > 50:
             print("qt3ui: Unknown widget xml tag",
                   widget.__class__, repr(c.tag))
-    
+
     if pineboolib.project._DGI.localDesktop():
         for c in properties:
             process_property(c)
