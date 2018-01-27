@@ -160,8 +160,9 @@ class FLFieldDB(QtWidgets.QWidget):
         # self.FLWidgetFieldDBLayout.addWidget(self.pushButtonDB)
         self.pushButtonDB.clicked.connect(self.searchValue)
 
-        self.timer_1 = QtCore.QTimer(self)
-        self.timer_1.singleShot(120, self.loaded)
+        # self.timer_1 = QtCore.QTimer(self)
+        # self.timer_1.singleShot(120, self.loaded)
+        self.cursorAux = None
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -1555,91 +1556,63 @@ class FLFieldDB(QtWidgets.QWidget):
             self.cursor_.newBuffer.connect(self.refresh)
             self.cursor_.bufferChanged.connect(self.refreshQuick)
             return
+        
+        
 
-        if not self.cursorAux:
-            # print("No tengo cursor Auxiliar", self.tableName_)
-            if self.cursorAuxInit is not None:
-                # print("Inicializando cursorauxiliar", self.tableName_)
-                return
+        tMD = self.cursor_.db().manager().metadata(self.tableName_)
 
-            tMD = self.cursor_.db().manager().metadata(self.tableName_)
+        if not tMD:
+            return
 
-            if not tMD:
-                return
+        try:
+            self.cursor_.newBuffer.disconnect(self.refresh)
+        except TypeError:
+            pass
 
-            try:
-                self.cursor_.newBuffer.disconnect(self.refresh)
-            except TypeError:
-                pass
+        try:
+            self.cursor_.bufferChanged.disconnect(self.refreshQuick)
+        except TypeError:
+            pass
 
-            try:
-                self.cursor_.bufferChanged.disconnect(self.refreshQuick)
-            except TypeError:
-                pass
+        self.cursorAux = self.cursor()
+        if not self.cursor().metadata():
+            return
 
-            self.cursorAux = self.cursor()
-            if not self.cursor().metadata():
-                return
+        curName = self.cursor().metadata().name()
 
-            curName = self.cursor().metadata().name()
+        rMD = tMD.relation(self.fieldRelation_,
+                            self.foreignField_, curName)
+        if not rMD:
+            checkIntegrity = False
+            testM1 = self.cursor_.metadata().relation(
+                self.foreignField_, self.fieldRelation_, self.tableName_)
+            if testM1:
+                if testM1.cardinality() == FLRelationMetaData.RELATION_1M:
+                    checkIntegrity = True
+            fMD = tMD.field(self.fieldRelation_)
 
-            rMD = tMD.relation(self.fieldRelation_,
-                               self.foreignField_, curName)
-            if not rMD:
-                checkIntegrity = False
-                testM1 = self.cursor_.metadata().relation(
-                    self.foreignField_, self.fieldRelation_, self.tableName_)
-                if testM1:
-                    if testM1.cardinality() == FLRelationMetaData.RELATION_1M:
-                        checkIntegrity = True
-                fMD = tMD.field(self.fieldRelation_)
+            if fMD:
+                rMD = FLRelationMetaData(
+                    curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
 
-                if fMD:
-                    rMD = FLRelationMetaData(
-                        curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
-
-                    fMD.addRelationMD(rMD)
-                    print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
-                          "pero sin embargo se han indicado los campos de relación( %s, %s)"
-                          % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
-                    print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" %
-                          (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
-                else:
-                    print("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (
-                        self.fieldRelation_, self.tableName_))
+                fMD.addRelationMD(rMD)
+                print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
+                        "pero sin embargo se han indicado los campos de relación( %s, %s)"
+                        % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
+                print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" %
+                        (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
+            else:
+                print("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (
+                    self.fieldRelation_, self.tableName_))
                     # pass
 
-            if self.tableName_:
+        if self.tableName_:
                 # self.cursor_ = FLSqlCursor(self.tableName_)
-                self.cursor_ = FLSqlCursor(
-                    self.tableName_, False, self.cursor_.connectionName(), self.cursorAux, rMD, self)
-            if not self.cursor_:
-                self.cursor_ = self.cursorAux
-                if self.showed:
-                    try:
-                        self.cursor_.newBuffer.disconnect(self.refresh)
-                    except Exception:
-                        self.logger.exception("Error al desconectar señal")
-
-                    try:
-                        self.cursor_.bufferChanged.disconnect(
-                            self.refreshQuick)
-                    except Exception:
-                        self.logger.exception("Error al desconectar señal")
-
-                self.cursor_.newBuffer.connect(self.refresh)
-                self.cursor_.bufferChanged.connect(self.refreshQuick)
-                self.cursorAux = False
-                return
-            else:
-                if self.showed:
-                    try:
-                        self.cursor_.newBuffer.disconnect(self.setNoShowed)
-                    except Exception:
-                        self.logger.exception("Error al desconectar señal")
-                self.cursor_.newBuffer.connect(self.setNoShowed)
-
-            self.cursor_.setModeAccess(FLSqlCursor.Browse)
+            self.cursor_ = FLSqlCursor(
+                self.tableName_, False, self.cursor_.connectionName(), self.cursorAux, rMD, self)
+            
+        if not self.cursor_:
+            self.cursor_ = self.cursorAux
             if self.showed:
                 try:
                     self.cursor_.newBuffer.disconnect(self.refresh)
@@ -1647,14 +1620,38 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.logger.exception("Error al desconectar señal")
 
                 try:
-                    self.cursor_.bufferChanged.disconnect(self.refreshQuick)
+                    self.cursor_.bufferChanged.disconnect(
+                        self.refreshQuick)
                 except Exception:
                     self.logger.exception("Error al desconectar señal")
 
             self.cursor_.newBuffer.connect(self.refresh)
             self.cursor_.bufferChanged.connect(self.refreshQuick)
+            self.cursorAux = None
+            return
+        else:
+            if self.showed:
+                try:
+                    self.cursor_.newBuffer.disconnect(self.setNoShowed)
+                except Exception:
+                    self.logger.exception("Error al desconectar señal")
+            self.cursor_.newBuffer.connect(self.setNoShowed)
 
-            self.cursorAuxInit = True
+        self.cursor_.setModeAccess(FLSqlCursor.Browse)
+        if self.showed:
+            try:
+                self.cursor_.newBuffer.disconnect(self.refresh)
+            except Exception:
+                self.logger.exception("Error al desconectar señal")
+
+            try:
+                self.cursor_.bufferChanged.disconnect(self.refreshQuick)
+            except Exception:
+                self.logger.exception("Error al desconectar señal")
+
+        self.cursor_.newBuffer.connect(self.refresh)
+        self.cursor_.bufferChanged.connect(self.refreshQuick)
+
             # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldName_)) #FIXME
             # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_)) #FIXME
 
@@ -1665,7 +1662,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def initEditor(self):
-        # print("Inicializando editor", self.fieldName_)
+        # print("Inicializando editor", self.fieldName_, self)
         if not self.cursor_:
             return
 
@@ -2786,7 +2783,7 @@ class FLFieldDB(QtWidgets.QWidget):
                                     le.setFocusPolicy(Qt.NoFocus)
                                     continue
 
-                            if isinstance(w, QtWidgets.QTextEdit):
+                            if isinstance(w, QtWidgets.pineboolib.project.resolveDGIObject("QTextEdit")):
                                 te = w
                                 te.setDisabled(False)
                                 te.setReadOnly(True)

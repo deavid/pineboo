@@ -94,7 +94,7 @@ class FLFormSearchDB(FLFormDB):
             return
 
         self.eventloop = QtCore.QEventLoop()
-        self.initForm()
+        # self.initForm() 
 
     """
     destructor

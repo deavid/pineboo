@@ -389,9 +389,8 @@ class FormDBWidget(QtWidgets.QWidget):
         parent = self
 
         while not cursor and parent:
-            parent = parent.parent()
+            parent = parent.parentWidget()
             cursor = getattr(parent, "cursor_", None)
-
         if cursor:
             self.cursor_ = cursor
         else:
@@ -420,7 +419,7 @@ class FormDBWidget(QtWidgets.QWidget):
 def FLFormSearchDB(name):
     widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
     widget.setWindowModality(QtCore.Qt.ApplicationModal)
-    widget.load()
+    #widget.load()
     widget.cursor_.setContext(widget.iface)
     return widget
 
