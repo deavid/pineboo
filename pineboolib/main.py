@@ -296,8 +296,8 @@ class Project(object):
             except Exception as e:
                 self.logger.error(e)
 
-            self.loadTranslations()
-            self.readState()
+        self.loadTranslations()
+        self.readState()
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
 
