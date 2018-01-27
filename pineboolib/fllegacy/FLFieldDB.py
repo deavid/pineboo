@@ -19,14 +19,12 @@ import datetime
 import pineboolib
 import logging
 
-
 DEBUG = False
 
 
 class FLNotImplemented():
     def __init__(self, *args, **kwargs):
         raise Exception("Not implemented")
-
 
 
 class FLFieldDB(QtWidgets.QWidget):
@@ -338,67 +336,66 @@ class FLFieldDB(QtWidgets.QWidget):
         if isinstance(ted, pineboolib.project.resolveDGIObject("QTextEdit")):
             ted.setTextFormat(self.textFormat_)
 
-    """
-    @return El formato del texto
-    """
-
     def textFormat(self):
+        """@return El formato del texto."""
         ted = self.editor_
         if isinstance(ted, pineboolib.project.resolveDGIObject("QTextEdit")):
             return ted.textFormat()
         return self.textFormat_
 
-    """
-    Establece el modo de "echo"
-
-    @param m Modo (Normal, NoEcho, Password)
-    """
-
     def setEchoMode(self, m):
+        """Establece el modo de "echo".
+
+        @param m Modo (Normal, NoEcho, Password)
+        """
         led = self.editor_
         if isinstance(led, pineboolib.project.resolveDGIObject("QLineEdit")):
             led.setEchoMode(m)
 
-    """
-  @return El mode de "echo" (Normal, NoEcho, Password)
-    """
-
     def echoMode(self):
+        """Returns the echo mode.
+
+        @return El mode de "echo" (Normal, NoEcho, Password)
+        """
         led = self.editor_
         if isinstance(led, pineboolib.project.resolveDGIObject("QLineEdit")):
             return led.echoMode()
         return pineboolib.project.resolveDGIObject("QLineEdit").Normal
 
-    """
-    Filtro de eventos
-    """
-    @QtCore.pyqtSlot()
-    @QtCore.pyqtSlot(int)
-    def eventFilter(self, obj, event):
-        if not obj:
-            return True
-
-        QtWidgets.QWidget.eventFilter(self, obj, event)
+    def _process_autocomplete_events(self, event):
         timerActive = False
-        if event.type() == QtCore.QEvent.KeyPress:
-            k = event
+        if self.autoComFrame_ and self.autoComFrame_.isVisible():
+            if event.key() == Qt.Key_Down and self.autoComPopup_:
+                self.autoComPopup_.setQuickFocus()
+                return True
 
-            if self.autoComFrame_ and self.autoComFrame_.isVisible():
-                if k.key() == Qt.Key_Down and self.autoComPopup_:
-                    self.autoComPopup_.setQuickFocus()
-                    return True
+            # --> WIN
+            if self.editor_:
+                self.editor_.releaseKeyboard()
+            if self.autoComPopup_:
+                self.autoComPopup_.releaseKeyboard()
+            # <-- WIN
 
-                # --> WIN
-                if self.editor_:
-                    self.editor_.releaseKeyboard()
-                if self.autoComPopup_:
-                    self.autoComPopup_.releaseKeyboard()
-                # <-- WIN
+            self.autoComFrame_.hide()
+            if self.editor_ and event.key() == Qt.Key_Backspace:
+                self.editor_.backspace()
 
-                self.autoComFrame_.hide()
-                if self.editor_ and k.key() == Qt.Key_Backspace:
-                    self.editor_.backspace()
+            if not self.timerAutoComp_:
+                self.timerAutoComp_ = QtCore.QTimer(self)
+                self.timerAutoComp_.timeout.connect(
+                    self.toggledAutoCompletion)
+            else:
+                self.timerAutoComp_.stop()
 
+            if not event.key() == Qt.Key_Enter and not event.key() == Qt.Key_Return:
+                timerActive = True
+                self.timerAutoComp_.start(500)
+            else:
+                timer = QtCore.QTimer(self)
+                timer.singleShot(0, self.autoCompletionUpdateValue)
+                return True
+        if not timerActive and self.autoCompMode_ == "AlwaysAuto" and not (self.autoComFrame_ or self.autoComFrame_.isvisible()):
+            if event.key() in (Qt.Key_Backspace, Qt.Key_Delete, Qt.Key_ydiaeresis):
                 if not self.timerAutoComp_:
                     self.timerAutoComp_ = QtCore.QTimer(self)
                     self.timerAutoComp_.timeout.connect(
@@ -406,29 +403,28 @@ class FLFieldDB(QtWidgets.QWidget):
                 else:
                     self.timerAutoComp_.stop()
 
-                if not k.key() == Qt.Key_Enter and not k.key() == Qt.Key_Return:
-                    timerActive = True
-                    self.timerAutoComp_.start(500)
-                else:
-                    timer = QtCore.QTimer(self)
-                    timer.singleShot(0, self.autoCompletionUpdateValue)
-                    return True
+            if not event.key() == Qt.Key_Enter and not event.key() == Qt.Key_Return:
+                timerActive = True
+                self.timerAutoComp_.start(500)
+            else:
+                timer.singleShot(0, self.autoCompletionUpdateValue)
+                return True
 
-            if not timerActive and self.autoCompMode_ == "AlwaysAuto" and not (self.autoComFrame_ or self.autoComFrame_.isvisible()):
-                if k.key() == Qt.Key_Backspace or k.key() == Qt.Key_Delete or (k.key() >= Qt.Key_Space and k.key() == Qt.Key_ydiaeresis):
-                    if not self.timerAutoComp_:
-                        self.timerAutoComp_ = QtCore.QTimer(self)
-                        self.timerAutoComp_.timeout.connect(
-                            self.toggledAutoCompletion)
-                    else:
-                        self.timerAutoComp_.stop()
+    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(int)
+    def eventFilter(self, obj, event):
+        """Process Qt events for keypresses.
 
-                if not k.key() == Qt.Key_Enter and not k.key() == Qt.Key_Return:
-                    timerActive = True
-                    self.timerAutoComp_.start(500)
-                else:
-                    timer.singleShot(0, self.autoCompletionUpdateValue)
-                    return True
+        Filtro de eventos
+        """
+        if not obj:
+            return True
+
+        QtWidgets.QWidget.eventFilter(self, obj, event)
+        if event.type() == QtCore.QEvent.KeyPress:
+            k = event
+            if self._process_autocomplete_events(event):
+                return True
             if isinstance(obj, pineboolib.project.resolveDGIObject("FLLineEdit")):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed()
@@ -464,13 +460,12 @@ class FLFieldDB(QtWidgets.QWidget):
         else:
             return False
 
-    """
-    Actualiza el valor del campo con una cadena de texto.
-
-    @param t Cadena de texto para actualizar el campo
-    """
     @QtCore.pyqtSlot()
     def updateValue(self, data=None):
+        """Actualiza el valor del campo con una cadena de texto.
+
+        @param t Cadena de texto para actualizar el campo
+        """
         # print("Update Value", type(data), type(self.editor_))
         # if isinstance(data, QString): #Para quitar en el futuro
         #   data = str(data)
@@ -583,8 +578,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, str(data))
 
-        elif isinstance(self.editorImg_, pineboolib.project.resolveDGIObject(
-                    "FLPixmapView")):
+        elif isinstance(self.editorImg_, pineboolib.project.resolveDGIObject("FLPixmapView")):
             if data == self.cursor_.valueBuffer(self.fieldName_):
                 return
 
@@ -1556,11 +1550,8 @@ class FLFieldDB(QtWidgets.QWidget):
             self.cursor_.newBuffer.connect(self.refresh)
             self.cursor_.bufferChanged.connect(self.refreshQuick)
             return
-        
-        
 
         tMD = self.cursor_.db().manager().metadata(self.tableName_)
-
         if not tMD:
             return
 
@@ -1580,8 +1571,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         curName = self.cursor().metadata().name()
 
-        rMD = tMD.relation(self.fieldRelation_,
-                            self.foreignField_, curName)
+        rMD = tMD.relation(self.fieldRelation_, self.foreignField_, curName)
         if not rMD:
             checkIntegrity = False
             testM1 = self.cursor_.metadata().relation(
@@ -1597,20 +1587,19 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 fMD.addRelationMD(rMD)
                 print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
-                        "pero sin embargo se han indicado los campos de relación( %s, %s)"
-                        % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
+                      "pero sin embargo se han indicado los campos de relación( %s, %s)"
+                      % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
                 print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" %
-                        (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
+                      (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
             else:
                 print("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (
-                    self.fieldRelation_, self.tableName_))
-                    # pass
+                      self.fieldRelation_, self.tableName_))
 
         if self.tableName_:
                 # self.cursor_ = FLSqlCursor(self.tableName_)
             self.cursor_ = FLSqlCursor(
                 self.tableName_, False, self.cursor_.connectionName(), self.cursorAux, rMD, self)
-            
+
         if not self.cursor_:
             self.cursor_ = self.cursorAux
             if self.showed:
@@ -1652,16 +1641,15 @@ class FLFieldDB(QtWidgets.QWidget):
         self.cursor_.newBuffer.connect(self.refresh)
         self.cursor_.bufferChanged.connect(self.refreshQuick)
 
-            # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldName_)) #FIXME
-            # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_)) #FIXME
-
-    """
-    Crea e inicia el editor apropiado para editar el tipo de datos
-    contenido en el campo (p.e: si el campo contiene una fecha crea
-    e inicia un QDataEdit)
-    """
+        # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldName_)) #FIXME
+        # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_)) #FIXME
 
     def initEditor(self):
+        """
+        Crea e inicia el editor apropiado para editar el tipo de datos
+        contenido en el campo (p.e: si el campo contiene una fecha crea
+        e inicia un QDataEdit)
+        """
         # print("Inicializando editor", self.fieldName_, self)
         if not self.cursor_:
             return
