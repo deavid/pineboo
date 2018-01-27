@@ -5,6 +5,7 @@ from PyQt5.Qt import qWarning
 
 from pineboolib.utils import filedir
 from pineboolib import decorators
+import pineboolib
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -146,7 +147,9 @@ class FLFormDB(QtWidgets.QDialog):
     _scriptForm = None
 
     def __init__(self, parent, action, load=False):
-        super(QtWidgets.QWidget, self).__init__(parent)
+        if pineboolib.project._DGI.localDesktop(): # Si es local Inicializa
+            super(QtWidgets.QWidget, self).__init__(parent)
+            
         try:
             assert (self.__class__, action) not in self.known_instances
         except AssertionError:
@@ -157,13 +160,16 @@ class FLFormDB(QtWidgets.QDialog):
         self.action = action
         self.prj = action.prj
         self.mod = action.mod
-
-        self.layout = QtWidgets.QVBoxLayout()
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSpacing(1)
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-        self.setLayout(self.layout)
+        
+        if pineboolib.project._DGI.localDesktop():
+            self.layout = QtWidgets.QVBoxLayout()
+            self.layout.setContentsMargins(1, 1, 1, 1)
+            self.layout.setSpacing(1)
+            self.layout.setContentsMargins(1, 1, 1, 1)
+            self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+            self.setLayout(self.layout)
+        else:
+            self.layout = [] 
 
         if not self._uiName:
             self._uiName = action.form
@@ -173,7 +179,7 @@ class FLFormDB(QtWidgets.QDialog):
 
         if not getattr(action, "alias", None):
             qWarning("FLFormDB::Cargando un action XML")
-        else:
+        elif pineboolib.project._DGI.localDesktop():
             self.setWindowTitle(action.alias)
 
         self.loaded = False
@@ -196,10 +202,13 @@ class FLFormDB(QtWidgets.QDialog):
             return
 
         # self.resize(550,350)
-        self.layout.insertWidget(0, self.widget)
-        self.layout.setSpacing(1)
-        self.layout.setContentsMargins(1, 1, 1, 1)
-        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        if pineboolib.project._DGI.localDesktop():
+            self.layout.insertWidget(0, self.widget)
+            self.layout.setSpacing(1)
+            self.layout.setContentsMargins(1, 1, 1, 1)
+            self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        else:
+            self.layout.append(self.widget)
 
         if self._uiName:
             self.prj.conn.managerModules().createUI(self._uiName, None, self)

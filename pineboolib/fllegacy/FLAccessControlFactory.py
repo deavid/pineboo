@@ -8,6 +8,7 @@ from pineboolib.fllegacy.FLAccessControl import FLAccessControl
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
+import pineboolib
 from PyQt5.Qt import qApp
 
 try:
@@ -115,21 +116,22 @@ class FLAccessControlForm(FLAccessControl):
     @decorators.BetaImplementation
     def __init__(self):
         super(FLAccessControlForm, self).__init__()
-        self.pal = QtGui.QPalette()
-        # cg = QtGui.QPalette()
-        bg = QtGui.QColor(qApp.palette().color(
-            QtGui.QPalette.Active, QtGui.QPalette.Background))
-        # cg.setColor(QtGui.QPalette.Foreground, bg)
-        # cg.setColor(QtGui.QPalette.Text, bg)
-        # cg.setColor(QtGui.QPalette.ButtonText, bg)
-        # cg.setColor(QtGui.QPalette.Base, bg)
-        # cg.setColor(QtGui.QPalette.Background, bg)
-        # self.pal.setColor(QtGui.QPalette.Disabled, cg)
-        self.pal.setColor(QtGui.QPalette.Foreground, bg)
-        self.pal.setColor(QtGui.QPalette.Text, bg)
-        self.pal.setColor(QtGui.QPalette.ButtonText, bg)
-        self.pal.setColor(QtGui.QPalette.Base, bg)
-        self.pal.setColor(QtGui.QPalette.Background, bg)
+        if pineboolib.project._DGI.localDesktop():
+            self.pal = QtGui.QPalette()
+            # cg = QtGui.QPalette()
+            bg = QtGui.QColor(qApp.palette().color(
+                QtGui.QPalette.Active, QtGui.QPalette.Background))
+            # cg.setColor(QtGui.QPalette.Foreground, bg)
+            # cg.setColor(QtGui.QPalette.Text, bg)
+            # cg.setColor(QtGui.QPalette.ButtonText, bg)
+            # cg.setColor(QtGui.QPalette.Base, bg)
+            # cg.setColor(QtGui.QPalette.Background, bg)
+            # self.pal.setColor(QtGui.QPalette.Disabled, cg)
+            self.pal.setColor(QtGui.QPalette.Foreground, bg)
+            self.pal.setColor(QtGui.QPalette.Text, bg)
+            self.pal.setColor(QtGui.QPalette.ButtonText, bg)
+            self.pal.setColor(QtGui.QPalette.Base, bg)
+            self.pal.setColor(QtGui.QPalette.Background, bg)
     """
   @return El tipo del que se encarga; "form".
     """

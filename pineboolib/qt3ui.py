@@ -9,6 +9,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib import flcontrols
 from pineboolib.fllegacy import FLTableDB
 from pineboolib.fllegacy import FLFieldDB
+import pineboolib
 
 import zlib
 from PyQt5.Qt import QSpacerItem
@@ -27,6 +28,9 @@ class Options:
 #      una nueva clase.
 
 def loadUi(path, widget, parent=None):
+    
+     
+        
     global ICONS
     parser = etree.XMLParser(
         ns_clean=True,
@@ -40,11 +44,15 @@ def loadUi(path, widget, parent=None):
         raise
     root = tree.getroot()
     ICONS = {}
-    widget.hide()
+    
     if parent is None:
         parent = widget
-    for xmlimage in root.xpath("images/image"):
-        loadIcon(xmlimage)
+        
+    if pineboolib.project._DGI.localDesktop():
+        widget.hide()
+        
+        for xmlimage in root.xpath("images/image"):
+            loadIcon(xmlimage)
 
     for xmlwidget in root.xpath("widget"):
         loadWidget(xmlwidget, widget, parent)
@@ -112,10 +120,18 @@ def loadUi(path, widget, parent=None):
                       signal_name, receiver, slot_name)
             if Options.DEBUG_LEVEL > 50:
                 print("Error:", e.__class__.__name__, e)
-    widget.show()
+    
+    if not pineboolib.project._DGI.localDesktop():
+        pineboolib.project._DGI.loadUI(path, widget)
+        pineboolib.project._DGI.showWidget(widget)
+    else:
+        widget.show()
 
 
 def createWidget(classname, parent=None):
+    if not pineboolib.project._DGI.localDesktop():
+        return pineboolib.project._DGI.createWidget(classname, parent)
+    
     cls = getattr(flcontrols, classname, None) or \
         getattr(QtWidgets, classname, None) or \
         getattr(FLTableDB, classname, None) or \
@@ -344,8 +360,10 @@ def loadWidget(xml, widget=None, parent=None):
         if Options.DEBUG_LEVEL > 50:
             print("qt3ui: Unknown widget xml tag",
                   widget.__class__, repr(c.tag))
-    for c in properties:
-        process_property(c)
+    
+    if pineboolib.project._DGI.localDesktop():
+        for c in properties:
+            process_property(c)
     for c, m in layouts_pending_process:
         process_layout_box(c, mode=m)
     for new_widget in unbold_fonts:

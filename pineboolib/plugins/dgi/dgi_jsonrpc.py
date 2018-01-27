@@ -2,6 +2,8 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
+from pineboolib import decorators
+
 import pineboolib
 
 from PyQt5 import QtCore
@@ -114,6 +116,27 @@ class dgi_jsonrpc(dgi_schema):
         run_simple('localhost', 4000, self._par.receive)
         #print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         #WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
+        
+    @decorators.NotImplementedWarn
+    def child(self, parent, name):
+        print("*****************Buscando --->", parent, name)
+        return None
+    
+    @decorators.NotImplementedWarn
+    def loadUI(self, path, widget):
+        print("Cargando", path, widget)
+    
+
+    @decorators.NotImplementedWarn
+    def showWidget(self, widget):
+        print("Mostrando",widget)        
+    
+
+    @decorators.NotImplementedWarn
+    def createWidget(self, classname, parent):
+        print("***********************Create widget", classname)
+        if classname in ("QFrame"):     
+            return object
 
 
 class mainForm(object):
@@ -122,8 +145,8 @@ class mainForm(object):
     MainForm = None
 
     def __init__(self):
-        self.mainWindow = mainWindow()
-        self.MainForm = MainForm()
+        self.mainWindow = json_mainWindow()
+        self.MainForm = json_MainForm()
     
     def json_process(self, args):
         try:
@@ -146,7 +169,7 @@ class mainForm(object):
             return False
 
 
-class mainWindow():
+class json_mainWindow():
 
     areas_ = {}
     modules_ = {}
@@ -271,7 +294,8 @@ class mainWindow():
         
         return False
 
-class MainForm(object):
+
+class json_MainForm(object):
     def setDebugLevel(self, number):
         pass
 
