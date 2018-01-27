@@ -926,13 +926,16 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def quickSqlSelect(self, f, s, w, connName="default"):
-        from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
         if not w:
             sql = "select " + s + " from " + f
         else:
             sql = "select " + s + " from " + f + " where " + w
-        q = FLSqlQuery(sql, FLSqlConnections().database(connName).db())
-        return q.value(0) if q.next() else False
+
+        q = FLSqlQuery(None, connName)
+        if not q.exec_(None, sql):
+            return False
+
+        return q.value(0) if q.first() else False
 
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
