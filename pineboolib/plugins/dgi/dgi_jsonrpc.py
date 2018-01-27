@@ -148,7 +148,7 @@ class dgi_jsonrpc(dgi_schema):
             return self._W[widget._action.name].remote_widgets[classname]
         else:
             print("%s rejected !!!!" % classname)
-            return False
+            return parent
     
     def reject_widgets(self):
         return self._reject_widgets
