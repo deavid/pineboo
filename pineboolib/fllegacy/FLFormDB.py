@@ -147,9 +147,9 @@ class FLFormDB(QtWidgets.QDialog):
     _scriptForm = None
 
     def __init__(self, parent, action, load=False):
-        if pineboolib.project._DGI.localDesktop(): # Si es local Inicializa
+        if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
             super(QtWidgets.QWidget, self).__init__(parent)
-            
+
         try:
             assert (self.__class__, action) not in self.known_instances
         except AssertionError:
@@ -160,7 +160,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.action = action
         self.prj = action.prj
         self.mod = action.mod
-        
+
         if pineboolib.project._DGI.localDesktop():
             self.layout = QtWidgets.QVBoxLayout()
             self.layout.setContentsMargins(1, 1, 1, 1)
@@ -169,7 +169,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
             self.setLayout(self.layout)
         else:
-            self.layout = [] 
+            self.layout = []
 
         if not self._uiName:
             self._uiName = action.form
@@ -506,7 +506,7 @@ class FLFormDB(QtWidgets.QDialog):
 
         if not self.initScript():
             return
-        
+
         if not self.isClosing_:
             QtCore.QTimer(self).singleShot(0, self.formReady)
 

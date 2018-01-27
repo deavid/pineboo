@@ -9,11 +9,9 @@ from binascii import unhexlify
 import zlib
 import importlib
 
-
 from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
-from pineboolib.fllegacy.FLTableDB import FLTableDB
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib import qt3ui
@@ -25,7 +23,6 @@ from PyQt5.Qt import qWarning, qApp
 
 import pineboolib.emptyscript
 from pineboolib import decorators
-
 
 from pineboolib.utils import filedir, one, Struct, XMLStruct
 Qt = QtCore.Qt
@@ -681,7 +678,7 @@ class ModuleActions(object):
 
 class MainForm(object):
     logger = logging.getLogger("main.MainForm")
-    
+
     def __init__(self, module, path):
         self.mod = module
         self.prj = module.prj
@@ -721,7 +718,7 @@ class MainForm(object):
                 if img_format == "XPM.GZ":
                     data = zlib.decompress(data, 15)
                     img_format = "XPM"
-                
+
                 if self.prj._DGI.localDesktop():
                     pixmap = QtGui.QPixmap()
                     pixmap.loadFromData(data, img_format)

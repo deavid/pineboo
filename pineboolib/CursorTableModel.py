@@ -328,6 +328,33 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % (
                 self._table.name, self.rows, (fromrow, torow), tiempo_final - tiempo_inicial))
 
+    def _refresh_field_info(self, qry):
+        for n, field in enumerate(self.metadata().fieldList()):
+            # if field.visibleGrid():
+            #    sql_fields.append(field.name())
+            if field.isPrimaryKey():
+                self.pkpos.append(n)
+            if field.isCompoundKey():
+                self.ckpos.append(n)
+
+            if self._table.query_table:
+                found = False
+                for table in qry.tablesList():
+                    # print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
+                    if self._prj.conn.manager().metadata(table).field(field.name()):
+                        self.sql_fields.append("%s.%s" % (table, field.name()))
+                        found = True
+                        break
+                # Omito los campos que aparentemente no existen
+                if not found and not field.name() in self.sql_fields_omited:
+                    if self._prj.debugLevel > 50:
+                        print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (
+                            field.name(), self._table.name, qry.tablesList()))
+                    self.sql_fields_omited.append(field.name())
+
+            else:
+                self.sql_fields.append(field.name())
+
     def refresh(self):
         if not self._table:
             print("ERROR: CursorTableModel :: No hay tabla")
@@ -390,33 +417,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             qry = self._prj.conn.manager().query(self.metadata().query())
             from_ = qry.from_()
         else:
+            qry = None
             from_ = self.metadata().name()
 
-        for n, field in enumerate(self.metadata().fieldList()):
-            # if field.visibleGrid():
-            #    sql_fields.append(field.name())
-            if field.isPrimaryKey():
-                self.pkpos.append(n)
-            if field.isCompoundKey():
-                self.ckpos.append(n)
-
-            if self._table.query_table:
-                found = False
-                for table in qry.tablesList():
-                    # print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
-                    if self._prj.conn.manager().metadata(table).field(field.name()):
-                        self.sql_fields.append("%s.%s" % (table, field.name()))
-                        found = True
-                        break
-                # Omito los campos que aparentemente no existen
-                if not found and not field.name() in self.sql_fields_omited:
-                    if self._prj.debugLevel > 50:
-                        print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (
-                            field.name(), self._table.name, qry.tablesList()))
-                    self.sql_fields_omited.append(field.name())
-
-            else:
-                self.sql_fields.append(field.name())
+        self._refresh_field_info(qry)
 
         self._curname = "cur_" + self._table.name + \
             "_%08d" % (next(self.CURSOR_COUNT))
@@ -624,7 +628,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 if b.type_ in ("string", "stringlist") and isinstance(value, str):
 
                     value = self._prj.conn.normalizeValue(value)
-                    
+
                 value = self._prj.conn.manager().formatValue(b.type_, value, False)
                 if not campos:
                     campos = b.name

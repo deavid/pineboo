@@ -18,7 +18,8 @@ from pineboolib.fllegacy.FLFieldDB import FLDoubleValidator,\
     FLUIntValidator, FLIntValidator
 
 import pineboolib
-
+import logging
+logger = logging.getLogger(__name__)
 
 DEBUG = False
 
@@ -114,7 +115,7 @@ class FLTableDB(QtWidgets.QWidget):
             try:
                 parent_cursor = self.topWidget.cursor()
             except Exception:
-                pass
+                logger.exception("Error ignorado al intentar encontrar el cursor padre")
             if not isinstance(parent_cursor, FLSqlCursor):
                 parent_cursor = None
             if parent_cursor:
@@ -646,7 +647,7 @@ class FLTableDB(QtWidgets.QWidget):
     def showWidget(self):
         if not self._loaded:
             return
-            
+
         if not self.showed and self.cursor_ and self.tableRecords_:
             if not self.topWidget:
                 self.initFakeEditor()

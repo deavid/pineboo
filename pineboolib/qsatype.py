@@ -289,20 +289,18 @@ def check_gc_referrers(typename, w_obj, name):
 
 
 class FormDBWidget(QtWidgets.QWidget):
-
     closed = QtCore.pyqtSignal()
     cursor_ = None
     parent_ = None
-    
-    def __init__(self, action, project, parent = None):
+
+    def __init__(self, action, project, parent=None):
         if not pineboolib.project._DGI.useDesktop():
             self._class_init()
             return
-        
+
         elif pineboolib.project._DGI.localDesktop():
             super(FormDBWidget, self).__init__(parent)
-        
-          
+
         self._action = action
         self.cursor_ = None
         self.parent_ = parent
@@ -426,7 +424,7 @@ class FormDBWidget(QtWidgets.QWidget):
 def FLFormSearchDB(name):
     widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
     widget.setWindowModality(QtCore.Qt.ApplicationModal)
-    #widget.load()
+    # widget.load()
     widget.cursor_.setContext(widget.iface)
     return widget
 
