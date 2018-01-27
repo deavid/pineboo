@@ -209,6 +209,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         else:
             self.layout.append(self.widget)
+            self.remote_widgets = {}
 
         if self._uiName:
             self.prj.conn.managerModules().createUI(self._uiName, None, self)

@@ -17,6 +17,7 @@ import signal
 import importlib
 import pineboo
 import logging
+from PyQt5.QtCore import QCoreApplication
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -236,7 +237,7 @@ def create_app(DGI):
             pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
     else:
         mainForm = DGI.mainForm()
-        app = None
+        app = QCoreApplication(sys.argv)
     # mainForm = getattr(module_, "MainForm")()
     # from pineboolib import mainForm
     return app, mainForm

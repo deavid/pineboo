@@ -79,7 +79,9 @@ arrayControles = {}
 
 class dgi_jsonrpc(dgi_schema):
     _par = None
-
+    _reject_widgets = []
+    _W = {}
+    
     def __init__(self):
         # desktopEnabled y mlDefault a True
         super(dgi_jsonrpc, self).__init__()
@@ -91,6 +93,7 @@ class dgi_jsonrpc(dgi_schema):
         self.showInitBanner()
         self.loadReferences()
         self._mainForm = None
+        self._reject_widgets =["QFrame"]
 
     def extraProjectInit(self):
         pass
@@ -119,25 +122,36 @@ class dgi_jsonrpc(dgi_schema):
         
     @decorators.NotImplementedWarn
     def child(self, parent, name):
-        print("*****************Buscando --->", parent, name)
-        return None
+        return self._W[parent._action.name]
     
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def loadUI(self, path, widget):
-        print("Cargando", path, widget)
+        self._W[widget._action.name] = widget
+        """
+        Convertir a .json el ui
+        """
     
 
     @decorators.NotImplementedWarn
     def showWidget(self, widget):
-        print("Mostrando",widget)        
+        print("Mostrando",widget)    
     
-
+    
     @decorators.NotImplementedWarn
     def createWidget(self, classname, parent):
-        print("***********************Create widget", classname)
-        if classname in ("QFrame"):     
-            return object
-
+        """
+        Carga un objecto del tipo classname y lo añade a self._W[widget._action.name]
+        """
+        
+        if classname not in self.reject_widgets():
+            print("%s acepted !!!!(%s)" % (classname, parent))
+            return self._W[widget._action.name].remote_widgets[classname]
+        else:
+            print("%s rejected !!!!" % classname)
+            return False
+    
+    def reject_widgets(self):
+        return self._reject_widgets
 
 class mainForm(object):
 
