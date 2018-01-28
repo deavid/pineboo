@@ -543,7 +543,7 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, QtWidgets.QCheckBox):
+        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("QCheckBox")):
             data = bool(self.editor_.checkState())
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
@@ -569,7 +569,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, QtWidgets.QComboBox):
+        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("QComboBox")):
             data = str(self.editor_.currentText())
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
@@ -1860,7 +1860,8 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "pixmap":
-            if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
+            # if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
+            if not self.tableName():
                 if not self.editorImg_:
                     self.FLWidgetFieldDBLayout.setDirection(
                         QtWidgets.QBoxLayout.Down)
