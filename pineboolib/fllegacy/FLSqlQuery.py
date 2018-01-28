@@ -457,7 +457,9 @@ class FLSqlQuery(ProjectClass):
             except Exception:
                 retorno = None
 
-            if retorno is not None and not isinstance(retorno, (str, int, bool, float, datetime.date)):
+            if isinstance(retorno, datetime.time):
+                retorno = str(retorno)[:8]
+            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, datetime.date)):
                 print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" %
                       (name, type(retorno), retorno))
                 retorno = float(retorno)

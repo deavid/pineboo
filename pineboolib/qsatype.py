@@ -327,17 +327,17 @@ class FormDBWidget(QtWidgets.QWidget):
         print("FormDBWidget: closeEvent para accion %r" % self._action.name)
         check_gc_referrers("FormDBWidget:" + self.__class__.__name__,
                            weakref.ref(self), self._action.name)
-        if hasattr(self, 'iface'):
-            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
-                               weakref.ref(self.iface), self._action.name)
-            del self.iface.ctx
-            del self.iface
-
         if can_exit:
             self.closed.emit()
             event.accept()  # let the window close
         else:
             event.ignore()
+
+        if hasattr(self, 'iface'):
+            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
+                               weakref.ref(self.iface), self._action.name)
+            del self.iface.ctx
+            del self.iface
 
     def child(self, childName):
         if pineboolib.project._DGI.localDesktop():

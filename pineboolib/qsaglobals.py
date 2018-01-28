@@ -248,7 +248,7 @@ def proxy_fn(wf, wr, slot):
     return fn
 
 
-def connect(sender, signal, receiver, slot):
+def connect(sender, signal, receiver, slot, doConnect=True):
     # print("Connect::", sender, signal, receiver, slot)
     if sender is None:
         print("Connect Error::", sender, signal, receiver, slot)
@@ -272,12 +272,13 @@ def connect(sender, signal, receiver, slot):
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
             try:
-                getattr(sender, sl_name).disconnect(
+                oSignal.disconnect(
                     proxy_fn(weak_fn, weak_receiver, slot))
             except Exception:
                 pass
 
-            oSignal.connect(proxy_fn(weak_fn, weak_receiver, slot))
+            if doConnect:
+                oSignal.connect(proxy_fn(weak_fn, weak_receiver, slot))
         except RuntimeError as e:
             print("ERROR Connecting:", sender,
                   QtCore.SIGNAL(signal), remote_fn)
@@ -305,7 +306,8 @@ def connect(sender, signal, receiver, slot):
             except Exception:
                 pass
 
-            getattr(sender, sg_name).connect(remote_fn)
+            if doConnect:
+                getattr(sender, sg_name).connect(remote_fn)
         except RuntimeError as e:
             print("ERROR Connecting:", sender, sg_name, remote_fn)
             print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
@@ -319,11 +321,17 @@ def connect(sender, signal, receiver, slot):
             except Exception:
                 pass
 
-            sender.signal.connect(receiver.slot)
+            if doConnect:
+                sender.signal.connect(receiver.slot)
         else:
             print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." %
                   (sender, signal, receiver, slot))
     return True
+
+
+def disconnect(sender, signal, receiver, slot):
+    # print("Disconnect::", sender, signal, receiver, slot)
+    connect(sender, signal, receiver, slot, False)
 
 
 class Date(object):
