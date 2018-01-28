@@ -27,9 +27,9 @@ class Options:
 #      una nueva clase.
 
 def loadUi(path, widget, parent=None):
-    
+
     if not pineboolib.project._DGI.localDesktop():
-        pineboolib.project._DGI.loadUI(path, widget)   
+        pineboolib.project._DGI.loadUI(path, widget)
 
     global ICONS
     parser = etree.XMLParser(
@@ -138,7 +138,7 @@ def createWidget(classname, parent=None):
             widgt = QtWidgets.QWidget(parent)
             widgt.setStyleSheet("* { background-color: #fa3; } ")
             return widgt
-            
+
         return cls(parent)
     else:
         return pineboolib.project._DGI.createWidget(classname, parent)
@@ -174,9 +174,10 @@ def loadWidget(xml, widget=None, parent=None):
                 set_fn = getattr(widget, setpname, None)
         else:
             set_fn = getattr(widget, setpname, None)
-        
+
         if set_fn is None:
-            if (not pineboolib.project._DGI.localDesktop() and type(widget) not in pineboolib.project._DGI.reject_widgets()) or pineboolib.project._DGI.localDesktop():
+            if (not pineboolib.project._DGI.localDesktop() and
+                    type(widget) not in pineboolib.project._DGI.reject_widgets()) or pineboolib.project._DGI.localDesktop():
                 if Options.DEBUG_LEVEL > 50:
                     print("qt3ui: Missing property", pname,
                           " for %r" % widget.__class__)
@@ -222,7 +223,7 @@ def loadWidget(xml, widget=None, parent=None):
             except Exception:
                 row = col = None
             if c.tag == "property":
-                if pineboolib.project._DGI.localDesktop(): 
+                if pineboolib.project._DGI.localDesktop():
                     process_property(c, widget.layout)
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
@@ -268,7 +269,7 @@ def loadWidget(xml, widget=None, parent=None):
                 else:
                     if Options.DEBUG_LEVEL > 50:
                         print("qt3ui: Unknown layout xml tag", repr(c.tag))
-        
+
         if pineboolib.project._DGI.localDesktop():
             widget.setLayout(widget.layout)
             widget.layout.setContentsMargins(1, 1, 1, 1)
