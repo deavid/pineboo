@@ -75,7 +75,7 @@ class PNConnection(QtCore.QObject):
     """
 
     def useConn(self, name="default"):
-        if name == "default":
+        if name == "default" or name == None:
             return self
 
         for k in self.connAux.keys():
