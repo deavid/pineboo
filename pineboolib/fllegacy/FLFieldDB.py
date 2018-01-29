@@ -1017,6 +1017,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             v = self.cursor_.valueBuffer(self.fieldName_)
             nulo = self.cursor_.bufferIsNull(self.fieldRelation_)
+
             # if self.cursor_.cursorRelation():
             # print(1)
             # if self.cursor_.cursorRelation().valueBuffer(self.fieldRelation_) in ("", None):
@@ -1148,7 +1149,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 except Exception:
                     self.logger.exception("Error al desconectar señal textChanged")
 
-            if v:
+            if v is not None:
                 if ol:
                     if v.find("QT_TRANSLATE") != -1:
                         v = aqtt(v)
