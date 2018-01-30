@@ -101,7 +101,6 @@ class parser(object):
 
 class dgi_jsonrpc(dgi_schema):
     _par = None
-    _reject_widgets = []
     _W = {}
     _WJS = {}
 
@@ -115,7 +114,6 @@ class dgi_jsonrpc(dgi_schema):
         self.setLocalDesktop(False)
         self.showInitBanner()
         self._mainForm = None
-        self._reject_widgets = ["QFrame", "QWidget"]
 
     def extraProjectInit(self):
         pass
@@ -155,7 +153,6 @@ class dgi_jsonrpc(dgi_schema):
 
 
 class mainForm(QtWidgets.QMainWindow):
-
     mainWindow = None
     MainForm = None
 

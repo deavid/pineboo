@@ -1,16 +1,12 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 from PyQt5 import QtWidgets
-from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import pineboolib
 import traceback
 import datetime
 
 
 class FLSqlQuery(ProjectClass):
-
-    countRefQuery = 0
-    invalidTables = False
     """
     Maneja consultas con características específicas para AbanQ, hereda de QSqlQuery.
 
@@ -19,6 +15,9 @@ class FLSqlQuery(ProjectClass):
 
     @author InfoSiAL S.L.
     """
+
+    countRefQuery = 0
+    invalidTables = False
 
     def __init__(self, name=None, connection_name=None):
         super(FLSqlQuery, self).__init__()

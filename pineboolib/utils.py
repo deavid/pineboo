@@ -1,9 +1,10 @@
 # # -*- coding: utf-8 -*-
-from PyQt5.QtCore import QObject, QVariant
 import os
 import os.path
 import re
-DEBUG = False
+import logging
+import sys
+logger = logging.getLogger(__name__)
 
 
 def auto_qt_translate_text(text):
@@ -112,40 +113,61 @@ class DefFun:
 
     def __str__(self):
         if self.realfun:
-            if DEBUG:
-                print("%r: Redirigiendo Propiedad a función %r" %
-                      (self.parent.__class__, self.funname))
+            logger.debug("%r: Redirigiendo Propiedad a función %r" %
+                         (self.parent.__class__, self.funname))
             return self.realfun()
-        if DEBUG:
-            print("WARN: %r: Propiedad no implementada %r" %
-                  (self.parent.__class__, self.funname))
+
+        logger.debug("WARN: %r: Propiedad no implementada %r" %
+                     (self.parent.__class__, self.funname))
         return 0
 
     def __call__(self, *args):
 
         if self.realfun:
-            if DEBUG:
-                print("%r: Redirigiendo Llamada a función %r %r" %
-                      (self.parent.__class__, self.funname, args))
+            logger.debug("%r: Redirigiendo Llamada a función %r %r" %
+                         (self.parent.__class__, self.funname, args))
             return self.realfun(*args)
 
-        if DEBUG:
-            print("WARN: %r: Método no implementado %r %r" %
-                  (self.parent.__class__, self.funname, args))
+        logger.debug("WARN: %r: Método no implementado %r %r" %
+                     (self.parent.__class__, self.funname, args))
         return None
 
 
-def bind(objectName, propertyName, type):
+def traceit(frame, event, arg):
+    """Print a trace line for each Python line executed or call.
+
+    This function is intended to be the callback of sys.settrace.
     """
-        Utilidad para crear propiedades de estilo Qt fácilmente.
-        Actualmente en desuso. Python tiene su propio sistema de propiedades y funciona bien.
-    """
+    import linecache
+    # if event != "line":
+    #    return traceit
+    try:
+        lineno = frame.f_lineno
+        filename = frame.f_globals["__file__"]
+        # if "pineboo" not in filename:
+        #     return traceit
+        if (filename.endswith(".pyc") or
+                filename.endswith(".pyo")):
+            filename = filename[:-1]
+        name = frame.f_globals["__name__"]
+        line = linecache.getline(filename, lineno)
+        print("%s:%s:%s %s" % (name, lineno, event, line.rstrip()))
+    except Exception:
+        pass
+    return traceit
 
-    def getter(self):
-        return type(self.findChild(QObject, objectName).property(propertyName).toPyObject())
 
-    def setter(self, value):
-        self.findChild(QObject, objectName).setProperty(
-            propertyName, QVariant(value))
+class TraceBlock():
+    def __enter__(self):
+        sys.settrace(traceit)
+        return traceit
 
-    return property(getter, setter)
+    def __exit__(self, type, value, traceback):
+        sys.settrace(None)
+
+
+def trace_function(f):
+    def wrapper(*args):
+        with TraceBlock():
+            return f(*args)
+    return wrapper

@@ -11,7 +11,6 @@ import re
 import traceback
 import os
 import gc
-import linecache
 from optparse import OptionParser
 import signal
 import importlib
@@ -310,6 +309,7 @@ def main():
     pineboolib.no_python_cache = options.no_python_cache
 
     if options.trace_debug:
+        from pineboo.utils import traceit
         sys.settrace(traceit)
     if options.trace_signals:
         monkey_patch_connect()
@@ -436,29 +436,6 @@ def init_project(DGI, splash, options, project, mainForm, app):
     del main_window
     del project
     return ret
-
-
-def traceit(frame, event, arg):
-    """Print a trace line for each Python line executed or call.
-
-    This function is intended to be the callback of sys.settrace.
-    """
-    if event != "line":
-        return traceit
-    try:
-        lineno = frame.f_lineno
-        filename = frame.f_globals["__file__"]
-        if "pineboo" not in filename:
-            return traceit
-        if (filename.endswith(".pyc") or
-                filename.endswith(".pyo")):
-            filename = filename[:-1]
-        name = frame.f_globals["__name__"]
-        line = linecache.getline(filename, lineno)
-        print("%s:%s: %s" % (name, lineno, line.rstrip()))
-    except Exception:
-        pass
-    return traceit
 
 
 def monkey_patch_connect():
