@@ -1205,18 +1205,6 @@ class FLSqlCursor(ProjectClass):
             if not self.d.buffer_:
                 # print("ERROR: FLSqlCursor(%s): aún después de refresh, no tengo buffer." % self.curName())
                 return None
-            else:
-                field = self.metadata().field(fN)
-                if field:
-                    type_ = field.type()
-                    v = self.d.buffer_.value(fN)
-
-                    if type_ == "pixmap":
-                        return self.d.db_.manager().fetchLargeValue(v)
-                    else:
-                        return v
-                else:
-                    return None
 
         field = self.metadata().field(fN)
         if not field:
@@ -1249,6 +1237,10 @@ class FLSqlCursor(ProjectClass):
 
         else:
             v = self.d.buffer_.value(fN)
+
+        if type_ in ("string", "stringlist") and not v:
+            v = ""
+
             # print("FLSqlCursor.valueBuffer(%s) = %s" % (fN, v))
         # if v.isValid():
             # v.cast(fltype)
