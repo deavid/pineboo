@@ -309,7 +309,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self._class_init()
             # timer = QtCore.QTimer(self)
             # timer.singleShot(250, self.init)
-            self.iface.init()
+            self.init()
         except Exception as e:
             print("FormDBWidget.__init__:", e)
 
