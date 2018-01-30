@@ -3,10 +3,11 @@ import importlib
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.utils import filedir
 import os
+import logging
+logger = logging.getLogger(__name__)
 
 
 class PNSqlDrivers(ProjectClass):
-
     driverName = None
     driver_ = None
 
@@ -26,7 +27,7 @@ class PNSqlDrivers(ProjectClass):
 
     def loadDriver(self, driverName):
         if driverName is None:
-            print("Seleccionado driver por defecto", self.defaultDriverName)
+            logger.info("Seleccionado driver por defecto %s", self.defaultDriverName)
             driverName = self.defaultDriverName
 
         module_ = importlib.import_module(
@@ -35,8 +36,7 @@ class PNSqlDrivers(ProjectClass):
 
         if self.driver_:
             # self.driverName = driverName
-            print("PNSqlDrivers::Driver %s v%s" %
-                  (self.driver().driverName(), self.driver().version()))
+            logger.info("Driver %s v%s", self.driver().driverName(), self.driver().version())
             return True
         else:
             return False

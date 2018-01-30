@@ -14,12 +14,11 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
 import sys
 import logging
+logger = logging.getLogger("PNConnection")
 
 
 class PNConnection(QtCore.QObject):
     """Wrapper for database cursors which are used to emulate FLSqlCursor."""
-
-    logger = logging.getLogger("PNConnection")
     db_name = None
     db_host = None
     db_port = None
@@ -60,8 +59,7 @@ class PNConnection(QtCore.QObject):
             self._dbAux = self
 
         else:
-            print("PNConnection.ERROR: No se encontro el driver \'%s\'" %
-                  driverAlias)
+            logger.error("PNConnection.ERROR: No se encontro el driver '%s'", driverAlias)
             sys.exit(0)
 
         self.transaction_ = 0
@@ -87,7 +85,7 @@ class PNConnection(QtCore.QObject):
             if k == name:
                 return self.connAux[name]
 
-        print("PNConnection::Creando nueva conexión", name)
+        logger.info("PNConnection::Creando nueva conexión %s", name)
 
         self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
                                           self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
@@ -114,7 +112,7 @@ class PNConnection(QtCore.QObject):
         try:
             return self.driver().DBName()
         except Exception as e:
-            self.logger.debug("DBName: %s", e)
+            logger.error("DBName: %s", e)
             return self.db_name
 
     def driver(self):
@@ -174,7 +172,7 @@ class PNConnection(QtCore.QObject):
             return False
 
         if self.transaction_ == 0:
-            print("Iniciando Transacción...")
+            logger.info("Iniciando Transacción...")
             if self.transaction():
                 self.savePoint(self.transaction_)
                 self.lastActiveCursor_ = cursor
@@ -183,11 +181,10 @@ class PNConnection(QtCore.QObject):
                 cursor.d.transactionsOpened_.append(self.transaction_)
                 return True
             else:
-                print(
-                    "PNConnection::doTransaction : Fallo al intentar iniciar la transacción")
+                logger.warn("doTransaction: Fallo al intentar iniciar la transacción")
                 return False
         else:
-            print("Creando punto de salvaguarda %s" % self.transaction_)
+            logger.info("Creando punto de salvaguarda %s", self.transaction_)
             self.savePoint(self.transaction_)
 
             self.transaction_ = self.transaction_ + 1
@@ -220,18 +217,17 @@ class PNConnection(QtCore.QObject):
             if cur.d.transactionsOpened_:
                 trans = cur.d.transactionsOpened_.pop()
                 if not trans == self.transaction_:
-                    print("FLSqlDatabase : El cursor va a deshacer la transacción %s pero la última que inició es la %s" % (
-                        self.transaction_, trans))
+                    logger.info("FLSqlDatabase: El cursor va a deshacer la transacción %s pero la última que inició es la %s",
+                                self.transaction_, trans)
             else:
-                print(
-                    "FLSqlDatabaser : El cursor va a deshacer la transacción %s pero no ha iniciado ninguna" % self.transaction_)
+                logger.info("FLSqlDatabaser : El cursor va a deshacer la transacción %s pero no ha iniciado ninguna", self.transaction_)
 
             self.transaction_ = self.transaction_ - 1
         else:
             return True
 
         if self.transaction_ == 0:
-            print("Deshaciendo Transacción...")
+            logger.info("Deshaciendo Transacción...")
             try:
                 self.rollbackSavePoint(self.transaction_)
                 self.rollbackTransaction()
@@ -242,12 +238,11 @@ class PNConnection(QtCore.QObject):
 
                 return True
             except Exception:
-                print(
-                    "FLSqlDatabase::doRollback : Fallo al intentar deshacer transacción")
+                logger.exception("doRollback: Fallo al intentar deshacer transacción")
                 return False
 
         else:
-            print("Restaurando punto de salvaguarda %s..." % self.transaction_)
+            logger.info("Restaurando punto de salvaguarda %s...", self.transaction_)
             self.rollbackSavePoint(self.transaction_)
             cur.d.modeAccess_ = FLSqlCursor.Browse
             return True
@@ -266,11 +261,9 @@ class PNConnection(QtCore.QObject):
             if cur.d.transactionsOpened_:
                 trans = cur.d.transactionsOpened_.pop()
                 if not trans == self.transaction_:
-                    print("PNConnect : El cursor va a terminar la transacción %s pero la última que inició es la %s" % (
-                        self.transaction_, trans))
+                    logger.warn("El cursor va a terminar la transacción %s pero la última que inició es la %s", self.transaction_, trans)
             else:
-                print(
-                    "PNConnect : El cursor va a terminar la transacción %s pero no ha iniciado ninguna" % self.transaction_)
+                logger.warn("El cursor va a terminar la transacción %s pero no ha iniciado ninguna", self.transaction_)
 
             self.transaction_ = self.transaction_ - 1
         else:
@@ -278,7 +271,7 @@ class PNConnection(QtCore.QObject):
             return True
 
         if self.transaction_ == 0:
-            print("Terminando transacción...")
+            logger.info("Terminando transacción...")
             try:
                 # self.conn.commit()
                 self.releaseSavePoint(self.transaction_)
@@ -292,10 +285,10 @@ class PNConnection(QtCore.QObject):
 
                 return True
             except Exception as e:
-                self.logger.warn("doCommit: Fallo al intentar terminar transacción: %s", e)
+                logger.error("doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
-            print("Liberando punto de salvaguarda %s..." % self.transaction_)
+            logger.info("Liberando punto de salvaguarda %s...", self.transaction_)
             if self.transaction_ == 1:
                 self.releaseSavePoint(self.transaction_)
                 if notify:
@@ -385,7 +378,7 @@ class PNConnection(QtCore.QObject):
         try:
             q.execute(sql)
         except Exception as e:
-            self.logger.exception("createTable: Error happened executing sql: %s...", sql[:80])
+            logger.exception("createTable: Error happened executing sql: %s...", sql[:80])
             self.rollbackTransaction()
             return False
         self.commitTransaction()
