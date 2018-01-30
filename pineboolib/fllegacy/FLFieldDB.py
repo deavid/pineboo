@@ -1153,7 +1153,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 if ol:
                     if v.find("QT_TRANSLATE") != -1:
                         v = aqtt(v)
-                    self.editor_.setCurrentIndex(field.getIndexOptionsList(v))
+                    idx = field.getIndexOptionsList(v)
+                    if idx is not None:
+                        self.editor_.setCurrentIndex(idx)
                 else:
                     self.editor_.setText(v)
             else:
