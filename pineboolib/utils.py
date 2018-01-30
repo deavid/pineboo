@@ -3,6 +3,7 @@ import os
 import os.path
 import re
 import logging
+import sys
 logger = logging.getLogger(__name__)
 
 
@@ -130,3 +131,43 @@ class DefFun:
         logger.debug("WARN: %r: Método no implementado %r %r" %
                      (self.parent.__class__, self.funname, args))
         return None
+
+
+def traceit(frame, event, arg):
+    """Print a trace line for each Python line executed or call.
+
+    This function is intended to be the callback of sys.settrace.
+    """
+    import linecache
+    # if event != "line":
+    #    return traceit
+    try:
+        lineno = frame.f_lineno
+        filename = frame.f_globals["__file__"]
+        # if "pineboo" not in filename:
+        #     return traceit
+        if (filename.endswith(".pyc") or
+                filename.endswith(".pyo")):
+            filename = filename[:-1]
+        name = frame.f_globals["__name__"]
+        line = linecache.getline(filename, lineno)
+        print("%s:%s:%s %s" % (name, lineno, event, line.rstrip()))
+    except Exception:
+        pass
+    return traceit
+
+
+class TraceBlock():
+    def __enter__(self):
+        sys.settrace(traceit)
+        return traceit
+
+    def __exit__(self, type, value, traceback):
+        sys.settrace(None)
+
+
+def trace_function(f):
+    def wrapper(*args):
+        with TraceBlock():
+            return f(*args)
+    return wrapper
