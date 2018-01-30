@@ -1,5 +1,7 @@
 from enum import Enum
 
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QDomDocument as FLDomDocument
@@ -70,7 +72,7 @@ class MLabelObject(MReportObject):
                 self.text_ = txt
         else:
             dni = 0
-            argList = Qt.QSArgumentList()
+            argList = QtCore.QSArgumentList()
             argList << txt
 
             if self.domNodeData_ and not self.domNodeData_.isNull():
@@ -137,7 +139,7 @@ class MLabelObject(MReportObject):
             if self.pixmap_:
                 self.pixmap_ = None
             if not self.pixmap_.isNull():
-                self.pixmap_ = Qt.QPixmap(pix)
+                self.pixmap_ = QtGui.QPixmap(pix)
         else:
             if self.pixmap_:
                 self.pixmap_ = None
@@ -153,7 +155,7 @@ class MLabelObject(MReportObject):
     def draw(self, p):
         if not self.paintFunction_:
             dni = 0
-            argList = Qt.QSArgumentList()
+            argList = QtCore.QSArgumentList()
             argList << self.text_
 
             if self.domNodeData_ and not self.domNodeData_.isNull():
@@ -165,9 +167,9 @@ class MLabelObject(MReportObject):
 
         # if (tp != QSArgument::Invalid) { #FIXME
         if tp:
-            pix = Qt.QPixmap()
-            if tp == Qt.QSArgument.VoidPointer:
-                vPix = Qt.QPixmap(v.ptr())
+            pix = QtGui.QPixmap()
+            if tp == QtCore.QSArgument.VoidPointer:
+                vPix = QtGui.QPixmap(v.ptr())
                 if vPix:
                     pix = vPix
             else:
@@ -190,23 +192,23 @@ class MLabelObject(MReportObject):
 
             tf = 0
             if self.hAlignment_ == self.HAlignment.Left:
-                tf = Qt.QPainter.AlignLeft
+                tf = QtGui.QPainter.AlignLeft
             elif self.hAlignment_ == self.HAlignment.Center:
-                tf = Qt.QPainter.AlignHCenter
+                tf = QtGui.QPainter.AlignHCenter
             elif self.hAlignment_ == self.HAlignment.Right:
-                tf = Qt.QPainter.AlignRight
+                tf = QtGui.QPainter.AlignRight
 
             if self.vAlignment_ == self.VAlignment.Top:
-                tf = tf | Qt.QPainter.AlignTop
+                tf = tf | QtGui.QPainter.AlignTop
             elif self.vAlignment_ == self.VAlignment.Bottom:
-                tf = tf | Qt.QPainter.AlignBottom
+                tf = tf | QtGui.QPainter.AlignBottom
             elif self.vAlignment_ == self.VAlignment.Middle:
-                tf = tf | Qt.QPainter.AlignVCenter
+                tf = tf | QtGui.QPainter.AlignVCenter
 
             if self.wordWrap_:
-                tf = tf | Qt.QPainter.WordBreak
+                tf = tf | QtGui.QPainter.WordBreak
 
-            fnt = Qt.QFont()
+            fnt = QtGui.QFont()
             fnt.setFamily(self.fontFamily_)
             fnt.setPointSizeFloat(self.fontSize_)
             fnt.setWeight(self.fontWeight_)
@@ -225,8 +227,8 @@ class MLabelObject(MReportObject):
             p.painter().setPen(self.foregroundColor_)
 
             restoreBg = False
-            oldBgMode = Qt.BGMode()
-            oldBgColor = Qt.QColor()
+            oldBgMode = QtGui.BGMode()
+            oldBgColor = QtGui.QColor()
             if not self.transparent_:
                 restoreBg = True
                 oldBgMode = p.painter().backgroundMode()
@@ -269,7 +271,7 @@ class MLabelObject(MReportObject):
         if self.pixmap_ and not self.pixmap_.isNull():
             return self.height_
 
-        fnt = Qt.QFont()
+        fnt = QtGui.QFont()
         fnt.setFamily(self.fontFamily_)
         fnt.setPointSizeFloat(self.fontSize_)
         fnt.setWeight(self.fontWeight_)
@@ -278,21 +280,21 @@ class MLabelObject(MReportObject):
 
         tf = 0
         if self.hAlignment_ == self.HAlignment.Left:
-            tf = Qt.QPainter.AlignLeft
+            tf = QtGui.QPainter.AlignLeft
         elif self.hAlignment_ == self.HAlignment.Center:
-            tf = Qt.QPainter.AlignHCenter
+            tf = QtGui.QPainter.AlignHCenter
         elif self.hAlignment_ == self.HAlignment.Right:
-            tf = Qt.QPainter.AlignRight
+            tf = QtGui.QPainter.AlignRight
 
         if self.vAlignment_ == self.VAlignment.Top:
-            tf = tf | Qt.QPainter.AlignTop
+            tf = tf | QtGui.QPainter.AlignTop
         elif self.vAlignment_ == self.VAlignment.Bottom:
-            tf = tf | Qt.QPainter.AlignBottom
+            tf = tf | QtGui.QPainter.AlignBottom
         elif self.vAlignment_ == self.VAlignment.Middle:
-            tf = tf | Qt.QPainter.AlignVCenter
+            tf = tf | QtGui.QPainter.AlignVCenter
 
         if self.wordWrap_:
-            tf = tf | Qt.QPainter.WordBreak
+            tf = tf | QtGui.QPainter.WordBreak
 
         maxRect = p.painter().boundingRect(0, 0, self.width_, self.height_, tf, self.text_)
         return maxRect.height() if maxRect.height() > self.height_ else self.height_
@@ -306,7 +308,7 @@ class MLabelObject(MReportObject):
                 p.painter().scale(float(self.width_) / float(self.pixmap_.width()),
                                   float(self.height_) / float(self.pixmap_.height()))
             else:
-                Qt.qWarning(
+                QtCore.qWarning(
                     "MLabelObject::drawPixmap : width and/or height are not valid")
                 return False
 
@@ -333,7 +335,7 @@ class MLabelObject(MReportObject):
 
         if mlo.pixmap_ and not mlo.pixmap_.isNull():
             if not self.pixmap_:
-                self.pixmap_ = Qt.QPixmap()
+                self.pixmap_ = QtGui.QPixmap()
             self.pixmap_ = mlo.pixmap_
 
         self.domNodeData_ = mlo.domNodeData_

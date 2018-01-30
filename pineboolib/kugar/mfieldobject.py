@@ -1,5 +1,7 @@
 from enum import Enum
 
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
@@ -36,23 +38,23 @@ class MFieldObject(MLabelObject):
             self.dataType_ = self.DataType.String
             self.format_ = MUtil.DateFormatType.MDY_SLASH
             self.precision_ = 0
-            self.currency_ = Qt.QChar(8364)
-            self.negativeValueColor_ = Qt.QColor().setRgb(255, 0, 0)
+            self.currency_ = QtCore.QChar(8364)
+            self.negativeValueColor_ = QtGui.QColor().setRgb(255, 0, 0)
             self.comma_ = 0
             self.blankZero_ = 0
             self.codbarType_ = FLCodBar.nameToType("code128")
             self.codbarRes_ = 72
-            self.saveColor_ = Qt.QColor().setRgb(0, 0, 0)
+            self.saveColor_ = QtGui.QColor().setRgb(0, 0, 0)
 
     @decorators.BetaImplementation
     def setText(self, txt):
-        d = Qt.QDate()
+        d = QtCore.QDate()
         ret = None
         month = None
         day = None
         year = None
         val = None
-        regexp = Qt.QRegExp(
+        regexp = QtCore.QRegExp(
             "[0-9][0-9](-|//)[0-9][0-9](-|//)[0-9][0-9][0-9][0-9]")
 
         if self.dataType_ == self.DataType.String:
@@ -65,7 +67,7 @@ class MFieldObject(MLabelObject):
         elif self.dataType_ == self.DataType.Integer:
             val = float(txt)
             if val < 0.5 and val > -0.5 and self.blankZero_:
-                self.text_ = Qt.QString("")
+                self.text_ = ""
             else:
                 self.text_ = round(val, 0)
                 self.formatNegValue()
@@ -74,7 +76,7 @@ class MFieldObject(MLabelObject):
         elif self.dataType_ == self.DataType.Float:
             val = float(txt)
             if val < 0.0000001 and val > -0.0000001 and self.blankZero_:
-                self.text_ = Qt.QString("")
+                self.text_ = ""
             else:
                 self.text_ = round(val, self.precision_)
                 self.formatNegValue()
@@ -82,7 +84,7 @@ class MFieldObject(MLabelObject):
                     self.formatCommas()
         elif self.dataType_ == self.DataType.Date:
             if not txt:
-                self.text_ = Qt.QString("")
+                self.text_ = ""
             else:
                 regexp.search(txt[0:])
                 ret = regexp.matchedLength()
@@ -96,13 +98,13 @@ class MFieldObject(MLabelObject):
                         d.setYMD(int(year), int(month), int(day))
                         self.text_ = MUtil.formatDate(d, self.format_)
                     else:
-                        self.text_ = Qt.QString("")
+                        self.text_ = ""
                 else:
                     self.text_ = txt
         elif self.dataType_ == self.DataType.Currency:
             val = float(txt)
             if val < 0.01 and val > -0.01 and self.blankZero_:
-                self.text_ = Qt.QString("")
+                self.text_ = ""
             else:
                 self.text_ = round(val, 2)
                 self.formatNegValue()
@@ -112,14 +114,14 @@ class MFieldObject(MLabelObject):
         elif self.dataType_ == self.DataType.Pixmap:
             if txt and not self.paintFunction_:
                 if not self.pixmap_:
-                    self.pixmap_ = Qt.QPixmap()
-                if Qt.QPixmapCache.find(txt[:100], self.pixmap_):
-                    if Qt.QFile.exists(txt):
+                    self.pixmap_ = QtGui.QPixmap()
+                if QtGui.QPixmapCache.find(txt[:100], self.pixmap_):
+                    if QtCore.QFile.exists(txt):
                         self.pixmap_.load(txt)
                     else:
                         self.pixmap_.loadFromData(txt)
                     if not self.pixmap_.isNull():
-                        Qt.QPixmapCache.insert(txt[:100], self.pixmap_)
+                        QtGui.QPixmapCache.insert(txt[:100], self.pixmap_)
                 if self.pixmap_.isNull():
                     self.pixmap_ = False
             else:
@@ -130,7 +132,7 @@ class MFieldObject(MLabelObject):
                 cb = FLCodBar(txt, self.codbarType_, 10, 1, 0, 0,
                               True, Qt.black, Qt.white, self.codbarRes_)
                 if not self.pixmap_:
-                    self.pixmap_ = Qt.QPixmap()
+                    self.pixmap_ = QtGui.QPixmap()
                 if not cb.pixmap().isNull():
                     self.pixmap_ = cb.pixmap()
                 else:
@@ -201,11 +203,11 @@ class MFieldObject(MLabelObject):
         j = 0
         while i >= offset:
             tmp = self.text_[i:(i + 1)] + tmp
-            j = j + 1
+            j += 1
             if j == 3 and (i - 1) >= offset:
                 tmp = "." + tmp
                 j = 0
-            i = i - 1
+            i -= 1
 
         if offset:
             tmp = "-" + tmp
@@ -267,7 +269,7 @@ class MFieldObject(MLabelObject):
     @decorators.BetaImplementation
     def setCurrency(self, c):
         if c is None or not c:
-            self.currency_ = Qt.QChar(8364)
+            self.currency_ = QtCore.QChar(8364)
         else:
             self.currency_ = c
 

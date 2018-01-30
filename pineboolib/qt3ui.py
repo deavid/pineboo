@@ -4,15 +4,14 @@ from builtins import str
 from binascii import unhexlify
 
 from lxml import etree
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib import flcontrols
 from pineboolib.fllegacy import FLTableDB
 from pineboolib.fllegacy import FLFieldDB
 
 import zlib
-from PyQt5.QtWidgets import QGroupBox
-from PyQt5.Qt import QPalette, QSpacerItem
+from PyQt5.Qt import QSpacerItem
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -46,6 +45,11 @@ def loadUi(path, widget, parent=None):
     for xmlwidget in root.xpath("widget"):
         loadWidget(xmlwidget, widget, parent)
 
+    # print("----------------------------------")
+    # for xmlwidget in root.xpath("actions"):
+    #     loadWidget(xmlwidget, widget, parent)
+    # print("----------------------------------")
+
     # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     formname = widget.objectName()
     if Options.DEBUG_LEVEL > 0:
@@ -63,13 +67,15 @@ def loadUi(path, widget, parent=None):
         sl_name = sl_name.replace("(bool)", "")
         sl_name = sl_name.replace("(const QString&)", "")
 
-        #print("SG_NAME", sg_name)
-        #print("SL_NAME", sl_name)
+        # print("SG_NAME", sg_name)
+        # print("SL_NAME", sl_name)
 
         if sender_name == formname:
             sender = widget
         else:
             sender = widget.findChild(QtWidgets.QWidget, sender_name)
+        if sender is None and hasattr(widget, "ui_") and sender_name in widget.ui_:
+            sender = widget.ui_[sender_name]
         receiver = None
         if sender is None:
             if Options.DEBUG_LEVEL > 50:
@@ -81,22 +87,27 @@ def loadUi(path, widget, parent=None):
                 print("Conectando de UI a QS: (%r.%r -> %r.%r)" %
                       (sender_name, signal_name, receiv_name, fn_name))
             # print dir(widget.iface)
-            if hasattr(widget.iface, fn_name):
+            ifx = widget
+            if hasattr(widget, "iface"):
+                ifx = widget.iface
+            if hasattr(ifx, fn_name):
                 try:
                     getattr(sender, sg_name).connect(
-                        getattr(widget.iface, fn_name))
+                        getattr(ifx, fn_name))
                 except Exception as e:
                     if Options.DEBUG_LEVEL > 50:
                         print("Error connecting:",
                               sender, signal_name,
                               receiver, slot_name,
-                              getattr(widget.iface, fn_name))
+                              getattr(ifx, fn_name))
                     if Options.DEBUG_LEVEL > 50:
                         print("Connect Error:", e.__class__.__name__, e)
                 continue
 
         if receiver is None:
             receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
+        if receiver is None and hasattr(widget, "ui_") and receiv_name in widget.ui_:
+            receiver = widget.ui_[receiv_name]
         if receiver is None:
             print("Connection receiver not found:", receiv_name)
         if sender is None or receiver is None:
@@ -125,7 +136,7 @@ def createWidget(classname, parent=None):
     return cls(parent)
 
 
-def loadWidget(xml, widget=None, parent=None):
+def loadWidget(xml, widget=None, parent=None, origWidget=None):
     translate_properties = {
         "caption": "windowTitle",
         "name": "objectName",
@@ -138,6 +149,10 @@ def loadWidget(xml, widget=None, parent=None):
         raise ValueError
     if parent is None:
         parent = widget
+    if origWidget is None:
+        origWidget = widget
+    if not hasattr(origWidget, "ui_"):
+        origWidget.ui_ = {}
 
     def process_property(xmlprop, widget=widget):
         pname = xmlprop.get("name")
@@ -170,7 +185,7 @@ def loadWidget(xml, widget=None, parent=None):
         elif pname == "margin":
             try:
                 value = loadVariant(xmlprop)
-            except:
+            except Exception:
                 value = 0
             value = QtCore.QMargins(value, value, value, value)
 
@@ -201,7 +216,8 @@ def loadWidget(xml, widget=None, parent=None):
                 process_property(c, widget.layout)
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
-                loadWidget(c, new_widget, parent)
+                loadWidget(c, new_widget, parent, origWidget)
+                origWidget.ui_[c.xpath("./property[@name='name']/cstring")[0].text] = new_widget
                 new_widget.show()
                 if mode == "box":
                     widget.layout.addWidget(new_widget)
@@ -245,6 +261,11 @@ def loadWidget(xml, widget=None, parent=None):
         widget.layout.setSpacing(1)
         widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
+    nwidget = None
+    if widget == origWidget:
+        nwidget = createWidget(xml.get("class"), parent=origWidget)
+        parent = nwidget
+
     layouts_pending_process = []
     properties = []
     unbold_fonts = []
@@ -265,7 +286,7 @@ def loadWidget(xml, widget=None, parent=None):
             widget.layout.setContentsMargins(3, 3, 3, 3)
 
             layouts_pending_process += [(c, "box")]
-            #process_layout_box(c, mode="box")
+            # process_layout_box(c, mode="box")
             continue
         if c.tag == "hbox":
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
@@ -278,7 +299,7 @@ def loadWidget(xml, widget=None, parent=None):
             widget.layout.setSpacing(3)
             widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "box")]
-            #process_layout_box(c, mode="box")
+            # process_layout_box(c, mode="box")
             continue
         if c.tag == "grid":
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
@@ -291,7 +312,7 @@ def loadWidget(xml, widget=None, parent=None):
             widget.layout.setSpacing(3)
             widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "grid")]
-            #process_layout_box(c, mode="grid")
+            # process_layout_box(c, mode="grid")
             continue
         if c.tag == "item":
             prop1 = {}
@@ -306,7 +327,7 @@ def loadWidget(xml, widget=None, parent=None):
             attrs = getattr(widget, "_attrs", None)
             if attrs is not None:
                 attrs[k] = v
-                #print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
+                # print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
             else:
                 print("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
                       (k, v), widget.__class__, repr(c.tag))
@@ -317,7 +338,8 @@ def loadWidget(xml, widget=None, parent=None):
             new_widget = createWidget(c.get("class"), parent=parent)
             new_widget.hide()
             new_widget._attrs = {}
-            loadWidget(c, new_widget, parent)
+            loadWidget(c, new_widget, parent, origWidget)
+            origWidget.ui_[c.xpath("./property[@name='name']/cstring")[0].text] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
             new_widget.show()
             if isinstance(widget, QtWidgets.QTabWidget):
@@ -350,6 +372,9 @@ def loadWidget(xml, widget=None, parent=None):
         f.setBold(False)
         f.setItalic(False)
         new_widget.setFont(f)
+
+    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
+        origWidget.ui_[origWidget.objectName()] = nwidget
 
 
 def loadIcon(xml):
@@ -450,7 +475,7 @@ def _loadVariant(variant):
         for c in variant:
             value = c.text.strip()
             bv = False
-            if not c.tag in ("family", "pointsize"):
+            if c.tag not in ("family", "pointsize"):
                 bv = b(value)
             try:
                 if c.tag == "bold":

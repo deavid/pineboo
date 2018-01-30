@@ -1,6 +1,6 @@
 from enum import Enum
 
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
 
 from pineboolib import decorators
 
@@ -33,7 +33,7 @@ class MSpecialObject(MLabelObject):
 
     @decorators.BetaImplementation
     def setText(self, d):
-        if isinstance(d, Qt.QDate):
+        if isinstance(d, QtCore.QDate):
             self.text_ = MUtil.formatDate(d, self.format_)
         else:
             self.text_.setNum(d)

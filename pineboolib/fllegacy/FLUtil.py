@@ -792,7 +792,7 @@ class FLUtil(ProjectClass):
 
     def readSettingEntry(self, key, def_=u"", ok=False):
         value = FLSettings().readEntry(key, def_, ok)
-        if value == None:
+        if value is None:
             value = def_
         return value
     """
@@ -1049,6 +1049,7 @@ class FLUtil(ProjectClass):
         pd_widget = QtWidgets.QProgressDialog(str(title), str(
             self.translate("scripts", "Cancelar")), 0, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
+        return pd_widget
 
     """
     Destruye el diálogo de progreso

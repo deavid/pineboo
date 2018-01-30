@@ -1,27 +1,28 @@
+from PyQt5 import QtWidgets
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QWidget
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 
-class MPageDisplay(ProjectClass, QWidget):
+class MPageDisplay(QWidget):
 
     @decorators.BetaImplementation
     def __init__(self, parent=0, name=0):
-        super(MPageDisplay, self).__init__(parent, name)
+        super(MPageDisplay, self).__init__(parent)
 
-        self.buffer_ = Qt.QPixmap()
-        self.buffer_.resize(1, 1)
+        self.buffer_ = QtGui.QPixmap()
+        self.buffer_ = self.buffer_.scaled(QtCore.QSize(1, 1))
 
-        self.bufferCopy_ = Qt.QPixmap()
-        self.bufferCopy_.resize(1, 1)
+        self.bufferCopy_ = QtGui.QPixmap()
+        self.bufferCopy_ = self.bufferCopy_.scaled(QtCore.QSize(1, 1))
 
     @decorators.BetaImplementation
     def setPage(self, image):
-        # self.buffer_.fill(Qt.white) #FIXME
-        self.buffer_.fill(self.white_)
-        p = Qt.QPainter(self.buffer_)
+        self.buffer_.fill(Qt.white)
+        p = QtGui.QPainter(self.buffer_)
         p.setClipRect(0, 0, self.buffer_.width(), self.buffer_.height())
         image.play(p)
         self.bufferCopy_ = self.buffer_
@@ -33,7 +34,7 @@ class MPageDisplay(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
     def setPageDimensions(self, size):
-        self.buffer_.resize(size)
+        self.buffer_ = self.buffer_.scaled(size)
         self.resize(size)
 
     @decorators.BetaImplementation
@@ -42,7 +43,7 @@ class MPageDisplay(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
     def sizePolicy(self):
-        return Qt.QSizePolicy(Qt.QSizePolicy.Fixed, Qt.QSizePolicy.Fixed)
+        return QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
     @decorators.BetaImplementation
     def zoomUp(self):
@@ -51,7 +52,7 @@ class MPageDisplay(ProjectClass, QWidget):
         height = self.buffer_.height() * 1.25
 
         if img and not img.isNull():
-            self.buffer_.resize(width, height)
+            self.buffer_ = self.buffer_.scaled(QtCore.QSize(width, height))
             self.resize(width, height)
             self.buffer_ = img.smoothScale(width, height)
 
@@ -62,6 +63,6 @@ class MPageDisplay(ProjectClass, QWidget):
         height = self.buffer_.height() / 1.25
 
         if img and not img.isNull():
-            self.buffer_.resize(width, height)
+            self.buffer_ = self.buffer_.scaled(QtCore.QSize(width, height))
             self.resize(width, height)
             self.buffer_ = img.smoothScale(width, height)

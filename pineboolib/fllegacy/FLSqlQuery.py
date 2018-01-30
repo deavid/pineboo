@@ -576,7 +576,7 @@ class FLSqlQuery(ProjectClass):
 
     def fieldMetaDataList(self):
         if not self.d.fieldMetaDataList_:
-            self.d.fieldMetaDataList_ = FLTableMetaData()
+            self.d.fieldMetaDataList_ = []
         table = None
         field = None
         for f in self.d.fieldList_:

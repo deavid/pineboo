@@ -1,3 +1,4 @@
+from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
@@ -20,19 +21,19 @@ class FLDiskCache(ProjectClass):
     def find(self, key, d):
         if isinstance(d, str):
             fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key
-            fi = Qt.QFile(fileCache)
+            fi = QtCore.QFile(fileCache)
             if not fi.open(Qt.IO_ReadOnly):
                 return False
-            t = Qt.QTextStream(fi)
+            t = QtCore.QTextStream(fi)
             d = t.read()
             fi.close()
             return d
         else:
             fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key + "-BIN"
-            fi = Qt.QFile(fileCache)
+            fi = QtCore.QFile(fileCache)
             if not fi.open(Qt.IO_ReadOnly):
                 return False
-            dat = Qt.QDataStream(fi)
+            dat = QtCore.QDataStream(fi)
             dat >> d
             fi.close()
             return d
@@ -41,30 +42,30 @@ class FLDiskCache(ProjectClass):
     def insert(self, key, d):
         if isinstance(d, str):
             fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key
-            fi = Qt.QFile(fileCache)
-            drc = Qt.QDir(self.AQ_DISKCACHE_DIRPATH)
+            fi = QtCore.QFile(fileCache)
+            drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
             if not drc.exists():
                 drc.mkdir(self.AQ_DISKCACHE_DIRPATH)
             elif fi.exists():
                 return True
             if d and d != "":
                 if fi.open(self.IO_WriteOnly):
-                    t = Qt.QTextStream(fi)
+                    t = QtCore.QTextStream(fi)
                     t << d
                     fi.close()
                     return True
             return False
         else:
             fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key + "-BIN"
-            fi = Qt.QFile(fileCache)
-            drc = Qt.QDir(self.AQ_DISKCACHE_DIRPATH)
+            fi = QtCore.QFile(fileCache)
+            drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
             if not drc.exists():
                 drc.mkdir(self.AQ_DISKCACHE_DIRPATH)
             elif fi.exists():
                 return True
             if not d.isEmpty():
                 if fi.open(self.IO_WriteOnly):
-                    dat = Qt.QDataStream(fi)
+                    dat = QtCore.QDataStream(fi)
                     dat << d
                     fi.close()
                     return True
@@ -72,31 +73,29 @@ class FLDiskCache(ProjectClass):
 
     @decorators.BetaImplementation
     def clear(self):
-        drc = Qt.QDir(self.AQ_DISKCACHE_DIRPATH)
+        drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
         if drc.exists():
             lst = drc.entryList("*; *.*")
-            it = lst.begin()
-            while it != lst.end():
+            for it in lst:
                 drc.remove(self.AQ_DISKCACHE_DIRPATH + '/' + it)
-                it = it + 1
 
     @decorators.BetaImplementation
     def absoluteFilePath(self, key):
         fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key
-        if not Qt.QFile.exists(fileCache):
+        if not QtCore.QFile.exists(fileCache):
             return ""
         return fileCache
 
     @decorators.BetaImplementation
     def aqSetAndCreateDirPath(self, path):
         self.AQ_DISKCACHE_DIRPATH = path
-        drc = Qt.QDir(self.AQ_DISKCACHE_DIRPATH)
+        drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
         if not drc.exists():
             drc.mkdir(self.AQ_DISKCACHE_DIRPATH)
 
     @decorators.BetaImplementation
     def init(self, app=0):
-        codec = Qt.QTextCodec.codecForLocale()
+        codec = QtCore.QTextCodec.codecForLocale()
         localEncode = codec.mimeName() if codec else ""
         if not app:
             self.aqSetAndCreateDirPath(AQ_USRHOME + '/.aqcache')
@@ -110,13 +109,11 @@ class FLDiskCache(ProjectClass):
             if localEncode and localEncode != "":
                 self.aqSetAndCreateDirPath(self.AQ_DISKCACHE_DIRPATH + '/' + localEncode)
 
-            drc = Qt.QDir(self.AQ_DISKCACHE_DIRPATH)
+            drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
             if drc.exists():
-                lst = drc.entryList("*.*", Qt.QDir.Files)
-                it = lst.begin()
-                while it != lst.end():
+                lst = drc.entryList("*.*", QtCore.QDir.Files)
+                for it in lst:
                     drc.remove(self.AQ_DISKCACHE_DIRPATH + '/' + str(it))
-                    it = it + 1
 
     AQ_DISKCACHE_INS = insert
     AQ_DISKCACHE_FIND = find
