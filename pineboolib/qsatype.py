@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import logging
 import os
 import fnmatch
 import weakref
@@ -292,6 +292,7 @@ class FormDBWidget(QtWidgets.QWidget):
     closed = QtCore.pyqtSignal()
     cursor_ = None
     parent_ = None
+    logger = logging.getLogger("qsatype.FormDBWidget")
 
     def __init__(self, action, project, parent=None):
         if not pineboolib.project._DGI.useDesktop():
@@ -310,8 +311,8 @@ class FormDBWidget(QtWidgets.QWidget):
             # timer = QtCore.QTimer(self)
             # timer.singleShot(250, self.init)
             self.init()
-        except Exception as e:
-            print("FormDBWidget.__init__:", e)
+        except Exception:
+            self.logger.exception("Error al inicializar la clase iface de QS:")
 
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
@@ -320,6 +321,11 @@ class FormDBWidget(QtWidgets.QWidget):
         return self.parent_
 
     def _class_init(self):
+        """Constructor de la clase QS (p.ej. interna(context))"""
+        pass
+
+    def init(self):
+        """Evento init del motor. Llama a interna_init en el QS"""
         pass
 
     def closeEvent(self, event):
