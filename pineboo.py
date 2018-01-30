@@ -25,7 +25,8 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 def version_check(modname, modver, minver):
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(modver) < version_normalize(minver):
-        logger.warn("La version de <%s> es %s. La mínima recomendada es %s.", modname, modver, minver)
+        logger.warn(
+            "La version de <%s> es %s. La mínima recomendada es %s.", modname, modver, minver)
 
 
 def version_normalize(v):
@@ -99,7 +100,8 @@ def translate_connstring(connstring):
         user_pass = user_pass.split(":") + [None, None, None]
         user, passwd, driver_alias = user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias
         if user_pass[3]:
-            raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
+            raise ValueError(
+                "La cadena de usuario debe tener el formato user:pass:driver.")
 
     if host_port:
         host_port = host_port.split(":") + [None]
@@ -173,7 +175,8 @@ def parse_options():
         log_format = '%(asctime)s - %(name)s:%(levelname)s: %(message)s'
 
     logging.basicConfig(format=log_format, level=options.loglevel)
-    logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s", options.loglevel, options.debug_level)
+    logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s",
+                 options.loglevel, options.debug_level)
 
     disable_loggers = [
         "PyQt5.uic.uiparser",
@@ -196,12 +199,14 @@ def load_dgi(name):
 
     dgi_entrypoint = getattr(dgi_pymodule, modname, None)
     if dgi_entrypoint is None:
-        raise ImportError("Fallo al cargar el punto de entrada al módulo DGI %s" % modpath)
+        raise ImportError(
+            "Fallo al cargar el punto de entrada al módulo DGI %s" % modpath)
 
     try:
         dgi = dgi_entrypoint()  # FIXME: Necesitamos ejecutar código dinámico tan pronto?
     except Exception:
-        logger.exception("Error inesperado al cargar el módulo DGI %s" % modpath)
+        logger.exception(
+            "Error inesperado al cargar el módulo DGI %s" % modpath)
         sys.exit(32)
 
     logger.info("DGI loaded: %s", name)
@@ -214,8 +219,8 @@ def create_app(DGI):
     from PyQt5 import QtGui, QtWidgets
     from pineboolib.utils import filedir
     import pineboolib
+    app = QtWidgets.QApplication(sys.argv)
     if DGI.localDesktop():
-        app = QtWidgets.QApplication(sys.argv)
 
         noto_fonts = [
             "NotoSans-BoldItalic.ttf",
@@ -232,12 +237,12 @@ def create_app(DGI):
         font.setItalic(False)
         QtWidgets.QApplication.setFont(font)
 
-        # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
+        # Es necesario importarlo a esta altura, QApplication tiene que ser
+        # construido antes que cualquier widget
         mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
             pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
     else:
         mainForm = DGI.mainForm()
-        app = QCoreApplication(sys.argv)
     # mainForm = getattr(module_, "MainForm")()
     # from pineboolib import mainForm
     return app, mainForm
@@ -271,7 +276,8 @@ def show_splashscreen(project):
     """Show a splashscreen to inform keep the user busy while Pineboo is warming up."""
     from PyQt5 import QtGui, QtCore, QtWidgets
     from pineboolib.utils import filedir
-    splash_pix = QtGui.QPixmap(filedir("../share/splashscreen/splash_%s.png" % project.dbname))
+    splash_pix = QtGui.QPixmap(
+        filedir("../share/splashscreen/splash_%s.png" % project.dbname))
     splash = QtWidgets.QSplashScreen(
         splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
@@ -461,8 +467,10 @@ def monkey_patch_connect():
     This is not stable and should be used with care
     """
     from PyQt5 import QtCore
-    logger.warn("--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
-    logger.warn("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
+    logger.warn(
+        "--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
+    logger.warn(
+        "... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
 
     class BoundSignal():
         _CONNECT = QtCore.pyqtBoundSignal.connect
@@ -480,13 +488,16 @@ def monkey_patch_connect():
                     # print("Calling slot: %r %r" % (slot, args))
                     ret = slot(*args)
                 except Exception:
-                    print("Unhandled exception in slot %r (%r): %r" % (slot, self, args))
+                    print("Unhandled exception in slot %r (%r): %r" %
+                          (slot, self, args))
                     print("-- Connection --")
                     print(traceback.format_list(connect_stack)[-2].rstrip())
-                    last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(selfid, None)
+                    last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(
+                        selfid, None)
                     if last_emit_stack:
                         print("-- Last signal emmitted --")
-                        print(traceback.format_list(last_emit_stack)[-2].rstrip())
+                        print(traceback.format_list(
+                            last_emit_stack)[-2].rstrip())
                     print("-- Slot traceback --")
                     print(traceback.format_exc())
                 return ret
@@ -503,7 +514,8 @@ def monkey_patch_connect():
             no_receiver_check is True to disable the check that the receiver's C++
             instance still exists when the signal is emitted.
             """
-            clname = getattr(getattr(slot, "__class__", {}), "__name__", "not a class")
+            clname = getattr(getattr(slot, "__class__", {}),
+                             "__name__", "not a class")
             # print("Connect: %s -> %s" % (type(self), slot))
             if clname == "method":
                 stack = traceback.extract_stack()

@@ -6,7 +6,7 @@ from pineboolib import decorators
 
 import pineboolib
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 
 from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
@@ -23,9 +23,13 @@ import traceback
 
 class parser(object):
     _mainForm = None
+    _queqe = {}
 
     def __init__(self, mainForm):
         self._mainForm = mainForm
+
+    def addQueqe(self, name, value):
+        self._queqe[name] = value
 
     @Request.application
     def receive(self, request):
@@ -42,7 +46,8 @@ class parser(object):
     def mainWindow(*args):
         if not args:
             return "needArguments"
-        obj_ = getattr(pineboolib.project.main_window, "json_%s" % args[0], None)
+        obj_ = getattr(pineboolib.project.main_window,
+                       "json_%s" % args[0], None)
         if obj_:
             return obj_(args)
         else:
@@ -60,12 +65,46 @@ class parser(object):
             print(traceback.format_exc())
             return "notFound"
 
+    @dispatcher.add_method
+    def queqe(*args):
+        if len(args) == 1:
+            if args[0] == "clean":
+                pineboolib.project._DGI._par._queqe = {}
+                return True
+            else:
+                return "notFound"
+
+        ret = pineboolib.project._DGI._par._queqe
+        pineboolib.project._DGI._par._queqe = {}
+        return ret
+
+    @dispatcher.add_method
+    def action(*args):
+        arguments = args
+        actionName = arguments[0]
+        control = arguments[1]
+        emite = arguments[2]
+        if actionName in pineboolib.project._DGI._WJS.keys():
+            ac = pineboolib.project._DGI._W[actionName]
+
+            cr = ac.child(control)
+            if cr:
+                em = getattr(cr, emite, None)
+                if em:
+                    getattr(cr, emite).emit()
+                    return True
+
+            return False
+
+        return "notFound"
+
 
 class dgi_jsonrpc(dgi_schema):
     _par = None
     _reject_widgets = []
     _W = {}
-    
+    _WJS = {}
+
     def __init__(self):
         # desktopEnabled y mlDefault a True
         super(dgi_jsonrpc, self).__init__()
@@ -75,20 +114,14 @@ class dgi_jsonrpc(dgi_schema):
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
         self.showInitBanner()
-        self.loadReferences()
         self._mainForm = None
-        self._reject_widgets =["QFrame"]
+        self._reject_widgets = ["QFrame", "QWidget"]
 
     def extraProjectInit(self):
         pass
 
     def setParameter(self, param):
         self._listenSocket = param
-
-    def loadReferences(self):
-        self.FLLineEdit = FLLineEdit
-        self.QPushButton = PushButton
-        self.QLineEdit = LineEdit
 
     def mainForm(self):
         if not self._mainForm:
@@ -104,45 +137,30 @@ class dgi_jsonrpc(dgi_schema):
         # print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         # WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
 
-    @decorators.NotImplementedWarn
-    def child(self, parent, name):
-        return self._W[parent._action.name]
-    
     @decorators.BetaImplementation
     def loadUI(self, path, widget):
+        print("*************Cargando UI", path, widget)
+        self._WJS[widget._action.name] = self.parserDGI.parse(path)
         self._W[widget._action.name] = widget
         """
         Convertir a .json el ui
         """
-    
 
-    @decorators.NotImplementedWarn
     def showWidget(self, widget):
-        print("Mostrando",widget)    
-    
-    
-    @decorators.NotImplementedWarn
-    def createWidget(self, classname, parent):
-        """
-        Carga un objecto del tipo classname y lo añade a self._W[widget._action.name]
-        """
-        
-        if classname not in self.reject_widgets():
-            print("%s acepted !!!!(%s)" % (classname, parent))
-            return self._W[widget._action.name].remote_widgets[classname]
-        else:
-            print("%s rejected !!!!" % classname)
-            return parent
-    
-    def reject_widgets(self):
-        return self._reject_widgets
+        self._par.addQueqe("showWidget", self._WJS[widget._action.name])
 
-class mainForm(object):
+    def loadReferences(self):
+        super(dgi_jsonrpc, self).loadReferences()
+        self.FLLineEdit = FLLineEdit
+
+
+class mainForm(QtWidgets.QMainWindow):
 
     mainWindow = None
     MainForm = None
 
     def __init__(self):
+        super(mainForm, self).__init__()
         self.mainWindow = json_mainWindow()
         self.MainForm = json_MainForm()
 
@@ -166,7 +184,7 @@ class mainForm(object):
             return False
 
 
-class json_mainWindow():
+class json_mainWindow(QtWidgets.QMainWindow):
     areas_ = {}
     modules_ = {}
     _actionsConnects = {}
@@ -175,6 +193,7 @@ class json_mainWindow():
     _images = {}
 
     def __init__(self):
+        super(json_mainWindow, self).__init__()
         self.areas_ = {}
         self.modules_ = {}
         self._actionsConnects = {}
@@ -185,6 +204,9 @@ class json_mainWindow():
     def load(self):
         pass
         # Aquí se genera el json con las acciones disponibles
+
+    def addFormTab(self, f):
+        pass
 
     def loadArea(self, area):
         self.areas_[area.idarea] = area.descripcion
@@ -228,7 +250,8 @@ class json_mainWindow():
         self._toolBarActions.append(name)
 
     def addToJson(self, xml):
-        _json = xml2json.data(fromstring(etree.tostring(xml, pretty_print=True)))
+        _json = xml2json.data(fromstring(
+            etree.tostring(xml, pretty_print=True)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 
@@ -288,50 +311,7 @@ class json_MainForm(object):
         pass
 
 
-"""
-class parser(object):
-    _mainForm = None
-
-    def __init__(self, mainForm):
-        self._mainForm = mainForm
-
-    def query(self, environ, start_response):
-        _received = environ["QUERY_STRING"]
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        print("JSON-RPC:INFO: Processing '%s' ..." % _received)
-        #if _received == "mainWindow":
-        #    return self._mainForm.mainWindow._json
-        #elif _received[0:7] == "action:":
-        #    try:
-        #        _action = _received[7:]
-        #        print("Loading action", _action)
-        #        self._mainForm.runAction(_action)
-        #
-        #
-        #        return "OK!"
-        #    except Exception:
-        #        print(traceback.format_exc())
-        retorno = self.proccess_rpc(_received)
-        print("_________>", retorno)
-        return retorno
-
-    def proccess_rpc(self, json_data):
-        return json_data
-
-"""
-
-
-class PushButton(object):
-    def __getattr__(self, name):
-        print("Pushbutton necesita", name)
-
-
-class LineEdit(object):
-    def __getattr__(self, name):
-        print("LineEdit necesita", name)
-
-
-class FLLineEdit(object):
+class FLLineEdit(QtWidgets.QLineEdit):
 
     _tipo = None
     _partDecimal = 0
@@ -341,14 +321,12 @@ class FLLineEdit(object):
     _name = None
     _longitudMax = None
     _parent = None
-    _name = None
+
     lostFocus = QtCore.pyqtSignal()
-    parentObj_ = None
 
     def __init__(self, parent, name=None):
-        if self.name:
-            self._name = name
-
+        super(FLLineEdit, self).__init__(parent)
+        self._name = name
         if isinstance(parent.fieldName_, str):
             self._fieldName = parent.fieldName_
             self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
@@ -358,21 +336,163 @@ class FLLineEdit(object):
             # self.textChanged.connect(self.controlFormato)
             self._parent = parent
 
-    # def __getattr__(self, name):
-    #     return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
     def controlFormato(self):
-        pass
+        texto = str(super(FLLineEdit, self).text())
+        denegarCambio_ = False
+        denegarCambioEnteros_ = False
+        cambiarComa_ = False
+        decimales_ = None
+        posComa_ = -1
 
-    # def setText(self, texto, b=True):
-    #     push(self, texto)
-    #
-    # def text(self):
-    #     return pull(self, "text")
+        if texto == "" or texto is None:
+            return
+        """
+        if self._tipo == "int" or self._tipo == "uint":
+            if not texto is None:
+                try:
+                    float(decimales_)
+                except:
+                        denegarCambio_ = True
 
-    """
-    Especifica un valor máximo para el text (numérico)
-    """
+            texto = texto.replace(",",".")
+            try:
+                posComa_ = texto.index(".")
+            except:
+                if posComa_ > -1:
+                    denegarCambio_ = True
 
-    def setMaxValue(self, value):
-        self._maxValue = value
+        """
+        if self._tipo == "string":
+            if len(texto) > int(self._longitudMax):
+                denegarCambio_ = True
+
+        if self._tipo == "double":
+
+            texto_old = texto
+            if (QtCore.QLocale().decimalPoint() == ","):
+                texto = texto.replace(".", ",")
+            else:
+                texto = texto.replace(",", ".")
+
+            if not texto_old == texto:
+                cambiarComa_ = True
+
+            try:
+                posComa_ = texto.index(".")
+                # print("Coma encontrada en pos", posComa_, denegarCambio_)
+            except Exception:
+                # print("Coma no encontrada", denegarCambio_)
+                pass
+
+            if posComa_ > -1:
+                decimales_ = texto[posComa_ + 1:]
+
+                if len(decimales_) > int(self._partDecimal):
+                    # print("Parte decimal (%s) se pasa de %s" % (decimales_ , self._partDecimal))
+                    denegarCambio_ = True
+
+            enteros_ = texto
+
+            if posComa_ > -1:
+                enteros_ = texto[:posComa_]
+
+            # print("enteros ...", enteros_)
+            if len(enteros_) > int(self._partInteger):
+                # print("Parte entera (%s) se pasa de %s" % (enteros_ , self._partInteger))
+                denegarCambioEnteros_ = True
+
+            # print("Decimales =", decimales_ , type(decimales_))
+            if decimales_ is not None:
+                try:
+                    float(decimales_)
+                except Exception:
+                    # print("Decimal esta mal", decimales_, len(decimales_))
+                    if len(decimales_) > 0:
+                        denegarCambio_ = True
+
+            # print("Enteros =", enteros_, type(enteros_))
+            try:
+                float(enteros_)
+            except Exception:
+                # print("Entero esta mal")
+                denegarCambioEnteros_ = True
+            # if not decimales_.isdecimal():
+                # denegarCambio_ = True
+
+            # if not enteros_.isdecimal():
+                # denegarCambioEnteros_ = True
+
+        # print("Procesado final", texto, denegarCambio_)
+
+        if denegarCambio_:
+            texto = texto[0:len(texto) - 1]
+            super(FLLineEdit, self).setText(texto)
+
+        if denegarCambioEnteros_ and decimales_ is not None:
+            texto = "%s%s%s" % (
+                enteros_[0:len(enteros_) - 1], QtCore.QLocale().decimalPoint(), decimales_)
+            super(FLLineEdit, self).setText(texto)
+        elif denegarCambioEnteros_ and decimales_ is None:
+            texto = enteros_[0:len(enteros_) - 1]
+            super(FLLineEdit, self).setText(texto)
+
+        if cambiarComa_:
+            super(FLLineEdit, self).setText(texto)
+
+    def setText(self, texto, b=True):
+        if self._maxValue:
+            if self._maxValue < int(texto):
+                texto = self._maxValue
+
+        texto = str(texto)
+
+        # Miramos si le falta digitos a la parte decimal ...
+        if self._tipo == "double" and len(texto) > 0:
+            if texto == "0":
+                d = 0
+                texto = "0."
+                while d < self._partDecimal:
+                    texto = texto + "0"
+                    d = d + 1
+
+            i = None
+            l = len(texto) - 1
+            try:
+                i = texto.index(".")
+            except Exception:
+                pass
+
+            if i:
+                # print("Posicion de . (%s) de %s en %s" % (i, l, texto))
+                f = (i + self._partDecimal) - l
+                # print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
+                while f > 0:
+                    texto = texto + "0"
+                    f = f - 1
+
+        super(FLLineEdit, self).setText(texto)
+        pineboolib.project._DGI._par.addQueqe(
+            "setText_%s" % self._fieldName, texto)
+        self.textChanged.emit(texto)
+
+    def text(self):
+        texto = str(super(FLLineEdit, self).text())
+
+        if texto is "":
+            texto = None
+
+        if texto is None:
+            if self._tipo == "string":
+                texto = ""
+
+            elif self._tipo == "double":
+                d = 0
+                texto = "0."
+                while d < self._partDecimal:
+                    texto = texto + "0"
+                    d = d + 1
+
+        return str(texto)

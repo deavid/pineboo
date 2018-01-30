@@ -298,8 +298,10 @@ class FormDBWidget(QtWidgets.QWidget):
             self._class_init()
             return
 
-        elif pineboolib.project._DGI.localDesktop():
-            super(FormDBWidget, self).__init__(parent)
+        if pineboolib.project._DGI.localDesktop():
+            self.remote_widgets = {}
+
+        super(FormDBWidget, self).__init__(parent)
 
         self._action = action
         self.cursor_ = None
@@ -340,36 +342,34 @@ class FormDBWidget(QtWidgets.QWidget):
             del self.iface
 
     def child(self, childName):
-        if pineboolib.project._DGI.localDesktop():
-            try:
-                parent = self
-                ret = None
-                while parent and not ret:
-                    ret = parent.findChild(QtWidgets.QWidget, childName)
-                    if not ret:
-                        parent = parent.parentWidget()
+        try:
+            parent = self
+            ret = None
+            while parent and not ret:
+                ret = parent.findChild(QtWidgets.QWidget, childName)
+                if not ret:
+                    parent = parent.parentWidget()
 
-            except RuntimeError as rte:
-                # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
-                # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
-                print("ERROR: Al buscar el control %r encontramos el error %r" %
-                      (childName, rte))
-                print_stack(8)
-                import gc
-                gc.collect()
-                print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
-                      (self, self._action.name, gc.get_referrers(self)))
-                if hasattr(self, 'iface'):
-                    print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (
-                        self.iface, gc.get_referrers(self.iface)))
-                ret = None
-            else:
-                if ret is None:
-                    qWarning("WARN: No se encontro el control %s" % childName)
+        except RuntimeError as rte:
+            # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
+            # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
+            print("ERROR: Al buscar el control %r encontramos el error %r" %
+                  (childName, rte))
+            print_stack(8)
+            import gc
+            gc.collect()
+            print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
+                  (self, self._action.name, gc.get_referrers(self)))
+            if hasattr(self, 'iface'):
+                print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (
+                    self.iface, gc.get_referrers(self.iface)))
+            ret = None
         else:
-            ret = pineboolib.project._DGI.child(self, childName)
+            if ret is None:
+                qWarning("WARN: No se encontro el control %s" % childName)
 
-        # Para inicializar los controles si se llaman desde qsa antes de mostrar el formulario.
+        # Para inicializar los controles si se llaman desde qsa antes de
+        # mostrar el formulario.
         if isinstance(ret, FLFieldDB_Legacy.FLFieldDB):
             if not ret.cursor():
                 ret.initCursor()
