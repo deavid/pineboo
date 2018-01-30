@@ -5,7 +5,7 @@ from PyQt5 import QtCore, QtWidgets
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLManager import FLManager
+# from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
@@ -499,6 +499,8 @@ class FLSqlDatabase():
     @decorators.BetaImplementation
     def manager(self):
         if not self.manager_:
+            from pineboolib.fllegacy.FLManager import FLManager
+
             self.manager_ = FLManager(self)
             self.manager_.init()
 
@@ -509,6 +511,8 @@ class FLSqlDatabase():
     @decorators.BetaImplementation
     def managerModules(self):
         if not self.manager_:
+            from pineboolib.fllegacy.FLManager import FLManager
+
             self.manager_ = FLManager(self)
             self.manager_.init()
 
