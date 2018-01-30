@@ -14,6 +14,10 @@ from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 from pineboolib.fllegacy.FLSqlConnections_deprecated import FLSqlConnections  # FIXME
 
 
+class FLDomNodeInterface():
+    pass
+
+
 class FLReportEngine(MReportEngine):
 
     class FLReportEnginePrivate(ProjectClass):
@@ -97,7 +101,8 @@ class FLReportEngine(MReportEngine):
                 i = len(self.qFieldList_) - 1
                 while i >= 0:
                     it = self.qFieldList_[i]
-                    fmtd = self.qFieldMtdList_.find(it.section('.', 1, 1).lower())
+                    fmtd = self.qFieldMtdList_.find(
+                        it.section('.', 1, 1).lower())
                     if fmtd:
                         if fmtd.type() == QtGui.QPixmap:
                             self.qImgFields_.append(i)
@@ -254,6 +259,7 @@ class FLReportEngine(MReportEngine):
                 dVal = float(sVal)
                 if not dVal:
                     dVal = 0
-                decimals = self.d_.qFieldMtdList_.find(it.section('.', 1, 1).lower()).partDecimal()
+                decimals = self.d_.qFieldMtdList_.find(
+                    it.section('.', 1, 1).lower()).partDecimal()
                 ita.setNodeValue(FLUtil.formatoMiles(round(dVal, decimals)))
         return pgs

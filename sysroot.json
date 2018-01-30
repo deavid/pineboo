@@ -35,7 +35,7 @@
                 "PyQt_PrintPreviewDialog", "PyQt_PrintPreviewWidget"
         ],
         "android#modules":              [
-                "QtCore", "QtGui", "QtNetwork", "QtPrintSupport", "QtWidgets",
+                "QtCore", "QtGui", "QtXml", "QtNetwork", "QtPrintSupport", "QtWidgets",
                 "QtAndroidExtras"
         ],
 
@@ -47,41 +47,25 @@
                 "PyQt_NotBootstrapped"
         ],
         "ios|macos#modules":            [
-                "QtCore", "QtGui", "QtNetwork", "QtPrintSupport", "QtWidgets",
+                "QtCore", "QtGui", "QtXml","QtNetwork", "QtPrintSupport", "QtWidgets",
                 "QtMacExtras"
         ],
 
         "linux#modules":                [
-                "QtCore", "QtGui", "QtNetwork", "QtPrintSupport", "QtWidgets",
+                "QtCore", "QtGui", "QtXml","QtNetwork", "QtPrintSupport", "QtWidgets",
                 "QtX11Extras"
         ],
 
         "win#disabled_features":        ["PyQt_Desktop_OpenGL"],
         "win#modules":                  [
-                "QtCore", "QtGui", "QtNetwork", "QtPrintSupport", "QtWidgets",
+                "QtCore", "QtGui", "QtXml","QtNetwork", "QtPrintSupport", "QtWidgets",
                 "QtWinExtras"
         ],
 
         "source":                   "PyQt5_*-5.*.tar.gz"
     },
 
-    "pyqt3d": {
-        "source":   "PyQt3D_*-5.*.tar.gz"
-    },
-
-    "pyqtchart": {
-        "source":   "PyQtChart_*-5.*.tar.gz"
-    },
-
     "pyqtdatavisualization": {
         "source":   "PyQtDataVisualization_*-5.*.tar.gz"
-    },
-
-    "pyqtpurchasing": {
-        "source":   "PyQtPurchasing_*-5.*.tar.gz"
-    },
-
-    "qscintilla": {
-        "source":   "QScintilla_*-2.*.tar.gz"
     }
 }

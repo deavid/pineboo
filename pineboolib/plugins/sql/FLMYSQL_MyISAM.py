@@ -1,14 +1,10 @@
 import sys
-from PyQt5.QtCore import QTime
-from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators
 from pineboolib.dbschema.schemaupdater import text2bool
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.utils import auto_qt_translate_text
 import traceback
 from PyQt5.Qt import qWarning, QApplication
-from PyQt5.QtWidgets import QMessageBox
 
 
 class FLMYSQL_MyISAM(object):
@@ -65,7 +61,7 @@ class FLMYSQL_MyISAM(object):
 
         s = None
 
-        if v == None:
+        if v is None:
             v = ""
         # TODO: psycopg2.mogrify ???
 
@@ -83,11 +79,11 @@ class FLMYSQL_MyISAM(object):
 
         else:
             v = auto_qt_translate_text(v)
-            if upper == True and type_ == "string":
+            if upper and type_ == "string":
                 v = v.upper()
 
             s = "'%s'" % v
-        #print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
+        # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
         return s
 
     def canOverPartition(self):
@@ -319,7 +315,7 @@ class FLMYSQL_MyISAM(object):
             self.setLastError(
                 "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
             qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (
-                n,  traceback.format_exc()))
+                n, traceback.format_exc()))
 
             return False
 
@@ -332,7 +328,7 @@ class FLMYSQL_MyISAM(object):
             return "::%s" % type_
 
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
-        if not curname in self.cursorsArray_.keys():
+        if curname not in self.cursorsArray_.keys():
             self.cursorsArray_[curname] = cursor
 
         sql = "SELECT %s FROM %s WHERE %s " % (fields, table, where)
@@ -372,7 +368,7 @@ class FLMYSQL_MyISAM(object):
         return ok
 
     def sqlCreateTable(self, tmd):
-        util = FLUtil()
+        # util = FLUtil()
         if not tmd:
             return None
 
@@ -432,13 +428,14 @@ class FLMYSQL_MyISAM(object):
                 sql = sql + "(%s)" % longitud
 
             if field.isPrimaryKey():
-                if primaryKey == None:
+                if primaryKey is None:
                     sql = sql + " PRIMARY KEY"
                 else:
                     qWarning(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
                              QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
                              field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
-                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, use FLCompoundKey para crear claves compuestas."))
+                             QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData,"
+                                             " use FLCompoundKey para crear claves compuestas."))
                     return None
             else:
                 if field.isUnique():

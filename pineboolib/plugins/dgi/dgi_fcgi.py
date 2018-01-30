@@ -2,11 +2,13 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from flup.server.fcgi import WSGIServer
+import traceback
+import sys
 
 dependences = []
 
 try:
-    import flup
+    import flup  # noqa
 except ImportError:
     print(traceback.format_exc())
     dependences.append("flup-py3")
@@ -66,7 +68,7 @@ class parser(object):
         try:
             import pineboolib.qsaglobals
             fn = eval(self._callScript, pineboolib.qsaglobals.__dict__)
-        except:
+        except Exception:
             print("No se encuentra la función buscada")
             print(self._callScript, environ["QUERY_STRING"])
             retorno_ = (

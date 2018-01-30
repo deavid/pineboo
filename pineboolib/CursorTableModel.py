@@ -1,20 +1,13 @@
 # # -*- coding: utf-8 -*-
 import math
-import random
-from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators
-from pineboolib.qsaglobals import ustr
-import pineboolib
 
 from pineboolib.utils import filedir
 
 from PyQt5 import QtCore, QtGui
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 import traceback
 
 import threading
-
+import logging
 import time
 import itertools
 
@@ -30,6 +23,7 @@ QAbstractTableModel_headerData = QtCore.QAbstractTableModel.headerData
 
 
 class CursorTableModel(QtCore.QAbstractTableModel):
+    logger = logging.getLogger("CursorTableModel")
     rows = 15
     cols = 5
     _cursor = None
@@ -44,7 +38,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
     def __init__(self, action, project, conn, *args):
         super(CursorTableModel, self).__init__(*args)
-        from pineboolib.qsaglobals import aqtt
 
         self._metadata = None
         self.rowsLoaded = 0
@@ -60,8 +53,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if action and action.table:
             try:
                 self._table = project.tables[action.table]
-            except:
-                #print("CursortableModel : Tabla %s no declarada en project.tables" % action.table)
+            except Exception as e:
+                self.logger.info("Tabla %s no declarada en project.tables", action.table)
                 self._table = None
                 return None
 
@@ -110,11 +103,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.fetchedRows = 0
         self._showPixmap = True
 
-        if self.USE_THREADS == True:
+        if self.USE_THREADS:
             self.threadFetcher = threading.Thread(target=self.threadFetch)
             self.threadFetcherStop = threading.Event()
 
-        if self.USE_TIMER == True:
+        if self.USE_TIMER:
             self.timer = QtCore.QTimer()
             self.timer.timeout.connect(self.updateRows)
             self.timer.start(1000)
@@ -125,12 +118,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def canFetchMore(self, index):
         return self.canFetchMore
         ret = self.rows > self.rowsLoaded
-        #print("canFetchMore: %r" % ret)
+        # print("canFetchMore: %r" % ret)
         return ret
 
     def data(self, index, role):
-        #print("Data ", index, role)
-        #print("Registros", self.rowCount())
+        # print("Data ", index, role)
+        # print("Registros", self.rowCount())
         # roles
         # 0 QtCore.Qt.DisplayRole
         # 1 QtCore.Qt.DecorationRole
@@ -165,7 +158,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return d
 
         if role == DisplayRole or role == EditRole:
-            #r = self._vdata[row]
+            # r = self._vdata[row]
             if _type == "bool":
                 if d in ("True", "1"):
                     d = "Sí"
@@ -183,9 +176,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if _type == "unlock":
 
                 if d in ("True", "1"):
-                    icon = QtGui.QIcon(filedir("icons", "unlock.png"))
+                    icon = QtGui.QIcon(filedir("../share/icons", "unlock.png"))
                 else:
-                    icon = QtGui.QIcon(filedir("icons", "lock.png"))
+                    icon = QtGui.QIcon(filedir("../share/icons", "lock.png"))
 
             if _type == "pixmap" and self._showPixmap:
                 pass
@@ -204,15 +197,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return d
 
         if role == QtCore.Qt.ForegroundRole:
-            if _type == "bool" and not d in ("True", "1"):
+            if _type == "bool" and d not in ("True", "1"):
                 d = QtGui.QBrush(QtCore.Qt.white)
             else:
                 d = None
 
             return d
 
-            #if row > self.rowsLoaded *0.95 - 200 and time.time() - self.lastFetch> 0.3: self.fetchMore(QtCore.QModelIndex())
-            #d = self._vdata[row*1000+col]
+            # if row > self.rowsLoaded *0.95 - 200 and time.time() - self.lastFetch> 0.3: self.fetchMore(QtCore.QModelIndex())
+            # d = self._vdata[row*1000+col]
             # if type(d) is str:
             #    d = QVariant(d)
             #    self._vdata[row*1000+col] = d
@@ -224,32 +217,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._showPixmap = show
 
     def threadFetch(self):
-        #ct = threading.current_thread()
-        #print("Thread: FETCH (INIT)")
+        # ct = threading.current_thread()
+        # print("Thread: FETCH (INIT)")
         if not self.metadata():
             return
 
-        tiempo_inicial = time.time()
-        #sql = """FETCH %d FROM %s""" % (2000,self._curname)
-        #conn = self._cursorConn.db()
         self.refreshFetch(2000, self._curname,
                           self.metadata().name(), self._cursor)
-        # try:
-        #    self._cursor.execute(sql)
-        # except Exception:
-        # conn.rollback()
-        #    print("CursorTableModel.threadFetch :: ERROR:" , traceback.format_exc())
-
-        tiempo_final = time.time()
-        if DEBUG:
-            if tiempo_final - tiempo_inicial > 0.2:
-                print("Thread: ", sql, "time: %.3fs" %
-                      (tiempo_final - tiempo_inicial))
 
     def updateRows(self):
-        if self.USE_THREADS == True:
+        if self.USE_THREADS:
             ROW_BATCH_COUNT = 200 if self.threadFetcher.is_alive() else 0
-        elif self.USE_TIMER == True:
+        elif self.USE_TIMER:
             ROW_BATCH_COUNT = 200 if self.timer.isActive() else 0
         else:
             return
@@ -266,14 +245,14 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(parent, fromrow, torow)
         self.rowsLoaded = torow + 1
         self.endInsertRows()
-        #print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        # print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         topLeft = self.index(fromrow, 0)
         bottomRight = self.index(torow, self.cols - 1)
         self.dataChanged.emit(topLeft, bottomRight)
 
     def fetchMore(self, index, tablename=None, where_filter=None):
         tiempo_inicial = time.time()
-        #ROW_BATCH_COUNT = min(200 + self.rowsLoaded // 10, 1000)
+        # ROW_BATCH_COUNT = min(200 + self.rowsLoaded // 10, 1000)
         ROW_BATCH_COUNT = 1000
 
         parent = index
@@ -283,20 +262,20 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if self.fetchedRows - ROW_BATCH_COUNT - 1 > torow:
             torow = self.fetchedRows - ROW_BATCH_COUNT - 1
 
-        #print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        # print("refrescando modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         if torow < fromrow:
             return
 
-        #print("QUERY:", sql)
+        # print("QUERY:", sql)
         if self.fetchedRows <= torow and self.canFetchMore:
 
-            if self.USE_THREADS == True and self.threadFetcher.is_alive():
+            if self.USE_THREADS and self.threadFetcher.is_alive():
                 self.threadFetcher.join()
 
-            if tablename == None:
+            if tablename is None:
                 tablename = self.metadata().name()
 
-            if where_filter == None:
+            if where_filter is None:
                 where_filter = self.where_filter
             c_all = self._prj.conn.driver().fetchAll(self._cursor, tablename, where_filter,
                                                      ", ".join(self.sql_fields), self._curname)
@@ -310,7 +289,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
             self.pendingRows = 0
             self.indexUpdateRowRange((from_rows, self.rows))
-            if self.USE_THREADS == True:
+            if self.USE_THREADS is True:
                 self.threadFetcher = threading.Thread(target=self.threadFetch)
                 self.threadFetcher.start()
 
@@ -334,7 +313,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.indexes_valid = True
         self.rowsLoaded = torow + 1
         self.endInsertRows()
-        #print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
+        # print("fin refresco modelo tabla %r , query %r, rows: %d %r" % (self._table.name, self._table.query_table, self.rows, (fromrow,torow)))
         topLeft = self.index(fromrow, 0)
         bottomRight = self.index(torow, self.cols - 1)
         self.dataChanged.emit(topLeft, bottomRight)
@@ -349,6 +328,33 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % (
                 self._table.name, self.rows, (fromrow, torow), tiempo_final - tiempo_inicial))
 
+    def _refresh_field_info(self, qry):
+        for n, field in enumerate(self.metadata().fieldList()):
+            # if field.visibleGrid():
+            #    sql_fields.append(field.name())
+            if field.isPrimaryKey():
+                self.pkpos.append(n)
+            if field.isCompoundKey():
+                self.ckpos.append(n)
+
+            if self._table.query_table:
+                found = False
+                for table in qry.tablesList():
+                    # print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
+                    if self._prj.conn.manager().metadata(table).field(field.name()):
+                        self.sql_fields.append("%s.%s" % (table, field.name()))
+                        found = True
+                        break
+                # Omito los campos que aparentemente no existen
+                if not found and not field.name() in self.sql_fields_omited:
+                    if self._prj.debugLevel > 50:
+                        print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (
+                            field.name(), self._table.name, qry.tablesList()))
+                    self.sql_fields_omited.append(field.name())
+
+            else:
+                self.sql_fields.append(field.name())
+
     def refresh(self):
         if not self._table:
             print("ERROR: CursorTableModel :: No hay tabla")
@@ -357,7 +363,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         parent = QtCore.QModelIndex()
         oldrows = self.rowsLoaded
         self.beginRemoveRows(parent, 0, oldrows)
-        if self.USE_THREADS == True:
+        if self.USE_THREADS is True:
             self.threadFetcherStop.set()
             if self.threadFetcher.is_alive():
                 self.threadFetcher.join()
@@ -382,7 +388,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 continue
             if not where_filter:
                 where_filter = wfilter
-            elif not wfilter in where_filter:
+            elif wfilter not in where_filter:
                 where_filter += " AND " + wfilter
         if not where_filter:
             where_filter = "1 = 1"
@@ -392,16 +398,16 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # for f in self.where_filters.keys():
         #    print("Filtro (%s).%s --> %s" % (self._action.table , f, self.where_filters[f]))
 
-        #print("Filtro final(%s) --> %s" % (self._action.table , self.where_filter))
+        # print("Filtro final(%s) --> %s" % (self._action.table , self.where_filter))
 
-        #print("Filtro", where_filter)
+        # print("Filtro", where_filter)
 
         self._cursor = self._cursorConn.cursor()
         # FIXME: Cuando la tabla es una query, aquí hay que hacer una subconsulta.
         # TODO: Convertir esto a un cursor de servidor (hasta 20.000 registros funciona bastante bien)
         # if self._table.query_table:
         # FIXME: Como no tenemos soporte para Queries, desactivamos el refresh.
-        #print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
+        # print("No hay soporte para CursorTableModel con Queries: name %r , query %r" % (self._table.name, self._table.query_table))
         # return
 
         if not self.metadata():
@@ -411,33 +417,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             qry = self._prj.conn.manager().query(self.metadata().query())
             from_ = qry.from_()
         else:
+            qry = None
             from_ = self.metadata().name()
 
-        for n, field in enumerate(self.metadata().fieldList()):
-            # if field.visibleGrid():
-            #    sql_fields.append(field.name())
-            if field.isPrimaryKey():
-                self.pkpos.append(n)
-            if field.isCompoundKey():
-                self.ckpos.append(n)
-
-            if self._table.query_table:
-                found = False
-                for table in qry.tablesList():
-                    #print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
-                    if self._prj.conn.manager().metadata(table).field(field.name()):
-                        self.sql_fields.append("%s.%s" % (table, field.name()))
-                        found = True
-                        break
-                # Omito los campos que aparentemente no existen
-                if not found and not field.name() in self.sql_fields_omited:
-                    if self._prj.debugLevel > 50:
-                        print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (
-                            field.name(), self._table.name, qry.tablesList()))
-                    self.sql_fields_omited.append(field.name())
-
-            else:
-                self.sql_fields.append(field.name())
+        self._refresh_field_info(qry)
 
         self._curname = "cur_" + self._table.name + \
             "_%08d" % (next(self.CURSOR_COUNT))
@@ -450,15 +433,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self.rows = 0
         self.canFetchMore = True
-        #print("rows:", self.rows)
+        # print("rows:", self.rows)
         self.pendingRows = 0
 
         self._column_hints = [120.0] * len(self.sql_fields)
-        #self.threadFetcher = threading.Thread(target=self.threadFetch)
-        #self.threadFetcherStop = threading.Event()
+        # self.threadFetcher = threading.Thread(target=self.threadFetch)
+        # self.threadFetcherStop = threading.Event()
         # self.threadFetcher.start()
         self.fetchMore(parent, self.metadata().name(), where_filter)
-        #print("%s:: rows: %s" % (self._curname, self.rows))
+        # print("%s:: rows: %s" % (self._curname, self.rows))
 
     def refreshFetch(self, number, curname, tablename, cursor):
         self._prj.conn.driver().refreshFetch(number, curname, tablename, cursor,
@@ -485,9 +468,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self.ckidx[key] = n + rowrange[0]
 
     def value(self, row, fieldName):
-        if row == None:
-            return None
-        if row < 0 or row >= self.rows:
+        if row is None or row < 0 or row >= self.rows:
             return None
         col = None
         if not self._table.query_table:
@@ -507,8 +488,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         type_ = self.metadata().field(fieldName).type()
 
         if type_ in ("serial", "uint", "int"):
-            if not campo in (None, "None"):
+            if campo not in (None, "None"):
                 campo = int(campo)
+            elif campo == "None":
+                self.logger.debug("Campo no deberia ser un string 'None'")
         """
         if self.metadata().field(fieldname).type() == "pixmap":
             q = FLSqlQuery()
@@ -522,26 +505,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return campo
         """
         return campo
-
-        """
-        value = None
-        if row < 0 or row >= self.rows: return value
-        try:
-            #col = self.sql_fields.index(fieldname)
-            col = self._prj.conn.manager.metadata(self._table.name).fieldIndex(fieldname)
-        except:
-            return value
-        if self.field_type[col] == 'pixmap':
-            campo = self._data[row][col]
-            cur = pineboolib.project.conn.cursor()
-            sql = "SELECT contenido FROM fllarge WHERE refkey ='%s'" % campo
-            cur.execute(sql)
-            for ret, in cur:
-                value = ret
-        else:
-            value = self._data[row][col]
-        return value
-        """
 
     def updateValuesDB(self, pKValue, dict_update):
         row = self.findPKRow([pKValue])
@@ -559,7 +522,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         typePK_ = self.metadata().field(self.metadata().primaryKey()).type()
         pKValue = self._prj.conn.manager().formatValue(typePK_, pKValue, False)
         # if typePK_ == "string" or typePK_ == "pixmap" or typePK_ == "stringlist" or typePK_ == "time" or typePK_ == "date":
-        #pKValue = str("'" + pKValue + "'")
+        # pKValue = str("'" + pKValue + "'")
 
         where_filter = "%s = %s" % (pkey_name, pKValue)
         update_set = []
@@ -567,18 +530,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         for key, value in dict_update.items():
             type_ = self.metadata().field(key).type()
             # if type_ == "string" or type_ == "pixmap" or type_ == "stringlist" or type_ == "time" or type_ == "date":
-            #value = str("'" + value + "'")
+            # value = str("'" + value + "'")
             if type_ in ("string", "stringlist"):
                 value = self._prj.conn.normalizeValue(value)
             value = self._prj.conn.manager().formatValue(type_, value, False)
 
-            #update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
+            # update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
             update_set.append("%s = %s" % (key, value))
 
         update_set_txt = ", ".join(update_set)
         sql = self._prj.conn.driver().queryUpdate(
             self.metadata().name(), update_set_txt, where_filter)
-        #print("MODIFYING SQL :: ", sql)
+        # print("MODIFYING SQL :: ", sql)
         try:
             self._cursor.execute(sql)
         except Exception:
@@ -593,16 +556,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 dict_update = dict(zip(returning_fields, orow))
                 self.setValuesDict(row, dict_update)
 
-        except:
-            pass
-
-    """
-    Asigna un valor una fila usando un diccionario
-    @param row. Columna afectada
-    @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
-    """
+        except Exception:
+            self.logger.exception("updateValuesDB: Error al assignar los valores de vuelta al buffer")
 
     def setValuesDict(self, row, update_dict):
+        """
+        Asigna un valor una fila usando un diccionario
+        @param row. Columna afectada
+        @param update_dict. array clave-valor indicando el listado de claves y valores a actualizar
+        """
 
         if DEBUG:
             print("CursorTableModel.setValuesDict(row %s) = %r" %
@@ -617,7 +579,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self._vdata[row] = r
             colsnotfound = []
             for fieldname, value in update_dict.items():
-                #col = self.metadata().indexPos(fieldname)
+                # col = self.metadata().indexPos(fieldname)
                 try:
                     col = self.sql_fields.index(fieldname)
                     self._data[row][col] = value
@@ -657,15 +619,16 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         valores = None
         for b in buffer.fieldsList():
             value = None
-            if buffer.value(b.name) == None:
+            if buffer.value(b.name) is None:
                 value = cursor.metadata().field(b.name).defaultValue()
             else:
                 value = buffer.value(b.name)
 
-            if not value == None: # si el campo se rellena o hay valor default
-                if b.type_ in ("string","stringlist") and isinstance(value, str):
+            if value is not None:  # si el campo se rellena o hay valor default
+                if b.type_ in ("string", "stringlist") and isinstance(value, str):
+
                     value = self._prj.conn.normalizeValue(value)
-                    
+
                 value = self._prj.conn.manager().formatValue(b.type_, value, False)
                 if not campos:
                     campos = b.name
@@ -676,7 +639,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (
                 buffer.cursor_.d.curName_, campos, valores)
-            #conn = self._cursorConn.db()
+            # conn = self._cursorConn.db()
             try:
                 # print(sql)
                 self._cursor.execute(sql)
@@ -697,7 +660,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         tableName = self.metadata().name()
         sql = "DELETE FROM %s WHERE %s = %s" % (tableName, pKName, self._prj.conn.manager(
         ).formatValue(typePK, self.value(cursor.d._currentregister, pKName), False))
-        #conn = self._cursorConn.db()
+        # conn = self._cursorConn.db()
         try:
             self._cursor.execute(sql)
         except Exception:

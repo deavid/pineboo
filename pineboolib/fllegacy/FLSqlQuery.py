@@ -1,6 +1,6 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import pineboolib
 import traceback
@@ -25,7 +25,7 @@ class FLSqlQuery(ProjectClass):
 
         self.d = FLSqlQueryPrivate(name)
         self.d.db_ = self._prj.conn.useConn(connection_name)
-            
+
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
         self._posicion = None
@@ -49,7 +49,7 @@ class FLSqlQuery(ProjectClass):
             del self._datos
             self._cursor.close()
             del self._cursor
-        except:
+        except Exception:
             pass
 
         self.countRefQuery = self.countRefQuery - 1
@@ -57,8 +57,9 @@ class FLSqlQuery(ProjectClass):
     """
     Ejecuta la consulta
     """
-    def exec(self, sql = None):
-        if self.invalidTablesList == True:
+
+    def exec_(self, sql=None):
+        if self.invalidTablesList:
             return False
 
         if not sql:
@@ -68,7 +69,7 @@ class FLSqlQuery(ProjectClass):
             return False
 
         """
-        En algunas consultas va con ';' , esto lo limpio 
+        En algunas consultas va con ';' , esto lo limpio
         """
         sql = sql.replace(";", "")
 
@@ -79,14 +80,16 @@ class FLSqlQuery(ProjectClass):
             micursor.execute(sql)
             self._cursor = micursor
         except Exception:
-        
+
             print(traceback.format_exc())
             # conn.rollback()
             return False
+        # conn.commit()
 
-        #conn.commit()
-        return True 
-    
+        return True
+
+    exec = exec_  # FIXME: En python no se puede llamar una variable "exec".
+
     @classmethod
     def __damecursor(self):
         if getattr(self.d, "db_", None):
@@ -110,10 +113,9 @@ class FLSqlQuery(ProjectClass):
         if self._datos:
             pass
         else:
-            self._datos=self._cursor.fetchall()
-    
-    
-    def exec_(self, conn = None, sql = None):
+            self._datos = self._cursor.fetchall()
+
+    def exec_(self, conn=None, sql=None):
         if conn:
             self.d.db_ = conn
         return self.exec(sql)
@@ -215,8 +217,8 @@ class FLSqlQuery(ProjectClass):
             s = s.replace(" ", "")
             s = s.split(sep)
 
-        #self.d.select_ = s.strip_whitespace()
-        #self.d.select_ = self.d.select_.simplifyWhiteSpace()
+        # self.d.select_ = s.strip_whitespace()
+        # self.d.select_ = self.d.select_.simplifyWhiteSpace()
 
         if not isinstance(s, list) and not "*" == s:
             self.d.fieldList_.clear()
@@ -224,7 +226,7 @@ class FLSqlQuery(ProjectClass):
 
             return
 
-        #fieldListAux = s.split(sep)
+        # fieldListAux = s.split(sep)
         # for f in s:
         #    f = str(f).strip()
 
@@ -236,7 +238,7 @@ class FLSqlQuery(ProjectClass):
             try:
                 table = f[:f.index(".")]
                 field = f[f.index(".") + 1:]
-            except:
+            except Exception:
                 pass
 
             if field == "*":
@@ -260,8 +262,8 @@ class FLSqlQuery(ProjectClass):
 
     def setFrom(self, f):
         self.d.from_ = f
-        #self.d.from_ = f.strip_whitespace()
-        #self.d.from_ = self.d.from_.simplifyWhiteSpace()
+        # self.d.from_ = f.strip_whitespace()
+        # self.d.from_ = self.d.from_.simplifyWhiteSpace()
 
     """
     Para establecer la parte WHERE de la sentencia SQL de la consulta.
@@ -272,8 +274,8 @@ class FLSqlQuery(ProjectClass):
 
     def setWhere(self, w):
         self.d.where_ = w
-        #self.d.where_ = w.strip_whitespace()
-        #self.d.where_ = self.d.where_.simplifyWhiteSpace()
+        # self.d.where_ = w.strip_whitespace()
+        # self.d.where_ = self.d.where_.simplifyWhiteSpace()
 
     """
     Para establecer la parte ORDER BY de la sentencia SQL de la consulta.
@@ -284,8 +286,8 @@ class FLSqlQuery(ProjectClass):
 
     def setOrderBy(self, w):
         self.d.orderBy_ = w
-        #self.d.orderBy_ = w.strip_whitespace()
-        #self.d.orderBy_ = self.d.orderBy_.simplifyWhiteSpace()
+        # self.d.orderBy_ = w.strip_whitespace()
+        # self.d.orderBy_ = self.d.orderBy_.simplifyWhiteSpace()
 
     """
     Para obtener la sentencia completa SQL de la consulta.
@@ -337,7 +339,6 @@ class FLSqlQuery(ProjectClass):
                 v = pD.value()
 
                 if not v:
-                    ok = True
                     v = QtWidgets.QInputDialog.getText(
                         QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD.alias(), None, None)
 
@@ -453,10 +454,12 @@ class FLSqlQuery(ProjectClass):
 
             try:
                 retorno = self._row[pos]
-            except:
+            except Exception:
                 retorno = None
 
-            if not type(retorno) in (str, int, bool, float, datetime.date) and not retorno == None:
+            if isinstance(retorno, datetime.time):
+                retorno = str(retorno)[:8]
+            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, datetime.date)):
                 print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" %
                       (name, type(retorno), retorno))
                 retorno = float(retorno)
@@ -475,7 +478,7 @@ class FLSqlQuery(ProjectClass):
 
     def isNull(self, n):
         i = self.self.fieldNameToPos(n)
-        return (self._row[i] == None)
+        return (self._row[i] is None)
 
     """
     Devuelve el nombre de campo, dada su posicion en la consulta.
@@ -682,7 +685,7 @@ class FLSqlQuery(ProjectClass):
         else:
             try:
                 self._row = self._cursor.fetchone()
-                if self._row == None:
+                if self._row is None:
                     return False
                 else:
                     return True
@@ -714,11 +717,11 @@ class FLSqlQuery(ProjectClass):
         else:
             try:
                 self._row = self._cursor.fetchone()
-                if self._row == None:
+                if self._row is None:
                     return False
                 else:
                     return True
-            except:
+            except Exception:
                 return False
 
     def last(self):

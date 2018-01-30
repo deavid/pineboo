@@ -3,12 +3,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib.flcontrols import ProjectClass
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLAccessControl import FLAccessControl
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
+import pineboolib
 from PyQt5.Qt import qApp
 
 try:
@@ -25,7 +25,7 @@ class FLAccessControlFactory(ProjectClass):
 
     @decorators.BetaImplementation
     def create(self, type_):
-        if type_ == None:
+        if type_ is None:
             return False
 
         if type_ == "mainwindow":
@@ -74,7 +74,7 @@ class FLAccessControlMainWindow(FLAccessControl):
 
     @decorators.BetaImplementation
     def processObject(self, obj):
-        mv = QMainWindow(obj)
+        mw = QtGui.QMainWindow(obj)
         if not mw or not self.acosPerms_:
             return
 
@@ -93,7 +93,7 @@ class FLAccessControlMainWindow(FLAccessControl):
 
             del l
 
-        it = Qtcore.QdictIterator(self.acosPerms_)
+        it = QtCore.QDictIterator(self.acosPerms_)
         for i in range(len(it.current())):
             a = mw.child(it.currentKey(), "QAction")
             if a:
@@ -116,21 +116,22 @@ class FLAccessControlForm(FLAccessControl):
     @decorators.BetaImplementation
     def __init__(self):
         super(FLAccessControlForm, self).__init__()
-        self.pal = QtGui.QPalette()
-        #cg = QtGui.QPalette()
-        bg = QtGui.QColor(qApp.palette().color(
-            QtGui.QPalette.Active, QtGui.QPalette.Background))
-        #cg.setColor(QtGui.QPalette.Foreground, bg)
-        #cg.setColor(QtGui.QPalette.Text, bg)
-        #cg.setColor(QtGui.QPalette.ButtonText, bg)
-        #cg.setColor(QtGui.QPalette.Base, bg)
-        #cg.setColor(QtGui.QPalette.Background, bg)
-        #self.pal.setColor(QtGui.QPalette.Disabled, cg)
-        self.pal.setColor(QtGui.QPalette.Foreground, bg)
-        self.pal.setColor(QtGui.QPalette.Text, bg)
-        self.pal.setColor(QtGui.QPalette.ButtonText, bg)
-        self.pal.setColor(QtGui.QPalette.Base, bg)
-        self.pal.setColor(QtGui.QPalette.Background, bg)
+        if pineboolib.project._DGI.localDesktop():
+            self.pal = QtGui.QPalette()
+            # cg = QtGui.QPalette()
+            bg = QtGui.QColor(qApp.palette().color(
+                QtGui.QPalette.Active, QtGui.QPalette.Background))
+            # cg.setColor(QtGui.QPalette.Foreground, bg)
+            # cg.setColor(QtGui.QPalette.Text, bg)
+            # cg.setColor(QtGui.QPalette.ButtonText, bg)
+            # cg.setColor(QtGui.QPalette.Base, bg)
+            # cg.setColor(QtGui.QPalette.Background, bg)
+            # self.pal.setColor(QtGui.QPalette.Disabled, cg)
+            self.pal.setColor(QtGui.QPalette.Foreground, bg)
+            self.pal.setColor(QtGui.QPalette.Text, bg)
+            self.pal.setColor(QtGui.QPalette.ButtonText, bg)
+            self.pal.setColor(QtGui.QPalette.Base, bg)
+            self.pal.setColor(QtGui.QPalette.Background, bg)
     """
   @return El tipo del que se encarga; "form".
     """

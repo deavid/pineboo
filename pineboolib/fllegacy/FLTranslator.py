@@ -44,7 +44,7 @@ class FLTranslator(QTranslator):
         else:
             tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %
                              (self._prj.conn.database(), self.idM_, self.idM_, self.lang_, key))
-        #qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
+        # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         qmFile = "%s.qm" % tsFile
 
         if os.path.exists(qmFile):

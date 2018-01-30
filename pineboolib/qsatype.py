@@ -2,38 +2,34 @@
 
 import os
 import fnmatch
-import re
-import datetime
 import weakref
-from lxml import etree
-from io import StringIO
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QDomDocument as FLDomDocument, QTabWidget, QTextEdit
+from PyQt5.Qt import QTabWidget, QTextEdit
 
-# Cargar toda la API de Qt para que sea visible.
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtCore import QIODevice
+from PyQt5.QtCore import QIODevice, qWarning, QTextStream
 
-from pineboolib import qsaglobals
-from pineboolib import flcontrols
 from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
-from pineboolib.flcontrols import FLTable, QLineEdit
+from pineboolib.flcontrols import FLTable
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLFieldDB as FLFieldDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
-from pineboolib.fllegacy import AQObjects 
+from pineboolib.fllegacy import AQObjects
+import pineboolib
 
 from pineboolib.utils import filedir
 
 from pineboolib import decorators
 import traceback
 from PyQt5.Qt import QWidget
-from sys import stderr
+
+# Cargar toda la API de Qt para que sea visible.
+from PyQt5.QtGui import *  # noqa
+from PyQt5.QtCore import *  # noqa
+from PyQt5.QtXml import QDomDocument
 
 
 class StructMyDict(dict):
@@ -120,8 +116,8 @@ class Array(object):
 
     def __setitem__(self, key, value):
         # if isinstance(key, int):
-            #key = str(key)
-        if not key in self.names_:
+        #   key = str(key)
+        if key not in self.names_:
             self.names_.append(key)
 
         self.dict_[key] = value
@@ -130,7 +126,7 @@ class Array(object):
         if isinstance(key, int):
             return self.dict_[self.names_[key]]
         else:
-            #print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
+            # print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
             return self.dict_[key]
 
     def __getattr__(self, k):
@@ -148,7 +144,8 @@ class Array(object):
         return len_
 
 
-def Boolean(x=False): return bool(x)
+def Boolean(x=False):
+    return bool(x)
 
 
 def FLSqlQuery(*args):
@@ -165,13 +162,16 @@ def FLUtil(*args):
 def AQUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
 
+
 def AQSql(*args):
     return AQObjects.AQSql(*args)
 
-def FLSqlCursor(action = None, cN = None):
+
+def FLSqlCursor(action=None, cN=None):
     if action is None:
         return None
     return FLSqlCursor_Legacy.FLSqlCursor(action, True, cN)
+
 
 def FLTableDB(*args):
     if not args:
@@ -180,6 +180,7 @@ def FLTableDB(*args):
 
 
 FLListViewItem = QtWidgets.QListView
+FLDomDocument = QDomDocument
 QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor
@@ -200,16 +201,16 @@ def FLReportViewer():
 
 """
 class FLDomDocument(object):
-    
+
     parser = None
     tree = None
     root_ = None
     string_ = None
-    
+
     def __init__(self):
         self.parser = etree.XMLParser(recover=True, encoding='utf-8')
         self.string_ = None
-        
+
 
     def setContent(self, value):
         try:
@@ -221,7 +222,7 @@ class FLDomDocument(object):
             return True
         except:
             return False
-        
+
     def namedItem(self, name):
         return u"<%s" % name in self.string_
 
@@ -288,28 +289,29 @@ def check_gc_referrers(typename, w_obj, name):
 
 
 class FormDBWidget(QtWidgets.QWidget):
-
     closed = QtCore.pyqtSignal()
     cursor_ = None
     parent_ = None
-    
-    def __init__(self, action, project, parent = None):
-        if not action.prj._DGI.useDesktop():
+
+    def __init__(self, action, project, parent=None):
+        if not pineboolib.project._DGI.useDesktop():
             self._class_init()
             return
 
-        super(FormDBWidget, self).__init__(parent)
+        elif pineboolib.project._DGI.localDesktop():
+            super(FormDBWidget, self).__init__(parent)
+
         self._action = action
         self.cursor_ = None
         self.parent_ = parent
-        #self.cursor_ = FLSqlCursor(action.name)
         self._prj = project
         try:
             self._class_init()
-            timer = QtCore.QTimer(self)
-            timer.singleShot(250, self.init)
-        except:
-            pass
+            # timer = QtCore.QTimer(self)
+            # timer.singleShot(250, self.init)
+            self.iface.init()
+        except Exception as e:
+            print("FormDBWidget.__init__:", e)
 
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
@@ -325,44 +327,47 @@ class FormDBWidget(QtWidgets.QWidget):
         print("FormDBWidget: closeEvent para accion %r" % self._action.name)
         check_gc_referrers("FormDBWidget:" + self.__class__.__name__,
                            weakref.ref(self), self._action.name)
-        if hasattr(self, 'iface'):
-            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
-                               weakref.ref(self.iface), self._action.name)
-            del self.iface.ctx
-            del self.iface
-
         if can_exit:
             self.closed.emit()
             event.accept()  # let the window close
         else:
             event.ignore()
 
-    def child(self, childName):
-        try:
-            parent = self
-            ret = None
-            while parent and not ret:
-                ret = parent.findChild(QtWidgets.QWidget, childName)
-                if not ret:
-                    parent = parent.parentWidget()
+        if hasattr(self, 'iface'):
+            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
+                               weakref.ref(self.iface), self._action.name)
+            del self.iface.ctx
+            del self.iface
 
-        except RuntimeError as rte:
-            # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
-            # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
-            print("ERROR: Al buscar el control %r encontramos el error %r" %
-                  (childName, rte))
-            print_stack(8)
-            import gc
-            gc.collect()
-            print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
-                  (self, self._action.name, gc.get_referrers(self)))
-            if hasattr(self, 'iface'):
-                print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (
-                    self.iface, gc.get_referrers(self.iface)))
-            ret = None
+    def child(self, childName):
+        if pineboolib.project._DGI.localDesktop():
+            try:
+                parent = self
+                ret = None
+                while parent and not ret:
+                    ret = parent.findChild(QtWidgets.QWidget, childName)
+                    if not ret:
+                        parent = parent.parentWidget()
+
+            except RuntimeError as rte:
+                # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
+                # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
+                print("ERROR: Al buscar el control %r encontramos el error %r" %
+                      (childName, rte))
+                print_stack(8)
+                import gc
+                gc.collect()
+                print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
+                      (self, self._action.name, gc.get_referrers(self)))
+                if hasattr(self, 'iface'):
+                    print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (
+                        self.iface, gc.get_referrers(self.iface)))
+                ret = None
+            else:
+                if ret is None:
+                    qWarning("WARN: No se encontro el control %s" % childName)
         else:
-            if ret is None:
-                qWarning("WARN: No se encontro el control %s" % childName)
+            ret = pineboolib.project._DGI.child(self, childName)
 
         # Para inicializar los controles si se llaman desde qsa antes de mostrar el formulario.
         if isinstance(ret, FLFieldDB_Legacy.FLFieldDB):
@@ -389,9 +394,8 @@ class FormDBWidget(QtWidgets.QWidget):
         parent = self
 
         while not cursor and parent:
-            parent = parent.parent()
+            parent = parent.parentWidget()
             cursor = getattr(parent, "cursor_", None)
-
         if cursor:
             self.cursor_ = cursor
         else:
@@ -420,7 +424,7 @@ class FormDBWidget(QtWidgets.QWidget):
 def FLFormSearchDB(name):
     widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
     widget.setWindowModality(QtCore.Qt.ApplicationModal)
-    widget.load()
+    # widget.load()
     widget.cursor_.setContext(widget.iface)
     return widget
 
@@ -721,14 +725,14 @@ class Dir_Class(object):
         self.home = filedir("..")
 
     def entryList(self, patron, type_=None):
-        p = os.walk(self.path_)
+        # p = os.walk(self.path_)
         retorno = []
         try:
             for file in os.listdir(self.path_):
                 if fnmatch.fnmatch(file, patron):
                     retorno.append(file)
-        except:
-            pass
+        except Exception as e:
+            print("Dir_Class.entryList:", e)
 
         return retorno
 
@@ -775,6 +779,16 @@ class File(QtCore.QFile):
         return in_.readAll()
 
     def write(self, text):
-        #encodig = text.property("encoding")
-        out_ = QTextStream(self)
-        out_ << text
+        raise NotImplementedError(
+            "File:: out_ << text not a valid Python operator")
+        # encoding = text.property("encoding")
+        # out_ = QTextStream(self)
+        # out_ << text
+
+
+class QString(str):
+    def mid(self, start, length=None):
+        if length is not None:
+            return self[start:]
+        else:
+            return self[start:start + length]

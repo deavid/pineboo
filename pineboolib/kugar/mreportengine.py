@@ -1,6 +1,8 @@
 import math
 from enum import Enum
 from datetime import datetime
+import sys
+import math
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
@@ -35,6 +37,9 @@ from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 # from pineboolib.fllegacy.AQOdsStyle import AQOdsStyle
 # from pineboolib.fllegacy.AQOdsImage import AQOdsImage
 # from pineboolib.fllegacy.AQOdsCentimeters import AQOdsCentimeters
+AQOdsGenerator = AQOdsSpreadSheet = AQOdsSheet = None  # FIXME
+AQOdsRow = AQOdsColor = AQOdsStyle = None  # FIXME
+AQOdsImage = AQOdsCentimeters = QPrinter = None  # FIXME
 
 
 class MReportEngine(QObject):
@@ -1007,7 +1012,8 @@ class MReportEngine(QObject):
         if self.rHeader_.getHeight() == 0:
             return
 
-        if (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and self.currPage_ == 1) or (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        if (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
+                self.currPage_ == 1) or (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
             self.rHeader_.setPageNumber(self.currPage_)
             self.rHeader_.setReportDate(self.currDate_)
             sectionHeight = self.rHeader_.getHeight()
@@ -1023,7 +1029,8 @@ class MReportEngine(QObject):
         if (self.currY_ + self.pHeader_.getHeight()) > self.currHeight_:
             self.newPage(pages)
 
-        if (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and self.currPage_ == 1) or (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        if (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
+                self.currPage_ == 1) or (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
             self.pHeader_.setPageNumber(self.currPage_)
             self.pHeader_.setReportDate(self.currDate_)
             sectionHeight = self.pHeader_.getHeight()
@@ -1041,7 +1048,8 @@ class MReportEngine(QObject):
 
         self.pFooter_.setCalcFieldData()
 
-        if (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.FirstPage and self.currPage_ == 1) or (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        if (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
+                self.currPage_ == 1) or (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
             self.pFooter_.setPageNumber(self.currPage_)
             self.pFooter_.setReportDate(self.currDate_)
             sectionHeight = self.pFooter_.getHeight()
@@ -1519,7 +1527,8 @@ class MReportEngine(QObject):
         if (self.currY_ + self.rFooter_.getHeight()) > self.currHeight_:
             self.newPage(pages)
 
-        if self.rFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage or self.rFooter_.printFrequency() == MReportSection.PrintFrequency.LastPage:
+        if self.rFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage or \
+                self.rFooter_.printFrequency() == MReportSection.PrintFrequency.LastPage:
             self.rFooter_.setCalcFieldData(self.grandTotal_)
 
             self.rFooter_.setPageNumber(self.currPage_)
@@ -1611,8 +1620,8 @@ class MReportEngine(QObject):
         children = report.childNodes()
         childCount = len(children)
 
-        for j in range(childCount):
-            child = children.item(j)
+        for i in range(childCount):
+            child = children.item(i)
 
             if child.nodeType() == QtXml.QDomNode.NodeType.ElementNode:
                 if child.nodeName() == "Line":
@@ -1695,16 +1704,15 @@ class MReportEngine(QObject):
         if not cols:
             cols = "1"
 
-        width = math.ceil(
-            (self.pageWidth_ - self.rightMargin_ - self.leftMargin_) / float(cols)
-        )
+        width = math.ceil((self.pageWidth_ - self.rightMargin_ -
+                           self.leftMargin_) / float(cols))
         section.setWidth(width)
 
         children = report.childNodes()
         childCount = len(children)
 
-        for j in range(childCount):
-            child = children.item(j)
+        for i in range(childCount):
+            child = children.item(i)
 
             if child.nodeType() == QtXml.QDomNode.NodeType.ElementNode:
                 if child.nodeName() == "Line":

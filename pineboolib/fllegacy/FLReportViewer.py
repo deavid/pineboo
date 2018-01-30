@@ -16,12 +16,15 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
+AQ_USRHOME = "."  # FIXME
 
 
 class FLReportViewer(QtWidgets.QWidget):
 
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=0):
-        pParam = 0 if parent and embedInParent else 0 | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | 0 | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
+        pParam = 0 if parent and embedInParent else 0
+        pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
+        pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
 
         super(FLReportViewer, self).__init__(parent, pParam)
 
@@ -94,6 +97,11 @@ class FLReportViewer(QtWidgets.QWidget):
                 # "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
+
+    @decorators.NotImplementedWarn
+    def setName(self, name):
+        # Emulacion, este código no funciona:
+        self.name = name
 
     @decorators.BetaImplementation
     def rptViewer(self):

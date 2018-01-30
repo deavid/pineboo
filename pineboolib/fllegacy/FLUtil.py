@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-#from PyQt4.QtCore import QString
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import qApp
+from PyQt5 import QtCore, QtWidgets
 import pineboolib
 from pineboolib.utils import DefFun
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -39,7 +36,8 @@ class FLUtil(ProjectClass):
     @author InfoSiAL S.L.
     """
 
-    def __getattr__(self, name): return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
     """
     Obtiene la parte entera de un número.
 
@@ -610,7 +608,7 @@ class FLUtil(ProjectClass):
             q.setWhere(where)
             q.setOrderBy(name + " DESC")
 
-            if not q.exec():
+            if not q.exec():  # FIXME: "exec" es palabra reservada en Python
                 return None
 
             maxRange = 10 ** _len
@@ -630,7 +628,7 @@ class FLUtil(ProjectClass):
                     relleno = cadena.rjust(_len - len(cadena), '0')
                     cadena = relleno + cadena
 
-                #res = serie + cadena
+                # res = serie + cadena
                 return cadena
 
             return None
@@ -651,7 +649,7 @@ class FLUtil(ProjectClass):
     @author Andrés Otón Urbano
     """
     @decorators.NotImplementedWarn
-    def nextSequence(self,  nivel, secuencia, ultimo):
+    def nextSequence(self, nivel, secuencia, ultimo):
         pass
 
     """
@@ -835,7 +833,7 @@ class FLUtil(ProjectClass):
     """
 
     def writeDBSettingEntry(self, key, value):
-        result = False
+        # result = False
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
         cursor = pineboolib.project.conn.cursor()
@@ -868,7 +866,7 @@ class FLUtil(ProjectClass):
 
     def roundFieldValue(self, n, table, field):
 
-        #tmd = self._prj.conn.manager().metadata(table)
+        # tmd = self._prj.conn.manager().metadata(table)
         tmd = pineboolib.project.conn.manager().metadata(table)
         if not tmd:
             return 0
@@ -897,7 +895,7 @@ class FLUtil(ProjectClass):
 
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
 
-        if w == None or w == "":
+        if w is None or w == "":
             return False
 
         q = FLSqlQuery(None, connName)
@@ -910,7 +908,7 @@ class FLUtil(ProjectClass):
         q.setFrom(f)
         q.setWhere(w)
         # q.setForwardOnly(True)
-        if not q.exec():
+        if not q.exec():  # FIXME: exec es palabra reservada
             return False
 
         if q.next():
@@ -928,13 +926,16 @@ class FLUtil(ProjectClass):
     """
     @decorators.BetaImplementation
     def quickSqlSelect(self, f, s, w, connName="default"):
-        from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
         if not w:
             sql = "select " + s + " from " + f
         else:
             sql = "select " + s + " from " + f + " where " + w
-        q = FLSqlQuery(sql, FLSqlConnections().database(connName).db())
-        return q.value(0) if q.next() else False
+
+        q = FLSqlQuery(None, connName)
+        if not q.exec_(None, sql):
+            return False
+
+        return q.value(0) if q.first() else False
 
     """
     Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
@@ -947,6 +948,7 @@ class FLUtil(ProjectClass):
     """
 
     def sqlInsert(self, t, fL, vL, connName="default"):
+        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
         fL = fL.split(",")
         vL = vL.split(",")
@@ -960,7 +962,7 @@ class FLUtil(ProjectClass):
 
         i = 0
         for f in fL:
-            if vL[i] == None:
+            if vL[i] is None:
                 c.bufferSetNull(f)
             else:
                 c.setValueBuffer(f, vL[i])
@@ -1272,8 +1274,3 @@ class FLUtil(ProjectClass):
     @decorators.NotImplementedWarn
     def savePixmap(self, data, filename, format_):
         pass
-
-
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLSettings import FLSettings

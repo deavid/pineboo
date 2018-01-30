@@ -1,5 +1,5 @@
-from builtins import str
-from builtins import object
+# from builtins import str
+# from builtins import object
 debug = 0
 
 
@@ -103,7 +103,7 @@ class cBaseList(cBase):
 
         try:
             ctype, csubtype = child.type
-        except:
+        except Exception:
             raise NameError(
                 "Base Class doesn't have `type` atribute or is incorrect.")
         if not hasattr(self.byType, ctype):
@@ -118,7 +118,7 @@ class cBaseList(cBase):
         if ctype == "Declaration":
             try:
                 cname = child.name
-            except:
+            except Exception:
                 raise NameError(
                     "Declaration Class doesn't have `name` atribute.")
 
@@ -130,7 +130,7 @@ class cBaseList(cBase):
                 self.byDefName[cname] = child
         try:
             child.addCodeDepth()
-        except:
+        except Exception:
             print(repr(child))
             raise NameError("Base Class doesn't have `addCodeDepth` function.")
 
@@ -285,7 +285,7 @@ class cFuncDecl(cBaseDecl):
         cBase.addCodeDepth(self)
         try:
             self.source.addCodeDepth()
-        except:
+        except Exception:
             import traceback
             import sys
             print("Exception in user code:")
@@ -321,7 +321,7 @@ class cClassDecl(cBaseDecl):
         cBase.addCodeDepth(self)
         try:
             self.source.addCodeDepth()
-        except:
+        except Exception:
             import traceback
             import sys
             print("Exception in user code:")

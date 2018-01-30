@@ -249,11 +249,19 @@ class FLManagerModules(ProjectClass):
     """
 
     def createUI(self, n, connector=None, parent=None, name=None):
-
-        if not ".ui" in n:
-            n = n + ".ui"
+        if ".ui" not in n:
+            n += ".ui"
         form_path = parent.prj.path(n)
+        if form_path is None:
+            raise AttributeError("File %r not found in project" % n)
         qt3ui.loadUi(form_path, parent.widget)
+
+    """
+    Llama al método load de los FLTableDB de un widget
+    @param w Widget que contiene los FLTableDB
+    """
+    def loadFLTableDBs(self, w):
+        qt3ui.loadFLTableDBs(w)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
@@ -450,12 +458,12 @@ class FLManagerModules(ProjectClass):
 
         self.listAllIdModules_ = []
         self.listAllIdModules_.append("sys")
-
         self.dictInfoMods = {}
 
         q = FLSqlQuery(None, self._prj.conn.dbAux())
         q.setForwardOnly(True)
-        q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion FROM flmodules left join flareas on flmodules.idarea = flareas.idarea")
+        q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion "
+                "FROM flmodules left join flareas on flmodules.idarea = flareas.idarea")
 
         sysModuleFound = False
         while q.next():

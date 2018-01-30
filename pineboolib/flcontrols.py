@@ -4,7 +4,7 @@
 from PyQt5 import QtCore, QtWidgets, QtGui  # , QtGui, QtWidgets, uic
 
 import pineboolib
-#from pineboolib.qsaglobals import ustr
+# from pineboolib.qsaglobals import ustr
 from pineboolib.utils import DefFun
 from pineboolib import decorators
 
@@ -45,7 +45,8 @@ class ProjectClass(QtCore.QObject):
 
 
 class QCheckBox(QtWidgets.QCheckBox):
-    def __getattr__(self, name): return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
     @QtCore.pyqtProperty(int)
     def checked(self):
@@ -82,10 +83,12 @@ class QLabel(QtWidgets.QLabel):
 
 
 class QComboBox(QtWidgets.QComboBox):
-    def __getattr__(self, name): return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
     @QtCore.pyqtProperty(str)
-    def currentItem(self): return self.currentIndex
+    def currentItem(self):
+        return self.currentIndex
 
     @currentItem.setter
     def currentItem(self, i):
@@ -97,10 +100,12 @@ class QComboBox(QtWidgets.QComboBox):
 
 
 class QButtonGroup(QtWidgets.QGroupBox):
-    def __getattr__(self, name): return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
     @property
-    def selectedId(self): return 0
+    def selectedId(self):
+        return 0
 
 
 class ProgressDialog(QtWidgets.QWidget):
@@ -110,7 +115,8 @@ class ProgressDialog(QtWidgets.QWidget):
         self.step = 0
         self.steps = 100
 
-    def __getattr__(self, name): return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
     def setup(self, title, steps):
         self.title = title
@@ -130,20 +136,21 @@ class ProgressDialog(QtWidgets.QWidget):
 
 
 class FLTable(QtWidgets.QTableWidget):
-    def __getattr__(self, name): return DefFun(self, name)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
 
 class QTabWidget(QtWidgets.QTabWidget):
 
     def setTabEnabled(self, tab, enabled):
-        #print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
+        # print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
         if isinstance(tab, int):
             return QtWidgets.QTabWidget.setTabEnabled(self, tab, enabled)
         if isinstance(tab, str):
             """
             tabs = [ str(QtWidgets.QTabWidget.tabText(self, i)).lower().replace("&","") for i in range(self.count()) ]
             try:
-                idx = tabs.index(tab.lower())              
+                idx = tabs.index(tab.lower())
                 return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
             """
             try:
@@ -152,11 +159,9 @@ class QTabWidget(QtWidgets.QTabWidget):
                         return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
 
             except ValueError:
-                print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (
-                    tab, enabled), tabs)
+                print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
                 return False
-        print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (
-            tab, enabled))
+        print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
 
 
 class QTable(QtWidgets.QTableWidget):
@@ -188,7 +193,7 @@ class QTable(QtWidgets.QTableWidget):
         self.setRowCount(n)
 
     def setReadOnly(self, b):
-        if b == True:
+        if b:
             self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         else:
             self.setEditTriggers(QtWidgets.QAbstractItemView.EditTriggers)
@@ -214,7 +219,7 @@ class QTable(QtWidgets.QTableWidget):
         return self.item(row, col).text()
 
     def setText(self, linea, col, value):
-        #self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
+        # self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
         self.setItem(linea, col, QtWidgets.QTableWidgetItem(str(value)))
 
     @decorators.NotImplementedWarn

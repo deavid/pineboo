@@ -4,7 +4,6 @@ from PyQt5 import QtCore
 
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
-from pineboolib.utils import filedir
 
 
 class FLSettings(ProjectClass):
@@ -24,16 +23,16 @@ class FLSettings(ProjectClass):
         ret = self.s.value(_key, None)  # devuelve un QVariant !!!!
 
         if "geo" in _key:
-            #print("Geo vale", str(ret))
-            #ret = ret.toSize()
-            #print("Geo vale", str(ret))
+            # print("Geo vale", str(ret))
+            # ret = ret.toSize()
+            # print("Geo vale", str(ret))
             if not ret:
                 ret = _def
         else:
             if str(ret) == "":
                 ret = _def
 
-        #print("Retornando %s ---> %s" % (_key, ret))
+        # print("Retornando %s ---> %s" % (_key, ret))
         return ret
 
     @decorators.BetaImplementation
@@ -50,7 +49,7 @@ class FLSettings(ProjectClass):
         ret = self.s.value(key)
         if isinstance(ret, str):
             ret = ret == "true"
-        if ret == None:
+        if ret is None:
             ret = _def
 
         return ret

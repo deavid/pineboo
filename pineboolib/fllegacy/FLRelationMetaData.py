@@ -8,7 +8,7 @@ from pineboolib import decorators
 class FLRelationMetaData():
 
     """
-    Constantes de tipos de cardinalidades de una relacion 
+    Constantes de tipos de cardinalidades de una relacion
     """
 
     RELATION_1M = "1M"

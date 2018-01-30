@@ -4,6 +4,8 @@ from PyQt5.QtCore import Qt
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 
+AQ_USRHOME = "."  # FIXME
+
 
 class FLDiskCache(ProjectClass):
 
@@ -100,14 +102,16 @@ class FLDiskCache(ProjectClass):
         if not app:
             self.aqSetAndCreateDirPath(AQ_USRHOME + '/.aqcache')
             if localEncode and localEncode != "":
-                self.aqSetAndCreateDirPath(self.AQ_DISKCACHE_DIRPATH + '/' + localEncode)
+                self.aqSetAndCreateDirPath(
+                    self.AQ_DISKCACHE_DIRPATH + '/' + localEncode)
         else:
             dbName = app.db().database()
             if app.db().driverName() == "FLsqlite":
                 dbName.replace(self.AQ_DISKCACHE_DIRPATH, "")
             self.aqSetAndCreateDirPath(AQ_USRHOME + '/.aqcache/' + dbName)
             if localEncode and localEncode != "":
-                self.aqSetAndCreateDirPath(self.AQ_DISKCACHE_DIRPATH + '/' + localEncode)
+                self.aqSetAndCreateDirPath(
+                    self.AQ_DISKCACHE_DIRPATH + '/' + localEncode)
 
             drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
             if drc.exists():
