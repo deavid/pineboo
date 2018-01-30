@@ -181,7 +181,8 @@ class FLAccessControlForm(FLAccessControl):
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
-                    w.setPalette(self.pal)
+                    if pineboolib.project._DGI.localDesktop():
+                        w.setPalette(self.pal)
                     w.setDisabled(True)
                     w.hide()
                     continue

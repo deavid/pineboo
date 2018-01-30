@@ -50,8 +50,8 @@ def loadUi(path, widget, parent=None):
     if pineboolib.project._DGI.localDesktop():
         widget.hide()
 
-        for xmlimage in root.xpath("images/image"):
-            loadIcon(xmlimage)
+    for xmlimage in root.xpath("images/image"):
+        loadIcon(xmlimage)
 
     for xmlwidget in root.xpath("widget"):
         loadWidget(xmlwidget, widget, parent)
@@ -141,20 +141,17 @@ def loadUi(path, widget, parent=None):
 
 
 def createWidget(classname, parent=None):
-    if pineboolib.project._DGI.localDesktop():
-        cls = getattr(flcontrols, classname, None) or \
-            getattr(QtWidgets, classname, None) or \
-            getattr(FLTableDB, classname, None) or \
-            getattr(FLFieldDB, classname, None)
-        if cls is None:
-            print("WARN: Class name not found in QtWidgets:", classname)
-            widgt = QtWidgets.QWidget(parent)
-            widgt.setStyleSheet("* { background-color: #fa3; } ")
-            return widgt
+    cls = getattr(flcontrols, classname, None) or \
+        getattr(QtWidgets, classname, None) or \
+        getattr(FLTableDB, classname, None) or \
+        getattr(FLFieldDB, classname, None)
+    if cls is None:
+        print("WARN: Class name not found in QtWidgets:", classname)
+        widgt = QtWidgets.QWidget(parent)
+        widgt.setStyleSheet("* { background-color: #fa3; } ")
+        return widgt
 
-        return cls(parent)
-    else:
-        return pineboolib.project._DGI.createWidget(classname, parent)
+    return cls(parent)
 
 
 def loadWidget(xml, widget=None, parent=None, origWidget=None):
@@ -172,7 +169,10 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         parent = widget
     if origWidget is None:
         origWidget = widget
-    if not hasattr(origWidget, "ui_"):
+    if pineboolib.project._DGI.localDesktop():
+        if not hasattr(origWidget, "ui_"):
+            origWidget.ui_ = {}
+    else:
         origWidget.ui_ = {}
 
     def process_property(xmlprop, widget=widget):
@@ -180,26 +180,21 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if pname in translate_properties:
             pname = translate_properties[pname]
         setpname = "set" + pname[0].upper() + pname[1:]
-        if pineboolib.project._DGI.localDesktop():
-            if pname == "layoutSpacing":
-                set_fn = widget.layout.setSpacing
-            elif pname == "margin":
-                set_fn = widget.setContentsMargins
-            elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
-                set_fn = widget.setStyleSheet
-            else:
-                set_fn = getattr(widget, setpname, None)
+        if pname == "layoutSpacing":
+            set_fn = widget.layout.setSpacing
+        elif pname == "margin":
+            set_fn = widget.setContentsMargins
+        elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
+            set_fn = widget.setStyleSheet
         else:
             set_fn = getattr(widget, setpname, None)
 
         if set_fn is None:
-            ld = pineboolib.project._DGI.localDesktop()
-            rw = pineboolib.project._DGI.reject_widgets()
-            if (not ld and type(widget) not in rw) or ld:
-                if Options.DEBUG_LEVEL > 50:
-                    print("qt3ui: Missing property", pname,
-                          " for %r" % widget.__class__)
-                    return
+
+            if Options.DEBUG_LEVEL > 50:
+                print("qt3ui: Missing property", pname,
+                      " for %r" % widget.__class__)
+                return
         # print "Found property", pname
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
@@ -257,44 +252,42 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     if pineboolib.project._DGI.localDesktop():
                         widget.layout.addWidget(new_widget, row, col)
             elif c.tag == "spacer":
-                if pineboolib.project._DGI.localDesktop():
-                    sH = None
-                    sV = None
-                    hPolicy = QtWidgets.QSizePolicy.Fixed
-                    vPolicy = QtWidgets.QSizePolicy.Fixed
-                    orient_ = None
-                    policy_ = None
+                sH = None
+                sV = None
+                hPolicy = QtWidgets.QSizePolicy.Fixed
+                vPolicy = QtWidgets.QSizePolicy.Fixed
+                orient_ = None
+                policy_ = None
 
-                    for p in c.xpath("property"):
-                        pname, value = loadProperty(p)
-                        if pname == "sizeHint":
-                            sH = value.width()
-                            sV = value.height()
-                        elif pname == "orientation":
-                            if value == 0:
-                                orient_ = 0
-                            else:
-                                orient_ = 1
-                        elif pname == "sizeType":
-                            policy_ = QtWidgets.QSizePolicy.Policy(value)
+                for p in c.xpath("property"):
+                    pname, value = loadProperty(p)
+                    if pname == "sizeHint":
+                        sH = value.width()
+                        sV = value.height()
+                    elif pname == "orientation":
+                        if value == 0:
+                            orient_ = 0
+                        else:
+                            orient_ = 1
+                    elif pname == "sizeType":
+                        policy_ = QtWidgets.QSizePolicy.Policy(value)
 
-                    if orient_ == 0:
-                        vPolicy = policy_
-                    else:
-                        hPolicy = policy_
-
-                    new_spacer = QSpacerItem(sH, sV, hPolicy, vPolicy)
-                    widget.layout.addItem(new_spacer)
-
+                if orient_ == 0:
+                    vPolicy = policy_
                 else:
-                    if Options.DEBUG_LEVEL > 50:
-                        print("qt3ui: Unknown layout xml tag", repr(c.tag))
+                    hPolicy = policy_
 
-        if pineboolib.project._DGI.localDesktop():
-            widget.setLayout(widget.layout)
-            widget.layout.setContentsMargins(1, 1, 1, 1)
-            widget.layout.setSpacing(1)
-            widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+                new_spacer = QSpacerItem(sH, sV, hPolicy, vPolicy)
+                widget.layout.addItem(new_spacer)
+
+            else:
+                if Options.DEBUG_LEVEL > 50:
+                    print("qt3ui: Unknown layout xml tag", repr(c.tag))
+
+        widget.setLayout(widget.layout)
+        widget.layout.setContentsMargins(1, 1, 1, 1)
+        widget.layout.setSpacing(1)
+        widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
     nwidget = None
     if widget == origWidget:
@@ -315,13 +308,13 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     print("qt3ui: Trying to replace layout. Ignoring.",
                           repr(c.tag), widget.layout)
                 continue
-            if pineboolib.project._DGI.localDesktop():
-                widget.layout = QtWidgets.QVBoxLayout()
-                widget.layout.setSizeConstraint(
-                    QtWidgets.QLayout.SetMinAndMaxSize
-                )
-                widget.layout.setSpacing(3)
-                widget.layout.setContentsMargins(3, 3, 3, 3)
+
+            widget.layout = QtWidgets.QVBoxLayout()
+            widget.layout.setSizeConstraint(
+                QtWidgets.QLayout.SetMinAndMaxSize
+            )
+            widget.layout.setSpacing(3)
+            widget.layout.setContentsMargins(3, 3, 3, 3)
 
             layouts_pending_process += [(c, "box")]
             # process_layout_box(c, mode="box")
@@ -332,13 +325,13 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     print("qt3ui: Trying to replace layout. Ignoring.",
                           repr(c.tag), widget.layout)
                 continue
-            if pineboolib.project._DGI.localDesktop():
-                widget.layout = QtWidgets.QHBoxLayout()
-                widget.layout.setSizeConstraint(
-                    QtWidgets.QLayout.SetMinAndMaxSize
-                )
-                widget.layout.setSpacing(3)
-                widget.layout.setContentsMargins(3, 3, 3, 3)
+
+            widget.layout = QtWidgets.QHBoxLayout()
+            widget.layout.setSizeConstraint(
+                QtWidgets.QLayout.SetMinAndMaxSize
+            )
+            widget.layout.setSpacing(3)
+            widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "box")]
             # process_layout_box(c, mode="box")
             continue
@@ -348,13 +341,13 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     print("qt3ui: Trying to replace layout. Ignoring.",
                           repr(c.tag), widget.layout)
                 continue
-            if pineboolib.project._DGI.localDesktop():
-                widget.layout = QtWidgets.QGridLayout()
-                widget.layout.setSizeConstraint(
-                    QtWidgets.QLayout.SetMinAndMaxSize
-                )
-                widget.layout.setSpacing(3)
-                widget.layout.setContentsMargins(3, 3, 3, 3)
+
+            widget.layout = QtWidgets.QGridLayout()
+            widget.layout.setSizeConstraint(
+                QtWidgets.QLayout.SetMinAndMaxSize
+            )
+            widget.layout.setSpacing(3)
+            widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "grid")]
             # process_layout_box(c, mode="grid")
             continue
@@ -363,8 +356,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             for p in c.xpath("property"):
                 k, v = loadProperty(p)
                 prop1[k] = v
-            if pineboolib.project._DGI.localDesktop():
-                widget.addItem(prop1["text"])
+
+            widget.addItem(prop1["text"])
             continue
         if c.tag == "attribute":
             k = c.get("name")
@@ -413,9 +406,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             print("qt3ui: Unknown widget xml tag",
                   widget.__class__, repr(c.tag))
 
-    if pineboolib.project._DGI.localDesktop():
-        for c in properties:
-            process_property(c)
+    for c in properties:
+        process_property(c)
     for c, m in layouts_pending_process:
         process_layout_box(c, mode=m)
     for new_widget in unbold_fonts:

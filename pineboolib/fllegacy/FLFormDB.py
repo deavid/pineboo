@@ -147,8 +147,9 @@ class FLFormDB(QtWidgets.QDialog):
     _scriptForm = None
 
     def __init__(self, parent, action, load=False):
-        if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
-            super(QtWidgets.QWidget, self).__init__(parent)
+        # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
+        #    super(QtWidgets.QWidget, self).__init__(parent)
+        super(QtWidgets.QWidget, self).__init__(parent)
 
         try:
             assert (self.__class__, action) not in self.known_instances
@@ -161,16 +162,12 @@ class FLFormDB(QtWidgets.QDialog):
         self.prj = action.prj
         self.mod = action.mod
 
-        if pineboolib.project._DGI.localDesktop():
-            self.layout = QtWidgets.QVBoxLayout()
-            self.layout.setContentsMargins(1, 1, 1, 1)
-            self.layout.setSpacing(1)
-            self.layout.setContentsMargins(1, 1, 1, 1)
-            self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-            self.setLayout(self.layout)
-        else:
-            self.layout = []
-
+        self.layout = QtWidgets.QVBoxLayout()
+        self.layout.setContentsMargins(1, 1, 1, 1)
+        self.layout.setSpacing(1)
+        self.layout.setContentsMargins(1, 1, 1, 1)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        self.setLayout(self.layout)
         if not self._uiName:
             self._uiName = action.form
 
@@ -202,14 +199,10 @@ class FLFormDB(QtWidgets.QDialog):
             return
 
         # self.resize(550,350)
-        if pineboolib.project._DGI.localDesktop():
-            self.layout.insertWidget(0, self.widget)
-            self.layout.setSpacing(1)
-            self.layout.setContentsMargins(1, 1, 1, 1)
-            self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-        else:
-            self.layout.append(self.widget)
-            self.remote_widgets = {}
+        self.layout.insertWidget(0, self.widget)
+        self.layout.setSpacing(1)
+        self.layout.setContentsMargins(1, 1, 1, 1)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         if self._uiName:
             self.prj.conn.managerModules().createUI(self._uiName, None, self)
@@ -238,7 +231,8 @@ class FLFormDB(QtWidgets.QDialog):
     """
     constructor
     """
-    # explicit FLFormDB(QWidget *parent = 0, const char *name = 0, WFlags f = 0);
+    # explicit FLFormDB(QWidget *parent = 0, const char *name = 0, WFlags f =
+    # 0);
 
     """
     constructor.

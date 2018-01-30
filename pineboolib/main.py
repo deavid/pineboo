@@ -253,7 +253,8 @@ class Project(object):
             cur2.execute(sql)
             for (contenido,) in cur2:
                 f2 = open(self.dir("cache", fileobj.filekey), "wb")
-                # La cadena decode->encode corrige el bug de guardado de AbanQ/Eneboo
+                # La cadena decode->encode corrige el bug de guardado de
+                # AbanQ/Eneboo
                 txt = ""
                 try:
                     # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
@@ -315,7 +316,8 @@ class Project(object):
         pass
 
     def call(self, function, aList, objectContext, showException=True):
-        # FIXME: No deberíamos usar este método. En Python hay formas mejores de hacer esto.
+        # FIXME: No deberíamos usar este método. En Python hay formas mejores
+        # de hacer esto.
         if Project.debugLevel > 50:
             print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" %
                   (function, aList, objectContext))
@@ -466,7 +468,7 @@ class Project(object):
         self.call("sys.widget.init()", [], None, True)
 
     def resolveDGIObject(self, name):
-        obj_ = getattr(self._DGI, name)
+        obj_ = getattr(self._DGI, name, None)
         if obj_:
             return obj_
 
@@ -702,9 +704,11 @@ class MainForm(object):
                     remove_blank_text=True,
                 )
                 self.tree = etree.parse(self.path, self.parser)
-                self.logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", self.path)
+                self.logger.exception(
+                    "Formulario %r se cargó con codificación ISO (UTF8 falló)", self.path)
             except etree.XMLSyntaxError:
-                self.logger.exception("Error cargando UI después de intentar con UTF8 y ISO", self.path)
+                self.logger.exception(
+                    "Error cargando UI después de intentar con UTF8 y ISO", self.path)
 
         self.root = self.tree.getroot()
         self.actions = {}
@@ -719,13 +723,10 @@ class MainForm(object):
                     data = zlib.decompress(data, 15)
                     img_format = "XPM"
 
-                if self.prj._DGI.localDesktop():
-                    pixmap = QtGui.QPixmap()
-                    pixmap.loadFromData(data, img_format)
-                    icon = QtGui.QIcon(pixmap)
-                    self.pixmaps[name] = icon
-                else:
-                    self.pixmaps[name] = data
+                pixmap = QtGui.QPixmap()
+                pixmap.loadFromData(data, img_format)
+                icon = QtGui.QIcon(pixmap)
+                self.pixmaps[name] = icon
 
         for xmlaction in self.root.xpath("actions//action"):
             action = XMLMainFormAction(xmlaction)
