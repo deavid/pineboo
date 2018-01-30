@@ -43,7 +43,9 @@ class MPageDisplay(QWidget):
 
     @decorators.BetaImplementation
     def sizePolicy(self):
-        return QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        return QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed
+        )
 
     @decorators.BetaImplementation
     def zoomUp(self):

@@ -105,23 +105,29 @@ class MReportViewer(QWidget):
 
     @decorators.BetaImplementation
     def setReportData(self, data):
-        return self.rptEngine_.setReportData(data) if self.rptEngine_ else False
+        if not self.rptEngine_:
+            return False
+        return self.rptEngine_.setReportData(data)
 
     @decorators.BetaImplementation
     def setReportTemplate(self, tpl):
-        return self.rptEngine_.setReportTemplate(tpl) if self.rptEngine_ else False
+        if not self.rptEngine_:
+            return False
+        return self.rptEngine_.setReportTemplate(tpl)
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, append=False, displayReport=None):
+    def renderReport(self, initRow=0, initCol=0, append=False, dispRpt=None):
         flags = None
-        if displayReport is None:
+        if dispRpt is None:
             flags = append
         else:
-            flags = MReportViewer.RenderReportFlags.Append.value if append else 0 | int(
-                MReportViewer.RenderReportFlags.Display.value if displayReport else 0)
+            ap = MReportViewer.RenderReportFlags.Append.value
+            dp = MReportViewer.RenderReportFlags.Display.value
+            flags = ap if append else 0
+            flags = flags | int(dp if dispRpt else 0)
 
-        append = flags & MReportViewer.RenderReportFlags.Append.value
-        displayReport = flags & MReportViewer.RenderReportFlags.Display.value
+        append = flags & ap
+        dispRpt = flags & dp
 
         if not self.rptEngine_:
             return False
@@ -138,17 +144,18 @@ class MReportViewer(QWidget):
             initRow, initCol, self.report_, flags)
         # self.insertChild(self.report_) # FIXME
 
-        if displayReport:
+        if dispRpt:
             self.printToPos_ = self.report_.printToPos()
 
         if self.progress_:
             self.progress_.deleteLater()
             self.progress_ = 0
 
-        # if displayReport and self.report_ != 0 and self.report_.getFirstPage() != 0: # FIXME
-        if True and self.report_ != 0 and self.report_.getFirstPage() != 0:
+        fp = self.report_.getFirstPage()
+        # if dispRpt and self.report_ != 0 and fp != 0: # FIXME
+        if True and self.report_ != 0 and fp != 0:
             self.display_.setPageDimensions(self.report_.pageDimensions())
-            self.display_.setPage(self.report_.getFirstPage())
+            self.display_.setPage(fp)
             self.display_.show()
             return True
 
@@ -238,8 +245,10 @@ class MReportViewer(QWidget):
                 FLUtil.translate(self, "app", "Falta Ghostscript"),
                 FLUtil.translate(
                     self, "app",
-                    "Para poder exportar a PDF debe instalar Ghostscript (http://www.ghostscript.com) y añadir\n"
-                    "el directorio de instalación a la ruta de búsqueda de programas\ndel sistema (PATH).\n\n"),
+                    "Para poder exportar a PDF debe instalar Ghostscript"
+                    "(http://www.ghostscript.com) y añadir\n"
+                    "el directorio de instalación a la ruta de"
+                    "búsqueda de programas\ndel sistema (PATH).\n\n"),
                 Qt.QMessageBox.Critical,
                 Qt.QMessageBox.Ok,
                 Qt.QMessageBox.NoButton,
@@ -375,7 +384,9 @@ class MReportViewer(QWidget):
             )
             return False
 
-        self.printer_ = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.PrinterMode.HighResolution)
+        self.printer_ = QtPrintSupport.QPrinter(
+            QtPrintSupport.QPrinter.PrinterMode.HighResolution
+        )
         self.printer_.setPageSize(self.report_.pageSize())
         if self.printer_.pageSize() == QtPrintSupport.QPrinter.PageSize.Custom:
             self.printer_.setCustomPaperSize(self.report_.pageDimensions())
@@ -393,7 +404,8 @@ class MReportViewer(QWidget):
 
         viewIdx = self.report_.getCurrentIndex()
 
-        if self.printer_.pageOrder() == QtPrintSupport.QPrinter.PageOrder.LastPageFirst:
+        lpf = QtPrintSupport.QPrinter.PageOrder.LastPageFirst
+        if self.printer_.pageOrder() == lpf:
             printRev = True
 
         printFrom = self.printer_.fromPage() - 1
@@ -484,7 +496,9 @@ class MReportViewer(QWidget):
             )
             return False
 
-        self.printer_ = QtPrintSupport.QPrinter(QtPrintSupport.QPrinter.PrinterMode.HighResolution)
+        self.printer_ = QtPrintSupport.QPrinter(
+            QtPrintSupport.QPrinter.PrinterMode.HighResolution
+        )
         self.printer_.setPageSize(self.report_.pageSize())
         if self.printer_.pageSize() == QtPrintSupport.QPrinter.PageSize.Custom:
             self.printer_.setCustomPaperSize(self.report_.pageDimensions())
@@ -511,7 +525,8 @@ class MReportViewer(QWidget):
 
             viewIdx = self.report_.getCurrentIndex()
 
-            if self.printer_.pageOrder() == QtPrintSupport.QPrinter.PageOrder.LastPageFirst:
+            lpf = QtPrintSupport.QPrinter.PageOrder.LastPageFirst
+            if self.printer_.pageOrder() == lpf:
                 printRev = True
 
             printFrom = self.printer_.fromPage() - 1

@@ -62,7 +62,11 @@ class MLineObject(ProjectClass):
 
         linePen = QtGui.QPen(self.penColor_, self.penWidth_, self.penStyle_)
         p.painter().setPen(linePen)
-        p.painter().drawLine(0, 0, self.xpos2_ - self.xpos1_, self.ypos2_ - self.ypos1_)
+        p.painter().drawLine(
+            0, 0,
+            self.xpos2_ - self.xpos1_,
+            self.ypos2_ - self.ypos1_
+        )
 
         if restore:
             p.painter().restore()

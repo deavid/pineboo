@@ -14,10 +14,6 @@ from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 from pineboolib.fllegacy.FLSqlConnections_deprecated import FLSqlConnections  # FIXME
 
 
-class FLDomNodeInterface():
-    pass
-
-
 class FLReportEngine(MReportEngine):
 
     class FLReportEnginePrivate(ProjectClass):
@@ -47,13 +43,15 @@ class FLReportEngine(MReportEngine):
 
             for it in self.qFieldList_:
                 rawVal = self.qry_.value(i, True)
-                if not self.qImgFields_.isEmpty() and self.qImgFields_.top() == i:
+                empty = self.qImgFields_.isEmpty()
+                if not empty and self.qImgFields_.top() == i:
                     strVal = str(rawVal)
                     imgFieldsBack.push_front(self.qImgFields_.pop())
                     if not strVal or strVal == "":
                         row.setAttribute(it, strVal)
                         continue
-                    imgFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/" + strVal + ".png"
+                    imgFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/"
+                    imgFile += strVal + ".png"
                     if not QtCore.QFile.exists(imgFile):
                         pix = QtGui.QPixmap()
                         # pix.loadFromData(str(self.qry_.value(i))) #FIXME?
@@ -75,7 +73,8 @@ class FLReportEngine(MReportEngine):
             g = self.qGroupDict_
 
             lev = 0
-            while lev < levelMax and vA.at(lev) == str(self.qry_.value(g[str(lev)].field())):
+            val = str(self.qry_.value(g[str(lev)].field()))
+            while lev < levelMax and vA.at(lev) == val:
                 lev += 1
 
             for i in range(lev, levelMax):
@@ -190,8 +189,9 @@ class FLReportEngine(MReportEngine):
 
         self.d_.template_ = t
         if not self.d_.qry_:
+            mgr = FLSqlConnections.database().managerModules()
             return super(FLReportEngine, self).setReportTemplate(
-                FLSqlConnections.database().managerModules().contentCached(t + ".kut")
+                mgr.contentCached(t + ".kut")
             )
         else:
             return super(FLReportEngine, self).setReportTemplate(
@@ -215,11 +215,15 @@ class FLReportEngine(MReportEngine):
 
     @decorators.BetaImplementation
     def reportData(self):
-        return FLDomNodeInterface.nodeInterface(self.rd if self.rd else QtXml.QDomDocument())
+        return FLDomNodeInterface.nodeInterface(
+            self.rd if self.rd else QtXml.QDomDocument()
+        )
 
     @decorators.BetaImplementation
     def reportTemplate(self):
-        return FLDomNodeInterface.nodeInterface(self.rt if self.rt else QtXml.QDomDocument())
+        return FLDomNodeInterface.nodeInterface(
+            self.rt if self.rt else QtXml.QDomDocument()
+        )
 
     @decorators.BetaImplementation
     def exportToOds(self, pages):
@@ -229,17 +233,19 @@ class FLReportEngine(MReportEngine):
         super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, fillRecords=False, pages=0):
+    def renderReport(self, initRow=0, initCol=0, fRec=False, pages=0):
+        fr = MReportEngine.RenderReportFlags.FillRecords.value
         pgc = super(FLReportEngine, self).renderReport(
             initRow,
             initCol,
             pages.pageCollection() if pages else 0,
-            MReportEngine.RenderReportFlags.FillRecords.value if fillRecords else 0
+            fr if fRec else 0
         )
 
         pgs = FLReportPages()
         pgs.setPageCollection(pgc)
-        if not fillRecords or not self.d_.qry_ or not self.d_.qFieldMtdList_ or self.d_.qDoubleFieldList_.isEmpty():
+        empty = self.d_.qDoubleFieldList_.isEmpty()
+        if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or empty:
             return pgs
 
         nl = QtXml.QDomNodeList(self.rd.elementsByTagName("Row"))

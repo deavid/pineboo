@@ -130,4 +130,8 @@ class MPageCollection(ProjectClass):
 
     @decorators.BetaImplementation
     def pageMargins(self):
-        return self.topMargin_, self.leftMargin_, self.bottomMargin_, self.rightMargin_
+        tm = self.topMargin_
+        lm = self.leftMargin_
+        bm = self.bottomMargin_
+        rm = self.rightMargin_
+        return tm, lm, bm, rm

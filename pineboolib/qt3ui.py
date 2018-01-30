@@ -85,7 +85,8 @@ def loadUi(path, widget, parent=None):
             sender = widget
         else:
             sender = widget.findChild(QtWidgets.QWidget, sender_name)
-        if sender is None and hasattr(widget, "ui_") and sender_name in widget.ui_:
+        wui = hasattr(widget, "ui_") and sender_name in widget.ui_
+        if sender is None and wui:
             sender = widget.ui_[sender_name]
         receiver = None
         if sender is None:
@@ -117,7 +118,8 @@ def loadUi(path, widget, parent=None):
 
         if receiver is None:
             receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
-        if receiver is None and hasattr(widget, "ui_") and receiv_name in widget.ui_:
+        wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
+        if receiver is None and wui:
             receiver = widget.ui_[receiv_name]
         if receiver is None:
             print("Connection receiver not found:", receiv_name)
@@ -191,7 +193,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn = getattr(widget, setpname, None)
 
         if set_fn is None:
-            if (not pineboolib.project._DGI.localDesktop() and type(widget) not in pineboolib.project._DGI.reject_widgets()) or pineboolib.project._DGI.localDesktop():
+            ld = pineboolib.project._DGI.localDesktop()
+            rw = pineboolib.project._DGI.reject_widgets()
+            if (not ld and type(widget) not in rw) or ld:
                 if Options.DEBUG_LEVEL > 50:
                     print("qt3ui: Missing property", pname,
                           " for %r" % widget.__class__)
@@ -242,7 +246,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c, new_widget, parent, origWidget)
-                origWidget.ui_[c.xpath("./property[@name='name']/cstring")[0].text] = new_widget
+                path = c.xpath("./property[@name='name']/cstring")[0].text
+                origWidget.ui_[path] = new_widget
                 if pineboolib.project._DGI.localDesktop():
                     new_widget.show()
                 if mode == "box":
@@ -312,7 +317,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 continue
             if pineboolib.project._DGI.localDesktop():
                 widget.layout = QtWidgets.QVBoxLayout()
-                widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+                widget.layout.setSizeConstraint(
+                    QtWidgets.QLayout.SetMinAndMaxSize
+                )
                 widget.layout.setSpacing(3)
                 widget.layout.setContentsMargins(3, 3, 3, 3)
 
@@ -327,7 +334,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 continue
             if pineboolib.project._DGI.localDesktop():
                 widget.layout = QtWidgets.QHBoxLayout()
-                widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+                widget.layout.setSizeConstraint(
+                    QtWidgets.QLayout.SetMinAndMaxSize
+                )
                 widget.layout.setSpacing(3)
                 widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "box")]
@@ -341,7 +350,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 continue
             if pineboolib.project._DGI.localDesktop():
                 widget.layout = QtWidgets.QGridLayout()
-                widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+                widget.layout.setSizeConstraint(
+                    QtWidgets.QLayout.SetMinAndMaxSize
+                )
                 widget.layout.setSpacing(3)
                 widget.layout.setContentsMargins(3, 3, 3, 3)
             layouts_pending_process += [(c, "grid")]
@@ -361,26 +372,30 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             attrs = getattr(widget, "_attrs", None)
             if attrs is not None:
                 attrs[k] = v
-                # print("qt3ui: attribute %r => %r" % (k,v), widget.__class__, repr(c.tag))
             else:
                 print("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
                       (k, v), widget.__class__, repr(c.tag))
             continue
         if c.tag == "widget":
-            # Si dentro del widget hay otro significa que estamos dentro de un contenedor.
-            # Según el tipo de contenedor, los widgets se agregan de una forma u otra.
+            # Si dentro del widget hay otro significa
+            # que estamos dentro de un contenedor.
+            # Según el tipo de contenedor, los widgets
+            # se agregan de una forma u otra.
             new_widget = createWidget(c.get("class"), parent=parent)
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget, parent, origWidget)
-            origWidget.ui_[c.xpath("./property[@name='name']/cstring")[0].text] = new_widget
+            path = c.xpath("./property[@name='name']/cstring")[0].text
+            origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
             new_widget.show()
+
+            gb = isinstance(widget, QtWidgets.QGroupBox)
+            wd = isinstance(widget, QtWidgets.QWidget)
             if isinstance(widget, QtWidgets.QTabWidget):
                 title = new_widget._attrs.get("title", "UnnamedTab")
                 widget.addTab(new_widget, title)
-
-            elif isinstance(widget, QtWidgets.QGroupBox) or isinstance(widget, QtWidgets.QWidget):
+            elif gb or wd:
                 lay = widget.layout()
                 if not lay:
                     lay = QtWidgets.QVBoxLayout()

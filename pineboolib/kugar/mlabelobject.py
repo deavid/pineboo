@@ -217,7 +217,14 @@ class MLabelObject(MReportObject):
 
             retVal = 0
             if self.changeHeight_:
-                maxRect = p.painter().boundingRect(0, 0, self.width_, self.height_, tf, self.text_)
+                maxRect = p.painter().boundingRect(
+                    0,
+                    0,
+                    self.width_,
+                    self.height_,
+                    tf,
+                    self.text_
+                )
                 if maxRect.height() > self.height_:
                     self.height_ = maxRect.height()
                     retVal = self.height_
@@ -245,9 +252,10 @@ class MLabelObject(MReportObject):
                     p.painter().translate(self.xpos_, self.ypos_)
                     restore = True
 
-                if self.adjustFontSize_ and not self.wordWrap_ and not self.changeHeight_:
-                    factor = float(
-                        self.width_) / float(p.painter().fontMetrics().width(self.text_))
+                w = p.painter().fontMetrics().width(self.text_)
+                afs = self.adjustFontSize_
+                if afs and not self.wordWrap_ and not self.changeHeight_:
+                    factor = float(self.width_) / float(w)
                     if factor < 1.0:
                         f = p.painter().font()
                         f.setPointSizeFloat(f.pointSizeFloat() * factor)
@@ -296,8 +304,19 @@ class MLabelObject(MReportObject):
         if self.wordWrap_:
             tf = tf | QtGui.QPainter.WordBreak
 
-        maxRect = p.painter().boundingRect(0, 0, self.width_, self.height_, tf, self.text_)
-        return maxRect.height() if maxRect.height() > self.height_ else self.height_
+        maxRect = p.painter().boundingRect(
+            0,
+            0,
+            self.width_,
+            self.height_,
+            tf,
+            self.text_
+        )
+
+        if maxRect.height() > self.height_:
+            return maxRect.height()
+
+        return self.height_
 
     @decorators.BetaImplementation
     def drawPixmap(self, p, pixmap):
@@ -305,11 +324,15 @@ class MLabelObject(MReportObject):
             if self.width_ > 0 and self.height_ > 0:
                 # p.painter().save(Qt.QObject.name())
                 p.painter().save(self.name())
-                p.painter().scale(float(self.width_) / float(self.pixmap_.width()),
-                                  float(self.height_) / float(self.pixmap_.height()))
+                p.painter().scale(
+                    float(self.width_) / float(self.pixmap_.width()),
+                    float(self.height_) / float(self.pixmap_.height())
+                )
             else:
                 QtCore.qWarning(
-                    "MLabelObject::drawPixmap : width and/or height are not valid")
+                    "MLabelObject::drawPixmap :"
+                    "width and/or height are not valid"
+                )
                 return False
 
             p.painter().drawPixmap(0, 0, pixmap)

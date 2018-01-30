@@ -164,15 +164,35 @@ class MFieldObject(MLabelObject):
                 sy = self.pixmap_.height() - self.height_
                 if sy < 0:
                     sy = 0
-                if not p.drawPixmap(self.pixmap_, 0, sy, self.width_, self.height_, self):
-                    p.painter().drawPixmap(0, 0, self.pixmap_, 0, sy, self.width_, self.height_)
+                if not p.drawPixmap(
+                    self.pixmap_,
+                    0, sy,
+                    self.width_, self.height_,
+                    self
+                ):
+                    p.painter().drawPixmap(
+                        0, 0,
+                        self.pixmap_,
+                        0, sy,
+                        self.width_, self.height_
+                    )
                 return 0
             else:
                 originalHeight = self.height_
                 pixH = self.pixmap_.height()
                 self.height_ = pixH
-                if not p.drawPixmap(self.pixmap_, 0, 0, self.width_, self.height_, self):
-                    p.painter().drawPixmap(0, 0, self.pixmap_, 0, 0, self.width_, self.height_)
+                if not p.drawPixmap(
+                    self.pixmap_,
+                    0, 0,
+                    self.width_, self.height_,
+                    self
+                ):
+                    p.painter().drawPixmap(
+                        0, 0,
+                        self.pixmap_,
+                        0, 0,
+                        self.width_, self.height_
+                    )
                 self.height_ = originalHeight
                 return pixH
 
@@ -251,7 +271,10 @@ class MFieldObject(MLabelObject):
     @decorators.BetaImplementation
     def setDataType(self, t):
         self.dataType_ = t
-        if self.dataType_ == self.DataType.Integer or self.dataType_ == self.DataType.Float or self.dataType_ == self.DataType.Currency:
+        i = self.DataType.Integer
+        f = self.DataType.Float
+        c = self.DataType.Currency
+        if t == i or t == f or t == c:
             self.saveColor_ = self.foregroundColor_
 
     @decorators.BetaImplementation

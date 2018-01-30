@@ -24,7 +24,8 @@ class FLReportViewer(QtWidgets.QWidget):
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=0):
         pParam = 0 if parent and embedInParent else 0
         pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
-        pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
+        pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
+        pParam = pParam | Qt.WindowSystemMenuHint
 
         super(FLReportViewer, self).__init__(parent, pParam)
 
@@ -78,12 +79,13 @@ class FLReportViewer(QtWidgets.QWidget):
         self.ui_["leMailServer"].setText(
             str(util.readSettingEntry("email/mailserver")))
 
-        self.initCentralWidget_ = self.ui_["FLWidgetReportViewer"].centralWidget()
+        wrv = self.ui_["FLWidgetReportViewer"]
+        self.initCentralWidget_ = wrv.centralWidget()
 
         self.smtpClient_ = FLSmtpClient(self)
         self.smtpClient_.status.connect(self.ui_["lblEstado"].setText)
 
-        self.ui_["FLWidgetReportViewer"].setCentralWidget(self.rptViewer_)
+        wrv.setCentralWidget(self.rptViewer_)
         self.ui_["frEMail"].hide()
         if self.initCentralWidget_:
             self.initCentralWidget_.hide()
@@ -92,16 +94,11 @@ class FLReportViewer(QtWidgets.QWidget):
             # Descomentar cuando se añada en qt3ui #FIXME
             pass
             # self.ui_["spnResolution"].setValue(int(FLUtil.readDBSettingEntry(
-                # "rptViewer/dpi", str(self.rptViewer_.resolution()))))
+            #     "rptViewer/dpi", str(self.rptViewer_.resolution()))))
             # self.ui_["spnPixel"].setValue(float(FLUtil.readDBSettingEntry(
-                # "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
+            #     "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
-
-    @decorators.NotImplementedWarn
-    def setName(self, name):
-        # Emulacion, este código no funciona:
-        self.name = name
 
     @decorators.BetaImplementation
     def rptViewer(self):
@@ -199,17 +196,19 @@ class FLReportViewer(QtWidgets.QWidget):
                 desk = QtWidgets.QApplication.desktop().availableGeometry(self)
                 inter = desk.intersected(geo)
                 self.resize(geo.size())
-                if inter.width() * inter.height() > (geo.width() * geo.height() / 20):
+                geodim = geo.width() * geo.height()
+                if inter.width() * inter.height() > (geodim / 20):
                     self.move(geo.topLeft())
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, append=False, displayReport=None):
+    def renderReport(self, initRow=0, initCol=0, append=False, dRpt=None):
         flags = None
-        if displayReport is None:
+        if dRpt is None:
             flags = append
         else:
-            flags = MReportViewer.RenderReportFlags.Append.value if append else 0 | int(
-                MReportViewer.RenderReportFlags.Display.value if displayReport else 0)
+            ap = MReportViewer.RenderReportFlags.Append.value
+            dp = MReportViewer.RenderReportFlags.Display.value
+            flags = ap if append else 0 | int(dp if dRpt else 0)
 
         if not self.rptEngine_:
             return False
@@ -265,7 +264,10 @@ class FLReportViewer(QtWidgets.QWidget):
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
             FLUtil.translate(
-                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                self,
+                "app",
+                "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -286,8 +288,16 @@ class FLReportViewer(QtWidgets.QWidget):
             QtCore.QMessageBox.critical(
                 self,
                 FLUtil.translate(self, "app", "Error abriendo fichero"),
-                FLUtil.translate(self, "app", "No se pudo abrir el fichero {} para escribir: {}").arg(
-                    fileName, QtWidgets.QApplication.translate("QFile", file.errorString()))
+                FLUtil.translate(
+                    self,
+                    "app",
+                    "No se pudo abrir el fichero {} para escribir: {}"
+                ).format(
+                    fileName,
+                    QtWidgets.QApplication.translate(
+                        "QFile", file.errorString()
+                    )
+                )
             )
 
     @decorators.BetaImplementation
@@ -313,7 +323,10 @@ class FLReportViewer(QtWidgets.QWidget):
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
             FLUtil.translate(
-                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                self,
+                "app",
+                "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -348,7 +361,10 @@ class FLReportViewer(QtWidgets.QWidget):
             self,
             FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
             FLUtil.translate(
-                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                self,
+                "app",
+                "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
             FLUtil.translate(self, "app", "&Sí"),
             FLUtil.translate(self, "app", "&No"),
             "",
@@ -365,7 +381,9 @@ class FLReportViewer(QtWidgets.QWidget):
 
         FLUtil.writeSettingEntry("email/to", self.ui_.lePara.text())
         FLUtil.writeSettingEntry("email/from", self.ui_.leDe.text())
-        FLUtil.writeSettingEntry("email/mailserver", self.ui_.leMailServer.text())
+        FLUtil.writeSettingEntry(
+            "email/mailserver", self.ui_.leMailServer.text()
+        )
 
         fi = QtCore.QFileInfo(fileName)
         name = fi.fileName()
@@ -373,29 +391,34 @@ class FLReportViewer(QtWidgets.QWidget):
         self.smtpClient_.setMailServer(self.ui_.leMailServer.text())
         self.smtpClient_.setTo(self.ui_.lePara.text())
         self.smtpClient_.setFrom(self.ui_.leDe.text())
-        self.smtpClient_.setSubject(
-            name if self.ui_.leAsunto.text() == "" else self.ui_.leAsunto.text())
+        asutxt = self.ui_.leAsunto.text()
+        self.smtpClient_.setSubject(name if asutxt == "" else asutxt)
         self.smtpClient_.setBody(self.ui_.leCuerpo.text() + "\n\n")
 
         html = "<html><body><a href=\"http://abanq.org/\">"
-        html = html + "<img src=\"cid:logo.png@3d8b627b6292\"/></a><br/><br/></body></html>"
+        html += "<img src=\"cid:logo.png@3d8b627b6292\"/>"
+        html += "</a><br/><br/></body></html>"
         self.smtpClient_.addTextPart(html, "text/html")
         self.smtpClient_.addAttachment(fileName)
         self.smtpClient_.startSend()
 
     @decorators.BetaImplementation
     def showInitCentralWidget(self, show):
+        wrv = self.ui_["FLWidgetReportViewer"]
         if show:
             self.rptViewer_.hide()
-            self.ui_["FLWidgetReportViewer"].setCentralWidget(self.initCentralWidget_)
+            wrv.setCentralWidget(self.initCentralWidget_)
             self.ui_.leDocumento.setText(
-                "doc-" + str(QtCore.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
+                "doc-" + str(
+                    QtCore.QDateTime.currentDateTime()
+                ).replace(":", ",").replace(" ", "")
+            )
             self.ui_.frEMail.show()
             self.initCentralWidget_.show()
         else:
             self.initCentralWidget_.hide()
             self.ui_.frEMail.hide()
-            self.ui_["FLWidgetReportViewer"].setCentralWidget(self.rptViewer_)
+            wrv.setCentralWidget(self.rptViewer_)
             self.rptViewer_.show()
 
     @decorators.BetaImplementation
@@ -420,7 +443,10 @@ class FLReportViewer(QtWidgets.QWidget):
                 FLUtil.translate(
                     self, "app", "Sobreescribir {}").format(fileName),
                 FLUtil.translate(
-                    self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
+                    self,
+                    "app",
+                    "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
                 FLUtil.translate(self, "app", "&Sí"),
                 FLUtil.translate(self, "app", "&No"),
                 "",
@@ -525,11 +551,15 @@ class FLReportViewer(QtWidgets.QWidget):
                 return True
             return False
         elif isinstance(d, FLSqlCursor):
-            return self.rptEngine_.setReportData(d) if self.rptEngine_ else False
+            if not self.rptEngine_:
+                return False
+            return self.rptEngine_.setReportData(d)
         elif isinstance(d, QtXml.QDomNode):
             self.xmlData_ = d
             self.qry_ = 0
-            return self.rptEngine_.setReportData(d) if self.rptEngine_ else False
+            if not self.rptEngine_:
+                return False
+            return self.rptEngine_.setReportData(d)
         return False
 
     @decorators.BetaImplementation
@@ -787,9 +817,9 @@ class FLReportViewer(QtWidgets.QWidget):
         return self.rptViewer_.colorMode()
 
     @decorators.BetaImplementation
-    def disableSlotsPrintExports(self, disablePrints=True, disableExports=True):
-        self.slotsPrintDisabled_ = disablePrints
-        self.slotsExportedDisabled_ = disableExports
+    def disableSlotsPrintExports(self, dPrints=True, dExports=True):
+        self.slotsPrintDisabled_ = dPrints
+        self.slotsExportedDisabled_ = dExports
 
     @decorators.BetaImplementation
     def exportToOds(self):

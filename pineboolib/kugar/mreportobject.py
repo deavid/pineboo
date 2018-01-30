@@ -78,13 +78,19 @@ class MReportObject(ProjectClass, QObject):
                 p.painter().setBrush(self.backgroundColor_)
 
             if self.borderStyle_ != 0:
-                p.painter().setPen(QtGui.QPen(self.borderColor_, self.borderWidth_, self.borderStyle_))
+                p.painter().setPen(QtGui.QPen(
+                    self.borderColor_, self.borderWidth_, self.borderStyle_)
+                )
             else:
                 p.painter().setPen(Qt.NoPen)
 
             p.painter().drawRect(0, 0, self.width_, self.height_)
         else:
-            p.painter().fillRect(0, 0, self.width_, self.height_, self.backgroundColor_)
+            p.painter().fillRect(
+                0, 0,
+                self.width_, self.height_,
+                self.backgroundColor_
+            )
 
         if restore:
             p.painter().restore()
