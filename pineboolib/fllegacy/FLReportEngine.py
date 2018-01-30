@@ -1,4 +1,6 @@
-from PyQt5.QtCore import Qt
+from PyQt5 import QtGui
+from PyQt5 import QtCore
+from PyQt5 import QtXml
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -8,12 +10,8 @@ from pineboolib.kugar.mreportengine import MReportEngine
 from pineboolib.fllegacy.FLReportPages import FLReportPages
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 from pineboolib.fllegacy.FLUtil import FLUtil
-# from pineboolib.fllegacy.FLDomNodeInterface import FLDomNodeInterface
-from pineboolib.fllegacy.FLSqlConnections import FLSqlConnections
-
-
-class FLDomNodeInterface():
-    pass
+from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
+from pineboolib.fllegacy.FLSqlConnections_deprecated import FLSqlConnections  # FIXME
 
 
 class FLReportEngine(MReportEngine):
@@ -22,46 +20,47 @@ class FLReportEngine(MReportEngine):
 
         @decorators.BetaImplementation
         def __init__(self, q):
+            super(FLReportEngine.FLReportEnginePrivate, self).__init__()
             self.qry_ = 0
             self.qFieldMtdList_ = 0
             self.qGroupDict_ = 0
             self.q_ = q
+            self.template_ = ""
 
-            self.qDoubleFieldList_ = Qt.QStringList()
-            self.qImgFields_ = Qt.QValueStack()
+            self.qDoubleFieldList_ = []
+            self.qImgFields_ = []
 
         @decorators.BetaImplementation
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
                 return
 
-            row = Qt.QDomElement(self.q_.rptXmlData().createElement("Row"))
+            row = QtXml.QDomElement(self.q_.rptXmlData().createElement("Row"))
             row.setAttribute("level", l)
 
-            imgFieldsBack = Qt.QValueStack()
+            imgFieldsBack = []
             i = 0
 
-            it = self.qFieldList_.begin()
-            while it != self.qFieldList_.end():
+            for it in self.qFieldList_:
                 rawVal = self.qry_.value(i, True)
-                if not self.qImgFields_.isEmpty() and self.qImgFields_.top() == i:
+                empty = len(self.qImgFields_) == 0
+                if not empty and self.qImgFields_.top() == i:
                     strVal = str(rawVal)
                     imgFieldsBack.push_front(self.qImgFields_.pop())
                     if not strVal or strVal == "":
                         row.setAttribute(it, strVal)
                         continue
-                    imgFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/" + strVal + ".png"
-                    if not Qt.QFile.exists(imgFile):
-                        pix = Qt.QPixmap()
+                    imgFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/"
+                    imgFile += strVal + ".png"
+                    if not QtCore.QFile.exists(imgFile):
+                        pix = QtGui.QPixmap()
                         # pix.loadFromData(str(self.qry_.value(i))) #FIXME?
                         pix.loadFromData(self.qry_.value(i).toCString())
                         pix.save(imgFile, "PNG")
                     row.setAttribute(it, imgFile)
                 else:
                     row.setAttribute(it, str(rawVal))
-
-                it = it + 1
-                i = i + 1
+                i += 1
 
             self.rows_.appendChild(row)
             self.qImgFields_ = imgFieldsBack
@@ -74,8 +73,9 @@ class FLReportEngine(MReportEngine):
             g = self.qGroupDict_
 
             lev = 0
-            while lev < levelMax and vA.at(lev) == str(self.qry_.value(g[str(lev)].field())):
-                lev = lev + 1
+            val = str(self.qry_.value(g[str(lev)].field()))
+            while lev < levelMax and vA.at(lev) == val:
+                lev += 1
 
             for i in range(lev, levelMax):
                 self.addRowToReportData(i)
@@ -97,19 +97,17 @@ class FLReportEngine(MReportEngine):
                 if not self.qFieldMtdList_:
                     return
 
-                i = self.qFieldList_.size() - 1
-                it = Qt.QStringList(self.qFieldList_.end())
+                i = len(self.qFieldList_) - 1
                 while i >= 0:
-                    it = it - 1
+                    it = self.qFieldList_[i]
                     fmtd = self.qFieldMtdList_.find(
                         it.section('.', 1, 1).lower())
                     if fmtd:
-                        if fmtd.type() == Qt.QPixmap:
-                            self.qImgFields_.push(i)
-                        elif fmtd.type() == Qt.Double:
-                            self.qDoubleFieldList_ << it
-                            break
-                    i = i - 1
+                        if fmtd.type() == QtGui.QPixmap:
+                            self.qImgFields_.append(i)
+                        elif fmtd.type() == QtCore.Double:
+                            self.qDoubleFieldList_.append(it)
+                    i -= 1
             else:
                 self.qFieldList_.clear()
                 self.qDoubleFieldList_.clear()
@@ -121,15 +119,15 @@ class FLReportEngine(MReportEngine):
     def __init__(self, parent=0):
         super(FLReportEngine, self).__init__(parent)
 
-        self.d_ = self.FLReportEnginePrivate(self)
+        self.d_ = FLReportEngine.FLReportEnginePrivate(self)
 
     @decorators.BetaImplementation
     def rptXmlData(self):
-        return self.rd_
+        return self.rd
 
     @decorators.BetaImplementation
     def rptXmlTemplate(self):
-        return self.rt_
+        return self.rt
 
     @decorators.BetaImplementation
     def setReportData(self, q):
@@ -139,10 +137,10 @@ class FLReportEngine(MReportEngine):
         if not q:
             return
 
-        if not self.rd_:
-            self.rd_ = Qt.QDomDocument("KUGAR_DATA")
+        if not self.rd:
+            self.rd = QtXml.QDomDocument("KUGAR_DATA")
 
-        tmpDoc = Qt.QDomDocument("KUGAR_DATA")
+        tmpDoc = QtXml.QDomDocument("KUGAR_DATA")
 
         self.d_.rows_ = tmpDoc.createDocumentFragment()
         self.d_.setQuery(q)
@@ -161,18 +159,18 @@ class FLReportEngine(MReportEngine):
                 if not q.next():
                     break
         else:
-            vA = Qt.QStringList()
+            vA = QtCore.QStringListModel().stringList()
             for i in range(10):
                 vA.append("")
             while True:
-                self.d_.groupBy(g.count(), vA)
+                self.d_.groupBy(len(g), vA)
                 if not q.next():
                     break
 
-        data = Qt.QDomElement(tmpDoc.createElement("KugarData"))
+        data = QtXml.QDomElement(tmpDoc.createElement("KugarData"))
         data.appendChild(self.d_.rows_)
         tmpDoc.appendChild(data)
-        self.rd_ = tmpDoc
+        self.rd = tmpDoc
         self.d_.rows_.clear()
 
         self.initData()
@@ -185,14 +183,15 @@ class FLReportEngine(MReportEngine):
 
     @decorators.BetaImplementation
     def setFLReportTemplate(self, t):
-        if isinstance(t, Qt.QDomNode):
+        if isinstance(t, QtXml.QDomNode):
             self.d_.template = ""
             return super(FLReportEngine, self).setReportTemplate(t)
 
         self.d_.template_ = t
         if not self.d_.qry_:
+            mgr = FLSqlConnections.database().managerModules()
             return super(FLReportEngine, self).setReportTemplate(
-                FLSqlConnections.database().managerModules().contentCached(t + ".kut")
+                mgr.contentCached(t + ".kut")
             )
         else:
             return super(FLReportEngine, self).setReportTemplate(
@@ -205,7 +204,7 @@ class FLReportEngine(MReportEngine):
 
     @decorators.BetaImplementation
     def rptNameTemplate(self):
-        return self.d_.t_
+        return self.d_.template_
 
     @decorators.BetaImplementation
     def setReportTemplate(self, t):
@@ -216,11 +215,15 @@ class FLReportEngine(MReportEngine):
 
     @decorators.BetaImplementation
     def reportData(self):
-        return FLDomNodeInterface.nodeInterface(self.rd_ if self.rd_ else Qt.QDomDocument())
+        return FLDomNodeInterface.nodeInterface(
+            self.rd if self.rd else QtXml.QDomDocument()
+        )
 
     @decorators.BetaImplementation
     def reportTemplate(self):
-        return FLDomNodeInterface.nodeInterface(self.rt_ if self.rt_ else Qt.QDomDocument())
+        return FLDomNodeInterface.nodeInterface(
+            self.rt if self.rt else QtXml.QDomDocument()
+        )
 
     @decorators.BetaImplementation
     def exportToOds(self, pages):
@@ -230,28 +233,29 @@ class FLReportEngine(MReportEngine):
         super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, fillRecords=False, pages=0):
+    def renderReport(self, initRow=0, initCol=0, fRec=False, pages=0):
+        fr = MReportEngine.RenderReportFlags.FillRecords.value
         pgc = super(FLReportEngine, self).renderReport(
             initRow,
             initCol,
             pages.pageCollection() if pages else 0,
-            MReportEngine.RenderReportFlags.FillRecords if fillRecords else 0
+            fr if fRec else 0
         )
 
         pgs = FLReportPages()
         pgs.setPageCollection(pgc)
-        if not fillRecords or not self.d_.qry_ or not self.d_.qFieldMtdList_ or self.d_.qDoubleFieldList_.isEmpty():
+        empty = (self.d_.qDoubleFieldList_) == 0
+        if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or empty:
             return pgs
 
-        nl = Qt.QDomNodeList(self.rd_.elementsByTagName("Row"))
+        nl = QtXml.QDomNodeList(self.rd.elementsByTagName("Row"))
         for i in range(nl.count()):
             itm = nl.item(i)
             if itm.isNull():
                 continue
             nm = itm.attributes()
 
-            it = self.d_.qDoubleFieldList_.begin()
-            while it != self.d_.qDoubleFieldList_.end():
+            for it in self.d_.qDoubleFieldList_:
                 ita = nm.namedItem(it)
                 if ita.isNull():
                     continue
@@ -264,6 +268,4 @@ class FLReportEngine(MReportEngine):
                 decimals = self.d_.qFieldMtdList_.find(
                     it.section('.', 1, 1).lower()).partDecimal()
                 ita.setNodeValue(FLUtil.formatoMiles(round(dVal, decimals)))
-
-                it = it + 1
         return pgs

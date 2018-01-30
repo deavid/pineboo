@@ -883,6 +883,14 @@ class Member(ASTPython):
                             arguments = [
                                 "%s %% (str(%s" % (sPart1, value + ")" + sPart2 + ")")]
 
+                    elif member == "join":
+                        print("JOIN")
+                        value = arg[5:]
+                        print("JOIN valur = " + str(value))
+                        value = value[:len(value) - 1]
+                        print("JOIN valur = " + str(value))
+                        arguments = ["%s.join(%s)" % (value, ".".join(part1))] + part2
+                        print("JOIN args = " + str(arguments[0]))
                     else:
                         if ".".join(part1):
                             arguments = ["%s.%s" %

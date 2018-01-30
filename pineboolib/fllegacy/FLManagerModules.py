@@ -196,7 +196,10 @@ class FLManagerModules(ProjectClass):
 
         if not shaKey and not self._prj.conn.manager().isSystemTable(name_):
             query = "SELECT sha FROM flfiles WHERE nombre='%s'" % n
-            cursor = self.db_.cursor()
+            try:
+                cursor = self.db_.cursor()
+            except Exception:
+                cursor = self._prj.conn.cursor()
             try:
                 cursor.execute(query)
             except Exception:

@@ -1,17 +1,16 @@
 from enum import Enum
 
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
 from PyQt5.Qt import QObject
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLPicture import FLPicture
 
 from pineboolib.kugar.mpagecollection import MPageCollection
 
 
-class FLReportPages(ProjectClass, QObject):
+class FLReportPages(QObject):
 
     class PageOrientation(Enum):
         Portrait = 0
@@ -65,8 +64,8 @@ class FLReportPages(ProjectClass, QObject):
     def setPageCollection(self, pages):
         if self.pages_:
             self.pages_.deleteLater()
-        if pages:
-            self.insertChild(pages)
+        # if pages:
+        #     self.insertChild(pages)  # FIXME
         self.pages_ = pages
 
     @decorators.BetaImplementation
@@ -157,7 +156,7 @@ class FLReportPages(ProjectClass, QObject):
     def pageDimensions(self):
         if self.pages_:
             return self.pages_.pageDimensions()
-        return Qt.QSize()
+        return QtCore.QSize()
 
     @decorators.BetaImplementation
     def pageCount(self):

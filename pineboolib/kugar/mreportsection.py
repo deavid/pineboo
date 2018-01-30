@@ -1,29 +1,22 @@
 from enum import Enum
 
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5.Qt import QObject
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mutil import MUtil
 from pineboolib.kugar.mfieldobject import MFieldObject
 from pineboolib.kugar.mcalcobject import MCalcObject
+from pineboolib.kugar.mspecialobject import MSpecialObject
 
-idSecGlob_ = 0
-
-
-class FLDomNodeInterface:
-    # FIXME
-    pass
+from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 
 
-class MSpecialObject:
-    # FIXME
-    pass
+class MReportSection(QObject):
 
-
-class MReportSection(ProjectClass, QObject):
+    idSecGlob_ = 0
 
     class PrintFrequency(Enum):
         FirstPage = 0
@@ -36,31 +29,33 @@ class MReportSection(ProjectClass, QObject):
         if len(args) and isinstance(args[0], MReportSection):
             self.copy(args[0])
         else:
+            super(MReportSection, self).__init__()
+
             self.strIdSec_ = args[0] if len(args) else ""
-            self.idSec_ = idSecGlob_
+            self.idSec_ = self.idSecGlob_
             self.height_ = 1
             self.width_ = 584
             self.level_ = 0
 
             self.frequency_ = self.PrintFrequency.EveryPage
 
-            self.reportDate_ = Qt.QDate.currentDate()
+            self.reportDate_ = QtCore.QDate.currentDate()
             self.pageNumber_ = 0
 
-            self.lines_ = Qt.QPtrList()
-            self.lines_.setAutoDelete(True)
+            self.lines_ = []
+            # self.lines_.setAutoDelete(True) #FIXME
 
-            self.labels_ = Qt.QPtrList()
-            self.labels_.setAutoDelete(True)
+            self.labels_ = []
+            # self.labels_.setAutoDelete(True) #FIXME
 
-            self.specialFields_ = Qt.QPtrList()
-            self.specialFields_.setAutoDelete(True)
+            self.specialFields_ = []
+            # self.specialFields_.setAutoDelete(True) #FIXME
 
-            self.fields_ = Qt.QPtrList()
-            self.fields_.setAutoDelete(True)
+            self.fields_ = []
+            # self.fields_.setAutoDelete(True) #FIXME
 
-            self.calculatedFields_ = Qt.QPtrList()
-            self.calculatedFields_.setAutoDelete(True)
+            self.calculatedFields_ = []
+            # self.calculatedFields_.setAutoDelete(True) #FIXME
 
     @decorators.NotImplementedWarn
     # def operator=(self, mrs): #FIXME
@@ -100,85 +95,134 @@ class MReportSection(ProjectClass, QObject):
         field.setSectionIndex(self.fields_.at())
 
     @decorators.BetaImplementation
-    def setFieldData(self, idx, data, record=0, fillRecord=False):
+    def setFieldData(self, idx, data, record=0, fRec=False):
         field = self.fields_.at()
         field.setText(data)
-        if record and fillRecord:
-            fieldType = field.getDataType()
+        if record and fRec:
+            ft = field.getDataType()
 
-            if fieldType != MFieldObject.DataType.Date and fieldType != MFieldObject.DataType.Pixmap and fieldType != MFieldObject.DataType.CodBar:
-                record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                "_" + field.getFieldName(), field.getText())
-
-    @decorators.BetaImplementation
-    def setCalcFieldDataGT(self, values, record=0, fillRecord=False):
-        field = self.calculatedFields_.first()
-        while field != 0:
-            if not field.getFromGrandTotal() and self.level_ > -1:
-                continue
-
-            grandTotalIndex = field.getSectionIndex()
-
-            if grandTotalIndex != -1:
-                self.calculateField(field, values.at(
-                    grandTotalIndex), "", record, fillRecord)
-
-            field = self.calculatedFields_.next()
+            date = MFieldObject.DataType.Date
+            px = MFieldObject.DataType.Pixmap
+            cb = MFieldObject.DataType.CodBar
+            if ft != date and ft != px and ft != cb:
+                fn = field.getFieldName()
+                record.toElement().setAttribute(
+                    self.strIdSec_ + int(self.level_) + "_" + fn,
+                    field.getText()
+                )
 
     @decorators.BetaImplementation
-    def calculateField(self, field, values, values2="", record=0, fillRecord=False):
+    def setCalcFieldData(self, values=0, values2=0, record=0, fRec=False):
+        if isinstance(values, int) and isinstance(values2, str):
+            self.calculatedFields_.at(values).setText(values2)
+            return
+
+        i = 0
+        value = ""
+
+        for field in self.calculatedFields_:
+            if field != 0:
+                if field.getFromGrandTotal():
+                    continue
+
+                calcType = field.getCalculationType()
+
+                if calcType == MCalcObject.CalculationType.NoOperation:
+                    if values2:
+                        value = values2[i]
+                    self.calculateField(field, 0, value, record, fRec)
+                elif calcType == MCalcObject.CalculationType.CallFunction:
+                    self.calculateField(field, 0, value, record, fRec)
+                else:
+                    if values:
+                        self.calculateField(field, values.at(
+                            i), value, record, fRec)
+            i += 1
+
+    @decorators.BetaImplementation
+    def setCalcFieldDataGT(self, values, record=0, fRec=False):
+        for field in self.calculatedFields_:
+            if field != 0:
+                if not field.getFromGrandTotal() and self.level_ > -1:
+                    continue
+
+                grandTotalIndex = field.getSectionIndex()
+
+                if grandTotalIndex != -1:
+                    self.calculateField(field, values.at(
+                        grandTotalIndex), "", record, fRec)
+
+    @decorators.BetaImplementation
+    def calculateField(self, field, values, values2="", record=0, fRec=False):
         calcType = field.getCalculationType()
+        fn = field.getFieldName()
 
         if calcType == MCalcObject.CalculationType.Count:
             if values:
                 field.setText(int(MUtil.count(values)))
-                if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                    "_" + field.getFieldName(), field.getText())
+                if record and fRec:
+                    record.toElement().setAttribute(
+                        self.strIdSec_ + int(self.level_) + "_" + fn,
+                        field.getText()
+                    )
         elif calcType == MCalcObject.CalculationType.Sum:
             if values:
                 field.setText(int(MUtil.sum(values), 'f'))
-                if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                    "_" + field.getFieldName(), field.getText())
+                if record and fRec:
+                    record.toElement().setAttribute(
+                        self.strIdSec_ + int(self.level_) + "_" + fn,
+                        field.getText()
+                    )
         elif calcType == MCalcObject.CalculationType.Average:
             if values:
                 field.setText(int(MUtil.average(values), 'f'))
-                if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                    "_" + field.getFieldName(), field.getText())
+                if record and fRec:
+                    record.toElement().setAttribute(
+                        self.strIdSec_ + int(self.level_) + "_" + fn,
+                        field.getText()
+                    )
         elif calcType == MCalcObject.CalculationType.Variance:
             if values:
                 field.setText(int(MUtil.variance(values), 'f'))
-                if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                    "_" + field.getFieldName(), field.getText())
+                if record and fRec:
+                    record.toElement().setAttribute(
+                        self.strIdSec_ + int(self.level_) + "_" + fn,
+                        field.getText()
+                    )
         elif calcType == MCalcObject.CalculationType.StandardDeviation:
             if values:
                 field.setText(int(MUtil.stdDeviation(values), 'f'))
-                if record and fillRecord:
-                    record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                    "_" + field.getFieldName(), field.getText())
+                if record and fRec:
+                    record.toElement().setAttribute(
+                        self.strIdSec_ + int(self.level_) + "_" + fn,
+                        field.getText()
+                    )
         elif calcType == MCalcObject.CalculationType.NoOperation:
             field.setText(values2)
-            if fillRecord and values2 != "":
-                record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                "_" + field.getFieldName(), field.getText())
+            if fRec and values2 != "":
+                record.toElement().setAttribute(
+                    self.strIdSec_ + int(self.level_) + "_" + fn,
+                    field.getText()
+                )
         elif calcType == MCalcObject.CalculationType.CallFunction:
             if record and field.getCalculationFunction() != "":
                 dni = FLDomNodeInterface(record)
-                argList = Qt.QSArgumentList()
+                argList = QtCore.QSArgumentList()
                 argList << dni
-                argList << field.getFieldName()
+                argList << fn
 
                 v = field.getCalculationFunction()(*argList)
 
                 if v and str(v).upper() != "NAN":
                     field.setText(str(v))
 
-                    if fillRecord and field.getDataType() != MCalcObject.CalculationType.Pixmap:
-                        record.toElement().setAttribute(self.strIdSec_ + int(self.level_) +
-                                                        "_" + field.getCalculationFunction(), field.getText())
+                    px = MCalcObject.CalculationType.Pixmap
+                    if fRec and field.getDataType() != px:
+                        cf = field.getCalculationFunction()
+                        record.toElement().setAttribute(
+                            self.strIdSec_ + int(self.level_) + "_" + cf,
+                            field.getText()
+                        )
                 del dni
 
         if record:
@@ -208,25 +252,23 @@ class MReportSection(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def getCalcFieldIndex(self, field):
-        tmpField = self.calculatedFields_.first()
-        while tmpField != 0:
-            if tmpField.getFieldName() == field:
-                break
-
-            tmpField = self.calculatedFields_.next()
-
-        return self.calculatedFields_.at()
+        i = 0
+        for tmpField in self.calculatedFields_:
+            if tmpField != 0:
+                if tmpField.getFieldName() == field:
+                    return i
+            i += 1
+        return i
 
     @decorators.BetaImplementation
     def getFieldIndex(self, field):
-        tmpField = self.fields_.first()
-        while tmpField != 0:
-            if tmpField.getFieldName() == field:
-                break
-
-            tmpField = self.fields_.next()
-
-        return self.fields_.at()
+        i = 0
+        for tmpField in self.fields_:
+            if tmpField != 0:
+                if tmpField.getFieldName() == field:
+                    return i
+            i += 1
+        return i
 
     @decorators.BetaImplementation
     def draw(self, p, xoffset, yoffset, newHeight):
@@ -246,31 +288,38 @@ class MReportSection(ProjectClass, QObject):
 
         if currentPage != lastPage:
             p.painter().end()
-            currentPageCopy = Qt.QPicture(currentPage)
-            lastPageCopy = Qt.QPicture(lastPage)
+            currentPageCopy = QtGui.QPicture(currentPage)
+            lastPageCopy = QtGui.QPicture(lastPage)
             p.painter().begin(lastPage)
             lastPageCopy.play(p.painter())
 
-        # Qt.QObject.setName("_##H{}-{}".format(self.strIdSec_, str(self.level_)))
         self.setName("_##H{}-{}".format(self.strIdSec_, str(self.level_)))
         p.beginSection(xcalc, ycalc, self.width_, self.height_, self)
         countObj = 0
 
-        calcField = self.calculatedFields_.first()
-        while calcField != 0:
-            if calcField.getDrawAtHeader():
-                if calcField.getObjectId():
-                    calcField.setName(
-                        "_##H{}-Calc.{}-{}".format(self.idSec_, calcField.fieldName_, calcField.getObjectId()))
-                else:
-                    calcField.setName(
-                        "_##H{}-Calc.{}-{}".format(self.idSec_, calcField.fieldName_, countObj))
-                    countObj = countObj + 1
-            p.beginMark(calcField.getX(), calcField.getY(), calcField)
-            calcField.draw(p)
-            p.endMark()
-
-            calcField = self.calculatedFields_.next()
+        for calcField in self.calculatedFields_:
+            if calcField != 0:
+                if calcField.getDrawAtHeader():
+                    if calcField.getObjectId():
+                        calcField.setName(
+                            "_##H{}-Calc.{}-{}".format(
+                                self.idSec_,
+                                calcField.fieldName_,
+                                calcField.getObjectId()
+                            )
+                        )
+                    else:
+                        calcField.setName(
+                            "_##H{}-Calc.{}-{}".format(
+                                self.idSec_,
+                                calcField.fieldName_,
+                                countObj
+                            )
+                        )
+                        countObj += 1
+                p.beginMark(calcField.getX(), calcField.getY(), calcField)
+                calcField.draw(p)
+                p.endMark()
 
         p.endSection()
 
@@ -293,100 +342,130 @@ class MReportSection(ProjectClass, QObject):
         countObj = 0
         yObjectPos = 0
 
-        line = self.lines_.first()
-        while line != 0:
-            if line.getObjectId():
-                line.setName(
-                    "_##Line{}-{}".format(self.idSec_, line.getObjectId()))
-            else:
-                line.setName("_##Line{}-{}".format(self.idSec_, countObj))
-                countObj = countObj + 1
-            p.beginMark(line.xpos1_, line.ypos1_, line)
-            line.draw(p)
-            p.endMark()
+        for line in self.lines_:
+            if line != 0:
+                if line.getObjectId():
+                    line.setName(
+                        "_##Line{}-{}".format(self.idSec_, line.getObjectId()))
+                else:
+                    line.setName("_##Line{}-{}".format(self.idSec_, countObj))
+                    countObj += 1
+                p.beginMark(line.xpos1_, line.ypos1_, line)
+                line.draw(p)
+                p.endMark()
 
-            line = self.lines_.next()
+        for label in self.labels_:
+            if label != 0:
+                if label.getObjectId():
+                    label.setName(
+                        "_##Label{}-{}".format(
+                            self.idSec_,
+                            label.getObjectId()
+                        )
+                    )
+                else:
+                    label.setName(
+                        "_##Label{}-{}".format(self.idSec_, countObj)
+                    )
+                    countObj += 1
+                ly = label.getY()
+                lh = label.getHeight()
+                ldab = label.getDrawAtBottom()
+                yObjectPos = newHeight - lh if ldab else ly
+                p.beginMark(label.getX(), yObjectPos, label)
+                modifiedHeight = label.draw(p)
+                p.endMark()
 
-        label = self.labels_.first()
-        while label != 0:
-            if label.getObjectId():
-                label.setName(
-                    "_##Label{}-{}".format(self.idSec_, label.getObjectId()))
-            else:
-                label.setName("_##Label{}-{}".format(self.idSec_, countObj))
-                countObj = countObj + 1
-            yObjectPos = newHeight - label.getHeight() if label.getDrawAtBottom() else label.getY()
-            p.beginMark(label.getX(), yObjectPos, label)
-            modifiedHeight = label.draw(p)
-            p.endMark()
+                if modifiedHeight and (ly + modifiedHeight) > self.height_:
+                    newHeight = label.getY() + modifiedHeight
 
-            if modifiedHeight and (label.getY() + modifiedHeight) > self.height_:
-                newHeight = label.getY() + modifiedHeight
+        for calcfield in self.calculatedFields_:
+            if calcfield != 0:
+                if calcfield.getObjectId():
+                    calcfield.setName(
+                        "_##{}-Calc.{}-{}".format(
+                            self.idSec_,
+                            calcfield.fieldName_,
+                            calcfield.getObjectId()
+                        )
+                    )
+                else:
+                    calcfield.setName(
+                        "_##{}-Calc.{}-{}".format(
+                            self.idSec_,
+                            calcfield.fieldName_,
+                            countObj
+                        )
+                    )
+                    countObj += 1
+                ch = calcfield.getHeight()
+                cy = calcfield.getY()
+                cdab = calcfield.getDrawAtBottom()
+                yObjectPos = newHeight - ch if cdab else cy
+                p.beginMark(calcfield.getX(), yObjectPos, calcfield)
+                modifiedHeight = calcfield.draw(p)
+                p.endMark()
 
-            label = self.labels_.next()
+                if modifiedHeight and (cy + modifiedHeight) > self.height_:
+                    newHeight = calcfield.getY() + modifiedHeight
 
-        calcfield = self.calculatedFields_.first()
-        while calcfield != 0:
-            if calcfield.getObjectId():
-                calcfield.setName("_##{}-Calc.{}-{}".format(self.idSec_,
-                                                            calcfield.fieldName_, calcfield.getObjectId()))
-            else:
-                calcfield.setName(
-                    "_##{}-Calc.{}-{}".format(self.idSec_, calcfield.fieldName_, countObj))
-                countObj = countObj + 1
-            yObjectPos = newHeight - \
-                calcfield.getHeight() if calcfield.getDrawAtBottom() else calcfield.getY()
-            p.beginMark(calcfield.getX(), yObjectPos, calcfield)
-            modifiedHeight = calcfield.draw(p)
-            p.endMark()
+        for special in self.specialFields_:
+            if special != 0:
+                if special.getObjectId():
+                    special.setName(
+                        "_##SpecialField{}-{}".format(
+                            self.idSec_,
+                            special.getObjectId()
+                        )
+                    )
+                else:
+                    special.setName(
+                        "_##SpecialField{}-{}".format(self.idSec_, countObj))
+                    countObj += 1
+                sh = special.getHeight()
+                sdab = special.getDrawAtBottom()
+                sy = special.getY()
+                yObjectPos = newHeight - sh if sdab else sy
+                p.beginMark(special.getX(), yObjectPos, special)
 
-            if modifiedHeight and (calcfield.getY() + modifiedHeight) > self.height_:
-                newHeight = calcfield.getY() + modifiedHeight
+                spType = special.getType()
+                if spType == MSpecialObject.DataType.Date:
+                    special.setText(self.reportDate_)
+                elif spType == MSpecialObject.DataType.pageNumber:
+                    special.setText(self.pageNumber_)
 
-            calcfield = self.calculatedFields_.next()
+                special.draw(p)
+                p.endMark()
 
-        special = self.specialFields_.first()
-        while special != 0:
-            if special.getObjectId():
-                special.setName(
-                    "_##SpecialField{}-{}".format(self.idSec_, special.getObjectId()))
-            else:
-                special.setName(
-                    "_##SpecialField{}-{}".format(self.idSec_, countObj))
-                countObj = countObj + 1
-            yObjectPos = newHeight - \
-                special.getHeight() if special.getDrawAtBottom() else special.getY()
-            p.beginMark(special.getX(), yObjectPos, special)
+        for field in self.fields_:
+            if field != 0:
+                if field.getObjectId():
+                    field.setName(
+                        "_##{}.{}-{}".format(
+                            self.idSec_,
+                            field.fieldName_,
+                            field.getObjectId()
+                        )
+                    )
+                else:
+                    field.setName(
+                        "_##{}.{}-{}".format(
+                            self.idSec_,
+                            field.fieldName_,
+                            countObj
+                        )
+                    )
+                    countObj += 1
+                fh = field.getHeight()
+                fy = field.getY()
+                fdab = field.getDrawAtBottom()
+                yObjectPos = newHeight - fh if fdab else fy
+                p.beginMark(field.getX(), yObjectPos, field)
+                modifiedHeight = field.draw(p)
+                p.endMark()
 
-            spType = special.getType()
-            if spType == MSpecialObject.DataType.Date:
-                special.setText(self.reportDate_)
-            elif spType == MSpecialObject.DataType.pageNumber:
-                special.setText(self.pageNumber_)
-
-            special.draw(p)
-            p.endMark()
-
-            special = self.specialFields_.next()
-
-        field = self.fields_.first()
-        while field != 0:
-            if field.getObjectId():
-                field.setName("_##{}.{}-{}".format(self.idSec_,
-                                                   field.fieldName_, field.getObjectId()))
-            else:
-                field.setName("_##{}.{}-{}".format(self.idSec_,
-                                                   field.fieldName_, countObj))
-                countObj = countObj + 1
-            yObjectPos = newHeight - field.getHeight() if field.getDrawAtBottom() else field.getY()
-            p.beginMark(field.getX(), yObjectPos, field)
-            modifiedHeight = field.draw(p)
-            p.endMark()
-
-            if modifiedHeight and (field.getY() + modifiedHeight) > self.height_:
-                newHeight = field.getY() + modifiedHeight
-
-            field = self.fields_.next()
+                if modifiedHeight and (fy + modifiedHeight) > self.height_:
+                    newHeight = field.getY() + modifiedHeight
 
         p.endSection()
 
@@ -394,27 +473,58 @@ class MReportSection(ProjectClass, QObject):
     def csvData(self):
         csvData = ""
 
-        calcfield = self.calculatedFields_.first()
-        while calcfield != 0:
-            calcType = calcfield.getCalculationType()
-            if calcType == MCalcObject.CalculationType.NoOperation or calcType == MCalcObject.CalculationType.CallFunction:
-                fieldValue = calcfield.getText()
+        for calcfield in self.calculatedFields_:
+            if calcfield != 0:
+                calcType = calcfield.getCalculationType()
+                no = MCalcObject.CalculationType.NoOperation
+                cf = MCalcObject.CalculationType.CallFunction
+                if calcType == no or calcType == cf:
+                    fieldValue = calcfield.getText()
+                    fieldValue.replace("\n", "-")
+                    csvData = csvData + "|" + fieldValue
+
+        for field in self.fields_:
+            if field != 0:
+                fieldValue = field.getText()
                 fieldValue.replace("\n", "-")
                 csvData = csvData + "|" + fieldValue
 
-            calcfield = self.calculatedFields_.next()
-
-        field = self.fields_.first()
-        while field != 0:
-            fieldValue = field.getText()
-            fieldValue.replace("\n", "-")
-            csvData = csvData + "|" + fieldValue
-
-            field = self.fields_.next()
-
     @decorators.BetaImplementation
-    def resetIdSecGlob(self):
-        self.idSecGlob_ = 0
+    def getHeight(self, p=None):
+        if p is None:
+            return self.height_
+
+        modifiedHeight = 0
+        newHeight = self.height_
+
+        for label in self.labels_:
+            if label != 0:
+                modifiedHeight = label.calcHeight(p)
+                ly = label.getY()
+                if modifiedHeight and (ly + modifiedHeight) > self.height_:
+                    newHeight = label.getY() + modifiedHeight
+
+        for calcfield in self.calculatedFields_:
+            if calcfield != 0:
+                if not calcfield.getDrawAtHeader():
+                    modifiedHeight = calcfield.calcHeight(p)
+                    cy = calcfield.getY()
+                    if modifiedHeight and (cy + modifiedHeight) > self.height_:
+                        newHeight = calcfield.getY() + modifiedHeight
+
+        for field in self.fields_:
+            if field != 0:
+                modifiedHeight = field.calcHeight(p)
+                fy = field.getY()
+                if modifiedHeight and (fy + modifiedHeight) > self.height_:
+                    newHeight = field.getY() + modifiedHeight
+
+        return newHeight
+
+    @classmethod
+    @decorators.BetaImplementation
+    def resetIdSecGlob(cls):
+        cls.idSecGlob_ = 0
 
     @decorators.BetaImplementation
     def copy(self, mrs):
@@ -439,42 +549,6 @@ class MReportSection(ProjectClass, QObject):
     @decorators.BetaImplementation
     def idSec(self):
         return self.idSec_
-
-    @decorators.BetaImplementation
-    def _getHeight_oldImplementation(self, p):
-        modifiedHeight = 0
-        newHeight = self.height_
-
-        label = self.labels_.first()
-        while label != 0:
-            modifiedHeight = label.calcHeight(p)
-            if modifiedHeight and (label.getY() + modifiedHeight) > self.height_:
-                newHeight = label.getY() + modifiedHeight
-
-            label = self.labels_.next()
-
-        calcfield = self.calculatedFields_.first()
-        while calcfield != 0:
-            if not calcfield.getDrawAtHeader():
-                modifiedHeight = calcfield.calcHeight(p)
-                if modifiedHeight and (calcfield.getY() + modifiedHeight) > self.height_:
-                    newHeight = calcfield.getY() + modifiedHeight
-
-            calcfield = self.calculatedFields_.next()
-
-        field = self.fields_.first()
-        while field != 0:
-            modifiedHeight = field.calcHeight(p)
-            if modifiedHeight and (field.getY() + modifiedHeight) > self.height_:
-                newHeight = field.getY() + modifiedHeight
-
-            field = self.fields_.next()
-
-        return newHeight
-
-    @decorators.BetaImplementation
-    def getHeight(self):
-        return self.height_
 
     @decorators.BetaImplementation
     def getWidth(self):
@@ -570,7 +644,7 @@ class MReportSection(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def getCalcFieldCount(self):
-        return self.calculatedFields_.count()
+        return len(self.calculatedFields_)
 
     @decorators.BetaImplementation
     def getFieldCount(self):
@@ -585,39 +659,17 @@ class MReportSection(ProjectClass, QObject):
         return self.calculatedFields_.at(idx).getFieldName()
 
     @decorators.BetaImplementation
-    def setCalcFieldData(self, idx, data):
-        self.calculatedFields_.at(idx).setText(data)
-
-    @decorators.BetaImplementation
-    def setCalcFieldData__2(self, values=0, values2=0, record=0, fillRecord=False):
-        i = 0
-        value = ""
-
-        field = self.calculatedFields_.first()
-        while field != 0:
-            if field.getFromGrandTotal():
-                continue
-
-            calcType = field.getCalculationType()
-
-            if calcType == MCalcObject.CalculationType.NoOperation:
-                if values2:
-                    value = values2[i]
-                self.calculateField(field, 0, value, record, fillRecord)
-            elif calcType == MCalcObject.CalculationType.CallFunction:
-                self.calculateField(field, 0, value, record, fillRecord)
-            else:
-                if values:
-                    self.calculateField(field, values.at(
-                        i), value, record, fillRecord)
-
-            i = i + 1
-            field = self.calculatedFields_.next()
-
-    @decorators.BetaImplementation
     def getField(self, idx):
         return self.fields_.at(idx)
 
     @decorators.BetaImplementation
     def getCalcField(self, idx):
         return self.calculatedFields_.at(idx)
+
+    @decorators.BetaImplementation
+    def setName(self, name):
+        self.objectName = name
+
+    @decorators.BetaImplementation
+    def name(self):
+        return self.objectName

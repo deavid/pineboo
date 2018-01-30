@@ -140,11 +140,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         col = index.column()
         field = self.metadata().indexFieldObject(col)
         _type = field.type()
-        r = None
 
-        if r is None:
-            r = [str(x) for x in self._data[row]]
-            self._data[row] = r
+        r = [x for x in self._data[row]]
+        self._data[row] = r
         d = r[col]
 
         if role == QtCore.Qt.TextAlignmentRole:
@@ -160,14 +158,19 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if role == DisplayRole or role == EditRole:
             # r = self._vdata[row]
             if _type == "bool":
-                if d in ("True", "1"):
+                if d in (True, "1"):
                     d = "Sí"
                 else:
                     d = "No"
 
-            if _type in ("unlock", "pixmap"):
-                # FIXME: Aquí cargaremos imagen en el futuro
+            elif _type in ("unlock", "pixmap"):
                 d = None
+
+            elif _type in ("string", "stringlist") and not d:
+                d = ""
+
+            elif _type in ("date", "time") and d:
+                d = str(d)
 
             return d
 
@@ -175,7 +178,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             icon = None
             if _type == "unlock":
 
-                if d in ("True", "1"):
+                if d in (True, "1"):
                     icon = QtGui.QIcon(filedir("../share/icons", "unlock.png"))
                 else:
                     icon = QtGui.QIcon(filedir("../share/icons", "lock.png"))
@@ -187,7 +190,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         if role == QtCore.Qt.BackgroundRole:
             if _type == "bool":
-                if d in ("True", "1"):
+                if d in (True, "1"):
                     d = QtGui.QBrush(QtCore.Qt.green)
                 else:
                     d = QtGui.QBrush(QtCore.Qt.red)
@@ -197,7 +200,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             return d
 
         if role == QtCore.Qt.ForegroundRole:
-            if _type == "bool" and d not in ("True", "1"):
+            if _type == "bool" and d not in (True, "1"):
                 d = QtGui.QBrush(QtCore.Qt.white)
             else:
                 d = None

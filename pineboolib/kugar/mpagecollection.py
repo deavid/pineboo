@@ -1,4 +1,5 @@
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -13,13 +14,13 @@ class MPageCollection(ProjectClass):
         else:
             from pineboolib.kugar.mreportengine import MReportEngine
 
-            super(MPageCollection, self).__init__(*args if len(args) else 0)
+            super(MPageCollection, self).__init__()
 
-            self.pages_ = Qt.QPtrList()
-            self.pages_.setAutoDelete(True)
+            self.pages_ = []
+            # self.pages_.setAutoDelete(True) #FIXME
             self.size_ = MReportEngine.PageSize.Letter
             self.orientation_ = MReportEngine.PageOrientation.Portrait
-            self.dimensions_ = Qt.QSize()
+            self.dimensions_ = QtCore.QSize()
             self.dimensions_.setWidth(0)
             self.dimensions_.setHeight(0)
             self.printToPos_ = False
@@ -27,53 +28,62 @@ class MPageCollection(ProjectClass):
             self.leftMargin_ = None
             self.bottomMargin_ = None
             self.rightMargin_ = None
+            self.pageIdx_ = None
 
     @decorators.BetaImplementation
     def clear(self):
         self.pages_.clear()
+        self.pageIdx_ = None
 
     @decorators.BetaImplementation
     def appendPage(self):
-        self.pages_.append(Qt.QPicture())
+        self.pageIdx_ = self.pageIdx_ if self.pageIdx_ else 0
+        self.pages_.append(QtGui.QPicture())
 
     @decorators.BetaImplementation
     def copy(self, mpc):
         self.pages_ = mpc.pages_
+        self.pageIdx_ = mpc.pageIdx_
         self.dimensions_ = mpc.dimensions_
         self.size_ = mpc.size_
         self.orientation_ = mpc.orientation_
 
     @decorators.BetaImplementation
     def getCurrentPage(self):
-        return self.pages_.current()
+        return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
     def getFirstPage(self):
-        return self.pages_.first()
+        self.pageIdx_ = 0
+        return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
     def getPreviousPage(self):
-        return self.pages_.prev()
+        self.pageIdx_ -= 1
+        return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
     def getNextPage(self):
-        return self.pages_.next()
+        self.pageIdx_ += 1
+        return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
     def getLastPage(self):
-        return self.pages_.last()
+        self.pageIdx_ = len(self.pages_) - 1 if len(self.pages_) else 0
+        return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
     def getPageAt(self, i):
-        return self.pages_.at(i)
+        self.pageIdx_ = i
+        return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
     def getCurrentIndex(self):
-        return self.pages_.at()
+        return self.pageIdx_
 
     @decorators.BetaImplementation
     def setCurrentPage(self, idx):
-        self.pages_.at(idx)
+        self.pageIdx_ = idx
 
     @decorators.BetaImplementation
     def setPageSize(self, s):
@@ -120,4 +130,8 @@ class MPageCollection(ProjectClass):
 
     @decorators.BetaImplementation
     def pageMargins(self):
-        return self.topMargin_, self.leftMargin_, self.bottomMargin_, self.rightMargin_
+        tm = self.topMargin_
+        lm = self.leftMargin_
+        bm = self.bottomMargin_
+        rm = self.rightMargin_
+        return tm, lm, bm, rm

@@ -2,7 +2,7 @@
 
 # Completa Si
 
-from pineboolib.fllegacy.FLSqlDatabase import FLSqlDatabase
+from pineboolib.fllegacy.FLSqlDatabase_deprecated import FLSqlDatabase
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
 
@@ -30,6 +30,7 @@ La conexión por defecto tendrá el nombre "default".
 
 class FLSqlConnections():
 
+    @classmethod
     @decorators.BetaImplementation
     def addDatabase(self, *args, **kwargs):
         if isinstance(args[0], QString):
@@ -59,6 +60,7 @@ class FLSqlConnections():
                         driver de base de datos.
     @return TRUE si se pudo realizar la conexión, FALSE en caso contrario
     """
+    @classmethod
     @decorators.BetaImplementation
     def addDatabase1(self, driverAlias, nameDB, user, password, host, port, connectionName, connectOptions=None):
 
@@ -84,6 +86,7 @@ class FLSqlConnections():
     @param connectionName Nombre de la conexion
     @return TRUE si se pudo realizar la conexión, FALSE en caso contrario
     """
+    @classmethod
     @decorators.BetaImplementation
     def addDatabase2(self, db, connectionName="default"):
         if not self.d:
@@ -110,6 +113,7 @@ class FLSqlConnections():
     @param connectionName Nombre de la conexion
     @return TRUE si se pudo eliminar la base de datos, FALSE en caso contrario
     """
+    @classmethod
     @decorators.BetaImplementation
     def removeDatabase(self, connectionName):
         if not self.d or not self.d.dictDB:
@@ -126,6 +130,7 @@ class FLSqlConnections():
     @param connectionNmae Nombre de la conexion
     @return La base de datos correspondiente al nombre de conexion indicado
     """
+    @classmethod
     @decorators.BetaImplementation
     def database(self, connectionName="default"):
         if not self.d:
@@ -155,6 +160,7 @@ class FLSqlConnections():
     """
     Finalizar todas las conexiones
     """
+    @classmethod
     @decorators.BetaImplementation
     def finish(self):
         del self.d
@@ -162,6 +168,7 @@ class FLSqlConnections():
     """
     @return Diccionario con las bases de datos abiertas
     """
+    @classmethod
     @decorators.BetaImplementation
     def dictDatabases(self):
         if self.d and self.d.dictDB:

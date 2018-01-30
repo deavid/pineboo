@@ -1,11 +1,13 @@
 from enum import Enum
 
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtPrintSupport
 from PyQt5.QtCore import Qt
-from PyQt5.Qt import QWidget
+from PyQt5.QtWidgets import QWidget
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.kugar.mpagecollection import MPageCollection
 from pineboolib.kugar.mpagedisplay import MPageDisplay
@@ -15,9 +17,11 @@ from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 
 
-class MReportViewer(ProjectClass, QWidget):
+class MReportViewer(QWidget):
 
     M_PROGRESS_DELAY = 1000
+
+    preferedTemplate = QtCore.pyqtSignal()
 
     class RenderReportFlags(Enum):
         Append = 0
@@ -31,8 +35,7 @@ class MReportViewer(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
     def __init__(self, parent=0, name=0):
-        ProjectClass.__init__(self)
-        QWidget.__init__(self, parent)
+        super(MReportViewer, self).__init__(parent)
 
         self.progress_ = 0
         self.totalSteps_ = 0
@@ -45,15 +48,19 @@ class MReportViewer(ProjectClass, QWidget):
         self.colorMode_ = self.PrinterColorMode.PrintColor
 
         self.psprinter_ = 0
-        self.scroller_ = Qt.QScrollView(self)
+        self.scroller_ = QtWidgets.QScrollArea(self)
         self.rptEngine_ = 0
         self.report_ = MPageCollection(self)
         self.p_ = QtWidgets.QApplication.palette()
-        self.g_ = self.p_.active()
-        self.scroller_.viewport().setBackgroundColor(self.g_.mid())
+        # self.g_ = self.p_.active()
+        pal = self.scroller_.viewport().palette()
+        pal.setBrush(QtGui.QPalette.Background, self.p_.mid())
+        self.scroller_.viewport().setPalette(pal)
         self.display_ = MPageDisplay(self.scroller_.viewport())
-        self.display_.setBackgroundColor(Qt.white)
-        self.scroller_.addChild(self.display_)
+        pal = self.display_.palette()
+        pal.setColor(QtGui.QPalette.Background, Qt.white)
+        self.display_.setPalette(pal)
+        self.scroller_.setWidget(self.display_)
         self.display_.hide()
 
     @decorators.BetaImplementation
@@ -98,23 +105,30 @@ class MReportViewer(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
     def setReportData(self, data):
-        return self.rptEngine_.setReportData(data) if self.rptEngine_ else False
+        if not self.rptEngine_:
+            return False
+        return self.rptEngine_.setReportData(data)
 
     @decorators.BetaImplementation
     def setReportTemplate(self, tpl):
-        return self.rptEngine_.setReportTemplate(tpl) if self.rptEngine_ else False
+        if not self.rptEngine_:
+            return False
+        return self.rptEngine_.setReportTemplate(tpl)
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, append=False, displayReport=None):
+    def renderReport(self, initRow=0, initCol=0, append=False, dispRpt=None):
+        ap = MReportViewer.RenderReportFlags.Append.value
+        dp = MReportViewer.RenderReportFlags.Display.value
+
         flags = None
-        if displayReport is None:
+        if dispRpt is None:
             flags = append
         else:
-            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(
-                MReportViewer.RenderReportFlags.Display if displayReport else 0)
+            flags = ap if append else 0
+            flags = flags | int(dp if dispRpt else 0)
 
-        append = flags & MReportViewer.RenderReportFlags.Append
-        displayReport = flags & MReportViewer.RenderReportFlags.Display
+        append = flags & ap
+        dispRpt = flags & dp
 
         if not self.rptEngine_:
             return False
@@ -129,18 +143,20 @@ class MReportViewer(ProjectClass, QWidget):
 
         self.report_ = self.rptEngine_.renderReport(
             initRow, initCol, self.report_, flags)
-        self.insertChild(self.report_)
+        # self.insertChild(self.report_) # FIXME
 
-        if displayReport:
+        if dispRpt:
             self.printToPos_ = self.report_.printToPos()
 
         if self.progress_:
             self.progress_.deleteLater()
             self.progress_ = 0
 
-        if displayReport and self.report_ != 0 and self.report_.getFirstPage() != 0:
+        fp = self.report_.getFirstPage()
+        # if dispRpt and self.report_ != 0 and fp != 0: # FIXME
+        if True and self.report_ != 0 and fp != 0:
             self.display_.setPageDimensions(self.report_.pageDimensions())
-            self.display_.setPage(self.report_.getFirstPage())
+            self.display_.setPage(fp)
             self.display_.show()
             return True
 
@@ -191,11 +207,11 @@ class MReportViewer(ProjectClass, QWidget):
         self.posprinter_.setPaperWidth(self.report_.pageSize())
         self.posprinter_.setPrinterName(self.printerName_)
 
-        painter = Qt.QPainter()
+        painter = QtGui.QPainter()
         viewIdx = self.report_.getCurrentIndex()
 
         painter.begin(self.posprinter_)
-        pdm = Qt.QPaintDeviceMetrics(self.posprinter_)
+        pdm = self.posprinter_.device()
         dim = self.report_.pageDimensions()
         painter.setWindow(0, 0, dim.width(), dim.height())
         painter.setViewport(0, 0, pdm.width(), pdm.height())
@@ -219,19 +235,21 @@ class MReportViewer(ProjectClass, QWidget):
 
         gs = QtWidgets.QApplication.gsExecutable()
         gsOk = False
-        procTemp = Qt.QProcess()
+        procTemp = QtCore.QProcess()
         procTemp.addArgument(gs)
         procTemp.addArgument("--version")
         gsOk = procTemp.start()
         del procTemp
 
         if not gsOk:
-            m = Qt.QMessageBox(
+            m = QtCore.QMessageBox(
                 FLUtil.translate(self, "app", "Falta Ghostscript"),
                 FLUtil.translate(
                     self, "app",
-                    "Para poder exportar a PDF debe instalar Ghostscript (http://www.ghostscript.com) y añadir\n"
-                    "el directorio de instalación a la ruta de búsqueda de programas\ndel sistema (PATH).\n\n"),
+                    "Para poder exportar a PDF debe instalar Ghostscript"
+                    "(http://www.ghostscript.com) y añadir\n"
+                    "el directorio de instalación a la ruta de"
+                    "búsqueda de programas\ndel sistema (PATH).\n\n"),
                 Qt.QMessageBox.Critical,
                 Qt.QMessageBox.Ok,
                 Qt.QMessageBox.NoButton,
@@ -246,13 +264,13 @@ class MReportViewer(ProjectClass, QWidget):
         outPsFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/outprintpdf.ps"
         outPsPdfFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/outprintps.pdf"
 
-        Qt.QFile.remove(outPsFile)
-        Qt.QFile.remove(outPsPdfFile)
+        QtCore.QFile.remove(outPsFile)
+        QtCore.QFile.remove(outPsPdfFile)
 
         if not self.printReportToPs(outPsFile):
             return False
 
-        proc = Qt.QProcess()
+        proc = QtCore.QProcess()
         proc.addArgument(gs)
         proc.addArgument("-q")
         proc.addArgument("-dBATCH")
@@ -267,35 +285,35 @@ class MReportViewer(ProjectClass, QWidget):
         proc.addArgument("-r{}".format(self.dpi_))
 
         ps = self.report_.pageSize()
-        if ps == Qt.QPrinter.PageSize.A0:
+        if ps == QtPrintSupport.QPrinter.PageSize.A0:
             proc.addArgument("-sPAPERSIZE=a0")
-        elif ps == Qt.QPrinter.PageSize.A1:
+        elif ps == QtPrintSupport.QPrinter.PageSize.A1:
             proc.addArgument("-sPAPERSIZE=a1")
-        elif ps == Qt.QPrinter.PageSize.A2:
+        elif ps == QtPrintSupport.QPrinter.PageSize.A2:
             proc.addArgument("-sPAPERSIZE=a2")
-        elif ps == Qt.QPrinter.PageSize.A3:
+        elif ps == QtPrintSupport.QPrinter.PageSize.A3:
             proc.addArgument("-sPAPERSIZE=a3")
-        elif ps == Qt.QPrinter.PageSize.A4:
+        elif ps == QtPrintSupport.QPrinter.PageSize.A4:
             proc.addArgument("-sPAPERSIZE=a4")
-        elif ps == Qt.QPrinter.PageSize.A5:
+        elif ps == QtPrintSupport.QPrinter.PageSize.A5:
             proc.addArgument("-sPAPERSIZE=a5")
-        elif ps == Qt.QPrinter.PageSize.B0:
+        elif ps == QtPrintSupport.QPrinter.PageSize.B0:
             proc.addArgument("-sPAPERSIZE=b0")
-        elif ps == Qt.QPrinter.PageSize.B1:
+        elif ps == QtPrintSupport.QPrinter.PageSize.B1:
             proc.addArgument("-sPAPERSIZE=b1")
-        elif ps == Qt.QPrinter.PageSize.B2:
+        elif ps == QtPrintSupport.QPrinter.PageSize.B2:
             proc.addArgument("-sPAPERSIZE=b2")
-        elif ps == Qt.QPrinter.PageSize.B3:
+        elif ps == QtPrintSupport.QPrinter.PageSize.B3:
             proc.addArgument("-sPAPERSIZE=b3")
-        elif ps == Qt.QPrinter.PageSize.B4:
+        elif ps == QtPrintSupport.QPrinter.PageSize.B4:
             proc.addArgument("-sPAPERSIZE=b4")
-        elif ps == Qt.QPrinter.PageSize.B5:
+        elif ps == QtPrintSupport.QPrinter.PageSize.B5:
             proc.addArgument("-sPAPERSIZE=b5")
-        elif ps == Qt.QPrinter.PageSize.Legal:
+        elif ps == QtPrintSupport.QPrinter.PageSize.Legal:
             proc.addArgument("-sPAPERSIZE=legal")
-        elif ps == Qt.QPrinter.PageSize.Letter:
+        elif ps == QtPrintSupport.QPrinter.PageSize.Letter:
             proc.addArgument("-sPAPERSIZE=letter")
-        elif ps == Qt.QPrinter.PageSize.Executive:
+        elif ps == QtPrintSupport.QPrinter.PageSize.Executive:
             proc.addArgument("-sPAPERSIZE=executive")
         else:
             sz = self.report_.pageDimensions()
@@ -318,7 +336,7 @@ class MReportViewer(ProjectClass, QWidget):
 
         QtWidgets.QApplication.processEvents()
 
-        proc = Qt.QProcess()
+        proc = QtCore.QProcess()
         proc.addArgument(gs)
         proc.addArgument("-q")
         proc.addArgument("-dBATCH")
@@ -356,20 +374,22 @@ class MReportViewer(ProjectClass, QWidget):
         cnt = self.report_.pageCount()
 
         if cnt == 0:
-            Qt.QMessageBox.critical(
+            QtCore.QMessageBox.critical(
                 self,
                 "Kugar",
                 FLUtil.translate(
                     self, "app", "No hay páginas en el\ninforme para."),
-                Qt.QMessageBox.Ok,
-                Qt.QMessageBox.NoButton,
-                Qt.QMessageBox.NoButton
+                QtCore.QMessageBox.Ok,
+                QtCore.QMessageBox.NoButton,
+                QtCore.QMessageBox.NoButton
             )
             return False
 
-        self.printer_ = Qt.QPrinter(Qt.QPrinter.PrinterMode.HighResolution)
+        self.printer_ = QtPrintSupport.QPrinter(
+            QtPrintSupport.QPrinter.PrinterMode.HighResolution
+        )
         self.printer_.setPageSize(self.report_.pageSize())
-        if self.printer_.pageSize() == Qt.QPrinter.PageSize.Custom:
+        if self.printer_.pageSize() == QtPrintSupport.QPrinter.PageSize.Custom:
             self.printer_.setCustomPaperSize(self.report_.pageDimensions())
         self.printer_.setOrientation(self.report_.pageOrientation())
         self.printer_.setMinMax(1, cnt)
@@ -380,12 +400,13 @@ class MReportViewer(ProjectClass, QWidget):
         self.printer_.setOutputToFile(True)
         self.printer_.setOutputFileName(outPsFile)
 
-        painter = Qt.QPainter()
+        painter = QtGui.QPainter()
         printRev = False
 
         viewIdx = self.report_.getCurrentIndex()
 
-        if self.printer_.pageOrder() == Qt.QPrinter.PageOrder.LastPageFirst:
+        lpf = QtPrintSupport.QPrinter.PageOrder.LastPageFirst
+        if self.printer_.pageOrder() == lpf:
             printRev = True
 
         printFrom = self.printer_.fromPage() - 1
@@ -398,21 +419,19 @@ class MReportViewer(ProjectClass, QWidget):
         self.printer_.setNumCopies(self.numCopies_)
         self.printer_.setResolution(self.dpi_)
 
-        self.progress_ = Qt.QProgressDialog(
+        util = FLUtil()
+
+        self.progress_ = util.createProgressDialog(
             FLUtil.translate(self, "app", "Imprimiendo Informe..."),
-            FLUtil.translate(self, "app", "Cancelar"),
-            self.totalSteps_,
-            self,
-            FLUtil.translate(self, "app", "progreso"),
-            True
+            self.totalSteps_
         )
-        self.progress_.setMinimunDuration(self.M_PROGRESS_DELAY)
-        self.progress_.cancelled.connect(self.slotCancelPrinting)
-        self.progress_.setProgress(0)
+        # self.progress_.setMinimunDuration(self.M_PROGRESS_DELAY)
+        self.progress_.canceled.connect(self.slotCancelPrinting)
+        util.setProgress(0)
         QtWidgets.QApplication.processEvents()
 
         painter.begin(self.printer_)
-        pdm = Qt.QPaintDeviceMetrics(self.printer_)
+        pdm = self.printer_.device()
         dim = self.report_.pageDimensions()
         painter.setWindow(0, 0, dim.width(), dim.height())
         painter.setViewport(0, 0, pdm.width(), pdm.height())
@@ -421,7 +440,7 @@ class MReportViewer(ProjectClass, QWidget):
             i = printFrom
             while i < printTo:
                 if not self.printer_.aborted():
-                    self.progress_.setProgress(currentStep)
+                    util.setProgress(currentStep)
                     QtWidgets.QApplication.processEvents()
 
                     if printRev:
@@ -438,8 +457,8 @@ class MReportViewer(ProjectClass, QWidget):
                     j = printCopies
                     break
 
-                i = i + 1
-                currentStep = currentStep + 1
+                i += 1
+                currentStep += 1
 
             if j < (printCopies - 1):
                 self.printer_.newPage()
@@ -467,20 +486,22 @@ class MReportViewer(ProjectClass, QWidget):
         cnt = self.report_.pageCount()
 
         if cnt == 0:
-            Qt.QMessageBox.critical(
+            QtCore.QMessageBox.critical(
                 self,
                 "Kugar",
                 FLUtil.translate(
                     self, "app", "No hay páginas en el\ninforme para."),
-                Qt.QMessageBox.Ok,
-                Qt.QMessageBox.NoButton,
-                Qt.QMessageBox.NoButton
+                QtCore.QMessageBox.Ok,
+                QtCore.QMessageBox.NoButton,
+                QtCore.QMessageBox.NoButton
             )
             return False
 
-        self.printer_ = Qt.QPrinter(Qt.QPrinter.PrinterMode.HighResolution)
+        self.printer_ = QtPrintSupport.QPrinter(
+            QtPrintSupport.QPrinter.PrinterMode.HighResolution
+        )
         self.printer_.setPageSize(self.report_.pageSize())
-        if self.printer_.pageSize() == Qt.QPrinter.PageSize.Custom:
+        if self.printer_.pageSize() == QtPrintSupport.QPrinter.PageSize.Custom:
             self.printer_.setCustomPaperSize(self.report_.pageDimensions())
         self.printer_.setOrientation(self.report_.pageOrientation())
         self.printer_.setMinMax(1, cnt)
@@ -500,12 +521,13 @@ class MReportViewer(ProjectClass, QWidget):
                 QtWidgets.QApplication.focusWidget())
 
         if printNow:
-            painter = Qt.QPainter()
+            painter = QtGui.QPainter()
             printRev = False
 
             viewIdx = self.report_.getCurrentIndex()
 
-            if self.printer_.pageOrder() == Qt.QPrinter.PageOrder.LastPageFirst:
+            lpf = QtPrintSupport.QPrinter.PageOrder.LastPageFirst
+            if self.printer_.pageOrder() == lpf:
                 printRev = True
 
             printFrom = self.printer_.fromPage() - 1
@@ -517,21 +539,19 @@ class MReportViewer(ProjectClass, QWidget):
 
             self.printer_.setNumCopies(1)
 
-            self.progress_ = Qt.QProgressDialog(
+            util = FLUtil()
+
+            self.progress_ = util.createProgressDialog(
                 FLUtil.translate(self, "app", "Imprimiendo Informe..."),
-                FLUtil.translate(self, "app", "Cancelar"),
-                self.totalSteps_,
-                self,
-                FLUtil.translate(self, "app", "progreso"),
-                True
+                self.totalSteps_
             )
-            self.progress_.setMinimunDuration(self.M_PROGRESS_DELAY)
-            self.progress_.cancelled.connect(self.slotCancelPrinting)
-            self.progress_.setProgress(0)
+            # self.progress_.setMinimunDuration(self.M_PROGRESS_DELAY)
+            self.progress_.canceled.connect(self.slotCancelPrinting)
+            util.setProgress(0)
             QtWidgets.QApplication.processEvents()
 
             painter.begin(self.printer_)
-            pdm = Qt.QPaintDeviceMetrics(self.printer_)
+            pdm = self.printer_.device()
             dim = self.report_.pageDimensions()
             painter.setWindow(0, 0, dim.width(), dim.height())
             painter.setViewport(0, 0, pdm.width(), pdm.height())
@@ -540,7 +560,7 @@ class MReportViewer(ProjectClass, QWidget):
                 i = printFrom
                 while i < printTo:
                     if not self.printer_.aborted():
-                        self.progress_.setProgress(currentStep)
+                        util.setProgress(currentStep)
                         QtWidgets.QApplication.processEvents()
 
                         if printRev:
@@ -557,8 +577,8 @@ class MReportViewer(ProjectClass, QWidget):
                         j = printCopies
                         break
 
-                    i = i + 1
-                    currentStep = currentStep + 1
+                    i += 1
+                    currentStep += 1
 
                 if j < (printCopies - 1):
                     self.printer_.newPage()
@@ -650,6 +670,7 @@ class MReportViewer(ProjectClass, QWidget):
 
     @decorators.BetaImplementation
     def slotRenderProgress(self, p):
+        util = FLUtil()
         if not self.rptEngine_:
             return
 
@@ -657,18 +678,14 @@ class MReportViewer(ProjectClass, QWidget):
             self.totalSteps_ = self.rptEngine_.getRenderSteps()
             if self.totalSteps_ <= 0:
                 self.totalSteps_ = 1
-            self.progress_ = Qt.QProgressDialog(
-                FLUtil.translate(self, "app", "Creando informe..."),
-                FLUtil.translate(self, "app", "Cancelar"),
-                self.totalSteps_,
-                0,
-                FLUtil.translate(self, "app", "progreso"),
-                True
+            self.progress_ = util.createProgressDialog(
+                util.translate("app", "Creando informe..."),
+                self.totalSteps_
             )
-            self.progress_.setMinimunDuration(self.M_PROGRESS_DELAY)
-            self.progress_.cancelled.connect(self.slotCancelPrinting)
+            # self.progress_.setMinimunDuration(self.M_PROGRESS_DELAY)
+            self.progress_.canceled.connect(self.slotCancelPrinting)
 
-        self.progress_.setProgress(p)
+        util.setProgress(p)
         QtWidgets.QApplication.processEvents()
 
     @decorators.BetaImplementation

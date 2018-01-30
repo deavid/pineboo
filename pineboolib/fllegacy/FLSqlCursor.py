@@ -1168,7 +1168,7 @@ class FLSqlCursor(ProjectClass):
 
             if pK:
                 pKV = self.d.buffer_.value(pK)
-                q = FLSqlQuery(None, self.d.db_.dbAux())
+                q = FLSqlQuery(None, "Aux")
 
                 q.exec_(None, "UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
                 ).formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
@@ -1205,18 +1205,6 @@ class FLSqlCursor(ProjectClass):
             if not self.d.buffer_:
                 # print("ERROR: FLSqlCursor(%s): aún después de refresh, no tengo buffer." % self.curName())
                 return None
-            else:
-                field = self.metadata().field(fN)
-                if field:
-                    type_ = field.type()
-                    v = self.d.buffer_.value(fN)
-
-                    if type_ == "pixmap":
-                        return self.d.db_.manager().fetchLargeValue(v)
-                    else:
-                        return v
-                else:
-                    return None
 
         field = self.metadata().field(fN)
         if not field:
@@ -1249,6 +1237,10 @@ class FLSqlCursor(ProjectClass):
 
         else:
             v = self.d.buffer_.value(fN)
+
+        if type_ in ("string", "stringlist") and not v:
+            v = ""
+
             # print("FLSqlCursor.valueBuffer(%s) = %s" % (fN, v))
         # if v.isValid():
             # v.cast(fltype)
@@ -1765,13 +1757,14 @@ class FLSqlCursor(ProjectClass):
                         tMD = self.d.db_.manager().metadata(r.foreignTable())
                         if not tMD:
                             continue
-                        q = FLSqlQuery(None)
+                        q = FLSqlQuery(None, self.d.db_.connectionName())
                         q.setTablesList(tMD.name())
                         q.setSelect(r.foreignField())
                         q.setFrom(tMD.name())
                         q.setWhere(self.d.db_.manager().formatAssignValue(
                             r.foreignField(), field, s, True))
                         q.setForwardOnly(True)
+                        print("SQL linea = " + q.sql() + " conn name = " + str(q._prj.conn.connectionName()))
                         q.exec_()
                         if not q.next():
                             # msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() +
@@ -2490,7 +2483,6 @@ class FLSqlCursor(ProjectClass):
                         self.d.buffer_.setValue(fiName, defVal)
 
                     if type_ == "serial":
-
                         self.d.buffer_.setValue(fiName, "%u" % self.d.db_.nextSerialVal(
                             self.d.metadata_.name(), fiName))
 

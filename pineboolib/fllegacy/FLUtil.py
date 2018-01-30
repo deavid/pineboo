@@ -1051,6 +1051,7 @@ class FLUtil(ProjectClass):
         pd_widget = QtWidgets.QProgressDialog(str(title), str(
             self.translate("scripts", "Cancelar")), 0, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
+        return pd_widget
 
     """
     Destruye el diálogo de progreso

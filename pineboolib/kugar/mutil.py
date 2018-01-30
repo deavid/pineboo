@@ -1,7 +1,7 @@
 import math
 from enum import Enum
 
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -102,7 +102,7 @@ class MUtil(ProjectClass):
         elif dformat == MUtil.DateFormatType.MM:
             string = "{}".format(month)
         elif dformat == MUtil.DateFormatType.Month:
-            string = Qt.QDate.longMonthName(value.month())
+            string = QtCore.QDate.longMonthName(value.month())
         elif dformat == MUtil.DateFormatType.YYYY:
             string = "{}".format(value.year())
         elif dformat == MUtil.DateFormatType.YY:

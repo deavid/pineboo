@@ -1,6 +1,6 @@
 from enum import Enum
 
-from PyQt5.QtCore import Qt
+from PyQt5 import QtGui
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -31,7 +31,7 @@ class MLineObject(ProjectClass):
             self.ypos2_ = 0
 
             self.penWidth_ = 0
-            self.penColor_ = Qt.QColor().setRgb(0, 0, 0)
+            self.penColor_ = QtGui.QColor().setRgb(0, 0, 0)
             self.penStyle_ = self.Style.SolidLine
 
             self.objectId = 0
@@ -60,9 +60,13 @@ class MLineObject(ProjectClass):
             p.painter().translate(self.xpos1_, self.ypos1_)
             restore = True
 
-        linePen = Qt.QPen(self.penColor_, self.penWidth_, self.penStyle_)
+        linePen = QtGui.QPen(self.penColor_, self.penWidth_, self.penStyle_)
         p.painter().setPen(linePen)
-        p.painter().drawLine(0, 0, self.xpos2_ - self.xpos1_, self.ypos2_ - self.ypos1_)
+        p.painter().drawLine(
+            0, 0,
+            self.xpos2_ - self.xpos1_,
+            self.ypos2_ - self.ypos1_
+        )
 
         if restore:
             p.painter().restore()

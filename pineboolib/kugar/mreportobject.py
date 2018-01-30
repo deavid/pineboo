@@ -1,5 +1,6 @@
 from enum import Enum
 
+from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QObject
 
@@ -65,7 +66,6 @@ class MReportObject(ProjectClass, QObject):
 
         restore = False
         if p.errCode() == FLStylePainter.IdNotFound:
-            # p.painter().save(Qt.QObject.name())
             p.painter().save(self.name())
             p.applyTransforms()
             p.painter().translate(self.xpos_, self.ypos_)
@@ -78,13 +78,19 @@ class MReportObject(ProjectClass, QObject):
                 p.painter().setBrush(self.backgroundColor_)
 
             if self.borderStyle_ != 0:
-                p.painter().setPen(Qt.QPen(self.borderColor_, self.borderWidth_, self.borderStyle_))
+                p.painter().setPen(QtGui.QPen(
+                    self.borderColor_, self.borderWidth_, self.borderStyle_)
+                )
             else:
                 p.painter().setPen(Qt.NoPen)
 
             p.painter().drawRect(0, 0, self.width_, self.height_)
         else:
-            p.painter().fillRect(0, 0, self.width_, self.height_, self.backgroundColor_)
+            p.painter().fillRect(
+                0, 0,
+                self.width_, self.height_,
+                self.backgroundColor_
+            )
 
         if restore:
             p.painter().restore()

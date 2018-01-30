@@ -1,12 +1,15 @@
+import math
 from enum import Enum
 from datetime import datetime
 import sys
-import math
 
 from PyQt5 import QtWidgets
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5 import QtPrintSupport
+from PyQt5 import QtXml
 from PyQt5.QtCore import Qt
 from PyQt5.Qt import QObject
-from PyQt5.Qt import QPaintDevice
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
@@ -37,11 +40,14 @@ AQOdsRow = AQOdsColor = AQOdsStyle = None  # FIXME
 AQOdsImage = AQOdsCentimeters = QPrinter = None  # FIXME
 
 
-class MReportEngine(ProjectClass, QObject):
+class MReportEngine(QObject):
 
     AQ_ODSCELL_WIDTH = 80.0
     AQ_ODSCELL_HEIGHT = 15.0
     AQ_ODS_ROWS_LIMIT = 64000
+
+    signalRenderStatus = QtCore.pyqtSignal(int)
+    preferedTemplate = QtCore.pyqtSignal()
 
     class PageOrientation(Enum):
         Portrait = 0
@@ -88,13 +94,12 @@ class MReportEngine(ProjectClass, QObject):
         PageBreak = 0x00000004
         FillRecords = 0x00000008
 
-    class AQNullPaintDevice(ProjectClass, QPaintDevice):
+    class AQNullPaintDevice(QtGui.QPaintDevice):
 
         @decorators.BetaImplementation
         def __init__(self, *args):
-            # AQNullPaintDevice() : QPaintDevice(QInternal::ExternalDevice) {} #FIXME
             super(MReportEngine.AQNullPaintDevice, self).__init__(
-                Qt.QInternal.PaintDevice.Flags.ExternalDevice)
+                QtCore.QInternal.PaintDevice.Flags.ExternalDevice)
 
         @decorators.BetaImplementation
         def cmd(self, *args):
@@ -104,7 +109,7 @@ class MReportEngine(ProjectClass, QObject):
 
         @decorators.BetaImplementation
         def __init__(self, *args):
-            if len(args) and isinstance(args[0], Qt.QPoint):
+            if len(args) and isinstance(args[0], QtCore.QPoint):
                 self.p_ = args[0]
             elif len(args) and isinstance(args[0], MReportEngine.AQPointKey):
                 self.p_ = args[0].p_
@@ -127,14 +132,14 @@ class MReportEngine(ProjectClass, QObject):
 
         @decorators.BetaImplementation
         def __init__(self, *args):
-            self.r_ = Qt.QRect()
-            self.rr_ = Qt.QRect()
+            self.r_ = QtCore.QRect()
+            self.rr_ = QtCore.QRect()
             self.str_ = ""
-            self.pix_ = Qt.QPixmap()
-            self.fnt_ = Qt.QFont()
-            self.pen_ = Qt.QPen()
-            self.brush_ = Qt.QBrush()
-            self.bgColor_ = Qt.QColor()
+            self.pix_ = QtGui.QPixmap()
+            self.fnt_ = QtGui.QFont()
+            self.pen_ = QtGui.QPen()
+            self.brush_ = QtGui.QBrush()
+            self.bgColor_ = QtGui.QColor()
             self.tf_ = Qt.Q_INT16
 
     # class AQPaintItemMap(ProjectClass, QMap):
@@ -165,30 +170,30 @@ class MReportEngine(ProjectClass, QObject):
 
             self.cancelRender_ = False
 
-            self.grandTotal_ = Qt.QPtrList()
-            self.grandTotal_.setAutoDelete(True)
+            self.grandTotal_ = []
+            # self.grandTotal_.setAutoDelete(True) #FIXME
 
             self.gDTFooters_ = []
             self.gDTSFooters_ = []
             for i in range(10):
-                self.gDTFooters_[i] = Qt.QPtrList()
-                self.gDTFooters_[i].setAutoDelete(True)
-                self.gDTSFooters_[i] = Qt.QValueVector()
+                self.gDTFooters_.append([])
+                # self.gDTFooters_[i].setAutoDelete(True) #FIXME
+                self.gDTSFooters_.append([])
 
-            self.dHeaders_ = Qt.QPtrList()
-            self.dHeaders_.setAutoDelete(True)
+            self.dHeaders_ = []
+            # self.dHeaders_.setAutoDelete(True) #FIXME
 
-            self.details_ = Qt.QPtrList()
-            self.details_.setAutoDelete(True)
+            self.details_ = []
+            # self.details_.setAutoDelete(True) #FIXME
 
-            self.dFooters_ = Qt.QPtrList()
-            self.dFooters_.setAutoDelete(True)
+            self.dFooters_ = []
+            # self.dFooters_.setAutoDelete(True) #FIXME
 
-            self.addOnHeaders_ = Qt.QPtrList()
-            self.addOnHeaders_.setAutoDelete(True)
+            self.addOnHeaders_ = []
+            # self.addOnHeaders_.setAutoDelete(True) #FIXME
 
-            self.addOnFooters_ = Qt.QPtrList()
-            self.addOnFooters_.setAutoDelete(True)
+            self.addOnFooters_ = []
+            # self.addOnFooters_.setAutoDelete(True) #FIXME
 
             MReportSection.resetIdSecGlob()
 
@@ -208,14 +213,16 @@ class MReportEngine(ProjectClass, QObject):
             self.rFooter_.setPrintFrequency(
                 MReportSection.PrintFrequency.LastPage)
 
-            ps = Qt.QSize(self.getPageMetrics(
+            ps = QtCore.QSize(self.getPageMetrics(
                 self.pageSize_, self.pageOrientation_))
             self.pageWidth_ = ps.width()
             self.pageHeight_ = ps.height()
-            self.rd = Qt.QDomDocument("KUGAR_DATA")
-            self.rt = Qt.QDomDocument("KUGAR_TEMPLATE")
+            self.rd = QtXml.QDomDocument("KUGAR_DATA")
+            self.rt = QtXml.QDomDocument("KUGAR_TEMPLATE")
             self.p_ = FLStylePainter()
             self.p_.setRelDpi(self.relCalcDpi_)
+
+            self.records_ = QtXml.QDomNodeList()
 
     @decorators.NotImplementedWarn
     # def operator=(self, mre): #FIXME
@@ -268,11 +275,11 @@ class MReportEngine(ProjectClass, QObject):
         if self.rFooter_:
             self.rFooter_ = None
 
-        if self.rd_:
-            self.rd_ = None
+        if self.rd:
+            self.rd = None
 
-        if self.rt_:
-            self.rt_ = None
+        if self.rt:
+            self.rt = None
 
     @decorators.BetaImplementation
     def clearGrantTotals(self):
@@ -290,40 +297,30 @@ class MReportEngine(ProjectClass, QObject):
         self.rHeader_.clear()
         self.pHeader_.clear()
 
-        secIt = self.addOnHeaders_.first()
-        while secIt:
+        for secIt in self.addOnHeaders_:
             secIt.clear()
-            secIt = self.addOnHeaders_.next()
 
-        secIt = self.dHeaders_.first()
-        while secIt:
+        for secIt in self.dHeaders_:
             secIt.clear()
-            secIt = self.dHeaders_.next()
 
-        secIt = self.details_.first()
-        while secIt:
+        for secIt in self.details_:
             secIt.clear()
-            secIt = self.details_.next()
 
-        secIt = self.dFooters_.first()
-        while secIt:
+        for secIt in self.dFooters_:
             secIt.clear()
-            secIt = self.dFooters_.next()
 
-        secIt = self.addOnFooters_.first()
-        while secIt:
+        for secIt in self.addOnFooters_:
             secIt.clear()
-            secIt = self.addOnFooters_.next()
 
         self.pFooter_.clear()
         self.rFooter_.clear()
 
     @decorators.BetaImplementation
     def setReportData(self, data):
-        if data and isinstance(data, Qt.QDomNode):
-            self.rd_ = data.cloneNode(True).toDocument()
-        elif not self.rd_.setContent(data):
-            Qt.qWarning("Unable to parse report data")
+        if data and isinstance(data, QtXml.QDomNode):
+            self.rd = data.cloneNode(True).toDocument()
+        elif not self.rd.setContent(data):
+            QtCore.qWarning("Unable to parse report data")
             return False
 
         self.initData()
@@ -331,13 +328,13 @@ class MReportEngine(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def initData(self):
-        n = self.rd_.firstChild()
+        n = self.rd.firstChild()
         while not n.isNull():
             if n.nodeName() == "KugarData":
                 self.records_ = n.childNodes()
                 attr = n.attributes()
                 tempattr = attr.namedItem("Template")
-                tempname = tempattr.nodeValue()
+                tempname = tempattr.nodeValue() or 0
                 if not tempname.isNull():
                     self.preferedTemplate.emit(tempname)
                     break
@@ -346,10 +343,10 @@ class MReportEngine(ProjectClass, QObject):
     @decorators.BetaImplementation
     def setReportTemplate(self, tpl):
         self.clearFormatting()
-        if tpl and isinstance(tpl, Qt.QDomNode):
-            self.rt_ = tpl.cloneNode(True).toDocument()
-        elif not self.rt_.setContent(tpl):
-            Qt.qWarning("Unable to parse report data")
+        if tpl and isinstance(tpl, QtXml.QDomNode):
+            self.rt = tpl.cloneNode(True).toDocument()
+        elif not self.rt.setContent(tpl):
+            QtCore.qWarning("Unable to parse report data")
             return False
 
         self.initTemplate()
@@ -374,7 +371,7 @@ class MReportEngine(ProjectClass, QObject):
         if self.dFooters_:
             self.dFooters_.clear()
 
-        report = self.rt_.firstChild()
+        report = self.rt.firstChild()
         while not report.isNull():
             if report.nodeName == "KugarTemplate":
                 break
@@ -388,7 +385,7 @@ class MReportEngine(ProjectClass, QObject):
         for j in range(childCount):
             child = children.item(j)
 
-            if child.nodeType() == Qt.QDomNode.NodeType.ElementNode:
+            if child.nodeType() == QtXml.QDomNode.NodeType.ElementNode:
                 if child.nodeName() == "ReportHeader":
                     self.setSectionAttributes(self.rHeader_, child)
 
@@ -436,58 +433,46 @@ class MReportEngine(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def findDetailHeader(self, level):
-        sec = self.dHeaders_.first()
-        while sec:
+        for sec in self.dHeaders_:
             if sec.getLevel() == level:
                 return sec
-            sec = self.dHeaders_.next()
         return 0
 
     @decorators.BetaImplementation
     def findAddOnHeader(self, level):
-        sec = self.addOnHeaders_.first()
-        while sec:
+        for sec in self.addOnHeaders_:
             if sec.getLevel() == level:
                 return sec
-            sec = self.addOnHeaders_.next()
         return 0
 
     @decorators.BetaImplementation
     def findDetail(self, level):
-        sec = self.details_.first()
-        while sec:
+        for sec in self.details_:
             if sec.getLevel() == level:
                 return sec
-            sec = self.details_.next()
         return 0
 
     @decorators.BetaImplementation
     def findDetailFooter(self, level):
-        sec = self.dFooters_.first()
-        while sec:
+        for sec in self.dFooters_:
             if sec.getLevel() == level:
                 return sec
-            sec = self.dFooters_.next()
         return 0
 
     @decorators.BetaImplementation
     def findAddOnFooter(self, level):
-        sec = self.addOnFooters_.first()
-        while sec:
+        for sec in self.addOnFooters_:
             if sec.getLevel() == level:
                 return sec
-            sec = self.addOnFooters_.next()
 
-        sec = self.addOnFooters_.first()
-        while sec:
+        for sec in self.addOnFooters_:
             if sec.getLevel() == -1:
                 return sec
-            sec = self.addOnFooters_.next()
         return 0
 
     @decorators.BetaImplementation
     def mapToOdsCell(self, r):
-        ret = Qt.QRect()
+        ret = QtCore.QRect()
 
         if r.x() <= self.AQ_ODSCELL_WIDTH:
             ret.setX(0)
@@ -521,24 +506,27 @@ class MReportEngine(ProjectClass, QObject):
         i2_16 = Qt.Q_INT16
         leng = Qt.Q_INT32
         ul = Qt.Q_UINT32
-        p = Qt.QPoint()
-        p1 = Qt.QPoint()
-        p2 = Qt.QPoint()
-        r = Qt.QRect()
-        a = Qt.QPointArray()
+        p = QtCore.QPoint()
+        p1 = QtCore.QPoint()
+        p2 = QtCore.QPoint()
+        r = QtCore.QRect()
+        a = QtCore.QPointArray()
         string = ""
         str1 = ""
-        color = Qt.QColor()
-        font = Qt.QFont()
-        pen = Qt.QPen()
-        brush = Qt.QBrush()
-        rgn = Qt.QRegion()
-        matrix = Qt.QWMatrix()
+        color = QtCore.QColor()
+        font = QtGui.QFont()
+        pen = QtGui.QPen()
+        brush = QtGui.QBrush()
+        rgn = QtCore.QRegion()
+        matrix = QtCore.QWMatrix()
         handled = False
         chkRow = 0
 
+        mTForm = QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawTextFormatted
+        mTForm2 = QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawText2Formatted
+
         while nrecords > 0 and not s.eof():
-            nrecords = nrecords - 1
+            nrecords -= 1
 
             handled = True
             s >> c
@@ -555,46 +543,46 @@ class MReportEngine(ProjectClass, QObject):
             if self.cancelRender_:
                 return False
 
-            if c == Qt.QPaintDevice.PaintDeviceMetric.PdcNOP:
+            if c == QtGui.QPaintDevice.PaintDeviceMetric.PdcNOP:
                 pass
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawPoint:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawPoint:
                 s >> p
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcMoveTo:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcMoveTo:
                 s >> p
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcLineTo:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcLineTo:
                 s >> p
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawLine:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawLine:
                 s >> p1 >> p2
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawRect:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawRect:
                 s >> r
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawRoundRect:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawRoundRect:
                 s >> r >> i1_16 >> i2_16
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawEllipse:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawEllipse:
                 s >> r
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawArc:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawArc:
                 s >> r >> i1_16 >> i2_16
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawPie:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawPie:
                 s >> r >> i1_16 >> i2_16
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawChord:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawChord:
                 s >> r >> i1_16 >> i2_16
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawLineSegments:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawLineSegments:
                 s >> a
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawPolyline:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawPolyline:
                 s >> a
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawPolygon:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawPolygon:
                 s >> a >> i_8
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawCubicBezier:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawCubicBezier:
                 s >> a
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawText:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawText:
                 s >> p >> str1
                 handled = False
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawTextFormatted:
+            elif c == mTForm:
                 s >> r >> i_16 >> str1
                 handled = False
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawText2:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawText2:
                 s >> p >> string
                 handled = False
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawText2Formatted:
+            elif c == mTForm2:
                 s >> r >> i_16 >> string
                 wm = painter.worldMatrix()
 
@@ -607,10 +595,10 @@ class MReportEngine(ProjectClass, QObject):
                 item.brush_ = painter.brush()
                 item.fnt_ = painter.font()
                 item.pen_ = painter.pen()
-                pKey = Qt.QPoint(item.rr_.x(), item.r_.y())
+                pKey = QtCore.QPoint(item.rr_.x(), item.r_.y())
                 aqmap.insert(MReportEngine.AQPointKey(pKey), item)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawPixmap:
-                pixmap = Qt.QPixmap()
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawPixmap:
+                pixmap = QtGui.QPixmap()
                 s >> r >> pixmap
                 wm = painter.worldMatrix()
 
@@ -620,82 +608,85 @@ class MReportEngine(ProjectClass, QObject):
                 item.str_ = "Pixmap"
                 item.bgColor_ = painter.backgroundColor()
                 item.pix_ = pixmap
-                pKey = Qt.QPoint(item.rr_.x(), item.r_.y())
+                pKey = QtCore.QPoint(item.rr_.x(), item.r_.y())
                 aqmap.insert(MReportEngine.AQPointKey(pKey), item)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcDrawImage:
-                image = Qt.QImage()
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcDrawImage:
+                image = QtCore.QImage()
                 s >> r >> image
                 handled = False
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcBegin:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcBegin:
                 s >> ul
                 if not self.execPage(painter, s, ul, aqmap):
                     return False
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcEnd:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcEnd:
                 if nrecords == 0:
                     return True
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSave:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSave:
                 s >> string
                 painter.save(string)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcRestore:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcRestore:
                 painter.restore()
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetBkColor:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetBkColor:
                 s >> color
                 painter.setBackgroundColor(color)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetBkMode:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetBkMode:
                 s >> i_8
                 painter.setBackgroundMode(i_8)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetROP:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetROP:
                 s >> i_8
                 painter.setRasterOp(i_8)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetBrushOrigin:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetBrushOrigin:
                 s >> p
                 painter.setBrushOrigin(p)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetFont:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetFont:
                 s >> font
                 painter.setFont(font)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetPen:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetPen:
                 s >> pen
                 painter.setPen(pen)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetBrush:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetBrush:
                 s >> brush
                 painter.setBrush(brush)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetTabStops:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetTabStops:
                 s >> i_16
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetTabArray:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetTabArray:
                 s >> i_16
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetVXform:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetVXform:
                 s >> i_8
                 painter.setViewXForm(i_8)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetWindow:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetWindow:
                 s >> r
                 painter.setWindow(r)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetViewport:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetViewport:
                 s >> r
                 painter.setViewport(r)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetWXform:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetWXform:
                 s >> i_8
-                painter.setWorldXForm(i_8)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetWMatrix:
+                # painter.setWorldXForm(i_8) # FIXME
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetWMatrix:
                 s >> matrix >> i_8
                 painter.setWorldMatrix(matrix, i_8)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSaveWMatrix:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSaveWMatrix:
                 painter.saveWorldMatrix()
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcRestoreWMatrix:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcRestoreWMatrix:
                 painter.restoreWorldMatrix()
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetClip:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetClip:
                 s >> i_8
                 painter.setClipping(i_8)
-            elif c == Qt.QPaintDevice.PaintDeviceMetric.PdcSetClipRegion:
+            elif c == QtGui.QPaintDevice.PaintDeviceMetric.PdcSetClipRegion:
                 s >> rgn >> i_8
                 painter.setClipRegion(rgn, i_8)
             else:
-                Qt.qWarning(
-                    "mreporengine.cpp execPage: Invalid command {}".format(c))
+                QtCore.qWarning(
+                    "mreporengine.cpp execPage: Invalid command {}".format(c)
+                )
                 if leng:
                     s.device().at(s.device().at() + leng)
 
             if not handled:
-                Qt.qWarning("Command not handled cmd:{} len:{}".format(c, len))
+                QtCore.qWarning(
+                    "Command not handled cmd:{} len:{}".format(c, leng)
+                )
                 pass
 
     @decorators.BetaImplementation
@@ -712,7 +703,7 @@ class MReportEngine(ProjectClass, QObject):
             ch = partDecimal[(prec - 1):prec]
             if ch.isdigit() and ch != "0":
                 break
-            prec = prec - 1
+            prec -= 1
         return prec
 
     @decorators.BetaImplementation
@@ -720,10 +711,10 @@ class MReportEngine(ProjectClass, QObject):
         odsGen = AQOdsGenerator()
         spreadsheet = AQOdsSpreadSheet(odsGen)
 
-        mapList = Qt.QValueList()
+        mapList = QtCore.QValueList()
         totalRecords = 0
         nullPdev = MReportEngine.AQNullPaintDevice()
-        painter = Qt.QPainter()
+        painter = QtGui.QPainter()
         curIdx = pages.getCurrentIndex()
         yOffset = 0
         aqmap = MReportEngine.AQPaintItemMap()
@@ -732,12 +723,12 @@ class MReportEngine(ProjectClass, QObject):
         painter.begin(nullPdev)
         for i in range(pages.pageCount()):
             pg = pages.getPageAt(i)
-            ba = Qt.QByteArray(pg.size() + Qt.Q_UINT32.__sizeof__())
+            ba = QtCore.QByteArray(pg.size() + Qt.Q_UINT32.__sizeof__())
 
-            sWrite = Qt.QDataStream(ba, Qt.IO_WriteOnly)
+            sWrite = QtCore.QDataStream(ba, Qt.IO_WriteOnly)
             sWrite << pg
 
-            sRead = Qt.QDataStream(ba, Qt.IO_ReadOnly)
+            sRead = QtCore.QDataStream(ba, Qt.IO_ReadOnly)
             sRead.device().at(14)
             sRead.setVersion(5)
 
@@ -753,7 +744,7 @@ class MReportEngine(ProjectClass, QObject):
             if not self.execPage(painter, sRead, nrecords, aqmap):
                 return
 
-            itAux = aqmap.end() - 1
+            itAux = len(aqmap) - 1
 
             # if (*itAux).r_.y() >= self.AQ_ODS_ROWS_LIMIT: #FIXME
             if aqmap[itAux].r_.y() >= self.AQ_ODS_ROWS_LIMIT:
@@ -786,8 +777,7 @@ class MReportEngine(ProjectClass, QObject):
         step = 0
         nPage = 1
 
-        itList = mapList.begin()
-        while itList != mapList.end():
+        for itList in mapList:
             nRow = 0
             nCol = 0
             curNRow = 0
@@ -796,8 +786,7 @@ class MReportEngine(ProjectClass, QObject):
             sheet = AQOdsSheet(spreadsheet, "Pag.{}".format(nPage))
 
             aqmap = itList
-            it = aqmap.begin()
-            while it != aqmap.end():
+            for it in aqmap:
                 if (step % relSteps) == 0:
                     self.signalRenderStatus.emit((step / relSteps) % rowCount)
                 if self.cancelRender_:
@@ -806,7 +795,7 @@ class MReportEngine(ProjectClass, QObject):
                 cell = it.r_
 
                 if (curNRow > cell.y()):
-                    Qt.qWarning(
+                    QtCore.qWarning(
                         "** MReportEngine::exportToOds curNRow > cell.y()")
                     pass
 
@@ -814,7 +803,7 @@ class MReportEngine(ProjectClass, QObject):
                     curRow.close()
                     curRow = None
                     curRow = 0
-                    nRow = nRow + 1
+                    nRow += 1
 
                 curNRow = cell.y()
                 while nRow < curNRow:
@@ -822,7 +811,7 @@ class MReportEngine(ProjectClass, QObject):
                     row.coveredCell()
                     row.close()
 
-                    nRow = nRow + 1
+                    nRow += 1
 
                 if not curRow:
                     curRow = AQOdsRow(sheet)
@@ -830,7 +819,7 @@ class MReportEngine(ProjectClass, QObject):
                     nCol = 0
 
                 if curNCol > cell.x():
-                    Qt.qWarning(
+                    QtCore.qWarning(
                         "** MReportEngine::exportToOds curNCol > cell.x()")
                     pass
 
@@ -838,7 +827,7 @@ class MReportEngine(ProjectClass, QObject):
                 while nCol < curNCol:
                     curRow.coveredCell()
 
-                    nCol = nCol + 1
+                    nCol += 1
 
                 string = it.str_
                 if string and string != "":
@@ -850,9 +839,9 @@ class MReportEngine(ProjectClass, QObject):
                         curRow.addFgColor(AQOdsColor(pen.color().rgb()))
 
                         tf = it.tf_
-                        if tf & Qt.QPainter.HAlignment.AlignHCenter:
+                        if tf & QtGui.QPainter.HAlignment.AlignHCenter:
                             curRow.opIn(AQOdsStyle(Qt.Style.ALIGN_CENTER))
-                        elif tf & Qt.QPainter.HAlignment.AlignLeft:
+                        elif tf & QtGui.QPainter.HAlignment.AlignLeft:
                             curRow.opIn(AQOdsStyle(Qt.Style.ALIGN_LEFT))
                         else:
                             curRow.opIn(AQOdsStyle(Qt.Style.ALIGN_RIGHT))
@@ -869,7 +858,8 @@ class MReportEngine(ProjectClass, QObject):
                         if prec > 0:
                             curRow.setFixedPrecision(prec)
                             ok = False
-                            val = QtWidgets.QApplication.localeSystem().toDouble(string, ok)
+                            lcl = QtWidgets.QApplication.localeSystem()
+                            val = lcl.toDouble(string, ok)
                             if ok:
                                 curRow.opIn(val, cell.width(), cell.height())
                             else:
@@ -899,9 +889,7 @@ class MReportEngine(ProjectClass, QObject):
                     curRow.coveredCell()
 
                 nCol = nCol + cell.width()
-
-                it = it + 1
-                step = step + 1
+                step += 1
 
             if curRow:
                 curRow.close()
@@ -909,9 +897,7 @@ class MReportEngine(ProjectClass, QObject):
                 curRow = 0
 
             sheet.close()
-
-            itList = itList + 1
-            nPage = nPage + 1
+            nPage += 1
 
         spreadsheet.close()
 
@@ -924,10 +910,14 @@ class MReportEngine(ProjectClass, QObject):
         self.signalRenderStatus.emit(rowCount)
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, pages=0, flags=RenderReportFlags.Display):
-        self.fillRecords_ = flags & MReportEngine.RenderReportFlags.FillRecords
-        pageBreak = flags & MReportEngine.RenderReportFlags.PageBreak
-        append = flags & MReportEngine.RenderReportFlags.Append
+    def renderReport(
+        self, initRow=0, initCol=0, pages=0,
+        flags=RenderReportFlags.Display.value
+    ):
+        flrecord = MReportEngine.RenderReportFlags.FillRecords.value
+        self.fillRecords_ = flags & flrecord
+        pageBreak = flags & MReportEngine.RenderReportFlags.PageBreak.value
+        append = flags & MReportEngine.RenderReportFlags.Append.value
         self.cancelRender_ = False
         self.currRecord_ = 0
         self.p_.setStyleName(self.styleName_)
@@ -949,7 +939,7 @@ class MReportEngine(ProjectClass, QObject):
                 self.p_.painter().end()
 
                 if currentPage:
-                    currentPageCopy = Qt.QPicture(currentPage)
+                    currentPageCopy = QtGui.QPicture(currentPage)
                     self.p_.painter().begin(currentPage)
                     currentPageCopy.play(self.p_.painter())
                     currentPageCopy = None
@@ -961,7 +951,7 @@ class MReportEngine(ProjectClass, QObject):
         self.clearGrantTotals()
 
         for i in range(self.rFooter_.getCalcFieldCount()):
-            self.grandTotal_.append(Qt.QMemArray())
+            self.grandTotal_.append(QtCore.QMemArray())
 
         if not lastPageFound:
             self.startPage(pages)
@@ -978,7 +968,9 @@ class MReportEngine(ProjectClass, QObject):
 
         self.p_.painter().end()
 
-        pages.setPageDimensions(Qt.QSize(self.pageWidth_, self.pageHeight_))
+        pages.setPageDimensions(
+            QtCore.QSize(self.pageWidth_, self.pageHeight_)
+        )
         pages.setPageSize(self.pageSize_)
         pages.setPageOrientation(self.pageOrientation_)
         pages.setPrintToPos(self.printToPos_)
@@ -997,7 +989,7 @@ class MReportEngine(ProjectClass, QObject):
         self.currX_ = self.leftMargin_
 
         pages.appendPage()
-        self.currPage_ = self.currPage_ + 1
+        self.currPage_ += 1
 
         self.p_.painter().begin(pages.getCurrentPage())
 
@@ -1030,8 +1022,10 @@ class MReportEngine(ProjectClass, QObject):
         if self.rHeader_.getHeight() == 0:
             return
 
-        if (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
-                self.currPage_ == 1) or (self.rHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        pf = self.rHeader_.printFrequency()
+        first = MReportSection.PrintFrequency.FirstPage
+        every = MReportSection.PrintFrequency.EveryPage
+        if (pf == first and self.currPage_ == 1) or (pf == every):
             self.rHeader_.setPageNumber(self.currPage_)
             self.rHeader_.setReportDate(self.currDate_)
             sectionHeight = self.rHeader_.getHeight()
@@ -1047,8 +1041,10 @@ class MReportEngine(ProjectClass, QObject):
         if (self.currY_ + self.pHeader_.getHeight()) > self.currHeight_:
             self.newPage(pages)
 
-        if (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
-                self.currPage_ == 1) or (self.pHeader_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        pf = self.pHeader_.printFrequency()
+        first = MReportSection.PrintFrequency.FirstPage
+        every = MReportSection.PrintFrequency.EveryPage
+        if (pf == first and self.currPage_ == 1) or (pf == every):
             self.pHeader_.setPageNumber(self.currPage_)
             self.pHeader_.setReportDate(self.currDate_)
             sectionHeight = self.pHeader_.getHeight()
@@ -1066,13 +1062,19 @@ class MReportEngine(ProjectClass, QObject):
 
         self.pFooter_.setCalcFieldData()
 
-        if (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.FirstPage and
-                self.currPage_ == 1) or (self.pFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage):
+        pf = self.pFooter_.printFrequency()
+        first = MReportSection.PrintFrequency.FirstPage
+        every = MReportSection.PrintFrequency.EveryPage
+        if (pf == first and self.currPage_ == 1) or (pf == every):
             self.pFooter_.setPageNumber(self.currPage_)
             self.pFooter_.setReportDate(self.currDate_)
             sectionHeight = self.pFooter_.getHeight()
-            self.pFooter_.draw(self.p_, self.leftMargin_, (self.pageHeight_ -
-                                                           self.bottomMargin_) - self.pFooter_.getHeight(), sectionHeight)
+            fh = self.pFooter_.getHeight()
+            self.pFooter_.draw(
+                self.p_, self.leftMargin_,
+                (self.pageHeight_ - self.bottomMargin_) - fh,
+                sectionHeight
+            )
             self.currY_ = self.currY_ + sectionHeight
 
     @decorators.BetaImplementation
@@ -1084,7 +1086,11 @@ class MReportEngine(ProjectClass, QObject):
         if not self.canDrawDetailHeader(level, currRecord, self.currY_):
             if level > 0:
                 self.drawAddOnFooter(
-                    pages, (level - 1), self.gDTFooters[(level - 1)], self.gDTSFooters[(level - 1)])
+                    pages,
+                    (level - 1),
+                    self.gDTFooters[(level - 1)],
+                    self.gDTSFooters[(level - 1)]
+                )
             self.newPage(pages, level)
 
             if not self.findAddOnHeader(level):
@@ -1115,7 +1121,7 @@ class MReportEngine(ProjectClass, QObject):
         stopVar = False
         while not stopVar:
             record = self.records_.item(currRecord)
-            if record.nodeType() == Qt.QDomNode.NodeType.ElementNode:
+            if record.nodeType() == QtXml.QDomNode.NodeType.ElementNode:
                 if self.currLevel_ == level:
                     # if ((chkRow = (nrecords / 2) % 20) == 0) #FIXME
                     chkRow = (currRecord / 2) % 20
@@ -1125,8 +1131,13 @@ class MReportEngine(ProjectClass, QObject):
                         lblCancel = MLabelObject()
                         lblCancel.setFont(
                             "Arial", 20, MLabelObject.FontWeight.Bold, False)
-                        lblCancel.setText(FLUtil.translate(
-                            self, "app", "INFORME INCOMPLETO\nCANCELADO POR EL USUARIO"))
+                        lblCancel.setText(
+                            FLUtil.translate(
+                                self,
+                                "app",
+                                "INFORME INCOMPLETO\nCANCELADO POR EL USUARIO"
+                            )
+                        )
                         lblCancel.setGeometry(
                             20, self.pageHeight_ / 2, 450, 70)
                         lblCancel.setHorizontalAlignment(
@@ -1144,12 +1155,20 @@ class MReportEngine(ProjectClass, QObject):
 
                     if not self.canDrawDetail(level, currRecord, self.currY_):
                         if loops:
-                            self.drawAddOnFooter(pages, level, self.gDTFooters_[
-                                                 level], self.gDTSFooters_[level])
+                            self.drawAddOnFooter(
+                                pages,
+                                level,
+                                self.gDTFooters_[level],
+                                self.gDTSFooters_[level]
+                            )
                         else:
                             if level > 0:
                                 self.drawAddOnFooter(
-                                    pages, (level - 1), self.gDTFooters_[(level - 1)], self.gDTSFooters_[(level - 1)])
+                                    pages,
+                                    (level - 1),
+                                    self.gDTFooters_[(level - 1)],
+                                    self.gDTSFooters_[(level - 1)]
+                                )
                         self.newPage(pages, level)
 
                     record = self.records_.item(currRecord)
@@ -1166,25 +1185,32 @@ class MReportEngine(ProjectClass, QObject):
 
                         self.currX_ = self.currX_ + detail.getWidth()
 
-                        if self.currX_ >= (self.pageWidth_ - self.rightMargin_ - self.leftMargin_):
+                        withoutmargin = self.pageWidth_
+                        withoutmargin -= self.rightMargin_ - self.leftMargin_
+                        if self.currX_ >= withoutmargin:
                             self.currX = self.leftMargin_
                             self.currY_ = self.currY_ + sectionHeight
-                    currRecord = currRecord + 1
+                    currRecord += 1
                 else:
                     self.drawDetail(pages, self.currLevel_, currRecord)
 
                 if currRecord < self.records_.count():
                     record = self.records_.item(currRecord)
                     fields = record.attributes()
-                    detailValue = fields.namedItem("level").nodeValue()
+                    detailValue = fields.namedItem("level").nodeValue() or 0
                     self.currLevel_ = int(detailValue)
 
                 if self.cancelRender_:
                     lblCancel = MLabelObject()
                     lblCancel.setFont(
                         "Arial", 20, MLabelObject.FontWeight.Bold, False)
-                    lblCancel.setText(FLUtil.translate(
-                        self, "app", "INFORME INCOMPLETO\nCANCELADO POR EL USUARIO"))
+                    lblCancel.setText(
+                        FLUtil.translate(
+                            self,
+                            "app",
+                            "INFORME INCOMPLETO\nCANCELADO POR EL USUARIO"
+                        )
+                    )
                     lblCancel.setGeometry(20, self.pageHeight_ / 2, 450, 70)
                     lblCancel.setHorizontalAlignment(
                         MLabelObject.HAlignment.Center)
@@ -1193,7 +1219,7 @@ class MReportEngine(ProjectClass, QObject):
                     lblCancel.draw(self.p_)
                     return
 
-            loops = loops + 1
+            loops += 1
             if level <= self.currLevel_ and currRecord < self.records_.count():
                 stopVar = True
 
@@ -1217,7 +1243,7 @@ class MReportEngine(ProjectClass, QObject):
         stopVar = False
         while not stopVar:
             record = self.records_.item(currRecord)
-            if record.nodeType == Qt.QDomNode.NodeType.ElementNode:
+            if record.nodeType == QtXml.QDomNode.NodeType.ElementNode:
                 if currLevel == level:
                     # if ((chkRow = (nrecords / 2) % 20) == 0) #FIXME
                     chkRow = (currRecord / 2) % 20
@@ -1247,14 +1273,14 @@ class MReportEngine(ProjectClass, QObject):
                                 if rS:
                                     csvData = csvData + rS.csvData()
                             csvData = csvData + "\n"
-                    currRecord = currRecord + 1
+                    currRecord += 1
                 else:
                     self.updateCsvData(currLevel, currRecord, csvData)
 
                 if currRecord < self.records_.count():
                     record = self.records_.item(currRecord)
                     fields = record.attributes()
-                    detailValue = fields.namedItem("level").nodeValue()
+                    detailValue = fields.namedItem("level").nodeValue() or 0
                     currLevel = int(detailValue)
 
             if level <= currLevel and currRecord < self.records_.count():
@@ -1289,7 +1315,7 @@ class MReportEngine(ProjectClass, QObject):
             nextRecord = self.records_.item(currRecord + 1)
             nextFields = nextRecord.attributes()
 
-            detailValue = nextFields.namedItem("level").nodeValue()
+            detailValue = nextFields.namedItem("level").nodeValue() or 0
             nextLevel = int(detailValue)
         else:
             nextLevel = 0
@@ -1320,14 +1346,15 @@ class MReportEngine(ProjectClass, QObject):
                 if footerAux:
                     footersHeight = footersHeight + footerAux.getHeight()
 
-                levelFooter = levelFooter - 1
+                levelFooter -= 1
 
             addOnFooterAuxHeight = 0
             addOnFooterAux = self.findAddOnFooter(nextLevel)
             if addOnFooterAux:
                 addOnFooterAuxHeight = addOnFooterAux.getHeight()
 
-            if (yPos + detailHeight + footersHeight + addOnFooterAuxHeight) > self.currHeight_:
+            h = yPos + detailHeight + footersHeight + addOnFooterAuxHeight
+            if h > self.currHeight_:
                 return False
 
         elif level < nextLevel:
@@ -1339,7 +1366,7 @@ class MReportEngine(ProjectClass, QObject):
                 if headerAux:
                     headersHeight = headersHeight + headerAux.getHeight()
 
-                levelFooter = levelFooter + 1
+                levelFooter += 1
 
             detailAux = self.findDetail(nextLevel)
             if detailAux:
@@ -1350,7 +1377,9 @@ class MReportEngine(ProjectClass, QObject):
             if addOnFooterAux:
                 addOnFooterAuxHeight = addOnFooterAux.getHeight()
 
-            if (self.currY_ + detailHeight + headersHeight + addOnFooterAuxHeight) > self.currHeight_:
+            h = self.currY_ + detailHeight
+            h += headersHeight + addOnFooterAuxHeight
+            if h > self.currHeight_:
                 return False
 
         return True
@@ -1374,8 +1403,8 @@ class MReportEngine(ProjectClass, QObject):
 
                     if calcIdx != -1:
                         self.gDTSFooters_[
-                            j][calcIdx] = fields.item(i).nodeValue()
-            j = j - 1
+                            j][calcIdx] = fields.item(i).nodeValue() or 0
+            j -= 1
 
     @decorators.BetaImplementation
     def setFieldValues(self, fields, level, detail, ptrRecord, noTotal=False):
@@ -1406,7 +1435,7 @@ class MReportEngine(ProjectClass, QObject):
                 self.gDTFooters_[j][calcIdx].resize(vsize + 1)
                 self.gDTFooters_[j][calcIdx][vsize] = float(detailValue)
 
-                j = j - 1
+                j -= 1
 
     @decorators.BetaImplementation
     def drawDetailFooter(self, pages, level, gDT=0, gDTS=0):
@@ -1435,8 +1464,14 @@ class MReportEngine(ProjectClass, QObject):
 
             sectionHeight = footer.getHeight()
             if footer.placeAtBottom():
-                footer.draw(self.p_, self.leftMargin_, (self.pageHeight_ - self.bottomMargin_ -
-                                                        self.pFooter_.getHeight()) - footer.getHeight(), sectionHeight)
+                diffh = self.pageHeight_ - self.bottomMargin_
+                diffh -= self.pFooter_.getHeight()
+                footer.draw(
+                    self.p_,
+                    self.leftMargin_,
+                    diffh - footer.getHeight(),
+                    sectionHeight
+                )
             else:
                 footer.draw(self.p_, self.leftMargin_,
                             self.currY_, sectionHeight)
@@ -1462,7 +1497,9 @@ class MReportEngine(ProjectClass, QObject):
             fields = record.attributes()
 
             for i in range(header.getFieldCount()):
-                value = fields.namedItem(header.getFieldName(i)).nodeValue()
+                value = fields.namedItem(
+                    header.getFieldName(i)
+                ).nodeValue() or 0
                 header.setFieldData(i, value, record, self.fillRecords_)
 
             header.setCalcFieldData(0, 0, record, self.fillRecords_)
@@ -1492,7 +1529,9 @@ class MReportEngine(ProjectClass, QObject):
             fields = record.attributes()
 
             for i in range(header.getFieldCount()):
-                value = fields.namedItem(header.getFieldName(i)).nodeValue()
+                value = fields.namedItem(
+                    header.getFieldName(i)
+                ).nodeValue() or 0
                 header.setFieldData(i, value, record, self.fillRecords_)
 
             if gDT and level > -1:
@@ -1520,7 +1559,9 @@ class MReportEngine(ProjectClass, QObject):
             fields = record.attributes()
 
             for i in range(footer.getFieldCount()):
-                value = fields.namedItem(footer.getFieldName(i)).nodeValue()
+                value = fields.namedItem(
+                    footer.getFieldName(i)
+                ).nodeValue() or 0
                 footer.setFieldData(i, value, record, self.fillRecords_)
 
             if gDT and level > -1:
@@ -1530,8 +1571,14 @@ class MReportEngine(ProjectClass, QObject):
 
             sectionHeight = footer.getHeight()
             if footer.placeAtBottom():
-                footer.draw(self.p_, self.leftMargin_, (self.pageHeight_ - self.bottomMargin_ -
-                                                        self.pFooter_.getHeight()) - footer.getHeight(), sectionHeight)
+                diffh = self.pageHeight_ - self.bottomMargin_
+                diffh -= self.pFooter_.getHeight()
+                footer.draw(
+                    self.p_,
+                    self.leftMargin_,
+                    diffh - footer.getHeight(),
+                    sectionHeight
+                )
             else:
                 footer.draw(self.p_, self.leftMargin_,
                             self.currY_, sectionHeight)
@@ -1545,8 +1592,10 @@ class MReportEngine(ProjectClass, QObject):
         if (self.currY_ + self.rFooter_.getHeight()) > self.currHeight_:
             self.newPage(pages)
 
-        if self.rFooter_.printFrequency() == MReportSection.PrintFrequency.EveryPage or \
-                self.rFooter_.printFrequency() == MReportSection.PrintFrequency.LastPage:
+        pf = self.rFooter_.printFrequency()
+        every = MReportSection.PrintFrequency.EveryPage
+        last = MReportSection.PrintFrequency.LastPage
+        if pf == every or pf == last:
             self.rFooter_.setCalcFieldData(self.grandTotal_)
 
             self.rFooter_.setPageNumber(self.currPage_)
@@ -1558,9 +1607,12 @@ class MReportEngine(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def getPageMetrics(self, size, orientation):
-        ps = Qt.QSize()
+        ps = QtCore.QSize()
 
-        if size >= QPrinter.PageSize.Custom:
+        s = size.value if hasattr(size, "value") else size
+        o = orientation.value if hasattr(orientation, "value") else orientation
+
+        if s >= self.PageSize.Custom.value:
             ps.setWidth(self.customWidthMM_ / 25.4 * 78.)
             ps.setHeight(self.customHeightMM_ / 25.4 * 78.)
             return ps
@@ -1571,19 +1623,19 @@ class MReportEngine(ProjectClass, QObject):
         else:
             # LINUX
             if not self.printToPos_:
-                printer = Qt.QPrinter(Qt.QPrinter.PrinterMode.HighResolution)
+                printer = QtPrintSupport.QPrinter(
+                    QtPrintSupport.QPrinter.HighResolution
+                )
                 printer.setFullPage(True)
-                printer.setOrientation(orientation)
-                printer.setPageSize(size)
-                pdm = Qt.QPaintDeviceMetrics(printer)
-                ps.setWidth(pdm.widthMM() / 25.4 * 78.)
-                ps.setHeight(pdm.heightMM() / 25.4 * 78.)
+                printer.setOrientation(o)
+                printer.setPageSize(s)
+                ps.setWidth(printer.widthMM() / 25.4 * 78.)
+                ps.setHeight(printer.heightMM() / 25.4 * 78.)
                 del printer
             else:
                 printer = FLPosPrinter()
-                pdm = Qt.QPaintDeviceMetrics(printer)
-                ps.setWidth(pdm.widthMM() / 25.4 * 78.)
-                ps.setHeight(pdm.heightMM() / 25.4 * 78.)
+                ps.setWidth(printer.widthMM() / 25.4 * 78.)
+                ps.setHeight(printer.heightMM() / 25.4 * 78.)
                 del printer
 
         return ps
@@ -1592,33 +1644,37 @@ class MReportEngine(ProjectClass, QObject):
     def setReportAttributes(self, report):
         attributes = report.attributes()
 
-        self.pageSize_ = int(attributes.namedItem("PageSize").nodeValue())
-        if self.pageSize_ > QPrinter.PageSize.Custom:
-            self.pageSize_ = QPrinter.PageSize.CustomOld
+        self.pageSize_ = int(attributes.namedItem("PageSize").nodeValue() or 0)
+        if self.pageSize_ > self.PageSize.Custom.value:
+            self.pageSize_ = self.PageSize.CustomOld.value
 
         self.pageOrientation_ = int(
-            attributes.namedItem("PageOrientation").nodeValue())
-        self.topMargin_ = int(attributes.namedItem("TopMargin").nodeValue())
+            attributes.namedItem("PageOrientation").nodeValue() or 0)
+        self.topMargin_ = int(
+            attributes.namedItem("TopMargin").nodeValue() or 0
+        )
         self.bottomMargin_ = int(
-            attributes.namedItem("BottomMargin").nodeValue())
-        self.leftMargin_ = int(attributes.namedItem("LeftMargin").nodeValue())
+            attributes.namedItem("BottomMargin").nodeValue() or 0)
+        self.leftMargin_ = int(
+            attributes.namedItem("LeftMargin").nodeValue() or 0
+        )
         self.rightMargin_ = int(
-            attributes.namedItem("RightMargin").nodeValue())
-        self.styleName_ = attributes.namedItem("StyleName").nodeValue()
+            attributes.namedItem("RightMargin").nodeValue() or 0)
+        self.styleName_ = attributes.namedItem("StyleName").nodeValue() or 0
 
         if not attributes.namedItem("CustomWidthMM").isNull():
             self.customWidthMM_ = int(
-                attributes.namedItem("CustomWidthMM").nodeValue())
+                attributes.namedItem("CustomWidthMM").nodeValue() or 0)
 
         if not attributes.namedItem("CustomHeightMM").isNull():
             self.customHeightMM_ = int(
-                attributes.namedItem("CustomHeightMM").nodeValue())
+                attributes.namedItem("CustomHeightMM").nodeValue() or 0)
 
         if not attributes.namedItem("PrintToPos").isNull():
             self.printToPos_ = (attributes.namedItem(
                 "PrintToPos").nodeValue().upper() == "TRUE")
 
-        ps = Qt.QSize(self.getPageMetrics(
+        ps = QtCore.QSize(self.getPageMetrics(
             self.pageSize_, self.pageOrientation_))
         self.pageWidth_ = ps.width()
         self.pageHeight_ = ps.height()
@@ -1627,12 +1683,12 @@ class MReportEngine(ProjectClass, QObject):
     def setSectionAttributes(self, section, report):
         attributes = report.attributes()
 
-        section.setHeight(int(attributes.namedItem("Height").nodeValue()))
+        section.setHeight(int(attributes.namedItem("Height").nodeValue() or 0))
         section.setPrintFrequency(
-            int(attributes.namedItem("PrintFrequency").nodeValue()))
+            int(attributes.namedItem("PrintFrequency").nodeValue() or 0))
         if attributes.contains("SectionId"):
             section.setIdSec(
-                int(attributes.namedItem("SectionId").nodeValue()))
+                int(attributes.namedItem("SectionId").nodeValue() or 0))
 
         children = report.childNodes()
         childCount = len(children)
@@ -1640,7 +1696,7 @@ class MReportEngine(ProjectClass, QObject):
         for i in range(childCount):
             child = children.item(i)
 
-            if child.nodeType() == Qt.QDomNode.NodeType.ElementNode:
+            if child.nodeType() == QtXml.QDomNode.NodeType.ElementNode:
                 if child.nodeName() == "Line":
                     attributes = child.attributes()
                     line = MLineObject()
@@ -1670,15 +1726,17 @@ class MReportEngine(ProjectClass, QObject):
     def setDetMiscAttributes(self, section, report):
         attributes = report.attributes()
 
-        section.setDrawIf(attributes.namedItem("DrawIf").nodeValue())
+        section.setDrawIf(attributes.namedItem("DrawIf").nodeValue() or 0)
 
         if (attributes.contains("SectionId")):
             section.setIdSec(
-                int(attributes.namedItem("SectionId").nodeValue()))
+                int(attributes.namedItem("SectionId").nodeValue() or 0))
 
         levelNode = attributes.namedItem("Level")
         if not levelNode.isNull():
-            section.setLevel(int(attributes.namedItem("Level").nodeValue()))
+            section.setLevel(int(
+                attributes.namedItem("Level").nodeValue() or 0)
+            )
         else:
             section.setLevel(-1)
 
@@ -1704,20 +1762,22 @@ class MReportEngine(ProjectClass, QObject):
     def setDetailAttributes(self, section, report):
         attributes = report.attributes()
 
-        section.setHeight(int(attributes.namedItem("Height").nodeValue()))
+        section.setHeight(int(attributes.namedItem("Height").nodeValue() or 0))
 
         if attributes.contains("SectionId"):
             section.setIdSec(
-                int(attributes.namedItem("SectionId").nodeValue()))
+                int(attributes.namedItem("SectionId").nodeValue() or 0))
 
         levelNode = attributes.namedItem("Level")
         if not levelNode.isNull():
-            section.setLevel(int(attributes.namedItem("Level").nodeValue()))
+            section.setLevel(int(
+                attributes.namedItem("Level").nodeValue() or 0)
+            )
         else:
             section.setLevel(-1)
 
-        section.setDrawIf(attributes.namedItem("DrawIf").nodeValue())
-        cols = attributes.namedItem("Cols").nodeValue()
+        section.setDrawIf(attributes.namedItem("DrawIf").nodeValue() or 0)
+        cols = attributes.namedItem("Cols").nodeValue() or 0
         if not cols:
             cols = "1"
 
@@ -1731,7 +1791,7 @@ class MReportEngine(ProjectClass, QObject):
         for i in range(childCount):
             child = children.item(i)
 
-            if child.nodeType() == Qt.QDomNode.NodeType.ElementNode:
+            if child.nodeType() == QtXml.QDomNode.NodeType.ElementNode:
                 if child.nodeName() == "Line":
                     attributes = child.attributes()
                     line = MLineObject()
@@ -1765,10 +1825,14 @@ class MReportEngine(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def setLineAttributes(self, line, attr):
-        line.setLine(int(attr.namedItem("X1").nodeValue()), int(attr.namedItem("Y1").nodeValue(
-        )), int(attr.namedItem("X2").nodeValue()), int(attr.namedItem("Y2").nodeValue()))
+        line.setLine(
+            int(attr.namedItem("X1").nodeValue() or 0),
+            int(attr.namedItem("Y1").nodeValue()),
+            int(attr.namedItem("X2").nodeValue() or 0),
+            int(attr.namedItem("Y2").nodeValue() or 0)
+        )
 
-        tmp = attr.namedItem("Color").nodeValue()
+        tmp = attr.namedItem("Color").nodeValue() or 0
 
         leng = len(tmp)
         find = tmp.find(",")
@@ -1780,21 +1844,31 @@ class MReportEngine(ProjectClass, QObject):
             int(tmp[-(leng - findRev - 1):])
         )
 
-        line.setWidth(int(attr.namedItem("Width").nodeValue()))
-        line.setStyle(int(attr.namedItem("Style").nodeValue()))
+        line.setWidth(int(attr.namedItem("Width").nodeValue() or 0))
+        line.setStyle(int(attr.namedItem("Style").nodeValue() or 0))
 
         if attr.contains("ObjectId"):
-            line.setObjectId(int(attr.namedItem("ObjectId").nodeValue()))
+            line.setObjectId(int(attr.namedItem("ObjectId").nodeValue() or 0))
 
     @decorators.BetaImplementation
     def setLabelAttributes(self, label, attr):
-        label.setPaintFunction(attr.namedItem("PaintFunction").nodeValue())
-        label.setLabelFunction(attr.namedItem("LabelFunction").nodeValue())
-        label.setText(attr.namedItem("Text").nodeValue().strip())
-        label.setGeometry(int(attr.namedItem("X").nodeValue()), int(attr.namedItem("Y").nodeValue(
-        )), int(attr.namedItem("Width").nodeValue()), int(attr.namedItem("Height").nodeValue()))
+        label.setPaintFunction(
+            attr.namedItem("PaintFunction").nodeValue() or 0
+        )
+        label.setLabelFunction(
+            attr.namedItem("LabelFunction").nodeValue() or 0
+        )
+        label.setText(
+            attr.namedItem("Text").nodeValue().strip()
+        )
+        label.setGeometry(
+            int(attr.namedItem("X").nodeValue() or 0),
+            int(attr.namedItem("Y").nodeValue()),
+            int(attr.namedItem("Width").nodeValue() or 0),
+            int(attr.namedItem("Height").nodeValue() or 0)
+        )
 
-        tmp = attr.namedItem("BackgroundColor").nodeValue()
+        tmp = attr.namedItem("BackgroundColor").nodeValue() or 0
         if tmp.upper() == "NOCOLOR":
             label.setTransparent(True)
             label.setBackgroundColor(255, 255, 255)
@@ -1810,84 +1884,96 @@ class MReportEngine(ProjectClass, QObject):
                 int(tmp[-(leng - findRev - 1):])
             )
 
-        tmp = attr.namedItem("ForegroundColor").nodeValue()
+        tmp = attr.namedItem("ForegroundColor").nodeValue() or 0
         label.setForegroundColor(
             int(tmp[find:]),
             int(tmp[find + 1:leng - findRev - find - 1]),
             int(tmp[-(leng - findRev - 1):])
         )
 
-        tmp = attr.namedItem("BorderColor").nodeValue()
+        tmp = attr.namedItem("BorderColor").nodeValue() or 0
         label.setBorderColor(
             int(tmp[find:]),
             int(tmp[find + 1:leng - findRev - find - 1]),
             int(tmp[-(leng - findRev - 1):])
         )
 
-        label.setBorderWidth(int(attr.namedItem("BorderWidth").nodeValue()))
-        label.setBorderStyle(int(attr.namedItem("BorderStyle").nodeValue()))
+        label.setBorderWidth(int(
+            attr.namedItem("BorderWidth").nodeValue() or 0)
+        )
+        label.setBorderStyle(int(
+            attr.namedItem("BorderStyle").nodeValue() or 0)
+        )
+        fsize = float(attr.namedItem("FontSize").nodeValue() or 0)
         label.setFont(
-            attr.namedItem("FontFamily").nodeValue(),
-            float(attr.namedItem("FontSize").nodeValue()) * self.relCalcDpi_,
-            int(attr.namedItem("FontWeight").nodeValue()),
+            attr.namedItem("FontFamily").nodeValue() or 0,
+            fsize * self.relCalcDpi_,
+            int(attr.namedItem("FontWeight").nodeValue() or 0),
             False if int(attr.namedItem(
-                "FontItalic").nodeValue()) == 0 else True
+                "FontItalic").nodeValue() or 0) == 0 else True
         )
         label.setHorizontalAlignment(
-            int(attr.namedItem("HAlignment").nodeValue()))
+            int(attr.namedItem("HAlignment").nodeValue() or 0))
         label.setVerticalAlignment(
-            int(attr.namedItem("VAlignment").nodeValue()))
+            int(attr.namedItem("VAlignment").nodeValue() or 0))
         label.setWordWrap(False if int(attr.namedItem(
-            "WordWrap").nodeValue()) == 0 else True)
+            "WordWrap").nodeValue() or 0) == 0 else True)
         label.setChangeHeight(False if int(attr.namedItem(
-            "ChangeHeight").nodeValue()) == 0 else True)
+            "ChangeHeight").nodeValue() or 0) == 0 else True)
         label.setDrawAtBottom(False if int(attr.namedItem(
-            "DrawAtBottom").nodeValue()) == 0 else True)
+            "DrawAtBottom").nodeValue() or 0) == 0 else True)
         label.setAdjustFontSize(True if int(attr.namedItem(
-            "AdjustFontSize").nodeValue()) == 1 else False)
+            "AdjustFontSize").nodeValue() or 0) == 1 else False)
 
         if attr.contains("ObjectId"):
-            label.setObjectId(int(attr.namedItem("ObjectId").nodeValue()))
+            label.setObjectId(int(attr.namedItem("ObjectId").nodeValue() or 0))
 
     @decorators.BetaImplementation
     def setSpecialAttributes(self, field, attr):
-        field.setType(int(attr.namedItem("Type").nodeValue()))
-        field.setDateFormat(int(attr.namedItem("DateFormat").nodeValue()))
+        field.setType(int(attr.namedItem("Type").nodeValue() or 0))
+        field.setDateFormat(int(attr.namedItem("DateFormat").nodeValue() or 0))
 
         self.setLabelAttributes(field, attr)
 
     @decorators.BetaImplementation
     def setFieldAttributes(self, field, attr):
-        field.setFieldName(attr.namedItem("Field").nodeValue())
-        field.setDataType(int(attr.namedItem("DataType").nodeValue()))
-        field.setDateFormat(int(attr.namedItem("DateFormat").nodeValue()))
-        field.setPrecision(int(attr.namedItem("Precision").nodeValue()))
-        field.setCurrency(int(attr.namedItem("Currency").nodeValue()))
+        field.setFieldName(attr.namedItem("Field").nodeValue() or 0)
+        field.setDataType(int(attr.namedItem("DataType").nodeValue() or 0))
+        field.setDateFormat(int(attr.namedItem("DateFormat").nodeValue() or 0))
+        field.setPrecision(int(attr.namedItem("Precision").nodeValue() or 0))
+        field.setCurrency(int(attr.namedItem("Currency").nodeValue() or 0))
         field.setCommaSeparator(
-            int(attr.namedItem("CommaSeparator").nodeValue()))
-        field.setCodBarType(int(attr.namedItem("CodBarType").nodeValue()))
-        res = int(attr.namedItem("DataType").nodeValue())
+            int(attr.namedItem("CommaSeparator").nodeValue() or 0))
+        field.setCodBarType(int(attr.namedItem("CodBarType").nodeValue() or 0))
+        res = int(attr.namedItem("DataType").nodeValue() or 0)
         field.setCodBarRes(res if res > 0 else 72)
-        field.setBlankZero(int(attr.namedItem("BlankZero").nodeValue()))
+        field.setBlankZero(int(attr.namedItem("BlankZero").nodeValue() or 0))
 
-        # tmp = attr.namedItem("NegValueColor").nodeValue()
-        # field.setNegValueColor(
-        #     int(tmp[find:]),
-        #     int(tmp[find + 1:leng - findRev - find - 1]),
-        #     int(tmp[-(leng - findRev - 1):])
-        # )
+        tmp = attr.namedItem("NegValueColor").nodeValue() or 0
+
+        leng = len(tmp)
+        find = tmp.find(",")
+        findRev = tmp.rfind(",")
+
+        field.setNegValueColor(
+            int(tmp[find:]),
+            int(tmp[find + 1:leng - findRev - find - 1]),
+            int(tmp[-(leng - findRev - 1):])
+        )
         self.setLabelAttributes(field, attr)
 
     @decorators.BetaImplementation
     def setCalculatedFieldAttributes(self, field, attr):
         field.setCalculationType(
-            int(attr.namedItem("CalculationType").nodeValue()))
+            int(attr.namedItem("CalculationType").nodeValue() or 0))
         field.setCalculationFunction(
-            attr.namedItem("FunctionName").nodeValue())
+            attr.namedItem("FunctionName").nodeValue() or 0)
         self.setFieldAttributes(field, attr)
 
-        field.setDrawAtHeader(attr.namedItem("DrawAtHeader").nodeValue())
-        field.setFromGrandTotal(attr.namedItem("FromGrandTotal").nodeValue())
+        field.setDrawAtHeader(attr.namedItem("DrawAtHeader").nodeValue() or 0)
+        field.setFromGrandTotal(
+            attr.namedItem("FromGrandTotal").nodeValue() or 0
+        )
         self.setFieldAttributes(field, attr)
 
     @decorators.BetaImplementation
@@ -1896,7 +1982,7 @@ class MReportEngine(ProjectClass, QObject):
 
         if True:
             # LINUX
-            pdm = Qt.QPaintDeviceMetrics(Qt.QApplication.desktop())
+            pdm = QtWidgets.QApplication.desktop()
             if pdm.logicalDpiX() < pdm.logicalDpiY():
                 self.relCalcDpi_ = self.relDpi_ / pdm.logicalDpiY()
             else:
@@ -1915,8 +2001,8 @@ class MReportEngine(ProjectClass, QObject):
     def copy(self, mre):
         self.clear()
 
-        self.rd_ = mre.rd_
-        self.rt_ = mre.rt_
+        self.rd = mre.rd
+        self.rt = mre.rt
 
         self.pageSize_ = mre.pageSize_
         self.pageOrientation_ = mre.pageOrientation_
@@ -1934,13 +2020,10 @@ class MReportEngine(ProjectClass, QObject):
         self.pHeader_ = mre.pHeader_
 
         temp = mre.details_
-        temp.setAutoDelete(True)
+        # temp.setAutoDelete(True) #FIXME
 
-        detail = temp.first()
-        while detail:
-            MReportSection()  # FIXME
+        for detail in temp:
             self.details_.append(detail)
-            detail = temp.next()
 
         del temp
 
