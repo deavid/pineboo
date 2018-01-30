@@ -188,7 +188,7 @@ class FLStylePainter(ProjectClass):
 
                 self.setObjNodesMap(self.doc_.documentElement())
 
-                if self.svgTypeMap_.isEmpty():
+                if len(self.svgTypeMap_.keys()) == 0:
                     etab = {
                         "a": FLStylePainter.ElementType.AnchorElement,
                         "#comment": FLStylePainter.ElementType.CommentElement,
@@ -236,7 +236,7 @@ class FLStylePainter(ProjectClass):
 
         @decorators.BetaImplementation
         def parseColor(self, col):
-            if self.svgColMap_.isEmpty():
+            if len(self.svgColMap_.keys()) == 0:
                 coltab = {
                     "black": "#000000",
                     "silver": "#c0c0c0",

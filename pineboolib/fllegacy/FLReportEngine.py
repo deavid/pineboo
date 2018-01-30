@@ -43,7 +43,7 @@ class FLReportEngine(MReportEngine):
 
             for it in self.qFieldList_:
                 rawVal = self.qry_.value(i, True)
-                empty = self.qImgFields_.isEmpty()
+                empty = len(self.qImgFields_) == 0
                 if not empty and self.qImgFields_.top() == i:
                     strVal = str(rawVal)
                     imgFieldsBack.push_front(self.qImgFields_.pop())
@@ -244,7 +244,7 @@ class FLReportEngine(MReportEngine):
 
         pgs = FLReportPages()
         pgs.setPageCollection(pgc)
-        empty = self.d_.qDoubleFieldList_.isEmpty()
+        empty = (self.d_.qDoubleFieldList_) == 0
         if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or empty:
             return pgs
 

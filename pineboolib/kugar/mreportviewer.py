@@ -117,12 +117,13 @@ class MReportViewer(QWidget):
 
     @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, append=False, dispRpt=None):
+        ap = MReportViewer.RenderReportFlags.Append.value
+        dp = MReportViewer.RenderReportFlags.Display.value
+
         flags = None
         if dispRpt is None:
             flags = append
         else:
-            ap = MReportViewer.RenderReportFlags.Append.value
-            dp = MReportViewer.RenderReportFlags.Display.value
             flags = ap if append else 0
             flags = flags | int(dp if dispRpt else 0)
 
