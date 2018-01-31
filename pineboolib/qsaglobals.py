@@ -248,8 +248,11 @@ def proxy_fn(wf, wr, slot):
     return fn
 
 
-def connect(sender, signal, receiver, slot, doConnect=True):
-    # print("Connect::", sender, signal, receiver, slot)
+def connect(sender, signal, receiver, slot, doConnect=True, caller=None):
+    if caller is not None:
+        print("* * * Connect::", caller, sender, signal, receiver, slot, doConnect)
+    else:
+        print("? ? ? Connect::", sender, signal, receiver, slot, doConnect)
     if sender is None:
         print("Connect Error::", sender, signal, receiver, slot)
         return False

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import sys
 import fnmatch
 import weakref
 
@@ -303,7 +304,9 @@ class FormDBWidget(QtWidgets.QWidget):
             self.remote_widgets = {}
 
         super(FormDBWidget, self).__init__(parent)
-
+        self._module = sys.modules[self.__module__]
+        self._module.connect = self._connect
+        self._module.disconnect = self._disconnect
         self._action = action
         self.cursor_ = None
         self.parent_ = parent
@@ -315,6 +318,16 @@ class FormDBWidget(QtWidgets.QWidget):
             self.init()
         except Exception:
             self.logger.exception("Error al inicializar la clase iface de QS:")
+
+    def _connect(self, sender, signal, receiver, slot):
+        print(" > > > connect:", self)
+        from pineboolib.qsaglobals import connect
+        return connect(sender, signal, receiver, slot, doConnect=True, caller=self)
+
+    def _disconnect(self, sender, signal, receiver, slot):
+        print(" > > > disconnect:", self)
+        from pineboolib.qsaglobals import connect
+        return connect(sender, signal, receiver, slot, doConnect=False, caller=self)
 
     def __del__(self):
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
