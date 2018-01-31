@@ -892,7 +892,8 @@ class XMLAction(XMLStruct):
         w = self.loadRecord(cursor)
         # w.init()
         if w:
-            w.show()
+            if pineboolib.project._DGI.localDesktop():
+                w.show()
 
     def execDefaultScript(self):
         if Project.debugLevel > 50:

@@ -11,6 +11,7 @@ from pineboolib import decorators, PNSqlDrivers
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+import pineboolib
 
 import sys
 import logging
@@ -59,7 +60,8 @@ class PNConnection(QtCore.QObject):
             self._dbAux = self
 
         else:
-            logger.error("PNConnection.ERROR: No se encontro el driver '%s'", driverAlias)
+            logger.error(
+                "PNConnection.ERROR: No se encontro el driver '%s'", driverAlias)
             sys.exit(0)
 
         self.transaction_ = 0
@@ -181,7 +183,8 @@ class PNConnection(QtCore.QObject):
                 cursor.d.transactionsOpened_.append(self.transaction_)
                 return True
             else:
-                logger.warn("doTransaction: Fallo al intentar iniciar la transacción")
+                logger.warn(
+                    "doTransaction: Fallo al intentar iniciar la transacción")
                 return False
         else:
             logger.info("Creando punto de salvaguarda %s", self.transaction_)
@@ -199,18 +202,20 @@ class PNConnection(QtCore.QObject):
 
         cancel = False
         if (self.interactiveGUI() and
-           (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and
-           cur.isModifiedBuffer() and cur.d.askForCancelChanges_):
+            (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and
+                cur.isModifiedBuffer() and cur.d.askForCancelChanges_):
             # res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios",
             #                "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes,
             #                [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
-            res = QtWidgets.QMessageBox.information(
-                QtWidgets.QApplication.focusWidget(),
-                "Cancelar Cambios",
-                "Todos los cambios se cancelarán.¿Está seguro?",
-                QMessageBox.Yes, QMessageBox.No)
-            if res == QMessageBox.No:
-                return False
+            if pineboolib.project._DGI.localDesktop():
+                res = QtWidgets.QMessageBox.information(
+                    QtWidgets.QApplication.focusWidget(),
+                    "Cancelar Cambios",
+                    "Todos los cambios se cancelarán.¿Está seguro?",
+                    QMessageBox.Yes, QMessageBox.No)
+                if res == QMessageBox.No:
+                    return False
+
             cancel = True
 
         if self.transaction_ > 0:
@@ -220,7 +225,8 @@ class PNConnection(QtCore.QObject):
                     logger.info("FLSqlDatabase: El cursor va a deshacer la transacción %s pero la última que inició es la %s",
                                 self.transaction_, trans)
             else:
-                logger.info("FLSqlDatabaser : El cursor va a deshacer la transacción %s pero no ha iniciado ninguna", self.transaction_)
+                logger.info(
+                    "FLSqlDatabaser : El cursor va a deshacer la transacción %s pero no ha iniciado ninguna", self.transaction_)
 
             self.transaction_ = self.transaction_ - 1
         else:
@@ -238,11 +244,13 @@ class PNConnection(QtCore.QObject):
 
                 return True
             except Exception:
-                logger.exception("doRollback: Fallo al intentar deshacer transacción")
+                logger.exception(
+                    "doRollback: Fallo al intentar deshacer transacción")
                 return False
 
         else:
-            logger.info("Restaurando punto de salvaguarda %s...", self.transaction_)
+            logger.info("Restaurando punto de salvaguarda %s...",
+                        self.transaction_)
             self.rollbackSavePoint(self.transaction_)
             cur.d.modeAccess_ = FLSqlCursor.Browse
             return True
@@ -261,9 +269,11 @@ class PNConnection(QtCore.QObject):
             if cur.d.transactionsOpened_:
                 trans = cur.d.transactionsOpened_.pop()
                 if not trans == self.transaction_:
-                    logger.warn("El cursor va a terminar la transacción %s pero la última que inició es la %s", self.transaction_, trans)
+                    logger.warn(
+                        "El cursor va a terminar la transacción %s pero la última que inició es la %s", self.transaction_, trans)
             else:
-                logger.warn("El cursor va a terminar la transacción %s pero no ha iniciado ninguna", self.transaction_)
+                logger.warn(
+                    "El cursor va a terminar la transacción %s pero no ha iniciado ninguna", self.transaction_)
 
             self.transaction_ = self.transaction_ - 1
         else:
@@ -285,10 +295,12 @@ class PNConnection(QtCore.QObject):
 
                 return True
             except Exception as e:
-                logger.error("doCommit: Fallo al intentar terminar transacción: %s", e)
+                logger.error(
+                    "doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
-            logger.info("Liberando punto de salvaguarda %s...", self.transaction_)
+            logger.info("Liberando punto de salvaguarda %s...",
+                        self.transaction_)
             if self.transaction_ == 1:
                 self.releaseSavePoint(self.transaction_)
                 if notify:
@@ -378,7 +390,8 @@ class PNConnection(QtCore.QObject):
         try:
             q.execute(sql)
         except Exception as e:
-            logger.exception("createTable: Error happened executing sql: %s...", sql[:80])
+            logger.exception(
+                "createTable: Error happened executing sql: %s...", sql[:80])
             self.rollbackTransaction()
             return False
         self.commitTransaction()

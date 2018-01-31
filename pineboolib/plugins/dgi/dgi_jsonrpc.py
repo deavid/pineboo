@@ -2,8 +2,9 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
+from pineboolib.fllegacy.FLFieldDB import FLFieldDB
+from pineboolib.fllegacy.FLTableDB import FLTableDB
 from pineboolib import decorators
-
 import pineboolib
 
 from PyQt5 import QtCore, QtWidgets
@@ -90,7 +91,19 @@ class parser(object):
             cr = ac.child(control)
             if cr:
                 em = getattr(cr, emite, None)
-                if em:
+                if isinstance(cr, FLFieldDB):
+                    if emite == "setText":
+                        cr.editor_.setText(arguments[3])
+                        return True
+                    else:
+                        print("Función desconocida", emite)
+                        return False
+
+                elif isinstance(cr, FLTableDB):
+                    if emite == "data":
+                        print("Recoge data!!!")
+
+                elif em:
                     getattr(cr, emite).emit()
                     return True
 
@@ -138,18 +151,15 @@ class dgi_jsonrpc(dgi_schema):
     @decorators.BetaImplementation
     def loadUI(self, path, widget):
         print("*************Cargando UI", path, widget)
-        self._WJS[widget._action.name] = self.parserDGI.parse(path)
-        self._W[widget._action.name] = widget
+        self._WJS[widget.__class__.__module__] = self.parserDGI.parse(path)
+        self._W[widget.__class__.__module__] = widget
         """
         Convertir a .json el ui
         """
 
     def showWidget(self, widget):
-        self._par.addQueqe("showWidget", self._WJS[widget._action.name])
-
-    def loadReferences(self):
-        super(dgi_jsonrpc, self).loadReferences()
-        self.FLLineEdit = FLLineEdit
+        self._par.addQueqe(
+            "showWidget_%s" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
 
 class mainForm(QtWidgets.QMainWindow):
@@ -306,190 +316,3 @@ class json_mainWindow(QtWidgets.QMainWindow):
 class json_MainForm(object):
     def setDebugLevel(self, number):
         pass
-
-
-class FLLineEdit(QtWidgets.QLineEdit):
-
-    _tipo = None
-    _partDecimal = 0
-    _partInteger = 0
-    _maxValue = None
-    autoSelect = True
-    _name = None
-    _longitudMax = None
-    _parent = None
-
-    lostFocus = QtCore.pyqtSignal()
-
-    def __init__(self, parent, name=None):
-        super(FLLineEdit, self).__init__(parent)
-        self._name = name
-        if isinstance(parent.fieldName_, str):
-            self._fieldName = parent.fieldName_
-            self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
-            self._partDecimal = parent.partDecimal_
-            self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
-            self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-            # self.textChanged.connect(self.controlFormato)
-            self._parent = parent
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
-    def controlFormato(self):
-        texto = str(super(FLLineEdit, self).text())
-        denegarCambio_ = False
-        denegarCambioEnteros_ = False
-        cambiarComa_ = False
-        decimales_ = None
-        posComa_ = -1
-
-        if texto == "" or texto is None:
-            return
-        """
-        if self._tipo == "int" or self._tipo == "uint":
-            if not texto is None:
-                try:
-                    float(decimales_)
-                except:
-                        denegarCambio_ = True
-
-            texto = texto.replace(",",".")
-            try:
-                posComa_ = texto.index(".")
-            except:
-                if posComa_ > -1:
-                    denegarCambio_ = True
-
-        """
-        if self._tipo == "string":
-            if len(texto) > int(self._longitudMax):
-                denegarCambio_ = True
-
-        if self._tipo == "double":
-
-            texto_old = texto
-            if (QtCore.QLocale().decimalPoint() == ","):
-                texto = texto.replace(".", ",")
-            else:
-                texto = texto.replace(",", ".")
-
-            if not texto_old == texto:
-                cambiarComa_ = True
-
-            try:
-                posComa_ = texto.index(".")
-                # print("Coma encontrada en pos", posComa_, denegarCambio_)
-            except Exception:
-                # print("Coma no encontrada", denegarCambio_)
-                pass
-
-            if posComa_ > -1:
-                decimales_ = texto[posComa_ + 1:]
-
-                if len(decimales_) > int(self._partDecimal):
-                    # print("Parte decimal (%s) se pasa de %s" % (decimales_ , self._partDecimal))
-                    denegarCambio_ = True
-
-            enteros_ = texto
-
-            if posComa_ > -1:
-                enteros_ = texto[:posComa_]
-
-            # print("enteros ...", enteros_)
-            if len(enteros_) > int(self._partInteger):
-                # print("Parte entera (%s) se pasa de %s" % (enteros_ , self._partInteger))
-                denegarCambioEnteros_ = True
-
-            # print("Decimales =", decimales_ , type(decimales_))
-            if decimales_ is not None:
-                try:
-                    float(decimales_)
-                except Exception:
-                    # print("Decimal esta mal", decimales_, len(decimales_))
-                    if len(decimales_) > 0:
-                        denegarCambio_ = True
-
-            # print("Enteros =", enteros_, type(enteros_))
-            try:
-                float(enteros_)
-            except Exception:
-                # print("Entero esta mal")
-                denegarCambioEnteros_ = True
-            # if not decimales_.isdecimal():
-                # denegarCambio_ = True
-
-            # if not enteros_.isdecimal():
-                # denegarCambioEnteros_ = True
-
-        # print("Procesado final", texto, denegarCambio_)
-
-        if denegarCambio_:
-            texto = texto[0:len(texto) - 1]
-            super(FLLineEdit, self).setText(texto)
-
-        if denegarCambioEnteros_ and decimales_ is not None:
-            texto = "%s%s%s" % (
-                enteros_[0:len(enteros_) - 1], QtCore.QLocale().decimalPoint(), decimales_)
-            super(FLLineEdit, self).setText(texto)
-        elif denegarCambioEnteros_ and decimales_ is None:
-            texto = enteros_[0:len(enteros_) - 1]
-            super(FLLineEdit, self).setText(texto)
-
-        if cambiarComa_:
-            super(FLLineEdit, self).setText(texto)
-
-    def setText(self, texto, b=True):
-        if self._maxValue:
-            if self._maxValue < int(texto):
-                texto = self._maxValue
-
-        texto = str(texto)
-
-        # Miramos si le falta digitos a la parte decimal ...
-        if self._tipo == "double" and len(texto) > 0:
-            if texto == "0":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
-
-            i = None
-            l = len(texto) - 1
-            try:
-                i = texto.index(".")
-            except Exception:
-                pass
-
-            if i:
-                # print("Posicion de . (%s) de %s en %s" % (i, l, texto))
-                f = (i + self._partDecimal) - l
-                # print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
-                while f > 0:
-                    texto = texto + "0"
-                    f = f - 1
-
-        super(FLLineEdit, self).setText(texto)
-        pineboolib.project._DGI._par.addQueqe(
-            "setText_%s" % self._fieldName, texto)
-        self.textChanged.emit(texto)
-
-    def text(self):
-        texto = str(super(FLLineEdit, self).text())
-
-        if texto is "":
-            texto = None
-
-        if texto is None:
-            if self._tipo == "string":
-                texto = ""
-
-            elif self._tipo == "double":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
-
-        return str(texto)

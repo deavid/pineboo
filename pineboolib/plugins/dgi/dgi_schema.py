@@ -1,6 +1,14 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, QtGui
+
+from xmljson import yahoo as xml2json
+from xml.etree.ElementTree import fromstring
+from json import dumps
+
 from pineboolib.utils import DefFun
+import pineboolib
+import sys
+import re
 import datetime
 
 
@@ -19,6 +27,7 @@ class dgi_schema(object):
         self._name = "dgi_shema"
         self._alias = "Default Schema"
         self.loadReferences()
+        self.parserDGI = parserJson()
 
     def name(self):
         return self._name
@@ -242,6 +251,9 @@ class FLLineEdit(QtWidgets.QLineEdit):
                     f = f - 1
 
         super(FLLineEdit, self).setText(texto)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe(
+                "setText_%s" % self._fieldName, texto)
         self.textChanged.emit(texto)
 
     def text(self):
@@ -446,3 +458,87 @@ class FLSpinBox(QtWidgets.QSpinBox):
 
     def setMaxValue(self, v):
         self.setMaximum(v)
+
+
+"""
+Exportador UI a JSON
+"""
+
+
+class parserJson():
+
+    def __init__(self):
+        self.aPropsForbidden = ['images', 'includehints', 'layoutdefaults',
+                                'slots', 'stdsetdef', 'stdset', 'version', 'spacer']
+        self.aObjsForbidden = ['geometry', 'sizePolicy', 'margin', 'spacing', 'frameShadow',
+                               'frameShape', 'maximumSize', 'minimumSize', 'font', 'focusPolicy', 'iconSet', 'author', 'comment', 'forwards', 'includes']
+
+    def isInDgi(self, property, type):
+        if type == "prop":
+            if property in self.aPropsForbidden:
+                return False
+            else:
+                if property in self.aObjsForbidden:
+                    return False
+
+        return True
+
+    def manageProperties(self, obj):
+        if isinstance(obj, dict):
+            for property in list(obj):
+                if self.isInDgi(property, "prop"):
+                    if property == "name" and not self.isInDgi(obj[property], "obj"):
+                        del obj
+                        return None
+                    else:
+                        prop = self.manageProperties(obj[property])
+                        if prop:
+                            obj[property] = prop
+                        else:
+                            del obj[property]
+                else:
+                    del obj[property]
+        elif isinstance(obj, list):
+            ind = 0
+            while ind < len(obj):
+                it = self.manageProperties(obj[ind])
+                if it:
+                    obj[ind] = it
+                    ind += 1
+                else:
+                    del obj[ind]
+        return obj
+
+    def parse(self, name):
+        inputFile = name
+        outputFile = re.search("\w+.ui", inputFile)
+
+        if outputFile == None:
+            print("Error. El fichero debe tener extension .ui")
+            return None
+
+        ret_out = outputFile
+
+        outputFile = re.sub(".ui", ".dgi", inputFile)
+
+        try:
+            ui = open(inputFile, 'r')
+            xml = ui.read()
+        except:
+            print("Error. El fichero no existe o no tiene formato XML")
+            sys.exit()
+
+        json = xml2json.data(fromstring(xml))
+        json = self.manageProperties(json)
+        strJson = dumps(json, sort_keys=True, indent=2)
+
+        """
+        try:
+            dgi = open(outputFile, 'w')
+            dgi.write(strJson)
+            dgi.close()
+        except:
+            print("Error. Ha habido un problema durante la escritura del fichero")
+            return None
+        """
+        return strJson
