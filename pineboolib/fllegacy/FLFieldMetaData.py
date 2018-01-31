@@ -446,6 +446,9 @@ class FLFieldMetaData(object):
     """
 
     def getIndexOptionsList(self, name):
+        if name is None:
+            return None
+
         i = 0
         for option in self.d.optionsList_:
             if option == str(name):
