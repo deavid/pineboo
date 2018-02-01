@@ -1225,10 +1225,9 @@ class FLSqlCursor(ProjectClass):
             if pK:
                 pKV = self.d.buffer_.value(pK)
                 q = FLSqlQuery()
-                sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.d.metadata.name(
+                sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.d.metadata_.name(
                 ), self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pK), pKV))
-                q.setSql(sql_query)
-                q.exec_(self.d.db_.dbAux())
+                q.exec_(self.d.db_.dbAux(), sql_query)
                 if q.next():
                     v = q.value(0)
             else:

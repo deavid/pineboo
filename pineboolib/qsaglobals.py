@@ -248,8 +248,11 @@ def proxy_fn(wf, wr, slot):
     return fn
 
 
-def connect(sender, signal, receiver, slot, doConnect=True):
-    # print("Connect::", sender, signal, receiver, slot)
+def connect(sender, signal, receiver, slot, doConnect=True, caller=None):
+    if caller is not None:
+        print("* * * Connect::", caller, sender, signal, receiver, slot, doConnect)
+    else:
+        print("? ? ? Connect::", sender, signal, receiver, slot, doConnect)
     if sender is None:
         print("Connect Error::", sender, signal, receiver, slot)
         return False
@@ -272,8 +275,7 @@ def connect(sender, signal, receiver, slot, doConnect=True):
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
             try:
-                oSignal.disconnect(
-                    proxy_fn(weak_fn, weak_receiver, slot))
+                oSignal.disconnect()
             except Exception:
                 pass
 
