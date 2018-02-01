@@ -231,6 +231,22 @@ class SysType(object):
         return pineboolib.project.conn.removeConn(connName)
 
 
+class ProxySlot:
+    PROXY_FUNCTIONS = {}
+
+    def __init__(self, remote_fn, receiver, slot):
+        self.key = "%r.%r->%r" % (remote_fn, receiver, slot)
+        if self.key not in self.PROXY_FUNCTIONS:
+            weak_fn = weakref.WeakMethod(remote_fn)
+            weak_receiver = weakref.ref(receiver)
+            self.PROXY_FUNCTIONS[self.key] = proxy_fn(
+                weak_fn, weak_receiver, slot)
+        self.proxy_function = self.PROXY_FUNCTIONS[self.key]
+
+    def getProxyFn(self):
+        return self.proxy_function
+
+
 def proxy_fn(wf, wr, slot):
     def fn(*args, **kwargs):
         f = wf()
@@ -248,11 +264,37 @@ def proxy_fn(wf, wr, slot):
     return fn
 
 
-def connect(sender, signal, receiver, slot, doConnect=True, caller=None):
+def connect(sender, signal, receiver, slot, caller=None):
     if caller is not None:
-        print("* * * Connect::", caller, sender, signal, receiver, slot, doConnect)
+        print("* * * Connect::", caller, sender, signal, receiver, slot)
     else:
-        print("? ? ? Connect::", sender, signal, receiver, slot, doConnect)
+        print("? ? ? Connect::", sender, signal, receiver, slot)
+    signal_slot = solve_connection(sender, signal, receiver, slot)
+    if not signal_slot:
+        return False
+    # http://pyqt.sourceforge.net/Docs/PyQt4/qt.html#ConnectionType-enum
+    conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
+    signal, slot = signal_slot
+    try:
+        signal.connect(slot, type=conntype)
+    except RuntimeError as e:
+        print("ERROR Connecting:", sender, signal, receiver, slot)
+        print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
+        return False
+
+    return signal_slot
+
+
+def disconnect(sender, signal, receiver, slot, caller=None):
+    signal_slot = solve_connection(sender, signal, receiver, slot)
+    if not signal_slot:
+        return False
+    signal, slot = signal_slot
+    signal.disconnect(slot)
+    return signal_slot
+
+
+def solve_connection(sender, signal, receiver, slot):
     if sender is None:
         print("Connect Error::", sender, signal, receiver, slot)
         return False
@@ -267,7 +309,8 @@ def connect(sender, signal, receiver, slot, doConnect=True, caller=None):
         oSignal = getattr(sender.parent(), sl_name, None)
 
     if not oSignal:
-        print("ERROR: No existe la señal %s para la clase %s" % (signal, sender.__class__.__name__))
+        print("ERROR: No existe la señal %s para la clase %s" %
+              (signal, sender.__class__.__name__))
         return
 
     if remote_fn:
@@ -299,45 +342,24 @@ def connect(sender, signal, receiver, slot, doConnect=True, caller=None):
         if remote_fn is None:
             raise AttributeError("Object %s not found on %s" %
                                  (remote_fn, remote_obj))
-        try:
-            if isinstance(sender, QDateEdit):
-                if "valueChanged" in signal:
-                    signal = signal.replace("valueChanged", "dateChanged")
 
-            # Quito cualquier texto entre parentesis
-            sg_name = re.sub(' *\(.*\)', '', signal)
+        if isinstance(sender, QDateEdit):
+            if "valueChanged" in signal:
+                signal = signal.replace("valueChanged", "dateChanged")
+        # Quito cualquier texto entre parentesis
+        sg_name = re.sub(' *\(.*\)', '', signal)
+        return getattr(sender, sg_name), remote_fn
 
-            try:
-                getattr(sender, sg_name).disconnect(remote_fn)
-            except Exception:
-                pass
-
-            if doConnect:
-                getattr(sender, sg_name).connect(remote_fn)
-        except RuntimeError as e:
-            print("ERROR Connecting:", sender, sg_name, remote_fn)
-            print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
-            return False
-
+    elif isinstance(receiver, QtCore.QObject):
+        if isinstance(signal, str):
+            signal = getattr(sender, signal)
+        if isinstance(slot, str):
+            slot = getattr(receiver, slot)
+        return signal, slot
     else:
-        if isinstance(receiver, QtCore.QObject):
-
-            try:
-                sender.signal.disconnect(receiver.slot)
-            except Exception:
-                pass
-
-            if doConnect:
-                sender.signal.connect(receiver.slot)
-        else:
-            print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." %
-                  (sender, signal, receiver, slot))
-    return True
-
-
-def disconnect(sender, signal, receiver, slot):
-    # print("Disconnect::", sender, signal, receiver, slot)
-    connect(sender, signal, receiver, slot, False)
+        print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." %
+              (sender, signal, receiver, slot))
+    return False
 
 
 class Date(object):
