@@ -272,8 +272,7 @@ def connect(sender, signal, receiver, slot, doConnect=True):
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
             try:
-                oSignal.disconnect(
-                    proxy_fn(weak_fn, weak_receiver, slot))
+                oSignal.disconnect()
             except Exception:
                 pass
 
