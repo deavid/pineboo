@@ -104,9 +104,9 @@ class FLPicture(QObject):
             return False
 
         @decorators.BetaImplementation
-        def play(self, *args):
+        def play(self, painter):
             if self.pic_:
-                return self.pic_.play(*args)
+                return self.pic_.play(painter)
             return False
 
         @decorators.BetaImplementation
@@ -230,9 +230,9 @@ class FLPicture(QObject):
         return self.d_.pte_.isActive()
 
     @decorators.BetaImplementation
-    def play(self, *args):
+    def play(self, painter):
         if self.d_:
-            return self.d_.play(*args)
+            return self.d_.play(painter)
         return False
 
     @decorators.BetaImplementation
