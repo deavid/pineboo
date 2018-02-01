@@ -309,7 +309,7 @@ def main():
     pineboolib.no_python_cache = options.no_python_cache
 
     if options.trace_debug:
-        from pineboo.utils import traceit
+        from pineboolib.utils import traceit
         sys.settrace(traceit)
     if options.trace_signals:
         monkey_patch_connect()
