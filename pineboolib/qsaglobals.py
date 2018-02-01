@@ -273,12 +273,16 @@ def connect(sender, signal, receiver, slot, doConnect=True):
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
             try:
-                oSignal.disconnect()
+                oSignal.disconnect(proxy_fn(weak_fn, weak_receiver, slot))
             except Exception:
                 pass
 
             if doConnect:
                 oSignal.connect(proxy_fn(weak_fn, weak_receiver, slot))
+            else:
+                oSignal.disconnect()
+                print("Desconectando %s - %s" % (signal, slot))
+
         except RuntimeError as e:
             print("ERROR Connecting:", sender,
                   QtCore.SIGNAL(signal), remote_fn)
