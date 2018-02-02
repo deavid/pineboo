@@ -541,6 +541,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             # update_set.append("%s = %s" % (key, (self._cursor.mogrify("%s",[value]))))
             update_set.append("%s = %s" % (key, value))
 
+        if len(update_set) == 0:
+            return
+
         update_set_txt = ", ".join(update_set)
         sql = self._prj.conn.driver().queryUpdate(
             self.metadata().name(), update_set_txt, where_filter)
