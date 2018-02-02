@@ -420,7 +420,7 @@ class FLManagerModules(ProjectClass):
             formatVal = self._prj.conn.manager().formatAssignValue("nombre", "string", n, True)
             q = FLSqlQuery(None, self._prj.conn.dbAux())
             q.setForwardOnly(True)
-            q.exec("SELECT sha FROM flfiles WHERE %s" % formatVal)
+            q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
             if q.next():
                 return str(q.value(0))
             return None
