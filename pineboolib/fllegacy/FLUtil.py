@@ -544,7 +544,7 @@ class FLUtil(ProjectClass):
             q.setWhere("LENGTH(%s)=%s" % (name, _len))
             q.setOrderBy(name + " DESC")
 
-            if not q.exec():
+            if not q.exec_():
                 return None
 
             maxRange = 10 ** _len
@@ -608,7 +608,7 @@ class FLUtil(ProjectClass):
             q.setWhere(where)
             q.setOrderBy(name + " DESC")
 
-            if not q.exec():  # FIXME: "exec" es palabra reservada en Python
+            if not q.exec_():
                 return None
 
             maxRange = 10 ** _len
@@ -908,7 +908,7 @@ class FLUtil(ProjectClass):
         q.setFrom(f)
         q.setWhere(w)
         # q.setForwardOnly(True)
-        if not q.exec():  # FIXME: exec es palabra reservada
+        if not q.exec_():
             return False
 
         if q.next():
@@ -932,7 +932,7 @@ class FLUtil(ProjectClass):
             sql = "select " + s + " from " + f + " where " + w
 
         q = FLSqlQuery(None, connName)
-        if not q.exec_(None, sql):
+        if not q.exec_(sql):
             return False
 
         return q.value(0) if q.first() else False
