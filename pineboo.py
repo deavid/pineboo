@@ -377,6 +377,8 @@ def init_project(DGI, splash, options, project, mainForm, app):
         splash.showMessage("Iniciando proyecto ...")
     logger.info("Iniciando proyecto ...")
 
+    project.conn.manager().cleanupMetaData()
+
     objaction = None
     for k, module in list(project.modules.items()):
         try:
