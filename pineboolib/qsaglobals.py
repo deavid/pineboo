@@ -314,10 +314,6 @@ def solve_connection(sender, signal, receiver, slot):
     if remote_fn:
         proxyfn = ProxySlot(remote_fn, receiver, slot)
         return oSignal, proxyfn
-            else:
-                oSignal.disconnect()
-                print("Desconectando %s - %s" % (signal, slot))
-
     elif m:
         remote_obj = getattr(receiver, m.group(1), None)
         if remote_obj is None:
