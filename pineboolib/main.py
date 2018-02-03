@@ -2,28 +2,29 @@
 import time
 import os
 import logging
-import traceback
-from lxml import etree
-from binascii import unhexlify
-
 import zlib
 import importlib
+from binascii import unhexlify
+
+from lxml import etree
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.Qt import qApp
 from PyQt5.QtCore import Qt
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLTranslator import FLTranslator
-from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
-from pineboolib.fllegacy.FLFormDB import FLFormDB
+
+import pineboolib.emptyscript
 from pineboolib import qt3ui
+from pineboolib import decorators
 from pineboolib.PNConnection import PNConnection
 from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
-from pineboolib import decorators
 from pineboolib.utils import filedir, one, Struct, XMLStruct
-import pineboolib.emptyscript
+
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.FLTranslator import FLTranslator
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
+from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 
 
 class DBServer(XMLStruct):
@@ -149,9 +150,17 @@ class Project(object):
         self.tables = {}
         pineboolib.project = self
 
+    def coalesce_path(self, *filenames):
+        for filename in filenames:
+            if filename is None:
+                return None
+            if filename in self.files:
+                return self.files[filename].path()
+        raise IOError("None of the files specified were found: %s", repr(filenames))
+
     def path(self, filename):
         if filename not in self.files:
-            self.logger.error("Fichero %s no encontrado en el proyecto.", filename)
+            self.logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=True)
             return None
         return self.files[filename].path()
 
@@ -559,12 +568,13 @@ class DelayedObjectProxyLoader(object):
         self._args = args
         self._kwargs = kwargs
         self.loaded_obj = None
+        self.logger = logging.getLogger("main.DelayedObjectProxyLoader")
 
     def __load(self):
         if not self.loaded_obj:
-            if Project.debugLevel > 50:
-                print("DelayedObjectProxyLoader: loading %s %r( *%r **%r)" %
-                      (self._name, self._obj, self._args, self._kwargs))
+            self.logger.debug(
+                "DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
+                self._name, self._obj, self._args, self._kwargs)
             self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
 
@@ -706,14 +716,11 @@ class MainForm(object):
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
                     if self.prj._DGI.useDesktop():
-                        print(
+                        self.logger.exception(
                             "main.Mainform: Error al intentar decodificar icono de accion. No existe.")
-                        print(e)
             else:
                 action.iconSet = None
-            # if iconSet:
-            #    for images in self.root.xpath("images/image[@name='%s']" % iconSet):
-            #        print("*****", iconSet, images)
+
             self.actions[action.name] = action
             if not self.prj._DGI.localDesktop():
                 self.prj._DGI.mainForm().mainWindow.loadAction(action)
@@ -733,9 +740,6 @@ class MainForm(object):
             self.toolbar.append(toolbar_action.get("name"))
             if not self.prj._DGI.localDesktop():
                 self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
-        # self.ui = WMainForm()
-        # self.ui.load(self.path)
-        # self.ui.show()
 
 
 class XMLMainFormAction(XMLStruct):
@@ -745,20 +749,21 @@ class XMLMainFormAction(XMLStruct):
     mod = None
     prj = None
     slot = None
+    logger = logging.getLogger("main.XMLMainFormAction")
 
     def run(self):
-        if Project.debugLevel > 50:
-            print("Running MainFormAction:", self.name, self.text, self.slot)
+        self.logger.debug("Running: %s %s %s", self.name, self.text, self.slot)
         try:
             action = self.mod.actions[self.name]
             getattr(action, self.slot, "unknownSlot")()
         finally:
-            if Project.debugLevel > 50:
-                print("END of Running MainFormAction:",
-                      self.name, self.text, self.slot)
+            self.logger.debug(
+                "END of Running: %s %s %s",
+                self.name, self.text, self.slot)
 
 
 class XMLAction(XMLStruct):
+    logger = logging.getLogger("main.XMLAction")
 
     def __init__(self, _project, *args, **kwargs):
         super(XMLAction, self).__init__(*args, **kwargs)
@@ -775,25 +780,18 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor=None):
         # if self.formrecord_widget is None:
         if not getattr(self, "formrecord", None):
-            if Project.debugLevel > 50:
-                print("Record action %s is not defined. Canceled !" %
-                      (self.name))
+            self.logger.warn("Record action %s is not defined. Canceled !", self.name)
             return None
-        if Project.debugLevel > 50:
-            print("Loading record action %s . . . " % (self.name))
+        self.logger.debug("Loading record action %s . . . ", self.name)
         parent_or_cursor = cursor  # Sin padre, ya que es ventana propia
         self.formrecord_widget = FLFormRecordDB(
             parent_or_cursor, self, load=True)
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         # self._record_loaded = True
         if self.mainform_widget:
-            if Project.debugLevel > 50:
-                print("End of record action load %s (iface:%s ; widget:%s)"
-                      % (self.name,
-                         repr(self.mainform_widget.iface),
-                          repr(self.mainform_widget.widget)
-                         )
-                      )
+            self.logger.debug(
+                "End of record action load %s (iface:%s ; widget:%s)",
+                self.name, self.mainform_widget.iface, self.mainform_widget.widget)
 
         self.initModule(self.name)
         return self.formrecord_widget
@@ -802,15 +800,13 @@ class XMLAction(XMLStruct):
         try:
             return self._load()
         except Exception as e:
-            print("ERROR: Loading action %s: %s" % (self.name, e))
-            print(traceback.format_exc())
+            self.logger.exception("While loading action %s", self.name)
             return None
 
     def _load(self):
         if self._loaded:
             return self.mainform_widget
-        if Project.debugLevel > 50:
-            print("Loading action %s . . . " % (self.name))
+        self.logger.debug("Loading action %s . . . ", self.name)
         w = self.prj.main_window
         if not self.mainform_widget:
             if self.prj._DGI.useDesktop():
@@ -824,21 +820,16 @@ class XMLAction(XMLStruct):
                     self.load_script(
                         getattr(self, "scriptform", None), self.mainform_widget)
                 except Exception:
-                    print(traceback.format_exc(), "---")
+                    self.logger.exception("Error trying to load scriptform for %s", self.name)
 
         self._loaded = True
-        if Project.debugLevel > 50:
-            print("End of action load %s (iface:%s ; widget:%s)"
-                  % (self.name,
-                     repr(self.mainform_widget.iface),
-                     repr(self.mainform_widget.widget)
-                     )
-                  )
+        self.logger.debug(
+            "End of action load %s (iface:%s ; widget:%s)",
+            self.name, self.mainform_widget.iface, self.mainform_widget.widget)
         return self.mainform_widget
 
     def openDefaultForm(self):
-        if Project.debugLevel > 50:
-            print("Opening default form for Action", self.name)
+        self.logger.debug("Opening default form for Action %s", self.name)
         self.load()
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # ... construido antes que cualquier widget)
@@ -853,8 +844,7 @@ class XMLAction(XMLStruct):
         return self.form
 
     def openDefaultFormRecord(self, cursor=None):
-        if Project.debugLevel > -50:
-            print("Opening default formRecord for Action", self.name)
+        self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()
         if w:
@@ -862,8 +852,7 @@ class XMLAction(XMLStruct):
                 w.show()
 
     def execDefaultScript(self):
-        if Project.debugLevel > 50:
-            print("Executing default script for Action", self.name)
+        self.logger.debug("Executing default script for Action %s", self.name)
 
         self.load_script(self.scriptform, None)
         self.initModule(self.name)
@@ -873,8 +862,9 @@ class XMLAction(XMLStruct):
             self.script.form.main()
 
     def load_script(self, scriptname, parent=None):
-        print("Cargando script " + str(scriptname) + " de " +
-              str(parent) + " accion " + str(self.name))
+        self.logger.info(
+            "Cargando script %s de %s accion %s",
+            scriptname, parent, self.name)
 
         parent_ = parent
         if parent is None:
@@ -908,48 +898,44 @@ class XMLAction(XMLStruct):
             return
 
         script_path_qs = prj_.path(scriptname + ".qs")
-        script_path_py = prj_.path(
-            scriptname + ".py") or prj_.path(scriptname + ".qs.py")
+        script_path_py = prj_.coalesce_path(scriptname + ".py", scriptname + ".qs.py", None)
 
         overload_pyfile = os.path.join(
             parent.prj.tmpdir, "overloadpy", scriptname + ".py")
         if os.path.isfile(overload_pyfile):
-            print(
-                "WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
+            self.logger.warn("Cargando %s desde overload en lugar de la base de datos!!", scriptname)
             try:
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, overload_pyfile).load_module()
             except Exception as e:
-                print("ERROR al cargar script OVERLOADPY para la accion %r:" %
-                      action_.name, e)
-                print(traceback.format_exc(), "---")
+                self.logger.exception(
+                    "ERROR al cargar script OVERLOADPY para la accion %s:", action_.name)
 
         elif script_path_py:
             script_path = script_path_py
-            print("Loading script PY %s . . . " % scriptname)
+            self.logger.info("Loading script PY %s . . . ", scriptname)
             if not os.path.isfile(script_path):
                 raise IOError
             try:
-                print("Cargando %s : %s " % (scriptname,
-                                             script_path.replace(parent.prj.tmpdir, "tempdata")))
+                self.logger.info(
+                    "Cargando %s : %s ", scriptname,
+                    script_path.replace(parent.prj.tmpdir, "tempdata"))
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, script_path).load_module()
             except Exception as e:
-                print("ERROR al cargar script PY para la accion %r:" %
-                      action_.name, e)
-                print(traceback.format_exc(), "---")
+                self.logger.exception(
+                    "ERROR al cargar script PY para la accion %s:", action_.name)
 
         elif script_path_qs:
             script_path = script_path_qs
-            print("Loading script QS %s . . . " % scriptname)
+            self.logger.info("Loading script QS %s . . . ", scriptname)
             # Intentar convertirlo a Python primero con flscriptparser2
             if not os.path.isfile(script_path):
-                raise IOError
+                raise IOError("QS Script File %s not found" % script_path)
             python_script_path = (
                 script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-                print("Convirtiendo a Python . . .")
-                # ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                self.logger.info("Convirtiendo a Python . . .")
                 from pineboolib.flparser import postparse
                 postparse.pythonify(script_path)
 
@@ -957,16 +943,13 @@ class XMLAction(XMLStruct):
                 raise AssertionError(
                     u"No se encontró el módulo de Python, falló flscriptparser?")
             try:
-                print("Cargando %s : %s " % (scriptname,
-                                             python_script_path.replace(self.prj.tmpdir, "tempdata")))
+                self.logger.info(
+                    "Cargando %s : %s ", scriptname,
+                    python_script_path.replace(self.prj.tmpdir, "tempdata"))
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, python_script_path).load_module()
-                # self.script = imp.load_source(scriptname,python_script_path)
-                # self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
-                print("ERROR al cargar script QS para la accion %r:" %
-                      action_.name, e)
-                print(traceback.format_exc(), "---")
+                self.logger.exception("ERROR al cargar script QS para la accion %s:", action_.name)
 
         parent.script.form = parent.script.FormInternalObj(
             action_, prj_, parent_)
@@ -976,8 +959,8 @@ class XMLAction(XMLStruct):
                 parent.iface = parent.widget.iface
 
     def unknownSlot(self):
-        print("Executing unknown script for Action", self.name)
-        # Aquí debería arramcar el script
+        self.logger.error("Executing unknown script for Action %s", self.name)
+        # Aquí debería arrancar el script
 
     """
     Inicializa el modulo del form en caso de que no se inicializara ya
