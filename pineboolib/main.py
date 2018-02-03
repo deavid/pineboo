@@ -638,7 +638,7 @@ class ModuleActions(object):
                     setattr(qsaglobals, "form" + name, delayed_action)
 
                 if hasattr(qsaglobals, "formRecord" + name):
-                    self.logger.debug("No se sobreescribe variable de entorno", "formRecord" + name)
+                    self.logger.debug("No se sobreescribe variable de entorno %s", "formRecord" + name)
                 else:
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
                         action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
