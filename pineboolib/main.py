@@ -300,11 +300,11 @@ class Project(object):
         name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
 
-    @decorators.NotImplementedWarn
+    @decorators.NotImplementedDebug
     def readState(self):
         pass
 
-    @decorators.NotImplementedWarn
+    @decorators.NotImplementedDebug
     def writeState(self):
         pass
 
@@ -579,6 +579,7 @@ class ModuleActions(object):
         self.prj = module.prj
         self.path = path
         self.moduleName = modulename
+        self.logger = logging.getLogger("main.ModuleActions")
         assert path
 
     def load(self):
@@ -603,8 +604,7 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals, action.name):
-            # print("INFO: No se sobreescribe variable de entorno", action.name)
-            pass
+            self.logger.debug("No se sobreescribe variable de entorno %s", action.name)
         else:
             setattr(qsaglobals, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
@@ -618,22 +618,17 @@ class ModuleActions(object):
             except AttributeError:
                 name = "unnamed"
             self.prj.actions[name] = action
-            # print(":::" , self.mod.name, name)
             if name != "unnamed":
                 if hasattr(qsaglobals, "form" + name):
-                    if Project.debugLevel > 150:
-                        print(
-                            "INFO: No se sobreescribe variable de entorno", "form" + name)
-                    pass
+                    self.logger.debug("No se sobreescribe variable de entorno %s", "form" + name)
                 else:
-                    setattr(qsaglobals, "form" + name, DelayedObjectProxyLoader(action.load,
-                                                                                name="QSA.Module.%s.Action.form%s" % (self.mod.name, name)))
+                    delayed_action = DelayedObjectProxyLoader(
+                        action.load,
+                        name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
+                    setattr(qsaglobals, "form" + name, delayed_action)
 
                 if hasattr(qsaglobals, "formRecord" + name):
-                    if Project.debugLevel > 150:
-                        print("INFO: No se sobreescribe variable de entorno",
-                              "formRecord" + name)
-                    pass
+                    self.logger.debug("No se sobreescribe variable de entorno", "formRecord" + name)
                 else:
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
                         action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))

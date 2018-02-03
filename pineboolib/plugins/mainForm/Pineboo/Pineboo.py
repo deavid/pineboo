@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
-import traceback
+from PyQt5.QtCore import Qt
 from pineboolib.utils import filedir, Struct
-Qt = QtCore.Qt
+import logging
+logger = logging.getLogger(__name__)
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -86,19 +87,18 @@ class MainForm(QtWidgets.QMainWindow):
         self.setWindowTitle("Pineboo")
 
     def closeFormTab(self, numero):
-        # print"Cerrando pestaña número %d " % numero
+        logger.debug("Cerrando pestaña número %s ", numero)
         self.formTab.removeTab(numero)
 
     def addFormTab(self, action):
         widget = action.mainform_widget
-        # print"Añadiendo Form a pestaña"
+        logger.debug("Añadiendo Form a pestaña %s", action)
         icon = None
         try:
             icon = action.mod.mod.mainform.actions[action.name].icon
             self.formTab.addTab(widget, icon, widget.windowTitle())
         except Exception as e:
-            print("ERROR: addFormTab: No pude localizar icono para %r. Error: %s" % (
-                action.name, e))
+            logger.warn("addFormTab: No pude localizar icono para %s: %s", action.name, e)
             self.formTab.addTab(widget, widget.windowTitle())
 
         self.formTab.setCurrentWidget(widget)
@@ -121,8 +121,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.areasTab.addItem(vl, area.descripcion)
 
     def loadModule(self, module):
-        if MainForm.debugLevel > 50:
-            print("- Procesando %s " % module.name)
+        logger.debug("loadModule: Procesando %s ", module.name)
         # Creamos pestañas de areas y un vBLayout por cada módulo. Despues ahí metemos los actions de cada módulo
         if module.areaid not in self.areas:
             self.loadArea(Struct(idarea=module.areaid,
@@ -144,17 +143,15 @@ class MainForm(QtWidgets.QMainWindow):
         try:
             self.moduleLoad(vBLayout.layout, module)
         except Exception:
-            print("ERROR al procesar modulo %s:" % module.name)
-            print(traceback.format_exc(), "---")
+            logger.exception("ERROR al procesar modulo %s", module.name)
 
     def moduleLoad(self, vBLayout, module):
         if not module.loaded:
             module.load()
         if not module.loaded:
-            print("WARN: Ignorando modulo %r por fallo al cargar" %
-                  (module.name))
+            logger.warn("moduleLoad: Ignorando modulo %s por fallo al cargar", module.name)
             return False
-        # print "Running module %s . . . " % self.name
+        logger.debug("moduleLoad: Running module %s . . . ", module.name)
         iconsize = QtCore.QSize(22, 22)
         iconsize = QtCore.QSize(16, 16)
         vBLayout.setSpacing(0)
@@ -196,7 +193,7 @@ class MainForm(QtWidgets.QMainWindow):
         if not dialog.exec_():
             evnt.ignore()
         else:
-            print("FIXME::Guardando pestañas abiertas ...")
+            logger.debug("FIXME: Guardando pestañas abiertas ...")
 
 
 mainWindow = MainForm()

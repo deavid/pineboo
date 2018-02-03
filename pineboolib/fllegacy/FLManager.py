@@ -76,7 +76,7 @@ class FLManager(ProjectClass):
             return
 
         q = FLSqlQuery(None, self.db_.dbAux())
-        q.setForwardOnly(True)
+        # q.setForwardOnly(True)
 
         self.createSystemTable("flsettings")
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
@@ -730,7 +730,7 @@ class FLManager(ProjectClass):
         trimm = False
 
         t = -1
-        l = 0
+        length = 0
         pI = 4
         pD = 0
 
@@ -794,7 +794,7 @@ class FLManager(ProjectClass):
                     continue
 
                 if e.tagName() == "length":
-                    l = int(e.text())
+                    length = int(e.text())
                     no = no.nextSibling()
                     continue
 
@@ -890,7 +890,7 @@ class FLManager(ProjectClass):
             no = no.nextSibling()
 
         f = FLFieldMetaData(n, util.translate("Metadata", a), aN, iPK, t,
-                            l, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
+                            length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
         f.setFullyCalculated(fullCalc)
         f.setTrimed(trimm)
 
@@ -1096,8 +1096,8 @@ class FLManager(ProjectClass):
         buffer = None
         table = ""
 
-        q.setForwardOnly(True)
-        c.setForwardOnly(True)
+        # q.setForwardOnly(True)
+        # c.setForwardOnly(True)
 
         if not self.dictKeyMetaData_:
             self.dictKeyMetaData_ = {}
