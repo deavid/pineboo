@@ -10,6 +10,8 @@ import zlib
 import importlib
 
 from PyQt5 import QtCore, QtGui
+from PyQt5.Qt import qApp
+from PyQt5.QtCore import Qt
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
@@ -19,13 +21,9 @@ from pineboolib.PNConnection import PNConnection
 from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
-from PyQt5.Qt import qWarning, qApp
-
-import pineboolib.emptyscript
 from pineboolib import decorators
-
 from pineboolib.utils import filedir, one, Struct, XMLStruct
-Qt = QtCore.Qt
+import pineboolib.emptyscript
 
 
 class DBServer(XMLStruct):
@@ -86,7 +84,6 @@ class Project(object):
 
     def setDebugLevel(self, q):
         Project.debugLevel = q
-        decorators.Options.DEBUG_LEVEL = q
         qt3ui.Options.DEBUG_LEVEL = q
 
     """
@@ -154,7 +151,7 @@ class Project(object):
 
     def path(self, filename):
         if filename not in self.files:
-            print("WARN: Fichero %r no encontrado en el proyecto." % filename)
+            self.logger.error("Fichero %s no encontrado en el proyecto.", filename)
             return None
         return self.files[filename].path()
 
@@ -165,8 +162,7 @@ class Project(object):
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
         if self.deleteCache and not not os.path.exists(self.dir("cache/%s" % self.dbname)):
-            print("DEVELOP: DeleteCache Activado\nBorrando %s" %
-                  self.dir("cache/%s" % self.dbname))
+            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", self.dir("cache/%s" % self.dbname))
             for root, dirs, files in os.walk(self.dir("cache/%s" % self.dbname), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
@@ -237,7 +233,7 @@ class Project(object):
                 continue  # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files:
-                print("WARN: file %s already loaded, overwritting..." % nombre)
+                self.logger.warn("run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
@@ -260,7 +256,7 @@ class Project(object):
                     # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
                     txt = contenido.encode("ISO-8859-15")
                 except Exception:
-                    print("Error al decodificar", idmodulo, nombre)
+                    self.logger.exception("Error al decodificar %s %s", idmodulo, nombre)
                     # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
                     txt = contenido.encode("ISO-8859-15", "replace")
 
@@ -272,10 +268,7 @@ class Project(object):
             p = p + 1
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
-
-            if Project.debugLevel > 50:
-                print("Descarga del proyecto completo a disco duro: %.3fs" %
-                      (tiempo_fin - tiempo_ini))
+            self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
 
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
@@ -318,9 +311,7 @@ class Project(object):
     def call(self, function, aList, objectContext, showException=True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
-        if Project.debugLevel > 50:
-            print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" %
-                  (function, aList, objectContext))
+        self.logger.debug("JS.CALL: fn:%s args:%s ctx:%s", function, aList, objectContext, stack_info=True)
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
@@ -328,16 +319,13 @@ class Project(object):
 
         aFunction = function.split(".")
         if not aFunction[0] in self.modules:
-            if Project.debugLevel > 50:
-                print("No existe el módulo %s" % (aFunction[0]))
+            self.logger.error("No existe el módulo %s", aFunction[0])
             return False
 
         funModule = self.modules[aFunction[0]]
 
         if not aFunction[0] in funModule.actions:
-            if Project.debugLevel > 50:
-                print("No existe la acción %s en el módulo %s" %
-                      (aFunction[0], aFunction[0]))
+            self.logger.error("No existe la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
         funAction = funModule.actions[aFunction[0]]
@@ -351,30 +339,22 @@ class Project(object):
             return False
 
         if not funScript:
-            if Project.debugLevel > 50:
-                print("No existe el script para la acción %s en el módulo %s" %
-                      (aFunction[0], aFunction[0]))
+            self.logger.error("No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
         fn = getattr(funScript, aFunction[2], None)
         if fn is None:
-            if Project.debugLevel > 50:
-                print("No existe la función %s en %s" %
-                      (aFunction[2], function))
-            return True
+            self.logger.error("No existe la función %s en %s", aFunction[2], function)
+            return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
-        # fn = None
         try:
-            # fn = eval(function, pineboolib.qsaglobals.__dict__)
             if aList:
                 return fn(*aList)
             else:
                 return fn()
-
         except Exception:
-            # print("** JS.CALL :: ERROR:", traceback.format_exc())
             if showException:
-                print("** JS.CALL :: ERROR:", traceback.format_exc())
+                self.logger.exception("js.call: error al llamar %s", function)
 
         return None
 
@@ -449,17 +429,12 @@ class Project(object):
         python_script_path = (
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-            print("Convirtiendo a Python . . .", scriptname)
-            # ret = subprocess.call(["flscriptparser2", "--full",script_path])
+            self.logger.info("Convirtiendo a Python . . . %s", scriptname)
             from pineboolib.flparser import postparse
             try:
                 postparse.pythonify(scriptname)
             except Exception as e:
-                qWarning("WARN: El fichero %s no se ha podido convertir: %s" %
-                         (scriptname, e))
-
-        # if not os.path.isfile(python_script_path):
-        #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
+                self.logger.warn("El fichero %s no se ha podido convertir: %s", scriptname, e)
 
     def reinitP(self):
         if self.acl_:
@@ -472,8 +447,7 @@ class Project(object):
         if obj_:
             return obj_
 
-        print("WARN: Project.resolveSDIObject no puede encontra el objeto %s en %s" % (
-            name, self._DGI.alias()))
+        self.logger.warn("Project.resolveSDIObject no puede encontra el objeto %s en %s", name, self._DGI.alias())
 
 
 class Module(object):
@@ -487,6 +461,7 @@ class Module(object):
         self.tables = {}
         self.loaded = False
         self.path = self.prj.path
+        self.logger = logging.getLogger("main.Module")
 
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
@@ -495,10 +470,10 @@ class Module(object):
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
-            print("ERROR: modulo %r: fichero XML no existe" % (self.name))
+            self.logger.error("modulo %s: fichero XML no existe", self.name)
             return False
         if pathui is None:
-            print("ERROR: modulo %r: fichero UI no existe" % (self.name))
+            self.logger.error("modulo %s: fichero UI no existe", self.name)
             return False
         if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
             tiempo_1 = time.time()
@@ -509,8 +484,7 @@ class Module(object):
                 self.mainform = MainForm(self, pathui)
                 self.mainform.load()
         except Exception as e:
-            print("ERROR al cargar modulo %r:" % self.name, e)
-            print(traceback.format_exc(), "---")
+            self.logger.exception("Al cargar modulo %s:", self.name)
             return False
 
         # TODO: Load Main Script:
@@ -527,12 +501,11 @@ class Module(object):
                 contenido = str(open(self.path(tablefile),
                                      "rb").read(), "ISO-8859-15")
             except UnicodeDecodeError as e:
-                print("Error al leer el fichero", tablefile, e)
+                self.logger.error("Error al leer el fichero %s %s", tablefile, e)
                 continue
             tableObj = parseTable(name, contenido)
             if tableObj is None:
-                print("No se pudo procesar. Se ignora tabla %s/%s " %
-                      (self.name, name))
+                self.logger.warn("No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
@@ -540,9 +513,7 @@ class Module(object):
         if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
             tiempo_3 = time.time()
             if tiempo_3 - tiempo_1 > 0.2:
-                if Project.debugLevel > 50:
-                    print("Carga del modulo %s : %.3fs ,  %.3fs" %
-                          (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
+                self.logger.debug("Carga del modulo %s : %.3fs ,  %.3fs", (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
 
         self.loaded = True
         return True

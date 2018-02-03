@@ -77,8 +77,8 @@ class FLAccessControlLists(ProjectClass):
             del self.accessControlList_
             self.accessControlList_ = {}
 
-        if not util.domDocumentSetContent(doc, aclXml):
-            logger.warn("Lista de control de acceso vacia o errónea")
+        if aclXml and not util.domDocumentSetContent(doc, aclXml):
+            logger.error("Lista de control de acceso errónea")
             return
 
         self.accessControlList_ = {}

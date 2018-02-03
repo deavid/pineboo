@@ -16,7 +16,6 @@ import signal
 import importlib
 import pineboo
 import logging
-from PyQt5.QtCore import QCoreApplication
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 

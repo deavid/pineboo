@@ -1,23 +1,13 @@
 # -*- coding: utf-8 -*-
 import time
 import re
-import traceback
 import logging
-
-
-class Options:
-    DEBUG_LEVEL = 100
 
 
 logger = logging.getLogger(__name__)
 MSG_EMITTED = {}
 CLEAN_REGEX = re.compile(r'\s*object\s+at\s+0x[0-9a-zA-Z]{6,38}', re.VERBOSE)
 MINIMUM_TIME_FOR_REPRINT = 300
-
-
-def print_stack(maxsize=1):
-    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
-        print(tb.rstrip())
 
 
 def clean_repr(x):
@@ -35,9 +25,7 @@ def NotImplementedWarn(fn):
         now = time.time()
         if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info("WARN: Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
-            if Options.DEBUG_LEVEL > 90:
-                print_stack()
+            logger.info("WARN: Not yet impl.: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=True)
         return ret
     return newfn
 
@@ -127,8 +115,6 @@ def Deprecated(fn):
         now = time.time()
         if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info("WARN: Deprecated: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret))
-            if Options.DEBUG_LEVEL > 90:
-                print_stack()
+            logger.info("WARN: Deprecated: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=True)
         return ret
     return newfn
