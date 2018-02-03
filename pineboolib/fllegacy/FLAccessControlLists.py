@@ -5,9 +5,12 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLAccessControlFactory import FLAccessControlFactory
 from pineboolib import decorators
+import logging
+logger = logging.getLogger(__name__)
 
 
 class FLAccessControlLists(ProjectClass):
+    """Gestionar las listas de acceso para limitar la aplicación a los usuarios."""
 
     """
     Nombre que identifica la lista de control de acceso actualmente establecida.
@@ -29,44 +32,40 @@ class FLAccessControlLists(ProjectClass):
 
     accessControlList_ = {}
 
-    """
-    Constructor
-    """
-
     def __init__(self):
+        """
+        Constructor
+        """
         super(FLAccessControlLists, self).__init__()
 
         self.name_ = None
         self.accessControlList_ = {}
 
-    """
-    Destructor
-    """
-
     def __del__(self):
+        """
+        Destructor
+        """
         if self.accessControlList_:
             self.accessControlList_.clear()
             del self.accessControlList_
 
-    """
-    Para obtener el nombre que identifica la lista de control de acceso actualmente establecida.
-
-    @return Nombre la lista de control de acceso actual.
-    """
-
     def name(self):
+        """
+        Para obtener el nombre que identifica la lista de control de acceso actualmente establecida.
+
+        @return Nombre la lista de control de acceso actual.
+        """
         return self.name_
 
-    """
-    Lee el fichero "acl.xml" y establece una nueva lista de control de acceso.
-
-    Si el fichero "acl.xml" no se puede leer, la lista de control de acceso queda vacía y
-    no se procesará ningún control de acceso sobre ningún objeto.
-
-    @param  aclXml  Contenido XML con la definición de la lista de control de acceso.
-    """
-
     def init_(self, aclXml=None):
+        """
+        Lee el fichero "acl.xml" y establece una nueva lista de control de acceso.
+
+        Si el fichero "acl.xml" no se puede leer, la lista de control de acceso queda vacía y
+        no se procesará ningún control de acceso sobre ningún objeto.
+
+        @param  aclXml  Contenido XML con la definición de la lista de control de acceso.
+        """
 
         util = FLUtil()
         if aclXml is None:
@@ -79,8 +78,7 @@ class FLAccessControlLists(ProjectClass):
             self.accessControlList_ = {}
 
         if not util.domDocumentSetContent(doc, aclXml):
-            print("FLAccessControlList : " +
-                  util.tr("Lista de control de acceso vacia o errónea"))
+            logger.warn("Lista de control de acceso vacia o errónea")
             return
 
         self.accessControlList_ = {}
@@ -100,8 +98,7 @@ class FLAccessControlLists(ProjectClass):
                 ac = FLAccessControlFactory().create(e.tagName())
                 if ac:
                     ac.set(e)
-                    print("******************", ac.type(),
-                          ac.name(), ac.user(), ac)
+                    logger.debug("****************** %s %s %s", ac.type(), ac.name(), ac.user(), ac)
                     self.accessControlList_["%s::%s::%s" %
                                             (ac.type(), ac.name(), ac.user())] = ac
                     no = no.nextSibling()
@@ -109,13 +106,12 @@ class FLAccessControlLists(ProjectClass):
 
             no = no.nextSibling()
 
-    """
-    Procesa un objeto de alto nivel según la lista de control de acceso establecida.
-
-    @param obj Objeto de alto nivel al que aplicar el control de acceso. Debe ser o heredar de la clase QObject.
-    """
-
     def process(self, obj):
+        """
+        Procesa un objeto de alto nivel según la lista de control de acceso establecida.
+
+        @param obj Objeto de alto nivel al que aplicar el control de acceso. Debe ser o heredar de la clase QObject.
+        """
         if not obj or not self.accessControlList_:
             return
 
@@ -133,13 +129,12 @@ class FLAccessControlLists(ProjectClass):
             if ac:
                 ac.processObject(obj)
 
-    """
-    Crea un nuevo fichero "acl.xml" y lo almacena sustituyendo el anterior, en el caso de que exista.
-
-    @param idacl Identificador del registro de la tabla "flacls" a utilizar para crear "acl.xml".
-    """
-
     def installACL(self, idacl):
+        """
+        Crea un nuevo fichero "acl.xml" y lo almacena sustituyendo el anterior, en el caso de que exista.
+
+        @param idacl Identificador del registro de la tabla "flacls" a utilizar para crear "acl.xml".
+        """
 
         util = FLUtil()
 
@@ -177,19 +172,19 @@ class FLAccessControlLists(ProjectClass):
 
     # private:
 
-    """
-    Crea el/los nodo(s) DOM correspondiente(s) a un registro de la tabla "flacs".
-
-    Utiliza FLAccessControlLists::makeRuleUser o FLAccessControlLists::makeRuleGroup dependiendo si el registro
-    al que apunta la consulta indica que la regla es para un usuario o un grupo. Si el registro indica a un
-    usuario se creará una regla de usuario, si indica a un grupo se creará una regla de usuario por cada uno de
-    los usuarios miembros del grupo.
-
-    @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir la(s) regla(s).
-    @param d Documento DOM/XML en el que insertará(n) el/los nodo(s) que describe(n) la(s) regla(s) de control de acceso.
-    """
     @decorators.BetaImplementation
     def makeRule(self, q, d):
+        """
+        Crea el/los nodo(s) DOM correspondiente(s) a un registro de la tabla "flacs".
+
+        Utiliza FLAccessControlLists::makeRuleUser o FLAccessControlLists::makeRuleGroup dependiendo si el registro
+        al que apunta la consulta indica que la regla es para un usuario o un grupo. Si el registro indica a un
+        usuario se creará una regla de usuario, si indica a un grupo se creará una regla de usuario por cada uno de
+        los usuarios miembros del grupo.
+
+        @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir la(s) regla(s).
+        @param d Documento DOM/XML en el que insertará(n) el/los nodo(s) que describe(n) la(s) regla(s) de control de acceso.
+        """
         if not q or not d:
             return
 
@@ -198,15 +193,14 @@ class FLAccessControlLists(ProjectClass):
         else:
             self.makeRuleUser(q, d, str(q.value(3)))
 
-    """
-    Crea un nodo DOM correspondiente a un registro de la tabla "flacs" y para un usuario determinado.
-
-    @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir la regla.
-    @param d Documento DOM/XML en el que insertará el nodo que describe la regla de control de acceso.
-    @param iduser Identificador del usuario utilizado en la regla de control de acceso.
-    """
-
     def makeRuleUser(self, q, d, iduser):
+        """
+        Crea un nodo DOM correspondiente a un registro de la tabla "flacs" y para un usuario determinado.
+
+        @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir la regla.
+        @param d Documento DOM/XML en el que insertará el nodo que describe la regla de control de acceso.
+        @param iduser Identificador del usuario utilizado en la regla de control de acceso.
+        """
         if not iduser or not q or not d:
             return
 
@@ -236,18 +230,17 @@ class FLAccessControlLists(ProjectClass):
 
             del ac
 
-    """
-    Crea varios nodos DOM correspondientes a un registro de la tabla "flacs" y para un grupo de usuarios determinado.
-
-    La función de este método es crear una regla para cada uno de los usuarios miembros del grupo, utilizando
-    FLAccessControlLists::makeRuleUser.
-
-    @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir las reglas.
-    @param d Documento DOM/XML en el que insertarán los nodos que describe las reglas de control de acceso.
-    @param idgroup Identificador del grupo de usuarios.
-    """
-
     def makeRuleGroup(self, q, d, idgroup):
+        """
+        Crea varios nodos DOM correspondientes a un registro de la tabla "flacs" y para un grupo de usuarios determinado.
+
+        La función de este método es crear una regla para cada uno de los usuarios miembros del grupo, utilizando
+        FLAccessControlLists::makeRuleUser.
+
+        @param q Consulta sobre la tabla "flacs" posicionada en el registro a utilizar para construir las reglas.
+        @param d Documento DOM/XML en el que insertarán los nodos que describe las reglas de control de acceso.
+        @param idgroup Identificador del grupo de usuarios.
+        """
         if not idgroup or not q or not d:
             return
 
