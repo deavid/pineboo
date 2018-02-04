@@ -43,19 +43,19 @@ def startup_check_dependencies():
         from lxml import etree
     except ImportError:
         logger.exception("El paquete python3-lxml no está instalado")
-        dependences.add("python3-lxml")
+        dependences.append("python3-lxml")
 
     try:
         import ply
     except ImportError:
         logger.exception("El paquete python3-ply no está instalado")
-        dependences.add("python3-ply")
+        dependences.append("python3-ply")
 
     try:
         from PyQt5 import QtCore
     except ImportError:
         logger.exception("El paquete python3-pyqt5 no está instalado")
-        dependences.add("python3-pyqt5")
+        dependences.append("python3-pyqt5")
 
     if dependences:
         logger.info("HINT: Dependencias incumplidas:")
