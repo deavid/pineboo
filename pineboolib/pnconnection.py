@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5.Qt import qWarning
 from PyQt5 import QtCore, QtWidgets
 
-from pineboolib import decorators, PNSqlDrivers
+from pineboolib import decorators, pnsqldrivers
 
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
@@ -47,7 +47,7 @@ class PNConnection(QtCore.QObject):
         self.db_port = db_port
         self.db_userName = db_userName
         self.db_password = db_password
-        self.driverSql = PNSqlDrivers.PNSqlDrivers()
+        self.driverSql = pnsqldrivers.PNSqlDrivers()
 
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
 

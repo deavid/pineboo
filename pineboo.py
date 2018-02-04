@@ -241,8 +241,8 @@ def create_app(DGI):
 
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # construido antes que cualquier widget
-        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-            pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
+        mainForm = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+            pineboolib.main.Project.mainFormName.lower(), pineboolib.main.Project.mainFormName.lower()))
     else:
         mainForm = DGI.mainForm()
     # mainForm = getattr(module_, "MainForm")()
@@ -252,8 +252,8 @@ def create_app(DGI):
 
 def show_connection_dialog(project, app):
     """Show the connection dialog, and configure the project accordingly."""
-    from pineboolib import DlgConnect
-    connection_window = DlgConnect.DlgConnect()
+    from pineboolib import dlgconnect
+    connection_window = dlgconnect.DlgConnect()
     connection_window.load()
     connection_window.show()
     ret = app.exec_()
@@ -302,7 +302,7 @@ def main():
     """
     # FIXME: This function should not initialize the program
     from pineboolib.utils import filedir
-    import pineboolib.DlgConnect
+    import pineboolib.dlgconnect
 
     import pineboolib
     import pineboolib.main
@@ -547,11 +547,14 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
         methodName = levelName.lower()
 
     if hasattr(logging, levelName):
-        raise AttributeError('{} already defined in logging module'.format(levelName))
+        raise AttributeError(
+            '{} already defined in logging module'.format(levelName))
     if hasattr(logging, methodName):
-        raise AttributeError('{} already defined in logging module'.format(methodName))
+        raise AttributeError(
+            '{} already defined in logging module'.format(methodName))
     if hasattr(logging.getLoggerClass(), methodName):
-        raise AttributeError('{} already defined in logger class'.format(methodName))
+        raise AttributeError(
+            '{} already defined in logger class'.format(methodName))
 
     # This method was inspired by the answers to Stack Overflow post
     # http://stackoverflow.com/q/2183233/2988730, especially

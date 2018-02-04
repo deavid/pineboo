@@ -6,7 +6,7 @@ import pineboolib
 from pineboolib import decorators
 
 from pineboolib.utils import DefFun, XMLStruct
-from pineboolib.CursorTableModel import CursorTableModel
+from pineboolib.cursortablemodel import CursorTableModel
 from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -29,11 +29,11 @@ class Struct(object):
 
 # ###############################################################################
 # ###############################################################################
-# ######                                                                  #######
-# ######                                                                  #######
-# ######                           PNBuffer                               #######
-# ######                                                                  #######
-# ######                                                                  #######
+# ######
+# ######
+# ######                           PNBuffer
+# ######
+# ######
 # ###############################################################################
 # ###############################################################################
 
@@ -198,7 +198,8 @@ class PNBuffer(ProjectClass):
         field = self.field(n)
 
         if field is None:
-            # FIXME: Esto es un error. Si el campo no existe, es una llamada errónea.
+            # FIXME: Esto es un error. Si el campo no existe, es una llamada
+            # errónea.
             return True
 
         if field.type_ in ("bool", "unlock"):
@@ -431,11 +432,11 @@ class PNBuffer(ProjectClass):
 
 # ###############################################################################
 # ###############################################################################
-# ######                                                                  #######
-# ######                                                                  #######
-# ######                      FLSqlCursorPrivate                          #######
-# ######                                                                  #######
-# ######                                                                  #######
+# ######
+# ######
+# ######                      FLSqlCursorPrivate
+# ######
+# ######
 # ###############################################################################
 # ###############################################################################
 
@@ -764,11 +765,11 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
 # ###############################################################################
 # ###############################################################################
-# ######                                                                  #######
-# ######                                                                  #######
-# ######                         FLSqlCursor                              #######
-# ######                                                                  #######
-# ######                                                                  #######
+# ######
+# ######
+# ######                         FLSqlCursor
+# ######
+# ######
 # ###############################################################################
 # ###############################################################################
 
@@ -825,7 +826,8 @@ class FLSqlCursor(ProjectClass):
         if connectionName_or_db is None:
             # print("Init1") # si soy texto y estoy vacio
             self.d.db_ = self._prj.conn
-        # elif isinstance(connectionName_or_db, QString) or isinstance(connectionName_or_db, str):
+        # elif isinstance(connectionName_or_db, QString) or
+        # isinstance(connectionName_or_db, str):
         elif isinstance(connectionName_or_db, str):
             # print("Init2 ")
             self.d.db_ = self._prj.conn.useConn(connectionName_or_db)
@@ -847,7 +849,8 @@ class FLSqlCursor(ProjectClass):
     def init(self, name, autopopulate, cR, r):
         # print("FLSqlCursor(%s): Init() %s (%s, %s)" % (name, self, cR, r))
 
-        # if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
+        # if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not
+        # self.d.metadata_.inCache():
 
         self.d.curName_ = name
         if self.setAction(self.d.curName_):
@@ -1198,7 +1201,8 @@ class FLSqlCursor(ProjectClass):
         if not self.metadata():
             return None
 
-        # if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
+        # if not self.d.buffer_ or self.d.buffer_.isEmpty() or not
+        # self.metadata():
         if (self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert) or not self.d.buffer_:
             if not self.d.buffer_:
                 # print("solicitando rb de", self.curName(), self.modeAccess(), self.d._currentregister, self.model().rows)
@@ -1767,7 +1771,8 @@ class FLSqlCursor(ProjectClass):
                         q.setWhere(self.d.db_.manager().formatAssignValue(
                             r.foreignField(), field, s, True))
                         q.setForwardOnly(True)
-                        print("SQL linea = " + q.sql() + " conn name = " + str(q._prj.conn.connectionName()))
+                        print("SQL linea = " + q.sql() + " conn name = " +
+                              str(q._prj.conn.connectionName()))
                         q.exec_()
                         if not q.next():
                             # msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() +
@@ -2421,7 +2426,8 @@ class FLSqlCursor(ProjectClass):
         else:
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 v = self.valueBuffer(self.d.relation_.field())
-                foreignFieldValueBuffer = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
+                foreignFieldValueBuffer = self.d.cursorRelation_.valueBuffer(
+                    self.d.relation_.foreignField())
                 if (foreignFieldValueBuffer != v and foreignFieldValueBuffer is not None):
                     self.d.cursorRelation_.setValueBuffer(
                         self.d.relation_.foreignField(), v)
@@ -3563,7 +3569,8 @@ class FLSqlCursor(ProjectClass):
                 print("FLSqlCursor.update:: Unhandled error on model updateRowDB:: ",
                       traceback.format_exc())
                 update_successful = False
-            # TODO: En el futuro, si no se puede conseguir un update, hay que "tirar atrás" todo.
+            # TODO: En el futuro, si no se puede conseguir un update, hay que
+            # "tirar atrás" todo.
             if update_successful:
                 row = self.model().findPKRow([pKValue])
                 if row is not None:

@@ -15,7 +15,7 @@ from PyQt5.QtCore import Qt
 import pineboolib.emptyscript
 from pineboolib import qt3ui
 from pineboolib import decorators
-from pineboolib.PNConnection import PNConnection
+from pineboolib.pnconnection import PNConnection
 from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.utils import filedir, one, Struct, XMLStruct
 
@@ -65,8 +65,8 @@ class Project(object):
         self._initModules = []
         if self._DGI.useDesktop():
             if self._DGI.localDesktop():
-                self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-                    self.mainFormName, self.mainFormName)).mainWindow
+                self.main_window = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+                    self.mainFormName.lower(), self.mainFormName.lower())).mainWindow
             else:
                 self.main_window = self._DGI.mainForm().mainWindow
         self.deleteCache = False
@@ -156,11 +156,13 @@ class Project(object):
                 return None
             if filename in self.files:
                 return self.files[filename].path()
-        raise IOError("None of the files specified were found: %s", repr(filenames))
+        raise IOError(
+            "None of the files specified were found: %s", repr(filenames))
 
     def path(self, filename):
         if filename not in self.files:
-            self.logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=True)
+            self.logger.error(
+                "Fichero %s no encontrado en el proyecto.", filename, stack_info=True)
             return None
         return self.files[filename].path()
 
@@ -171,7 +173,8 @@ class Project(object):
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
         if self.deleteCache and not not os.path.exists(self.dir("cache/%s" % self.dbname)):
-            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", self.dir("cache/%s" % self.dbname))
+            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", self.dir(
+                "cache/%s" % self.dbname))
             for root, dirs, files in os.walk(self.dir("cache/%s" % self.dbname), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
@@ -242,7 +245,8 @@ class Project(object):
                 continue  # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files:
-                self.logger.warn("run: file %s already loaded, overwritting..." % nombre)
+                self.logger.warn(
+                    "run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
@@ -265,7 +269,8 @@ class Project(object):
                     # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
                     txt = contenido.encode("ISO-8859-15")
                 except Exception:
-                    self.logger.exception("Error al decodificar %s %s", idmodulo, nombre)
+                    self.logger.exception(
+                        "Error al decodificar %s %s", idmodulo, nombre)
                     # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
                     txt = contenido.encode("ISO-8859-15", "replace")
 
@@ -277,7 +282,8 @@ class Project(object):
             p = p + 1
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
-            self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
+            self.logger.info(
+                "Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
 
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
@@ -320,7 +326,8 @@ class Project(object):
     def call(self, function, aList, objectContext, showException=True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
-        self.logger.debug("JS.CALL: fn:%s args:%s ctx:%s", function, aList, objectContext, stack_info=True)
+        self.logger.debug("JS.CALL: fn:%s args:%s ctx:%s",
+                          function, aList, objectContext, stack_info=True)
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
@@ -334,7 +341,8 @@ class Project(object):
         funModule = self.modules[aFunction[0]]
 
         if not aFunction[0] in funModule.actions:
-            self.logger.error("No existe la acción %s en el módulo %s", aFunction[0], aFunction[0])
+            self.logger.error(
+                "No existe la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
         funAction = funModule.actions[aFunction[0]]
@@ -348,12 +356,14 @@ class Project(object):
             return False
 
         if not funScript:
-            self.logger.error("No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
+            self.logger.error(
+                "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
         fn = getattr(funScript, aFunction[2], None)
         if fn is None:
-            self.logger.error("No existe la función %s en %s", aFunction[2], function)
+            self.logger.error("No existe la función %s en %s",
+                              aFunction[2], function)
             return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
@@ -443,7 +453,8 @@ class Project(object):
             try:
                 postparse.pythonify(scriptname)
             except Exception as e:
-                self.logger.warn("El fichero %s no se ha podido convertir: %s", scriptname, e)
+                self.logger.warn(
+                    "El fichero %s no se ha podido convertir: %s", scriptname, e)
 
     def reinitP(self):
         if self.acl_:
@@ -456,7 +467,8 @@ class Project(object):
         if obj_:
             return obj_
 
-        self.logger.warn("Project.resolveSDIObject no puede encontra el objeto %s en %s", name, self._DGI.alias())
+        self.logger.warn(
+            "Project.resolveSDIObject no puede encontra el objeto %s en %s", name, self._DGI.alias())
 
 
 class Module(object):
@@ -510,11 +522,13 @@ class Module(object):
                 contenido = str(open(self.path(tablefile),
                                      "rb").read(), "ISO-8859-15")
             except UnicodeDecodeError as e:
-                self.logger.error("Error al leer el fichero %s %s", tablefile, e)
+                self.logger.error(
+                    "Error al leer el fichero %s %s", tablefile, e)
                 continue
             tableObj = parseTable(name, contenido)
             if tableObj is None:
-                self.logger.warn("No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
+                self.logger.warn(
+                    "No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
@@ -522,7 +536,8 @@ class Module(object):
         if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
             tiempo_3 = time.time()
             if tiempo_3 - tiempo_1 > 0.2:
-                self.logger.debug("Carga del modulo %s : %.3fs ,  %.3fs", (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
+                self.logger.debug("Carga del modulo %s : %.3fs ,  %.3fs",
+                                  (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
 
         self.loaded = True
         return True
@@ -614,7 +629,8 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals, action.name):
-            self.logger.debug("No se sobreescribe variable de entorno %s", action.name)
+            self.logger.debug(
+                "No se sobreescribe variable de entorno %s", action.name)
         else:
             setattr(qsaglobals, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
@@ -630,7 +646,8 @@ class ModuleActions(object):
             self.prj.actions[name] = action
             if name != "unnamed":
                 if hasattr(qsaglobals, "form" + name):
-                    self.logger.debug("No se sobreescribe variable de entorno %s", "form" + name)
+                    self.logger.debug(
+                        "No se sobreescribe variable de entorno %s", "form" + name)
                 else:
                     delayed_action = DelayedObjectProxyLoader(
                         action.load,
@@ -638,7 +655,8 @@ class ModuleActions(object):
                     setattr(qsaglobals, "form" + name, delayed_action)
 
                 if hasattr(qsaglobals, "formRecord" + name):
-                    self.logger.debug("No se sobreescribe variable de entorno %s", "formRecord" + name)
+                    self.logger.debug(
+                        "No se sobreescribe variable de entorno %s", "formRecord" + name)
                 else:
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
                         action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
@@ -781,7 +799,8 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor=None):
         # if self.formrecord_widget is None:
         if not getattr(self, "formrecord", None):
-            self.logger.warn("Record action %s is not defined. Canceled !", self.name)
+            self.logger.warn(
+                "Record action %s is not defined. Canceled !", self.name)
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
         parent_or_cursor = cursor  # Sin padre, ya que es ventana propia
@@ -821,7 +840,8 @@ class XMLAction(XMLStruct):
                     self.load_script(
                         getattr(self, "scriptform", None), self.mainform_widget)
                 except Exception:
-                    self.logger.exception("Error trying to load scriptform for %s", self.name)
+                    self.logger.exception(
+                        "Error trying to load scriptform for %s", self.name)
 
         self._loaded = True
         self.logger.debug(
@@ -899,12 +919,14 @@ class XMLAction(XMLStruct):
             return
 
         script_path_qs = prj_.path(scriptname + ".qs")
-        script_path_py = prj_.coalesce_path(scriptname + ".py", scriptname + ".qs.py", None)
+        script_path_py = prj_.coalesce_path(
+            scriptname + ".py", scriptname + ".qs.py", None)
 
         overload_pyfile = os.path.join(
             parent.prj.tmpdir, "overloadpy", scriptname + ".py")
         if os.path.isfile(overload_pyfile):
-            self.logger.warn("Cargando %s desde overload en lugar de la base de datos!!", scriptname)
+            self.logger.warn(
+                "Cargando %s desde overload en lugar de la base de datos!!", scriptname)
             try:
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, overload_pyfile).load_module()
@@ -950,7 +972,8 @@ class XMLAction(XMLStruct):
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, python_script_path).load_module()
             except Exception as e:
-                self.logger.exception("ERROR al cargar script QS para la accion %s:", action_.name)
+                self.logger.exception(
+                    "ERROR al cargar script QS para la accion %s:", action_.name)
 
         parent.script.form = parent.script.FormInternalObj(
             action_, prj_, parent_)

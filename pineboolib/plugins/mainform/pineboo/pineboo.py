@@ -25,7 +25,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def load(self):
         self.ui = uic.loadUi(
-            filedir('plugins/mainForm/Pineboo/mainform.ui'), self)
+            filedir('plugins/mainform/pineboo/mainform.ui'), self)
 
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(
