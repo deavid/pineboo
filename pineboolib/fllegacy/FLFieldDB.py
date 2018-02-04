@@ -429,7 +429,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed()
                     return True
-            elif isinstance(obj, QtWidgets.QTextEdit):
+            elif isinstance(obj, pineboolib.project.resolveDGIObject("QTextEdit")):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed()
                     return True
@@ -454,7 +454,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
             return False
 
-        # elif isinstance(event, QtCore.QEvent.MouseButtonRelease) and isinstance(obj,self.textLabelDB) and event.button() == Qt.LeftButton:
+        # elif isinstance(event, QtCore.QEvent.MouseButtonRelease) and
+        # isinstance(obj,self.textLabelDB) and event.button() == Qt.LeftButton:
         elif event.type() == QtCore.QEvent.MouseButtonRelease and isinstance(obj, type(self.textLabelDB)) and event.button() == Qt.LeftButton:
             self.emitLabelClicked()
         else:
@@ -1147,7 +1148,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 try:
                     self.editor_.textChanged.disconnect(self.updateValue)
                 except Exception:
-                    self.logger.exception("Error al desconectar señal textChanged")
+                    self.logger.exception(
+                        "Error al desconectar señal textChanged")
 
             if v is not None:
                 if ol:
@@ -1266,7 +1268,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 try:
                     self.editor_.dateChanged.disconnect(self.updateValue)
                 except Exception:
-                    self.logger.exception("Error al desconectar señal textChanged")
+                    self.logger.exception(
+                        "Error al desconectar señal textChanged")
 
                 if v:
                     util = FLUtil()
@@ -1288,7 +1291,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 try:
                     self.editor_.timeChanged.disconnect(self.updateValue)
                 except Exception:
-                    self.logger.exception("Error al desconectar señal timeChanged")
+                    self.logger.exception(
+                        "Error al desconectar señal timeChanged")
 
                 if v is not None:
                     self.editor_.setTime(v)
@@ -1454,7 +1458,8 @@ class FLFieldDB(QtWidgets.QWidget):
             try:
                 self.editor_.valueChanged.disconnect(self.updateValue)
             except Exception:
-                self.logger.exception("Error al desconectar señal valueChanged")
+                self.logger.exception(
+                    "Error al desconectar señal valueChanged")
             self.editor_.setDate(v)
             self.editor_.valueChanged.connect(self.updateValue)
 
@@ -1645,7 +1650,8 @@ class FLFieldDB(QtWidgets.QWidget):
         self.cursor_.bufferChanged.connect(self.refreshQuick)
 
         # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldName_)) #FIXME
-        # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_)) #FIXME
+        # self.cursor_.append(self.cursor_.db().db().recordInfo(self.tableName_).find(self.fieldRelation_))
+        # #FIXME
 
     def initEditor(self):
         """
@@ -1910,7 +1916,8 @@ class FLFieldDB(QtWidgets.QWidget):
                                 self.KeyF2Pressed.disconnect(
                                     self.pbAux3_.animateClick)
                             except Exception:
-                                self.logger.exception("Error al desconectar señal")
+                                self.logger.exception(
+                                    "Error al desconectar señal")
                         try:
                             self.KeyF2Pressed.connect(
                                 self.pbAux3_.animateClick)
@@ -2702,7 +2709,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not enable or not field.editable():
                     self.editor_.setStyleSheet('background-color: #f0f0f0')
                 else:
-                    # TODO: al re-habilitar un control, restaurar el color que le toca
+                    # TODO: al re-habilitar un control, restaurar el color que
+                    # le toca
                     if not field.allowNull() and not (field.type() == "time" or field.type() == "date"):
                         self.editor_.setStyleSheet(
                             'background-color:' + self.notNullColor().name())
@@ -2822,7 +2830,8 @@ class FLFieldDB(QtWidgets.QWidget):
                                     self.foreignField_)
                                 # print("El valor de %s.%s es %s" % (tMD.name(), self.foreignField_, v))
 
-                                # FIXME q = FLSqlQuery(False, self.cursor_.db().connectionName())
+                                # FIXME q = FLSqlQuery(False,
+                                # self.cursor_.db().connectionName())
                                 q = FLSqlQuery()
                                 q.setForwardOnly(True)
                                 q.setTablesList(self.tableName_)
