@@ -386,7 +386,8 @@ def init_project(DGI, splash, options, project, mainForm, app):
         splash.showMessage("Iniciando proyecto ...")
     logger.info("Iniciando proyecto ...")
 
-    # project.conn.manager().cleanupMetaData()
+    # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
+    project.conn.manager().db_.managerModules().loadAllIdModules()
 
     objaction = None
     for k, module in list(project.modules.items()):

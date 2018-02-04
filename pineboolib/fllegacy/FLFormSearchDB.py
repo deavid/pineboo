@@ -191,7 +191,7 @@ class FLFormSearchDB(FLFormDB):
     @return El valor del campo si se acepta, o QVariant::Invalid si se cancela
     """
 
-    def exec_(self, valor):
+    def exec_(self, valor=None):
         if not self.cursor_:
             return None
 

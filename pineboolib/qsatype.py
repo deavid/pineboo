@@ -341,6 +341,9 @@ class FormDBWidget(QtWidgets.QWidget):
         self.doCleanUp()
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
 
+    def obj(self):
+        return self
+
     def parent(self):
         return self.parent_
 
@@ -440,7 +443,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                self.cursor_ = FLSqlCursor(self._action.name)
+                self.cursor_ = FLSqlCursor(self._action.table)
 
         return self.cursor_
 

@@ -102,7 +102,7 @@ class PNBuffer(ProjectClass):
                 # else:
                 #    field.value = False
 
-            elif self.cursor().model().value(row, field.name) in ("None", "", None):
+            elif self.cursor().model().value(row, field.name) in ("None", None):
                 field.value = None
 
             else:
@@ -342,7 +342,9 @@ class PNBuffer(ProjectClass):
             if actual in (None, "None"):
                 return True
 
-            if type in ("string", "stringlist"):
+            if (actual == "" and value != "") or (actual != "" and value == ""):
+                return True
+            elif type in ("string", "stringlist"):
                 return not (actual == value)
             elif type in ("int", "uint", "serial"):
                 return not (int(actual) == int(value))
@@ -2615,7 +2617,6 @@ class FLSqlCursor(ProjectClass):
         #    return False
 
         b = self.moveby(1)
-
         if b and emite:
             self.d._current_changed.emit(self.at())
 
@@ -2627,6 +2628,7 @@ class FLSqlCursor(ProjectClass):
     def moveby(self, pos):
         if self.d._currentregister:
             pos += self.d._currentregister
+
         return self.move(pos)
 
     """
@@ -2793,11 +2795,12 @@ class FLSqlCursor(ProjectClass):
             self.setFilter(finalFilter)
 
         self.model().refresh()
+        self.d._currentregister = -1
+
         if self.cursorRelation() and self.modeAccess() == self.Browse:
             self.d._currentregister = self.atFrom()
 
         self.refreshBuffer()
-
         # if self.modeAccess() == self.Browse:
         #    self.d._currentregister = -1
         self.newBuffer.emit()
