@@ -316,7 +316,7 @@ class FLPixmapView(QtWidgets.QWidget):
 
     def __init__(self, parent):
         super(FLPixmapView, self).__init__(parent)
-        self.scrollView = QtWidgets.QScrollArea(parent)
+        # self.scrollView = QtWidgets.QScrollArea(parent)
         self.autoScaled_ = False
         self.lay_ = QtWidgets.QHBoxLayout(self)
         self.pixmap_ = QtGui.QPixmap()

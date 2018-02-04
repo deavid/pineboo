@@ -2437,7 +2437,7 @@ class FLFieldDB(QtWidgets.QWidget):
             newHeight = 0
             if img.width() < img.height():
                 newHeight = self.maxPixImages_
-                newWidth = round(newWidth * img.width() / img.height())
+                newWidth = round(newHeight * img.width() / img.height())
             else:
                 newWidth = self.maxPixImages_
                 newHeight = round(newWidth * img.height() / img.width())
