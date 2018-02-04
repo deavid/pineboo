@@ -164,7 +164,7 @@ def parse_options():
         options.no_python_cache = True
         options.preload = True
 
-    options.loglevel = 30 + (options.quiet - options.verbose) * 10
+    options.loglevel = 30 + (options.quiet - options.verbose) * 5
     options.debug_level = 200  # 50 - (options.quiet - options.verbose) * 25
 
     # ---- LOGGING -----
@@ -175,6 +175,11 @@ def parse_options():
 
     if options.log_time:
         log_format = '%(asctime)s - %(name)s:%(levelname)s: %(message)s'
+
+    addLoggingLevel('TRACE', logging.DEBUG - 5)
+    addLoggingLevel('NOTICE', logging.INFO - 5)
+    addLoggingLevel('HINT', logging.INFO - 2)
+    addLoggingLevel('MESSAGE', logging.WARN - 5)
 
     logging.basicConfig(format=log_format, level=options.loglevel)
     logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s",
