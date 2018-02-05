@@ -1223,7 +1223,7 @@ class FLSqlCursor(ProjectClass):
 
         if self.d.buffer_.isNull(fN):
             if type_ == "double" or type_ == "int" or type_ == "uint":
-                return 0
+                return None
 
         v = None
         if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() == self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert:
