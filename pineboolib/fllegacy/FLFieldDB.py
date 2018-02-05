@@ -1721,6 +1721,10 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.initMaxSize_ = self.maximumSize()
         self.initMinSize_ = self.minimumSize()
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setType" % self.objectName(), self._tipo)
+            if self.showAlias():
+                pineboolib.project._DGI._par.addQueqe("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
         if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
@@ -1743,7 +1747,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 for olN in olNoTranslated:
                     olTranslated.append(olN)
                 self.editor_.addItems(olTranslated)
-
+                if not pineboolib.project._DGI.localDesktop():
+                    pineboolib.project._DGI._par.addQueqe("%s_setOptionsList" % self.objectName(), olTranslated.split(","))
                 self.editor_.installEventFilter(self)
                 if self.showed:
                     try:
@@ -1818,6 +1823,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.textChanged.connect(self.emitTextChanged)
 
                 if hasPushButtonDB:
+                    if not pineboolib.project._DGI.localDesktop():
+                        pineboolib.project._DGI._par.addQueqe("%s_setHasPushButton" % self.objectName(), True)
                     if self.showed:
                         try:
                             self.KeyF2Pressed.disconnect(
@@ -2692,6 +2699,8 @@ class FLFieldDB(QtWidgets.QWidget):
             self.activatedAccel.emit()
 
     def setDisabled(self, disable):
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setDisabled" % self.objectName(), disabled)
         self.setEnabled(not disable)
 
     """

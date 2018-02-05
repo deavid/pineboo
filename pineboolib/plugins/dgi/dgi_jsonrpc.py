@@ -72,11 +72,18 @@ class parser(object):
             if args[0] == "clean":
                 pineboolib.project._DGI._par._queqe = {}
                 return True
+            elif args[0] in pineboolib.project._DGI._par._queqe.keys():
+                ret = []
+                for q in pineboolib.project._DGI._par._queqe.keys():
+                    if q.find(args[0]) > -1:
+                        ret.append(q, pineboolib.project._DGI._par._queqe[q])
+                        del pineboolib.project._DGI._par._queqe[q]
             else:
-                return "notFound"
+                ret = "Not Found"
+        else:
+            ret = pineboolib.project._DGI._par._queqe
+            pineboolib.project._DGI._par._queqe = {}
 
-        ret = pineboolib.project._DGI._par._queqe
-        pineboolib.project._DGI._par._queqe = {}
         return ret
 
     @dispatcher.add_method
@@ -159,7 +166,7 @@ class dgi_jsonrpc(dgi_schema):
 
     def showWidget(self, widget):
         self._par.addQueqe(
-            "showWidget_%s" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
+            "%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
 
 class mainForm(QtWidgets.QMainWindow):
