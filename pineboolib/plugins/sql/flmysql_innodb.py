@@ -1,7 +1,7 @@
-from pineboolib.plugins.sql.FLMYSQL_MyISAM import FLMYSQL_MyISAM
+from pineboolib.plugins.sql.flmysql_myisam import FLMYSQL_MYISAM
 
 
-class FLMYSQL_INNODB(FLMYSQL_MyISAM):
+class FLMYSQL_INNODB(FLMYSQL_MYISAM):
 
     version_ = None
     conn_ = None
@@ -16,4 +16,6 @@ class FLMYSQL_INNODB(FLMYSQL_MyISAM):
         self.alias_ = "MySQL_INNODB (EN OBRAS)"
         self.noInnoDB = False
 
-    # Aquí , en principio la única diferencia es a la hora de crear las tablas. cuando el driver este más avanzado sobreescribiremos la función de crear tablas.
+    # Aquí , en principio la única diferencia es a la hora de crear las
+    # tablas. cuando el driver este más avanzado sobreescribiremos la función
+    # de crear tablas.

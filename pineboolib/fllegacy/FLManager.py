@@ -17,21 +17,22 @@ from pineboolib.fllegacy.FLAction import FLAction
 from pineboolib.fllegacy.FLUtil import FLUtil
 
 from lxml import etree
+import logging
 # import os
-
-"""
-Esta clase sirve como administrador de la base de datos.
-
-Encargada de abrir los formularios u obtener sus definiciones (ficheros .ui).
-Tambien mantiene los metadatos de todas la tablas de la base de
-datos, ofreciendo la posibilidad de recuperar los metadatos
-mediante objetos FLTableMetaData de una tabla dada.
-
-@author InfoSiAL S.L.
-"""
+logger = logging.getLogger(__name__)
 
 
 class FLManager(ProjectClass):
+    """
+    Esta clase sirve como administrador de la base de datos.
+
+    Encargada de abrir los formularios u obtener sus definiciones (ficheros .ui).
+    Tambien mantiene los metadatos de todas la tablas de la base de
+    datos, ofreciendo la posibilidad de recuperar los metadatos
+    mediante objetos FLTableMetaData de una tabla dada.
+
+    @author InfoSiAL S.L.
+    """
 
     listTables_ = []  # Lista de las tablas de la base de datos, para optimizar lecturas
     dictKeyMetaData_ = None  # Diccionario de claves de metadatos, para optimizar lecturas
@@ -43,11 +44,10 @@ class FLManager(ProjectClass):
     initCount_ = 0  # Indica el número de veces que se ha llamado a FLManager::init()
     buffer_ = None
 
-    """
-    constructor
-    """
-
     def __init__(self, db):
+        """
+        constructor
+        """
         super(FLManager, self).__init__()
         self.db_ = db
         self.listTables_ = []
@@ -58,18 +58,16 @@ class FLManager(ProjectClass):
         self.cacheAction_ = []
         QtCore.QTimer.singleShot(100, self.init)
 
-    """
-    destructor
-    """
-
     def __del__(self):
+        """
+        destructor
+        """
         self.finish()
 
-    """
-    Acciones de inicialización.
-    """
-
     def init(self):
+        """
+        Acciones de inicialización.
+        """
         self.initCount_ = self.initCount_ + 1
         self.createSystemTable("flmetadata")
         self.createSystemTable("flseqs")
@@ -78,7 +76,7 @@ class FLManager(ProjectClass):
             return
 
         q = FLSqlQuery(None, self.db_.dbAux())
-        q.setForwardOnly(True)
+        # q.setForwardOnly(True)
 
         self.createSystemTable("flsettings")
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
@@ -93,7 +91,7 @@ class FLManager(ProjectClass):
 
         q.exec_("SELECT tabla,xml FROM flmetadata")
         while q.next():
-            self.dictKeyMetaData_.insert(q.value(0), q.value(1))
+            self.dictKeyMetaData_[q.value(0)] = q.value(1)
 
         q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'")
         if not q.next():
@@ -116,37 +114,35 @@ class FLManager(ProjectClass):
         if not self.cacheMetaDataSys_:
             self.cacheMetaDataSys_ = []
 
-    """
-    Acciones de finalización.
-    """
-
     def finish(self):
+        """
+        Acciones de finalización.
+        """
         self.dictKeyMetaData_ = {}
         self.listTables_ = []
         self.cacheMetaData_ = []
         self.cacheAction_ = []
 
-    """
-    Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
-
-    El nombre de la tabla corresponde con el nombre del fichero mas la extensión ".mtd"
-    que contiene en XML la descripción de la tablas. Este método escanea el fichero
-    y construye/devuelve el objeto FLTableMetaData correspondiente, además
-    realiza una copia de estos metadatos en una tabla de la misma base de datos
-    para poder determinar cuando ha sido modificados y así, si es necesario, reconstruir
-    la tabla para que se adapte a la nuevos metadatos. NO SE HACEN
-    CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    IMPORTANTE :Para que estos métodos funcionen correctamente, es estrictamente
-        necesario haber creado la base de datos en PostgreSQL con codificación
-        UNICODE; "createdb -E UNICODE abanq".
-
-    @param n Nombre de la tabla de la base de datos de la que obtener los metadatos
-    @param quick Si TRUE no realiza chequeos, usar con cuidado
-    @return Un objeto FLTableMetaData con los metadatos de la tabla solicitada
-    """
-
     def metadata(self, n, quick=False):
+        """
+        Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
+
+        El nombre de la tabla corresponde con el nombre del fichero mas la extensión ".mtd"
+        que contiene en XML la descripción de la tablas. Este método escanea el fichero
+        y construye/devuelve el objeto FLTableMetaData correspondiente, además
+        realiza una copia de estos metadatos en una tabla de la misma base de datos
+        para poder determinar cuando ha sido modificados y así, si es necesario, reconstruir
+        la tabla para que se adapte a la nuevos metadatos. NO SE HACEN
+        CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
+
+        IMPORTANTE :Para que estos métodos funcionen correctamente, es estrictamente
+            necesario haber creado la base de datos en PostgreSQL con codificación
+            UNICODE; "createdb -E UNICODE abanq".
+
+        @param n Nombre de la tabla de la base de datos de la que obtener los metadatos
+        @param quick Si TRUE no realiza chequeos, usar con cuidado
+        @return Un objeto FLTableMetaData con los metadatos de la tabla solicitada
+        """
 
         util = FLUtil()
 
@@ -227,7 +223,7 @@ class FLManager(ProjectClass):
                     "application",
                     "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
                     "Debe regenerar la base de datos.").replace("%1", n)
-                print(msg)
+                logger.warn(msg)
                 # throwMsgWarning(self.db_, msg)
 
             return ret
@@ -403,19 +399,18 @@ class FLManager(ProjectClass):
     def metadataDev(self, n, quick=None):
         return True
 
-    """
-    Para obtener una consulta de la base de datos, a partir de un fichero XML.
-
-    El nombre de la consulta corresponde con el nombre del fichero mas la extensión ".qry"
-    que contiene en XML la descripción de la consulta. Este método escanea el fichero
-    y construye/devuelve el objeto FLSqlQuery. NO SE HACEN
-    CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    @param n Nombre de la consulta de la base de datos que se quiere obtener
-    @return Un objeto FLSqlQuery que representa a la consulta que se quiere obtener
-    """
-
     def query(self, n, parent=None):
+        """
+        Para obtener una consulta de la base de datos, a partir de un fichero XML.
+
+        El nombre de la consulta corresponde con el nombre del fichero mas la extensión ".qry"
+        que contiene en XML la descripción de la consulta. Este método escanea el fichero
+        y construye/devuelve el objeto FLSqlQuery. NO SE HACEN
+        CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
+
+        @param n Nombre de la consulta de la base de datos que se quiere obtener
+        @return Un objeto FLSqlQuery que representa a la consulta que se quiere obtener
+        """
         qryName = "%s.qry" % n
         qry_ = self.db_.managerModules().contentCached(qryName)
 
@@ -456,18 +451,18 @@ class FLManager(ProjectClass):
 
         return q
 
-    """
-    Obtiene la definición de una acción a partir de su nombre.
-
-    Este método busca en los [id_modulo].xml la acción que se le pasa
-    como nombre y construye y devuelve el objeto FLAction correspondiente.
-    NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    @param n Nombre de la accion
-    @return Un objeto FLAction con la descripcion de la accion
-    """
     @decorators.Incomplete
     def action(self, n):
+        """
+        Obtiene la definición de una acción a partir de su nombre.
+
+        Este método busca en los [id_modulo].xml la acción que se le pasa
+        como nombre y construye y devuelve el objeto FLAction correspondiente.
+        NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
+
+        @param n Nombre de la accion
+        @return Un objeto FLAction con la descripcion de la accion
+        """
         if not n:
             return None
 
@@ -483,16 +478,15 @@ class FLManager(ProjectClass):
         self.cacheAction_.append(actionN)
         return actionN
 
-    """
-    Comprueba si existe la tabla especificada en la base de datos.
-
-    @param n      Nombre de la tabla que se quiere comprobar si existe
-    @param cache  Si cierto consulta primero la cache de tablas, en caso contrario
-                realiza una consulta a la base para obtener las tablas existentes
-    @return TRUE si existe la tabla, FALSE en caso contrario
-    """
-
     def existsTable(self, n, cache=True):
+        """
+        Comprueba si existe la tabla especificada en la base de datos.
+
+        @param n      Nombre de la tabla que se quiere comprobar si existe
+        @param cache  Si cierto consulta primero la cache de tablas, en caso contrario
+                    realiza una consulta a la base para obtener las tablas existentes
+        @return TRUE si existe la tabla, FALSE en caso contrario
+        """
 
         sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
         # Al usar dbAux no bloquea sql si falla
@@ -505,49 +499,46 @@ class FLManager(ProjectClass):
 
         return True
 
-    """
-    Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
-
-    Compara los metadatos de dos tablas,  la definición en XML de esas dos tablas se
-    pasan como dos cadenas de caracteres.
-
-    @param mtd1 Cadena de caracteres con XML que describe la primera tabla
-    @param mtd2 Cadena de caracteres con XML que describe la primera tabla
-    @return TRUE si las dos descripciones son iguales, y FALSE en caso contrario
-    """
-
     def checkMetaData(self, mtd1, mtd2):
+        """
+        Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
+
+        Compara los metadatos de dos tablas,  la definición en XML de esas dos tablas se
+        pasan como dos cadenas de caracteres.
+
+        @param mtd1 Cadena de caracteres con XML que describe la primera tabla
+        @param mtd2 Cadena de caracteres con XML que describe la primera tabla
+        @return TRUE si las dos descripciones son iguales, y FALSE en caso contrario
+        """
         if mtd1 == mtd2:
             return True
         return False
 
-    """
-    Modifica la estructura o metadatos de una tabla, preservando los posibles datos
-    que pueda contener.
-
-    Según la definición existente en un momento dado de los metadatos en el fichero .mtd, este
-    método reconstruye la tabla con esos metadatos sin la pérdida de información o datos,
-    que pudieran existir en ese momento en la tabla.
-
-    @param n Nombre de la tabla a reconstruir
-    @param mtd1 Descripcion en XML de la vieja estructura
-    @param mtd2 Descripcion en XML de la nueva estructura
-    @param key Clave sha1 de la vieja estructura
-    @return TRUE si la modificación tuvo éxito
-    """
-
     def alterTable(self, mtd1=None, mtd2=None, key=None):
+        """
+        Modifica la estructura o metadatos de una tabla, preservando los posibles datos
+        que pueda contener.
+
+        Según la definición existente en un momento dado de los metadatos en el fichero .mtd, este
+        método reconstruye la tabla con esos metadatos sin la pérdida de información o datos,
+        que pudieran existir en ese momento en la tabla.
+
+        @param n Nombre de la tabla a reconstruir
+        @param mtd1 Descripcion en XML de la vieja estructura
+        @param mtd2 Descripcion en XML de la nueva estructura
+        @param key Clave sha1 de la vieja estructura
+        @return TRUE si la modificación tuvo éxito
+        """
         return self.db_.alterTable(mtd1, mtd2, key)
 
-    """
-    Crea una tabla en la base de datos.
-
-    @param n_tmd Nombre o metadatos de la tabla que se quiere crear
-    @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
-      0 si no se pudo crear la tabla o ya existía
-    """
-
     def createTable(self, n_or_tmd):
+        """
+        Crea una tabla en la base de datos.
+
+        @param n_tmd Nombre o metadatos de la tabla que se quiere crear
+        @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
+          0 si no se pudo crear la tabla o ya existía
+        """
         util = FLUtil()
         if n_or_tmd is None:
             return False
@@ -569,46 +560,45 @@ class FLManager(ProjectClass):
                 return n_or_tmd
 
             if not self.db_.createTable(n_or_tmd):
-                print("FLManager :", util.tr(
+                logger.warn("FLManager : %s", util.tr(
                     "No se ha podido crear la tabla ") + n_or_tmd.name())
                 return False
 
             return n_or_tmd
 
-    """
-    Devuelve el contenido del valor de de un campo formateado para ser reconocido
-    por la base de datos actual en condiciones LIKE, dentro de la clausura WHERE de SQL.
-
-    Este método toma como parametros los metadatos del campo definidos con
-    FLFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
-    lógico también acepta los valores Sí y No (o su traducción al idioma correspondiente).
-    Las fechas son adaptadas al forma AAAA-MM-DD, que es el formato reconocido por PostgreSQL .
-
-    @param fMD Objeto FLFieldMetaData que describre los metadatos para el campo
-    @param v Valor que se quiere formatear para el campo indicado
-    @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
-    """
     @decorators.NotImplementedWarn
     def formatValueLike(self, *args, **kwargs):
+        """
+        Devuelve el contenido del valor de de un campo formateado para ser reconocido
+        por la base de datos actual en condiciones LIKE, dentro de la clausura WHERE de SQL.
+
+        Este método toma como parametros los metadatos del campo definidos con
+        FLFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
+        lógico también acepta los valores Sí y No (o su traducción al idioma correspondiente).
+        Las fechas son adaptadas al forma AAAA-MM-DD, que es el formato reconocido por PostgreSQL .
+
+        @param fMD Objeto FLFieldMetaData que describre los metadatos para el campo
+        @param v Valor que se quiere formatear para el campo indicado
+        @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
+        """
         return True
 
     @decorators.NotImplementedWarn
     def formatAssignValueLike(self, *args, **kwargs):
+        """
+        Devuelve el contenido del valor de de un campo formateado para ser reconocido
+        por la base de datos actual, dentro de la clausura WHERE de SQL.
+
+        Este método toma como parametros los metadatos del campo definidos con
+        FLFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
+        lógico también acepta los valores Sí y No (o su traducción al idioma correspondiente).
+        Las fechas son adaptadas al forma AAAA-MM-DD, que es el formato reconocido por PostgreSQL .
+
+        @param fMD Objeto FLFieldMetaData que describre los metadatos para el campo
+        @param v Valor que se quiere formatear para el campo indicado
+        @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
+        """
         return True
-
-    """
-    Devuelve el contenido del valor de de un campo formateado para ser reconocido
-    por la base de datos actual, dentro de la clausura WHERE de SQL.
-
-    Este método toma como parametros los metadatos del campo definidos con
-    FLFieldMetaData. Además de TRUE y FALSE como posibles valores de un campo
-    lógico también acepta los valores Sí y No (o su traducción al idioma correspondiente).
-    Las fechas son adaptadas al forma AAAA-MM-DD, que es el formato reconocido por PostgreSQL .
-
-    @param fMD Objeto FLFieldMetaData que describre los metadatos para el campo
-    @param v Valor que se quiere formatear para el campo indicado
-    @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
-    """
 
     def formatValue(self, fMD_or_type, v, upper=False):
 
@@ -698,23 +688,22 @@ class FLManager(ProjectClass):
 
             return retorno
 
-    """
-    Crea un objeto FLFieldMetaData a partir de un elemento XML.
-
-    Dado un elemento XML, que contiene la descripción de un
-    campo de una tabla construye y agrega a una lista de descripciones
-    de campos el objeto FLFieldMetaData correspondiente, que contiene
-    dicha definición del campo. Tambien lo agrega a una lista de claves
-    compuesta, si el campo construido pertenece a una clave compuesta.
-    NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    @param field Elemento XML con la descripción del campo
-    @param v Valor utilizado por defecto para la propiedad visible
-    @param ed Valor utilizado por defecto para la propiedad editable
-    @return Objeto FLFieldMetaData que contiene la descripción del campo
-    """
-
     def metadataField(self, field, v=True, ed=True):
+        """
+        Crea un objeto FLFieldMetaData a partir de un elemento XML.
+
+        Dado un elemento XML, que contiene la descripción de un
+        campo de una tabla construye y agrega a una lista de descripciones
+        de campos el objeto FLFieldMetaData correspondiente, que contiene
+        dicha definición del campo. Tambien lo agrega a una lista de claves
+        compuesta, si el campo construido pertenece a una clave compuesta.
+        NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
+
+        @param field Elemento XML con la descripción del campo
+        @param v Valor utilizado por defecto para la propiedad visible
+        @param ed Valor utilizado por defecto para la propiedad editable
+        @return Objeto FLFieldMetaData que contiene la descripción del campo
+        """
         if not field:
             return None
 
@@ -741,7 +730,7 @@ class FLManager(ProjectClass):
         trimm = False
 
         t = -1
-        l = 0
+        length = 0
         pI = 4
         pD = 0
 
@@ -805,7 +794,7 @@ class FLManager(ProjectClass):
                     continue
 
                 if e.tagName() == "length":
-                    l = int(e.text())
+                    length = int(e.text())
                     no = no.nextSibling()
                     continue
 
@@ -901,7 +890,7 @@ class FLManager(ProjectClass):
             no = no.nextSibling()
 
         f = FLFieldMetaData(n, util.translate("Metadata", a), aN, iPK, t,
-                            l, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
+                            length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
         f.setFullyCalculated(fullCalc)
         f.setTrimed(trimm)
 
@@ -947,19 +936,18 @@ class FLManager(ProjectClass):
 
         return f
 
-    """
-    Crea un objeto FLRelationMetaData a partir de un elemento XML.
-
-    Dado un elemento XML, que contiene la descripción de una
-    relación entre tablas, construye y devuelve el objeto FLRelationMetaData
-    correspondiente, que contiene dicha definición de la relación.
-    NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    @param relation Elemento XML con la descripción de la relación
-    @return Objeto FLRelationMetaData que contiene la descripción de la relación
-    """
-
     def metadataRelation(self, relation):
+        """
+        Crea un objeto FLRelationMetaData a partir de un elemento XML.
+
+        Dado un elemento XML, que contiene la descripción de una
+        relación entre tablas, construye y devuelve el objeto FLRelationMetaData
+        correspondiente, que contiene dicha definición de la relación.
+        NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
+
+        @param relation Elemento XML con la descripción de la relación
+        @return Objeto FLRelationMetaData que contiene la descripción de la relación
+        """
         if not relation:
             return False
 
@@ -1012,48 +1000,47 @@ class FLManager(ProjectClass):
 
         return FLRelationMetaData(fT, fF, rC, dC, uC, cI)
 
-    """
-    Crea un objeto FLParameterQuery a partir de un elemento XML.
-
-    Dado un elemento XML, que contiene la descripción de una
-    parámetro de una consulta, construye y devuelve el objeto FLParameterQuery
-    correspondiente.
-    NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    @param parameter Elemento XML con la descripción del parámetro de una consulta
-    @return Objeto FLParameterQuery que contiene la descrición del parámetro
-    """
     @decorators.NotImplementedWarn
     def queryParameter(self, parameter):
+        """
+        Crea un objeto FLParameterQuery a partir de un elemento XML.
+
+        Dado un elemento XML, que contiene la descripción de una
+        parámetro de una consulta, construye y devuelve el objeto FLParameterQuery
+        correspondiente.
+        NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
+
+        @param parameter Elemento XML con la descripción del parámetro de una consulta
+        @return Objeto FLParameterQuery que contiene la descrición del parámetro
+        """
         return True
 
-    """
-    Crea un objeto FLGroupByQuery a partir de un elemento XML.
-
-    Dado un elemento XML, que contiene la descripción de un nivel de agrupamiento
-    de una consulta, construye y devuelve el objeto FLGroupByQuery correspondiente.
-    NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
-
-    @param group Elemento XML con la descripción del nivel de agrupamiento de una consulta.
-    @return Objeto FLGroupByQuery que contiene la descrición del nivel de agrupamiento
-    """
     @decorators.NotImplementedWarn
     def queryGroup(self, group):
+        """
+        Crea un objeto FLGroupByQuery a partir de un elemento XML.
+
+        Dado un elemento XML, que contiene la descripción de un nivel de agrupamiento
+        de una consulta, construye y devuelve el objeto FLGroupByQuery correspondiente.
+        NO SE HACEN CHEQUEOS DE ERRORES SINTÁCTICOS EN EL XML.
+
+        @param group Elemento XML con la descripción del nivel de agrupamiento de una consulta.
+        @return Objeto FLGroupByQuery que contiene la descrición del nivel de agrupamiento
+        """
         return True
 
-    """
-    Crea una tabla del sistema.
-
-    Este método lee directamente de disco el fichero con la descripción de una tabla
-    del sistema y la crea en la base de datos. Su uso normal es para inicializar
-    el sistema con tablas iniciales.
-
-    @param n Nombre de la tabla.
-    @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
-      False si no se pudo crear la tabla o ya existía
-    """
-
     def createSystemTable(self, n):
+        """
+        Crea una tabla del sistema.
+
+        Este método lee directamente de disco el fichero con la descripción de una tabla
+        del sistema y la crea en la base de datos. Su uso normal es para inicializar
+        el sistema con tablas iniciales.
+
+        @param n Nombre de la tabla.
+        @return Un objeto FLTableMetaData con los metadatos de la tabla que se ha creado, o
+          False si no se pudo crear la tabla o ya existía
+        """
         util = FLUtil()
         if not self.existsTable(n):
             doc = QDomDocument()
@@ -1068,7 +1055,7 @@ class FLManager(ProjectClass):
                 _in = QtCore.QTextStream(_file)
                 _data = _in.readAll()
                 if not util.domDocumentSetContent(doc, _data):
-                    print("FLManager::createSystemTable :", util.tr(
+                    logger.warn("FLManager::createSystemTable: %s", util.tr(
                         "Error al cargar los metadatos para la tabla %1").arg(n))
                     return False
                 else:
@@ -1081,11 +1068,10 @@ class FLManager(ProjectClass):
 
         return False
 
-    """
-    Carga en la lista de tablas los nombres de las tablas de la base de datos
-    """
-
     def loadTables(self):
+        """
+        Carga en la lista de tablas los nombres de las tablas de la base de datos
+        """
         if not self.db_.dbAux():
             return
 
@@ -1096,12 +1082,11 @@ class FLManager(ProjectClass):
 
         self.listTables_ = self.db_.dbAux().tables()
 
-    """
-    Limpieza la tabla flmetadata, actualiza el cotenido xml con el de los fichero .mtd
-    actualmente cargados
-    """
-
     def cleanupMetaData(self):
+        """
+        Limpieza la tabla flmetadata, actualiza el cotenido xml con el de los fichero .mtd
+        actualmente cargados
+        """
         # util = FLUtil()
         if not self.existsTable("flfiles") or not self.existsTable("flmetadata"):
             return
@@ -1111,8 +1096,8 @@ class FLManager(ProjectClass):
         buffer = None
         table = ""
 
-        q.setForwardOnly(True)
-        c.setForwardOnly(True)
+        # q.setForwardOnly(True)
+        # c.setForwardOnly(True)
 
         if not self.dictKeyMetaData_:
             self.dictKeyMetaData_ = {}
@@ -1148,14 +1133,13 @@ class FLManager(ProjectClass):
 
                 self.dictKeyMetaData_[table] = str(q.value(1))
 
-    """
-    Para saber si la tabla dada es una tabla de sistema.
-
-    @param n Nombre de la tabla.
-    @return TRUE si es una tabla de sistema
-    """
-
     def isSystemTable(self, n):
+        """
+        Para saber si la tabla dada es una tabla de sistema.
+
+        @param n Nombre de la tabla.
+        @return TRUE si es una tabla de sistema
+        """
 
         if not n[0:2] == "fl":
             return False
@@ -1165,25 +1149,24 @@ class FLManager(ProjectClass):
 
         return False
 
-    """
-    Utilizado para almacenar valores grandes de campos en tablas separadas indexadas
-    por claves SHA del contenido del valor.
-
-    Se utiliza para optimizar consultas que incluyen campos con valores grandes,
-    como por ejemplo imágenes, para manejar en las consulta SQL la referencia al valor
-    que es de tamaño constante en vez del valor en sí. Esto disminuye el tráfico al
-    reducir considerablemente el tamaño de los registros obtenidos.
-
-    Las consultas pueden utilizar una referencia y obtener su valor sólo cuando se
-    necesita mediante FLManager::fetchLargeValue().
-
-
-    @param mtd Metadatos de la tabla que contiene el campo
-    @param largeValue Valor de gran tamaño del campo
-    @return Clave de referencia al valor
-    """
-
     def storeLargeValue(self, mtd, largeValue):
+        """
+        Utilizado para almacenar valores grandes de campos en tablas separadas indexadas
+        por claves SHA del contenido del valor.
+
+        Se utiliza para optimizar consultas que incluyen campos con valores grandes,
+        como por ejemplo imágenes, para manejar en las consulta SQL la referencia al valor
+        que es de tamaño constante en vez del valor en sí. Esto disminuye el tráfico al
+        reducir considerablemente el tamaño de los registros obtenidos.
+
+        Las consultas pueden utilizar una referencia y obtener su valor sólo cuando se
+        necesita mediante FLManager::fetchLargeValue().
+
+
+        @param mtd Metadatos de la tabla que contiene el campo
+        @param largeValue Valor de gran tamaño del campo
+        @return Clave de referencia al valor
+        """
 
         if largeValue[0:3] == "RK@" or not mtd:
             return None
@@ -1226,27 +1209,24 @@ class FLManager(ProjectClass):
                 sql = "UPDATE %s SET contenido = '%s' WHERE refkey ='%s'" % (
                     tableLarge, largeValue, refKey)
                 if not util.execSql(sql, "Aux"):
-                    print("FLManager::ERROR:StoreLargeValue.Update %s.%s" %
-                          (tableLarge, refKey))
+                    logger.warn("FLManager::ERROR:StoreLargeValue.Update %s.%s", tableLarge, refKey)
                     return None
         else:
             sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (
                 tableLarge, largeValue, refKey)
             if not util.execSql(sql, "Aux"):
-                print("FLManager::ERROR:StoreLargeValue.Insert %s.%s" %
-                      (tableLarge, refKey))
+                logger.warn("FLManager::ERROR:StoreLargeValue.Insert %s.%s", tableLarge, refKey)
                 return None
 
         return refKey
 
-    """
-    Obtiene el valor de gran tamaño segun su clave de referencia.
-
-    @param refKey Clave de referencia. Esta clave se suele obtener mediante FLManager::storeLargeValue
-    @return Valor de gran tamaño almacenado
-    """
-
     def fetchLargeValue(self, refKey):
+        """
+        Obtiene el valor de gran tamaño segun su clave de referencia.
+
+        @param refKey Clave de referencia. Esta clave se suele obtener mediante FLManager::storeLargeValue
+        @return Valor de gran tamaño almacenado
+        """
         if refKey is None:
             return None
         if not refKey[0:3] == "RK@":
@@ -1273,9 +1253,8 @@ class FLManager(ProjectClass):
             # print(v)
             return v
 
-    """
-    Uso interno. Indica el número de veces que se ha llamado a FLManager::init().
-    """
-
     def initCount(self):
+        """
+        Uso interno. Indica el número de veces que se ha llamado a FLManager::init().
+        """
         return self.initCount_

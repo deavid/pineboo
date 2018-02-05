@@ -1,7 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
 from json import dumps
 
@@ -317,7 +316,7 @@ class FLPixmapView(QtWidgets.QWidget):
 
     def __init__(self, parent):
         super(FLPixmapView, self).__init__(parent)
-        self.scrollView = QtWidgets.QScrollArea(parent)
+        # self.scrollView = QtWidgets.QScrollArea(parent)
         self.autoScaled_ = False
         self.lay_ = QtWidgets.QHBoxLayout(self)
         self.pixmap_ = QtGui.QPixmap()
@@ -510,21 +509,22 @@ class parserJson():
         return obj
 
     def parse(self, name):
+        from xmljson import yahoo as xml2json
         inputFile = name
         outputFile = re.search("\w+.ui", inputFile)
 
-        if outputFile == None:
+        if outputFile is None:
             print("Error. El fichero debe tener extension .ui")
             return None
 
-        ret_out = outputFile
+        # ret_out = outputFile
 
         outputFile = re.sub(".ui", ".dgi", inputFile)
 
         try:
             ui = open(inputFile, 'r')
             xml = ui.read()
-        except:
+        except Exception:
             print("Error. El fichero no existe o no tiene formato XML")
             sys.exit()
 

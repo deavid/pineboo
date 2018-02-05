@@ -422,8 +422,8 @@ class FLManagerModules(ProjectClass):
         if self._prj.conn.dbAux() and not n[:3] == "sys" and not self._prj.conn.manager().isSystemTable(n):
             formatVal = self._prj.conn.manager().formatAssignValue("nombre", "string", n, True)
             q = FLSqlQuery(None, self._prj.conn.dbAux())
-            q.setForwardOnly(True)
-            q.exec("SELECT sha FROM flfiles WHERE %s" % formatVal)
+            # q.setForwardOnly(True)
+            q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
             if q.next():
                 return str(q.value(0))
             return None
@@ -440,7 +440,7 @@ class FLManagerModules(ProjectClass):
         self.dictKeyFiles = {}
         self.dictModFiles = {}
         q = FLSqlQuery(None, self._prj.conn.dbAux())
-        q.setForwardOnly(True)
+        # q.setForwardOnly(True)
         q.exec_("SELECT nombre, sha, idmodulo FROM flfiles")
         name = None
         while q.next():
@@ -461,7 +461,7 @@ class FLManagerModules(ProjectClass):
         self.dictInfoMods = {}
 
         q = FLSqlQuery(None, self._prj.conn.dbAux())
-        q.setForwardOnly(True)
+        # q.setForwardOnly(True)
         q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion "
                 "FROM flmodules left join flareas on flmodules.idarea = flareas.idarea")
 
@@ -502,7 +502,7 @@ class FLManagerModules(ProjectClass):
 
         self.listIdAreas_ = []
         q = FLSqlQuery(None, self._prj.conn.dbAux())
-        q.setForwardOnly(True)
+        # q.setForwardOnly(True)
         q.exec_("SELECT idarea from flareas WHERE idarea <> 'sys'")
         while q.next():
             self.listIdAreas_.append(str(q.value(0)))

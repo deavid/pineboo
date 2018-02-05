@@ -265,7 +265,8 @@ class FLFieldMetaData(object):
     """
     Tipo de datos lista de relaciones
     """
-    # typedef QPtrList<FLRelationMetaData> FLRelationMetaDataList; // FLRelationMetaDataList.py
+    # typedef QPtrList<FLRelationMetaData> FLRelationMetaDataList; //
+    # FLRelationMetaDataList.py
 
     """
     Añade una relacion con otra tabla para este campo.
@@ -446,6 +447,9 @@ class FLFieldMetaData(object):
     """
 
     def getIndexOptionsList(self, name):
+        if name is None:
+            return None
+
         i = 0
         for option in self.d.optionsList_:
             if option == str(name):
@@ -648,6 +652,7 @@ class FLFieldMetaData(object):
 
         if upper and isText:
             fName = "upper(%s)" % fieldName
+            formatV = formatV.upper()
         else:
             fName = fieldName
 

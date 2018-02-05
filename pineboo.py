@@ -16,7 +16,6 @@ import signal
 import importlib
 import pineboo
 import logging
-from PyQt5.QtCore import QCoreApplication
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -44,19 +43,19 @@ def startup_check_dependencies():
         from lxml import etree
     except ImportError:
         logger.exception("El paquete python3-lxml no está instalado")
-        dependences.add("python3-lxml")
+        dependences.append("python3-lxml")
 
     try:
         import ply
     except ImportError:
         logger.exception("El paquete python3-ply no está instalado")
-        dependences.add("python3-ply")
+        dependences.append("python3-ply")
 
     try:
         from PyQt5 import QtCore
     except ImportError:
         logger.exception("El paquete python3-pyqt5 no está instalado")
-        dependences.add("python3-pyqt5")
+        dependences.append("python3-pyqt5")
 
     if dependences:
         logger.info("HINT: Dependencias incumplidas:")
@@ -166,10 +165,14 @@ def parse_options():
         options.preload = True
 
     options.loglevel = 30 + (options.quiet - options.verbose) * 10
-    options.debug_level = 50 - (options.quiet - options.verbose) * 25
+    options.debug_level = 200  # 50 - (options.quiet - options.verbose) * 25
 
     # ---- LOGGING -----
-    log_format = '%(name)s:%(levelname)s: %(message)s'
+    if options.loglevel > 30:
+        log_format = '%(name)s:%(levelname)s: %(message)s'
+    else:
+        log_format = '%(levelname)s: %(message)s'
+
     if options.log_time:
         log_format = '%(asctime)s - %(name)s:%(levelname)s: %(message)s'
 
@@ -238,8 +241,8 @@ def create_app(DGI):
 
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # construido antes que cualquier widget
-        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-            pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
+        mainForm = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+            pineboolib.main.Project.mainFormName.lower(), pineboolib.main.Project.mainFormName.lower()))
     else:
         mainForm = DGI.mainForm()
     # mainForm = getattr(module_, "MainForm")()
@@ -249,8 +252,8 @@ def create_app(DGI):
 
 def show_connection_dialog(project, app):
     """Show the connection dialog, and configure the project accordingly."""
-    from pineboolib import DlgConnect
-    connection_window = DlgConnect.DlgConnect()
+    from pineboolib import dlgconnect
+    connection_window = dlgconnect.DlgConnect()
     connection_window.load()
     connection_window.show()
     ret = app.exec_()
@@ -299,7 +302,7 @@ def main():
     """
     # FIXME: This function should not initialize the program
     from pineboolib.utils import filedir
-    import pineboolib.DlgConnect
+    import pineboolib.dlgconnect
 
     import pineboolib
     import pineboolib.main
@@ -309,7 +312,7 @@ def main():
     pineboolib.no_python_cache = options.no_python_cache
 
     if options.trace_debug:
-        from pineboo.utils import traceit
+        from pineboolib.utils import traceit
         sys.settrace(traceit)
     if options.trace_signals:
         monkey_patch_connect()
@@ -382,6 +385,9 @@ def init_project(DGI, splash, options, project, mainForm, app):
     if DGI.useDesktop() and DGI.localDesktop():
         splash.showMessage("Iniciando proyecto ...")
     logger.info("Iniciando proyecto ...")
+
+    # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
+    project.conn.manager().db_.managerModules().loadAllIdModules()
 
     objaction = None
     for k, module in list(project.modules.items()):
@@ -510,6 +516,60 @@ def monkey_patch_connect():
             return BoundSignal._EMIT(self, *args)
     QtCore.pyqtBoundSignal.connect = BoundSignal.connect
     QtCore.pyqtBoundSignal.emit = BoundSignal.emit
+
+
+def addLoggingLevel(levelName, levelNum, methodName=None):
+    """
+    Comprehensively adds a new logging level to the `logging` module and the
+    currently configured logging class.
+
+    `levelName` becomes an attribute of the `logging` module with the value
+    `levelNum`. `methodName` becomes a convenience method for both `logging`
+    itself and the class returned by `logging.getLoggerClass()` (usually just
+    `logging.Logger`). If `methodName` is not specified, `levelName.lower()` is
+    used.
+
+    To avoid accidental clobberings of existing attributes, this method will
+    raise an `AttributeError` if the level name is already an attribute of the
+    `logging` module or if the method name is already present
+
+    Example
+    -------
+    >>> addLoggingLevel('TRACE', logging.DEBUG - 5)
+    >>> logging.getLogger(__name__).setLevel("TRACE")
+    >>> logging.getLogger(__name__).trace('that worked')
+    >>> logging.trace('so did this')
+    >>> logging.TRACE
+    5
+
+    """
+    if not methodName:
+        methodName = levelName.lower()
+
+    if hasattr(logging, levelName):
+        raise AttributeError(
+            '{} already defined in logging module'.format(levelName))
+    if hasattr(logging, methodName):
+        raise AttributeError(
+            '{} already defined in logging module'.format(methodName))
+    if hasattr(logging.getLoggerClass(), methodName):
+        raise AttributeError(
+            '{} already defined in logger class'.format(methodName))
+
+    # This method was inspired by the answers to Stack Overflow post
+    # http://stackoverflow.com/q/2183233/2988730, especially
+    # http://stackoverflow.com/a/13638084/2988730
+    def logForLevel(self, message, *args, **kwargs):
+        if self.isEnabledFor(levelNum):
+            self._log(levelNum, message, args, **kwargs)
+
+    def logToRoot(message, *args, **kwargs):
+        logging.log(levelNum, message, *args, **kwargs)
+
+    logging.addLevelName(levelNum, levelName)
+    setattr(logging, levelName, levelNum)
+    setattr(logging.getLoggerClass(), methodName, logForLevel)
+    setattr(logging, methodName, logToRoot)
 
 
 if __name__ == "__main__":

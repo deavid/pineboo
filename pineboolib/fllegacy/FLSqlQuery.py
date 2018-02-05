@@ -67,9 +67,6 @@ class FLSqlQuery(ProjectClass):
         if not sql:
             return False
 
-        """
-        En algunas consultas va con ';' , esto lo limpio
-        """
         sql = sql.replace(";", "")
 
         # micursor=self.__damecursor()
@@ -87,7 +84,14 @@ class FLSqlQuery(ProjectClass):
 
         return True
 
-    exec = exec_  # FIXME: En python no se puede llamar una variable "exec".
+    # exec = exec_  # FIXME: En python no se puede llamar una variable "exec".
+
+    """
+    def exec_(self, sql=None, conn=None):
+        if conn:
+            self.d.db_ = conn
+        return self.exec(sql)
+    """
 
     @classmethod
     def __damecursor(self):
@@ -98,7 +102,7 @@ class FLSqlQuery(ProjectClass):
         return cursor
 
     def __dameConn(self):
-        from pineboolib.PNConnection import PNConnection
+        from pineboolib.pnconnection import PNConnection
         if getattr(self.d, "db_", None):
             if isinstance(self.d.db_, PNConnection):
                 conn = self.d.db_.conn
@@ -113,11 +117,6 @@ class FLSqlQuery(ProjectClass):
             pass
         else:
             self._datos = self._cursor.fetchall()
-
-    def exec_(self, conn=None, sql=None):
-        if conn:
-            self.d.db_ = conn
-        return self.exec(sql)
 
     """
     Añade la descripción parámetro al diccionario de parámetros.

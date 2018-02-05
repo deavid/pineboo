@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+import sys
 import fnmatch
 import weakref
 
@@ -277,13 +278,11 @@ def check_gc_referrers(typename, w_obj, name):
                     if v is obj:
                         k = "(**)" + k
                         x.insert(0, k)
-                    else:
-                        x.append(k)
-                print(" - ", repr(x[:48]))
+                print(" - dict:", repr(x), gc.get_referrers(ref))
             else:
                 if "<frame" in str(repr(ref)):
                     continue
-                print(" - ", repr(ref))
+                print(" - obj:", repr(ref), [x for x in dir(ref) if getattr(ref, x) is obj])
 
     threading.Thread(target=checkfn).start()
 
@@ -303,10 +302,13 @@ class FormDBWidget(QtWidgets.QWidget):
             self.remote_widgets = {}
 
         super(FormDBWidget, self).__init__(parent)
-
+        self._module = sys.modules[self.__module__]
+        self._module.connect = self._connect
+        self._module.disconnect = self._disconnect
         self._action = action
         self.cursor_ = None
         self.parent_ = parent
+        self._formconnections = set([])
         self._prj = project
         try:
             self._class_init()
@@ -316,8 +318,31 @@ class FormDBWidget(QtWidgets.QWidget):
         except Exception:
             self.logger.exception("Error al inicializar la clase iface de QS:")
 
+    def _connect(self, sender, signal, receiver, slot):
+        print(" > > > connect:", self)
+        from pineboolib.qsaglobals import connect
+        signal_slot = connect(sender, signal, receiver, slot, caller=self)
+        if not signal_slot:
+            return False
+        self._formconnections.add(signal_slot)
+
+    def _disconnect(self, sender, signal, receiver, slot):
+        print(" > > > disconnect:", self)
+        from pineboolib.qsaglobals import disconnect
+        signal_slot = disconnect(sender, signal, receiver, slot, caller=self)
+        if not signal_slot:
+            return False
+        try:
+            self._formconnections.remove(signal_slot)
+        except KeyError:
+            self.logger.exception("Error al eliminar una señal que no se encuentra")
+
     def __del__(self):
+        self.doCleanUp()
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
+
+    def obj(self):
+        return self
 
     def parent(self):
         return self.parent_
@@ -338,8 +363,20 @@ class FormDBWidget(QtWidgets.QWidget):
         if can_exit:
             self.closed.emit()
             event.accept()  # let the window close
+            self.doCleanUp()
         else:
             event.ignore()
+            return
+
+    def doCleanUp(self):
+        # Limpiar todas las conexiones hechas en el script
+        for signal, slot in self._formconnections:
+            try:
+                signal.disconnect(slot)
+                self.logger.info("Señal desconectada al limpiar: %s %s", signal, slot)
+            except Exception:
+                self.logger.exception("Error al limpiar una señal: %s %s", signal, slot)
+        self._formconnections.clear()
 
         if hasattr(self, 'iface'):
             check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
@@ -406,7 +443,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                self.cursor_ = FLSqlCursor(self._action.name)
+                self.cursor_ = FLSqlCursor(self._action.table)
 
         return self.cursor_
 

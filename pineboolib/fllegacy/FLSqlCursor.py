@@ -6,7 +6,7 @@ import pineboolib
 from pineboolib import decorators
 
 from pineboolib.utils import DefFun, XMLStruct
-from pineboolib.CursorTableModel import CursorTableModel
+from pineboolib.cursortablemodel import CursorTableModel
 from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -29,11 +29,11 @@ class Struct(object):
 
 # ###############################################################################
 # ###############################################################################
-# ######                                                                  #######
-# ######                                                                  #######
-# ######                           PNBuffer                               #######
-# ######                                                                  #######
-# ######                                                                  #######
+# ######
+# ######
+# ######                           PNBuffer
+# ######
+# ######
 # ###############################################################################
 # ###############################################################################
 
@@ -102,7 +102,7 @@ class PNBuffer(ProjectClass):
                 # else:
                 #    field.value = False
 
-            elif self.cursor().model().value(row, field.name) in ("None", "", None):
+            elif self.cursor().model().value(row, field.name) in ("None", None):
                 field.value = None
 
             else:
@@ -198,7 +198,8 @@ class PNBuffer(ProjectClass):
         field = self.field(n)
 
         if field is None:
-            # FIXME: Esto es un error. Si el campo no existe, es una llamada errónea.
+            # FIXME: Esto es un error. Si el campo no existe, es una llamada
+            # errónea.
             return True
 
         if field.type_ in ("bool", "unlock"):
@@ -342,7 +343,9 @@ class PNBuffer(ProjectClass):
             if actual in (None, "None"):
                 return True
 
-            if type in ("string", "stringlist"):
+            if (actual == "" and value != "") or (actual != "" and value == ""):
+                return True
+            elif type in ("string", "stringlist"):
                 return not (actual == value)
             elif type in ("int", "uint", "serial"):
                 return not (int(actual) == int(value))
@@ -429,11 +432,11 @@ class PNBuffer(ProjectClass):
 
 # ###############################################################################
 # ###############################################################################
-# ######                                                                  #######
-# ######                                                                  #######
-# ######                      FLSqlCursorPrivate                          #######
-# ######                                                                  #######
-# ######                                                                  #######
+# ######
+# ######
+# ######                      FLSqlCursorPrivate
+# ######
+# ######
 # ###############################################################################
 # ###############################################################################
 
@@ -762,11 +765,11 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
 # ###############################################################################
 # ###############################################################################
-# ######                                                                  #######
-# ######                                                                  #######
-# ######                         FLSqlCursor                              #######
-# ######                                                                  #######
-# ######                                                                  #######
+# ######
+# ######
+# ######                         FLSqlCursor
+# ######
+# ######
 # ###############################################################################
 # ###############################################################################
 
@@ -823,7 +826,8 @@ class FLSqlCursor(ProjectClass):
         if connectionName_or_db is None:
             # print("Init1") # si soy texto y estoy vacio
             self.d.db_ = self._prj.conn
-        # elif isinstance(connectionName_or_db, QString) or isinstance(connectionName_or_db, str):
+        # elif isinstance(connectionName_or_db, QString) or
+        # isinstance(connectionName_or_db, str):
         elif isinstance(connectionName_or_db, str):
             # print("Init2 ")
             self.d.db_ = self._prj.conn.useConn(connectionName_or_db)
@@ -845,7 +849,8 @@ class FLSqlCursor(ProjectClass):
     def init(self, name, autopopulate, cR, r):
         # print("FLSqlCursor(%s): Init() %s (%s, %s)" % (name, self, cR, r))
 
-        # if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not self.d.metadata_.inCache():
+        # if self.d.metadata_ and not self.d.metadata_.aqWasDeleted() and not
+        # self.d.metadata_.inCache():
 
         self.d.curName_ = name
         if self.setAction(self.d.curName_):
@@ -1170,7 +1175,7 @@ class FLSqlCursor(ProjectClass):
                 pKV = self.d.buffer_.value(pK)
                 q = FLSqlQuery(None, "Aux")
 
-                q.exec_(None, "UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
+                q.exec_("UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
                 ).formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
             else:
                 FLUtil.tr(
@@ -1196,7 +1201,8 @@ class FLSqlCursor(ProjectClass):
         if not self.metadata():
             return None
 
-        # if not self.d.buffer_ or self.d.buffer_.isEmpty() or not self.metadata():
+        # if not self.d.buffer_ or self.d.buffer_.isEmpty() or not
+        # self.metadata():
         if (self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert) or not self.d.buffer_:
             if not self.d.buffer_:
                 # print("solicitando rb de", self.curName(), self.modeAccess(), self.d._currentregister, self.model().rows)
@@ -1224,11 +1230,12 @@ class FLSqlCursor(ProjectClass):
             pK = self.d.metadata_.primaryKey()
             if pK:
                 pKV = self.d.buffer_.value(pK)
-                q = FLSqlQuery()
-                sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.d.metadata.name(
+                # q = FLSqlQuery()
+                q = FLSqlQuery(None, "Aux")
+                sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.d.metadata_.name(
                 ), self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pK), pKV))
-                q.setSql(sql_query)
-                q.exec_(self.d.db_.dbAux())
+                # q.exec_(self.d.db_.dbAux(), sql_query)
+                q.exec_(sql_query)
                 if q.next():
                     v = q.value(0)
             else:
@@ -1764,7 +1771,8 @@ class FLSqlCursor(ProjectClass):
                         q.setWhere(self.d.db_.manager().formatAssignValue(
                             r.foreignField(), field, s, True))
                         q.setForwardOnly(True)
-                        print("SQL linea = " + q.sql() + " conn name = " + str(q._prj.conn.connectionName()))
+                        print("SQL linea = " + q.sql() + " conn name = " +
+                              str(q._prj.conn.connectionName()))
                         q.exec_()
                         if not q.next():
                             # msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() +
@@ -2058,7 +2066,8 @@ class FLSqlCursor(ProjectClass):
 
         if pos == -99:
             # q = FLSqlQuery(None, self.d.db_.db()) FIXME
-            q = FLSqlQuery()
+            # q = FLSqlQuery()
+            q = FLSqlQuery(None, self.d.db_.connectionName())
             sql = self.curFilter()
             sqlIn = self.curFilter()
             cFilter = self.curFilter()
@@ -2102,7 +2111,8 @@ class FLSqlCursor(ProjectClass):
                     sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
                 else:
                     sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
-                q.exec_(self.d.db_, sqlIn)
+                # q.exec_(self.d.db_, sqlIn)
+                q.exec_(sqlIn)
                 if not q.next():
                     self.seek(self.at())
                     if self.isValid():
@@ -2122,6 +2132,7 @@ class FLSqlCursor(ProjectClass):
                 posEqual = sqlPriKeyValue.index("=")
                 leftSqlPriKey = sqlPriKeyValue[0:posEqual]
                 # FIXME: solo compatible con PostgreSQL!
+                """
                 sqlRowNum = (
                     "SELECT rownum FROM ("
                     "SELECT row_number() OVER (ORDER BY %s) as rownum, %s as %s FROM %s WHERE %s ORDER BY %s) as subnumrow where"
@@ -2130,6 +2141,7 @@ class FLSqlCursor(ProjectClass):
                     pos = int(q.value(0)) - 1
                     if pos >= 0:
                         return pos
+                """
 
             found = False
             q.exec_(sql)
@@ -2414,7 +2426,8 @@ class FLSqlCursor(ProjectClass):
         else:
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 v = self.valueBuffer(self.d.relation_.field())
-                foreignFieldValueBuffer = self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField())
+                foreignFieldValueBuffer = self.d.cursorRelation_.valueBuffer(
+                    self.d.relation_.foreignField())
                 if (foreignFieldValueBuffer != v and foreignFieldValueBuffer is not None):
                     self.d.cursorRelation_.setValueBuffer(
                         self.d.relation_.foreignField(), v)
@@ -2610,7 +2623,6 @@ class FLSqlCursor(ProjectClass):
         #    return False
 
         b = self.moveby(1)
-
         if b and emite:
             self.d._current_changed.emit(self.at())
 
@@ -2622,6 +2634,7 @@ class FLSqlCursor(ProjectClass):
     def moveby(self, pos):
         if self.d._currentregister:
             pos += self.d._currentregister
+
         return self.move(pos)
 
     """
@@ -2788,11 +2801,12 @@ class FLSqlCursor(ProjectClass):
             self.setFilter(finalFilter)
 
         self.model().refresh()
+        self.d._currentregister = -1
+
         if self.cursorRelation() and self.modeAccess() == self.Browse:
             self.d._currentregister = self.atFrom()
 
         self.refreshBuffer()
-
         # if self.modeAccess() == self.Browse:
         #    self.d._currentregister = -1
         self.newBuffer.emit()
@@ -3555,7 +3569,8 @@ class FLSqlCursor(ProjectClass):
                 print("FLSqlCursor.update:: Unhandled error on model updateRowDB:: ",
                       traceback.format_exc())
                 update_successful = False
-            # TODO: En el futuro, si no se puede conseguir un update, hay que "tirar atrás" todo.
+            # TODO: En el futuro, si no se puede conseguir un update, hay que
+            # "tirar atrás" todo.
             if update_successful:
                 row = self.model().findPKRow([pKValue])
                 if row is not None:
