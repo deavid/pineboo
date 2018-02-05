@@ -247,19 +247,8 @@ class FLLineEdit(QtWidgets.QLineEdit):
     def text(self):
         texto = str(super(FLLineEdit, self).text())
 
-        if texto is "":
-            texto = None
-
         if texto is None:
-            if self._tipo == "string":
-                texto = ""
-
-            elif self._tipo == "double":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
+            texto = ""
 
         return str(texto)
 
