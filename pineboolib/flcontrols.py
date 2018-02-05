@@ -241,6 +241,14 @@ class QTable(QtWidgets.QTableWidget):
 
 class QLineEdit(QtWidgets.QLineEdit):
 
+    _parent = None
+
+    def __init__(self, parent):
+        super(QLineEdit, self).__init__(parent)
+        self._parent = parent
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
+
     @QtCore.pyqtProperty(str)
     def text(self):
         return super(QLineEdit, self).text()
@@ -250,6 +258,8 @@ class QLineEdit(QtWidgets.QLineEdit):
         if not isinstance(v, str):
             v = str(v)
         super(QLineEdit, self).setText(v)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), "QLineEdit")
 
     # def __getattr__(self, name):
         # return DefFun(self, name)

@@ -81,10 +81,10 @@ class dgi_schema(object):
         self.FLSpinBox = FLSpinBox
 
         self.QPushButton = QtWidgets.QPushButton
-        self.QLineEdit = QtWidgets.QLineEdit
+        self.QLineEdit = QLineEdit
         self.QComboBox = QComboBox
-        self.QCheckBox = QtWidgets.QCheckBox
-        self.QTextEdit = QtWidgets.QTextEdit
+        self.QCheckBox = QCheckBox
+        self.QTextEdit = QTextEdit
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
@@ -478,6 +478,48 @@ class QComboBox(QtWidgets.QComboBox):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueqe("%s_setCurrentText" % self._parent.objectName(), t)
         super(QComboBox, self).setCurrentText(n)
+
+
+class QLineEdit(QtWidgets.QLineEdit):
+
+    _parent = None
+
+    def __init__(self, parent):
+        self._parent = parent
+        super(QLineEdit, self).__init__(parent)
+
+    def setText(self, text):
+        super(QLineEdit, self).setText(text)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), t)
+
+
+class QTextEdit(QtWidgets.QTextEdit):
+
+    _parent = None
+
+    def __init__(self, parent):
+        self._parent = parent
+        super(QTextEdit, self).__init__(parent)
+
+    def setText(self, text):
+        super(QTextEdit, self).setText(text)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), t)
+
+
+class QCheckBox(QtWidgets.QCheckBox):
+
+    _parent = None
+
+    def __init__(self, parent):
+        self._parent = parent
+        super(QCheckBox, self).__init__(parent)
+
+    def setChecked(self, b):
+        super(QCheckBox, self).setChecked(b)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setChecked" % self._parent.objectName(), b)
 
 
 """
