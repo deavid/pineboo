@@ -7,7 +7,7 @@ import traceback
 from PyQt5.Qt import qWarning, QApplication
 
 
-class FLMYSQL_MyISAM(object):
+class FLMYSQL_MYISAM(object):
 
     version_ = None
     conn_ = None

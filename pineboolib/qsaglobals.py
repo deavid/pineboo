@@ -239,8 +239,7 @@ class ProxySlot:
         if self.key not in self.PROXY_FUNCTIONS:
             weak_fn = weakref.WeakMethod(remote_fn)
             weak_receiver = weakref.ref(receiver)
-            self.PROXY_FUNCTIONS[self.key] = proxy_fn(
-                weak_fn, weak_receiver, slot)
+            self.PROXY_FUNCTIONS[self.key] = proxy_fn(weak_fn, weak_receiver, slot)
         self.proxy_function = self.PROXY_FUNCTIONS[self.key]
 
     def getProxyFn(self):
@@ -309,30 +308,12 @@ def solve_connection(sender, signal, receiver, slot):
         oSignal = getattr(sender.parent(), sl_name, None)
 
     if not oSignal:
-        print("ERROR: No existe la señal %s para la clase %s" %
-              (signal, sender.__class__.__name__))
+        print("ERROR: No existe la señal %s para la clase %s" % (signal, sender.__class__.__name__))
         return
 
     if remote_fn:
-        try:
-            weak_fn = weakref.WeakMethod(remote_fn)
-            weak_receiver = weakref.ref(receiver)
-            try:
-                oSignal.disconnect(proxy_fn(weak_fn, weak_receiver, slot))
-            except Exception:
-                pass
-
-            if doConnect:
-                oSignal.connect(proxy_fn(weak_fn, weak_receiver, slot))
-            else:
-                oSignal.disconnect()
-                print("Desconectando %s - %s" % (signal, slot))
-
-        except RuntimeError as e:
-            print("ERROR Connecting:", sender,
-                  QtCore.SIGNAL(signal), remote_fn)
-            print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
-            return False
+        proxyfn = ProxySlot(remote_fn, receiver, slot)
+        return oSignal, proxyfn
     elif m:
         remote_obj = getattr(receiver, m.group(1), None)
         if remote_obj is None:

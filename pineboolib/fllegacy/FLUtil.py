@@ -8,22 +8,12 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSettings import FLSettings
 import platform
 import hashlib
-import traceback
 import datetime
+import logging
+logger = logging.getLogger(__name__)
 
 
 class FLUtil(ProjectClass):
-
-    progress_dialog_stack = []
-    vecUnidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece',
-                   'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiun', 'veintidos',
-                   'veintitres', 'veinticuatro', 'veinticinco', 'veintiseis', 'veintisiete', 'veintiocho', 'veintinueve']
-
-    vecDecenas = ['', '', '', 'treinta', 'cuarenta',
-                  'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa']
-    vecCentenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos',
-                   'setecientos', 'ochocientos', 'novecientos']
-
     """
     Clase con métodos, herramientas y utiles necesarios para ciertas operaciones.
 
@@ -36,65 +26,75 @@ class FLUtil(ProjectClass):
     @author InfoSiAL S.L.
     """
 
+    progress_dialog_stack = []
+    vecUnidades = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece',
+                   'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiun', 'veintidos',
+                   'veintitres', 'veinticuatro', 'veinticinco', 'veintiseis', 'veintisiete', 'veintiocho', 'veintinueve']
+
+    vecDecenas = ['', '', '', 'treinta', 'cuarenta',
+                  'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa']
+    vecCentenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos',
+                   'setecientos', 'ochocientos', 'novecientos']
+
     def __getattr__(self, name):
         return DefFun(self, name)
-    """
-    Obtiene la parte entera de un número.
-
-    Dado un número devuelve la parte entera correspondiente, es decir,
-    cifras en la parte izquierda de la coma decimal.
-
-    @param n Número del que obtener la parte entera. Debe ser positivo
-    @return La parte entera del número, que puede ser cero
-    """
 
     def partInteger(self, n):
+        """
+        Obtiene la parte entera de un número.
+
+        Dado un número devuelve la parte entera correspondiente, es decir,
+        cifras en la parte izquierda de la coma decimal.
+
+        @param n Número del que obtener la parte entera. Debe ser positivo
+        @return La parte entera del número, que puede ser cero
+        """
         i, d = divmod(n, 1)
         return int(i)
 
-    """
-    Obtiene la parte decimal de un número.
-
-    Dado un número devuelve la parte decimal correspondiente, es decir,
-    cifras en la parte derecha de la coma decimal
-    @param n Número del que obtener la parte decimal. Debe ser positivo
-    @return La parte decimal del número, que puede ser cero
-    """
-
     def partDecimal(self, n):
+        """
+        Obtiene la parte decimal de un número.
+
+        Dado un número devuelve la parte decimal correspondiente, es decir,
+        cifras en la parte derecha de la coma decimal
+        @param n Número del que obtener la parte decimal. Debe ser positivo
+        @return La parte decimal del número, que puede ser cero
+        """
         i, d = divmod(n, 1)
         d = d * 100
         return int(d)
 
-    """
-    Enunciado de las unidades de un número.
-
-    @param n Número a tratar. Debe ser positivo
-    """
-
     def unidades(self, n):
-        if n > 0:
+        """
+        Enunciado de las unidades de un número.
+
+        @param n Número a tratar. Debe ser positivo
+        """
+        if n >= 0:
             return self.vecUnidades[n]
+        else:
+            raise ValueError("Parameter 'n' must be a positive integer")
 
-    """
-    Pasa una cadena a codificación utf-8
-
-    @param s: Cadena
-    @return Cadena en formato UTF-8
-    """
     @decorators.NotImplementedWarn
     def utf8(self, s):
+        """
+        Pasa una cadena a codificación utf-8
+
+        @param s: Cadena
+        @return Cadena en formato UTF-8
+        """
         return s
 
-    """
-    Enunciado de las centenas de millar de un número.
-
-    @param n Número a tratar. Debe ser positivo
-    """
-
     def centenamillar(self, n):
-        buffer = ""
+        """
+        Enunciado de las centenas de millar de un número.
 
+        @param n Número a tratar. Debe ser positivo
+        """
+        buffer = ""
+        if n < 0:
+            raise ValueError("Param n must be positive integer")
         if n < 10000:
             buffer = self.decenasmillar(n)
             return buffer
@@ -105,15 +105,16 @@ class FLUtil(ProjectClass):
 
         return buffer
 
-    """
-    Enunciado de las decenas de un número.
-
-    @param n Número a tratar. Debe ser positivo
-    """
-
     def decenas(self, n):
+        """
+        Enunciado de las decenas de un número.
+
+        @param n Número a tratar. Debe ser positivo
+        """
         buffer = ""
 
+        if n < 0:
+            raise ValueError("Param n must be positive integer")
         if n < 30:
             buffer = self.unidades(n)
         else:
@@ -124,14 +125,15 @@ class FLUtil(ProjectClass):
 
         return buffer
 
-    """
-    Enunciado de las centenas de un número.
-
-    @param n Número a tratar. Debe ser positivo
-    """
-
     def centenas(self, n):
+        """
+        Enunciado de las centenas de un número.
+
+        @param n Número a tratar. Debe ser positivo
+        """
         buffer = ""
+        if n < 0:
+            raise ValueError("Param n must be positive integer")
         if n == 100:
             buffer = "cien"
 
@@ -144,13 +146,12 @@ class FLUtil(ProjectClass):
 
         return buffer
 
-    """
-    Enunciado de las unidades de millar de un número.
-
-    @param n Número a tratar. Debe ser positivo
-    """
-
     def unidadesmillar(self, n):
+        """
+        Enunciado de las unidades de millar de un número.
+
+        @param n Número a tratar. Debe ser positivo
+        """
         buffer = ""
         if n < 1000:
             buffer = ""
@@ -166,13 +167,12 @@ class FLUtil(ProjectClass):
 
         return buffer
 
-    """
-    Enunciado de las decenas de millar de un número.
-
-    @param n Número a tratar. Debe ser positivo
-    """
-
     def decenasmillar(self, n):
+        """
+        Enunciado de las decenas de millar de un número.
+
+        @param n Número a tratar. Debe ser positivo
+        """
         buffer = ""
         if n < 10000:
             buffer = self.unidadesmillar(n)
@@ -183,18 +183,17 @@ class FLUtil(ProjectClass):
         buffer = buffer + self.centenas(n % 10000)
         return buffer
 
-    """
-    Obtiene la expresión en texto de como se enuncia un número, en castellano.
-
-    Dado un número entero, devuelve su expresión en texto de como se
-    enuncia de forma hablada; por ejemplo dado el número 130,
-    devolverá la cadena de texto "ciento treinta".
-
-    @param n Número a transladar a su forma hablada. Debe ser positivo
-    @return Cadena de texto con su expresión hablada
-    """
-
     def enLetra(self, n):
+        """
+        Obtiene la expresión en texto de como se enuncia un número, en castellano.
+
+        Dado un número entero, devuelve su expresión en texto de como se
+        enuncia de forma hablada; por ejemplo dado el número 130,
+        devolverá la cadena de texto "ciento treinta".
+
+        @param n Número a transladar a su forma hablada. Debe ser positivo
+        @return Cadena de texto con su expresión hablada
+        """
         buffer = ""
         if n > 1000000000:
             buffer = "Sólo hay capacidad hasta mil millones"
@@ -213,20 +212,20 @@ class FLUtil(ProjectClass):
         buffer = buffer + self.centenamillar(n % 1000000)
         return buffer.upper()
 
-    """
-    Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
-    y en cualquier moneda indicada.
-
-    Dado un número doble, devuelve su expresión en texto de como se
-    enuncia de forma hablada en la moneda indicada; por ejemplo dado el número 130.25,
-    devolverá la cadena de texto "ciento treinta 'moneda' con veinticinco céntimos".
-
-    @param n Número a transladar a su forma hablada. Debe ser positivo
-    @param m Nombre de la moneda
-    @return Cadena de texto con su expresión hablada
-    """
     @decorators.BetaImplementation
     def enLetraMoneda(self, n, m):
+        """
+        Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
+        y en cualquier moneda indicada.
+
+        Dado un número doble, devuelve su expresión en texto de como se
+        enuncia de forma hablada en la moneda indicada; por ejemplo dado el número 130.25,
+        devolverá la cadena de texto "ciento treinta 'moneda' con veinticinco céntimos".
+
+        @param n Número a transladar a su forma hablada. Debe ser positivo
+        @param m Nombre de la moneda
+        @return Cadena de texto con su expresión hablada
+        """
         nTemp = n * -1.00 if n < 0.00 else n
         entero = self.partInteger(nTemp)
         decimal = self.partDecimal(nTemp)
@@ -249,65 +248,62 @@ class FLUtil(ProjectClass):
 
         return res.upper()
 
-    """
-    Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
-    y en Euros.
-
-    Dado un número doble, devuelve su expresión en texto de como se
-    enuncia de forma hablada en euros; por ejemplo dado el número 130.25,
-    devolverá la cadena de texto "ciento treinta euros con veinticinco céntimos".
-
-    @param n Número a transladar a su forma hablada. Debe ser positivo
-    @return Cadena de texto con su expresión hablada
-    """
     @decorators.BetaImplementation
     def enLetraMonedaEuro(self, n):
+        """
+        Obtiene la expresión en texto de como se enuncia una cantidad monetaria, en castellano
+        y en Euros.
+
+        Dado un número doble, devuelve su expresión en texto de como se
+        enuncia de forma hablada en euros; por ejemplo dado el número 130.25,
+        devolverá la cadena de texto "ciento treinta euros con veinticinco céntimos".
+
+        @param n Número a transladar a su forma hablada. Debe ser positivo
+        @return Cadena de texto con su expresión hablada
+        """
         # return enLetraMoneda(n, QT_TR_NOOP("euros"));
         return self.enLetraMoneda(n, "euros")
 
-    """
-    Obtiene la letra asociada al némero del D.N.I. español.
-
-    @param n Numero de D.N.I
-    @return Caracter asociado al núemro de D.N.I
-    """
-
     def letraDni(self, n):
+        """
+        Obtiene la letra asociada al némero del D.N.I. español.
+
+        @param n Numero de D.N.I
+        @return Caracter asociado al núemro de D.N.I
+        """
         letras = "TRWAGMYFPDXBNJZSQVHLCKE"
         return letras[n % 23]
 
-    """
-    Obtiene la lista de nombres de campos de la tabla especificada.
-    El primer string de la lista contiene el número de campos de la tabla
-
-    @param tabla. Nombre de la tabla
-    @return Lista de campos
-    """
-
     def nombreCampos(self, tablename):
+        """
+        Obtiene la lista de nombres de campos de la tabla especificada.
+        El primer string de la lista contiene el número de campos de la tabla
+
+        @param tabla. Nombre de la tabla
+        @return Lista de campos
+        """
         campos = pineboolib.project.conn.manager().metadata(tablename).fieldsNames()
         return [len(campos)] + campos
 
-    """
-    Obtiene el número del digito de control, para cuentas bancarias.
-
-    Los números de las cuentas corrientes se organizan de la forma siguiente:
-
-    4 Digitos----->Código del banco   (ej. 0136 Banco Arabe español)
-    4 Digitos----->Código de la oficina
-    1 Digito de control------>de los 8 primeros digitos
-    1 Digito de control------>del número de cuenta (de los 10 ultimos digitos)
-    10 Digitos del número de la cuenta
-
-    Para comprobar el numero de cuenta se pasa primero los 8 primeros digitos
-    obteniendo asi el primer digito de control, después se pasan los 10 digitos
-    del número de la cuenta obteniendo el segundo digito de control.
-
-    @param n Número del que se debe obtener el dígito de control
-    @return Caracter con el dígito de control asociado al número dado
-    """
-
     def calcularDC(self, n):
+        """
+        Obtiene el número del digito de control, para cuentas bancarias.
+
+        Los números de las cuentas corrientes se organizan de la forma siguiente:
+
+        4 Digitos----->Código del banco   (ej. 0136 Banco Arabe español)
+        4 Digitos----->Código de la oficina
+        1 Digito de control------>de los 8 primeros digitos
+        1 Digito de control------>del número de cuenta (de los 10 ultimos digitos)
+        10 Digitos del número de la cuenta
+
+        Para comprobar el numero de cuenta se pasa primero los 8 primeros digitos
+        obteniendo asi el primer digito de control, después se pasan los 10 digitos
+        del número de la cuenta obteniendo el segundo digito de control.
+
+        @param n Número del que se debe obtener el dígito de control
+        @return Caracter con el dígito de control asociado al número dado
+        """
         Tabla = [6, 3, 7, 9, 10, 5, 8, 4, 2, 1]
 
         DC = None
@@ -330,15 +326,14 @@ class FLUtil(ProjectClass):
         char = chr(DC + 48)
         return char
 
-    """
-    Convierte fechas del tipo DD-MM-AAAA, DD/MM/AAAA o
-    DDMMAAAA al tipo AAAA-MM-DD.
-
-    @param  f Cadena de texto con la fecha a transformar
-    @return Cadena de texto con la fecha transformada
-    """
-
     def dateDMAtoAMD(self, f):
+        """
+        Convierte fechas del tipo DD-MM-AAAA, DD/MM/AAAA o
+        DDMMAAAA al tipo AAAA-MM-DD.
+
+        @param  f Cadena de texto con la fecha a transformar
+        @return Cadena de texto con la fecha transformada
+        """
         dia_ = None
         mes_ = None
         ano_ = None
@@ -370,15 +365,14 @@ class FLUtil(ProjectClass):
         retorno = "%s-%s-%s" % (ano_, mes_, dia_)
         return retorno
 
-    """
-    Convierte fechas del tipo AAAA-MM-DD, AAAA-MM-DD o
-    AAAAMMDD al tipo DD-MM-AAAA.
-
-    @param  f Cadena de texto con la fecha a transformar
-    @return Cadena de texto con la fecha transformada
-    """
-
     def dateAMDtoDMA(self, f):
+        """
+        Convierte fechas del tipo AAAA-MM-DD, AAAA-MM-DD o
+        AAAAMMDD al tipo DD-MM-AAAA.
+
+        @param  f Cadena de texto con la fecha a transformar
+        @return Cadena de texto con la fecha transformada
+        """
         dia_ = None
         mes_ = None
         ano_ = None
@@ -400,17 +394,18 @@ class FLUtil(ProjectClass):
 
         retorno = "%s-%s-%s" % (dia_, mes_, ano_)
         return retorno
-    """
-    Formatea una cadena de texto poniéndole separadores de miles.
 
-    La cadena que se pasa se supone que un número, convirtiendola
-    con QString::toDouble(), si la cadena no es número el resultado es imprevisible.
-
-    @param s Cadena de texto a la que se le quieren poder separadores de miles
-    @return Devuelve la cadena formateada con los separadores de miles
-    """
     @decorators.BetaImplementation
     def formatoMiles(self, s):
+        """
+        Formatea una cadena de texto poniéndole separadores de miles.
+
+        La cadena que se pasa se supone que un número, convirtiendola
+        con QString::toDouble(), si la cadena no es número el resultado es imprevisible.
+
+        @param s Cadena de texto a la que se le quieren poder separadores de miles
+        @return Devuelve la cadena formateada con los separadores de miles
+        """
         s = str(s)
         decimal = ''
         entera = ''
@@ -444,75 +439,72 @@ class FLUtil(ProjectClass):
 
         return ret
 
-    """
-    Traducción de una cadena al idioma local
-
-    Se hace una llamada a la función tr() de la clase QObject para hacer la traducción.
-    Se utiliza para traducciones desde fuera de objetos QObject
-
-    @param group Contexto en el que se encuentra la cadena, generalmente se refiere a la clase en la que está definida
-    @param s Cadena de texto a traducir
-    @return Devuelve la cadena traducida al idioma local
-    """
-
     def translate(self, group, string):
+        """
+        Traducción de una cadena al idioma local
+
+        Se hace una llamada a la función tr() de la clase QObject para hacer la traducción.
+        Se utiliza para traducciones desde fuera de objetos QObject
+
+        @param group Contexto en el que se encuentra la cadena, generalmente se refiere a la clase en la que está definida
+        @param s Cadena de texto a traducir
+        @return Devuelve la cadena traducida al idioma local
+        """
         from pineboolib.fllegacy.FLTranslations import FLTranslate
         return str(FLTranslate(group, string))
 
-    """
-    Devuelve si el numero de tarjeta de Credito es valido.
-
-    El parametro que se pasa es la cadena de texto que contiene el numero de tarjeta.
-
-    @param num Cadena de texto con el numero de tarjeta
-    @return Devuelve verdadero si el numero de tarjeta es valido
-    """
     @decorators.NotImplementedWarn
     def numCreditCard(self, num):
+        """
+        Devuelve si el numero de tarjeta de Credito es valido.
+
+        El parametro que se pasa es la cadena de texto que contiene el numero de tarjeta.
+
+        @param num Cadena de texto con el numero de tarjeta
+        @return Devuelve verdadero si el numero de tarjeta es valido
+        """
         pass
 
-    """
-    Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla.
-
-    Este metodo es muy util cuando se insertan registros en los que
-    la referencia es secuencial y no nos acordamos de cual fue el ultimo
-    numero usado. El valor devuelto es un QVariant del tipo de campo es
-    el que se busca la ultima referencia. Lo más aconsejable es que el tipo
-    del campo sea 'String' porque así se le puede dar formato y ser
-    usado para generar un código de barras. De todas formas la función
-    soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
-
-    @param name Nombre del campo
-    @param cursor_ Cursor a la tabla donde se encuentra el campo.
-    @return Qvariant con el numero siguiente.
-    @author Andrés Otón Urbano.
-    """
-
-    """
-    dpinelo: Este método es una extensión de nextCounter pero permitiendo la introducción de una primera
-    secuencia de caracteres. Es útil cuando queremos mantener diversos contadores dentro de una misma tabla.
-    Ejemplo, Tabla Grupo de clientes: Agregamos un campo prefijo, que será una letra: A, B, C, D.
-    Queremos que la numeración de los clientes sea del tipo A00001, o B000023. Con esta función, podremos
-    seguir usando los métodos counter cuando agregamos esa letra.
-
-    Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla para una serie determinada.
-
-    Este metodo es muy util cuando se insertan registros en los que
-    la referencia es secuencial según una secuencia y no nos acordamos de cual fue el último
-    numero usado. El valor devuelto es un QVariant del tipo de campo es
-    el que se busca la ultima referencia. Lo más aconsejable es que el tipo
-    del campo sea 'String' porque así se le puede dar formato y ser
-    usado para generar un código de barras. De todas formas la función
-    soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
-
-    @param serie serie que diferencia los contadores
-    @param name Nombre del campo
-    @param cursor_ Cursor a la tabla donde se encuentra el campo.
-    @return Qvariant con el numero siguiente.
-    @author Andrés Otón Urbano.
-    """
-
     def nextCounter(self, *args, **kwargs):
+        """
+        Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla.
+
+        Este metodo es muy util cuando se insertan registros en los que
+        la referencia es secuencial y no nos acordamos de cual fue el ultimo
+        numero usado. El valor devuelto es un QVariant del tipo de campo es
+        el que se busca la ultima referencia. Lo más aconsejable es que el tipo
+        del campo sea 'String' porque así se le puede dar formato y ser
+        usado para generar un código de barras. De todas formas la función
+        soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
+
+        @param name Nombre del campo
+        @param cursor_ Cursor a la tabla donde se encuentra el campo.
+        @return Qvariant con el numero siguiente.
+        @author Andrés Otón Urbano.
+        """
+        """
+        dpinelo: Este método es una extensión de nextCounter pero permitiendo la introducción de una primera
+        secuencia de caracteres. Es útil cuando queremos mantener diversos contadores dentro de una misma tabla.
+        Ejemplo, Tabla Grupo de clientes: Agregamos un campo prefijo, que será una letra: A, B, C, D.
+        Queremos que la numeración de los clientes sea del tipo A00001, o B000023. Con esta función, podremos
+        seguir usando los métodos counter cuando agregamos esa letra.
+
+        Este metodo devuelve el siguiente valor de un campo tipo contador de una tabla para una serie determinada.
+
+        Este metodo es muy util cuando se insertan registros en los que
+        la referencia es secuencial según una secuencia y no nos acordamos de cual fue el último
+        numero usado. El valor devuelto es un QVariant del tipo de campo es
+        el que se busca la ultima referencia. Lo más aconsejable es que el tipo
+        del campo sea 'String' porque así se le puede dar formato y ser
+        usado para generar un código de barras. De todas formas la función
+        soporta tanto que el campo sea de tipo 'String' como de tipo 'double'.
+
+        @param serie serie que diferencia los contadores
+        @param name Nombre del campo
+        @param cursor_ Cursor a la tabla donde se encuentra el campo.
+        @return Qvariant con el numero siguiente.
+        @author Andrés Otón Urbano.
+        """
         if len(args) == 2:
             name = args[0]
             cursor_ = args[1]
@@ -633,38 +625,37 @@ class FLUtil(ProjectClass):
 
             return None
 
-    """
-    Nos devuelve el siguiente valor de la secuencia segun la profundidad indicada por nivel.
-    Para explicar el funcionamiento pondremos un ejemplo. Supongamos una secuencia tipo %A-%N.
-    %A indica que se coloque en esa posicion una secuencia en letras y %N una secuencia en numero.
-    La numeración de niveles va de derecha a izquierda asi el nivel 1 es %N y el nivel 2 %A.
-    Si hacemos un nextSequence a nivel 1 el valor de vuelto será un %A que estubiera y un %N sumando 1
-    al anterior. Si el nivel es 2 obtendremos un %A + 1, trasformado a letras, y todos los niveles a
-    la derecha de este se ponen a 1 o su correspondiente en letra que seria A.
-
-    @param nivel Indica la profundidad a la que se hace el incremento.
-    @param secuencia Estructura de la secuencia.
-    @param ultimo Ultimo valor de la secuencia para poder dar el siguiente valor.
-    @return La secuencia en el formato facilitado.
-    @author Andrés Otón Urbano
-    """
     @decorators.NotImplementedWarn
     def nextSequence(self, nivel, secuencia, ultimo):
+        """
+        Nos devuelve el siguiente valor de la secuencia segun la profundidad indicada por nivel.
+        Para explicar el funcionamiento pondremos un ejemplo. Supongamos una secuencia tipo %A-%N.
+        %A indica que se coloque en esa posicion una secuencia en letras y %N una secuencia en numero.
+        La numeración de niveles va de derecha a izquierda asi el nivel 1 es %N y el nivel 2 %A.
+        Si hacemos un nextSequence a nivel 1 el valor de vuelto será un %A que estubiera y un %N sumando 1
+        al anterior. Si el nivel es 2 obtendremos un %A + 1, trasformado a letras, y todos los niveles a
+        la derecha de este se ponen a 1 o su correspondiente en letra que seria A.
+
+        @param nivel Indica la profundidad a la que se hace el incremento.
+        @param secuencia Estructura de la secuencia.
+        @param ultimo Ultimo valor de la secuencia para poder dar el siguiente valor.
+        @return La secuencia en el formato facilitado.
+        @author Andrés Otón Urbano
+        """
         pass
 
-    """
-    Para comprobar si la cabecera de un fichero de definición corresponde
-    con las soportadas por AbanQ.
-
-    Este método no sirve para los scripts, sólo para los ficheros de definición;
-    mtd, ui, qry, xml, ts y kut.
-
-    @param head Cadena de caracteres con la cabecera del fichero, bastaría
-        con las tres o cuatro primeras linea del fichero no vacías
-    @return TRUE si es un fichero soportado, FALSE en caso contrario
-    """
-
     def isFLDefFile(self, head):
+        """
+        Para comprobar si la cabecera de un fichero de definición corresponde
+        con las soportadas por AbanQ.
+
+        Este método no sirve para los scripts, sólo para los ficheros de definición;
+        mtd, ui, qry, xml, ts y kut.
+
+        @param head Cadena de caracteres con la cabecera del fichero, bastaría
+            con las tres o cuatro primeras linea del fichero no vacías
+        @return TRUE si es un fichero soportado, FALSE en caso contrario
+        """
         if head.find("<!DOCTYPE UI>") == 0:
             return True
         if head.find("<!DOCTYPE QRY>") == 0:
@@ -682,15 +673,14 @@ class FLUtil(ProjectClass):
 
         return False
 
-    """
-    Suma dias a una fecha.
-
-    @param fecha Fecha con la que operar
-    @param offset Numero de dias que sumar. Si es negativo resta dias
-    @return Fecha con el desplazamiento de dias
-    """
-
     def addDays(self, fecha, offset):
+        """
+        Suma dias a una fecha.
+
+        @param fecha Fecha con la que operar
+        @param offset Numero de dias que sumar. Si es negativo resta dias
+        @return Fecha con el desplazamiento de dias
+        """
         from pineboolib.qsatype import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
@@ -698,19 +688,18 @@ class FLUtil(ProjectClass):
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" %
-                  type(fecha))
+            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha))
+            return None
         return fecha.addDays(offset).toString("yyyy-MM-dd")
 
-    """
-    Suma meses a una fecha.
-
-    @param fecha Fecha con la que operar
-    @param offset Numero de meses que sumar. Si es negativo resta meses
-    @return Fecha con el desplazamiento de meses
-    """
-
     def addMonths(self, fecha, offset):
+        """
+        Suma meses a una fecha.
+
+        @param fecha Fecha con la que operar
+        @param offset Numero de meses que sumar. Si es negativo resta meses
+        @return Fecha con el desplazamiento de meses
+        """
         from pineboolib.qsatype import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
@@ -718,19 +707,18 @@ class FLUtil(ProjectClass):
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" %
-                  type(fecha))
+            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha))
+            return None
         return fecha.addMonths(offset).toString("yyyy-MM-dd")
 
-    """
-    Suma años a una fecha.
-
-    @param fecha Fecha con la que operar
-    @param offset Numero de años que sumar. Si es negativo resta años
-    @return Fecha con el desplazamiento de años
-    """
-
     def addYears(self, fecha, offset):
+        """
+        Suma años a una fecha.
+
+        @param fecha Fecha con la que operar
+        @param offset Numero de años que sumar. Si es negativo resta años
+        @return Fecha con el desplazamiento de años
+        """
         from pineboolib.qsatype import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
@@ -738,32 +726,30 @@ class FLUtil(ProjectClass):
         if isinstance(fecha, str):
             fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
         if not isinstance(fecha, QtCore.QDate):
-            print("FATAL: FLUtil.addYears: No reconozco el tipo de dato %r" %
-                  type(fecha))
+            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha))
         return fecha.addYears(offset).toString("yyyy-MM-dd")
 
-    """
-    Diferencia de dias desde una fecha a otra.
-
-    @param d1 Fecha de partida
-    @param d2 Fecha de destino
-    @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
-    """
     @decorators.NotImplementedWarn
     def daysTo(self, d1, d2):
+        """
+        Diferencia de dias desde una fecha a otra.
+
+        @param d1 Fecha de partida
+        @param d2 Fecha de destino
+        @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
+        """
         pass
 
-    """
-    Construye un string a partir de un número, especificando el formato y precisión
-
-    @param v. Número a convertir a QString
-    @param tipo. Formato del número
-    @param partDecimal. Precisión (número de cifras decimales) del número
-
-    @return Cadena que contiene el número formateado
-    """
-
     def buildNumber(self, v, tipo, partDecimal):
+        """
+        Construye un string a partir de un número, especificando el formato y precisión
+
+        @param v. Número a convertir a QString
+        @param tipo. Formato del número
+        @param partDecimal. Precisión (número de cifras decimales) del número
+
+        @return Cadena que contiene el número formateado
+        """
         if not v:
             v = 0
         d = float(v) * 10**partDecimal
@@ -778,41 +764,40 @@ class FLUtil(ProjectClass):
             ret = float(ret)
         return ret
 
-    """
-    Lee el valor de un setting en el directorio de la instalación de AbanQ
-
-    @param key. Clave identificadora del setting
-    @param def. Valor por defecto en el caso de que el setting no esté establecido
-    @param ok. Indicador de que la lectura es correcta
-
-    @return Valor del setting
-    """
-
     def readSettingEntry(self, key, def_=u"", ok=False):
+        """
+        Lee el valor de un setting en el directorio de la instalación de AbanQ
+
+        @param key. Clave identificadora del setting
+        @param def. Valor por defecto en el caso de que el setting no esté establecido
+        @param ok. Indicador de que la lectura es correcta
+
+        @return Valor del setting
+        """
         value = FLSettings().readEntry(key, def_, ok)
         if value is None:
             value = def_
         return value
-    """
-    Establece el valor de un setting en el directorio de instalación de AbanQ
-
-    @param key. Clave identificadora del setting
-    @param Valor del setting
-
-    @return Indicador de si la escritura del settings se realiza correctamente
-    """
 
     def writeSettingEntry(self, key, value):
+        """
+        Establece el valor de un setting en el directorio de instalación de AbanQ
+
+        @param key. Clave identificadora del setting
+        @param Valor del setting
+
+        @return Indicador de si la escritura del settings se realiza correctamente
+        """
         FLSettings().writeEntry(key, value)
-    """
-    Lee el valor de un setting en la tabla flsettings
-
-    @param key. Clave identificadora del setting
-
-    @return Valor del setting
-    """
 
     def readDBSettingEntry(self, key):
+        """
+        Lee el valor de un setting en la tabla flsettings
+
+        @param key. Clave identificadora del setting
+
+        @return Valor del setting
+        """
         q = FLSqlQuery()
         q.setSelect("valor")
         q.setFrom("flsettings")
@@ -823,16 +808,15 @@ class FLUtil(ProjectClass):
 
         return None
 
-    """
-    Establece el valor de un setting en la tabla flsettings
-
-    @param key. Clave identificadora del setting
-    @param Valor del setting
-
-    @return Indicador de si la escritura del settings se realiza correctamente
-    """
-
     def writeDBSettingEntry(self, key, value):
+        """
+        Establece el valor de un setting en la tabla flsettings
+
+        @param key. Clave identificadora del setting
+        @param Valor del setting
+
+        @return Indicador de si la escritura del settings se realiza correctamente
+        """
         # result = False
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
@@ -847,25 +831,24 @@ class FLUtil(ProjectClass):
             cursor.execute(sql)
 
         except Exception:
-            print(traceback.format_exc())
-            cursor.rollback()
+            logger.exception("writeDBSettingEntry: Error al ejecutar SQL: %s", sql)
+            # FIXME: Quito el rollback porque esta función no inicia transacción
+            # cursor.rollback()
             return False
 
         cursor.close()
         return True
 
-    """
-    Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
-
-    @param n. Número a redondear
-    @param table. Nombre de la tabla
-    @param field. Nombre del campo
-
-    @return Número redondeado
-    """
-
     def roundFieldValue(self, n, table, field):
+        """
+        Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
+        @param n. Número a redondear
+        @param table. Nombre de la tabla
+        @param field. Nombre del campo
+
+        @return Número redondeado
+        """
         # tmd = self._prj.conn.manager().metadata(table)
         tmd = pineboolib.project.conn.manager().metadata(table)
         if not tmd:
@@ -881,20 +864,18 @@ class FLUtil(ProjectClass):
             del tmd
         return ret
 
-    """
-    Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
-
-    @param f: Sentencia from de la query
-    @param s: Sentencia select de la query, que será el nombre del campo a devolver
-    @param w: Sentencia where de la query
-    @param tL: Sentencia tableslist de la query. Necesario cuando en la sentencia from se incluya más de una tabla
-    @param size: Número de líneas encontradas. (-1 si hay error)
-    @param connName Nombre de la conexion
-    @return Valor resultante de la query o falso si no encuentra nada.
-    """
-
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
+        """
+        Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
 
+        @param f: Sentencia from de la query
+        @param s: Sentencia select de la query, que será el nombre del campo a devolver
+        @param w: Sentencia where de la query
+        @param tL: Sentencia tableslist de la query. Necesario cuando en la sentencia from se incluya más de una tabla
+        @param size: Número de líneas encontradas. (-1 si hay error)
+        @param connName Nombre de la conexion
+        @return Valor resultante de la query o falso si no encuentra nada.
+        """
         if w is None or w == "":
             return False
 
@@ -920,12 +901,12 @@ class FLUtil(ProjectClass):
         if size:
             return False
 
-    """
-    Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
-    Usar con precaución.
-    """
     @decorators.BetaImplementation
     def quickSqlSelect(self, f, s, w, connName="default"):
+        """
+        Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
+        Usar con precaución.
+        """
         if not w:
             sql = "select " + s + " from " + f
         else:
@@ -937,17 +918,16 @@ class FLUtil(ProjectClass):
 
         return q.value(0) if q.first() else False
 
-    """
-    Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
-
-    @param t Nombre de la tabla
-    @param fL Lista separada con comas de los nombres de los campos
-    @param vL Lista separada con comas de los valores correspondientes
-    @param connName Nombre de la conexion
-    @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-    """
-
     def sqlInsert(self, t, fL, vL, connName="default"):
+        """
+        Realiza la inserción de un registro en una tabla mediante un objeto FLSqlCursor
+
+        @param t Nombre de la tabla
+        @param fL Lista separada con comas de los nombres de los campos
+        @param vL Lista separada con comas de los valores correspondientes
+        @param connName Nombre de la conexion
+        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
+        """
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
         fL = fL.split(",")
@@ -971,18 +951,17 @@ class FLUtil(ProjectClass):
 
         return c.commitBuffer()
 
-    """
-    Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
-
-    @param t Nombre de la tabla
-    @param fL Lista separada con comas de los nombres de los campos
-    @param vL Lista separada con comas de los valores correspondientes
-    @param w Sentencia where para identificar los registros a editar.
-    @param connName Nombre de la conexion
-    @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-    """
-
     def sqlUpdate(self, t, fL, vL, w, connName="default"):
+        """
+        Realiza la modificación de uno o más registros en una tabla mediante un objeto FLSqlCursor
+
+        @param t Nombre de la tabla
+        @param fL Lista separada con comas de los nombres de los campos
+        @param vL Lista separada con comas de los valores correspondientes
+        @param w Sentencia where para identificar los registros a editar.
+        @param connName Nombre de la conexion
+        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
+        """
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
         c.setForwardOnly(True)
@@ -1007,16 +986,16 @@ class FLUtil(ProjectClass):
                 return False
 
         return True
-    """
-    Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
-
-    @param t Nombre de la tabla
-    @param w Sentencia where para identificar los registros a borrar.
-    @param connName Nombre de la conexion
-    @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
-    """
 
     def sqlDelete(self, t, w, connName="default"):
+        """
+        Borra uno o más registros en una tabla mediante un objeto FLSqlCursor
+
+        @param t Nombre de la tabla
+        @param w Sentencia where para identificar los registros a borrar.
+        @param connName Nombre de la conexion
+        @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
+        """
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
         c.setForwardOnly(True)
@@ -1033,81 +1012,75 @@ class FLUtil(ProjectClass):
 
         return True
 
-    """
-    Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
-    Usar con precaución.
-    """
     @decorators.NotImplementedWarn
     def quickSqlDelete(self, t, w, connName="default"):
+        """
+        Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
+        Usar con precaución.
+        """
         pass
-    """
-    Crea un diálogo de progreso
-
-    @param l Label del diálogo
-    @param tS Número total de pasos a realizar
-    """
 
     def createProgressDialog(self, title, steps, id_="default"):
+        """
+        Crea un diálogo de progreso
+
+        @param l Label del diálogo
+        @param tS Número total de pasos a realizar
+        """
         pd_widget = QtWidgets.QProgressDialog(str(title), str(
             self.translate("scripts", "Cancelar")), 0, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
         return pd_widget
 
-    """
-    Destruye el diálogo de progreso
-    """
-
     def destroyProgressDialog(self, id_="default"):
+        """
+        Destruye el diálogo de progreso
+        """
         pd_widget = self.__class__.progress_dialog_stack[-1]
         del self.__class__.progress_dialog_stack[-1]
         pd_widget.hide()
         pd_widget.close()
 
-    """
-    Establece el grado de progreso del diálogo
-
-    @param p Grado de progreso
-    """
-
     def setProgress(self, step_number, id_="default"):
+        """
+        Establece el grado de progreso del diálogo
+
+        @param p Grado de progreso
+        """
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setValue(step_number)
 
-    """
-    Cambia el texto de la etiqueta del diálogo
-
-    @param l Etiqueta
-    """
-
     def setLabelText(self, l, id_="default"):
+        """
+        Cambia el texto de la etiqueta del diálogo
+
+        @param l Etiqueta
+        """
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setLabelText(str(l))
 
-    """
-    Establece el número total de pasos del diálogo
-
-    @param ts Número total de pasos
-    """
-
     def setTotalSteps(self, tS, id_="default"):
+        """
+        Establece el número total de pasos del diálogo
+
+        @param ts Número total de pasos
+        """
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setTotalSteps(tS)
 
-    """
-    Establece el contenido de un documento XML.
-
-    Establece un documento DOM a partir del XML. Chequea errores, y si existen
-    muestra el error encontrado y la linea y columna donde se encuentra.
-
-    @param doc Documento DOM a establecer
-    @param content Contenido XML
-    @return FALSE si hubo fallo, TRUE en caso contrario
-    """
-
     def domDocumentSetContent(self, doc, content):
+        """
+        Establece el contenido de un documento XML.
+
+        Establece un documento DOM a partir del XML. Chequea errores, y si existen
+        muestra el error encontrado y la linea y columna donde se encuentra.
+
+        @param doc Documento DOM a establecer
+        @param content Contenido XML
+        @return FALSE si hubo fallo, TRUE en caso contrario
+        """
         if not content:
-            print("FLUtil :", self.tr(
-                "Se ha intentado cargar un fichero XML vacío"))
+            logger.warn("Se ha intentado cargar un fichero XML vacío", stack_info=True)
             return False
 
         ErrMsg = ""
@@ -1116,20 +1089,18 @@ class FLUtil(ProjectClass):
 
         # if not doc.setContent(content, ErrMsg, errLine, errColumn):
         if not doc.setContent(content):
-            print("FLUtil :", self.tr("Error en fichero XML.\nError : %1\nLinea : %2\nColumna : %3").
-                  arg(ErrMsg, str(errLine), str(errColumn)))
+            logger.warn("Error en fichero XML.\nError : %s\nLinea : %s\nColumna : %s", ErrMsg, errLine, errColumn)
             return False
 
         return True
 
-    """
-    Obtiene la clave SHA1 de una cadena de texto.
-
-    @param str Cadena de la que obtener la clave SHA1
-    @return Clave correspondiente en digitos hexadecimales
-    """
-
     def sha1(self, str_):
+        """
+        Obtiene la clave SHA1 de una cadena de texto.
+
+        @param str Cadena de la que obtener la clave SHA1
+        @return Clave correspondiente en digitos hexadecimales
+        """
         sha_ = hashlib.new("sha1", str_.encode())
         st = "%s" % sha_.hexdigest()
         st = st.upper()
@@ -1139,59 +1110,59 @@ class FLUtil(ProjectClass):
     def usha1(self, data, _len):
         pass
 
-    """
-    Obtiene la imagen o captura de pantalla de un formulario.
-
-    @param n Nombre del fichero que contiene la descricpción del formulario.
-    """
     @decorators.NotImplementedWarn
     def snapShotUI(self, n):
+        """
+        Obtiene la imagen o captura de pantalla de un formulario.
+
+        @param n Nombre del fichero que contiene la descricpción del formulario.
+        """
         pass
 
-    """
-    Salva en un fichero con formato PNG la imagen o captura de pantalla de un formulario.
-
-    @param n Nombre del fichero que contiene la descricpción del formulario.
-    @param pathFile Ruta y nombre del fichero donde guardar la imagen
-    """
     @decorators.NotImplementedWarn
     def saveSnapShotUI(self, n, pathFile):
-        pass
-    """
-    Decodifica un tipo de AbanQ a un tipo QVariant
+        """
+        Salva en un fichero con formato PNG la imagen o captura de pantalla de un formulario.
 
-    @param fltype Tipo de datos de AbanQ.
-    @return Tipo de datos QVariant.
-    """
+        @param n Nombre del fichero que contiene la descricpción del formulario.
+        @param pathFile Ruta y nombre del fichero donde guardar la imagen
+        """
+        pass
+
     @decorators.NotImplementedWarn
     def flDecodeType(self, fltype):
-        pass
-    """
-    Guarda la imagen de icono de un botón de un formulario en un ficher png. Utilizado para documentación
+        """
+        Decodifica un tipo de AbanQ a un tipo QVariant
 
-    @param data Contenido de la imagen en una cadena de caracteres
-    @param pathFile Ruta completa al fichero donde se guadará la imagen
-    """
+        @param fltype Tipo de datos de AbanQ.
+        @return Tipo de datos QVariant.
+        """
+        pass
+
     @decorators.NotImplementedWarn
     def saveIconFile(self, data, pathFile):
+        """
+        Guarda la imagen de icono de un botón de un formulario en un ficher png. Utilizado para documentación
+
+        @param data Contenido de la imagen en una cadena de caracteres
+        @param pathFile Ruta completa al fichero donde se guadará la imagen
+        """
         pass
 
-    """
-    Devuelve una cadena de dos caracteres con el código de idioma del sistema
-
-    @return Código de idioma del sistema
-    """
-
     def getIdioma(self):
+        """
+        Devuelve una cadena de dos caracteres con el código de idioma del sistema
+
+        @return Código de idioma del sistema
+        """
         return QtCore.QLocale().name()[:2]
 
-    """
-    Devuelve el sistema operativo sobre el que se ejecuta el programa
-
-    @return Código del sistema operativo (WIN32, LINUX, MACX)
-    """
-
     def getOS(self):
+        """
+        Devuelve el sistema operativo sobre el que se ejecuta el programa
+
+        @return Código del sistema operativo (WIN32, LINUX, MACX)
+        """
         if platform.system() == "Windows":
             return "WIN32"
         elif platform.system() == "Linux" or platform.system() == "Linux2":
@@ -1201,59 +1172,58 @@ class FLUtil(ProjectClass):
         else:
             return platform.system()
 
-    """
-    Esta función convierte una cadena que es una serie de letras en su correspondiente valor numerico.
-
-    @param letter Cadena con la serie.
-    @return Una cadena pero que contiene numeros.
-    """
     @decorators.NotImplementedWarn
     def serialLettertoNumber(self, letter):
+        """
+        Esta función convierte una cadena que es una serie de letras en su correspondiente valor numerico.
+
+        @param letter Cadena con la serie.
+        @return Una cadena pero que contiene numeros.
+        """
         pass
 
-    """
-    Esta función convierte un numero a su correspondiente secuencia de Letras.
-
-    @param number Número a convertir
-    """
     @decorators.NotImplementedWarn
     def serialNumbertoLetter(self, number):
+        """
+        Esta función convierte un numero a su correspondiente secuencia de Letras.
+
+        @param number Número a convertir
+        """
         pass
 
-    """
-    Busca ficheros recursivamente en las rutas indicadas y según el patrón indicado
-
-    Ejemplo:
-
-    C++:
-    QStringList filesFound = FLUtil::findFiles(QStringList() << "/home/user/Documents", "*.odt *.gif");
-    for (QStringList::Iterator it = filesFound.begin(); it != filesFound.end(); ++it)
-        qWarning(*it);
-
-    QSA:
-    var util = new FLUtil;
-    var filesFound = util.findFiles( [ "/home/user/Documents" ], "*.odt *.gif");
-
-    for(var i = 0; i < filesFound.length; ++i)
-        debug(filesFound[i]);
-
-
-    @param  paths   Rutas de búsqueda
-    @param  filter  Patrón de filtrado para los ficheros. Admite varios separados por espacios "*.gif *.png".
-                  Por defecto todos, "*"
-    @param  breakOnFirstMatch Si es TRUE al encontrar el primer fichero que cumpla el patrón indicado, termina
-                            la búsqueda y devuelve el nombre de ese fichero
-    @return Lista de los nombres de los ficheros encontrados
-    """
     @decorators.NotImplementedWarn
     def findFiles(self, paths, filter_="*", breakOnFirstMatch=False):
+        """
+        Busca ficheros recursivamente en las rutas indicadas y según el patrón indicado
+
+        Ejemplo:
+
+        C++:
+        QStringList filesFound = FLUtil::findFiles(QStringList() << "/home/user/Documents", "*.odt *.gif");
+        for (QStringList::Iterator it = filesFound.begin(); it != filesFound.end(); ++it)
+            qWarning(*it);
+
+        QSA:
+        var util = new FLUtil;
+        var filesFound = util.findFiles( [ "/home/user/Documents" ], "*.odt *.gif");
+
+        for(var i = 0; i < filesFound.length; ++i)
+            debug(filesFound[i]);
+
+
+        @param  paths   Rutas de búsqueda
+        @param  filter  Patrón de filtrado para los ficheros. Admite varios separados por espacios "*.gif *.png".
+                      Por defecto todos, "*"
+        @param  breakOnFirstMatch Si es TRUE al encontrar el primer fichero que cumpla el patrón indicado, termina
+                                la búsqueda y devuelve el nombre de ese fichero
+        @return Lista de los nombres de los ficheros encontrados
+        """
         pass
 
-    """
-    Uso interno
-    """
-
     def execSql(self, sql, connName="default"):
+        """
+        Uso interno
+        """
         conn_ = pineboolib.project.conn.useConn(connName)
         cur = conn_.cursor()
         try:
@@ -1261,16 +1231,17 @@ class FLUtil(ProjectClass):
             conn_.conn.commit()
             return True
         except Exception:
-            print(traceback.format_exc())
+            logger.exception("execSql: Error al ejecutar la SQL: %s", sql)
             return False
-    """
-    Guarda imagen Pixmap en una ruta determinada.
 
-    @param data Contenido de la imagen en una cadena de caracteres
-    @param filename: Ruta al fichero donde se guardará la imagen
-    @param fmt Indica el formato con el que guardar la imagen
-    @author Silix
-    """
     @decorators.NotImplementedWarn
     def savePixmap(self, data, filename, format_):
+        """
+        Guarda imagen Pixmap en una ruta determinada.
+
+        @param data Contenido de la imagen en una cadena de caracteres
+        @param filename: Ruta al fichero donde se guardará la imagen
+        @param fmt Indica el formato con el que guardar la imagen
+        @author Silix
+        """
         pass

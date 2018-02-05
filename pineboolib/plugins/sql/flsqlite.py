@@ -15,7 +15,7 @@ class QApplication:
         return text
 
 
-class FLsqlite(object):
+class FLSQLITE(object):
 
     version_ = None
     conn_ = None
@@ -28,7 +28,8 @@ class FLsqlite(object):
     sql = None
     rowsFetched = None
     db_ = None
-    # True por defecto, convierte los datos de entrada y salida a UTF-8 desde Latin1
+    # True por defecto, convierte los datos de entrada y salida a UTF-8 desde
+    # Latin1
     parseFromLatin = None
 
     def __init__(self):

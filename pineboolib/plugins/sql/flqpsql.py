@@ -97,7 +97,8 @@ class FLQPSQL(object):
                     None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
                 return False
 
-        # self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a false para que las transacciones funcionen
+        # self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a
+        # false para que las transacciones funcionen
         self.conn_.set_isolation_level(
             psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 

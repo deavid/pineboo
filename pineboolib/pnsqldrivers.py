@@ -20,7 +20,7 @@ class PNSqlDrivers(ProjectClass):
             if not f[0:2] == "__":
                 f = f[:f.find(".py")]
                 mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % f)
-                driver_ = getattr(mod_, f)()
+                driver_ = getattr(mod_, f.upper())()
                 self.driversdict[f] = driver_.alias_
 
         self.defaultDriverName = "FLQPSQL"
@@ -31,8 +31,8 @@ class PNSqlDrivers(ProjectClass):
             driverName = self.defaultDriverName
 
         module_ = importlib.import_module(
-            "pineboolib.plugins.sql.%s" % driverName)
-        self.driver_ = getattr(module_, driverName)()
+            "pineboolib.plugins.sql.%s" % driverName.lower())
+        self.driver_ = getattr(module_, driverName.upper())()
 
         if self.driver_:
             # self.driverName = driverName

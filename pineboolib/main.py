@@ -2,30 +2,29 @@
 import time
 import os
 import logging
-import traceback
-from lxml import etree
-from binascii import unhexlify
-
 import zlib
 import importlib
+from binascii import unhexlify
+
+from lxml import etree
 
 from PyQt5 import QtCore, QtGui
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLTranslator import FLTranslator
-from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
-from pineboolib.fllegacy.FLFormDB import FLFormDB
-from pineboolib import qt3ui
-from pineboolib.PNConnection import PNConnection
-from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
-from PyQt5.Qt import qWarning, qApp
+from PyQt5.Qt import qApp
+from PyQt5.QtCore import Qt
 
 import pineboolib.emptyscript
+from pineboolib import qt3ui
 from pineboolib import decorators
-
+from pineboolib.pnconnection import PNConnection
+from pineboolib.dbschema.schemaupdater import parseTable
 from pineboolib.utils import filedir, one, Struct, XMLStruct
-Qt = QtCore.Qt
+
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.FLTranslator import FLTranslator
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
+from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 
 
 class DBServer(XMLStruct):
@@ -66,8 +65,8 @@ class Project(object):
         self._initModules = []
         if self._DGI.useDesktop():
             if self._DGI.localDesktop():
-                self.main_window = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-                    self.mainFormName, self.mainFormName)).mainWindow
+                self.main_window = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+                    self.mainFormName.lower(), self.mainFormName.lower())).mainWindow
             else:
                 self.main_window = self._DGI.mainForm().mainWindow
         self.deleteCache = False
@@ -86,7 +85,6 @@ class Project(object):
 
     def setDebugLevel(self, q):
         Project.debugLevel = q
-        decorators.Options.DEBUG_LEVEL = q
         qt3ui.Options.DEBUG_LEVEL = q
 
     """
@@ -152,9 +150,19 @@ class Project(object):
         self.tables = {}
         pineboolib.project = self
 
+    def coalesce_path(self, *filenames):
+        for filename in filenames:
+            if filename is None:
+                return None
+            if filename in self.files:
+                return self.files[filename].path()
+        raise IOError(
+            "None of the files specified were found: %s", repr(filenames))
+
     def path(self, filename):
         if filename not in self.files:
-            print("WARN: Fichero %r no encontrado en el proyecto." % filename)
+            self.logger.error(
+                "Fichero %s no encontrado en el proyecto.", filename, stack_info=True)
             return None
         return self.files[filename].path()
 
@@ -165,8 +173,8 @@ class Project(object):
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
         if self.deleteCache and not not os.path.exists(self.dir("cache/%s" % self.dbname)):
-            print("DEVELOP: DeleteCache Activado\nBorrando %s" %
-                  self.dir("cache/%s" % self.dbname))
+            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", self.dir(
+                "cache/%s" % self.dbname))
             for root, dirs, files in os.walk(self.dir("cache/%s" % self.dbname), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
@@ -237,7 +245,8 @@ class Project(object):
                 continue  # I
             fileobj = File(self, idmodulo, nombre, sha)
             if nombre in self.files:
-                print("WARN: file %s already loaded, overwritting..." % nombre)
+                self.logger.warn(
+                    "run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
@@ -260,7 +269,8 @@ class Project(object):
                     # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
                     txt = contenido.encode("ISO-8859-15")
                 except Exception:
-                    print("Error al decodificar", idmodulo, nombre)
+                    self.logger.exception(
+                        "Error al decodificar %s %s", idmodulo, nombre)
                     # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
                     txt = contenido.encode("ISO-8859-15", "replace")
 
@@ -272,10 +282,8 @@ class Project(object):
             p = p + 1
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
-
-            if Project.debugLevel > 50:
-                print("Descarga del proyecto completo a disco duro: %.3fs" %
-                      (tiempo_fin - tiempo_ini))
+            self.logger.info(
+                "Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
 
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
@@ -307,20 +315,19 @@ class Project(object):
         name = "geo/%s" % name
         return FLSettings().readEntry(name, None)
 
-    @decorators.NotImplementedWarn
+    @decorators.NotImplementedDebug
     def readState(self):
         pass
 
-    @decorators.NotImplementedWarn
+    @decorators.NotImplementedDebug
     def writeState(self):
         pass
 
     def call(self, function, aList, objectContext, showException=True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
-        if Project.debugLevel > 50:
-            print("*** JS.CALL :: function:%r   argument.list:%r    context:%r ***" %
-                  (function, aList, objectContext))
+        self.logger.debug("JS.CALL: fn:%s args:%s ctx:%s",
+                          function, aList, objectContext, stack_info=True)
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
@@ -328,16 +335,14 @@ class Project(object):
 
         aFunction = function.split(".")
         if not aFunction[0] in self.modules:
-            if Project.debugLevel > 50:
-                print("No existe el módulo %s" % (aFunction[0]))
+            self.logger.error("No existe el módulo %s", aFunction[0])
             return False
 
         funModule = self.modules[aFunction[0]]
 
         if not aFunction[0] in funModule.actions:
-            if Project.debugLevel > 50:
-                print("No existe la acción %s en el módulo %s" %
-                      (aFunction[0], aFunction[0]))
+            self.logger.error(
+                "No existe la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
         funAction = funModule.actions[aFunction[0]]
@@ -351,30 +356,24 @@ class Project(object):
             return False
 
         if not funScript:
-            if Project.debugLevel > 50:
-                print("No existe el script para la acción %s en el módulo %s" %
-                      (aFunction[0], aFunction[0]))
+            self.logger.error(
+                "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
         fn = getattr(funScript, aFunction[2], None)
         if fn is None:
-            if Project.debugLevel > 50:
-                print("No existe la función %s en %s" %
-                      (aFunction[2], function))
-            return True
+            self.logger.error("No existe la función %s en %s",
+                              aFunction[2], function)
+            return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
-        # fn = None
         try:
-            # fn = eval(function, pineboolib.qsaglobals.__dict__)
             if aList:
                 return fn(*aList)
             else:
                 return fn()
-
         except Exception:
-            # print("** JS.CALL :: ERROR:", traceback.format_exc())
             if showException:
-                print("** JS.CALL :: ERROR:", traceback.format_exc())
+                self.logger.exception("js.call: error al llamar %s", function)
 
         return None
 
@@ -449,17 +448,13 @@ class Project(object):
         python_script_path = (
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-            print("Convirtiendo a Python . . .", scriptname)
-            # ret = subprocess.call(["flscriptparser2", "--full",script_path])
+            self.logger.info("Convirtiendo a Python . . . %s", scriptname)
             from pineboolib.flparser import postparse
             try:
                 postparse.pythonify(scriptname)
             except Exception as e:
-                qWarning("WARN: El fichero %s no se ha podido convertir: %s" %
-                         (scriptname, e))
-
-        # if not os.path.isfile(python_script_path):
-        #    raise AssertionError(u"No se encontró el módulo de Python, falló flscriptparser?")
+                self.logger.warn(
+                    "El fichero %s no se ha podido convertir: %s", scriptname, e)
 
     def reinitP(self):
         if self.acl_:
@@ -472,8 +467,8 @@ class Project(object):
         if obj_:
             return obj_
 
-        print("WARN: Project.resolveSDIObject no puede encontra el objeto %s en %s" % (
-            name, self._DGI.alias()))
+        self.logger.warn(
+            "Project.resolveSDIObject no puede encontra el objeto %s en %s", name, self._DGI.alias())
 
 
 class Module(object):
@@ -487,6 +482,7 @@ class Module(object):
         self.tables = {}
         self.loaded = False
         self.path = self.prj.path
+        self.logger = logging.getLogger("main.Module")
 
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
@@ -495,10 +491,10 @@ class Module(object):
         pathxml = self.path("%s.xml" % self.name)
         pathui = self.path("%s.ui" % self.name)
         if pathxml is None:
-            print("ERROR: modulo %r: fichero XML no existe" % (self.name))
+            self.logger.error("modulo %s: fichero XML no existe", self.name)
             return False
         if pathui is None:
-            print("ERROR: modulo %r: fichero UI no existe" % (self.name))
+            self.logger.error("modulo %s: fichero UI no existe", self.name)
             return False
         if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
             tiempo_1 = time.time()
@@ -509,8 +505,7 @@ class Module(object):
                 self.mainform = MainForm(self, pathui)
                 self.mainform.load()
         except Exception as e:
-            print("ERROR al cargar modulo %r:" % self.name, e)
-            print(traceback.format_exc(), "---")
+            self.logger.exception("Al cargar modulo %s:", self.name)
             return False
 
         # TODO: Load Main Script:
@@ -527,12 +522,13 @@ class Module(object):
                 contenido = str(open(self.path(tablefile),
                                      "rb").read(), "ISO-8859-15")
             except UnicodeDecodeError as e:
-                print("Error al leer el fichero", tablefile, e)
+                self.logger.error(
+                    "Error al leer el fichero %s %s", tablefile, e)
                 continue
             tableObj = parseTable(name, contenido)
             if tableObj is None:
-                print("No se pudo procesar. Se ignora tabla %s/%s " %
-                      (self.name, name))
+                self.logger.warn(
+                    "No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
                 continue
             self.tables[name] = tableObj
             self.prj.tables[name] = tableObj
@@ -540,9 +536,8 @@ class Module(object):
         if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
             tiempo_3 = time.time()
             if tiempo_3 - tiempo_1 > 0.2:
-                if Project.debugLevel > 50:
-                    print("Carga del modulo %s : %.3fs ,  %.3fs" %
-                          (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
+                self.logger.debug("Carga del modulo %s : %.3fs ,  %.3fs",
+                                  (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
 
         self.loaded = True
         return True
@@ -588,12 +583,13 @@ class DelayedObjectProxyLoader(object):
         self._args = args
         self._kwargs = kwargs
         self.loaded_obj = None
+        self.logger = logging.getLogger("main.DelayedObjectProxyLoader")
 
     def __load(self):
         if not self.loaded_obj:
-            if Project.debugLevel > 50:
-                print("DelayedObjectProxyLoader: loading %s %r( *%r **%r)" %
-                      (self._name, self._obj, self._args, self._kwargs))
+            self.logger.debug(
+                "DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
+                self._name, self._obj, self._args, self._kwargs)
             self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
 
@@ -608,6 +604,7 @@ class ModuleActions(object):
         self.prj = module.prj
         self.path = path
         self.moduleName = modulename
+        self.logger = logging.getLogger("main.ModuleActions")
         assert path
 
     def load(self):
@@ -632,8 +629,8 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         self.prj.actions[action.name] = action
         if hasattr(qsaglobals, action.name):
-            # print("INFO: No se sobreescribe variable de entorno", action.name)
-            pass
+            self.logger.debug(
+                "No se sobreescribe variable de entorno %s", action.name)
         else:
             setattr(qsaglobals, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
@@ -647,22 +644,19 @@ class ModuleActions(object):
             except AttributeError:
                 name = "unnamed"
             self.prj.actions[name] = action
-            # print(":::" , self.mod.name, name)
             if name != "unnamed":
                 if hasattr(qsaglobals, "form" + name):
-                    if Project.debugLevel > 150:
-                        print(
-                            "INFO: No se sobreescribe variable de entorno", "form" + name)
-                    pass
+                    self.logger.debug(
+                        "No se sobreescribe variable de entorno %s", "form" + name)
                 else:
-                    setattr(qsaglobals, "form" + name, DelayedObjectProxyLoader(action.load,
-                                                                                name="QSA.Module.%s.Action.form%s" % (self.mod.name, name)))
+                    delayed_action = DelayedObjectProxyLoader(
+                        action.load,
+                        name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
+                    setattr(qsaglobals, "form" + name, delayed_action)
 
                 if hasattr(qsaglobals, "formRecord" + name):
-                    if Project.debugLevel > 150:
-                        print("INFO: No se sobreescribe variable de entorno",
-                              "formRecord" + name)
-                    pass
+                    self.logger.debug(
+                        "No se sobreescribe variable de entorno %s", "formRecord" + name)
                 else:
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
                         action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
@@ -740,14 +734,11 @@ class MainForm(object):
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
                     if self.prj._DGI.useDesktop():
-                        print(
+                        self.logger.exception(
                             "main.Mainform: Error al intentar decodificar icono de accion. No existe.")
-                        print(e)
             else:
                 action.iconSet = None
-            # if iconSet:
-            #    for images in self.root.xpath("images/image[@name='%s']" % iconSet):
-            #        print("*****", iconSet, images)
+
             self.actions[action.name] = action
             if not self.prj._DGI.localDesktop():
                 self.prj._DGI.mainForm().mainWindow.loadAction(action)
@@ -767,9 +758,6 @@ class MainForm(object):
             self.toolbar.append(toolbar_action.get("name"))
             if not self.prj._DGI.localDesktop():
                 self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
-        # self.ui = WMainForm()
-        # self.ui.load(self.path)
-        # self.ui.show()
 
 
 class XMLMainFormAction(XMLStruct):
@@ -779,20 +767,21 @@ class XMLMainFormAction(XMLStruct):
     mod = None
     prj = None
     slot = None
+    logger = logging.getLogger("main.XMLMainFormAction")
 
     def run(self):
-        if Project.debugLevel > 50:
-            print("Running MainFormAction:", self.name, self.text, self.slot)
+        self.logger.debug("Running: %s %s %s", self.name, self.text, self.slot)
         try:
             action = self.mod.actions[self.name]
             getattr(action, self.slot, "unknownSlot")()
         finally:
-            if Project.debugLevel > 50:
-                print("END of Running MainFormAction:",
-                      self.name, self.text, self.slot)
+            self.logger.debug(
+                "END of Running: %s %s %s",
+                self.name, self.text, self.slot)
 
 
 class XMLAction(XMLStruct):
+    logger = logging.getLogger("main.XMLAction")
 
     def __init__(self, _project, *args, **kwargs):
         super(XMLAction, self).__init__(*args, **kwargs)
@@ -810,25 +799,19 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor=None):
         # if self.formrecord_widget is None:
         if not getattr(self, "formrecord", None):
-            if Project.debugLevel > 50:
-                print("Record action %s is not defined. Canceled !" %
-                      (self.name))
+            self.logger.warn(
+                "Record action %s is not defined. Canceled !", self.name)
             return None
-        if Project.debugLevel > 50:
-            print("Loading record action %s . . . " % (self.name))
+        self.logger.debug("Loading record action %s . . . ", self.name)
         parent_or_cursor = cursor  # Sin padre, ya que es ventana propia
         self.formrecord_widget = FLFormRecordDB(
             parent_or_cursor, self, load=True)
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         # self._record_loaded = True
         if self.mainform_widget:
-            if Project.debugLevel > 50:
-                print("End of record action load %s (iface:%s ; widget:%s)"
-                      % (self.name,
-                         repr(self.mainform_widget.iface),
-                          repr(self.mainform_widget.widget)
-                         )
-                      )
+            self.logger.debug(
+                "End of record action load %s (iface:%s ; widget:%s)",
+                self.name, self.mainform_widget.iface, self.mainform_widget.widget)
 
         self.initModule(self.name)
         return self.formrecord_widget
@@ -837,15 +820,13 @@ class XMLAction(XMLStruct):
         try:
             return self._load()
         except Exception as e:
-            print("ERROR: Loading action %s: %s" % (self.name, e))
-            print(traceback.format_exc())
+            self.logger.exception("While loading action %s", self.name)
             return None
 
     def _load(self):
         if self._loaded:
             return self.mainform_widget
-        if Project.debugLevel > 50:
-            print("Loading action %s . . . " % (self.name))
+        self.logger.debug("Loading action %s . . . ", self.name)
         w = self.prj.main_window
         if not self.mainform_widget:
             if self.prj._DGI.useDesktop():
@@ -859,21 +840,17 @@ class XMLAction(XMLStruct):
                     self.load_script(
                         getattr(self, "scriptform", None), self.mainform_widget)
                 except Exception:
-                    print(traceback.format_exc(), "---")
+                    self.logger.exception(
+                        "Error trying to load scriptform for %s", self.name)
 
         self._loaded = True
-        if Project.debugLevel > 50:
-            print("End of action load %s (iface:%s ; widget:%s)"
-                  % (self.name,
-                     repr(self.mainform_widget.iface),
-                     repr(self.mainform_widget.widget)
-                     )
-                  )
+        self.logger.debug(
+            "End of action load %s (iface:%s ; widget:%s)",
+            self.name, self.mainform_widget.iface, self.mainform_widget.widget)
         return self.mainform_widget
 
     def openDefaultForm(self):
-        if Project.debugLevel > 50:
-            print("Opening default form for Action", self.name)
+        self.logger.debug("Opening default form for Action %s", self.name)
         self.load()
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # ... construido antes que cualquier widget)
@@ -888,8 +865,7 @@ class XMLAction(XMLStruct):
         return self.form
 
     def openDefaultFormRecord(self, cursor=None):
-        if Project.debugLevel > -50:
-            print("Opening default formRecord for Action", self.name)
+        self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()
         if w:
@@ -897,8 +873,7 @@ class XMLAction(XMLStruct):
                 w.show()
 
     def execDefaultScript(self):
-        if Project.debugLevel > 50:
-            print("Executing default script for Action", self.name)
+        self.logger.debug("Executing default script for Action %s", self.name)
 
         self.load_script(self.scriptform, None)
         self.initModule(self.name)
@@ -908,8 +883,9 @@ class XMLAction(XMLStruct):
             self.script.form.main()
 
     def load_script(self, scriptname, parent=None):
-        print("Cargando script " + str(scriptname) + " de " +
-              str(parent) + " accion " + str(self.name))
+        self.logger.info(
+            "Cargando script %s de %s accion %s",
+            scriptname, parent, self.name)
 
         parent_ = parent
         if parent is None:
@@ -943,48 +919,46 @@ class XMLAction(XMLStruct):
             return
 
         script_path_qs = prj_.path(scriptname + ".qs")
-        script_path_py = prj_.path(
-            scriptname + ".py") or prj_.path(scriptname + ".qs.py")
+        script_path_py = prj_.coalesce_path(
+            scriptname + ".py", scriptname + ".qs.py", None)
 
         overload_pyfile = os.path.join(
             parent.prj.tmpdir, "overloadpy", scriptname + ".py")
         if os.path.isfile(overload_pyfile):
-            print(
-                "WARN: ** cargando %r de overload en lugar de la base de datos!!" % scriptname)
+            self.logger.warn(
+                "Cargando %s desde overload en lugar de la base de datos!!", scriptname)
             try:
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, overload_pyfile).load_module()
             except Exception as e:
-                print("ERROR al cargar script OVERLOADPY para la accion %r:" %
-                      action_.name, e)
-                print(traceback.format_exc(), "---")
+                self.logger.exception(
+                    "ERROR al cargar script OVERLOADPY para la accion %s:", action_.name)
 
         elif script_path_py:
             script_path = script_path_py
-            print("Loading script PY %s . . . " % scriptname)
+            self.logger.info("Loading script PY %s . . . ", scriptname)
             if not os.path.isfile(script_path):
                 raise IOError
             try:
-                print("Cargando %s : %s " % (scriptname,
-                                             script_path.replace(parent.prj.tmpdir, "tempdata")))
+                self.logger.info(
+                    "Cargando %s : %s ", scriptname,
+                    script_path.replace(parent.prj.tmpdir, "tempdata"))
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, script_path).load_module()
             except Exception as e:
-                print("ERROR al cargar script PY para la accion %r:" %
-                      action_.name, e)
-                print(traceback.format_exc(), "---")
+                self.logger.exception(
+                    "ERROR al cargar script PY para la accion %s:", action_.name)
 
         elif script_path_qs:
             script_path = script_path_qs
-            print("Loading script QS %s . . . " % scriptname)
+            self.logger.info("Loading script QS %s . . . ", scriptname)
             # Intentar convertirlo a Python primero con flscriptparser2
             if not os.path.isfile(script_path):
-                raise IOError
+                raise IOError("QS Script File %s not found" % script_path)
             python_script_path = (
                 script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-                print("Convirtiendo a Python . . .")
-                # ret = subprocess.call(["flscriptparser2", "--full",script_path])
+                self.logger.info("Convirtiendo a Python . . .")
                 from pineboolib.flparser import postparse
                 postparse.pythonify(script_path)
 
@@ -992,16 +966,14 @@ class XMLAction(XMLStruct):
                 raise AssertionError(
                     u"No se encontró el módulo de Python, falló flscriptparser?")
             try:
-                print("Cargando %s : %s " % (scriptname,
-                                             python_script_path.replace(self.prj.tmpdir, "tempdata")))
+                self.logger.info(
+                    "Cargando %s : %s ", scriptname,
+                    python_script_path.replace(self.prj.tmpdir, "tempdata"))
                 parent.script = importlib.machinery.SourceFileLoader(
                     scriptname, python_script_path).load_module()
-                # self.script = imp.load_source(scriptname,python_script_path)
-                # self.script = imp.load_source(scriptname,filedir(scriptname+".py"), open(python_script_path,"U"))
             except Exception as e:
-                print("ERROR al cargar script QS para la accion %r:" %
-                      action_.name, e)
-                print(traceback.format_exc(), "---")
+                self.logger.exception(
+                    "ERROR al cargar script QS para la accion %s:", action_.name)
 
         parent.script.form = parent.script.FormInternalObj(
             action_, prj_, parent_)
@@ -1011,8 +983,8 @@ class XMLAction(XMLStruct):
                 parent.iface = parent.widget.iface
 
     def unknownSlot(self):
-        print("Executing unknown script for Action", self.name)
-        # Aquí debería arramcar el script
+        self.logger.error("Executing unknown script for Action %s", self.name)
+        # Aquí debería arrancar el script
 
     """
     Inicializa el modulo del form en caso de que no se inicializara ya

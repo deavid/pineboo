@@ -102,7 +102,7 @@ class FLSqlQuery(ProjectClass):
         return cursor
 
     def __dameConn(self):
-        from pineboolib.PNConnection import PNConnection
+        from pineboolib.pnconnection import PNConnection
         if getattr(self.d, "db_", None):
             if isinstance(self.d.db_, PNConnection):
                 conn = self.d.db_.conn
@@ -117,7 +117,6 @@ class FLSqlQuery(ProjectClass):
             pass
         else:
             self._datos = self._cursor.fetchall()
-
 
     """
     Añade la descripción parámetro al diccionario de parámetros.
