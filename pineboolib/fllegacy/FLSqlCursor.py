@@ -102,7 +102,7 @@ class PNBuffer(ProjectClass):
                 # else:
                 #    field.value = False
 
-            elif self.cursor().model().value(row, field.name) in ("None", "", None):
+            elif self.cursor().model().value(row, field.name) in ("None", None):
                 field.value = None
 
             else:
@@ -342,7 +342,9 @@ class PNBuffer(ProjectClass):
             if actual in (None, "None"):
                 return True
 
-            if type in ("string", "stringlist"):
+            if (actual == "" and value != "") or (actual != "" and value == ""):
+                return True
+            elif type in ("string", "stringlist"):
                 return not (actual == value)
             elif type in ("int", "uint", "serial"):
                 return not (int(actual) == int(value))
@@ -1170,7 +1172,7 @@ class FLSqlCursor(ProjectClass):
                 pKV = self.d.buffer_.value(pK)
                 q = FLSqlQuery(None, "Aux")
 
-                q.exec_(None, "UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
+                q.exec_("UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
                 ).formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
             else:
                 FLUtil.tr(
@@ -1217,17 +1219,19 @@ class FLSqlCursor(ProjectClass):
 
         if self.d.buffer_.isNull(fN):
             if type_ == "double" or type_ == "int" or type_ == "uint":
-                return 0
+                return None
 
         v = None
         if field.outTransaction() and self.d.db_.dbAux() and not self.d.db_.db() == self.d.db_.dbAux() and not self.d.modeAccess_ == self.Insert:
             pK = self.d.metadata_.primaryKey()
             if pK:
                 pKV = self.d.buffer_.value(pK)
-                q = FLSqlQuery()
+                # q = FLSqlQuery()
+                q = FLSqlQuery(None, "Aux")
                 sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.d.metadata_.name(
                 ), self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pK), pKV))
-                q.exec_(self.d.db_.dbAux(), sql_query)
+                # q.exec_(self.d.db_.dbAux(), sql_query)
+                q.exec_(sql_query)
                 if q.next():
                     v = q.value(0)
             else:
@@ -2057,7 +2061,8 @@ class FLSqlCursor(ProjectClass):
 
         if pos == -99:
             # q = FLSqlQuery(None, self.d.db_.db()) FIXME
-            q = FLSqlQuery()
+            # q = FLSqlQuery()
+            q = FLSqlQuery(None, self.d.db_.connectionName())
             sql = self.curFilter()
             sqlIn = self.curFilter()
             cFilter = self.curFilter()
@@ -2101,7 +2106,8 @@ class FLSqlCursor(ProjectClass):
                     sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
                 else:
                     sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
-                q.exec_(self.d.db_, sqlIn)
+                # q.exec_(self.d.db_, sqlIn)
+                q.exec_(sqlIn)
                 if not q.next():
                     self.seek(self.at())
                     if self.isValid():
@@ -2121,6 +2127,7 @@ class FLSqlCursor(ProjectClass):
                 posEqual = sqlPriKeyValue.index("=")
                 leftSqlPriKey = sqlPriKeyValue[0:posEqual]
                 # FIXME: solo compatible con PostgreSQL!
+                """
                 sqlRowNum = (
                     "SELECT rownum FROM ("
                     "SELECT row_number() OVER (ORDER BY %s) as rownum, %s as %s FROM %s WHERE %s ORDER BY %s) as subnumrow where"
@@ -2129,6 +2136,7 @@ class FLSqlCursor(ProjectClass):
                     pos = int(q.value(0)) - 1
                     if pos >= 0:
                         return pos
+                """
 
             found = False
             q.exec_(sql)
@@ -2609,7 +2617,6 @@ class FLSqlCursor(ProjectClass):
         #    return False
 
         b = self.moveby(1)
-
         if b and emite:
             self.d._current_changed.emit(self.at())
 
@@ -2621,6 +2628,7 @@ class FLSqlCursor(ProjectClass):
     def moveby(self, pos):
         if self.d._currentregister:
             pos += self.d._currentregister
+
         return self.move(pos)
 
     """
@@ -2787,11 +2795,12 @@ class FLSqlCursor(ProjectClass):
             self.setFilter(finalFilter)
 
         self.model().refresh()
+        self.d._currentregister = -1
+
         if self.cursorRelation() and self.modeAccess() == self.Browse:
             self.d._currentregister = self.atFrom()
 
         self.refreshBuffer()
-
         # if self.modeAccess() == self.Browse:
         #    self.d._currentregister = -1
         self.newBuffer.emit()

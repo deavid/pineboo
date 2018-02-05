@@ -799,6 +799,7 @@ class XMLAction(XMLStruct):
         self.prj = _project
         self.form = self._v("form")
         self.script = self._v("script")
+        self.table = self._v("table")
         self.mainform = self._v("mainform")
         self.mainscript = self._v("mainscript")
         self.mainform_widget = None

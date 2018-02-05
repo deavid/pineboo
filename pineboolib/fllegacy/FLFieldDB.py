@@ -1130,7 +1130,7 @@ class FLFieldDB(QtWidgets.QWidget):
             except Exception:
                 self.logger.exception("Error al desconectar señal textChanged")
             s = None
-            if v is not None:
+            if v not in (None, ""):
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
             elif not nulo:

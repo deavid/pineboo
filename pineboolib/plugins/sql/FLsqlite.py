@@ -136,7 +136,7 @@ class FLsqlite(object):
         q.setSelect("max(%s)" % field)
         q.setFrom(table)
         q.setWhere("1 = 1")
-        if not q.exec():  # FIXME: exec es palabra reservada
+        if not q.exec_():  # FIXME: exec es palabra reservada
             print("not exec sequence")
             return None
         if q.first():
