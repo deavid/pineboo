@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtWidgets
 
 
 import traceback
+import math
 import pineboolib
 from pineboolib import decorators
 from pineboolib.utils import filedir
@@ -55,6 +56,21 @@ class FileDialog(QtWidgets.QFileDialog):
 
     def getExistingDirectory(basedir):
         return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
+
+
+class Math(object):
+
+    def abs(x):
+        return math.fabs(x)
+
+    def ceil(x):
+        return math.ceil(x)
+
+    def floor(x):
+        return math.floor(x)
+
+    def pow(x, y):
+        return math.pow(x, y)
 
 
 def parseFloat(x):
@@ -290,7 +306,11 @@ def disconnect(sender, signal, receiver, slot, caller=None):
     if not signal_slot:
         return False
     signal, slot = signal_slot
-    signal.disconnect(slot)
+    try:
+        signal.disconnect(slot)
+    except Exception:
+        pass
+
     return signal_slot
 
 
