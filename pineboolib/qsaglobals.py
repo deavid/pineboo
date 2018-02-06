@@ -15,6 +15,7 @@ import weakref
 from PyQt5.Qt import qWarning, QDateEdit
 
 from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.AQObjects import AQSql
 
 AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
@@ -312,7 +313,8 @@ def solve_connection(sender, signal, receiver, slot):
         return
 
     if remote_fn:
-        proxyfn = ProxySlot(remote_fn, receiver, slot)
+        pS = ProxySlot(remote_fn, receiver, slot)
+        proxyfn = pS.getProxyFn()
         return oSignal, proxyfn
     elif m:
         remote_obj = getattr(receiver, m.group(1), None)
