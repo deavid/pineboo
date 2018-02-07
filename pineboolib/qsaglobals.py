@@ -10,6 +10,7 @@ import pineboolib
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.AQObjects import AQSql
 
 logger = logging.getLogger(__name__)
 AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
@@ -50,6 +51,21 @@ class FileDialog(QtWidgets.QFileDialog):
 
     def getExistingDirectory(basedir):
         return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
+
+
+class Math(object):
+
+    def abs(x):
+        return math.fabs(x)
+
+    def ceil(x):
+        return math.ceil(x)
+
+    def floor(x):
+        return math.floor(x)
+
+    def pow(x, y):
+        return math.pow(x, y)
 
 
 def parseFloat(x):
@@ -283,7 +299,11 @@ def disconnect(sender, signal, receiver, slot, caller=None):
     if not signal_slot:
         return False
     signal, slot = signal_slot
-    signal.disconnect(slot)
+    try:
+        signal.disconnect(slot)
+    except Exception:
+        pass
+
     return signal_slot
 
 
@@ -306,7 +326,8 @@ def solve_connection(sender, signal, receiver, slot):
         return
 
     if remote_fn:
-        proxyfn = ProxySlot(remote_fn, receiver, slot)
+        pS = ProxySlot(remote_fn, receiver, slot)
+        proxyfn = pS.getProxyFn()
         return oSignal, proxyfn
     elif m:
         remote_obj = getattr(receiver, m.group(1), None)
