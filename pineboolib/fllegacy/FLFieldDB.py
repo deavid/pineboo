@@ -2853,7 +2853,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                                 if filterAc:
                                     # print("FilterAC == ", filterAc)
-                                    if where.isEmpty():
+                                    if where not in (None, ""):
                                         where = filterAc
                                     else:
                                         where = "%s AND %s" % (where, filterAc)
