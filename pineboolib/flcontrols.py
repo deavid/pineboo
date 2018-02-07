@@ -93,9 +93,13 @@ class QComboBox(QtWidgets.QComboBox):
     @currentItem.setter
     def currentItem(self, i):
         if i:
+            if not pineboolib.project._DGI.localDesktop():
+                pineboolib.project._DGI._par.addQueqe("%s_setCurrentIndex" % self.objectName(), n)
             self.setCurrentIndex(i)
 
     def insertStringList(self, strl):
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_insertStringList" % self.objectName(), strl)
         self.insertItems(len(strl), strl)
 
 
@@ -145,6 +149,8 @@ class QTabWidget(QtWidgets.QTabWidget):
     def setTabEnabled(self, tab, enabled):
         # print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
         if isinstance(tab, int):
+            if not pineboolib.project._DGI.localDesktop():
+                pineboolib.project._DGI._par.addQueqe("%s_setTabEnabled" % self.objectName(), [tab, enabled])
             return QtWidgets.QTabWidget.setTabEnabled(self, tab, enabled)
         if isinstance(tab, str):
             """
@@ -156,6 +162,8 @@ class QTabWidget(QtWidgets.QTabWidget):
             try:
                 for idx in range(self.count()):
                     if self.widget(idx).objectName() == tab.lower():
+                        if not pineboolib.project._DGI.localDesktop():
+                            pineboolib.project._DGI._par.addQueqe("%s_setTabEnabled" % self.objectName(), [idx, enabled])
                         return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
 
             except ValueError:
@@ -233,6 +241,14 @@ class QTable(QtWidgets.QTableWidget):
 
 class QLineEdit(QtWidgets.QLineEdit):
 
+    _parent = None
+
+    def __init__(self, parent):
+        super(QLineEdit, self).__init__(parent)
+        self._parent = parent
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
+
     @QtCore.pyqtProperty(str)
     def text(self):
         return super(QLineEdit, self).text()
@@ -242,6 +258,8 @@ class QLineEdit(QtWidgets.QLineEdit):
         if not isinstance(v, str):
             v = str(v)
         super(QLineEdit, self).setText(v)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), "QLineEdit")
 
     # def __getattr__(self, name):
         # return DefFun(self, name)

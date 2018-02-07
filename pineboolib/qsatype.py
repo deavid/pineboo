@@ -19,6 +19,7 @@ from pineboolib.fllegacy import FLFieldDB as FLFieldDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 from pineboolib.fllegacy import AQObjects
+from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter as FLPosPrinter_Legacy
 import pineboolib
 
 from pineboolib.utils import filedir
@@ -188,11 +189,8 @@ QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
 
 
-@decorators.NotImplementedWarn
 def FLPosPrinter(*args, **kwargs):
-    class flposprinter:
-        pass
-    return flposprinter()
+    return FLPosPrinter_Legacy()
 
 
 @decorators.BetaImplementation
