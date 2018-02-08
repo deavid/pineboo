@@ -5,6 +5,7 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import DefFun
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.utils import filedir
+import pineboolib
 
 
 class FLFormSearchDB(FLFormDB):
@@ -57,8 +58,16 @@ class FLFormSearchDB(FLFormDB):
 
             name = args[0]
 
-            self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
-            action = self.cursor_._action
+            self.setAction(name)
+            action = self.action
+            if action is None:
+                return
+
+            table = action.table
+            if not table:
+                return
+
+            self.cursor_ = FLSqlCursor(table, True, "default", None, None, self)
             self.accepted_ = False
 
         elif isinstance(args[0], FLSqlCursor):
@@ -95,6 +104,16 @@ class FLFormSearchDB(FLFormDB):
 
         self.eventloop = QtCore.QEventLoop()
         # self.initForm()
+
+    def setAction(self, a):
+        if not isinstance(a, str):
+            self.action = None
+            return
+
+        try:
+            self.action = pineboolib.project.actions[str(a)]
+        except KeyError:
+            self.action = None
 
     """
     destructor

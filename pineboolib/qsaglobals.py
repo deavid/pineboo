@@ -3,16 +3,23 @@ import re
 import os.path
 import weakref
 import logging
+import traceback
+import math
+
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import QDateEdit
+
 
 import pineboolib
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.AQObjects import AQSql
+from pineboolib.fllegacy.AQObjects import AQSql as AQSql_Legacy
+
 
 logger = logging.getLogger(__name__)
+
+AQSql = AQSql_Legacy
 AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 
