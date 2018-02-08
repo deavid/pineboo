@@ -45,6 +45,8 @@ class parser(object):
 
     @dispatcher.add_method
     def mainWindow(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         if not args:
             return "needArguments"
         obj_ = getattr(pineboolib.project.main_window,
@@ -57,6 +59,8 @@ class parser(object):
 
     @dispatcher.add_method
     def mainForm(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         if not args:
             return "needArguments"
         try:
@@ -68,6 +72,9 @@ class parser(object):
 
     @dispatcher.add_method
     def callFunction(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
+
         fun_ = args[0]
         param_ = None
         fn = None
@@ -106,6 +113,8 @@ class parser(object):
 
     @dispatcher.add_method
     def action(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         arguments = args
         actionName = arguments[0]
         control = arguments[1]
@@ -175,12 +184,8 @@ class dgi_jsonrpc(dgi_schema):
 
     @decorators.BetaImplementation
     def loadUI(self, path, widget):
-        print("*************Cargando UI", path, widget)
         self._WJS[widget.__class__.__module__] = self.parserDGI.parse(path)
         self._W[widget.__class__.__module__] = widget
-        """
-        Convertir a .json el ui
-        """
 
     def showWidget(self, widget):
         self._par.addQueqe(
@@ -201,7 +206,6 @@ class mainForm(QtWidgets.QMainWindow):
             _action = args[0]
 
             if _action == "launch":
-                print("Lanzando", args[1])
                 return self.runAction(args[1])
         except Exception:
             print(traceback.format_exc())
