@@ -5,7 +5,6 @@ import re
 import os.path
 from PyQt5 import QtCore, QtWidgets
 
-
 import traceback
 import math
 import pineboolib
@@ -16,8 +15,9 @@ import weakref
 from PyQt5.Qt import qWarning, QDateEdit
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.AQObjects import AQSql
+from pineboolib.fllegacy.AQObjects import AQSql as AQSql_Legacy
 
+AQSql = AQSql_Legacy
 AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 
