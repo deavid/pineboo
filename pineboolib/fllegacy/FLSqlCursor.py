@@ -1404,7 +1404,7 @@ class FLSqlCursor(ProjectClass):
         if self.d.ctxt_:
             return self.d.ctxt_()
         else:
-            logger.debug("context(). No hay contexto" % self.curName())
+            logger.debug("%s.context(). No hay contexto" % self.curName())
             return None
 
     """
