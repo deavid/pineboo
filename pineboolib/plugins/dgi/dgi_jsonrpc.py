@@ -67,6 +67,24 @@ class parser(object):
             return "notFound"
 
     @dispatcher.add_method
+    def callFunction(*args):
+        fun_ = args[0]
+        param_ = None
+        fn = None
+        if len(args) > 1:
+            param_ = ",".join(args[1:])
+
+        try:
+            import pineboolib.qsaglobals
+            fn = eval(fun_, pineboolib.qsaglobals.__dict__)
+        except Exception:
+            return "notFound"
+        if param_:
+            return fn(param_)
+        else:
+            return fn()
+
+    @dispatcher.add_method
     def queqe(*args):
         if len(args) == 1:
             if args[0] == "clean":
