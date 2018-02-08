@@ -505,7 +505,7 @@ class QTextEdit(QtWidgets.QTextEdit):
     def setText(self, text):
         super(QTextEdit, self).setText(text)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), t)
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), text)
 
 
 class QCheckBox(QtWidgets.QCheckBox):
@@ -531,9 +531,9 @@ class parserJson():
 
     def __init__(self):
         self.aPropsForbidden = ['images', 'includehints', 'layoutdefaults',
-                                'slots', 'stdsetdef', 'stdset', 'version', 'spacer']
+                                'slots', 'stdsetdef', 'stdset', 'version', 'spacer', 'connections']
         self.aObjsForbidden = ['geometry', 'sizePolicy', 'margin', 'spacing', 'frameShadow',
-                               'frameShape', 'maximumSize', 'minimumSize', 'font', 'focusPolicy', 'iconSet', 'author', 'comment', 'forwards', 'includes']
+                               'frameShape', 'maximumSize', 'minimumSize', 'font', 'focusPolicy', 'iconSet', 'author', 'comment', 'forwards', 'includes', 'sizepolicy', 'horstretch', 'verstretch']
 
     def isInDgi(self, property, type):
         if type == "prop":
@@ -587,6 +587,7 @@ class parserJson():
         try:
             ui = open(inputFile, 'r')
             xml = ui.read()
+
         except Exception:
             print("Error. El fichero no existe o no tiene formato XML")
             sys.exit()
@@ -604,4 +605,6 @@ class parserJson():
             print("Error. Ha habido un problema durante la escritura del fichero")
             return None
         """
+        strJson = strJson.replace("\n", "")
+        strJson = " ".join(strJson.split())
         return strJson

@@ -1722,14 +1722,14 @@ class FLFieldDB(QtWidgets.QWidget):
         self.initMaxSize_ = self.maximumSize()
         self.initMinSize_ = self.minimumSize()
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setType" % self.objectName(), self._tipo)
+            pineboolib.project._DGI._par.addQueqe("%s_setType" % self.objectName(), type_)
             if self.showAlias():
                 pineboolib.project._DGI._par.addQueqe("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
         if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
                 self.editor_ = pineboolib.project.resolveDGIObject(
-                    "QComboBox")()
+                    "QComboBox")(self)
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 # self.editor_.setAutoCompletion(True)
@@ -1748,7 +1748,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     olTranslated.append(olN)
                 self.editor_.addItems(olTranslated)
                 if not pineboolib.project._DGI.localDesktop():
-                    pineboolib.project._DGI._par.addQueqe("%s_setOptionsList" % self.objectName(), olTranslated.split(","))
+                    pineboolib.project._DGI._par.addQueqe("%s_setOptionsList" % self.objectName(), olTranslated)
                 self.editor_.installEventFilter(self)
                 if self.showed:
                     try:
@@ -2700,7 +2700,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setDisabled(self, disable):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setDisabled" % self.objectName(), disabled)
+            pineboolib.project._DGI._par.addQueqe("%s_setDisabled" % self.objectName(), disable)
         self.setEnabled(not disable)
 
     """
