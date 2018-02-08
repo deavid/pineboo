@@ -156,6 +156,9 @@ def parse_options():
     parser.add_option("--dgi_parameter",
                       dest="dgi_parameter",
                       help="Change the gdi mode by default", metavar="DGIPARAMETER")
+    parser.add_option("--test",
+                      action="store_true", dest="test", default=False,
+                      help="Launch all test")
 
     (options, args) = parser.parse_args()
 
@@ -361,6 +364,7 @@ def main():
     if project.conn.conn is False:
         raise ValueError("No connection was provided. Aborting Pineboo load.")
         # return main()
+
     init_project(DGI, splash, options, project, mainForm, app)
 
 
@@ -425,6 +429,10 @@ def init_project(DGI, splash, options, project, mainForm, app):
         main_window.loadModule(module)
     if options.preload:
         preload_actions(project, options.forceload)
+
+    if options.test:
+        print(project.test())
+        return
 
     if DGI.localDesktop():
         splash.showMessage("Abriendo interfaz ...")
