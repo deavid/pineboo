@@ -1131,7 +1131,7 @@ class FLFieldDB(QtWidgets.QWidget):
             except Exception:
                 self.logger.exception("Error al desconectar señal textChanged")
             s = None
-            if v is not None:
+            if v not in (None, ""):
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
             elif not nulo:
@@ -1721,11 +1721,15 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.initMaxSize_ = self.maximumSize()
         self.initMinSize_ = self.minimumSize()
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setType" % self.objectName(), type_)
+            if self.showAlias():
+                pineboolib.project._DGI._par.addQueqe("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
         if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
                 self.editor_ = pineboolib.project.resolveDGIObject(
-                    "QComboBox")()
+                    "QComboBox")(self)
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 # self.editor_.setAutoCompletion(True)
@@ -1743,7 +1747,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 for olN in olNoTranslated:
                     olTranslated.append(olN)
                 self.editor_.addItems(olTranslated)
-
+                if not pineboolib.project._DGI.localDesktop():
+                    pineboolib.project._DGI._par.addQueqe("%s_setOptionsList" % self.objectName(), olTranslated)
                 self.editor_.installEventFilter(self)
                 if self.showed:
                     try:
@@ -1818,6 +1823,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.textChanged.connect(self.emitTextChanged)
 
                 if hasPushButtonDB:
+                    if not pineboolib.project._DGI.localDesktop():
+                        pineboolib.project._DGI._par.addQueqe("%s_setHasPushButton" % self.objectName(), True)
                     if self.showed:
                         try:
                             self.KeyF2Pressed.disconnect(
@@ -2692,6 +2699,8 @@ class FLFieldDB(QtWidgets.QWidget):
             self.activatedAccel.emit()
 
     def setDisabled(self, disable):
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setDisabled" % self.objectName(), disable)
         self.setEnabled(not disable)
 
     """
@@ -2844,7 +2853,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                                 if filterAc:
                                     # print("FilterAC == ", filterAc)
-                                    if where.isEmpty():
+                                    if where not in (None, ""):
                                         where = filterAc
                                     else:
                                         where = "%s AND %s" % (where, filterAc)

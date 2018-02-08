@@ -113,23 +113,22 @@ class DefFun:
 
     def __str__(self):
         if self.realfun:
-            logger.debug("%r: Redirigiendo Propiedad a función %r" %
-                         (self.parent.__class__, self.funname))
+            logger.debug("%r: Redirigiendo Propiedad a función %r",
+                         self.parent.__class__.__name__, self.funname)
             return self.realfun()
 
-        logger.debug("WARN: %r: Propiedad no implementada %r" %
-                     (self.parent.__class__, self.funname))
+        logger.debug("WARN: %r: Propiedad no implementada %r",
+                     self.parent.__class__.__name__, self.funname)
         return 0
 
     def __call__(self, *args):
-
         if self.realfun:
-            logger.debug("%r: Redirigiendo Llamada a función %r %r" %
-                         (self.parent.__class__, self.funname, args))
+            logger.debug("%r: Redirigiendo Llamada a función %s %s",
+                         self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
 
-        logger.debug("WARN: %r: Método no implementado %r %r" %
-                     (self.parent.__class__, self.funname, args))
+        logger.debug("%r: Método no implementado %s %s",
+                     self.parent.__class__.__name__, self.funname, args)
         return None
 
 

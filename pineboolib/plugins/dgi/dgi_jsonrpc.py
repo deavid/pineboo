@@ -45,6 +45,8 @@ class parser(object):
 
     @dispatcher.add_method
     def mainWindow(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         if not args:
             return "needArguments"
         obj_ = getattr(pineboolib.project.main_window,
@@ -57,6 +59,8 @@ class parser(object):
 
     @dispatcher.add_method
     def mainForm(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         if not args:
             return "needArguments"
         try:
@@ -67,20 +71,50 @@ class parser(object):
             return "notFound"
 
     @dispatcher.add_method
+    def callFunction(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
+
+        fun_ = args[0]
+        param_ = None
+        fn = None
+        if len(args) > 1:
+            param_ = ",".join(args[1:])
+
+        try:
+            import pineboolib.qsaglobals
+            fn = eval(fun_, pineboolib.qsaglobals.__dict__)
+        except Exception:
+            return "notFound"
+        if param_:
+            return fn(param_)
+        else:
+            return fn()
+
+    @dispatcher.add_method
     def queqe(*args):
         if len(args) == 1:
             if args[0] == "clean":
                 pineboolib.project._DGI._par._queqe = {}
                 return True
+            elif args[0] in pineboolib.project._DGI._par._queqe.keys():
+                ret = []
+                for q in pineboolib.project._DGI._par._queqe.keys():
+                    if q.find(args[0]) > -1:
+                        ret.append(q, pineboolib.project._DGI._par._queqe[q])
+                        del pineboolib.project._DGI._par._queqe[q]
             else:
-                return "notFound"
+                ret = "Not Found"
+        else:
+            ret = pineboolib.project._DGI._par._queqe
+            pineboolib.project._DGI._par._queqe = {}
 
-        ret = pineboolib.project._DGI._par._queqe
-        pineboolib.project._DGI._par._queqe = {}
         return ret
 
     @dispatcher.add_method
     def action(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         arguments = args
         actionName = arguments[0]
         control = arguments[1]
@@ -150,16 +184,12 @@ class dgi_jsonrpc(dgi_schema):
 
     @decorators.BetaImplementation
     def loadUI(self, path, widget):
-        print("*************Cargando UI", path, widget)
         self._WJS[widget.__class__.__module__] = self.parserDGI.parse(path)
         self._W[widget.__class__.__module__] = widget
-        """
-        Convertir a .json el ui
-        """
 
     def showWidget(self, widget):
         self._par.addQueqe(
-            "showWidget_%s" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
+            "%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
 
 class mainForm(QtWidgets.QMainWindow):
@@ -176,7 +206,6 @@ class mainForm(QtWidgets.QMainWindow):
             _action = args[0]
 
             if _action == "launch":
-                print("Lanzando", args[1])
                 return self.runAction(args[1])
         except Exception:
             print(traceback.format_exc())

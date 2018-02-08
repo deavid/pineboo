@@ -1,21 +1,25 @@
 # -*- coding: utf-8 -*-
-
-from builtins import object
 import re
 import os.path
-from PyQt5 import QtCore, QtWidgets
-
-
+import weakref
+import logging
 import traceback
+import math
+
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.Qt import QDateEdit
+
+
 import pineboolib
 from pineboolib import decorators
 from pineboolib.utils import filedir
-
-import weakref
-from PyQt5.Qt import qWarning, QDateEdit
-
 from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.AQObjects import AQSql as AQSql_Legacy
 
+
+logger = logging.getLogger(__name__)
+
+AQSql = AQSql_Legacy
 AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 
@@ -25,7 +29,7 @@ Del = 2
 Browse = 3
 
 
-class File(object):
+class File:
 
     @classmethod
     def exists(cls, name):
@@ -54,6 +58,21 @@ class FileDialog(QtWidgets.QFileDialog):
 
     def getExistingDirectory(basedir):
         return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(basedir)
+
+
+class Math(object):
+
+    def abs(x):
+        return math.fabs(x)
+
+    def ceil(x):
+        return math.ceil(x)
+
+    def floor(x):
+        return math.floor(x)
+
+    def pow(x, y):
+        return math.pow(x, y)
 
 
 def parseFloat(x):
@@ -142,13 +161,12 @@ def ustr1(t):
     try:
         return str(t)
     except Exception as e:
-        print("ERROR Coercing to string:", repr(t))
-        print("ERROR", e.__class__.__name__, str(e))
+        logger.exception("ERROR Coercing to string: %s", repr(t))
         return None
 
 
 def debug(txt):
-    print("---> DEBUG:", ustr(txt))
+    logger.message("---> ", ustr(txt))
 
 
 class aqApp(object):
@@ -198,7 +216,7 @@ class SysType(object):
         if obj:
             return obj
         else:
-            qWarning("No se encuentra sys.%s" % name)
+            logger.warn("No se encuentra sys.%s", name)
 
     def version(self):
         return pineboolib.project.version
@@ -265,9 +283,9 @@ def proxy_fn(wf, wr, slot):
 
 def connect(sender, signal, receiver, slot, caller=None):
     if caller is not None:
-        print("* * * Connect::", caller, sender, signal, receiver, slot)
+        logger.debug("* * * Connect::", caller, sender, signal, receiver, slot)
     else:
-        print("? ? ? Connect::", sender, signal, receiver, slot)
+        logger.debug("? ? ? Connect::", sender, signal, receiver, slot)
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
         return False
@@ -276,9 +294,8 @@ def connect(sender, signal, receiver, slot, caller=None):
     signal, slot = signal_slot
     try:
         signal.connect(slot, type=conntype)
-    except RuntimeError as e:
-        print("ERROR Connecting:", sender, signal, receiver, slot)
-        print("ERROR %s : %s" % (e.__class__.__name__, str(e)))
+    except RuntimeError:
+        logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return False
 
     return signal_slot
@@ -289,13 +306,17 @@ def disconnect(sender, signal, receiver, slot, caller=None):
     if not signal_slot:
         return False
     signal, slot = signal_slot
-    signal.disconnect(slot)
+    try:
+        signal.disconnect(slot)
+    except Exception:
+        pass
+
     return signal_slot
 
 
 def solve_connection(sender, signal, receiver, slot):
     if sender is None:
-        print("Connect Error::", sender, signal, receiver, slot)
+        logger.error("Connect Error:: %s %s %s %s", sender, signal, receiver, slot)
         return False
     m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
     if slot.endswith("()"):
@@ -308,11 +329,12 @@ def solve_connection(sender, signal, receiver, slot):
         oSignal = getattr(sender.parent(), sl_name, None)
 
     if not oSignal:
-        print("ERROR: No existe la señal %s para la clase %s" % (signal, sender.__class__.__name__))
+        logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
         return
 
     if remote_fn:
-        proxyfn = ProxySlot(remote_fn, receiver, slot)
+        pS = ProxySlot(remote_fn, receiver, slot)
+        proxyfn = pS.getProxyFn()
         return oSignal, proxyfn
     elif m:
         remote_obj = getattr(receiver, m.group(1), None)
@@ -338,8 +360,10 @@ def solve_connection(sender, signal, receiver, slot):
             slot = getattr(receiver, slot)
         return signal, slot
     else:
-        print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." %
-              (sender, signal, receiver, slot))
+        logger.error(
+            "Al realizar connect %s:%s -> %s:%s ; "
+            "el slot no se reconoce y el receptor no es QObject.",
+            sender, signal, receiver, slot)
     return False
 
 
@@ -357,8 +381,7 @@ class MessageBox(QMessageBox):
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
         if title or form:
-            print(
-                "WARN: MessageBox: Se intentó usar título y form, y no está implementado.")
+            logger.warn("MessageBox: Se intentó usar título y/o form, y no está implementado.")
         icon = QMessageBox.NoIcon
         title = "Message"
         if typename == "question":
@@ -449,9 +472,7 @@ class qsa:
                     return len(self.parent)
                 else:
                     return 0
-            print("FATAL: qsa: error al intentar emular getattr de %r.%r" %
-                  (self.parent, k))
-            print(traceback.format_exc(4))
+            logger.exception("qsa: error al intentar emular getattr de %s.%s", self.parent, k)
 
     def __setattr__(self, k, v):
         if not self.loaded:
@@ -473,9 +494,7 @@ class qsa:
                 else:
                     return setattr(self.parent, k, v)
             except Exception:
-                print("FATAL: qsa: error al intentar emular setattr de %r.%r = %r" % (
-                    self.parent, k, v))
-                print(traceback.format_exc(4))
+                logger.exception("qsa: error al intentar emular setattr de %s.%s = %s", self.parent, k, v)
 
 
 # -------------------------- FORBIDDEN FRUIT ----------------------------------

@@ -33,3 +33,5 @@ python3 ./cliente_json-rpc.py -m queqe
 python3 ./cliente_json-rpc.py -m action -p clientes:fdbNombre:setText:jose
 python3 ./cliente_json-rpc.py -m queqe
 python3 ./cliente_json-rpc.py -m action -p clientes:pushButtonCancel:clicked
+
+python3 ./cliente_json-rpc.py -m callFunction -p flfactppal.iface.valorDefectoEmpresa

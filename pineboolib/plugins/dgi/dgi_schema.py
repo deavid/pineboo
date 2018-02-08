@@ -81,10 +81,10 @@ class dgi_schema(object):
         self.FLSpinBox = FLSpinBox
 
         self.QPushButton = QtWidgets.QPushButton
-        self.QLineEdit = QtWidgets.QLineEdit
-        self.QComboBox = QtWidgets.QComboBox
-        self.QCheckBox = QtWidgets.QCheckBox
-        self.QTextEdit = QtWidgets.QTextEdit
+        self.QLineEdit = QLineEdit
+        self.QComboBox = QComboBox
+        self.QCheckBox = QCheckBox
+        self.QTextEdit = QTextEdit
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
@@ -251,26 +251,14 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
         super(FLLineEdit, self).setText(texto)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe(
-                "setText_%s" % self._fieldName, texto)
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), texto)
         self.textChanged.emit(texto)
 
     def text(self):
         texto = str(super(FLLineEdit, self).text())
 
-        if texto is "":
-            texto = None
-
         if texto is None:
-            if self._tipo == "string":
-                texto = ""
-
-            elif self._tipo == "double":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
+            texto = ""
 
         return str(texto)
 
@@ -313,6 +301,7 @@ class FLPixmapView(QtWidgets.QWidget):
     pixmapView_ = None
     lay_ = None
     gB_ = None
+    _parent = None
 
     def __init__(self, parent):
         super(FLPixmapView, self).__init__(parent)
@@ -322,8 +311,13 @@ class FLPixmapView(QtWidgets.QWidget):
         self.pixmap_ = QtGui.QPixmap()
         self.pixmapView_ = QtWidgets.QLabel(self)
         self.lay_.addWidget(self.pixmapView_)
+        self._parent = parent
 
     def setPixmap(self, pix):
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setPixmap" % self._parent.objectName(), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
+            return
+
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         self.pixmap_ = pix
         if not self.autoScaled_:
@@ -392,12 +386,14 @@ class FLDateEdit(QtWidgets.QDateEdit):
 
     valueChanged = QtCore.pyqtSignal()
     DMY = "dd-MM-yyyy"
+    _parent = None
 
     def __init__(self, parent, name):
         super(FLDateEdit, self).__init__(parent)
         self.setDisplayFormat("dd-MM-yyyy")
         self.setMinimumWidth(120)
         self.setMaximumWidth(120)
+        self._parent = parent
 
     def setOrder(self, order):
         self.setDisplayFormat(order)
@@ -423,7 +419,10 @@ class FLDateEdit(QtWidgets.QDateEdit):
             date = d
 
         super(FLDateEdit, self).setDate(date)
-        self.setStyleSheet('color: black')
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setDate" % self._parent.objectName(), date.toString())
+        else:
+            self.setStyleSheet('color: black')
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -443,7 +442,10 @@ class FLTimeEdit(QtWidgets.QTimeEdit):
             time = QtCore.QTime(int(v[0]), int(v[1]), int(v[2]))
         else:
             time = v
+
         super(FLTimeEdit, self).setTime(time)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setTime" % self._parent.objectName(), date.toString())
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -459,6 +461,67 @@ class FLSpinBox(QtWidgets.QSpinBox):
         self.setMaximum(v)
 
 
+class QComboBox(QtWidgets.QComboBox):
+
+    _parent = None
+
+    def __init__(self, parent=None):
+        self._parent = parent
+        super(QComboBox, self).__init__(parent)
+
+    def setCurrentIndex(self, n):
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setCurrentIndex" % self._parent.objectName(), n)
+        super(QComboBox, self).setCurrentIndex(n)
+
+    def setCurrentText(self, t):
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setCurrentText" % self._parent.objectName(), t)
+        super(QComboBox, self).setCurrentText(n)
+
+
+class QLineEdit(QtWidgets.QLineEdit):
+
+    _parent = None
+
+    def __init__(self, parent):
+        self._parent = parent
+        super(QLineEdit, self).__init__(parent)
+
+    def setText(self, text):
+        super(QLineEdit, self).setText(text)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), t)
+
+
+class QTextEdit(QtWidgets.QTextEdit):
+
+    _parent = None
+
+    def __init__(self, parent):
+        self._parent = parent
+        super(QTextEdit, self).__init__(parent)
+
+    def setText(self, text):
+        super(QTextEdit, self).setText(text)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), text)
+
+
+class QCheckBox(QtWidgets.QCheckBox):
+
+    _parent = None
+
+    def __init__(self, parent):
+        self._parent = parent
+        super(QCheckBox, self).__init__(parent)
+
+    def setChecked(self, b):
+        super(QCheckBox, self).setChecked(b)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueqe("%s_setChecked" % self._parent.objectName(), b)
+
+
 """
 Exportador UI a JSON
 """
@@ -468,9 +531,9 @@ class parserJson():
 
     def __init__(self):
         self.aPropsForbidden = ['images', 'includehints', 'layoutdefaults',
-                                'slots', 'stdsetdef', 'stdset', 'version', 'spacer']
+                                'slots', 'stdsetdef', 'stdset', 'version', 'spacer', 'connections']
         self.aObjsForbidden = ['geometry', 'sizePolicy', 'margin', 'spacing', 'frameShadow',
-                               'frameShape', 'maximumSize', 'minimumSize', 'font', 'focusPolicy', 'iconSet', 'author', 'comment', 'forwards', 'includes']
+                               'frameShape', 'maximumSize', 'minimumSize', 'font', 'focusPolicy', 'iconSet', 'author', 'comment', 'forwards', 'includes', 'sizepolicy', 'horstretch', 'verstretch']
 
     def isInDgi(self, property, type):
         if type == "prop":
@@ -524,6 +587,7 @@ class parserJson():
         try:
             ui = open(inputFile, 'r')
             xml = ui.read()
+
         except Exception:
             print("Error. El fichero no existe o no tiene formato XML")
             sys.exit()
@@ -541,4 +605,6 @@ class parserJson():
             print("Error. Ha habido un problema durante la escritura del fichero")
             return None
         """
+        strJson = strJson.replace("\n", "")
+        strJson = " ".join(strJson.split())
         return strJson

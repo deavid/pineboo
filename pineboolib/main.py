@@ -326,7 +326,7 @@ class Project(object):
     def call(self, function, aList, objectContext, showException=True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
-        self.logger.debug("JS.CALL: fn:%s args:%s ctx:%s",
+        self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s",
                           function, aList, objectContext, stack_info=True)
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()

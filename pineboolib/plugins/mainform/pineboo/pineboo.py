@@ -151,7 +151,7 @@ class MainForm(QtWidgets.QMainWindow):
         if not module.loaded:
             logger.warn("moduleLoad: Ignorando modulo %s por fallo al cargar", module.name)
             return False
-        logger.debug("moduleLoad: Running module %s . . . ", module.name)
+        logger.trace("moduleLoad: Running module %s . . . ", module.name)
         iconsize = QtCore.QSize(22, 22)
         iconsize = QtCore.QSize(16, 16)
         vBLayout.setSpacing(0)

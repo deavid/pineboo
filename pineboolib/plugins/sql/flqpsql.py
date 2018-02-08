@@ -121,10 +121,14 @@ class FLQPSQL(object):
         # if v == None:
         #    v = ""
         # TODO: psycopg2.mogrify ???
+
         if type_ == "pixmap" and v.find("'") > -1:
             v = self.normalizeValue(v)
 
-        if type_ == "bool" or type_ == "unlock":
+        if v is None:
+            s = "Null"
+
+        elif type_ == "bool" or type_ == "unlock":
             s = text2bool(v)
 
         elif type_ == "date":
@@ -138,18 +142,20 @@ class FLQPSQL(object):
             s = "'%s'" % v
 
         elif type_ in ("uint", "int", "double", "serial"):
-            if v is None:
-                s = 0
+            s = v
+
+        elif type_ in ("string", "stringlist"):
+            if v == "":
+                s = "Null"
             else:
-                s = v
+                v = auto_qt_translate_text(v)
+                if upper and type_ == "string":
+                    v = v.upper()
 
+                s = "'%s'" % v
         else:
-            v = auto_qt_translate_text(v)
-            if upper and type_ == "string":
-                v = v.upper()
-
-            s = "'%s'" % v
-        # qWarning ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
+            s = v
+        # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
         return s
 
     def canOverPartition(self):
@@ -595,7 +601,7 @@ class FLQPSQL(object):
         return tl
 
     def normalizeValue(self, text):
-        return None if text is None else text.replace("'", "''")
+        return None if text is None else str(text).replace("'", "''")
 
     def hasCheckColumn(self, mtd):
         fieldList = mtd.fieldList()
