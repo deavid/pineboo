@@ -318,21 +318,32 @@ def solve_connection(sender, signal, receiver, slot):
     if sender is None:
         print("Connect Error::", sender, signal, receiver, slot)
         return False
+
     m = re.search(r"^(\w+)\.(\w+)(\(.*\))?", slot)
     if slot.endswith("()"):
         slot = slot[:-2]
+
+    if isinstance(sender, QDateEdit):
+        if "valueChanged" in signal:
+            signal = signal.replace("valueChanged", "dateChanged")
+
+    if receiver.__class__.__name__ == "FormInternalObj" and slot == "accept":
+        receiver = receiver.parent()
+
     remote_fn = getattr(receiver, slot, None)
 
-    sl_name = re.sub(' *\(.*\)', '', signal)
-    oSignal = getattr(sender, sl_name, None)
+    sg_name = re.sub(' *\(.*\)', '', signal)
+    oSignal = getattr(sender, sg_name, None)
     if not oSignal and sender.__class__.__name__ == "FormInternalObj":
-        oSignal = getattr(sender.parent(), sl_name, None)
-
+        oSignal = getattr(sender.parent(), sg_name, None)
     if not oSignal:
         print("ERROR: No existe la señal %s para la clase %s" % (signal, sender.__class__.__name__))
-        return
+        return False
 
     if remote_fn:
+        if receiver.__class__.__name__ == "FLFormSearchDB" and slot == "accept":
+            return oSignal, remote_fn
+
         pS = ProxySlot(remote_fn, receiver, slot)
         proxyfn = pS.getProxyFn()
         return oSignal, proxyfn
@@ -345,20 +356,14 @@ def solve_connection(sender, signal, receiver, slot):
         if remote_fn is None:
             raise AttributeError("Object %s not found on %s" %
                                  (remote_fn, remote_obj))
-
-        if isinstance(sender, QDateEdit):
-            if "valueChanged" in signal:
-                signal = signal.replace("valueChanged", "dateChanged")
-        # Quito cualquier texto entre parentesis
-        sg_name = re.sub(' *\(.*\)', '', signal)
-        return getattr(sender, sg_name), remote_fn
+        return oSignal, remote_fn
 
     elif isinstance(receiver, QtCore.QObject):
-        if isinstance(signal, str):
-            signal = getattr(sender, signal)
         if isinstance(slot, str):
-            slot = getattr(receiver, slot)
-        return signal, slot
+            oSlot = getattr(receiver, slot, None)
+            if not oSlot:
+                return False
+        return oSignal, oSlot
     else:
         print("ERROR: Al realizar connect %r:%r -> %r:%r ; el slot no se reconoce y el receptor no es QObject." %
               (sender, signal, receiver, slot))
