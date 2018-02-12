@@ -176,6 +176,7 @@ class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
     currentChanged = QtCore.pyqtSignal(int, int)
+    doubleClicked = QtCore.pyqtSignal(int, int)
 
     def __init__(self, parent=None):
         super(QTable, self).__init__(parent)
@@ -184,9 +185,13 @@ class QTable(QtWidgets.QTableWidget):
 
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
+        self.cellDoubleClicked.connect(self.doubleClicked_)
 
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
         self.currentChanged.emit(currentRow, currentColumn)
+
+    def doubleClicked_(self, f, c):
+        self.doubleClicked.emit(f, c)
 
     def numRows(self):
         return self.rowCount()
@@ -221,7 +226,7 @@ class QTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(array_)
 
     def insertRows(self, numero):
-        self.setRowCount(numero + 1)
+        self.insertRow(numero)
 
     def text(self, row, col):
         return self.item(row, col).text()
