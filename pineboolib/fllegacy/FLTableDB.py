@@ -85,6 +85,8 @@ class FLTableDB(QtWidgets.QWidget):
     _controlsInit = None
 
     tdbFilterBuildWhere_ = None
+    filterHidden_ = False
+    findHidden_ = False
 
     """
     constructor
@@ -429,100 +431,128 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Devuelve la lista de los campos ordenada por sus columnas en la tabla de izquierda a derecha
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def orderCols(self):
-        return None
+        list_ = []
+
+        if not self.cursor_:
+            return list_
+
+        tMD = self.cursor_.metadata()
+        if not tMD:
+            return list_
+
+        if not self.showed:
+            self.showWidget()
+
+        model = self.cursor_.model()
+
+        if model:
+            for column in range(model.columnCount()):
+                list_.append(self.tableRecords._model.headerData(column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+
+        return list_
 
     """
     Establece el filtro de la tabla
 
     @param f Sentencia Where que establece el filtro
     """
-    @decorators.NotImplementedWarn
+
     def setFilter(self, f):
-        pass
+        self.filter_ = f
 
     """
     Devuelve el filtro de la tabla
 
     @return Filtro
     """
-    @decorators.NotImplementedWarn
+
     def filter(self):
-        return None
+        return self.filter_
 
     """
     Devuelve el filtro de la tabla impuesto en el Find
 
     @return Filtro
     """
-    @decorators.NotImplementedWarn
+
     def findFilter(self):
-        return None
+        return self.tdbFilterLastWhere_
 
     """
     Obtiene si la columna de selección está activada
     """
-    @decorators.NotImplementedWarn
+
     def checkColumnEnabled(self):
-        return None
+        return self.checkColumnEnabled_
 
     """
     Establece el estado de activación de la columna de selección
 
     El cambio de estado no será efectivo hasta el siguiente refresh.
     """
-    @decorators.NotImplementedWarn
+
     def setCheckColumnEnabled(self, b):
-        pass
+        self.checkColumnEnabled_ = b
 
     """
     Obiente el texto de la etiqueta de encabezado para la columna de selección
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def aliasCheckColumn(self):
-        pass
+        return self.tableRecords._model.headerData(self.tableRecords_.selectionModel().selectedColumns(), QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
 
     """
     Establece el texto de la etiqueta de encabezado para la columna de selección
 
     El cambio del texto de la etiqueta no será efectivo hasta el próximo refresh
     """
-    @decorators.NotImplementedWarn
+
     def setAliasCheckColumn(self, t):
-        pass
+        self.aliasCheckColumn_ = t
 
     """
     Obtiene si el marco de búsqueda está oculto
     """
-    @decorators.NotImplementedWarn
+
     def findHidden(self):
-        return None
+        return self.findHidden_
 
     """
     Oculta o muestra el marco de búsqueda
 
     @param  h TRUE lo oculta, FALSE lo muestra
     """
-    @decorators.NotImplementedWarn
+
     def setFindHidden(self, h):
-        pass
+        if self.findHidden_ is not h:
+            self.findHidden_ = h
+            if h:
+                self.tabControlLayout.hide()
+            else:
+                self.tabControlLayout.show()
 
     """
     Obtiene si el marco para conmutar entre datos y filtro está oculto
     """
-    @decorators.NotImplementedWarn
+
     def filterHidden(self):
-        return None
+        return self.filterHidden_
 
     """
     Oculta o muestra el marco para conmutar entre datos y filtro
 
     @param  h TRUE lo oculta, FALSE lo muestra
     """
-    @decorators.NotImplementedWarn
+
     def setFilterHidden(self, h):
-        pass
+        if self.filterHidden_ is not h:
+            self.filterHidden_ = h
+            if h:
+                self.tabFilter.hide()
+            else:
+                self.tabFilter.show()
 
     """
     Ver FLTableDB::showAllPixmaps_
@@ -1953,9 +1983,21 @@ class FLTableDB(QtWidgets.QWidget):
     viceversa. Los registros siempre se ordenan por la primera columna.
     Si la propiedad autoSortColumn es TRUE.
     """
-    @decorators.NotImplementedWarn
+
     def switchSortOrder(self, col=0):
-        pass
+        if not self.autoSortColumn_:
+            return
+
+        if self.checkColumnVisible_:
+            col = col - 1
+
+        if col == 0:
+            self.orderAsc_ = not self.orderAsc_
+        elif col == 1:
+            self.orderAsc2_ = not self.orderAsc2_
+
+        self.tableRecords().hide()
+        self.refresh(True, True)
 
     """
     Filtra los registros de la tabla utilizando el primer campo, según el patrón dado.
@@ -2020,9 +2062,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.tableRecords_.sortByColumn(0, order)
 
-    @decorators.NotImplementedWarn
     def isSortOrderAscending(self):
-        pass
+        return self.orderAsc_
 
     """
     Activa la tabla de datos
