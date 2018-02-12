@@ -1722,9 +1722,9 @@ class FLFieldDB(QtWidgets.QWidget):
         self.initMaxSize_ = self.maximumSize()
         self.initMinSize_ = self.minimumSize()
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueue("%s_setType" % self.objectName(), type_)
+            pineboolib.project._DGI._par.addQueque("%s_setType" % self.objectName(), type_)
             if self.showAlias():
-                pineboolib.project._DGI._par.addQueue("%s_setAlias" % self.objectName(), self.fieldAlias_)
+                pineboolib.project._DGI._par.addQueque("%s_setAlias" % self.objectName(), self.fieldAlias_)
 
         if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
@@ -1748,7 +1748,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     olTranslated.append(olN)
                 self.editor_.addItems(olTranslated)
                 if not pineboolib.project._DGI.localDesktop():
-                    pineboolib.project._DGI._par.addQueue("%s_setOptionsList" % self.objectName(), olTranslated)
+                    pineboolib.project._DGI._par.addQueque("%s_setOptionsList" % self.objectName(), olTranslated)
                 self.editor_.installEventFilter(self)
                 if self.showed:
                     try:
@@ -1824,7 +1824,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 if hasPushButtonDB:
                     if not pineboolib.project._DGI.localDesktop():
-                        pineboolib.project._DGI._par.addQueue("%s_setHasPushButton" % self.objectName(), True)
+                        pineboolib.project._DGI._par.addQueque("%s_setHasPushButton" % self.objectName(), True)
                     if self.showed:
                         try:
                             self.KeyF2Pressed.disconnect(
@@ -2700,7 +2700,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setDisabled(self, disable):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueue("%s_setDisabled" % self.objectName(), disable)
+            pineboolib.project._DGI._par.addQueque("%s_setDisabled" % self.objectName(), disable)
         self.setEnabled(not disable)
 
     """

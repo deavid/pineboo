@@ -434,7 +434,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.isClosing_ = True
         self.isClosing_ = super(FLFormDB, self).close()
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueue("%s_close" % self.__class__.__module__, None)
+            pineboolib.project._DGI._par.addQueque("%s_close" % self.__class__.__module__, None)
 
     """
     Se activa al pulsar el boton aceptar
