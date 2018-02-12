@@ -778,6 +778,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.editor_:
                 if v is None:
                     self.editor_.setDate(QtCore.QDate())
+                elif isinstance(v, str):
+                    self.editor_.setDate(QtCore.QDate.fromString(v, "yyyy-MM-dd"))
                 else:
                     self.editor_.setDate(v)
 

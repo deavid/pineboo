@@ -2795,6 +2795,8 @@ class FLSqlCursor(ProjectClass):
         #    self.d._currentregister = -1
         self.newBuffer.emit()
 
+        return True
+
     """
     Redefinicion del método sort() de QSqlCursor
     """

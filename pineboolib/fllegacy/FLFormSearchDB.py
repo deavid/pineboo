@@ -225,7 +225,7 @@ class FLFormSearchDB(FLFormDB):
 
             return None
 
-        self.load()  # Extra
+        # self.load()  # Extra
 
         self.inExec_ = True
         self.acceptingRejecting_ = False

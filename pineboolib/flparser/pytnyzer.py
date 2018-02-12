@@ -825,7 +825,7 @@ class Member(ASTPython):
                                      ".".join(part1)] + part2
                     #    arguments = ["str(%s)" % (".".join(part1))] + part2
                     elif member == "isEmpty()":
-                        arguments = ["%s == None" % (".".join(part1))] + part2
+                        arguments = ["%s == ''" % (".".join(part1))] + part2
                     elif member == "left":
                         value = arg[5:]
                         value = value[:len(value) - 1]
