@@ -19,6 +19,7 @@ from pineboolib.fllegacy.FLFieldDB import FLDoubleValidator,\
 
 import pineboolib
 import logging
+from PyQt5.QtWidgets import QTextEdit
 logger = logging.getLogger(__name__)
 
 DEBUG = False
@@ -424,9 +425,53 @@ class FLTableDB(QtWidgets.QWidget):
 
     @param fields Lista de los nombres de los campos ordenada según se desea que aparezcan en la tabla de izquierda a derecha
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def setOrderCols(self, fields):
-        pass
+        if not self.cursor_:
+            return
+        tMD = self.cursor_.metadata()
+        if not tMD:
+            return
+
+        if not self.showed:
+            self.showWidget()
+
+        fieldsList = []
+
+        for f in fields.split(","):
+            fmd = tMD.field(f)
+            if fmd:
+                if fmd.visibleGrid():
+                    fieldsList.append(f)
+
+        hCount = self.cursor_.model().columnCount()
+
+        if len(fieldsList) > hCount:
+            return
+
+        i = 0
+        for fi in fieldsList:
+            _index = self.tableRecords_.realColumnIndex(fi)
+            self.moveCol(_index, i)
+            i = i + 1
+
+        textSearch = self.lineEditSearch.text()
+        self.refresh(True)
+
+        if textSearch:
+            self.refresh(False, True)
+
+            try:
+                self.lineEditSearch.textChanged.disconnect(self.filterRecords)
+            except Exception:
+                pass
+            self.lineEditSearch.setText(textSearch)
+            self.lineEditSearch.textChanged.connect(self.filterRecords)
+            self.lineEditSearch.selectAll()
+            self.seekCursor()
+            QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+        else:
+            self.refreshDelayed()
 
     """
     Devuelve la lista de los campos ordenada por sus columnas en la tabla de izquierda a derecha
@@ -769,9 +814,16 @@ class FLTableDB(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
         sizePolicyClean.setHeightForWidth(True)
 
+        sizePolicyGB = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
         self.dataLayout = QtWidgets.QHBoxLayout()  # Contiene tabData y tabFilters
         self.tabData = QtWidgets.QGroupBox()  # contiene data
+        self.tabData.setSizePolicy(sizePolicyGB)
+
         self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
+        self.tabFilter.setSizePolicy(sizePolicyGB)
+
         dataL = QtWidgets.QVBoxLayout()
         filterL = QtWidgets.QVBoxLayout()
         self.tabData.setLayout(dataL)
@@ -1313,9 +1365,32 @@ class FLTableDB(QtWidgets.QWidget):
     Crea una previsualización muy esquemática del editor, pero suficiente para
     ver la posisicón y el tamaño aproximado que tendrá el editor real.
     """
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def initFakeEditor(self):
-        pass
+        if not self.fakeEditor_:
+            self.fakeEditor_ = QTextEdit(self.tabData)
+
+            sizePolizy = QtWidgets.QSizePolicy(7, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy.setHeightForWidth(True)
+
+            self.fakeEditor_.setSizePolicy(sizePolizy)
+            self.fakeEditor_.setTabChangesFocus(True)
+            self.fakeEditor_.setFocusPolicy(QtCore.Qt.StrongFocus)
+            self.setFocusProxy(self.fakeEditor_)
+            self.tabDataLayout.addWidget(self.fakeEditor_)
+            self.setTabOrder(self.fakeEditor_, self.lineEditSearch)
+            self.setTabOrder(self.fakeEditor_, self.comboBoxFieldToSearch)
+            self.fakeEditor_.show()
+
+            prty = ""
+            if self.tableName_:
+                prty = prty + "tableName: %s\n" % self.tableName_
+            if self.foreignField_:
+                prty = prty + "foreignField: %s\n" % self.foreignField_
+            if self.fieldRelation_:
+                prty = prty + "fieldRelation: %s\n" % self.fieldRelation_
+
+            self.fakeEditor_.setText(prty)
 
     """
     Componente para visualizar los registros
