@@ -132,7 +132,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
     def getSortOrder(self):
         if self._sortOrder is None:
-            self._sortOrder = "%s DESC" % (self.metadata().indexFieldObject(0).name())
+            self._sortOrder = "%s ASC" % (self.metadata().indexFieldObject(0).name())
 
         return self._sortOrder
 
