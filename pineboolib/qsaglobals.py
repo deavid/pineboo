@@ -166,7 +166,7 @@ def ustr1(t):
 
 
 def debug(txt):
-    logger.message("---> ", ustr(txt))
+    logger.message("---> %s" % ustr(txt))
 
 
 class aqApp(object):
