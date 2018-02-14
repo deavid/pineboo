@@ -455,6 +455,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.moveCol(_index, i)
             i = i + 1
 
+        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(0), QtCore.Qt.AscendingOrder)
         textSearch = self.lineEditSearch.text()
         self.refresh(True)
 
@@ -1842,6 +1843,7 @@ class FLTableDB(QtWidgets.QWidget):
             return False
 
         self.moveCol(_index, 0)
+        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(0), QtCore.Qt.AscendingOrder)
         return True
 
     """
