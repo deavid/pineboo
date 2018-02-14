@@ -83,6 +83,7 @@ class FLDataTable(QtWidgets.QTableView):
 
             self.setModel(self.cursor_.model())
             self.setSelectionModel(self.cursor_.selection())
+            self.model().sort(self.visualIndexToRealIndex(0), 0)
             # if self.cursor_.at() >= 0:
             #    QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
     """
