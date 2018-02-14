@@ -413,7 +413,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self.where_filter = where_filter
 
-        self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
+        if self.where_filter.find("ORDER BY") == -1:
+            self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
         # for f in self.where_filters.keys():
         #    print("Filtro (%s).%s --> %s" % (self._action.table , f, self.where_filters[f]))
 
