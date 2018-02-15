@@ -35,6 +35,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     where_filters = {}
     _table = None
     _metadata = None
+    _sortOrder = None
 
     def __init__(self, action, project, conn, *args):
         super(CursorTableModel, self).__init__(*args)
@@ -120,6 +121,17 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         ret = self.rows > self.rowsLoaded
         # print("canFetchMore: %r" % ret)
         return ret
+
+    def sort(self, col, order):
+        # order 0 ascendente , 1 descendente
+        ord = "ASC"
+        if order == 1:
+            ord = "DESC"
+        self._sortOrder = "%s %s" % (self.metadata().indexFieldObject(col).name(), ord)
+        self.refresh()
+
+    def getSortOrder(self):
+        return self._sortOrder
 
     def data(self, index, role):
         # print("Data ", index, role)
@@ -398,6 +410,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self.where_filter = where_filter
 
+        if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():  # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
+            if self.where_filter.find(";") > -1:  # Si el where termina en ; ...
+                self.where_filter = self.where_filter.replace(";", " ORDER BY %s;" % self.getSortOrder())
+            else:
+                self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
         # for f in self.where_filters.keys():
         #    print("Filtro (%s).%s --> %s" % (self._action.table , f, self.where_filters[f]))
 
@@ -429,7 +446,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             "_%08d" % (next(self.CURSOR_COUNT))
 
         self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields),
-                                             from_, where_filter, self._cursor, self._cursorConn.db())
+                                             from_, self.where_filter, self._cursor, self._cursorConn.db())
 
         self.refreshFetch(1000, self._curname,
                           self.metadata().name(), self._cursor)
@@ -443,7 +460,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # self.threadFetcher = threading.Thread(target=self.threadFetch)
         # self.threadFetcherStop = threading.Event()
         # self.threadFetcher.start()
-        self.fetchMore(parent, self.metadata().name(), where_filter)
+        self.fetchMore(parent, self.metadata().name(), self.where_filter)
         # print("%s:: rows: %s" % (self._curname, self.rows))
 
     def refreshFetch(self, number, curname, tablename, cursor):

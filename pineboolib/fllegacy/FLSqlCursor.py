@@ -1404,7 +1404,7 @@ class FLSqlCursor(ProjectClass):
         if self.d.ctxt_:
             return self.d.ctxt_()
         else:
-            logger.debug("context(). No hay contexto" % self.curName())
+            logger.debug("%s.context(). No hay contexto" % self.curName())
             return None
 
     """
@@ -1552,10 +1552,13 @@ class FLSqlCursor(ProjectClass):
             return
 
         if self.refreshBuffer():  # Hace doTransaction antes de abrir formulario y crear savepoint
+            if m != self.Insert:
+                self.updateBufferCopy()
+
             self._action.openDefaultFormRecord(self)
 
-            if m != self.Insert and self.refreshBuffer():
-                self.updateBufferCopy()
+            # if m != self.Insert and self.refreshBuffer():
+            #     self.updateBufferCopy()
 
     def isNull(self, fN):
         return self.d.buffer_.isNull(fN)
@@ -2794,6 +2797,8 @@ class FLSqlCursor(ProjectClass):
         # if self.modeAccess() == self.Browse:
         #    self.d._currentregister = -1
         self.newBuffer.emit()
+
+        return True
 
     """
     Redefinicion del método sort() de QSqlCursor

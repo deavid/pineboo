@@ -94,12 +94,12 @@ class QComboBox(QtWidgets.QComboBox):
     def currentItem(self, i):
         if i:
             if not pineboolib.project._DGI.localDesktop():
-                pineboolib.project._DGI._par.addQueqe("%s_setCurrentIndex" % self.objectName(), n)
+                pineboolib.project._DGI._par.addQueque("%s_setCurrentIndex" % self.objectName(), n)
             self.setCurrentIndex(i)
 
     def insertStringList(self, strl):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_insertStringList" % self.objectName(), strl)
+            pineboolib.project._DGI._par.addQueque("%s_insertStringList" % self.objectName(), strl)
         self.insertItems(len(strl), strl)
 
 
@@ -150,7 +150,7 @@ class QTabWidget(QtWidgets.QTabWidget):
         # print("QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
         if isinstance(tab, int):
             if not pineboolib.project._DGI.localDesktop():
-                pineboolib.project._DGI._par.addQueqe("%s_setTabEnabled" % self.objectName(), [tab, enabled])
+                pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [tab, enabled])
             return QtWidgets.QTabWidget.setTabEnabled(self, tab, enabled)
         if isinstance(tab, str):
             """
@@ -163,7 +163,7 @@ class QTabWidget(QtWidgets.QTabWidget):
                 for idx in range(self.count()):
                     if self.widget(idx).objectName() == tab.lower():
                         if not pineboolib.project._DGI.localDesktop():
-                            pineboolib.project._DGI._par.addQueqe("%s_setTabEnabled" % self.objectName(), [idx, enabled])
+                            pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [idx, enabled])
                         return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
 
             except ValueError:
@@ -176,6 +176,7 @@ class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
     currentChanged = QtCore.pyqtSignal(int, int)
+    doubleClicked = QtCore.pyqtSignal(int, int)
 
     def __init__(self, parent=None):
         super(QTable, self).__init__(parent)
@@ -184,9 +185,13 @@ class QTable(QtWidgets.QTableWidget):
 
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
+        self.cellDoubleClicked.connect(self.doubleClicked_)
 
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
         self.currentChanged.emit(currentRow, currentColumn)
+
+    def doubleClicked_(self, f, c):
+        self.doubleClicked.emit(f, c)
 
     def numRows(self):
         return self.rowCount()
@@ -221,7 +226,7 @@ class QTable(QtWidgets.QTableWidget):
         self.setHorizontalHeaderLabels(array_)
 
     def insertRows(self, numero):
-        self.setRowCount(numero + 1)
+        self.insertRow(numero)
 
     def text(self, row, col):
         return self.item(row, col).text()
@@ -247,7 +252,7 @@ class QLineEdit(QtWidgets.QLineEdit):
         super(QLineEdit, self).__init__(parent)
         self._parent = parent
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
+            pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
 
     @QtCore.pyqtProperty(str)
     def text(self):
@@ -259,7 +264,7 @@ class QLineEdit(QtWidgets.QLineEdit):
             v = str(v)
         super(QLineEdit, self).setText(v)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), "QLineEdit")
+            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), "QLineEdit")
 
     # def __getattr__(self, name):
         # return DefFun(self, name)

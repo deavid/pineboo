@@ -470,6 +470,44 @@ class Project(object):
         self.logger.warn(
             "Project.resolveSDIObject no puede encontra el objeto %s en %s", name, self._DGI.alias())
 
+    def test(self, name=None):
+        dirlist = os.listdir(filedir("../pineboolib/plugins/test"))
+        testDict = {}
+        for f in dirlist:
+            if not f[0:2] == "__":
+                f = f[:f.find(".py")]
+                mod_ = importlib.import_module("pineboolib.plugins.test.%s" % f)
+                test_ = getattr(mod_, f)
+                testDict[f] = test_
+
+        maxValue = 0
+        value = 0
+        result = None
+        resultValue = 0
+        if name:
+            try:
+                t = testDict[name]()
+                maxValue = t.maxValue()
+                value = t.run()
+            except Exception:
+                result = False
+        else:
+
+            for test in testDict.keys():
+                print("test", test)
+                t = testDict[test]()
+                maxValue = maxValue + t.maxValue
+                v = t.run()
+                print("result", test, v, "/", t.maxValue)
+                value = value + v
+
+        if result is None and maxValue > 0:
+            resultValue = value
+
+        result = "%s/%s" % (resultValue, maxValue)
+
+        return result
+
 
 class Module(object):
     def __init__(self, project, areaid, name, description, icon):

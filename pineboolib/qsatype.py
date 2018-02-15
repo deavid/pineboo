@@ -426,6 +426,12 @@ class FormDBWidget(QtWidgets.QWidget):
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
         return ret
 
+    def accept(self):
+        try:
+            self.parent_.accept()
+        except:
+            pass
+
     def cursor(self):
 
         # if self.cursor_:

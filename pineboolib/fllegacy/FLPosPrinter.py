@@ -15,7 +15,7 @@ class FLPosPrinter():
     escBuffer = []
     idxBuffer = []
     server_ = None
-    queqeName_ = None
+    queueName_ = None
 
     def __init__(self):
 
@@ -107,5 +107,5 @@ class FLPosPrinter():
     def parsePrinterName(self):
         posdots = self.printerName_.find(":")
         self.server_ = self.printerName_[:posdots]
-        self.queqeName_ = self.printerName_[posdots:]
-        print("FLPosPrinter:parsePinterName", self.server_, self.queqeName_)
+        self.queueName_ = self.printerName_[posdots:]
+        print("FLPosPrinter:parsePinterName", self.server_, self.queueName_)

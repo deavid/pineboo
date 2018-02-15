@@ -251,7 +251,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
         super(FLLineEdit, self).setText(texto)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), texto)
+            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), texto)
         self.textChanged.emit(texto)
 
     def text(self):
@@ -315,7 +315,7 @@ class FLPixmapView(QtWidgets.QWidget):
 
     def setPixmap(self, pix):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setPixmap" % self._parent.objectName(), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
+            pineboolib.project._DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
             return
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
@@ -420,7 +420,7 @@ class FLDateEdit(QtWidgets.QDateEdit):
 
         super(FLDateEdit, self).setDate(date)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setDate" % self._parent.objectName(), date.toString())
+            pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
         else:
             self.setStyleSheet('color: black')
 
@@ -445,7 +445,7 @@ class FLTimeEdit(QtWidgets.QTimeEdit):
 
         super(FLTimeEdit, self).setTime(time)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setTime" % self._parent.objectName(), date.toString())
+            pineboolib.project._DGI._par.addQueque("%s_setTime" % self._parent.objectName(), date.toString())
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -471,12 +471,12 @@ class QComboBox(QtWidgets.QComboBox):
 
     def setCurrentIndex(self, n):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setCurrentIndex" % self._parent.objectName(), n)
+            pineboolib.project._DGI._par.addQueque("%s_setCurrentIndex" % self._parent.objectName(), n)
         super(QComboBox, self).setCurrentIndex(n)
 
     def setCurrentText(self, t):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setCurrentText" % self._parent.objectName(), t)
+            pineboolib.project._DGI._par.addQueque("%s_setCurrentText" % self._parent.objectName(), t)
         super(QComboBox, self).setCurrentText(n)
 
 
@@ -491,7 +491,7 @@ class QLineEdit(QtWidgets.QLineEdit):
     def setText(self, text):
         super(QLineEdit, self).setText(text)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), t)
+            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), t)
 
 
 class QTextEdit(QtWidgets.QTextEdit):
@@ -505,7 +505,7 @@ class QTextEdit(QtWidgets.QTextEdit):
     def setText(self, text):
         super(QTextEdit, self).setText(text)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setText" % self._parent.objectName(), text)
+            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
 
 
 class QCheckBox(QtWidgets.QCheckBox):
@@ -519,7 +519,7 @@ class QCheckBox(QtWidgets.QCheckBox):
     def setChecked(self, b):
         super(QCheckBox, self).setChecked(b)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueqe("%s_setChecked" % self._parent.objectName(), b)
+            pineboolib.project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)
 
 
 """

@@ -29,7 +29,7 @@ class parser(object):
     def __init__(self, mainForm):
         self._mainForm = mainForm
 
-    def addQueqe(self, name, value):
+    def addQueque(self, name, value):
         self._queqe[name] = value
 
     @Request.application
@@ -188,7 +188,7 @@ class dgi_jsonrpc(dgi_schema):
         self._W[widget.__class__.__module__] = widget
 
     def showWidget(self, widget):
-        self._par.addQueqe(
+        self._par.addQueque(
             "%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
 
