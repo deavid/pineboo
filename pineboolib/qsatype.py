@@ -231,21 +231,9 @@ class FLDomDocument(object):
 """
 
 
-@decorators.NotImplementedWarn
-def FLCodBar(*args, **kwargs):
-    class flcodbar:
-        def nameToType(self, name):
-            return name
-
-        def pixmapError(self):
-            return QtGui.QPixmap()
-
-        def pixmap(self):
-            return QtGui.QPixmap()
-
-        def validBarcode(self):
-            return None
-    return flcodbar()
+def FLCodBar(*args):
+    from pineboolib.fllegacy.FLCodBar import FLCodBar as FLCodBar_Legacy
+    return FLCodBar_Legacy(*args)
 
 
 def print_stack(maxsize=1):
