@@ -1,5 +1,6 @@
 from pineboolib.flcontrols import ProjectClass
 import pineboolib
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
 
 class AQSql(ProjectClass):
@@ -11,6 +12,62 @@ class AQSql(ProjectClass):
     """
     def database(connectionName="default"):
         return pineboolib.project.conn.useConn(connectionName)
+
+    """
+    Actualiza un conjunto de registros de un cursor con nuevos valores
+
+    Si hay un error SQL, eleva una excepción con el mensaje de error
+
+    Ejemplo:
+
+    var cur = new AQSqlCursor("clientes");
+    try {
+      AQSql.update(cur,
+                   ["nombre","cifnif","codserie"],
+                   ["juan","ZYX","A"],
+                   "codcliente='1'");
+    } catch (e) {
+      sys.errorMsgBox("Error SQL: " + e);
+    }
+    """
+    def update(table_or_cursor, fields, values, where="", conn=None):
+
+        if isinstance(table_or_cursor, str):
+            cur = FLSqlCursor(table_or_cursor, conn)
+        else:
+            cur = table_or_cursor
+
+        if cur is None:
+            return False
+
+        if not cur.metadata():
+            return False
+
+        cur.select(where)
+
+        ok = True
+        actCheck = cur.activatedCheckIntegrity()
+
+        fieldsCount = len(fields)
+
+        while ok and cur.next():
+            cur.setModeAccess(cur.Edit)
+            cur.refreshBuffer()
+
+            for i in range(0, fieldsCount - 1):
+                cur.setValueBuffer(fields[i], values[i])
+
+            msgCheck = cur.msgCheckIntegrity()
+            if msgCheck != "":
+                ok = False
+                raise Exception(msgCheck)
+                break
+
+            cur.setActivatedCheckIntegrity(False)
+            ok = cur.commitBuffer()
+            cur.setActivatedCheckIntegrity(actCheck)
+
+        return ok
 
 
 """
