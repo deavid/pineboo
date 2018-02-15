@@ -75,7 +75,8 @@ function anon(%s) {
     exec(pyprog, glob, loc)
     # ... y lo peor es que funciona. W-T-F.
 
-    return loc["anon"]
+    # return loc["anon"]
+    return getattr(loc["FormInternalObj"], "anon")
 
 
 def Object(x=None):

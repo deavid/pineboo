@@ -61,6 +61,16 @@ class QCheckBox(QtWidgets.QCheckBox):
         self.setChecked(v)
 
 
+class QToolButton(QtWidgets.QToolButton):
+
+    def __getattr__(self, name):
+        return DefFun(self, name)
+
+    @QtCore.pyqtProperty(bool)
+    def on(self):
+        return self.isDown()
+
+
 class QLabel(QtWidgets.QLabel):
 
     def __getattr__(self, name):

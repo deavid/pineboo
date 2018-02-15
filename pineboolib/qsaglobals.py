@@ -15,6 +15,7 @@ from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.AQObjects import AQSql as AQSql_Legacy
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
 
 logger = logging.getLogger(__name__)
@@ -247,6 +248,73 @@ class SysType(object):
 
     def removeDatabase(self, connName="default"):
         return pineboolib.project.conn.removeConn(connName)
+
+    def runTransaction(self, f, oParam):
+
+        curT = FLSqlCursor("flfiles")
+        curT.transaction(False)
+        # gui = self.interactiveGUI()
+        # if gui:
+        #   AQS.Application_setOverrideCursor(AQS.WaitCursor);
+
+        try:
+            valor = f(oParam)
+            errorMsg = getattr(oParam, "errorMsg", None)
+            if valor:
+                curT.commit()
+            else:
+                curT.rollback()
+                # if gui:
+                #   AQS.Application_restoreOverrideCursor();
+                if errorMsg is None:
+                    self.warnMsgBox(self.translate(u"Error al ejecutar la función"))
+                else:
+                    self.warnMsgBox(errorMsg)
+                return False
+
+        except Exception:
+            curT.rollback()
+            # if gui:
+            #   AQS.Application_restoreOverrideCursor();
+            if errorMsg is None:
+                self.warnMsgBox(self.translate(u"Error al ejecutar la función"))
+            else:
+                self.warnMsgBox(errorMsg)
+            return False
+
+        # if gui:
+        #   AQS.Application_restoreOverrideCursor();
+        return valor
+
+    def infoMsgBox(self, msg):
+
+        if not isinstance(msg, str):
+            return
+        msg += "\n"
+        if self.interactiveGUI():
+            MessageBox.information(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
+        else:
+            print("INFO ", msg)
+
+    def warnMsgBox(self, msg):
+
+        if not isinstance(msg, str):
+            return
+        msg += "\n"
+        if self.interactiveGUI():
+            MessageBox.warning(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
+        else:
+            print("WARN ", msg)
+
+    def errorMsgBox(self, msg):
+
+        if not isinstance(msg, str):
+            return
+        msg += "\n"
+        if self.interactiveGUI():
+            MessageBox.critical(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
+        else:
+            print("ERROR ", msg)
 
 
 class ProxySlot:
