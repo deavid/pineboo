@@ -1934,7 +1934,7 @@ class FLFieldDB(QtWidgets.QWidget):
                                 self.logger.exception(
                                     "Error al desconectar señal")
                         try:
-                            self.KeyF2Pressed.connect(
+                            self.keyF2Pressed.connect(
                                 self.pbAux3_.animateClick)
                         except Exception:
                             self.logger.exception("Error al desconectar señal")
