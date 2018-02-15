@@ -51,6 +51,8 @@ def id_translate(name):
 
 
 ast_class_types = []
+cont_switch = 0
+cont_do_while = 0
 
 
 class ASTPythonFactory(type):
@@ -189,7 +191,7 @@ class Function(ASTPython):
             else:
                 if len(expr) == 1:
                     expr += ["=", "None"]
-                arguments.append(" ".join(expr))
+                arguments.append("".join(expr))
 
         yield "line", "def %s(%s):" % (name, ", ".join(arguments))
         yield "begin", "block-def-%s" % (name)
@@ -351,7 +353,9 @@ class DoWhile(ASTPython):
             else:
                 main_expr.append(" ".join(expr))
         # TODO .....
-        key = "%02x" % random.randint(0, 255)
+        global cont_do_while
+        cont_do_while += 1
+        key = "%02x" % cont_do_while
         name1st = "s%s_dowhile_1stloop" % key
         yield "line", "%s = True" % (name1st)
 
@@ -434,7 +438,10 @@ class For(ASTPython):
             yield "begin", "block-error-catch"
             yield "line", "%s" % (" ".join(main_expr))
             yield "end", "block-error-catch"
-            yield "line", "except: break"
+            yield "line", "except Exception:"
+            yield "begin", "block-except"
+            yield "line", "break"
+            yield "end", "block-except"
             yield "end", "block-for"
 
 
@@ -466,7 +473,9 @@ class ForIn(ASTPython):
 
 class Switch(ASTPython):
     def generate(self, **kwargs):
-        key = "%02x" % random.randint(0, 255)
+        global cont_switch
+        cont_switch += 1
+        key = "%02x" % cont_switch
         name = "s%s_when" % key
         name_pr = "s%s_do_work" % key
         name_pr2 = "s%s_work_done" % key
@@ -485,7 +494,7 @@ class Switch(ASTPython):
             else:
                 main_expr.append(" ".join(expr))
         yield "line", "%s = %s" % (name, " ".join(main_expr))
-        yield "line", "%s,%s = %s,%s" % (name_pr, name_pr2, "False", "False")
+        yield "line", "%s, %s = %s, %s" % (name_pr, name_pr2, "False", "False")
         for scase in self.elem.xpath("Case"):
             value_expr = []
             for n, arg in enumerate(scase.xpath("Value")):
@@ -502,14 +511,17 @@ class Switch(ASTPython):
                 else:
                     value_expr.append(" ".join(expr))
 
-            yield "line", "if %s == %s: %s,%s = %s,%s" % (name, " ".join(value_expr), name_pr, name_pr2, "True", "True")
+            yield "line", "if %s == %s:" % (name, " ".join(value_expr))
+            yield "begin", "block-if"
+            yield "line", "%s, %s = %s, %s" % (name_pr, name_pr2, "True", "True")
+            yield "end", "block-if"
             yield "line", "if %s:" % (name_pr)
             yield "begin", "block-if"
             count = 0
             for source in scase.xpath("Source"):
                 for obj in parse_ast(source).generate(break_mode=True):
                     if obj[0] == "break":
-                        yield "line", "%s = %s # BREAK" % (name_pr, "False")
+                        yield "line", "%s = %s  # BREAK" % (name_pr, "False")
                         count += 1
                     else:
                         yield obj
@@ -519,13 +531,16 @@ class Switch(ASTPython):
             yield "end", "block-if"
 
         for scasedefault in self.elem.xpath("CaseDefault"):
-            yield "line", "if not %s: %s,%s = %s,%s" % (name_pr2, name_pr, name_pr2, "True", "True")
+            yield "line", "if not %s:" % (name_pr2)
+            yield "begin", "block-if"
+            yield "line", "%s, %s = %s, %s" % (name_pr, name_pr2, "True", "True")
+            yield "end", "block-if"
             yield "line", "if %s:" % (name_pr)
             yield "begin", "block-if"
             for source in scasedefault.xpath("Source"):
                 for obj in parse_ast(source).generate(break_mode=True):
                     if obj[0] == "break":
-                        yield "line", "%s = %s # BREAK" % (name_pr, "False")
+                        yield "line", "%s = %s  # BREAK" % (name_pr, "False")
                     else:
                         yield obj
             yield "end", "block-if"
