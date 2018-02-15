@@ -4,7 +4,6 @@
 from optparse import OptionParser
 import os
 import os.path
-import random
 import re
 from lxml import etree
 
