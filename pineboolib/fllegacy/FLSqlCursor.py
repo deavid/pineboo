@@ -252,7 +252,6 @@ class PNBuffer(ProjectClass):
 
     def setValue(self, name, value, mark_=True):
         # logger.trace("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
-
         if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool)):
             raise ValueError(
                 "No se admite el tipo %r , en setValue %r" % (type(value), value))
@@ -260,6 +259,9 @@ class PNBuffer(ProjectClass):
         field = self.field(name)
         if field is None:
             return False
+
+        if field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
+            value = str(value)
 
         # if field.type_ in ("bool","unlock") and isinstance(value , str):
         #    value = (value == "true")
@@ -1231,9 +1233,9 @@ class FLSqlCursor(ProjectClass):
             v = self.d.buffer_.value(fN)
 
         # Por compatibilidad con Eneboo no devolvemos None nunca
-        if type_ in ("string", "stringlist") and not v:
+        if type_ in ("string", "stringlist") and v is None:
             v = ""
-        elif type_ in ("double", "int", "uint") and not v:
+        elif type_ in ("double", "int", "uint") and v is None:
             v = 0
 
         if v and type_ == "pixmap":
