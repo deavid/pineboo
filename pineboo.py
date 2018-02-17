@@ -57,6 +57,12 @@ def startup_check_dependencies():
         logger.exception("El paquete python3-pyqt5 no está instalado")
         dependences.append("python3-pyqt5")
 
+    try:
+        import barcode
+    except ImportError:
+        logger.exception("El paquete python-barcode no está instalado")
+        dependences.append("python-barcode")
+
     if dependences:
         logger.info("HINT: Dependencias incumplidas:")
         for dep in dependences:
