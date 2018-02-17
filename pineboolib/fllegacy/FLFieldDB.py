@@ -509,7 +509,6 @@ class FLFieldDB(QtWidgets.QWidget):
         """
         if isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLDateEdit")):
             data = str(self.editor_.date().toString("yyyy-MM-dd"))
-
             if not data:
                 isNull = True
 
@@ -1261,11 +1260,14 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "date":
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and nulo and not field.allowNull():
                 defVal = field.defaultValue()
-                # if not defVal.isValid() or defVal.isNull():
-                if not defVal:
-                    self.editor_.setDate(QtCore.QDate.currentDate())
+                if defVal:
+                    defVal = defVal.toDate()
                 else:
-                    self.editor_.setDate(defVal.toDate())
+                    defVal = QtCore.QDate.currentDate()
+
+                self.editor_.setDate(defVal)
+                self.updateValue(defVal)
+
             else:
                 try:
                     self.editor_.dateChanged.disconnect(self.updateValue)
@@ -1285,10 +1287,14 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "time":
             if self.cursor_.modeAccess() == FLSqlCursor.Insert and nulo and not field.allowNull():
                 defVal = field.defaultValue()
-                if not defVal or defVal is None:
-                    self.editor_.setTime(QtCore.QTime.currentTime())
+                if defVal:
+                    defVal = defVal.toTime()
                 else:
-                    self.editor_.setTime(defVal.toTime())
+                    defVal = QtCore.QTime.currentTime()
+
+                self.editor_.setTime(defVal)
+                self.updateValue(defVal)
+
             else:
                 try:
                     self.editor_.timeChanged.disconnect(self.updateValue)
