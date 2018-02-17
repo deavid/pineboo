@@ -123,7 +123,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return ret
 
     def sort(self, col, order):
-        # order 0 descendente , 1 ascendente
+        # order 0 ascendente , 1 descendente
         ord = "ASC"
         if order == 1:
             ord = "DESC"
@@ -131,9 +131,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.refresh()
 
     def getSortOrder(self):
-        if self._sortOrder is None:
-            self._sortOrder = "%s ASC" % (self.metadata().indexFieldObject(0).name())
-
         return self._sortOrder
 
     def data(self, index, role):
@@ -413,8 +410,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self.where_filter = where_filter
 
-        if self.where_filter.find("ORDER BY") == -1:
-            self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
+        if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():  # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
+            if self.where_filter.find(";") > -1:  # Si el where termina en ; ...
+                self.where_filter = self.where_filter.replace(";", " ORDER BY %s;" % self.getSortOrder())
+            else:
+                self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
         # for f in self.where_filters.keys():
         #    print("Filtro (%s).%s --> %s" % (self._action.table , f, self.where_filters[f]))
 
