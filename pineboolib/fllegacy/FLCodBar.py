@@ -1,5 +1,5 @@
 from PyQt5 import QtCore
-from PyQt5.QtGui import QPixmapCache, QPixmap
+from PyQt5.QtGui import QPixmapCache, QPixmap, QColor
 from PyQt5.QtWidgets import qApp
 from pineboolib import decorators
 from pineboolib import qsatype
@@ -36,18 +36,13 @@ class FLCodBar(object):
     barcode = {}
     p = None
     pError = None
-    proc = None
-    readingStdout = None
-    writingStdout = None
 
     @decorators.BetaImplementation
     def __init__(self, value=None, type_=None, margin=None, scale=None, cut=None, rotation=None, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72):
 
         self.barcode["value"] = ""
-        self.barcode["render_options"] = {}
 
         if value in [None, 0]:
-            self.proc = qsatype.Process()
             self.p = None
             self.pError = QPixmap()
             self.readingStdout = False
@@ -55,7 +50,6 @@ class FLCodBar(object):
             self.fillDefault(self.barcode)
         else:
             if isinstance(value, str):
-                self.proc = qsatype.Process()
                 self.p = None
                 self.pError = QPixmap()
                 self.readingStdout = False
@@ -74,10 +68,6 @@ class FLCodBar(object):
 
             else:
                 self._copyBarCode(value, self.barcode)
-
-    def __del__(self):
-        if self.proc:
-            del self.proc
 
     @decorators.BetaImplementation
     def pixmap(self):
@@ -175,8 +165,8 @@ class FLCodBar(object):
         return self.barcode
 
     def fillDefault(self, data):
-        data["bg"] = QtCore.Qt.white
-        data["fg"] = QtCore.Qt.black
+        data["bg"] = "white"
+        data["fg"] = "black"
         data["margin"] = 10
         data["text"] = True
         data["value"] = "1234567890"
@@ -279,22 +269,31 @@ class FLCodBar(object):
         if self.barcode["value"] == "":
             return
         if self.barcode["type"] == BARCODE_ANY:
+            logger.warning("Usando %s por defecto" % self.typeToName(BARCODE_128))
             self.barcode["type"] = BARCODE_128
 
         type_ = self.typeToName(self.barcode["type"])
         value_ = self.barcode["value"]
+        bg_ = self.barcode["bg"]
+        fg_ = self.barcode["fg"]
+        if not isinstance(self.barcode["bg"], str):
+            bg_ = QColor(self.barcode["bg"]).name()
 
+        if not isinstance(self.barcode["fg"], str):
+            fg_ = QColor(self.barcode["fg"]).name()
+
+        margin_ = self.barcode["margin"] / 10
         bar_ = None
         render_options = {
             'module_width': 0.2,
             'module_height': 5,  # 15
             'text_distance': 1.0,  # 5.0
-            'background': 'white',
-            'foreground': 'black',
+            'background': bg_.lower(),
+            'foreground': fg_.lower(),
             'write_text': self.barcode["text"],
             'font_size': 10,
             'text': value_,
-            'quiet_zone': 1.0,  # 6.5
+            'quiet_zone': margin_,  # 6.5
         }
 
         try:
@@ -311,6 +310,16 @@ class FLCodBar(object):
             self.p = None
 
         if self.p:
+            self.barcode["x"] = self.p.width()
+            self.barcode["y"] = self.p.height()
+            # Escalar
+            if self.barcode["scale"] != 1.0:
+                wS_ = self.barcode["x"] * self.barcode["scale"]
+                hS_ = self.barcode["y"] * self.barcode["scale"]
+                self.p = self.p.scaled(wS_, hS_)
+
+            # FALTA: res , cut y rotation
+
             self.barcode["valid"] = True
         else:
             self.barcode["valid"] = False
