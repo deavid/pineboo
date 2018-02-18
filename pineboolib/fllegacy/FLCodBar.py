@@ -310,13 +310,14 @@ class FLCodBar(object):
             self.p = None
 
         if self.p:
-            self.barcode["x"] = self.p.width()
-            self.barcode["y"] = self.p.height()
             # Escalar
             if self.barcode["scale"] != 1.0:
                 wS_ = self.barcode["x"] * self.barcode["scale"]
                 hS_ = self.barcode["y"] * self.barcode["scale"]
                 self.p = self.p.scaled(wS_, hS_)
+
+            self.barcode["x"] = self.p.width()
+            self.barcode["y"] = self.p.height()
 
             # FALTA: res , cut y rotation
 
