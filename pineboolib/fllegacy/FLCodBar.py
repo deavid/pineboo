@@ -1,3 +1,4 @@
+# # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmapCache, QPixmap
 from PyQt5.QtWidgets import qApp
