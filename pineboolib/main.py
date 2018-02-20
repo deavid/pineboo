@@ -6,7 +6,7 @@ import zlib
 import importlib
 from binascii import unhexlify
 
-from lxml import etree
+from xml import etree
 
 from PyQt5 import QtCore, QtGui
 from PyQt5.Qt import qApp
@@ -121,17 +121,17 @@ class Project(object):
         pineboolib.project = self
 
     def load(self, filename):
-        self.parser = etree.XMLParser(
-            ns_clean=True,
-            encoding="UTF-8",
-            remove_blank_text=True,
-        )
-        self.tree = etree.parse(filename, self.parser)
+        # self.parser = etree.XMLParser(
+        #    ns_clean=True,
+        #    encoding="UTF-8",
+        #    remove_blank_text=True,
+        #)
+        self.tree = etree.ElementTree.parse(filename)
         self.root = self.tree.getroot()
-        self.dbserver = DBServer(one(self.root.xpath("database-server")))
-        self.dbauth = DBAuth(one(self.root.xpath("database-credentials")))
-        self.dbname = one(self.root.xpath("database-name/text()"))
-        self.apppath = one(self.root.xpath("application-path/text()"))
+        self.dbserver = DBServer(one(self.root.find("database-server")))
+        self.dbauth = DBAuth(one(self.root.find("database-credentials")))
+        self.dbname = one(self.root.find("database-name").text)
+        self.apppath = one(self.root.find("application-path").text)
         self.tmpdir = filedir("../tempdata")
         if not getattr(self.dbserver, "host", None):
             self.dbserver.host = None
@@ -648,14 +648,10 @@ class ModuleActions(object):
     def load(self):
         from pineboolib import qsaglobals
 
-        self.parser = etree.XMLParser(
-            ns_clean=True,
-            encoding="ISO-8859-15",
-            remove_blank_text=True,
-        )
-
-        self.tree = etree.parse(self.path, self.parser)
+        self.parser = etree.ElementTree.XMLParser(html=0, encoding="ISO-8859-15")
+        self.tree = etree.ElementTree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
+
         action = XMLAction(self.prj, None)
         action.mod = self
         action.prj = self.prj
@@ -721,24 +717,14 @@ class MainForm(object):
 
     def load(self):
         try:
-            self.parser = etree.XMLParser(
-                ns_clean=True,
-                encoding="UTF8",
-                remove_blank_text=True,
-            )
-            self.tree = etree.parse(self.path, self.parser)
-        except etree.XMLSyntaxError:
+            self.tree = etree.ElementTree.parse(self.path)
+        except Exception:
             try:
-                self.parser = etree.XMLParser(
-                    ns_clean=True,
-                    encoding="ISO-8859-15",
-                    recover=True,
-                    remove_blank_text=True,
-                )
-                self.tree = etree.parse(self.path, self.parser)
+                self.parser = etree.ElementTree.XMLParser(html=0, encoding="ISO-8859-15")
+                self.tree = etree.ElementTree.parse(self.path, self.parser)
                 self.logger.exception(
                     "Formulario %r se cargó con codificación ISO (UTF8 falló)", self.path)
-            except etree.XMLSyntaxError:
+            except Exception:
                 self.logger.exception(
                     "Error cargando UI después de intentar con UTF8 y ISO", self.path)
 
@@ -746,9 +732,9 @@ class MainForm(object):
         self.actions = {}
         self.pixmaps = {}
         if self.prj._DGI.useDesktop():
-            for image in self.root.xpath("images/image[@name]"):
+            for image in self.root.findall("images//image[@name]"):
                 name = image.get("name")
-                xmldata = image.xpath("data")[0]
+                xmldata = image.find("data")
                 img_format = xmldata.get("format")
                 data = unhexlify(xmldata.text.strip())
                 if img_format == "XPM.GZ":
@@ -760,7 +746,7 @@ class MainForm(object):
                 icon = QtGui.QIcon(pixmap)
                 self.pixmaps[name] = icon
 
-        for xmlaction in self.root.xpath("actions//action"):
+        for xmlaction in self.root.findall("actions//action"):
             action = XMLMainFormAction(xmlaction)
             action.mainform = self
             action.mod = self.mod
@@ -782,7 +768,7 @@ class MainForm(object):
                 self.prj._DGI.mainForm().mainWindow.loadAction(action)
 
             # Asignamos slot a action
-            for slots in self.root.xpath("connections//connection"):
+            for slots in self.root.findall("connections//connection"):
                 slot = XMLStruct(slots)
                 if slot._v("sender") == action.name:
                     action.slot = slot._v("slot")
@@ -792,7 +778,7 @@ class MainForm(object):
                     self.prj._DGI.mainForm().mainWindow.loadConnection(action)
 
         self.toolbar = []
-        for toolbar_action in self.root.xpath("toolbars//action"):
+        for toolbar_action in self.root.findall("toolbars//action"):
             self.toolbar.append(toolbar_action.get("name"))
             if not self.prj._DGI.localDesktop():
                 self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
