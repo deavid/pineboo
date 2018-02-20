@@ -8,6 +8,7 @@ from pineboolib.utils import DefFun
 import pineboolib
 import sys
 import datetime
+import re
 
 
 class dgi_schema(object):
