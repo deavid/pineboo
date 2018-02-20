@@ -2,7 +2,7 @@
 from builtins import str
 from binascii import unhexlify
 
-from lxml import etree
+from xml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib import flcontrols
@@ -31,13 +31,13 @@ def loadUi(path, widget, parent=None):
         pineboolib.project._DGI.loadUI(path, widget)
 
     global ICONS
-    parser = etree.XMLParser(
-        ns_clean=True,
-        encoding="UTF-8",
-        remove_blank_text=True,
-    )
+    # parser = etree.XMLParser(
+    #    ns_clean=True,
+    #    encoding="UTF-8",
+    #    remove_blank_text=True,
+    #)
     try:
-        tree = etree.parse(path, parser)
+        tree = etree.ElementTree.parse(path)
     except Exception as e:
         print("Qt3Ui: Unable to read UI: %r" % path)
         raise
@@ -50,10 +50,10 @@ def loadUi(path, widget, parent=None):
     if pineboolib.project._DGI.localDesktop():
         widget.hide()
 
-    for xmlimage in root.xpath("images/image"):
+    for xmlimage in root.findall("images//image"):
         loadIcon(xmlimage)
 
-    for xmlwidget in root.xpath("widget"):
+    for xmlwidget in root.findall("widget"):
         loadWidget(xmlwidget, widget, parent)
 
     # print("----------------------------------")
@@ -65,11 +65,11 @@ def loadUi(path, widget, parent=None):
     formname = widget.objectName()
     if Options.DEBUG_LEVEL > 0:
         print("form:", formname)
-    for xmlconnection in root.xpath("connections/connection"):
-        sender_name = xmlconnection.xpath("sender/text()")[0]
-        signal_name = xmlconnection.xpath("signal/text()")[0]
-        receiv_name = xmlconnection.xpath("receiver/text()")[0]
-        slot_name = xmlconnection.xpath("slot/text()")[0]
+    for xmlconnection in root.findall("connections//connection"):
+        sender_name = xmlconnection.find("sender").text
+        signal_name = xmlconnection.find("signal").text
+        receiv_name = xmlconnection.find("receiver").text
+        slot_name = xmlconnection.find("slot").text
 
         sg_name = signal_name.replace("()", "")
         sg_name = sg_name.replace("(bool)", "")
@@ -241,7 +241,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c, new_widget, parent, origWidget)
-                path = c.xpath("./property[@name='name']/cstring")[0].text
+                path = c.find("./property[@name='name']/cstring").text
                 origWidget.ui_[path] = new_widget
                 if pineboolib.project._DGI.localDesktop():
                     new_widget.show()
@@ -259,7 +259,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 orient_ = None
                 policy_ = None
 
-                for p in c.xpath("property"):
+                for p in c.findall("property"):
                     pname, value = loadProperty(p)
                     if pname == "sizeHint":
                         sH = value.width()
@@ -378,7 +378,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             new_widget.hide()
             new_widget._attrs = {}
             loadWidget(c, new_widget, parent, origWidget)
-            path = c.xpath("./property[@name='name']/cstring")[0].text
+            path = c.find("./property[@name='name']/cstring").text
             origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
             new_widget.show()
@@ -437,7 +437,7 @@ def loadFLTableDBs(w):
 def loadIcon(xml):
     global ICONS
     name = xml.get("name")
-    xmldata = xml.xpath("data")[0]
+    xmldata = xml.find("data")
     img_format = xmldata.get("format")
     data = unhexlify(xmldata.text.strip())
     pixmap = QtGui.QPixmap()

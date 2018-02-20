@@ -2,7 +2,7 @@
 from pineboolib.dbschema import db_postgresql as pginspect
 
 from io import StringIO
-from lxml import etree
+from xml import etree
 from builtins import object
 import traceback
 
@@ -22,22 +22,23 @@ class SchemaFieldStruct(Struct):
 def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
     file_alike = StringIO(contenido)
 
-    parser = etree.XMLParser(
-        ns_clean=True,
-        encoding=encoding,
-        recover=False,
-        remove_blank_text=remove_blank_text,
-    )
+    # parser = etree.XMLParser(
+    #    ns_clean=True,
+    #    encoding=encoding,
+    #    recover=False,
+    #    remove_blank_text=remove_blank_text,
+    #)
     try:
-        tree = etree.parse(file_alike, parser)
+        #tree = etree.parse(file_alike, parser)
+        tree = etree.ElementTree.parse(file_alike)
     except Exception as e:
         print("Error al procesar tabla:", nombre)
         print(traceback.format_exc())
         return None
     root = tree.getroot()
 
-    objname = root.xpath("name")[0]
-    query = root.xpath("query")
+    objname = root.find("name")
+    query = root.find("query")
     if query:
         if query[-1].text != nombre:
             print("WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (
@@ -54,8 +55,10 @@ def getTableObj(tree, root):
     table = SchemaTableStruct()
     table.xmltree = tree
     table.xmlroot = root
-    query_name = one(table.xmlroot.xpath("query/text()"), None)
-    name = table.xmlroot.xpath("name/text()")[0]
+    query_name = None
+    if table.xmlroot.find("query"):
+        query_name = one(table.xmlroot.find("query").text, None)
+    name = table.xmlroot.find("name").text
     table.tablename = name
     if query_name:
         table.name = query_name
