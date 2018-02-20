@@ -236,6 +236,11 @@ def FLCodBar(*args):
     return FLCodBar_Legacy(*args)
 
 
+def FLNetwork(*args):
+    from pineboolib.fllegacy.FLNetwork import FLNetwork as FLNetwork_Legacy
+    return FLNetwork_Legacy(*args)
+
+
 def print_stack(maxsize=1):
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
