@@ -167,7 +167,7 @@ def ustr1(t):
 
 
 def debug(txt):
-    logger.message("---> %s" % ustr(txt))
+    logger.message("---> " + ustr(txt))
 
 
 class aqApp(object):
@@ -257,6 +257,7 @@ class SysType(object):
         # if gui:
         #   AQS.Application_setOverrideCursor(AQS.WaitCursor);
 
+        errorMsg = None
         try:
             valor = f(oParam)
             errorMsg = getattr(oParam, "errorMsg", None)

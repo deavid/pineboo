@@ -1,24 +1,35 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
-from PyQt5.QtGui import QPixmapCache, QPixmap
+from PyQt5.QtGui import QPixmapCache, QPixmap, QColor
 from PyQt5.QtWidgets import qApp
 from pineboolib import decorators
 from pineboolib import qsatype
 
+import barcode
+import traceback
+import logging
+
+
+logger = logging.getLogger(__name__)
+
 BARCODE_ANY = 0
 BARCODE_EAN = 1
-BARCODE_UPC = 2
-BARCODE_ISBN = 3
-BARCODE_39 = 4
-BARCODE_128 = 5
-BARCODE_128B = 6
-BARCODE_128C = 7
-BARCODE_128RAW = 7
-BARCODE_I25 = 8
-BARCODE_CBR = 9
-BARCODE_MSI = 10
-BARCODE_PLS = 11
-BARCODE_93 = 12
+BARCODE_EAN_8 = 2
+BARCODE_EAN_13 = 3
+BARCODE_EAN_14 = 4
+BARCODE_UPC = 5
+BARCODE_UPC_A = 6
+BARCODE_JAN = 7
+BARCODE_ISBN = 8
+BARCODE_ISBN_10 = 9
+BARCODE_ISBN_13 = 10
+BARCODE_ISSN = 11
+BARCODE_39 = 12
+BARCODE_128 = 13
+BARCODE_PZN = 14
+BARCODE_ITF = 15
+BARCODE_GS1 = 16
+BARCODE_GTIN = 17
 
 
 class FLCodBar(object):
@@ -26,14 +37,13 @@ class FLCodBar(object):
     barcode = {}
     p = None
     pError = None
-    proc = None
-    readingStdout = None
-    writingStdout = None
 
     @decorators.BetaImplementation
     def __init__(self, value=None, type_=None, margin=None, scale=None, cut=None, rotation=None, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72):
+
+        self.barcode["value"] = ""
+
         if value in [None, 0]:
-            self.proc = qsatype.Process()
             self.p = None
             self.pError = QPixmap()
             self.readingStdout = False
@@ -41,7 +51,6 @@ class FLCodBar(object):
             self.fillDefault(self.barcode)
         else:
             if isinstance(value, str):
-                self.proc = qsatype.Process()
                 self.p = None
                 self.pError = QPixmap()
                 self.readingStdout = False
@@ -61,13 +70,8 @@ class FLCodBar(object):
             else:
                 self._copyBarCode(value, self.barcode)
 
-    def __del__(self):
-        if self.proc:
-            del self.proc
-
     @decorators.BetaImplementation
     def pixmap(self):
-
         if not self.p:
             key = "%s%s%s" % (self.barcode["value"], self.barcode["type"], self.barcode["res"])
 
@@ -75,9 +79,14 @@ class FLCodBar(object):
                 self._createBarcode()
                 if self.barcode["valid"]:
                     key = "%s%s%s" % (self.barcode["value"], self.barcode["type"], self.barcode["res"])
-                    QPixmapCache.insert(key, self.p)
+                    if key:
+                        QPixmapCache.insert(key, self.p)
             else:
+                self.p = QPixmapCache.find(key)
                 self.barcode["valid"] = True
+
+        if not self.p:
+            self.barcode["valid"] = False
 
         return self.p
 
@@ -157,8 +166,8 @@ class FLCodBar(object):
         return self.barcode
 
     def fillDefault(self, data):
-        data["bg"] = QtCore.Qt.white
-        data["fg"] = QtCore.Qt.black
+        data["bg"] = "white"
+        data["fg"] = "black"
         data["margin"] = 10
         data["text"] = True
         data["value"] = "1234567890"
@@ -180,31 +189,40 @@ class FLCodBar(object):
             return BARCODE_ANY
         elif n == "ean":
             return BARCODE_EAN
+        elif n == "ean-8":
+            return BARCODE_EAN_8
+        elif n == "ean-13":
+            return BARCODE_EAN_13
+        elif n == "ean-14":
+            return BARCODE_EAN_14
         elif n == "upc":
             return BARCODE_UPC
+        elif n == "upc-a":
+            return BARCODE_UPC_A
+        elif n == "jan":
+            return BARCODE_JAN
         elif n == "isbn":
             return BARCODE_ISBN
+        elif n == "isbn-10":
+            return BARCODE_ISBN_10
+        elif n == "isbn-13":
+            return BARCODE_ISBN_13
+        elif n == "issn":
+            return BARCODE_ISSN
         elif n == "code39":
             return BARCODE_39
         elif n == "code128":
             return BARCODE_128
-        elif n == "code128c":
-            return BARCODE_128C
-        elif n == "code128b":
-            return BARCODE_128B
-        elif n == "codei25":
-            return BARCODE_I25
-        elif n == "code128r":
-            return BARCODE_128RAW
-        elif n == "cbr":
-            return BARCODE_CBR
-        elif n == "msi":
-            return BARCODE_MSI
-        elif n == "pls":
-            return BARCODE_PLS
-        elif n == "code93":
-            return BARCODE_93
+        elif n == "pzn":
+            return BARCODE_PZN
+        elif n == "itf":
+            return BARCODE_ITF
+        elif n == "gs1":
+            return BARCODE_GS1
+        elif n == "gtin":
+            return BARCODE_GTIN
         else:
+            logger.warning("Formato no soportado (%s)\nSoportados: %s." % (n, barcode.PROVIDED_BARCODES))
             return BARCODE_ANY
 
     def typeToName(self, type_):
@@ -212,57 +230,101 @@ class FLCodBar(object):
             return "ANY"
         elif type_ == BARCODE_EAN:
             return "EAN"
+        elif type_ == BARCODE_EAN_8:
+            return "EAN-8"
+        elif type_ == BARCODE_EAN_13:
+            return "EAN-13"
+        elif type_ == BARCODE_EAN_14:
+            return "EAN-14"
         elif type_ == BARCODE_UPC:
             return "UPC"
+        elif type_ == BARCODE_UPC_A:
+            return "UPC-A"
+        elif type_ == BARCODE_JAN:
+            return "JAN"
         elif type_ == BARCODE_ISBN:
             return "ISBN"
+        elif type_ == BARCODE_ISBN_10:
+            return "ISBN-10"
+        elif type_ == BARCODE_ISBN_13:
+            return "ISBN-13"
+        elif type_ == BARCODE_ISSN:
+            return "ISSN"
         elif type_ == BARCODE_39:
             return "Code39"
         elif type_ == BARCODE_128:
             return "Code128"
-        elif type_ == BARCODE_128C:
-            return "Code128C"
-        elif type_ == BARCODE_128B:
-            return "Code128B"
-        elif type_ == BARCODE_I25:
-            return "CodeI25"
-        elif type_ == BARCODE_128RAW:
-            return "Code128RAW"
-        elif type_ == BARCODE_CBR:
-            return "CBR"
-        elif type_ == BARCODE_MSI:
-            return "MSI"
-        elif type_ == BARCODE_PLS:
-            return "PLS"
-        elif type_ == BARCODE_93:
-            return "Code93"
+        elif type_ == BARCODE_PZN:
+            return "PZN"
+        elif type_ == BARCODE_ITF:
+            return "ITF"
+        elif type_ == BARCODE_GS1:
+            return "GS1"
+        elif type_ == BARCODE_GTIN:
+            return "GTIN"
         else:
             return "ANY"
 
     @decorators.BetaImplementation
-    @QtCore.pyqtSlot()
-    def readPixmapStdout(self):
-        if self.writingStdout:
-            qApp.processEvents()
-            return
-
-        self.p.loadFormData(self.proc.readStdout(), "PNG")
-        if self.p:
-            m = QWMatrix
-            m.rotate(self.barcode["rotation"])
-            self.p.xForm(m)
-            self.barcode["valid"] = True
-
-        self.readingStdout = False
-
-    @QtCore.pyqtSlot()
-    def writingStdoutFinished(self):
-        self.writingStdout = False
-        self.readPixmapStdout()
-
-    @decorators.NotImplementedWarn
     def _createBarcode(self):
-        pass
+        if self.barcode["value"] == "":
+            return
+        if self.barcode["type"] == BARCODE_ANY:
+            logger.warning("Usando %s por defecto" % self.typeToName(BARCODE_128))
+            self.barcode["type"] = BARCODE_128
+
+        type_ = self.typeToName(self.barcode["type"])
+        value_ = self.barcode["value"]
+        bg_ = self.barcode["bg"]
+        fg_ = self.barcode["fg"]
+        if not isinstance(self.barcode["bg"], str):
+            bg_ = QColor(self.barcode["bg"]).name()
+
+        if not isinstance(self.barcode["fg"], str):
+            fg_ = QColor(self.barcode["fg"]).name()
+
+        margin_ = self.barcode["margin"] / 10
+        bar_ = None
+        render_options = {
+            'module_width': 0.2,
+            'module_height': 5,  # 15
+            'text_distance': 1.0,  # 5.0
+            'background': bg_.lower(),
+            'foreground': fg_.lower(),
+            'write_text': self.barcode["text"],
+            'font_size': 10,
+            'text': value_,
+            'quiet_zone': margin_,  # 6.5
+        }
+
+        try:
+            from barcode.writer import ImageWriter
+            from PIL.ImageQt import ImageQt
+            barC = barcode.get_barcode_class(type_.lower())
+            bar_ = barC(u'%s' % value_, writer=ImageWriter())
+            b = bar_.render(render_options)
+            qim = ImageQt(b)
+            self.p = QPixmap.fromImage(qim)
+        except Exception:
+            print(traceback.format_exc())
+            self.barcode["valid"] = False
+            self.p = None
+
+        if self.p:
+            # Escalar
+            if self.barcode["scale"] != 1.0:
+                wS_ = self.barcode["x"] * self.barcode["scale"]
+                hS_ = self.barcode["y"] * self.barcode["scale"]
+                self.p = self.p.scaled(wS_, hS_)
+
+            self.barcode["x"] = self.p.width()
+            self.barcode["y"] = self.p.height()
+
+            # FALTA: res , cut y rotation
+
+            self.barcode["valid"] = True
+        else:
+            self.barcode["valid"] = False
 
     def _copyBarCode(self, source, dest):
         dest["value"] = source["value"]
