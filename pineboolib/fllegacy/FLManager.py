@@ -16,7 +16,7 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLAction import FLAction
 from pineboolib.fllegacy.FLUtil import FLUtil
 
-from lxml import etree
+from xml import etree
 import logging
 # import os
 logger = logging.getLogger(__name__)
@@ -417,19 +417,19 @@ class FLManager(ProjectClass):
         if not qry_:
             return None
 
-        parser_ = etree.XMLParser(
-            ns_clean=True,
-            encoding="UTF-8",
-            remove_blank_text=True,
-        )
+        # parser_ = etree.XMLParser(
+        #    ns_clean=True,
+        #    encoding="UTF-8",
+        #    remove_blank_text=True,
+        #)
 
         q = FLSqlQuery(parent, self.db_.connectionName())
 
-        root_ = etree.fromstring(qry_, parser_)
-        q.setSelect(root_.xpath("select/text()")[0].strip(' \t\n\r'))
-        q.setFrom(root_.xpath("from/text()")[0].strip(' \t\n\r'))
-        q.setWhere(root_.xpath("where/text()")[0].strip(' \t\n\r'))
-        q.setTablesList(root_.xpath("tables/text()")[0].strip(' \t\n\r'))
+        root_ = etree.ElementTree.fromstring(qry_)
+        q.setSelect(root_.find("select").text.strip(' \t\n\r'))
+        q.setFrom(root_.find("from").text.strip(' \t\n\r'))
+        q.setWhere(root_.find("where").text.strip(' \t\n\r'))
+        q.setTablesList(root_.find("tables").text.strip(' \t\n\r'))
 
         orderBy_ = None
         try:
