@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtWidgets
 from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
 from json import dumps
-from lxml import etree
+from xml import etree
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
