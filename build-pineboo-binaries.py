@@ -112,8 +112,8 @@ else:
 
 if target == "android-32":
     try:
-        os.symlink("%s/../src/cosp-android-bzip2/lib/include/bzlib.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/bzlib.h" % sysroot_dir)
-        os.symlink("%s/../src/cosp-android-bzip2/lib/lib/armeabi/libbz2.so" % os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libbz2.so" % sysroot_dir)
+        os.symlink("%s/../src/bzip2-android/lib/include/bzlib.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/bzlib.h" % sysroot_dir)
+        os.symlink("%s/../src/bzip2-android/lib/lib/armeabi/libbz2.so" % os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libbz2.so" % sysroot_dir)
         os.symlink("%s/../src/sqlite3-android/build/sqlite3.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3.h" % sysroot_dir)
         os.symlink("%s/../src/sqlite3-android/obj/local/armeabi/libsqlite3.so" %
                    os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libsqlite3.so" % sysroot_dir)
