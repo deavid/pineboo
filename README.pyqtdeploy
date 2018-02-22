@@ -6,26 +6,36 @@ Instalación:
  
 Copiamos los siguientes paquetes en la carpeta src.
 
-Enlaces:
-
+Compilación básica (Linux64 - Linux64)
+============================================
 https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
 https://www.openssl.org/source/openssl-1.0.2n.tar.gz
-https://download.qt.io/archive/qt/5.9/5.9.3/single/qt-everywhere-opensource-src-5.9.3.tar.xz.mirrorlist
+https://download.qt.io/archive/qt/5.10/5.10.1/single/qt-everywhere-src-5.10.1.tar.xz
 https://sourceforge.net/projects/pyqt/files/sip/sip-4.19.6/sip-4.19.6.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.9.2/PyQt5_gpl-5.9.2.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-5.9.2/PyQtDataVisualization_gpl-5.9.2.tar.gz/download
+https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.10/PyQt5_gpl-5.10.tar.gz
+https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-5.10/PyQtDataVisualization_gpl-5.10.tar.gz
+https://sourceforge.net/projects/pyqt/files/PyQt3D/PyQt3D-5.10/PyQt3D_gpl-5.10.tar.gz
 
 sudo apt-get install libbz2-dev
 sudo apt-get install libsqlite3-dev
 
+Ejecutar:
+build_binaries_linux_64.sh
 
 
 
-Compilación cruzada andorid (en desarrollo)
-https://developer.android.com/studio/index.html
-https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
+Compilación cruzada andorid-32 (en desarrollo)
+============================================
+https://developer.android.com/studio/index.html (en ./src y ejecutar studio.sh)
+https://dl.google.com/android/repository/android-ndk-r15b-linux-x86_64.zip (extraer en ./src)
 https://www.openssl.org/source/openssl-1.0.2n.tar.gz
-http://download.qt.io/online/qtsdkrepository/linux_x64/android/qt5_59/qt.59.android_armv7/5.9.0-0-201703230537qt3d-Linux-RHEL_7_2-GCC-Android-Android_ANY-ARMv7.7z (copiar en pineboo/src/Qt/5.9.0)
+http://download.qt.io/official_releases/qt/5.10/5.10.1/qt-opensource-linux-x64-5.10.1.run (Instalar en /opt/Qt5.10.1 o modificar sysroot.json)
+
+Ejecutar:
+build_binaries_android.sh
+
+
+
 
 
 Compilar qt cruzado para qmake:

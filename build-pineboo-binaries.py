@@ -28,6 +28,8 @@ import argparse
 import os
 import subprocess
 import sys
+import shutil
+import traceback
 
 
 def run(args):
@@ -60,6 +62,8 @@ sources = cmd_line_args.sources
 target = cmd_line_args.target
 quiet = cmd_line_args.quiet
 verbose = cmd_line_args.verbose
+
+print("TARGET %s\n" % target)
 
 if sources:
     sources = os.path.abspath(sources)
@@ -103,7 +107,18 @@ if build_sysroot:
     args.append('sysroot.json')
 
     run(args)
+else:
+    print("INFO::sysroot-%s ya existe, omitiendo ..." % target)
 
+if target == "android-32":
+    try:
+        os.symlink("%s/../src/cosp-android-bzip2/lib/include/bzlib.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/bzlib.h" % sysroot_dir)
+        os.symlink("%s/../src/cosp-android-bzip2/lib/lib/armeabi/libbz2.so" % os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libbz2.so" % sysroot_dir)
+        os.symlink("%s/../src/sqlite3-android/build/sqlite3.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3.h" % sysroot_dir)
+        os.symlink("%s/../src/sqlite3-android/obj/local/armeabi/libsqlite3.so" %
+                   os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libsqlite3.so" % sysroot_dir)
+    except:
+        pass
 # Build the demo.
 run(['pyqtdeploy-build', '--target', target, '--sysroot', sysroot_dir,
      '--build-dir', build_dir, 'pyqt-pineboo.pdy'])
@@ -124,7 +139,7 @@ else:
     if target.startswith('android'):
         run([make, 'INSTALL_ROOT=deploy', 'install'])
         run([os.path.join(host_bin_dir, 'androiddeployqt'), '--input',
-             'android-libpyqt-pineboo.so-deployment-settings.json', '--output',
+             'android-libPineboo.so-deployment-settings.json', '--output',
              'deploy'])
 
 # Tell the user where the demo is.
@@ -145,3 +160,18 @@ elif target.startswith('win') or sys.platform == 'win32':
 else:
     print("The Pineboo executable can be found in the '{0}' directory.".format(
         build_dir))
+
+# Limpiar y completar build_dir
+lstDir = os.walk(build_dir)
+for root, dirs, files in lstDir:
+    for fichero in files:
+        (nombreFichero, extension) = os.path.splitext(fichero)
+        if extension in [".o", ".h", ".cpp"]:
+            os.remove(fichero)
+
+
+os.makedirs("%s/projects" % build_dir)
+os.makedirs("%s/tempdata" % build_dir)
+os.makedirs("%s/libs" % build_dir)
+shutil.copytree("%s/../pineboolib" % build_dir, "%s/pineboolib" % build_dir)
+shutil.copytree("%s/../share" % build_dir, "%s/share" % build_dir)

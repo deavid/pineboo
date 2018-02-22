@@ -1,16 +1,17 @@
 {
     "Description": "The sysroot for the demo application.",
 
-    "android|macos|win#openssl": {
+    "android|macos#openssl": {
         "source":           "openssl-1.0.*.tar.gz",
         "python_source":    "Python-3.*.tar.xz"
     },
 
     "qt5": {
-        "android#qt_dir":           "Qt/*/android_armv7",
+        "android#qt_dir":           "/opt/Qt5.10.1/*/android_armv7",
         "ios#qt_dir":               "Qt/*/ios",
+	"win#qt_dir":		    "mxe/usr/x86_64-w64-mingw32.static/qt5",
 
-        "linux|macos|win#source":   "qt-everywhere-*-src-5.*.tar.xz",
+        "linux|macos#source":   "qt-everywhere-*-src-5.*.tar.xz",
 
         "android|linux#ssl":        "openssl-runtime",
         "ios#ssl":                  "securetransport",
