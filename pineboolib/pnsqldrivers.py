@@ -42,7 +42,11 @@ class PNSqlDrivers(ProjectClass):
             return False
 
     def nameToAlias(self, name):
-        return self.driversdict.get(name, None)
+        name = name.lower()
+        if name in self.driversdict.keys():
+            return self.driversdict[name]
+        else:
+            return None
 
     def aliasToName(self, alias):
         if not alias:
