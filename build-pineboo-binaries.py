@@ -107,18 +107,17 @@ if build_sysroot:
     args.append('sysroot.json')
 
     run(args)
+    if target == "android-32":
+        try:
+            os.symlink("%s/../src/bzip2-android/lib/include/bzlib.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/bzlib.h" % sysroot_dir)
+            os.symlink("%s/../src/bzip2-android/lib/lib/armeabi/libbz2.so" % os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libbz2.so" % sysroot_dir)
+            os.symlink("%s/../src/sqlite3-android/build/sqlite3.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3.h" % sysroot_dir)
+            os.symlink("%s/../src/sqlite3-android/obj/local/armeabi/libsqlite3.so" %
+                       os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libsqlite3.so" % sysroot_dir)
+        except:
+            pass
 else:
     print("INFO::sysroot-%s ya existe, omitiendo ..." % target)
-
-if target == "android-32":
-    try:
-        os.symlink("%s/../src/bzip2-android/lib/include/bzlib.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/bzlib.h" % sysroot_dir)
-        os.symlink("%s/../src/bzip2-android/lib/lib/armeabi/libbz2.so" % os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libbz2.so" % sysroot_dir)
-        os.symlink("%s/../src/sqlite3-android/build/sqlite3.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3.h" % sysroot_dir)
-        os.symlink("%s/../src/sqlite3-android/obj/local/armeabi/libsqlite3.so" %
-                   os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libsqlite3.so" % sysroot_dir)
-    except:
-        pass
 # Build the demo.
 run(['pyqtdeploy-build', '--target', target, '--sysroot', sysroot_dir,
      '--build-dir', build_dir, 'pyqt-pineboo.pdy'])
@@ -142,11 +141,11 @@ else:
         #os.symlink("%s/../../project.properties" % os.path.abspath("deploy"), "%s/project.properties" % os.path.abspath("deploy"))
         run([os.path.join(host_bin_dir, 'androiddeployqt'), '--input',
              'android-libPineboo.so-deployment-settings.json', '--output',
-             'deploy','--deployment','bundled','--android-platform',os.environ.get('ANDROID_NDK_PLATFORM'),'--gradle'])
+             'deploy', '--deployment', 'bundled', '--android-platform', os.environ.get('ANDROID_NDK_PLATFORM'), '--gradle'])
 
 # Tell the user where the demo is.
 if target.startswith('android'):
-    apk_dir = os.path.join(build_dir, 'deploy', 'build','outputs','apk')
+    apk_dir = os.path.join(build_dir, 'deploy', 'build', 'outputs', 'apk')
     print("""The QtApp-debug.apk file can be found in the '{0}'
 directory.  Run adb to install it to a simulator.""".format(apk_dir))
 

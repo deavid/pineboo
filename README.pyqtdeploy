@@ -26,7 +26,17 @@ build_binaries_linux_64.sh
 
 Compilación cruzada andorid-32 (en desarrollo)
 ============================================
-https://developer.android.com/studio/index.html (en ./src y ejecutar studio.sh)
+https://developer.android.com/studio/index.html (en ./src y ejecutar studio.sh. Configurar compiladores y descargar SDK)
+
+configure -> sdk manager -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools
+
+.. and make sure you have these installed and up to date:
+
+    Android SDK Build tools
+    Google Play Services
+    Google Repository
+
+
 https://dl.google.com/android/repository/android-ndk-r15b-linux-x86_64.zip (extraer en ./src)
 https://www.openssl.org/source/openssl-1.0.2n.tar.gz
 http://download.qt.io/official_releases/qt/5.10/5.10.1/qt-opensource-linux-x64-5.10.1.run (Instalar en /opt/Qt5.10.1 o modificar sysroot.json)
