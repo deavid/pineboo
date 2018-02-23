@@ -39,11 +39,6 @@ def startup_check_dependencies():
         sys.exit(32)
 
     dependences = []
-    try:
-        from lxml import etree
-    except ImportError:
-        logger.exception("El paquete python3-lxml no está instalado")
-        dependences.append("python3-lxml")
 
     try:
         import ply
@@ -69,7 +64,6 @@ def startup_check_dependencies():
             logger.info("HINT: Instale el paquete %s e intente de nuevo" % dep)
         sys.exit(32)
 
-    version_check("lxml.etree", etree.__version__, '3.7.0')
     version_check("ply", ply.__version__, '3.9')
     version_check("pyqt5", QtCore.QT_VERSION_STR, '5.7')
 
