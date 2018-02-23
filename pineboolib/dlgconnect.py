@@ -12,6 +12,7 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 from builtins import str
 import sqlite3
 import os
+import sys
 
 
 class DlgConnect(QtWidgets.QWidget):
@@ -44,8 +45,11 @@ class DlgConnect(QtWidgets.QWidget):
             filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite')
 
     def load(self):
-        self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
-
+        try:
+            self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
+        except:
+            QtWidgets.QMessageBox.information(self, "AVISO", "No encuentro %s :(" % filedir('forms/dlg_connect.ui'))
+            sys.exit(32)
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(
             QtWidgets.QApplication.desktop().cursor().pos())
