@@ -138,13 +138,15 @@ else:
 
     if target.startswith('android'):
         run([make, 'INSTALL_ROOT=deploy', 'install'])
+        #os.symlink("%s/../../build_android.xml" % os.path.abspath("deploy"),"%s/build.xml" % os.path.abspath("deploy"))
+        #os.symlink("%s/../../project.properties" % os.path.abspath("deploy"), "%s/project.properties" % os.path.abspath("deploy"))
         run([os.path.join(host_bin_dir, 'androiddeployqt'), '--input',
              'android-libPineboo.so-deployment-settings.json', '--output',
-             'deploy'])
+             'deploy','--deployment','bundled','--android-platform',os.environ.get('ANDROID_NDK_PLATFORM'),'--gradle'])
 
 # Tell the user where the demo is.
 if target.startswith('android'):
-    apk_dir = os.path.join(build_dir, 'deploy', 'bin')
+    apk_dir = os.path.join(build_dir, 'deploy', 'build','outputs','apk')
     print("""The QtApp-debug.apk file can be found in the '{0}'
 directory.  Run adb to install it to a simulator.""".format(apk_dir))
 
@@ -168,10 +170,3 @@ for root, dirs, files in lstDir:
         (nombreFichero, extension) = os.path.splitext(fichero)
         if extension in [".o", ".h", ".cpp"]:
             os.remove(fichero)
-
-
-os.makedirs("%s/projects" % build_dir)
-os.makedirs("%s/tempdata" % build_dir)
-os.makedirs("%s/libs" % build_dir)
-shutil.copytree("%s/../pineboolib" % build_dir, "%s/pineboolib" % build_dir)
-shutil.copytree("%s/../share" % build_dir, "%s/share" % build_dir)

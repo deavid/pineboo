@@ -2,7 +2,7 @@
 TARGET="android-32"
 SYSROOT=""
 LOCALDIR="$(pwd)"
-export ANDROID_SDK_ROOT=$LOCALDIR/src/android-studio
+export ANDROID_SDK_ROOT=~/Android/Sdk
 export ANDROID_NDK_ROOT=$LOCALDIR/src/android-ndk-r15b
 export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
 export PATH=$PATH:$ANDROID_SDK_ROOT/tools
@@ -32,7 +32,11 @@ build.sh $ANDROID_NDK_ROOT --prefix=./lib
 cd ..   
 fi
 
-
 cd ..
-python3 ./build-pineboo-binaries.py --target $TARGET $SYSROOT
+
+rm project.properties
+
+echo "target=$ANDROID_NDK_PLATFORM" >> project.properties
+echo "java.compilerargs=-Xlint:all -Werror" >> project.properties
+python3 ./build-pineboo-binaries.py --target $TARGET $SYSROOT --verbose
 
