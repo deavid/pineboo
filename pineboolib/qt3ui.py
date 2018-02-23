@@ -226,7 +226,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if Options.DEBUG_LEVEL > 50:
                 print(e, repr(value))
             if Options.DEBUG_LEVEL > 50:
-                print(etree.tostring(xmlprop))
+                print(etree.ElementTree.tostring(xmlprop))
 
     def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:
@@ -599,4 +599,4 @@ def _loadVariant(variant):
         return c
 
     if Options.DEBUG_LEVEL > 50:
-        print("qt3ui: Unknown variant:", etree.tostring(variant))
+        print("qt3ui: Unknown variant:", etree.ElementTree.tostring(variant))
