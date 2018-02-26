@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
-from PyQt5.Qt import QDomDocument, qWarning, QApplication
+from PyQt5.Qt import qWarning, QApplication
+from PyQt5.QtXml import QDomDocument
 
 
 from pineboolib import decorators, qsatype
