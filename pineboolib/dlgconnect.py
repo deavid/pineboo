@@ -5,14 +5,16 @@ from PyQt5 import QtWidgets, QtCore, uic
 # from PyQt5.QtWidgets import *
 # from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QTableWidgetItem
-from pineboolib.utils import filedir
 from pineboolib.pnsqldrivers import PNSqlDrivers
 from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.utils import filedir
 
 from builtins import str
 import sqlite3
 import os
 import sys
+import traceback
+from PyQt5.QtCore import QFileInfo
 
 
 class DlgConnect(QtWidgets.QWidget):
@@ -40,15 +42,16 @@ class DlgConnect(QtWidgets.QWidget):
     def openDB(self):
         if self.dbProjects_:
             self.dbProjects_.close()
-
-        self.dbProjects_ = sqlite3.connect(
-            filedir(self.ui.leFolderSQLITE.text()) + '/pinebooconectores.sqlite')
+        dbFile = self.ui.leFolderSQLITE.text() + '/pinebooconectores.sqlite'
+        self.dbProjects_ = sqlite3.connect(dbFile)
 
     def load(self):
+        dlg_ = filedir('forms/dlg_connect.ui')
         try:
-            self.ui = uic.loadUi(filedir('forms/dlg_connect.ui'), self)
-        except:
-            QtWidgets.QMessageBox.information(self, "AVISO", "No encuentro %s :(" % filedir('forms/dlg_connect.ui'))
+            self.ui = uic.loadUi(dlg_, self)
+        except Exception:
+            print(traceback.format_exc())
+            QtWidgets.QMessageBox.information(self, "AVISO", "No encuentro %s :(" % dlg_)
             sys.exit(32)
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(
@@ -69,7 +72,8 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.pbnProyectoEjemplo.clicked.connect(self.saveProjectExample)
         self.ui.pbnEnebooImportButton.clicked.connect(self.saveEnebooImport)
         # hasta aqui la modificación 4
-
+        if not os.path.exists(filedir("../projects")):
+            os.makedirs(filedir("../projects"))
         self.ui.leFolderSQLITE.setText(filedir("../projects"))
 
         self.leName = self.ui.leName
