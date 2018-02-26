@@ -14,8 +14,12 @@ class PNSqlDrivers(ProjectClass):
     def __init__(self):
 
         self.driversdict = {}
+        # if not os.path.exists("pineboolib/plugins"):
+        #    os.makedirs("pineboolib/plugins")
+        if not os.path.exists("pineboolib/plugins/sql"):
+            os.makedirs("pineboolib/plugins/sql")
 
-        dirlist = os.listdir(filedir("../pineboolib/plugins/sql"))
+        dirlist = os.listdir(filedir("plugins/sql"))
         for f in dirlist:
             if not f[0:2] == "__":
                 f = f[:f.find(".py")]
@@ -23,7 +27,7 @@ class PNSqlDrivers(ProjectClass):
                 driver_ = getattr(mod_, f.upper())()
                 self.driversdict[f] = driver_.alias_
 
-        self.defaultDriverName = "FLQPSQL"
+        self.defaultDriverName = "FLsqlite"
 
     def loadDriver(self, driverName):
         if driverName is None:
