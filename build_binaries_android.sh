@@ -13,7 +13,7 @@ export TOOLCHAIN_PREFIX=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/p
 
 if [ -e "sysroot-$TARGET" ]; then
 SYSROOT="--no-sysroot"
-fi
+else
 
 cd src
 if [ ! -e "sqlite3-android" ] ; then
@@ -23,9 +23,7 @@ make
 cd ..
 fi
 
-
-# Download source
-if [ ! -e "cosp-android-bzip2" ] ; then
+if [ ! -e "bzip2-android" ] ; then
 git clone https://github.com/dmcrystax/cosp-android-bzip2 bzip2-android
 cd bzip2-android
 build.sh $ANDROID_NDK_ROOT --prefix=./lib
@@ -33,10 +31,13 @@ cd ..
 fi
 
 cd ..
+fi
 
-rm project.properties
 
-echo "target=$ANDROID_NDK_PLATFORM" >> project.properties
-echo "java.compilerargs=-Xlint:all -Werror" >> project.properties
+
+
+
+
+
 python3 ./build-pineboo-binaries.py --target $TARGET $SYSROOT --verbose
-
+#python3 ./build-demo.py --target $TARGET $SYSROOT --verbose

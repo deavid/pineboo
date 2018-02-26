@@ -140,7 +140,7 @@ else:
         #os.symlink("%s/../../build_android.xml" % os.path.abspath("deploy"),"%s/build.xml" % os.path.abspath("deploy"))
         #os.symlink("%s/../../project.properties" % os.path.abspath("deploy"), "%s/project.properties" % os.path.abspath("deploy"))
         run([os.path.join(host_bin_dir, 'androiddeployqt'), '--input',
-             'android-libPineboo.so-deployment-settings.json', '--output',
+             'android-libpineboo.so-deployment-settings.json', '--output',
              'deploy', '--deployment', 'bundled', '--android-platform', os.environ.get('ANDROID_NDK_PLATFORM'), '--gradle'])
 
 # Tell the user where the demo is.
