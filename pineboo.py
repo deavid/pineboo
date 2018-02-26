@@ -14,10 +14,10 @@ import gc
 from optparse import OptionParser
 import signal
 import importlib
-import pineboo
 import logging
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
+_DGI = None
 
 
 def version_check(modname, modver, minver):
@@ -308,15 +308,23 @@ def main():
     Handles optionlist and help.
     Also initializes all the objects
     """
-    # FIXME: This function should not initialize the program
-    from pineboolib.utils import filedir
-    import pineboolib.dlgconnect
-
-    import pineboolib
     import pineboolib.main
+    import pineboolib.dlgconnect
+    from pineboolib.utils import download_files, filedir
+
+    # FIXME: This function should not initialize the program
 
     # TODO: Refactorizar función en otras más pequeñas
     options = parse_options()
+
+    _DGI = load_dgi(options.dgi)
+
+    dir_ = filedir("forms")
+    dir_ = dir_.replace(":", ".")
+    if not os.path.exists(dir_):
+        os.makedirs(dir_)
+        download_files(dir_, "dlg_connect.ui")
+
     pineboolib.no_python_cache = options.no_python_cache
 
     if options.trace_debug:
@@ -325,18 +333,15 @@ def main():
     if options.trace_signals:
         monkey_patch_connect()
 
-    DGI = load_dgi(options.dgi)
-    pineboo.DGI = DGI
-
     if options.dgi_parameter:
-        DGI.setParameter(options.dgi_parameter)
+        _DGI.setParameter(options.dgi_parameter)
 
-    if DGI.useDesktop():
-        app, mainForm = create_app(DGI)
+    if _DGI.useDesktop():
+        app, mainForm = create_app(_DGI)
 
-    project = pineboolib.main.Project(DGI)
+    project = pineboolib.main.Project(_DGI)
     project.setDebugLevel(options.debug_level)
-    if DGI.useDesktop():
+    if _DGI.useDesktop():
         mainForm.MainForm.setDebugLevel(options.debug_level)
 
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
@@ -350,12 +355,12 @@ def main():
         user, passwd, driver_alias, host, port, dbname = translate_connstring(
             options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
-    elif DGI.useDesktop() and DGI.localDesktop():
+    elif _DGI.useDesktop() and _DGI.localDesktop():
         show_connection_dialog(project, app)
 
     # Cargando spashscreen
     # Create and display the splash screen
-    if DGI.useDesktop() and DGI.localDesktop():
+    if _DGI.useDesktop() and _DGI.localDesktop():
         splash = show_splashscreen(project)
     else:
         splash = None
@@ -365,7 +370,7 @@ def main():
         raise ValueError("No connection was provided. Aborting Pineboo load.")
         # return main()
 
-    init_project(DGI, splash, options, project, mainForm, app)
+    init_project(_DGI, splash, options, project, mainForm, app)
 
 
 def preload_actions(project, forceload=None):
@@ -595,7 +600,7 @@ if __name__ == "__main__":
     startup_check_dependencies()
     sys.excepthook = traceback.print_exception
     ret = main()
-    if pineboo.DGI.useMLDefault():  # FIXME: Esto debería manejarlo main()
+    if _DGI.useMLDefault():  # FIXME: Esto debería manejarlo main()
         gc.collect()
         print("Closing Pineboo...")
         if ret:
@@ -604,4 +609,4 @@ if __name__ == "__main__":
             sys.exit(0)
 
     else:
-        pineboo.DGI.alternativeMain(ret)
+        _DGI.alternativeMain(ret)
