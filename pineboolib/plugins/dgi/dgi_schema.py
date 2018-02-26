@@ -86,6 +86,14 @@ class dgi_schema(object):
         self.QCheckBox = QCheckBox
         self.QTextEdit = QTextEdit
 
+    def AndroidPlatform(self):
+        try:
+            import PyQt5.QtAndroidExtras
+        except ImportError:
+            return False
+
+        return True
+
 
 class FLLineEdit(QtWidgets.QLineEdit):
 
