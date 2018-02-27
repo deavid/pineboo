@@ -33,10 +33,12 @@ def filedir(*path):
             Filedir devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
             Es útil para especificar rutas a recursos del programa.
     """
-    ruta_ = os.path.join(os.path.dirname(__file__), *path)
-    if ruta_.find(":/pineboolib/forms") > -1 or ruta_.find(":/pineboolib/plugins") > -1:
+    ruta_ = os.path.dirname(__file__)
+    if ruta_.find(":") > -1:
         ruta_ = ruta_.replace(":", ".")
-    print("--->", ruta_)
+    ruta_ = os.path.realpath(os.path.join(ruta_, *path))
+    # if ruta_.find(":/pineboolib/forms") > -1 or ruta_.find(":/pineboolib/plugins") > -1 or ruta_.find(":/pineboolib/..") > -1:
+
     return ruta_
 
 
@@ -182,7 +184,9 @@ class downloadManager(QObject):
     reply = None
     url = None
     result = None
-    le = None
+    filename = None
+    dir_ = None
+    url_ = None
 
     def __init__(self):
         super(downloadManager, self).__init__()
@@ -190,11 +194,13 @@ class downloadManager(QObject):
         self.currentDownload = []
         self.manager.finished.connect(self.downloadFinished)
 
-    def setLE(self, le):
-        self.le = le
+    def setLE(self, filename, dir_, urllineedit):
+        self.filename = filename
+        self.dir_ = dir_
+        self.url_ = urllineedit
 
     def doDownload(self):
-        request = QNetworkRequest(QUrl(self.le.text()))
+        request = QNetworkRequest(QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename)))
         self.reply = self.manager.get(request)
         # self.reply.sslErrors.connect(self.sslErrors)
         self.currentDownload.append(self.reply)
@@ -218,6 +224,8 @@ class downloadManager(QObject):
 
     def saveToDisk(self, filename, data):
         fi = "%s/%s" % (self.dir_, filename)
+        if not os.path.exists(self.dir_):
+            os.makedirs(self.dir_)
         file = QFile(fi)
         if not file.open(QIODevice.WriteOnly):
             return False
@@ -239,7 +247,7 @@ class downloadManager(QObject):
                 filename = self.saveFileName(url)
                 filename = filename.replace(":", "")
                 self.saveToDisk(filename, reply)
-                self.result = "%s ---> %s" % (url, filedir(filename))
+                self.result = "%s ---> %s/%s" % (url, self.dir_, filename)
             else:
                 self.result = "Redireccionado ... :("
         else:
@@ -249,13 +257,10 @@ class downloadManager(QObject):
         # infile.open(QIODevice.ReadOnly)
         #uncompress = QByteArray(infile.readAll())
 
-        QtWidgets.QMessageBox.information(None, "AVISO", "%s" % self.result)
-
-    def setPath(self, dir_):
-        self.dir_ = dir_
+        #QtWidgets.QMessageBox.information(None, "AVISO", "%s" % self.result)
 
 
-def download_files(dir_, file):
+def download_files():
     import sysconfig
     from PyQt5.QtWidgets import (QApplication, QLabel, QTreeView, QVBoxLayout,
                                  QWidget, QLineEdit, QPushButton)
@@ -294,27 +299,58 @@ def download_files(dir_, file):
 
     app = QApplication(sys.argv)
     QApplication.setStyle("Android")
+    lista = {}
+    lista["dlg_connect.ui"] = "pineboolib/forms"
+    lista["flareas.mtd"] = "share/pineboo/tables"
+    lista["flfiles.mtd"] = "share/pineboo/tables"
+    lista["flgroups.mtd"] = "share/pineboo/tables"
+    lista["fllarge.mtd"] = "share/pineboo/tables"
+    lista["flmetadata.mtd"] = "share/pineboo/tables"
+    lista["flmodules.mtd"] = "share/pineboo/tables"
+    lista["flseqs.mtd"] = "share/pineboo/tables"
+    lista["flserial.mtd"] = "share/pineboo/tables"
+    lista["flsettings.mtd"] = "share/pineboo/tables"
+    lista["flusers.mtd"] = "share/pineboo/tables"
+    lista["flvar.mtd"] = "share/pineboo/tables"
+    lista["sys.xpm"] = "share/pineboo"
+    lista["flareas.ui"] = "share/pineboo/forms"
+    lista["flfiles.ui"] = "share/pineboo/forms"
+    lista["flgroups.ui"] = "share/pineboo/forms"
+    lista["flmodulos.ui"] = "share/pineboo/forms"
+    lista["flusers.ui"] = "share/pineboo/forms"
+    lista["FLWidgetMasterTable.ui"] = "share/pineboo/forms"
+    lista["mainwindow.ui"] = "share/pineboo/forms"
+    lista["master.ui"] = "share/pineboo/forms"
+    lista["master_copy.ui"] = "share/pineboo/forms"
+    lista["master_print.ui"] = "share/pineboo/forms"
+    lista["master_print_copy.ui"] = "share/pineboo/forms"
+    lista["sys.ui"] = "share/pineboo/forms"
+    lista["flloadmod.qs.py"] = "share/pineboo/scripts"
+    lista["flmodules.qs.py"] = "share/pineboo/scripts"
+    lista["sys.qs.py"] = "share/pineboo/scripts"
+    lista["sys.xml"] = "share/pineboo"
+    lista["mainform.ui"] = "pineboolib/plugins/mainform/pineboo"
+
     shell = QWidget()
     shell_layout = QVBoxLayout()
-    try:
-        dm = downloadManager()
-    except Exception:
-        pass
+
     header = QLabel("""<h1>PINEBOO</h1>
     <p>Se necesita una descarga adicional
     </p>""")
     header.setWordWrap(True)
-    shell_layout.addWidget(header)
     urllineedit = QLineEdit()
-    urllineedit.setText('http://192.168.1.106/%s' % file)
+    urllineedit.setText("http://192.168.1.106")
     pb = QPushButton()
     pb.setText("Descargar")
-    dm.setPath(dir_)
-    dm.setLE(urllineedit)
-    pb.clicked.connect(dm.doDownload)
+    shell_layout.addWidget(header)
     shell_layout.addWidget(urllineedit)
     shell_layout.addWidget(pb)
     shell.setLayout(shell_layout)
+    dm = {}
+    for l in lista.keys():
+        dm[l] = downloadManager()
+        dm[l].setLE(l, lista[l], urllineedit)
+        pb.clicked.connect(dm[l].doDownload)
 
     # Show the GUI and interact with it.
     shell.show()

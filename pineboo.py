@@ -323,7 +323,7 @@ def main():
     dir_ = dir_.replace(":", ".")
     if not os.path.exists(dir_):
         os.makedirs(dir_)
-        download_files(dir_, "dlg_connect.ui")
+        download_files()
 
     pineboolib.no_python_cache = options.no_python_cache
 
