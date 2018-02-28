@@ -2077,7 +2077,7 @@ class FLSqlCursor(ProjectClass):
                     sqlPriKey = "%s.%s" % (self.d.metadata_.name(), pKN)
                     sqlFrom = qry.from_()
                     sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
-                    qry.deleteLater()
+                    del qry
                 else:
                     logger.error("atFrom Error al crear la consulta")
                     self.seek(self.at())
@@ -2094,7 +2094,7 @@ class FLSqlCursor(ProjectClass):
                 sqlWhere = "1=1"
 
             if field:
-                sqlPriKeyValue = self.d.db_.manager().formatAssignValue(field, pKValue)
+                sqlPriKeyValue = self.d.db_.manager().formatAssignValue(field, pKValue, True)
                 if cFilter:
                     sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
                 else:
