@@ -353,7 +353,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
         if c.tag == "item":
             prop1 = {}
-            for p in c.xpath("property"):
+            for p in c.findall("property"):
                 k, v = loadProperty(p)
                 prop1[k] = v
 
