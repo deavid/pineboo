@@ -352,7 +352,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if field.isCompoundKey():
                 self.ckpos.append(n)
 
-            if self._table.query_table:
+            if self.metadata().isQuery():
                 found = False
                 for table in qry.tablesList():
                     # print("Comprobando %s en %s" % (field.name(), self._prj.conn.manager().metadata(table).fieldList()))
@@ -418,7 +418,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # for f in self.where_filters.keys():
         #    print("Filtro (%s).%s --> %s" % (self._action.table , f, self.where_filters[f]))
 
-        # print("Filtro final(%s) --> %s" % (self._action.table , self.where_filter))
+        # print("Filtro final(%s) --> %s" % (self._action.table, self.where_filter))
 
         # print("Filtro", where_filter)
 
@@ -433,7 +433,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if not self.metadata():
             return
 
-        if self._table.query_table:
+        if self.metadata().isQuery():
             qry = self._prj.conn.manager().query(self.metadata().query())
             from_ = qry.from_()
         else:
@@ -491,7 +491,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if row is None or row < 0 or row >= self.rows:
             return None
         col = None
-        if not self._table.query_table:
+        if not self.metadata().isQuery():
             col = self.metadata().indexPos(fieldName)
         else:
             # Comparo con los campos de la qry, por si hay algun hueco que no se detectaria con indexPos
