@@ -388,7 +388,7 @@ class FLManager(ProjectClass):
 
                                 tmd.addFieldMD(fmtdAux)
 
-                    qry.deleteLater()
+                    del qry
 
             acl = self._prj.acl()
             if acl:
@@ -434,20 +434,23 @@ class FLManager(ProjectClass):
 
         orderBy_ = None
         try:
-            orderBy_ = root_.xpath("order/text()")[0].strip(' \t\n\r')
+            orderBy_ = root_.find("order").text.strip(' \t\n\r')
             q.setOrderBy(orderBy_)
         except Exception:
             pass
 
-        groupXml_ = root_.xpath("group")
+        groupXml_ = root_.find("group")
+
+        if not groupXml_:
+            groupXml_ = []
         # group_ = []
         i = 0
         while i < len(groupXml_):
             gr = groupXml_[i]
-            if float(gr.xpath("level/text()")[0].strip(' \t\n\r')) == i:
+            if float(gr.find("level").text.strip(' \t\n\r')) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                q.addGroup(FLGroupByQuery(i, gr.xpath(
-                    "field/text()")[0].strip(' \t\n\r')))
+                q.addGroup(FLGroupByQuery(i, gr.find(
+                    "field").text.strip(' \t\n\r')))
                 i = i + 1
 
         return q
@@ -653,7 +656,7 @@ class FLManager(ProjectClass):
                         if fieldSection == fieldName:
                             break
 
-                    qry.deleteLater()
+                    del qry
 
                 # fieldName.prepend(prefixTable + ".")
                 fieldName = prefixTable + "." + fieldName
