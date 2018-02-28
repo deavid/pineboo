@@ -207,7 +207,10 @@ class SysType(object):
         return u"%s" % text
 
     def mainWidget(self):
-        return pineboolib.project.main_window.ui
+        if pineboolib.project._DGI.localDesktop():
+            return pineboolib.project.main_window.ui
+        else:
+            return None
 
     def installPrefix(self):
         return filedir("..")

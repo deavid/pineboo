@@ -35,7 +35,7 @@ class dgi_schema(object):
         return self._alias
 
     # Establece un lanzador alternativo al de la aplicación
-    def alternativeMain(self, main_):
+    def alternativeMain(self, options):
         pass
 
     def useDesktop(self):
