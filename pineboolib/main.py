@@ -4,6 +4,7 @@ import os
 import logging
 import zlib
 import importlib
+from importlib import machinery
 from binascii import unhexlify
 
 from xml import etree
@@ -952,7 +953,7 @@ class XMLAction(XMLStruct):
             self.logger.warn(
                 "Cargando %s desde overload en lugar de la base de datos!!", scriptname)
             try:
-                parent.script = importlib.machinery.SourceFileLoader(
+                parent.script = machinery.SourceFileLoader(
                     scriptname, overload_pyfile).load_module()
             except Exception as e:
                 self.logger.exception(
@@ -967,7 +968,7 @@ class XMLAction(XMLStruct):
                 self.logger.info(
                     "Cargando %s : %s ", scriptname,
                     script_path.replace(parent.prj.tmpdir, "tempdata"))
-                parent.script = importlib.machinery.SourceFileLoader(
+                parent.script = machinery.SourceFileLoader(
                     scriptname, script_path).load_module()
             except Exception as e:
                 self.logger.exception(
@@ -993,7 +994,7 @@ class XMLAction(XMLStruct):
                 self.logger.info(
                     "Cargando %s : %s ", scriptname,
                     python_script_path.replace(self.prj.tmpdir, "tempdata"))
-                parent.script = importlib.machinery.SourceFileLoader(
+                parent.script = machinery.SourceFileLoader(
                     scriptname, python_script_path).load_module()
             except Exception as e:
                 self.logger.exception(
