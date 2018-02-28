@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../icons/pineboo-logo-16.png</normaloff>../icons/pineboo-logo-16.png</iconset>
+    <normaloff>../../share/icons/pineboo-logo-16.png</normaloff>../../share/icons/pineboo-logo-16.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
