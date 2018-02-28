@@ -6,7 +6,7 @@ import traceback
 import datetime
 
 
-class FLSqlQuery(ProjectClass):
+class FLSqlQuery(object):
     """
     Maneja consultas con características específicas para AbanQ, hereda de QSqlQuery.
 
@@ -20,10 +20,10 @@ class FLSqlQuery(ProjectClass):
     invalidTables = False
 
     def __init__(self, name=None, connection_name=None):
-        super(FLSqlQuery, self).__init__()
+        # super(FLSqlQuery, self).__init__()
 
         self.d = FLSqlQueryPrivate(name)
-        self.d.db_ = self._prj.conn.useConn(connection_name)
+        self.d.db_ = pineboolib.project.conn.useConn(connection_name)
 
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
@@ -60,15 +60,12 @@ class FLSqlQuery(ProjectClass):
     def exec_(self, sql=None):
         if self.invalidTablesList:
             return False
-
         if not sql:
             sql = self.sql()
-
         if not sql:
             return False
 
         sql = sql.replace(";", "")
-
         # micursor=self.__damecursor()
         conn = self.__dameConn()
         micursor = conn.cursor()
@@ -76,8 +73,8 @@ class FLSqlQuery(ProjectClass):
             micursor.execute(sql)
             self._cursor = micursor
         except Exception:
-
             print(traceback.format_exc())
+            sys.exit()
             # conn.rollback()
             return False
         # conn.commit()
@@ -530,7 +527,7 @@ class FLSqlQuery(ProjectClass):
         self.d.tablesList_ = []
         for tabla in tl.split(","):
 
-            if not self._prj.conn.manager().metadata(tabla):
+            if not pineboolib.project.conn.manager().metadata(tabla):
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
@@ -840,13 +837,12 @@ class FLSqlQueryPrivate():
     db_ = None
 
 
-class FLGroupByQuery(ProjectClass):
+class FLGroupByQuery(object):
 
     level_ = None
     field_ = None
 
     def __init__(self, n, v):
-        super(FLGroupByQuery, self).__init__()
         self.level_ = n
         self.field_ = v
 
