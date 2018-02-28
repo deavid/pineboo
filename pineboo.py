@@ -336,6 +336,9 @@ def main():
     if options.dgi_parameter:
         _DGI.setParameter(options.dgi_parameter)
 
+    if not _DGI.useMLDefault():
+        return _DGI.alternativeMain(options)
+
     if _DGI.useDesktop():
         app, mainForm = create_app(_DGI)
 
@@ -443,7 +446,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
         splash.showMessage("Abriendo interfaz ...")
     logger.info("Abriendo interfaz ...")
     main_window.show()
-    project.call("sys.widget._class_init()", [], None, True)
+    project.call("sys.iface._class_init()", [], None, True)
     if DGI.localDesktop():
         splash.showMessage("Listo ...")
         QtCore.QTimer.singleShot(2000, splash.hide)
@@ -600,13 +603,9 @@ if __name__ == "__main__":
     startup_check_dependencies()
     sys.excepthook = traceback.print_exception
     ret = main()
-    if _DGI.useMLDefault():  # FIXME: Esto debería manejarlo main()
-        gc.collect()
-        print("Closing Pineboo...")
-        if ret:
-            sys.exit(ret)
-        else:
-            sys.exit(0)
-
+    gc.collect()
+    print("Closing Pineboo...")
+    if ret:
+        sys.exit(ret)
     else:
-        _DGI.alternativeMain(ret)
+        sys.exit(0)
