@@ -1676,7 +1676,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if not finalFilter:
                     finalFilter = self.tdbFilterLastWhere_
                 else:
-                    finalFilter = "%s and %s" % (
+                    finalFilter = "%s AND %s" % (
                         finalFilter, self.tdbFilterLastWhere_)
 
             self.tableRecords_.setPersistentFilter(finalFilter)
