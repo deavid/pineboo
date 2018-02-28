@@ -67,22 +67,23 @@ class MainForm(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.formTab.tabCloseRequested[int].connect(self.closeFormTab)
         self.formTab.removeTab(0)
-        app_icon = QtGui.QIcon()
-        app_icon.addFile(filedir('icons/pineboo-logo-16.png'),
-                         QtCore.QSize(16, 16))
-        app_icon.addFile(filedir('icons/pineboo-logo-24.png'),
-                         QtCore.QSize(24, 24))
-        app_icon.addFile(filedir('icons/pineboo-logo-32.png'),
-                         QtCore.QSize(32, 32))
-        app_icon.addFile(filedir('icons/pineboo-logo-48.png'),
-                         QtCore.QSize(48, 48))
-        app_icon.addFile(filedir('icons/pineboo-logo-64.png'),
-                         QtCore.QSize(64, 64))
-        app_icon.addFile(filedir('icons/pineboo-logo-128.png'),
-                         QtCore.QSize(128, 128))
-        app_icon.addFile(filedir('icons/pineboo-logo-256.png'),
-                         QtCore.QSize(256, 256))
-        self.setWindowIcon(app_icon)
+        #app_icon = QtGui.QIcon('share/icons/pineboo-logo-16.png')
+        #app_icon.addFile(filedir('share/icons/pineboo-logo-16.png'),
+        #                 QtCore.QSize(16, 16))
+        #app_icon.addFile(filedir('share/icons/pineboo-logo-24.png'),
+        #                 QtCore.QSize(24, 24))
+        #app_icon.addFile(filedir('share/icons/pineboo-logo-32.png'),
+        #                 QtCore.QSize(32, 32))
+        #app_icon.addFile(filedir('share/icons/pineboo-logo-48.png'),
+        #                 QtCore.QSize(48, 48))
+        #app_icon.addFile(filedir('share/icons/pineboo-logo-64.png'),
+        #                 QtCore.QSize(64, 64))
+        #app_icon.addFile(filedir('share/icons/pineboo-logo-128.png'),
+        #                 QtCore.QSize(128, 128))
+        #app_icon.addFile(filedir('share/icons/pineboo-logo-256.png'),
+        #                 QtCore.QSize(256, 256))
+        #self.setWindowIcon(app_icon)
+        self.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
 
         self.setWindowTitle("Pineboo")
 
@@ -174,6 +175,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         dialog = QtWidgets.QDialog()
         dialog.setWindowTitle("Salir de Pineboo")
+        dialog.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
         dialog.setWindowModality(QtCore.Qt.ApplicationModal)
         _layout = QtWidgets.QVBoxLayout()
         dialog.setLayout(_layout)
