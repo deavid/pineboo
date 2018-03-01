@@ -1633,7 +1633,7 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(bool)
     @QtCore.pyqtSlot(bool, bool)
-    def refresh(self, refreshHead=False, refreshData=False):
+    def refresh(self, refreshHead=False, refreshData=True):
         if not self.cursor_ or not self.tableRecords_:
             return
 
