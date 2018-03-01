@@ -74,7 +74,6 @@ class FLSqlQuery(object):
             self._cursor = micursor
         except Exception:
             print(traceback.format_exc())
-            sys.exit()
             # conn.rollback()
             return False
         # conn.commit()
