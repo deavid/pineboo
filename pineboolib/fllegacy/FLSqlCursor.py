@@ -1760,7 +1760,7 @@ class FLSqlCursor(ProjectClass):
                         q.setWhere(self.d.db_.manager().formatAssignValue(
                             r.foreignField(), field, s, True))
                         q.setForwardOnly(True)
-                        logger.debug("SQL linea = %s conn name = %s", q.sql(), str(q._prj.conn.connectionName()))
+                        logger.debug("SQL linea = %s conn name = %s", q.sql(), str(pineboolib.project.conn.connectionName()))
                         q.exec_()
                         if not q.next():
                             # msg = msg + "\n" + self.d.metadata_.name() + ":" + field.alias() +
