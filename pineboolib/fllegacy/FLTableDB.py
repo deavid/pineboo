@@ -438,7 +438,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         fieldsList = []
 
-        for f in fields.split(","):
+        for f in fields:
             fmd = tMD.field(f)
             if fmd:
                 if fmd.visibleGrid():
