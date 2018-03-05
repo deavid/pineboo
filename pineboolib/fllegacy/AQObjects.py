@@ -69,6 +69,40 @@ class AQSql(ProjectClass):
 
         return ok
 
+    def insert(table_or_cursor, fields, values, where="", conn=None):
+
+        if isinstance(table_or_cursor, str):
+            cur = FLSqlCursor(table_or_cursor, conn)
+        else:
+            cur = table_or_cursor
+
+        if cur is None:
+            return False
+
+        if not cur.metadata():
+            return False
+
+        fieldsCount = len(fields)
+
+        cur.setModeAccess(cur.Insert)
+        cur.refreshBuffer()
+
+        for i in range(0, fieldsCount - 1):
+            cur.setValueBuffer(fields[i], values[i])
+
+        msgCheck = cur.msgCheckIntegrity()
+        if msgCheck != "":
+            ok = False
+            raise Exception(msgCheck)
+
+        ok = False
+        actCheck = cur.activatedCheckIntegrity()
+        cur.setActivatedCheckIntegrity(False)
+        ok = cur.commitBuffer()
+        cur.setActivatedCheckIntegrity(actCheck)
+
+        return ok
+
 
 """
 Código C++ original
