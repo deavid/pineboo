@@ -103,6 +103,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.tabFilterLoaded = False
         self.timer_1 = QtCore.QTimer(self)
         self._name = name
+        self.checkColumnVisible_ = False
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -1657,11 +1658,11 @@ class FLTableDB(QtWidgets.QWidget):
                     else:
                         fieldCheck = tMD.field(self.fieldNameCheckColumn_)
                 self.checkColumnVisible_ = True
-                self.tableRecords_.setModel(self.tableRecords().cursor().model())
-                self.moveCol(self.tableRecords().cursor().model().metadata().fieldIsIndex(fieldCheck.name()), 0)
                 self.sortColumn_ = 1
                 self.sortColumn2_ = 2
                 self.sortColumn3_ = 3
+                pos = self.tableRecords_.realColumnIndex(fieldCheck.name())
+                # self.putFirstCol(fieldCheck.name())
                 #buffer_ = self.cursor_.buffer()
                 # print(buffer_)
                 # for i in enumerate(buffer_.count()):
