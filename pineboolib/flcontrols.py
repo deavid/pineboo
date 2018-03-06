@@ -320,6 +320,8 @@ class QDateEdit(QtWidgets.QDateEdit):
 
     @QtCore.pyqtProperty(str)
     def date(self):
+        if super(QDateEdit, self).date().toString(Qt.ISODate) == "2000-01-01":
+            return None
         return super(QDateEdit, self).date().toString(Qt.ISODate)
 
     @date.setter
