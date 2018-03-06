@@ -164,7 +164,7 @@ class PNBuffer(ProjectClass):
     """
 
     def setGenerated(self, f, value):
-        if not isinstance(f, str):
+        if not isinstance(f, str) and not isinstance(f, int):
             f = f.name()
         self.field(f).generated = value
 
@@ -2433,7 +2433,7 @@ class FLSqlCursor(ProjectClass):
     def editBuffer(self, b=None):
         # if not self.d.buffer_:
             # self.d.buffer_ = PNBuffer(self.d)
-        self.primeUpdate()
+        return self.primeUpdate()
 
     """
     Refresca el buffer segun el modo de acceso establecido.
