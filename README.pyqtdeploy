@@ -10,7 +10,7 @@ Compilación básica (Linux64 - Linux64)
 ============================================
 https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
 https://www.openssl.org/source/openssl-1.0.2n.tar.gz
-https://download.qt.io/archive/qt/5.10/5.10.1/single/qt-everywhere-src-5.10.1.tar.xz
+https://download.qt.io/archive/qt/5.10/5.10.1/single/qt-everywhere-src-5.10.1.tar.xz (Renombrar a qt-everywhere-opensource-src-5.10.1.tar.xz)
 https://sourceforge.net/projects/pyqt/files/sip/sip-4.19.6/sip-4.19.6.tar.gz/download
 https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.10/PyQt5_gpl-5.10.tar.gz
 https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-5.10/PyQtDataVisualization_gpl-5.10.tar.gz
