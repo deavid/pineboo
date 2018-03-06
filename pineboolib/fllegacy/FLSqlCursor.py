@@ -2486,17 +2486,18 @@ class FLSqlCursor(ProjectClass):
 
                     if field.isCounter():
                         siguiente = None
-                        if self.context():
-                            try:
-                                siguiente = self.context().calculateCounter()
-                            except Exception:
-                                util = FLUtil()
-                                siguiente = util.nextCounter(
-                                    field.name(), self)
+                        try:
+                            # siguiente = self.context().calculateCounter()
+                            functionCounter = self.actionName() + ".widget.calculateCounter"
+                            siguiente = self._prj.call(functionCounter, None, self.context(), True)
+                        except Exception:
+                            util = FLUtil()
+                            siguiente = util.nextCounter(
+                                field.name(), self)
 
-                            if siguiente:
-                                self.d.buffer_.setValue(
-                                    field.name(), siguiente)
+                        if siguiente:
+                            self.d.buffer_.setValue(
+                                field.name(), siguiente)
 
             if self.d.cursorRelation_ and self.d.relation_ and self.d.cursorRelation_.metadata():
                 self.setValueBuffer(self.d.relation_.field(

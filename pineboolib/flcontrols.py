@@ -307,6 +307,30 @@ class QLineEdit(QtWidgets.QLineEdit):
         # return DefFun(self, name)
 
 
+class QDateEdit(QtWidgets.QDateEdit):
+
+    _parent = None
+
+    def __init__(self, parent):
+        super(QDateEdit, self).__init__(parent)
+        super(QDateEdit, self).setDisplayFormat("dd-MM-yyyy")
+        self._parent = parent
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QDateEdit")
+
+    @QtCore.pyqtProperty(str)
+    def date(self):
+        return super(QDateEdit, self).date().toString(Qt.ISODate)
+
+    @date.setter
+    def date(self, v):
+        if not isinstance(v, str):
+            v = str(v)
+        super(QDateEdit, self).setDate(v)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), "QDateEdit")
+
+
 class QListView(QtWidgets.QListView):
 
     model = None

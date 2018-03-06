@@ -335,24 +335,19 @@ class Project(object):
             function = function[:-2]
 
         aFunction = function.split(".")
-        if not aFunction[0] in self.modules:
-            self.logger.error("No existe el módulo %s", aFunction[0])
-            return False
-
-        funModule = self.modules[aFunction[0]]
-
-        if not aFunction[0] in funModule.actions:
+        if not aFunction[0] in self.actions:
             self.logger.error(
-                "No existe la acción %s en el módulo %s", aFunction[0], aFunction[0])
+                "No existe la acción %s en el módulo %s", aFunction[0])
             return False
 
-        funAction = funModule.actions[aFunction[0]]
+        funAction = self.actions[aFunction[0]]
 
         if aFunction[1] == "iface":
             mW = funAction.load()
             funScript = mW.iface
         elif aFunction[1] == "widget":
-            funScript = funAction.formrecord_widget
+            fR = funAction.loadRecord()
+            funScript = fR.iface
         else:
             return False
 
@@ -364,7 +359,7 @@ class Project(object):
         fn = getattr(funScript, aFunction[2], None)
         if fn is None:
             self.logger.error("No existe la función %s en %s",
-                              aFunction[2], function)
+                              aFunction[2], aFunction[0])
             return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
