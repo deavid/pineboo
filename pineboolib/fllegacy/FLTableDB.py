@@ -1644,6 +1644,35 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.tableName_:
             self.tableName_ = tMD.name()
 
+        if self.checkColumnEnabled_:
+            if not self.checkColumnVisible_:
+                fieldCheck = tMD.field(self.fieldNameCheckColumn_)
+                if not fieldCheck:
+                    self.fieldNameCheckColumn_ = "%s_check_column" % tMD.name()
+
+                    if self.fieldNameCheckColumn_ not in tMD.fieldsNames():
+                        fieldCheck = FLFieldMetaData(self.fieldNameCheckColumn_, self.tr(self.aliasCheckColumn_), True, False, FLFieldMetaData.Check,
+                                                     0, False, True, True, 0, 0, False, False, False, None, False, None, True, False, False)
+                        tMD.addFieldMD(fieldCheck)
+                    else:
+                        fieldCheck = tMD.field(self.fieldNameCheckColumn_)
+                self.checkColumnVisible_ = True
+                self.tableRecords_.setModel(self.tableRecords().cursor().model())
+                self.moveCol(self.tableRecords().cursor().model().metadata().fieldIsIndex(fieldCheck.name()), 0)
+                self.sortColumn_ = 1
+                self.sortColumn2_ = 2
+                self.sortColumn3_ = 3
+                #buffer_ = self.cursor_.buffer()
+                # print(buffer_)
+                # for i in enumerate(buffer_.count()):
+                #    buffer_.setGenerated(i, True)
+
+        else:
+            self.sortColumn_ = 0
+            self.sortColumn2_ = 1
+            self.sortColumn3_ = 2
+            self.checkColumnVisible_ = False
+
         if refreshHead:
             if not self.tableRecords_.isHidden():
                 self.tableRecords_.hide()

@@ -31,7 +31,7 @@ class FLFieldMetaData(object):
 
     Serial = "serial"
     Unlock = "unlock"
-    Check = "bool"
+    Check = "check"
     count_ = 0
 
     def __init__(self, *args, **kwargs):

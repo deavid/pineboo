@@ -65,6 +65,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self.sql_fields = []
         self.sql_fields_omited = []
+        self.sql_fields_without_check = []
         self.field_aliases = []
         self.field_type = []
         self.field_metaData = []
@@ -293,7 +294,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if where_filter is None:
                 where_filter = self.where_filter
             c_all = self._prj.conn.driver().fetchAll(self._cursor, tablename, where_filter,
-                                                     ", ".join(self.sql_fields), self._curname)
+                                                     self.sql_str, self._curname)
             newrows = len(c_all)  # self._cursor.rowcount
             from_rows = self.rows
             self._data += c_all
@@ -368,6 +369,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                     self.sql_fields_omited.append(field.name())
 
             else:
+                from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
+                if field.type() != FLFieldMetaData.Check:
+                    self.sql_fields_without_check.append(field.name())
+
                 self.sql_fields.append(field.name())
 
     def refresh(self):
@@ -387,6 +392,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.rowsLoaded = 0
         self.fetchedRows = 0
         self.sql_fields = []
+        self.sql_fields_without_check = []
         self.pkpos = []
         self.ckpos = []
         self._data = []
@@ -445,7 +451,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._curname = "cur_" + self._table.name + \
             "_%08d" % (next(self.CURSOR_COUNT))
 
-        self._prj.conn.driver().refreshQuery(self._curname, ", ".join(self.sql_fields),
+        if self.sql_fields_without_check:
+            self.sql_str = ", ".join(self.sql_fields_without_check)
+        else:
+            self.sql_str = ", ".join(self.sql_fields)
+
+        self._prj.conn.driver().refreshQuery(self._curname, self.sql_str,
                                              from_, self.where_filter, self._cursor, self._cursorConn.db())
 
         self.refreshFetch(1000, self._curname,
@@ -465,7 +476,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
     def refreshFetch(self, number, curname, tablename, cursor):
         self._prj.conn.driver().refreshFetch(number, curname, tablename, cursor,
-                                             ", ".join(self.sql_fields), self.where_filter)
+                                             self.sql_str, self.where_filter)
 
     def indexUpdateRow(self, rownum):
         row = self._data[rownum]
@@ -759,14 +770,18 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         """
 
     def columnCount(self, parent=None):
+        if self.cols != len(self.metadata().fieldList()):
+            self.cols = len(self.metadata().fieldList())
+            self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
+            self._refresh_field_info(None)
         return self.cols
-        if parent is None:
-            parent = QtCore.QModelIndex()
-        if parent.isValid():
-            return 0
+        # if parent is None:
+        #    parent = QtCore.QModelIndex()
+        # if parent.isValid():
+        #    return 0
         # print(self.cols)
-        print("colcount", self.cols)
-        return self.cols
+        #print("colcount", self.cols)
+        # return self.cols
 
     def rowCount(self, parent=None):
         return self.rowsLoaded
