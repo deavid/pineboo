@@ -99,6 +99,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.showAllPixmaps_ = True
         self.tdbFilterBuildWhere_ = None
         self.sortColumn_ = 0
+        self.sortColumn2_ = 1
+        self.sortColumn3_ = 2
         self.autoSortColumn_ = True
         self.tabFilterLoaded = False
         self.timer_1 = QtCore.QTimer(self)
@@ -1871,7 +1873,7 @@ class FLTableDB(QtWidgets.QWidget):
         if _index < 0:
             return False
 
-        self.moveCol(_index, 0)
+        self.moveCol(_index, self.sortColumn_)
         self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(0), QtCore.Qt.AscendingOrder)
         return True
 
@@ -1890,7 +1892,7 @@ class FLTableDB(QtWidgets.QWidget):
         if _index < 0:
             return False
 
-        self.moveCol(_index, 1)
+        self.moveCol(_index, self.sortColumn2_)
         return True
 
     """
