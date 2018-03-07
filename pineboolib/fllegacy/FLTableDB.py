@@ -1657,11 +1657,11 @@ class FLTableDB(QtWidgets.QWidget):
                         tMD.addFieldMD(fieldCheck)
                     else:
                         fieldCheck = tMD.field(self.fieldNameCheckColumn_)
+                self.tableRecords().cursor().model().updateColumnsCount()
                 self.checkColumnVisible_ = True
                 self.sortColumn_ = 1
                 self.sortColumn2_ = 2
                 self.sortColumn3_ = 3
-                pos = self.tableRecords_.realColumnIndex(fieldCheck.name())
                 # self.putFirstCol(fieldCheck.name())
                 #buffer_ = self.cursor_.buffer()
                 # print(buffer_)
@@ -1679,7 +1679,6 @@ class FLTableDB(QtWidgets.QWidget):
                 self.tableRecords_.hide()
 
             model = self.cursor_.model()
-
             for column in range(model.columnCount()):
                 field = model.metadata().indexFieldObject(column)
                 if not field.visibleGrid():

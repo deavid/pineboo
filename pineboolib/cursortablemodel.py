@@ -91,9 +91,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._data = []
         self._vdata = []
         self._column_hints = []
-        self.cols = len(self.metadata().fieldList())
-        self.col_aliases = [str(self.metadata().indexFieldObject(
-            i).alias()) for i in range(self.cols)]
+        self.updateColumnsCount()
         self.fetchLock = threading.Lock()
         self.rows = 0
         self.rowsLoaded = 0
@@ -770,10 +768,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         """
 
     def columnCount(self, parent=None):
-        if self.cols != len(self.metadata().fieldList()):
-            self.cols = len(self.metadata().fieldList())
-            self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
-            self._refresh_field_info(None)
         return self.cols
         # if parent is None:
         #    parent = QtCore.QModelIndex()
@@ -782,6 +776,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # print(self.cols)
         #print("colcount", self.cols)
         # return self.cols
+
+    def updateColumnsCount(self):
+        if self.cols != len(self.metadata().fieldList()):
+            self.cols = len(self.metadata().fieldList())
+            self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
+            self._refresh_field_info(None)
 
     def rowCount(self, parent=None):
         return self.rowsLoaded
@@ -800,7 +800,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 return section + 1
         return QVariant_invalid
 
-        return QAbstractTableModel_headerData(self, section, orientation, role)
+        # return QAbstractTableModel_headerData(self, section, orientation, role)
 
     def fieldMetadata(self, fieldName):
         return self.metadata().field(fieldName)
