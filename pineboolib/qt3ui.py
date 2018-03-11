@@ -488,7 +488,7 @@ def _loadVariant(variant):
     text = text.strip()
     if variant.tag == "cstring":
         return text
-    if variant.tag == "iconset":
+    if variant.tag in ["iconset", "pixmap"]:
         global ICONS
         return ICONS.get(text, text)
     if variant.tag == "string":
