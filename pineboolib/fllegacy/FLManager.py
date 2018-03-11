@@ -439,7 +439,7 @@ class FLManager(ProjectClass):
         except Exception:
             pass
 
-        groupXml_ = root_.find("group")
+        groupXml_ = root_.findall("group")
 
         if not groupXml_:
             groupXml_ = []
