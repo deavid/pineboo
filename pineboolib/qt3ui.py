@@ -12,7 +12,7 @@ import pineboolib
 
 import zlib
 from PyQt5.Qt import QSpacerItem
-from PyQt5.QtWidgets import QToolBar, QAction
+from PyQt5.QtWidgets import QToolBar, QAction, QSpinBox, QMenuBar, QMenu
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -55,12 +55,21 @@ def loadUi(path, widget, parent=None):
     for xmlimage in root.findall("images//image"):
         loadIcon(xmlimage)
 
-    for xmlwidget in root.findall("widget"):
-        loadWidget(xmlwidget, widget, parent)
+    xmlmenubar = root.find("menubar")
+    if xmlmenubar:
+        nameMB_ = xmlmenubar.find("./property[@name='name']/cstring").text
+        bar = widget.menuBar()
+        for itemM in xmlmenubar.findall("item"):
+            menubar = bar.addMenu(itemM.get("text"))
+            loadWidget(itemM, menubar, parent, widget)
 
     for xmltoolbar in root.findall("toolbars//toolbar"):
-        toolbar = QToolBar(widget)
-        loadWidget(xmltoolbar, toolbar, parent)
+        nameTB_ = xmltoolbar.find("./property[@name='name']/cstring").text
+        toolbar = widget.addToolBar(nameTB_)
+        loadWidget(xmltoolbar, toolbar, parent, widget)
+
+    for xmlwidget in root.findall("widget"):
+        loadWidget(xmlwidget, widget, parent)
 
     # print("----------------------------------")
     # for xmlwidget in root.xpath("actions"):
@@ -84,9 +93,6 @@ def loadUi(path, widget, parent=None):
         wui = hasattr(widget, "ui_") and sender_name in widget.ui_
         if sender is None and wui:
             sender = widget.ui_[sender_name]
-
-        if isinstance(sender, QAction) and signal_name == "activated()":
-            signal_name = "toggled"
 
         sg_name = signal_name.replace("()", "")
         sg_name = sg_name.replace("(bool)", "")
@@ -198,6 +204,26 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn = widget.setContentsMargins
         elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
             set_fn = widget.setStyleSheet
+        elif pname == "menuText":
+            if not isinstance(widget, QAction):
+                set_fn = widget.setText
+            else:
+                return
+        elif pname == "movingEnabled":
+            set_fn = widget.setMovable
+        elif pname == "toggleAction":
+            set_fn = widget.setChecked
+        elif pname == "label" and isinstance(widget, QToolBar):
+            return
+        elif pname == "maxValue" and isinstance(widget, QSpinBox):
+            set_fn = widget.setMaximum
+        elif pname == "minValue" and isinstance(widget, QSpinBox):
+            set_fn = widget.setMinimum
+        elif pname == "lineStep" and isinstance(widget, QSpinBox):
+            set_fn = widget.setSingleStep
+        elif pname == "newLine":
+            set_fn = origWidget.addToolBarBreak
+
         else:
             set_fn = getattr(widget, setpname, None)
 
@@ -229,6 +255,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
         elif pname == "paletteForegroundColor":
             value = 'color:' + loadVariant(xmlprop).name()
+
         else:
             value = loadVariant(xmlprop)
 
@@ -241,7 +268,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 print(etree.ElementTree.tostring(xmlprop))
 
     def process_action(xmlaction, toolBar):
-        action = QAction()
+        action = createWidget("QAction")
         for p in xmlaction:
             pname = p.get("name")
             if pname in translate_properties:
@@ -249,7 +276,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
             process_property(p, action)
         toolBar.addAction(action)
-        origWidget.parent().ui_[action.objectName()] = action
+        origWidget.ui_[action.objectName()] = action
 
     def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:
@@ -380,13 +407,17 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             # process_layout_box(c, mode="grid")
             continue
         if c.tag == "item":
-            prop1 = {}
-            for p in c.findall("property"):
-                k, v = loadProperty(p)
-                prop1[k] = v
+            if isinstance(widget, QMenu):
+                continue
+            else:
+                prop1 = {}
+                for p in c.findall("property"):
+                    k, v = loadProperty(p)
+                    prop1[k] = v
 
-            widget.addItem(prop1["text"])
+                widget.addItem(prop1["text"])
             continue
+
         if c.tag == "attribute":
             k = c.get("name")
             v = loadVariant(c)
@@ -417,13 +448,16 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 title = new_widget._attrs.get("title", "UnnamedTab")
                 widget.addTab(new_widget, title)
             elif gb or wd:
-                lay = widget.layout
-                if not lay:
+                lay = getattr(widget, "layout")()
+                if not lay and not isinstance(widget, QToolBar):
                     lay = QtWidgets.QVBoxLayout()
                     widget.setLayout(lay)
 
                 if isinstance(widget, QToolBar):
-                    widget.addWidget(new_widget)
+                    if isinstance(new_widget, QAction):
+                        widget.addAction(new_widget)
+                    else:
+                        widget.addWidget(new_widget)
                 else:
                     lay.addWidget(new_widget)
             else:
@@ -436,12 +470,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "action":
             acName = c.get("name")
             for xmlaction in root.findall("actions//action"):
-                for p in xmlaction:
-                    if p.get("name") == "name":
-                        pName = loadVariant(p)
-                        if pName == acName:
-                            process_action(xmlaction, widget)
-                            continue
+                if xmlaction.find("./property[@name='name']/cstring").text == acName:
+                    process_action(xmlaction, widget)
+                    continue
 
             continue
 
