@@ -9,15 +9,15 @@ from pineboolib import decorators
 
 class MPageDisplay(QWidget):
 
+    buffer_ = None
+    bufferCopy_ = None
+
     @decorators.BetaImplementation
     def __init__(self, parent=0, name=0):
         super(MPageDisplay, self).__init__(parent)
 
-        self.buffer_ = QtGui.QPixmap()
-        self.buffer_ = self.buffer_.scaled(QtCore.QSize(1, 1))
-
-        self.bufferCopy_ = QtGui.QPixmap()
-        self.bufferCopy_ = self.bufferCopy_.scaled(QtCore.QSize(1, 1))
+        self.buffer_ = QtGui.QPixmap(1, 1)
+        self.bufferCopy_ = QtGui.QPixmap(1, 1)
 
     @decorators.BetaImplementation
     def setPage(self, image):

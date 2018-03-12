@@ -11,7 +11,7 @@ from pineboolib.fllegacy.FLReportPages import FLReportPages
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 from pineboolib.fllegacy.FLUtil import FLUtil
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
-from pineboolib.fllegacy.FLSqlConnections_deprecated import FLSqlConnections  # FIXME
+import pineboolib
 
 
 class FLReportEngine(MReportEngine):
@@ -189,7 +189,7 @@ class FLReportEngine(MReportEngine):
 
         self.d_.template_ = t
         if not self.d_.qry_:
-            mgr = FLSqlConnections.database().managerModules()
+            mgr = pineboolib.project.conn.managerModules()
             return super(FLReportEngine, self).setReportTemplate(
                 mgr.contentCached(t + ".kut")
             )

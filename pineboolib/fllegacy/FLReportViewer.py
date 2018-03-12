@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt
 from pineboolib import decorators
 from pineboolib import qt3ui
 from pineboolib.utils import filedir
+import pineboolib
 
 from pineboolib.kugar.mreportviewer import MReportViewer
 
@@ -30,6 +31,7 @@ class FLReportViewer(QtWidgets.QWidget):
         super(FLReportViewer, self).__init__(parent, pParam)
 
         self.loop_ = False
+        self.eventloop = QtCore.QEventLoop()
         self.reportPrinted_ = False
         self.rptViewer_ = 0
         self.rptEngine_ = 0
@@ -151,15 +153,16 @@ class FLReportViewer(QtWidgets.QWidget):
     @decorators.BetaImplementation
     def exec_(self):
         if self.loop_:
+            print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
             return
 
         self.show()
+        self.eventloop.exec_()
 
         if self.embedInParent_:
             return
 
         self.loop_ = True
-        # QtWidgets.QApplication.eventLoop().enterLoop() # FIXME
         # self.clearWFlags(Qt.WShowModal) # FIXME
 
     @decorators.BetaImplementation
@@ -177,11 +180,12 @@ class FLReportViewer(QtWidgets.QWidget):
 
         if not self.embedInParent_:
             geo = QtCore.QRect(self.x(), self.y(), self.width(), self.height())
-            QtWidgets.QApplication.saveGeometryForm(self.name(), geo)
+            pineboolib.project.saveGeometryForm(self.name(), geo)
 
         if self.loop_ and not self.embedInParent_:
             self.loop_ = False
-            # QtWidgets.QApplication.eventLoop().exitLoop() # FIXME
+
+        self.eventloop.exit()
 
         super(FLReportViewer, self).closeEvent(e)
         self.deleteLater()
