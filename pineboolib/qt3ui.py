@@ -12,9 +12,11 @@ import pineboolib
 
 import zlib
 from PyQt5.Qt import QSpacerItem
+from PyQt5.QtWidgets import QToolBar, QAction
 
 Qt = QtCore.Qt
 ICONS = {}
+root = None
 
 
 class Options:
@@ -30,7 +32,7 @@ def loadUi(path, widget, parent=None):
     if not pineboolib.project._DGI.localDesktop():
         pineboolib.project._DGI.loadUI(path, widget)
 
-    global ICONS
+    global ICONS, root
     # parser = etree.XMLParser(
     #    ns_clean=True,
     #    encoding="UTF-8",
@@ -56,6 +58,10 @@ def loadUi(path, widget, parent=None):
     for xmlwidget in root.findall("widget"):
         loadWidget(xmlwidget, widget, parent)
 
+    for xmltoolbar in root.findall("toolbars//toolbar"):
+        toolbar = QToolBar(widget)
+        loadWidget(xmltoolbar, toolbar, parent)
+
     # print("----------------------------------")
     # for xmlwidget in root.xpath("actions"):
     #     loadWidget(xmlwidget, widget, parent)
@@ -71,16 +77,6 @@ def loadUi(path, widget, parent=None):
         receiv_name = xmlconnection.find("receiver").text
         slot_name = xmlconnection.find("slot").text
 
-        sg_name = signal_name.replace("()", "")
-        sg_name = sg_name.replace("(bool)", "")
-        sg_name = sg_name.replace("(const QString&)", "")
-        sl_name = slot_name.replace("()", "")
-        sl_name = sl_name.replace("(bool)", "")
-        sl_name = sl_name.replace("(const QString&)", "")
-
-        # print("SG_NAME", sg_name)
-        # print("SL_NAME", sl_name)
-
         if sender_name == formname:
             sender = widget
         else:
@@ -88,6 +84,22 @@ def loadUi(path, widget, parent=None):
         wui = hasattr(widget, "ui_") and sender_name in widget.ui_
         if sender is None and wui:
             sender = widget.ui_[sender_name]
+
+        if isinstance(sender, QAction) and signal_name == "activated()":
+            signal_name = "toggled"
+
+        sg_name = signal_name.replace("()", "")
+        sg_name = sg_name.replace("(bool)", "")
+        sg_name = sg_name.replace("(int)", "")
+        sg_name = sg_name.replace("(const QString&)", "")
+        sl_name = slot_name.replace("()", "")
+        sl_name = sl_name.replace("(bool)", "")
+        sl_name = sl_name.replace("(int)", "")
+        sl_name = sl_name.replace("(const QString&)", "")
+
+        # print("SG_NAME", sg_name)
+        # print("SL_NAME", sl_name)
+
         receiver = None
         if sender is None:
             if Options.DEBUG_LEVEL > 50:
@@ -228,6 +240,17 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if Options.DEBUG_LEVEL > 50:
                 print(etree.ElementTree.tostring(xmlprop))
 
+    def process_action(xmlaction, toolBar):
+        action = QAction()
+        for p in xmlaction:
+            pname = p.get("name")
+            if pname in translate_properties:
+                pname = translate_properties[pname]
+
+            process_property(p, action)
+        toolBar.addAction(action)
+        origWidget.parent().ui_[action.objectName()] = action
+
     def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:
             try:
@@ -291,9 +314,14 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
     nwidget = None
     if widget == origWidget:
-        nwidget = createWidget(xml.get("class"), parent=origWidget)
-        parent = nwidget
+        class_ = None
+        if xml.get("class"):
+            class_ = xml.get("class")
+        else:
+            class_ = "QToolBar"
 
+        nwidget = createWidget(class_, parent=origWidget)
+        parent = nwidget
     layouts_pending_process = []
     properties = []
     unbold_fonts = []
@@ -389,17 +417,36 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 title = new_widget._attrs.get("title", "UnnamedTab")
                 widget.addTab(new_widget, title)
             elif gb or wd:
-                lay = widget.layout()
+                lay = widget.layout
                 if not lay:
                     lay = QtWidgets.QVBoxLayout()
                     widget.setLayout(lay)
 
-                lay.addWidget(new_widget)
+                if isinstance(widget, QToolBar):
+                    widget.addWidget(new_widget)
+                else:
+                    lay.addWidget(new_widget)
             else:
                 if Options.DEBUG_LEVEL > 50:
                     print("qt3ui: Unknown container widget xml tag",
                           widget.__class__, repr(c.tag))
             unbold_fonts.append(new_widget)
+            continue
+
+        if c.tag == "action":
+            acName = c.get("name")
+            for xmlaction in root.findall("actions//action"):
+                for p in xmlaction:
+                    if p.get("name") == "name":
+                        pName = loadVariant(p)
+                        if pName == acName:
+                            process_action(xmlaction, widget)
+                            continue
+
+            continue
+
+        if c.tag == "separator":
+            widget.addSeparator()
             continue
 
         if Options.DEBUG_LEVEL > 50:
