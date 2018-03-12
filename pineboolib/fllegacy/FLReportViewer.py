@@ -20,7 +20,7 @@ from pineboolib.fllegacy.FLReportEngine import FLReportEngine
 AQ_USRHOME = "."  # FIXME
 
 
-class FLReportViewer(QtWidgets.QWidget):
+class FLReportViewer(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=0):
         pParam = 0 if parent and embedInParent else 0
@@ -42,6 +42,7 @@ class FLReportViewer(QtWidgets.QWidget):
         self.printing_ = False
         self.embedInParent_ = True if parent and embedInParent else False
         self.ui_ = {}
+
         qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
 
         if not name:
@@ -50,8 +51,7 @@ class FLReportViewer(QtWidgets.QWidget):
         if self.embedInParent_:
             self.autoClose_ = False
             self.ui_["menubar"].hide()
-            # Descomentar cuando se añada en qt3ui #FIXME
-            # self.ui_["chkAutoClose"].hide()
+            self.ui_["chkAutoClose"].hide()
             self.ui_["spnResolution"].hide()
             self.ui_["spnPixel"].hide()
             self.ui_["salir"].setVisible(False)
@@ -64,8 +64,7 @@ class FLReportViewer(QtWidgets.QWidget):
         else:
             self.autoClose_ = bool(FLUtil().readSettingEntry(
                 "rptViewer/autoClose", "false"))
-            # Descomentar cuando se añada en qt3ui #FIXME
-            # self.ui_["chkAutoClose"].setChecked(self.autoClose_)
+            self.ui_["chkAutoClose"].setChecked(self.autoClose_)
 
         self.rptViewer_ = MReportViewer(self)
         self.setReportEngine(FLReportEngine(
@@ -91,14 +90,11 @@ class FLReportViewer(QtWidgets.QWidget):
         self.ui_["frEMail"].hide()
         if self.initCentralWidget_:
             self.initCentralWidget_.hide()
-
         if not self.embedInParent_:
-            # Descomentar cuando se añada en qt3ui #FIXME
-            pass
-            # self.ui_["spnResolution"].setValue(int(FLUtil.readDBSettingEntry(
-            #     "rptViewer/dpi", str(self.rptViewer_.resolution()))))
-            # self.ui_["spnPixel"].setValue(float(FLUtil.readDBSettingEntry(
-            #     "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
+            self.ui_["spnResolution"].setValue(int(util.readSettingEntry(
+                "rptViewer/dpi", str(self.rptViewer_.resolution()))))
+            self.ui_["spnPixel"].setValue(float(util.readSettingEntry(
+                "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
 
@@ -134,18 +130,15 @@ class FLReportViewer(QtWidgets.QWidget):
                 self.xmlData_ = self.rptEngine_.rptXmlTemplate()
             self.rptEngine_.destroyed.connect(self.setReportEngine)
 
-            # Descomentar cuando se añada en qt3ui #FIXME
-            # self.ui_["ledStyle"].setDisabled(False)
-            # self.ui_["save_page_SVG"].setDisabled(False)
-            # self.ui_["save_page_tpl_SVG"].setDisabled(False)
-            # self.ui_["load_tpl_SVG"].setDisabled(False)
+            self.ui_["ledStyle"].setDisabled(False)
+            self.ui_["save_page_SVG"].setDisabled(False)
+            self.ui_["save_page_tpl_SVG"].setDisabled(False)
+            self.ui_["load_tpl_SVG"].setDisabled(False)
         else:
-            # Descomentar cuando se añada en qt3ui #FIXME
-            pass
-            # self.ui_["ledStyle"].setDisabled(True)
-            # self.ui_["save_page_SVG"].setDisabled(True)
-            # self.ui_["save_page_tpl_SVG"].setDisabled(True)
-            # self.ui_["load_tpl_SVG"].setDisabled(True)
+            self.ui_["ledStyle"].setDisabled(True)
+            self.ui_["save_page_SVG"].setDisabled(True)
+            self.ui_["save_page_tpl_SVG"].setDisabled(True)
+            self.ui_["load_tpl_SVG"].setDisabled(True)
 
         if noSigDestroy:
             self.rptViewer_.setReportEngine(self.rptEngine_)
