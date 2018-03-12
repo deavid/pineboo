@@ -301,7 +301,8 @@ class FLReportViewer(QtWidgets.QWidget):
             )
 
     @decorators.BetaImplementation
-    def exportToPdf(self):
+    @QtCore.pyqtSlot()
+    def exportToPDF(self):
         if self.slotsExportedDisabled_:
             return
 
@@ -340,7 +341,8 @@ class FLReportViewer(QtWidgets.QWidget):
         self.slotPrintReportToPDF(fileName)
 
     @decorators.BetaImplementation
-    def sendEMailPdf(self):
+    @QtCore.pyqtSlot()
+    def sendEMailPDF(self):
         t = self.ui_.leDocumento.text()
         name = "informe.pdf" if not t or t == "" else t
         fileName = QtCore.QFileDialog.getSaveFileName(
@@ -611,11 +613,13 @@ class FLReportViewer(QtWidgets.QWidget):
         else:
             self.autoClose_ = b
 
+    @QtCore.pyqtSlot(int)
     @decorators.BetaImplementation
     def setResolution(self, dpi):
         FLUtil.writeSettingEntry("rptViewer/dpi", str(dpi))
         self.rptViewer_.setResolution(dpi)
 
+    @QtCore.pyqtSlot(int)
     @decorators.BetaImplementation
     def setPixel(self, relDpi):
         FLUtil.writeSettingEntry("rptViewer/pixel", str(float(relDpi / 10.)))
