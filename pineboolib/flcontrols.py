@@ -395,3 +395,15 @@ class QGroupBox(QtWidgets.QGroupBox):
 
     def setLineWidth(self, width):
         self.setContentsMargins(width, width, width, width)
+
+
+class QAction(QtWidgets.QAction):
+
+    activated = QtCore.pyqtSignal()
+
+    def __init__(self, *args, **kwargs):
+        super(QAction, self).__init__(*args, **kwargs)
+        self.triggered.connect(self.send_activated)
+
+    def send_activated(self, b=None):
+        self.activated.emit()
