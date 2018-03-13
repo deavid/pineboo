@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy import FLSqlCursor
+from PyQt5.QtWidgets import QApplication, QCheckBox
 
 
 class FLDataTable(QtWidgets.QTableView):
@@ -59,6 +60,9 @@ class FLDataTable(QtWidgets.QTableView):
         if self.cursor_:
             self.cursor_.restoreEditionFlag(self)
             self.cursor_.restoreBrowseFlag(self)
+
+    def header(self):
+        return self._h_header
 
     """
     Establece el cursor
@@ -160,7 +164,9 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def clearChecked(self):
-        self.primarysKeysChecked_ = []
+        self.primarysKeysChecked_.clear()
+        for r in self.cursor().model()._checkColumn.keys():
+            self.cursor().model()._checkColumn[r].setChecked(False)
 
     """
     Establece el estado seleccionado por chequeo para un regsitro, indicando el valor de su clave primaria
@@ -175,6 +181,11 @@ class FLDataTable(QtWidgets.QTableView):
             if primaryKeyValue in self.primarysKeysChecked_:
                 self.primarysKeysChecked_.remove(primaryKeyValue)
                 self.primaryKeyToggled.emit(primaryKeyValue, False)
+
+        if primaryKeyValue not in self.cursor().model()._checkColumn.keys():
+            self.cursor().model()._checkColumn[primaryKeyValue] = QCheckBox()
+
+        self.cursor().model()._checkColumn[primaryKeyValue].setChecked(on)
 
     """
     Ver FLDataTable::showAllPixmaps_
@@ -266,13 +277,22 @@ class FLDataTable(QtWidgets.QTableView):
     def contentsContextMenuEvent(self, e):
         pass
     """
-    Redefine por conveniencia, el comportamiento al hacer doble clic sobre una
+    Redefine por conveniencia, el comportamiento al hacer clic sobre una
     celda
     """
-    @decorators.NotImplementedWarn
-    def contentsMouseDoubleClickEvent(self, e):
-        pass
 
+    def setChecked(self, index):
+        row = index.row()
+        col = index.column()
+        field = self.cursor_.metadata().indexFieldObject(col)
+        _type = field.type()
+
+        if _type is not "check":
+            return
+
+        pK = str(self.cursor().model().value(row, self.cursor().metadata().primaryKey()))
+        self.cursor().model()._checkColumn[pK].setChecked(not self.cursor().model()._checkColumn[pK].isChecked())
+        self.setPrimaryKeyChecked(str(pK), self.cursor().model()._checkColumn[pK].isChecked())
     """
     Redefinida por conveniencia
     """
@@ -484,7 +504,7 @@ class FLDataTable(QtWidgets.QTableView):
 
     """
     Activado cuando se hace click en el chequeo de la columna de selección
-    """
+    
 
     def setChecked(self, on):
 
@@ -500,6 +520,7 @@ class FLDataTable(QtWidgets.QTableView):
                 self.cursor_.metadata().primaryKey())
             self.setPrimaryKeyChecked(primaryKeyValue, on)
             self.cursor_.seek(curAt)
+    """
 
     def delayedViewportRepaint(self):
         if not self.timerViewRepaint_:
@@ -600,38 +621,3 @@ class FLDataTable(QtWidgets.QTableView):
 
         _return = self._h_header.visualIndex(posReal)
         return _return
-
-
-class FLCheckBox(QtWidgets.QCheckBox):
-
-    row_ = None
-
-    def __init__(self, parent, row=0, name=None):
-        super(FLCheckBox, self).__init__()
-
-        self.row_ = row
-
-    def row(self):
-        return self.row_
-
-    def drawButton(self, p):
-        rect = None
-        wrect = self.rect()
-
-        rect = QtCore.QRect((wrect.width - 13) / 2,
-                            (wrect.height - 13) / 2, 13, 13)
-        if self.isChecked():
-            bu = QtGui.QBrush(QtCore.Qt.green)
-            p.fillRect(0, 0, wrect.width() - 1, wrect.height() - 1, bu)
-
-        # irect = QtGui.QStyle.visualRect(Qt_LayoutDirection, QRect, QRect)
-        irect = QtWidgets.QStyle().visualRect(self.layoutDirection(), rect, self.rect())
-        p.fillRect(irect, QtCore.Qt.white)
-        p.drawRect(irect)
-
-    def hitButton(self, pos):
-
-        return self.rect().contains(pos)
-
-
-# endif

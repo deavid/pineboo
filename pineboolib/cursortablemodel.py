@@ -3,13 +3,14 @@ import math
 
 from pineboolib.utils import filedir
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import traceback
 
 import threading
 import logging
 import time
 import itertools
+from PyQt5.QtWidgets import QCheckBox
 
 DEBUG = False
 
@@ -36,6 +37,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     _table = None
     _metadata = None
     _sortOrder = None
+    _checkColumn = None
 
     def __init__(self, action, project, conn, *args):
         super(CursorTableModel, self).__init__(*args)
@@ -113,7 +115,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.timer.start(1000)
 
         self.canFetchMore = True
+
         self.refresh()
+        self._checkColumn = {}
 
     def canFetchMore(self, index):
         return self.canFetchMore
@@ -152,14 +156,27 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         field = self.metadata().indexFieldObject(col)
         _type = field.type()
 
-        r = [x for x in self._data[row]]
-        self._data[row] = r
-        d = r[col]
+        if _type is not "check":
+            r = [x for x in self._data[row]]
+            self._data[row] = r
+            d = r[col]
+        else:
+            pK = str(self.value(row, self.metadata().primaryKey()))
+            if not pK in self._checkColumn.keys():
+                d = QtWidgets.QCheckBox()
+                self._checkColumn[pK] = d
+
+        if role == QtCore.Qt.CheckStateRole and _type == "check":
+            if pK in self._checkColumn.keys():
+                if self._checkColumn[pK].isChecked():
+                    return QtCore.Qt.Checked
+
+            return QtCore.Qt.Unchecked
 
         if role == QtCore.Qt.TextAlignmentRole:
             if _type in ("int", "double", "uint"):
                 d = QtCore.Qt.AlignRight
-            elif _type in ("bool", "unlock", "date", "time", "pixmap"):
+            elif _type in ("bool", "unlock", "date", "time", "pixmap", "check"):
                 d = QtCore.Qt.AlignCenter
             else:
                 d = None
@@ -168,7 +185,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         if role == DisplayRole or role == EditRole:
             # r = self._vdata[row]
-            if _type == "bool":
+            if _type is "bool":
                 if d in (True, "1"):
                     d = "Sí"
                 else:
@@ -182,6 +199,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type in ("date", "time") and d:
                 d = str(d)
+
+            elif _type is "check":
+                return
 
             return d
 
@@ -205,6 +225,14 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                     d = QtGui.QBrush(QtCore.Qt.green)
                 else:
                     d = QtGui.QBrush(QtCore.Qt.red)
+
+            if _type == "check":
+                d = self._checkColumn[pK]
+                if d.isChecked():
+                    d = QtGui.QBrush(QtCore.Qt.green)
+                else:
+                    d = QtGui.QBrush(QtCore.Qt.white)
+
             else:
                 d = None
 
@@ -226,6 +254,10 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         return None
 
         return QVariant_invalid
+
+    @QtCore.pyqtSlot(bool)
+    def multicheck_setChecked(self, b):
+        print("----------->", b)
 
     def setShowPixmap(self, show):
         self._showPixmap = show
@@ -512,9 +544,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             if not col:
                 return None
 
-        campo = self._data[row][col]
-
         type_ = self.metadata().field(fieldName).type()
+
+        if type_ is "check":
+            return
+
+        campo = self._data[row][col]
 
         if type_ in ("serial", "uint", "int"):
             if campo not in (None, "None"):

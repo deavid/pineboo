@@ -7,7 +7,7 @@ from pineboolib import decorators
 from pineboolib.utils import DefFun, filedir
 from pineboolib.flcontrols import QComboBox, QTable
 
-from pineboolib.fllegacy.FLDataTable import FLDataTable, FLCheckBox
+from pineboolib.fllegacy.FLDataTable import FLDataTable
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
@@ -106,6 +106,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.timer_1 = QtCore.QTimer(self)
         self._name = name
         self.checkColumnVisible_ = False
+        self.tdbFilterLastWhere_ = u""
+        self.filter_ = u""
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -458,7 +460,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.moveCol(_index, i)
             i = i + 1
 
-        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(0), QtCore.Qt.AscendingOrder)
+        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), QtCore.Qt.AscendingOrder)
         textSearch = self.lineEditSearch.text()
         self.refresh(True)
 
@@ -948,8 +950,8 @@ class FLTableDB(QtWidgets.QWidget):
                         column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
             self.comboBoxFieldToSearch.addItem("*")
             self.comboBoxFieldToSearch2.addItem("*")
-            self.comboBoxFieldToSearch.setCurrentIndex(0)
-            self.comboBoxFieldToSearch2.setCurrentIndex(1)
+            self.comboBoxFieldToSearch.setCurrentIndex(self.sortColumn_)
+            self.comboBoxFieldToSearch2.setCurrentIndex(self.sortColumn2_)
             self.comboBoxFieldToSearch.currentIndexChanged.connect(
                 self.putFirstCol)
             self.comboBoxFieldToSearch2.currentIndexChanged.connect(
@@ -980,12 +982,17 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def setTableRecordsCursor(self):
-        self.tableRecords_.setFLSqlCursor(self.cursor_)
+        self.tableRecords().setFLSqlCursor(self.cursor_)
         try:
-            self.tableRecords_.doubleClicked.disconnect(self.chooseRecord)
+            self.tableRecords().doubleClicked.disconnect(self.chooseRecord)
         except Exception:
             pass
-        self.tableRecords_.doubleClicked.connect(self.chooseRecord)
+
+        self.tableRecords().doubleClicked.connect(self.chooseRecord)
+
+        if self.checkColumnEnabled_:
+            print("Soy", self)
+            self.tableRecords().clicked.connect(self.tableRecords().setChecked)
 
     """
     Refresca la pestaña datos aplicando el filtro
@@ -1548,7 +1555,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Almacena la última claúsula de filtro aplicada en el refresco
     """
-    tdbFilterLastWhere_ = None
+    tdbFilterLastWhere_ = ""
 
     """
     Diccionario que relaciona literales descriptivos de una condición de filtro
@@ -1660,13 +1667,13 @@ class FLTableDB(QtWidgets.QWidget):
                     else:
                         fieldCheck = tMD.field(self.fieldNameCheckColumn_)
                 self.tableRecords().cursor().model().updateColumnsCount()
+                self.tableRecords().header().reset()
+                self.tableRecords().header().swapSections(self.tableRecords().realColumnIndex(fieldCheck.name()), self.sortColumn_)
                 self.checkColumnVisible_ = True
                 self.sortColumn_ = 1
                 self.sortColumn2_ = 2
                 self.sortColumn3_ = 3
-                # self.putFirstCol(fieldCheck.name())
-                #buffer_ = self.cursor_.buffer()
-                # print(buffer_)
+
                 # for i in enumerate(buffer_.count()):
                 #    buffer_.setGenerated(i, True)
 
@@ -1683,7 +1690,7 @@ class FLTableDB(QtWidgets.QWidget):
             model = self.cursor_.model()
             for column in range(model.columnCount()):
                 field = model.metadata().indexFieldObject(column)
-                if not field.visibleGrid():
+                if not field.visibleGrid() or (field.type() is "check" and not self.checkColumnEnabled_):
                     self.tableRecords_.setColumnHidden(column, True)
                 else:
                     self.tableRecords_.setColumnHidden(column, False)
@@ -1874,7 +1881,7 @@ class FLTableDB(QtWidgets.QWidget):
             return False
 
         self.moveCol(_index, self.sortColumn_)
-        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(0), QtCore.Qt.AscendingOrder)
+        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), QtCore.Qt.AscendingOrder)
         return True
 
     """
@@ -1939,7 +1946,7 @@ class FLTableDB(QtWidgets.QWidget):
             # Falta mejorar
             if self.comboBoxFieldToSearch.currentIndex() == self.comboBoxFieldToSearch2.currentIndex():
                 self.comboBoxFieldToSearch2.setCurrentIndex(
-                    self.tableRecords_._h_header.logicalIndex(0))
+                    self.tableRecords_._h_header.logicalIndex(self.sortColumn_))
             self.comboBoxFieldToSearch2.currentIndexChanged.connect(
                 self.putSecondCol)
 
@@ -1961,7 +1968,7 @@ class FLTableDB(QtWidgets.QWidget):
                     pass
                 if self.comboBoxFieldToSearch.currentIndex() == self.comboBoxFieldToSearch2.currentIndex():
                     self.comboBoxFieldToSearch.setCurrentIndex(
-                        self.tableRecords_._h_header.logicalIndex(1))
+                        self.tableRecords_._h_header.logicalIndex(self.sortColumn2_))
                 self.comboBoxFieldToSearch.currentIndexChanged.connect(
                     self.putFirstCol)
 
@@ -2099,9 +2106,9 @@ class FLTableDB(QtWidgets.QWidget):
         if self.checkColumnVisible_:
             col = col - 1
 
-        if col == 0:
+        if col == self.sortColumn_:
             self.orderAsc_ = not self.orderAsc_
-        elif col == 1:
+        elif col == self.sortColumn2_:
             self.orderAsc2_ = not self.orderAsc2_
 
         self.tableRecords().hide()
@@ -2128,7 +2135,7 @@ class FLTableDB(QtWidgets.QWidget):
         # if p.endswith("%"): refreshData = True
 
         msec_refresh = 400
-        column = self.tableRecords_._h_header.logicalIndex(0)
+        column = self.tableRecords_._h_header.logicalIndex(self.sortColumn_)
         field = self.cursor_.model().metadata().indexFieldObject(column)
 
         bFilter = self.cursor_.db().manager().formatAssignValue(field, p, True)
@@ -2168,7 +2175,7 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             order = Qt.DescendingOrder
 
-        self.tableRecords_.sortByColumn(0, order)
+        self.tableRecords_.sortByColumn(self.sortColumn_, order)
 
     def isSortOrderAscending(self):
         return self.orderAsc_
@@ -2249,3 +2256,13 @@ class FLTableDB(QtWidgets.QWidget):
             self.cursor().browseRecord()
         else:
             self.cursor().editRecord()
+
+    def primarysKeysChecked(self):
+        return self.tableRecords().primarysKeysChecked()
+
+    def clearChecked(self):
+        self.tableRecords().clearChecked()
+
+    def setPrimaryKeyChecked(self, name, b):
+        name = str(name)
+        self.tableRecords().setPrimaryKeyChecked(name, b)
