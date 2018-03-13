@@ -33,6 +33,8 @@ from PyQt5.QtGui import *  # noqa
 from PyQt5.QtCore import *  # noqa
 from PyQt5.QtXml import QDomDocument
 
+String = str
+
 
 class StructMyDict(dict):
 
