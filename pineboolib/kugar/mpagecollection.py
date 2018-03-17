@@ -60,11 +60,16 @@ class MPageCollection(ProjectClass):
     @decorators.BetaImplementation
     def getPreviousPage(self):
         self.pageIdx_ -= 1
+        if self.pageIdx_ < 0:
+            self.pageIdx_ = 0
+
         return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
     def getNextPage(self):
         self.pageIdx_ += 1
+        if self.pageIdx_ > (len(self.pages_) - 1):
+            self.pageIdx_ = len(self.pages_) - 1
         return self.pages_[self.pageIdx_]
 
     @decorators.BetaImplementation
@@ -111,7 +116,7 @@ class MPageCollection(ProjectClass):
 
     @decorators.BetaImplementation
     def pageCount(self):
-        return self.pages_.count()
+        return len(self.pages_)
 
     @decorators.BetaImplementation
     def printToPos(self):

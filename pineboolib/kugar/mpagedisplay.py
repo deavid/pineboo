@@ -56,7 +56,8 @@ class MPageDisplay(QWidget):
         if img and not img.isNull():
             self.buffer_ = self.buffer_.scaled(QtCore.QSize(width, height))
             self.resize(width, height)
-            self.buffer_ = img.smoothScale(width, height)
+            #self.buffer_ = img.smoothScale(width, height)
+            self.buffer_ = img.scaled(width, height)
 
     @decorators.BetaImplementation
     def zoomDown(self):
@@ -67,4 +68,5 @@ class MPageDisplay(QWidget):
         if img and not img.isNull():
             self.buffer_ = self.buffer_.scaled(QtCore.QSize(width, height))
             self.resize(width, height)
-            self.buffer_ = img.smoothScale(width, height)
+            #self.buffer_ = img.smoothScale(width, height)
+            self.buffer_ = img.scaled(width, height)

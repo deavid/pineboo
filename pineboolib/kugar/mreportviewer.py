@@ -5,7 +5,7 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtPrintSupport
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QLayout, QApplication
 
 from pineboolib import decorators
 
@@ -45,14 +45,14 @@ class MReportViewer(QWidget):
         self.printToPos_ = False
         self.printerName_ = ""
         self.dpi_ = 300
-        self.colorMode_ = self.PrinterColorMode.PrintColor
+        self.colorMode_ = QtPrintSupport.QPrinter.Color
 
         self.psprinter_ = 0
         self.scroller_ = QtWidgets.QScrollArea(self)
         self.rptEngine_ = 0
         self.report_ = MPageCollection(self)
         self.p_ = QtWidgets.QApplication.palette()
-        # self.g_ = self.p_.active()
+        self.g_ = self.p_.Active
         pal = self.scroller_.viewport().palette()
         pal.setBrush(QtGui.QPalette.Background, self.p_.mid())
         self.scroller_.viewport().setPalette(pal)
@@ -116,19 +116,10 @@ class MReportViewer(QWidget):
         return self.rptEngine_.setReportTemplate(tpl)
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, append=False, dispRpt=None):
-        ap = MReportViewer.RenderReportFlags.Append.value
-        dp = MReportViewer.RenderReportFlags.Display.value
-
-        flags = None
-        if dispRpt is None:
-            flags = append
-        else:
-            flags = ap if append else 0
-            flags = flags | int(dp if dispRpt else 0)
-
-        append = flags & ap
-        dispRpt = flags & dp
+    def renderReport(self, initRow=0, initCol=0, flags=0):
+        append = True if flags == MReportViewer.RenderReportFlags.Append.value else False
+        dispRpt = True if flags == MReportViewer.RenderReportFlags.Display.value else False
+        pb = True if flags == MReportViewer.RenderReportFlags.PageBreak.value else False
 
         if not self.rptEngine_:
             return False
@@ -143,7 +134,8 @@ class MReportViewer(QWidget):
 
         self.report_ = self.rptEngine_.renderReport(
             initRow, initCol, self.report_, flags)
-        # self.insertChild(self.report_) # FIXME
+
+        # self.insertChild(self.report_)
 
         if dispRpt:
             self.printToPos_ = self.report_.printToPos()
@@ -153,8 +145,7 @@ class MReportViewer(QWidget):
             self.progress_ = 0
 
         fp = self.report_.getFirstPage()
-        # if dispRpt and self.report_ != 0 and fp != 0: # FIXME
-        if True and self.report_ != 0 and fp != 0:
+        if dispRpt and self.report_ and fp:
             self.display_.setPageDimensions(self.report_.pageDimensions())
             self.display_.setPage(fp)
             self.display_.show()
@@ -386,7 +377,7 @@ class MReportViewer(QWidget):
             return False
 
         self.printer_ = QtPrintSupport.QPrinter(
-            QtPrintSupport.QPrinter.PrinterMode.HighResolution
+            QtPrintSupport.QPrinter.HighResolution
         )
         self.printer_.setPageSize(self.report_.pageSize())
         if self.printer_.pageSize() == QtPrintSupport.QPrinter.PageSize.Custom:
@@ -498,27 +489,31 @@ class MReportViewer(QWidget):
             return False
 
         self.printer_ = QtPrintSupport.QPrinter(
-            QtPrintSupport.QPrinter.PrinterMode.HighResolution
+            QtPrintSupport.QPrinter.HighResolution
         )
         self.printer_.setPageSize(self.report_.pageSize())
-        if self.printer_.pageSize() == QtPrintSupport.QPrinter.PageSize.Custom:
+        if self.printer_.pageSize() == self.printer_.Custom:
             self.printer_.setCustomPaperSize(self.report_.pageDimensions())
         self.printer_.setOrientation(self.report_.pageOrientation())
-        self.printer_.setMinMax(1, cnt)
+        self.printer_.setPrintRange(self.printer_.AllPages)
         self.printer_.setFromTo(1, cnt)
         self.printer_.setFullPage(True)
         self.printer_.setColorMode(self.colorMode_)
-        self.printer_.setNumCopies(self.numCopies_)
+        self.printer_.setCopyCount(self.numCopies_)
         if self.printerName_ and self.printerName_ != "":
             self.printer_.setPrinterName(self.printerName_)
-        printProg = QtWidgets.QApplication.printProgram()
+        printProg = self.printer_.printProgram()
         if printProg and printProg != "":
             self.printer_.setPrintProgram(printProg)
 
         printNow = True
         if not self.printerName_ or self.printerName_ == "":
-            printNow = self.printer_.setup(
-                QtWidgets.QApplication.focusWidget())
+            dialog = QtPrintSupport.QPrintDialog()
+            if dialog.exec_() != dialog.Accepted:
+                printNow = False
+
+            # printNow = self.printer_.setup(
+                # QtWidgets.QApplication.focusWidget())
 
         if printNow:
             painter = QtGui.QPainter()
@@ -526,23 +521,23 @@ class MReportViewer(QWidget):
 
             viewIdx = self.report_.getCurrentIndex()
 
-            lpf = QtPrintSupport.QPrinter.PageOrder.LastPageFirst
+            lpf = QtPrintSupport.QPrinter.LastPageFirst
             if self.printer_.pageOrder() == lpf:
                 printRev = True
 
             printFrom = self.printer_.fromPage() - 1
             printTo = self.printer_.toPage()
             printCnt = (printTo - printFrom)
-            printCopies = self.printer_.numCopies()
+            printCopies = self.printer_.copyCount()
             self.totalSteps_ = printCnt * printCopies
             currentStep = 1
 
-            self.printer_.setNumCopies(1)
+            self.printer_.setCopyCount(1)
 
             util = FLUtil()
 
             self.progress_ = util.createProgressDialog(
-                FLUtil.translate(self, "app", "Imprimiendo Informe..."),
+                util.translate("app", "Imprimiendo Informe..."),
                 self.totalSteps_
             )
             # self.progress_.setMinimunDuration(self.M_PROGRESS_DELAY)
