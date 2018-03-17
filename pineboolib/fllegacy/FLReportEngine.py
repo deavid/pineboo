@@ -244,8 +244,7 @@ class FLReportEngine(MReportEngine):
 
         pgs = FLReportPages()
         pgs.setPageCollection(pgc)
-        empty = (self.d_.qDoubleFieldList_) == 0
-        if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or empty:
+        if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or not self.d_.qDoubleFieldList_:
             return pgs
 
         nl = QtXml.QDomNodeList(self.rd.elementsByTagName("Row"))

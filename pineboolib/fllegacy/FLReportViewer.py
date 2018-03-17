@@ -243,12 +243,13 @@ class FLReportViewer(QtWidgets.QMainWindow):
         if self.slotsExportedDisabled_:
             return
 
+        util = FLUtil()
         fileName = QtCore.QFileDialog.getSaveFileName(
             "",
-            FLUtil.translate(self, "app", "Fichero CSV (*.csv *.txt)"),
+            util.translate(self, "app", "Fichero CSV (*.csv *.txt)"),
             self,
-            FLUtil.translate(self, "app", "Exportar a CSV"),
-            FLUtil.translate(self, "app", "Exportar a CSV")
+            util.translate(self, "app", "Exportar a CSV"),
+            util.translate(self, "app", "Exportar a CSV")
         )
 
         if not fileName or fileName == "":
@@ -259,14 +260,14 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
         q = QtCore.QMessageBox.question(
             self,
-            FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(
+            util.translate(self, "app", "Sobreescribir {}").format(fileName),
+            util.translate(
                 self,
                 "app",
                 "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
             ).format(fileName),
-            FLUtil.translate(self, "app", "&Sí"),
-            FLUtil.translate(self, "app", "&No"),
+            util.translate(self, "app", "&Sí"),
+            util.translate(self, "app", "&No"),
             "",
             0,
             1
@@ -284,8 +285,8 @@ class FLReportViewer(QtWidgets.QMainWindow):
         else:
             QtCore.QMessageBox.critical(
                 self,
-                FLUtil.translate(self, "app", "Error abriendo fichero"),
-                FLUtil.translate(
+                util.translate(self, "app", "Error abriendo fichero"),
+                util.translate(
                     self,
                     "app",
                     "No se pudo abrir el fichero {} para escribir: {}"
@@ -303,12 +304,13 @@ class FLReportViewer(QtWidgets.QMainWindow):
         if self.slotsExportedDisabled_:
             return
 
+        util = FLUtil()
         fileName = QtCore.QFileDialog.getSaveFileName(
             "",
-            FLUtil.translate(self, "app", "Fichero PDF (*.pdf)"),
+            util.translate(self, "app", "Fichero PDF (*.pdf)"),
             self,
-            FLUtil.translate(self, "app", "Exportar a PDF"),
-            FLUtil.translate(self, "app", "Exportar a PDF")
+            util.translate(self, "app", "Exportar a PDF"),
+            util.translate(self, "app", "Exportar a PDF")
         )
 
         if not fileName or fileName == "":
@@ -319,14 +321,14 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
         q = QtCore.QMessageBox.question(
             self,
-            FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(
+            util.translate(self, "app", "Sobreescribir {}").format(fileName),
+            util.translate(
                 self,
                 "app",
                 "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
             ).format(fileName),
-            FLUtil.translate(self, "app", "&Sí"),
-            FLUtil.translate(self, "app", "&No"),
+            util.translate(self, "app", "&Sí"),
+            util.translate(self, "app", "&No"),
             "",
             0,
             1
@@ -341,13 +343,14 @@ class FLReportViewer(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def sendEMailPDF(self):
         t = self.ui_.leDocumento.text()
+        util = FLUtil()
         name = "informe.pdf" if not t or t == "" else t
         fileName = QtCore.QFileDialog.getSaveFileName(
             AQ_USRHOME + "/" + name + ".pdf",
-            FLUtil.translate(self, "app", "Fichero PDF a enviar (*.pdf)"),
+            util.translate(self, "app", "Fichero PDF a enviar (*.pdf)"),
             self,
-            FLUtil.translate(self, "app", "Exportar a PDF para enviar"),
-            FLUtil.translate(self, "app", "Exportar a PDF para enviar")
+            util.translate(self, "app", "Exportar a PDF para enviar"),
+            util.translate(self, "app", "Exportar a PDF para enviar")
         )
 
         if not fileName or fileName == "":
@@ -358,14 +361,14 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
         q = QtCore.QMessageBox.question(
             self,
-            FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(
+            util.translate(self, "app", "Sobreescribir {}").format(fileName),
+            util.translate(
                 self,
                 "app",
                 "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
             ).format(fileName),
-            FLUtil.translate(self, "app", "&Sí"),
-            FLUtil.translate(self, "app", "&No"),
+            util.translate(self, "app", "&Sí"),
+            util.translate(self, "app", "&No"),
             "",
             0,
             1
@@ -378,21 +381,21 @@ class FLReportViewer(QtWidgets.QMainWindow):
         self.slotPrintReportToPDF(fileName)
         self.autoClose_ = autoCloseSave
 
-        FLUtil.writeSettingEntry("email/to", self.ui_.lePara.text())
-        FLUtil.writeSettingEntry("email/from", self.ui_.leDe.text())
-        FLUtil.writeSettingEntry(
-            "email/mailserver", self.ui_.leMailServer.text()
+        util.writeSettingEntry("email/to", self.ui_["lePara"].text())
+        util.writeSettingEntry("email/from", self.ui_["leDe"].text())
+        util.writeSettingEntry(
+            "email/mailserver", self.ui_["leMailServer"].text()
         )
 
         fi = QtCore.QFileInfo(fileName)
         name = fi.fileName()
 
-        self.smtpClient_.setMailServer(self.ui_.leMailServer.text())
-        self.smtpClient_.setTo(self.ui_.lePara.text())
-        self.smtpClient_.setFrom(self.ui_.leDe.text())
-        asutxt = self.ui_.leAsunto.text()
+        self.smtpClient_.setMailServer(self.ui_["leMailServer"].text())
+        self.smtpClient_.setTo(self.ui_["lePara"].text())
+        self.smtpClient_.setFrom(self.ui_["leDe"].text())
+        asutxt = self.ui_["leAsunto"].text()
         self.smtpClient_.setSubject(name if asutxt == "" else asutxt)
-        self.smtpClient_.setBody(self.ui_.leCuerpo.text() + "\n\n")
+        self.smtpClient_.setBody(self.ui_["leCuerpo"].text() + "\n\n")
 
         html = "<html><body><a href=\"http://abanq.org/\">"
         html += "<img src=\"cid:logo.png@3d8b627b6292\"/>"
@@ -407,28 +410,29 @@ class FLReportViewer(QtWidgets.QMainWindow):
         if show:
             self.rptViewer_.hide()
             wrv.setCentralWidget(self.initCentralWidget_)
-            self.ui_.leDocumento.setText(
+            self.ui["leDocumento"].setText(
                 "doc-" + str(
                     QtCore.QDateTime.currentDateTime()
                 ).replace(":", ",").replace(" ", "")
             )
-            self.ui_.frEMail.show()
+            self.ui_["frEMail"].show()
             self.initCentralWidget_.show()
         else:
             self.initCentralWidget_.hide()
-            self.ui_.frEMail.hide()
+            self.ui_["frEMail"].hide()
             wrv.setCentralWidget(self.rptViewer_)
             self.rptViewer_.show()
 
     @decorators.BetaImplementation
     def saveSVGStyle(self):
+        util = FLUtil()
         if self.report_:
             fileName = QtCore.QFileDialog.getSaveFileName(
                 "",
-                FLUtil.translate(self, "app", "Fichero SVG (*.svg)"),
+                util.translate(self, "app", "Fichero SVG (*.svg)"),
                 self,
-                FLUtil.translate(self, "app", "Guardar en SVG"),
-                FLUtil.translate(self, "app", "Guardar en SVG")
+                util.translate(self, "app", "Guardar en SVG"),
+                util.translate(self, "app", "Guardar en SVG")
             )
 
             if not fileName or fileName == "":
@@ -439,15 +443,15 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
             q = QtCore.QMessageBox.question(
                 self,
-                FLUtil.translate(
+                util.translate(
                     self, "app", "Sobreescribir {}").format(fileName),
-                FLUtil.translate(
+                util.translate(
                     self,
                     "app",
                     "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
                 ).format(fileName),
-                FLUtil.translate(self, "app", "&Sí"),
-                FLUtil.translate(self, "app", "&No"),
+                util.translate(self, "app", "&Sí"),
+                util.translate(self, "app", "&No"),
                 "",
                 0,
                 1
@@ -484,18 +488,19 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
     @decorators.BetaImplementation
     def loadSVGStyle(self):
+        util = FLUtil()
         fileName = QtCore.QFileDialog.getOpenFileName(
             "",
-            FLUtil.translate(self, "app", "Fichero SVG (*.svg)"),
+            util.translate(self, "app", "Fichero SVG (*.svg)"),
             self,
-            FLUtil.translate(self, "app", "Cargar estilo SVG"),
-            FLUtil.translate(self, "app", "Cargar estilo SVG")
+            util.translate(self, "app", "Cargar estilo SVG"),
+            util.translate(self, "app", "Cargar estilo SVG")
         )
 
         if not fileName or fileName == "":
             return
 
-        self.ui_.ledStyle.setText("file:" + fileName)
+        self.ui_["ledStyle"].setText("file:" + fileName)
         self.updateReport()
 
     @decorators.BetaImplementation
@@ -613,13 +618,15 @@ class FLReportViewer(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(int)
     @decorators.BetaImplementation
     def setResolution(self, dpi):
-        FLUtil.writeSettingEntry("rptViewer/dpi", str(dpi))
+        util = FLUtil()
+        util.writeSettingEntry("rptViewer/dpi", str(dpi))
         self.rptViewer_.setResolution(dpi)
 
     @QtCore.pyqtSlot(int)
     @decorators.BetaImplementation
     def setPixel(self, relDpi):
-        FLUtil.writeSettingEntry("rptViewer/pixel", str(float(relDpi / 10.)))
+        util = FLUtil()
+        util.writeSettingEntry("rptViewer/pixel", str(float(relDpi / 10.)))
         if self.rptEngine_:
             self.rptEngine_.setRelDpi(relDpi / 10.)
 
