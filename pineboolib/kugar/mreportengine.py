@@ -45,6 +45,7 @@ class MReportEngine(QObject):
     AQ_ODSCELL_WIDTH = 80.0
     AQ_ODSCELL_HEIGHT = 15.0
     AQ_ODS_ROWS_LIMIT = 64000
+    currPage_ = 0
 
     signalRenderStatus = QtCore.pyqtSignal(int)
     preferedTemplate = QtCore.pyqtSignal()
@@ -927,7 +928,6 @@ class MReportEngine(QObject):
         currentPage = 0
         currentPageCopy = 0
         lastPageFound = False
-
         if pages == 0:
             pages = MPageCollection(self)
             self.currPage_ = 0

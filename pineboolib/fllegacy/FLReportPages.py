@@ -64,8 +64,8 @@ class FLReportPages(QObject):
     def setPageCollection(self, pages):
         if self.pages_:
             self.pages_.deleteLater()
-        # if pages:
-        #     self.insertChild(pages)  # FIXME
+        if pages:
+            self.insertChild(pages)
         self.pages_ = pages
 
     @decorators.BetaImplementation

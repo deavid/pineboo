@@ -116,10 +116,18 @@ class MReportViewer(QWidget):
         return self.rptEngine_.setReportTemplate(tpl)
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, flags=0):
-        append = True if flags == MReportViewer.RenderReportFlags.Append.value else False
-        dispRpt = True if flags == MReportViewer.RenderReportFlags.Display.value else False
-        pb = True if flags == MReportViewer.RenderReportFlags.PageBreak.value else False
+    def renderReport(self, initRow=0, initCol=0, append=False, dispRpt=None):
+        ap = MReportViewer.RenderReportFlags.Append.value
+        dp = MReportViewer.RenderReportFlags.Display.value
+        flags = None
+        if dispRpt is None:
+            flags = append
+        else:
+            flags = ap if append else 0
+            flags = flags | int(dp if dispRpt else 0)
+
+        append = flags & ap
+        dispRpt = flags & dp
 
         if not self.rptEngine_:
             return False
@@ -133,9 +141,9 @@ class MReportViewer(QWidget):
             self.progress_ = 0
 
         self.report_ = self.rptEngine_.renderReport(
-            initRow, initCol, self.report_, flags)
+            initRow, initCol, flags, self.report_)
 
-        # self.insertChild(self.report_)
+        self.insertChild(self.report_)
 
         if dispRpt:
             self.printToPos_ = self.report_.printToPos()

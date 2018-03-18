@@ -233,16 +233,18 @@ class FLReportEngine(MReportEngine):
         super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, fRec=False, pages=0):
+    def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
+        print("FLReportEngine.renderReport. FIXME!!", pages)
         fr = MReportEngine.RenderReportFlags.FillRecords.value
+        pgs = FLReportPages() if pages is None else pages
+        # PGS tiene que ser FLReportPages !!!!
         pgc = super(FLReportEngine, self).renderReport(
             initRow,
             initCol,
-            pages.pageCollection() if pages else 0,
+            pgs,
             fr if fRec else 0
         )
 
-        pgs = FLReportPages()
         pgs.setPageCollection(pgc)
         if not fRec or not self.d_.qry_ or not self.d_.qFieldMtdList_ or not self.d_.qDoubleFieldList_:
             return pgs

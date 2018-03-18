@@ -198,14 +198,18 @@ class FLReportViewer(QtWidgets.QMainWindow):
                     self.move(geo.topLeft())
 
     @decorators.BetaImplementation
-    def renderReport(self, initRow=0, initCol=0, append=False, dRpt=None):
+    def renderReport(self, initRow=0, initCol=0, append_or_flags=None, dRpt=None):
         flags = None
+        ap = MReportViewer.RenderReportFlags.Append.value
+        dp = MReportViewer.RenderReportFlags.Display.value
+
         if dRpt is None:
-            flags = append
+            if append_or_flags is None:
+                flags = dp
+            else:
+                flags = append_or_flags
         else:
-            ap = MReportViewer.RenderReportFlags.Append.value
-            dp = MReportViewer.RenderReportFlags.Display.value
-            flags = ap if append else 0 | int(dp if dRpt else 0)
+            flags = ap if append_or_flags else 0 | int(dp) if dRpt else 0
 
         if not self.rptEngine_:
             return False
