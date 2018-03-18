@@ -234,10 +234,13 @@ class FLReportEngine(MReportEngine):
 
     @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
-        print("FLReportEngine.renderReport. FIXME!!", pages)
         fr = MReportEngine.RenderReportFlags.FillRecords.value
-        pgs = FLReportPages() if pages is None else pages
-        # PGS tiene que ser FLReportPages !!!!
+
+        pgs = FLReportPages()
+        if pages:
+            pgs.pages_ = pages
+            # Esto seria mejor con setPageCollection????
+
         pgc = super(FLReportEngine, self).renderReport(
             initRow,
             initCol,
