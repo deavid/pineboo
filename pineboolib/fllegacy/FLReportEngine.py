@@ -4,23 +4,20 @@ from PyQt5 import QtXml
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
+from pineboolib import parse2reportlab
 
-from pineboolib.kugar.mreportengine import MReportEngine
-
-from pineboolib.fllegacy.FLReportPages import FLReportPages
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 from pineboolib.fllegacy.FLUtil import FLUtil
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
 
 
-class FLReportEngine(MReportEngine):
+class FLReportEngine(object):
 
-    class FLReportEnginePrivate(ProjectClass):
+    class FLReportEnginePrivate(object):
 
-        @decorators.BetaImplementation
+        @decorators.NotImplementedWarn
         def __init__(self, q):
-            super(FLReportEngine.FLReportEnginePrivate, self).__init__()
             self.qry_ = 0
             self.qFieldMtdList_ = 0
             self.qGroupDict_ = 0
@@ -30,7 +27,7 @@ class FLReportEngine(MReportEngine):
             self.qDoubleFieldList_ = []
             self.qImgFields_ = []
 
-        @decorators.BetaImplementation
+        @decorators.NotImplementedWarn
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
                 return
@@ -65,7 +62,7 @@ class FLReportEngine(MReportEngine):
             self.rows_.appendChild(row)
             self.qImgFields_ = imgFieldsBack
 
-        @decorators.BetaImplementation
+        @decorators.NotImplementedWarn
         def groupBy(self, levelMax, vA):
             if not self.qry_.isValid():
                 return
@@ -83,7 +80,7 @@ class FLReportEngine(MReportEngine):
 
             self.addRowToReportData(levelMax)
 
-        @decorators.BetaImplementation
+        @decorators.NotImplementedWarn
         def setQuery(self, qry):
             self.qry_ = qry
 
@@ -115,21 +112,25 @@ class FLReportEngine(MReportEngine):
                 self.qFieldMtdList_ = 0
                 self.qGroupDict_ = 0
 
-    @decorators.BetaImplementation
-    def __init__(self, parent=0):
-        super(FLReportEngine, self).__init__(parent)
-
+    @decorators.NotImplementedWarn
+    def __init__(self, parent):
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
+        self.relDpi_ = 78.
+        self.rd = None
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def rptXmlData(self):
         return self.rd
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def rptXmlTemplate(self):
         return self.rt
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
+    def relDpi(self):
+        return self.relDpi_
+
+    @decorators.NotImplementedWarn
     def setReportData(self, q):
         if isinstance(q, FLDomNodeInterface):
             return self.setFLReportData(q.obj())
@@ -176,63 +177,64 @@ class FLReportEngine(MReportEngine):
         self.initData()
         return True
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def setFLReportData(self, n):
         self.d_.setQuery(0)
         return super(FLReportEngine, self).setReportData(n)
 
     @decorators.BetaImplementation
     def setFLReportTemplate(self, t):
-        if isinstance(t, QtXml.QDomNode):
-            self.d_.template = ""
-            return super(FLReportEngine, self).setReportTemplate(t)
+        # buscamos el .kut o el .rlab
 
         self.d_.template_ = t
+
         if not self.d_.qry_:
             mgr = pineboolib.project.conn.managerModules()
-            return super(FLReportEngine, self).setReportTemplate(
-                mgr.contentCached(t + ".kut")
-            )
-        else:
-            return super(FLReportEngine, self).setReportTemplate(
-                self.d_.qry_.db().managerModules().contentCached(t + ".kut")
-            )
 
-    @decorators.BetaImplementation
+        else:
+            mgr = self.d_.qry_.db().managerModules()
+
+        rpt = mgr.contentCached(t + ".kut")
+        if rpt:
+            rpt = parse2reportlab.parseKut(t, rpt)
+        else:
+            rpt = mgr.contentCached(t + ".rlab")
+
+    @decorators.NotImplementedWarn
     def rptQueryData(self):
         return self.d_.qry_
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def rptNameTemplate(self):
         return self.d_.template_
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def setReportTemplate(self, t):
         if isinstance(t, FLDomNodeInterface):
             return self.setFLReportData(t.obj())
 
         return self.setFLReportData(t)
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def reportData(self):
         return FLDomNodeInterface.nodeInterface(
             self.rd if self.rd else QtXml.QDomDocument()
         )
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def reportTemplate(self):
         return FLDomNodeInterface.nodeInterface(
             self.rt if self.rt else QtXml.QDomDocument()
         )
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def exportToOds(self, pages):
         if not pages or not pages.pageCollection():
             return
 
         super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
-    @decorators.BetaImplementation
+    @decorators.NotImplementedWarn
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
         fr = MReportEngine.RenderReportFlags.FillRecords.value
 
