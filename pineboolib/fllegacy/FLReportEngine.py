@@ -238,8 +238,7 @@ class FLReportEngine(MReportEngine):
 
         pgs = FLReportPages()
         if pages:
-            pgs.pages_ = pages
-            # Esto seria mejor con setPageCollection????
+            pgs.setPageCollection(pages)
 
         pgc = super(FLReportEngine, self).renderReport(
             initRow,

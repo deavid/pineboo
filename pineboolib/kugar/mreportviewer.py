@@ -15,6 +15,7 @@ from pineboolib.kugar.mpagedisplay import MPageDisplay
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
+from pineboolib.fllegacy.FLReportPages import FLReportPages
 
 
 class MReportViewer(QWidget):
@@ -50,7 +51,7 @@ class MReportViewer(QWidget):
         self.psprinter_ = 0
         self.scroller_ = QtWidgets.QScrollArea(self)
         self.rptEngine_ = 0
-        self.report_ = MPageCollection(self)
+        self.report_ = FLReportPages()
         self.p_ = QtWidgets.QApplication.palette()
         self.g_ = self.p_.Active
         pal = self.scroller_.viewport().palette()
@@ -228,7 +229,7 @@ class MReportViewer(QWidget):
         return True
 
     @decorators.BetaImplementation
-    def printReportToPDF(self, outPdfFile):
+    def printReportToPdf(self, outPdfFile):
         if self.report_ == 0:
             return False
 

@@ -2,10 +2,10 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
+from PyQt5.Qt import QObject
 
 
-class MPageCollection(ProjectClass):
+class MPageCollection(QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):

@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtXml
 from PyQt5.QtCore import Qt
+from PyQt5.Qt import QFileDialog, QMessageBox
 
 from pineboolib import decorators
 from pineboolib import qt3ui
@@ -248,12 +249,11 @@ class FLReportViewer(QtWidgets.QMainWindow):
             return
 
         util = FLUtil()
-        fileName = QtCore.QFileDialog.getSaveFileName(
-            "",
-            util.translate(self, "app", "Fichero CSV (*.csv *.txt)"),
+        fileName = QFileDialog.getSaveFileName(
             self,
-            util.translate(self, "app", "Exportar a CSV"),
-            util.translate(self, "app", "Exportar a CSV")
+            util.translate("app", "Exportar a CSV"),
+            "",
+            util.translate("app", "Fichero CSV (*.csv *.txt)")
         )
 
         if not fileName or fileName == "":
@@ -264,14 +264,14 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
         q = QtCore.QMessageBox.question(
             self,
-            util.translate(self, "app", "Sobreescribir {}").format(fileName),
+            util.translate("app", "Sobreescribir {}").format(fileName),
             util.translate(
                 self,
                 "app",
                 "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
             ).format(fileName),
-            util.translate(self, "app", "&Sí"),
-            util.translate(self, "app", "&No"),
+            util.translate("app", "&Sí"),
+            util.translate("app", "&No"),
             "",
             0,
             1
@@ -289,9 +289,8 @@ class FLReportViewer(QtWidgets.QMainWindow):
         else:
             QtCore.QMessageBox.critical(
                 self,
-                util.translate(self, "app", "Error abriendo fichero"),
+                util.translate("app", "Error abriendo fichero"),
                 util.translate(
-                    self,
                     "app",
                     "No se pudo abrir el fichero {} para escribir: {}"
                 ).format(
@@ -309,39 +308,38 @@ class FLReportViewer(QtWidgets.QMainWindow):
             return
 
         util = FLUtil()
-        fileName = QtCore.QFileDialog.getSaveFileName(
-            "",
-            util.translate(self, "app", "Fichero PDF (*.pdf)"),
+        fileName = QFileDialog.getSaveFileName(
             self,
-            util.translate(self, "app", "Exportar a PDF"),
-            util.translate(self, "app", "Exportar a PDF")
+            util.translate("app", "Exportar a PDF"),
+            "",
+            util.translate("app", "Fichero PDF (*.pdf)")
         )
 
-        if not fileName or fileName == "":
+        if fileName[0] == '':
             return
 
-        if not fileName.upper().contains(".PDF"):
-            fileName = fileName + ".pdf"
+        if fileName[0].upper().find(".PDF") == -1:
+            fileName = fileName[0] + ".pdf"
 
-        q = QtCore.QMessageBox.question(
-            self,
-            util.translate(self, "app", "Sobreescribir {}").format(fileName),
-            util.translate(
+        if QtCore.QFile.exists(fileName):
+
+            q = QMessageBox.question(
                 self,
-                "app",
-                "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
-            ).format(fileName),
-            util.translate(self, "app", "&Sí"),
-            util.translate(self, "app", "&No"),
-            "",
-            0,
-            1
-        )
+                util.translate("app", "Sobreescribir {}").format(fileName),
+                util.translate(
+                    "app",
+                    "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
+                util.translate("app", "&Sí"),
+                util.translate("app", "&No"),
+                "",
+                0,
+                1
+            )
+            if q:
+                return
 
-        if QtCore.QFile.exists(fileName) and q:
-            return
-
-        self.slotPrintReportToPDF(fileName)
+        self.slotPrintReportToPdf(fileName)
 
     @decorators.BetaImplementation
     @QtCore.pyqtSlot()
@@ -351,10 +349,10 @@ class FLReportViewer(QtWidgets.QMainWindow):
         name = "informe.pdf" if not t or t == "" else t
         fileName = QtCore.QFileDialog.getSaveFileName(
             AQ_USRHOME + "/" + name + ".pdf",
-            util.translate(self, "app", "Fichero PDF a enviar (*.pdf)"),
+            util.translate("app", "Fichero PDF a enviar (*.pdf)"),
             self,
-            util.translate(self, "app", "Exportar a PDF para enviar"),
-            util.translate(self, "app", "Exportar a PDF para enviar")
+            util.translate("app", "Exportar a PDF para enviar"),
+            util.translate("app", "Exportar a PDF para enviar")
         )
 
         if not fileName or fileName == "":
@@ -365,14 +363,14 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
         q = QtCore.QMessageBox.question(
             self,
-            util.translate(self, "app", "Sobreescribir {}").format(fileName),
+            util.translate("app", "Sobreescribir {}").format(fileName),
             util.translate(
                 self,
                 "app",
                 "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
             ).format(fileName),
-            util.translate(self, "app", "&Sí"),
-            util.translate(self, "app", "&No"),
+            util.translate("app", "&Sí"),
+            util.translate("app", "&No"),
             "",
             0,
             1
@@ -382,7 +380,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
             return
 
         autoCloseSave = self.autoClose_
-        self.slotPrintReportToPDF(fileName)
+        self.slotPrintReportToPdf(fileName)
         self.autoClose_ = autoCloseSave
 
         util.writeSettingEntry("email/to", self.ui_["lePara"].text())
