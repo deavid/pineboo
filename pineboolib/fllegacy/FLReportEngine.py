@@ -160,7 +160,7 @@ class FLReportEngine(object):
             for i in range(10):
                 vA.append(None)
             while True:
-                self.d_.groupBy(len(g) - 1, vA)
+                self.d_.groupBy(len(g), vA)
                 if not q.next():
                     break
 
@@ -236,7 +236,7 @@ class FLReportEngine(object):
         if self.rt.find("KugarTemplate") > -1:
             parser = parse2reportlab()
             self.rt = parser.parseKut(self.d_.template_, self.rt, self.rd.toString(1))
-
+            print(self.rd.toString(1))
         """
         fr = MReportEngine.RenderReportFlags.FillRecords.value
 
