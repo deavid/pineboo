@@ -585,7 +585,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
             self.template_ = t
             self.styleName_ = style
             if self.rptEngine_ and self.rptEngine_.setFLReportTemplate(t):
-                self.rptEngine_.setStyleName(style)
+                # self.rptEngine_.setStyleName(style)
                 self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
                 return True
             return False
@@ -869,4 +869,4 @@ class internalReportViewer(QWidget):
         return self.report_
 
     def renderReport(self, initRow, initCol, flags):
-        self.rptEngine_.renderReport
+        self.rptEngine_.renderReport()

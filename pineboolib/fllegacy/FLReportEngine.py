@@ -195,10 +195,11 @@ class FLReportEngine(object):
             mgr = self.d_.qry_.db().managerModules()
 
         rpt = mgr.contentCached(t + ".kut")
-        if rpt:
-            rpt = parse2reportlab.parseKut(t, rpt)
-        else:
+        if not rpt:
             rpt = mgr.contentCached(t + ".rlab")
+
+        self.rt = rpt
+        return True
 
     @decorators.NotImplementedWarn
     def rptQueryData(self):
@@ -236,6 +237,9 @@ class FLReportEngine(object):
 
     @decorators.NotImplementedWarn
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
+        canvas_ = parse2reportlab.parseKut(self.d_.template_, self.rt)
+
+        """
         fr = MReportEngine.RenderReportFlags.FillRecords.value
 
         pgs = FLReportPages()
@@ -274,3 +278,4 @@ class FLReportEngine(object):
                     it.section('.', 1, 1).lower()).partDecimal()
                 ita.setNodeValue(FLUtil.formatoMiles(round(dVal, decimals)))
         return pgs
+        """
