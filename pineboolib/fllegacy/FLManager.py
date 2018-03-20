@@ -157,7 +157,7 @@ class FLManager(ProjectClass):
 
             ret = False
             acl = False
-            key = n
+            key = n.strip()
             stream = None
 
             isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
@@ -427,7 +427,7 @@ class FLManager(ProjectClass):
         q = FLSqlQuery(parent, self.db_.connectionName())
 
         root_ = etree.ElementTree.fromstring(qry_)
-        q.setSelect(root_.find("select").text.strip(' \t\n\r'))
+        q.setSelect(root_.find("select").text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
         q.setFrom(root_.find("from").text.strip(' \t\n\r'))
         q.setWhere(root_.find("where").text.strip(' \t\n\r'))
         q.setTablesList(root_.find("tables").text.strip(' \t\n\r'))
