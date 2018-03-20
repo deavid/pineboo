@@ -4,7 +4,7 @@ from PyQt5 import QtXml
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
-from pineboolib import parse2reportlab
+from pineboolib.parse2reportlab import parse2reportlab
 
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 from pineboolib.fllegacy.FLUtil import FLUtil
@@ -16,7 +16,7 @@ class FLReportEngine(object):
 
     class FLReportEnginePrivate(object):
 
-        @decorators.NotImplementedWarn
+        @decorators.BetaImplementation
         def __init__(self, q):
             self.qry_ = 0
             self.qFieldMtdList_ = 0
@@ -31,28 +31,27 @@ class FLReportEngine(object):
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
                 return
-
             row = QtXml.QDomElement(self.q_.rptXmlData().createElement("Row"))
             row.setAttribute("level", l)
 
             imgFieldsBack = []
             i = 0
-
             for it in self.qFieldList_:
                 rawVal = self.qry_.value(i, True)
-                empty = len(self.qImgFields_) == 0
-                if not empty and self.qImgFields_.top() == i:
+                # Cargo datos forzado!!
+                if rawVal is None:
+                    rawVal = self.qry_.value(i, False)
+
+                if self.qImgFields_ and self.qImgFields_[len(self.qImgFields_) - 1] == i:
                     strVal = str(rawVal)
-                    imgFieldsBack.push_front(self.qImgFields_.pop())
+                    imgFieldsBack.append(self.qImgFields_.pop())
                     if not strVal or strVal == "":
                         row.setAttribute(it, strVal)
                         continue
                     imgFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/"
                     imgFile += strVal + ".png"
                     if not QtCore.QFile.exists(imgFile):
-                        pix = QtGui.QPixmap()
-                        # pix.loadFromData(str(self.qry_.value(i))) #FIXME?
-                        pix.loadFromData(self.qry_.value(i).toCString())
+                        pix = QtGui.QPixmap(str(self.qry_.value(i)))
                         pix.save(imgFile, "PNG")
                     row.setAttribute(it, imgFile)
                 else:
@@ -62,31 +61,31 @@ class FLReportEngine(object):
             self.rows_.appendChild(row)
             self.qImgFields_ = imgFieldsBack
 
-        @decorators.NotImplementedWarn
+        @decorators.BetaImplementation
         def groupBy(self, levelMax, vA):
             if not self.qry_.isValid():
                 return
 
             g = self.qGroupDict_
-
             lev = 0
-            val = str(self.qry_.value(g[str(lev)].field()))
-            while lev < levelMax and vA.at(lev) == val:
+            val = str(self.qry_.value(g[lev]))
+            while lev < levelMax and vA[lev] == val:
                 lev += 1
 
             for i in range(lev, levelMax):
                 self.addRowToReportData(i)
-                vA.at[i] = str(self.qry_.value(g[str(i)].field()))
+                vA[i] = str(self.qry_.value(g[i]))
 
             self.addRowToReportData(levelMax)
 
-        @decorators.NotImplementedWarn
+        @decorators.BetaImplementation
         def setQuery(self, qry):
             self.qry_ = qry
 
             if self.qry_:
                 self.qFieldList_ = self.qry_.fieldList()
                 self.qFieldMtdList_ = self.qry_.fieldMetaDataList()
+                print("-->", self.qry_.groupDict())
                 self.qGroupDict_ = self.qry_.groupDict()
                 self.qDoubleFieldList_.clear()
                 self.qImgFields_.clear()
@@ -97,22 +96,22 @@ class FLReportEngine(object):
                 i = len(self.qFieldList_) - 1
                 while i >= 0:
                     it = self.qFieldList_[i]
-                    fmtd = self.qFieldMtdList_.find(
-                        it.section('.', 1, 1).lower())
-                    if fmtd:
-                        if fmtd.type() == QtGui.QPixmap:
+                    key = it[it.find(".") + 1:].lower()
+                    if key in self.qFieldMtdList_.keys():
+                        fmtd = self.qFieldMtdList_[key]
+                        if fmtd.type() == "pixmap":
                             self.qImgFields_.append(i)
-                        elif fmtd.type() == QtCore.Double:
+                        elif fmtd.type() == "double":
                             self.qDoubleFieldList_.append(it)
                     i -= 1
             else:
                 self.qFieldList_.clear()
                 self.qDoubleFieldList_.clear()
                 self.qImgFields_.clear()
-                self.qFieldMtdList_ = 0
-                self.qGroupDict_ = 0
+                self.qFieldMtdList_ = []
+                self.qGroupDict_ = {}
 
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def __init__(self, parent):
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
         self.relDpi_ = 78.
@@ -122,7 +121,7 @@ class FLReportEngine(object):
     def rptXmlData(self):
         return self.rd
 
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def rptXmlTemplate(self):
         return self.rt
 
@@ -134,7 +133,6 @@ class FLReportEngine(object):
     def setReportData(self, q):
         if isinstance(q, FLDomNodeInterface):
             return self.setFLReportData(q.obj())
-
         if not q:
             return
 
@@ -146,10 +144,8 @@ class FLReportEngine(object):
         self.d_.rows_ = tmpDoc.createDocumentFragment()
         self.d_.setQuery(q)
         q.setForwardOnly(True)
-
         if not q.exec_():
             return False
-
         if not q.next():
             return False
 
@@ -160,11 +156,11 @@ class FLReportEngine(object):
                 if not q.next():
                     break
         else:
-            vA = QtCore.QStringListModel().stringList()
+            vA = []
             for i in range(10):
-                vA.append("")
+                vA.append(None)
             while True:
-                self.d_.groupBy(len(g), vA)
+                self.d_.groupBy(len(g) - 1, vA)
                 if not q.next():
                     break
 
@@ -201,7 +197,7 @@ class FLReportEngine(object):
         self.rt = rpt
         return True
 
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def rptQueryData(self):
         return self.d_.qry_
 
@@ -209,7 +205,7 @@ class FLReportEngine(object):
     def rptNameTemplate(self):
         return self.d_.template_
 
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def setReportTemplate(self, t):
         if isinstance(t, FLDomNodeInterface):
             return self.setFLReportData(t.obj())
@@ -235,9 +231,11 @@ class FLReportEngine(object):
 
         super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
-    @decorators.NotImplementedWarn
+    @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
-        canvas_ = parse2reportlab.parseKut(self.d_.template_, self.rt)
+        if self.rt.find("KugarTemplate") > -1:
+            parser = parse2reportlab()
+            self.rt = parser.parseKut(self.d_.template_, self.rt, self.rd.toString(1))
 
         """
         fr = MReportEngine.RenderReportFlags.FillRecords.value
@@ -279,3 +277,17 @@ class FLReportEngine(object):
                 ita.setNodeValue(FLUtil.formatoMiles(round(dVal, decimals)))
         return pgs
         """
+
+    @decorators.BetaImplementation
+    def initData(self):
+        n = self.rd.firstChild()
+        while not n.isNull():
+            if n.nodeName() == "KugarData":
+                self.records_ = n.childNodes()
+                attr = n.attributes()
+                tempattr = attr.namedItem("Template")
+                tempname = tempattr.nodeValue() or None
+                if tempname is not None:
+                    self.preferedTemplate.emit(tempname)
+                    break
+            n = n.nextSibling()

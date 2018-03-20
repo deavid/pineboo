@@ -44,28 +44,28 @@ class FLReportViewer(QtWidgets.QMainWindow):
         self.embedInParent_ = True if parent and embedInParent else False
         self.ui_ = {}
 
-        qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
+        #qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
 
-        if not name:
-            self.setName("FLReportViewer")
+        # if not name:
+        #    self.setName("FLReportViewer")
 
-        if self.embedInParent_:
-            self.autoClose_ = False
-            self.ui_["menubar"].hide()
-            self.ui_["chkAutoClose"].hide()
-            self.ui_["spnResolution"].hide()
-            self.ui_["spnPixel"].hide()
-            self.ui_["salir"].setVisible(False)
+        # if self.embedInParent_:
+        #    self.autoClose_ = False
+        #    self.ui_["menubar"].hide()
+        #    self.ui_["chkAutoClose"].hide()
+        #    self.ui_["spnResolution"].hide()
+        #    self.ui_["spnPixel"].hide()
+        #    self.ui_["salir"].setVisible(False)
 
-            if not parent.layout():
-                lay = QtCore.QVBoxLayout(parent)
-                lay.addWidget(self)
-            else:
-                parent.layout().add(self)
-        else:
-            self.autoClose_ = bool(FLUtil().readSettingEntry(
-                "rptViewer/autoClose", "false"))
-            self.ui_["chkAutoClose"].setChecked(self.autoClose_)
+        #   if not parent.layout():
+        #        lay = QtCore.QVBoxLayout(parent)
+        #        lay.addWidget(self)
+        #    else:
+        #        parent.layout().add(self)
+        # else:
+        #    self.autoClose_ = bool(FLUtil().readSettingEntry(
+        #        "rptViewer/autoClose", "false"))
+        #    self.ui_["chkAutoClose"].setChecked(self.autoClose_)
 
         self.rptViewer_ = internalReportViewer(self)
         self.setReportEngine(FLReportEngine(
@@ -81,16 +81,16 @@ class FLReportViewer(QtWidgets.QMainWindow):
         # self.ui_["leMailServer"].setText(
         #    str(util.readSettingEntry("email/mailserver")))
 
-        wrv = self.ui_["FLWidgetReportViewer"]
-        self.initCentralWidget_ = wrv.centralWidget()
+        #wrv = self.ui_["FLWidgetReportViewer"]
+        #self.initCentralWidget_ = wrv.centralWidget()
 
         #self.smtpClient_ = FLSmtpClient(self)
         # self.smtpClient_.status.connect(self.ui_["lblEstado"].setText)
 
-        wrv.setCentralWidget(self.rptViewer_)
+        # wrv.setCentralWidget(self.rptViewer_)
         # self.ui_["frEMail"].hide()
-        if self.initCentralWidget_:
-            self.initCentralWidget_.hide()
+        # if self.initCentralWidget_:
+        #    self.initCentralWidget_.hide()
         # if not self.embedInParent_:
         #    self.ui_["spnResolution"].setValue(int(util.readSettingEntry(
         #        "rptViewer/dpi", str(self.rptViewer_.resolution()))))
