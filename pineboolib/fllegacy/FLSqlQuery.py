@@ -33,14 +33,14 @@ class FLSqlQuery(object):
         self.invalidTablesList = False
         self.d.select_ = None
         self.d.fieldList_ = []
-        self.d.fieldMetaDataList_ = []
+        #self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
         if name:
             retornoQry = pineboolib.project.conn.manager().query(name, self)
 
         if retornoQry:
-            self = retornoQry
+            self.d = retornoQry.d
 
     def __del__(self):
         try:
@@ -120,12 +120,9 @@ class FLSqlQuery(object):
     @param p Objeto FLParameterQuery con la descripción del parámetro a añadir
     """
 
-    def addParameter(self, p):
-        if not self.d.parameterDict_:
-            self.d.parameterDict_ = {}
-
-        if p:
-            self.d.parameterDict_.insert(p.name(), p)
+    def addParameter(self, p=None):
+        if p is not None:
+            self.d.parameterDict_[p.name()] = p
 
     """
     Añade la descripción de un grupo al diccionario de grupos.
@@ -329,15 +326,14 @@ class FLSqlQuery(object):
             res = res + " ORDER BY " + self.d.orderBy_
 
         if self.d.parameterDict_:
-            for pD in self.d.parameterDict_:
-                v = pD.value()
+            for pD in self.d.parameterDict_.keys():
+                v = self.d.parameterDict_[pD]
 
                 if not v:
                     v = QtWidgets.QInputDialog.getText(
-                        QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD.alias(), None, None)
+                        QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
 
-                res = res.replace(
-                    pD.key(), self.d.db_.manager().formatValue(pD.type(), v))
+                res = res.replace("[%s]" % pD, "\'%s\'" % v)
 
         return res
 
@@ -443,7 +439,7 @@ class FLSqlQuery(object):
             name = self.posToFieldName(pos)
 
         if raw:
-            return self.d.db_.fetchLargeValue(self._row[pos])
+            return self.d.db_.manager().fetchLargeValue(self._row[pos])
         else:
 
             try:
@@ -539,8 +535,7 @@ class FLSqlQuery(object):
     """
 
     def setValueParam(self, name, v):
-        if self.d.parameterDict_:
-            self.d.parameterDict_[name] = v
+        self.d.parameterDict_[name] = v
 
     """
     Obtiene el valor de un parámetro.
@@ -549,7 +544,7 @@ class FLSqlQuery(object):
     """
 
     def valueParam(self, name):
-        if self.d.parameterDict_:
+        if name in self.d.parameterDict_.keys():
             return self.d.parameterDict_[name]
         else:
             return None
@@ -573,7 +568,7 @@ class FLSqlQuery(object):
 
     def fieldMetaDataList(self):
         if not self.d.fieldMetaDataList_:
-            self.d.fieldMetaDataList_ = []
+            self.d.fieldMetaDataList_ = {}
         table = None
         field = None
         for f in self.d.fieldList_:
@@ -584,7 +579,7 @@ class FLSqlQuery(object):
                 continue
             fd = mtd.field(field)
             if fd:
-                self.d.fieldMetaDataList_.insert(field.lower(), fd)
+                self.d.fieldMetaDataList_[field.lower()] = fd
 
             if not mtd.inCache():
                 del mtd
@@ -609,7 +604,7 @@ class FLSqlQuery(object):
 
     @decorators.NotImplementedWarn
     def isValid(self):
-        pass
+        return True
 
     @decorators.NotImplementedWarn
     def isActive(self):
@@ -759,9 +754,7 @@ class FLSqlQueryPrivate():
     from_ = None
     where_ = None
     orderBy_ = None
-    parameterDict_ = []
     groupDict_ = []
-    fieldMetaDataList_ = []
 
     def __init__(self, name=None):
         self.name_ = name
@@ -769,9 +762,9 @@ class FLSqlQueryPrivate():
         self.from_ = None
         self.where_ = None
         self.orderBy_ = None
-        self.parameterDict_ = []
+        self.parameterDict_ = {}
         self.groupDict_ = []
-        self.fieldMetaDataList_ = []
+        self.fieldMetaDataList_ = {}
         self.db_ = None
 
     def __del__(self):
@@ -828,7 +821,7 @@ class FLSqlQueryPrivate():
     """
     Lista de con los metadatos de los campos de la consulta
     """
-    fieldMetaDataList_ = []
+    fieldMetaDataList_ = {}
 
     """
     Base de datos sobre la que trabaja
