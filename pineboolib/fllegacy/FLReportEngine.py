@@ -4,7 +4,7 @@ from PyQt5 import QtXml
 
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
-from pineboolib.parse2reportlab import parse2reportlab
+from pineboolib.rml.kut2rml import kut2rml
 
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 from pineboolib.fllegacy.FLUtil import FLUtil
@@ -85,7 +85,6 @@ class FLReportEngine(object):
             if self.qry_:
                 self.qFieldList_ = self.qry_.fieldList()
                 self.qFieldMtdList_ = self.qry_.fieldMetaDataList()
-                print("-->", self.qry_.groupDict())
                 self.qGroupDict_ = self.qry_.groupDict()
                 self.qDoubleFieldList_.clear()
                 self.qImgFields_.clear()
@@ -137,9 +136,9 @@ class FLReportEngine(object):
             return
 
         if not self.rd:
-            self.rd = QtXml.QDomDocument("KUGAR_DATA")
+            self.rd = QtXml.QDomDocument("QUERY_DATA")
 
-        tmpDoc = QtXml.QDomDocument("KUGAR_DATA")
+        tmpDoc = QtXml.QDomDocument("QUERY_DATA")
 
         self.d_.rows_ = tmpDoc.createDocumentFragment()
         self.d_.setQuery(q)
@@ -164,7 +163,7 @@ class FLReportEngine(object):
                 if not q.next():
                     break
 
-        data = QtXml.QDomElement(tmpDoc.createElement("KugarData"))
+        data = QtXml.QDomElement(tmpDoc.createElement("queryData"))
         data.appendChild(self.d_.rows_)
         tmpDoc.appendChild(data)
         self.rd = tmpDoc
@@ -234,9 +233,9 @@ class FLReportEngine(object):
     @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
         if self.rt.find("KugarTemplate") > -1:
-            parser = parse2reportlab()
-            self.rt = parser.parseKut(self.d_.template_, self.rt, self.rd.toString(1))
-            print(self.rd.toString(1))
+            parser = kut2rml()
+            self.rt = parser.parse(self.d_.template_, self.rt, self.rd.toString(1))
+            # print(self.rd.toString(1))
         """
         fr = MReportEngine.RenderReportFlags.FillRecords.value
 

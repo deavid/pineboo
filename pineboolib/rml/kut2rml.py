@@ -10,7 +10,7 @@ name_ = None
 pageFormat_ = []
 
 
-class parse2reportlab(object):
+class kut2rml(object):
 
     rml_ = None
     header_ = None
@@ -28,22 +28,44 @@ class parse2reportlab(object):
         self.rml_ = Element(None)
         self.pagina = 0
 
-    def parseKut(self, name, kut, data):
+    def parse(self, name, kut, dataString):
         self.xmlK_ = etree.ElementTree.fromstring(kut)
         documment = SubElement(self.rml_, "documment")
         self.templateName_ = name
         documment.set("filename", "%s.pdf" % self.templateName_)
         template = SubElement(documment, "template")
 
-        pTemplate = self.newPage(template)
+        data = etree.ElementTree.fromstring(dataString).findall("Row")
+        self.processKutDetails(self.xmlK_, data, template)
 
         st = SubElement(documment, "stylesheet")
         story = SubElement(documment, "story")
 
         #self.pageTemplate_ = self.pageFormat(self.xmlK_)
         #self.header_ = self.pageHeader(self.xmlK_.find("PageHeader"))
-        # print(etree.ElementTree.tostring(self.rml_))
+        print(etree.ElementTree.tostring(self.rml_))
         return etree.ElementTree.tostring(self.rml_)
+
+    def processKutDetails(self, xml, xmlData, parent):
+        pageG = self.newPage(parent)
+        prevLevel = -1
+        for data in xmlData:
+            level = int(data.get("level"))
+            if prevLevel > level:  # Si el nivel anteior era mayor que el actual, procesado footer
+                self.processData("DetailFooter", xml, data, pageG, level)
+            else:
+                prevLevel = level
+
+            self.processData("Detail", xml, data, pageG, level)
+
+        self.processData("DetailFooter", xml, data, pageG, level)
+        self.pageFooter(xml.find("PageFooter"), pageG)
+
+    def processData(self, name, xml, data, parent, level):
+        listDF = xml.findall(name)
+        for dF in listDF:
+            if dF.get("Level") == str(level):
+                self.processXML(dF, parent, data)
 
     def newPage(self, parent):
         self.pagina = self.pagina + 1
@@ -52,6 +74,7 @@ class parse2reportlab(object):
         pG = SubElement(el, "pageGraphics")
         self.pageFormat(self.xmlK_, el)
         self.pageHeader(self.xmlK_.find("PageHeader"), pG)
+        return pG
 
     def pageFormat(self, xml, parent):
         Custom = None
@@ -79,7 +102,12 @@ class parse2reportlab(object):
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
             self.processXML(xml, parent)
 
-    def processXML(self, xml, parent):
+    def pageFooter(self, xml, parent):
+        frecuencia = int(xml.get("PrintFrequency"))
+        if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
+            self.processXML(xml, parent)
+
+    def processXML(self, xml, parent, data=None):
 
         for label in xml.findall("Label"):
             self.processLabel(label, parent)
@@ -88,7 +116,7 @@ class parse2reportlab(object):
             self.processLine(line, parent)
 
         for field in xml.findall("Field"):
-            self.processField(field, parent)
+            self.processField(field, parent, data)
 
         for Special in xml.findall("Special"):
             self.processSpecial(Special, parent)
@@ -182,10 +210,10 @@ class parse2reportlab(object):
 
         return ret
 
-    def processField(self, xml):
+    def processField(self, xml, parent, data):
         pass
 
-    def processSpecial(self, xml):
+    def processSpecial(self, xml, parent):  # Recogemos datos especiales del documento ....
         pass
 
     def converPageSize(self, size, orientation, Custom=None):
