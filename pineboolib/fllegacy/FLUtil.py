@@ -738,7 +738,30 @@ class FLUtil(ProjectClass):
         @param d2 Fecha de destino
         @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
         """
-        pass
+        from pineboolib.qsatype import Date
+        if isinstance(d1, Date):
+            d1 = d1.toString()
+
+        if isinstance(d1, str):
+            d1 = d1[:10]
+
+        if not isinstance(d1, str):
+            logger.error("addYears: No reconozco el tipo de dato %s", type(d1))
+            return None
+
+        if isinstance(d2, Date):
+            d2 = d2.toString()
+
+        if isinstance(d2, str):
+            d2 = d2[:10]
+
+        if not isinstance(d2, str):
+            logger.error("addYears: No reconozco el tipo de dato %s", type(d2))
+            return None
+
+        d1 = datetime.datetime.strptime(d1, "%Y-%m-%d").date()
+        d2 = datetime.datetime.strptime(d2, "%Y-%m-%d").date()
+        return (d2 - d1).days
 
     def buildNumber(self, v, tipo, partDecimal):
         """

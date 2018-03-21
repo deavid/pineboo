@@ -815,6 +815,7 @@ class Member(ASTPython):
             "length",
             "text",
             "join",
+            "push",
             "date",
             "toString()",
             "isEmpty()",
@@ -898,13 +899,13 @@ class Member(ASTPython):
                                 "%s %% (str(%s" % (sPart1, value + ")" + sPart2 + ")")]
 
                     elif member == "join":
-                        print("JOIN")
                         value = arg[5:]
-                        print("JOIN valur = " + str(value))
                         value = value[:len(value) - 1]
-                        print("JOIN valur = " + str(value))
                         arguments = ["%s.join(%s)" % (value, ".".join(part1))] + part2
-                        print("JOIN args = " + str(arguments[0]))
+                    elif member == "push":
+                        value = arg[5:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s.append(%s)" % (".".join(part1), value)] + part2
                     else:
                         if ".".join(part1):
                             arguments = ["%s.%s" %
