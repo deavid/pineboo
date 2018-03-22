@@ -5,11 +5,14 @@ from PyQt5 import QtXml
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.rml.kut2rml import kut2rml
+from pineboolib.utils import filedir
 
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
 from pineboolib.fllegacy.FLUtil import FLUtil
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
+
+import os
 
 
 class FLReportEngine(object):
@@ -37,25 +40,23 @@ class FLReportEngine(object):
             imgFieldsBack = []
             i = 0
             for it in self.qFieldList_:
-                rawVal = self.qry_.value(i, True)
-                # Cargo datos forzado!!
-                if rawVal is None:
-                    rawVal = self.qry_.value(i, False)
-
+                strVal = str(self.qry_.value(i, False))
                 if self.qImgFields_ and self.qImgFields_[len(self.qImgFields_) - 1] == i:
-                    strVal = str(rawVal)
                     imgFieldsBack.append(self.qImgFields_.pop())
-                    if not strVal or strVal == "":
+                    if strVal in ["", "None"]:
                         row.setAttribute(it, strVal)
                         continue
-                    imgFile = FLDiskCache.AQ_DISKCACHE_DIRPATH + "/"
-                    imgFile += strVal + ".png"
-                    if not QtCore.QFile.exists(imgFile):
-                        pix = QtGui.QPixmap(str(self.qry_.value(i)))
-                        pix.save(imgFile, "PNG")
+                    imgFile = filedir("../tempdata")
+                    imgFile += "/%s.png" % strVal
+                    if not os.path.exists(imgFile):
+                        #print("Creando", imgFile)
+                        #print(self.qry_.value(i, True))
+                        pix = QtGui.QPixmap(self.qry_.value(i, True))
+                        if not pix.save(imgFile):
+                            print("FLReportEngine::No se ha podido guardar", imgFile)
                     row.setAttribute(it, imgFile)
                 else:
-                    row.setAttribute(it, str(rawVal))
+                    row.setAttribute(it, strVal)
                 i += 1
 
             self.rows_.appendChild(row)
