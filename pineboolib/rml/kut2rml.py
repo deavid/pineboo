@@ -45,7 +45,7 @@ class kut2rml(object):
 
         #self.pageTemplate_ = self.pageFormat(self.xmlK_)
         #self.header_ = self.pageHeader(self.xmlK_.find("PageHeader"))
-        print(etree.ElementTree.tostring(self.rml_))
+        # print(etree.ElementTree.tostring(self.rml_))
         return etree.ElementTree.tostring(self.rml_)
 
     def processKutDetails(self, xml, xmlData, parent):
@@ -79,7 +79,8 @@ class kut2rml(object):
                             heightCalculated += self.getHeight(pageFooter)
 
                     if heightCalculated > self.maxHSize[str(self.pagina)]:  # Si nos pasamos
-                        parent = self.newPage(docParent)
+                        self.pageFooter(xml.find("PageFooter"), parent)  # Pie de página
+                        parent = self.newPage(docParent)  # Nueva página
 
                 self.processXML(dF, parent, data)
 
@@ -192,14 +193,13 @@ class kut2rml(object):
             if text == "None":
                 return
 
-            print("Data!!", text)
-
             precision = xml.get("Precision")
             negValueColor = xml.get("NegValueColor")
             Currency = xml.get("Currency")
             dataType = xml.get("Datatype")
             commaSeparator = xml.get("CommaSeparator")
             dateFormat = xml.get("DateFormat")
+            """
             if precision:
                 print("Fix Field.precision", precision)
             if negValueColor:
@@ -212,7 +212,7 @@ class kut2rml(object):
                 print("Fix Field.commaSeparator", commaSeparator)
             if dateFormat:
                 print("Fix Field.dateFormat", dateFormat)
-
+            """
         # if font not in canvas_.getAvailableFonts():
         #    font = "Helvetica"
 
@@ -264,9 +264,6 @@ class kut2rml(object):
             ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"])
 
         return ret
-
-    def processField(self, xml, parent, data):
-        pass
 
     def processSpecial(self, xml, parent):  # Recogemos datos especiales del documento ....
         pass
