@@ -22,6 +22,8 @@ class kut2rml(object):
     repeatHeader_ = None
     pagina = 0
     templateName_ = None
+    actualHSize = {}
+    maxHSize = {}
 
     def __init__(self):
         #self.rml_.append('<!DOCTYPE document SYSTEM "rml.dtd">')
@@ -51,30 +53,54 @@ class kut2rml(object):
         prevLevel = -1
         for data in xmlData:
             level = int(data.get("level"))
-            if prevLevel > level:  # Si el nivel anteior era mayor que el actual, procesado footer
-                self.processData("DetailFooter", xml, data, pageG, level)
+            if prevLevel > level:  # Si el nivel anteiror era mayor que el actual, procesamos footer
+                pageG = self.processData("DetailFooter", xml, data, pageG, level)
             else:
                 prevLevel = level
 
-            self.processData("Detail", xml, data, pageG, level)
+            pageG = self.processData("Detail", xml, data, pageG, level, parent)
 
-        self.processData("DetailFooter", xml, data, pageG, level)
-        self.pageFooter(xml.find("PageFooter"), pageG)
+        pageG = self.processData("DetailFooter", xml, data, pageG, level)
+        pageG = self.pageFooter(xml.find("PageFooter"), pageG)
 
-    def processData(self, name, xml, data, parent, level):
+    def processData(self, name, xml, data, parent, level, docParent=None):
         listDF = xml.findall(name)
         for dF in listDF:
             if dF.get("Level") == str(level):
+                if name is "Detail":
+                    heightCalculated = self.getHeight(dF) + self.actualHSize[str(self.pagina)]
+                    # Buscamos si existe DetailFooter y PageFooter y miramos si no excede tamaño
+                    for dFooter in xml.findall("DetailFooter"):
+                        if dFooter.get("Level") == str(level):
+                            heightCalculated += self.getHeight(dFooter)
+                    pageFooter = xml.get("PageFooter")
+                    if pageFooter is not None:
+                        if self.pagina == 1 or pageFooter.get("PrintFrecuency") == "1":
+                            heightCalculated += self.getHeight(pageFooter)
+
+                    if heightCalculated > self.maxHSize[str(self.pagina)]:  # Si nos pasamos
+                        parent = self.newPage(docParent)
+
                 self.processXML(dF, parent, data)
+
+        return parent
 
     def newPage(self, parent):
         self.pagina = self.pagina + 1
         el = SubElement(parent, "pageTemplate")
+        self.actualHSize[str(self.pagina)] = 0
         el.set("id", "Pagina_%s" % self.pagina)
         pG = SubElement(el, "pageGraphics")
         self.pageFormat(self.xmlK_, el)
         self.pageHeader(self.xmlK_.find("PageHeader"), pG)
         return pG
+
+    def getHeight(self, xml):
+        h = xml.get("Height")
+        if h:
+            return int(h)
+        else:
+            return 0
 
     def pageFormat(self, xml, parent):
         Custom = None
@@ -92,31 +118,35 @@ class kut2rml(object):
         self.pageSize_["TM"] = int(TM)
         self.pageSize_["RM"] = int(RM)
         parent.set("pageSize", self.converPageSize(PS, PO, Custom))
-
+        self.maxHSize[str(self.pagina)] = self.pageSize_["H"]  # Fix!!??
         parent.set("id", "main")
         parent.set("title", self.templateName_)
         parent.set("author", "pineboo.parse2reportlab")
 
     def pageHeader(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
+
+        self.actualHSize[str(self.pagina)] += self.getHeight(xml)
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
             self.processXML(xml, parent)
 
     def pageFooter(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
+        self.actualHSize[str(self.pagina)] += self.getHeight(xml)
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
             self.processXML(xml, parent)
 
     def processXML(self, xml, parent, data=None):
+        self.actualHSize[str(self.pagina)] += self.getHeight(xml)
 
         for label in xml.findall("Label"):
-            self.processLabel(label, parent)
+            self.processText(label, parent)
 
         for line in xml.findall("Line"):
             self.processLine(line, parent)
 
         for field in xml.findall("Field"):
-            self.processField(field, parent, data)
+            self.processText(field, parent, data)
 
         for Special in xml.findall("Special"):
             self.processSpecial(Special, parent)
@@ -139,7 +169,7 @@ class kut2rml(object):
         lineE = SubElement(parent, "lines")
         lineE.text = "%s %s %s %s" % (self.getCord("X", X1), self.getCord("Y", Y1), X2, self.getCord("Y", Y2))
 
-    def processLabel(self, xml, parent):
+    def processText(self, xml, parent, data=None):
         x = int(xml.get("X"))
         y = int(xml.get("Y"))
         text = xml.get("Text")
@@ -157,6 +187,31 @@ class kut2rml(object):
         fontW = int(xml.get("FontWeight"))
         fontI = int(xml.get("FontItalic"))
         text = xml.get("Text")
+        if data is not None:
+            text = data.get(text[1:len(text) - 1])
+            if text == "None":
+                return
+
+            print("Data!!", text)
+
+            precision = xml.get("Precision")
+            negValueColor = xml.get("NegValueColor")
+            Currency = xml.get("Currency")
+            dataType = xml.get("Datatype")
+            commaSeparator = xml.get("CommaSeparator")
+            dateFormat = xml.get("DateFormat")
+            if precision:
+                print("Fix Field.precision", precision)
+            if negValueColor:
+                print("Fix Field.negValueColor", negValueColor)
+            if Currency:
+                print("Fix Field.Currency", Currency)
+            if dataType:
+                print("Fix Field.dataType", dataType)
+            if commaSeparator:
+                print("Fix Field.commaSeparator", commaSeparator)
+            if dateFormat:
+                print("Fix Field.dateFormat", dateFormat)
 
         # if font not in canvas_.getAvailableFonts():
         #    font = "Helvetica"
@@ -195,7 +250,7 @@ class kut2rml(object):
             strE = SubElement(parent, "drawString")
             strE.set("x", str(self.getCord("X", x)))
             strE.set("y", str(self.getCord("Y", y)))
-            strE.text = xml.get("Text")
+            strE.text = text
 
     def getColor(self, rgb):
         rgb = rgb.split(",")
