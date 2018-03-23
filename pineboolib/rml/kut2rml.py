@@ -3,6 +3,7 @@ from xml import etree
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from PyQt5.QtGui import QColor
 from lxml.etree import ElementTree
+from pineboolib.utils import filedir
 
 canvas_ = None
 header_ = []
@@ -171,6 +172,7 @@ class kut2rml(object):
         lineE.text = "%s %s %s %s" % (self.getCord("X", X1), self.getCord("Y", Y1), X2, self.getCord("Y", Y2))
 
     def processText(self, xml, parent, data=None):
+        isImage = False
         x = int(xml.get("X"))
         y = int(xml.get("Y"))
         text = xml.get("Text")
@@ -189,9 +191,12 @@ class kut2rml(object):
         fontI = int(xml.get("FontItalic"))
         text = xml.get("Text")
         if data is not None:
-            text = data.get(text[1:len(text) - 1])
+            text = data.get(xml.get("Field"))
             if text == "None":
                 return
+
+            if text.startswith(filedir("../tempdata")):
+                isImage = True
 
             precision = xml.get("Precision")
             negValueColor = xml.get("NegValueColor")
@@ -244,13 +249,18 @@ class kut2rml(object):
         if VAlig == 1:  # Centrado
             y = y + (H / 2)
 
+        if not isImage:
             fontE = SubElement(parent, "setFont")
             fontE.set("name", str(font))
             fontE.set("size", str(fontSize))
             strE = SubElement(parent, "drawString")
-            strE.set("x", str(self.getCord("X", x)))
-            strE.set("y", str(self.getCord("Y", y)))
             strE.text = text
+        else:
+            strE = SubElement(parent, "image")
+            strE.set("file", text)
+
+        strE.set("x", str(self.getCord("X", x)))
+        strE.set("y", str(self.getCord("Y", y)))
 
     def getColor(self, rgb):
         rgb = rgb.split(",")
