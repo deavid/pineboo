@@ -320,9 +320,10 @@ def main():
     _DGI = load_dgi(options.dgi)
 
     dir_ = filedir("forms")
-    dir_ = dir_.replace(":", ".")
-    if not os.path.exists(dir_):
-        download_files()
+    if dir_.find(":") > 1:
+        dir_ = dir_.replace(":", ".")
+        if not os.path.exists(dir_):
+            download_files()
 
     pineboolib.no_python_cache = options.no_python_cache
 
