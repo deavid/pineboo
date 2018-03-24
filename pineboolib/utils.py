@@ -4,6 +4,7 @@ import os.path
 import re
 import logging
 import sys
+import traceback
 
 
 logger = logging.getLogger(__name__)
@@ -267,70 +268,36 @@ def download_files():
                                  QWidget)
 
     dir_ = filedir("forms")
-    dir_ = dir_.replace(":", ".")
+    if dir_.find(":") > 1:
+        dir_ = dir_.replace(":", ".")
     if os.path.exists(dir_):
         return
 
-    # Try and import the platform-specific modules.
-    platform_module = "Not available"
-
     try:
-        import PyQt5.QtAndroidExtras
-        platform_module = 'QtAndroidExtras'
-    except ImportError:
+        os.makedirs(filedir("../projects"))
+    except:
         pass
 
-    try:
-        import PyQt5.QtMacExtras
-        platform_module = 'QtMacExtras'
-    except ImportError:
-        pass
+    copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
+    copy_dir_recursive(":/share", filedir("../share"))
 
-    try:
-        import PyQt5.QtWinExtras
-        platform_module = 'QtWinExtras'
-    except ImportError:
-        pass
-
-    try:
-        import PyQt5.QtX11Extras
-        platform_module = 'QtX11Extras'
-    except ImportError:
-        pass
-
-    # Try and import the optional products.
-    optional_products = []
-
-    # Create the GUI.
-
-    app = QApplication(sys.argv)
-    if platform_module is 'QtAndroidExtras':
-        QApplication.setStyle("Android")
-
-    shell = QWidget()
-    shell_layout = QVBoxLayout()
-
-    header = QLabel("""<h1>PINEBOO</h1>
-    <p>Preparado entorno (""" + platform_module + """
-    </p>""")
-    shell_layout.addWidget(header)
-    shell.setLayout(shell_layout)
-    copy_dir_recursive("pineboolib", filedir("../"))
-    shell.show()
-    app.exec()
+    # app.exec()
 
     # All done.
-    sys.exit()
+    # sys.exit()
+    return
 
 
 def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
     dir = QDir()
-    dir.setPath(from_)
+    dir.setPath(from_dir)
 
     from_dir += QDir.separator()
     to_dir += QDir.separator()
-    print("Origen ..", from_dir)
-    print("Destino ..", to_dir)
+    try:
+        os.makedirs(to_dir)
+    except:
+        pass
 
     for file_ in dir.entryList(QDir.Files):
         from_ = from_dir + file_
@@ -350,8 +317,10 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
         from_ = from_dir + dir_
         to_ = to_dir + dir_
 
-        if not dir.mkpath(to):
-            return False
+        try:
+            os.makedirs(to_)
+        except:
+            pass
 
         if not copy_dir_recursive(from_, to_, replace_on_conflict):
             return False
