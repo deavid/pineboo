@@ -173,7 +173,8 @@ def trace_function(f):
 
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QByteArray
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QByteArray,\
+    QDir
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply,\
     QNetworkRequest
 
@@ -263,7 +264,12 @@ class downloadManager(QObject):
 def download_files():
     import sysconfig
     from PyQt5.QtWidgets import (QApplication, QLabel, QTreeView, QVBoxLayout,
-                                 QWidget, QLineEdit, QPushButton)
+                                 QWidget)
+
+    dir_ = filedir("forms")
+    dir_ = dir_.replace(":", ".")
+    if os.path.exists(dir_):
+        return
 
     # Try and import the platform-specific modules.
     platform_module = "Not available"
@@ -298,63 +304,56 @@ def download_files():
     # Create the GUI.
 
     app = QApplication(sys.argv)
-    QApplication.setStyle("Android")
-    lista = {}
-    lista["dlg_connect.ui"] = "pineboolib/forms"
-    lista["flareas.mtd"] = "share/pineboo/tables"
-    lista["flfiles.mtd"] = "share/pineboo/tables"
-    lista["flgroups.mtd"] = "share/pineboo/tables"
-    lista["fllarge.mtd"] = "share/pineboo/tables"
-    lista["flmetadata.mtd"] = "share/pineboo/tables"
-    lista["flmodules.mtd"] = "share/pineboo/tables"
-    lista["flseqs.mtd"] = "share/pineboo/tables"
-    lista["flserial.mtd"] = "share/pineboo/tables"
-    lista["flsettings.mtd"] = "share/pineboo/tables"
-    lista["flusers.mtd"] = "share/pineboo/tables"
-    lista["flvar.mtd"] = "share/pineboo/tables"
-    lista["sys.xpm"] = "share/pineboo"
-    lista["flareas.ui"] = "share/pineboo/forms"
-    lista["flfiles.ui"] = "share/pineboo/forms"
-    lista["flgroups.ui"] = "share/pineboo/forms"
-    lista["flmodulos.ui"] = "share/pineboo/forms"
-    lista["flusers.ui"] = "share/pineboo/forms"
-    lista["FLWidgetMasterTable.ui"] = "share/pineboo/forms"
-    lista["mainwindow.ui"] = "share/pineboo/forms"
-    lista["master.ui"] = "share/pineboo/forms"
-    lista["master_copy.ui"] = "share/pineboo/forms"
-    lista["master_print.ui"] = "share/pineboo/forms"
-    lista["master_print_copy.ui"] = "share/pineboo/forms"
-    lista["sys.ui"] = "share/pineboo/forms"
-    lista["flloadmod.qs.py"] = "share/pineboo/scripts"
-    lista["flmodules.qs.py"] = "share/pineboo/scripts"
-    lista["sys.qs.py"] = "share/pineboo/scripts"
-    lista["sys.xml"] = "share/pineboo"
-    lista["mainform.ui"] = "pineboolib/plugins/mainform/pineboo"
+    if platform_module is 'QtAndroidExtras':
+        QApplication.setStyle("Android")
 
     shell = QWidget()
     shell_layout = QVBoxLayout()
 
     header = QLabel("""<h1>PINEBOO</h1>
-    <p>Se necesita una descarga adicional
+    <p>Preparado entorno (""" + platform_module + """
     </p>""")
-    header.setWordWrap(True)
-    urllineedit = QLineEdit()
-    urllineedit.setText("http://192.168.1.106")
-    pb = QPushButton()
-    pb.setText("Descargar")
     shell_layout.addWidget(header)
-    shell_layout.addWidget(urllineedit)
-    shell_layout.addWidget(pb)
     shell.setLayout(shell_layout)
-    dm = {}
-    for l in lista.keys():
-        dm[l] = downloadManager()
-        dm[l].setLE(l, lista[l], urllineedit)
-        pb.clicked.connect(dm[l].doDownload)
-
-    # Show the GUI and interact with it.
+    copy_dir_recursive("pineboolib", filedir("../"))
     shell.show()
     app.exec()
 
     # All done.
     sys.exit()
+
+
+def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
+    dir = QDir()
+    dir.setPath(from_)
+
+    from_dir += QDir.separator()
+    to_dir += QDir.separator()
+    print("Origen ..", from_dir)
+    print("Destino ..", to_dir)
+
+    for file_ in dir.entryList(QDir.Files):
+        from_ = from_dir + file_
+        to_ = to_dir + file_
+
+        if os.path.exists(to_):
+            if replace_on_conflict:
+                if not QFile.remove(to):
+                    return False
+            else:
+                continue
+
+        if not QFile.copy(from_, to_):
+            return False
+
+    for dir_ in dir.entryList(QDir.Dirs | QDir.NoDotAndDotDot):
+        from_ = from_dir + dir_
+        to_ = to_dir + dir_
+
+        if not dir.mkpath(to):
+            return False
+
+        if not copy_dir_recursive(from_, to_, replace_on_conflict):
+            return False
+
+    return True
