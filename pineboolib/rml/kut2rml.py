@@ -2,7 +2,6 @@
 from xml import etree
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from PyQt5.QtGui import QColor
-from lxml.etree import ElementTree
 from pineboolib.utils import filedir
 
 canvas_ = None
