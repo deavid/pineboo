@@ -93,7 +93,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self._data = []
         self._vdata = []
         self._column_hints = []
-        self.col_aliases = []
         self.updateColumnsCount()
         self.fetchLock = threading.Lock()
         self.rows = 0
@@ -814,14 +813,13 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # return self.cols
 
     def updateColumnsCount(self):
-        if self.cols != len(self.metadata().fieldList()):
-            self.cols = len(self.metadata().fieldList())
-            self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
-            if self.metadata().isQuery():
-                qry = self._prj.conn.manager().query(self.metadata().query())
-            else:
-                qry = None
-            self._refresh_field_info(qry)
+        self.cols = len(self.metadata().fieldList())
+        self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
+        if self.metadata().isQuery():
+            qry = self._prj.conn.manager().query(self.metadata().query())
+        else:
+            qry = None
+        self._refresh_field_info(qry)
 
     def rowCount(self, parent=None):
         return self.rowsLoaded
