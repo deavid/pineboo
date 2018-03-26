@@ -1208,7 +1208,7 @@ class FLSqlCursor(ProjectClass):
 
         field = self.metadata().field(fN)
         if not field:
-            logger.warn("valueBuffer(): No existe el campo %s:%s", self.curName(), fN)
+            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s", self.curName(), fN, self.metadata().name())
             return None
 
         type_ = field.type()
