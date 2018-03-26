@@ -35,8 +35,8 @@ def filedir(*path):
             Es útil para especificar rutas a recursos del programa.
     """
     ruta_ = os.path.dirname(__file__)
-    if ruta_.find(":") > -1:
-        ruta_ = ruta_.replace(":", ".")
+    if ruta_.startswith(":"):
+        ruta_ = "." + ruta_[1:]
     ruta_ = os.path.realpath(os.path.join(ruta_, *path))
     # if ruta_.find(":/pineboolib/forms") > -1 or ruta_.find(":/pineboolib/plugins") > -1 or ruta_.find(":/pineboolib/..") > -1:
 
@@ -268,8 +268,6 @@ def download_files():
                                  QWidget)
 
     dir_ = filedir("forms")
-    if dir_.find(":") > 1:
-        dir_ = dir_.replace(":", ".")
     if os.path.exists(dir_):
         return
 
@@ -294,10 +292,9 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
 
     from_dir += QDir.separator()
     to_dir += QDir.separator()
-    try:
+
+    if not os.path.exists(to_dir):
         os.makedirs(to_dir)
-    except:
-        pass
 
     for file_ in dir.entryList(QDir.Files):
         from_ = from_dir + file_
@@ -317,10 +314,8 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
         from_ = from_dir + dir_
         to_ = to_dir + dir_
 
-        try:
+        if not os.path.exists(to_):
             os.makedirs(to_)
-        except:
-            pass
 
         if not copy_dir_recursive(from_, to_, replace_on_conflict):
             return False
