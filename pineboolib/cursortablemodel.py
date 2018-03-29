@@ -681,6 +681,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
     def Insert(self, cursor):
         # Metemos lineas en la tabla de la bd
+        pKValue = None
         buffer = cursor.buffer()
         campos = None
         valores = None
@@ -692,6 +693,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 value = buffer.value(b.name)
 
             if value is not None:  # si el campo se rellena o hay valor default
+                if b.name == cursor.metadata().primaryKey():
+                    pKValue = value
                 if b.type_ in ("string", "stringlist") and isinstance(value, str):
 
                     value = self._prj.conn.normalizeValue(value)
@@ -711,6 +714,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 # print(sql)
                 self._cursor.execute(sql)
                 self.refresh()
+                if pKValue is not None:
+                    cursor.move(self.findPKRow((pKValue, )))
             except Exception:
                 print("CursorTableModel.Insert() :: ERROR:",
                       traceback.format_exc())
@@ -746,7 +751,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             for n in range(self.rows):
                 self.indexUpdateRow(n)
             self.indexes_valid = True
+
         pklist = tuple(pklist)
+
         if pklist not in self.pkidx:
             print(
                 "CursorTableModel.findPKRow:: PK not found: %r (requires list, not integer or string)" % pklist)
