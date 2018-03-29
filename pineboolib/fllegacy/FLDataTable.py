@@ -74,6 +74,11 @@ class FLDataTable(QtWidgets.QTableView):
             if self.cursor_ and not self.cursor_ == c:
                 self.cursor_.restoreEditionFlag(self)
                 self.cursor_.restoreBrowseFlag(self)
+                try:
+                    self.cursor().bufferCommited.disconnect(self.ensureRowSelectedVisible)
+                except:
+                    pass
+
                 curChg = True
 
             self.cursor_ = c
@@ -84,6 +89,8 @@ class FLDataTable(QtWidgets.QTableView):
                     self.setEditOnly(self.editonly_)
                     self.setInsertOnly(self.insertonly_)
                     self.setOnlyTable(self.onlyTable_)
+
+                self.cursor().bufferCommited.connect(self.ensureRowSelectedVisible)
 
             self.setModel(self.cursor_.model())
             self.setSelectionModel(self.cursor_.selection())
@@ -96,7 +103,6 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def marcaRow(self):
-
         self.selectRow(self.cursor_.at())
 
     def setPersistentFilter(self, pFilter):
@@ -460,30 +466,20 @@ class FLDataTable(QtWidgets.QTableView):
             self.hide()
             self.cursor_.setFilter(self.persistentFilter_)
             self.cursor().refresh()
-            self.selectRow(self.cursor_.at())
+            self.marcaRow()
             self.show()
             self.refreshing_ = False
 
     """
     Hace que la fila seleccionada esté visible
     """
-    @decorators.NotImplementedWarn
+    @QtCore.pyqtSlot()
     def ensureRowSelectedVisible(self):
-        pass
-    """
-        if self.rowSelected > -1:
-            if not self.isUpdatesEnabled() or not self.viewport().isUpdaesEnabled():
-                return
+        if not self.selectedIndexes():
+            self.selectRow(self.cursor().at())
+        self.scrollTo(self.cursor().model().index(self.cursor().at(), 0))
+        # FIXME: Asegurarme de que esté pintada la columna seleccionada
 
-            cw = self.columnWidth(self.colSelected)
-            margin = self.visibleHeight() / 2
-            y = self.rowPos(self.rowSelected) + self.rowHeight(self.rowSelected) / 2
-            if cw < self.visibleWidth():
-                self.ensureVisible(self.columnPos(self.colSelected) + cw /2, y, cw /2, margin)
-            else:
-                self.ensureVisible(self.columnPos(self.colSelected), y, None, margin)
-
-    """
     """
     Foco rápido sin refrescos para optimizar
     """
