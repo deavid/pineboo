@@ -2304,6 +2304,9 @@ class FLSqlCursor(ProjectClass):
 
     def selection_pk(self, value):
 
+        if value is None:
+            return False
+
         i = 0
         while i <= self.model().rowCount():
             if self.model().value(i, self.buffer().pK()) == value:
@@ -3070,7 +3073,6 @@ class FLSqlCursor(ProjectClass):
             # pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
             self.model().Insert(self)
             # self.update(False)
-
             self.selection_pk(self.buffer().value(self.buffer().pK()))
 
             # if not self.d.persistentFilter_:
