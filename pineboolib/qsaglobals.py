@@ -366,9 +366,10 @@ def connect(sender, signal, receiver, slot, caller=None):
     # http://pyqt.sourceforge.net/Docs/PyQt4/qt.html#ConnectionType-enum
     conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
     signal, slot = signal_slot
+
     try:
         signal.connect(slot, type=conntype)
-    except RuntimeError:
+    except Exception:
         logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return False
 
