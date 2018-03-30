@@ -5,6 +5,7 @@ from PyQt5 import QtXml
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.rml.kut2rml import kut2rml
+from pineboolib.rml.rml2pdf import rml2pdf
 from pineboolib.utils import filedir
 
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
@@ -13,6 +14,7 @@ from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
 
 import os
+import datetime
 
 
 class FLReportEngine(object):
@@ -236,6 +238,11 @@ class FLReportEngine(object):
         if self.rt.find("KugarTemplate") > -1:
             parser = kut2rml()
             self.rt = parser.parse(self.d_.template_, self.rt, self.rd.toString(1))
+
+            pdfname = filedir("../tempdata")
+            pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            rml2pdf.parsepdf.parse(self.rt, pdfname)
+
             # print(self.rd.toString(1))
         """
         fr = MReportEngine.RenderReportFlags.FillRecords.value
