@@ -214,19 +214,18 @@ class FLFormDB(QtWidgets.QDialog):
     """
     @QtCore.pyqtSlot()
     def initScript(self):
-        if self.iface:
-            try:
-                if self.loaded:
-                    if self.iface:
-                        self.iface.init()
-                        return True
-                    elif self.script.FormInternalObj:
-                        self.script.FormInternalObj.init()
-                        return True
-                else:
-                    self.initScript()
-            except Exception:
-                return False
+        try:
+            if self.loaded:
+                if self.iface:
+                    self.iface.init()
+                    return True
+                elif self.script.FormInternalObj:
+                    self.script.FormInternalObj.init()
+                    return True
+            else:
+                self.initScript()
+        except Exception:
+            return False
 
     """
     constructor
