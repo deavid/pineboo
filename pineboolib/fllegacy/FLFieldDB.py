@@ -1464,12 +1464,12 @@ class FLFieldDB(QtWidgets.QWidget):
                 return
 
             try:
-                self.editor_.valueChanged.disconnect(self.updateValue)
+                self.editor_.dateChanged.disconnect(self.updateValue)
             except Exception:
                 self.logger.exception(
-                    "Error al desconectar señal valueChanged")
+                    "Error al desconectar señal dateChanged")
             self.editor_.setDate(v)
-            self.editor_.valueChanged.connect(self.updateValue)
+            self.editor_.dateChanged.connect(self.updateValue)
 
         elif type_ == "time":
             if v == str(self.editor_.time()):
