@@ -2616,7 +2616,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
     @param v Valor
     """
-    @decorators.NotImplementedWarn
     @QtCore.pyqtSlot(str)
     def setMapValue(self, v=None):
         if v:
