@@ -3250,7 +3250,7 @@ class FLSqlCursor(ProjectClass):
                     if activeWid and activeWidEnabled:
                         activeWid.setEnabled(True)
 
-        if self.d.modeAccess_ == self.Browse or self.d.modeAccess_ == self.Edit:
+        elif self.d.modeAccess_ == self.Browse or self.d.modeAccess_ == self.Edit:
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.modeAccess() == self.Insert:
                     if activeWid and activeWidEnabled:
