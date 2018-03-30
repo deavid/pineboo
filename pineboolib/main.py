@@ -336,8 +336,12 @@ class Project(object):
 
         aFunction = function.split(".")
         if not aFunction[0] in self.actions:
-            self.logger.error(
-                "No existe la acción %s en el módulo %s", aFunction[0])
+            if len(aFunction) > 1:
+                self.logger.error(
+                    "No existe la acción %s en el módulo %s", aFunction[1], aFunction[0])
+            else:
+                self.logger.error(
+                    "No existe la acción %s", aFunction[0])
             return False
 
         funAction = self.actions[aFunction[0]]
