@@ -109,6 +109,11 @@ class FLFormDB(QtWidgets.QDialog):
     accepted_ = None
 
     """
+    Nombre del formulario relativo a la acción (form / formRecrd + nombre de la acción)
+    """
+    actionName_ = None
+
+    """
     Interface para scripts
     """
     iface = None
@@ -159,6 +164,11 @@ class FLFormDB(QtWidgets.QDialog):
         self.known_instances[(self.__class__, action)] = self
 
         self.action = action
+        if type(self).__name__ == "FLFormRecordDB":
+            self.actionName_ = "formRecord" + action.name
+        else:
+            self.actionName_ = "form" + action.name
+
         self.prj = action.prj
         self.mod = action.mod
 
@@ -504,7 +514,11 @@ class FLFormDB(QtWidgets.QDialog):
             return
 
         if not self.isClosing_:
-            QtCore.QTimer(self).singleShot(0, self.formReady)
+            QtCore.QTimer(self).singleShot(0, self.emitFormReady)
+
+    def emitFormReady(self):
+        self.formReady
+        self._prj.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
 
     # protected_:
 
