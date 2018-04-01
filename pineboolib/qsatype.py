@@ -4,6 +4,7 @@ import os
 import sys
 import fnmatch
 import weakref
+import re
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QTabWidget, QTextEdit
@@ -263,8 +264,7 @@ def check_gc_referrers(typename, w_obj, name):
         # ..... alguna referencia a un formulario (o similar) que impide que se destruya
         # ..... cuando se deja de usar. Causando que los connects no se destruyan tampoco
         # ..... y que se llamen referenciando al código antiguo y fallando.
-        print("HINT: Objetos referenciando %r::%r (%r) :" %
-              (typename, obj, name))
+        # print("HINT: Objetos referenciando %r::%r (%r) :" % (typename, obj, name))
         for ref in gc.get_referrers(obj):
             if isinstance(ref, dict):
                 x = []
@@ -272,11 +272,11 @@ def check_gc_referrers(typename, w_obj, name):
                     if v is obj:
                         k = "(**)" + k
                         x.insert(0, k)
-                print(" - dict:", repr(x), gc.get_referrers(ref))
+                # print(" - dict:", repr(x), gc.get_referrers(ref))
             else:
                 if "<frame" in str(repr(ref)):
                     continue
-                print(" - obj:", repr(ref), [x for x in dir(ref) if getattr(ref, x) is obj])
+                # print(" - obj:", repr(ref), [x for x in dir(ref) if getattr(ref, x) is obj])
 
     threading.Thread(target=checkfn).start()
 
@@ -313,7 +313,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self.logger.exception("Error al inicializar la clase iface de QS:")
 
     def _connect(self, sender, signal, receiver, slot):
-        print(" > > > connect:", self)
+        # print(" > > > connect:", sender, " signal ", str(signal))
         from pineboolib.qsaglobals import connect
         signal_slot = connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
@@ -321,7 +321,7 @@ class FormDBWidget(QtWidgets.QWidget):
         self._formconnections.add(signal_slot)
 
     def _disconnect(self, sender, signal, receiver, slot):
-        print(" > > > disconnect:", self)
+        # print(" > > > disconnect:", self)
         from pineboolib.qsaglobals import disconnect
         signal_slot = disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
@@ -470,6 +470,39 @@ def FLFormSearchDB(name):
     # widget.load()
     widget.cursor_.setContext(widget.iface)
     return widget
+
+
+def RegExp(strRE):
+    if strRE[-2:] == "/g":
+        strRE = strRE[:-2]
+
+    if strRE[:1] == "/":
+        strRE = strRE[1:]
+
+    return qsaRegExp(strRE)
+
+
+class qsaRegExp(object):
+
+    strRE_ = None
+    result_ = None
+
+    def __init__(self, strRE):
+        print("Nuevo Objeto RegExp de " + strRE)
+        self.strRE_ = strRE
+
+    def search(self, text):
+        print("Buscando " + self.strRE_ + " en " + text)
+        self.result_ = re.search(self.strRE_, text)
+
+    def cap(self, i):
+        if self.result_ is None:
+            return None
+
+        try:
+            return self.result_.group(i)
+        except Exception:
+            return None
 
 
 class Date(object):
