@@ -807,6 +807,7 @@ class XMLAction(XMLStruct):
         super(XMLAction, self).__init__(*args, **kwargs)
         self.prj = _project
         self.form = self._v("form")
+        self.name = self._v("name")
         self.script = self._v("script")
         self.table = self._v("table")
         self.mainform = self._v("mainform")
