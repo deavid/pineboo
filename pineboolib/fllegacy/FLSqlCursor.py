@@ -2388,11 +2388,11 @@ class FLSqlCursor(ProjectClass):
         if self.d.buffer_ is not None:
             return
 
-        if not self._refreshDelayedTimer:
-            time = QtCore.QTimer()
-            time.singleShot(msec, self.refreshDelayed)
-            self._refreshDelayedTimer = True
-            return
+        # if not self._refreshDelayedTimer:
+        #     time = QtCore.QTimer()
+        #     time.singleShot(msec, self.refreshDelayed)
+        #     self._refreshDelayedTimer = True
+        #     return
 
         self._refreshDelayedTimer = False
 
