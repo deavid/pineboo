@@ -2,7 +2,7 @@ Esta herramienta permite crear binarios para plataformas a partir de python3 y p
 
 
 Instalación:
- sudo -H pip3 install pyqtdeploy (Actualmente instala la versión 2.0.1)
+ sudo -H pip3 install pyqtdeploy (Actualmente instala la versión 2.1)
  
 Copiamos los siguientes paquetes en la carpeta src.
 
@@ -12,12 +12,21 @@ https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
 https://www.openssl.org/source/openssl-1.0.2n.tar.gz
 https://download.qt.io/archive/qt/5.10/5.10.1/single/qt-everywhere-src-5.10.1.tar.xz (Renombrar a qt-everywhere-opensource-src-5.10.1.tar.xz)
 https://sourceforge.net/projects/pyqt/files/sip/sip-4.19.6/sip-4.19.6.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.10/PyQt5_gpl-5.10.tar.gz
-https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-5.10/PyQtDataVisualization_gpl-5.10.tar.gz
-https://sourceforge.net/projects/pyqt/files/PyQt3D/PyQt3D-5.10/PyQt3D_gpl-5.10.tar.gz
+https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.10/PyQt5_gpl-5.10.tar.gz/download
+https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-5.10/PyQtDataVisualization_gpl-5.10.tar.gz/download
+https://sourceforge.net/projects/pyqt/files/PyQt3D/PyQt3D-5.10/PyQt3D_gpl-5.10.tar.gz/download
 
 sudo apt-get install libbz2-dev
 sudo apt-get install libsqlite3-dev
+sudo apt-get install pkg-config
+sudo apt-get install flex
+sudo apt-get install bison
+sudo apt-get install gperf
+sudo apt-get install dbus-*dev
+sudo apt-get install libssl-dev
+
+
+https://github.com/lxml/lxml.git a carpeta src tb y extraemos
 
 Ejecutar:
 build_binaries_linux_64.sh
