@@ -9,7 +9,6 @@ class parsepdf(object):
 
     def parse(self, xml, filename):
         res_ = rml2pdf.parseString(xml).read()
-        print(xml)
         with open(filename, 'wb') as w:
             w.write(res_)
 

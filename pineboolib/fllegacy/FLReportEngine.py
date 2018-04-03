@@ -242,7 +242,7 @@ class FLReportEngine(object):
             pdfname = filedir("../tempdata")
             pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             parser_ = parsepdf()
-            parser_.parse(self.rt.decode("utf-8"), pdfname)
+            parser_.parse(self.rt, pdfname)
 
             # print(self.rd.toString(1))
         """

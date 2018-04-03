@@ -32,7 +32,7 @@ class kut2rml(object):
 
     def parse(self, name, kut, dataString):
         self.xmlK_ = etree.ElementTree.fromstring(kut)
-        documment = SubElement(self.rml_, "documment")
+        documment = SubElement(self.rml_, "document")
         self.templateName_ = name
         documment.set("filename", "%s.pdf" % self.templateName_)
         template = SubElement(documment, "template")
@@ -46,7 +46,11 @@ class kut2rml(object):
         #self.pageTemplate_ = self.pageFormat(self.xmlK_)
         #self.header_ = self.pageHeader(self.xmlK_.find("PageHeader"))
         # print(etree.ElementTree.tostring(self.rml_))
-        return etree.ElementTree.tostring(self.rml_, encoding='utf8', method='xml')
+        res_ = etree.ElementTree.tostring(self.rml_)
+        res_ = "<!DOCTYPE document SYSTEM \"rml_1_0.dtd\">%s" % res_.decode("utf-8")
+        print(res_)
+        #res_ = '<!DOCTYPE document SYSTEM "rml_1_0.dtd"><document filename="bancos.pdf"><template><pageTemplate author="pineboo.parse2reportlab" id="main" pageSize="[595, 842]" title="bancos"></pageTemplate></template><stylesheet/></document>'
+        return res_
 
     def processKutDetails(self, xml, xmlData, parent):
         pageG = self.newPage(parent)
