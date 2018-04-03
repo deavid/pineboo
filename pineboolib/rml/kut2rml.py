@@ -22,8 +22,8 @@ class kut2rml(object):
     repeatHeader_ = None
     pagina = 0
     templateName_ = None
-    actualHSize = {}
-    maxHSize = {}
+    actualVSize = {}
+    maxVSize = {}
 
     def __init__(self):
         self.rml_ = Element(None)
@@ -70,7 +70,7 @@ class kut2rml(object):
         for dF in listDF:
             if dF.get("Level") == str(level):
                 if name is "Detail":
-                    heightCalculated = self.getHeight(dF) + self.actualHSize[str(self.pagina)]
+                    heightCalculated = self.getHeight(dF) + self.actualVSize[str(self.pagina)]
                     # Buscamos si existe DetailFooter y PageFooter y miramos si no excede tamaño
                     for dFooter in xml.findall("DetailFooter"):
                         if dFooter.get("Level") == str(level):
@@ -80,19 +80,19 @@ class kut2rml(object):
                         if self.pagina == 1 or pageFooter.get("PrintFrecuency") == "1":
                             heightCalculated += self.getHeight(pageFooter)
 
-                    if heightCalculated > self.maxHSize[str(self.pagina)]:  # Si nos pasamos
+                    if heightCalculated > self.maxVSize[str(self.pagina)]:  # Si nos pasamos
                         self.pageFooter(xml.find("PageFooter"), parent)  # Pie de página
                         parent = self.newPage(docParent)  # Nueva página
 
                 self.processXML(dF, parent, data)
-
+                print("%s_BOTTON" % name.upper(), self.actualVSize[str(self.pagina)])
         return parent
 
     def newPage(self, parent):
         self.pagina = self.pagina + 1
         #el = SubElement(parent, "pageTemplate")
         #el.set("id", "main")
-        self.actualHSize[str(self.pagina)] = 0
+        self.actualVSize[str(self.pagina)] = 0
         #el.set("id", "main" if self.pagina == 1 else "Pagina_%s" % self.pagina)
         #pG = SubElement(el, "pageDrawing")
         pG = SubElement(parent, "pageDrawing")
@@ -127,26 +127,27 @@ class kut2rml(object):
         parent.set("pagesize", "(%s,%s)" % (pS[0], pS[1]))
         parent.set("leftMargin", str(LM))
         parent.set("showBoundary", "1")
-        self.maxHSize[str(self.pagina)] = self.pageSize_["H"]  # Fix!!??
+        self.maxVSize[str(self.pagina)] = self.pageSize_["H"]  # Fix!!??
         #parent.set("id", "main")
         #parent.set("title", self.templateName_)
         #parent.set("author", "pineboo.parse2reportlab")
 
     def pageHeader(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
-
-        self.actualHSize[str(self.pagina)] += self.getHeight(xml)
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
             self.processXML(xml, parent)
+
+        #self.actualVSize[str(self.pagina)] += self.getHeight(xml)
+        print("PAGE_HEADER BOTTON", self.actualVSize[str(self.pagina)])
 
     def pageFooter(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
-        self.actualHSize[str(self.pagina)] += self.getHeight(xml)
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
+            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] - self.getHeight(xml)
+            print("PAGE_FOOTER BOTTON", self.actualVSize[str(self.pagina)])
             self.processXML(xml, parent)
 
     def processXML(self, xml, parent, data=None):
-        self.actualHSize[str(self.pagina)] += self.getHeight(xml)
 
         for label in xml.findall("Label"):
             self.processText(label, parent)
@@ -159,6 +160,8 @@ class kut2rml(object):
 
         for Special in xml.findall("Special"):
             self.processSpecial(Special, parent)
+
+        self.actualVSize[str(self.pagina)] += self.getHeight(xml)
 
     def processLine(self, xml, parent):
 
@@ -227,7 +230,7 @@ class kut2rml(object):
             """
         # if font not in canvas_.getAvailableFonts():
         #    font = "Helvetica"
-        # FIXME!!
+
         # if fontW > 60:
         #    text = "<b>%s</b>" % text
 
@@ -244,7 +247,11 @@ class kut2rml(object):
             rectE = SubElement(parent, "rect")
             rectE.set("x", str(self.getCord("X", x)))
             rectE.set("y", str(self.getCord("Y", y)))
-            rectE.set("width", str(W - self.getCord("X", x)))
+            print("Ancho", W)
+            if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):
+                print("Limite pasado", self.pageSize_["W"] - self.pageSize_["RM"], W)
+                W = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
+            rectE.set("width", str(W))
             rectE.set("height", str(H * -1))
             rectE.set("fill", "no")
             rectE.set("stroke", "yes")
@@ -279,7 +286,7 @@ class kut2rml(object):
         if t is "X":
             ret = int(self.pageSize_["LM"]) + int(val)
         elif t is "Y":
-            ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"])
+            ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] + self.actualVSize[str(self.pagina)])
 
         return ret
 
