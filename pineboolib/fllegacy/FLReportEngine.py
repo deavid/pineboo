@@ -5,7 +5,7 @@ from PyQt5 import QtXml
 from pineboolib import decorators
 from pineboolib.flcontrols import ProjectClass
 from pineboolib.rml.kut2rml import kut2rml
-from pineboolib.rml.rml2pdf import rml2pdf
+from pineboolib.rml.rml2pdf import parsepdf
 from pineboolib.utils import filedir
 
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
@@ -241,7 +241,8 @@ class FLReportEngine(object):
 
             pdfname = filedir("../tempdata")
             pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            rml2pdf.parsepdf.parse(self.rt, pdfname)
+            parser_ = parsepdf()
+            parser_.parse(self.rt.decode("utf-8"), pdfname)
 
             # print(self.rd.toString(1))
         """

@@ -46,7 +46,7 @@ class kut2rml(object):
         #self.pageTemplate_ = self.pageFormat(self.xmlK_)
         #self.header_ = self.pageHeader(self.xmlK_.find("PageHeader"))
         # print(etree.ElementTree.tostring(self.rml_))
-        return etree.ElementTree.tostring(self.rml_)
+        return etree.ElementTree.tostring(self.rml_, encoding='utf8', method='xml')
 
     def processKutDetails(self, xml, xmlData, parent):
         pageG = self.newPage(parent)

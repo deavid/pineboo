@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from z3c.rml import rml2pdf
+from z3c.rml import document, rml2pdf
+from xml import etree
 import sys
 
 
-class rml2pdf(object):
+class parsepdf(object):
 
-    def parse(self, text, filename):
-        pdf = parseString(text)
+    def parse(self, xml, filename):
+        res_ = rml2pdf.parseString(xml).read()
+        print(xml)
+        with open(filename, 'wb') as w:
+            w.write(res_)
 
-        with open(filename, 'w') as pdfFile:
-            pdfFile.write(pdf.read())
+        w.close()
