@@ -59,9 +59,9 @@ def startup_check_dependencies():
         dependences.append("python-barcode")
 
     try:
-        import z3c
+        import z3c.rml
     except ImportError:
-        logger.exception("El paquete z3c no está instalado")
+        logger.exception("El paquete z3c.rml no está instalado")
         dependences.append("z3c.rml")
 
     if dependences:
