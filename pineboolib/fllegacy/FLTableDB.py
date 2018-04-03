@@ -2064,6 +2064,18 @@ class FLTableDB(QtWidgets.QWidget):
         pass
 
     """
+    Selecciona la fila indicada
+
+    @param  r   Índice de la fila a seleccionar
+    """
+    def setCurrentRow(self, r):
+        t = self.tableRecords_
+        if not t:
+            return
+
+        t.selectRow(r)
+
+    """
     @return Ancho de la columna
     """
     @decorators.NotImplementedWarn

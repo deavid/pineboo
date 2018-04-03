@@ -2176,9 +2176,34 @@ class FLSqlCursor(ProjectClass):
     @param  orderAsc TRUE (por defecto) si el orden es ascendente, FALSE si es descendente
     @return Posición del registro dentro del cursor, o 0 si no encuentra coincidencia.
     """
-    @decorators.NotImplementedWarn
     def atFromBinarySearch(self, fN, v, orderAsc=True):
-        return True
+
+        ret = -1
+        ini = 0
+        fin = self.size() - 1
+        mid = None
+        comp = None
+        midVal = None
+
+        while ini <= fin:
+            mid = int((ini + fin) / 2)
+            midVal = str(self.model().value(mid, fN))
+            if v == midVal:
+                ret = mid
+                break
+
+            if orderAsc:
+                comp = v < midVal
+            else:
+                comp = v > midVal
+
+            if not comp:
+                ini = mid + 1
+            else:
+                fin = mid - 1
+            ret = ini
+
+        return ret
 
     """
     Redefinido por conveniencia
