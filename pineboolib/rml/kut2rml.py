@@ -26,7 +26,6 @@ class kut2rml(object):
     maxHSize = {}
 
     def __init__(self):
-        #self.rml_.append('<!DOCTYPE document SYSTEM "rml.dtd">')
         self.rml_ = Element(None)
         self.pagina = 0
 
@@ -35,21 +34,20 @@ class kut2rml(object):
         documment = SubElement(self.rml_, "document")
         self.templateName_ = name
         documment.set("filename", "%s.pdf" % self.templateName_)
-        template = SubElement(documment, "template")
+        documment.set("invariant", "1")
+        #template = SubElement(documment, "template")
 
         data = etree.ElementTree.fromstring(dataString).findall("Row")
-        self.processKutDetails(self.xmlK_, data, template)
+        self.processKutDetails(self.xmlK_, data, documment)
 
-        st = SubElement(documment, "stylesheet")
-        story = SubElement(documment, "story")
+        #st = SubElement(documment, "stylesheet")
+        #story = SubElement(documment, "story")
 
         #self.pageTemplate_ = self.pageFormat(self.xmlK_)
         #self.header_ = self.pageHeader(self.xmlK_.find("PageHeader"))
         # print(etree.ElementTree.tostring(self.rml_))
         res_ = etree.ElementTree.tostring(self.rml_)
-        res_ = "<!DOCTYPE document SYSTEM \"rml_1_0.dtd\">%s" % res_.decode("utf-8")
-        print(res_)
-        #res_ = '<!DOCTYPE document SYSTEM "rml_1_0.dtd"><document filename="bancos.pdf"><template><pageTemplate author="pineboo.parse2reportlab" id="main" pageSize="[595, 842]" title="bancos"></pageTemplate></template><stylesheet/></document>'
+        res_ = '<!DOCTYPE document SYSTEM \"rml_1_0.dtd\">%s' % res_.decode("utf-8")
         return res_
 
     def processKutDetails(self, xml, xmlData, parent):
@@ -57,7 +55,7 @@ class kut2rml(object):
         prevLevel = -1
         for data in xmlData:
             level = int(data.get("level"))
-            if prevLevel > level:  # Si el nivel anteiror era mayor que el actual, procesamos footer
+            if prevLevel > level:  # Si el nivel anterior era mayor que el actual, procesamos footer
                 pageG = self.processData("DetailFooter", xml, data, pageG, level)
             else:
                 prevLevel = level
@@ -92,11 +90,14 @@ class kut2rml(object):
 
     def newPage(self, parent):
         self.pagina = self.pagina + 1
-        el = SubElement(parent, "pageTemplate")
+        #el = SubElement(parent, "pageTemplate")
+        #el.set("id", "main")
         self.actualHSize[str(self.pagina)] = 0
-        el.set("id", "Pagina_%s" % self.pagina)
-        pG = SubElement(el, "pageGraphics")
-        self.pageFormat(self.xmlK_, el)
+        #el.set("id", "main" if self.pagina == 1 else "Pagina_%s" % self.pagina)
+        #pG = SubElement(el, "pageDrawing")
+        pG = SubElement(parent, "pageDrawing")
+        self.pageFormat(self.xmlK_, parent)
+        #el.set("pagesize", parent.get("pagesize"))
         self.pageHeader(self.xmlK_.find("PageHeader"), pG)
         return pG
 
@@ -122,11 +123,14 @@ class kut2rml(object):
         self.pageSize_["LM"] = int(LM)
         self.pageSize_["TM"] = int(TM)
         self.pageSize_["RM"] = int(RM)
-        parent.set("pageSize", self.converPageSize(PS, PO, Custom))
+        pS = self.converPageSize(PS, PO, Custom)
+        parent.set("pagesize", "(%s,%s)" % (pS[0], pS[1]))
+        parent.set("leftMargin", str(LM))
+        parent.set("showBoundary", "1")
         self.maxHSize[str(self.pagina)] = self.pageSize_["H"]  # Fix!!??
-        parent.set("id", "main")
-        parent.set("title", self.templateName_)
-        parent.set("author", "pineboo.parse2reportlab")
+        #parent.set("id", "main")
+        #parent.set("title", self.templateName_)
+        #parent.set("author", "pineboo.parse2reportlab")
 
     def pageHeader(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
@@ -223,15 +227,15 @@ class kut2rml(object):
             """
         # if font not in canvas_.getAvailableFonts():
         #    font = "Helvetica"
+        # FIXME!!
+        # if fontW > 60:
+        #    text = "<b>%s</b>" % text
 
-        if fontW > 60:
-            text = "<b>%s</b>" % text
+        # if fontI == 1:
+        #    text = "<i>%s</i>" % text
 
-        if fontI == 1:
-            text = "<i>%s</i>" % text
-
-        if W > self.pageSize_["W"]:
-            W = self.pageSize_["W"] - self.pageSize_["RM"]
+        # if W > self.pageSize_["W"]:
+        #    W = self.pageSize_["W"] - self.pageSize_["RM"]
 
         if borderStyle == 1:
             # Rectangulo
@@ -253,17 +257,18 @@ class kut2rml(object):
             y = y + (H / 2)
 
         if not isImage:
-            fontE = SubElement(parent, "setFont")
-            fontE.set("name", str(font))
-            fontE.set("size", str(fontSize))
+            # FIXME!!
+            #fontE = SubElement(parent, "setFont")
+            #fontE.set("name", str(font))
+            #fontE.set("size", str(fontSize))
             strE = SubElement(parent, "drawString")
             strE.text = text
         else:
             strE = SubElement(parent, "image")
             strE.set("file", text)
 
-        strE.set("x", str(self.getCord("X", x)))
-        strE.set("y", str(self.getCord("Y", y)))
+        strE.set("x", str("%s" % self.getCord("X", x)))
+        strE.set("y", str("%s" % self.getCord("Y", y)))
 
     def getColor(self, rgb):
         rgb = rgb.split(",")
