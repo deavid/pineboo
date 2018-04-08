@@ -5,6 +5,8 @@ from pineboolib.utils import filedir, Struct
 import logging
 logger = logging.getLogger(__name__)
 
+import pineboolib
+
 
 class MainForm(QtWidgets.QMainWindow):
     areas = []
@@ -68,23 +70,24 @@ class MainForm(QtWidgets.QMainWindow):
         self.formTab.tabCloseRequested[int].connect(self.closeFormTab)
         self.formTab.removeTab(0)
         #app_icon = QtGui.QIcon('share/icons/pineboo-logo-16.png')
-        #app_icon.addFile(filedir('share/icons/pineboo-logo-16.png'),
+        # app_icon.addFile(filedir('share/icons/pineboo-logo-16.png'),
         #                 QtCore.QSize(16, 16))
-        #app_icon.addFile(filedir('share/icons/pineboo-logo-24.png'),
+        # app_icon.addFile(filedir('share/icons/pineboo-logo-24.png'),
         #                 QtCore.QSize(24, 24))
-        #app_icon.addFile(filedir('share/icons/pineboo-logo-32.png'),
+        # app_icon.addFile(filedir('share/icons/pineboo-logo-32.png'),
         #                 QtCore.QSize(32, 32))
-        #app_icon.addFile(filedir('share/icons/pineboo-logo-48.png'),
+        # app_icon.addFile(filedir('share/icons/pineboo-logo-48.png'),
         #                 QtCore.QSize(48, 48))
-        #app_icon.addFile(filedir('share/icons/pineboo-logo-64.png'),
+        # app_icon.addFile(filedir('share/icons/pineboo-logo-64.png'),
         #                 QtCore.QSize(64, 64))
-        #app_icon.addFile(filedir('share/icons/pineboo-logo-128.png'),
+        # app_icon.addFile(filedir('share/icons/pineboo-logo-128.png'),
         #                 QtCore.QSize(128, 128))
-        #app_icon.addFile(filedir('share/icons/pineboo-logo-256.png'),
+        # app_icon.addFile(filedir('share/icons/pineboo-logo-256.png'),
         #                 QtCore.QSize(256, 256))
-        #self.setWindowIcon(app_icon)
+        # self.setWindowIcon(app_icon)
         self.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
-
+        self.actionAcercaQt.triggered.connect(pineboolib.main.aboutQt)
+        self.actionAcercaPineboo.triggered.connect(pineboolib.main.aboutPineboo)
         self.setWindowTitle("Pineboo")
 
     def closeFormTab(self, numero):

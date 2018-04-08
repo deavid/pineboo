@@ -9,7 +9,7 @@ from binascii import unhexlify
 
 from xml import etree
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qApp
 from PyQt5.QtCore import Qt
 
@@ -1029,3 +1029,12 @@ class XMLAction(XMLStruct):
 class FLMainForm(FLFormDB):
     """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """
     pass
+
+
+def aboutQt(self):
+    QtWidgets.QMessageBox.aboutQt(QtWidgets.QWidget())
+
+
+def aboutPineboo(self):
+    msg = "Texto Acerca de Pineboo"
+    QtWidgets.QMessageBox.information(QtWidgets.QWidget(), "Pineboo", msg)
