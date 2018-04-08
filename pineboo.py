@@ -242,6 +242,7 @@ def create_app(DGI):
                 filedir("../share/fonts/Noto_Sans", fontfile))
 
         QtWidgets.QApplication.setStyle("QtCurve")
+        # TODO: Recoger el tipo de letra si hay en configuración local
         font = QtGui.QFont('Noto Sans', 9)
         font.setBold(False)
         font.setItalic(False)

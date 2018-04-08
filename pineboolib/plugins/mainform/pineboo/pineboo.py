@@ -88,6 +88,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
         self.actionAcercaQt.triggered.connect(pineboolib.main.aboutQt)
         self.actionAcercaPineboo.triggered.connect(pineboolib.main.aboutPineboo)
+        self.actionTipografia.triggered.connect(pineboolib.main.fontDialog)
+        self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
         self.setWindowTitle("Pineboo")
 
     def closeFormTab(self, numero):

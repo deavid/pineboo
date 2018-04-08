@@ -1031,10 +1031,22 @@ class FLMainForm(FLFormDB):
     pass
 
 
-def aboutQt(self):
+def aboutQt():
     QtWidgets.QMessageBox.aboutQt(QtWidgets.QWidget())
 
 
-def aboutPineboo(self):
+def aboutPineboo():
     msg = "Texto Acerca de Pineboo"
     QtWidgets.QMessageBox.information(QtWidgets.QWidget(), "Pineboo", msg)
+
+
+def fontDialog():
+    font_ = QtWidgets.QFontDialog().getFont()
+    if font_:
+        QtWidgets.QApplication.setFont(font_[0])
+        # TODO: Guardar el nuevo tipo de letra
+
+
+def styleDialog():
+    print(QtWidgets.QStyleFactory.keys())
+    # TODO: Menú seleccionable de los estilos disponibles
