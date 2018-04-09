@@ -93,6 +93,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.actionAcercaQt.triggered.connect(pineboolib.main.aboutQt)
         self.actionAcercaPineboo.triggered.connect(pineboolib.main.aboutPineboo)
         self.actionTipografia.triggered.connect(pineboolib.main.fontDialog)
+        self.menuPineboo.addSeparator()
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
         pineboolib.main.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
@@ -148,8 +149,11 @@ class MainForm(QtWidgets.QMainWindow):
         vBLayout.layout.setContentsMargins(0, 0, 0, 0)
 
         vBLayout.setLayout(vBLayout.layout)
-
-        moduleToolBox.addItem(vBLayout, module.description)
+        if module.icon:
+            pixmap = QtGui.QPixmap(module.icon)
+            moduleToolBox.addItem(vBLayout, QtGui.QIcon(pixmap), module.description)
+        else:
+            moduleToolBox.addItem(vBLayout, module.description)
 
         try:
             self.moduleLoad(vBLayout.layout, module)
