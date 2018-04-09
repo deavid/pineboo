@@ -15,6 +15,8 @@ from optparse import OptionParser
 import signal
 import importlib
 import logging
+from pineboolib.fllegacy.FLSettings import FLSettings
+
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 _DGI = None
@@ -241,11 +243,22 @@ def create_app(DGI):
             QtGui.QFontDatabase.addApplicationFont(
                 filedir("../share/fonts/Noto_Sans", fontfile))
 
-        QtWidgets.QApplication.setStyle("QtCurve")
-        # TODO: Recoger el tipo de letra si hay en configuración local
-        font = QtGui.QFont('Noto Sans', 9)
-        font.setBold(False)
-        font.setItalic(False)
+        sett_ = FLSettings()
+
+        styleA = sett_.readEntry("application/style", None)
+        if styleA is None:
+            styleA = "Fusion"
+
+        QtWidgets.QApplication.setStyle(styleA)
+
+        fontA = sett_.readEntry("application/font", None)
+        if fontA is None:
+            font = QtGui.QFont('Noto Sans', 9)
+            font.setBold(False)
+            font.setItalic(False)
+        else:
+            font = QtGui.QFont(fontA[0], int(fontA[1]), int(fontA[2]), fontA[3] == "true")
+
         QtWidgets.QApplication.setFont(font)
 
         # Es necesario importarlo a esta altura, QApplication tiene que ser

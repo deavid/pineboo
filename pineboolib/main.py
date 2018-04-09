@@ -11,7 +11,7 @@ from xml import etree
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qApp
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSignalMapper
 
 import pineboolib.emptyscript
 from pineboolib import qt3ui
@@ -26,6 +26,7 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
+from PyQt5.QtWidgets import QMenu, QActionGroup
 
 
 class DBServer(XMLStruct):
@@ -215,11 +216,37 @@ class Project(object):
                          self.conn.driver().formatValue("bool", "True", False))
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in self.cur:
+            v = icono
+            if v.find("{"):
+                v = v[v.find("{") + 3:]
+                v = v[:v.find("};") + 1]
+                # v = v.replace("\t", "")
+                v = v.replace("\n", "")
+                # v = v.replace("\",", ",")
+                # v = v.replace(",\"", ",")
+                v = v.replace("\t", "    ")
+                # v = v.replace("\n\"", "")
+                # v = v.split(",")
+            v = v.split('","')
+            icono = v
+
             self.modules[idmodulo] = Module(
                 self, idarea, idmodulo, descripcion, icono)
-        # Añadimos módulo sistema(falta icono)
+
+        file_object = open(filedir("..", "share", "pineboo", "sys.xpm"), "r")
+        icono = file_object.read()
+        file_object.close()
+        v = icono
+        if v.find("{"):
+            v = v[v.find("{") + 3:]
+            v = v[:v.find("};") + 1]
+            v = v.replace("\n", "")
+            v = v.replace("\t", "    ")
+        v = v.split('","')
+        icono = v
+
         self.modules["sys"] = Module(
-            self, "sys", "sys", "Administración", None)
+            self, "sys", "sys", "Administración", icono)
 
         # Descargar proyecto . . .
 
@@ -1044,9 +1071,47 @@ def fontDialog():
     font_ = QtWidgets.QFontDialog().getFont()
     if font_:
         QtWidgets.QApplication.setFont(font_[0])
-        # TODO: Guardar el nuevo tipo de letra
+        save_ = []
+        save_.append(font_[0].family())
+        save_.append(font_[0].pointSize())
+        save_.append(font_[0].weight())
+        save_.append(font_[0].italic())
+
+        sett_ = FLSettings()
+        sett_.writeEntry("application/font", save_)
 
 
-def styleDialog():
-    print(QtWidgets.QStyleFactory.keys())
-    # TODO: Menú seleccionable de los estilos disponibles
+@QtCore.pyqtSlot(int)
+def setStyle(n):
+    style_ = styleMapper.mapping(n).text()
+    if style_:
+        sett_ = FLSettings()
+        sett_.writeEntry("application/style", style_)
+        QtWidgets.QApplication.setStyle(style_)
+
+
+def initStyle(menu):
+    menuStyle = menu.addMenu("Estilo")
+    ag = QActionGroup(menuStyle)
+    styleMapper.mapped.connect(setStyle)
+    i = 0
+    sett_ = FLSettings()
+    styleS = sett_.readEntry("application/style", None)
+    if styleS is None:
+        styleS = "Fusion"
+    # TODO: marcar estilo usado...
+    for style_ in QtWidgets.QStyleFactory.keys():
+        action_ = menuStyle.addAction(style_)
+        action_.setCheckable(True)
+        ag.addAction(action_)
+        if style_ == styleS:
+            action_.setChecked(True)
+
+        action_.triggered.connect(styleMapper.map)
+        styleMapper.setMapping(action_, i)
+        i = i + 1
+
+    ag.setExclusive(True)
+
+
+styleMapper = QSignalMapper()

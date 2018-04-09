@@ -41,11 +41,10 @@
     <addaction name="separator"/>
     <addaction name="actionSalir"/>
    </widget>
-   <widget class="QMenu" name="menuConfiguracion">
+   <widget class="QMenu" name="configMenu">
     <property name="title">
      <string>Configuración</string>
     </property>
-    <addaction name="actionEstilo"/>
     <addaction name="actionTipografia"/>
    </widget>
    <widget class="QMenu" name="menuVentanas">
@@ -71,7 +70,7 @@
     <addaction name="actionAcercaQt"/>
    </widget>
    <addaction name="menuPineboo"/>
-   <addaction name="menuConfiguracion"/>
+   <addaction name="configMenu"/>
    <addaction name="menuVentanas"/>
    <addaction name="menuAyuda"/>
   </widget>

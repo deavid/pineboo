@@ -3,6 +3,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import Qt
 from pineboolib.utils import filedir, Struct
 import logging
+from binascii import unhexlify
+from PyQt5.QtWidgets import QAction
 logger = logging.getLogger(__name__)
 
 import pineboolib
@@ -20,6 +22,8 @@ class MainForm(QtWidgets.QMainWindow):
     dockAreasTab = None
     dockFavoritos = None
     dockForm = None
+    mPAreas = {}  # Almacena los nombre de submenus areas de menú pineboo
+    mPModulos = {}  # Almacena los nombre de submenus modulos de menú pineboo
 
     @classmethod
     def setDebugLevel(self, q):
@@ -89,7 +93,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.actionAcercaQt.triggered.connect(pineboolib.main.aboutQt)
         self.actionAcercaPineboo.triggered.connect(pineboolib.main.aboutPineboo)
         self.actionTipografia.triggered.connect(pineboolib.main.fontDialog)
-        self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
+        # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
+        pineboolib.main.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
 
     def closeFormTab(self, numero):
@@ -164,7 +169,6 @@ class MainForm(QtWidgets.QMainWindow):
         vBLayout.setContentsMargins(0, 0, 0, 0)
         for key in module.mainform.toolbar:
             action = module.mainform.actions[key]
-
             button = QtWidgets.QToolButton()
             button.setText(action.text)
             button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
@@ -174,6 +178,7 @@ class MainForm(QtWidgets.QMainWindow):
                 button.setIcon(action.icon)
             button.clicked.connect(action.run)
             vBLayout.addWidget(button)
+            self.addToMenuPineboo(action, module)
         vBLayout.addStretch()
 
     def closeEvent(self, evnt):
@@ -201,6 +206,30 @@ class MainForm(QtWidgets.QMainWindow):
             evnt.ignore()
         else:
             logger.debug("FIXME: Guardando pestañas abiertas ...")
+
+    def addToMenuPineboo(self, ac, mod):
+        #print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
+        # Comprueba si el area ya se ha creado
+        if mod.areaid not in self.mPAreas.keys():
+            areaM = self.menuPineboo.addMenu(QtGui.QIcon('share/icons/gtk-open.png'), pineboolib.project.areas[mod.areaid].descripcion)
+            self.mPAreas[mod.areaid] = areaM
+        else:
+            areaM = self.mPAreas[mod.areaid]
+
+        # Comprueba si el modulo ya se ha creado
+        if mod.name not in self.mPModulos.keys():
+            pixmap = QtGui.QPixmap(mod.icon)
+            if pixmap:
+                moduloM = areaM.addMenu(QtGui.QIcon(pixmap), mod.description)
+            else:
+                moduloM = areaM.addMenu(mod.description)
+
+            self.mPModulos[mod.name] = moduloM
+        else:
+            moduloM = self.mPModulos[mod.name]
+
+        action_ = moduloM.addAction(ac.icon, ac.text)
+        action_.triggered.connect(ac.run)
 
 
 mainWindow = MainForm()
