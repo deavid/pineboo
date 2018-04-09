@@ -60,6 +60,12 @@ def startup_check_dependencies():
         logger.exception("El paquete python-barcode no está instalado")
         dependences.append("python-barcode")
 
+    try:
+        import PIL
+    except ImportError:
+        logger.exception("El paquete Pillow no está instalado")
+        dependences.append("Pillow")
+
     if dependences:
         logger.info("HINT: Dependencias incumplidas:")
         for dep in dependences:
@@ -67,6 +73,7 @@ def startup_check_dependencies():
         sys.exit(32)
 
     version_check("ply", ply.__version__, '3.9')
+    version_check("Pillow", PIL.__version__, '5.1.0')
     version_check("pyqt5", QtCore.QT_VERSION_STR, '5.7')
 
 
