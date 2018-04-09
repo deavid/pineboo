@@ -321,3 +321,14 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
             return False
 
     return True
+
+
+def clearXPM(text):
+    v = text
+    if v.find("{"):
+        v = v[v.find("{") + 3:]
+        v = v[:v.find("};") + 1]
+        v = v.replace("\n", "")
+        v = v.replace("\t", "    ")
+    v = v.split('","')
+    return v

@@ -6,7 +6,7 @@ from PyQt5.QtXml import QDomDocument
 
 from pineboolib import decorators, qsatype
 from pineboolib.flcontrols import ProjectClass
-from pineboolib.utils import filedir, auto_qt_translate_text
+from pineboolib.utils import filedir, auto_qt_translate_text, clearXPM
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
@@ -1243,17 +1243,7 @@ class FLManager(ProjectClass):
             v = q.value(0)
             del q
             # print(v)
-            if v.find("{"):
-                v = v[v.find("{") + 3:]
-                v = v[:v.find("};") + 1]
-                # v = v.replace("\t", "")
-                v = v.replace("\n", "")
-                # v = v.replace("\",", ",")
-                # v = v.replace(",\"", ",")
-                v = v.replace("\t", "    ")
-                # v = v.replace("\n\"", "")
-                # v = v.split(",")
-            v = v.split('","')
+            v = clearXPM(v)
             # print(v)
             return v
 

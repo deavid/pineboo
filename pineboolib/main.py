@@ -18,7 +18,7 @@ from pineboolib import qt3ui
 from pineboolib import decorators
 from pineboolib.pnconnection import PNConnection
 from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.utils import filedir, one, Struct, XMLStruct
+from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFormDB import FLFormDB
@@ -216,34 +216,14 @@ class Project(object):
                          self.conn.driver().formatValue("bool", "True", False))
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in self.cur:
-            v = icono
-            if v.find("{"):
-                v = v[v.find("{") + 3:]
-                v = v[:v.find("};") + 1]
-                # v = v.replace("\t", "")
-                v = v.replace("\n", "")
-                # v = v.replace("\",", ",")
-                # v = v.replace(",\"", ",")
-                v = v.replace("\t", "    ")
-                # v = v.replace("\n\"", "")
-                # v = v.split(",")
-            v = v.split('","')
-            icono = v
-
+            icono = clearXPM(icono)
             self.modules[idmodulo] = Module(
                 self, idarea, idmodulo, descripcion, icono)
 
         file_object = open(filedir("..", "share", "pineboo", "sys.xpm"), "r")
         icono = file_object.read()
         file_object.close()
-        v = icono
-        if v.find("{"):
-            v = v[v.find("{") + 3:]
-            v = v[:v.find("};") + 1]
-            v = v.replace("\n", "")
-            v = v.replace("\t", "    ")
-        v = v.split('","')
-        icono = v
+        icono = clearXPM(icono)
 
         self.modules["sys"] = Module(
             self, "sys", "sys", "Administración", icono)
