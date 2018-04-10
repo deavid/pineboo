@@ -62,7 +62,8 @@ def startup_check_dependencies():
 
     try:
         import PIL
-    except ImportError:
+        v = PIL.__version__
+    except Exception:
         logger.exception("El paquete Pillow no está instalado")
         dependences.append("Pillow")
 
@@ -72,9 +73,12 @@ def startup_check_dependencies():
             logger.info("HINT: Instale el paquete %s e intente de nuevo" % dep)
         sys.exit(32)
 
-    version_check("ply", ply.__version__, '3.9')
-    version_check("Pillow", PIL.__version__, '5.1.0')
-    version_check("pyqt5", QtCore.QT_VERSION_STR, '5.7')
+    if "python3-ply" not in dependences:
+        version_check("ply", ply.__version__, '3.9')
+    if "Pillow" not in dependences:
+        version_check("Pillow", PIL.__version__, '5.1.0')
+    if "python3-pyqt5" not in dependences:
+        version_check("pyqt5", QtCore.QT_VERSION_STR, '5.7')
 
 
 def translate_connstring(connstring):
