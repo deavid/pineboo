@@ -2,6 +2,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 from PyQt5.QtCore import Qt
 from pineboolib.utils import filedir, Struct
+from pineboolib.fllegacy.FLSettings import FLSettings
 import logging
 from binascii import unhexlify
 from PyQt5.QtWidgets import QAction
@@ -24,6 +25,7 @@ class MainForm(QtWidgets.QMainWindow):
     dockForm = None
     mPAreas = {}  # Almacena los nombre de submenus areas de menú pineboo
     mPModulos = {}  # Almacena los nombre de submenus modulos de menú pineboo
+    openTabs = []
 
     @classmethod
     def setDebugLevel(self, q):
@@ -62,7 +64,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.dockForm.setWidget(self.formTab)
 
         self.addDockWidget(Qt.RightDockWidgetArea, self.dockForm)
-        self.dockForm.setMaximumWidth(950)
+        # self.dockForm.setMaximumWidth(950)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dockAreasTab)
         # self.dockAreasTab.show()
         # self.dockForm.show()
@@ -97,13 +99,35 @@ class MainForm(QtWidgets.QMainWindow):
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
         pineboolib.main.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
+        self.showMaximized()
 
     def closeFormTab(self, numero):
-        logger.debug("Cerrando pestaña número %s ", numero)
-        self.formTab.removeTab(numero)
+        if isinstance(numero, str):
+            i = 0
+            name = numero
+            numero = None
+            for n in self.openTabs:
+                if name == n:
+                    numero = i
+                    break
+                i = i + 1
+
+        if numero is not None:
+            logger.debug("Cerrando pestaña número %s ", numero)
+            self.formTab.removeTab(numero)
+
+            i = 0
+            for name in self.openTabs:
+                if i == numero:
+                    self.openTabs.remove(name)
+                    break
+                i = i + 1
 
     def addFormTab(self, action):
         widget = action.mainform_widget
+        if action.name in self.openTabs:
+            self.closeFormTab(action.name)
+
         logger.debug("Añadiendo Form a pestaña %s", action)
         icon = None
         try:
@@ -114,6 +138,7 @@ class MainForm(QtWidgets.QMainWindow):
             self.formTab.addTab(widget, widget.windowTitle())
 
         self.formTab.setCurrentWidget(widget)
+        self.openTabs.append(action.name)
 
     def loadArea(self, area):
         assert area.idarea not in self.areas
@@ -209,7 +234,8 @@ class MainForm(QtWidgets.QMainWindow):
         if not dialog.exec_():
             evnt.ignore()
         else:
-            logger.debug("FIXME: Guardando pestañas abiertas ...")
+            sett_ = FLSettings()
+            sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
 
     def addToMenuPineboo(self, ac, mod):
         #print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
@@ -234,6 +260,17 @@ class MainForm(QtWidgets.QMainWindow):
 
         action_ = moduloM.addAction(ac.icon, ac.text)
         action_.triggered.connect(ac.run)
+
+    def restoreOpenedTabs(self):
+        # Cargamos pestañas abiertas
+        sett_ = FLSettings()
+        tabsOpened_ = sett_.readListEntry("application/mainForm/tabsOpened")
+        if tabsOpened_:
+            for t in tabsOpened_:
+                for k, module in sorted(pineboolib.project.modules.items()):
+                    if t in module.mainform.actions:
+                        module.mainform.actions[t].run()
+                        break
 
 
 mainWindow = MainForm()

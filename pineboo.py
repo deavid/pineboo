@@ -455,6 +455,8 @@ def init_project(DGI, splash, options, project, mainForm, app):
         main_window.loadArea(area)
     for k, module in sorted(project.modules.items()):
         main_window.loadModule(module)
+    main_window.restoreOpenedTabs()
+
     if options.preload:
         preload_actions(project, options.forceload)
 
