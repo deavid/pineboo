@@ -13,9 +13,7 @@ class FLSettings(ProjectClass):
 
     @decorators.BetaImplementation
     def readListEntry(self, key, retOk=False):
-        ret = []
-        if key in self.s:
-            ret = self.s.value(key)
+        ret = self.s.value(key)
         return ret
 
     def readEntry(self, _key, _def=None, retOk=False):
