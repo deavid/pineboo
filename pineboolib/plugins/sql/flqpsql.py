@@ -59,7 +59,7 @@ class FLQPSQL(object):
             self.conn_ = psycopg2.connect(conninfostr)
         except psycopg2.OperationalError as e:
 
-            if "does not exist" in str(e):
+            if "does not exist" in str(e) or "no existe" in str(e):
                 ret = QMessageBox.warning(None, "Pineboo",
                                           "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
                                           QMessageBox.Ok | QMessageBox.No)
