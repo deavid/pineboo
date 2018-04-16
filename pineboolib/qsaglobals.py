@@ -199,7 +199,7 @@ class SysType(object):
         return util.getOS()
 
     def nameBD(self):
-        return pineboolib.project.conn.databaseName()
+        return pineboolib.project.conn.DBName()
 
     def setCaptionMainWidget(self, value):
         self.mainWidget().setWindowTitle("Pineboo - %s" % value)
