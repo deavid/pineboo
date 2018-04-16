@@ -1,7 +1,6 @@
 <ACTIONS>
 
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Modulos")</alias>
 		<name>flmodules</name>
 		<table>flmodules</table>
 		<form>FLWidgetMasterTable</form>
@@ -10,7 +9,6 @@
 	</action>
 
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Areas")</alias>
 		<name>flareas</name>
 		<table>flareas</table>
 		<form>FLWidgetMasterTable</form>
@@ -19,7 +17,6 @@
 	</action>
 
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Ficheros")</alias>
 		<name>flfiles</name>
 		<table>flfiles</table>
 		<form>FLWidgetMasterTable</form>
@@ -28,13 +25,11 @@
 	</action>
 
 	<action>
-	<alias>QT_TRANSLATE_NOOP("MetaData","Carga de Módulos")</alias>
 		<name>flloadmod</name>
 		<scriptform>flloadmod</scriptform>
 	</action>
 
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Usuarios")</alias>
 		<name>flusers</name>
 		<table>flusers</table>
 		<form>FLWidgetMasterTable</form>
@@ -42,7 +37,6 @@
 	</action>
 	
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Grupos de Usuarios")</alias>
 		<name>flgroups</name>
 		<table>flgroups</table>
 		<form>FLWidgetMasterTable</form>
@@ -50,7 +44,6 @@
 	</action>
 
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Listas de control de acceso")</alias>
 		<name>flacls</name>
 		<table>flacls</table>
 		<form>flmasteracls</form>
@@ -59,7 +52,6 @@
 	</action>
 	
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Reglas de control de acceso")</alias>
 		<name>flacs</name>
 		<table>flacs</table>
 		<form>FLWidgetMasterTable</form>
@@ -68,7 +60,6 @@
 	</action>
 	
 	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Objetos de Control de Acceso")</alias>
 		<name>flacos</name>
 		<table>flacos</table>
 		<form>FLWidgetMasterTable</form>
@@ -94,15 +85,22 @@
 		<name>flmrproper</name>
 		<scriptform>flmrproper</scriptform>
 	</action>
-	
-	<action>
-		<alias>QT_TRANSLATE_NOOP("MetaData","Actualizaciones automáticas")</alias>
-		<name>flupdates</name>
-		<scriptform>flupdates</scriptform>
-	</action>
         
 	<action>
 		<name>fllarge</name>
 		<table>fllarge</table>
+	</action>
+	<action>
+		<name>ebcomportamiento</name>
+		<scriptform>ebcomportamiento</scriptform>
+
+	</action>
+	<action>
+		<name>flloadmodpkg</name>
+		<scriptform>flloadmodpkg</scriptform>
+	</action>
+	<action>
+		<name>fldumpdb</name>
+		<scriptform>fldumpdb</scriptform>
 	</action>
 </ACTIONS>

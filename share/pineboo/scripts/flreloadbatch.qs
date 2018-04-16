@@ -177,6 +177,7 @@ function oficial_ejecutarComando(comando: String) : Array {
 \end */
 function oficial_cargarModulo(nombreFichero: String) : Boolean {
   var util: FLUtil = new FLUtil;
+  if (util.getOS() == "WIN32") nombreFichero = nombreFichero.left( nombreFichero.length - 1 );
   var fichero = new File(nombreFichero);
 
   var modulo;
@@ -211,14 +212,14 @@ function oficial_cargarModulo(nombreFichero: String) : Boolean {
     }
   } else {
     var aF = f.split("\n");
-    modulo = aF[0];
-    descripcion = aF[1];
-    area = aF[2];
-    desArea = aF[3];
-    version = aF[4];
-    nombreIcono =aF[5];
-    if (aF.length > 6) versionMinimaFL = aF[6];
-    if (aF.length > 7) dependencias = aF[7].split(/ [ , ; ] /);
+    modulo = dameValor(aF[0]);
+    descripcion = dameValor(aF[1]);
+    area = dameValor(aF[2]);
+    desArea = dameValor(aF[3]);
+    version = dameValor(aF[4]);
+    nombreIcono = dameValor(aF[5]);
+    if (aF.length > 6) versionMinimaFL = dameValor(aF[6]);
+    if (aF.length > 7) dependencias = dameValor(aF[7]).split(/ [ , ; ] /);
   }
 
   descripcion = this.iface.traducirCadena(descripcion, fichero.path, modulo);
@@ -228,11 +229,11 @@ function oficial_cargarModulo(nombreFichero: String) : Boolean {
   fichIcono.open(File.ReadOnly);
   var icono = fichIcono.read();
 
-  //var versionSys = sys.version().match(/ [ 0 - 9 ] + .[ 0 - 9 ] + /);
-  //if (this.iface.compararVersiones(versionSys, versionMinimaFL) == 2) {
-    //var contVersion = MessageBox.warning(util.translate("scripts", "Este módulo necesita la versión ") + versionMinimaFL + util.translate("scripts", " o superior de la aplicación base,\nactualmente la versión instalada es la ") + sys.version() + util.translate("scripts", ".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No);
-    //if (contVersion == MessageBox.No) return;
-  //}
+  var versionSys = sys.version().match(/ [ 0 - 9 ] + .[ 0 - 9 ] + /);
+  if (this.iface.compararVersiones(versionSys, versionMinimaFL) == 2) {
+    var contVersion = MessageBox.warning(util.translate("scripts", "Este módulo necesita la versión ") + versionMinimaFL + util.translate("scripts", " o superior de la aplicación base,\nactualmente la versión instalada es la ") + sys.version() + util.translate("scripts", ".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No);
+    if (contVersion == MessageBox.No) return;
+  }
 
   if (!util.sqlSelect("flareas", "idarea", "idarea = '" + area + "'")) {
     if (!util.sqlInsert("flareas", "idarea,descripcion", area + "," + desArea)) {

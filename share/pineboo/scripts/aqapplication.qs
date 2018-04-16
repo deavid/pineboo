@@ -29,8 +29,8 @@ class DockListView
     if (mainWindow == undefined)
       return;
 
-    this.w_ = new QDockWindow(AQS.InDock, mainWindow.w_, name);
-    var w = this.w_;
+    var w = this.w_ = new QDockWindow(AQS.InDock, mainWindow.w_, name);
+
     this.lw_ = new QListView(w, name + "ListView");
     this.lw_.addColumn("");
     this.lw_.addColumn("");
@@ -622,11 +622,9 @@ class MainWindow
       var list = new AQObjectQueryList(this.agMenu_, "QAction", "",
                                        true, true);
       var obj;
-      obj = list.current()
-      while (obj != undefined) {
+      while ((obj = list.current()) != undefined) {
         this.agMenu_.removeChild(obj);
         list.next();
-	obj = list.current()
       }
       w.removeChild(this.agMenu_);
       this.agMenu_ = undefined;
@@ -722,14 +720,10 @@ class MainWindow
   {
     var w = this.w_;
 
-     
-    this.tw_ = w.child("tabWidget", "QTabWidget");
-    var tw = this.tw_
+    var tw = this.tw_ = w.child("tabWidget", "QTabWidget");
     tw.removePage(tw.page(0));
 
-    
-    this.twCorner_ = new QToolButton(tw, "tabWidgetCorner");
-    var tb = this.twCorner_
+    var tb = this.twCorner_ = new QToolButton(tw, "tabWidgetCorner");
     tb.autoRaise = false;
     tb.setFixedSize(16, 16);
     tb.setIconSet(this.iconSet16x16(AQS.Pixmap_fromMimeSource("fileclose.png")));

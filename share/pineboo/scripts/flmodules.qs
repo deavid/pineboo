@@ -31,8 +31,9 @@ function init() {
 }
 
 function cargarFicheroEnBD(nombre, contenido, log, directorio) {
-  if (!util.isFLDefFile(contenido) && !nombre.endsWith(".qs") && !nombre.endsWith(".ar")) return;
+  if (!util.isFLDefFile(contenido) && !nombre.endsWith(".mod") && !nombre.endsWith(".xpm") && !nombre.endsWith(".signatures") && !nombre.endsWith(".checksum") && !nombre.endsWith(".certificates") && !nombre.endsWith(".qs") && !nombre.endsWith(".ar")) return;
 
+  
   var cursorFicheros = new FLSqlCursor("flfiles");
   var cursor = this.cursor();
 
@@ -84,7 +85,7 @@ function cargarFicheroEnBD(nombre, contenido, log, directorio) {
 
 function cargarAr(nombre, contenido, log, directorio)
 {
-	if (!sys.isLoadedModule("eneboodev"))
+	if (!sys.isLoadedModule("flar2kut"))
 		return false;
 		
 	if (util.readSettingEntry("scripts/sys/conversionAr") != "true")
@@ -92,7 +93,7 @@ function cargarAr(nombre, contenido, log, directorio)
 
 	  log.append(util.translate("scripts", "Convirtiendo %0 a kut").arg(nombre));
 	  contenido = sys.toUnicode(contenido, "UTF-8");
-	  contenido = eneboodev.iface.pub_ar2kut(contenido);
+	  contenido = flar2kut.iface.pub_ar2kut(contenido);
 
 	  nombre = nombre.toString().left(nombre.length - 3) + ".kut";
 	  if (contenido) {
@@ -173,6 +174,11 @@ function cargarDeDisco(directorio, comprobarLicencia) {
       sys.processEvents();
       this.setDisabled(true);
       cargarFicheros(directorio + "/", "*.xml");
+      cargarFicheros(directorio + "/", "*.mod");
+      cargarFicheros(directorio + "/", "*.xpm");
+      cargarFicheros(directorio + "/", "*.signatures");
+      cargarFicheros(directorio + "/", "*.certificates");
+      cargarFicheros(directorio + "/", "*.checksum");
       cargarFicheros(directorio + "/forms/", "*.ui");
       cargarFicheros(directorio + "/tables/", "*.mtd");
       cargarFicheros(directorio + "/scripts/", "*.qs");
@@ -228,6 +234,26 @@ function exportarADisco(directorio) {
             sys.write("ISO-8859-1", directorio + "/" + file, contenido);
             log.append(util.translate("scripts", "* Exportando " + file + "."));
             break;
+          case ".mod":
+            sys.write("ISO-8859-1", directorio + "/" + file, contenido);
+            log.append(util.translate("scripts", "* Exportando " + file + "."));
+            break;
+          case ".xpm":
+            sys.write("ISO-8859-1", directorio + "/" + file, contenido);
+            log.append(util.translate("scripts", "* Exportando " + file + "."));
+            break;
+          case ".signatures":
+            sys.write("ISO-8859-1", directorio + "/" + file, contenido);
+            log.append(util.translate("scripts", "* Exportando " + file + "."));
+            break;
+          case ".certificates":
+            sys.write("ISO-8859-1", directorio + "/" + file, contenido);
+            log.append(util.translate("scripts", "* Exportando " + file + "."));
+            break;
+          case ".checksum":
+            sys.write("ISO-8859-1", directorio + "/" + file, contenido);
+            log.append(util.translate("scripts", "* Exportando " + file + "."));
+            break;
           case ".ui":
             sys.write("ISO-8859-1", directorio + "/forms/" + file, contenido);
             log.append(util.translate("scripts", "* Exportando " + file + "."));
@@ -259,29 +285,34 @@ function exportarADisco(directorio) {
         sys.processEvents();
       } while ( curFiles . next ());
        cursorModules.select("idmodulo = '" + idModulo + "'");
-
-      if (cursorModules.first())
-                  {
+       
+       if (cursorModules.first())
+            {
                     cursorAreas.select("idarea = '" + cursorModules.valueBuffer("idarea") + "'");
                     cursorAreas.first();
                      areaName = cursorAreas.valueBuffer("descripcion");
 
-
-                   sys.write("ISO-8859-1", directorio + "/" + cursorModules.valueBuffer("idmodulo")+".xpm", cursorModules.valueBuffer("icono"));
-                   log.append(util.translate("scripts", "* Exportando " + cursorModules.valueBuffer("idmodulo") + ".xpm ."));
-
-                   contenido = '<!DOCTYPE MODULE>\n<MODULE>\n<name>'+cursorModules.valueBuffer("idmodulo")+'</name>\n<alias>QT_TRANSLATE_NOOP("FLWidgetApplication","'+
-                       cursorModules.valueBuffer("descripcion")+'")</alias>\n<area>'+cursorModules.valueBuffer("idarea")+'</area>\n<areaname>QT_TRANSLATE_NOOP("FLWidgetApplication","'+
-                       areaName+'")</areaname>\n<version>'+cursorModules.valueBuffer("version")+'</version>\n<icon>'+cursorModules.valueBuffer("idmodulo")+
-                       '.xpm</icon>\n<flversion>'+cursorModules.valueBuffer("version")+'</flversion>\n<description>'+cursorModules.valueBuffer("idmodulo")+'</description>\n</MODULE>';
-                    
-                    sys.write("ISO-8859-1", directorio + "/" + cursorModules.valueBuffer("idmodulo")+".mod",contenido);
-                   log.append(util.translate("scripts", "* Generando " + cursorModules.valueBuffer("idmodulo") + ".mod ."));      
-
+       if (!File.exists(directorio + "/" + cursorModules.valueBuffer("idmodulo")+".xpm"))
+       		{
+          	sys.write("ISO-8859-1", directorio + "/" + cursorModules.valueBuffer("idmodulo")+".xpm", cursorModules.valueBuffer("icono"));
+                log.append(util.translate("scripts", "* Exportando " + cursorModules.valueBuffer("idmodulo") + ".xpm (Regenerado)."));
+		}
+				
+	if (!File.exists(directorio + "/" + cursorModules.valueBuffer("idmodulo")+".mod"))	
+		{	
+                 contenido = '<!DOCTYPE MODULE>\n<MODULE>\n<name>'+cursorModules.valueBuffer("idmodulo")+'</name>\n<alias>QT_TRANSLATE_NOOP("FLWidgetApplication","'+
+                 cursorModules.valueBuffer("descripcion")+'")</alias>\n<area>'+cursorModules.valueBuffer("idarea")+'</area>\n<areaname>QT_TRANSLATE_NOOP("FLWidgetApplication","'+
+                 areaName+'")</areaname>\n<version>'+cursorModules.valueBuffer("version")+'</version>\n<icon>'+cursorModules.valueBuffer("idmodulo")+
+                 '.xpm</icon>\n<flversion>'+cursorModules.valueBuffer("version")+'</flversion>\n<description>'+cursorModules.valueBuffer("idmodulo")+'</description>\n</MODULE>';
+                  
+                sys.write("ISO-8859-1", directorio + "/" + cursorModules.valueBuffer("idmodulo")+".mod",contenido);
+                log.append(util.translate("scripts", "* Generando " + cursorModules.valueBuffer("idmodulo") + ".mod (Regenerado)."));      
+		}
                      
           
  
-                  }
+            }
+
       this.setDisabled(false);
       log.append(util.translate("scripts", "* Exportación finalizada."));
     }
