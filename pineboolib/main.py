@@ -211,6 +211,8 @@ class Project(object):
         for idarea, descripcion in self.cur:
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
+        self.areas["sys"] = Struct(idarea="sys", descripcion="Area de Sistema")
+
         # Obtener modulos activos
         self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ %
                          self.conn.driver().formatValue("bool", "True", False))
