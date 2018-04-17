@@ -268,9 +268,10 @@ class MainForm(QtWidgets.QMainWindow):
         if tabsOpened_:
             for t in tabsOpened_:
                 for k, module in sorted(pineboolib.project.modules.items()):
-                    if t in module.mainform.actions:
-                        module.mainform.actions[t].run()
-                        break
+                    if hasattr(module, "mainform"):
+                        if t in module.mainform.actions:
+                            module.mainform.actions[t].run()
+                            break
 
 
 mainWindow = MainForm()
