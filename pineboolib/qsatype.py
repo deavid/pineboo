@@ -818,6 +818,12 @@ class Dir_Class(object):
     def cleanDirPath(name):
         return str(name)
 
+    def setCurrent(self, val=None):
+        if val is None:
+            val = filedir(".")
+        print("DIR.setCurrent(%s)" % val)
+        os.chdir(val)
+
 
 Dir = Dir_Class
 
