@@ -122,9 +122,6 @@ class FLQPSQL(object):
         #    v = ""
         # TODO: psycopg2.mogrify ???
 
-        if type_ == "pixmap" and v.find("'") > -1:
-            v = self.normalizeValue(v)
-
         if v is None:
             s = "Null"
 
@@ -153,6 +150,12 @@ class FLQPSQL(object):
                     v = v.upper()
 
                 s = "'%s'" % v
+
+        elif type_ == "pixmap":
+            if v.find("'") > -1:
+                v = self.normalizeValue(v)
+            s = "'%s'" % v
+
         else:
             s = v
         # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
@@ -582,18 +585,18 @@ class FLQPSQL(object):
 
         if not typeName or typeName == "Tables":
             t.exec_(
-                "select relname from pg_class where ( relkind = 'r' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
+                "select relname from pg_class where ( relkind = 'r' ) AND ( relname !~ '^Inv' ) AND ( relname !~ '^pg_' ) ")
             while t.next():
                 tl.append(str(t.value(0)))
 
         if not typeName or typeName == "Views":
             t.exec_(
-                "select relname from pg_class where ( relkind = 'v' ) AND ( relname !~ '^Inv' ) AND relname !~ '^pg_' ) ")
+                "select relname from pg_class where ( relkind = 'v' ) AND ( relname !~ '^Inv' ) AND ( relname !~ '^pg_' ) ")
             while t.next():
                 tl.append(str(t.value(0)))
         if not typeName or typeName == "SystemTables":
             t.exec_(
-                "select relname from pg_class where ( relkind = 'r' ) AND relname like 'pg_%' ) ")
+                "select relname from pg_class where ( relkind = 'r' ) AND ( relname like 'pg_%' ) ")
             while t.next():
                 tl.append(str(t.value(0)))
 
