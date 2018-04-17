@@ -183,10 +183,10 @@ class Project(object):
                 for name in dirs:
                     os.rmdir(os.path.join(root, name))
             # borrando de share
-            for root, dirs, files in os.walk(self.dir("../share/pineboo"), topdown=False):
-                for name in files:
-                    if name.endswith("qs.py") or name.endswith("qs.py.debug") or name.endswith("qs.xml"):
-                        os.remove(os.path.join(root, name))
+            # for root, dirs, files in os.walk(self.dir("../share/pineboo"), topdown=False):
+            #    for name in files:
+            #        if name.endswith("qs.py") or name.endswith("qs.py.debug") or name.endswith("qs.xml"):
+            #            os.remove(os.path.join(root, name))
 
         if not os.path.exists(self.dir("cache")):
             os.makedirs(self.dir("cache"))
