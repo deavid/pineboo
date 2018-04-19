@@ -3,6 +3,9 @@ from xml import etree
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from PyQt5.QtGui import QColor
 from pineboolib.utils import filedir
+import logging
+from datetime import date
+from reportlab.pdfbase import pdfmetrics
 
 canvas_ = None
 header_ = []
@@ -11,7 +14,6 @@ pageFormat_ = []
 
 
 class kut2rml(object):
-
     rml_ = None
     header_ = None
     repeatHeader_ = False
@@ -28,6 +30,7 @@ class kut2rml(object):
     def __init__(self):
         self.rml_ = Element(None)
         self.pagina = 0
+        self.logger = logging.getLogger("kut2rml")
 
     def parse(self, name, kut, dataString):
         self.xmlK_ = etree.ElementTree.fromstring(kut)
@@ -61,8 +64,8 @@ class kut2rml(object):
                 prevLevel = level
 
             pageG = self.processData("Detail", xml, data, pageG, level, parent)
+            pageG = self.processData("DetailFooter", xml, data, pageG, level)
 
-        pageG = self.processData("DetailFooter", xml, data, pageG, level)
         pageG = self.pageFooter(xml.find("PageFooter"), pageG)
 
     def processData(self, name, xml, data, parent, level, docParent=None):
@@ -80,12 +83,14 @@ class kut2rml(object):
                         if self.pagina == 1 or pageFooter.get("PrintFrecuency") == "1":
                             heightCalculated += self.getHeight(pageFooter)
 
+                    heightCalculated += self.pageSize_["BM"]
+
                     if heightCalculated > self.maxVSize[str(self.pagina)]:  # Si nos pasamos
                         self.pageFooter(xml.find("PageFooter"), parent)  # Pie de página
                         parent = self.newPage(docParent)  # Nueva página
 
                 self.processXML(dF, parent, data)
-                print("%s_BOTTON" % name.upper(), self.actualVSize[str(self.pagina)])
+                self.logger.warn("%s_BOTTON" % name.upper(), self.actualVSize[str(self.pagina)])
         return parent
 
     def newPage(self, parent):
@@ -110,7 +115,7 @@ class kut2rml(object):
 
     def pageFormat(self, xml, parent):
         Custom = None
-        BottomMargin = xml.get("BottomMargin")
+        BM = xml.get("BottomMargin")
         LM = xml.get("LeftMargin")
         PO = int(xml.get("PageOrientation"))
         PS = int(xml.get("PageSize"))
@@ -119,10 +124,11 @@ class kut2rml(object):
         if PS in [30, 31]:
             Custom = [int(xml.get("CustomHeightMM")), int(xml.get("CustomWidthMM"))]
         self.pageSize_["W"], self.pageSize_["H"] = self.converPageSize(int(PS), int(PO))
-        self.pageSize_["H"] = self.pageSize_["H"] - int(TM)
+        #self.pageSize_["H"] = self.pageSize_["H"] - int(TM)
         self.pageSize_["LM"] = int(LM)
         self.pageSize_["TM"] = int(TM)
         self.pageSize_["RM"] = int(RM)
+        self.pageSize_["BM"] = int(BM)
         pS = self.converPageSize(PS, PO, Custom)
         parent.set("pagesize", "(%s,%s)" % (pS[0], pS[1]))
         parent.set("leftMargin", str(LM))
@@ -138,28 +144,30 @@ class kut2rml(object):
             self.processXML(xml, parent)
 
         #self.actualVSize[str(self.pagina)] += self.getHeight(xml)
-        print("PAGE_HEADER BOTTON", self.actualVSize[str(self.pagina)])
+        self.logger.warn("PAGE_HEADER BOTTON", self.actualVSize[str(self.pagina)])
 
     def pageFooter(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
-            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] - self.getHeight(xml)
-            print("PAGE_FOOTER BOTTON", self.actualVSize[str(self.pagina)])
+            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] - self.getHeight(xml) - self.pageSize_["BM"]
+            self.logger.warn("PAGE_FOOTER BOTTON", self.actualVSize[str(self.pagina)])
             self.processXML(xml, parent)
 
     def processXML(self, xml, parent, data=None):
 
-        for label in xml.findall("Label"):
-            self.processText(label, parent)
-
-        for line in xml.findall("Line"):
-            self.processLine(line, parent)
-
-        for field in xml.findall("Field"):
-            self.processText(field, parent, data)
-
-        for Special in xml.findall("Special"):
-            self.processSpecial(Special, parent)
+        for child in xml.iter():
+            if child.tag == "Label":
+                self.processText(child, parent)
+            elif child.tag == "Line":
+                self.processLine(child, parent)
+            elif child.tag == "Field":
+                self.processText(child, parent, data)
+            elif child.tag == "Special":
+                # print(etree.ElementTree.tostring(child))
+                self.processText(child, parent)
+            else:
+                if child.tag not in ("PageFooter", "PageHeader", "DetailFooter", "Detail"):
+                    self.logger.warn("porcessXML: Unknown tag %s." % child.tag)
 
         self.actualVSize[str(self.pagina)] += self.getHeight(xml)
 
@@ -200,21 +208,23 @@ class kut2rml(object):
         fontW = int(xml.get("FontWeight"))
         fontI = int(xml.get("FontItalic"))
         text = xml.get("Text")
-        if data is not None:
+        if xml.tag == "Field" and data is not None:
             text = data.get(xml.get("Field"))
             if text == "None":
                 return
+        if xml.tag == "Special":
+            text = self.getSpecial(text[1:len(text) - 1])
 
-            if text.startswith(filedir("../tempdata")):
-                isImage = True
+        if text.startswith(filedir("../tempdata")):
+            isImage = True
 
-            precision = xml.get("Precision")
-            negValueColor = xml.get("NegValueColor")
-            Currency = xml.get("Currency")
-            dataType = xml.get("Datatype")
-            commaSeparator = xml.get("CommaSeparator")
-            dateFormat = xml.get("DateFormat")
-            """
+        precision = xml.get("Precision")
+        negValueColor = xml.get("NegValueColor")
+        Currency = xml.get("Currency")
+        dataType = xml.get("Datatype")
+        commaSeparator = xml.get("CommaSeparator")
+        dateFormat = xml.get("DateFormat")
+        """
             if precision:
                 print("Fix Field.precision", precision)
             if negValueColor:
@@ -227,15 +237,27 @@ class kut2rml(object):
                 print("Fix Field.commaSeparator", commaSeparator)
             if dateFormat:
                 print("Fix Field.dateFormat", dateFormat)
-            """
-        # if font not in canvas_.getAvailableFonts():
-        #    font = "Helvetica"
+        """
+        if font not in pdfmetrics.standardFonts:
+            self.logger.warn("porcessXML: Unknown font %s in (%s).Using Helvetica" % (font, pdfmetrics.standardFonts))
+            font = "Helvetica"
 
-        # if fontW > 60:
-        #    text = "<b>%s</b>" % text
+        if fontW > 60 and fontSize > 10:
+            fontB = "%s-Bold" % font
+            if fontB in pdfmetrics.standardFonts:
+                font = fontB
 
-        # if fontI == 1:
-        #    text = "<i>%s</i>" % text
+        if fontI == 1:
+            fontIt = None
+            if font.find("Bold") == -1:
+                fontIt = "%s-" % font
+            else:
+                fontIt = "%s"
+
+            if "%sOblique" % fontIt in pdfmetrics.standardFonts:
+                font = "%sOblique" % fontIt
+            elif "%sItalic" % fontIt in pdfmetrics.standardFonts:
+                font = "%sItalic" % fontIt
 
         # if W > self.pageSize_["W"]:
         #    W = self.pageSize_["W"] - self.pageSize_["RM"]
@@ -255,20 +277,25 @@ class kut2rml(object):
             rectE.set("height", str(H * -1))
             rectE.set("fill", "no")
             rectE.set("stroke", "yes")
+            #print("Creando rectangulo", W, H)
 
         # Calculamos la posicion real contando con el tamaño
         if HAlig == 1:  # Centrado
-            x = x + (W / 2)
+            x = x + (W / 2) - (fontW / 1.75)
+        elif HAlig == 2:
+            x = x + (fontW / 1.75)
 
         if VAlig == 1:  # Centrado
-            y = y + (H / 2)
+            y = y + (H / 2) + (H / 4)
 
         if not isImage:
-            # FIXME!!
-            #fontE = SubElement(parent, "setFont")
-            #fontE.set("name", str(font))
-            #fontE.set("size", str(fontSize))
+            fontE = SubElement(parent, "setFont")
+            fontE.set("name", font)
+            fontE.set("size", str(fontSize))
             strE = SubElement(parent, "drawString")
+            #strE.set("fontName", font)
+            #strE.set("fontSize", str(fontSize))
+
             strE.text = text
         else:
             strE = SubElement(parent, "image")
@@ -283,15 +310,12 @@ class kut2rml(object):
 
     def getCord(self, t, val):
         ret = None
-        if t is "X":
+        if t is "X":  # Horizontal
             ret = int(self.pageSize_["LM"]) + int(val)
-        elif t is "Y":
-            ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] + self.actualVSize[str(self.pagina)])
+        elif t is "Y":  # Vertical
+            ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
 
         return ret
-
-    def processSpecial(self, xml, parent):  # Recogemos datos especiales del documento ....
-        pass
 
     def converPageSize(self, size, orientation, Custom=None):
         result_ = None
@@ -353,10 +377,20 @@ class kut2rml(object):
         elif size in [30, 31]:
             r = Custom  # "CUSTOM"
         if r is None:
-            print("No se encuentra pagesize para %s. Usando A4" % size)
+            self.logger.warn("porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
             r = [595, 842]
 
         if orientation != 0:
             r = [r[1], r[0]]
 
         return r
+
+    def getSpecial(self, name):
+        self.logger.debug("porcessXML:getSpecial %s" % name)
+        ret = "None"
+        if name == "Fecha":
+            ret = str(date.__format__(date.today(), "%d.%m.%Y"))
+        if name == "NúmPágina":
+            ret = str(self.pagina)
+
+        return ret
