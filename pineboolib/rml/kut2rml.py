@@ -31,6 +31,7 @@ class kut2rml(object):
         self.rml_ = Element(None)
         self.pagina = 0
         self.logger = logging.getLogger("kut2rml")
+        self.correcionAltura_ = 0.927
 
     def parse(self, name, kut, dataString):
         self.xmlK_ = etree.ElementTree.fromstring(kut)
@@ -90,26 +91,26 @@ class kut2rml(object):
                         parent = self.newPage(docParent)  # Nueva página
 
                 self.processXML(dF, parent, data)
-                self.logger.warn("%s_BOTTON" % name.upper(), self.actualVSize[str(self.pagina)])
+                self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
         return parent
 
     def newPage(self, parent):
         self.pagina = self.pagina + 1
         #el = SubElement(parent, "pageTemplate")
         #el.set("id", "main")
-        self.actualVSize[str(self.pagina)] = 0
         #el.set("id", "main" if self.pagina == 1 else "Pagina_%s" % self.pagina)
         #pG = SubElement(el, "pageDrawing")
         pG = SubElement(parent, "pageDrawing")
         self.pageFormat(self.xmlK_, parent)
+        self.actualVSize[str(self.pagina)] = self.pageSize_["TM"]
         #el.set("pagesize", parent.get("pagesize"))
         self.pageHeader(self.xmlK_.find("PageHeader"), pG)
         return pG
 
     def getHeight(self, xml):
-        h = xml.get("Height")
+        h = int(xml.get("Height"))
         if h:
-            return int(h)
+            return h
         else:
             return 0
 
@@ -149,7 +150,7 @@ class kut2rml(object):
     def pageFooter(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
-            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] - self.getHeight(xml) - self.pageSize_["BM"]
+            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
             self.logger.warn("PAGE_FOOTER BOTTON", self.actualVSize[str(self.pagina)])
             self.processXML(xml, parent)
 
@@ -239,7 +240,7 @@ class kut2rml(object):
                 print("Fix Field.dateFormat", dateFormat)
         """
         if font not in pdfmetrics.standardFonts:
-            self.logger.warn("porcessXML: Unknown font %s in (%s).Using Helvetica" % (font, pdfmetrics.standardFonts))
+            #self.logger.warn("porcessXML: Unknown font %s in (%s).Using Helvetica" % (font, pdfmetrics.standardFonts))
             font = "Helvetica"
 
         if fontW > 60 and fontSize > 10:
@@ -268,11 +269,15 @@ class kut2rml(object):
             sE.set("color", fgColor)
             rectE = SubElement(parent, "rect")
             rectE.set("x", str(self.getCord("X", x)))
+            # if (self.pageSize_["H"] - self.pageSize_["TM"]) < self.getCord("Y", y):  # Controla si se sobrepasa el margen superior
+            #    self.logger.debug("Alto max %s , actual %s" % ((self.pageSize_["H"] - self.pageSize_["TM"]), self.getCord("Y", y)))
+            #    rectE.set("y", str(self.pageSize_["H"] - self.pageSize_["TM"]))
+            # else:
             rectE.set("y", str(self.getCord("Y", y)))
-            print("Ancho", W)
-            if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):
-                print("Limite pasado", self.pageSize_["W"] - self.pageSize_["RM"], W)
+            if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
+                self.logger.debug("Limite Ancho pasado %s de %s" % (self.pageSize_["W"] - self.pageSize_["RM"], W))
                 W = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
+
             rectE.set("width", str(W))
             rectE.set("height", str(H * -1))
             rectE.set("fill", "no")
@@ -313,7 +318,8 @@ class kut2rml(object):
         if t is "X":  # Horizontal
             ret = int(self.pageSize_["LM"]) + int(val)
         elif t is "Y":  # Vertical
-            ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
+            #ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
+            ret = int(self.pageSize_["H"]) - int(val) - int(self.actualVSize[str(self.pagina)] * self.correcionAltura_)
 
         return ret
 
