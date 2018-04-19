@@ -174,8 +174,13 @@ class FLManagerModules(ProjectClass):
     @return QString con el contenido del fichero o vacía en caso de error.
     """
 
-    def contentFS(self, pN):
-        return str(open(pN, "rb").read(), "ISO-8859-15")
+    def contentFS(self, pN, utf8=False):
+        ret = None
+        if utf8:
+            ret = str(open(pN, "rb").read(), "utf-8")
+        else:
+            ret = str(open(pN, "rb").read(), "ISO-8859-15")
+        return ret
 
     """
     Obtiene el contenido de un fichero, utilizando la caché de memoria y disco.
@@ -217,8 +222,11 @@ class FLManagerModules(ProjectClass):
         else:
             modId = self._prj.conn.managerModules().idModuleOfFile(n)
         if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" % (self._prj.dbname, modId, ext_, name_))):
+            utf8_ = False
+            if ext_ == "kut":
+                utf8_ = True
             data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %
-                                          (self._prj.dbname, modId, ext_, name_, shaKey, ext_)))
+                                          (self._prj.dbname, modId, ext_, name_, shaKey, ext_)), utf8_)
         elif os.path.exists(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_))):
             data = self.contentFS(
                 filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
@@ -260,6 +268,7 @@ class FLManagerModules(ProjectClass):
     Llama al método load de los FLTableDB de un widget
     @param w Widget que contiene los FLTableDB
     """
+
     def loadFLTableDBs(self, w):
         qt3ui.loadFLTableDBs(w)
 
