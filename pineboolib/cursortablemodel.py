@@ -71,6 +71,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.field_aliases = []
         self.field_type = []
         self.field_metaData = []
+        self.col_aliases = []
 
         # Indices de busqueda segun PK y CK. Los array "pos" guardan las posiciones
         # de las columnas afectadas. PK normalmente valdrá [0,].
@@ -815,7 +816,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def updateColumnsCount(self):
         if self.cols != len(self.metadata().fieldList()):
             self.cols = len(self.metadata().fieldList())
-            self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
+            self.loadColAliases()
             self._refresh_field_info(None)
 
     def rowCount(self, parent=None):
@@ -830,12 +831,15 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     def headerData(self, section, orientation, role):
         if role == DisplayRole:
             if orientation == Horizontal:
+                if not self.col_aliases:
+                    self.loadColAliases()
                 return self.col_aliases[section]
             elif orientation == Vertical:
                 return section + 1
         return QVariant_invalid
 
-        # return QAbstractTableModel_headerData(self, section, orientation, role)
+    def loadColAliases(self):
+        self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
 
     def fieldMetadata(self, fieldName):
         return self.metadata().field(fieldName)
