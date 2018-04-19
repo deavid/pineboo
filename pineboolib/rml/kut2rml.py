@@ -66,16 +66,18 @@ class kut2rml(object):
 
     def processKutDetails(self, xml, xmlData, parent):
         pageG = self.newPage(parent)
-        prevLevel = -1
+        prevLevel = 0
         for data in xmlData:
             level = int(data.get("level"))
-            if prevLevel > level:  # Si el nivel anterior era mayor que el actual, procesamos footer
-                pageG = self.processData("DetailFooter", xml, data, pageG, level)
-            else:
-                prevLevel = level
+            if prevLevel > level:
+                pageG = self.processData("DetailFooter", xml, data, pageG, prevLevel)
 
             pageG = self.processData("Detail", xml, data, pageG, level, parent)
-            pageG = self.processData("DetailFooter", xml, data, pageG, level)
+
+            prevLevel = level
+
+        print("final!!")
+        pageG = self.processData("DetailFooter", xml, data, pageG, level)
 
         pageG = self.pageFooter(xml.find("PageFooter"), pageG)
 
