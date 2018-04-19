@@ -4,6 +4,7 @@ from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from PyQt5.QtGui import QColor
 from pineboolib.utils import filedir
 import logging
+import os
 from datetime import date
 from reportlab.pdfbase import pdfmetrics
 
@@ -26,6 +27,8 @@ class kut2rml(object):
     templateName_ = None
     actualVSize = {}
     maxVSize = {}
+    docInitSubElemet_ = None
+    registeredFonts = []
 
     def __init__(self):
         self.rml_ = Element(None)
@@ -36,6 +39,13 @@ class kut2rml(object):
     def parse(self, name, kut, dataString):
         self.xmlK_ = etree.ElementTree.fromstring(kut)
         documment = SubElement(self.rml_, "document")
+        # Para definir tipos de letra
+        self.docInitSubElemet_ = SubElement(documment, "docinit")
+        for f in pdfmetrics.standardFonts:
+            self.registeredFonts.append(f)
+
+        # FIXME Añadir todas las fuentes de share/fonts/
+
         self.templateName_ = name
         documment.set("filename", "%s.pdf" % self.templateName_)
         documment.set("invariant", "1")
@@ -150,7 +160,8 @@ class kut2rml(object):
     def pageFooter(self, xml, parent):
         frecuencia = int(xml.get("PrintFrequency"))
         if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
-            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
+            #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
+            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self.getHeight(xml) * self.correcionAltura_
             self.logger.warn("PAGE_FOOTER BOTTON", self.actualVSize[str(self.pagina)])
             self.processXML(xml, parent)
 
@@ -188,7 +199,7 @@ class kut2rml(object):
         lineME = SubElement(parent, "lineMode")
         lineME.set("width", str(width))
         lineE = SubElement(parent, "lines")
-        lineE.text = "%s %s %s %s" % (self.getCord("X", X1), self.getCord("Y", Y1), X2, self.getCord("Y", Y2))
+        lineE.text = "%s %s %s %s" % (self.getCord("X", X1), self.getCord("Y", Y1 * self.correcionAltura_), X2, self.getCord("Y", Y2 * self.correcionAltura_))
 
     def processText(self, xml, parent, data=None):
         isImage = False
@@ -239,13 +250,13 @@ class kut2rml(object):
             if dateFormat:
                 print("Fix Field.dateFormat", dateFormat)
         """
-        if font not in pdfmetrics.standardFonts:
-            #self.logger.warn("porcessXML: Unknown font %s in (%s).Using Helvetica" % (font, pdfmetrics.standardFonts))
+        if font not in self.registeredFonts:
             font = "Helvetica"
+        fontName = font
 
         if fontW > 60 and fontSize > 10:
             fontB = "%s-Bold" % font
-            if fontB in pdfmetrics.standardFonts:
+            if fontB in self.registeredFonts:
                 font = fontB
 
         if fontI == 1:
@@ -255,10 +266,18 @@ class kut2rml(object):
             else:
                 fontIt = "%s"
 
-            if "%sOblique" % fontIt in pdfmetrics.standardFonts:
+            if "%sOblique" % fontIt in self.registeredFonts:
                 font = "%sOblique" % fontIt
-            elif "%sItalic" % fontIt in pdfmetrics.standardFonts:
+            elif "%sItalic" % fontIt in self.registeredFonts:
                 font = "%sItalic" % fontIt
+
+        if font not in self.registeredFonts:
+            self.logger.warn("porcessXML: Registering %s font" % font)
+            self.registeredFonts.append(fontName)
+
+            rF = SubElement(self.docInitSubElemet_, "registerTTFont")
+            rF.set("faceName", font)
+            rF.set("fileName", fileF)
 
         # if W > self.pageSize_["W"]:
         #    W = self.pageSize_["W"] - self.pageSize_["RM"]
@@ -273,7 +292,7 @@ class kut2rml(object):
             #    self.logger.debug("Alto max %s , actual %s" % ((self.pageSize_["H"] - self.pageSize_["TM"]), self.getCord("Y", y)))
             #    rectE.set("y", str(self.pageSize_["H"] - self.pageSize_["TM"]))
             # else:
-            rectE.set("y", str(self.getCord("Y", y)))
+            rectE.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
             if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
                 self.logger.debug("Limite Ancho pasado %s de %s" % (self.pageSize_["W"] - self.pageSize_["RM"], W))
                 W = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
@@ -306,8 +325,8 @@ class kut2rml(object):
             strE = SubElement(parent, "image")
             strE.set("file", text)
 
-        strE.set("x", str("%s" % self.getCord("X", x)))
-        strE.set("y", str("%s" % self.getCord("Y", y)))
+        strE.set("x", str(self.getCord("X", x)))
+        strE.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
 
     def getColor(self, rgb):
         rgb = rgb.split(",")
