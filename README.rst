@@ -27,7 +27,8 @@ Aproximaciones existentes
 ---------------------------
 Solo existe una única aproximación a la ejecución de proyectos de Eneboo:
 
- - Python3.x + PyQt5 + PsycoPG2 (El un futuro será según opción sql seleccionada (PostgreSQL, MySQL, SQLite, ...)
+ - Python3.x + PyQt5
+ - Permite ejecutarlo en PostgreSQL y en MySQL.
  - Motor realizado integramente en Python
  - Conversión al vuelo de QSA a PY con parseador FLScriptParser2 
  - Conversión al vuelo de formularios Qt3 a Qt5 creando un UiLoader manualmente
@@ -78,24 +79,26 @@ Lo mejor es usarlo en bases de datos de desarrollo para evitar problemas.
 
 Cómo poner en marcha Pineboo
 ------------------------------
-Bien, supongo que la mayoría de la gente antes de leer esto habrá intentado
-ejecutar "./pineboo" y se ha encontrado con un diálogo de conexión que no funciona.
+    PASO 1 - DESCARGAMOS PINEBOO Y FLSCRIPTPARSER :
+    PASO 2 - INSTALAMOS PYTHON 3.x :
+    PASO 3 - CREAR EL PATH PARA PYTHON 3.X :
+    PASO 4 - INSTALAR "Python-lxml" PARA WINDOWS :
+    PASO 5 - INSTALAR PYTHON3-PLY :
+    PASO 6 - INSTALAR PYTHON3-PYQT5 :
+    PASO 7 - INSTALAR PYTHON3-FUTURE :
+    PASO 8 - INSTALAR PYTHON3-PSYCOPG2 :
+    PASO 9 - INSTALAR PYTHON3-XMLJSON :
+    PASO 9B-Instalar PYTHON3-BARCODE :
+    PASO 9C-Instalar PYTHON3-PILLOW :
+    PASO 9D-Instalar PYTHON3-Z3C.RML :
+    PASO 10 - INSTALAR SERVIDOR PostgreSQL o MySQL
+    PASO 11 - DAR DE ALTA NUEVO USUARIO Y BASE DE DATOS EN SERVIDOR PostgreSQL o MySQL
+    PASO 12 - ARRANCAR PINEBOO :
+    PASO 13 - A�ADIR DATOS CONEXI�N AL FORMULARIO DE ENTRADA :
 
-Efectivamente, no funciona. O mejor aún, no está programado siquiera. Si a agluien 
-le apetece colaborar, este formulario es un buen inicio.
+Al llamar al programa Pineboo �ste crea una base de datos sqlite llamada "conectores" en el subdirectorio "/projects". Es accesible desde una tabla-formulario.
 
-Para poder iniciarlo se necesita especificar manualmente la conexión. Y la única
-forma es a través de un XML de proyecto.
-
-Tenéis una carpeta llamada "projects/" y dentro un ejemplo "eneboo-base.xml".
-Debéis copiar el ejemplo a otro nombre, por ejemplo "proyecto1.xml" y cambiarle 
-los datos de conexión.
-
-Cuando cambiéis los datos de conexión de vuestro "proyecto1.xml" a lo mejor os
-preguntáis para que sirve lo del nombre o lo del path de la aplicación, de si
-hay que cambiarlo o no. Es puramente decorativo, así que lo podéis dejar tal cual.
-Es posible que la aplicación sí lea el contenido, aunque no lo use, así que no 
-borréis las etiquetas ni su contenido. Por lo que pueda pasar.
+Desde ese formulario se configura el acceso a la empresa elegida. Existe un bot�n en la tercera pesta�a desde el cu�l cargar una "Empresa de Prueba".
 
 Con esto, pineboo debería iniciarse así::
 
@@ -122,9 +125,9 @@ Algunos ejemplos interesantes son las acciones de articulos, tarifas, pedidoscli
 
 Pineboo en Windows
 ----------------------
-No se ha programado Pineboo pensando en que sea ejecutado en Windows. Pero no hay 
-nada que impida que funcione. Nadie lo ha probado. Probablemente con las instrucciones
-genéricas funcione también. Para poner flscriptparser2 en el PATH a lo mejor
+S� se ha programado Pineboo pensando en que sea ejecutado en Windows. Se ejecuta con "python pineboo.py"
+
+Para poner flscriptparser2 en el PATH a lo mejor
 es más conveniente cambiar el PATH de windows.
 
 Por otra parte todos los paquetes necesarios tienen que ser instalados uno a uno
