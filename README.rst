@@ -62,6 +62,11 @@ lanza el init() automáticamente.
 Las referencias entre módulos (flfacturac.iface.XYZ) funcionan con carga de módulo
 retrasada.
 
+La API de QSA y Eneboo estÃ¡ en desarrollo. En la API aÃºn existente son
+funciones y clases "fake", que desde el script, parece que funcionen pero no 
+realizan ningÃºn trabajo. Esto permite ejecutar los scripts, pero no opera correctamente.
+
+
 La API de QSA y Eneboo está en desarrollo. En la API aún existente son
 funciones y clases "fake", que desde el script, parece que funcionen pero no 
 realizan ningún trabajo. Esto permite ejecutar los scripts, pero no opera correctamente.
@@ -94,11 +99,11 @@ Cómo poner en marcha Pineboo
     PASO 10 - INSTALAR SERVIDOR PostgreSQL o MySQL
     PASO 11 - DAR DE ALTA NUEVO USUARIO Y BASE DE DATOS EN SERVIDOR PostgreSQL o MySQL
     PASO 12 - ARRANCAR PINEBOO :
-    PASO 13 - A�ADIR DATOS CONEXI�N AL FORMULARIO DE ENTRADA :
+    PASO 13 - AÑADIR DATOS CONEXIÓN AL FORMULARIO DE ENTRADA :
 
-Al llamar al programa Pineboo �ste crea una base de datos sqlite llamada "conectores" en el subdirectorio "/projects". Es accesible desde una tabla-formulario.
+Al llamar al programa Pineboo éste crea una base de datos sqlite llamada "conectores" en el subdirectorio "/projects". Es accesible desde una tabla-formulario.
 
-Desde ese formulario se configura el acceso a la empresa elegida. Existe un bot�n en la tercera pesta�a desde el cu�l cargar una "Empresa de Prueba".
+Desde ese formulario se configura el acceso a la empresa elegida. Existe un botón en la tercera pestaña desde el cuál cargar una "Empresa de Prueba".
 
 Con esto, pineboo debería iniciarse así::
 
@@ -125,7 +130,7 @@ Algunos ejemplos interesantes son las acciones de articulos, tarifas, pedidoscli
 
 Pineboo en Windows
 ----------------------
-S� se ha programado Pineboo pensando en que sea ejecutado en Windows. Se ejecuta con "python pineboo.py"
+Sí se ha programado Pineboo pensando en que sea ejecutado en Windows. Se ejecuta con "python pineboo.py"
 
 Para poner flscriptparser2 en el PATH a lo mejor
 es más conveniente cambiar el PATH de windows.
