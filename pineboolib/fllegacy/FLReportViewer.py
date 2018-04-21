@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtXml
 from PyQt5.QtCore import Qt
-from PyQt5.Qt import QFileDialog, QMessageBox
+from PyQt5.Qt import QFileDialog, QMessageBox, QWidget
 
 from pineboolib import decorators
 from pineboolib import qt3ui
@@ -23,7 +23,7 @@ AQ_USRHOME = "."  # FIXME
 
 class FLReportViewer(QtWidgets.QMainWindow):
 
-    def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=0):
+    def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None):
         pParam = 0 if parent and embedInParent else 0
         pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
         pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
@@ -35,7 +35,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
         self.eventloop = QtCore.QEventLoop()
         self.reportPrinted_ = False
         self.rptViewer_ = 0
-        self.rptEngine_ = 0
+        self.rptEngine_ = None
         self.report_ = 0
         self.qry_ = 0
         self.slotsPrintDisabled_ = False
@@ -44,58 +44,58 @@ class FLReportViewer(QtWidgets.QMainWindow):
         self.embedInParent_ = True if parent and embedInParent else False
         self.ui_ = {}
 
-        qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
+        #qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
 
-        if not name:
-            self.setName("FLReportViewer")
+        # if not name:
+        #    self.setName("FLReportViewer")
 
-        if self.embedInParent_:
-            self.autoClose_ = False
-            self.ui_["menubar"].hide()
-            self.ui_["chkAutoClose"].hide()
-            self.ui_["spnResolution"].hide()
-            self.ui_["spnPixel"].hide()
-            self.ui_["salir"].setVisible(False)
+        # if self.embedInParent_:
+        #    self.autoClose_ = False
+        #    self.ui_["menubar"].hide()
+        #    self.ui_["chkAutoClose"].hide()
+        #    self.ui_["spnResolution"].hide()
+        #    self.ui_["spnPixel"].hide()
+        #    self.ui_["salir"].setVisible(False)
 
-            if not parent.layout():
-                lay = QtCore.QVBoxLayout(parent)
-                lay.addWidget(self)
-            else:
-                parent.layout().add(self)
-        else:
-            self.autoClose_ = bool(FLUtil().readSettingEntry(
-                "rptViewer/autoClose", "false"))
-            self.ui_["chkAutoClose"].setChecked(self.autoClose_)
+        #   if not parent.layout():
+        #        lay = QtCore.QVBoxLayout(parent)
+        #        lay.addWidget(self)
+        #    else:
+        #        parent.layout().add(self)
+        # else:
+        #    self.autoClose_ = bool(FLUtil().readSettingEntry(
+        #        "rptViewer/autoClose", "false"))
+        #    self.ui_["chkAutoClose"].setChecked(self.autoClose_)
 
-        self.rptViewer_ = MReportViewer(self)
+        self.rptViewer_ = internalReportViewer(self)
         self.setReportEngine(FLReportEngine(
-            self) if rptEngine == 0 else rptEngine)
+            self) if rptEngine is None else rptEngine)
 
         self.setFont(QtWidgets.QApplication.font())
         self.setFocusPolicy(Qt.StrongFocus)
 
         util = FLUtil()
 
-        self.ui_["lePara"].setText(str(util.readSettingEntry("email/to")))
-        self.ui_["leDe"].setText(str(util.readSettingEntry("email/from")))
-        self.ui_["leMailServer"].setText(
-            str(util.readSettingEntry("email/mailserver")))
+        # self.ui_["lePara"].setText(str(util.readSettingEntry("email/to")))
+        # self.ui_["leDe"].setText(str(util.readSettingEntry("email/from")))
+        # self.ui_["leMailServer"].setText(
+        #    str(util.readSettingEntry("email/mailserver")))
 
-        wrv = self.ui_["FLWidgetReportViewer"]
-        self.initCentralWidget_ = wrv.centralWidget()
+        #wrv = self.ui_["FLWidgetReportViewer"]
+        #self.initCentralWidget_ = wrv.centralWidget()
 
-        self.smtpClient_ = FLSmtpClient(self)
-        self.smtpClient_.status.connect(self.ui_["lblEstado"].setText)
+        #self.smtpClient_ = FLSmtpClient(self)
+        # self.smtpClient_.status.connect(self.ui_["lblEstado"].setText)
 
-        wrv.setCentralWidget(self.rptViewer_)
-        self.ui_["frEMail"].hide()
-        if self.initCentralWidget_:
-            self.initCentralWidget_.hide()
-        if not self.embedInParent_:
-            self.ui_["spnResolution"].setValue(int(util.readSettingEntry(
-                "rptViewer/dpi", str(self.rptViewer_.resolution()))))
-            self.ui_["spnPixel"].setValue(float(util.readSettingEntry(
-                "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
+        # wrv.setCentralWidget(self.rptViewer_)
+        # self.ui_["frEMail"].hide()
+        # if self.initCentralWidget_:
+        #    self.initCentralWidget_.hide()
+        # if not self.embedInParent_:
+        #    self.ui_["spnResolution"].setValue(int(util.readSettingEntry(
+        #        "rptViewer/dpi", str(self.rptViewer_.resolution()))))
+        #    self.ui_["spnPixel"].setValue(float(util.readSettingEntry(
+        #        "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
 
@@ -125,21 +125,21 @@ class FLReportViewer(QtWidgets.QMainWindow):
         if self.rptEngine_:
             self.template_ = self.rptEngine_.rptNameTemplate()
             self.qry_ = self.rptEngine_.rptQueryData()
-            if self.rptEngine_.rptXmlTemplate():
-                self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
-            if self.rptEngine_.rptXmlTemplate():
-                self.xmlData_ = self.rptEngine_.rptXmlTemplate()
-            self.rptEngine_.destroyed.connect(self.setReportEngine)
+            # if self.rptEngine_.rptXmlTemplate():
+            #    self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
+            # if self.rptEngine_.rptXmlTemplate():
+            #    self.xmlData_ = self.rptEngine_.rptXmlTemplate()
+            # self.rptEngine_.destroyed.connect(self.setReportEngine)
 
-            self.ui_["ledStyle"].setDisabled(False)
-            self.ui_["save_page_SVG"].setDisabled(False)
-            self.ui_["save_page_tpl_SVG"].setDisabled(False)
-            self.ui_["load_tpl_SVG"].setDisabled(False)
-        else:
-            self.ui_["ledStyle"].setDisabled(True)
-            self.ui_["save_page_SVG"].setDisabled(True)
-            self.ui_["save_page_tpl_SVG"].setDisabled(True)
-            self.ui_["load_tpl_SVG"].setDisabled(True)
+            # self.ui_["ledStyle"].setDisabled(False)
+            # self.ui_["save_page_SVG"].setDisabled(False)
+            # self.ui_["save_page_tpl_SVG"].setDisabled(False)
+            # self.ui_["load_tpl_SVG"].setDisabled(False)
+        # else:
+            # self.ui_["ledStyle"].setDisabled(True)
+            # self.ui_["save_page_SVG"].setDisabled(True)
+            # self.ui_["save_page_tpl_SVG"].setDisabled(True)
+            # self.ui_["load_tpl_SVG"].setDisabled(True)
 
         if noSigDestroy:
             self.rptViewer_.setReportEngine(self.rptEngine_)
@@ -200,6 +200,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
     @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, append_or_flags=None, dRpt=None):
+        """
         flags = None
         ap = MReportViewer.RenderReportFlags.Append.value
         dp = MReportViewer.RenderReportFlags.Display.value
@@ -214,8 +215,8 @@ class FLReportViewer(QtWidgets.QMainWindow):
 
         if not self.rptEngine_:
             return False
-
-        ret = self.rptViewer_.renderReport(initRow, initCol, flags)
+        """
+        ret = self.rptViewer_.renderReport(initRow, initCol, append_or_flags)
         self.report_ = self.rptViewer_.reportPages()
         return ret
 
@@ -584,7 +585,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
             self.template_ = t
             self.styleName_ = style
             if self.rptEngine_ and self.rptEngine_.setFLReportTemplate(t):
-                self.rptEngine_.setStyleName(style)
+                # self.rptEngine_.setStyleName(style)
                 self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
                 return True
             return False
@@ -845,3 +846,27 @@ class FLReportViewer(QtWidgets.QMainWindow):
     @decorators.BetaImplementation
     def name(self):
         return self.name_
+
+
+class internalReportViewer(QWidget):
+
+    rptEngine_ = None
+    dpi_ = 0
+    report_ = []
+
+    def __init__(self, parent):
+        super(internalReportViewer, self).__init__(parent)
+        self.dpi_ = 300
+        self.report_ = []
+
+    def setReportEngine(self, rptEngine):
+        self.rptEngine_ = rptEngine
+
+    def resolution(self):
+        return self.dpi_
+
+    def reportPages(self):
+        return self.report_
+
+    def renderReport(self, initRow, initCol, flags):
+        self.rptEngine_.renderReport()

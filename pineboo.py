@@ -67,6 +67,12 @@ def startup_check_dependencies():
         logger.exception("El paquete Pillow no está instalado")
         dependences.append("Pillow")
 
+    try:
+        import z3c.rml
+    except ImportError:
+        logger.exception("El paquete z3c.rml no está instalado")
+        dependences.append("z3c.rml")
+
     if dependences:
         logger.info("HINT: Dependencias incumplidas:")
         for dep in dependences:
