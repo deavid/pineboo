@@ -3,10 +3,12 @@ from xml import etree
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
 from PyQt5.QtGui import QColor
 from pineboolib.utils import filedir
+import pineboolib
 import logging
 import os
 from datetime import date
 from reportlab.pdfbase import pdfmetrics
+from PyQt5.QtXml import QDomNode
 
 canvas_ = None
 header_ = []
@@ -19,6 +21,7 @@ class kut2rml(object):
     header_ = None
     repeatHeader_ = False
     xmlK_ = None
+    xmlData_ = None
     pageTemplate_ = None
     pageSize_ = {}
     documment_ = ""
@@ -37,7 +40,11 @@ class kut2rml(object):
         self.correcionAltura_ = 0.927
 
     def parse(self, name, kut, dataString):
-        self.xmlK_ = etree.ElementTree.fromstring(kut)
+        try:
+            self.xmlK_ = etree.ElementTree.fromstring(kut)
+        except Exception:
+            self.logger.exception("KUT2RML: Problema al procesar %s.kut\n%s" % (name, kut))
+            return False
         documment = SubElement(self.rml_, "document")
         # Para definir tipos de letra
         self.docInitSubElemet_ = SubElement(documment, "docinit")
@@ -51,8 +58,8 @@ class kut2rml(object):
         documment.set("invariant", "1")
         #template = SubElement(documment, "template")
 
-        data = etree.ElementTree.fromstring(dataString).findall("Row")
-        self.processKutDetails(self.xmlK_, data, documment)
+        self.xmlData_ = etree.ElementTree.fromstring(dataString)
+        self.processKutDetails(self.xmlK_, self.xmlData_, documment)
 
         #st = SubElement(documment, "stylesheet")
         #story = SubElement(documment, "story")
@@ -67,25 +74,30 @@ class kut2rml(object):
     def processKutDetails(self, xml, xmlData, parent):
         pageG = self.newPage(parent)
         prevLevel = 0
-        for data in xmlData:
+        for data in xmlData.findall("Row"):
             level = int(data.get("level"))
             if prevLevel > level:
                 pageG = self.processData("DetailFooter", xml, data, pageG, prevLevel)
+            elif prevLevel < level:
+                pageG = self.processData("DetailHeader", xml, data, pageG, level)
 
             pageG = self.processData("Detail", xml, data, pageG, level, parent)
 
             prevLevel = level
 
-        print("final!!")
-        pageG = self.processData("DetailFooter", xml, data, pageG, level)
+        for l in reversed(range(level + 1)):
+            pageG = self.processData("DetailFooter", xml, data, pageG, l)
 
-        pageG = self.pageFooter(xml.find("PageFooter"), pageG)
+        if xml.find("PageFooter"):
+            pageG = self.pageFooter(xml.find("PageFooter"), pageG)
+        elif xml.find("AddOnFooter"):
+            pageG = self.pageFooter(xml.find("AddOnFooter"), pageG)
 
     def processData(self, name, xml, data, parent, level, docParent=None):
         listDF = xml.findall(name)
         for dF in listDF:
             if dF.get("Level") == str(level):
-                if name is "Detail":
+                if name is "Detail" and (dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None):
                     heightCalculated = self.getHeight(dF) + self.actualVSize[str(self.pagina)]
                     # Buscamos si existe DetailFooter y PageFooter y miramos si no excede tamaño
                     for dFooter in xml.findall("DetailFooter"):
@@ -102,8 +114,9 @@ class kut2rml(object):
                         self.pageFooter(xml.find("PageFooter"), parent)  # Pie de página
                         parent = self.newPage(docParent)  # Nueva página
 
-                self.processXML(dF, parent, data)
-                self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
+                if dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None:
+                    self.processXML(dF, parent, data)
+                    self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
         return parent
 
     def newPage(self, parent):
@@ -116,7 +129,10 @@ class kut2rml(object):
         self.pageFormat(self.xmlK_, parent)
         self.actualVSize[str(self.pagina)] = self.pageSize_["TM"]
         #el.set("pagesize", parent.get("pagesize"))
-        self.pageHeader(self.xmlK_.find("PageHeader"), pG)
+        if self.xmlK_.find("PageHeader"):
+            self.pageHeader(self.xmlK_.find("PageHeader"), pG)
+        # elif self.xmlK_.find("AddOnHeader"):
+        #    self.pageHeader(self.xmlK_.find("AddOnHeader"), pG)
         return pG
 
     def getHeight(self, xml):
@@ -152,16 +168,17 @@ class kut2rml(object):
         #parent.set("author", "pineboo.parse2reportlab")
 
     def pageHeader(self, xml, parent):
-        frecuencia = int(xml.get("PrintFrequency"))
-        if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
+        frecuencia = int(self.getOption(xml, "PrintFrequency"))
+        if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
             self.processXML(xml, parent)
 
         #self.actualVSize[str(self.pagina)] += self.getHeight(xml)
         self.logger.warn("PAGE_HEADER BOTTON", self.actualVSize[str(self.pagina)])
 
     def pageFooter(self, xml, parent):
-        frecuencia = int(xml.get("PrintFrequency"))
-        if frecuencia == 1 or self.pagina_ == 1:  # Siempre o si es primera pagina
+        frecuencia = int(self.getOption(xml, "PrintFrequency"))
+        botton_ = xml.get("PlaceAtBotton")  # Fixme
+        if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
             #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
             self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self.getHeight(xml) * self.correcionAltura_
             self.logger.warn("PAGE_FOOTER BOTTON", self.actualVSize[str(self.pagina)])
@@ -171,7 +188,7 @@ class kut2rml(object):
 
         for child in xml.iter():
             if child.tag == "Label":
-                self.processText(child, parent)
+                self.processText(child, parent, data)
             elif child.tag == "Line":
                 self.processLine(child, parent)
             elif child.tag == "Field":
@@ -179,8 +196,10 @@ class kut2rml(object):
             elif child.tag == "Special":
                 # print(etree.ElementTree.tostring(child))
                 self.processText(child, parent)
+            elif child.tag == "CalculatedField":
+                self.processText(child, parent, data)
             else:
-                if child.tag not in ("PageFooter", "PageHeader", "DetailFooter", "Detail"):
+                if child.tag not in ("PageFooter", "PageHeader", "DetailFooter", "Detail", "AddOnHeader", "AddOnFooter", "DetailHeader"):
                     self.logger.warn("porcessXML: Unknown tag %s." % child.tag)
 
         self.actualVSize[str(self.pagina)] += self.getHeight(xml)
@@ -208,20 +227,20 @@ class kut2rml(object):
         x = int(xml.get("X"))
         y = int(xml.get("Y"))
         text = xml.get("Text")
-        borderStyle = int(xml.get("BorderStyle"))
-        BorderWidth = int(xml.get("BorderWidth"))
+        borderStyle = int(self.getOption(xml, "BorderStyle"))
+        BorderWidth = int(self.getOption(xml, "BorderWidth"))
         borderColor = self.getColor(xml.get("BorderColor")).name()
         bgColor = self.getColor(xml.get("BackgroundColor")).name()
         fgColor = self.getColor(xml.get("ForegroundColor")).name()
-        HAlig = int(xml.get("HAlignment"))
-        VAlig = int(xml.get("VAlignment"))
+        HAlig = int(self.getOption(xml, "HAlignment"))
+        VAlig = int(self.getOption(xml, "VAlignment"))
         W = int(xml.get("Width"))
         H = int(xml.get("Height"))
         font = xml.get("FontFamily")
         fontSize = int(xml.get("FontSize"))
-        fontW = int(xml.get("FontWeight"))
-        fontI = int(xml.get("FontItalic"))
-        text = xml.get("Text")
+        fontW = int(self.getOption(xml, "FontWeight"))
+        fontI = int(self.getOption(xml, "FontItalic"))
+
         if xml.tag == "Field" and data is not None:
             text = data.get(xml.get("Field"))
             if text == "None":
@@ -229,8 +248,17 @@ class kut2rml(object):
         if xml.tag == "Special":
             text = self.getSpecial(text[1:len(text) - 1])
 
-        if text.startswith(filedir("../tempdata")):
-            isImage = True
+        if xml.tag == "CalculatedField":
+            if xml.get("FunctionName"):
+                fN = xml.get("FunctionName")
+                text = pineboolib.project.call(fN, data)
+                print("Llamando a", fN, data, text)
+            else:
+                text = self.calculated(xml.get("Field"), xml.get("CalculationType"), xml.get("Precision"))
+
+        if text:
+            if text.startswith(filedir("../tempdata")):
+                isImage = True
 
         precision = xml.get("Precision")
         negValueColor = xml.get("NegValueColor")
@@ -331,8 +359,19 @@ class kut2rml(object):
         strE.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
 
     def getColor(self, rgb):
-        rgb = rgb.split(",")
-        return QColor(int(rgb[0]), int(rgb[1]), int(rgb[2]))
+        ret = None
+        if rgb is None:
+            ret = QColor(0, 0, 0)
+        else:
+            if rgb.find(",") > -1:
+                rgb_ = rgb.split(",")
+                ret = QColor(int(rgb_[0]), int(rgb_[1]), int(rgb_[2]))
+            elif len(rgb) == 3:
+                ret = QColor(int(rgb[0]), int(rgb[1]), int(rgb[2]))
+            else:
+                ret = QColor(int(rgb[0:2]), int(rgb[3:5]), int(rgb[6:8]))
+
+        return ret
 
     def getCord(self, t, val):
         ret = None
@@ -421,3 +460,13 @@ class kut2rml(object):
             ret = str(self.pagina)
 
         return ret
+
+    def getOption(self, xml, name):
+        ret = xml.get(name)
+        if ret is None:
+            ret = 0
+
+        return ret
+
+    def calculated(self, field, calculation, Precision):
+        return "¡¡Calculated!!"
