@@ -723,13 +723,13 @@ class CheckBox(QWidget):
             return super(CheckBox, self).__getattr__(name)
 
 
-class ComboBox(QWidget):
+class QComboBox(QWidget):
 
     _label = None
     _combo = None
 
     def __init__(self):
-        super(ComboBox, self).__init__()
+        super(QComboBox, self).__init__()
 
         self._label = QtWidgets.QLabel(self)
         self._combo = QtWidgets.QComboBox(self)
@@ -753,13 +753,13 @@ class ComboBox(QWidget):
         elif name == "currentItem":
             self._combo.setCurrentText(str(value))
         else:
-            super(ComboBox, self).__setattr__(name, value)
+            super(QComboBox, self).__setattr__(name, value)
 
     def __getattr__(self, name):
         if name == "currentItem":
             return self._combo.currentText()
         else:
-            return super(ComboBox, self).__getattr__(name)
+            return super(QComboBox, self).__getattr__(name)
 
 
 class LineEdit(QWidget):
