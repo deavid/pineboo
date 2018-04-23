@@ -176,10 +176,14 @@ class FLManagerModules(ProjectClass):
 
     def contentFS(self, pN, utf8=False):
         ret = None
-        if utf8:
-            ret = str(open(pN, "rb").read(), "utf-8")
-        else:
-            ret = str(open(pN, "rb").read(), "ISO-8859-15")
+        try:
+            if utf8:
+                ret = str(open(pN, "rb").read(), "utf-8")
+            else:
+                ret = str(open(pN, "rb").read(), "ISO-8859-15")
+        except Exception:
+            pass
+
         return ret
 
     """
