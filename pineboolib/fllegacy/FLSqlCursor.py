@@ -2176,6 +2176,7 @@ class FLSqlCursor(ProjectClass):
     @param  orderAsc TRUE (por defecto) si el orden es ascendente, FALSE si es descendente
     @return Posición del registro dentro del cursor, o 0 si no encuentra coincidencia.
     """
+
     def atFromBinarySearch(self, fN, v, orderAsc=True):
 
         ret = -1
@@ -2680,6 +2681,8 @@ class FLSqlCursor(ProjectClass):
     """
 
     def move(self, row):
+        if row is None:
+            row = -1
 
         if not self.model():
             return False
