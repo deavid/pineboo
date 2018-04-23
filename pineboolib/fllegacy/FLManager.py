@@ -429,7 +429,8 @@ class FLManager(ProjectClass):
         root_ = etree.ElementTree.fromstring(qry_)
         q.setSelect(root_.find("select").text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
         q.setFrom(root_.find("from").text.strip(' \t\n\r'))
-        q.setWhere(root_.find("where").text.strip(' \t\n\r'))
+        if root_.find("where"):
+            q.setWhere(root_.find("where").text.strip(' \t\n\r'))
         q.setTablesList(root_.find("tables").text.strip(' \t\n\r'))
 
         orderBy_ = None
@@ -1126,8 +1127,7 @@ class FLManager(ProjectClass):
 
                 tmd = self.metadata(table)
                 if not tmd:
-                    qWarning("FLManager::cleanupMetaDAta " + QApplication.tr(
-                        "No se ha podido crear los metadatatos para la tabla %1").arg(table))
+                    qWarning("FLManager::cleanupMetaDAta " + QApplication.tr(self, "No se ha podido crear los metadatatos para la tabla %s") % table)
 
                 c.select("tabla='%s'" % table)
                 if c.next():
