@@ -9,6 +9,7 @@ import os
 from datetime import date
 from reportlab.pdfbase import pdfmetrics
 from PyQt5.QtXml import QDomNode
+from pineboolib.rml import refkey2cache
 
 canvas_ = None
 header_ = []
@@ -177,7 +178,6 @@ class kut2rml(object):
 
     def pageFooter(self, xml, parent):
         frecuencia = int(self.getOption(xml, "PrintFrequency"))
-        botton_ = xml.get("PlaceAtBotton")  # Fixme
         if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
             #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
             self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self.getHeight(xml) * self.correcionAltura_
@@ -185,6 +185,10 @@ class kut2rml(object):
             self.processXML(xml, parent)
 
     def processXML(self, xml, parent, data=None):
+
+        if xml.tag == "DetailFooter":
+            if xml.get("PlaceAtBottom") == "true":
+                self.actualVSize[str(self.pagina)] = self.pageSize_["H"] - self.getHeight(xml)
 
         for child in xml.iter():
             if child.tag == "Label":
@@ -251,10 +255,18 @@ class kut2rml(object):
         if xml.tag == "CalculatedField":
             if xml.get("FunctionName"):
                 fN = xml.get("FunctionName")
-                text = pineboolib.project.call(fN, data)
-                print("Llamando a", fN, data, text)
+                try:
+                    text = pineboolib.project.call(fN, data)
+                except:
+                    return
+                if text and xml.get("DataType"):
+                    text = self.calculated(text, xml.get("DataType"), xml.get("Precision"))
             else:
-                text = self.calculated(xml.get("Field"), xml.get("CalculationType"), xml.get("Precision"))
+                text = self.calculated(xml.get("Field"), xml.get("DataType"), xml.get("Precision"))
+
+            if int(xml.get("DataType")) == 5:
+                print("Añadida imagen", text)
+                isImage = True
 
         if text:
             if text.startswith(filedir("../tempdata")):
@@ -311,6 +323,13 @@ class kut2rml(object):
 
         # if W > self.pageSize_["W"]:
         #    W = self.pageSize_["W"] - self.pageSize_["RM"]
+        if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
+            self.logger.debug("Limite Ancho pasado %s de %s" % (self.pageSize_["W"] - self.pageSize_["RM"], W))
+            W = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
+
+        if self.pageSize_["H"] - self.pageSize_["TM"] < H + self.getCord("Y", y):  # Controla si se sobrepasa el margen derecho
+            self.logger.debug("Limite Alto pasado %s de %s" % (self.pageSize_["H"] - self.pageSize_["TM"], H))
+            Y = self.pageSize_["H"] - self.pageSize_["TM"] - self.getCord("Y", y)
 
         if borderStyle == 1:
             # Rectangulo
@@ -323,9 +342,6 @@ class kut2rml(object):
             #    rectE.set("y", str(self.pageSize_["H"] - self.pageSize_["TM"]))
             # else:
             rectE.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
-            if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
-                self.logger.debug("Limite Ancho pasado %s de %s" % (self.pageSize_["W"] - self.pageSize_["RM"], W))
-                W = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
 
             rectE.set("width", str(W))
             rectE.set("height", str(H * -1))
@@ -335,12 +351,18 @@ class kut2rml(object):
 
         # Calculamos la posicion real contando con el tamaño
         if HAlig == 1:  # Centrado
-            x = x + (W / 2) - (fontW / 1.75)
+            if not isImage:
+                x = x + (W / 2) - (fontW / 1.75)
+
         elif HAlig == 2:
-            x = x + (fontW / 1.75)
+            if not isImage:
+                x = x + (fontW / 1.75)
 
         if VAlig == 1:  # Centrado
-            y = y + (H / 2) + (H / 4)
+            if not isImage:
+                y = y + (H / 2) + (H / 4)
+            else:
+                y = y + H
 
         if not isImage:
             fontE = SubElement(parent, "setFont")
@@ -354,6 +376,8 @@ class kut2rml(object):
         else:
             strE = SubElement(parent, "image")
             strE.set("file", text)
+            strE.set("width", str(W))
+            strE.set("height", str(H))
 
         strE.set("x", str(self.getCord("X", x)))
         strE.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
@@ -468,5 +492,9 @@ class kut2rml(object):
 
         return ret
 
-    def calculated(self, field, calculation, Precision):
-        return "¡¡Calculated!!"
+    def calculated(self, field, dataType, Precision):
+        ret = field
+        if int(dataType) == 5:  # Imagen
+            ret = refkey2cache.parseKey(field)
+
+        return ret
