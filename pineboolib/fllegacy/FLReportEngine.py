@@ -238,11 +238,11 @@ class FLReportEngine(object):
         if self.rt.find("KugarTemplate") > -1:
             parser = kut2rml()
             self.rt = parser.parse(self.d_.template_, self.rt, self.rd.toString(1))
-
-            pdfname = filedir("../tempdata")
-            pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            parser_ = parsepdf()
-            parser_.parse(self.rt, pdfname)
+            if self.rt:
+                pdfname = filedir("../tempdata")
+                pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                parser_ = parsepdf()
+                parser_.parse(self.rt, pdfname)
 
             # print(self.rd.toString(1))
         """
