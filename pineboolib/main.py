@@ -251,6 +251,7 @@ class Project(object):
             if self._DGI.useDesktop() and self._DGI.localDesktop():
                 util.setProgress((p * 100) / size_)
                 util.setLabelText("Convirtiendo %s." % nombre)
+                qApp.processEvents()
             if idmodulo not in self.modules:
                 continue  # I
             fileobj = File(self, idmodulo, nombre, sha)

@@ -5,7 +5,7 @@ import weakref
 import logging
 import traceback
 import math
-
+from PyQt5.Qt import qApp
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import QDateEdit
 
@@ -229,9 +229,8 @@ class SysType(object):
     def version(self):
         return pineboolib.project.version
 
-    @decorators.NotImplementedWarn
     def processEvents(self):
-        pass
+        qApp.processEvents()
 
     @decorators.NotImplementedWarn
     def reinit(self):
