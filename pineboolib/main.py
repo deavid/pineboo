@@ -333,7 +333,7 @@ class Project(object):
     def writeState(self):
         pass
 
-    def call(self, function, aList, objectContext, showException=True):
+    def call(self, function, aList, objectContext=None, showException=True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s",
@@ -355,7 +355,7 @@ class Project(object):
 
         funAction = self.actions[aFunction[0]]
 
-        if aFunction[1] == "iface":
+        if aFunction[1] == "iface" or len(aFunction) == 2:
             mW = funAction.load()
             funScript = mW.iface
         elif aFunction[1] == "widget":
@@ -369,10 +369,16 @@ class Project(object):
                 "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
-        fn = getattr(funScript, aFunction[2], None)
+        if len(aFunction) > 2:
+            last_ = aFunction[2]
+        else:
+            last_ = aFunction[1]
+
+        fn = getattr(funScript, last_, None)
+
         if fn is None:
             self.logger.error("No existe la función %s en %s",
-                              aFunction[2], aFunction[0])
+                              last_, aFunction[0])
             return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
