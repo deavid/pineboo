@@ -10,6 +10,7 @@ import platform
 import hashlib
 import datetime
 import logging
+from PyQt5.QtWidgets import qApp
 logger = logging.getLogger(__name__)
 
 
@@ -1053,6 +1054,7 @@ class FLUtil(ProjectClass):
         pd_widget = QtWidgets.QProgressDialog(str(title), str(
             self.translate("scripts", "Cancelar")), 0, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)
+        qApp.processEvents()
         return pd_widget
 
     def destroyProgressDialog(self, id_="default"):
@@ -1072,6 +1074,7 @@ class FLUtil(ProjectClass):
         """
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setValue(step_number)
+        qApp.processEvents()
 
     def setLabelText(self, l, id_="default"):
         """
@@ -1081,6 +1084,7 @@ class FLUtil(ProjectClass):
         """
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setLabelText(str(l))
+        qApp.processEvents()
 
     def setTotalSteps(self, tS, id_="default"):
         """
@@ -1090,6 +1094,7 @@ class FLUtil(ProjectClass):
         """
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setTotalSteps(tS)
+        qApp.processEvents()
 
     def domDocumentSetContent(self, doc, content):
         """
