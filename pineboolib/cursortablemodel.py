@@ -61,6 +61,9 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self._table = None
                 return None
 
+            if not project.conn.manager().existsTable(self._table.name):
+                project.conn.manager().createTable(self._table.name)
+
             self._metadata = project.conn.manager().metadata(self._table.name)
         else:
             raise AssertionError
@@ -699,7 +702,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 if b.type_ in ("string", "stringlist") and isinstance(value, str):
 
                     value = self._prj.conn.normalizeValue(value)
-
                 value = self._prj.conn.manager().formatValue(b.type_, value, False)
                 if not campos:
                     campos = b.name
@@ -710,6 +712,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if campos:
             sql = "INSERT INTO %s (%s) VALUES (%s)" % (
                 buffer.cursor_.d.curName_, campos, valores)
+
             # conn = self._cursorConn.db()
             try:
                 # print(sql)
