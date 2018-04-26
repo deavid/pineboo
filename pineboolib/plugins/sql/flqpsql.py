@@ -145,7 +145,8 @@ class FLQPSQL(object):
             if v == "":
                 s = "Null"
             else:
-                v = auto_qt_translate_text(v)
+                if type_ == "string":
+                    v = auto_qt_translate_text(v)
                 if upper and type_ == "string":
                     v = v.upper()
 
@@ -1087,7 +1088,7 @@ class FLQPSQL(object):
         steps = 0
 
         rx = QRegExp("^.*\\d{6,9}$")
-        listOldBks = rx in self.tables("")
+        listOldBks = self.tables()
         qry.exec_("select nombre from flfiles where nombre similar to"
                   "'%[[:digit:]][[:digit:]][[:digit:]][[:digit:]]-[[:digit:]][[:digit:]]%:[[:digit:]][[:digit:]]%' or nombre similar to"
                   "'%alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]]%' or (bloqueo='f' and nombre like '%.mtd')")
@@ -1109,7 +1110,7 @@ class FLQPSQL(object):
 
         for item in listOldBks:
             if self.existsTable(item):
-                util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                util.setLabelText(util.tr("Borrando tabla %s" % item))
                 qry2.exec_("DROP TABLE %s CASCADE" % item)
 
             steps = steps + 1
@@ -1121,7 +1122,7 @@ class FLQPSQL(object):
         qry.exec_("DELETE FROM flmetadata")
         qry.exec_("DELETE FROM flvar")
         self.db_.manager().cleanupMetaData()
-        self.db_.commit()
+        # self.db_.driver().commit()
         util.destroyProgressDialog()
 
         steps = 0
@@ -1146,7 +1147,7 @@ class FLQPSQL(object):
             steps = steps + 1
             util.setProgress(steps)
 
-        self.db_.dbAux().transaction()
+        self.db_.dbAux().driver().transaction()
         steps = 0
         sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
         sqlQuery = FLSqlQuery(None, self.db_.dbAux())
@@ -1181,7 +1182,7 @@ class FLQPSQL(object):
 
                 sqlCursor.setName(item, True)
 
-        self.db_.dbAux().commit()
+        self.db_.dbAux().driver().commit()
 
         steps = 0
         qry.exec_("select tablename from pg_tables where schemaname='public'")
