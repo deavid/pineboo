@@ -360,6 +360,13 @@ class QListView(QtWidgets.QListView):
 
 
 class QPushButton(QtWidgets.QPushButton):
+
+    on = True  # FIXME :No se para que es
+
+    def __init__(self, *args, **kwargs):
+        super(QPushButton, self).__init__(*args, **kwargs)
+        self.on = True
+
     @property
     def pixmap(self):
         return self.icon()
@@ -387,6 +394,12 @@ class QPushButton(QtWidgets.QPushButton):
 
     toggleButton = property(getToggleButton, setToggleButton)
 
+    def on(self):
+        return self.on_
+
+    def setOn(self, value):
+        self.on_ = value
+
 
 class QGroupBox(QtWidgets.QGroupBox):
 
@@ -407,3 +420,25 @@ class QAction(QtWidgets.QAction):
 
     def send_activated(self, b=None):
         self.activated.emit()
+
+
+class QTextEdit(QtWidgets.QTextEdit):
+
+    def __init__(self, *args, **kwargs):
+        super(QTextEdit, self).__init__(*args, **kwargs)
+
+    @decorators.NotImplementedWarn
+    def textFormat(self):
+        return
+
+    @decorators.NotImplementedWarn
+    def setTextFormat(self, value):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setShown(self, value):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setAutoFormatting(self, value):
+        pass
