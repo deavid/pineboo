@@ -216,6 +216,9 @@ class SysType(object):
         else:
             return None
 
+    def Mr_Proper(self):
+        pineboolib.project.conn.Mr_Proper()
+
     def installPrefix(self):
         return filedir("..")
 
