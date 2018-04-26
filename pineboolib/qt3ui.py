@@ -231,7 +231,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
             if Options.DEBUG_LEVEL > 50:
                 print("qt3ui: Missing property", pname,
-                      " for %r" % widget.__class__)
+                      "for %r" % widget.__class__)
                 return
         # print "Found property", pname
         if pname == "contentsMargins" or pname == "layoutSpacing":
