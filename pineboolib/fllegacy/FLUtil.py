@@ -1093,7 +1093,7 @@ class FLUtil(ProjectClass):
         @param ts Número total de pasos
         """
         pd_widget = self.__class__.progress_dialog_stack[-1]
-        pd_widget.setTotalSteps(tS)
+        pd_widget.setRange(0, tS)
         qApp.processEvents()
 
     def domDocumentSetContent(self, doc, content):
