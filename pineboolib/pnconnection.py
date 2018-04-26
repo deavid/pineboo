@@ -342,6 +342,12 @@ class PNConnection(QtCore.QObject):
 
         return self.driver().releaseSavePoint(savePoint)
 
+    def Mr_Proper(self):
+        if not self.db():
+            return
+
+        self.driver().Mr_Proper()
+
     def rollbackSavePoint(self, savePoint):
         if not self.db():
             return False
