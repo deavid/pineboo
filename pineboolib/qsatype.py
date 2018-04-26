@@ -5,6 +5,7 @@ import sys
 import fnmatch
 import weakref
 import re
+import codecs
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QTabWidget, QTextEdit
@@ -306,9 +307,10 @@ class FormDBWidget(QtWidgets.QWidget):
         self._prj = project
         try:
             self._class_init()
-            # timer = QtCore.QTimer(self)
-            # timer.singleShot(250, self.init)
-            self.init()
+
+            timer = QtCore.QTimer(self)
+            timer.singleShot(0, self.init)
+            # self.init()
         except Exception:
             self.logger.exception("Error al inicializar la clase iface de QS:")
 
@@ -840,37 +842,56 @@ class File(QtCore.QFile):
     ReadOnly = QIODevice.ReadOnly
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
+    encode_ = None
 
-    def __init__(self, rutaFichero):
+    def __init__(self, rutaFichero, encode=None):
+        self.encode_ = "iso-8859-15"
         if isinstance(rutaFichero, tuple):
             rutaFichero = rutaFichero[0]
         self.fichero = str(rutaFichero)
         super(File, self).__init__(rutaFichero)
         self.path = os.path.dirname(self.fichero)
 
+        if encode is not None:
+            self.encode_ = encode
+
     # def open(self, mode):
     #    super(File, self).open(self.fichero, mode)
 
     def read(self):
-        if isinstance(self, str):
-            f = File(self)
-            f.open(File.ReadOnly)
-            return f.read()
 
-        in_ = QTextStream(self)
-        return in_.readAll()
+        if isinstance(self, str):
+            file_ = self
+            encode = "iso-8859-15"
+        else:
+            file_ = self.fichero
+            encode = self.encode_
+
+        f = codecs.open(file_, encoding=encode)
+        ret = ""
+        for l in f:
+            ret = ret + l
+
+        f.close()
+        return ret
+        # if isinstance(self, str):
+        #    f = File(self)
+        #    f.open(File.ReadOnly)
+        #    return f.read()
+
+        #in_ = QTextStream(self)
+        # return in_.readAll()
 
     def write(self, text):
-        raise NotImplementedError(
-            "File:: out_ << text not a valid Python operator")
-        # encoding = text.property("encoding")
-        # out_ = QTextStream(self)
-        # out_ << text
+        f = codecs.open(self.fichero, encoding=self.encode_, mode="w+")
+        f.write(text)
+        f.seek(0)
+        f.close()
 
 
 class QString(str):
     def mid(self, start, length=None):
-        if length is not None:
+        if length is None:
             return self[start:]
         else:
             return self[start:start + length]
