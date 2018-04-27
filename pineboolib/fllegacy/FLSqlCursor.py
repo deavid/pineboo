@@ -252,9 +252,12 @@ class PNBuffer(ProjectClass):
 
     def setValue(self, name, value, mark_=True):
         # logger.trace("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
-        if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool)):
+        if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsatype.Date)):
             raise ValueError(
                 "No se admite el tipo %r , en setValue %r" % (type(value), value))
+
+        if isinstance(value, pineboolib.qsatype.Date):
+            value = value.toString()
 
         field = self.field(name)
         if field is None:
