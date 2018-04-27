@@ -512,14 +512,18 @@ class Date(object):
     date_ = None
     time_ = None
 
-    def __init__(self, date_=None):
+    def __init__(self, *args):
         super(Date, self).__init__()
-        if not date_:
+        if len(args) == 1:
+            date_ = args[0]
+            self.date_ = QtCore.QDate(date_)
+            self.time_ = QtCore.QTime(0, 0)
+        elif not args:
             self.date_ = QtCore.QDate.currentDate()
             self.time_ = QtCore.QTime.currentTime()
         else:
-            self.date_ = QtCore.QDate(date_)
-            self.time_ = QtCore.QTime("00:00:00")
+            self.date_ = QtCore.QDate(args[0], args[1], args[2])
+            self.time_ = QtCore.QTime(0, 0)
 
     def toString(self, *args, **kwargs):
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"), self.date_.toString("MM"), self.date_.toString(
