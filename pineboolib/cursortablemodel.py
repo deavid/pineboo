@@ -61,9 +61,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self._table = None
                 return None
 
-            if not project.conn.manager().existsTable(self._table.name):
-                project.conn.manager().createTable(self._table.name)
-
             self._metadata = project.conn.manager().metadata(self._table.name)
         else:
             raise AssertionError

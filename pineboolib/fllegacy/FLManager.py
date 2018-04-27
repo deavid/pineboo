@@ -225,6 +225,8 @@ class FLManager(ProjectClass):
                     "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
                     "Debe regenerar la base de datos.").replace("%1", n)
                 logger.warn(msg)
+            elif not self.existsTable(n) and not ret.isQuery():
+                self.createTable(ret)
                 # throwMsgWarning(self.db_, msg)
 
             return ret
