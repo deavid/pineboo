@@ -20,7 +20,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             botonExportar.setEnabled(False)
 
     def cargarFicheroEnBD(self, nombre=None, contenido=None, log=None, directorio=None):
-        if not util.isFLDefFile(contenido) and not nombre.endswith(u".mod") and not nombre.endswith(u".xpm") and not nombre.endswith(u".signatures") and not nombre.endswith(u".checksum") and not nombre.endswith(u".certificates") and not nombre.endswith(u".qs") and not nombre.endswith(u".ar"):
+        if not util.isFLDefFile(contenido) and not nombre.endswith(u".mod") and not nombre.endswith(u".xpm") and not nombre.endswith(u".signatures") and not nombre.endswith(u".checksum") and not nombre.endswith(u".certificates") and not nombre.endswith(u".qs") and not nombre.endswith(u".ar") and not nombre.endswith(u".qs.py"):
             return
         cursorFicheros = qsatype.FLSqlCursor(u"flfiles")
         cursor = self.cursor()
