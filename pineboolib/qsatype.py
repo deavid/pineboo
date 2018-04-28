@@ -604,8 +604,8 @@ class Process(QtCore.QProcess):
         pro.setArguments(argumentos)
         pro.start()
         pro.waitForFinished(30000)
-        Process.stdout = pro.readAllStandardOutput()
-        Process.stderr = pro.readAllStandardError()
+        Process.stdout = pro.readAllStandardOutput().data().decode()
+        Process.stderr = pro.readAllStandardError().data().decode()
 
 
 class RadioButton(QtWidgets.QRadioButton):
