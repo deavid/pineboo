@@ -234,8 +234,11 @@ class MainForm(QtWidgets.QMainWindow):
         if not dialog.exec_():
             evnt.ignore()
         else:
-            sett_ = FLSettings()
-            sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
+            self.saveTabs()
+
+    def saveTabs(self):
+        sett_ = FLSettings()
+        sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
 
     def addToMenuPineboo(self, ac, mod):
         #print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
