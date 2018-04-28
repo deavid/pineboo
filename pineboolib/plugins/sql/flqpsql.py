@@ -1088,13 +1088,18 @@ class FLQPSQL(object):
         steps = 0
 
         rx = QRegExp("^.*\\d{6,9}$")
-        listOldBks = self.tables()
+        if rx in self.tables() is not False:
+            listOldBks = rx in self.tables()
+        else:
+            listOldBks = []
+
         qry.exec_("select nombre from flfiles where nombre similar to"
                   "'%[[:digit:]][[:digit:]][[:digit:]][[:digit:]]-[[:digit:]][[:digit:]]%:[[:digit:]][[:digit:]]%' or nombre similar to"
                   "'%alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]]%' or (bloqueo='f' and nombre like '%.mtd')")
 
         util.createProgressDialog(
             util.tr("Borrando backups"), len(listOldBks) + qry.size() + 2)
+
         while qry.next():
             item = qry.value(0)
             util.setLabelText(util.tr("Borrando registro %1").arg(item))
@@ -1131,15 +1136,15 @@ class FLQPSQL(object):
             util.tr("Comprobando base de datos"), qry.size())
         while qry.next():
             item = qry.value(0)
-            util.setLabelText(util.tr("Comprobando tabla %1").arg(item))
+            util.setLabelText(util.tr("Comprobando tabla %s" % item))
 
             mustAlter = self.mismatchedTable(item, item)
             if mustAlter:
                 conte = self.db_.managerModules().content("%s.mtd" % item)
                 if conte:
-                    msg = util.tr("La estructura de los metadatos de la tabla '%1' y su "
+                    msg = util.tr("La estructura de los metadatos de la tabla '%s' y su "
                                   "estructura interna en la base de datos no coinciden. "
-                                  "Intentando regenerarla.").arg(item)
+                                  "Intentando regenerarla." % item)
 
                     print(msg)
                     self.alterTable2(conte, conte, None, True)
@@ -1159,7 +1164,7 @@ class FLQPSQL(object):
                 item = sqlQuery.value(0)
                 steps = steps + 1
                 util.setProgress(steps)
-                util.setLabelText(util.tr("Creando índices para %1").arg(item))
+                util.setLabelText(util.tr("Creando índices para %s" % item))
                 mtd = self.db_.manager().metadata(item)
                 fL = mtd.fieldList()
                 if not mtd or not fL:
@@ -1168,7 +1173,7 @@ class FLQPSQL(object):
                     if not it or not it.type() == "pixmap":
                         continue
                     cur = FLSqlCursor(item, True, self.db_.dbAux())
-                    cur.select("%s not like 'RK@%'" % it.name())
+                    cur.select(it.name() + " not like 'RK@%'")
                     while cur.next():
                         v = cur.value(it.name())
                         if v is None:
@@ -1182,7 +1187,7 @@ class FLQPSQL(object):
 
                 sqlCursor.setName(item, True)
 
-        self.db_.dbAux().driver().commit()
+        # self.db_.dbAux().driver().commit()
 
         steps = 0
         qry.exec_("select tablename from pg_tables where schemaname='public'")
@@ -1190,7 +1195,7 @@ class FLQPSQL(object):
             util.tr("Analizando base de datos"), qry.size())
         while qry.next():
             item = qry.value(0)
-            util.setLabelText(util.tr("Analizando tabla %1").arg(item))
+            util.setLabelText(util.tr("Analizando tabla %s" % item))
             qry2.exec_("vacuum analyze %s" % item)
             steps = steps + 1
             util.setProgress(steps)
