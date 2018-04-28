@@ -655,6 +655,7 @@ class Dialog(QtWidgets.QDialog):
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
         self._tab = QTabWidget()
+        self._tab.hide()
         self._layout.addWidget(self._tab)
         self.oKButtonText = None
         self.cancelButtonText = None
@@ -672,6 +673,8 @@ class Dialog(QtWidgets.QDialog):
         return super(Dialog, self).exec_()
 
     def newTab(self, name):
+        if self._tab.isHidden():
+            self._tab.show()
         self._tab.addTab(QtWidgets.QWidget(), str(name))
 
     def __getattr__(self, name):
