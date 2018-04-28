@@ -86,7 +86,8 @@ class FormInternalObj(qsatype.FormDBWidget):
             MessageBox.warning(util.translate(u"scripts", u"Error al buscar los módulos en el directorio:\n") +
                                dirMods, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton)
             return
-        opciones = resComando.salida.split(u"\n")
+
+        opciones = resComando.salida.data().decode().split(u"\n")
         opciones.pop()
         modulos = self.iface.elegirOpcion(opciones)
         if modulos == - 1 or modulos == - 2:

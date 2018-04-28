@@ -162,6 +162,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                 self.cargarFicheros(ustr(directorio, u"/forms/"), u"*.ui")
                 self.cargarFicheros(ustr(directorio, u"/tables/"), u"*.mtd")
                 self.cargarFicheros(ustr(directorio, u"/scripts/"), u"*.qs")
+                self.cargarFicheros(ustr(directorio, u"/scripts/"), u"*.qs.py")
                 self.cargarFicheros(ustr(directorio, u"/queries/"), u"*.qry")
                 self.cargarFicheros(ustr(directorio, u"/reports/"), u"*.kut")
                 self.cargarFicheros(ustr(directorio, u"/reports/"), u"*.ar")
@@ -172,7 +173,7 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def tipoDeFichero(self, nombre=None):
         posPunto = nombre.rfind(u".")
-        return nombre[(len(nombre) - (len(nombre) - posPunto)):]
+        return nombre[0:posPunto]
 
     def exportarADisco(self, directorio=None):
         if directorio:
@@ -208,7 +209,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                 while s01_dowhile_1stloop or curFiles.next():
                     s01_dowhile_1stloop = False
                     file = curFiles.valueBuffer(u"nombre")
-                    tipo = tipoDeFichero(file)
+                    tipo = self.tipoDeFichero(file)
                     contenido = curFiles.valueBuffer(u"contenido")
                     if not contenido == '':
                         s01_when = tipo
@@ -255,7 +256,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                             sys.write(u"ISO-8859-1", ustr(directorio, u"/forms/", file), contenido)
                             log.append(util.translate(u"scripts", ustr(u"* Exportando ", file, u".")))
                             s01_do_work = False  # BREAK
-                        if s01_when == u".qs":
+                        if s01_when in (u".qs", u".qs.py"):
                             s01_do_work, s01_work_done = True, True
                         if s01_do_work:
                             sys.write(u"ISO-8859-1", ustr(directorio, u"/scripts/", file), contenido)
