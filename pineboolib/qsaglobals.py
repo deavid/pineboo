@@ -62,7 +62,10 @@ class FileDialog(QtWidgets.QFileDialog):
     def getExistingDirectory(basedir, caption=None):
         if basedir == False:
             basedir = filedir("..")
-        return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(None, caption, basedir)
+
+        if pineboolib.project._DGI.localDesktop():
+            parent = pineboolib.project.main_window.ui
+            return "%s/" % QtWidgets.QFileDialog.getExistingDirectory(parent, caption, basedir)
 
 
 class Math(object):
