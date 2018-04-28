@@ -121,11 +121,6 @@ class FLFormDB(QtWidgets.QDialog):
     # protected slots:
 
     """
-    Emite señal formulari listo. Ver FLFormDB::formReady()
-    """
-    formReady = QtCore.pyqtSignal()
-
-    """
     Uso interno
     """
     oldFormObjDestroyed = QtCore.pyqtSignal()
@@ -517,7 +512,10 @@ class FLFormDB(QtWidgets.QDialog):
 
     def emitFormReady(self):
         self.formReady
-        self._prj.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
+        from pineboolib.qsaglobals import SysType
+        sys_ = SysType()
+        if sys_.isLoadedModule('fltesttest'):
+            self._prj.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
 
     # protected_:
 
