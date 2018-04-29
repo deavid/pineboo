@@ -27,6 +27,7 @@ class FLMYSQL_MYISAM(object):
         self.alias_ = "MySQL_MyISAM (EN OBRAS)"
         self.cursorsArray_ = {}
         self.noInnoDB = True
+        self._dbname = None
 
     def version(self):
         return self.version_
@@ -37,7 +38,11 @@ class FLMYSQL_MYISAM(object):
     def isOpen(self):
         return self.open_
 
+    def DBName(self):
+        return self._dbname
+
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
+        self._dbname = db_name
 
         try:
             import MySQLdb
