@@ -482,6 +482,7 @@ p_parse.__doc__ = '''
 
     whilestatement  : WHILE LPAREN condition RPAREN statement_block
     dowhilestatement  : DO statement_block WHILE LPAREN condition RPAREN SEMI
+                      | DO statement_block WHILE LPAREN condition RPAREN
 
     withstatement   : WITH LPAREN variable RPAREN statement_block
                     | error
