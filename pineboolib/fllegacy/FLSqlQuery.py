@@ -521,8 +521,7 @@ class FLSqlQuery(object):
     def setTablesList(self, tl):
         self.d.tablesList_ = []
         for tabla in tl.split(","):
-
-            if not pineboolib.project.conn.manager().metadata(tabla):
+            if not pineboolib.project.conn.manager().existsTable(tabla):
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
