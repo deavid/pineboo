@@ -32,7 +32,6 @@ class FLReportEngine(object):
             self.qDoubleFieldList_ = []
             self.qImgFields_ = []
 
-        @decorators.NotImplementedWarn
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
                 return
@@ -119,7 +118,6 @@ class FLReportEngine(object):
         self.relDpi_ = 78.
         self.rd = None
 
-    @decorators.NotImplementedWarn
     def rptXmlData(self):
         return self.rd
 
@@ -131,7 +129,6 @@ class FLReportEngine(object):
     def relDpi(self):
         return self.relDpi_
 
-    @decorators.NotImplementedWarn
     def setReportData(self, q):
         if isinstance(q, FLDomNodeInterface):
             return self.setFLReportData(q.obj())
