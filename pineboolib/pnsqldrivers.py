@@ -10,8 +10,12 @@ logger = logging.getLogger(__name__)
 class PNSqlDrivers(ProjectClass):
     driverName = None
     driver_ = None
+    _mobile = None
 
-    def __init__(self):
+    def __init__(self, _DGI=None):
+        self._mobile = False
+        if _DGI:
+            self._mobile = _DGI.mobilePlatform()
 
         self.driversdict = {}
         # if not os.path.exists("pineboolib/plugins"):
@@ -25,7 +29,8 @@ class PNSqlDrivers(ProjectClass):
                 f = f[:f.find(".py")]
                 mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % f)
                 driver_ = getattr(mod_, f.upper())()
-                self.driversdict[f] = driver_.alias_
+                if driver_.mobile_ or not self._mobile:
+                    self.driversdict[f] = driver_.alias_
 
         self.defaultDriverName = "FLsqlite"
 
