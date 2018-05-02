@@ -17,6 +17,7 @@ class FLMYSQL_MYISAM(object):
     lastError_ = None
     cursorsArray_ = None
     noInnoDB = None
+    mobile_ = False
 
     def __init__(self):
         self.version_ = "0.3"
@@ -28,6 +29,7 @@ class FLMYSQL_MYISAM(object):
         self.cursorsArray_ = {}
         self.noInnoDB = True
         self._dbname = None
+        self.mobile_ = False
 
     def version(self):
         return self.version_

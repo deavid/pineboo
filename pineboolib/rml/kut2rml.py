@@ -7,7 +7,6 @@ import pineboolib
 import logging
 import os
 from datetime import date
-from reportlab.pdfbase import pdfmetrics
 from PyQt5.QtXml import QDomNode
 from pineboolib.rml import refkey2cache
 
@@ -41,10 +40,15 @@ class kut2rml(object):
         self.correcionAltura_ = 0.927
 
     def parse(self, name, kut, dataString):
+        if not pineboolib.project._DGI.isDeployed():
+            from reportlab.pdfbase import pdfmetrics
+        else:
+            return None
+
         try:
             self.xmlK_ = etree.ElementTree.fromstring(kut)
         except Exception:
-            self.logger.exception("KUT2RML: Problema al procesar %s.kut\n%s" % (name, kut))
+            self.logger.exception("KUT2RML: Problema al procesar %s.kut\n" % name)
             return False
         documment = SubElement(self.rml_, "document")
         # Para definir tipos de letra

@@ -77,7 +77,11 @@ def startup_check_dependencies():
         logger.info("HINT: Dependencias incumplidas:")
         for dep in dependences:
             logger.info("HINT: Instale el paquete %s e intente de nuevo" % dep)
-        sys.exit(32)
+
+        try:
+            from pdytools import hexversion as pdy_hexversion
+        except ImportError:
+            sys.exit(32)
 
     if "python3-ply" not in dependences:
         version_check("ply", ply.__version__, '3.9')
@@ -292,7 +296,7 @@ def create_app(DGI):
 def show_connection_dialog(project, app):
     """Show the connection dialog, and configure the project accordingly."""
     from pineboolib import dlgconnect
-    connection_window = dlgconnect.DlgConnect()
+    connection_window = dlgconnect.DlgConnect(project._DGI)
     connection_window.load()
     connection_window.show()
     ret = app.exec_()

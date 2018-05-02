@@ -18,6 +18,8 @@ class dgi_schema(object):
     _name = None
     _alias = None
     _localDesktop = True
+    _mobile = False
+    _deployed = False
 
     def __init__(self):
         self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
@@ -27,6 +29,17 @@ class dgi_schema(object):
         self._alias = "Default Schema"
         self.loadReferences()
         self.parserDGI = parserJson()
+        try:
+            import PyQt5.QtAndroidExtras
+            self._mobile = True
+        except ImportError:
+            self._mobile = False
+
+        try:
+            from pdytools import hexversion as pdy_hexversion
+            self._deployed = True
+        except ImportError:
+            self._deployed = False
 
     def name(self):
         return self._name
@@ -86,13 +99,11 @@ class dgi_schema(object):
         self.QCheckBox = QCheckBox
         self.QTextEdit = QTextEdit
 
-    def AndroidPlatform(self):
-        try:
-            import PyQt5.QtAndroidExtras
-        except ImportError:
-            return False
+    def mobilePlatform(self):
+        return self._mobile
 
-        return True
+    def isDeployed(self):
+        return self._deployed
 
 
 class FLLineEdit(QtWidgets.QLineEdit):

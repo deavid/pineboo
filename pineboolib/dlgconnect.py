@@ -26,9 +26,11 @@ class DlgConnect(QtWidgets.QWidget):
     database = ""
     ui = None
     dbProjects_ = None
+    _DGI = None
 
-    def __init__(self):
+    def __init__(self, _DGI):
         super(DlgConnect, self).__init__()
+        self._DGI = _DGI
         self.ruta = ""
         self.username = ""
         self.password = ""
@@ -87,7 +89,7 @@ class DlgConnect(QtWidgets.QWidget):
         # hasta aqui la modificación 6
         self.cBDrivers = self.ui.cBDrivers
 
-        DV = PNSqlDrivers()
+        DV = PNSqlDrivers(self._DGI)
         list = DV.aliasList()
         self.cBDrivers.addItems(list)
 
