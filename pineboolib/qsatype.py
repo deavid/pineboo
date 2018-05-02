@@ -833,6 +833,12 @@ class Dir_Class(object):
         print("DIR.setCurrent(%s)" % val)
         os.chdir(val)
 
+    def mkdir(self, name):
+        try:
+            os.stat(name)
+        except:
+            os.mkdir(name)
+
 
 Dir = Dir_Class
 
