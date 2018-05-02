@@ -5,6 +5,7 @@ import weakref
 import logging
 import traceback
 import math
+import codecs
 from PyQt5.Qt import qApp
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.Qt import QDateEdit
@@ -241,6 +242,12 @@ class SysType(object):
     @decorators.NotImplementedWarn
     def reinit(self):
         pass
+
+    def write(self, encode_, dir_, contenido):
+        f = codecs.open(dir_, encoding=encode_, mode="w+")
+        f.write(contenido)
+        f.seek(0)
+        f.close()
 
     def cleanupMetaData(self, connName="default"):
         pineboolib.project.conn.database(connName).manager().cleanupMetaData()
