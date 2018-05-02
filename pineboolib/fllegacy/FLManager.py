@@ -161,38 +161,40 @@ class FLManager(ProjectClass):
             stream = None
 
             isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
-            if not isSysTable:
-                stream = self.db_.managerModules().contentCached("%s.mtd" % key)
+            # if not isSysTable:
+            #    stream = self.db_.managerModules().contentCached("%s.mtd" % key)
 
-                if not stream:
-                    qWarning(
-                        "FLManager : Error al cargar los metadatos para la tabla %s" % n)
+            #    if not stream:
+            #        qWarning(
+            #            "FLManager : Error al cargar los metadatos para la tabla %s" % n)
 
-                    return None
+            #       return None
 
             #    if not key:
             #        key = n
-
-            if not isSysTable:
-                for fi in self.cacheMetaData_:
-                    if fi.name() == key:
-                        ret = fi
-                        break
-            else:
+            cacheFound_ = False
+            if isSysTable:
                 for fi in self.cacheMetaDataSys_:
                     if fi.name() == key:
                         ret = fi
+                        cacheFound_ = True
+                        break
+            else:
+                for fi in self.cacheMetaData_:
+                    if fi.name() == key:
+                        ret = fi
+                        cacheFound_ = True
                         break
 
-            if not ret:
-                if isSysTable:
-                    stream = self.db_.managerModules().contentCached("%s.mtd" % n)
+            if not cacheFound_:
 
-                    if not stream:
-                        qWarning(
-                            "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                stream = self.db_.managerModules().contentCached("%s.mtd" % n)
 
-                        return None
+                if not stream:
+                    qWarning(
+                        "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+
+                    return None
 
                 doc = QDomDocument(n)
                 if not util.domDocumentSetContent(doc, stream):
@@ -202,19 +204,22 @@ class FLManager(ProjectClass):
 
                 docElem = doc.documentElement()
                 ret = self.metadata(docElem, quick)
-                if not ret:
+                if not ret or ret.name() != n:
                     return None
 
-                if not isSysTable and not ret.isQuery():
+                if not isSysTable:
                     self.cacheMetaData_.append(ret)
+                    if not ret.isQuery() and not self.existsTable(n):
+                        self.createTable(ret)
+
                 elif isSysTable:
                     self.cacheMetaDataSys_.append(ret)
 
             else:
                 acl = self._prj.acl()
 
-            if ret.fieldsNamesUnlock():
-                ret = FLTableMetaData(ret)
+            # if ret.fieldsNamesUnlock():
+            #    ret = FLTableMetaData(ret)
 
             if acl:
                 acl.process(ret)
@@ -225,8 +230,6 @@ class FLManager(ProjectClass):
                     "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
                     "Debe regenerar la base de datos.").replace("%1", n)
                 logger.warn(msg)
-            elif not self.existsTable(n) and not ret.isQuery():
-                self.createTable(ret)
                 # throwMsgWarning(self.db_, msg)
 
             return ret
@@ -366,7 +369,7 @@ class FLManager(ProjectClass):
                         mtdAux = self.metadata(table, True)
                         if mtdAux:
                             fmtdAux = mtdAux.field(field)
-                            if mtdAux:
+                            if fmtdAux:
                                 isForeignKey = False
                                 if fmtdAux.isPrimaryKey() and not table == name:
                                     fmtdAux = FLFieldMetaData(fmtdAux)
@@ -495,7 +498,7 @@ class FLManager(ProjectClass):
         @return TRUE si existe la tabla, FALSE en caso contrario
         """
 
-        sql_query = "SELECT * FROM %s WHERE 1 = 1" % n
+        sql_query = "SELECT * FROM %s WHERE 1 = 1 LIMIT 1" % n
         # Al usar dbAux no bloquea sql si falla
         cursor = self._prj.conn.useConn("dbAux").cursor()
         try:
@@ -1099,46 +1102,47 @@ class FLManager(ProjectClass):
         if not self.existsTable("flfiles") or not self.existsTable("flmetadata"):
             return
 
-        q = FLSqlQuery(None, self.db_.dbAux())
-        c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
         buffer = None
         table = ""
 
         # q.setForwardOnly(True)
         # c.setForwardOnly(True)
 
-        if not self.dictKeyMetaData_:
-            self.dictKeyMetaData_ = {}
-        else:
+        if self.dictKeyMetaData_:
             self.dictKeyMetaData_.clear()
+        else:
+            self.dictKeyMetaData_ = {}
 
         self.loadTables()
         self.db_.managerModules().loadKeyFiles()
         self.db_.managerModules().loadAllIdModules()
         self.db_.managerModules().loadIdAreas()
 
-        q.exec_("SELECT tabla, xml FROM flmetadata")
+        q = FLSqlQuery(None, self.db_.dbAux())
+        q.exec_("SELECT tabla,xml FROM flmetadata")
         while q.next():
             self.dictKeyMetaData_[str(q.value(0))] = str(q.value(1))
 
-            q.exec_("SELECT nombre, sha FROM flfiles WHERE nombre LIKE '%.mtd'")
-            while q.next():
-                table = str(q.value(0))
-                table = table.replace(".mtd", "")
-                if not self.existsTable(table):
-                    self.createTable(table)
+        c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
 
-                tmd = self.metadata(table)
-                if not tmd:
-                    qWarning("FLManager::cleanupMetaDAta " + QApplication.tr(self, "No se ha podido crear los metadatatos para la tabla %s") % table)
+        q2 = FLSqlQuery(None, self.db_.dbAux())
+        q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd'")
+        while q2.next():
+            table = str(q2.value(0))
+            table = table.replace(".mtd", "")
+            tmd = self.metadata(table)
+            if not tmd:
+                #qWarning("FLManager::cleanupMetaData " + QApplication.tr(self, "No se ha podido crear los metadatatos para la tabla %s") % table)
+                continue
+            if not self.existsTable(table):
+                self.createTable(table)
 
-                c.select("tabla='%s'" % table)
-                if c.next():
-                    buffer = c.primeUpdate()
-                    buffer.setValue("xml", str(q.value(1)))
-                    c.update()
-
-                self.dictKeyMetaData_[table] = str(q.value(1))
+            c.select("tabla='%s'" % table)
+            if c.next():
+                buffer = c.primeUpdate()
+                buffer.setValue("xml", str(q2.value(1)))
+                c.update()
+            self.dictKeyMetaData_[table] = str(q2.value(1))
 
     def isSystemTable(self, n):
         """
@@ -1148,8 +1152,8 @@ class FLManager(ProjectClass):
         @return TRUE si es una tabla de sistema
         """
 
-        if not n[0:2] == "fl":
-            return False
+        # if not n[0:2] == "fl":
+        #    return False
 
         if n in ("flfiles", "flmetadata", "flmodules", "flareas", "flserial", "flvar", "flsettings", "flseqs", "flupdates"):
             return True
