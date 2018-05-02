@@ -61,8 +61,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                 cursorFicheros.setValueBuffer(u"contenido", contenido)
                 cursorFicheros.commitBuffer()
                 if nombre.endswith(u".ar"):
-                    if not cargarAr(nombre, contenido, log, directorio):
-                        return
+                    self.cargarAr(nombre, contenido, log, directorio)
 
     def cargarAr(self, nombre=None, contenido=None, log=None, directorio=None):
         if not sys.isLoadedModule(u"flar2kut"):
@@ -147,11 +146,11 @@ class FormInternalObj(qsatype.FormDBWidget):
                     MessageBox.critical(util.translate(u"scripts", u"Imposible cargar el módulo.\nLicencia del módulo no aceptada."), MessageBox.Ok)
                     return
             sys.cleanupMetaData()
+            sys.processEvents()
             if self.cursor().commitBuffer():
                 self.child(u"idMod").setDisabled(True)
                 log = self.child(u"log")
                 log.text = u""
-                sys.processEvents()
                 self.setDisabled(True)
                 self.cargarFicheros(ustr(directorio, u"/"), u"*.xml")
                 self.cargarFicheros(ustr(directorio, u"/"), u"*.mod")
@@ -173,7 +172,7 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def tipoDeFichero(self, nombre=None):
         posPunto = nombre.rfind(u".")
-        return nombre[0:posPunto]
+        return nombre[posPunto:]
 
     def exportarADisco(self, directorio=None):
         if directorio:

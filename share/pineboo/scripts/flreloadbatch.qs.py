@@ -243,6 +243,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         curModulo.editRecord()
         formRecordflmodules.cargarDeDisco(ustr(fichero.path, u"/"), False)
         formRecordflmodules.accept()
+        sys.processEvents()
         return True
 
     def oficial_compararVersiones(self, v1=None, v2=None):
