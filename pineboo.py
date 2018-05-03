@@ -19,7 +19,6 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-_DGI = None
 
 
 def version_check(modname, modver, minver):
@@ -282,6 +281,9 @@ def create_app(DGI):
 
         QtWidgets.QApplication.setFont(font)
 
+        if DGI.mobilePlatform():
+            pineboolib.main.Project.mainFormName = "Mobile"
+
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # construido antes que cualquier widget
         mainForm = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
@@ -353,7 +355,8 @@ def main():
     options = parse_options()
 
     _DGI = load_dgi(options.dgi)
-    download_files()
+    if _DGI.isDeployed():
+        download_files()
 
     pineboolib.no_python_cache = options.no_python_cache
 
@@ -388,8 +391,10 @@ def main():
         user, passwd, driver_alias, host, port, dbname = translate_connstring(
             options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
-    elif _DGI.useDesktop() and _DGI.localDesktop():
+    elif _DGI.useDesktop() and _DGI.localDesktop() and not _DGI.mobilePlatform():
         show_connection_dialog(project, app)
+    elif _DGI.useDesktop() and _DGI.localDesktop() and _DGI.mobilePlatform():
+        project.load_db("pineboo.sqlite3", None, None, None, None, "SQLite3")
 
     # Cargando spashscreen
     # Create and display the splash screen

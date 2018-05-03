@@ -35,8 +35,15 @@ def filedir(*path):
             Es útil para especificar rutas a recursos del programa.
     """
     ruta_ = os.path.dirname(__file__)
-    if ruta_.startswith(":"):
-        ruta_ = "." + ruta_[1:]
+
+    try:
+        from pdytools import hexversion as pdy_hexversion
+        if ruta_.startswith(":"):
+            ruta_ = "." + ruta_[1:]
+
+    except ImportError:
+        pass
+
     ruta_ = os.path.realpath(os.path.join(ruta_, *path))
     # if ruta_.find(":/pineboolib/forms") > -1 or ruta_.find(":/pineboolib/plugins") > -1 or ruta_.find(":/pineboolib/..") > -1:
 
@@ -274,16 +281,10 @@ def download_files():
     try:
         os.makedirs(filedir("../projects"))
     except:
-        pass
+        return  # Si existe project, es porque ya se ha hecho el download desde el deploy previamente
 
     copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
     copy_dir_recursive(":/share", filedir("../share"))
-
-    # app.exec()
-
-    # All done.
-    # sys.exit()
-    return
 
 
 def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
