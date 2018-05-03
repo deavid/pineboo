@@ -434,8 +434,10 @@ class FLManager(ProjectClass):
         root_ = etree.ElementTree.fromstring(qry_)
         q.setSelect(root_.find("select").text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
         q.setFrom(root_.find("from").text.strip(' \t\n\r'))
-        if root_.find("where"):
-            q.setWhere(root_.find("where").text.strip(' \t\n\r'))
+
+        for where in root_.iter("where"):
+            q.setWhere(where.text.strip(' \t\n\r'))
+
         q.setTablesList(root_.find("tables").text.strip(' \t\n\r'))
 
         orderBy_ = None
