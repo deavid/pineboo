@@ -178,14 +178,14 @@ class kut2rml(object):
             self.processXML(xml, parent)
 
         #self.actualVSize[str(self.pagina)] += self.getHeight(xml)
-        self.logger.warn("PAGE_HEADER BOTTON", self.actualVSize[str(self.pagina)])
+        self.logger.warn("PAGE_HEADER BOTTON %s" % self.actualVSize[str(self.pagina)])
 
     def pageFooter(self, xml, parent):
         frecuencia = int(self.getOption(xml, "PrintFrequency"))
         if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
             #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
             self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self.getHeight(xml) * self.correcionAltura_
-            self.logger.warn("PAGE_FOOTER BOTTON", self.actualVSize[str(self.pagina)])
+            self.logger.warn("PAGE_FOOTER BOTTON %s" % self.actualVSize[str(self.pagina)])
             self.processXML(xml, parent)
 
     def processXML(self, xml, parent, data=None):
@@ -198,7 +198,7 @@ class kut2rml(object):
             if child.tag == "Label":
                 self.processText(child, parent, data)
             elif child.tag == "Line":
-                self.processLine(child, parent)
+                self.drawLine(child, parent)
             elif child.tag == "Field":
                 self.processText(child, parent, data)
             elif child.tag == "Special":
@@ -212,7 +212,7 @@ class kut2rml(object):
 
         self.actualVSize[str(self.pagina)] += self.getHeight(xml)
 
-    def processLine(self, xml, parent):
+    def drawLine(self, xml, parent):
 
         color = self.getColor(xml.get("Color")).name()
         style = int(xml.get("Style"))
@@ -232,18 +232,9 @@ class kut2rml(object):
 
     def processText(self, xml, parent, data=None):
         isImage = False
-        x = int(xml.get("X"))
-        y = int(xml.get("Y"))
         text = xml.get("Text")
-        borderStyle = int(self.getOption(xml, "BorderStyle"))
         BorderWidth = int(self.getOption(xml, "BorderWidth"))
         borderColor = self.getColor(xml.get("BorderColor")).name()
-        bgColor = self.getColor(xml.get("BackgroundColor")).name()
-        fgColor = self.getColor(xml.get("ForegroundColor")).name()
-        HAlig = int(self.getOption(xml, "HAlignment"))
-        VAlig = int(self.getOption(xml, "VAlignment"))
-        W = int(xml.get("Width"))
-        H = int(xml.get("Height"))
         font = xml.get("FontFamily")
         fontSize = int(xml.get("FontSize"))
         fontW = int(self.getOption(xml, "FontWeight"))
@@ -325,6 +316,50 @@ class kut2rml(object):
             rF.set("faceName", font)
             rF.set("fileName", fileF)
 
+        if self.getOption(xml, "BorderStyle") == "1":
+            self.drawRec(xml, parent)
+
+        if not isImage:
+            self.setFont(parent, font, fontSize)
+            self.drawText(xml, parent, text)
+        else:
+            self.drawImage(xml, parent, text)
+
+    def drawRec(self, xml, parent):
+            # Rectangulo
+        bgColor = self.getColor(xml.get("BackgroundColor")).name()
+        fgColor = self.getColor(xml.get("ForegroundColor")).name()
+
+        sE = SubElement(parent, "stroke")
+        sE.set("color", fgColor)
+        rectE = SubElement(parent, "rect")
+        self.setPos(rectE, xml)
+        self.setSize(xml, rectE, True)
+
+        rectE.set("fill", "no")
+        rectE.set("stroke", "yes")
+        #print("Creando rectangulo", W, H)
+
+    def drawImage(self, xml, parent, filename):
+        strE = SubElement(parent, "image")
+        strE.set("file", text)
+        self.setSize(xml, strE)
+        self.setPos(strE, xml)
+
+    def drawText(self, xml, parent, text):
+        strE = SubElement(parent, "drawString")
+        strE.text = text
+        self.setPos(strE, xml)
+
+    def setSize(self, xml, obj, reverseH=False):
+        rev = 1
+        if reverseH is True:
+            rev = -1
+        W = int(xml.get("Width"))
+        H = int(xml.get("Height"))
+        x = xml.get("X")
+        y = xml.get("Y")
+
         # if W > self.pageSize_["W"]:
         #    W = self.pageSize_["W"] - self.pageSize_["RM"]
         if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
@@ -333,27 +368,22 @@ class kut2rml(object):
 
         if self.pageSize_["H"] - self.pageSize_["TM"] < H + self.getCord("Y", y):  # Controla si se sobrepasa el margen derecho
             self.logger.debug("Limite Alto pasado %s de %s" % (self.pageSize_["H"] - self.pageSize_["TM"], H))
-            Y = self.pageSize_["H"] - self.pageSize_["TM"] - self.getCord("Y", y)
+            H = self.pageSize_["H"] - self.pageSize_["TM"] - self.getCord("Y", y)
 
-        if borderStyle == 1:
-            # Rectangulo
-            sE = SubElement(parent, "stroke")
-            sE.set("color", fgColor)
-            rectE = SubElement(parent, "rect")
-            rectE.set("x", str(self.getCord("X", x)))
-            # if (self.pageSize_["H"] - self.pageSize_["TM"]) < self.getCord("Y", y):  # Controla si se sobrepasa el margen superior
-            #    self.logger.debug("Alto max %s , actual %s" % ((self.pageSize_["H"] - self.pageSize_["TM"]), self.getCord("Y", y)))
-            #    rectE.set("y", str(self.pageSize_["H"] - self.pageSize_["TM"]))
-            # else:
-            rectE.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
+        obj.set("width", str(W))
+        obj.set("height", str(H * rev))
 
-            rectE.set("width", str(W))
-            rectE.set("height", str(H * -1))
-            rectE.set("fill", "no")
-            rectE.set("stroke", "yes")
-            #print("Creando rectangulo", W, H)
+    def setPos(self, obj, xml):
+
+        x = int(xml.get("X"))
+        y = int(xml.get("Y"))
+        HAlig = int(self.getOption(xml, "HAlignment"))
+        VAlig = int(self.getOption(xml, "VAlignment"))
+        W = int(xml.get("Width"))
+        H = int(xml.get("Height"))
 
         # Calculamos la posicion real contando con el tamaño
+        """
         if HAlig == 1:  # Centrado
             if not isImage:
                 x = x + (W / 2) - (fontW / 1.75)
@@ -367,24 +397,14 @@ class kut2rml(object):
                 y = y + (H / 2) + (H / 4)
             else:
                 y = y + H
+        """
+        obj.set("x", str(self.getCord("X", x)))
+        obj.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
 
-        if not isImage:
-            fontE = SubElement(parent, "setFont")
-            fontE.set("name", font)
-            fontE.set("size", str(fontSize))
-            strE = SubElement(parent, "drawString")
-            #strE.set("fontName", font)
-            #strE.set("fontSize", str(fontSize))
-
-            strE.text = text
-        else:
-            strE = SubElement(parent, "image")
-            strE.set("file", text)
-            strE.set("width", str(W))
-            strE.set("height", str(H))
-
-        strE.set("x", str(self.getCord("X", x)))
-        strE.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
+    def setFont(self, parent, font, size):
+        fontE = SubElement(parent, "setFont")
+        fontE.set("name", font)
+        fontE.set("size", str(size))
 
     def getColor(self, rgb):
         ret = None
@@ -400,6 +420,10 @@ class kut2rml(object):
                 ret = QColor(int(rgb[0:2]), int(rgb[3:5]), int(rgb[6:8]))
 
         return ret
+
+    """
+    Calcula la coordenada en el nuevo report , segun los tramos ya añadidos 
+    """
 
     def getCord(self, t, val):
         ret = None
