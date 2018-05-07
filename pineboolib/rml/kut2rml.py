@@ -5,9 +5,9 @@ from PyQt5.QtGui import QColor
 from pineboolib.utils import filedir
 import pineboolib
 import logging
+import traceback
 import os
 from datetime import date
-from PyQt5.QtXml import QDomNode
 from pineboolib.rml import refkey2cache
 
 canvas_ = None
@@ -251,13 +251,16 @@ class kut2rml(object):
             if xml.get("FunctionName"):
                 fN = xml.get("FunctionName")
                 try:
-                    text = pineboolib.project.call(fN, data)
-                except:
+                    nodo = self.convertToNode(data)
+                    text = str(pineboolib.project.call(fN, [nodo]))
+                except Exception:
+                    print(traceback.format_exc())
                     return
-                if text and xml.get("DataType"):
-                    text = self.calculated(text, xml.get("DataType"), xml.get("Precision"))
-            else:
-                text = self.calculated(xml.get("Field"), xml.get("DataType"), xml.get("Precision"))
+            if text and xml.get("DataType") is not None:
+                text = self.calculated(text, xml.get("DataType"), xml.get("Precision"), data)
+
+            # else:
+            #    text = self.calculated(xml.get("Field"), xml.get("DataType"), xml.get("Precision"), data)
 
             if int(xml.get("DataType")) == 5:
                 print("Añadida imagen", text)
@@ -322,11 +325,18 @@ class kut2rml(object):
         if not isImage:
             self.setFont(parent, font, fontSize)
             self.drawText(xml, parent, text)
-        else:
-            self.drawImage(xml, parent, text)
+        # else:
+        #    self.drawImage(xml, parent, text)
+
+    def convertToNode(self, data):
+        node = Node()
+        for k in data.keys():
+            node.setAttribute(k, data.get(k))
+
+        return node
 
     def drawRec(self, xml, parent):
-            # Rectangulo
+        # Rectangulo
         bgColor = self.getColor(xml.get("BackgroundColor")).name()
         fgColor = self.getColor(xml.get("ForegroundColor")).name()
 
@@ -342,7 +352,7 @@ class kut2rml(object):
 
     def drawImage(self, xml, parent, filename):
         strE = SubElement(parent, "image")
-        strE.set("file", text)
+        strE.set("file", filename)
         self.setSize(xml, strE)
         self.setPos(strE, xml)
 
@@ -363,7 +373,7 @@ class kut2rml(object):
         # if W > self.pageSize_["W"]:
         #    W = self.pageSize_["W"] - self.pageSize_["RM"]
         W = self.fixRMarging(W, x)
-
+        #H = self.fixTMargin(H, y)
         # if self.pageSize_["H"] - self.pageSize_["TM"] < H + self.getCord("Y", y):  # Controla si se sobrepasa el margen derecho
         #    self.logger.debug("Limite Alto pasado %s de %s" % (self.pageSize_["H"] - self.pageSize_["TM"], H))
         #    H = self.pageSize_["H"] - self.pageSize_["TM"] - self.getCord("Y", y)
@@ -381,8 +391,8 @@ class kut2rml(object):
         H = int(xml.get("Height"))
 
         # Calculamos la posicion real contando con el tamaño
-        if xml.tag in ("Label", "Field", "Special"):
-            if xml.get("Text") and obj.tag == "drawString":
+        if xml.tag in ("Label", "Field", "Special", "CalculatedField"):
+            if (xml.get("Text") and obj.tag == "drawString"):
                 Ancho_ = int(xml.get("FontSize")) * len(xml.get("Text"))
                 Alto_ = int(xml.get("FontSize"))
                 #x = x + (W / 2) - Ancho_
@@ -399,13 +409,21 @@ class kut2rml(object):
                 if HAlig == 2:  # Derecha
                     x = x + W
 
-                    # Ojo :Corregir si nos pasamos del margen
-
-                # elif HAlig == 2:
-                #    x = x + (fontW / 1.75)
-
                 if VAlig == 1:  # Centrado
                     y = y + H + (Alto_ / 2) + (Alto_ / 4) - (H / 8)
+
+            if obj.tag == "image":
+                x = x
+                y = self.fixTMargin(H, y)
+
+            if obj.tag == "rect":
+                x = x
+                y = y
+                if HAlig == 1:  # Centrado
+                    x = x
+
+                if VAlig == 1:  # Centrado
+                    y = y - (H / 8)
 
         obj.set("x", str(self.getCord("X", x)))
         obj.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
@@ -421,6 +439,12 @@ class kut2rml(object):
             if self.pageSize_["W"] - self.pageSize_["RM"] < (W + self.pageSize_["LM"]):
                 ret = self.pageSize_["W"] - (self.pageSize_["RM"])
 
+        return ret
+
+    def fixTMargin(self, H, y=None):
+        ret = H + int(y)
+        if H + self.pageSize_["TM"] > int(y):
+            ret = H
         return ret
 
     def setFont(self, parent, font, size):
@@ -543,9 +567,26 @@ class kut2rml(object):
 
         return ret
 
-    def calculated(self, field, dataType, Precision):
+    def calculated(self, field, dataType, Precision, data=None):
+
         ret = field
         if int(dataType) == 5:  # Imagen
             ret = refkey2cache.parseKey(field)
+        elif data:
+            print("Recogiendo", field, data.get(field))
+            ret = data.get(field)
 
         return ret
+
+
+class Node(object):
+    list_ = None
+
+    def __init__(self):
+        self.list_ = {}
+
+    def setAttribute(self, name, value):
+        self.list_[name] = value
+
+    def attributeValue(self, name):
+        return self.list_[name]
