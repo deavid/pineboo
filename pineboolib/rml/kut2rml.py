@@ -38,6 +38,7 @@ class kut2rml(object):
         self.pagina = 0
         self.logger = logging.getLogger("kut2rml")
         self.correcionAltura_ = 0.927
+        self.correccionAncho_ = 0.927
 
     def parse(self, name, kut, dataString):
         if not pineboolib.project._DGI.isDeployed():
@@ -219,16 +220,15 @@ class kut2rml(object):
         width = int(xml.get("Width"))
         X1 = int(xml.get("X1"))
         X2 = int(xml.get("X2"))
-        Y1 = int(xml.get("Y1"))
-        Y2 = int(xml.get("Y2"))
+        Y1 = int(xml.get("Y1")) * self.correcionAltura_
+        Y2 = int(xml.get("Y2")) * self.correcionAltura_
 
-        if X2 > self.pageSize_["W"]:
-            X2 = self.pageSize_["W"] - self.pageSize_["RM"]
+        X2 = self.fixRMarging(X2)
 
         lineME = SubElement(parent, "lineMode")
         lineME.set("width", str(width))
         lineE = SubElement(parent, "lines")
-        lineE.text = "%s %s %s %s" % (self.getCord("X", X1), self.getCord("Y", Y1 * self.correcionAltura_), X2, self.getCord("Y", Y2 * self.correcionAltura_))
+        lineE.text = "%s %s %s %s" % (self.getCord("X", X1), self.getCord("Y", Y1), X2, self.getCord("Y", Y2))
 
     def processText(self, xml, parent, data=None):
         isImage = False
@@ -362,13 +362,11 @@ class kut2rml(object):
 
         # if W > self.pageSize_["W"]:
         #    W = self.pageSize_["W"] - self.pageSize_["RM"]
-        if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
-            self.logger.debug("Limite Ancho pasado %s de %s" % (self.pageSize_["W"] - self.pageSize_["RM"], W))
-            W = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
+        W = self.fixRMarging(W, x)
 
-        if self.pageSize_["H"] - self.pageSize_["TM"] < H + self.getCord("Y", y):  # Controla si se sobrepasa el margen derecho
-            self.logger.debug("Limite Alto pasado %s de %s" % (self.pageSize_["H"] - self.pageSize_["TM"], H))
-            H = self.pageSize_["H"] - self.pageSize_["TM"] - self.getCord("Y", y)
+        # if self.pageSize_["H"] - self.pageSize_["TM"] < H + self.getCord("Y", y):  # Controla si se sobrepasa el margen derecho
+        #    self.logger.debug("Limite Alto pasado %s de %s" % (self.pageSize_["H"] - self.pageSize_["TM"], H))
+        #    H = self.pageSize_["H"] - self.pageSize_["TM"] - self.getCord("Y", y)
 
         obj.set("width", str(W))
         obj.set("height", str(H * rev))
@@ -383,23 +381,47 @@ class kut2rml(object):
         H = int(xml.get("Height"))
 
         # Calculamos la posicion real contando con el tamaño
-        """
-        if HAlig == 1:  # Centrado
-            if not isImage:
-                x = x + (W / 2) - (fontW / 1.75)
+        if xml.tag in ("Label", "Field", "Special"):
+            if xml.get("Text") and obj.tag == "drawString":
+                Ancho_ = int(xml.get("FontSize")) * len(xml.get("Text"))
+                Alto_ = int(xml.get("FontSize"))
+                #x = x + (W / 2) - Ancho_
+                y = y - Alto_
 
-        elif HAlig == 2:
-            if not isImage:
-                x = x + (fontW / 1.75)
+                W = self.fixRMarging(W, x)
 
-        if VAlig == 1:  # Centrado
-            if not isImage:
-                y = y + (H / 2) + (H / 4)
-            else:
-                y = y + H
-        """
+                if HAlig == 0:  # Izquierda
+                    x = x
+
+                if HAlig == 1:  # Centrado
+                    x = x + (W / 2)  # Falla un poco revisar
+
+                if HAlig == 2:  # Derecha
+                    x = x + W
+
+                    # Ojo :Corregir si nos pasamos del margen
+
+                # elif HAlig == 2:
+                #    x = x + (fontW / 1.75)
+
+                if VAlig == 1:  # Centrado
+                    y = y + H + (Alto_ / 2) + (Alto_ / 4) - (H / 8)
+
         obj.set("x", str(self.getCord("X", x)))
         obj.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
+
+    def fixRMarging(self, W, x=None):
+        ret = W
+
+        if x:
+            if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
+                ret = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
+        else:
+
+            if self.pageSize_["W"] - self.pageSize_["RM"] < (W + self.pageSize_["LM"]):
+                ret = self.pageSize_["W"] - (self.pageSize_["RM"])
+
+        return ret
 
     def setFont(self, parent, font, size):
         fontE = SubElement(parent, "setFont")
@@ -428,11 +450,12 @@ class kut2rml(object):
     def getCord(self, t, val):
         ret = None
         if t is "X":  # Horizontal
-            ret = int(self.pageSize_["LM"]) + int(val)
+            ret = int(self.pageSize_["LM"]) + int(val) * self.correccionAncho_
+            #ret = val
         elif t is "Y":  # Vertical
             #ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
+            #ret = int(self.pageSize_["H"]) - int(val) - int(self.actualVSize[str(self.pagina)] * self.correcionAltura_)
             ret = int(self.pageSize_["H"]) - int(val) - int(self.actualVSize[str(self.pagina)] * self.correcionAltura_)
-
         return ret
 
     def converPageSize(self, size, orientation, Custom=None):
