@@ -256,6 +256,15 @@ class kut2rml(object):
                 except Exception:
                     print(traceback.format_exc())
                     return
+            else:
+                if not data:
+                    data = self.xmlData_[0]
+                    if xml.get("Field"):
+                        v = data.get(xml.get("Field"))
+                        if v == "None":
+                            v = ""
+                        text = v
+
             if text and xml.get("DataType") is not None:
                 text = self.calculated(text, xml.get("DataType"), xml.get("Precision"), data)
 
