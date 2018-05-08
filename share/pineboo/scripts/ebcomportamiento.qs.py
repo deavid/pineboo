@@ -2,7 +2,6 @@
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
 import traceback
-from PyQt5.QtWidgets import QWidget
 sys = SysType()
 
 
@@ -12,8 +11,8 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def main(self):
         mng = aqApp.db().managerModules()
-        self.w_ = QWidget()
-        self.w_ = mng.createUI(u"ebcomportamiento.ui", None,  self.w_)
+        self.w_ = qsatype.QWidget()
+        self.w_ = mng.createUI(u"ebcomportamiento.ui", None, self.w_)
         w = self.w_
         botonAceptar = w.child(u"pbnAceptar")
         botonCancelar = w.child(u"pbnCancelar")
@@ -27,25 +26,25 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def cargarConfiguracion(self):
         w = self.w_
-        w.child(u"leNombreVertical").text = leerValorGlobal(u"verticalName")
-        w.child(u"cbFLTableDC").checked = leerValorLocal(u"FLTableDoubleClick")
-        w.child(u"cbFLTableSC").checked = leerValorLocal(u"FLTableShortCut")
-        w.child(u"cbFLTableCalc").checked = leerValorLocal(u"FLTableExport2Calc")
-        w.child(u"cbDebuggerMode").checked = leerValorLocal(u"isDebuggerMode")
-        w.child(u"cbSLConsola").checked = leerValorLocal(u"SLConsola")
-        w.child(u"cbSLInterface").checked = leerValorLocal(u"SLInterface")
-        w.child(u"leCallFunction").text = leerValorLocal(u"ebCallFunction")
-        w.child(u"leMaxPixImages").text = leerValorLocal(u"maxPixImages")
-        w.child(u"cbFLLarge").checked = leerValorGlobal(u"FLLargeMode")
-        w.child(u"cbPosInfo").checked = leerValorGlobal(u"PosInfo")
+        w.child(u"leNombreVertical").text = self.leerValorGlobal(u"verticalName")
+        w.child(u"cbFLTableDC").checked = self.leerValorLocal(u"FLTableDoubleClick")
+        w.child(u"cbFLTableSC").checked = self.leerValorLocal(u"FLTableShortCut")
+        w.child(u"cbFLTableCalc").checked = self.leerValorLocal(u"FLTableExport2Calc")
+        w.child(u"cbDebuggerMode").checked = self.leerValorLocal(u"isDebuggerMode")
+        w.child(u"cbSLConsola").checked = self.leerValorLocal(u"SLConsola")
+        w.child(u"cbSLInterface").checked = self.leerValorLocal(u"SLInterface")
+        w.child(u"leCallFunction").text = self.leerValorLocal(u"ebCallFunction")
+        w.child(u"leMaxPixImages").text = self.leerValorLocal(u"maxPixImages")
+        w.child(u"cbFLLarge").checked = self.leerValorGlobal(u"FLLargeMode")
+        w.child(u"cbPosInfo").checked = self.leerValorGlobal(u"PosInfo")
         w.child(u"leCO").hide()
-        if leerValorLocal(u"colorObligatorio") == u"":
+        if self.leerValorLocal(u"colorObligatorio") == u"":
             w.child(u"leCO").paletteBackgroundColor = u"#FFE9AD"
         else:
-            w.child(u"leCO").paletteBackgroundColor = leerValorLocal(u"colorObligatorio")
+            w.child(u"leCO").paletteBackgroundColor = self.leerValorLocal(u"colorObligatorio")
 
         w.child(u"leCO").show()
-        w.child(u"cbActionsMenuRed").checked = leerValorLocal(u"ActionsMenuRed")
+        w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
 
     def leerValorGlobal(self, valorName=None):
         util = qsatype.FLUtil()

@@ -2,6 +2,7 @@
 
 	<action>
 		<name>flmodules</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Módulos")</alias>
 		<table>flmodules</table>
 		<form>FLWidgetMasterTable</form>
 		<formrecord>flmodulos</formrecord>
@@ -10,6 +11,7 @@
 
 	<action>
 		<name>flareas</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Áreas")</alias>
 		<table>flareas</table>
 		<form>FLWidgetMasterTable</form>
 		<formrecord>flareas</formrecord>
@@ -31,6 +33,7 @@
 
 	<action>
 		<name>flusers</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Usuarios")</alias>
 		<table>flusers</table>
 		<form>FLWidgetMasterTable</form>
 		<formrecord>flusers</formrecord>
@@ -38,6 +41,7 @@
 	
 	<action>
 		<name>flgroups</name>
+		<alias>QT_TRANSLATE_NOOP("MetaData","Grupos de usuarios")</alias>
 		<table>flgroups</table>
 		<form>FLWidgetMasterTable</form>
 		<formrecord>flgroups</formrecord>
