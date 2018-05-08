@@ -263,10 +263,21 @@ class FLManagerModules(ProjectClass):
     def createUI(self, n, connector=None, parent=None, name=None):
         if ".ui" not in n:
             n += ".ui"
-        form_path = parent.prj.path(n)
+        if getattr(parent, "prj", None) is None:
+            form_path = self._prj.path(n)
+        else:
+            form_path = parent.prj.path(n)
         if form_path is None:
             raise AttributeError("File %r not found in project" % n)
-        qt3ui.loadUi(form_path, parent.widget)
+            return
+
+        if getattr(parent, "widget", None) is None:
+            w_ = parent
+        else:
+            w_ = parent.widget
+
+        qt3ui.loadUi(form_path, w_)
+        return w_
 
     """
     Llama al método load de los FLTableDB de un widget
