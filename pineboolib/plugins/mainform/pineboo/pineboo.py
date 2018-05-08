@@ -19,13 +19,13 @@ class MainForm(QtWidgets.QMainWindow):
     areasTab = None
     formTab = None
     debugLevel = 100
-    dockAreas = None
     dockAreasTab = None
     dockFavoritos = None
     dockForm = None
     mPAreas = {}  # Almacena los nombre de submenus areas de menú pineboo
     mPModulos = {}  # Almacena los nombre de submenus modulos de menú pineboo
     openTabs = []
+    favoritosW = None
 
     @classmethod
     def setDebugLevel(self, q):
@@ -52,19 +52,25 @@ class MainForm(QtWidgets.QMainWindow):
             pass
 
         self.dockAreasTab = QtWidgets.QDockWidget()
-        self.dockAreas = QtWidgets.QDockWidget()
+        self.dockAreasTab.setWindowTitle("Módulos")
+        #self.dockAreas = QtWidgets.QDockWidget()
         self.dockFavoritos = QtWidgets.QDockWidget()
+        self.dockFavoritos.setWindowTitle("Favoritos")
+
         self.dockForm = QtWidgets.QDockWidget()
 
         self.dockAreasTab.setWidget(self.areasTab)
         self.dockAreasTab.setMaximumWidth(400)
-        self.dockAreasTab.setMinimumWidth(400)
-        self.dockAreasTab.setMaximumHeight(500)
+        self.dockFavoritos.setMaximumWidth(400)
+        self.dockFavoritos.setMaximumHeight(500)
+        # self.dockAreasTab.setMinimumWidth(400)
+        # self.dockAreasTab.setMaximumHeight(500)
 
         self.dockForm.setWidget(self.formTab)
 
         self.addDockWidget(Qt.RightDockWidgetArea, self.dockForm)
         # self.dockForm.setMaximumWidth(950)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.dockFavoritos)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.dockAreasTab)
         # self.dockAreasTab.show()
         # self.dockForm.show()
@@ -94,12 +100,16 @@ class MainForm(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
         self.actionAcercaQt.triggered.connect(pineboolib.main.aboutQt)
         self.actionAcercaPineboo.triggered.connect(pineboolib.main.aboutPineboo)
+        self.actionFavoritos.triggered.connect(self.changeStateDockFavoritos)
+        self.dockFavoritos.visibilityChanged.connect(self.changeStateActionFavoritos)
+        self.actionModulos.triggered.connect(self.changeStateDockAreas)
+        self.dockAreasTab.visibilityChanged.connect(self.changeStateActionAreas)
         self.actionTipografia.triggered.connect(pineboolib.main.fontDialog)
         self.menuPineboo.addSeparator()
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
         pineboolib.main.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
-        self.showMaximized()
+        self.loadPreferences()
 
     def closeFormTab(self, numero):
         if isinstance(numero, str):
@@ -127,7 +137,6 @@ class MainForm(QtWidgets.QMainWindow):
         widget = action.mainform_widget
         if action.name in self.openTabs:
             self.closeFormTab(action.name)
-
         logger.debug("Añadiendo Form a pestaña %s", action)
         icon = None
         try:
@@ -229,16 +238,20 @@ class MainForm(QtWidgets.QMainWindow):
         _layout.addWidget(label)
         _layout.addWidget(buttonBox)
         OKButton.clicked.connect(dialog.accept)
+        OKButton.clicked.connect(self.saveState)
         cancelButton.clicked.connect(dialog.reject)
 
         if not dialog.exec_():
             evnt.ignore()
-        else:
-            self.saveTabs()
 
-    def saveTabs(self):
+    def saveState(self):
         sett_ = FLSettings()
         sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
+        sett_.writeEntry("application/mainForm/viewFavorites", self.dockFavoritos.isVisible())
+        sett_.writeEntry("application/mainForm/FavoritesSize", self.dockFavoritos.size())
+        sett_.writeEntry("application/mainForm/viewAreas", self.dockAreasTab.isVisible())
+        sett_.writeEntry("application/mainForm/AreasSize", self.dockFavoritos.size())
+        sett_.writeEntry("application/mainForm/mainFormSize", self.size())
 
     def addToMenuPineboo(self, ac, mod):
         #print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
@@ -275,6 +288,60 @@ class MainForm(QtWidgets.QMainWindow):
                         if t in module.mainform.actions:
                             module.mainform.actions[t].run()
                             break
+
+    def loadPreferences(self):
+        sett_ = FLSettings()
+        viewFavorites_ = sett_.readBoolEntry("application/mainForm/viewFavorites", True)
+        viewAreas_ = sett_.readBoolEntry("application/mainForm/viewAreas", True)
+        sizeF_ = sett_.readEntry("application/mainForm/FavoritesSize", None)
+        sizeA_ = sett_.readEntry("application/mainForm/AreasSize", None)
+        sizeMF_ = sett_.readEntry("application/mainForm/mainFormSize", None)
+        if sizeF_ is not None:
+            self.dockFavoritos.resize(sizeF_)
+
+        if sizeA_ is not None:
+            self.dockAreasTab.resize(sizeA_)
+
+        if sizeMF_ is not None:
+            self.resize(sizeMF_)
+        else:
+            self.showMaximized()
+
+        self.dockFavoritos.setVisible(viewFavorites_)
+        self.actionFavoritos.setChecked(viewFavorites_)
+        self.dockAreasTab.setVisible(viewAreas_)
+        self.actionModulos.setChecked(viewAreas_)
+
+    def changeStateDockFavoritos(self):
+        visible_ = self.actionFavoritos.isChecked()
+        if visible_:
+            sett_ = FLSettings()
+            sizeF_ = sett_.readEntry("application/mainForm/FavoritesSize", None)
+            if sizeF_ is not None:
+                self.dockFavoritos.resize(sizeF_)
+
+        self.dockFavoritos.setVisible(visible_)
+
+    def changeStateActionFavoritos(self):
+        if self.dockFavoritos.isVisible():
+            self.actionFavoritos.setChecked(True)
+        else:
+            self.actionFavoritos.setChecked(False)
+
+    def changeStateDockAreas(self):
+        visible_ = self.actionModulos.isChecked()
+        if visible_:
+            sett_ = FLSettings()
+            sizeA_ = sett_.readEntry("application/mainForm/AreasSize", None)
+            if sizeA_ is not None:
+                self.dockAreasTab.resize(sizeA_)
+        self.dockAreasTab.setVisible(visible_)
+
+    def changeStateActionAreas(self):
+        if self.dockAreasTab.isVisible():
+            self.actionModulos.setChecked(True)
+        else:
+            self.actionModulos.setChecked(False)
 
 
 mainWindow = MainForm()
