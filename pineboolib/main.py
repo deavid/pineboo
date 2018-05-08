@@ -164,7 +164,7 @@ class Project(object):
     def path(self, filename):
         if filename not in self.files:
             self.logger.error(
-                "Fichero %s no encontrado en el proyecto.", filename, stack_info=True)
+                "Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
             return None
         return self.files[filename].path()
 
@@ -248,8 +248,9 @@ class Project(object):
             util.createProgressDialog("Pineboo", size_)
         p = 0
         for idmodulo, nombre, sha in self.cur:
+            p = p + 1
             if self._DGI.useDesktop() and self._DGI.localDesktop():
-                util.setProgress((p * 100) / size_)
+                util.setProgress(p)
                 util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules:
                 continue  # I
@@ -289,7 +290,6 @@ class Project(object):
             if self.parseProject and nombre.endswith(".qs"):
                 self.parseScript(self.dir("cache", fileobj.filekey))
 
-            p = p + 1
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
             self.logger.info(
