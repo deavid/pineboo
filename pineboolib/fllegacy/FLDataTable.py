@@ -407,7 +407,7 @@ class FLDataTable(QtWidgets.QTableView):
     changingNumRows_ = None
 
     def syncNumRows(self):
-        print("syncNumRows")
+        # print("syncNumRows")
 
         if self.changingNumRows_:
             return
@@ -582,7 +582,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def realColumnIndex(self, name):
-        print("FLDataTable:realColumnIndex")
+        # print("FLDataTable:realColumnIndex")
         if not isinstance(name, str) or not self.cursor_:
             return -1
 
@@ -595,7 +595,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def visualIndexToRealIndex(self, c):
-        print("FLDataTable:visualIndexToRealIndex")
+        # print("FLDataTable:visualIndexToRealIndex")
         if not isinstance(c, int) or not self.cursor_:
             return
 
