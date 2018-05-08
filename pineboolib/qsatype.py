@@ -908,3 +908,9 @@ class QString(str):
             return self[start:]
         else:
             return self[start:start + length]
+
+
+class QWidget(QWidget):
+
+    def child(self, name):
+        return self.findChild(QtWidgets.QWidget, name)
