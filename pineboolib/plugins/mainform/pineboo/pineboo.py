@@ -183,7 +183,7 @@ class MainForm(QtWidgets.QMainWindow):
         vBLayout.layout.setContentsMargins(0, 0, 0, 0)
 
         vBLayout.setLayout(vBLayout.layout)
-        if module.icon:
+        if module.icon[0] != "":
             pixmap = QtGui.QPixmap(module.icon)
             moduleToolBox.addItem(vBLayout, QtGui.QIcon(pixmap), module.description)
         else:
@@ -264,7 +264,9 @@ class MainForm(QtWidgets.QMainWindow):
 
         # Comprueba si el modulo ya se ha creado
         if mod.name not in self.mPModulos.keys():
-            pixmap = QtGui.QPixmap(mod.icon)
+            pixmap = None
+            if mod.icon[0] != "":
+                pixmap = QtGui.QPixmap(mod.icon)
             if pixmap:
                 moduloM = areaM.addMenu(QtGui.QIcon(pixmap), mod.description)
             else:
