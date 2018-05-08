@@ -1807,7 +1807,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         aqDumper.init()
 
     def setObjText(self, container=None, component=None, value=None):
-        c = testObj(container, component)
+        c = self.testObj(container, component)
         if not c:
             return False
         clase = (u"FLFieldDB" if (u"editor" in c) else c.className())
