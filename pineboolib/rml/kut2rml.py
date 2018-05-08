@@ -582,7 +582,6 @@ class kut2rml(object):
         if int(dataType) == 5:  # Imagen
             ret = refkey2cache.parseKey(field)
         elif data:
-            print("Recogiendo", field, data.get(field))
             ret = data.get(field)
 
         return ret
