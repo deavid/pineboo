@@ -585,7 +585,10 @@ class FLFormDB(QtWidgets.QDialog):
             QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
-        pbSize = QtCore.QSize(22, 22)
+        if not pineboolib.project._DGI.mobilePlatform():
+            pbSize = QtCore.QSize(22, 22)
+        else:
+            pbSize = QtCore.QSize(60, 60)
 
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
