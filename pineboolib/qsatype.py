@@ -13,6 +13,7 @@ from PyQt5.Qt import QTabWidget, QTextEdit
 from PyQt5.QtCore import QIODevice, qWarning, QTextStream
 
 from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
+from pineboolib.fllegacy import FLSettings as FLSettings_Legacy
 from pineboolib.flcontrols import FLTable
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
@@ -192,6 +193,7 @@ QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
+AQSettings = FLSettings_Legacy.FLSettings
 
 
 def FLPosPrinter(*args, **kwargs):
