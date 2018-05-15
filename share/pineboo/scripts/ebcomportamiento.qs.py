@@ -102,7 +102,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         return valor
 
     def grabarValorLocal(self, valorName=None, value=None):
-        if valorName == u"maxPixImages" and value < 1:
+        if valorName == u"maxPixImages" and not value:
             value = 600
         s02_when = valorName
         s02_do_work, s02_work_done = False, False
