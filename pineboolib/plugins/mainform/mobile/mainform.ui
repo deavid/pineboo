@@ -52,6 +52,9 @@
      <string>Configuración</string>
     </property>
     <addaction name="actionTipografia"/>
+    <addaction name="separator"/>
+    <addaction name="actionModulos"/>
+    <addaction name="actionFavoritos"/>
    </widget>
    <widget class="QMenu" name="menuAyuda">
     <property name="title">
@@ -119,11 +122,6 @@
    </property>
    <property name="menuRole">
     <enum>QAction::AboutQtRole</enum>
-   </property>
-  </action>
-  <action name="actionVistas">
-   <property name="text">
-    <string>Vistas</string>
    </property>
   </action>
   <action name="actionFavoritos">
