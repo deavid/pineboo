@@ -1776,7 +1776,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     if not field.allowNull() and field.editable() and not (type_ == "time" or type_ == "date"):
                         # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                         self.editor_.setStyleSheet(
-                            'background-color:' + self.notNullColor().name())
+                            'background-color:' + self.notNullColor())
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
@@ -2729,7 +2729,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     # le toca
                     if not field.allowNull() and not (field.type() == "time" or field.type() == "date"):
                         self.editor_.setStyleSheet(
-                            'background-color:' + self.notNullColor().name())
+                            'background-color:' + self.notNullColor())
                     else:
                         self.editor_.setStyleSheet('background-color: #fff')
 
