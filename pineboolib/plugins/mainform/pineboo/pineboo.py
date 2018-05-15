@@ -5,10 +5,11 @@ from pineboolib.utils import filedir, Struct
 from pineboolib.fllegacy.FLSettings import FLSettings
 import logging
 from binascii import unhexlify
-from PyQt5.QtWidgets import QAction
+from PyQt5.QtWidgets import QAction, QTextEdit
 logger = logging.getLogger(__name__)
 
 import pineboolib
+import sys
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -22,6 +23,7 @@ class MainForm(QtWidgets.QMainWindow):
     dockAreasTab = None
     dockFavoritos = None
     dockForm = None
+    dockConsole = None
     mPAreas = {}  # Almacena los nombre de submenus areas de menú pineboo
     mPModulos = {}  # Almacena los nombre de submenus modulos de menú pineboo
     openTabs = []
@@ -32,8 +34,9 @@ class MainForm(QtWidgets.QMainWindow):
         MainForm.debugLevel = q
 
     def load(self):
-        self.ui = uic.loadUi(
-            filedir('plugins/mainform/pineboo/mainform.ui'), self)
+        if not self.ui:
+            self.ui = uic.loadUi(
+                filedir('plugins/mainform/pineboo/mainform.ui'), self)
 
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(
@@ -109,6 +112,23 @@ class MainForm(QtWidgets.QMainWindow):
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
         pineboolib.main.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
+
+        logger.info("Módulos y pestañas ...")
+        for k, area in sorted(pineboolib.project.areas.items()):
+            self.loadArea(area)
+        for k, module in sorted(pineboolib.project.modules.items()):
+            self.loadModule(module)
+
+        # Cargando Area desarrollo si procede ...
+        sett_ = FLSettings()
+        if (sett_.readBoolEntry("application/isDebuggerMode", False)):
+            areaDevelop = Struct(idarea="dvl", descripcion="Desarrollo")
+            self.loadArea(areaDevelop)
+
+            self.loadDevelop()
+
+        self.restoreOpenedTabs()
+
         self.loadPreferences()
 
     def closeFormTab(self, numero):
@@ -344,6 +364,55 @@ class MainForm(QtWidgets.QMainWindow):
             self.actionModulos.setChecked(True)
         else:
             self.actionModulos.setChecked(False)
+
+    def loadDevelop(self):
+        moduleToolBox = self.toolBoxs[self.areas.index("dvl")]
+        vBLayout = QtWidgets.QWidget()
+        vBLayout.layout = QtWidgets.QVBoxLayout()  # layout de cada módulo.
+        vBLayout.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        vBLayout.layout.setSpacing(0)
+        vBLayout.layout.setContentsMargins(0, 0, 0, 0)
+        vBLayout.setLayout(vBLayout.layout)
+
+        button = QtWidgets.QToolButton()
+        button.setText("Consola")
+        button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        iconsize = QtCore.QSize(16, 16)
+        button.setIconSize(iconsize)
+        button.setAutoRaise(True)
+        button.setIcon(QtGui.QIcon('share/icons/terminal.png'))
+        button.clicked.connect(self.showConsole)
+        vBLayout.layout.addWidget(button)
+        moduleToolBox.addItem(vBLayout, "Desarrollo")
+
+        #self.addToMenuPineboo(action, module)
+
+    def showConsole(self):
+        if not self.dockConsole:
+            self.dockConsole = QtWidgets.QDockWidget()
+            self.dockConsole.setWindowTitle("Consola")
+            self.addDockWidget(Qt.BottomDockWidgetArea, self.dockConsole)
+            self.teo_ = OutputWindow()
+            self.dockConsole.setWidget(self.teo_)
+
+        self.dockConsole.setVisible(True)
+
+
+class OutputWindow(QtWidgets.QPlainTextEdit):
+    oldStdout = None
+    oldStderr = None
+
+    def __init__(self):
+        super(OutputWindow, self).__init__()
+
+        self.oldStdout = sys.stdout
+        self.oldStderr = sys.stderr
+        sys.stdout = self
+        sys.stderr = self
+
+    def write(self, txt):
+        self.oldStdout.write(txt)
+        self.appendPlainText(str(txt))
 
 
 mainWindow = MainForm()
