@@ -848,3 +848,6 @@ class FLSQLITE(object):
         steps = steps + 1
         util.setProgress(steps)
         util.destryProgressDialog()
+
+    def cascadeSupport(self):
+        return False

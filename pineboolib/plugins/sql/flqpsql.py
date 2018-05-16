@@ -1203,3 +1203,6 @@ class FLQPSQL(object):
             util.setProgress(steps)
 
         util.destroyProgressDialog()
+
+    def cascadeSupport(self):
+        return True

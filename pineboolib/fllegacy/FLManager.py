@@ -16,6 +16,7 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery, FLGroupByQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLAction import FLAction
 from pineboolib.fllegacy.FLUtil import FLUtil
+import pineboolib
 
 from xml import etree
 import logging
@@ -81,7 +82,12 @@ class FLManager(ProjectClass):
 
         self.createSystemTable("flsettings")
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
-            q.exec_("DROP TABLE flsettings CASCADE")
+
+            if pineboolib.project.conn.driver().cascadeSupport():
+                q.exec_("DROP TABLE flsettings CASCADE")
+            else:
+                q.exec_("DROP TABLE flsettings")
+
             self.createSystemTable("flsettings")
 
         if not self.dictKeyMetaData_:
@@ -96,7 +102,12 @@ class FLManager(ProjectClass):
 
         q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'")
         if not q.next():
-            q.exec_("DROP TABLE flmetadata CASCADE")
+
+            if pineboolib.project.conn.driver().cascadeSupport():
+                q.exec_("DROP TABLE flmetadata CASCADE")
+            else:
+                q.exec_("DROP TABLE flmetadata")
+
             self.createSystemTable("flmetadata")
 
             c = FLSqlCursor("flmetadata", True, self.db_.dbAux())

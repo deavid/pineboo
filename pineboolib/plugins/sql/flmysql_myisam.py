@@ -470,3 +470,6 @@ class FLMYSQL_MYISAM(object):
 
         else:
             return self.mismatchedTable(table1, tmd_or_table2.name(), db_)
+
+    def cascadeSupport(self):
+        return True
