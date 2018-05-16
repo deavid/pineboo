@@ -86,6 +86,16 @@ if not target:
         print("Unsupported platform:", sys.platform, file=sys.stderr)
         sys.exit(2)
 
+# rename al files in scripts for deploy
+path_ = "%s/share/pineboo/scripts" % os.path.dirname(os.path.abspath(__file__))
+script_files = os.listdir(path_)
+i = 1
+
+for file_name in script_files:
+    if str(file_name).endswith(".py"):
+        file_name_dest = file_name.replace(".py", ".py.src")
+        shutil.copy(os.path.join(path_, file_name), os.path.join(path_, file_name_dest))
+    i = i + 1
 # Anchor everything from the directory containing this script.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 

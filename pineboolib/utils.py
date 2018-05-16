@@ -278,11 +278,7 @@ def download_files():
     if os.path.exists(dir_):
         return
 
-    try:
-        os.makedirs(filedir("../projects"))
-    except:
-        return  # Si existe project, es porque ya se ha hecho el download desde el deploy previamente
-
+    os.makedirs(filedir("../projects"))
     copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
     copy_dir_recursive(":/share", filedir("../share"))
 
@@ -300,10 +296,12 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
     for file_ in dir.entryList(QDir.Files):
         from_ = from_dir + file_
         to_ = to_dir + file_
+        if str(to_).endswith(".src"):
+            to_ = str(to_).replace(".src", "")
 
         if os.path.exists(to_):
             if replace_on_conflict:
-                if not QFile.remove(to):
+                if not QFile.remove(to_):
                     return False
             else:
                 continue
