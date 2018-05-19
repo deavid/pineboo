@@ -18,360 +18,509 @@
     <property name="icon">
         <pixmap>image13840</pixmap>
     </property>
-    <vbox>
+    <widget class="QTabWidget">
         <property name="name">
-            <cstring>unnamed</cstring>
+            <cstring>tbwEbComportamiento</cstring>
         </property>
-        <property name="margin">
-            <number>6</number>
+        <property name="geometry">
+            <rect>
+                <x>6</x>
+                <y>6</y>
+                <width>606</width>
+                <height>432</height>
+            </rect>
         </property>
-        <property name="spacing">
-            <number>6</number>
-        </property>
-        <widget class="QTabWidget">
+        <widget class="QWidget">
             <property name="name">
-                <cstring>tbwEbComportamiento</cstring>
+                <cstring>tabLocales</cstring>
             </property>
-            <widget class="QWidget">
+            <attribute name="title">
+                <string>Locales</string>
+            </attribute>
+            <widget class="QTabWidget">
                 <property name="name">
-                    <cstring>tabLocales</cstring>
+                    <cstring>tbwLocales</cstring>
                 </property>
-                <attribute name="title">
-                    <string>Locales</string>
-                </attribute>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>523</width>
+                        <height>361</height>
+                    </rect>
+                </property>
+                <widget class="QWidget">
+                    <property name="name">
+                        <cstring>tabControles</cstring>
+                    </property>
+                    <attribute name="title">
+                        <string>Controles</string>
+                    </attribute>
+                    <vbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>gbxFLTable</cstring>
+                            </property>
+                            <property name="title">
+                                <string>FLTable</string>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLabel">
+                                    <property name="name">
+                                        <cstring>textLabel1_2_2</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>&lt;p align="center"&gt;Estas opciones permiten modificar el comportamiento del control FLTableDB. Es muy aconsejable para que el módulo de control de acceso no tenga vulnerabilidades.&lt;/p&gt;</string>
+                                    </property>
+                                    <property name="alignment">
+                                        <set>WordBreak|AlignVCenter</set>
+                                    </property>
+                                </widget>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>cbFLTableDC</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Desactivar edición con doble click</string>
+                                    </property>
+                                </widget>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>cbFLTableSC</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Desactivar atajos de teclado</string>
+                                    </property>
+                                </widget>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>cbFLTableCalc</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Desactivar exportar a hoja de cálculo</string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>gbxFLField</cstring>
+                            </property>
+                            <property name="title">
+                                <string>FLField</string>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QLayoutWidget">
+                                    <property name="name">
+                                        <cstring>Layout1</cstring>
+                                    </property>
+                                    <hbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QLabel">
+                                            <property name="name">
+                                                <cstring>textLabel1_3</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Resolución máxima de imágenes (default 600)</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLineEdit">
+                                            <property name="name">
+                                                <cstring>leMaxPixImages</cstring>
+                                            </property>
+                                        </widget>
+                                    </hbox>
+                                </widget>
+                                <widget class="QLayoutWidget">
+                                    <property name="name">
+                                        <cstring>Layout2</cstring>
+                                    </property>
+                                    <hbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QLabel">
+                                            <property name="name">
+                                                <cstring>textLabel1_4</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Color de campos obligatorios</string>
+                                            </property>
+                                        </widget>
+                                        <widget class="QLineEdit">
+                                            <property name="name">
+                                                <cstring>leCO</cstring>
+                                            </property>
+                                        </widget>
+                                        <spacer>
+                                            <property name="name">
+                                                <cstring>unnamed</cstring>
+                                            </property>
+                                            <property name="orientation">
+                                                <enum>Horizontal</enum>
+                                            </property>
+                                            <property name="sizeType">
+                                                <enum>Fixed</enum>
+                                            </property>
+                                            <property name="sizeHint">
+                                                <size>
+                                                    <width>40</width>
+                                                    <height>20</height>
+                                                </size>
+                                            </property>
+                                        </spacer>
+                                        <widget class="QPushButton">
+                                            <property name="name">
+                                                <cstring>pbnCO</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Cam&amp;biar</string>
+                                            </property>
+                                            <property name="accel">
+                                                <string>Alt+B</string>
+                                            </property>
+                                        </widget>
+                                    </hbox>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>gbActionsMenu</cstring>
+                            </property>
+                            <property name="title">
+                                <string>Menú de acciones</string>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>cbActionsMenuRed</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Mostrar menú de acciones reducido (sin acciones de la barra de herramientas)</string>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Expanding</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>20</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </vbox>
+                </widget>
+                <widget class="QWidget">
+                    <property name="name">
+                        <cstring>tabInicio</cstring>
+                    </property>
+                    <attribute name="title">
+                        <string>Inicio</string>
+                    </attribute>
+                    <vbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QGroupBox">
+                            <property name="name">
+                                <cstring>gbxCallFunction</cstring>
+                            </property>
+                            <property name="title">
+                                <string>Ejecutar estas funciones</string>
+                            </property>
+                            <vbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <widget class="QTextEdit">
+                                    <property name="name">
+                                        <cstring>leCallFunction</cstring>
+                                    </property>
+                                </widget>
+                            </vbox>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Expanding</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>20</width>
+                                    <height>150</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </vbox>
+                </widget>
+                <widget class="QWidget">
+                    <property name="name">
+                        <cstring>tabDesarrollo</cstring>
+                    </property>
+                    <attribute name="title">
+                        <string>Desarrollo</string>
+                    </attribute>
+                    <vbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                        <widget class="QCheckBox">
+                            <property name="name">
+                                <cstring>cbDebuggerMode</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Activar modo desarrollo</string>
+                            </property>
+                        </widget>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>lytDev1</cstring>
+                            </property>
+                            <hbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Horizontal</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Fixed</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>cbSLConsola</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Mostrar carga estática en consola</string>
+                                    </property>
+                                </widget>
+                            </hbox>
+                        </widget>
+                        <widget class="QLayoutWidget">
+                            <property name="name">
+                                <cstring>lytDev2</cstring>
+                            </property>
+                            <hbox>
+                                <property name="name">
+                                    <cstring>unnamed</cstring>
+                                </property>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Horizontal</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Fixed</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>20</width>
+                                            <height>10</height>
+                                        </size>
+                                    </property>
+                                </spacer>
+                                <widget class="QCheckBox">
+                                    <property name="name">
+                                        <cstring>cbSLInterface</cstring>
+                                    </property>
+                                    <property name="text">
+                                        <string>Mostrar carga estática en interface gráfico</string>
+                                    </property>
+                                </widget>
+                            </hbox>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>spacer12</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Fixed</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>20</width>
+                                    <height>40</height>
+                                </size>
+                            </property>
+                        </spacer>
+                        <widget class="QCheckBox">
+                            <property name="name">
+                                <cstring>cbDeleteCache</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Eliminar cache al iniciar</string>
+                            </property>
+                        </widget>
+                        <widget class="QCheckBox">
+                            <property name="name">
+                                <cstring>cbParseProject</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Parsear todo el QSA al iniciar</string>
+                            </property>
+                        </widget>
+                        <spacer>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <property name="orientation">
+                                <enum>Vertical</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>Expanding</enum>
+                            </property>
+                            <property name="sizeHint">
+                                <size>
+                                    <width>21</width>
+                                    <height>120</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </vbox>
+                </widget>
+                <widget class="QWidget">
+                    <property name="name">
+                        <cstring>TabPageOtros</cstring>
+                    </property>
+                    <attribute name="title">
+                        <string>Otros</string>
+                    </attribute>
+                    <vbox>
+                        <property name="name">
+                            <cstring>unnamed</cstring>
+                        </property>
+                    </vbox>
+                </widget>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>tabGlobales</cstring>
+            </property>
+            <attribute name="title">
+                <string>Globales</string>
+            </attribute>
+            <vbox>
+                <property name="name">
+                    <cstring>unnamed</cstring>
+                </property>
                 <widget class="QTabWidget">
                     <property name="name">
-                        <cstring>tbwLocales</cstring>
-                    </property>
-                    <property name="geometry">
-                        <rect>
-                            <x>11</x>
-                            <y>11</y>
-                            <width>568</width>
-                            <height>374</height>
-                        </rect>
+                        <cstring>tbwGlobales</cstring>
                     </property>
                     <widget class="QWidget">
                         <property name="name">
-                            <cstring>tabControles</cstring>
+                            <cstring>tabVertical</cstring>
                         </property>
                         <attribute name="title">
-                            <string>Controles</string>
+                            <string>Datos Vertical</string>
                         </attribute>
                         <vbox>
                             <property name="name">
                                 <cstring>unnamed</cstring>
                             </property>
-                            <widget class="QGroupBox">
-                                <property name="name">
-                                    <cstring>gbxFLTable</cstring>
-                                </property>
-                                <property name="title">
-                                    <string>FLTable</string>
-                                </property>
-                                <vbox>
-                                    <property name="name">
-                                        <cstring>unnamed</cstring>
-                                    </property>
-                                    <widget class="QLabel">
-                                        <property name="name">
-                                            <cstring>textLabel1_2_2</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>&lt;p align="center"&gt;Estas opciones permiten modificar el comportamiento del control FLTableDB. Es muy aconsejable para que el módulo de control de acceso no tenga vulnerabilidades.&lt;/p&gt;</string>
-                                        </property>
-                                        <property name="alignment">
-                                            <set>WordBreak|AlignVCenter</set>
-                                        </property>
-                                    </widget>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>cbFLTableDC</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Desactivar edición con doble click</string>
-                                        </property>
-                                    </widget>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>cbFLTableSC</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Desactivar atajos de teclado</string>
-                                        </property>
-                                    </widget>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>cbFLTableCalc</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Desactivar exportar a hoja de cálculo</string>
-                                        </property>
-                                    </widget>
-                                </vbox>
-                            </widget>
-                            <widget class="QGroupBox">
-                                <property name="name">
-                                    <cstring>gbxFLField</cstring>
-                                </property>
-                                <property name="title">
-                                    <string>FLField</string>
-                                </property>
-                                <vbox>
-                                    <property name="name">
-                                        <cstring>unnamed</cstring>
-                                    </property>
-                                    <widget class="QLayoutWidget">
-                                        <property name="name">
-                                            <cstring>Layout1</cstring>
-                                        </property>
-                                        <hbox>
-                                            <property name="name">
-                                                <cstring>unnamed</cstring>
-                                            </property>
-                                            <widget class="QLabel">
-                                                <property name="name">
-                                                    <cstring>textLabel1_3</cstring>
-                                                </property>
-                                                <property name="text">
-                                                    <string>Resolución máxima de imágenes (default 600)</string>
-                                                </property>
-                                            </widget>
-                                            <widget class="QLineEdit">
-                                                <property name="name">
-                                                    <cstring>leMaxPixImages</cstring>
-                                                </property>
-                                            </widget>
-                                        </hbox>
-                                    </widget>
-                                    <widget class="QLayoutWidget">
-                                        <property name="name">
-                                            <cstring>Layout2</cstring>
-                                        </property>
-                                        <hbox>
-                                            <property name="name">
-                                                <cstring>unnamed</cstring>
-                                            </property>
-                                            <widget class="QLabel">
-                                                <property name="name">
-                                                    <cstring>textLabel1_4</cstring>
-                                                </property>
-                                                <property name="text">
-                                                    <string>Color de campos obligatorios</string>
-                                                </property>
-                                            </widget>
-                                            <widget class="QLineEdit">
-                                                <property name="name">
-                                                    <cstring>leCO</cstring>
-                                                </property>
-                                            </widget>
-                                            <spacer>
-                                                <property name="name">
-                                                    <cstring>unnamed</cstring>
-                                                </property>
-                                                <property name="orientation">
-                                                    <enum>Horizontal</enum>
-                                                </property>
-                                                <property name="sizeType">
-                                                    <enum>Fixed</enum>
-                                                </property>
-                                                <property name="sizeHint">
-                                                    <size>
-                                                        <width>40</width>
-                                                        <height>20</height>
-                                                    </size>
-                                                </property>
-                                            </spacer>
-                                            <widget class="QPushButton">
-                                                <property name="name">
-                                                    <cstring>pbnCO</cstring>
-                                                </property>
-                                                <property name="text">
-                                                    <string>Cam&amp;biar</string>
-                                                </property>
-                                                <property name="accel">
-                                                    <string>Alt+B</string>
-                                                </property>
-                                            </widget>
-                                        </hbox>
-                                    </widget>
-                                </vbox>
-                            </widget>
-                            <widget class="QGroupBox">
-                                <property name="name">
-                                    <cstring>gbActionsMenu</cstring>
-                                </property>
-                                <property name="title">
-                                    <string>Menú de acciones</string>
-                                </property>
-                                <vbox>
-                                    <property name="name">
-                                        <cstring>unnamed</cstring>
-                                    </property>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>cbActionsMenuRed</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Mostrar menú de acciones reducido (sin acciones de la barra de herramientas)</string>
-                                        </property>
-                                    </widget>
-                                </vbox>
-                            </widget>
-                            <spacer>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <property name="orientation">
-                                    <enum>Vertical</enum>
-                                </property>
-                                <property name="sizeType">
-                                    <enum>Expanding</enum>
-                                </property>
-                                <property name="sizeHint">
-                                    <size>
-                                        <width>20</width>
-                                        <height>20</height>
-                                    </size>
-                                </property>
-                            </spacer>
-                        </vbox>
-                    </widget>
-                    <widget class="QWidget">
-                        <property name="name">
-                            <cstring>tabInicio</cstring>
-                        </property>
-                        <attribute name="title">
-                            <string>Inicio</string>
-                        </attribute>
-                        <vbox>
-                            <property name="name">
-                                <cstring>unnamed</cstring>
-                            </property>
-                            <widget class="QGroupBox">
-                                <property name="name">
-                                    <cstring>gbxCallFunction</cstring>
-                                </property>
-                                <property name="title">
-                                    <string>Ejecutar estas funciones</string>
-                                </property>
-                                <vbox>
-                                    <property name="name">
-                                        <cstring>unnamed</cstring>
-                                    </property>
-                                    <widget class="QTextEdit">
-                                        <property name="name">
-                                            <cstring>leCallFunction</cstring>
-                                        </property>
-                                    </widget>
-                                </vbox>
-                            </widget>
-                            <spacer>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <property name="orientation">
-                                    <enum>Vertical</enum>
-                                </property>
-                                <property name="sizeType">
-                                    <enum>Expanding</enum>
-                                </property>
-                                <property name="sizeHint">
-                                    <size>
-                                        <width>20</width>
-                                        <height>150</height>
-                                    </size>
-                                </property>
-                            </spacer>
-                        </vbox>
-                    </widget>
-                    <widget class="QWidget">
-                        <property name="name">
-                            <cstring>tabDesarrollo</cstring>
-                        </property>
-                        <attribute name="title">
-                            <string>Desarrollo</string>
-                        </attribute>
-                        <vbox>
-                            <property name="name">
-                                <cstring>unnamed</cstring>
-                            </property>
-                            <widget class="QCheckBox">
-                                <property name="name">
-                                    <cstring>cbDebuggerMode</cstring>
-                                </property>
-                                <property name="text">
-                                    <string>Activar modo desarrollo</string>
-                                </property>
-                            </widget>
                             <widget class="QLayoutWidget">
                                 <property name="name">
-                                    <cstring>lytDev1</cstring>
+                                    <cstring>Layout4</cstring>
                                 </property>
                                 <hbox>
                                     <property name="name">
                                         <cstring>unnamed</cstring>
                                     </property>
-                                    <spacer>
+                                    <widget class="QLabel">
                                         <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <property name="orientation">
-                                            <enum>Horizontal</enum>
-                                        </property>
-                                        <property name="sizeType">
-                                            <enum>Fixed</enum>
-                                        </property>
-                                        <property name="sizeHint">
-                                            <size>
-                                                <width>20</width>
-                                                <height>10</height>
-                                            </size>
-                                        </property>
-                                    </spacer>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>cbSLConsola</cstring>
+                                            <cstring>textLabel1</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Mostrar carga estática en consola</string>
+                                            <string>Descripción (acepta HTML)</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit">
+                                        <property name="name">
+                                            <cstring>leNombreVertical</cstring>
                                         </property>
                                     </widget>
                                 </hbox>
                             </widget>
                             <widget class="QLayoutWidget">
                                 <property name="name">
-                                    <cstring>lytDev2</cstring>
+                                    <cstring>layout7</cstring>
                                 </property>
                                 <hbox>
                                     <property name="name">
                                         <cstring>unnamed</cstring>
                                     </property>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>cbPosInfo</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Mostrar información de conexión en la barra de tareas</string>
+                                        </property>
+                                    </widget>
                                     <spacer>
                                         <property name="name">
-                                            <cstring>unnamed</cstring>
+                                            <cstring>spacer10</cstring>
                                         </property>
                                         <property name="orientation">
                                             <enum>Horizontal</enum>
                                         </property>
                                         <property name="sizeType">
-                                            <enum>Fixed</enum>
+                                            <enum>Expanding</enum>
                                         </property>
                                         <property name="sizeHint">
                                             <size>
-                                                <width>20</width>
-                                                <height>10</height>
+                                                <width>211</width>
+                                                <height>20</height>
                                             </size>
                                         </property>
                                     </spacer>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
-                                            <cstring>cbSLInterface</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Mostrar carga estática en interface gráfico</string>
-                                        </property>
-                                    </widget>
                                 </hbox>
                             </widget>
                             <spacer>
@@ -387,7 +536,7 @@
                                 <property name="sizeHint">
                                     <size>
                                         <width>21</width>
-                                        <height>150</height>
+                                        <height>270</height>
                                     </size>
                                 </property>
                             </spacer>
@@ -395,214 +544,103 @@
                     </widget>
                     <widget class="QWidget">
                         <property name="name">
-                            <cstring>TabPageOtros</cstring>
+                            <cstring>TabImagen</cstring>
                         </property>
                         <attribute name="title">
-                            <string>Otros</string>
+                            <string>Imagenes</string>
                         </attribute>
                         <vbox>
                             <property name="name">
                                 <cstring>unnamed</cstring>
                             </property>
+                            <widget class="QCheckBox">
+                                <property name="name">
+                                    <cstring>cbFLLarge</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Usar múltiples tablas FLLarge (modo AbanQ)</string>
+                                </property>
+                            </widget>
+                            <spacer>
+                                <property name="name">
+                                    <cstring>spacer9</cstring>
+                                </property>
+                                <property name="orientation">
+                                    <enum>Vertical</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>Expanding</enum>
+                                </property>
+                                <property name="sizeHint">
+                                    <size>
+                                        <width>20</width>
+                                        <height>301</height>
+                                    </size>
+                                </property>
+                            </spacer>
                         </vbox>
                     </widget>
                 </widget>
-            </widget>
-            <widget class="QWidget">
-                <property name="name">
-                    <cstring>tabGlobales</cstring>
-                </property>
-                <attribute name="title">
-                    <string>Globales</string>
-                </attribute>
-                <vbox>
-                    <property name="name">
-                        <cstring>unnamed</cstring>
-                    </property>
-                    <widget class="QTabWidget">
-                        <property name="name">
-                            <cstring>tbwGlobales</cstring>
-                        </property>
-                        <widget class="QWidget">
-                            <property name="name">
-                                <cstring>tabVertical</cstring>
-                            </property>
-                            <attribute name="title">
-                                <string>Datos Vertical</string>
-                            </attribute>
-                            <vbox>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>Layout4</cstring>
-                                    </property>
-                                    <hbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QLabel">
-                                            <property name="name">
-                                                <cstring>textLabel1</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Descripción (acepta HTML)</string>
-                                            </property>
-                                        </widget>
-                                        <widget class="QLineEdit">
-                                            <property name="name">
-                                                <cstring>leNombreVertical</cstring>
-                                            </property>
-                                        </widget>
-                                    </hbox>
-                                </widget>
-                                <widget class="QLayoutWidget">
-                                    <property name="name">
-                                        <cstring>layout7</cstring>
-                                    </property>
-                                    <hbox>
-                                        <property name="name">
-                                            <cstring>unnamed</cstring>
-                                        </property>
-                                        <widget class="QCheckBox">
-                                            <property name="name">
-                                                <cstring>cbPosInfo</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Mostrar información de conexión en la barra de tareas</string>
-                                            </property>
-                                        </widget>
-                                        <spacer>
-                                            <property name="name">
-                                                <cstring>spacer10</cstring>
-                                            </property>
-                                            <property name="orientation">
-                                                <enum>Horizontal</enum>
-                                            </property>
-                                            <property name="sizeType">
-                                                <enum>Expanding</enum>
-                                            </property>
-                                            <property name="sizeHint">
-                                                <size>
-                                                    <width>211</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                    </hbox>
-                                </widget>
-                                <spacer>
-                                    <property name="name">
-                                        <cstring>unnamed</cstring>
-                                    </property>
-                                    <property name="orientation">
-                                        <enum>Vertical</enum>
-                                    </property>
-                                    <property name="sizeType">
-                                        <enum>Expanding</enum>
-                                    </property>
-                                    <property name="sizeHint">
-                                        <size>
-                                            <width>21</width>
-                                            <height>270</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </vbox>
-                        </widget>
-                        <widget class="QWidget">
-                            <property name="name">
-                                <cstring>TabImagen</cstring>
-                            </property>
-                            <attribute name="title">
-                                <string>Imagenes</string>
-                            </attribute>
-                            <vbox>
-                                <property name="name">
-                                    <cstring>unnamed</cstring>
-                                </property>
-                                <widget class="QCheckBox">
-                                    <property name="name">
-                                        <cstring>cbFLLarge</cstring>
-                                    </property>
-                                    <property name="text">
-                                        <string>Usar múltiples tablas FLLarge (modo AbanQ)</string>
-                                    </property>
-                                </widget>
-                                <spacer>
-                                    <property name="name">
-                                        <cstring>spacer9</cstring>
-                                    </property>
-                                    <property name="orientation">
-                                        <enum>Vertical</enum>
-                                    </property>
-                                    <property name="sizeType">
-                                        <enum>Expanding</enum>
-                                    </property>
-                                    <property name="sizeHint">
-                                        <size>
-                                            <width>20</width>
-                                            <height>301</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </vbox>
-                        </widget>
-                    </widget>
-                </vbox>
-            </widget>
+            </vbox>
         </widget>
-        <widget class="QLayoutWidget">
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout0</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>6</x>
+                <y>444</y>
+                <width>606</width>
+                <height>25</height>
+            </rect>
+        </property>
+        <hbox>
             <property name="name">
-                <cstring>Layout0</cstring>
+                <cstring>unnamed</cstring>
             </property>
-            <hbox>
+            <spacer>
                 <property name="name">
                     <cstring>unnamed</cstring>
                 </property>
-                <spacer>
-                    <property name="name">
-                        <cstring>unnamed</cstring>
-                    </property>
-                    <property name="orientation">
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property name="sizeType">
-                        <enum>Expanding</enum>
-                    </property>
-                    <property name="sizeHint">
-                        <size>
-                            <width>301</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>pbnAceptar</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Guardar</string>
-                    </property>
-                    <property name="accel">
-                        <string>Alt+G</string>
-                    </property>
-                </widget>
-                <widget class="QPushButton">
-                    <property name="name">
-                        <cstring>pbnCancelar</cstring>
-                    </property>
-                    <property name="text">
-                        <string>&amp;Cancelar</string>
-                    </property>
-                    <property name="accel">
-                        <string>Alt+C</string>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-    </vbox>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>301</width>
+                        <height>20</height>
+                    </size>
+                </property>
+            </spacer>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>pbnAceptar</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Guardar</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+G</string>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>pbnCancelar</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Cancelar</string>
+                </property>
+                <property name="accel">
+                    <string>Alt+C</string>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
 </widget>
 <images>
     <image name="image13840">

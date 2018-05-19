@@ -310,8 +310,8 @@ def show_connection_dialog(project, app):
         # elif connection_window.database:
         if connection_window.database:
             logger.info("Cargando credenciales")
-            project.deleteCache = connection_window.deleteCache
-            project.parseProject = connection_window.parseProject
+            project.deleteCache = FLSettings().readBoolEntry("ebcomportamiento/deleteCache", False)
+            project.parseProject = FLSettings().readBoolEntry("ebcomportamiento/parseProject", False)
             project.load_db(connection_window.database, connection_window.hostname, connection_window.portnumber,
                             connection_window.username, connection_window.password, connection_window.driveralias)
 

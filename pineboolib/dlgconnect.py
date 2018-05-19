@@ -38,8 +38,6 @@ class DlgConnect(QtWidgets.QWidget):
         self.portnumber = ""
         self.database = ""
         self.dbProjects_ = None
-        self.deleteCache = False
-        self.parseProject = False
 
     def openDB(self):
         if self.dbProjects_:
@@ -100,7 +98,6 @@ class DlgConnect(QtWidgets.QWidget):
                 break
 
             i = i + 1
-        self.loadPreferences()
         self.openDB()
         self.ShowTable()
 
@@ -120,8 +117,6 @@ class DlgConnect(QtWidgets.QWidget):
         self.portnumber = self.lePort.text()
         self.database = self.leDBName.text()
         self.driveralias = self.cBDrivers.currentText()
-        self.deleteCache = self.ui.cBDeleteCache.isChecked()
-        self.parseProject = self.ui.cBParseProject.isChecked()
 
         """
         if not self.leName.text():
@@ -373,16 +368,5 @@ class DlgConnect(QtWidgets.QWidget):
 """
         print("Conexiones de Eneboo IMPORTADAS")
 
-    def loadPreferences(self):
-        dCache = FLSettings().readBoolEntry("DEVELOP/deleteCache", False)
-        parseProject = FLSettings().readBoolEntry("DEVELOP/parseProject", False)
-        self.ui.cBDeleteCache.setChecked(dCache)
-        self.ui.cBParseProject.setChecked(parseProject)
-
-    def savePreferences(self):
-        FLSettings().writeEntry("DEVELOP/deleteCache", self.ui.cBDeleteCache.isChecked())
-        FLSettings().writeEntry("DEVELOP/parseProject", self.ui.cBParseProject.isChecked())
-
     def close(self):
-        self.savePreferences()
         return super(DlgConnect, self).close()

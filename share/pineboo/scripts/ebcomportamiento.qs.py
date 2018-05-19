@@ -2,6 +2,7 @@
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
 import traceback
+from PyQt5.QtGui import QPalette
 sys = SysType()
 
 
@@ -22,7 +23,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         connect(botonCambiarColor, u"clicked()", self, u"seleccionarColor_clicked")
         self.cargarConfiguracion()
         self.initEventFilter()
-        w_.show()
+        w.show()
 
     def cargarConfiguracion(self):
         w = self.w_
@@ -37,11 +38,14 @@ class FormInternalObj(qsatype.FormDBWidget):
         w.child(u"leMaxPixImages").text = self.leerValorLocal(u"maxPixImages")
         w.child(u"cbFLLarge").checked = self.leerValorGlobal(u"FLLargeMode")
         w.child(u"cbPosInfo").checked = self.leerValorGlobal(u"PosInfo")
+        w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
+        w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"leCO").hide()
-        if self.leerValorLocal(u"colorObligatorio") == u"":
-            w.child(u"leCO").paletteBackgroundColor = u"#FFE9AD"
-        else:
-            w.child(u"leCO").paletteBackgroundColor = self.leerValorLocal(u"colorObligatorio")
+        self.colorActual_ = self.leerValorLocal(u"colorObligatorio")
+        if self.colorActual_ is "":
+            self.colorActual_ = "#FFE9AD"
+
+        w.child(u"leCO").setStyleSheet('background-color:' + self.colorActual_)
 
         w.child(u"leCO").show()
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
@@ -65,63 +69,26 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def leerValorLocal(self, valorName=None):
         util = qsatype.FLUtil()
-        valor = ""
-        s01_when = valorName
-        s01_do_work, s01_work_done = False, False
-        if s01_when == u"isDebuggerMode":
-            s01_do_work, s01_work_done = True, True
-        if s01_do_work:
-            settings = qsatype.AQSettings()
+        settings = qsatype.AQSettings()
+        if valorName == u"isDebuggerMode":
             valor = settings.readBoolEntry(ustr(u"application/", valorName))
-            s01_do_work = False  # BREAK
-        if s01_when == u"SLInterface":
-            s01_do_work, s01_work_done = True, True
-        if s01_do_work:
-            pass
-        if s01_when == u"SLConsola":
-            s01_do_work, s01_work_done = True, True
-        if s01_do_work:
-            pass
-        if s01_when == u"FLTableDoubleClick":
-            s01_do_work, s01_work_done = True, True
-        if s01_do_work:
-            pass
-        if s01_when == u"FLTableShortCut":
-            s01_do_work, s01_work_done = True, True
-        if s01_do_work:
-            pass
-        if s01_when == u"FLTableExport2Calc":
-            s01_do_work, s01_work_done = True, True
-        if s01_do_work:
-            pass
-        if not s01_work_done:
-            s01_do_work, s01_work_done = True, True
-        if s01_do_work:
+        else:
             valor = util.readSettingEntry(ustr(u"ebcomportamiento/", valorName), u"")
-            s01_do_work = False  # BREAK
         return valor
 
     def grabarValorLocal(self, valorName=None, value=None):
-        if valorName == u"maxPixImages" and not value:
+        settings = qsatype.AQSettings()
+        if valorName == "maxPixImages" and value is None:
             value = 600
-        s02_when = valorName
-        s02_do_work, s02_work_done = False, False
-        if s02_when == u"isDebuggerMode":
-            s02_do_work, s02_work_done = True, True
-        if s02_do_work:
-            settings = qsatype.AQSettings()
+
+        if valorName == "isDebuggerMode":
             settings.writeEntry(ustr(u"application/", valorName), value)
-            s02_do_work = False  # BREAK
-        if not s02_work_done:
-            s02_do_work, s02_work_done = True, True
-        if s02_do_work:
-            settings = qsatype.AQSettings()
+        else:
             settings.writeEntry(ustr(u"ebcomportamiento/", valorName), value)
-            s02_do_work = False  # BREAK
 
     def initEventFilter(self):
         w = self.w_
-        w.eventFilterFunction = ustr(self.name, u".eventFilter")
+        w.eventFilterFunction = ustr(w.objectName, u".eventFilter")
         w.allowedEvents = qsatype.Array([AQS.Close])
         w.installEventFilter(w)
 
@@ -148,22 +115,17 @@ class FormInternalObj(qsatype.FormDBWidget):
         self.grabarValorLocal(u"SLInterface", w.child(u"cbSLInterface").checked)
         self.grabarValorLocal(u"ebCallFunction", w.child(u"leCallFunction").text)
         self.grabarValorLocal(u"maxPixImages", w.child(u"leMaxPixImages").text)
-        self.grabarValorLocal(u"colorObligatorio", ustr(w.child(u"leCO").paletteBackgroundColor, u""))
+        self.grabarValorLocal(u"colorObligatorio", self.colorActual_)
         self.grabarValorLocal(u"ActionsMenuRed", w.child(u"cbActionsMenuRed").checked)
         self.grabarValorGlobal(u"FLLargeMode", w.child(u"cbFLLarge").checked)
         self.grabarValorGlobal(u"PosInfo", w.child(u"cbPosInfo").checked)
+        self.grabarValorLocal("deleteCache", w.child(u"cbDeleteCache").checked)
+        self.grabarValorLocal("parseProject", w.child(u"cbParseProject").checked)
         self.cerrar_clicked()
 
     def seleccionarColor_clicked(self):
-        w = self.w_
-        colorActual = w.child(u"leCO").paletteBackgroundColor
-        w.child(u"leCO").hide()
-        w.child(u"leCO").paletteBackgroundColor = AQS.ColorDialog_getColor(colorActual)
-        w_.hide()
-        w_.show()
-        if w.child(u"leCO").paletteBackgroundColor == u"#000000":
-            w.child(u"leCO").paletteBackgroundColor = colorActual
-        w.child(u"leCO").show()
+        self.colorActual_ = AQS.ColorDialog_getColor(self.colorActual_, self.w_).name()
+        self.w_.child(u"leCO").setStyleSheet('background-color:' + self.colorActual_)
 
     def fixPath(self, ruta=None):
         rutaFixed = ""
