@@ -2767,7 +2767,7 @@ class FLFieldDB(QtWidgets.QWidget):
                                     cBg = QtWidgets.QApplication().palette().color(
                                         QtGui.QPalette.Active, QtGui.QPalette.Base)
                                 else:
-                                    cBg = self.NotNullColor().name()
+                                    cBg = self.NotNullColor()
 
                                 le.setDisabled(False)
                                 le.setReadOnly(False)
@@ -2967,7 +2967,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.notNullColor_ = FLSettings().readEntry(
             "ebcomportamiento/colorObligatorio", None)
         if self.notNullColor_ is None:
-            self.notNullColor_ = QtGui.QColor(255, 233, 173)
+            self.notNullColor_ = QtGui.QColor(255, 233, 173).name()
         return self.notNullColor_
 
 
