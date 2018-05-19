@@ -3,7 +3,7 @@ import pineboolib
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 
 
-class AQSql(ProjectClass):
+class AQSql(object):
     """
     Obtiene la base de datos de una conexion.
 
