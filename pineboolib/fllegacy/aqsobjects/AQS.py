@@ -6,7 +6,6 @@ class AQS(object):
     Close = None
 
     def __init__(self):
-        print("Eoo")
         self.Close = QCloseEvent
 
     def ColorDialog_getColor(self, color=None, parent=None, name=None):
