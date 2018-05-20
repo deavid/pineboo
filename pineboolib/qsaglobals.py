@@ -16,19 +16,18 @@ from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.aqs.AQS import AQS as AQS_Legacy
-
+from pineboolib.fllegacy.aqsobjects.AQS import AQS as AQS_Legacy
 
 logger = logging.getLogger(__name__)
 
-AQUtil = FLUtil()  # A falta de crear AQUtil, usamos la versión anterior
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
-AQS = AQS_Legacy()
 
 Insert = 0
 Edit = 1
 Del = 2
 Browse = 3
+
+AQS = AQS_Legacy()
 
 
 class File:

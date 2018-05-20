@@ -13,7 +13,6 @@ from PyQt5.Qt import QTabWidget, QTextEdit
 from PyQt5.QtCore import QIODevice, qWarning, QTextStream
 
 from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
-from pineboolib.fllegacy import FLSettings as FLSettings_Legacy
 from pineboolib.flcontrols import FLTable
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
@@ -21,9 +20,13 @@ from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
 from pineboolib.fllegacy import FLFieldDB as FLFieldDB_Legacy
 from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
-from pineboolib.fllegacy.aqs import AQS
 from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter as FLPosPrinter_Legacy
 import pineboolib
+
+#AQSObjects
+from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
+from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil
+from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
 
 from pineboolib.utils import filedir
 
@@ -167,13 +170,6 @@ def FLUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
 
 
-def AQUtil(*args):
-    return FLUtil_Legacy.FLUtil(*args)
-
-
-def AQSql(*args):
-    return AQS.AQSql(*args)
-
 
 def FLSqlCursor(action=None, cN=None):
     if action is None:
@@ -193,7 +189,6 @@ QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
-AQSettings = FLSettings_Legacy.FLSettings
 
 
 def FLPosPrinter(*args, **kwargs):
@@ -916,3 +911,5 @@ class QWidget(QWidget):
 
     def child(self, name):
         return self.findChild(QtWidgets.QWidget, name)
+
+

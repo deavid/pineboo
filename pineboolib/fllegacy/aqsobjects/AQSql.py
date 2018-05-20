@@ -1,4 +1,4 @@
-from pineboolib.flcontrols import ProjectClass
+# -*- coding: utf-8 -*-
 import pineboolib
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 

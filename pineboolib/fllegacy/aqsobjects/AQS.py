@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QColor, QCloseEvent
-from pineboolib.fllegacy.aqs.AQObjects import AQSql as AQSql_legacy
-
-AQSql = AQSql_legacy
-
 
 class AQS(object):
 
