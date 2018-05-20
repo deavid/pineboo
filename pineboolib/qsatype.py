@@ -6,38 +6,36 @@ import fnmatch
 import weakref
 import re
 import codecs
+import traceback
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QTabWidget, QTextEdit
-
-from PyQt5.QtCore import QIODevice, qWarning, QTextStream
-
-from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
-from pineboolib.flcontrols import FLTable
-from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
-from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
-from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
-from pineboolib.fllegacy import FLFieldDB as FLFieldDB_Legacy
-from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
-from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
-from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter as FLPosPrinter_Legacy
-import pineboolib
+from PyQt5.Qt import QTabWidget, QTextEdit, QWidget
+from PyQt5.QtGui import *  # noqa
+from PyQt5.QtCore import *  # noqa
+from PyQt5.QtXml import QDomDocument
 
 #AQSObjects
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
 from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil
 from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
 
+from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter as FLPosPrinter_Legacy
+
+from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
+from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
+from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
+from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
+from pineboolib.fllegacy import FLFieldDB as FLFieldDB_Legacy
+from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
+from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
+
 from pineboolib.utils import filedir
 
-from pineboolib import decorators
-import traceback
-from PyQt5.Qt import QWidget
+from pineboolib.flcontrols import FLTable
 
-# Cargar toda la API de Qt para que sea visible.
-from PyQt5.QtGui import *  # noqa
-from PyQt5.QtCore import *  # noqa
-from PyQt5.QtXml import QDomDocument
+from pineboolib import decorators
+
+import pineboolib
 
 String = str
 
