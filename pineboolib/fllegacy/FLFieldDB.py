@@ -91,7 +91,7 @@ class FLFieldDB(QtWidgets.QWidget):
     def __init__(self, parent, *args):
         super(FLFieldDB, self).__init__(parent)
 
-        self.maxPixImages_ = FLSettings().readEntry("maxPixImages", None)
+        self.maxPixImages_ = FLSettings().readEntry("ebcomportamiento/maxPixImages", None)
         if self.maxPixImages_ is None:
             self.maxPixImages_ = 600
 

@@ -1255,9 +1255,18 @@ class FLManager(ProjectClass):
             return None
         if not refKey[0:3] == "RK@":
             return None
+
+        if self._prj.singleFLLarge():
+            tableName = "fllarge"
+        else:
+            tableName = "fllarge_" + refKey.split("@")[1]
+
+        if not self.existsTable(tableName):
+            return None
+
         q = FLSqlQuery()
         q.setSelect("contenido")
-        q.setFrom("fllarge")
+        q.setFrom(tableName)
         q.setWhere(" refkey = '%s'" % refKey)
         if q.exec_() and q.first():
             v = q.value(0)

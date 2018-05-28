@@ -14,6 +14,7 @@ from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLFieldDB import FLDoubleValidator,\
     FLUIntValidator, FLIntValidator
 
@@ -874,6 +875,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbOdf.setWhatsThis("Exportar a hoja de cálculo")
         self.buttonsLayout.addWidget(self.pbOdf)
         self.pbOdf.clicked.connect(self.exportToOds)
+        if FLSettings().readEntry("ebcomportamiento/FLTableExport2Calc", "false") == "true":
+            self.pbOdf.setDisabled(True)
 
         self.pbClean = QtWidgets.QPushButton(self)
         self.pbClean.setSizePolicy(sizePolicyClean)
@@ -987,11 +990,10 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords().doubleClicked.disconnect(self.chooseRecord)
         except Exception:
             pass
-
-        self.tableRecords().doubleClicked.connect(self.chooseRecord)
+        if FLSettings().readEntry("ebcomportamiento/FLTableDoubleClick", "false") == "false":
+            self.tableRecords().doubleClicked.connect(self.chooseRecord)
 
         if self.checkColumnEnabled_:
-            print("Soy", self)
             self.tableRecords().clicked.connect(self.tableRecords().setChecked)
 
     """
@@ -2068,6 +2070,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     @param  r   Índice de la fila a seleccionar
     """
+
     def setCurrentRow(self, r):
         t = self.tableRecords_
         if not t:

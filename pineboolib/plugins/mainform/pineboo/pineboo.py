@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 import pineboolib
 import sys
 
+from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.qsaglobals import SysType
+
 
 class MainForm(QtWidgets.QMainWindow):
     areas = []
@@ -130,6 +133,20 @@ class MainForm(QtWidgets.QMainWindow):
         self.restoreOpenedTabs()
 
         self.loadPreferences()
+        # Cargamos nombre de vertical
+        util = FLUtil()
+        verticalName = util.sqlSelect("flsettings", "valor", "flkey='verticalName'")
+        cbPosInfo = util.sqlSelect("flsettings", "valor", "flkey='PosInfo'")
+
+        if verticalName != None:
+            statusText = verticalName
+
+        if cbPosInfo == 'True':
+            sys_ = SysType()
+            statusText += "\t\t\t" + sys_.nameUser() + "@" + sys_.nameDB()
+
+        if verticalName != None:
+            self.statusBar().showMessage(statusText)
 
     def closeFormTab(self, numero):
         if isinstance(numero, str):

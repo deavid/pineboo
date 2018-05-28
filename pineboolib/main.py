@@ -94,7 +94,7 @@ class Project(object):
     """
 
     def singleFLLarge(self):
-        return True
+        return FLUtil().sqlSelect("flsettings", "valor", "flkey='FLLargeMode'") == "False"
 
     """
     Retorna si hay o no acls cargados
@@ -793,10 +793,15 @@ class MainForm(object):
                     self.prj._DGI.mainForm().mainWindow.loadConnection(action)
 
         self.toolbar = []
-        for toolbar_action in self.root.findall("toolbars//action"):
-            self.toolbar.append(toolbar_action.get("name"))
-            if not self.prj._DGI.localDesktop():
-                self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
+        sett_ = FLSettings()
+        if not sett_.readBoolEntry("ebcomportamiento/ActionsMenuRed", False):
+            for toolbar_action in self.root.findall("toolbars//action"):
+                self.toolbar.append(toolbar_action.get("name"))
+                if not self.prj._DGI.localDesktop():
+                    self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
+        else:
+            # FIXME: cargar solo las actions de los menus
+            sett_.writeEntry("ebcomportamiento/ActionsMenuRed", False)
 
 
 class XMLMainFormAction(XMLStruct):

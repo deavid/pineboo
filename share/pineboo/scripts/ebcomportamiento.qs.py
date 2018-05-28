@@ -36,27 +36,24 @@ class FormInternalObj(qsatype.FormDBWidget):
         w.child(u"cbSLInterface").checked = self.leerValorLocal(u"SLInterface")
         w.child(u"leCallFunction").text = self.leerValorLocal(u"ebCallFunction")
         w.child(u"leMaxPixImages").text = self.leerValorLocal(u"maxPixImages")
-        w.child(u"cbFLLarge").checked = self.leerValorGlobal(u"FLLargeMode")
-        w.child(u"cbPosInfo").checked = self.leerValorGlobal(u"PosInfo")
+        w.child(u"cbFLLarge").checked = (self.leerValorGlobal(u"FLLargeMode") == 'True')
+        w.child(u"cbPosInfo").checked = (self.leerValorGlobal(u"PosInfo") == 'True')
         w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
+        w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
         w.child(u"leCO").hide()
         self.colorActual_ = self.leerValorLocal(u"colorObligatorio")
         if self.colorActual_ is "":
             self.colorActual_ = "#FFE9AD"
 
         w.child(u"leCO").setStyleSheet('background-color:' + self.colorActual_)
-
         w.child(u"leCO").show()
-        w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
 
     def leerValorGlobal(self, valorName=None):
         util = qsatype.FLUtil()
-        valor = u""
-        if not util.sqlSelect(u"flsettings", u"valor", ustr(u"flkey='", valorName, u"'")):
-            valor = u""
-        else:
-            valor = util.sqlSelect(u"flsettings", u"valor", ustr(u"flkey='", valorName, u"'"))
+        valor = util.sqlSelect(u"flsettings", u"valor", ustr(u"flkey='", valorName, u"'"))
+        if valor is None:
+            valor = ""
 
         return valor
 
