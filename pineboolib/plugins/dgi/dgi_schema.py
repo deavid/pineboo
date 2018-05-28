@@ -5,6 +5,7 @@ from xml.etree.ElementTree import fromstring
 from json import dumps
 
 from pineboolib.utils import DefFun
+from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
 import pineboolib
 import sys
 import datetime
@@ -34,6 +35,9 @@ class dgi_schema(object):
             self._mobile = True
         except ImportError:
             self._mobile = False
+
+        if AQSettings().readBoolEntry(u"ebcomportamiento/mobileMode", False):
+            self._mobile = True
 
         try:
             from pdytools import hexversion as pdy_hexversion

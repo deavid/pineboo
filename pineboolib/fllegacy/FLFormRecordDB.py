@@ -5,6 +5,7 @@ from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+import pineboolib
 
 DEBUG = False
 
@@ -266,7 +267,11 @@ class FLFormRecordDB(FLFormDB):
             QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
-        pbSize = QtCore.QSize(22, 22)
+        if pineboolib.project._DGI.mobilePlatform():
+            pbSize = QtCore.QSize(60, 60)
+            self.showMaximized()
+        else:
+            pbSize = QtCore.QSize(22, 22)
 
         if self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if not self.pushButtonFirst:

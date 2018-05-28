@@ -45,8 +45,8 @@
                     <rect>
                         <x>10</x>
                         <y>10</y>
-                        <width>523</width>
-                        <height>361</height>
+                        <width>522</width>
+                        <height>374</height>
                     </rect>
                 </property>
                 <widget class="QWidget">
@@ -405,6 +405,14 @@
                                 <string>Parsear todo el QSA al iniciar</string>
                             </property>
                         </widget>
+                        <widget class="QCheckBox">
+                            <property name="name">
+                                <cstring>cbMobile</cstring>
+                            </property>
+                            <property name="text">
+                                <string>Forzar modo Mobile</string>
+                            </property>
+                        </widget>
                         <spacer>
                             <property name="name">
                                 <cstring>unnamed</cstring>
@@ -418,7 +426,7 @@
                             <property name="sizeHint">
                                 <size>
                                     <width>21</width>
-                                    <height>120</height>
+                                    <height>110</height>
                                 </size>
                             </property>
                         </spacer>

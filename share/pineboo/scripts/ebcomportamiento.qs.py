@@ -38,6 +38,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         w.child(u"leMaxPixImages").text = self.leerValorLocal(u"maxPixImages")
         w.child(u"cbFLLarge").checked = (self.leerValorGlobal(u"FLLargeMode") == 'True')
         w.child(u"cbPosInfo").checked = (self.leerValorGlobal(u"PosInfo") == 'True')
+        w.child(u"cbMobile").checked = self.leerValorLocal(u"mobileMode")
         w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
@@ -116,8 +117,9 @@ class FormInternalObj(qsatype.FormDBWidget):
         self.grabarValorLocal(u"ActionsMenuRed", w.child(u"cbActionsMenuRed").checked)
         self.grabarValorGlobal(u"FLLargeMode", w.child(u"cbFLLarge").checked)
         self.grabarValorGlobal(u"PosInfo", w.child(u"cbPosInfo").checked)
-        self.grabarValorLocal("deleteCache", w.child(u"cbDeleteCache").checked)
-        self.grabarValorLocal("parseProject", w.child(u"cbParseProject").checked)
+        self.grabarValorLocal(u"deleteCache", w.child(u"cbDeleteCache").checked)
+        self.grabarValorLocal(u"parseProject", w.child(u"cbParseProject").checked)
+        self.grabarValorLocal(u"mobileMode", w.child(u"cbMobile").checked)
         self.cerrar_clicked()
 
     def seleccionarColor_clicked(self):

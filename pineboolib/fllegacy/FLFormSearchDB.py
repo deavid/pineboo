@@ -150,7 +150,11 @@ class FLFormSearchDB(FLFormDB):
             QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
-        pbSize = QtCore.QSize(22, 22)
+        if pineboolib.project._DGI.mobilePlatform():
+            pbSize = QtCore.QSize(60, 60)
+            self.showMaximized()
+        else:
+            pbSize = QtCore.QSize(22, 22)
 
         if not self.pushButtonAccept:
             self.pushButtonAccept = QtWidgets.QToolButton()
