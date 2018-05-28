@@ -436,7 +436,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             util = qsatype.FLUtil()
             codEjercicio = flfactppal.iface.pub_ejercicioActual()
             nombreEjercicio = util.sqlSelect(u"ejercicios", u"nombre", ustr(u"codejercicio='", codEjercicio, u"'"))
-            if AQUtil.sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == u"true":
+            if qsatype.AQUtil().sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == u"true":
                 texto = ""
                 if nombreEjercicio:
                     texto = ustr(u"[ ", nombreEjercicio, u" ]")
