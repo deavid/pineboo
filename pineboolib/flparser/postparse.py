@@ -679,7 +679,7 @@ def execute(options, args):
             if options.verbose:
                 sys.stdout.write(
                     "Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname, 100.0 * (nf + 1.0) / nfs))
-            if options.verbose:
+            if options.verbose and hasattr(sys.stdout, "flush"):
                 sys.stdout.flush()
             old_stderr = sys.stdout
             stream = io.StringIO()
@@ -705,7 +705,7 @@ def execute(options, args):
             if options.verbose:
                 sys.stdout.write(
                     "Parsing File: %-35s . . . .        (%.1f%%)    " % (bname, 100.0 * (nf + 1.0) / nfs))
-            if options.verbose:
+            if options.verbose and hasattr(sys.stdout, "flush"):
                 sys.stdout.flush()
             try:
                 filecontent = open(filename, "r", encoding="latin-1").read()
