@@ -280,7 +280,6 @@ class FLSQLITE(object):
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
-
         try:
             cursor.execute(self.sql)
             rows = cursor.fetchall()
@@ -385,14 +384,15 @@ class FLSQLITE(object):
                 sql = sql + ","
                 i = i + 1
 
-        sql = sql + ")"
+        sql = sql + ");"
 
         createIndex = "CREATE INDEX %s_pkey ON %s (%s)" % (
             tmd.name(), tmd.name(), tmd.primaryKey())
 
-        q = FLSqlQuery()
-        q.setForwardOnly(True)
-        q.exec_(createIndex)
+        #q = FLSqlQuery()
+        # q.setForwardOnly(True)
+        # q.exec_(createIndex)
+        sql += createIndex
 
         return sql
 
