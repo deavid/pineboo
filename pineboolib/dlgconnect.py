@@ -72,7 +72,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.pbnProyectoEjemplo.clicked.connect(self.saveProjectExample)
         self.ui.pbnEnebooImportButton.clicked.connect(self.saveEnebooImport)
         # hasta aqui la modificación 4
-        self.ui.leFolderSQLITE.setText(filedir("../projects"))
+        self.ui.leFolderSQLITE.setText(filedir(".."))
 
         self.leName = self.ui.leName
         self.leDBName = self.ui.leDBName

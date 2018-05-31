@@ -17,8 +17,7 @@ import pineboolib.emptyscript
 from pineboolib import qt3ui
 from pineboolib import decorators
 from pineboolib.pnconnection import PNConnection
-from pineboolib.dbschema.schemaupdater import parseTable
-from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM
+from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFormDB import FLFormDB
