@@ -150,8 +150,12 @@ class FLFieldDB(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         PBSizePolicy.setHeightForWidth(True)
         self.pushButtonDB.setSizePolicy(PBSizePolicy)
-        self.pushButtonDB.setMinimumSize(16, 16)
-        self.pushButtonDB.setMaximumSize(24, 24)
+        if pineboolib.project._DGI.mobilePlatform():
+            self.pushButtonDB.setMinimumSize(60, 60)
+            self.pushButtonDB.setMaximumSize(60, 60)
+        else:
+            self.pushButtonDB.setMinimumSize(16, 16)
+            self.pushButtonDB.setMaximumSize(24, 24)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(
             filedir("../share/icons", "flfielddb.png")))
@@ -2920,6 +2924,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 QtWidgets.QSizePolicy.Ignored, QtWidgets.QSizePolicy.Fixed)
             # self.editor_.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
             self.editor_.setMinimumWidth(100)
+            if pineboolib.project._DGI.mobilePlatform():
+                self.editor_.setMinimumHeight(60)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.setFocusPolicy(Qt.StrongFocus)
             self.setFocusProxy(self.editor_)

@@ -720,7 +720,8 @@ class FLTableDB(QtWidgets.QWidget):
 
     def showEvent(self, e):
         super(FLTableDB, self).showEvent(e)
-        self.showWidget()
+        if self._loaded == True:
+            self.showWidget()
 
     """
     Redefinida por conveniencia
@@ -842,7 +843,10 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbData = QtWidgets.QPushButton(self)
         self.pbData.setSizePolicy(sizePolicy)
-        self.pbData.setMinimumSize(22, 22)
+        if pineboolib.project._DGI.mobilePlatform():
+            self.pbData.setMinimumSize(60, 60)
+        else:
+            self.pbData.setMinimumSize(22, 22)
         self.pbData.setFocusPolicy(Qt.NoFocus)
         self.pbData.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-data.png")))
@@ -854,7 +858,10 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbFilter = QtWidgets.QPushButton(self)
         self.pbFilter.setSizePolicy(sizePolicy)
-        self.pbFilter.setMinimumSize(22, 22)
+        if pineboolib.project._DGI.mobilePlatform():
+            self.pbFilter.setMinimumSize(60, 60)
+        else:
+            self.pbFilter.setMinimumSize(22, 22)
         self.pbFilter.setFocusPolicy(Qt.NoFocus)
         self.pbFilter.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-filter.png")))
@@ -866,7 +873,10 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbOdf = QtWidgets.QPushButton(self)
         self.pbOdf.setSizePolicy(sizePolicy)
-        self.pbOdf.setMinimumSize(22, 22)
+        if pineboolib.project._DGI.mobilePlatform():
+            self.pbOdf.setMinimumSize(60, 60)
+        else:
+            self.pbOdf.setMinimumSize(22, 22)
         self.pbOdf.setFocusPolicy(Qt.NoFocus)
         self.pbOdf.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-odf.png")))
