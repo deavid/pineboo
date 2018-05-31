@@ -209,7 +209,7 @@ class PNConnection(QtCore.QObject):
             #                [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
             if pineboolib.project._DGI.localDesktop():
                 res = QtWidgets.QMessageBox.information(
-                    QtWidgets.QApplication.focusWidget(),
+                    QtWidgets.QApplication.activeWindow(),
                     "Cancelar Cambios",
                     "Todos los cambios se cancelarán.¿Está seguro?",
                     QMessageBox.Yes, QMessageBox.No)
@@ -393,13 +393,14 @@ class PNConnection(QtCore.QObject):
             return False
         self.transaction()
         q = self.cursor()
-        try:
-            q.execute(sql)
-        except Exception as e:
-            logger.exception(
-                "createTable: Error happened executing sql: %s...", sql[:80])
-            self.rollbackTransaction()
-            return False
+        for singleSql in sql.split(";"):
+            try:
+                q.execute(singleSql)
+            except Exception as e:
+                logger.exception(
+                    "createTable: Error happened executing sql: %s...", singleSql[:80])
+                self.rollbackTransaction()
+                return False
         self.commitTransaction()
         return True
 

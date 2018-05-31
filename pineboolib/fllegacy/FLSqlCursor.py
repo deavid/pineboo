@@ -764,7 +764,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         logger.message(msg)
         if not throwException:
             QtWidgets.QMessageBox.warning(
-                QtWidgets.QApplication.focusWidget(), "Pineboo", msg)
+                QtWidgets.QApplication.activeWindow(), "Pineboo", msg)
 
 
 # ###############################################################################
