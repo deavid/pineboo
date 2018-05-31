@@ -88,6 +88,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
     firstRefresh = None
 
+    """
+    Tamaño de icono por defecto
+    """
+    iconSize = None
+
     def __init__(self, parent, *args):
         super(FLFieldDB, self).__init__(parent)
 
@@ -97,7 +102,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.topWidget_ = parent
         # self._parent = parent
-
+        self.iconSize = pineboolib.project._DGI.iconSize()
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
         self.FLLayoutH.setContentsMargins(0, 0, 0, 0)
         self.FLLayoutH.setSpacing(0)
@@ -150,12 +155,8 @@ class FLFieldDB(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         PBSizePolicy.setHeightForWidth(True)
         self.pushButtonDB.setSizePolicy(PBSizePolicy)
-        if pineboolib.project._DGI.mobilePlatform():
-            self.pushButtonDB.setMinimumSize(60, 60)
-            self.pushButtonDB.setMaximumSize(60, 60)
-        else:
-            self.pushButtonDB.setMinimumSize(16, 16)
-            self.pushButtonDB.setMaximumSize(24, 24)
+        self.pushButtonDB.setMinimumSize(self.iconSize)
+        self.pushButtonDB.setMaximumSize(self.iconSize)
         self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
         self.pushButtonDB.setIcon(QtGui.QIcon(
             filedir("../share/icons", "flfielddb.png")))

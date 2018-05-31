@@ -267,11 +267,7 @@ class FLFormRecordDB(FLFormDB):
             QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
-        if pineboolib.project._DGI.mobilePlatform():
-            pbSize = QtCore.QSize(60, 60)
-            self.showMaximized()
-        else:
-            pbSize = QtCore.QSize(22, 22)
+        pbSize = self.iconSize
 
         if self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if not self.pushButtonFirst:

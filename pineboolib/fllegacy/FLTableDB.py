@@ -91,6 +91,11 @@ class FLTableDB(QtWidgets.QWidget):
     findHidden_ = False
 
     """
+    Tamaño de icono por defecto
+    """
+    iconSize = None
+
+    """
     constructor
     """
 
@@ -109,6 +114,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.checkColumnVisible_ = False
         self.tdbFilterLastWhere_ = u""
         self.filter_ = u""
+        self.iconSize = pineboolib.project._DGI.iconSize()
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -843,10 +849,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbData = QtWidgets.QPushButton(self)
         self.pbData.setSizePolicy(sizePolicy)
-        if pineboolib.project._DGI.mobilePlatform():
-            self.pbData.setMinimumSize(60, 60)
-        else:
-            self.pbData.setMinimumSize(22, 22)
+        self.pbData.setMinimumSize(self.iconSize)
         self.pbData.setFocusPolicy(Qt.NoFocus)
         self.pbData.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-data.png")))
@@ -858,10 +861,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbFilter = QtWidgets.QPushButton(self)
         self.pbFilter.setSizePolicy(sizePolicy)
-        if pineboolib.project._DGI.mobilePlatform():
-            self.pbFilter.setMinimumSize(60, 60)
-        else:
-            self.pbFilter.setMinimumSize(22, 22)
+        self.pbFilter.setMinimumSize(self.iconSize)
         self.pbFilter.setFocusPolicy(Qt.NoFocus)
         self.pbFilter.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-filter.png")))
@@ -873,10 +873,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbOdf = QtWidgets.QPushButton(self)
         self.pbOdf.setSizePolicy(sizePolicy)
-        if pineboolib.project._DGI.mobilePlatform():
-            self.pbOdf.setMinimumSize(60, 60)
-        else:
-            self.pbOdf.setMinimumSize(22, 22)
+        self.pbOdf.setMinimumSize(self.iconSize)
         self.pbOdf.setFocusPolicy(Qt.NoFocus)
         self.pbOdf.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-odf.png")))
@@ -890,7 +887,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.pbClean = QtWidgets.QPushButton(self)
         self.pbClean.setSizePolicy(sizePolicyClean)
-        self.pbClean.setMinimumSize(22, 22)
+        self.pbClean.setMinimumSize(self.iconSize)
         self.pbClean.setFocusPolicy(Qt.NoFocus)
         self.pbClean.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-clean.png")))

@@ -109,6 +109,13 @@ class dgi_schema(object):
     def isDeployed(self):
         return self._deployed
 
+    def iconSize(self):
+        size = QtCore.QSize(22, 22)
+        if self.mobilePlatform():
+            size = QtCore.QSize(60, 60)
+
+        return size
+
 
 class FLLineEdit(QtWidgets.QLineEdit):
 

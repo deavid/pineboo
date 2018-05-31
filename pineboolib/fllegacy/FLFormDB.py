@@ -118,6 +118,11 @@ class FLFormDB(QtWidgets.QDialog):
     """
     iface = None
 
+    """
+    Tamaño de icono por defecto
+    """
+    iconSize = None
+
     # protected slots:
 
     """
@@ -194,6 +199,8 @@ class FLFormDB(QtWidgets.QDialog):
         except AttributeError:
             script = None
         self.action.load_script(script, self)
+
+        self.iconSize = pineboolib.project._DGI.iconSize()
 
         if load:
             self.load()
@@ -585,11 +592,7 @@ class FLFormDB(QtWidgets.QDialog):
             QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
-        if pineboolib.project._DGI.mobilePlatform():
-            pbSize = QtCore.QSize(60, 60)
-            self.showMaximized()
-        else:
-            pbSize = QtCore.QSize(22, 22)
+        pbSize = self.iconSize
 
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
