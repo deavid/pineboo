@@ -5,7 +5,8 @@ import re
 import logging
 import sys
 import traceback
-
+from io import StringIO
+from xml import etree
 
 logger = logging.getLogger(__name__)
 
@@ -262,12 +263,6 @@ class downloadManager(QObject):
         else:
             self.result = reply.errorString()
 
-        #infile = QFile(filename)
-        # infile.open(QIODevice.ReadOnly)
-        #uncompress = QByteArray(infile.readAll())
-
-        #QtWidgets.QMessageBox.information(None, "AVISO", "%s" % self.result)
-
 
 def download_files():
     import sysconfig
@@ -278,7 +273,6 @@ def download_files():
     if os.path.exists(dir_):
         return
 
-    os.makedirs(filedir("../projects"))
     copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
     copy_dir_recursive(":/share", filedir("../share"))
 
@@ -331,3 +325,83 @@ def clearXPM(text):
         v = v.replace("\t", "    ")
     v = v.split('","')
     return v
+
+
+def text2bool(text):
+    text = str(text).strip().lower()
+    if text.startswith("t"):
+        return True
+    if text.startswith("f"):
+        return False
+
+    if text.startswith("y"):
+        return True
+    if text.startswith("n"):
+        return False
+
+    if text.startswith("1"):
+        return True
+    if text.startswith("0"):
+        return False
+
+    if text == "on":
+        return True
+    if text == "off":
+        return False
+
+    if text.startswith("s"):
+        return True
+    raise ValueError("Valor booleano no comprendido '%s'" % text)
+
+
+def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
+    file_alike = StringIO(contenido)
+
+    # parser = etree.XMLParser(
+    #    ns_clean=True,
+    #    encoding=encoding,
+    #    recover=False,
+    #    remove_blank_text=remove_blank_text,
+    #)
+    try:
+        #tree = etree.parse(file_alike, parser)
+        tree = etree.ElementTree.parse(file_alike)
+    except Exception as e:
+        print("Error al procesar tabla:", nombre)
+        print(traceback.format_exc())
+        return None
+    root = tree.getroot()
+
+    objname = root.find("name")
+    query = root.find("query")
+    if query:
+        if query[-1].text != nombre:
+            print("WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (
+                objname.text, nombre))
+            query[-1].text = nombre
+    elif objname.text != nombre:
+        print("WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (
+            objname.text, nombre))
+        objname.text = nombre
+    return getTableObj(tree, root)
+
+
+def getTableObj(tree, root):
+    table = Struct()
+    table.xmltree = tree
+    table.xmlroot = root
+    query_name = None
+    if table.xmlroot.find("query"):
+        query_name = one(table.xmlroot.find("query").text, None)
+    name = table.xmlroot.find("name").text
+    table.tablename = name
+    if query_name:
+        table.name = query_name
+        table.query_table = name
+    else:
+        table.name = name
+        table.query_table = None
+    table.fields = []
+    table.pk = []
+    table.fields_idx = {}
+    return table
