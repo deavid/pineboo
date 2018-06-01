@@ -100,7 +100,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                 while_pass = True
                 continue
             while_pass = False
-            while formRecordflmodules.child(u"log"):
+            if getattr(formRecordflmodules, "child", None):
                 sys.processEvents()
             if not self.iface.cargarModulo(modulos[i]):
                 MessageBox.warning(util.translate(u"scripts", u"Error al cargar el módulo:\n") +
