@@ -647,7 +647,10 @@ class DelayedObjectProxyLoader(object):
 
     def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
         obj = self.__load()
-        return getattr(obj, name)
+        if obj:
+            return getattr(obj, name)
+        else:
+            return None
 
 
 class ModuleActions(object):
@@ -848,9 +851,10 @@ class XMLAction(XMLStruct):
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
         parent_or_cursor = cursor  # Sin padre, ya que es ventana propia
-        self.formrecord_widget = FLFormRecordDB(
-            parent_or_cursor, self, load=True)
-        self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
+        if cursor:
+            self.formrecord_widget = FLFormRecordDB(
+                parent_or_cursor, self, load=True)
+            self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         # self._record_loaded = True
         if self.mainform_widget:
             self.logger.debug(
