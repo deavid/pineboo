@@ -302,8 +302,9 @@ class FLQPSQL(object):
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
+        sql = "FETCH %d FROM %s" % (number, curname)
         try:
-            cursor.execute("FETCH %d FROM %s" % (number, str(curname)))
+            cursor.execute(sql)
         except Exception:
             qWarning("PSQLDriver.refreshFetch\n %s" % traceback.format_exc())
 
