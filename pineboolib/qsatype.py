@@ -14,7 +14,7 @@ from PyQt5.QtGui import *  # noqa
 from PyQt5.QtCore import *  # noqa
 from PyQt5.QtXml import QDomDocument
 
-#AQSObjects
+# AQSObjects
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
 from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil
 from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
@@ -166,7 +166,6 @@ def FLSqlQuery(*args):
 
 def FLUtil(*args):
     return FLUtil_Legacy.FLUtil(*args)
-
 
 
 def FLSqlCursor(action=None, cN=None):
@@ -329,7 +328,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self.logger.exception("Error al eliminar una señal que no se encuentra")
 
     def __del__(self):
-        self.doCleanUp()
+        # self.doCleanUp()
         print("FormDBWidget: Borrando form para accion %r" % self._action.name)
 
     def obj(self):
@@ -909,5 +908,3 @@ class QWidget(QWidget):
 
     def child(self, name):
         return self.findChild(QtWidgets.QWidget, name)
-
-
