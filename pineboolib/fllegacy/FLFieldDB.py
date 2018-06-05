@@ -1748,7 +1748,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 # self.editor_.setAutoCompletion(True)
                 self.editor_.setSizePolicy(
                     QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-                self.editor_.setMinimumSize(22, 22)
+                self.editor_.setMinimumSize(self.iconSize)
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 # if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                 # if not field.allowNull():
@@ -1774,7 +1774,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_ = pineboolib.project.resolveDGIObject(
                     "FLLineEdit")(self, "editor")
                 self.editor_.setFont(QtWidgets.QApplication.font())
-                self.editor_.setMinimumSize(22, 22)
+                self.editor_.setMinimumSize(self.iconSize)
+                self.editor_.setMaximumHeight(self.iconSize.height())
                 self.editor_._tipo = type_
                 self.editor_.partDecimal = partDecimal
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
@@ -1916,7 +1917,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux3_ = pineboolib.project.resolveDGIObject(
                         "QPushButton")(self)
                     self.pbAux3_.setSizePolicy(sizePolicy)
-                    self.pbAux3_.setMinimumSize(22, 22)
+                    self.pbAux3_.setMinimumSize(self.iconSize)
                     self.pbAux3_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux3_.setIcon(QtGui.QIcon(
                         filedir("../share/icons", "gtk-open.png")))
@@ -1951,7 +1952,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux4_ = pineboolib.project.resolveDGIObject(
                         "QPushButton")(self)
                     self.pbAux4_.setSizePolicy(sizePolicy)
-                    self.pbAux4_.setMinimumSize(22, 22)
+                    self.pbAux4_.setMinimumSize(self.iconSize)
                     self.pbAux4_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux4_.setIcon(QtGui.QIcon(
                         filedir("../share/icons", "gtk-paste.png")))
@@ -1973,7 +1974,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux_ = pineboolib.project.resolveDGIObject(
                         "QPushButton")(self)
                     self.pbAux_.setSizePolicy(sizePolicy)
-                    self.pbAux_.setMinimumSize(22, 22)
+                    self.pbAux_.setMinimumSize(self.iconSize)
                     self.pbAux_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux_.setIcon(QtGui.QIcon(
                         filedir("../share/icons", "gtk-clear.png")))
@@ -1999,7 +2000,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                     self.pbAux2_.setMenu(savepixmap_)
                     self.pbAux2_.setSizePolicy(sizePolicy)
-                    self.pbAux2_.setMinimumSize(22, 22)
+                    self.pbAux2_.setMinimumSize(self.iconSize)
                     self.pbAux2_.setFocusPolicy(Qt.NoFocus)
                     self.pbAux2_.setIcon(QtGui.QIcon(
                         filedir("../share/icons", "gtk-save.png")))
@@ -2106,7 +2107,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 "QTextEdit")(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setTabChangesFocus(True)
-            self.editor_.setMinimumHeight(120)
+            self.editor_.setMinimumHeight(self.iconSize.height())
             self.editor_.setMaximumHeight(120)
             sizePolicy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
