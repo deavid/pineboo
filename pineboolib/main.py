@@ -711,7 +711,7 @@ class ModuleActions(object):
                         "No se sobreescribe variable de entorno %s", "formRecord" + name)
                 else:
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
-                        action.loadRecord, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
+                        action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))  # aqui hacemos loadRecord sin cursor ...
 
     def __contains__(self, k):
         return k in self.prj.actions
@@ -909,6 +909,9 @@ class XMLAction(XMLStruct):
 
     def formRecord(self):
         return self.form
+
+    def formRecordWidget(self):
+        return self.formrecord_widget
 
     def openDefaultFormRecord(self, cursor=None):
         self.logger.info("Opening default formRecord for Action %s", self.name)
