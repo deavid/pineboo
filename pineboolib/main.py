@@ -358,7 +358,8 @@ class Project(object):
             mW = funAction.load()
             funScript = mW.iface
         elif aFunction[1] == "widget":
-            fR = funAction.loadRecord()
+            fR = None
+            funAction.load_script(aFunction[0], fR)
             funScript = fR.iface
         else:
             return False
@@ -850,10 +851,9 @@ class XMLAction(XMLStruct):
                 "Record action %s is not defined. Canceled !", self.name)
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
-        if cursor:
-            self.formrecord_widget = FLFormRecordDB(cursor, self, load=True)
-            self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
-        # self._record_loaded = True
+        self.formrecord_widget = FLFormRecordDB(cursor, self, load=True)
+        self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
+        self._record_loaded = True
         if self.mainform_widget:
             self.logger.debug(
                 "End of record action load %s (iface:%s ; widget:%s)",
