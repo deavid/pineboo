@@ -150,11 +150,13 @@ class FLFormDB(QtWidgets.QDialog):
 
     _uiName = None
     _scriptForm = None
+    ui_ = None
 
     def __init__(self, parent, action, load=False):
         # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
+        self.ui_ = {}
 
         try:
             assert (self.__class__, action) not in self.known_instances
@@ -443,7 +445,7 @@ class FLFormDB(QtWidgets.QDialog):
         if self.isClosing_:
             return True
         self.isClosing_ = True
-        self.isClosing_ = super(FLFormDB, self).close()
+        super(FLFormDB, self).close()
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_close" % self.__class__.__module__, None)
 
