@@ -131,6 +131,6 @@ def Deprecated(fn):
         now = time.time()
         if keyname not in MSG_EMITTED or now - MSG_EMITTED[keyname] > MINIMUM_TIME_FOR_REPRINT:
             MSG_EMITTED[keyname] = now
-            logger.info("WARN: Deprecated: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=True)
+            logger.info("WARN: Deprecated: %s(%s) -> %s", fn.__name__, ", ".join(x_args), repr(ret), stack_info=False)
         return ret
     return newfn
