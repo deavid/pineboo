@@ -577,8 +577,8 @@ class FLFormDB(QtWidgets.QDialog):
         if self.bottomToolbar:
             self.toolButtonClose.hide()
         self.bottomToolbar = QtWidgets.QFrame()
-        self.bottomToolbar.setMaximumHeight(64)
-        self.bottomToolbar.setMinimumHeight(16)
+        self.bottomToolbar.setMinimumSize(self.iconSize)
+
         self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
         self.bottomToolbar.setLayout(self.bottomToolbar.layout)
         self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
