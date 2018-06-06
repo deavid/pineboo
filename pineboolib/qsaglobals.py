@@ -242,9 +242,15 @@ class SysType(object):
     def processEvents(self):
         qApp.processEvents()
 
-    @decorators.NotImplementedWarn
     def reinit(self):
-        pass
+        self.processEvents()
+        pineboolib.project.main_window.saveState()
+        pineboolib.project.run()
+        pineboolib.project.main_window.areas = []
+        # FIXME: Limpiar el ui para no duplicar controles
+        pineboolib.project.main_window.load()
+        pineboolib.project.main_window.show()
+        pineboolib.project.call("sys.iface._class_init()", [], None, True)
 
     def write(self, encode_, dir_, contenido):
         f = codecs.open(dir_, encoding=encode_, mode="w+")

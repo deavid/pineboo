@@ -37,9 +37,11 @@ class MainForm(QtWidgets.QMainWindow):
         MainForm.debugLevel = q
 
     def load(self):
-        if not self.ui:
-            self.ui = uic.loadUi(
-                filedir('plugins/mainform/pineboo/mainform.ui'), self)
+        if self.ui:
+            del self.ui
+
+        self.ui = uic.loadUi(
+            filedir('plugins/mainform/pineboo/mainform.ui'), self)
 
         frameGm = self.frameGeometry()
         screen = QtWidgets.QApplication.desktop().screenNumber(

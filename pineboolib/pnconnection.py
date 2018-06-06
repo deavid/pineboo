@@ -94,9 +94,8 @@ class PNConnection(QtCore.QObject):
 
         return self.connAux[name]
 
-    @decorators.NotImplementedWarn
     def removeConn(self, name="default"):
-        return True
+        return self.useConn(name).conn.close()
 
     def isOpen(self):
         return self.driver().isOpen()

@@ -192,8 +192,9 @@ class Project(object):
 
         # Conectar:
 
-        self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port,
-                                 self.dbauth.username, self.dbauth.password, self.dbserver.type)
+        if not self.conn:
+            self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port,
+                                     self.dbauth.username, self.dbauth.password, self.dbserver.type)
         if self.conn.conn is False:
             return False
 
@@ -208,6 +209,7 @@ class Project(object):
         self.cur.execute(
             """ SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
         for idarea, descripcion in self.cur:
+            print(idarea, descripcion)
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
         self.areas["sys"] = Struct(idarea="sys", descripcion="Area de Sistema")
