@@ -209,7 +209,6 @@ class Project(object):
         self.cur.execute(
             """ SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
         for idarea, descripcion in self.cur:
-            print(idarea, descripcion)
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
         self.areas["sys"] = Struct(idarea="sys", descripcion="Area de Sistema")
@@ -899,15 +898,10 @@ class XMLAction(XMLStruct):
 
     def openDefaultForm(self):
         self.logger.debug("Opening default form for Action %s", self.name)
-        self.load()
-        # Es necesario importarlo a esta altura, QApplication tiene que ser
-        # ... construido antes que cualquier widget)
         w = self.prj.main_window
-        # self.mainform_widget.init()
         self.initModule(self.name)
         self.mainform_widget = FLMainForm(w, self, load=True)
         w.addFormTab(self)
-        # self.mainform_widget.show()
 
     def formRecord(self):
         return self.form
