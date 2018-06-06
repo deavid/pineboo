@@ -2107,7 +2107,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 "QTextEdit")(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setTabChangesFocus(True)
-            self.editor_.setMinimumHeight(self.iconSize.height())
+            self.editor_.setMinimumHeight(100)
             self.editor_.setMaximumHeight(120)
             sizePolicy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
@@ -2121,7 +2121,7 @@ class FLFieldDB(QtWidgets.QWidget):
             # textEditTab_ = AQTextEditBar(self, "extEditTab_", self.textLabelDB) #FIXME
             # textEditTab_.doConnections(ted)
             # self.FLWidgetFieldDBLayout.addWidget(textEditTab_)
-
+            self.setMinimumHeight(100)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.installEventFilter(self)
 
