@@ -343,18 +343,13 @@ class FLFormRecordDB(FLFormDB):
 
         if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if self.showAcceptContinue_:
-                if not self.pushButtonAcceptContinue:
-                    self.pushButtonAcceptContinue = QtWidgets.QToolButton()
-                    self.pushButtonAcceptContinue.setObjectName(
-                        "pushButtonAcceptContinue")
-                    self.pushButtonAcceptContinue.clicked.connect(
-                        self.acceptContinue)
-
+                self.pushButtonAcceptContinue = QtWidgets.QToolButton()
+                self.pushButtonAcceptContinue.setObjectName("pushButtonAcceptContinue")
+                self.pushButtonAcceptContinue.clicked.connect(self.acceptContinue)
                 self.pushButtonAcceptContinue.setSizePolicy(sizePolicy)
                 self.pushButtonAcceptContinue.setMaximumSize(pbSize)
                 self.pushButtonAcceptContinue.setMinimumSize(pbSize)
-                self.pushButtonAcceptContinue.setIcon(
-                    QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
+                self.pushButtonAcceptContinue.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
                 # pushButtonAcceptContinue->setAccel(QKeySequence(Qt::Key_F9)); FIXME
                 self.pushButtonAcceptContinue.setWhatsThis(
                     "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
