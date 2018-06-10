@@ -942,13 +942,14 @@ class XMLAction(XMLStruct):
             prj_ = parent.prj
 
         # Si ya esta cargado se reusa...
-        if getattr(self, "script", None) and parent_:
-            parent.script = self.script
-            # self.script.form = self.script.FormInternalObj(action = self.action, project = self.prj, parent = self)
-            parent.widget = parent.script.form
-            if getattr(parent.widget, "iface", None):
-                parent.iface = parent.widget.iface
-            return
+        # if getattr(self, "script", None) and parent_:
+        #    if getattr(self.script, "form", None):
+        #        parent.script = self.script
+        #        parent.widget = self.script.form
+        #    else:
+        #        if getattr(self.script.form, "iface", None):
+        #            parent.iface = self.script.form.iface
+        #        return
 
             # import aqui para evitar dependencia ciclica
         import pineboolib.emptyscript
