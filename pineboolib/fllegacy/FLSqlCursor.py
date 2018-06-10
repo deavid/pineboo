@@ -3042,7 +3042,7 @@ class FLSqlCursor(ProjectClass):
 
         fieldNameCheck = None
 
-        if self.d.modeAccess_ == self.Edit or self.d.modeAccess_ == self.Insert:
+        if self.modeAccess() == self.Edit or self.modeAccess() == self.Insert:
             fieldList = self.d.metadata_.fieldList()
 
             for field in fieldList:
@@ -3069,7 +3069,7 @@ class FLSqlCursor(ProjectClass):
 
         functionBefore = None
         functionAfter = None
-        if not self.d.modeAccess_ == FLSqlCursor.Browse and self.d.activatedCommitActions_:
+        if not self.modeAccess() == FLSqlCursor.Browse and self.d.activatedCommitActions_:
             idMod = self.d.db_.managerModules().idModuleOfFile(
                 "%s.%s" % (self.d.metadata_.name(), "mtd"))
 
@@ -3114,7 +3114,7 @@ class FLSqlCursor(ProjectClass):
 
             updated = True
 
-        elif self.d.modeAccess_ == self.Edit:
+        elif self.modeAccess() == self.Edit:
             if not self.d.db_.canSavePoint():
                 if self.d.db_.currentSavePoint_:
                     self.d.db_.currentSavePoint_.saveEdit(
@@ -3150,7 +3150,7 @@ class FLSqlCursor(ProjectClass):
                 self.setNotGenerateds()
             logger.trace("commitBuffer -- Edit . 30 . ")
 
-        elif self.d.modeAccess_ == self.Del:
+        elif self.modeAccess() == self.Del:
 
             if self.d.cursorRelation_ and self.d.relation_:
                 if self.d.cursorRelation_.metadata():
@@ -3211,7 +3211,7 @@ class FLSqlCursor(ProjectClass):
             #    del savePoint
             return False
 
-        if not self.d.modeAccess_ == self.Browse and functionAfter and self.d.activatedCommitActions_:
+        if not self.modeAccess() == self.Browse and functionAfter and self.d.activatedCommitActions_:
             # cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
             cI = self.context()
             v = self._prj.call(functionAfter, [self], cI, False)
