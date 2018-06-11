@@ -247,6 +247,7 @@ class SysType(object):
     def processEvents(self):
         qApp.processEvents()
 
+    @decorators.BetaImplementation
     def reinit(self):
         self.processEvents()
         pineboolib.project.main_window.saveState()
