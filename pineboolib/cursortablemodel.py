@@ -34,7 +34,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     CURSOR_COUNT = itertools.count()
     rowsLoaded = 0
     where_filters = {}
-    _table = None
     _metadata = None
     _sortOrder = None
     _checkColumn = None
@@ -55,13 +54,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         if action and action.table:
             try:
-                self._table = project.tables[action.table]
+                _table = project.tables[action.table]
             except Exception as e:
                 self.logger.info("Tabla %s no declarada en project.tables", action.table)
-                self._table = None
                 return None
 
-            self._metadata = project.conn.manager().metadata(self._table.name)
+            self._metadata = project.conn.manager().metadata(_table.name)
         else:
             raise AssertionError
 
@@ -258,7 +256,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
     @QtCore.pyqtSlot(bool)
     def multicheck_setChecked(self, b):
-        print("----------->", b)
+        pass
 
     def setShowPixmap(self, show):
         self._showPixmap = show
@@ -286,8 +284,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if torow - fromrow < 10:
             return
         if DEBUG:
-            print("Updaterows %s (UPDATE:%d)" %
-                  (self._table.name, torow - fromrow + 1))
+            self.logger.info("Updaterows %s (UPDATE:%d)", self.metadata().name(), torow - fromrow + 1)
 
         self.beginInsertRows(parent, fromrow, torow)
         self.rowsLoaded = torow + 1
@@ -372,8 +369,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         #    self.threadFetcher.start()
 
         if tiempo_final - tiempo_inicial > 0.2:
-            print("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)" % (
-                self._table.name, self.rows, (fromrow, torow), tiempo_final - tiempo_inicial))
+            self.logger.info("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)", self.metadata().name(),
+                             self.rows, (fromrow, torow), tiempo_final - tiempo_inicial)
 
     def _refresh_field_info(self, qry):
         for n, field in enumerate(self.metadata().fieldList()):
@@ -395,8 +392,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 # Omito los campos que aparentemente no existen
                 if not found and not field.name() in self.sql_fields_omited:
                     if self._prj.debugLevel > 50:
-                        print("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s " % (
-                            field.name(), self._table.name, qry.tablesList()))
+                        self.logger.info("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
+                                         field.name(), self.metadata().name(), qry.tablesList())
                     self.sql_fields_omited.append(field.name())
 
             else:
@@ -407,8 +404,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 self.sql_fields.append(field.name())
 
     def refresh(self):
-        if not self._table:
-            print("ERROR: CursorTableModel :: No hay tabla")
+        if not self.metadata():
+            self.logger.warn("ERROR: CursorTableModel :: No hay tabla")
             return
 
         parent = QtCore.QModelIndex()
@@ -431,7 +428,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         if oldrows > 0:
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
         where_filter = None
-
         for k, wfilter in sorted(self.where_filters.items()):
             if wfilter is None:
                 continue
@@ -446,7 +442,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             where_filter = "1 = 1"
 
         self.where_filter = where_filter
-
         if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():  # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
             if self.where_filter.find(";") > -1:  # Si el where termina en ; ...
                 self.where_filter = self.where_filter.replace(";", " ORDER BY %s;" % self.getSortOrder())
@@ -479,7 +474,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self._refresh_field_info(qry)
 
-        self._curname = "cur_" + self._table.name + \
+        self._curname = "cur_" + self.metadata().name() + \
             "_%08d" % (next(self.CURSOR_COUNT))
 
         if self.sql_fields_without_check:
@@ -492,7 +487,6 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
         self.refreshFetch(1000, self._curname,
                           self.metadata().name(), self._cursor)
-
         self.rows = 0
         self.canFetchMore = True
         # print("rows:", self.rows)
@@ -612,8 +606,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # print("MODIFYING SQL :: ", sql)
         try:
             self._cursor.execute(sql)
-        except Exception:
-            print("ERROR: CursorTableModel.Update", traceback.format_exc())
+        except Exception as e:
+            self.logger.exception("ERROR: CursorTableModel.Update %s:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
             return
 
@@ -635,8 +629,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         """
 
         if DEBUG:
-            print("CursorTableModel.setValuesDict(row %s) = %r" %
-                  (row, update_dict))
+            self.logger.info("CursorTableModel.setValuesDict(row %s) = %r", row, update_dict)
 
         try:
             if isinstance(self._data[row], tuple):
@@ -655,14 +648,12 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 except ValueError:
                     colsnotfound.append(fieldname)
             if colsnotfound:
-                print("CursorTableModel.setValuesDict:: columns not found: %r" % (
-                    colsnotfound))
+                self.logger.warn("CursorTableModel.setValuesDict:: columns not found: %r", colsnotfound)
             self.indexUpdateRow(row)
 
-        except Exception:
+        except Exception as e:
 
-            print("CursorTableModel.setValuesDict(row %s) = %r :: ERROR:" %
-                  (row, update_dict), traceback.format_exc())
+            self.logger.exception("CursorTableModel.setValuesDict(row %s) = %r :: ERROR:", row, update_dict)
 
     """
     Asigna un valor una celda
@@ -714,12 +705,11 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             try:
                 # print(sql)
                 self._cursor.execute(sql)
-                self.refresh()
+                # self.refresh()
                 if pKValue is not None:
                     cursor.move(self.findPKRow((pKValue, )))
-            except Exception:
-                print("CursorTableModel.Insert() :: ERROR:",
-                      traceback.format_exc())
+            except Exception as e:
+                self.logger.exception("CursorTableModel.%s.Insert() :: ERROR:", self.metadata().name())
                 # self._cursor.execute("ROLLBACK")
                 return False
 
@@ -736,8 +726,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         # conn = self._cursorConn.db()
         try:
             self._cursor.execute(sql)
-        except Exception:
-            print("CursorTableModel.Delete() :: ERROR:", traceback.format_exc())
+        except Exception as e:
+            self.logger.exception("CursorTableModel.%s.Delete() :: ERROR:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
             return
 
@@ -756,8 +746,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         pklist = tuple(pklist)
 
         if pklist not in self.pkidx:
-            print(
-                "CursorTableModel.findPKRow:: PK not found: %r (requires list, not integer or string)" % pklist)
+            self.logger.warn(
+                "CursorTableModel.%s.findPKRow:: PK not found: %r", self.metadata().name(), pklist)
             return None
         return self.pkidx[pklist]
 
@@ -770,8 +760,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             self.indexes_valid = True
         cklist = tuple(cklist)
         if cklist not in self.ckidx:
-            print(
-                "CursorTableModel.findCKRow:: CK not found: %r (requires list, not integer or string)" % cklist)
+            self.logger.warn(
+                "CursorTableModel.%s.findCKRow:: CK not found: %r ", self.metadata().name(), cklist)
             return None
         return self.ckidx[cklist]
 
@@ -835,7 +825,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
             parent = QtCore.QModelIndex()
         if parent.isValid():
             return 0
-        print("rowcount", self.rows)
+        self.logger.info("%s rowcount: %d", self.metadata().name(), self.rows)
         return self.rows
 
     def headerData(self, section, orientation, role):
