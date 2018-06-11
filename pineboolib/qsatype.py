@@ -301,11 +301,7 @@ class FormDBWidget(QtWidgets.QWidget):
         self._prj = project
         try:
             self._class_init()
-
-            timer = QtCore.QTimer(self)
-            timer.singleShot(0, self.init)
-            # self.init()
-        except Exception:
+        except Exception as e:
             self.logger.exception("Error al inicializar la clase iface de QS:")
 
     def _connect(self, sender, signal, receiver, slot):
@@ -417,12 +413,6 @@ class FormDBWidget(QtWidgets.QWidget):
         # else:
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
         return ret
-
-    def accept(self):
-        try:
-            self.parent_.accept()
-        except:
-            pass
 
     def cursor(self):
 
