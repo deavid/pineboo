@@ -9,6 +9,7 @@ from pineboolib import flcontrols
 from pineboolib.fllegacy import FLTableDB
 from pineboolib.fllegacy import FLFieldDB
 import pineboolib
+import logging
 
 import zlib
 from PyQt5.Qt import QSpacerItem
@@ -17,6 +18,7 @@ from PyQt5.QtWidgets import QToolBar, QAction, QSpinBox, QMenuBar, QMenu
 Qt = QtCore.Qt
 ICONS = {}
 root = None
+logger = logging.getLogger("qt3ui")
 
 
 class Options:
@@ -41,7 +43,7 @@ def loadUi(path, widget, parent=None):
     try:
         tree = etree.ElementTree.parse(path)
     except Exception as e:
-        print("Qt3Ui: Unable to read UI: %r" % path)
+        self.logger.exception("Qt3Ui: Unable to read UI: %r", path)
         raise
     root = tree.getroot()
     ICONS = {}
@@ -78,8 +80,7 @@ def loadUi(path, widget, parent=None):
 
     # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     formname = widget.objectName()
-    if Options.DEBUG_LEVEL > 0:
-        print("form:", formname)
+    logger.info("form: %s", formname)
     for xmlconnection in root.findall("connections//connection"):
         sender_name = xmlconnection.find("sender").text
         signal_name = xmlconnection.find("signal").text
@@ -103,20 +104,14 @@ def loadUi(path, widget, parent=None):
         sl_name = sl_name.replace("(int)", "")
         sl_name = sl_name.replace("(const QString&)", "")
 
-        # print("SG_NAME", sg_name)
-        # print("SL_NAME", sl_name)
-
         receiver = None
         if sender is None:
-            if Options.DEBUG_LEVEL > 50:
-                print("Connection sender not found:", sender_name)
+            logger.warn("Connection sender not found:", sender_name)
         if receiv_name == formname:
             receiver = widget
             fn_name = slot_name.rstrip("()")
-            if Options.DEBUG_LEVEL > 50:
-                print("Conectando de UI a QS: (%r.%r -> %r.%r)" %
-                      (sender_name, signal_name, receiv_name, fn_name))
-            # print dir(widget.iface)
+            logger.warn("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
+
             ifx = widget
             if hasattr(widget, "iface"):
                 ifx = widget.iface
@@ -125,13 +120,10 @@ def loadUi(path, widget, parent=None):
                     getattr(sender, sg_name).connect(
                         getattr(ifx, fn_name))
                 except Exception as e:
-                    if Options.DEBUG_LEVEL > 50:
-                        print("Error connecting:",
-                              sender, signal_name,
-                              receiver, slot_name,
-                              getattr(ifx, fn_name))
-                    if Options.DEBUG_LEVEL > 50:
-                        print("Connect Error:", e.__class__.__name__, e)
+                    logger.exception("Error connecting:",
+                                     sender, signal_name,
+                                     receiver, slot_name,
+                                     getattr(ifx, fn_name))
                 continue
 
         if receiver is None:
@@ -140,17 +132,14 @@ def loadUi(path, widget, parent=None):
         if receiver is None and wui:
             receiver = widget.ui_[receiv_name]
         if receiver is None:
-            print("Connection receiver not found:", receiv_name)
+            logger.warn("Connection receiver not found:", receiv_name)
         if sender is None or receiver is None:
             continue
         try:
             getattr(sender, sg_name).connect(getattr(receiver, sl_name))
         except Exception as e:
-            if Options.DEBUG_LEVEL > 50:
-                print("Error connecting:", sender,
-                      signal_name, receiver, slot_name)
-            if Options.DEBUG_LEVEL > 50:
-                print("Error:", e.__class__.__name__, e)
+            logger.exception(print("Error connecting:", sender,
+                                   signal_name, receiver, slot_name))
 
     if not pineboolib.project._DGI.localDesktop():
         pineboolib.project._DGI.showWidget(widget)
@@ -164,7 +153,7 @@ def createWidget(classname, parent=None):
         getattr(FLTableDB, classname, None) or \
         getattr(FLFieldDB, classname, None)
     if cls is None:
-        print("WARN: Class name not found in QtWidgets:", classname)
+        logger.warn("WARN: Class name not found in QtWidgets:", classname)
         widgt = QtWidgets.QWidget(parent)
         widgt.setStyleSheet("* { background-color: #fa3; } ")
         return widgt
@@ -228,12 +217,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn = getattr(widget, setpname, None)
 
         if set_fn is None:
-
-            if Options.DEBUG_LEVEL > 50:
-                print("qt3ui: Missing property", pname,
-                      "for %r" % widget.__class__)
-                return
-        # print "Found property", pname
+            logger.warn("qt3ui: Missing property %s for %r", pname, widget.__class__)
+            return
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
                 value = int(xmlprop.get("stdset"))
@@ -262,10 +247,11 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         try:
             set_fn(value)
         except Exception as e:
-            if Options.DEBUG_LEVEL > 50:
-                print(e, repr(value))
-            if Options.DEBUG_LEVEL > 50:
-                print(etree.ElementTree.tostring(xmlprop))
+            logger.exception(etree.ElementTree.tostring(xmlprop))
+            # if Options.DEBUG_LEVEL > 50:
+            #    print(e, repr(value))
+            # if Options.DEBUG_LEVEL > 50:
+            #    print(etree.ElementTree.tostring(xmlprop))
 
     def process_action(xmlaction, toolBar):
         action = createWidget("QAction")
@@ -331,8 +317,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 widget.layout.addItem(new_spacer)
 
             else:
-                if Options.DEBUG_LEVEL > 50:
-                    print("qt3ui: Unknown layout xml tag", repr(c.tag))
+                logger.warn("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
         widget.layout.setContentsMargins(1, 1, 1, 1)
