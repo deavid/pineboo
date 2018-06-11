@@ -229,6 +229,11 @@ class SysType(object):
     def installPrefix(self):
         return filedir("..")
 
+    def installACL(self, idacl):
+        acl_ = pineboolib.project.acl()
+        if acl_:
+            acl_.installACL(idacl)
+
     def __getattr__(self, name):
         obj = eval("sys.widget.%s" % name, pineboolib.qsaglobals.__dict__)
         if obj:
