@@ -641,8 +641,8 @@ class DelayedObjectProxyLoader(object):
 
     def __load(self):
         if not self.loaded_obj:
-            self.logger.info(
-                "***DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
+            self.logger.debug(
+                "DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
                 self._name, self._obj, self._args, self._kwargs)
             self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
