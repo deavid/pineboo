@@ -746,7 +746,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         pklist = tuple(pklist)
 
         if pklist not in self.pkidx:
-            self.logger.warn(
+            self.logger.info(
                 "CursorTableModel.%s.findPKRow:: PK not found: %r", self.metadata().name(), pklist)
             return None
         return self.pkidx[pklist]
