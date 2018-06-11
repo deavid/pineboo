@@ -474,7 +474,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
         splash.showMessage("Abriendo interfaz ...")
     logger.info("Abriendo interfaz ...")
     main_window.show()
-    project.call("sys.iface._class_init()", [], None, True)
+    project.call("sys.iface.init()", [], None, True)
     if DGI.localDesktop():
         splash.showMessage("Listo ...")
         QtCore.QTimer.singleShot(2000, splash.hide)
