@@ -846,7 +846,6 @@ class XMLAction(XMLStruct):
         self._record_loaded = False
 
     def loadRecord(self, cursor=None):
-        oldFormRecordwidget = self.formrecord_widget
         # if self.formrecord_widget is None:
         if not getattr(self, "formrecord", None):
             self.logger.warn(
@@ -861,10 +860,8 @@ class XMLAction(XMLStruct):
                 "End of record action load %s (iface:%s ; widget:%s)",
                 self.name, self.mainform_widget.iface, self.mainform_widget.widget)
 
-        if not oldFormRecordwidget:
-            self.initModule(self.name)
-        # else:
-            # Conectamos lo vioejo al nuevo formrecord
+        self.initModule(self.name)
+
         return self.formrecord_widget
 
     def load(self):
@@ -913,6 +910,7 @@ class XMLAction(XMLStruct):
         # Así cuando se haga un loadRecord de verdad (desde openDefaultFormRecord, este se cargara con su cursor de verdad
         if not self.formrecord_widget:
             self.load_script(scriptName, None)
+
             self.formrecord_widget = self.script
             self.formrecord_widget.widget = self.script.form
             self.formrecord_widget.iface = self.formrecord_widget.widget.iface
@@ -930,13 +928,21 @@ class XMLAction(XMLStruct):
 
     def execDefaultScript(self):
         self.logger.debug("Executing default script for Action %s", self.name)
-
+        # FIXME:
+        if not getattr(self, "scriptform", None):
+            self.scriptform = self.name
+        #<--
         self.load_script(self.scriptform, None)
+
+        self.mainform_widget = self.script
+        self.mainform_widget.widget = self.script.form
+        self.mainform_widget.iface = self.mainform_widget.widget.iface
+        if not getattr(self.mainform_widget, "iface", None):
+            self.mainform_widget.iface = self.mainform_widget.widget
+
         self.initModule(self.name)
-        if getattr(self.script.form, "iface", None):
-            self.script.form.iface.main()
-        else:
-            self.script.form.main()
+
+        self.mainform_widget.iface.main()
 
     def load_script(self, scriptname, parent=None):
         self.logger.info(
