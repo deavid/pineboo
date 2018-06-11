@@ -156,7 +156,6 @@ class FLFormDB(QtWidgets.QDialog):
         # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
-        self.ui_ = {}
 
         try:
             assert (self.__class__, action) not in self.known_instances
@@ -164,6 +163,8 @@ class FLFormDB(QtWidgets.QDialog):
             print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
                   "Puede que se estén perdiendo datos!")
         self.known_instances[(self.__class__, action)] = self
+
+        self.ui_ = {}
 
         self.action = action
         if type(self).__name__ == "FLFormRecordDB":
@@ -219,7 +220,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
         if self._uiName:
-            self.prj.conn.managerModules().createUI(self._uiName, None, self)
+            pineboolib.project.conn.managerModules().createUI(self._uiName, None, self)
 
         self.loaded = True
 
@@ -328,7 +329,7 @@ class FLFormDB(QtWidgets.QDialog):
         if not w:
             if not self.cursor_:
                 self.setMainWidget(
-                    self.prj.conn.managerModules().createForm(self.action_, self))
+                    pineboolib.project.conn.managerModules().createForm(self.action_, self))
                 return
             else:
                 self.setMainWidget(self.cursor_.db().managerModules(
@@ -337,7 +338,7 @@ class FLFormDB(QtWidgets.QDialog):
         elif isinstance(w, str):
             if not self.cursor_:
                 self.setMainWidget(
-                    self.prj.conn.managerModules().createUI(self.action_, self))
+                    pineboolib.project.conn.managerModules().createUI(self.action_, self))
                 return
             else:
                 self.setMainWidget(self.cursor_.db().managerModules(
@@ -533,14 +534,14 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def initForm(self):
-        acl = self.prj.acl()
+        acl = pineboolib.project.acl()
         if acl:
             acl.process(self)
 
         self.loadControls()
 
         if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
-            self.prj.conn.managerModules().loadFLTableDBs(self)
+            pineboolib.project.conn.managerModules().loadFLTableDBs(self)
 
         """
         if self.cursor_ and self.cursor_.metadata():
@@ -707,7 +708,7 @@ class FLFormDB(QtWidgets.QDialog):
 
             self.bindIface()
 
-        size = self.prj.loadGeometryForm(self.geoName())
+        size = pineboolib.project.loadGeometryForm(self.geoName())
         if size:
             self.resize(size)
 
@@ -726,7 +727,7 @@ class FLFormDB(QtWidgets.QDialog):
         else:
             geo = QtCore.QSize(pW.width(), pW.height())
 
-        self.prj.saveGeometryForm(self.geoName(), geo)
+        pineboolib.project.saveGeometryForm(self.geoName(), geo)
 
     """
     Captura evento de entrar foco

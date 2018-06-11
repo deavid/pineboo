@@ -116,13 +116,11 @@ class FLFormRecordDB(FLFormDB):
         if getattr(action, "scriptformrecord", None):
             self._scriptForm = action.scriptformrecord
 
-        if not isinstance(parent_or_cursor, FLSqlCursor):
-            parent = parent_or_cursor
-        else:
-            parent = None
-
         if isinstance(parent_or_cursor, FLSqlCursor):
+            parent = None
             self.setCursor(parent_or_cursor)
+        else:
+            parent = parent_or_cursor
 
         super(FLFormRecordDB, self).__init__(parent, action, load)
 
@@ -144,7 +142,7 @@ class FLFormRecordDB(FLFormDB):
             self.initialModeAccess = FLSqlCursor.Browse
 
         if self.loaded:
-            self.prj.conn.managerModules().loadFLTableDBs(self)
+            pineboolib.project.conn.managerModules().loadFLTableDBs(self)
 
     def loaded(self):
         return self.loaded
