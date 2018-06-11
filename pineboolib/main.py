@@ -712,7 +712,7 @@ class ModuleActions(object):
                         "No se sobreescribe variable de entorno %s", "formRecord" + name)
                 else:
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
-                        action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))  # aqui hacemos loadRecord sin cursor ...
+                        action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
 
     def __contains__(self, k):
         return k in self.prj.actions
@@ -846,6 +846,7 @@ class XMLAction(XMLStruct):
         self._record_loaded = False
 
     def loadRecord(self, cursor=None):
+        oldFormRecordwidget = self.formrecord_widget
         # if self.formrecord_widget is None:
         if not getattr(self, "formrecord", None):
             self.logger.warn(
@@ -860,41 +861,41 @@ class XMLAction(XMLStruct):
                 "End of record action load %s (iface:%s ; widget:%s)",
                 self.name, self.mainform_widget.iface, self.mainform_widget.widget)
 
-        self.initModule(self.name)
+        if not oldFormRecordwidget:
+            self.initModule(self.name)
+        # else:
+            # Conectamos lo vioejo al nuevo formrecord
         return self.formrecord_widget
 
     def load(self):
         try:
-            return self._load()
+            if self._loaded:
+                return self.mainform_widget
+            self.logger.debug("Loading action %s . . . ", self.name)
+            w = self.prj.main_window
+            if not self.mainform_widget:
+                if self.prj._DGI.useDesktop():
+                    self.mainform_widget = FLMainForm(w, self, load=False)
+                else:
+                    from pineboolib.utils import Struct
+                    self.mainform_widget = Struct()
+                    self.mainform_widget.action = self
+                    self.mainform_widget.prj = self.prj
+                    try:
+                        self.load_script(
+                            getattr(self, "scriptform", None), self.mainform_widget)
+                    except Exception:
+                        self.logger.exception(
+                            "Error trying to load scriptform for %s", self.name)
+
+            self._loaded = True
+            self.logger.debug(
+                "End of action load %s (iface:%s ; widget:%s)",
+                self.name, self.mainform_widget.iface, self.mainform_widget.widget)
+            return self.mainform_widget
         except Exception as e:
             self.logger.exception("While loading action %s", self.name)
             return None
-
-    def _load(self):
-        if self._loaded:
-            return self.mainform_widget
-        self.logger.debug("Loading action %s . . . ", self.name)
-        w = self.prj.main_window
-        if not self.mainform_widget:
-            if self.prj._DGI.useDesktop():
-                self.mainform_widget = FLMainForm(w, self, load=False)
-            else:
-                from pineboolib.utils import Struct
-                self.mainform_widget = Struct()
-                self.mainform_widget.action = self
-                self.mainform_widget.prj = self.prj
-                try:
-                    self.load_script(
-                        getattr(self, "scriptform", None), self.mainform_widget)
-                except Exception:
-                    self.logger.exception(
-                        "Error trying to load scriptform for %s", self.name)
-
-        self._loaded = True
-        self.logger.debug(
-            "End of action load %s (iface:%s ; widget:%s)",
-            self.name, self.mainform_widget.iface, self.mainform_widget.widget)
-        return self.mainform_widget
 
     def openDefaultForm(self):
         self.logger.debug("Opening default form for Action %s", self.name)
@@ -907,8 +908,16 @@ class XMLAction(XMLStruct):
         return self.form
 
     def formRecordWidget(self):
+        scriptName = getattr(self, "scriptformrecord", None)
+        # Si no existe self.form_widget, lo carga con load_script. NUNCA con loadRecord.
+        # Así cuando se haga un loadRecord de verdad (desde openDefaultFormRecord, este se cargara con su cursor de verdad
         if not self.formrecord_widget:
-            self.formrecord_widget = self.loadRecord()
+            self.load_script(scriptName, None)
+            self.formrecord_widget = self.script
+            self.formrecord_widget.widget = self.script.form
+            self.formrecord_widget.iface = self.formrecord_widget.widget.iface
+            self.initModule(self.name)
+
         return self.formrecord_widget
 
     def openDefaultFormRecord(self, cursor=None):
@@ -938,10 +947,8 @@ class XMLAction(XMLStruct):
         if parent is None:
             parent = self
             action_ = self
-            prj_ = self.prj
         else:
             action_ = parent.action
-            prj_ = parent.prj
 
         # Si ya esta cargado se reusa...
         # if getattr(self, "script", None) and parent_:
@@ -961,13 +968,13 @@ class XMLAction(XMLStruct):
 
         if scriptname is None:
             parent.script.form = parent.script.FormInternalObj(
-                action=action_, project=prj_, parent=parent)
+                action=action_, project=pineboolib.project, parent=parent)
             parent.widget = parent.script.form
             parent.iface = parent.widget.iface
             return
 
-        script_path_qs = prj_.path(scriptname + ".qs")
-        script_path_py = prj_.coalesce_path(
+        script_path_qs = pineboolib.project.path(scriptname + ".qs")
+        script_path_py = pineboolib.project.coalesce_path(
             scriptname + ".py", scriptname + ".qs.py", None)
 
         overload_pyfile = os.path.join(
@@ -990,7 +997,7 @@ class XMLAction(XMLStruct):
             try:
                 self.logger.info(
                     "Cargando %s : %s ", scriptname,
-                    script_path.replace(parent.prj.tmpdir, "tempdata"))
+                    script_path.replace(pineboolib.project.tmpdir, "tempdata"))
                 parent.script = machinery.SourceFileLoader(
                     scriptname, script_path).load_module()
             except Exception as e:
@@ -1016,7 +1023,7 @@ class XMLAction(XMLStruct):
             try:
                 self.logger.info(
                     "Cargando %s : %s ", scriptname,
-                    python_script_path.replace(self.prj.tmpdir, "tempdata"))
+                    python_script_path.replace(pineboolib.project.tmpdir, "tempdata"))
                 parent.script = machinery.SourceFileLoader(
                     scriptname, python_script_path).load_module()
             except Exception as e:
@@ -1024,7 +1031,7 @@ class XMLAction(XMLStruct):
                     "ERROR al cargar script QS para la accion %s:", action_.name)
 
         parent.script.form = parent.script.FormInternalObj(
-            action_, prj_, parent_)
+            action_, pineboolib.project, parent_)
         if parent_:
             parent.widget = parent.script.form
             if getattr(parent.widget, "iface", None):
