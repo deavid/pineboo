@@ -229,14 +229,12 @@ class FLFormDB(QtWidgets.QDialog):
     """
     @QtCore.pyqtSlot()
     def initScript(self):
-
         if self.loaded:
             if not getattr(self.widget, "iface", None):
-                self.widget._class_init()
+                self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
 
-            if hasattr(self.widget, "iface"):
-                self.widget.iface.init()
-                return True
+            self.iface.init()
+            return True
         return False
 
     """
