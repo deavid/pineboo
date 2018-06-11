@@ -3022,10 +3022,10 @@ class FLSqlCursor(ProjectClass):
 
     @QtCore.pyqtSlot()
     def commitBuffer(self, emite=True, checkLocks=False):
-        if not self.d.buffer_ or not self.d.metadata_:
+        if not self.buffer() or not self.metadata():
             return False
 
-        if self.d.db_.interactiveGUI() and self.d.db_.canDetectLocks() and (checkLocks or self.d.metadata_.detectLocks()):
+        if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.metadata().detectLocks()):
             self.checkRisksLocks()
             if self.d.inRisksLocks_:
                 ret = QtWidgets.QMessageBox.warning(
@@ -3043,24 +3043,23 @@ class FLSqlCursor(ProjectClass):
         fieldNameCheck = None
 
         if self.modeAccess() == self.Edit or self.modeAccess() == self.Insert:
-            fieldList = self.d.metadata_.fieldList()
+            fieldList = self.metadata().fieldList()
 
             for field in fieldList:
                 if field.isCheck():
                     fieldNameCheck = field.name()
-                    self.d.buffer_.setGenerated(fieldNameCheck, False)
-                    if self.d.bufferCopy_:
-                        self.d.bufferCopy_.setGenerated(fieldNameCheck, False)
+                    self.buffer().setGenerated(fieldNameCheck, False)
+                    if self.bufferCopy():
+                        self.bufferCopy().setGenerated(fieldNameCheck, False)
                     continue
 
-                if not self.d.buffer_.isGenerated(field.name()):
+                if not self.buffer().isGenerated(field.name()):
                     continue
 
                 if self.context() and field.calculated():
                     v = None
                     try:
-                        v = self.d.ctxt_().calculateField(field.name())
-                        # v = self.
+                        v = self.context().calculateField(field.name())
                     except Exception:
                         logger.exception("commitBuffer(): Campo calculado %s, pero no se ha calculado nada", field.name())
 
@@ -3069,80 +3068,67 @@ class FLSqlCursor(ProjectClass):
 
         functionBefore = None
         functionAfter = None
-        if not self.modeAccess() == FLSqlCursor.Browse and self.d.activatedCommitActions_:
-            idMod = self.d.db_.managerModules().idModuleOfFile(
-                "%s.%s" % (self.d.metadata_.name(), "mtd"))
+        if not self.modeAccess() == FLSqlCursor.Browse and self.activatedCommitActions():
+            idMod = self.db().managerModules().idModuleOfFile(
+                "%s.%s" % (self.metadata().name(), "mtd"))
 
             if idMod:
                 functionBefore = "%s.iface.beforeCommit_%s" % (
-                    idMod, self.d.metadata_.name())
+                    idMod, self.metadata().name())
                 functionAfter = "%s.iface.afterCommit_%s" % (
-                    idMod, self.d.metadata_.name())
+                    idMod, self.metadata().name())
             else:
-                functionBefore = "sys.iface.beforeCommit_%s" % self.d.metadata_.name()
-                functionAfter = "sys.iface.afterCommit_%s" % self.d.metadata_.name()
+                functionBefore = "sys.iface.beforeCommit_%s" % self.metadata().name()
+                functionAfter = "sys.iface.afterCommit_%s" % self.metadata().name()
 
             if functionBefore:
                 cI = self.context()
-                v = self._prj.call(functionBefore, [self], cI, True)
+                v = pineboolib.project.call(functionBefore, [self], cI, True)
                 if v and not isinstance(v, bool):
                     return False
 
-        # if not self.checkIntegrity():
-        #    return False
-
-        pKN = self.d.metadata_.primaryKey()
+        pKN = self.metadata().primaryKey()
         updated = False
         savePoint = None
-        if self.d.modeAccess_ == self.Insert:
-            if self.d.cursorRelation_ and self.d.relation_:
-                if self.d.cursorRelation_.metadata() and self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()):
-                    self.setValueBuffer(self.d.relation_.field(
-                    ), self.d.cursorRelation_.valueBuffer(self.d.relation_.foreignField()))
-                    self.d.cursorRelation_.setAskForCancelChanges(True)
+        if self.modeAccess() == self.Insert:
+            if self.cursorRelation() and self.relation():
+                if self.cursorRelation().metadata() and self.cursorRelation().valueBuffer(self.relation().foreignField()):
+                    self.setValueBuffer(self.relation().field(
+                    ), self.cursorRelation().valueBuffer(self.relation().foreignField()))
+                    self.cursorRelation().setAskForCancelChanges(True)
 
-            # pkWhere = self.d.db_.manager().formatAssignValue(self.d.metadata_.field(pKN), self.valueBuffer(pKN))
             self.model().Insert(self)
-            # self.update(False)
-            self.selection_pk(self.buffer().value(self.buffer().pK()))
+            #/////////////////////////////////////////////////////////////////////////////////////////////////
+            # MEJORABLE: Esto es un parche para evitar doble commitBuffer cuando usamos cursores relacionados.
 
-            # if not self.d.persistentFilter_:
-            #    self.d.persistentFilter_ = pkWhere
-            # else:
-            #    if not pkWhere in self.d.persistentFilter_:
-            #        self.dl.persistentFilter_ = "%s OR %s" % (self.d.persistentFilter_, pkWhere)
+            # El segundo peta diciendo que ya existe el registro
+            if not self.selection_pk(self.buffer().value(self.buffer().pK())):
+                self.model().refresh()  # <- Solo seria necesaria esta parte
+                self.selection_pk(self.buffer().value(self.buffer().pK()))
+            #//////////////////////////////////////////////////////////////////////////////////////////////////
+            self.move(self.model().findPKRow((self.buffer().value(self.buffer().pK()), )))
 
             updated = True
 
         elif self.modeAccess() == self.Edit:
-            if not self.d.db_.canSavePoint():
-                if self.d.db_.currentSavePoint_:
-                    self.d.db_.currentSavePoint_.saveEdit(
-                        pKN, self.d.bufferCopy_, self)
+            if not self.db().canSavePoint():
+                if self.db().currentSavePoint_:
+                    self.db().currentSavePoint_.saveEdit(
+                        pKN, self.bufferCopy(), self)
 
             if functionAfter and self.d.activatedCommitActions_:
                 if not savePoint:
                     savePoint = FLSqlSavePoint(None)
-                savePoint.saveEdit(pKN, self.d.bufferCopy_, self)
+                savePoint.saveEdit(pKN, self.bufferCopy(), self)
 
-            if self.d.cursorRelation_ and self.d.relation_:
-                if self.d.cursorRelation_.metadata():
-                    self.d.cursorRelation_.setAskForCancelChanges(True)
+            if self.cursorRelation() and self.relation():
+                if self.cursorRelation().metadata():
+                    self.cursorRelation().setAskForCancelChanges(True)
             logger.trace("commitBuffer -- Edit . 20 . ")
             if self.isModifiedBuffer():
-                # i = 0
-                # while i < self.d.buffer_.count():
-                #    if self.d.buffer_.value(i) == self.d.bufferCopy_.value(i) and self.d.buffer_.isNull(i) and self.d.bufferCopy_.isNull(i):
-                #        self.d.buffer_.setGenerated(i, False)
-
-                #    i = i +1
 
                 logger.trace("commitBuffer -- Edit . 22 . ")
                 self.update(False)
-                # i = 0
-                # while i < self.d.buffer_.count():
-                #    self.d.buffer_.setGenerated(i, True)
-                #    i = i + 1
 
                 logger.trace("commitBuffer -- Edit . 25 . ")
 
@@ -3152,17 +3138,17 @@ class FLSqlCursor(ProjectClass):
 
         elif self.modeAccess() == self.Del:
 
-            if self.d.cursorRelation_ and self.d.relation_:
-                if self.d.cursorRelation_.metadata():
-                    self.d.cursorRelation_.setAskForCancelChanges(True)
+            if self.cursorRelation() and self.relation():
+                if self.cursorRelation().metadata():
+                    self.cursorRelation().setAskForCancelChanges(True)
 
             recordDelBefore = "recordDelBefore%s" % self.metadata().name()
             cI = self.context()
-            v = self._prj.call(recordDelBefore, [self], cI, False)
+            v = pineboolib.project.call(recordDelBefore, [self], cI, False)
             if v and not isinstance(v, bool):
                 return False
 
-            fieldList = self.d.metadata_.fieldList()
+            fieldList = self.metadata().fieldList()
 
             for field in fieldList:
 
@@ -3202,24 +3188,17 @@ class FLSqlCursor(ProjectClass):
 
             recordDelAfter = "recordDelAfter%s" % self.metadata().name()
             cI = self.context()
-            v = self._prj.call(recordDelAfter, [self], cI, False)
+            v = pineboolib.project.call(recordDelAfter, [self], cI, False)
 
             updated = True
 
         if updated and self.lastError():
-            # if savePoint == True:
-            #    del savePoint
             return False
 
-        if not self.modeAccess() == self.Browse and functionAfter and self.d.activatedCommitActions_:
-            # cI = FLSqlCursorInterface::sqlCursorInterface(this) FIXME
+        if not self.modeAccess() == self.Browse and functionAfter and self.activatedCommitActions():
             cI = self.context()
-            v = self._prj.call(functionAfter, [self], cI, False)
+            v = pineboolib.project.call(functionAfter, [self], cI, False)
             if v and not isinstance(v, bool):
-                # if savePoint == True:
-                #    savePoint.undo()
-                #    del savePoint
-
                 return False
 
         if self.modeAccess() in (self.Del, self.Edit):
@@ -3230,9 +3209,9 @@ class FLSqlCursor(ProjectClass):
 
         if updated:
             if fieldNameCheck:
-                self.d.buffer_.setGenerated(fieldNameCheck, True)
-                if self.d.bufferCopy_:
-                    self.d.bufferCopy_.setGenerated(fieldNameCheck, True)
+                self.buffer().setGenerated(fieldNameCheck, True)
+                if self.bufferCopy():
+                    self.bufferCopy().setGenerated(fieldNameCheck, True)
 
             self.setFilter(None)
             self.clearMapCalcFields()
