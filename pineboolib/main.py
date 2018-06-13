@@ -913,7 +913,10 @@ class XMLAction(XMLStruct):
 
             self.formrecord_widget = self.script
             self.formrecord_widget.widget = self.script.form
-            self.formrecord_widget.iface = self.formrecord_widget.widget.iface
+            if not getattr(self.formrecord_widget, "iface", None):
+                self.formrecord_widget.iface = self.mainform_widget.widget
+            else:
+                self.formrecord_widget.iface = self.formrecord_widget.widget.iface
             self.initModule(self.name)
 
         return self.formrecord_widget
@@ -936,9 +939,10 @@ class XMLAction(XMLStruct):
 
         self.mainform_widget = self.script
         self.mainform_widget.widget = self.script.form
-        self.mainform_widget.iface = self.mainform_widget.widget.iface
         if not getattr(self.mainform_widget, "iface", None):
             self.mainform_widget.iface = self.mainform_widget.widget
+        else:
+            self.mainform_widget.iface = self.mainform_widget.widget.iface
 
         self.initModule(self.name)
 
