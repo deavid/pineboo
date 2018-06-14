@@ -199,4 +199,6 @@ Los ficheros son convertidos a python y guardados junto al fichero QS de cache.
 Por ejemplo, las conversiones de masterarticulos.qs se pueden ver en la ruta
 `tempdata/cache/nombre_bd/flfactalma/file.qs/masterarticulos/`.
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8851ebbd29a64616904500cc0aa30096)](https://www.codacy.com/app/Aulla/pineboo?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Aulla/pineboo&amp;utm_campaign=Badge_Grade)
+
  
