@@ -1126,7 +1126,6 @@ class New(ASTPython):
                                     break
                         parentClass_ = parentClass_.get("parent_")
                     
-                    print("***", ident, classIdent_)
                     if not classIdent_:
                         data = "qsatype." + data
                 yield dtype, data
@@ -1327,7 +1326,8 @@ def file_template(ast):
     for child in ast:
         if child.tag != "Function":
             child.set("constructor", "1")
-            csource.append(child)
+            if child.tag != "Class": #Limpiamos las class, se cuelan desde el cambio de xml
+                csource.append(child)
         else:
             mainsource.append(child)
 
