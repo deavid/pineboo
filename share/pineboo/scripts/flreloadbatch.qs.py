@@ -241,7 +241,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         curSeleccion = qsatype.FLSqlCursor(u"flmodules")
         curModulo.setMainFilter(ustr(u"idmodulo = '", modulo, u"'"))
         curModulo.editRecord()
-        formRecordflmodules.cargarDeDisco(ustr(fichero.path, u"/"), False)
+        formRecordflmodules.cargarDeDisco(u"%s/" % fichero.path, False)
         formRecordflmodules.accept()
         sys.processEvents()
         return True
