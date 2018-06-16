@@ -122,12 +122,8 @@ class Project(object):
         pineboolib.project = self
 
     def load(self, filename):
-        # self.parser = etree.XMLParser(
-        #    ns_clean=True,
-        #    encoding="UTF-8",
-        #    remove_blank_text=True,
-        #)
-        self.tree = etree.ElementTree.parse(filename)
+        self.parser = etree.elementTree.XMLParser(html=0, encoding="UTF-8")
+        self.tree = etree.ElementTree.parse(filename, self.parser)
         self.root = self.tree.getroot()
         self.dbserver = DBServer(one(self.root.find("database-server")))
         self.dbauth = DBAuth(one(self.root.find("database-credentials")))
@@ -911,14 +907,10 @@ class XMLAction(XMLStruct):
         if not self.formrecord_widget:
             self.load_script(scriptName, None)
 
-            self.formrecord_widget = self.script
-            self.formrecord_widget.widget = self.script.form
-            if not getattr(self.formrecord_widget, "iface", None):
-                self.formrecord_widget.iface = self.mainform_widget.widget
-            else:
-                self.formrecord_widget.iface = self.formrecord_widget.widget.iface
+            self.formrecord_widget = self.script.form
+            self.formrecord_widget.widget = self.formrecord_widget
             self.initModule(self.name)
-
+        
         return self.formrecord_widget
 
     def openDefaultFormRecord(self, cursor=None):
@@ -937,15 +929,10 @@ class XMLAction(XMLStruct):
         #<--
         self.load_script(self.scriptform, None)
 
-        self.mainform_widget = self.script
-        self.mainform_widget.widget = self.script.form
-        if not getattr(self.mainform_widget, "iface", None):
-            self.mainform_widget.iface = self.mainform_widget.widget
-        else:
-            self.mainform_widget.iface = self.mainform_widget.widget.iface
-
+        self.mainform_widget = self.script.form
+        self.mainform_widget.widget = self.mainform_widget
         self.initModule(self.name)
-
+        
         self.mainform_widget.iface.main()
 
     def load_script(self, scriptname, parent=None):
