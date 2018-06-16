@@ -623,7 +623,8 @@ class Variable(ASTPython):
         # if name.startswith("colorFun"): print(name)
         yield "expr", id_translate(name)
         values = 0
-        for value in self.elem.findall("Value|Expression"):
+        #for value in self.elem.findall("Value|Expression"):
+        for value in self.elem.findall("Value"):
             value.set("parent_", self.elem)
             values += 1
             yield "expr", "="
@@ -1115,8 +1116,18 @@ class New(ASTPython):
                     data = data + "()"
                 ident = data[:data.find("(")]
                 if ident.find(".") == -1:
-                    #if len(self.elem.findall("//Class[@name='%s']" % ident)) == 0: #fixme
-                    if len(self.elem.get("parent_").findall("Class[@name='%s']" % ident)) == 0:
+                    parentClass_ = self.elem.get("parent_")
+                    classIdent_ = False
+                    while parentClass_:
+                        if parentClass_.tag == "Source":
+                            for m in parentClass_.findall("Class"):
+                                if m.get("name") == ident:
+                                    classIdent_ = True
+                                    break
+                        parentClass_ = parentClass_.get("parent_")
+                    
+                    print("***", ident, classIdent_)
+                    if not classIdent_:
                         data = "qsatype." + data
                 yield dtype, data
 
