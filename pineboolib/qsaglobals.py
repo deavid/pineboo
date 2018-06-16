@@ -29,7 +29,6 @@ Browse = 3
 
 AQS = AQS_Legacy()
 
-
 class File:
 
     @classmethod
@@ -39,8 +38,6 @@ class File:
 
 class FileDialog(QtWidgets.QFileDialog):
 
-    # def __init__(self):
-    #    super(FileDialog, self).__init__()
 
     def getOpenFileName(*args):
         obj = None
