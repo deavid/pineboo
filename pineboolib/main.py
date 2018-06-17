@@ -35,7 +35,7 @@ class DBServer(XMLStruct):
 
 class DBAuth(XMLStruct):
     username = "postgres"
-    password = "passwd"
+    password = None
 
 
 class Project(object):
@@ -923,10 +923,7 @@ class XMLAction(XMLStruct):
 
     def execDefaultScript(self):
         self.logger.debug("Executing default script for Action %s", self.name)
-        # FIXME:
-        if not getattr(self, "scriptform", None):
-            self.scriptform = self.name
-        #<--
+        self.scriptform = getattr(self, "scriptform", None)
         self.load_script(self.scriptform, None)
 
         self.mainform_widget = self.script.form

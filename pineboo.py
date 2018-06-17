@@ -98,7 +98,7 @@ def translate_connstring(connstring):
     valores por defecto y las diferentes formas de abreviar que existen.
     """
     user = "postgres"
-    passwd = "passwd"
+    passwd = None
     host = "127.0.0.1"
     port = "5432"
     dbname = ""

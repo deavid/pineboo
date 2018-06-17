@@ -20,7 +20,7 @@ from PyQt5.QtCore import QFileInfo
 class DlgConnect(QtWidgets.QWidget):
     ruta = ""
     username = ""
-    password = ""
+    password = None
     hostname = ""
     portnumber = ""
     database = ""
