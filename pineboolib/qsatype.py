@@ -280,6 +280,8 @@ class FormDBWidget(QtWidgets.QWidget):
     closed = QtCore.pyqtSignal()
     cursor_ = None
     parent_ = None
+    iface = None
+    
     logger = logging.getLogger("qsatype.FormDBWidget")
 
     def __init__(self, action, project, parent=None):
@@ -301,6 +303,7 @@ class FormDBWidget(QtWidgets.QWidget):
         self._prj = project
         try:
             self._class_init()
+            
         except Exception as e:
             self.logger.exception("Error al inicializar la clase iface de QS:")
 
@@ -415,7 +418,6 @@ class FormDBWidget(QtWidgets.QWidget):
         return ret
 
     def cursor(self):
-
         # if self.cursor_:
         #    return self.cursor_
 
@@ -448,6 +450,7 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def cursorRelation(self):
         return self.cursor().cursorRelation()
+
 
 
 def FLFormSearchDB(name):
@@ -814,7 +817,6 @@ class Dir_Class(object):
     def setCurrent(self, val=None):
         if val is None:
             val = filedir(".")
-        print("DIR.setCurrent(%s)" % val)
         os.chdir(val)
 
     def mkdir(self, name):

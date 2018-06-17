@@ -150,7 +150,7 @@ class FLFormDB(QtWidgets.QDialog):
 
     _uiName = None
     _scriptForm = None
-    ui_ = None
+    ui_ = {}
 
     def __init__(self, parent, action, load=False):
         # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa

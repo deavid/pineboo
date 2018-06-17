@@ -100,8 +100,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                 while_pass = True
                 continue
             while_pass = False
-            if getattr(formRecordflmodules, "child", None):
-                sys.processEvents()
+            sys.processEvents()
             if not self.iface.cargarModulo(modulos[i]):
                 MessageBox.warning(util.translate(u"scripts", u"Error al cargar el módulo:\n") +
                                    modulos[i], MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton)
@@ -139,7 +138,7 @@ class FormInternalObj(qsatype.FormDBWidget):
 
         if not isinstance(nombreFichero, str):
             nombreFichero = nombreFichero.data().decode("utf-8")
-
+        
         fichero = qsatype.File(nombreFichero, "iso-8859-15")
         modulo = None
         descripcion = None

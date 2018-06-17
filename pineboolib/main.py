@@ -908,7 +908,6 @@ class XMLAction(XMLStruct):
             self.load_script(scriptName, None)
 
             self.formrecord_widget = self.script.form
-            self.formrecord_widget.widget = self.formrecord_widget
             self.initModule(self.name)
         
         return self.formrecord_widget
@@ -927,10 +926,9 @@ class XMLAction(XMLStruct):
         self.load_script(self.scriptform, None)
 
         self.mainform_widget = self.script.form
-        self.mainform_widget.widget = self.mainform_widget
         self.initModule(self.name)
         
-        self.mainform_widget.iface.main()
+        self.mainform_widget.main()
 
     def load_script(self, scriptname, parent=None):
         self.logger.info(
