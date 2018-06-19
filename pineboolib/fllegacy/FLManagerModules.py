@@ -1,6 +1,6 @@
 from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, qt3ui
-from pineboolib.utils import filedir
+from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 import os
 import traceback
@@ -263,10 +263,8 @@ class FLManagerModules(ProjectClass):
     def createUI(self, n, connector=None, parent=None, name=None):
         if ".ui" not in n:
             n += ".ui"
-        if getattr(parent, "prj", None) is None:
-            form_path = self._prj.path(n)
-        else:
-            form_path = parent.prj.path(n)
+
+        form_path = _path(n)
         if form_path is None:
             raise AttributeError("File %r not found in project" % n)
             return
