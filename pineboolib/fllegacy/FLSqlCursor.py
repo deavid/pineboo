@@ -288,7 +288,6 @@ class PNBuffer(object):
 
         return True
 
-    
     """
     Comprueba si un campo tiene valor diferente. Esto es especialmente util para los número con decimales
     @return True si ha cambiado, False si es el mismo valor
@@ -1155,7 +1154,6 @@ class FLSqlCursor(QtCore.QObject):
 
         if not self.metadata():
             return None
-
 
         if (self.model().rows > 0 and not self.modeAccess() == FLSqlCursor.Insert) or not self.buffer():
             if not self.buffer():
@@ -3038,7 +3036,7 @@ class FLSqlCursor(QtCore.QObject):
 
             if functionBefore:
                 cI = self.context()
-                v = pineboolib.project.call(functionBefore, [self], cI, True)
+                v = pineboolib.project.call(functionBefore, [self], cI, False)
                 if v and not isinstance(v, bool):
                     return False
 
