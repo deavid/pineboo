@@ -8,6 +8,10 @@ import traceback
 from io import StringIO
 from xml import etree
 
+import pineboolib
+
+from pineboolib.fllegacy.FLSettings import FLSettings
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,15 +30,17 @@ def auto_qt_translate_text(text):
 
 aqtt = auto_qt_translate_text
 
-# Convertir una ruta relativa, a una ruta relativa a este fichero.
+
+"""  
+filedir(path1[, path2, path3 , ...])
+@param array de carpetas de la ruta
+@return devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
+Es útil para especificar rutas a recursos del programa.
+"""
 
 
 def filedir(*path):
-    """  filedir(path1[, path2, path3 , ...])
 
-            Filedir devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
-            Es útil para especificar rutas a recursos del programa.
-    """
     ruta_ = os.path.dirname(__file__)
 
     try:
@@ -49,6 +55,45 @@ def filedir(*path):
     # if ruta_.find(":/pineboolib/forms") > -1 or ruta_.find(":/pineboolib/plugins") > -1 or ruta_.find(":/pineboolib/..") > -1:
 
     return ruta_
+
+
+"""
+Calcula la ruta de una carpeta
+@param x. str o array con la ruta de la carpeta
+@return str con ruta absoluta a una carpeta
+"""
+
+
+def _dir(*x):
+    return os.path.join(pineboolib.project.tmpdir, *x)
+
+
+"""
+Retorna el primer fichero existente de un grupo de ficheros
+@return ruta al primer fichero encontrado
+"""
+
+
+def coalesce_path(*filenames):
+    for filename in filenames:
+        if filename is None:
+            return None
+        if filename in pineboolib.project.files:
+            return pineboolib.project.files[filename].path()
+    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False)
+
+
+"""
+Retorna el primer fichero existente de un grupo de ficheros
+@return ruta al fichero
+"""
+
+
+def _path(filename):
+    if filename not in pineboolib.project.files:
+        logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
+        return None
+    return pineboolib.project.files[filename].path()
 
 
 def one(x, default=None):
@@ -405,3 +450,27 @@ def getTableObj(tree, root):
     table.pk = []
     table.fields_idx = {}
     return table
+
+
+"""
+Guarda la geometría de una ventana
+@param name, Nombre de la ventana
+@param geo, QSize con los valores de la ventana
+"""
+
+
+def saveGeometryForm(name, geo):
+    name = "geo/%s" % name
+    FLSettings().writeEntry(name, geo)
+
+
+"""
+Carga la geometría de una ventana
+@param name, Nombre de la ventana
+@return QSize con los datos de la geometríca de la ventana guardados.
+"""
+
+
+def loadGeometryForm(name):
+    name = "geo/%s" % name
+    return FLSettings().readEntry(name, None)
