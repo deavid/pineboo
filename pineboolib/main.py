@@ -3,21 +3,21 @@ import time
 import os
 import logging
 import zlib
-import importlib
-from importlib import machinery
-from binascii import unhexlify
 
+from importlib import machinery, import_module
+from binascii import unhexlify
 from xml import etree
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qApp
 from PyQt5.QtCore import Qt, QSignalMapper
+from PyQt5.QtWidgets import QMenu, QActionGroup
 
-import pineboolib.emptyscript
-from pineboolib import qt3ui
-from pineboolib import decorators
+import pineboolib
+
+from pineboolib import decorators, qt3ui, emptyscript
 from pineboolib.pnconnection import PNConnection
-from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable
+from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable, path, coalesce_path, _dir
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFormDB import FLFormDB
@@ -25,7 +25,10 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
-from PyQt5.QtWidgets import QMenu, QActionGroup
+
+"""
+Almacena los datos del serividor de la BD principal
+"""
 
 
 class DBServer(XMLStruct):
@@ -33,9 +36,19 @@ class DBServer(XMLStruct):
     port = "5432"
 
 
+"""
+Almacena los datos de autenticación de la BD principal
+"""
+
+
 class DBAuth(XMLStruct):
     username = "postgres"
     password = None
+
+
+"""
+Esta es la clase principal del projecto. Se puede acceder a esta con pineboolib.project desde cualquier parte del projecto
+"""
 
 
 class Project(object):
@@ -52,6 +65,12 @@ class Project(object):
     translator_ = None
     acl_ = None
     _DGI = None
+    deleteCache = None
+    path = None
+
+    """
+    Constructor
+    """
 
     def __init__(self, DGI):
         self._DGI = DGI
@@ -66,7 +85,7 @@ class Project(object):
         self._initModules = []
         if self._DGI.useDesktop():
             if self._DGI.localDesktop():
-                self.main_window = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+                self.main_window = import_module("pineboolib.plugins.mainform.%s.%s" % (
                     self.mainFormName.lower(), self.mainFormName.lower())).mainWindow
             else:
                 self.main_window = self._DGI.mainForm().mainWindow
@@ -81,8 +100,17 @@ class Project(object):
         if not self._DGI.localDesktop():
             self._DGI.extraProjectInit()
 
+    """
+    Destructor
+    """
+
     def __del__(self):
         self.writeState()
+
+    """
+    Especifica el nivel de debug de la aplicación
+    @param q Número con el nimvel espeficicado
+    """
 
     def setDebugLevel(self, q):
         Project.debugLevel = q
@@ -90,6 +118,7 @@ class Project(object):
 
     """
     Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)
+    @return True (Tabla única), False (Múltiples tablas)
     """
 
     def singleFLLarge(self):
@@ -97,13 +126,20 @@ class Project(object):
 
     """
     Retorna si hay o no acls cargados
+    @return Objeto acl_
     """
 
     def acl(self):
         return self.acl_
 
-    def consoleShown(self):
-        return True
+    """
+    Especifica los datos para luego conectarse a la BD.
+    @param dbname. Nombre de la BD.
+    @param host. Nombre del equipo anfitrión de la BD.
+    @param port. Puerto a usar para conectarse a la BD.
+    @param passwd. Contraseña de la BD.
+    @param driveralias. Alias del pluging a usar en la conexión
+    """
 
     def load_db(self, dbname, host, port, user, passwd, driveralias):
         self.dbserver = DBServer()
@@ -121,6 +157,7 @@ class Project(object):
         self.tables = {}
         pineboolib.project = self
 
+    """
     def load(self, filename):
         self.parser = etree.elementTree.XMLParser(html=0, encoding="UTF-8")
         self.tree = etree.ElementTree.parse(filename, self.parser)
@@ -146,45 +183,31 @@ class Project(object):
         self.actions = {}
         self.tables = {}
         pineboolib.project = self
+    """
 
-    def coalesce_path(self, *filenames):
-        for filename in filenames:
-            if filename is None:
-                return None
-            if filename in self.files:
-                return self.files[filename].path()
-        raise IOError(
-            "None of the files specified were found: %s", repr(filenames))
-
-    def path(self, filename):
-        if filename not in self.files:
-            self.logger.error(
-                "Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
-            return None
-        return self.files[filename].path()
-
-    def dir(self, *x):
-        return os.path.join(self.tmpdir, *x)
+    """
+    Arranca el projecto. Conecta a la BD y carga los datos
+    """
 
     def run(self):
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
-        if self.deleteCache and not not os.path.exists(self.dir("cache/%s" % self.dbname)):
-            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", self.dir(
+        if self.deleteCache and not not os.path.exists(_dir("cache/%s" % self.dbname)):
+            self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir(
                 "cache/%s" % self.dbname))
-            for root, dirs, files in os.walk(self.dir("cache/%s" % self.dbname), topdown=False):
+            for root, dirs, files in os.walk(dir("cache/%s" % self.dbname), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
                 for name in dirs:
                     os.rmdir(os.path.join(root, name))
             # borrando de share
-            # for root, dirs, files in os.walk(self.dir("../share/pineboo"), topdown=False):
+            # for root, dirs, files in os.walk(_dir("../share/pineboo"), topdown=False):
             #    for name in files:
             #        if name.endswith("qs.py") or name.endswith("qs.py.debug") or name.endswith("qs.xml"):
             #            os.remove(os.path.join(root, name))
 
-        if not os.path.exists(self.dir("cache")):
-            os.makedirs(self.dir("cache"))
+        if not os.path.exists(_dir("cache")):
+            os.makedirs(_dir("cache"))
 
         # Conectar:
 
@@ -195,7 +218,7 @@ class Project(object):
             return False
 
         # Se verifica que existen estas tablas
-        for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar"):
+        for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar", "flmetadata"):
             self.conn.manager().createSystemTable(table)
 
         util = FLUtil()
@@ -209,35 +232,34 @@ class Project(object):
 
         self.areas["sys"] = Struct(idarea="sys", descripcion="Area de Sistema")
 
-        # Obtener modulos activos
+        # Obtener módulos activos
         self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ %
                          self.conn.driver().formatValue("bool", "True", False))
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in self.cur:
             icono = clearXPM(icono)
             self.modules[idmodulo] = Module(
-                self, idarea, idmodulo, descripcion, icono)
+                idarea, idmodulo, descripcion, icono)
 
         file_object = open(filedir("..", "share", "pineboo", "sys.xpm"), "r")
         icono = file_object.read()
         file_object.close()
         icono = clearXPM(icono)
 
-        self.modules["sys"] = Module(
-            self, "sys", "sys", "Administración", icono)
+        self.modules["sys"] = Module("sys", "sys", "Administración", icono)
 
         # Descargar proyecto . . .
 
         self.cur.execute(
-            """ SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
+            """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
         size_ = len(self.cur.fetchall())
         self.cur.execute(
-            """ SELECT idmodulo, nombre, sha FROM flfiles ORDER BY idmodulo, nombre """)
-        f1 = open(self.dir("project.txt"), "w")
+            """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
+        f1 = open(_dir("project.txt"), "w")
         self.files = {}
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_ini = time.time()
-        if not os.path.exists(self.dir("cache")):
+        if not os.path.exists(_dir("cache")):
             raise AssertionError
         # if self.parseProject:
         if self._DGI.useDesktop() and self._DGI.localDesktop():
@@ -250,16 +272,16 @@ class Project(object):
                 util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules:
                 continue  # I
-            fileobj = File(self, idmodulo, nombre, sha)
+            fileobj = File(idmodulo, nombre, sha)
             if nombre in self.files:
                 self.logger.warn(
                     "run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
-            if os.path.exists(self.dir("cache", fileobj.filekey)):
+            if os.path.exists(_dir("cache", fileobj.filekey)):
                 continue
-            fileobjdir = os.path.dirname(self.dir("cache", fileobj.filekey))
+            fileobjdir = os.path.dirname(_dir("cache", fileobj.filekey))
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
 
@@ -268,7 +290,7 @@ class Project(object):
                 "string", idmodulo, False), self.conn.driver().formatValue("string", nombre, False), self.conn.driver().formatValue("string", sha, False))
             cur2.execute(sql)
             for (contenido,) in cur2:
-                f2 = open(self.dir("cache", fileobj.filekey), "wb")
+                f2 = open(_dir("cache", fileobj.filekey), "wb")
                 # La cadena decode->encode corrige el bug de guardado de
                 # AbanQ/Eneboo
                 txt = ""
@@ -284,7 +306,7 @@ class Project(object):
                 f2.write(txt)
 
             if self.parseProject and nombre.endswith(".qs"):
-                self.parseScript(self.dir("cache", fileobj.filekey))
+                self.parseScript(_dir("cache", fileobj.filekey))
 
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
@@ -296,11 +318,11 @@ class Project(object):
         for root, dirs, files in os.walk(filedir("..", "share", "pineboo")):
             for nombre in files:
                 if root.find("modulos") == -1:
-                    fileobj = File(self, idmodulo, nombre, basedir=root)
+                    fileobj = File(idmodulo, nombre, basedir=root)
                     self.files[nombre] = fileobj
                     self.modules[idmodulo].add_project_file(fileobj)
                     if self.parseProject and nombre.endswith(".qs"):
-                        self.parseScript(self.dir(root, nombre))
+                        self.parseScript(_dir(root, nombre))
 
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             try:
@@ -313,21 +335,22 @@ class Project(object):
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
 
-    def saveGeometryForm(self, name, geo):
-        name = "geo/%s" % name
-        FLSettings().writeEntry(name, geo)
-
-    def loadGeometryForm(self, name):
-        name = "geo/%s" % name
-        return FLSettings().readEntry(name, None)
-
-    @decorators.NotImplementedDebug
+    @decorators.NotImplementedWarn
     def readState(self):
         pass
 
-    @decorators.NotImplementedDebug
+    @decorators.NotImplementedWarn
     def writeState(self):
         pass
+
+    """
+    LLama a una función del projecto.
+    @param function. Nombre de la función a llamar.
+    @param aList. Array con los argumentos.
+    @param objectContext. Contexto en el que se ejecuta la función.
+    @param showException. Boolean que especifica si se muestra los errores.
+    @return Boolean con el resultado.
+    """
 
     def call(self, function, aList, objectContext=None, showException=True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
@@ -374,8 +397,8 @@ class Project(object):
         fn = getattr(funScript, last_, None)
 
         if fn is None:
-            self.logger.error("No existe la función %s en %s",
-                              last_, aFunction[0])
+            if showException:
+                self.logger.error("No existe la función %s en %s", last_, aFunction[0])
             return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
@@ -388,6 +411,10 @@ class Project(object):
                 self.logger.exception("js.call: error al llamar %s", function)
 
         return None
+
+    """
+    Instala las traducciones cargadas
+    """
 
     def loadTranslations(self):
         translatorsCopy = None
@@ -408,22 +435,44 @@ class Project(object):
                 else:
                     item.deletelater()
 
+    """
+    Busca la traducción de un texto a un Idioma dado
+    @param s, Cadena de texto
+    @param l, Idioma.
+    @return Cadena de texto traducida. 
+    """
     @decorators.BetaImplementation
     def trMulti(self, s, l):
         backMultiEnabled = self.multiLangEnabled_
-        ret = self.translate("%s_MULTILANG" % l.upper(). s)
+        ret = self.translate("%s_MULTILANG" % l.upper(), s)
         self.multiLangEnabled_ = backMultiEnabled
         return ret
 
+    """
+    Cambia el estado de la opción MultiLang
+    @param enable, Boolean con el nuevo estado
+    @param langid, Identificador del leguaje a activar
+    """
     @decorators.BetaImplementation
     def setMultiLang(self, enable, langid):
         self.multiLangEnabled_ = enable
         if enable and langid:
             self.multiLangId_ = langid.upper()
 
+    """
+    Carga una traducción desde un módulo dado
+    @param idM, Identificador del módulo donde buscar
+    @param lang, Lenguaje a buscar
+    """
+
     def loadTranslationFromModule(self, idM, lang):
         self.installTranslator(self.createModTranslator(idM, lang, True))
         # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
+
+    """
+    Instala una traducción para la aplicación
+    @param tor, Objeto con la traducción a cargar
+    """
 
     def installTranslator(self, tor):
         if not tor:
@@ -432,9 +481,23 @@ class Project(object):
             qApp.installTranslator(tor)
             self.translator_.append(tor)
 
+    """
+    Crea una traducción para sys
+    @param lang, Idioma a usar
+    @param loadDefault, Boolean para cargar los datos por defecto
+    @return objeto traducción
+    """
     @decorators.NotImplementedWarn
     def createSysTranslator(self, lang, loadDefault):
         pass
+
+    """
+    Crea una traducción para un módulo especificado
+    @param idM, Identificador del módulo
+    @param lang, Idioma a usar
+    @param loadDefault, Boolean para cargar los datos por defecto
+    @return objeto traducción
+    """
 
     def createModTranslator(self, idM, lang, loadDefault=False):
         fileTs = "%s.%s.ts" % (idM, lang)
@@ -449,16 +512,19 @@ class Project(object):
 
         return self.createModTranslator(idM, "es") if loadDefault else None
 
-    @decorators.NotImplementedWarn
-    def initToolBox(self):
-        pass
+    #@decorators.NotImplementedWarn
+    # def initToolBox(self):
+    #    pass
+    """
+    Convierte un script .qs a .py lo deja al lado
+    @param scriptname, Nombre del script a convertir
+    """
 
     def parseScript(self, scriptname):
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
             raise IOError
-        python_script_path = (
-            scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
+        python_script_path = (scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             self.logger.info("Convirtiendo a Python . . . %s", scriptname)
             from pineboolib.flparser import postparse
@@ -468,11 +534,21 @@ class Project(object):
                 self.logger.warn(
                     "El fichero %s no se ha podido convertir: %s", scriptname, e)
 
+    """
+    fixme: Reinicializa????
+    """
+
     def reinitP(self):
         if self.acl_:
             self.acl_.init_()
 
         self.call("sys.widget.init()", [], None, True)
+
+    """
+    Devuelve un objecto
+    @param name, Nombre del objecto
+    @return Objeto o None
+    """
 
     def resolveDGIObject(self, name):
         obj_ = getattr(self._DGI, name, None)
@@ -481,6 +557,12 @@ class Project(object):
 
         self.logger.warn(
             "Project.resolveSDIObject no puede encontra el objeto %s en %s", name, self._DGI.alias())
+
+    """
+    Lanza los test
+    @param name, Nombre del test específico. Si no se especifica se lanzan todos los tests disponibles
+    @return Texto con la valoración de los test aplicados
+    """
 
     def test(self, name=None):
         dirlist = os.listdir(filedir("../pineboolib/plugins/test"))
@@ -521,9 +603,21 @@ class Project(object):
         return result
 
 
+"""
+Esta clase almacena la información de los módulos cargados
+"""
+
+
 class Module(object):
-    def __init__(self, project, areaid, name, description, icon):
-        self.prj = project
+    """
+    Constructor
+    @param areaid. Identificador de area.
+    @param name. Nombre del módulo
+    @param description. Descripción del módulo
+    @param icon. Icono del módulo
+    """
+
+    def __init__(self, areaid, name, description, icon):
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
@@ -531,37 +625,47 @@ class Module(object):
         self.files = {}
         self.tables = {}
         self.loaded = False
-        self.path = self.prj.path
+        self.path = pineboolib.project.path
         self.logger = logging.getLogger("main.Module")
+
+    """
+    Añade ficheros al array que controla que ficehros tengo.
+    @param fileobj. Objeto File con información del fichero
+    """
 
     def add_project_file(self, fileobj):
         self.files[fileobj.filename] = fileobj
 
+    """
+    Carga las acciones pertenecientes a este módulo
+    @return Boolean. True si ok, False si hay problemas
+    """
+
     def load(self):
-        pathxml = self.path("%s.xml" % self.name)
-        pathui = self.path("%s.ui" % self.name)
+        pathxml = path("%s.xml" % self.name)
+        pathui = path("%s.ui" % self.name)
         if pathxml is None:
-            self.logger.error("modulo %s: fichero XML no existe", self.name)
+            self.logger.error("módulo %s: fichero XML no existe", self.name)
             return False
         if pathui is None:
-            self.logger.error("modulo %s: fichero UI no existe", self.name)
+            self.logger.error("módulo %s: fichero UI no existe", self.name)
             return False
-        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+        if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
             tiempo_1 = time.time()
         try:
             self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
-            if self.prj._DGI.useDesktop():
+            if pineboolib.project._DGI.useDesktop():
                 self.mainform = MainForm(self, pathui)
                 self.mainform.load()
         except Exception as e:
-            self.logger.exception("Al cargar modulo %s:", self.name)
+            self.logger.exception("Al cargar módulo %s:", self.name)
             return False
 
         # TODO: Load Main Script:
         self.mainscript = None
         # /-----------------------
-        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+        if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
             tiempo_2 = time.time()
 
         for tablefile in self.files:
@@ -569,7 +673,7 @@ class Module(object):
                 continue
             name, ext = os.path.splitext(tablefile)
             try:
-                contenido = str(open(self.path(tablefile),
+                contenido = str(open(path(tablefile),
                                      "rb").read(), "ISO-8859-15")
             except UnicodeDecodeError as e:
                 self.logger.error(
@@ -581,21 +685,33 @@ class Module(object):
                     "No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
                 continue
             self.tables[name] = tableObj
-            self.prj.tables[name] = tableObj
+            pineboolib.project.tables[name] = tableObj
 
-        if self.prj._DGI.useDesktop() and self.prj._DGI.localDesktop():
+        if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
             tiempo_3 = time.time()
             if tiempo_3 - tiempo_1 > 0.2:
-                self.logger.debug("Carga del modulo %s : %.3fs ,  %.3fs",
+                self.logger.debug("Carga del módulo %s : %.3fs ,  %.3fs",
                                   (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
 
         self.loaded = True
         return True
 
 
+"""
+Clase que gestiona cada uno de los ficheros de un módulo
+"""
+
+
 class File(object):
-    def __init__(self, project, module, filename, sha=None, basedir=None):
-        self.prj = project
+    """
+    Constructor
+    @param module. Identificador del módulo propietario
+    @param filename. Nombre del fichero
+    @param sha. Código sha1 del contenido del fichero
+    @param basedir. Ruta al fichero en cache
+    """
+
+    def __init__(self, module, filename, sha=None, basedir=None):
         self.module = module
         self.filename = filename
         self.sha = sha
@@ -605,7 +721,7 @@ class File(object):
         else:
             self.name, self.ext = os.path.splitext(filename)
 
-        db_name = self.prj.conn.DBName()
+        db_name = pineboolib.project.conn.DBName()
 
         if self.sha:
             self.filekey = "%s/%s/file%s/%s/%s%s" % (
@@ -614,16 +730,31 @@ class File(object):
             self.filekey = filename
         self.basedir = basedir
 
+    """
+    Devuelve la ruta absoluta del fichero
+    @return Ruta absoluta del fichero
+    """
+
     def path(self):
         if self.basedir:
             # Probablemente porque es local . . .
-            return self.prj.dir(self.basedir, self.filename)
+            return _dir(self.basedir, self.filename)
         else:
             # Probablemente es remoto (DB) y es una caché . . .
-            return self.prj.dir("cache", *(self.filekey.split("/")))
+            return _dir("cache", *(self.filekey.split("/")))
+
+
+"""
+Clase encargada de gestionar los diferentes módulos de inteligencia lógica del projecto
+"""
 
 
 class DelayedObjectProxyLoader(object):
+
+    """
+    Constructor
+    """
+
     def __init__(self, obj, *args, **kwargs):
         self._name = "unnamed-loader"
         if "name" in kwargs:
@@ -635,6 +766,11 @@ class DelayedObjectProxyLoader(object):
         self.loaded_obj = None
         self.logger = logging.getLogger("main.DelayedObjectProxyLoader")
 
+    """
+    Carga un objeto nuevo
+    @return objeto nuevo o si ya existe , cacheado
+    """
+
     def __load(self):
         if not self.loaded_obj:
             self.logger.debug(
@@ -642,6 +778,12 @@ class DelayedObjectProxyLoader(object):
                 self._name, self._obj, self._args, self._kwargs)
             self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
+
+    """
+    Retorna una función buscada
+    @param name. Nombre del la función buscada
+    @return el objecto del XMLAction afectado
+    """
 
     def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
         obj = self.__load()
@@ -651,14 +793,31 @@ class DelayedObjectProxyLoader(object):
             return None
 
 
+"""
+Retorna una función buscada
+@param name. Nombre del la función buscada
+@return el objecto del XMLAction afectado
+"""
+
+
 class ModuleActions(object):
+    """
+    Constructor
+    @param module. Identificador del módulo
+    @param path. Ruta del módulo
+    @param modulename. Nombre del módulo
+    """
+
     def __init__(self, module, path, modulename):
         self.mod = module
-        self.prj = module.prj
         self.path = path
         self.moduleName = modulename
         self.logger = logging.getLogger("main.ModuleActions")
         assert path
+
+    """
+    Carga las actions del módulo en el projecto
+    """
 
     def load(self):
         from pineboolib import qsaglobals
@@ -667,16 +826,15 @@ class ModuleActions(object):
         self.tree = etree.ElementTree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
 
-        action = XMLAction(self.prj, None)
+        action = XMLAction()
         action.mod = self
-        action.prj = self.prj
         action.name = self.mod.name
         action.alias = self.mod.name
         # action.form = self.mod.name
         action.form = None
         action.table = None
         action.scriptform = self.mod.name
-        self.prj.actions[action.name] = action
+        pineboolib.project.actions[action.name] = action
         if hasattr(qsaglobals, action.name):
             self.logger.debug(
                 "No se sobreescribe variable de entorno %s", action.name)
@@ -685,14 +843,13 @@ class ModuleActions(object):
                 action.load, name="QSA.Module.%s" % action.name))
 
         for xmlaction in self.root:
-            action = XMLAction(self.prj, xmlaction)
+            action = XMLAction(xmlaction)
             action.mod = self
-            action.prj = self.prj
             try:
                 name = action.name
             except AttributeError:
                 name = "unnamed"
-            self.prj.actions[name] = action
+            pineboolib.project.actions[name] = action
             if name != "unnamed":
                 if hasattr(qsaglobals, "form" + name):
                     self.logger.debug(
@@ -710,25 +867,55 @@ class ModuleActions(object):
                     setattr(qsaglobals, "formRecord" + name, DelayedObjectProxyLoader(
                         action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
 
+    """
+    Busca si es propietario de una action
+    """
+
     def __contains__(self, k):
-        return k in self.prj.actions
+        return k in pineboolib.project.actions
 
-    def __getitem__(self, k):
-        return self.prj.actions[k]
+    """
+    Recoge una action determinada
+    @param name. Nombre de la action
+    @return Retorna el XMLAction de la action dada
+    """
 
-    def __setitem__(self, k, v):
+    def __getitem__(self, name):
+        return pineboolib.project.actions[name]
+
+    """
+    Añade una action a propiedad del módulo
+    @param name. Nombre de la action
+    @param action_. Action a añadir a la propiedad del módulo
+    """
+
+    def __setitem__(self, name, action_):
         raise NotImplementedError("Actions are not writable!")
-        self.prj.actions[k] = v
+        pineboolib.project.actions[name] = action_
+
+
+"""
+Continene la información del mainForm de cada módulo
+"""
 
 
 class MainForm(object):
     logger = logging.getLogger("main.MainForm")
 
+    """
+    Constructor
+    @param module. Módulo al que pertenece el mainForm
+    @param path. Ruta del módulo
+    """
+
     def __init__(self, module, path):
         self.mod = module
-        self.prj = module.prj
         self.path = path
         assert path
+
+    """
+    Carga los actions del mainForm del módulo
+    """
 
     def load(self):
         try:
@@ -746,7 +933,7 @@ class MainForm(object):
         self.root = self.tree.getroot()
         self.actions = {}
         self.pixmaps = {}
-        if self.prj._DGI.useDesktop():
+        if pineboolib.project._DGI.useDesktop():
             for image in self.root.findall("images//image[@name]"):
                 name = image.get("name")
                 xmldata = image.find("data")
@@ -765,22 +952,21 @@ class MainForm(object):
             action = XMLMainFormAction(xmlaction)
             action.mainform = self
             action.mod = self.mod
-            action.prj = self.prj
             iconSet = getattr(action, "iconSet", None)
             action.icon = None
             if iconSet:
                 try:
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
-                    if self.prj._DGI.useDesktop():
+                    if pineboolib.project._DGI.useDesktop():
                         self.logger.exception(
                             "main.Mainform: Error al intentar decodificar icono de accion. No existe.")
             else:
                 action.iconSet = None
 
             self.actions[action.name] = action
-            if not self.prj._DGI.localDesktop():
-                self.prj._DGI.mainForm().mainWindow.loadAction(action)
+            if not pineboolib.project._DGI.localDesktop():
+                pineboolib.project._DGI.mainForm().mainWindow.loadAction(action)
 
             # Asignamos slot a action
             for slots in self.root.findall("connections//connection"):
@@ -789,19 +975,24 @@ class MainForm(object):
                     action.slot = slot._v("slot")
                     action.slot = action.slot.replace('(', '')
                     action.slot = action.slot.replace(')', '')
-                if not self.prj._DGI.localDesktop():
-                    self.prj._DGI.mainForm().mainWindow.loadConnection(action)
+                if not pineboolib.project._DGI.localDesktop():
+                    pineboolib.project._DGI.mainForm().mainWindow.loadConnection(action)
 
         self.toolbar = []
         sett_ = FLSettings()
         if not sett_.readBoolEntry("ebcomportamiento/ActionsMenuRed", False):
             for toolbar_action in self.root.findall("toolbars//action"):
                 self.toolbar.append(toolbar_action.get("name"))
-                if not self.prj._DGI.localDesktop():
-                    self.prj._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
+                if not pineboolib.project._DGI.localDesktop():
+                    pineboolib.project._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
         else:
             # FIXME: cargar solo las actions de los menus
             sett_.writeEntry("ebcomportamiento/ActionsMenuRed", False)
+
+
+"""
+Contiene Información de cada action del mainForm
+"""
 
 
 class XMLMainFormAction(XMLStruct):
@@ -812,6 +1003,10 @@ class XMLMainFormAction(XMLStruct):
     prj = None
     slot = None
     logger = logging.getLogger("main.XMLMainFormAction")
+
+    """
+    Lanza la action 
+    """
 
     def run(self):
         self.logger.debug("Running: %s %s %s", self.name, self.text, self.slot)
@@ -824,12 +1019,20 @@ class XMLMainFormAction(XMLStruct):
                 self.name, self.text, self.slot)
 
 
+"""
+Contiene información de las actions especificadas en el .xml del módulo
+"""
+
+
 class XMLAction(XMLStruct):
     logger = logging.getLogger("main.XMLAction")
 
-    def __init__(self, _project, *args, **kwargs):
+    """
+    Constructor
+    """
+
+    def __init__(self, *args, **kwargs):
         super(XMLAction, self).__init__(*args, **kwargs)
-        self.prj = _project
         self.form = self._v("form")
         self.name = self._v("name")
         self.script = self._v("script")
@@ -841,8 +1044,17 @@ class XMLAction(XMLStruct):
         self._loaded = False
         self._record_loaded = False
 
-    def loadRecord(self, cursor=None):
-        # if self.formrecord_widget is None:
+    """
+    Carga FLFormRecordDB por defecto
+    @param cursor. Asigna un cursor al FLFormRecord
+    @return widget con form inicializado
+    """
+
+    def loadRecord(self, cursor):
+        if self.formrecord_widget and hasattr(self.formrecord_widget, "cursor_"):
+            self.logger.warn(
+                "Se está cargando un FLFormRecord, sobre un módulo que ya contenia un cursor inicializado",
+                "Esto puede ocasionar que no se recojan cambios en el cursor viejo", self.name)
         if not getattr(self, "formrecord", None):
             self.logger.warn(
                 "Record action %s is not defined. Canceled !", self.name)
@@ -865,15 +1077,14 @@ class XMLAction(XMLStruct):
             if self._loaded:
                 return self.mainform_widget
             self.logger.debug("Loading action %s . . . ", self.name)
-            w = self.prj.main_window
+            w = pineboolib.project.main_window
             if not self.mainform_widget:
-                if self.prj._DGI.useDesktop():
+                if pineboolib.project._DGI.useDesktop():
                     self.mainform_widget = FLMainForm(w, self, load=False)
                 else:
                     from pineboolib.utils import Struct
                     self.mainform_widget = Struct()
                     self.mainform_widget.action = self
-                    self.mainform_widget.prj = self.prj
                     try:
                         self.load_script(
                             getattr(self, "scriptform", None), self.mainform_widget)
@@ -889,16 +1100,27 @@ class XMLAction(XMLStruct):
         except Exception as e:
             self.logger.exception("While loading action %s", self.name)
             return None
+    """
+    Abre el FLFormDB por defecto
+    """
 
     def openDefaultForm(self):
         self.logger.debug("Opening default form for Action %s", self.name)
-        w = self.prj.main_window
+        w = pineboolib.project.main_window
         self.initModule(self.name)
         self.mainform_widget = FLMainForm(w, self, load=True)
         w.addFormTab(self)
 
+    """
+    Retorna el widget del masterform
+    """
+
     def formRecord(self):
         return self.form
+    """
+    Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía
+    @return wigdet del formRecord.
+    """
 
     def formRecordWidget(self):
         scriptName = getattr(self, "scriptformrecord", None)
@@ -909,16 +1131,25 @@ class XMLAction(XMLStruct):
 
             self.formrecord_widget = self.script.form
             self.initModule(self.name)
-        
+
         return self.formrecord_widget
 
-    def openDefaultFormRecord(self, cursor=None):
+    """
+    Abre el FLFormRecordDB por defecto
+    @param cursor. Cursor a usar por el FLFormRecordDB
+    """
+
+    def openDefaultFormRecord(self, cursor):
         self.logger.info("Opening default formRecord for Action %s", self.name)
         w = self.loadRecord(cursor)
         # w.init()
         if w:
             if pineboolib.project._DGI.localDesktop():
                 w.show()
+
+    """
+    Ejecuta el script por defecto
+    """
 
     def execDefaultScript(self):
         self.logger.debug("Executing default script for Action %s", self.name)
@@ -927,8 +1158,13 @@ class XMLAction(XMLStruct):
 
         self.mainform_widget = self.script.form
         self.initModule(self.name)
-        
-        self.mainform_widget.main()
+        self.mainform_widget.iface.main()
+
+    """
+    Convierte un script qsa en .py y lo carga
+    @param scriptname. Nombre del script a convertir
+    @param parent. Objecto al que carga el script, si no se especifica es a self.script
+    """
 
     def load_script(self, scriptname, parent=None):
         self.logger.info(
@@ -965,12 +1201,12 @@ class XMLAction(XMLStruct):
             parent.iface = parent.widget.iface
             return
 
-        script_path_qs = pineboolib.project.path(scriptname + ".qs")
-        script_path_py = pineboolib.project.coalesce_path(
+        script_path_qs = path(scriptname + ".qs")
+        script_path_py = coalesce_path(
             scriptname + ".py", scriptname + ".qs.py", None)
 
         overload_pyfile = os.path.join(
-            parent.prj.tmpdir, "overloadpy", scriptname + ".py")
+            pineboolib.project.tmpdir, "overloadpy", scriptname + ".py")
         if os.path.isfile(overload_pyfile):
             self.logger.warn(
                 "Cargando %s desde overload en lugar de la base de datos!!", scriptname)
@@ -998,20 +1234,9 @@ class XMLAction(XMLStruct):
 
         elif script_path_qs:
             script_path = script_path_qs
+            pineboolib.project.parseScript(script_path)
             self.logger.info("Loading script QS %s . . . ", scriptname)
-            # Intentar convertirlo a Python primero con flscriptparser2
-            if not os.path.isfile(script_path):
-                raise IOError("QS Script File %s not found" % script_path)
-            python_script_path = (
-                script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
-            if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-                self.logger.info("Convirtiendo a Python . . .")
-                from pineboolib.flparser import postparse
-                postparse.pythonify(script_path)
-
-            if not os.path.isfile(python_script_path):
-                raise AssertionError(
-                    u"No se encontró el módulo de Python, falló flscriptparser?")
+            python_script_path = (script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             try:
                 self.logger.info(
                     "Cargando %s : %s ", scriptname,
@@ -1034,17 +1259,17 @@ class XMLAction(XMLStruct):
         # Aquí debería arrancar el script
 
     """
-    Inicializa el modulo del form en caso de que no se inicializara ya
+    Inicializa el módulo del form en caso de que no se inicializara ya
     """
 
     def initModule(self, name):
 
-        moduleName = self.prj.actions[name].mod.moduleName
+        moduleName = pineboolib.project.actions[name].mod.moduleName
         if moduleName in (None, "sys"):
             return
-        if moduleName not in self.prj._initModules:
-            self.prj._initModules.append(moduleName)
-            self.prj.call("%s.iface.init()" % moduleName, [], None, False)
+        if moduleName not in pineboolib.project._initModules:
+            pineboolib.project._initModules.append(moduleName)
+            pineboolib.project.call("%s.iface.init()" % moduleName, [], None, False)
             return
 
 
