@@ -7,7 +7,7 @@ import os.path
 import sys
 import imp
 import traceback
-from lxml import etree
+from xml import etree
 
 
 try:
@@ -83,7 +83,7 @@ class TagObject(object, metaclass=TagObjectFactory):
 
     def __init__(self, tagname):
         self.astname = tagname
-        self.xml = etree.Element(self.tagname(tagname))
+        self.xml = etree.ElementTree.Element(self.tagname(tagname))
         self.xmlname = None
         self.subelems = []
         self.values = []
@@ -91,7 +91,7 @@ class TagObject(object, metaclass=TagObjectFactory):
             self.xml.set("name", "")
 
     def adopt_children(self, argn, subelem):
-        for child in subelem.xml.iterchildren():
+        for child in list(subelem.xml):
             if self.set_child_argn:
                 child.set("argn", str(argn))
             else:
@@ -749,7 +749,7 @@ def execute(options, args):
             else:
                 destname = filename + ".xml"
             f1 = open(destname, "wb")
-            f1.write(etree.tostring(ast, pretty_print=True))
+            f1.write(etree.ElementTree.tostring(ast))
             f1.close()
 
 

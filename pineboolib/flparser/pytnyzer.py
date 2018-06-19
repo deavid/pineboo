@@ -189,7 +189,7 @@ class Function(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 if len(expr) == 1:
                     expr += ["=", "None"]
@@ -222,15 +222,14 @@ class FunctionCall(ASTPython):
                     class_ = p_
                     break
                 p_ = p_.get("parent_")
-                
-                
+
             if class_:
                 extends = class_.get("extends")
                 if extends == name:
                     name = "super(%s, self).__init__" % class_.get("name")
             functions = parent.findall("Function[@name=\"%s\"]" % name)
             for f in functions:
-                # yield "debug", "Function to:" + etree.tostring(f)
+                # yield "debug", "Function to:" + etree.ElementTree.tostring(f)
                 name = "self.%s" % name
                 break
 
@@ -247,7 +246,7 @@ class FunctionCall(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -271,7 +270,7 @@ class If(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
 
@@ -339,7 +338,7 @@ class While(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
 
@@ -366,7 +365,7 @@ class DoWhile(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
         # TODO .....
@@ -513,7 +512,7 @@ class Switch(ASTPython):
             if len(expr) == 0:
                 main_expr.append("False")
                 yield "debug", "Expression %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 main_expr.append(" ".join(expr))
         yield "line", "%s = %s" % (name, " ".join(main_expr))
@@ -532,7 +531,7 @@ class Switch(ASTPython):
                 if len(expr) == 0:
                     value_expr.append("False")
                     yield "debug", "Expression %d not understood" % n
-                    yield "debug", etree.tostring(arg)
+                    yield "debug", etree.ElementTree.tostring(arg)
                 else:
                     value_expr.append(" ".join(expr))
 
@@ -623,7 +622,7 @@ class Variable(ASTPython):
         # if name.startswith("colorFun"): print(name)
         yield "expr", id_translate(name)
         values = 0
-        #for value in self.elem.findall("Value|Expression"):
+        # for value in self.elem.findall("Value|Expression"):
         for value in self.elem.findall("Value"):
             value.set("parent_", self.elem)
             values += 1
@@ -658,9 +657,9 @@ class Variable(ASTPython):
                 parent2 = parent1.get("parent_")
                 parent3 = parent2.get("parent_")
                 #print("**", parent2.tag, parent3.tag)
-                #if parent2.tag == "Source" and parent3.tag == "Class":
+                # if parent2.tag == "Source" and parent3.tag == "Class":
                 #    yield "expr", "None"
-                #else:
+                # else:
                 yield "expr", "qsatype.%s()" % dtype
 
         # if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
@@ -674,14 +673,14 @@ class InstructionUpdate(ASTPython):
             for dtype, data in parse_ast(arg).generate(isolate=False):
                 if dtype == "expr":
                     if data is None:
-                        raise ValueError(etree.tostring(arg))
+                        raise ValueError(etree.ElementTree.tostring(arg))
                     expr.append(data)
                 else:
                     yield dtype, data
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -701,7 +700,7 @@ class InlineUpdate(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
         ctype = self.elem.get("type")
@@ -734,7 +733,7 @@ class InstructionCall(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
         yield "line", " ".join(arguments)
@@ -754,7 +753,7 @@ class Instruction(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
         if arguments:
@@ -776,7 +775,7 @@ class InstructionFlow(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -815,7 +814,7 @@ class Member(ASTPython):
             if len(expr) == 0:
                 txtarg = "unknownarg"
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 txtarg = " ".join(expr)
             arguments.append(txtarg)
@@ -965,7 +964,7 @@ class ArrayMember(ASTPython):
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
-                yield "debug", etree.tostring(arg)
+                yield "debug", etree.ElementTree.tostring(arg)
             else:
                 arguments.append(" ".join(expr))
 
@@ -980,7 +979,7 @@ class Value(ASTPython):
             child.set("parent_", self.elem)
             for dtype, data in parse_ast(child).generate():
                 if data is None:
-                    raise ValueError(etree.tostring(child))
+                    raise ValueError(etree.ElementTree.tostring(child))
                 yield dtype, data
         if isolate:
             yield "expr", ")"
@@ -1125,7 +1124,7 @@ class New(ASTPython):
                                     classIdent_ = True
                                     break
                         parentClass_ = parentClass_.get("parent_")
-                    
+
                     if not classIdent_:
                         data = "qsatype." + data
                 yield dtype, data
@@ -1157,7 +1156,7 @@ class Constant(ASTPython):
                         if len(expr) == 0:
                             arguments.append("unknownarg")
                             yield "debug", "Argument %d not understood" % n
-                            yield "debug", etree.tostring(arg)
+                            yield "debug", etree.ElementTree.tostring(arg)
                         else:
                             arguments.append(" ".join(expr))
 
@@ -1270,7 +1269,7 @@ class DeclarationBlock(ASTPython):
             for dtype, data in parse_ast(var).generate(force_value=True):
                 if dtype == "expr":
                     if data is None:
-                        raise ValueError(etree.tostring(var))
+                        raise ValueError(etree.ElementTree.tostring(var))
                     expr.append(data)
                 else:
                     yield dtype, data
@@ -1326,7 +1325,7 @@ def file_template(ast):
     for child in ast:
         if child.tag != "Function":
             child.set("constructor", "1")
-            if child.tag != "Class": #Limpiamos las class, se cuelan desde el cambio de xml
+            if child.tag != "Class":  # Limpiamos las class, se cuelan desde el cambio de xml
                 csource.append(child)
         else:
             mainsource.append(child)
@@ -1400,7 +1399,7 @@ def write_python_file(fobj, ast):
 def pythonize(filename, destfilename, debugname=None):
     # bname = os.path.basename(filename)
     ASTPython.debug_file = open(debugname, "w") if debugname else None
-    parser = etree.ElementTree.XMLParser()#remove_blank_text
+    parser = etree.ElementTree.XMLParser()  # remove_blank_text
     try:
         ast_tree = etree.ElementTree.parse(open(filename), parser)
     except Exception:
