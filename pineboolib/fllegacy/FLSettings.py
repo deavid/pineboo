@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore
-
-from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 
 
-class FLSettings(ProjectClass):
+class FLSettings(QtCore.QObject):
 
     s = QtCore.QSettings(QtCore.QSettings.NativeFormat,
                          QtCore.QSettings.UserScope, "Eneboo", "Pineboo")
