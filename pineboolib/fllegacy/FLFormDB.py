@@ -232,8 +232,10 @@ class FLFormDB(QtWidgets.QDialog):
             if not getattr(self.widget, "iface", None):
                 self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
 
-            self.iface.init()
-            return True
+            if hasattr(self.iface, "init"):
+                self.iface.init()
+                return True
+
         return False
 
     """
