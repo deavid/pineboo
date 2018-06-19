@@ -3,7 +3,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qWarning
 
-from pineboolib.utils import filedir
+from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm
 from pineboolib import decorators
 import pineboolib
 
@@ -172,7 +172,6 @@ class FLFormDB(QtWidgets.QDialog):
         else:
             self.actionName_ = "form" + action.name
 
-        self.prj = action.prj
         self.mod = action.mod
 
         self.layout = QtWidgets.QVBoxLayout()
@@ -703,7 +702,7 @@ class FLFormDB(QtWidgets.QDialog):
 
             self.bindIface()
 
-        size = pineboolib.project.loadGeometryForm(self.geoName())
+        size = loadGeometryForm(self.geoName())
         if size:
             self.resize(size)
 
@@ -722,7 +721,7 @@ class FLFormDB(QtWidgets.QDialog):
         else:
             geo = QtCore.QSize(pW.width(), pW.height())
 
-        pineboolib.project.saveGeometryForm(self.geoName(), geo)
+        saveGeometryForm(self.geoName(), geo)
 
     """
     Captura evento de entrar foco
