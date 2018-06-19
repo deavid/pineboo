@@ -235,7 +235,7 @@ class FLManager(ProjectClass):
             if acl:
                 acl.process(ret)
 
-            if not quick and not isSysTable and self._prj.consoleShown() and not ret.isQuery() and self.db_.mismatchedTable(n, ret) and self.existsTable(n):
+            if not quick and not isSysTable and not ret.isQuery() and self.db_.mismatchedTable(n, ret) and self.existsTable(n):
                 msg = util.translate(
                     "application",
                     "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
