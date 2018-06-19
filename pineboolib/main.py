@@ -365,11 +365,13 @@ class Project(object):
         aFunction = function.split(".")
         if not aFunction[0] in self.actions:
             if len(aFunction) > 1:
-                self.logger.error(
-                    "No existe la acción %s en el módulo %s", aFunction[1], aFunction[0])
+                if showException:
+                    self.logger.error(
+                        "No existe la acción %s en el módulo %s", aFunction[1], aFunction[0])
             else:
-                self.logger.error(
-                    "No existe la acción %s", aFunction[0])
+                if showException:
+                    self.logger.error(
+                        "No existe la acción %s", aFunction[0])
             return False
 
         funAction = self.actions[aFunction[0]]
@@ -385,8 +387,9 @@ class Project(object):
             return False
 
         if not funScript:
-            self.logger.error(
-                "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
+            if showException:
+                self.logger.error(
+                    "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
             return False
 
         if len(aFunction) > 2:
@@ -1053,7 +1056,7 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor):
         if self.formrecord_widget and hasattr(self.formrecord_widget, "cursor_"):
             self.logger.warn(
-                "Se está cargando un FLFormRecord, sobre un módulo que ya contenia un cursor inicializado. Esto puede ocasionar que no se recojan cambios en el cursor viejo", self.name)
+                "Se está cargando un FLFormRecord, sobre un módulo que ya contenia un cursor inicializado.\nEsto puede ocasionar que no se recojan cambios en el cursor viejo. Form :%s", self.name)
         if not getattr(self, "formrecord", None):
             self.logger.warn(
                 "Record action %s is not defined. Canceled !", self.name)
