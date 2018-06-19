@@ -17,7 +17,7 @@ import pineboolib
 
 from pineboolib import decorators, qt3ui, emptyscript
 from pineboolib.pnconnection import PNConnection
-from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable, path, coalesce_path, _dir
+from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable, _path, coalesce_path, _dir
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFormDB import FLFormDB
@@ -642,8 +642,8 @@ class Module(object):
     """
 
     def load(self):
-        pathxml = path("%s.xml" % self.name)
-        pathui = path("%s.ui" % self.name)
+        pathxml = _path("%s.xml" % self.name)
+        pathui = _path("%s.ui" % self.name)
         if pathxml is None:
             self.logger.error("módulo %s: fichero XML no existe", self.name)
             return False
@@ -673,7 +673,7 @@ class Module(object):
                 continue
             name, ext = os.path.splitext(tablefile)
             try:
-                contenido = str(open(path(tablefile),
+                contenido = str(open(_path(tablefile),
                                      "rb").read(), "ISO-8859-15")
             except UnicodeDecodeError as e:
                 self.logger.error(
@@ -690,8 +690,7 @@ class Module(object):
         if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
             tiempo_3 = time.time()
             if tiempo_3 - tiempo_1 > 0.2:
-                self.logger.debug("Carga del módulo %s : %.3fs ,  %.3fs",
-                                  (self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2))
+                self.logger.debug("Carga del módulo %s : %.3fs ,  %.3fs", self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2)
 
         self.loaded = True
         return True
@@ -891,7 +890,7 @@ class ModuleActions(object):
 
     def __setitem__(self, name, action_):
         raise NotImplementedError("Actions are not writable!")
-        pineboolib.project.actions[name] = action_
+        #pineboolib.project.actions[name] = action_
 
 
 """
@@ -1005,7 +1004,7 @@ class XMLMainFormAction(XMLStruct):
     logger = logging.getLogger("main.XMLMainFormAction")
 
     """
-    Lanza la action 
+    Lanza la action
     """
 
     def run(self):
@@ -1053,8 +1052,7 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor):
         if self.formrecord_widget and hasattr(self.formrecord_widget, "cursor_"):
             self.logger.warn(
-                "Se está cargando un FLFormRecord, sobre un módulo que ya contenia un cursor inicializado",
-                "Esto puede ocasionar que no se recojan cambios en el cursor viejo", self.name)
+                "Se está cargando un FLFormRecord, sobre un módulo que ya contenia un cursor inicializado. Esto puede ocasionar que no se recojan cambios en el cursor viejo", self.name)
         if not getattr(self, "formrecord", None):
             self.logger.warn(
                 "Record action %s is not defined. Canceled !", self.name)
@@ -1189,10 +1187,9 @@ class XMLAction(XMLStruct):
         #        return
 
             # import aqui para evitar dependencia ciclica
-        import pineboolib.emptyscript
         python_script_path = None
         # primero default, luego sobreescribimos
-        parent.script = pineboolib.emptyscript
+        parent.script = emptyscript
 
         if scriptname is None:
             parent.script.form = parent.script.FormInternalObj(
@@ -1201,7 +1198,7 @@ class XMLAction(XMLStruct):
             parent.iface = parent.widget.iface
             return
 
-        script_path_qs = path(scriptname + ".qs")
+        script_path_qs = _path(scriptname + ".qs")
         script_path_py = coalesce_path(
             scriptname + ".py", scriptname + ".qs.py", None)
 
