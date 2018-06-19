@@ -1863,7 +1863,7 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         if self.cursor_:
-            self._cursor.copyRecord()
+            self.cursor_.copyRecord()
 
     """
     Coloca la columna como primera pasando el nombre del campo.
