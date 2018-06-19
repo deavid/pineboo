@@ -1637,13 +1637,13 @@ class FLSqlCursor(QtCore.QObject):
                         # if not ss:
                         #     ss = None
                     if ss:
-                        _filter1 = "%s AND %s" % (self.db().manager().formatAssignValue(field.associatedFieldFilterTo(
+                        filter = "%s AND %s" % (self.db().manager().formatAssignValue(field.associatedFieldFilterTo(
                         ), fMD, ss, True), self.db().manager().formatAssignValue(field.relationM1().foreignField(), field, s, True))
                         q = FLSqlQuery(None, self.db().connectionName())
                         q.setTablesList(tMD.name())
                         q.setSelect(field.associatedFieldFilterTo())
                         q.setFrom(tMD.name())
-                        q.setWhere(_filter1)
+                        q.setWhere(filter)
                         q.setForwardOnly(True)
                         q.exec_()
                         if not q.next():
@@ -1733,16 +1733,16 @@ class FLSqlCursor(QtCore.QObject):
                 fieldListCK = self.metadata().fieldListOfCompoundKey(fiName)
                 if fieldListCK and not checkedCK and self.d.modeAccess_ == self.Insert:
                     if fieldListCK:
-                        _filter2 = None
+                        filter = None
                         field = None
                         valuesFields = None
                         for fieldCK in fieldListCK:
                             sCK = self.buffer().value(fieldCK.name())
-                            if _filter1 is None:
-                                _filter2 = self.db().manager().formatAssignValue(fieldCK, sCK, True)
+                            if filter is None:
+                                filter = self.db().manager().formatAssignValue(fieldCK, sCK, True)
                             else:
-                                _filter2 = "%s AND %s" % (
-                                    _filter1, self.db().manager().formatAssignValue(fieldCK, sCK, True))
+                                filter = "%s AND %s" % (
+                                    filter, self.db().manager().formatAssignValue(fieldCK, sCK, True))
                             if field is None:
                                 field = fieldCK.alias()
                             else:
@@ -1757,7 +1757,7 @@ class FLSqlCursor(QtCore.QObject):
                         q.setTablesList(self.metadata().name())
                         q.setSelect(fiName)
                         q.setFrom(self.metadata().name())
-                        q.setWhere(_filter2)
+                        q.setWhere(filter)
                         q.setForwardOnly(True)
                         q.exec_()
                         if q.next():
