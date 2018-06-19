@@ -812,7 +812,8 @@ class ModuleActions(object):
         self.path = path
         self.moduleName = modulename
         self.logger = logging.getLogger("main.ModuleActions")
-        assert path
+        if not self.path:
+            self.logger.error("El módulo no tiene un path válido %s", self.moduleName)
 
     """
     Carga las actions del módulo en el projecto
