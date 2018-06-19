@@ -218,7 +218,7 @@ class FLFormRecordDB(FLFormDB):
         else:
             self.setCaptionWidget("No hay metadatos")
 
-        acl = self.prj.acl()
+        acl = pineboolib.project.acl()
         if acl:
             acl.process(self)
 
