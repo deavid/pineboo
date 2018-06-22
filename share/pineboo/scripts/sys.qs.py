@@ -2,6 +2,7 @@
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
 import traceback
+import ast
 sys = SysType()
 
 
@@ -13,17 +14,17 @@ class AQGlobalFunctions(object):
     @classmethod
     def set(self, functionName=None, globalFunction=None):
         functions_[functionName] = globalFunction
-    
+
     @classmethod
     def get(self, functionName=None):
         return functions_[functionName]
-    
+
     @classmethod
     def exec_(self, functionName=None):
         fn = functions_[functionName]
         if fn != None:
             fn()
-            
+
     @classmethod
     def mapConnect(self, obj=None, signal=None, functionName=None):
         c = self.count_ % 100
@@ -399,7 +400,7 @@ class AbanQDbDumper(object):
         file.close()
         AQUtil.destroyProgressDialog()
         return True
-    
+
     @classmethod
     def dumpAllTablesToCsv(self):
         fileName = self.fileName_
@@ -448,7 +449,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                     except Exception as e:
                         e = traceback.format_exc()
                         debug(e)
-    
+
     @classmethod
     def afterCommit_flfiles(self, curFiles=None):
         if curFiles.modeAccess() != curFiles.Browse:
@@ -700,7 +701,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             while qry.next():
                 v = AQUtil.sha1(v + parseString(qry.value(0)))
         return v
-    
+
     @classmethod
     def registerUpdate(self, input_=None):
         if not input_:
@@ -1005,7 +1006,8 @@ class FormInternalObj(qsatype.FormDBWidget):
         if input_ == None:
             dir_ = qsatype.Dir(ustr(sys.installPrefix(), u"/share/eneboo/packages"))
             dir_.setCurrent()
-            input_ = FileDialog.getOpenFileName(u"Eneboo Packages (*.eneboopkg)\nAbanQ Packages (*.abanq)", AQUtil.translate(u"scripts", u"Seleccionar Fichero"))
+            input_ = FileDialog.getOpenFileName(u"Eneboo Packages (*.eneboopkg)\nAbanQ Packages (*.abanq)",
+                                                AQUtil.translate(u"scripts", u"Seleccionar Fichero"))
         if warnBackup == None:
             warnBackup = True
         if input_:
@@ -1272,7 +1274,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         regExp.global_ = True
         msgHtml = ustr(u"<img source=\"about.png\" align=\"right\">", u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
         sys.popupWarn(msgHtml, [])
-    
+
     @classmethod
     def warnPopup(self, msg=None):
         if (msg) != u"string":
@@ -1299,7 +1301,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             return tagText
         txt = QString(tagText).mid(len(String(u"QT_TRANSLATE_NOOP")) + 1)
         txt = ustr(u"[", QString(txt).mid(0, len(txt) - 1), u"]")
-        arr = eval(txt)
+        arr = ast.literal_eval(txt)
         return sys.translate(arr[0], arr[1])
 
     @classmethod
@@ -1976,11 +1978,11 @@ class FormInternalObj(qsatype.FormDBWidget):
         c = container.child(component)
         if method in c:
             s = ustr(container.name, u".child(\"", component, u"\").", method)
-            m = eval(s)
+            m = ast.literal_eval(s)
             if m == u"function":
                 m(param)
             else:
-                eval(ustr(s, u" = ", param))
+                ast.literal_eval("%s = %s" % (s, param))
 
         else:
             debug(ustr(method, u" no existe"))

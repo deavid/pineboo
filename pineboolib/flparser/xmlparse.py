@@ -2,6 +2,7 @@ from builtins import str
 import xml.parsers.expat
 from optparse import OptionParser
 import re
+import ast
 
 elements = []
 show_end = True
@@ -89,7 +90,7 @@ def unmap(lines):
         t_txt = rg1.group('txt')
         txt = ""
         if t_txt:
-            txt = eval(t_txt[1:-1])
+            txt = ast.literal_eval(t_txt[1:-1])
 
         while depth < len(elementpool):
             toclose = elementpool.pop()
