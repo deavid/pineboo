@@ -96,7 +96,7 @@ class ASTPython(object, metaclass=ASTPythonFactory):
         return self
 
     def generate(self, **kwargs):
-        yield "debug", "* not-known-seq * " + etree.tounicode(self.elem)
+        yield "debug", "* not-known-seq * " + etree.ElementTree.tostring(self.elem, encoding="UTF-8")
 
     def _generate(self, **kwargs):
         self.debug("begin-gen")
