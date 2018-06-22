@@ -96,7 +96,7 @@ class ASTPython(object, metaclass=ASTPythonFactory):
         return self
 
     def generate(self, **kwargs):
-        yield "debug", "* not-known-seq * " + etree.ElementTree.tostring(self.elem, encoding="UTF-8")
+        yield "debug", "* not-known-seq * %s" % etree.ElementTree.tostring(self.elem, encoding="UTF-8")
 
     def _generate(self, **kwargs):
         self.debug("begin-gen")
@@ -214,7 +214,7 @@ class FunctionCall(ASTPython):
         name = id_translate(self.elem.get("name"))
         parent = self.elem.get("parent_")
         # data_ = None
-        if parent.tag == "InstructionCall":
+        if parent and parent.tag == "InstructionCall":
             class_ = None
             p_ = parent
             while (p_):
@@ -669,6 +669,7 @@ class InstructionUpdate(ASTPython):
     def generate(self, **kwargs):
         arguments = []
         for n, arg in enumerate(self.elem):
+            arg.set("parent_", self.elem)
             expr = []
             for dtype, data in parse_ast(arg).generate(isolate=False):
                 if dtype == "expr":
@@ -691,6 +692,7 @@ class InlineUpdate(ASTPython):
     def generate(self, plusplus_as_instruction=False, **kwargs):
         arguments = []
         for n, arg in enumerate(self.elem):
+            arg.set("parent_", self.elem)
             expr = []
             for dtype, data in parse_ast(arg).generate(isolate=False):
                 if dtype == "expr":
