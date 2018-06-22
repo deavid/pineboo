@@ -6,12 +6,10 @@ from PyQt5 import QtCore
 from PyQt5 import QtXml
 from PyQt5.QtCore import Qt
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
-
-from pineboolib.fllegacy.FLSqlConnections_deprecated import FLSqlConnections  # FIXME
+import pineboolib
 
 
-class FLStylePainter(ProjectClass):
+class FLStylePainter(object):
 
     Q_PI = math.pi
     deg2rad = 0.017453292519943295769
@@ -42,7 +40,7 @@ class FLStylePainter(ProjectClass):
         SectionElement = 18
         SetStyleElement = 19
 
-    class FLStylePainterPrivate(ProjectClass):
+    class FLStylePainterPrivate(object):
 
         svgMode_ = False
 
@@ -171,7 +169,7 @@ class FLStylePainter(ProjectClass):
                 errColumn = None
 
                 if self.styleName_.lower().startswith("abanq:"):
-                    content = FLSqlConnections.database().managerModules(
+                    content = pineboolib.project.conn.managerModules(
                     ).contentCached(self.styleName_[6:])
                     if not self.doc_.setContent(
                         content, errMsg, errLine, errColumn
