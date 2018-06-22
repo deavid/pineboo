@@ -14,6 +14,7 @@ import hashlib
 import re
 import ply.yacc as yacc
 import ply.lex as lex
+import tempfile
 
 try:
     from pineboolib.flparser import flex
@@ -527,7 +528,7 @@ p_parse.__doc__ = '''
 
 
 parser = yacc.yacc(method='LALR', debug=0,
-                   optimize=1, write_tables=1, debugfile='/tmp/yaccdebug.txt', outputdir='/tmp/')
+                   optimize=1, write_tables=1, debugfile='%s/yaccdebug.txt' % tempfile.gettempdir(), outputdir='%s/' % tempfile.gettempdir())
 
 # parser = yacc.yacc(method='LALR',debug=1,
 #      optimize = 0, write_tables = 0, debugfile = 'yaccdebug.txt',outputdir='.')
