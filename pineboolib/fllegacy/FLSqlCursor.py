@@ -968,8 +968,7 @@ class FLSqlCursor(QtCore.QObject):
             # self._action = pineboolib.project.actions["articulos"]
 
             if getattr(self._action, "table", None):
-                self.d._model = CursorTableModel(
-                    self._action, pineboolib.project, self.conn())
+                self.d._model = CursorTableModel(self._action, self.conn())
                 if not self.model():
                     return None
 
