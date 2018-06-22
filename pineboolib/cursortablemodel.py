@@ -344,8 +344,8 @@ class CursorTableModel(QtCore.QAbstractTableModel):
 
             if where_filter is None:
                 where_filter = self.where_filter
-            c_all = pineboolib.project.conn.driver().fetchAll(self.cursorDB(), tablename, where_filter,
-                                                              self.sql_str, self._curname)
+            c_all = self._cursorConn.driver().fetchAll(self.cursorDB(), tablename, where_filter,
+                                                       self.sql_str, self._curname)
             newrows = len(c_all)  # self._cursor.rowcount
             from_rows = self.rows
             self._data += c_all
@@ -413,7 +413,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
                 found = False
                 for table in qry.tablesList():
                     # print("Comprobando %s en %s" % (field.name(), pineboolib.project.conn.manager().metadata(table).fieldList()))
-                    if pineboolib.project.conn.manager().metadata(table).field(field.name()):
+                    if self._cursorConn.manager().metadata(table).field(field.name()):
                         self.sql_fields.append("%s.%s" % (table, field.name()))
                         found = True
                         break
@@ -866,7 +866,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         self.cols = len(self.metadata().fieldList())
         self.loadColAliases()
         if self.metadata().isQuery():
-            qry = pineboolib.project.conn.manager().query(self.metadata().query())
+            qry = self._cursorConn.manager().query(self.metadata().query())
         else:
             qry = None
         self._refresh_field_info(qry)
