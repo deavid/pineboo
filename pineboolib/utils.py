@@ -89,9 +89,10 @@ Retorna el primer fichero existente de un grupo de ficheros
 """
 
 
-def _path(filename):
+def _path(filename, showNotFound=True):
     if filename not in pineboolib.project.files:
-        logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
+        if showNotFound:
+            logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
         return None
     return pineboolib.project.files[filename].path()
 

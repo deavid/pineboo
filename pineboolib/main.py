@@ -1202,7 +1202,7 @@ class XMLAction(XMLStruct):
             parent.iface = parent.widget.iface
             return
 
-        script_path_qs = _path(scriptname + ".qs")
+        script_path_qs = _path(scriptname + ".qs", False)
         script_path_py = coalesce_path(
             scriptname + ".py", scriptname + ".qs.py", None)
 
