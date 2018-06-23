@@ -47,7 +47,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Proyecto :</string>
+        <string>Perfil :</string>
        </property>
       </widget>
      </item>
@@ -58,6 +58,23 @@
          <width>200</width>
          <height>16777215</height>
         </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="tbDeleteProfile">
+       <property name="toolTip">
+        <string>Borra el perfil seleccionado</string>
+       </property>
+       <property name="statusTip">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../share/icons/gtk-cancel.png</normaloff>../../share/icons/gtk-cancel.png</iconset>
        </property>
       </widget>
      </item>
@@ -174,9 +191,9 @@
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="ConectionsTab">
+        <widget class="QWidget" name="NewProfileTab">
          <attribute name="title">
-          <string>Conexiones</string>
+          <string>Nuevo Perfil</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
@@ -188,7 +205,7 @@
              </sizepolicy>
             </property>
             <property name="title">
-             <string>Nueva Conexión</string>
+             <string>Nuevo Perfil</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_3">
              <item>

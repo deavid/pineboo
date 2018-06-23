@@ -63,7 +63,8 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.ui.pbLogin.clicked.connect(self.open)
         self.ui.tbOptions.clicked.connect(self.showOptions)
-        self.ui.pbSaveConnection.clicked.connect(self.saveConnection)
+        self.ui.pbSaveConnection.clicked.connect(self.saveProfile)
+        self.ui.tbDeleteProfile.clicked.connect(self.deleteProfile)
         self.showOptions()
 
         # self.loadProjects()
@@ -78,11 +79,13 @@ class DlgConnect(QtWidgets.QWidget):
     def showOptions(self):
         if self.optionsShowed:
             self.ui.frmOptions.hide()
+            self.ui.tbDeleteProfile.hide()
             self.ui.setMinimumSize(self.minSize)
             self.ui.setMaximumSize(self.minSize)
             self.ui.resize(self.minSize)
         else:
             self.ui.frmOptions.show()
+            self.ui.tbDeleteProfile.show()
             self.ui.setMinimumSize(self.maxSize)
             self.ui.setMaximumSize(self.maxSize)
             self.ui.resize(self.maxSize)
@@ -100,5 +103,12 @@ class DlgConnect(QtWidgets.QWidget):
     Guarda la conexión
     """
     @QtCore.pyqtSlot()
-    def saveConnection(self):
-        print("Guardando Conexión")
+    def saveProfile(self):
+        print("Guardando perfil")
+
+    """
+    Borra la conexión seleccionada
+    """
+    @QtCore.pyqtSlot()
+    def deleteProfile(self):
+        print("Borrando perfil")
