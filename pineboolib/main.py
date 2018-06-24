@@ -1160,7 +1160,10 @@ class XMLAction(XMLStruct):
 
         self.mainform_widget = self.script.form
         self.initModule(self.name)
-        self.mainform_widget.iface.main()
+        if self.mainform_widget.iface:
+            self.mainform_widget.iface.main()
+        else:
+            self.mainform_widget.main()
 
     """
     Convierte un script qsa en .py y lo carga
