@@ -130,7 +130,7 @@ class DlgConnect(QtWidgets.QWidget):
         root = tree.getroot()
 
         for profile in root.findall("profile-data"):
-            if profile.find("password"):
+            if getattr(profile.find("password"), "text", None):
                 psP = profile.find("password").text
                 psP = base64.b64decode(psP).decode()
                 if psP:
