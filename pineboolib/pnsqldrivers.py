@@ -18,6 +18,7 @@ class PNSqlDrivers(ProjectClass):
             self._mobile = _DGI.mobilePlatform()
 
         self.driversdict = {}
+        self.driversDefaultPort = {}
         # if not os.path.exists("pineboolib/plugins"):
         #    os.makedirs("pineboolib/plugins")
         if not os.path.exists("pineboolib/plugins/sql"):
@@ -31,6 +32,7 @@ class PNSqlDrivers(ProjectClass):
                 driver_ = getattr(mod_, f.upper())()
                 if driver_.mobile_ or not self._mobile:
                     self.driversdict[f] = driver_.alias_
+                    self.driversDefaultPort[driver_.alias_] = driver_.defaultPort_
 
         self.defaultDriverName = "FLsqlite"
 
@@ -66,6 +68,11 @@ class PNSqlDrivers(ProjectClass):
                 return key
 
         return None
+
+    def port(self, alias):
+        for k, value in self.driversDefaultPort.items():
+            if k == alias:
+                return "%s" % value
 
     def aliasList(self):
 
