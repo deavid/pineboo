@@ -32,6 +32,7 @@ class FLSQLITE(object):
     # True por defecto, convierte los datos de entrada y salida a UTF-8 desde
     # Latin1
     parseFromLatin = None
+    defaultPort_ = None
 
     def __init__(self):
         self.version_ = "0.5"
@@ -47,6 +48,7 @@ class FLSQLITE(object):
         self.db_ = None
         self.parseFromLatin = False
         self.mobile_ = True
+        self.defaultPort_ = 0
 
     def version(self):
         return self.version_

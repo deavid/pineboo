@@ -1,372 +1,244 @@
 # -*- coding: utf-8 -*-
-
-
-from PyQt5 import QtWidgets, QtCore, uic
-# from PyQt5.QtWidgets import *
-# from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QTableWidgetItem
-from pineboolib.pnsqldrivers import PNSqlDrivers
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.utils import filedir
-
 from builtins import str
-import sqlite3
 import os
 import sys
 import traceback
-from PyQt5.QtCore import QFileInfo
+import logging
+import base64
+
+import xml
+
+from pineboolib.pnsqldrivers import PNSqlDrivers
+from pineboolib.utils import filedir
+
+from PyQt5 import QtWidgets, QtCore, uic
+from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox
+from PyQt5.QtCore import QFileInfo, QSize
+from PyQt5.Qt import QWidget
 
 
 class DlgConnect(QtWidgets.QWidget):
-    ruta = ""
-    username = ""
-    password = None
-    hostname = ""
-    portnumber = ""
-    database = ""
-    ui = None
-    dbProjects_ = None
+    """
+    Esta clase muestra gestiona el dialogo de Login
+    """
     _DGI = None
+    optionsShowed = True
+    minSize = None
+    maxSize = None
+    profileDir = None
+    pNSqlDrivers = None
 
     def __init__(self, _DGI):
+        """
+        Constructor
+        @param _DGI. DGI cargado.
+        """
         super(DlgConnect, self).__init__()
         self._DGI = _DGI
-        self.ruta = ""
-        self.username = ""
-        self.password = ""
-        self.hostname = ""
-        self.portnumber = ""
-        self.database = ""
-        self.dbProjects_ = None
-
-    def openDB(self):
-        if self.dbProjects_:
-            self.dbProjects_.close()
-        dbFile = self.ui.leFolderSQLITE.text() + '/pinebooconectores.sqlite'
-        self.dbProjects_ = sqlite3.connect(dbFile)
+        self.optionsShowed = True
+        self.minSize = QSize(350, 140)
+        self.maxSize = QSize(350, 495)
+        self.profileDir = filedir("../profiles")
+        self.pNSqlDrivers = PNSqlDrivers()
 
     def load(self):
+        """
+        Carga el form dlg_connect
+        """
         dlg_ = filedir('forms/dlg_connect.ui')
-        try:
-            self.ui = uic.loadUi(dlg_, self)
-        except Exception:
-            print(traceback.format_exc())
-            QtWidgets.QMessageBox.information(self, "AVISO", "No encuentro %s :(" % dlg_)
-            sys.exit(32)
+
+        self.ui = uic.loadUi(dlg_, self)
+
+        # Centrado en pantalla
         frameGm = self.frameGeometry()
-        screen = QtWidgets.QApplication.desktop().screenNumber(
-            QtWidgets.QApplication.desktop().cursor().pos())
+        screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
         centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
 
-        self.ui.pbnStart.clicked.connect(self.on_click)
-        self.ui.pbnSearchFolder.clicked.connect(self.findPathProject)
+        self.ui.pbLogin.clicked.connect(self.open)
+        self.ui.tbOptions.clicked.connect(self.showOptions)
+        self.ui.pbSaveConnection.clicked.connect(self.saveProfile)
+        self.ui.tbDeleteProfile.clicked.connect(self.deleteProfile)
+        self.cleanProfileForm()
+        self.ui.cbDBType.currentIndexChanged.connect(self.updatePort)
+        self.ui.cbProfiles.currentIndexChanged.connect(self.enablePassword)
+        self.showOptions()
+        self.loadProfiles()
 
-        # MODIFICACION 4 PARA CONECTOR SQLITE : DEFINIMOS LO QUE HACEN LOS BOTONES nuevos
-        self.ui.pbnCargarDatos.clicked.connect(self.loadProject)
-        self.tableWidget.doubleClicked.connect(self.on_click)
-        # self.ui.pbnMostrarProyectos.clicked.connect(self.ShowTable)
-        self.ui.pbnBorrarProyecto.clicked.connect(self.deleteProject)
-        self.ui.pbnGuardarProyecto.clicked.connect(self.saveProject)
-        self.ui.pbnProyectoEjemplo.clicked.connect(self.saveProjectExample)
-        self.ui.pbnEnebooImportButton.clicked.connect(self.saveEnebooImport)
-        # hasta aqui la modificación 4
-        self.ui.leFolderSQLITE.setText(filedir(".."))
+    def cleanProfileForm(self):
+        """
+        Limpia el tab de creación de profiles , y rellena los datos básicos del driver SQL por defecto
+        """
+        self.ui.leDescription.setText("")
+        driver_list = self.pNSqlDrivers.aliasList()
+        self.ui.cbDBType.clear()
+        self.ui.cbDBType.addItems(driver_list)
+        self.ui.cbDBType.setCurrentText(self.pNSqlDrivers.defaultDriverName)
+        self.ui.leURL.setText("localhost")
+        self.ui.leDBUser.setText("")
+        self.ui.leDBPassword.setText("")
+        self.ui.leDBName.setText("")
+        self.ui.leProfilePassword.setText("")
+        self.ui.cbAutoLogin.setChecked(False)
+        self.updatePort()
 
-        self.leName = self.ui.leName
-        self.leDBName = self.ui.leDBName
-        self.leUserName = self.ui.leUserName
-        self.lePassword = self.ui.lePassword
-        self.lePort = self.ui.lePort
-        # MODIFICACION 6 PARA CONECTOR SQLITE : DEFINIMOS los NUEVOS CAMPOS DEL UI:
-        self.leFolder = self.ui.leFolderSQLITE
-        # self.leDBType = self.ui.leDBType
-        self.leHostName = self.ui.leHostName
+    def loadProfiles(self):
+        """
+        Actualiza el ComboBox de los perfiles
+        """
+        self.ui.cbProfiles.clear()
+        if not os.path.exists(self.profileDir):
+            os.mkdir(filedir(self.profileDir))
 
-        # hasta aqui la modificación 6
-        self.cBDrivers = self.ui.cBDrivers
+        files = [f for f in os.listdir(self.profileDir) if os.path.isfile(os.path.join(self.profileDir, f))]
+        for file in files:
+            fileName = file.split(".")[0]
+            self.ui.cbProfiles.addItem(fileName)
 
-        DV = PNSqlDrivers(self._DGI)
-        list = DV.aliasList()
-        self.cBDrivers.addItems(list)
-
-        i = 0
-        while i < self.cBDrivers.count():
-            if DV.aliasToName(self.cBDrivers.itemText(i)) == DV.defaultDriverName:
-                self.cBDrivers.setCurrentIndex(i)
-                break
-
-            i = i + 1
-        self.openDB()
-        self.ShowTable()
+    """
+    SLOTS
+    """
 
     @QtCore.pyqtSlot()
-    def conectar(self):
-        folder_ = None
-
-        if self.leFolder.text():
-            folder_ = self.leFolder.text()
-        else:
-            folder_ = filedir("../projects")
-
-        self.ruta = filedir(str(folder_), str(self.leName.text()))
-        self.username = self.leUserName.text()
-        self.password = self.lePassword.text()
-        self.hostname = self.leHostName.text()
-        self.portnumber = self.lePort.text()
-        self.database = self.leDBName.text()
-        self.driveralias = self.cBDrivers.currentText()
-
+    def showOptions(self):
         """
-        if not self.leName.text():
-            self.ruta = ""
-        elif not self.ruta.endswith(".xml"):
-            self.ruta += ".xml"
-        if not os.path.isfile(self.ruta) and self.leName.text():
-            QtWidgets.QMessageBox.information(self, "AVISO", "El proyecto \n" + self.ruta +" no existe")
-            self.ruta = None
-        else:
-            self.close()
+        Muestra el frame opciones
         """
-        self.dbProjects_.close()
+        if self.optionsShowed:
+            self.ui.frmOptions.hide()
+            self.ui.tbDeleteProfile.hide()
+            self.ui.setMinimumSize(self.minSize)
+            self.ui.setMaximumSize(self.minSize)
+            self.ui.resize(self.minSize)
+        else:
+            self.ui.frmOptions.show()
+            self.ui.tbDeleteProfile.show()
+            self.ui.setMinimumSize(self.maxSize)
+            self.ui.setMaximumSize(self.maxSize)
+            self.ui.resize(self.maxSize)
+
+        self.optionsShowed = not self.optionsShowed
+
+    @QtCore.pyqtSlot()
+    def open(self):
+        """
+        Abre la conexión seleccionada
+        """
+        fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
+        tree = xml.etree.ElementTree.parse(fileName)
+        root = tree.getroot()
+
+        for profile in root.findall("profile-data"):
+            if profile.find("password"):
+                psP = profile.find("password").text
+                psP = base64.b64decode(psP).decode()
+                if psP:
+                    if self.ui.lePassword.text() != psP:
+                        QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
+                        return
+
+        self.database = root.find("database-name").text
+        for db in root.findall("database-server"):
+            self.hostname = db.find("host").text
+            self.portnumber = db.find("port").text
+            self.driveralias = db.find("type").text
+
+        for credentials in root.findall("database-credentials"):
+            self.username = credentials.find("username").text
+            ps = credentials.find("password").text
+            self.password = base64.b64decode(ps).decode()
+
         self.close()
 
     @QtCore.pyqtSlot()
-    def findPathProject(self):
-        filename = QtWidgets.QFileDialog.getExistingDirectory(
-            self, "Seleccione Directorio")
-        if filename:
-            self.leFolder.setText(str(filename))
-            self.ShowTable()
-
-        self.openDB()
-        # cambiamos el directorio de trabajo donde guardar la base de datos Sqlite:
-        os.chdir(filename)
-
-    # MODIFICACION 8 PARA CONECTOR SQLITE :añado uso botón CARGAR PROYECTO
-    @QtCore.pyqtSlot()
-    def loadProject(self):
-        if not self.tableWidget.item(self.tableWidget.currentRow(), 0):
-            return False
-
-        par = self.tableWidget.item(self.tableWidget.currentRow(), 0).text()
-
-        cursor = self.dbProjects_.cursor()
-        # ELEGIR UNA FILA DE LA TABLA proyectos DE LA BASE DE DATOS:
-        cursor.execute("SELECT * FROM proyectos WHERE name = '%s'" % par)
-
-        registro = cursor.fetchone()
-        # escribir los campos de la fila ELEGIDA en la zona de "CARGAR DATOS":
-        self.leName.setText(str(registro[1]))
-        self.leDBName.setText(str(registro[2]))
-        id = self.cBDrivers.findText(str(registro[3]))
-        self.cBDrivers.setCurrentIndex(id)
-        self.leHostName.setText(str(registro[4]))
-        self.lePort.setText(str(registro[5]))
-        self.leUserName.setText(str(registro[6]))
-        self.lePassword.setText(str(registro[7]))
-
-        return True
-
-        # hasta aqui la modificación 8
-
-# MODIFICACION 9 PARA CONECTOR SQLITE :añado uso botón MOSTRAR TABLA DE REGISTROS-PROYECTOS
-    @QtCore.pyqtSlot()
-    def ShowTable(self):
-        self.tableWidget.clear()
-        cursor = self.dbProjects_.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos ('
-                       'id INTEGER PRIMARY KEY, name TEXT UNIQUE, dbname TEXT, '
-                       'dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
-        cursor.execute(
-            'SELECT id, name, dbname, dbtype, dbhost, dbport, username, password FROM proyectos')
-        conectores = cursor.fetchall()
-        self.tableWidget.setHorizontalHeaderLabels(
-            ['Name', 'DBname', 'DBType', 'DBHost', 'DBPort', 'Username', 'Password'])
-        # cuento el número de filas TOTAL. Necessary even when there are no rows in the table
-        self.tableWidget.rowCount()
-        self.tableWidget.setEditTriggers(
-            QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.tableWidget.setSelectionMode(
-            QtWidgets.QAbstractItemView.SingleSelection)
-        self.tableWidget.setSelectionBehavior(
-            QtWidgets.QAbstractItemView.SelectRows)
-        self.tableWidget.setAlternatingRowColors(True)
-        # escribir el campo 0 de la fila 1:
-        i = 0
-        self.tableWidget.setRowCount(len(conectores))
-        for conector in conectores:
-            # add more if there is more columns in the database.
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(conector[1]))
-            self.tableWidget.setItem(i, 1, QTableWidgetItem(conector[2]))
-            self.tableWidget.setItem(i, 2, QTableWidgetItem(conector[3]))
-            self.tableWidget.setItem(i, 3, QTableWidgetItem(conector[4]))
-            self.tableWidget.setItem(i, 4, QTableWidgetItem(conector[5]))
-            self.tableWidget.setItem(i, 5, QTableWidgetItem(conector[6]))
-            self.tableWidget.setItem(i, 6, QTableWidgetItem(conector[7]))
-            i = i + 1
-
-    @QtCore.pyqtSlot()
-    def on_click(self):
-        if self.loadProject():
-            self.conectar()
-
-    @QtCore.pyqtSlot()
-    def deleteProject(self):
-        cursor = self.dbProjects_.cursor()
-        try:
-            par = self.tableWidget.item(
-                self.tableWidget.currentRow(), 0).text()
-            if par:
-                cursor.execute("DELETE FROM proyectos WHERE name= '%s'" % par)
-                self.dbProjects_.commit()
-        except Exception:
-            self.logger.exception("Error inesperado al borrar proyecto")
-
-        self.ShowTable()
-
-    @QtCore.pyqtSlot()
-    def saveProject(self):
-
-        name2 = str(self.ui.leName.text())
-        dbname2 = str(self.ui.leDBName.text())
-        dbtype2 = self.ui.cBDrivers.currentText()
-        dbhost2 = str(self.ui.leHostName.text())
-        dbport2 = str(self.ui.lePort.text())
-        username2 = str(self.ui.leUserName.text())
-        password2 = str(self.ui.lePassword.text())
-
-        cursor = self.dbProjects_.cursor()
-        with self.dbProjects_:
-            sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password) VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (
-                name2, dbname2, dbtype2, dbhost2, dbport2, username2, password2)
-            cursor.execute(sql)
-
-        self.ShowTable()
-
-    @QtCore.pyqtSlot()
-    def saveProjectExample(self):
-        # db = sqlite3.connect('pinebooconectores.sqlite')
-        # Get a cursor object para CREAR la tabla "proyectos"
-        cursor = self.dbProjects_.cursor()
-        cursor.execute("CREATE TABLE IF NOT EXISTS proyectos("
-                       "id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, "
-                       "dbtype TEXT, dbhost TEXT, dbport TEXT, "
-                       "username TEXT, password TEXT)")
-        self.dbProjects_.commit()
-        # Get a cursor object  para AÑADIR CAMPOS DE EJEMPLO:
-        cursor = self.dbProjects_.cursor()
-        name1 = 'Empresa de Ejemplo'
-        dbname1 = 'eneboobase'
-        dbtype1 = 'PostgreSQL'
-        dbhost1 = 'localhost'
-        dbport1 = '5432'
-        username1 = 'postgres'
-        password1 = 'postgres'
-        cursor = self.dbProjects_.cursor()
-        with self.dbProjects_:
-            sql = ("INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password)"
-                   " VALUES ('%s','%s','%s','%s','%s','%s','%s')"
-                   % (name1, dbname1, dbtype1, dbhost1, dbport1, username1, password1))
-            cursor.execute(sql)
-
-        self.ShowTable()
-
-        # escribir los campos de la fila ELEGIDA en la zona de "CARGAR DATOS":
-        self.leName.setText(str(name1))
-        self.leDBName.setText(str(dbname1))
-        # self.leDBType.setText(str(dbtype1))
-        self.leHostName.setText(str(dbhost1))
-        self.lePort.setText(str(dbport1))
-        self.leUserName.setText(str(username1))
-        self.lePassword.setText(str(password1))
-        # When we are done working with the DB we need to close the connection:
-        # db.close()
-        print("PROYECTO DE EJEMPLO GRABADO y CARGADO")
-
-    @QtCore.pyqtSlot()
-    def saveEnebooImport(self):
+    def saveProfile(self):
         """
-        Este codigo es para reutilizar la configuracion del mismo equipo con Eneboo
-        Para conseguir la contraseña del fichero en texto plano:
-        password + username+ port+ hostname + db + lastDB
-        print config.get('DBA', 'passwordusuario5432localhostPostgresSQLapertus')
+        Guarda la conexión
+        """
+        profile = xml.etree.ElementTree.Element("Profile")
+        description = self.ui.leDescription.text()
 
+        if os.path.exists(os.path.join(self.profileDir, "%s.xml" % description)):
+            QMessageBox.information(self.ui, "Pineboo", "El perfil ya existe")
+            return
 
-        from os.path import expanduser
-        HOME = expanduser("~")
-        import configparser
-        config = configparser.ConfigParser()
-        config.read( HOME + '/.qt/eneboorc')
+        dbt = self.ui.cbDBType.currentText()
+        url = self.ui.leURL.text()
+        port = self.ui.lePort.text()
+        userDB = self.ui.leDBUser.text()
+        passwDB = self.ui.leDBPassword.text()  # Base 64?
+        nameDB = self.ui.leDBName.text()
+        passProfile = self.ui.leProfilePassword.text()  # base 64?
+        autoLogin = self.ui.cbAutoLogin.isChecked()
 
-        A = config['DBA']['db']
-        B = config['DBA']['hostname']
-        C = config['DBA']['lastDB']
-        D = config['DBA']['username']
-        E = config['DBA']['port']
-        F = config['DBA']['rememberPasswd']
+        name = xml.etree.ElementTree.SubElement(profile, "name")
+        name.text = description
+        dbs = xml.etree.ElementTree.SubElement(profile, "database-server")
+        dbstype = xml.etree.ElementTree.SubElement(dbs, "type")
+        dbstype.text = dbt
+        dbshost = xml.etree.ElementTree.SubElement(dbs, "host")
+        dbshost.text = url
+        dbsport = xml.etree.ElementTree.SubElement(dbs, "port")
+        dbsport.text = port
 
-        print (A)
+        dbc = xml.etree.ElementTree.SubElement(profile, "database-credentials")
+        dbcuser = xml.etree.ElementTree.SubElement(dbc, "username")
+        dbcuser.text = userDB
+        dbcpasswd = xml.etree.ElementTree.SubElement(dbc, "password")
+        dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
+        dbname = xml.etree.ElementTree.SubElement(profile, "database-name")
+        dbname.text = nameDB
+        profile_user = xml.etree.ElementTree.SubElement(profile, "profile-data")
+        if not autoLogin:
+            profile_password = xml.etree.ElementTree.SubElement(profile_user, "password")
+            profile_password.text = base64.b64encode(passProfile.encode()).decode()
 
+        tree = xml.etree.ElementTree.ElementTree(profile)
 
-        # Get a cursor object para CREAR la tabla "proyectos"
-        cursor = self.dbProjects_.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS proyectos ('
-                'id INTEGER PRIMARY KEY, name TEXT, dbname TEXT, dbtype TEXT, dbhost TEXT, dbport TEXT, username TEXT, password TEXT)')
-        self.dbProjects_.commit()
+        tree.write(os.path.join(self.profileDir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
+        # self.cleanProfileForm()
+        self.loadProfiles()
 
-        # ABRO BUCLE PARA GRABAR VARIAS EMPRESAS DE ENEBOO
-        currentRowCount = self.tableWidget.rowCount() #cuento el número de filas TOTAL ACTUAL (ANTES DE TRAER LAS DE ENEBOO).
-        self.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.tableWidget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
-        self.tableWidget.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.tableWidget.setAlternatingRowColors(True)
-        # escribir A PARTIR DE LA FILA EXISTENTE:
-        i = currentRowCount + 1
-        self.tableWidget.setRowCount(len(conectores))
-        for conector in conectores:
-            # add more if there is more columns in the database.
-            # Get a cursor object  para AÑADIR CAMPOS:
+    @QtCore.pyqtSlot()
+    def deleteProfile(self):
+        """
+        Borra la conexión seleccionada
+        """
+        if self.ui.cbProfiles.count() > 0:
+            res = QMessageBox.warning(
+                self.ui, "Pineboo", "¿Desea borrar el perfil %s?" % self.ui.cbProfiles.currentText(),
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+            if res == QtWidgets.QMessageBox.No:
+                return
 
-            # PASO-1: COPIAR LOS DATOS DE ENEBOO
-            cursor = self.dbProjects_.cursor()
-            nameE = FLUtil.readSettingEntry('Empresa de Ejemplo')
-            dbnameE = FLUtil.readSettingEntry()
-            dbtypeE = FLUtil.readSettingEntry('PostgreSQL')
-            dbhostE = FLUtil.readSettingEntry('localhost')
-            dbportE = FLUtil.readSettingEntry('5432')
-            usernameE = FLUtil.readSettingEntry('postgres')
-            passwordE = FLUtil.readSettingEntry('postgres')
+            fileName = "%s.xml" % self.ui.cbProfiles.currentText()
+            os.remove(os.path.join(self.profileDir, fileName))
+            self.loadProfiles()
 
-            # PASO-2: GRABAR LOS DATOS EN LA BASE DE DATOS PINEBOOCONECTORES
-            cursor = self.dbProjects_.cursor()
-            with self.dbProjects_:
-                sql = "INSERT INTO proyectos(name, dbname, dbtype, dbhost, dbport, username, password)"
-                    " VALUES ('%s','%s','%s','%s','%s','%s','%s')" % (nameE, dbnameE, dbtypeE, dbhostE, dbportE, usernameE, passwordE)
-                cursor.execute(sql)
-            self.ShowTable()
+    @QtCore.pyqtSlot(int)
+    def updatePort(self):
+        """
+        Actualiza al puerto por defecto del driver
+        """
+        self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
 
-            # PASO-3: ESCRIBIR LOS DATOS DE ESA EMPRESA EN la zona de "CARGAR DATOS":
-            self.leName.setText(str(nameE))
-            self.leDBName.setText(str(dbnameE))
-            #self.leDBType.setText(str(dbtypeE))
-            self.leHostName.setText(str(dbhostE))
-            self.lePort.setText(str(dbportE))
-            self.leUserName.setText(str(usernameE))
-            self.lePassword.setText(str(passwordE))
-            self.tableWidget.setItem(i, 0, QTableWidgetItem(conector[1]))
-            self.tableWidget.setItem(i, 1, QTableWidgetItem(conector[2]))
-            self.tableWidget.setItem(i, 2, QTableWidgetItem(conector[3]))
-            self.tableWidget.setItem(i, 3, QTableWidgetItem(conector[4]))
-            self.tableWidget.setItem(i, 4, QTableWidgetItem(conector[5]))
-            self.tableWidget.setItem(i, 5, QTableWidgetItem(conector[6]))
-            self.tableWidget.setItem(i, 6, QTableWidgetItem(conector[7]))
+    @QtCore.pyqtSlot(int)
+    def enablePassword(self):
+        """
+        Comprueba si el perfil requiere password para login o no
+        """
+        if self.ui.cbProfiles.count() == 0:
+            return
+        password = None
+        fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
+        tree = xml.etree.ElementTree.parse(fileName)
+        root = tree.getroot()
 
-            i = i + 1
+        for profile in root.findall("profile-data"):
+            password = profile.find("password")
 
-"""
-        print("Conexiones de Eneboo IMPORTADAS")
-
-    def close(self):
-        return super(DlgConnect, self).close()
+        if password is None:
+            self.ui.lePassword.setEnabled(False)
+        else:
+            self.ui.lePassword.setEnabled(True)
