@@ -6,8 +6,7 @@ import traceback
 import logging
 import base64
 
-from xml import etree
-from xml.etree.ElementTree import Element, SubElement, ElementTree
+import xml
 
 from pineboolib.pnsqldrivers import PNSqlDrivers
 from pineboolib.utils import filedir
@@ -17,36 +16,35 @@ from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox
 from PyQt5.QtCore import QFileInfo, QSize
 from PyQt5.Qt import QWidget
 
-"""
-Esta clase muestra gestiona el dialogo de Login
-"""
-
 
 class DlgConnect(QtWidgets.QWidget):
+    """
+    Esta clase muestra gestiona el dialogo de Login
+    """
     _DGI = None
     optionsShowed = True
     minSize = None
     maxSize = None
     profileDir = None
-
-    """
-    Constructor
-    @param _DGI. DGI cargado.
-    """
+    pNSqlDrivers = None
 
     def __init__(self, _DGI):
+        """
+        Constructor
+        @param _DGI. DGI cargado.
+        """
         super(DlgConnect, self).__init__()
         self._DGI = _DGI
         self.optionsShowed = True
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
         self.profileDir = filedir("../profiles")
-
-    """
-    Carga el form dlg_connect
-    """
+        self.pNSqlDrivers = PNSqlDrivers()
 
     def load(self):
+        """
+        Carga el form dlg_connect
+        """
         dlg_ = filedir('forms/dlg_connect.ui')
 
         self.ui = uic.loadUi(dlg_, self)
@@ -63,17 +61,50 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.pbSaveConnection.clicked.connect(self.saveProfile)
         self.ui.tbDeleteProfile.clicked.connect(self.deleteProfile)
         self.cleanProfileForm()
+        self.ui.cbDBType.currentIndexChanged.connect(self.updatePort)
+        self.ui.cbProfiles.currentIndexChanged.connect(self.enablePassword)
         self.showOptions()
         self.loadProfiles()
+
+    def cleanProfileForm(self):
+        """
+        Limpia el tab de creación de profiles , y rellena los datos básicos del driver SQL por defecto
+        """
+        self.ui.leDescription.setText("")
+        driver_list = self.pNSqlDrivers.aliasList()
+        self.ui.cbDBType.clear()
+        self.ui.cbDBType.addItems(driver_list)
+        self.ui.cbDBType.setCurrentText(self.pNSqlDrivers.defaultDriverName)
+        self.ui.leURL.setText("localhost")
+        self.ui.leDBUser.setText("")
+        self.ui.leDBPassword.setText("")
+        self.ui.leDBName.setText("")
+        self.ui.leProfilePassword.setText("")
+        self.ui.cbAutoLogin.setChecked(False)
+        self.updatePort()
+
+    def loadProfiles(self):
+        """
+        Actualiza el ComboBox de los perfiles
+        """
+        self.ui.cbProfiles.clear()
+        if not os.path.exists(self.profileDir):
+            os.mkdir(filedir(self.profileDir))
+
+        files = [f for f in os.listdir(self.profileDir) if os.path.isfile(os.path.join(self.profileDir, f))]
+        for file in files:
+            fileName = file.split(".")[0]
+            self.ui.cbProfiles.addItem(fileName)
+
     """
     SLOTS
     """
 
-    """
-    Muestra el frame opciones
-    """
     @QtCore.pyqtSlot()
     def showOptions(self):
+        """
+        Muestra el frame opciones
+        """
         if self.optionsShowed:
             self.ui.frmOptions.hide()
             self.ui.tbDeleteProfile.hide()
@@ -89,34 +120,49 @@ class DlgConnect(QtWidgets.QWidget):
 
         self.optionsShowed = not self.optionsShowed
 
-    """
-    Actualiza el ComboBox de los perfiles
-    """
-
-    def loadProfiles(self):
-        self.ui.cbProfiles.clear()
-        if not os.path.exists(self.profileDir):
-            os.mkdir(filedir(self.profileDir))
-
-        files = [f for f in os.listdir(self.profileDir) if os.path.isfile(os.path.join(self.profileDir, f))]
-        for file in files:
-            fileName = file.split(".")[0]
-            self.ui.cbProfiles.addItem(fileName)
-
-    """
-    Abre la conexión seleccionada
-    """
     @QtCore.pyqtSlot()
     def open(self):
-        print("lanzando!!")
+        """
+        Abre la conexión seleccionada
+        """
+        fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
+        tree = xml.etree.ElementTree.parse(fileName)
+        root = tree.getroot()
 
-    """
-    Guarda la conexión
-    """
+        for profile in root.findall("profile-data"):
+            if profile.find("password"):
+                psP = profile.find("password").text
+                psP = base64.b64decode(psP).decode()
+                if psP:
+                    if self.ui.lePassword.text() != psP:
+                        QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
+                        return
+
+        self.database = root.find("database-name").text
+        for db in root.findall("database-server"):
+            self.hostname = db.find("host").text
+            self.portnumber = db.find("port").text
+            self.driveralias = db.find("type").text
+
+        for credentials in root.findall("database-credentials"):
+            self.username = credentials.find("username").text
+            ps = credentials.find("password").text
+            self.password = base64.b64decode(ps).decode()
+
+        self.close()
+
     @QtCore.pyqtSlot()
     def saveProfile(self):
-        profile = Element("Profile")
+        """
+        Guarda la conexión
+        """
+        profile = xml.etree.ElementTree.Element("Profile")
         description = self.ui.leDescription.text()
+
+        if os.path.exists(os.path.join(self.profileDir, "%s.xml" % description)):
+            QMessageBox.information(self.ui, "Pineboo", "El perfil ya existe")
+            return
+
         dbt = self.ui.cbDBType.currentText()
         url = self.ui.leURL.text()
         port = self.ui.lePort.text()
@@ -126,37 +172,39 @@ class DlgConnect(QtWidgets.QWidget):
         passProfile = self.ui.leProfilePassword.text()  # base 64?
         autoLogin = self.ui.cbAutoLogin.isChecked()
 
-        name = SubElement(profile, "name")
+        name = xml.etree.ElementTree.SubElement(profile, "name")
         name.text = description
-        dbs = SubElement(profile, "database-server")
-        dbstype = SubElement(dbs, "type")
+        dbs = xml.etree.ElementTree.SubElement(profile, "database-server")
+        dbstype = xml.etree.ElementTree.SubElement(dbs, "type")
         dbstype.text = dbt
-        dbshost = SubElement(dbs, "host")
+        dbshost = xml.etree.ElementTree.SubElement(dbs, "host")
         dbshost.text = url
-        dbsport = SubElement(dbs, "port")
+        dbsport = xml.etree.ElementTree.SubElement(dbs, "port")
         dbsport.text = port
 
-        dbc = SubElement(profile, "database-credentials")
-        dbcuser = SubElement(dbc, "username")
+        dbc = xml.etree.ElementTree.SubElement(profile, "database-credentials")
+        dbcuser = xml.etree.ElementTree.SubElement(dbc, "username")
         dbcuser.text = userDB
-        dbcpasswd = SubElement(dbc, "password")
+        dbcpasswd = xml.etree.ElementTree.SubElement(dbc, "password")
         dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
-        dbname = SubElement(profile, "database-name")
+        dbname = xml.etree.ElementTree.SubElement(profile, "database-name")
         dbname.text = nameDB
-        profile_user = SubElement(profile, "profile-data")
+        profile_user = xml.etree.ElementTree.SubElement(profile, "profile-data")
         if not autoLogin:
-            profile_password = SubElement(profile_user, "password")
+            profile_password = xml.etree.ElementTree.SubElement(profile_user, "password")
             profile_password.text = base64.b64encode(passProfile.encode()).decode()
 
-        tree = ElementTree(profile)
-        tree.write(os.path.join(self.profileDir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
-        self.cleanProfileForm()
+        tree = xml.etree.ElementTree.ElementTree(profile)
 
-    """
-    Borra la conexión seleccionada
-    """
+        tree.write(os.path.join(self.profileDir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
+        # self.cleanProfileForm()
+        self.loadProfiles()
+
     @QtCore.pyqtSlot()
     def deleteProfile(self):
+        """
+        Borra la conexión seleccionada
+        """
         if self.ui.cbProfiles.count() > 0:
             res = QMessageBox.warning(
                 self.ui, "Pineboo", "¿Desea borrar el perfil %s?" % self.ui.cbProfiles.currentText(),
@@ -168,14 +216,29 @@ class DlgConnect(QtWidgets.QWidget):
             os.remove(os.path.join(self.profileDir, fileName))
             self.loadProfiles()
 
-    def cleanProfileForm(self):
-        self.ui.leDescription.setText("")
-        # FIX cargar drivers y poner el por defecto
-        # Conectar el changeitem del driver para actualizar el numero de puerto
-        self.ui.leURL.setText("localhost")
-        self.ui.lePort.setText("")
-        self.ui.leDBUser.setText("")
-        self.ui.leDBPassword.setText("")
-        self.ui.leDBName.setText("")
-        self.ui.leProfilePassword.setText("")
-        self.ui.cbAutoLogin.setChecked(False)
+    @QtCore.pyqtSlot(int)
+    def updatePort(self):
+        """
+        Actualiza al puerto por defecto del driver
+        """
+        self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
+
+    @QtCore.pyqtSlot(int)
+    def enablePassword(self):
+        """
+        Comprueba si el perfil requiere password para login o no
+        """
+        if self.ui.cbProfiles.count() == 0:
+            return
+        password = None
+        fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
+        tree = xml.etree.ElementTree.parse(fileName)
+        root = tree.getroot()
+
+        for profile in root.findall("profile-data"):
+            password = profile.find("password")
+
+        if password is None:
+            self.ui.lePassword.setEnabled(False)
+        else:
+            self.ui.lePassword.setEnabled(True)
