@@ -474,7 +474,7 @@
                <item>
                 <widget class="QLabel" name="label_13">
                  <property name="text">
-                  <string>Acceso Automático</string>
+                  <string>Acceso sin contraseña</string>
                  </property>
                 </widget>
                </item>
