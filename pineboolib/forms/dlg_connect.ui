@@ -52,7 +52,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="cBProyectos">
+      <widget class="QComboBox" name="cbProfiles">
        <property name="maximumSize">
         <size>
          <width>200</width>
@@ -236,6 +236,33 @@
               </layout>
              </item>
              <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_12">
+               <item>
+                <widget class="QLabel" name="label_14">
+                 <property name="text">
+                  <string>Base de Datos :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="leDBName">
+                 <property name="minimumSize">
+                  <size>
+                   <width>130</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>150</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
               <layout class="QHBoxLayout" name="horizontalLayout_5">
                <item>
                 <widget class="QLabel" name="label_5">
@@ -245,7 +272,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="comboBox">
+                <widget class="QComboBox" name="cbDBType">
                  <property name="minimumSize">
                   <size>
                    <width>150</width>
@@ -272,7 +299,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit">
+                <widget class="QLineEdit" name="leURL">
                  <property name="minimumSize">
                   <size>
                    <width>150</width>
@@ -315,12 +342,15 @@
                 </spacer>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_2">
+                <widget class="QLineEdit" name="lePort">
                  <property name="maximumSize">
                   <size>
                    <width>70</width>
                    <height>16777215</height>
                   </size>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -336,7 +366,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_3">
+                <widget class="QLineEdit" name="leDBUser">
                  <property name="minimumSize">
                   <size>
                    <width>150</width>
@@ -363,7 +393,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_4">
+                <widget class="QLineEdit" name="leDBPassword">
                  <property name="minimumSize">
                   <size>
                    <width>150</width>
@@ -375,6 +405,9 @@
                    <width>150</width>
                    <height>16777215</height>
                   </size>
+                 </property>
+                 <property name="echoMode">
+                  <enum>QLineEdit::Password</enum>
                  </property>
                 </widget>
                </item>
@@ -390,7 +423,7 @@
                 </widget>
                </item>
                <item>
-                <widget class="QLineEdit" name="lineEdit_5">
+                <widget class="QLineEdit" name="leProfilePassword">
                  <property name="minimumSize">
                   <size>
                    <width>150</width>
@@ -402,6 +435,9 @@
                    <width>150</width>
                    <height>16777215</height>
                   </size>
+                 </property>
+                 <property name="echoMode">
+                  <enum>QLineEdit::Password</enum>
                  </property>
                 </widget>
                </item>
@@ -477,7 +513,51 @@
           <item>
            <widget class="QLabel" name="label_12">
             <property name="text">
-             <string>Desarrollado por la comunidad Eneboo</string>
+             <string>Desarrollado por la comunidad Eneboo
+ basandose en el proyecto pineboo de:
+ David Martínez Martí</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>https://github.com/deavid/pineboo</string>
+            </property>
+            <property name="openExternalLinks">
+             <bool>false</bool>
+            </property>
+            <property name="textInteractionFlags">
+             <set>Qt::NoTextInteraction</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_15">
+            <property name="text">
+             <string>Licencia</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="plainTextEdit">
+            <property name="plainText">
+             <string>This software is distributed under the MIT License. As a whole, other conditions
+may apply too since there are many other libraries required that have other
+terms like PyQt5. Even if such conditions apply, the files distributed here may
+be used, distributed and modified as documentation under the MIT license.
+
+If anyone later modifies the software to remove certain libraries, the terms
+of those libraries will no longer apply to any part of this software. 
+
+At the time of this writting this software is using PyQt5, which is distributed 
+with a GPL License. So, if you convey this work you should meet the license 
+terms of GPL as well. 
+
+The LICENSE.mit should be included with this software and holds the MIT license.
+
+Copyright and license notices are not required to appear in any part of the 
+graphical interface of the software. Those are completely optional. </string>
             </property>
            </widget>
           </item>
@@ -486,28 +566,16 @@
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>194</height>
+              <height>10</height>
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="lineWidth">
-             <number>1</number>
-            </property>
-            <property name="text">
-             <string>This software is provided under the terms
- of GNU Gneral Public License ( GPL ) and
- without warranty of any kind.</string>
-            </property>
-            <property name="textFormat">
-             <enum>Qt::AutoText</enum>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>
