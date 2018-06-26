@@ -63,6 +63,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.cleanProfileForm()
         self.ui.cbDBType.currentIndexChanged.connect(self.updatePort)
         self.ui.cbProfiles.currentIndexChanged.connect(self.enablePassword)
+        self.ui.cbAutoLogin.stateChanged.connect(self.enableProfilePassword)
         self.showOptions()
         self.loadProfiles()
 
@@ -242,3 +243,14 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.lePassword.setEnabled(False)
         else:
             self.ui.lePassword.setEnabled(True)
+
+    @QtCore.pyqtSlot(int)
+    def enableProfilePassword(self):
+        """
+        Comprueba si el perfil requiere password
+        """
+
+        if self.ui.cbAutoLogin.isChecked():
+            self.ui.leProfilePassword.setEnabled(False)
+        else:
+            self.ui.leProfilePassword.setEnabled(True)
