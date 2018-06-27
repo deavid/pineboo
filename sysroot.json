@@ -65,9 +65,5 @@
         ],
 
         "source":                   "PyQt5_*-5.*.tar.gz"
-    },
-
-    "pyqtdatavisualization": {
-        "source":   "PyQtDataVisualization_*-5.*.tar.gz"
     }
 }
