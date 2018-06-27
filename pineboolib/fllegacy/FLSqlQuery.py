@@ -72,6 +72,7 @@ class FLSqlQuery(object):
         try:
             micursor.execute(sql)
             self._cursor = micursor
+            self._posicion = None
         except Exception:
             print(traceback.format_exc())
             # conn.rollback()
