@@ -148,7 +148,10 @@ class DlgConnect(QtWidgets.QWidget):
         for credentials in root.findall("database-credentials"):
             self.username = credentials.find("username").text
             ps = credentials.find("password").text
-            self.password = base64.b64decode(ps).decode()
+            if ps:
+                self.password = base64.b64decode(ps).decode()
+            else:
+                self.password = ""
 
         self.close()
 
