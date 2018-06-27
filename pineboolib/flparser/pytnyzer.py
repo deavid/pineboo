@@ -576,7 +576,7 @@ class Switch(ASTPython):
 
 
 class With(ASTPython):
-    python_keywords = ["select", "select", "first", "next", "prev", "last", "setValueBuffer",
+    python_keywords = ["select", "select", "first", "next", "prev", "last", "setValueBuffer", "valueBuffer",
                        "setTablesList", "setSelect", "setFrom", "setWhere", "setForwardOnly", "setModeAccess",
                        "commitBuffer", "commit", "refreshBuffer", "setNull", "setUnLock"]
 
