@@ -77,10 +77,11 @@ class FLManager(ProjectClass):
         if not self.db_.dbAux():
             return
 
-        q = FLSqlQuery(None, self.db_.dbAux())
+        #q = FLSqlQuery(None, self.db_.dbAux())
         # q.setForwardOnly(True)
 
         self.createSystemTable("flsettings")
+        """
         if not q.exec_("SELECT * FROM flsettings WHERE flkey = 'sysmodver'"):
 
             if pineboolib.project.conn.driver().cascadeSupport():
@@ -116,7 +117,7 @@ class FLManager(ProjectClass):
                 buffer.setValue("tabla", key)
                 buffer.setValue("xml", value)
                 c.insert()
-
+        """
         if not self.cacheMetaData_:
             self.cacheMetaData_ = []
 
