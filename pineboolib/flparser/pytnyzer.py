@@ -1409,7 +1409,7 @@ def pythonize(filename, destfilename, debugname=None):
         raise
     ast = ast_tree.getroot()
 
-    f1 = open(destfilename, "w")
+    f1 = open(destfilename, "w", encoding="UTF-8")
     write_python_file(f1, ast)
     f1.close()
 
