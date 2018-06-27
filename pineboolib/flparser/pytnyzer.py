@@ -1346,8 +1346,8 @@ def write_python_file(fobj, ast):
     ASTPython.numline = 1
     last_dtype = None
     for dtype, data in file_template(ast):
-        if isinstance(data, bytes):
-            data = data.decode("UTF-8", "replace")
+        # if isinstance(data, bytes):
+        #    data = data.decode("UTF-8", "replace")
         line = None
         if dtype == "line":
             line = data
@@ -1401,7 +1401,7 @@ def write_python_file(fobj, ast):
 def pythonize(filename, destfilename, debugname=None):
     # bname = os.path.basename(filename)
     ASTPython.debug_file = open(debugname, "w") if debugname else None
-    parser = etree.ElementTree.XMLParser()  # remove_blank_text
+    parser = etree.ElementTree.XMLParser(encoding="UTF-8")
     try:
         ast_tree = etree.ElementTree.parse(open(filename), parser)
     except Exception:
