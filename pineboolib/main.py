@@ -122,7 +122,11 @@ class Project(object):
     """
 
     def singleFLLarge(self):
-        return FLUtil().sqlSelect("flsettings", "valor", "flkey='FLLargeMode'") == "False"
+        ret = FLUtil().sqlSelect("flsettings", "valor", "flkey='FLLargeMode'")
+        if ret == "True":
+            return False
+
+        return True
 
     """
     Retorna si hay o no acls cargados
