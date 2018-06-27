@@ -856,3 +856,6 @@ class FLSQLITE(object):
 
     def canDetectLocks(self):
         return True
+
+    def desktopFile(self):
+        return True

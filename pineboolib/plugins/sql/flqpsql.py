@@ -1212,3 +1212,6 @@ class FLQPSQL(object):
 
     def canDetectLocks(self):
         return True
+
+    def desktopFile(self):
+        return False
