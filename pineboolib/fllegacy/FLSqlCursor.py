@@ -822,8 +822,8 @@ class FLSqlCursor(QtCore.QObject):
         if name:
             if not self.db().manager().existsTable(name):
                 self.d.metadata_ = self.db().manager().createTable(name)
-        else:
-            self.d.metadata_ = self.db().manager().metadata(name)
+            else:
+                self.d.metadata_ = self.db().manager().metadata(name)
         self.d.cursorRelation_ = cR
         if r:  # FLRelationMetaData
             if self.relation() and self.relation().deref():
@@ -2372,11 +2372,11 @@ class FLSqlCursor(QtCore.QObject):
         if self.buffer():
             return
 
-        # if not self._refreshDelayedTimer:
-        #     time = QtCore.QTimer()
-        #     time.singleShot(msec, self.refreshDelayed)
-        #     self._refreshDelayedTimer = True
-        #     return
+        if not self._refreshDelayedTimer:
+            time = QtCore.QTimer()
+            time.singleShot(msec, self.refreshDelayed)
+            self._refreshDelayedTimer = True
+            return
 
         self._refreshDelayedTimer = False
 
