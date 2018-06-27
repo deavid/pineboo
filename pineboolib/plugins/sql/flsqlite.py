@@ -853,3 +853,6 @@ class FLSQLITE(object):
 
     def cascadeSupport(self):
         return False
+
+    def canDetectLocks(self):
+        return True

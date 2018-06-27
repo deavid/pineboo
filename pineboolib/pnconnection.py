@@ -313,9 +313,11 @@ class PNConnection(QtCore.QObject):
 
             return True
 
-    @decorators.NotImplementedWarn
     def canDetectLocks(self):
-        return True
+        if not self.db():
+            return False
+
+        return self.driver().canDetectLocks()
 
     def managerModules(self):
         if not self._managerModules:

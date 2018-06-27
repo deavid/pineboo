@@ -1209,3 +1209,6 @@ class FLQPSQL(object):
 
     def cascadeSupport(self):
         return True
+
+    def canDetectLocks(self):
+        return True
