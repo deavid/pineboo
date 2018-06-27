@@ -315,7 +315,7 @@ def show_connection_dialog(project, app):
             project.load_db(connection_window.database, connection_window.hostname, connection_window.portnumber,
                             connection_window.username, connection_window.password, connection_window.driveralias)
 
-    if not connection_window.ruta and not connection_window.database:
+    if not connection_window.database:
         sys.exit(ret)
 
 
