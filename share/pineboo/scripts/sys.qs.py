@@ -190,7 +190,7 @@ class AbanQDbDumper(object):
     def genFileName(self):
         now = qsatype.Date()
         timeStamp = parseString(now)
-        regExp = qsatype.RegExp(u"[-|:]")
+        regExp = "[-|:]"
         regExp.global_ = True
         timeStamp = timeStamp.replace(regExp, u"")
         fileName = ustr(self.dirBase_, u"/dump_", self.db_.database(), u"_", timeStamp)
