@@ -4,7 +4,7 @@ from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from flup.server.fcgi import WSGIServer
 import traceback
 import sys
-import tempfile
+import pineboolib
 
 dependences = []
 
@@ -34,7 +34,7 @@ class dgi_fcgi(dgi_schema):
         self._name = "fcgi"
         self._alias = "FastCGI"
         self._fcgiCall = "flfactppal.iface.fcgiProcessRequest"
-        self._fcgiSocket = "%s/pineboo-fastcgi.socket" % tempfile.gettempdir()
+        self._fcgiSocket = "%s/pineboo-fastcgi.socket" % pineboolib.project.getTempDir()
         self.setUseDesktop(False)
         self.setUseMLDefault(False)
         self.showInitBanner()

@@ -14,7 +14,7 @@ import hashlib
 import re
 import ply.yacc as yacc
 import ply.lex as lex
-import tempfile
+import pineboolib
 
 try:
     from pineboolib.flparser import flex
@@ -22,6 +22,12 @@ try:
 except ImportError:
     import flex
     # from flclasses import *
+
+try:
+    import pineboolib
+    tempDir = pineboolib.project.getTempDir()
+except ImportError:
+    tempDir = "/tmp"
 
 # Get the token map
 tokens = flex.tokens
@@ -528,7 +534,7 @@ p_parse.__doc__ = '''
 
 
 parser = yacc.yacc(method='LALR', debug=0,
-                   optimize=1, write_tables=1, debugfile='%s/yaccdebug.txt' % tempfile.gettempdir(), outputdir='%s/' % tempfile.gettempdir())
+                   optimize=1, write_tables=1, debugfile='%s/yaccdebug.txt' % tempDir, outputdir='%s/' % tempDir)
 
 # parser = yacc.yacc(method='LALR',debug=1,
 #      optimize = 0, write_tables = 0, debugfile = 'yaccdebug.txt',outputdir='.')

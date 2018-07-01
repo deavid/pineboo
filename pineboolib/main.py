@@ -608,6 +608,13 @@ class Project(object):
         result = "%s/%s" % (resultValue, maxValue)
 
         return result
+    
+    """
+    Retorna la carpeta temporal predefinida de pineboo
+    @return ruta a la carpeta temporal
+    """
+    def getTempDir(self):
+        return self.tmpdir
 
 
 """
