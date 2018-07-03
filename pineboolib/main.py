@@ -608,11 +608,12 @@ class Project(object):
         result = "%s/%s" % (resultValue, maxValue)
 
         return result
-    
+
     """
     Retorna la carpeta temporal predefinida de pineboo
     @return ruta a la carpeta temporal
     """
+
     def getTempDir(self):
         return self.tmpdir
 
@@ -1076,10 +1077,10 @@ class XMLAction(XMLStruct):
         self.formrecord_widget = FLFormRecordDB(cursor, self, load=True)
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         self._record_loaded = True
-        if self.mainform_widget:
+        if self.formrecord_widget:
             self.logger.debug(
                 "End of record action load %s (iface:%s ; widget:%s)",
-                self.name, self.mainform_widget.iface, self.mainform_widget.widget)
+                self.name, self.formrecord_widget.iface, self.formrecord_widget.widget)
 
         self.initModule(self.name)
 
