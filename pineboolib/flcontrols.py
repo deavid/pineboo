@@ -1,15 +1,26 @@
 # -*- coding: utf-8 -*-
 
-
 from PyQt5 import QtCore, QtWidgets, QtGui  # , QtGui, QtWidgets, uic
+from PyQt5.Qt import Qt
 
-import pineboolib
-# from pineboolib.qsaglobals import ustr
+
 from pineboolib.utils import DefFun
 from pineboolib import decorators
+import pineboolib
 
-Qt = QtCore.Qt
-# TODO: separar en otro fichero de utilidades
+import logging
+logger = logging.getLogger("FLControls")
+
+"""
+Conjunto de controles que originalmente podian ser alcanzados desde QSA. Estos emulan los controles de QT3
+"""
+
+
+"""
+Convierte a string un valor dado
+@param t, valor a convertir
+@return valor convertido
+"""
 
 
 def ustr1(t):
@@ -20,9 +31,15 @@ def ustr1(t):
     try:
         return str(t)
     except Exception as e:
-        print("ERROR Coercing to string:", repr(t))
-        print("ERROR", e.__class__.__name__, str(e))
+        logger.error("ERROR Coercing to string:", repr(t), e.__class__.__name__, str(e))
         return None
+
+
+"""
+Convierte a string un array de valores datos
+@param t1, array de valores
+@return cadena string
+"""
 
 
 def ustr(*t1):
@@ -31,17 +48,6 @@ def ustr(*t1):
 
 class QLayoutWidget(QtWidgets.QWidget):
     pass
-
-
-class ProjectClass(QtCore.QObject):
-    def __init__(self):
-        super(ProjectClass, self).__init__()
-        self._prj = pineboolib.project
-
-    def __iter__(self):
-        # Para soportar el modo Javascript de "attribute" in object
-        # agregamos soporte de iteración
-        return iter(self.__dict__.keys())
 
 
 class QCheckBox(QtWidgets.QCheckBox):
@@ -197,7 +203,7 @@ class QTabWidget(QtWidgets.QTabWidget):
         if isinstance(tab, int):
             return tab
         elif not isinstance(tab, str):
-            print("ERROR: Unknown type tab name or index:: QTabWidget %r" % (tab))
+            logger.error("ERROR: Unknown type tab name or index:: QTabWidget %r", tab)
             return None
 
         try:
@@ -205,7 +211,7 @@ class QTabWidget(QtWidgets.QTabWidget):
                 if self.widget(idx).objectName() == tab.lower():
                     return idx
         except ValueError:
-            print("ERROR: Tab not found:: QTabWidget, tab name = %r" % (tab))
+            logger.error("ERROR: Tab not found:: QTabWidget, tab name = %r", tab)
         return None
 
 
@@ -343,7 +349,6 @@ class QListView(QtWidgets.QListView):
         self.model = QtGui.QStandardItemModel(self)
 
     def __getattr__(self, name):
-        print("flcontrols.QListView: Emulando método %r" % name)
         return self.defaultFunction
 
     def addItem(self, item):
@@ -355,8 +360,9 @@ class QListView(QtWidgets.QListView):
     def setItemMargin(self, margin):
         pass
 
+    @decorators.NotImplementedWarn
     def defaultFunction(self, *args, **kwargs):
-        print("flcontrols.QListView: llamada a método no implementado", args, kwargs)
+        pass
 
 
 class QPushButton(QtWidgets.QPushButton):
