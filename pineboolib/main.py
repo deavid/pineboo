@@ -1126,6 +1126,7 @@ class XMLAction(XMLStruct):
         w.addFormTab(self)
 
     """
+    Llama a la función main de una action
     """
 
     def execMainScript(self, name):
