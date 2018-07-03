@@ -767,7 +767,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
         typePK = self.metadata().field(pKName).type()
         tableName = self.metadata().name()
         val = self._cursorConn.manager().formatValue(typePK, self.value(cursor.d._currentregister, pKName))
-        sql = "DELETE FROM %s WHERE %s = %s" % (tableName, pKName, val, False)
+        sql = "DELETE FROM %s WHERE %s = %s" % (tableName, pKName, val)
         # conn = self._cursorConn.db()
         try:
             self.cursorDB().execute(sql)
