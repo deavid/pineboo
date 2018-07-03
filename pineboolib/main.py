@@ -1109,7 +1109,7 @@ class XMLAction(XMLStruct):
             self._loaded = True
             self.logger.debug(
                 "End of action load %s (iface:%s ; widget:%s)",
-                self.name, self.mainform_widget.iface, self.mainform_widget.widget)
+                self.name, getattr(self.mainform_widget, "iface", None), getattr(self.mainform_widget, "widget", None))
             return self.mainform_widget
         except Exception as e:
             self.logger.exception("While loading action %s", self.name)
@@ -1124,6 +1124,16 @@ class XMLAction(XMLStruct):
         self.initModule(self.name)
         self.mainform_widget = FLMainForm(w, self, load=True)
         w.addFormTab(self)
+
+    """
+    """
+
+    def execMainScript(self, name):
+        a = pineboolib.project.conn.manager().action(name)
+        if not a:
+            self.logger.warn("No existe la acción %s", name)
+            return
+        pineboolib.project.call("%s.main" % a.name(), [])
 
     """
     Retorna el widget del masterform

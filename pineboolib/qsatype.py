@@ -435,7 +435,7 @@ class FormDBWidget(QtWidgets.QWidget):
         return self.cursor_
 
     """
-    FIX: Cuando usamos this como cursor
+    FIX: Cuando usamos this como cursor o execMainscript... todo esto tiene que buscarse en cursor o action ... (dentro de un __getattr__)
     """
 
     def valueBuffer(self, name):
@@ -449,6 +449,9 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def cursorRelation(self):
         return self.cursor().cursorRelation()
+
+    def execMainScript(self, name):
+        self._action.execMainScript(name)
 
 
 def FLFormSearchDB(name):
