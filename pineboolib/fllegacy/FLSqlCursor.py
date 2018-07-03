@@ -7,7 +7,6 @@ from pineboolib import decorators
 
 from pineboolib.utils import DefFun, XMLStruct
 from pineboolib.cursortablemodel import CursorTableModel
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLUtil import FLUtil
@@ -938,8 +937,12 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def action(self):
-        action = FLAction(self._action)
-        return str(action.name())
+        ret = None
+        if hasattr(self._action, "name"):
+            action = FLAction(self._action)
+            ret = str(action.name())
+
+        return ret
 
     def actionName(self):
         return self.curName()

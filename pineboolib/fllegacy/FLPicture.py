@@ -6,7 +6,6 @@ from PyQt5.QtCore import QObject
 from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 
 class FLPicture(QObject):
@@ -85,7 +84,7 @@ class FLPicture(QObject):
         AlignHorizontal_Mask = Qt.AlignHorizontal_Mask
         AlignVertical_Mask = Qt.AlignVertical_Mask
 
-    class FLPicturePrivate(ProjectClass):
+    class FLPicturePrivate(QtCore.QObject):
 
         @decorators.BetaImplementation
         def __init__(self, *args):

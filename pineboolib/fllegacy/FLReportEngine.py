@@ -3,7 +3,6 @@ from PyQt5 import QtCore
 from PyQt5 import QtXml
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 from pineboolib.rml.kut2rml import kut2rml
 from pineboolib.rml.rml2pdf import parsepdf
 from pineboolib.utils import filedir

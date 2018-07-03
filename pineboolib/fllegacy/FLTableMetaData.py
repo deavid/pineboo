@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLCompoundKey import FLCompoundKey
 
 import copy
+from PyQt5 import QtCore
 
 
 """
@@ -22,7 +22,7 @@ los metadatos de una consulta, ver FLTableMetaData::query().
 """
 
 
-class FLTableMetaData(ProjectClass):
+class FLTableMetaData(QtCore.QObject):
 
     d = None
 

@@ -1522,13 +1522,11 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
             self.cursorBackup_ = self.cursor_
             if self.cursor_:
-                self.cursor_ = FLSqlCursor(self.tableName_)
-                # FIXME: self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db().connectionName(), 0, 0, self)
+                self.cursor_ = FLSqlCursor(self.tableName_, True, pineboolib.project.conn.db().connectionName(), None, None, self)
             else:
                 if not self.topWidget_:
                     return
-                self.cursor_ = FLSqlCursor(self.tableName_)
-                # FIXME: self.cursor_ = FLSqlCursor(self.tableName_, True, FLSqlConnections.database().connectionName(), 0, 0, self)
+                self.cursor_ = FLSqlCursor(self.tableName_, True, pineboolib.project.conn.database().connectionName(), None, None, self)
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
             if self.showed:
                 try:
@@ -1729,6 +1727,7 @@ class FLFieldDB(QtWidgets.QWidget):
             tmd = self.cursor_.db().manager().metadata(rt)
             if not tmd:
                 self.pushButtonDB.setDisabled(True)
+                field.setEditable(False)
 
             if tmd and not tmd.inCache():
                 del tmd
@@ -2280,11 +2279,11 @@ class FLFieldDB(QtWidgets.QWidget):
             ), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtWidgets.QMessageBox.Ok)
             return
 
-        mng = FLManager(self.cursor_.db().manager())
+        self.cursor_.db().manager()
         c = FLSqlCursor(field.relationM1().foreignTable(),
                         True, self.cursor_.db().connectionName())
         # c = FLSqlCursor(field.relationM1().foreignTable())
-        c.select(mng.formatAssignValue(
+        c.select(self.cursor_.db().manager().formatAssignValue(
             field.relationM1().foreignField(), field, v, True))
         # if c.size() <= 0:
         #    return

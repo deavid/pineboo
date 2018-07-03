@@ -1,4 +1,3 @@
-from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 from PyQt5 import QtWidgets
 import pineboolib

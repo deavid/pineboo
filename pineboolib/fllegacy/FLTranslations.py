@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
 from PyQt5.Qt import QFile, QTextStream, qApp
-from pineboolib.flcontrols import ProjectClass
 # from pineboolib.utils import filedir
 from subprocess import call
 import os
 
 
-class FLTranslations(ProjectClass):
+class FLTranslations(QtCore.QObject):
 
     TML = None
     qmFileName = None
@@ -98,7 +97,7 @@ class metaTranslator(object):
         return call(["lrelease", filename])
 
 
-class FLTranslate(ProjectClass):
+class FLTranslate(QtCore.QObject):
 
     group_ = None
     context_ = None

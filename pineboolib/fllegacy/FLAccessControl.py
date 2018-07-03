@@ -1,5 +1,5 @@
-from pineboolib.flcontrols import ProjectClass
-
+# -*- coding: utf-8 -*-
+from PyQt5 import QtCore
 """
 Clase base para Controles de Acceso, también denominados Reglas de Control de Acceso.
 
@@ -58,7 +58,7 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 """
 
 
-class FLAccessControl(ProjectClass):
+class FLAccessControl(QtCore.QObject):
 
     """
     Almacena el nombre del objeto de alto nivel.

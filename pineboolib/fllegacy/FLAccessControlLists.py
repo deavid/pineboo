@@ -1,15 +1,17 @@
 from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtCore
 
-from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLAccessControlFactory import FLAccessControlFactory
 from pineboolib import decorators
+import pineboolib
+
 import logging
 logger = logging.getLogger(__name__)
 
 
-class FLAccessControlLists(ProjectClass):
+class FLAccessControlLists(QtCore.QObject):
     """Gestionar las listas de acceso para limitar la aplicación a los usuarios."""
 
     """
@@ -69,7 +71,7 @@ class FLAccessControlLists(ProjectClass):
 
         util = FLUtil()
         if aclXml is None:
-            aclXml = self._prj.conn.managerModules().content("acl.xml")
+            aclXml = pineboolib.project.conn.managerModules().content("acl.xml")
 
         doc = QDomDocument("ACL")
         if self.accessControlList_:

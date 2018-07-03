@@ -1,9 +1,10 @@
-from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators, qt3ui
 from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 import os
 import traceback
+from PyQt5 import QtCore
+import pineboolib
 
 """
 Gestor de módulos.
@@ -35,7 +36,7 @@ class FLInfoMod(object):
     areaDescripcion = None
 
 
-class FLManagerModules(ProjectClass):
+class FLManagerModules(QtCore.QObject):
 
     """
     Mantiene el identificador del area a la que pertenece el módulo activo.
@@ -203,12 +204,12 @@ class FLManagerModules(ProjectClass):
         name_ = n[:n.index(".")]
         ext_ = n[n.index(".") + 1:]
 
-        if not shaKey and not self._prj.conn.manager().isSystemTable(name_):
+        if not shaKey and not pineboolib.project.conn.manager().isSystemTable(name_):
             query = "SELECT sha FROM flfiles WHERE nombre='%s'" % n
             try:
                 cursor = self.db_.cursor()
             except Exception:
-                cursor = self._prj.conn.cursor()
+                cursor = pineboolib.project.conn.cursor()
             try:
                 cursor.execute(query)
             except Exception:
@@ -221,16 +222,16 @@ class FLManagerModules(ProjectClass):
             for contenido in cursor:
                 shaKey = contenido[0]
 
-        if self._prj.conn.manager().isSystemTable(name_):
+        if pineboolib.project.conn.manager().isSystemTable(name_):
             modId = "sys"
         else:
-            modId = self._prj.conn.managerModules().idModuleOfFile(n)
-        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" % (self._prj.dbname, modId, ext_, name_))):
+            modId = pineboolib.project.conn.managerModules().idModuleOfFile(n)
+        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" % (pineboolib.project.dbname, modId, ext_, name_))):
             utf8_ = False
             if ext_ == "kut":
                 utf8_ = True
             data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %
-                                          (self._prj.dbname, modId, ext_, name_, shaKey, ext_)), utf8_)
+                                          (pineboolib.project.dbname, modId, ext_, name_, shaKey, ext_)), utf8_)
         elif os.path.exists(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_))):
             data = self.contentFS(
                 filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
@@ -441,9 +442,9 @@ class FLManagerModules(ProjectClass):
     """
 
     def shaOfFile(self, n):
-        if self._prj.conn.dbAux() and not n[:3] == "sys" and not self._prj.conn.manager().isSystemTable(n):
-            formatVal = self._prj.conn.manager().formatAssignValue("nombre", "string", n, True)
-            q = FLSqlQuery(None, self._prj.conn.dbAux())
+        if pineboolib.project.conn.dbAux() and not n[:3] == "sys" and not pineboolib.project.conn.manager().isSystemTable(n):
+            formatVal = pineboolib.project.conn.manager().formatAssignValue("nombre", "string", n, True)
+            q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
             # q.setForwardOnly(True)
             q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
             if q.next():
@@ -461,7 +462,7 @@ class FLManagerModules(ProjectClass):
 
         self.dictKeyFiles = {}
         self.dictModFiles = {}
-        q = FLSqlQuery(None, self._prj.conn.dbAux())
+        q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
         # q.setForwardOnly(True)
         q.exec_("SELECT nombre, sha, idmodulo FROM flfiles")
         name = None
@@ -475,14 +476,14 @@ class FLManagerModules(ProjectClass):
     """
 
     def loadAllIdModules(self):
-        if not self._prj.conn.dbAux():
+        if not pineboolib.project.conn.dbAux():
             return
 
         self.listAllIdModules_ = []
         self.listAllIdModules_.append("sys")
         self.dictInfoMods = {}
 
-        q = FLSqlQuery(None, self._prj.conn.dbAux())
+        q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
         # q.setForwardOnly(True)
         q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion "
                 "FROM flmodules left join flareas on flmodules.idarea = flareas.idarea")
@@ -519,11 +520,11 @@ class FLManagerModules(ProjectClass):
     """
 
     def loadIdAreas(self):
-        if not self._prj.conn.dbAux():
+        if not pineboolib.project.conn.dbAux():
             return
 
         self.listIdAreas_ = []
-        q = FLSqlQuery(None, self._prj.conn.dbAux())
+        q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
         # q.setForwardOnly(True)
         q.exec_("SELECT idarea from flareas WHERE idarea <> 'sys'")
         while q.next():

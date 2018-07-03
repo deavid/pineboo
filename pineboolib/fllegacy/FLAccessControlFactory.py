@@ -2,7 +2,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pineboolib.flcontrols import ProjectClass
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLAccessControl import FLAccessControl
 from pineboolib.fllegacy.FLFormDB import FLFormDB
@@ -18,7 +17,7 @@ except NameError:
     QString = str
 
 
-class FLAccessControlFactory(ProjectClass):
+class FLAccessControlFactory(QtCore.QObject):
 
     def __init__(self):
         super(FLAccessControlFactory, self).__init__()

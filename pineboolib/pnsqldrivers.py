@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import importlib
-from pineboolib.flcontrols import ProjectClass
 from pineboolib.utils import filedir
 import os
 import logging
+from PyQt5 import QtCore
 logger = logging.getLogger(__name__)
 
 
-class PNSqlDrivers(ProjectClass):
+class PNSqlDrivers(QtCore.QObject):
     driverName = None
     driver_ = None
     _mobile = None

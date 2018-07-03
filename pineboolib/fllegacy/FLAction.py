@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from pineboolib.flcontrols import ProjectClass
+from PyQt5 import QtCore
 
 
-class FLAction(ProjectClass):
+class FLAction(QtCore.QObject):
 
     """
     Esta clase contiene información de acciones para abrir formularios.

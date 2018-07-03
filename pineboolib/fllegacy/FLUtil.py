@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 from PyQt5 import QtCore, QtWidgets
 import pineboolib
@@ -14,7 +13,7 @@ from PyQt5.QtWidgets import qApp
 logger = logging.getLogger(__name__)
 
 
-class FLUtil(ProjectClass):
+class FLUtil(QtCore.QObject):
     """
     Clase con métodos, herramientas y utiles necesarios para ciertas operaciones.
 

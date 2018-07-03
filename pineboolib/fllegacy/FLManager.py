@@ -5,7 +5,6 @@ from PyQt5.QtXml import QDomDocument
 
 
 from pineboolib import decorators, qsatype
-from pineboolib.flcontrols import ProjectClass
 from pineboolib.utils import filedir, auto_qt_translate_text, clearXPM
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
@@ -24,7 +23,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class FLManager(ProjectClass):
+class FLManager(QtCore.QObject):
     """
     Esta clase sirve como administrador de la base de datos.
 
@@ -204,14 +203,14 @@ class FLManager(ProjectClass):
 
                 if not stream:
                     qWarning(
-                        "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        "FLManager : " + util.tr("1Error al cargar los metadatos para la tabla %s" % n))
 
                     return None
 
                 doc = QDomDocument(n)
                 if not util.domDocumentSetContent(doc, stream):
                     qWarning(
-                        "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        "FLManager : " + util.tr("2Error al cargar los metadatos para la tabla %s" % n))
                     return None
 
                 docElem = doc.documentElement()
@@ -228,7 +227,7 @@ class FLManager(ProjectClass):
                     self.cacheMetaDataSys_.append(ret)
 
             else:
-                acl = self._prj.acl()
+                acl = pineboolib.project.acl()
 
             # if ret.fieldsNamesUnlock():
             #    ret = FLTableMetaData(ret)
@@ -407,7 +406,7 @@ class FLManager(ProjectClass):
 
                     del qry
 
-            acl = self._prj.acl()
+            acl = pineboolib.project.acl()
             if acl:
                 acl.process(tmd)
 
@@ -514,7 +513,7 @@ class FLManager(ProjectClass):
 
         sql_query = "SELECT * FROM %s WHERE 1 = 1 LIMIT 1" % n
         # Al usar dbAux no bloquea sql si falla
-        cursor = self._prj.conn.useConn("dbAux").cursor()
+        cursor = pineboolib.project.conn.useConn("dbAux").cursor()
         try:
             cursor.execute(sql_query)
         except Exception:
@@ -1202,7 +1201,7 @@ class FLManager(ProjectClass):
 
         tableLarge = None
 
-        if self._prj.singleFLLarge():
+        if pineboolib.project.singleFLLarge():
             tableLarge = "fllarge"
         else:
             tableLarge = "fllarge_%s" % tableName
@@ -1257,7 +1256,7 @@ class FLManager(ProjectClass):
         if not refKey[0:3] == "RK@":
             return None
 
-        if self._prj.singleFLLarge():
+        if pineboolib.project.singleFLLarge():
             tableName = "fllarge"
         else:
             tableName = "fllarge_" + refKey.split("@")[1]
