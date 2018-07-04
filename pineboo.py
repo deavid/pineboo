@@ -297,7 +297,7 @@ def create_app(DGI):
 
 def show_connection_dialog(project, app):
     """Show the connection dialog, and configure the project accordingly."""
-    from pineboolib import dlgconnect
+    from pineboolib.dlgconnect import dlgconnect
     connection_window = dlgconnect.DlgConnect(project._DGI)
     connection_window.load()
     connection_window.show()

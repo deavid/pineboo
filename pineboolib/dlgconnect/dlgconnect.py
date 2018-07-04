@@ -43,9 +43,9 @@ class DlgConnect(QtWidgets.QWidget):
 
     def load(self):
         """
-        Carga el form dlg_connect
+        Carga el form dlgconnect
         """
-        dlg_ = filedir('forms/dlg_connect.ui')
+        dlg_ = filedir('dlgconnect/dlgconnect.ui')
 
         self.ui = uic.loadUi(dlg_, self)
 
