@@ -5,7 +5,7 @@ from binascii import unhexlify
 from xml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pineboolib import flcontrols
+from pineboolib import pncontrolsfactory
 from pineboolib.fllegacy import FLTableDB
 from pineboolib.fllegacy import FLFieldDB
 import pineboolib
@@ -148,7 +148,7 @@ def loadUi(path, widget, parent=None):
 
 
 def createWidget(classname, parent=None):
-    cls = getattr(flcontrols, classname, None) or \
+    cls = getattr(pncontrolsfactory, classname, None) or \
         getattr(QtWidgets, classname, None) or \
         getattr(FLTableDB, classname, None) or \
         getattr(FLFieldDB, classname, None)

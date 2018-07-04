@@ -42,6 +42,8 @@ Convierte a string un array de valores datos
 """
 
 
+#TODO: QUE TODAS LAS CLASES APUNTEN A DGI
+
 def ustr(*t1):
     return "".join([ustr1(t) for t in t1])
 

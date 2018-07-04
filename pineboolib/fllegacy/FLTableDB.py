@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.utils import DefFun, filedir
-from pineboolib.flcontrols import QComboBox, QTable
+from pineboolib.pncontrolsfactory import QComboBox, QTable
 
 from pineboolib.fllegacy.FLDataTable import FLDataTable
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
