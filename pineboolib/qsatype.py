@@ -31,7 +31,7 @@ from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
 from pineboolib.utils import filedir
 
-from pineboolib.flcontrols import FLTable
+from pineboolib.pncontrolsfactory import FLTable
 
 from pineboolib import decorators
 
