@@ -6,7 +6,7 @@ import pineboolib
 from pineboolib import decorators
 
 from pineboolib.utils import DefFun, XMLStruct
-from pineboolib.cursortablemodel import CursorTableModel
+from pineboolib.pncursortablemodel import PNCursorTableModel
 
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLUtil import FLUtil
@@ -971,7 +971,7 @@ class FLSqlCursor(QtCore.QObject):
             # self._action = pineboolib.project.actions["articulos"]
 
             if getattr(self._action, "table", None):
-                self.d._model = CursorTableModel(self._action, self.conn())
+                self.d._model = PNCursorTableModel(self._action, self.conn())
                 if not self.model():
                     return None
 

@@ -20,7 +20,7 @@ Esta clase es el enlace entre FLSqlCursor y el SGBD
 """
 
 
-class CursorTableModel(QtCore.QAbstractTableModel):
+class PNCursorTableModel(QtCore.QAbstractTableModel):
     logger = logging.getLogger("CursorTableModel")
     rows = 15
     cols = 5
@@ -42,7 +42,7 @@ class CursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def __init__(self, action, conn):
-        super(CursorTableModel, self).__init__()
+        super(PNCursorTableModel, self).__init__()
 
         self._action = action
         self._cursorConn = conn
