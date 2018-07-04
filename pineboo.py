@@ -1,9 +1,9 @@
 #!/usr/bin/python3 -u
 # -*# -*- coding: utf-8 -*-
-"""Start the application and give control to pineboolib.main().
+"""Start the application and give control to pineboolib.pnapplication().
 
 Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
-pineboolib.main(); para ello acepta los parámetros necesarios de consola
+pineboolib.pnapplication(); para ello acepta los parámetros necesarios de consola
 y configura el programa adecuadamente.
 """
 import sys
@@ -282,12 +282,12 @@ def create_app(DGI):
         QtWidgets.QApplication.setFont(font)
 
         if DGI.mobilePlatform():
-            pineboolib.main.Project.mainFormName = "Mobile"
+            pineboolib.pnapplication.Project.mainFormName = "Mobile"
 
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # construido antes que cualquier widget
         mainForm = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
-            pineboolib.main.Project.mainFormName.lower(), pineboolib.main.Project.mainFormName.lower()))
+            pineboolib.pnapplication.Project.mainFormName.lower(), pineboolib.pnapplication.Project.mainFormName.lower()))
     else:
         mainForm = DGI.mainForm()
     # mainForm = getattr(module_, "MainForm")()
@@ -345,7 +345,7 @@ def main():
     Handles optionlist and help.
     Also initializes all the objects
     """
-    import pineboolib.main
+    import pineboolib.pnapplication
     import pineboolib.dlgconnect
     from pineboolib.utils import download_files, filedir
 
@@ -375,7 +375,7 @@ def main():
     if _DGI.useDesktop():
         app, mainForm = create_app(_DGI)
 
-    project = pineboolib.main.Project(_DGI)
+    project = pineboolib.pnapplication.Project(_DGI)
     project.setDebugLevel(options.debug_level)
     if _DGI.useDesktop():
         mainForm.MainForm.setDebugLevel(options.debug_level)
