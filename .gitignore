@@ -2,6 +2,7 @@
 *~
 tempdata/*
 projects/*
+profiles/*
 share/pineboo/scripts/*.qs.xml
 share/pineboo/scripts/*.qs.py.debug
 share/pineboo/scripts/*.py.src
