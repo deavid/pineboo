@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import QMenu, QActionGroup
 
 import pineboolib
 
-from pineboolib import decorators, qt3ui, emptyscript
+from pineboolib import decorators, pnqt3ui, emptyscript
 from pineboolib.pnconnection import PNConnection
 from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable, _path, coalesce_path, _dir
 
@@ -114,7 +114,7 @@ class Project(object):
 
     def setDebugLevel(self, q):
         Project.debugLevel = q
-        qt3ui.Options.DEBUG_LEVEL = q
+        pnqt3ui.Options.DEBUG_LEVEL = q
 
     """
     Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)

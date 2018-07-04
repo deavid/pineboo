@@ -1,4 +1,4 @@
-from pineboolib import decorators, qt3ui
+from pineboolib import decorators, pnqt3ui
 from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 import os
@@ -275,7 +275,7 @@ class FLManagerModules(QtCore.QObject):
         else:
             w_ = parent.widget
 
-        qt3ui.loadUi(form_path, w_)
+        pnqt3ui.loadUi(form_path, w_)
         return w_
 
     """
@@ -284,7 +284,7 @@ class FLManagerModules(QtCore.QObject):
     """
 
     def loadFLTableDBs(self, w):
-        qt3ui.loadFLTableDBs(w)
+        pnqt3ui.loadFLTableDBs(w)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.

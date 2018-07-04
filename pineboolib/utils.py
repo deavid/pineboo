@@ -129,7 +129,7 @@ class XMLStruct(Struct):
             for child in xmlobj:
                 if child.tag == "property":
                     # Se importa aquí para evitar error de importación cíclica.
-                    from pineboolib.qt3ui import loadProperty
+                    from pineboolib.pnqt3ui import loadProperty
 
                     key, text = loadProperty(child)
                 else:
