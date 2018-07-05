@@ -826,7 +826,15 @@ class Member(ASTPython):
         if len(arguments) >= 3 and arguments[0:2] == ["self", "iface"] and arguments[2].startswith("__"):
             # From: self.iface.__function()
             # to: super(className, self.iface).function()
-            funs = self.elem.xpath("ancestor::Function")
+            parent = self.elem.get("parent_")
+            funs = None
+            p_ = parent
+            while(p_):
+                if p_.tag == "Funciton":
+                    funs = p_
+                    break
+                p_ = p_.get("parent_")
+
             if funs:
                 fun = funs[-1]
                 name_parts = fun.get("name").split("_")
@@ -839,7 +847,14 @@ class Member(ASTPython):
         if len(arguments) >= 2 and arguments[0:1] == ["_i"] and arguments[1].startswith("__"):
             # From: self.iface.__function()
             # to: super(className, self.iface).function()
-            funs = self.elem.xpath("ancestor::Function")
+            parent = self.elem.get("parent_")
+            funs = None
+            p_ = parent
+            while(p_):
+                if p_.tag == "Funciton":
+                    funs = p_
+                    break
+                p_ = p_.get("parent_")
             if funs:
                 fun = funs[-1]
                 name_parts = fun.get("name").split("_")
