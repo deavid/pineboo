@@ -14,27 +14,11 @@ from PyQt5.Qt import QDateEdit
 import pineboolib
 from pineboolib import decorators
 from pineboolib.utils import filedir
-from pineboolib.fllegacy.FLUtil import FLUtil
+
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.aqsobjects.AQS import AQS as AQS_Legacy
+
 
 logger = logging.getLogger(__name__)
-
-util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
-
-Insert = 0
-Edit = 1
-Del = 2
-Browse = 3
-
-AQS = AQS_Legacy()
-
-
-class File:
-
-    @classmethod
-    def exists(cls, name):
-        return os.path.isfile(name)
 
 
 class FileDialog(QtWidgets.QFileDialog):
