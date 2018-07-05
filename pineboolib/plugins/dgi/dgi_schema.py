@@ -1,15 +1,22 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, QtGui
-
+from importlib import import_module
 from xml.etree.ElementTree import fromstring
 from json import dumps
 
 from pineboolib.utils import DefFun
+from pineboolib import decorators
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
 import pineboolib
 import sys
 import datetime
 import re
+
+
+def resolveObject(name):
+    mod_ = import_module(__name__)
+    ret_ = getattr(mod_, name, None)
+    return ret_
 
 
 class dgi_schema(object):
@@ -91,17 +98,20 @@ class dgi_schema(object):
         pass
 
     def loadReferences(self):
+        return
+        """
         self.FLLineEdit = FLLineEdit
         self.FLDateEdit = FLDateEdit
         self.FLTimeEdit = FLTimeEdit
         self.FLPixmapView = FLPixmapView
         self.FLSpinBox = FLSpinBox
 
-        self.QPushButton = QtWidgets.QPushButton
+        self.QPushButton = QPushButton
         self.QLineEdit = QLineEdit
         self.QComboBox = QComboBox
         self.QCheckBox = QCheckBox
         self.QTextEdit = QTextEdit
+        """
 
     def mobilePlatform(self):
         return self._mobile
@@ -115,6 +125,9 @@ class dgi_schema(object):
             size = QtCore.QSize(60, 60)
 
         return size
+
+    def __getattr__(self, name):
+        return resolveObject(name)
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
@@ -218,6 +231,58 @@ class FLLineEdit(QtWidgets.QLineEdit):
     """
 
 
+class QPushButton(QtWidgets.QPushButton):
+
+    on = True  # FIXME :No se para que es
+
+    def __init__(self, *args, **kwargs):
+        super(QPushButton, self).__init__(*args, **kwargs)
+        self.on = True
+
+    @property
+    def pixmap(self):
+        return self.icon()
+
+    @property
+    def enabled(self):
+        return self.getEnabled()
+
+    @enabled.setter
+    def enabled(self, s):
+        return self.setEnabled(s)
+
+    @pixmap.setter
+    def pixmap(self, value):
+        return self.setIcon(value)
+
+    def setPixmap(self, value):
+        return self.setIcon(value)
+
+    def getToggleButton(self):
+        return self.isCheckable()
+
+    def setToggleButton(self, v):
+        return self.setCheckable(v)
+
+    toggleButton = property(getToggleButton, setToggleButton)
+
+    def on(self):
+        return self.on_
+
+    def setOn(self, value):
+        self.on_ = value
+
+
+class QToolButton(QtWidgets.QToolButton):
+
+    def __getattr__(self, name):
+        return DefFun(self, name)
+
+    @QtCore.pyqtProperty(bool)
+    def on(self):
+        return self.isDown()
+
+
 class FLPixmapView(QtWidgets.QWidget):
     frame_ = None
     scrollView = None
@@ -308,7 +373,136 @@ class FLPixmapView(QtWidgets.QWidget):
         self.autoScaled_ = autoScaled
 
 
-class FLDateEdit(QtWidgets.QDateEdit):
+class QLayoutWidget(QtWidgets.QWidget):
+    pass
+
+
+class QGroupBox(QtWidgets.QGroupBox):
+
+    def __init__(self, *args, **kwargs):
+        super(QGroupBox, self).__init__(*args, **kwargs)
+
+    def setLineWidth(self, width):
+        self.setContentsMargins(width, width, width, width)
+
+    @property
+    def selectedId(self):
+        return 0
+
+
+class QAction(QtWidgets.QAction):
+
+    activated = QtCore.pyqtSignal()
+
+    def __init__(self, *args, **kwargs):
+        super(QAction, self).__init__(*args, **kwargs)
+        self.triggered.connect(self.send_activated)
+
+    def send_activated(self, b=None):
+        self.activated.emit()
+
+
+class ProgressDialog(QtWidgets.QWidget):
+    def __init__(self, *args, **kwargs):
+        super(ProgressDialog, self).__init__(*args, **kwargs)
+        self.title = "Untitled"
+        self.step = 0
+        self.steps = 100
+
+    def __getattr__(self, name):
+        return DefFun(self, name)
+
+    def setup(self, title, steps):
+        self.title = title
+        self.step = 0
+        self.steps = steps
+        self.setWindowTitle("%s - %d/%d" % (self.title, self.step, self.steps))
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+
+    def setProgress(self, step):
+        self.step = step
+        self.setWindowTitle("%s - %d/%d" % (self.title, self.step, self.steps))
+        if step > 0:
+            self.show()
+        self.update()
+        QtCore.QCoreApplication.processEvents(
+            QtCore.QEventLoop.ExcludeUserInputEvents)
+
+
+class QLabel(QtWidgets.QLabel):
+
+    def __getattr__(self, name):
+        return DefFun(self, name)
+
+    @QtCore.pyqtProperty(str)
+    def text(self):
+        return self.text()
+
+    @text.setter
+    def text(self, v):
+        if not isinstance(v, str):
+            v = str(v)
+        self.setText(v)
+
+    def setText(self, text):
+        if not isinstance(text, str):
+            text = str(text)
+        super(QLabel, self).setText(text)
+
+
+class QListView(QtWidgets.QListView):
+
+    model = None
+
+    def __init__(self, *args, **kwargs):
+        super(QListView, self).__init__(*args, **kwargs)
+
+        self.model = QtGui.QStandardItemModel(self)
+
+    def __getattr__(self, name):
+        return self.defaultFunction
+
+    def addItem(self, item):
+        it = QtGui.QStandardItem(item)
+        self.model.appendRow(it)
+        self.setModel(self.model)
+
+    @decorators.Deprecated
+    def setItemMargin(self, margin):
+        pass
+
+    @decorators.NotImplementedWarn
+    def defaultFunction(self, *args, **kwargs):
+        pass
+
+
+class QDateEdit(QtWidgets.QDateEdit):
+
+    _parent = None
+
+    def __init__(self, parent):
+        super(QDateEdit, self).__init__(parent)
+        super(QDateEdit, self).setDisplayFormat("dd-MM-yyyy")
+        self._parent = parent
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QDateEdit")
+
+    @QtCore.pyqtProperty(str)
+    def date(self):
+        if super(QDateEdit, self).date().toString(Qt.ISODate) == "2000-01-01":
+            return None
+        return super(QDateEdit, self).date().toString(Qt.ISODate)
+
+    @date.setter
+    def date(self, v):
+        if not isinstance(v, str):
+            v = str(v)
+        super(QDateEdit, self).setDate(v)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), "QDateEdit")
+
+
+class FLDateEdit(QDateEdit):
 
     valueChanged = QtCore.pyqtSignal()
     DMY = "dd-MM-yyyy"
@@ -354,6 +548,141 @@ class FLDateEdit(QtWidgets.QDateEdit):
         return DefFun(self, name)
 
 
+class QTabWidget(QtWidgets.QTabWidget):
+
+    def setTabEnabled(self, tab, enabled):
+
+        idx = self.indexByName(tab)
+        if idx is None:
+            return
+
+        if pineboolib.project._DGI.localDesktop():
+            return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
+        else:
+            pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [idx, enabled])
+
+            # try:
+            #     for idx in range(self.count()):
+            #         if self.widget(idx).objectName() == tab.lower():
+            #             if not pineboolib.project._DGI.localDesktop():
+            #                 pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [idx, enabled])
+            #             return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
+
+            # except ValueError:
+            #     print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
+            #     return False
+        # print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
+
+    def showPage(self, tab):
+
+        idx = self.indexByName(tab)
+        if idx is None:
+            return
+
+        if pineboolib.project._DGI.localDesktop():
+            return QtWidgets.QTabWidget.setCurrentIndex(self, idx)
+        else:
+            pass
+            # pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [idx, enabled])
+
+    def indexByName(self, tab):
+
+        idx = None
+        if isinstance(tab, int):
+            return tab
+        elif not isinstance(tab, str):
+            logger.error("ERROR: Unknown type tab name or index:: QTabWidget %r", tab)
+            return None
+
+        try:
+            for idx in range(self.count()):
+                if self.widget(idx).objectName() == tab.lower():
+                    return idx
+        except ValueError:
+            logger.error("ERROR: Tab not found:: QTabWidget, tab name = %r", tab)
+        return None
+
+
+class FLTable(QtWidgets.QTableWidget):
+    def __getattr__(self, name):
+        return DefFun(self, name)
+
+
+class QTable(QtWidgets.QTableWidget):
+
+    lineaActual = None
+    currentChanged = QtCore.pyqtSignal(int, int)
+    doubleClicked = QtCore.pyqtSignal(int, int)
+
+    def __init__(self, parent=None):
+        super(QTable, self).__init__(parent)
+        if not parent:
+            self.setParent(self.parentWidget())
+
+        self.lineaActual = -1
+        self.currentCellChanged.connect(self.currentChanged_)
+        self.cellDoubleClicked.connect(self.doubleClicked_)
+
+    def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
+        self.currentChanged.emit(currentRow, currentColumn)
+
+    def doubleClicked_(self, f, c):
+        self.doubleClicked.emit(f, c)
+
+    def numRows(self):
+        return self.rowCount()
+
+    def numCols(self):
+        return self.columnCount()
+
+    def setNumCols(self, n):
+        self.setColumnCount(n)
+
+    def setNumRows(self, n):
+        self.setRowCount(n)
+
+    def setReadOnly(self, b):
+        if b:
+            self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        else:
+            self.setEditTriggers(QtWidgets.QAbstractItemView.EditTriggers)
+
+    @decorators.NotImplementedWarn
+    def setColumnReadOnly(self, n, b):
+        pass
+
+    def selectionMode(self):
+        return super(QTable, self).selectionMode()
+
+    def setFocusStyle(self, m):
+        self.setStyleSheet(m)
+
+    def setColumnLabels(self, separador, lista):
+        array_ = lista.split(separador)
+        self.setHorizontalHeaderLabels(array_)
+
+    def insertRows(self, numero):
+        self.insertRow(numero)
+
+    def text(self, row, col):
+        return self.item(row, col).text()
+
+    def setText(self, linea, col, value):
+        # self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
+        self.setItem(linea, col, QtWidgets.QTableWidgetItem(str(value)))
+
+    @decorators.NotImplementedWarn
+    def adjustColumn(self, k):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setRowReadOnly(self, row, b):
+        pass
+
+    # def __getattr__(self, name):
+        # return DefFun(self, name)
+
+
 class FLTimeEdit(QtWidgets.QTimeEdit):
 
     def __init__(self, parent):
@@ -395,15 +724,24 @@ class QComboBox(QtWidgets.QComboBox):
         self._parent = parent
         super(QComboBox, self).__init__(parent)
 
-    def setCurrentIndex(self, n):
-        if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueque("%s_setCurrentIndex" % self._parent.objectName(), n)
-        super(QComboBox, self).setCurrentIndex(n)
+    def __getattr__(self, name):
+        return DefFun(self, name)
 
-    def setCurrentText(self, t):
+    @QtCore.pyqtProperty(str)
+    def currentItem(self):
+        return self.currentIndex
+
+    @currentItem.setter
+    def currentItem(self, i):
+        if i:
+            if not pineboolib.project._DGI.localDesktop():
+                pineboolib.project._DGI._par.addQueque("%s_setCurrentIndex" % self.objectName(), n)
+            self.setCurrentIndex(i)
+
+    def insertStringList(self, strl):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueque("%s_setCurrentText" % self._parent.objectName(), t)
-        super(QComboBox, self).setCurrentText(n)
+            pineboolib.project._DGI._par.addQueque("%s_insertStringList" % self.objectName(), strl)
+        self.insertItems(len(strl), strl)
 
 
 class QLineEdit(QtWidgets.QLineEdit):
@@ -411,13 +749,22 @@ class QLineEdit(QtWidgets.QLineEdit):
     _parent = None
 
     def __init__(self, parent):
-        self._parent = parent
         super(QLineEdit, self).__init__(parent)
-
-    def setText(self, text):
-        super(QLineEdit, self).setText(text)
+        self._parent = parent
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), t)
+            pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
+
+    @QtCore.pyqtProperty(str)
+    def text(self):
+        return super(QLineEdit, self).text()
+
+    @text.setter
+    def text(self, v):
+        if not isinstance(v, str):
+            v = str(v)
+        super(QLineEdit, self).setText(v)
+        if not pineboolib.project._DGI.localDesktop():
+            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), v)
 
 
 class QTextEdit(QtWidgets.QTextEdit):
@@ -433,6 +780,22 @@ class QTextEdit(QtWidgets.QTextEdit):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
 
+    @decorators.NotImplementedWarn
+    def textFormat(self):
+        return
+
+    @decorators.NotImplementedWarn
+    def setTextFormat(self, value):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setShown(self, value):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setAutoFormatting(self, value):
+        pass
+
 
 class QCheckBox(QtWidgets.QCheckBox):
 
@@ -442,7 +805,14 @@ class QCheckBox(QtWidgets.QCheckBox):
         self._parent = parent
         super(QCheckBox, self).__init__(parent)
 
-    def setChecked(self, b):
+    @QtCore.pyqtProperty(int)
+    def checked(self):
+        return self.isChecked()
+
+    @checked.setter
+    def checked(self, b):
+        if isinstance(b, str):
+            b = (b == "true")
         super(QCheckBox, self).setChecked(b)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)

@@ -147,8 +147,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         self.FLWidgetFieldDBLayout.addWidget(self.textLabelDB)
 
-        self.pushButtonDB = pineboolib.project.resolveDGIObject(
-            "QPushButton")()
+        self.pushButtonDB = pineboolib.pncontrolsfactory.QPushButton()
         if pineboolib.project._DGI.localDesktop():
             self.setFocusProxy(self.pushButtonDB)
         # self.pushButtonDB.setFlat(True)
@@ -339,13 +338,13 @@ class FLFieldDB(QtWidgets.QWidget):
     def setTextFormat(self, f):
         self.textFormat_ = f
         ted = self.editor_
-        if isinstance(ted, pineboolib.project.resolveDGIObject("QTextEdit")):
+        if isinstance(ted, pineboolib.pncontrolsfactory.QTextEdit):
             ted.setTextFormat(self.textFormat_)
 
     def textFormat(self):
         """@return El formato del texto."""
         ted = self.editor_
-        if isinstance(ted, pineboolib.project.resolveDGIObject("QTextEdit")):
+        if isinstance(ted, pineboolib.pncontrolsfactory.QTextEdit):
             return ted.textFormat()
         return self.textFormat_
 
@@ -355,7 +354,7 @@ class FLFieldDB(QtWidgets.QWidget):
         @param m Modo (Normal, NoEcho, Password)
         """
         led = self.editor_
-        if isinstance(led, pineboolib.project.resolveDGIObject("QLineEdit")):
+        if isinstance(led, pineboolib.pncontrolsfactory.QLineEdit):
             led.setEchoMode(m)
 
     def echoMode(self):
@@ -364,9 +363,9 @@ class FLFieldDB(QtWidgets.QWidget):
         @return El mode de "echo" (Normal, NoEcho, Password)
         """
         led = self.editor_
-        if isinstance(led, pineboolib.project.resolveDGIObject("QLineEdit")):
+        if isinstance(led, pineboolib.pncontrolsfactory.QLineEdit):
             return led.echoMode()
-        return pineboolib.project.resolveDGIObject("QLineEdit").Normal
+        return pineboolib.pncontrolsfactory.QLineEdit.Normal
 
     def _process_autocomplete_events(self, event):
         timerActive = False
@@ -431,11 +430,11 @@ class FLFieldDB(QtWidgets.QWidget):
             k = event
             if self._process_autocomplete_events(event):
                 return True
-            if isinstance(obj, pineboolib.project.resolveDGIObject("FLLineEdit")):
+            if isinstance(obj, pineboolib.pncontrolsfactory.FLLineEdit):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed()
                     return True
-            elif isinstance(obj, pineboolib.project.resolveDGIObject("QTextEdit")):
+            elif isinstance(obj, pineboolib.pncontrolsfactory.QTextEdit):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed()
                     return True
@@ -513,7 +512,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.cursor_.setValueBuffer(self.fieldName_, t)
 
         """
-        if isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLDateEdit")):
+        if isinstance(self.editor_, pineboolib.pncontrolsfactory.FLDateEdit):
             data = str(self.editor_.date().toString("yyyy-MM-dd"))
             if not data:
                 isNull = True
@@ -531,7 +530,7 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLTimeEdit")):
+        elif isinstance(self.editor_, pineboolib.pncontrolsfactory.FLTimeEdit):
             data = str(self.editor_.time().toString("hh:mm:ss"))
 
             if not data:
@@ -549,7 +548,7 @@ class FLFieldDB(QtWidgets.QWidget):
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("QCheckBox")):
+        elif isinstance(self.editor_, pineboolib.pncontrolsfactory.QCheckBox):
             data = bool(self.editor_.checkState())
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
@@ -558,7 +557,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("QTextEdit")):
+        elif isinstance(self.editor_, pineboolib.pncontrolsfactory.QTextEdit):
             data = str(self.editor_.toPlainText())
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if self.cursor_.valueBuffer(self.fieldName_) == data:
@@ -566,7 +565,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("FLLineEdit")):
+        elif isinstance(self.editor_, pineboolib.pncontrolsfactory.FLLineEdit):
 
             data = self.editor_.text()
             if not self.cursor_.bufferIsNull(self.fieldName_):
@@ -575,7 +574,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
-        elif isinstance(self.editor_, pineboolib.project.resolveDGIObject("QComboBox")):
+        elif isinstance(self.editor_, pineboolib.pncontrolsfactory.QComboBox):
             data = str(self.editor_.currentText())
 
             if not self.cursor_.bufferIsNull(self.fieldName_):
@@ -584,7 +583,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             self.cursor_.setValueBuffer(self.fieldName_, str(data))
 
-        elif isinstance(self.editorImg_, pineboolib.project.resolveDGIObject("FLPixmapView")):
+        elif isinstance(self.editorImg_, pineboolib.pncontrolsfactory.FLPixmapView):
             if data == self.cursor_.valueBuffer(self.fieldName_):
                 return
 
@@ -831,13 +830,13 @@ class FLFieldDB(QtWidgets.QWidget):
         if type_ == "double" or type_ == "int" or type_ == "uint" or type_ == "string" or type_ == "stringlist":
             if self.editor_:
                 ed_ = self.editor_
-                if isinstance(ed_, pineboolib.project.resolveDGIObject("FLLineEdit")):
+                if isinstance(ed_, pineboolib.pncontrolsfactory.FLLineEdit):
                     v = ed_.text()
 
         elif type_ == "serial":
             if self.editor_:
                 ed_ = self.editor_
-                if isinstance(ed_, pineboolib.project.resolveDGIObject("FLSpinBox")):
+                if isinstance(ed_, pineboolib.pncontrolsfactory.FLSpinBox):
                     v = ed_.value()
 
         elif type_ == "pixmap":
@@ -1224,8 +1223,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "pixmap":
             if not self.editorImg_:
-                self.editorImg_ = pineboolib.project.resolveDGIObject(
-                    "FLPixmapView")(self)
+                self.editorImg_ = pineboolib.pncontrolsfactory.FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
                 self.editorImg_.setMaximumSize(self.maximumSize())
@@ -1441,8 +1439,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "pixmap":
             if not self.editorImg_:
-                self.editorImg_ = pineboolib.project.resolveDGIObject(
-                    "FLPixmapView")(self)
+                self.editorImg_ = pineboolib.pncontrolsfactory.FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
                 self.editorImg_.setMaximumSize(self.maximumSize())
@@ -1741,8 +1738,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
-                self.editor_ = pineboolib.project.resolveDGIObject(
-                    "QComboBox")(self)
+                self.editor_ = pineboolib.pncontrolsfactory.QComboBox(self)
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 # self.editor_.setAutoCompletion(True)
@@ -1771,8 +1767,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.activated.connect(self.updateValue)
 
             else:
-                self.editor_ = pineboolib.project.resolveDGIObject(
-                    "FLLineEdit")(self, "editor")
+                self.editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self, "editor")
                 self.editor_.setFont(QtWidgets.QApplication.font())
                 self.editor_.setMinimumSize(self.iconSize)
                 self.editor_.setMaximumHeight(self.iconSize.height())
@@ -1868,8 +1863,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
 
         elif type_ == "serial":
-            self.editor_ = pineboolib.project.resolveDGIObject(
-                "FLLineEdit")(self, "editor")
+            self.editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self, "editor")
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setMaxValue(pow(10, field.partInteger()) - 1)
             sizePolicy = QtWidgets.QSizePolicy(
@@ -1895,8 +1889,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not self.editorImg_:
                     self.FLWidgetFieldDBLayout.setDirection(
                         QtWidgets.QBoxLayout.Down)
-                    self.editorImg_ = pineboolib.project.resolveDGIObject(
-                        "FLPixmapView")(self)
+                    self.editorImg_ = pineboolib.pncontrolsfactory.FLPixmapView(self)
                     self.editorImg_.setFocusPolicy(Qt.NoFocus)
                     self.editorImg_.setSizePolicy(self.sizePolicy())
                     self.editorImg_.setMaximumSize(self.maximumSize())
@@ -1914,8 +1907,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     spcBut = QtWidgets.QSpacerItem(
                         20, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
                     self.lytButtons.addItem(spcBut)
-                    self.pbAux3_ = pineboolib.project.resolveDGIObject(
-                        "QPushButton")(self)
+                    self.pbAux3_ = pineboolib.pncontrolsfactory.QPushButton(self)
                     self.pbAux3_.setSizePolicy(sizePolicy)
                     self.pbAux3_.setMinimumSize(self.iconSize)
                     self.pbAux3_.setFocusPolicy(Qt.NoFocus)
@@ -1949,8 +1941,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.pbAux3_.installEventFilter(self)
 
                 if not self.pbAux4_:
-                    self.pbAux4_ = pineboolib.project.resolveDGIObject(
-                        "QPushButton")(self)
+                    self.pbAux4_ = pineboolib.pncontrolsfactory.QPushButton(self)
                     self.pbAux4_.setSizePolicy(sizePolicy)
                     self.pbAux4_.setMinimumSize(self.iconSize)
                     self.pbAux4_.setFocusPolicy(Qt.NoFocus)
@@ -1971,8 +1962,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux4_.clicked.connect(self.setPixmapFromClipboard)
 
                 if not self.pbAux_:
-                    self.pbAux_ = pineboolib.project.resolveDGIObject(
-                        "QPushButton")(self)
+                    self.pbAux_ = pineboolib.pncontrolsfactory.QPushButton(self)
                     self.pbAux_.setSizePolicy(sizePolicy)
                     self.pbAux_.setMinimumSize(self.iconSize)
                     self.pbAux_.setFocusPolicy(Qt.NoFocus)
@@ -1990,8 +1980,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.pbAux_.clicked.connect(self.clearPixmap)
 
                 if not self.pbAux2_:
-                    self.pbAux2_ = pineboolib.project.resolveDGIObject(
-                        "QPushButton")(self)
+                    self.pbAux2_ = pineboolib.pncontrolsfactory.QPushButton(self)
                     savepixmap_ = QtWidgets.QMenu(self.pbAux2_)
                     savepixmap_.addAction("JPG")
                     savepixmap_.addAction("XPM")
@@ -2021,8 +2010,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.pushButtonDB.setDisabled(True)
 
         elif type_ == "date":
-            self.editor_ = pineboolib.project.resolveDGIObject(
-                "FLDateEdit")(self, "editor")
+            self.editor_ = pineboolib.pncontrolsfactory.FLDateEdit(self, "editor")
             self.editor_.setFont(QtWidgets.QApplication.font())
             sizePolicy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
@@ -2075,8 +2063,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.setDate(defVal.toDate())
 
         elif type_ == "time":
-            self.editor_ = pineboolib.project.resolveDGIObject(
-                "FLTimeEdit")(self)
+            self.editor_ = pineboolib.pncontrolsfactory.FLTimeEdit(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             # self.editor_.setAutoAdvance(True)
             sizePolicy = QtWidgets.QSizePolicy(
@@ -2103,8 +2090,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "stringlist":
 
-            self.editor_ = pineboolib.project.resolveDGIObject(
-                "QTextEdit")(self)
+            self.editor_ = pineboolib.pncontrolsfactory.QTextEdit(self)
             self.editor_.setFont(QtWidgets.QApplication.font())
             self.editor_.setTabChangesFocus(True)
             self.editor_.setMinimumHeight(100)
@@ -2148,8 +2134,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.setWhatsThis("Completado automático desactivado")
 
         elif type_ == "bool":
-            self.editor_ = pineboolib.project.resolveDGIObject(
-                "QCheckBox")(self)
+            self.editor_ = pineboolib.pncontrolsfactory.QCheckBox(self)
             # self.editor_.setName("editor")
             self.editor_.setText(tMD.fieldNameToAlias(self.fieldName_))
             self.editor_.setFont(QtWidgets.QApplication.font())
@@ -2760,7 +2745,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     for w in self.children():
                         if not w.testAttribute(Qt.WA_ForceDisabled):
                             le = w
-                            if isinstance(le, pineboolib.project.resolveDGIObject("QLineEdit")):
+                            if isinstance(le, pineboolib.pncontrolsfactory.QLineEdit):
                                 allowNull = True
                                 tMD = self.cursor_.metadata()
                                 if tMD:
@@ -2796,7 +2781,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                     if self.children():
                         for w in self.children():
-                            if isinstance(w, pineboolib.project.resolveDGIObject("QLineEdit")):
+                            if isinstance(w, pineboolib.pncontrolsfactory.QLineEdit):
                                 le = w
                                 if le:
                                     le.setDisabled(False)
@@ -2805,7 +2790,7 @@ class FLFieldDB(QtWidgets.QWidget):
                                     le.setFocusPolicy(Qt.NoFocus)
                                     continue
 
-                            if isinstance(w, QtWidgets.pineboolib.project.resolveDGIObject("QTextEdit")):
+                            if isinstance(w, pineboolib.pncontrolsfactory.QTextEdit):
                                 te = w
                                 te.setDisabled(False)
                                 te.setReadOnly(True)
@@ -2919,7 +2904,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.fieldAlias_ = self.fieldName_
 
         if not self.editor_:
-            self.editor_ = pineboolib.project.resolveDGIObject("QLineEdit")()
+            self.editor_ = pineboolib.pncontrolsfactory.QLineEdit()
             self.editor_.setSizePolicy(
                 QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
             self.textLabelDB.setSizePolicy(

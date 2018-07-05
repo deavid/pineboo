@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.utils import DefFun, filedir
-from pineboolib.pncontrolsfactory import QComboBox, QTable
+
 
 from pineboolib.fllegacy.FLDataTable import FLDataTable
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
@@ -20,7 +20,6 @@ from pineboolib.fllegacy.FLFieldDB import FLDoubleValidator,\
 
 import pineboolib
 import logging
-from PyQt5.QtWidgets import QTextEdit
 logger = logging.getLogger(__name__)
 
 DEBUG = False
@@ -715,7 +714,7 @@ class FLTableDB(QtWidgets.QWidget):
             if k.text() == "'" or k.text() == "\\":
                 return True
 
-        if isinstance(obj, FLDataTable) or isinstance(obj, pineboolib.project.resolveDGIObject("FLLineEdit")):
+        if isinstance(obj, FLDataTable) or isinstance(obj, pineboolib.pncontrolsfactory.FLLineEdit):
             return False
         else:
             return super(FLTableDB, self).eventFilter(obj, ev)
@@ -901,8 +900,9 @@ class FLTableDB(QtWidgets.QWidget):
             20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.buttonsLayout.addItem(spacer)
 
-        self.comboBoxFieldToSearch = QtWidgets.QComboBox()
-        self.comboBoxFieldToSearch2 = QtWidgets.QComboBox()
+        from pineboolib.pncontrolsfactory import QComboBox
+        self.comboBoxFieldToSearch = QComboBox()
+        self.comboBoxFieldToSearch2 = QComboBox()
         self.lineEditSearch = QtWidgets.QLineEdit()
         label1 = QtWidgets.QLabel()
         label2 = QtWidgets.QLabel()
@@ -972,6 +972,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.comboBoxFieldToSearch.addItem("*")
             self.comboBoxFieldToSearch2.addItem("*")
 
+        from pineboolib.pncontrolsfactory import QTable
         self.tdbFilter = QTable()
         filterL.addWidget(self.tdbFilter)
 
@@ -1070,6 +1071,7 @@ class FLTableDB(QtWidgets.QWidget):
             i = 0
             # for headT in hCount:
             _linea = 0
+
             while i < hCount:
                 _label = self.cursor().model().headerData(i + self.sortColumn_,
                                                           QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
@@ -1091,7 +1093,7 @@ class FLTableDB(QtWidgets.QWidget):
                 partDecimal = field.partDecimal()
                 rX = field.regExpValidator()
                 ol = field.hasOptionsList()
-
+                from pineboolib.pncontrolsfactory import QComboBox
                 cond = QComboBox()
                 if not type == "pixmap":
                     condList = [util.tr("Todos"), util.tr("Igual a Valor"), util.tr(
@@ -1120,8 +1122,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                             editor_.insertStringList(olTranslated)
                         else:
-                            editor_ = pineboolib.project.resolveDGIObject(
-                                "FLLineEdit")(self)
+                            editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self)
 
                             if type == "double":
                                 editor_.setValidator(FLDoubleValidator(
@@ -1146,16 +1147,14 @@ class FLTableDB(QtWidgets.QWidget):
                                     editor_.setAlignment(Qt.AlignLeft)
 
                     if type == "serial":
-                        editor_ = pineboolib.project.resolveDGIObject(
-                            "FLSpinBox")()
+                        editor_ = pineboolib.pncontrolsfactory.FLSpinBox()
                         editor_.setMaxValue(pow(10, partInteger) - 1)
 
                     if type == "pixmap":
                         self.tdbFilter.setRowReadOnly(i, True)
 
                     if type == "date":
-                        editor_ = pineboolib.project.resolveDGIObject(
-                            "FLDateEdit")(self, _label)
+                        editor_ = pineboolib.pncontrolsfactory.FLDateEdit(self, _label)
                         # editor_.setOrder(FLDateEdit.DMY) # FIXME
                         editor_.setAutoAdvance(True)
                         editor_.setSeparator("-")
@@ -1163,8 +1162,7 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_.setDate(da.currentDate())
 
                     if type == "time":
-                        editor_ = pineboolib.project.resolveDGIObject(
-                            "FLTimeEdit")(self)
+                        editor_ = pineboolib.pncontrolsfactory.FLTimeEdit(self)
                         timeNow = QtCore.QTime.currentTime()
                         editor_.setTime(timeNow)
 
@@ -1307,8 +1305,7 @@ class FLTableDB(QtWidgets.QWidget):
                     arg2 = editorOp1.value()
                     arg4 = editorOp2.value()
                 else:
-                    editorOp1 = pineboolib.project.resolveDGIObject(
-                        "FLSpinBox")(self.tdbFilter.cellWidget(i, 2))
+                    editorOp1 = pineboolib.pncontrolsfactory.FLSpinBox(self.tdbFilter.cellWidget(i, 2))
                     arg2 = editorOp1.value()
 
             if type == "date":
