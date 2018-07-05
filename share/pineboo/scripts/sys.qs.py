@@ -424,10 +424,10 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def init(self):
         if sys.isLoadedModule(u"flfactppal"):
-            util = qsatype.FLUtil()
+            util = FLUtil()
             codEjercicio = flfactppal.iface.pub_ejercicioActual()
             nombreEjercicio = util.sqlSelect(u"ejercicios", u"nombre", ustr(u"codejercicio='", codEjercicio, u"'"))
-            if qsatype.AQUtil().sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == u"true":
+            if AQUtil().sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == u"true":
                 texto = ""
                 if nombreEjercicio:
                     texto = ustr(u"[ ", nombreEjercicio, u" ]")
@@ -2136,7 +2136,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         return ahora
 
     def __getattr__(self, name):
-        ret_ = getattr(pineboolib.pncontrolsfactory.SysType(), name, None)
+        ret_ = getattr(SysType(), name, None)
         if ret_ is not None:
             return ret_
 

@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
+from pineboolib.qsatype import *
 import traceback
-sys = SysType()
+
 
 class FormInternalObj(qsatype.FormDBWidget):
     def _class_init(self):
         self.util = qsatype.FLUtil()
-    
+
     def main(self):
-        continuar = MessageBox.warning(util.translate(u"scripts", u"Antes de cargar un módulo asegúrese de tener una copia de seguridad de todos los datos,\ny de que no hay ningun otro usuario conectado a la base de datos mientras se realiza la carga.\n\n¿Desea continuar?"), MessageBox.Yes, MessageBox.No)
+        continuar = MessageBox.warning(util.translate(
+            u"scripts", u"Antes de cargar un módulo asegúrese de tener una copia de seguridad de todos los datos,\ny de que no hay ningun otro usuario conectado a la base de datos mientras se realiza la carga.\n\n¿Desea continuar?"), MessageBox.Yes, MessageBox.No)
         if continuar == MessageBox.No:
-            return 
+            return
         nombreFichero = FileDialog.getOpenFileName(u"modfiles(*.mod)", util.translate(u"scripts", u"Elegir Fichero"))
         if nombreFichero:
             fichero = qsatype.File(nombreFichero)
-            if not formRecordflmodules.aceptarLicenciaDelModulo(ustr( fichero.path , u"/" )):
+            if not formRecordflmodules.aceptarLicenciaDelModulo(ustr(fichero.path, u"/")):
                 MessageBox.critical(util.translate(u"scripts", u"Imposible cargar el módulo.\nLicencia del módulo no aceptada."), MessageBox.Ok)
-                return 
+                return
             modulo = None
             descripcion = None
             area = None
@@ -58,8 +60,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                             i < len(nodeDepend)
                         except Exception:
                             break
-                        
-            
+
             else:
                 aF = f.split(u"\n")
                 modulo = dameValor(aF[0])
@@ -72,30 +73,42 @@ class FormInternalObj(qsatype.FormDBWidget):
                     versionMinimaFL = dameValor(aF[6])
                 if len(aF) > 7:
                     # DEBUG:: Argument 0 not understood
-                    # DEBUG:: <Value><Constant><regexbody><regexchar arg00="LBRACKET"/><regexchar arg00="COMMA"/><regexchar arg00="SEMI"/><regexchar arg00="RBRACKET"/></regexbody></Constant></Value>
+                    # DEBUG:: <Value><Constant><regexbody><regexchar
+                    # arg00="LBRACKET"/><regexchar arg00="COMMA"/><regexchar
+                    # arg00="SEMI"/><regexchar
+                    # arg00="RBRACKET"/></regexbody></Constant></Value>
                     dependencias = dameValor(aF[7]).split(unknownarg)
-            
+
             descripcion = traducirCadena(descripcion, fichero.path, modulo)
             desArea = traducirCadena(desArea, fichero.path, modulo)
-            fichIcono = qsatype.File(ustr( fichero.path , u"/" , nombreIcono ))
+            fichIcono = qsatype.File(ustr(fichero.path, u"/", nombreIcono))
             fichIcono.open(qsatype.File.ReadOnly)
             icono = fichIcono.read()
             # DEBUG:: Argument 0 not understood
-            # DEBUG:: <Value><Constant><regexbody><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/><regexchar arg00="PERIOD"/><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/></regexbody></Constant></Value>
+            # DEBUG:: <Value><Constant><regexbody><regexchar
+            # arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar
+            # arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar
+            # arg00="RBRACKET"/><regexchar arg00="PLUS"/><regexchar
+            # arg00="PERIOD"/><regexchar arg00="LBRACKET"/><regexchar
+            # arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar
+            # arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar
+            # arg00="PLUS"/></regexbody></Constant></Value>
             versionSys = sys.version().match(unknownarg)
             if compararVersiones(versionSys, versionMinimaFL) == 2:
-                contVersion = MessageBox.warning(util.translate(u"scripts", u"Este módulo necesita la versión ") + versionMinimaFL + util.translate(u"scripts", u" o superior de la aplicación base,\nactualmente la versión instalada es la ") + sys.version() + util.translate(u"scripts", u".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
+                contVersion = MessageBox.warning(util.translate(u"scripts", u"Este módulo necesita la versión ") + versionMinimaFL + util.translate(u"scripts", u" o superior de la aplicación base,\nactualmente la versión instalada es la ") +
+                                                 sys.version() + util.translate(u"scripts", u".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
                 if contVersion == MessageBox.No:
-                    return 
+                    return
             if evaluarDependencias(dependencias) == False:
-                return 
-            if not valorPorClave(u"flareas", u"idarea", ustr( u"idarea = '" , area , u"'" )):
-                crearArea = MessageBox.warning(util.translate(u"scripts", u"El área con el identificador ") + area + util.translate(u"scripts", u" no existe. ¿Desea crearla?"), MessageBox.Yes, MessageBox.No)
+                return
+            if not valorPorClave(u"flareas", u"idarea", ustr(u"idarea = '", area, u"'")):
+                crearArea = MessageBox.warning(util.translate(u"scripts", u"El área con el identificador ") + area +
+                                               util.translate(u"scripts", u" no existe. ¿Desea crearla?"), MessageBox.Yes, MessageBox.No)
                 if crearArea == MessageBox.No:
-                    return 
+                    return
                 dialogo = qsatype.Dialog()
                 dialogo.width = 400
-                dialogo.caption = ustr( util.translate(u"scripts", u"Crear área ") , area , u":" )
+                dialogo.caption = ustr(util.translate(u"scripts", u"Crear área "), area, u":")
                 dialogo.okButtonText = util.translate(u"scripts", u"Aceptar")
                 dialogo.cancelButtonText = util.translate(u"scripts", u"Cancelar")
                 leDesArea = qsatype.LineEdit()
@@ -109,28 +122,28 @@ class FormInternalObj(qsatype.FormDBWidget):
                     curArea.setValueBuffer(u"idarea", area)
                     curArea.setValueBuffer(u"descripcion", leDesArea.text)
                     curArea.commitBuffer()
-                
+
                 else:
-                    return 
-                
-            
+                    return
+
             recargar = None
-            if valorPorClave(u"flmodules", u"idmodulo", ustr( u"idmodulo = '" , modulo , u"'" )):
-                recargar = MessageBox.warning(util.translate(u"scripts", u"El módulo ") + modulo + util.translate(u"scripts", u" ya existe. ¿Desea recargarlo?"), MessageBox.Yes, MessageBox.No)
+            if valorPorClave(u"flmodules", u"idmodulo", ustr(u"idmodulo = '", modulo, u"'")):
+                recargar = MessageBox.warning(util.translate(u"scripts", u"El módulo ") + modulo + util.translate(u"scripts",
+                                                                                                                  u" ya existe. ¿Desea recargarlo?"), MessageBox.Yes, MessageBox.No)
                 if recargar == MessageBox.No:
-                    return 
+                    return
             curModulo = qsatype.FLSqlCursor(u"flmodules")
             if recargar == MessageBox.Yes:
-                 #WITH_START
-                curModulo.select(ustr( u"idmodulo = '" , modulo , u"'" ))
+                 # WITH_START
+                curModulo.select(ustr(u"idmodulo = '", modulo, u"'"))
                 curModulo.first()
                 curModulo.setModeAccess(curModulo.Edit)
-                 #WITH_END
-            
+                # WITH_END
+
             else:
                 curModulo.setModeAccess(curModulo.Insert)
-            
-             #WITH_START
+
+             # WITH_START
             curModulo.refreshBuffer()
             curModulo.setValueBuffer(u"idmodulo", modulo)
             curModulo.setValueBuffer(u"descripcion", descripcion)
@@ -138,30 +151,30 @@ class FormInternalObj(qsatype.FormDBWidget):
             curModulo.setValueBuffer(u"version", version)
             curModulo.setValueBuffer(u"icono", icono)
             curModulo.commitBuffer()
-             #WITH_END
+            # WITH_END
             curSeleccion = qsatype.FLSqlCursor(u"flmodules")
-            curModulo.setMainFilter(ustr( u"idmodulo = '" , modulo , u"'" ))
+            curModulo.setMainFilter(ustr(u"idmodulo = '", modulo, u"'"))
             curModulo.editRecord()
-            formRecordflmodules.cargarDeDisco(ustr( fichero.path , u"/" ), False)
+            formRecordflmodules.cargarDeDisco(ustr(fichero.path, u"/"), False)
             formRecordflmodules.accept()
-            setting = ustr( u"scripts/sys/modLastModule_" , sys.nameBD() )
+            setting = ustr(u"scripts/sys/modLastModule_", sys.nameBD())
             util.writeSettingEntry(setting, nombreFichero)
-    
+
     def dameValor(self, linea=None):
         return linea
-    
+
     def valorPorClave(self, tabla=None, campo=None, where=None):
         valor = None
         query = qsatype.FLSqlQuery()
         query.setTablesList(tabla)
         query.setSelect(campo)
         query.setFrom(tabla)
-        query.setWhere(ustr( where , u";" ))
+        query.setWhere(ustr(where, u";"))
         query.exec_()
         if query.next():
             valor = query.value(0)
         return valor
-    
+
     def compararVersiones(self, v1=None, v2=None):
         a1 = None
         a2 = None
@@ -186,10 +199,9 @@ class FormInternalObj(qsatype.FormDBWidget):
                     i < len(a1)
                 except Exception:
                     break
-                
-        
+
         return 0
-    
+
     def evaluarDependencias(self, dependencias=None):
         res = None
         if not dependencias:
@@ -203,9 +215,10 @@ class FormInternalObj(qsatype.FormDBWidget):
                 continue
             while_pass = False
             if dependencias[i] == '':
-                continue 
+                continue
             if sys.isLoadedModule(dependencias[i]) == False:
-                res = MessageBox.warning(util.translate(u"scripts", u"Este módulo depende del módulo ") + dependencias[i] + util.translate(u"scripts", u", que no está instalado.\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
+                res = MessageBox.warning(util.translate(u"scripts", u"Este módulo depende del módulo ") + dependencias[i] + util.translate(
+                    u"scripts", u", que no está instalado.\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
                 if res == MessageBox.No:
                     return False
             i += 1
@@ -214,21 +227,20 @@ class FormInternalObj(qsatype.FormDBWidget):
                 i < len(dependencias)
             except Exception:
                 break
-            
-        
+
         return True
-    
+
     def traducirCadena(self, cadena=None, path=None, modulo=None):
         if cadena.find(u"QT_TRANSLATE_NOOP") == - 1:
             return cadena
         cadena = QString(cadena).mid(41, len(cadena) - 43)
         nombreFichero = None
         try:
-            nombreFichero = ustr( path , u"/translations/" , modulo , u"." , util.getIdioma() , u".ts" )
+            nombreFichero = ustr(path, u"/translations/", modulo, u".", util.getIdioma(), u".ts")
         except Exception as e:
             e = traceback.format_exc()
             return cadena
-        
+
         if not qsatype.File.exists(nombreFichero):
             return cadena
         fichero = qsatype.File(nombreFichero)
@@ -255,10 +267,8 @@ class FormInternalObj(qsatype.FormDBWidget):
                     i < len(nodeMess)
                 except Exception:
                     break
-                
-        
+
         return cadena
-    
 
 
 form = None

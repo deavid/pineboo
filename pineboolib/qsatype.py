@@ -8,15 +8,13 @@ import codecs
 import traceback
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QTabWidget, QTextEdit, QWidget
-from PyQt5.QtGui import *  # noqa
-from PyQt5.QtCore import *  # noqa
+from PyQt5.Qt import QTabWidget, QTextEdit, QWidget, QIODevice
 from PyQt5.QtXml import QDomDocument
 
 # AQSObjects
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
-from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil
-from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
+from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil as AQUtil_Legacy
+from pineboolib.fllegacy.aqsobjects.AQSql import AQSql as AQSql_Legacy
 
 from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter as FLPosPrinter_Legacy
 
@@ -29,12 +27,175 @@ from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
 from pineboolib.utils import filedir
+from pineboolib.qsaglobals import *
 
 from pineboolib import decorators
 
 import pineboolib
 
 util = FLUtil_Legacy.FLUtil()  # <- para cuando QS erróneo usa util sin definirla
+AQUtil = AQUtil_Legacy
+
+
+logger = logging.getLogger(__name__)
+
+
+class SysType(object):
+    def __init__(self):
+        self._name_user = None
+
+    def nameUser(self):
+        return pineboolib.project.conn.user()
+
+    def interactiveGUI(self):
+        return "Pineboo"
+
+    def isLoadedModule(self, modulename):
+        return modulename in pineboolib.project.conn.managerModules().listAllIdModules()
+
+    def translate(self, text):
+        return text
+
+    def osName(self):
+        util = FLUtil()
+        return util.getOS()
+
+    def nameDB(self):
+        return pineboolib.project.conn.DBName()
+
+    def setCaptionMainWidget(self, value):
+        self.mainWidget().setWindowTitle("Pineboo - %s" % value)
+        pass
+
+    def toUnicode(self, text, format):
+        return u"%s" % text
+
+    def mainWidget(self):
+        if pineboolib.project._DGI.localDesktop():
+            return pineboolib.project.main_window.ui_
+        else:
+            return None
+
+    def Mr_Proper(self):
+        pineboolib.project.conn.Mr_Proper()
+
+    def installPrefix(self):
+        return filedir("..")
+
+    def installACL(self, idacl):
+        acl_ = pineboolib.project.acl()
+        if acl_:
+            acl_.installACL(idacl)
+
+    def version(self):
+        return pineboolib.project.version
+
+    def processEvents(self):
+        qApp.processEvents()
+
+    @decorators.BetaImplementation
+    def reinit(self):
+        self.processEvents()
+        pineboolib.project.main_window.saveState()
+        pineboolib.project.run()
+        pineboolib.project.main_window.areas = []
+        # FIXME: Limpiar el ui para no duplicar controles
+        pineboolib.project.main_window.load()
+        pineboolib.project.main_window.show()
+        pineboolib.project.call("sys.iface._class_init()", [], None, True)
+
+    def write(self, encode_, dir_, contenido):
+        f = codecs.open(dir_, encoding=encode_, mode="w+")
+        f.write(contenido)
+        f.seek(0)
+        f.close()
+
+    def cleanupMetaData(self, connName="default"):
+        pineboolib.project.conn.database(connName).manager().cleanupMetaData()
+
+    def updateAreas(self):
+        pineboolib.project.initToolBox()
+
+    @decorators.NotImplementedWarn
+    def isDebuggerMode(self):
+        return False
+
+    def nameDriver(self, connName="default"):
+        return pineboolib.project.conn.database(connName).driverName()
+
+    def addDatabase(self, connName="default"):
+        return pineboolib.project.conn.useConn(connName)()
+
+    def removeDatabase(self, connName="default"):
+        return pineboolib.project.conn.removeConn(connName)
+
+    def runTransaction(self, f, oParam):
+
+        curT = FLSqlCursor("flfiles")
+        curT.transaction(False)
+        # gui = self.interactiveGUI()
+        # if gui:
+        #   AQS.Application_setOverrideCursor(AQS.WaitCursor);
+
+        errorMsg = None
+        try:
+            valor = f(oParam)
+            errorMsg = getattr(oParam, "errorMsg", None)
+            if valor:
+                curT.commit()
+            else:
+                curT.rollback()
+                # if gui:
+                #   AQS.Application_restoreOverrideCursor();
+                if errorMsg is None:
+                    self.warnMsgBox(self.translate(u"Error al ejecutar la función"))
+                else:
+                    self.warnMsgBox(errorMsg)
+                return False
+
+        except Exception:
+            curT.rollback()
+            # if gui:
+            #   AQS.Application_restoreOverrideCursor();
+            if errorMsg is None:
+                self.warnMsgBox(self.translate(u"Error al ejecutar la función"))
+            else:
+                self.warnMsgBox(errorMsg)
+            return False
+
+        # if gui:
+        #   AQS.Application_restoreOverrideCursor();
+        return valor
+
+    def infoMsgBox(self, msg):
+
+        if not isinstance(msg, str):
+            return
+        msg += "\n"
+        if self.interactiveGUI():
+            MessageBox.information(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
+        else:
+            print("INFO ", msg)
+
+    def warnMsgBox(self, msg):
+
+        if not isinstance(msg, str):
+            return
+        msg += "\n"
+        if self.interactiveGUI():
+            MessageBox.warning(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
+        else:
+            print("WARN ", msg)
+
+    def errorMsgBox(self, msg):
+
+        if not isinstance(msg, str):
+            return
+        msg += "\n"
+        if self.interactiveGUI():
+            MessageBox.critical(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
+        else:
+            print("ERROR ", msg)
 
 
 class StructMyDict(dict):
@@ -150,8 +311,190 @@ class Array(object):
         return len_
 
 
+class FileDialog(QtWidgets.QFileDialog):
+
+    def getOpenFileName(*args):
+        obj = None
+        parent = QtWidgets.QApplication.activeModalWidget()
+        if len(args) == 1:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]))
+        elif len(args) == 2:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]))
+        elif len(args) == 3:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]))
+        elif len(args) == 4:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]), str(args[3]))
+
+        if obj is None:
+            return None
+
+        return obj[0]
+
+    def getExistingDirectory(basedir=None, caption=None):
+        if not basedir:
+            basedir = filedir("..")
+
+        if pineboolib.project._DGI.localDesktop():
+            parent = pineboolib.project.main_window.ui_
+            ret = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
+            if ret:
+                ret = ret + "/"
+
+            return ret
+
+
 def Boolean(x=False):
     return bool(x)
+
+
+class Math(object):
+
+    def abs(x):
+        return math.fabs(x)
+
+    def ceil(x):
+        return math.ceil(x)
+
+    def floor(x):
+        return math.floor(x)
+
+    def pow(x, y):
+        return math.pow(x, y)
+
+
+def parseFloat(x):
+    if x is None:
+        return 0
+    return float(x)
+
+
+def parseString(objeto):
+    try:
+        return objeto.toString()
+    except Exception:
+        return str(objeto)
+
+
+def parseInt(x):
+    if x is None:
+        return 0
+    return int(x)
+
+
+def isNaN(x):
+    if not x:
+        return True
+
+    try:
+        float(x)
+        return False
+    except ValueError:
+        return True
+
+
+def ustr(*t1):
+
+    return "".join([ustr1(t) for t in t1])
+
+
+def ustr1(t):
+    if isinstance(t, str):
+        return t
+
+    if isinstance(t, float):
+        try:
+            t = int(t)
+        except Exception:
+            pass
+
+    # if isinstance(t, QtCore.QString): return str(t)
+    if isinstance(t, str):
+        return str(t, "UTF-8")
+    try:
+        return str(t)
+    except Exception as e:
+        logger.exception("ERROR Coercing to string: %s", repr(t))
+        return None
+
+
+class Date(object):
+
+    @classmethod
+    def parse(cls, value):
+        return QtCore.QDate.fromString(value)
+
+
+QMessageBox = QtWidgets.QMessageBox
+
+
+class MessageBox(QMessageBox):
+    @classmethod
+    def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
+        if title or form:
+            logger.warn("MessageBox: Se intentó usar título y/o form, y no está implementado.")
+        icon = QMessageBox.NoIcon
+        title = "Message"
+        if typename == "question":
+            icon = QMessageBox.Question
+            title = "Question"
+        elif typename == "information":
+            icon = QMessageBox.Information
+            title = "Information"
+        elif typename == "warning":
+            icon = QMessageBox.Warning
+            title = "Warning"
+        elif typename == "critical":
+            icon = QMessageBox.Critical
+            title = "Critical"
+        # title = unicode(title,"UTF-8")
+        # text = unicode(text,"UTF-8")
+        msg = QMessageBox(icon, str(title), str(text))
+        msg.addButton(button0)
+        if button1:
+            msg.addButton(button1)
+        if button2:
+            msg.addButton(button2)
+        return msg.exec_()
+
+    @classmethod
+    def question(cls, *args):
+        return cls.msgbox("question", *args)
+
+    @classmethod
+    def information(cls, *args):
+        return cls.msgbox("question", *args)
+
+    @classmethod
+    def warning(cls, *args):
+        return cls.msgbox("warning", *args)
+
+    @classmethod
+    def critical(cls, *args):
+        return cls.msgbox("critical", *args)
+
+
+class Input(object):
+    @classmethod
+    def getText(cls, question, prevtxt, title):
+        text, ok = QtWidgets.QInputDialog.getText(None, title,
+                                                  question, QtWidgets.QLineEdit.Normal, prevtxt)
+        if not ok:
+            return None
+        return text
+
+
+def qsa_length(obj):
+    lfn = getattr(obj, "length", None)
+    if lfn:
+        return lfn()
+    return len(lfn)
+
+
+def qsa_text(obj):
+    try:
+        return obj.text()
+    except Exception:
+        return obj.text
 
 
 def FLSqlQuery(*args):
