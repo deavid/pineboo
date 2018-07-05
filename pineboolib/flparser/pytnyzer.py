@@ -34,12 +34,18 @@ def id_translate(name):
         name = "endswith"
     if name == "lastIndexOf":
         name = "rfind"
+    # if name == "File":
+    #    name = "qsatype.File"
+    # if name == "Dir":
+    #    name = "qsatype.Dir"
     if name == "findRev":
         name = "find"
     if name == "toLowerCase":
         name = "lower"
     if name == "toUpperCase":
         name = "upper"
+    # if name == "Process":
+    #    name = "qsatype.Process"
     return name
 
 
@@ -899,7 +905,7 @@ class Member(ASTPython):
                             "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        arguments[idx - 1] = "QString(%s)" % arguments[idx - 1]
+                        arguments[idx - 1] = "str(%s)" % arguments[idx - 1]
                         """ print("###### ARG:", arguments, value, expr)
                         if value.find(",") > -1 and value.find(")") > value.find(","):
                             value = value[0:len(value) - 1]
