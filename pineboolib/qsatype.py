@@ -306,7 +306,7 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
-        from pineboolib.qsaglobals import connect
+        from pineboolib.pncontrolsfactory import connect
         signal_slot = connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
@@ -314,7 +314,7 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def _disconnect(self, sender, signal, receiver, slot):
         # print(" > > > disconnect:", self)
-        from pineboolib.qsaglobals import disconnect
+        from pineboolib.pncontrolsfactory import disconnect
         signal_slot = disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
@@ -910,3 +910,38 @@ class QWidget(QWidget):
 
     def child(self, name):
         return self.findChild(QtWidgets.QWidget, name)
+
+
+def ustr(*t1):
+
+    return "".join([ustr1(t) for t in t1])
+
+
+def ustr1(t):
+    if isinstance(t, str):
+        return t
+
+    if isinstance(t, float):
+        try:
+            t = int(t)
+        except Exception:
+            pass
+
+    # if isinstance(t, QtCore.QString): return str(t)
+    if isinstance(t, str):
+        return str(t, "UTF-8")
+    try:
+        return str(t)
+    except Exception as e:
+        logger.exception("ERROR Coercing to string: %s", repr(t))
+        return None
+
+
+def debug(txt):
+    logger.message("---> " + ustr(txt))
+
+
+class aqApp(object):
+
+    def db():
+        return pineboolib.project.conn
