@@ -830,13 +830,14 @@ class Member(ASTPython):
             funs = None
             p_ = parent
             while(p_):
-                if p_.tag == "Funciton":
+                if p_.tag == "Function":
                     funs = p_
                     break
                 p_ = p_.get("parent_")
 
             if funs:
-                fun = funs[-1]
+                #fun = funs[-1]
+                fun = funs
                 name_parts = fun.get("name").split("_")
                 classname = name_parts[0]
                 arguments[2] = arguments[2][2:]
@@ -851,12 +852,13 @@ class Member(ASTPython):
             funs = None
             p_ = parent
             while(p_):
-                if p_.tag == "Funciton":
+                if p_.tag == "Function":
                     funs = p_
                     break
                 p_ = p_.get("parent_")
             if funs:
-                fun = funs[-1]
+                #fun = funs[-1]
+                fun = funs
                 name_parts = fun.get("name").split("_")
                 classname = name_parts[0]
                 arguments[1] = arguments[1][2:]
@@ -1373,7 +1375,7 @@ def write_python_file(fobj, ast):
                 fobj.write((len(indent) * indent_text) + "\n")
             last_line_for_indent[len(indent)] = numline
         if dtype == "debug":
-            line = "# DEBUG:: " + data
+            line = "# DEBUG:: %s" % data
             # print(numline, line)
         if dtype == "expr":
             line = "# EXPR??:: " + data
