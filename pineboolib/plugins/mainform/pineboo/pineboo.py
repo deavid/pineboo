@@ -12,7 +12,6 @@ import pineboolib
 import sys
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.qsaglobals import SysType
 
 
 class MainForm(QtWidgets.QMainWindow):

@@ -2135,7 +2135,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         return ahora
 
     def __getattr__(self, name):
-        ret_ = getattr(pineboolib.qsaglobals.SysType(), name, None)
+        ret_ = getattr(pineboolib.pncontrolsfactory.SysType(), name, None)
         if ret_ is not None:
             return ret_
 
