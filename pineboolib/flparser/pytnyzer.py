@@ -34,18 +34,12 @@ def id_translate(name):
         name = "endswith"
     if name == "lastIndexOf":
         name = "rfind"
-    if name == "File":
-        name = "qsatype.File"
-    if name == "Dir":
-        name = "qsatype.Dir"
     if name == "findRev":
         name = "find"
     if name == "toLowerCase":
         name = "lower"
     if name == "toUpperCase":
         name = "upper"
-    if name == "Process":
-        name = "qsatype.Process"
     return name
 
 
@@ -632,7 +626,7 @@ class Variable(ASTPython):
 
                 # if self.elem.get("type",None) == "Array" and data == "[]":
                 if data == "[]":
-                    yield "expr", "qsatype.Array()"
+                    yield "expr", "Array()"
                     expr += 1
                     continue
 
@@ -660,7 +654,7 @@ class Variable(ASTPython):
                 # if parent2.tag == "Source" and parent3.tag == "Class":
                 #    yield "expr", "None"
                 # else:
-                yield "expr", "qsatype.%s()" % dtype
+                yield "expr", "%s()" % dtype
 
         # if dtype and force_value == False: yield "debug", "Variable %s:%s" % (name,dtype)
 
@@ -905,7 +899,7 @@ class Member(ASTPython):
                             "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        arguments[idx - 1] = "qsatype.QString(%s)" % arguments[idx - 1]
+                        arguments[idx - 1] = "QString(%s)" % arguments[idx - 1]
                         """ print("###### ARG:", arguments, value, expr)
                         if value.find(",") > -1 and value.find(")") > value.find(","):
                             value = value[0:len(value) - 1]
@@ -1142,8 +1136,6 @@ class New(ASTPython):
                                     break
                         parentClass_ = parentClass_.get("parent_")
 
-                    if not classIdent_:
-                        data = "qsatype." + data
                 yield dtype, data
 
 
@@ -1177,7 +1169,7 @@ class Constant(ASTPython):
                         else:
                             arguments.append(" ".join(expr))
 
-                    yield "expr", "qsatype.Array([%s])" % (", ".join(arguments))
+                    yield "expr", "Array([%s])" % (", ".join(arguments))
             return
         if ctype == "String":
             delim = self.elem.get("delim")
@@ -1321,10 +1313,8 @@ def parse_ast(elem):
 
 def file_template(ast):
     yield "line", "# -*- coding: utf-8 -*-"
-    yield "line", "from pineboolib import qsatype"
+    yield "line", "from pineboolib.qsatype import *"
     yield "line", "from pineboolib.qsaglobals import *"
-    yield "line", "import traceback"
-    yield "line", "sys = SysType()"
     yield "line", ""
     sourceclasses = etree.ElementTree.Element("Source")
     for cls in ast.findall("Class"):
@@ -1332,7 +1322,7 @@ def file_template(ast):
         sourceclasses.append(cls)
 
     mainclass = etree.ElementTree.SubElement(
-        sourceclasses, "Class", name="FormInternalObj", extends="qsatype.FormDBWidget")
+        sourceclasses, "Class", name="FormInternalObj", extends="FormDBWidget")
     mainsource = etree.ElementTree.SubElement(mainclass, "Source")
 
     constructor = etree.ElementTree.SubElement(mainsource, "Function", name="_class_init")
