@@ -2,8 +2,8 @@
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
 import traceback
+import pineboolib
 import ast
-sys = SysType()
 
 
 class AQGlobalFunctions(object):
@@ -2133,6 +2133,11 @@ class FormInternalObj(qsatype.FormDBWidget):
         if q.isActive() and q.next():
             ahora = q.value(0)
         return ahora
+
+    def __getattr__(self, name):
+        ret_ = getattr(pineboolib.qsaglobals.SysType(), name, None)
+        if ret_ is not None:
+            return ret_
 
 
 form = None
