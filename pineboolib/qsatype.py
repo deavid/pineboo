@@ -21,7 +21,7 @@ from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
 
 from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter as FLPosPrinter_Legacy
 
-from pineboolib.fllegacy import FLFormSearchDB as FLFormSearchDB_legacy
+from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy import FLSqlQuery as FLSqlQuery_Legacy
 from pineboolib.fllegacy import FLSqlCursor as FLSqlCursor_Legacy
 from pineboolib.fllegacy import FLTableDB as FLTableDB_Legacy
@@ -35,7 +35,7 @@ from pineboolib import decorators
 
 import pineboolib
 
-String = str
+util = FLUtil_Legacy.FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 
 
 class StructMyDict(dict):
@@ -459,14 +459,6 @@ class FormDBWidget(QtWidgets.QWidget):
             print(name, type(ret_))
             print("Retornando", tpye(ret_))
             return ret_
-
-
-def FLFormSearchDB(name):
-    widget = FLFormSearchDB_legacy.FLFormSearchDB(name)
-    widget.setWindowModality(QtCore.Qt.ApplicationModal)
-    # widget.load()
-    widget.cursor_.setContext(widget.iface)
-    return widget
 
 
 def RegExp(strRE):
@@ -897,13 +889,18 @@ class File(QtCore.QFile):
         f.seek(0)
         f.close()
 
+    def exists(self, name):
+        return os.path.isfile(name)
 
+
+"""
 class QString(str):
     def mid(self, start, length=None):
         if length is None:
             return self[start:]
         else:
             return self[start:start + length]
+"""
 
 
 class QWidget(QWidget):
