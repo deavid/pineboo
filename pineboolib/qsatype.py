@@ -31,8 +31,6 @@ from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
 from pineboolib.utils import filedir
 
-from pineboolib.pncontrolsfactory import FLTable
-
 from pineboolib import decorators
 
 import pineboolib
@@ -182,7 +180,6 @@ def FLTableDB(*args):
 
 FLListViewItem = QtWidgets.QListView
 FLDomDocument = QDomDocument
-QTable = FLTable
 Color = QtGui.QColor
 QColor = QtGui.QColor
 QDateEdit = QtWidgets.QDateEdit
@@ -293,6 +290,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self.remote_widgets = {}
 
         super(FormDBWidget, self).__init__(parent)
+
         self._module = sys.modules[self.__module__]
         self._module.connect = self._connect
         self._module.disconnect = self._disconnect
@@ -437,7 +435,7 @@ class FormDBWidget(QtWidgets.QWidget):
     """
     FIX: Cuando usamos this como cursor o execMainscript... todo esto tiene que buscarse en cursor o action ... (dentro de un __getattr__)
     """
-
+    """
     def valueBuffer(self, name):
         return self.cursor().valueBuffer(name)
 
@@ -452,6 +450,15 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def execMainScript(self, name):
         self._action.execMainScript(name)
+    
+    """
+
+    def __getattr__(self, name):
+        ret_ = getattr([self._action, self.cursor_], name, None)
+        if ret_ is not None:
+            print(name, type(ret_))
+            print("Retornando", tpye(ret_))
+            return ret_
 
 
 def FLFormSearchDB(name):
