@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
+from pineboolib.qsatype import *
 from pineboolib.utils import clearXPM
 import traceback
-sys = SysType()
 
 
 class interna(object):
@@ -138,7 +138,7 @@ class FormInternalObj(qsatype.FormDBWidget):
 
         if not isinstance(nombreFichero, str):
             nombreFichero = nombreFichero.data().decode("utf-8")
-        
+
         fichero = qsatype.File(nombreFichero, "iso-8859-15")
         modulo = None
         descripcion = None
@@ -285,7 +285,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             e = traceback.format_exc()
             return cadena
 
-        if not qsatype.File.exists(nombreFichero):
+        if not File.exists(nombreFichero):
             return cadena
         fichero = qsatype.File(nombreFichero)
         fichero.open(qsatype.File.ReadOnly)

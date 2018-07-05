@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
-import sys
 import fnmatch
 import weakref
 import re
@@ -290,7 +289,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self.remote_widgets = {}
 
         super(FormDBWidget, self).__init__(parent)
-
+        import sys
         self._module = sys.modules[self.__module__]
         self._module.connect = self._connect
         self._module.disconnect = self._disconnect
@@ -889,18 +888,16 @@ class File(QtCore.QFile):
         f.seek(0)
         f.close()
 
-    def exists(self, name):
+    def exists(name):
         return os.path.isfile(name)
 
 
-"""
 class QString(str):
     def mid(self, start, length=None):
         if length is None:
             return self[start:]
         else:
             return self[start:start + length]
-"""
 
 
 class QWidget(QWidget):

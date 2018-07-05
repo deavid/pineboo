@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import qApp
 
 import pineboolib
 import logging
 import weakref
 from pineboolib import decorators
+
 
 logger = logging.getLogger("PNControlsFactory")
 
@@ -88,13 +90,6 @@ class SysType(object):
         acl_ = pineboolib.project.acl()
         if acl_:
             acl_.installACL(idacl)
-
-    def __getattr__(self, name):
-        obj = eval("sys.widget.%s" % name, pineboolib.qsaglobals.__dict__)
-        if obj:
-            return obj
-        else:
-            logger.warn("No se encuentra sys.%s", name)
 
     def version(self):
         return pineboolib.project.version
