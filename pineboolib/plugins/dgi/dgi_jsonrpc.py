@@ -80,16 +80,17 @@ class parser(object):
         fn = None
         if len(args) > 1:
             param_ = ",".join(args[1:])
+        else:
+            param_ = [args[0]]
 
         try:
-            import pineboolib.qsaglobals
-            fn = eval(fun_, pineboolib.qsaglobals.__dict__)
+            pineboolib.project.call(fun_, param_)
         except Exception:
             return "notFound"
-        if param_:
-            return fn(param_)
-        else:
-            return fn()
+        # if param_:
+        #    return fn(param_)
+        # else:
+        #    return fn()
 
     @dispatcher.add_method
     def queqe(*args):

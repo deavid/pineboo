@@ -658,8 +658,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
                 condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(
                     str(self.cursor_.value(self.acosCondName_))))
             elif self.acosCond_ == FLSqlCursor.Function:
-                fn = eval(self.acosCondName_, pineboolib.qsaglobals.__dict__)
-                condTrue_ = fn(self.cursor_) == self.acosCondVal_
+                condTrue_ = pineboolib.project.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
 
             if condTrue_:
                 if not self.acTable_.name() == self.id_:
