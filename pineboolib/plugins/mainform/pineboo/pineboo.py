@@ -19,7 +19,7 @@ class MainForm(QtWidgets.QMainWindow):
     areas = []
     toolBoxs = []
     tab = 0
-    ui = None
+    ui_ = None
     areasTab = None
     formTab = None
     debugLevel = 100
@@ -37,10 +37,10 @@ class MainForm(QtWidgets.QMainWindow):
         MainForm.debugLevel = q
 
     def load(self):
-        if self.ui:
-            del self.ui
+        if self.ui_:
+            del self.ui_
 
-        self.ui = uic.loadUi(
+        self.ui_ = uic.loadUi(
             filedir('plugins/mainform/pineboo/mainform.ui'), self)
 
         frameGm = self.frameGeometry()

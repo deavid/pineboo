@@ -5,7 +5,7 @@ from binascii import unhexlify
 from xml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pineboolib import pncontrolsfactory
+
 from pineboolib.fllegacy import FLTableDB
 from pineboolib.fllegacy import FLFieldDB
 import pineboolib
@@ -91,9 +91,11 @@ def loadUi(path, widget, parent=None):
             sender = widget
         else:
             sender = widget.findChild(QtWidgets.QWidget, sender_name)
-        wui = hasattr(widget, "ui_") and sender_name in widget.ui_
-        if sender is None and wui:
-            sender = widget.ui_[sender_name]
+
+        if not pineboolib.project._DGI.localDesktop():
+            wui = hasattr(widget, "ui_") and sender_name in widget.ui_
+            if sender is None and wui:
+                sender = widget.ui_[sender_name]
 
         sg_name = signal_name.replace("()", "")
         sg_name = sg_name.replace("(bool)", "")
@@ -128,9 +130,11 @@ def loadUi(path, widget, parent=None):
 
         if receiver is None:
             receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
-        wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
-        if receiver is None and wui:
-            receiver = widget.ui_[receiv_name]
+
+        if not pineboolib.project._DGI.localDesktop():
+            wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
+            if receiver is None and wui:
+                receiver = widget.ui_[receiv_name]
         if receiver is None:
             logger.warn("Connection receiver not found:", receiv_name)
         if sender is None or receiver is None:
@@ -148,6 +152,7 @@ def loadUi(path, widget, parent=None):
 
 
 def createWidget(classname, parent=None):
+    from pineboolib import pncontrolsfactory
     cls = getattr(pncontrolsfactory, classname, None) or \
         getattr(QtWidgets, classname, None) or \
         getattr(FLTableDB, classname, None) or \
@@ -278,7 +283,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c, new_widget, parent, origWidget)
                 path = c.find("./property[@name='name']/cstring").text
-                origWidget.ui_[path] = new_widget
+                if not pineboolib.project._DGI.localDesktop():
+                    origWidget.ui_[path] = new_widget
                 if pineboolib.project._DGI.localDesktop():
                     new_widget.show()
                 if mode == "box":
@@ -423,7 +429,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             new_widget._attrs = {}
             loadWidget(c, new_widget, parent, origWidget)
             path = c.find("./property[@name='name']/cstring").text
-            origWidget.ui_[path] = new_widget
+            if not pineboolib.project._DGI.localDesktop():
+                origWidget.ui_[path] = new_widget
             new_widget.setContentsMargins(0, 0, 0, 0)
             new_widget.show()
 
@@ -479,8 +486,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         f.setItalic(False)
         new_widget.setFont(f)
 
-    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
-        origWidget.ui_[origWidget.objectName()] = nwidget
+    if not pineboolib.project._DGI.localDesktop():
+        if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
+            origWidget.ui_[origWidget.objectName()] = nwidget
 
 
 """

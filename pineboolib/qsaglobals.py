@@ -29,6 +29,7 @@ Browse = 3
 
 AQS = AQS_Legacy()
 
+
 class File:
 
     @classmethod
@@ -37,7 +38,6 @@ class File:
 
 
 class FileDialog(QtWidgets.QFileDialog):
-
 
     def getOpenFileName(*args):
         obj = None
@@ -61,7 +61,7 @@ class FileDialog(QtWidgets.QFileDialog):
             basedir = filedir("..")
 
         if pineboolib.project._DGI.localDesktop():
-            parent = pineboolib.project.main_window.ui
+            parent = pineboolib.project.main_window.ui_
             ret = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
             if ret:
                 ret = ret + "/"
@@ -216,7 +216,7 @@ class SysType(object):
 
     def mainWidget(self):
         if pineboolib.project._DGI.localDesktop():
-            return pineboolib.project.main_window.ui
+            return pineboolib.project.main_window.ui_
         else:
             return None
 
