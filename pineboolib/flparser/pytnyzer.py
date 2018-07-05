@@ -276,6 +276,7 @@ class If(ASTPython):
 
         yield "line", "if %s:" % (" ".join(main_expr))
         for source in self.elem.findall("Source"):
+            source.set("parent_", self.elem)
             yield "begin", "block-if"
             for obj in parse_ast(source).generate(break_mode=break_mode):
                 yield obj
@@ -623,7 +624,9 @@ class Variable(ASTPython):
         yield "expr", id_translate(name)
         values = 0
         # for value in self.elem.findall("Value|Expression"):
-        for value in self.elem.findall("Value"):
+        for value in self.elem:
+            if value.tag not in ("Value", "Expression"):
+                continue
             value.set("parent_", self.elem)
             values += 1
             yield "expr", "="
@@ -907,7 +910,7 @@ class Member(ASTPython):
                             "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        arguments[idx - 1] = "str(%s)" % arguments[idx - 1]
+                        arguments[idx - 1] = "QString(%s)" % arguments[idx - 1]
                         """ print("###### ARG:", arguments, value, expr)
                         if value.find(",") > -1 and value.find(")") > value.find(","):
                             value = value[0:len(value) - 1]
@@ -1322,7 +1325,7 @@ def parse_ast(elem):
 def file_template(ast):
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from pineboolib.qsatype import *"
-    yield "line", "from pineboolib.qsaglobals import *"
+    # yield "line", "from pineboolib.qsaglobals import *"
     yield "line", ""
     sourceclasses = etree.ElementTree.Element("Source")
     for cls in ast.findall("Class"):
