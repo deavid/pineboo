@@ -10,6 +10,7 @@ import traceback
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QTabWidget, QTextEdit, QWidget, QIODevice
 from PyQt5.QtXml import QDomDocument
+from PyQt5.QtWidgets import QApplication
 
 # AQSObjects
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
@@ -27,7 +28,6 @@ from pineboolib.fllegacy import FLUtil as FLUtil_Legacy
 from pineboolib.fllegacy import FLReportViewer as FLReportViewer_Legacy
 
 from pineboolib.utils import filedir
-from pineboolib.qsaglobals import *
 
 from pineboolib import decorators
 
@@ -60,7 +60,7 @@ class SysType(object):
         util = FLUtil()
         return util.getOS()
 
-    def nameDB(self):
+    def nameBD(self):
         return pineboolib.project.conn.DBName()
 
     def setCaptionMainWidget(self, value):
@@ -82,6 +82,11 @@ class SysType(object):
     def installPrefix(self):
         return filedir("..")
 
+    def __getattr__(self, fun_):
+        ret_ = eval(fun_, pineboolib.qsatype.__dict__)
+        if ret_ is not None:
+            return ret_
+
     def installACL(self, idacl):
         acl_ = pineboolib.project.acl()
         if acl_:
@@ -91,7 +96,7 @@ class SysType(object):
         return pineboolib.project.version
 
     def processEvents(self):
-        qApp.processEvents()
+        QApplication.processEvents()
 
     @decorators.BetaImplementation
     def reinit(self):
@@ -196,6 +201,9 @@ class SysType(object):
             MessageBox.critical(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
         else:
             print("ERROR ", msg)
+
+
+sys = SysType()
 
 
 class StructMyDict(dict):
