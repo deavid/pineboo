@@ -2,7 +2,6 @@
 from pineboolib import qsatype
 from pineboolib.qsaglobals import *
 import traceback
-sys = SysType()
 
 
 class FormInternalObj(qsatype.FormDBWidget):

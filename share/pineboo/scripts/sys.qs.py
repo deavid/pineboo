@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib import qsatype
+from pineboolib.qsatype import *
 from pineboolib.qsaglobals import *
 import traceback
 import pineboolib
