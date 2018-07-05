@@ -1,5 +1,5 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore, QtGui, Qt
 from importlib import import_module
 from xml.etree.ElementTree import fromstring
 from json import dumps
