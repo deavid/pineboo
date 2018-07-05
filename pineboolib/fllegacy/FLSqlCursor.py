@@ -775,7 +775,9 @@ class FLSqlCursor(QtCore.QObject):
 
     _refreshDelayedTimer = None
 
-    def __init__(self, name, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
+    def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
+        if name is None:
+            return
         super(FLSqlCursor, self).__init__()
         self._valid = False
         self.d = FLSqlCursorPrivate()
@@ -903,8 +905,8 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def metadata(self):
-        if not self.d.metadata_:
-            logger.trace("FLSqlCursor(%s) Esta devolviendo un metadata vacio", self.curName())
+        if not getattr(self.d, "metadata_", None):
+            logger.trace("FLSqlCursor(%s) Esta devolviendo un metadata vacio", getattr(self, "curName()", None))
             return None
         return self.d.metadata_
 
