@@ -299,7 +299,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         if self.cursorAux and isinstance(self.topWidget, FLFormSearchDB):
             self.topWidget.setCaption(self.cursor_.metadata().alias())
-            self.topWidget_.setCursor(self.cursor_)
+            self.topWidget.setCursor(self.cursor_)
 
         if ownTMD or tMD and not tMD.inCache():
             del tMD
@@ -1206,7 +1206,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def tdbFilterBuildWhere(self):
-        if not self.topWidget_:
+        if not self.topWidget:
             return None
 
         rCount = self.tdbFilter.numRows()
