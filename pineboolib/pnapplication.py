@@ -808,7 +808,7 @@ class DelayedObjectProxyLoader(object):
 
 
 """
-Retorna una función buscada
+Genera un arbol con las acciones de los diferentes módulos
 @param name. Nombre del la función buscada
 @return el objecto del XMLAction afectado
 """
@@ -1054,6 +1054,7 @@ class XMLAction(XMLStruct):
         self.table = self._v("table")
         self.mainform = self._v("mainform")
         self.mainscript = self._v("mainscript")
+        self.formrecord = self._v("formrecord")
         self.mainform_widget = None
         self.formrecord_widget = None
         self._loaded = False

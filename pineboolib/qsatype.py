@@ -778,7 +778,8 @@ class FormDBWidget(QtWidgets.QWidget):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                self.cursor_ = FLSqlCursor(self._action.table)
+                print("Creando cursor", self, self._action.table)
+                self.cursor_ = FLSqlCursor(self._action)
 
         return self.cursor_
 

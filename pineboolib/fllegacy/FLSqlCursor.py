@@ -773,10 +773,18 @@ class FLSqlCursor(QtCore.QObject):
     _selection = None
 
     _refreshDelayedTimer = None
+    actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
         if name is None:
             return
+
+        if isinstance(name, XMLStruct):
+            self.actionName_ = name.name
+            name = name.table
+        else:
+            self.actionName_ = name
+
         super(FLSqlCursor, self).__init__()
         self._valid = False
         self.d = FLSqlCursorPrivate()
@@ -811,7 +819,7 @@ class FLSqlCursor(QtCore.QObject):
         # self.metadata().inCache():
 
         self.d.curName_ = name
-        if self.setAction(self.curName()):
+        if self.setAction(self.actionName_):
             self.d.countRefCursor = self.d.countRefCursor + 1
         else:
             # logger.trace("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
