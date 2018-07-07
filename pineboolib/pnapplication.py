@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import QMenu, QActionGroup
 
 import pineboolib
 
-from pineboolib import decorators, pnqt3ui, emptyscript
+from pineboolib import decorators, pnqt3ui
 from pineboolib.pnconnection import PNConnection
 from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable, _path, coalesce_path, _dir
 
@@ -194,6 +194,8 @@ class Project(object):
     """
 
     def run(self):
+        from pineboolib import emptyscript
+        self.emptyscript = emptyscript
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
         if self.deleteCache and not not os.path.exists(_dir("cache/%s" % self.dbname)):
@@ -1220,7 +1222,7 @@ class XMLAction(XMLStruct):
             # import aqui para evitar dependencia ciclica
         python_script_path = None
         # primero default, luego sobreescribimos
-        parent.script = emptyscript
+        parent.script = pineboolib.project.emptyscript
 
         if scriptname is None:
             parent.script.form = parent.script.FormInternalObj(

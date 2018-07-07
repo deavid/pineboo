@@ -11,7 +11,7 @@ class FLNetwork(object):
     request = None
     manager = None
 
-    self.reply = None
+    reply = None
 
     finished = QtCore.pyqtSignal()
     start = QtCore.pyqtSignal()

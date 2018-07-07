@@ -11,6 +11,8 @@ import pineboolib
 import sys
 import datetime
 import re
+from PyQt5.QtXml import QDomDocument
+from PyQt5.Qt import QMessageBox
 
 
 def resolveObject(name):
@@ -128,6 +130,13 @@ class dgi_schema(object):
 
     def __getattr__(self, name):
         return resolveObject(name)
+    
+
+class QWidget(Qt.QWidget):
+    
+
+    def child(self, name):
+        return self.findChild(QtWidgets.QWidget, name)
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
@@ -742,7 +751,45 @@ class QComboBox(QtWidgets.QComboBox):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_insertStringList" % self.objectName(), strl)
         self.insertItems(len(strl), strl)
+"""
+class QComboBox(QWidget):
 
+    _label = None
+    _combo = None
+
+    def __init__(self):
+        super(QComboBox, self).__init__()
+
+        self._label = QtWidgets.QLabel(self)
+        self._combo = QtWidgets.QComboBox(self)
+        self._combo.setMinimumHeight(25)
+        _lay = QtWidgets.QHBoxLayout()
+        _lay.addWidget(self._label)
+        _lay.addWidget(self._combo)
+
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHeightForWidth(True)
+        self._combo.setSizePolicy(sizePolicy)
+
+        self.setLayout(_lay)
+
+    def __setattr__(self, name, value):
+        if name == "label":
+            self._label.setText(str(value))
+        elif name == "itemList":
+            self._combo.insertItems(len(value), value)
+        elif name == "currentItem":
+            self._combo.setCurrentText(str(value))
+        else:
+            super(QComboBox, self).__setattr__(name, value)
+
+    def __getattr__(self, name):
+        if name == "currentItem":
+            return self._combo.currentText()
+        else:
+            return super(QComboBox, self).__getattr__(name)
+"""
 
 class QLineEdit(QtWidgets.QLineEdit):
 
@@ -904,3 +951,238 @@ class parserJson():
         strJson = strJson.replace("\n", "")
         strJson = " ".join(strJson.split())
         return strJson
+
+class CheckBox(QWidget):
+    _label = None
+    _cb = None
+
+    def __init__(self):
+        super(CheckBox, self).__init__()
+
+        self._label = QtWidgets.QLabel(self)
+        self._cb = QtWidgets.QCheckBox(self)
+        spacer = QtWidgets.QSpacerItem(
+            1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        _lay = QtWidgets.QHBoxLayout()
+        _lay.addWidget(self._cb)
+        _lay.addWidget(self._label)
+        _lay.addSpacerItem(spacer)
+        self.setLayout(_lay)
+
+    def __setattr__(self, name, value):
+        if name == "text":
+            self._label.setText(str(value))
+        elif name == "checked":
+            self._cb.setChecked(value)
+        else:
+            super(CheckBox, self).__setattr__(name, value)
+
+    def __getattr__(self, name):
+        if name == "checked":
+            return self._cb.isChecked()
+        else:
+            return super(CheckBox, self).__getattr__(name)
+        
+class LineEdit(QWidget):
+    _label = None
+    _line = None
+
+    def __init__(self):
+        super(LineEdit, self).__init__()
+
+        self._label = QtWidgets.QLabel(self)
+        self._line = QtWidgets.QLineEdit(self)
+        _lay = QtWidgets.QHBoxLayout()
+        _lay.addWidget(self._label)
+        _lay.addWidget(self._line)
+        self.setLayout(_lay)
+
+    def __setattr__(self, name, value):
+        if name == "label":
+            self._label.setText(str(value))
+        elif name == "text":
+            self._line.setText(str(value))
+        else:
+            super(LineEdit, self).__setattr__(name, value)
+
+    def __getattr__(self, name):
+        if name == "text":
+            return self._line.text()
+        else:
+            return super(LineEdit, self).__getattr__(name)
+
+FLDomDocument= QDomDocument
+FLListViewItem = QtWidgets.QListView
+
+
+class FileDialog(QtWidgets.QFileDialog):
+
+    def getOpenFileName(*args):
+        obj = None
+        parent = QtWidgets.QApplication.activeModalWidget()
+        if len(args) == 1:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]))
+        elif len(args) == 2:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]))
+        elif len(args) == 3:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]))
+        elif len(args) == 4:
+            obj = QtWidgets.QFileDialog.getOpenFileName(parent, str(args[0]), str(args[1]), str(args[2]), str(args[3]))
+
+        if obj is None:
+            return None
+
+        return obj[0]
+
+    def getExistingDirectory(basedir=None, caption=None):
+        if not basedir:
+            from pinebooolib.utils import filedir
+            basedir = filedir("..")
+        
+        import pineboolib
+        if pineboolib.project._DGI.localDesktop():
+            parent = pineboolib.project.main_window.ui_
+            ret = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
+            if ret:
+                ret = ret + "/"
+
+            return ret
+
+class MessageBox(QMessageBox):
+    @classmethod
+    def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
+        if title or form:
+            logger.warn("MessageBox: Se intentó usar título y/o form, y no está implementado.")
+        icon = QMessageBox.NoIcon
+        title = "Message"
+        if typename == "question":
+            icon = QMessageBox.Question
+            title = "Question"
+        elif typename == "information":
+            icon = QMessageBox.Information
+            title = "Information"
+        elif typename == "warning":
+            icon = QMessageBox.Warning
+            title = "Warning"
+        elif typename == "critical":
+            icon = QMessageBox.Critical
+            title = "Critical"
+        # title = unicode(title,"UTF-8")
+        # text = unicode(text,"UTF-8")
+        msg = QMessageBox(icon, str(title), str(text))
+        msg.addButton(button0)
+        if button1:
+            msg.addButton(button1)
+        if button2:
+            msg.addButton(button2)
+        return msg.exec_()
+
+    @classmethod
+    def question(cls, *args):
+        return cls.msgbox("question", *args)
+
+    @classmethod
+    def information(cls, *args):
+        return cls.msgbox("question", *args)
+
+    @classmethod
+    def warning(cls, *args):
+        return cls.msgbox("warning", *args)
+
+    @classmethod
+    def critical(cls, *args):
+        return cls.msgbox("critical", *args)
+
+QColor = QtGui.QColor
+
+class RadioButton(QtWidgets.QRadioButton):
+
+    def __ini__(self):
+        super(RadioButton, self).__init__()
+        self.setChecked(False)
+
+    def __setattr__(self, name, value):
+        if name == "text":
+            self.setText(value)
+        elif name == "checked":
+            self.setChecked(value)
+        else:
+            super(RadioButton, self).__setattr__(name, value)
+
+    def __getattr__(self, name):
+        if name == "checked":
+            return self.isChecked()
+
+
+
+class Dialog(QtWidgets.QDialog):
+    _layout = None
+    buttonBox = None
+    okButtonText = None
+    cancelButtonText = None
+    okButton = None
+    cancelButton = None
+    _tab = None
+
+    def __init__(self, title=None, f=None, desc=None):
+        # FIXME: f no lo uso , es qt.windowsflg
+        super(Dialog, self).__init__()
+        if title:
+            self.setWindowTitle(str(title))
+
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        self._layout = QtWidgets.QVBoxLayout()
+        self.setLayout(self._layout)
+        self.buttonBox = QtWidgets.QDialogButtonBox()
+        self.okButton = QtWidgets.QPushButton("&Aceptar")
+        self.cancelButton = QtWidgets.QPushButton("&Cancelar")
+        self.buttonBox.addButton(
+            self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton(
+            self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
+        self.okButton.clicked.connect(self.accept)
+        self.cancelButton.clicked.connect(self.reject)
+        from PyQt5.Qt import QTabWidget 
+        self._tab = QTabWidget()
+        self._tab.hide()
+        self._layout.addWidget(self._tab)
+        self.oKButtonText = None
+        self.cancelButtonText = None
+
+    def add(self, _object):
+        self._layout.addWidget(_object)
+
+    def exec_(self):
+        if self.okButtonText:
+            self.okButton.setText(str(self.okButtonText))
+        if (self.cancelButtonText):
+            self.cancelButton.setText(str(self.cancelButtonText))
+        self._layout.addWidget(self.buttonBox)
+
+        return super(Dialog, self).exec_()
+
+    def newTab(self, name):
+        if self._tab.isHidden():
+            self._tab.show()
+        self._tab.addTab(QtWidgets.QWidget(), str(name))
+
+    def __getattr__(self, name):
+        if name == "caption":
+            name = self.setWindowTitle
+
+        return getattr(super(Dialog, self), name)
+
+class GroupBox(QtWidgets.QGroupBox):
+    def __init__(self):
+        super(GroupBox, self).__init__()
+        self._layout = QtWidgets.QVBoxLayout()
+        self.setLayout(self._layout)
+
+    def add(self, _object):
+        self._layout.addWidget(_object)
+
+    def __setattr__(self, name, value):
+        if name == "title":
+            self.setTitle(str(value))
+        else:
+            super(GroupBox, self).__setattr__(name, value)

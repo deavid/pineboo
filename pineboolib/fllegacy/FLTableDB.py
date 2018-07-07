@@ -98,7 +98,9 @@ class FLTableDB(QtWidgets.QWidget):
     constructor
     """
 
-    def __init__(self, parent, name=None):
+    def __init__(self, parent=None, name=None):
+        if parent is None:
+            return
         super(FLTableDB, self).__init__(parent)
         self.topWidget = parent
         self.showAllPixmaps_ = True

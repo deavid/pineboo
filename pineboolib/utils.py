@@ -475,3 +475,39 @@ Carga la geometría de una ventana
 def loadGeometryForm(name):
     name = "geo/%s" % name
     return FLSettings().readEntry(name, None)
+
+
+def ustr(*t1):
+
+    return "".join([ustr1(t) for t in t1])
+
+
+def ustr1(t):
+    if isinstance(t, str):
+        return t
+
+    if isinstance(t, float):
+        try:
+            t = int(t)
+        except Exception:
+            pass
+
+    # if isinstance(t, QtCore.QString): return str(t)
+    if isinstance(t, str):
+        return str(t, "UTF-8")
+    try:
+        return str(t)
+    except Exception as e:
+        logger.exception("ERROR Coercing to string: %s", repr(t))
+        return None
+
+class StructMyDict(dict):
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError as e:
+            raise AttributeError(e)
+
+    def __setattr__(self, name, value):
+        self[name] = value

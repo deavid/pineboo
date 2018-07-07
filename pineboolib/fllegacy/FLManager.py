@@ -4,7 +4,7 @@ from PyQt5.Qt import qWarning, QApplication
 from PyQt5.QtXml import QDomDocument
 
 
-from pineboolib import decorators, qsatype
+from pineboolib import decorators
 from pineboolib.utils import filedir, auto_qt_translate_text, clearXPM
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
@@ -1069,6 +1069,7 @@ class FLManager(QtCore.QObject):
         if not self.existsTable(n):
             doc = QDomDocument()
             _path = filedir("..", "share", "pineboo", "tables")
+            from pineboolib import qsatype
             dir = qsatype.Dir_Class(_path)
             _tables = dir.entryList("%s.mtd" % n)
 
