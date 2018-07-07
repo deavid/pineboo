@@ -44,7 +44,7 @@ class FLManager(QtCore.QObject):
     db_ = None  # Base de datos a utilizar por el manejador
     initCount_ = 0  # Indica el número de veces que se ha llamado a FLManager::init()
     buffer_ = None
-
+    metadataCachedFails = []
     def __init__(self, db):
         """
         constructor
@@ -58,6 +58,8 @@ class FLManager(QtCore.QObject):
         self.cacheMetaDataSys_ = []
         self.cacheAction_ = []
         QtCore.QTimer.singleShot(100, self.init)
+        self.metadataCachedFails = []
+        
 
     def __del__(self):
         """
@@ -198,19 +200,22 @@ class FLManager(QtCore.QObject):
                         break
 
             if not cacheFound_:
-
+                
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
 
                 if not stream:
-                    qWarning(
-                        "FLManager : " + util.tr("1Error al cargar los metadatos para la tabla %s" % n))
-
+                    if not n in self.metadataCachedFails:
+                        qWarning(
+                            "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        self.metadataCachedFails.append(n)
                     return None
 
                 doc = QDomDocument(n)
                 if not util.domDocumentSetContent(doc, stream):
-                    qWarning(
-                        "FLManager : " + util.tr("2Error al cargar los metadatos para la tabla %s" % n))
+                    if not n in self.metadataCachedFails:
+                        qWarning(
+                            "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        self.metadataCachedFails.append(n)
                     return None
 
                 docElem = doc.documentElement()
