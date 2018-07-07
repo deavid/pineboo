@@ -308,15 +308,14 @@ def show_connection_dialog(project, app):
         #    print("Cargando desde ruta %r " % prjpath)
         #    project.load(prjpath)
         # elif connection_window.database:
-        if connection_window.database:
+        if getattr(connection_window,"database", None):
             logger.info("Cargando credenciales")
             project.deleteCache = FLSettings().readBoolEntry("ebcomportamiento/deleteCache", False)
             project.parseProject = FLSettings().readBoolEntry("ebcomportamiento/parseProject", False)
             project.load_db(connection_window.database, connection_window.hostname, connection_window.portnumber,
                             connection_window.username, connection_window.password, connection_window.driveralias)
-
-    if not connection_window.database:
-        sys.exit(ret)
+        else:
+            sys.exit(ret)
 
 
 def show_splashscreen(project):
