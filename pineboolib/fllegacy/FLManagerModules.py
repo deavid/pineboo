@@ -96,7 +96,7 @@ class FLManagerModules(QtCore.QObject):
     reportsDir_ = None
     queriesDir_ = None
     transDir_ = None
-
+    filesCached_ = {}
     """
     constructor
     """
@@ -105,7 +105,8 @@ class FLManagerModules(QtCore.QObject):
         super(FLManagerModules, self).__init__()
         if db:
             self.db_ = db
-
+        
+        self.filesCached_ = {}
     """
     destructor
     """
@@ -139,7 +140,7 @@ class FLManagerModules(QtCore.QObject):
     """
 
     def content(self, n):
-        query = "SELECT contenido FROM flfiles WHERE nombre='%s'" % n
+        query = "SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n
         cursor = self.db_.cursor()
         try:
             cursor.execute(query)
@@ -199,6 +200,9 @@ class FLManagerModules(QtCore.QObject):
 
     def contentCached(self, n, shaKey=None):
 
+        if n in self.filesCached_.items():
+            return self.filesCached_[n]
+
         data = None
         modId = None
         name_ = n[:n.index(".")]
@@ -238,6 +242,7 @@ class FLManagerModules(QtCore.QObject):
         else:
             data = self.content(n)
 
+        self.filesCached_[n] = data
         return data
 
     """
