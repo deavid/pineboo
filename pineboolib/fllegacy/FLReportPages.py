@@ -6,7 +6,7 @@ from pineboolib import decorators
 
 from pineboolib.fllegacy.FLPicture import FLPicture
 
-from pineboolib.kugar.mpagecollection import MPageCollection
+from pineboolib.fllegacy.kugar.mpagecollection import MPageCollection
 
 
 class FLReportPages(MPageCollection):

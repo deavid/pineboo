@@ -9,7 +9,7 @@ from pineboolib import pnqt3ui
 from pineboolib.utils import filedir
 import pineboolib
 
-from pineboolib.kugar.mreportviewer import MReportViewer
+from pineboolib.fllegacy.kugar.mreportviewer import MReportViewer
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPicture import FLPicture

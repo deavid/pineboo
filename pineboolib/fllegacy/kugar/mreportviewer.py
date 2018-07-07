@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import QWidget, QLayout, QApplication
 
 from pineboolib import decorators
 
-from pineboolib.kugar.mpagecollection import MPageCollection
-from pineboolib.kugar.mpagedisplay import MPageDisplay
+from pineboolib.fllegacy.kugar.mpagecollection import MPageCollection
+from pineboolib.fllegacy.kugar.mpagedisplay import MPageDisplay
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
