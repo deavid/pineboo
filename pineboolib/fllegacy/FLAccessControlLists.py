@@ -122,7 +122,7 @@ class FLAccessControlLists(QtCore.QObject):
 
         type = FLAccessControlFactory().type(obj)
         name = obj.name()
-        user = self._prj.conn.user()
+        user = pineboolib.project.conn.user()
         if not type or not name or not user:
             return
 

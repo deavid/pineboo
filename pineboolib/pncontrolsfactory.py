@@ -26,7 +26,7 @@ def resolveObject(name):
     return ret_
 
 
-#Clases Qt
+# Clases Qt
 QComboBox = resolveObject("QComboBox")
 QTable = resolveObject("QTable")
 QLayoutWidget = resolveObject("QLayoutWidget")
@@ -43,23 +43,24 @@ QWidget = resolveObject("QWidget")
 QtWidgets = resolveObject("QtWidgets")
 QColor = resolveObject("QColor")
 QMessageBox = resolveObject("QMessageBox")
-#Clases FL
+# Clases FL
 FLLineEdit = resolveObject("FLLineEdit")
 FLTimeEdit = resolveObject("FLTimeEdit")
 FLDateEdit = resolveObject("FLDateEdit")
 FLPixmapView = resolveObject("FLPixmapView")
 FLDomDocument = resolveObject("FLDomDocument")
 FLListViewItem = resolveObject("FLListViewItem")
-#Clases QSA
+# Clases QSA
 CheckBox = resolveObject("CheckBox")
 TextEdit = QTextEdit
 LineEdit = resolveObject("LineEdit")
 FileDialog = resolveObject("FileDialog")
 MessageBox = resolveObject("MessageBox")
-RadioButton = resolveObject("Radiobutton")
+RadioButton = resolveObject("RadioButton")
 Color = QColor
 Dialog = resolveObject("Dialog")
 GroupBox = resolveObject("GroupBox")
+
 
 class SysType(object):
     def __init__(self):
@@ -347,6 +348,7 @@ def solve_connection(sender, signal, receiver, slot):
             sender, signal, receiver, slot)
     return False
 
+
 class aqApp(object):
 
     def db():
@@ -544,7 +546,7 @@ class FormDBWidget(QWidget):
             print(name, type(ret_))
             print("Retornando", tpye(ret_))
             return ret_
-        
+
 
 def check_gc_referrers(typename, w_obj, name):
     import threading
@@ -576,7 +578,6 @@ def check_gc_referrers(typename, w_obj, name):
                 # print(" - obj:", repr(ref), [x for x in dir(ref) if getattr(ref, x) is obj])
 
     threading.Thread(target=checkfn).start()
-
 
 
 def print_stack(maxsize=1):
