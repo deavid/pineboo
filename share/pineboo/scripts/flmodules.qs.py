@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from pineboolib import qsatype
-from pineboolib.qsatype import *
+from pineboolib.qsa import *
 import traceback
 
 
-class FormInternalObj(qsatype.FormDBWidget):
+class FormInternalObj(FormDBWidget):
     def _class_init(self):
-        self.util = qsatype.FLUtil()
+        self.util = FLUtil()
 
     def init(self):
         botonCargar = self.child(u"botonCargar")
@@ -21,7 +20,7 @@ class FormInternalObj(qsatype.FormDBWidget):
     def cargarFicheroEnBD(self, nombre=None, contenido=None, log=None, directorio=None):
         if not util.isFLDefFile(contenido) and not nombre.endswith(u".mod") and not nombre.endswith(u".xpm") and not nombre.endswith(u".signatures") and not nombre.endswith(u".checksum") and not nombre.endswith(u".certificates") and not nombre.endswith(u".qs") and not nombre.endswith(u".ar") and not nombre.endswith(u".qs.py"):
             return
-        cursorFicheros = qsatype.FLSqlCursor(u"flfiles")
+        cursorFicheros = FLSqlCursor(u"flfiles")
         cursor = self.cursor()
         cursorFicheros.select(ustr(u"nombre = '", nombre, u"'"))
         if not cursorFicheros.first():
@@ -45,7 +44,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                 log.append(util.translate(u"scripts", u"- Actualizando :: ") + nombre)
                 cursorFicheros.setModeAccess(cursorFicheros.Insert)
                 cursorFicheros.refreshBuffer()
-                d = qsatype.Date()
+                d = Date()
                 cursorFicheros.setValueBuffer(u"nombre", nombre + parseString(d))
                 cursorFicheros.setValueBuffer(u"idmodulo", cursor.valueBuffer(u"idmodulo"))
                 cursorFicheros.setValueBuffer(u"contenido", contenidoCopia)
@@ -78,7 +77,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             contenido = sys.fromUnicode(contenido, localEnc)
             self.cargarFicheroEnBD(nombre, contenido, log, directorio)
             log.append(util.translate(u"scripts", u"Volcando a disco ") + nombre)
-            qsatype.File.write(qsatype.Dir.cleanDirPath(ustr(directorio, u"/", nombre)), contenido)
+            File.write(Dir.cleanDirPath(ustr(directorio, u"/", nombre)), contenido)
 
         else:
             log.append(util.translate(u"scripts", u"Error de conversión"))
@@ -87,8 +86,8 @@ class FormInternalObj(qsatype.FormDBWidget):
         return True
 
     def cargarFicheros(self, directorio=None, extension=None):
-        dir = qsatype.Dir(directorio)
-        ficheros = dir.entryList(extension, qsatype.Dir.Files)
+        dir = Dir(directorio)
+        ficheros = dir.entryList(extension, Dir.Files)
         log = self.child(u"log")
         i = 0
         while_pass = True
@@ -98,8 +97,8 @@ class FormInternalObj(qsatype.FormDBWidget):
                 while_pass = True
                 continue
             while_pass = False
-            path_ = qsatype.Dir.cleanDirPath(ustr(directorio, u"/", ficheros[i]))
-            value = qsatype.File(path_).read()
+            path_ = Dir.cleanDirPath(ustr(directorio, u"/", ficheros[i]))
+            value = File(path_).read()
             self.cargarFicheroEnBD(ficheros[i], value, log, directorio)
             sys.processEvents()
             i += 1
@@ -118,17 +117,17 @@ class FormInternalObj(qsatype.FormDBWidget):
         self.exportarADisco(directorio)
 
     def aceptarLicenciaDelModulo(self, directorio=None):
-        licencia = qsatype.Dir.cleanDirPath(ustr(directorio, u"/COPYING"))
-        if not qsatype.File.exists(licencia):
+        licencia = Dir.cleanDirPath(ustr(directorio, u"/COPYING"))
+        if not File.exists(licencia):
             MessageBox.critical(util.translate(u"scripts", ustr(u"El fichero ", licencia,
                                                                 u" con la licencia del módulo no existe.\nEste fichero debe existir para poder aceptar la licencia que contiene.")), MessageBox.Ok)
             return False
-        licencia = qsatype.File.read(licencia)
-        dialog = qsatype.Dialog()
+        licencia = File.read(licencia)
+        dialog = Dialog()
         dialog.width = 600
         dialog.caption = util.translate(u"scripts", u"Acuerdo de Licencia.")
         dialog.newTab(util.translate(u"scripts", u"Acuerdo de Licencia."))
-        texto = qsatype.TextEdit()
+        texto = TextEdit()
         texto.text = licencia
         dialog.add(texto)
         dialog.okButtonText = util.translate(u"scripts", u"Sí, acepto este acuerdo de licencia.")
@@ -176,14 +175,14 @@ class FormInternalObj(qsatype.FormDBWidget):
     def exportarADisco(self, directorio=None):
         if directorio:
             curFiles = self.child(u"lineas").cursor()
-            cursorModules = qsatype.FLSqlCursor(u"flmodules")
-            cursorAreas = qsatype.FLSqlCursor(u"flareas")
+            cursorModules = FLSqlCursor(u"flmodules")
+            cursorAreas = FLSqlCursor(u"flareas")
             if curFiles.size() != 0:
-                dir = qsatype.Dir()
+                dir = Dir()
                 idModulo = self.cursor().valueBuffer(u"idmodulo")
                 log = self.child(u"log")
                 log.text = u""
-                directorio = qsatype.Dir.cleanDirPath(ustr(directorio, u"/", idModulo))
+                directorio = Dir.cleanDirPath(ustr(directorio, u"/", idModulo))
                 if not dir.fileExists(directorio):
                     dir.mkdir(directorio)
                 if not dir.fileExists(ustr(directorio, u"/forms")):
@@ -296,10 +295,10 @@ class FormInternalObj(qsatype.FormDBWidget):
                     cursorAreas.select(ustr(u"idarea = '", cursorModules.valueBuffer(u"idarea"), u"'"))
                     cursorAreas.first()
                     areaName = cursorAreas.valueBuffer(u"descripcion")
-                    if not qsatype.File.exists(ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".xpm")):
+                    if not File.exists(ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".xpm")):
                         sys.write(u"ISO-8859-1", ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".xpm"), cursorModules.valueBuffer(u"icono"))
                         log.append(util.translate(u"scripts", ustr(u"* Exportando ", cursorModules.valueBuffer(u"idmodulo"), u".xpm (Regenerado).")))
-                    if not qsatype.File.exists(ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".mod")):
+                    if not File.exists(ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".mod")):
                         contenido = ustr(u'<!DOCTYPE MODULE>\n<MODULE>\n<name>', cursorModules.valueBuffer(u"idmodulo"), u'</name>\n<alias>QT_TRANSLATE_NOOP("FLWidgetApplication","', cursorModules.valueBuffer(u"descripcion"), u'")</alias>\n<area>', cursorModules.valueBuffer(u"idarea"), u'</area>\n<areaname>QT_TRANSLATE_NOOP("FLWidgetApplication","',
                                          areaName, u'")</areaname>\n<version>', cursorModules.valueBuffer(u"version"), u'</version>\n<icon>', cursorModules.valueBuffer(u"idmodulo"), u'.xpm</icon>\n<flversion>', cursorModules.valueBuffer(u"version"), u'</flversion>\n<description>', cursorModules.valueBuffer(u"idmodulo"), u'</description>\n</MODULE>')
                         sys.write(u"ISO-8859-1", ustr(directorio, u"/", cursorModules.valueBuffer(u"idmodulo"), u".mod"), contenido)

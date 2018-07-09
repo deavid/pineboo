@@ -1324,7 +1324,7 @@ def parse_ast(elem):
 
 def file_template(ast):
     yield "line", "# -*- coding: utf-8 -*-"
-    yield "line", "from pineboolib.qsatype import *"
+    yield "line", "from pineboolib.qsa import *"
     # yield "line", "from pineboolib.qsaglobals import *"
     yield "line", ""
     sourceclasses = etree.ElementTree.Element("Source")

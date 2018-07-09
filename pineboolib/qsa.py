@@ -13,6 +13,7 @@ from PyQt5 import QtCore, QtGui
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
 from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil
 from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
+from pineboolib.fllegacy.aqsobjects.AQS import AQS
 # FLObjects
 from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
@@ -28,15 +29,13 @@ from pineboolib.utils import ustr, ustr1
 
 from pineboolib.pncontrolsfactory import CheckBox, TextEdit, LineEdit, FileDialog, MessageBox, Color, RadioButton, Dialog, GroupBox
 from pineboolib.pncontrolsfactory import FLListViewItem, FLDomDocument
-from pineboolib.pncontrolsfactory import QTextEdit, QWidget, QtWidgets, QDateEdit, QColor, QMessageBox,QComboBox
+from pineboolib.pncontrolsfactory import QTextEdit, QWidget, QtWidgets, QDateEdit, QColor, QMessageBox, QComboBox
 from pineboolib.pncontrolsfactory import SysType, aqApp, FormDBWidget
 logger = logging.getLogger(__name__)
 
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 sys = SysType()
-
-
-
+AQS = AQS()
 
 
 def Function(args, source):
@@ -75,7 +74,7 @@ function anon(%s) {
 def Object(x=None):
     if x is None:
         x = {}
-    
+
     from pineboolib.utils import StructMyDict
     return StructMyDict(x)
 
@@ -135,8 +134,6 @@ class Array(object):
         return len_
 
 
-
-
 def Boolean(x=False):
     return bool(x)
 
@@ -186,12 +183,6 @@ def isNaN(x):
         return True
 
 
-    
-
-
-
-
-
 class Input(object):
     @classmethod
     def getText(cls, question, prevtxt, title):
@@ -214,10 +205,6 @@ def qsa_text(obj):
         return obj.text()
     except Exception:
         return obj.text
-
-
-
-
 
 
 def RegExp(strRE):
@@ -296,7 +283,7 @@ class Date(object):
 
     def getMilliseconds(self):
         return self.time_.msec()
-    
+
     @classmethod
     def parse(cls, value):
         return QtCore.QDate.fromString(value)
@@ -465,7 +452,6 @@ class QString(str):
             return self[start:]
         else:
             return self[start:start + length]
-
 
 
 def debug(txt):

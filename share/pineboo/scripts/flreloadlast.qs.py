@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from pineboolib import qsatype
-from pineboolib.qsaglobals import *
-from pineboolib.qsatype import *
-import traceback
+from pineboolib.qsa import *
 
 
 class interna(object):
-    ctx = qsatype.Object()
+    ctx = Object()
 
     def __init__(self, context=None):
         self.ctx = context
@@ -21,7 +18,7 @@ class interna(object):
 class oficial(interna):
     pathLocal = ""
     idFuncional = ""
-    bloqueo = qsatype.Boolean()
+    bloqueo = Boolean()
 
     def __init__(self, context=None):
         super(oficial, self).__init__(context)
@@ -46,7 +43,7 @@ class ifaceCtx(head):
         super(ifaceCtx, self).__init__(context)
 
 
-class FormInternalObj(qsatype.FormDBWidget):
+class FormInternalObj(FormDBWidget):
     def _class_init(self):
         self.iface = ifaceCtx(self)
 
@@ -54,7 +51,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         pass
 
     def interna_main(self):
-        util = qsatype.FLUtil()
+        util = FLUtil()
         setting = ustr(u"scripts/sys/modLastModule_", sys.nameBD())
         fichMod = util.readSettingEntry(setting)
         if not fichMod:
@@ -68,8 +65,8 @@ class FormInternalObj(qsatype.FormDBWidget):
         sys.reinit()
 
     def oficial_cargarModulo(self, nombreFichero=None):
-        util = qsatype.FLUtil()
-        fichero = qsatype.File(nombreFichero)
+        util = FLUtil()
+        fichero = File(nombreFichero)
         modulo = None
         descripcion = None
         area = None
@@ -77,10 +74,10 @@ class FormInternalObj(qsatype.FormDBWidget):
         version = None
         nombreIcono = None
         versionMinimaFL = None
-        dependencias = qsatype.Array()
-        fichero.open(qsatype.File.ReadOnly)
+        dependencias = Array()
+        fichero.open(File.ReadOnly)
         f = fichero.read()
-        xmlModule = qsatype.FLDomDocument()
+        xmlModule = FLDomDocument()
         if xmlModule.setContent(f):
             nodeModule = xmlModule.namedItem(u"MODULE")
             if not nodeModule:
@@ -131,8 +128,8 @@ class FormInternalObj(qsatype.FormDBWidget):
 
         descripcion = self.iface.traducirCadena(descripcion, fichero.path, modulo)
         desArea = self.iface.traducirCadena(desArea, fichero.path, modulo)
-        fichIcono = qsatype.File(ustr(fichero.path, u"/", nombreIcono))
-        fichIcono.open(qsatype.File.ReadOnly)
+        fichIcono = File(ustr(fichero.path, u"/", nombreIcono))
+        fichIcono.open(File.ReadOnly)
         icono = fichIcono.read()
         # DEBUG:: Argument 0 not understood
         # DEBUG:: <Value><Constant><regexbody><regexchar
@@ -154,7 +151,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                 MessageBox.warning(util.translate(u"scripts", u"Error al crear el área:\n") + area, MessageBox.Ok, MessageBox.NoButton)
                 return False
         recargar = util.sqlSelect(u"flmodules", u"idmodulo", ustr(u"idmodulo = '", modulo, u"'"))
-        curModulo = qsatype.FLSqlCursor(u"flmodules")
+        curModulo = FLSqlCursor(u"flmodules")
         if recargar:
              # WITH_START
             curModulo.select(ustr(u"idmodulo = '", modulo, u"'"))
@@ -174,7 +171,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         curModulo.setValueBuffer(u"icono", icono)
         curModulo.commitBuffer()
         # WITH_END
-        curSeleccion = qsatype.FLSqlCursor(u"flmodules")
+        curSeleccion = FLSqlCursor(u"flmodules")
         curModulo.setMainFilter(ustr(u"idmodulo = '", modulo, u"'"))
         curModulo.editRecord()
         formRecordflmodules.cargarDeDisco(ustr(fichero.path, u"/"), False)
@@ -209,10 +206,10 @@ class FormInternalObj(qsatype.FormDBWidget):
         return 0
 
     def oficial_traducirCadena(self, cadena=None, path=None, modulo=None):
-        util = qsatype.FLUtil()
+        util = FLUtil()
         if cadena.find(u"QT_TRANSLATE_NOOP") == - 1:
             return cadena
-        cadena = qsatype.QString(cadena).mid(41, len(cadena) - 43)
+        cadena = QString(cadena).mid(41, len(cadena) - 43)
         nombreFichero = None
         try:
             nombreFichero = ustr(path, u"/translations/", modulo, u".", util.getIdioma(), u".ts")
@@ -220,12 +217,12 @@ class FormInternalObj(qsatype.FormDBWidget):
             e = traceback.format_exc()
             return cadena
 
-        if not qsatype.File.exists(nombreFichero):
+        if not File.exists(nombreFichero):
             return cadena
-        fichero = qsatype.File(nombreFichero)
-        fichero.open(qsatype.File.ReadOnly)
+        fichero = File(nombreFichero)
+        fichero.open(File.ReadOnly)
         f = fichero.read()
-        xmlTranslations = qsatype.FLDomDocument()
+        xmlTranslations = FLDomDocument()
         if xmlTranslations.setContent(f):
             nodeMess = xmlTranslations.elementsByTagName(u"message")
             i = 0

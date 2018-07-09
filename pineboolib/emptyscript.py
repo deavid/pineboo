@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib import qsatype
+from pineboolib.qsa import *
 
 
 class interna(object):
-    ctx = qsatype.Object()
+    ctx = Object()
 
     def __init__(self, context=None):
         self.ctx = context
@@ -28,7 +28,7 @@ class ifaceCtx(head):
         super(ifaceCtx, self).__init__(context)
 
 
-class FormInternalObj(qsatype.FormDBWidget):
+class FormInternalObj(FormDBWidget):
     def _class_init(self):
         # DEBUG:: Const Declaration:
         self.iface = ifaceCtx(self)

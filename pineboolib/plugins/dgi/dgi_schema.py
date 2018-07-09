@@ -528,7 +528,7 @@ class FLDateEdit(QDateEdit):
         self.setDisplayFormat(order)
 
     def setDate(self, d=None):
-        from pineboolib.qsatype import Date
+        from pineboolib.qsa import Date
 
         if d in (None, "NAN"):
             d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")

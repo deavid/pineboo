@@ -1074,8 +1074,8 @@ class FLManager(QtCore.QObject):
         if not self.existsTable(n):
             doc = QDomDocument()
             _path = filedir("..", "share", "pineboo", "tables")
-            from pineboolib import qsatype
-            dir = qsatype.Dir_Class(_path)
+            from pineboolib import qsa
+            dir = qsa.Dir_Class(_path)
             _tables = dir.entryList("%s.mtd" % n)
 
             for f in _tables:

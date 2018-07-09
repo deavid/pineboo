@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-from pineboolib import qsatype
-from pineboolib.qsaglobals import *
-import traceback
+from pineboolib.qsa import *
 sys = SysType()
 
-class FormInternalObj(qsatype.FormDBWidget):
+class FormInternalObj(FormDBWidget):
     def _class_init(self):
         pass
     

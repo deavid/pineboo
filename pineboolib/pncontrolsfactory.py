@@ -105,7 +105,7 @@ class SysType(object):
         return filedir("..")
 
     def __getattr__(self, fun_):
-        ret_ = eval(fun_, pineboolib.qsatype.__dict__)
+        ret_ = eval(fun_, pineboolib.qsa.__dict__)
         if ret_ is not None:
             return ret_
 
@@ -361,7 +361,7 @@ class FormDBWidget(QWidget):
     parent_ = None
     iface = None
 
-    logger = logging.getLogger("qsatype.FormDBWidget")
+    logger = logging.getLogger("pnControlsFactory.FormDBWidget")
 
     def __init__(self, action, project, parent=None):
         import pineboolib

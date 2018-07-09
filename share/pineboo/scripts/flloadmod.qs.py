@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
-from pineboolib import qsatype
-from pineboolib.qsaglobals import *
-from pineboolib.qsatype import *
+from pineboolib.qsa import *
 import traceback
 
 
-class FormInternalObj(qsatype.FormDBWidget):
+class FormInternalObj(FormDBWidget):
     def _class_init(self):
-        self.util = qsatype.FLUtil()
+        self.util = FLUtil()
 
     def main(self):
         continuar = MessageBox.warning(util.translate(
@@ -16,7 +14,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             return
         nombreFichero = FileDialog.getOpenFileName(u"modfiles(*.mod)", util.translate(u"scripts", u"Elegir Fichero"))
         if nombreFichero:
-            fichero = qsatype.File(nombreFichero)
+            fichero = File(nombreFichero)
             if not formRecordflmodules.aceptarLicenciaDelModulo(ustr(fichero.path, u"/")):
                 MessageBox.critical(util.translate(u"scripts", u"Imposible cargar el módulo.\nLicencia del módulo no aceptada."), MessageBox.Ok)
                 return
@@ -27,10 +25,10 @@ class FormInternalObj(qsatype.FormDBWidget):
             version = None
             nombreIcono = None
             versionMinimaFL = None
-            dependencias = qsatype.Array()
-            fichero.open(qsatype.File.ReadOnly)
+            dependencias = Array()
+            fichero.open(File.ReadOnly)
             f = fichero.read()
-            xmlModule = qsatype.FLDomDocument()
+            xmlModule = FLDomDocument()
             if xmlModule.setContent(f):
                 nodeModule = xmlModule.namedItem(u"MODULE")
                 if not nodeModule:
@@ -81,8 +79,8 @@ class FormInternalObj(qsatype.FormDBWidget):
 
             descripcion = traducirCadena(descripcion, fichero.path, modulo)
             desArea = traducirCadena(desArea, fichero.path, modulo)
-            fichIcono = qsatype.File(ustr(fichero.path, u"/", nombreIcono))
-            fichIcono.open(qsatype.File.ReadOnly)
+            fichIcono = File(ustr(fichero.path, u"/", nombreIcono))
+            fichIcono.open(File.ReadOnly)
             icono = fichIcono.read()
             # DEBUG:: Argument 0 not understood
             # DEBUG:: <Value><Constant><regexbody><regexchar
@@ -106,17 +104,17 @@ class FormInternalObj(qsatype.FormDBWidget):
                                                util.translate(u"scripts", u" no existe. ¿Desea crearla?"), MessageBox.Yes, MessageBox.No)
                 if crearArea == MessageBox.No:
                     return
-                dialogo = qsatype.Dialog()
+                dialogo = Dialog()
                 dialogo.width = 400
                 dialogo.caption = ustr(util.translate(u"scripts", u"Crear área "), area, u":")
                 dialogo.okButtonText = util.translate(u"scripts", u"Aceptar")
                 dialogo.cancelButtonText = util.translate(u"scripts", u"Cancelar")
-                leDesArea = qsatype.LineEdit()
+                leDesArea = LineEdit()
                 leDesArea.text = desArea
                 leDesArea.label = util.translate(u"scripts", u"Descripción: ")
                 dialogo.add(leDesArea)
                 if dialogo.exec_():
-                    curArea = qsatype.FLSqlCursor(u"flareas")
+                    curArea = FLSqlCursor(u"flareas")
                     curArea.setModeAccess(curArea.Insert)
                     curArea.refreshBuffer()
                     curArea.setValueBuffer(u"idarea", area)
@@ -132,7 +130,7 @@ class FormInternalObj(qsatype.FormDBWidget):
                                                                                                                   u" ya existe. ¿Desea recargarlo?"), MessageBox.Yes, MessageBox.No)
                 if recargar == MessageBox.No:
                     return
-            curModulo = qsatype.FLSqlCursor(u"flmodules")
+            curModulo = FLSqlCursor(u"flmodules")
             if recargar == MessageBox.Yes:
                  # WITH_START
                 curModulo.select(ustr(u"idmodulo = '", modulo, u"'"))
@@ -152,7 +150,7 @@ class FormInternalObj(qsatype.FormDBWidget):
             curModulo.setValueBuffer(u"icono", icono)
             curModulo.commitBuffer()
             # WITH_END
-            curSeleccion = qsatype.FLSqlCursor(u"flmodules")
+            curSeleccion = FLSqlCursor(u"flmodules")
             curModulo.setMainFilter(ustr(u"idmodulo = '", modulo, u"'"))
             curModulo.editRecord()
             formRecordflmodules.cargarDeDisco(ustr(fichero.path, u"/"), False)
@@ -165,7 +163,7 @@ class FormInternalObj(qsatype.FormDBWidget):
 
     def valorPorClave(self, tabla=None, campo=None, where=None):
         valor = None
-        query = qsatype.FLSqlQuery()
+        query = FLSqlQuery()
         query.setTablesList(tabla)
         query.setSelect(campo)
         query.setFrom(tabla)
@@ -241,12 +239,12 @@ class FormInternalObj(qsatype.FormDBWidget):
             e = traceback.format_exc()
             return cadena
 
-        if not qsatype.File.exists(nombreFichero):
+        if not File.exists(nombreFichero):
             return cadena
-        fichero = qsatype.File(nombreFichero)
-        fichero.open(qsatype.File.ReadOnly)
+        fichero = File(nombreFichero)
+        fichero.open(File.ReadOnly)
         f = fichero.read()
-        xmlTranslations = qsatype.FLDomDocument()
+        xmlTranslations = FLDomDocument()
         if xmlTranslations.setContent(f):
             nodeMess = xmlTranslations.elementsByTagName(u"message")
             i = 0

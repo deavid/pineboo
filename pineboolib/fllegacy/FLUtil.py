@@ -681,7 +681,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de dias que sumar. Si es negativo resta dias
         @return Fecha con el desplazamiento de dias
         """
-        from pineboolib.qsatype import Date
+        from pineboolib.qsa import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
 
@@ -700,7 +700,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de meses que sumar. Si es negativo resta meses
         @return Fecha con el desplazamiento de meses
         """
-        from pineboolib.qsatype import Date
+        from pineboolib.qsa import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
 
@@ -719,7 +719,7 @@ class FLUtil(QtCore.QObject):
         @param offset Numero de años que sumar. Si es negativo resta años
         @return Fecha con el desplazamiento de años
         """
-        from pineboolib.qsatype import Date
+        from pineboolib.qsa import Date
         if isinstance(fecha, Date):
             fecha = fecha.date_
 
@@ -738,7 +738,7 @@ class FLUtil(QtCore.QObject):
         @param d2 Fecha de destino
         @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
         """
-        from pineboolib.qsatype import Date
+        from pineboolib.qsa import Date
         if isinstance(d1, Date):
             d1 = d1.toString()
 

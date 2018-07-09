@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
-from pineboolib import qsatype
-from pineboolib.qsaglobals import *
+from pineboolib.qsa import *
 import traceback
 from PyQt5.QtGui import QPalette
 sys = SysType()
 
 
-class FormInternalObj(qsatype.FormDBWidget):
+class FormInternalObj(FormDBWidget):
     def _class_init(self):
         pass
 
     def main(self):
         mng = aqApp.db().managerModules()
-        self.w_ = qsatype.QWidget()
+        self.w_ = QWidget()
         self.w_ = mng.createUI(u"ebcomportamiento.ui", None, self.w_)
         w = self.w_
         botonAceptar = w.child(u"pbnAceptar")
@@ -51,7 +50,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         w.child(u"leCO").show()
 
     def leerValorGlobal(self, valorName=None):
-        util = qsatype.FLUtil()
+        util = FLUtil()
         valor = util.sqlSelect(u"flsettings", u"valor", ustr(u"flkey='", valorName, u"'"))
         if valor is None:
             valor = ""
@@ -59,15 +58,15 @@ class FormInternalObj(qsatype.FormDBWidget):
         return valor
 
     def grabarValorGlobal(self, valorName=None, value=None):
-        util = qsatype.FLUtil()
+        util = FLUtil()
         if not util.sqlSelect(u"flsettings", u"flkey", ustr(u"flkey='", valorName, u"'")):
             util.sqlInsert(u"flsettings", u"flkey,valor", ustr(valorName, u",", value))
         else:
             util.sqlUpdate(u"flsettings", u"valor", value, ustr(u"flkey = '", valorName, u"'"))
 
     def leerValorLocal(self, valorName=None):
-        util = qsatype.FLUtil()
-        settings = qsatype.AQSettings()
+        util = FLUtil()
+        settings = AQSettings()
         if valorName == u"isDebuggerMode":
             valor = settings.readBoolEntry(ustr(u"application/", valorName))
         else:
@@ -75,7 +74,7 @@ class FormInternalObj(qsatype.FormDBWidget):
         return valor
 
     def grabarValorLocal(self, valorName=None, value=None):
-        settings = qsatype.AQSettings()
+        settings = AQSettings()
         if valorName == "maxPixImages" and value is None:
             value = 600
 
@@ -87,7 +86,7 @@ class FormInternalObj(qsatype.FormDBWidget):
     def initEventFilter(self):
         w = self.w_
         w.eventFilterFunction = ustr(w.objectName, u".eventFilter")
-        w.allowedEvents = qsatype.Array([AQS.Close])
+        w.allowedEvents = Array([AQS.Close])
         w.installEventFilter(w)
 
     def eventFilter(self, o=None, e=None):

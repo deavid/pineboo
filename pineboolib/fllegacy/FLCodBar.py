@@ -3,7 +3,6 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmapCache, QPixmap, QColor
 from PyQt5.QtWidgets import qApp
 from pineboolib import decorators
-from pineboolib import qsatype
 
 import barcode
 import traceback

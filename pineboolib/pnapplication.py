@@ -837,7 +837,7 @@ class ModuleActions(object):
     """
 
     def load(self):
-        from pineboolib import qsatype as qsatype_dict_modules  # Ojo: Almacena un arbol con los módulos cargados
+        from pineboolib import qsa as qsa_dict_modules  # Ojo: Almacena un arbol con los módulos cargados
 
         self.parser = etree.ElementTree.XMLParser(html=0, encoding="ISO-8859-15")
         self.tree = etree.ElementTree.parse(self.path, self.parser)
@@ -852,11 +852,11 @@ class ModuleActions(object):
         action.table = None
         action.scriptform = self.mod.name
         pineboolib.project.actions[action.name] = action
-        if hasattr(qsatype_dict_modules, action.name):
+        if hasattr(qsa_dict_modules, action.name):
             self.logger.debug(
                 "No se sobreescribe variable de entorno %s", action.name)
         else:
-            setattr(qsatype_dict_modules, action.name, DelayedObjectProxyLoader(
+            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
 
         for xmlaction in self.root:
@@ -868,20 +868,20 @@ class ModuleActions(object):
                 name = "unnamed"
             pineboolib.project.actions[name] = action
             if name != "unnamed":
-                if hasattr(qsatype_dict_modules, "form" + name):
+                if hasattr(qsa_dict_modules, "form" + name):
                     self.logger.debug(
                         "No se sobreescribe variable de entorno %s", "form" + name)
                 else:
                     delayed_action = DelayedObjectProxyLoader(
                         action.load,
                         name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
-                    setattr(qsatype_dict_modules, "form" + name, delayed_action)
+                    setattr(qsa_dict_modules, "form" + name, delayed_action)
 
-                if hasattr(qsatype_dict_modules, "formRecord" + name):
+                if hasattr(qsa_dict_modules, "formRecord" + name):
                     self.logger.debug(
                         "No se sobreescribe variable de entorno %s", "formRecord" + name)
                 else:
-                    setattr(qsatype_dict_modules, "formRecord" + name, DelayedObjectProxyLoader(
+                    setattr(qsa_dict_modules, "formRecord" + name, DelayedObjectProxyLoader(
                         action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
 
     """
