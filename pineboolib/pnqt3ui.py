@@ -276,6 +276,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 col = int(c.get("column"))
             except Exception:
                 row = col = None
+
             if c.tag == "property":
                 if pineboolib.project._DGI.localDesktop():
                     process_property(c, widget.layout)
@@ -292,7 +293,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         widget.layout.addWidget(new_widget)
                 elif mode == "grid":
                     if pineboolib.project._DGI.localDesktop():
-                        widget.layout.addWidget(new_widget, row, col)
+                        rowSpan = c.get("rowspan") or 1
+                        colSpan = c.get("colspan") or 1
+                        widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
             elif c.tag == "spacer":
                 sH = None
                 sV = None
