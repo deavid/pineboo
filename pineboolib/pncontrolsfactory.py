@@ -79,6 +79,7 @@ class SysType(object):
         return text
 
     def osName(self):
+        from pineboolib.fllegacy.FLUtil import FLUtil
         util = FLUtil()
         return util.getOS()
 
