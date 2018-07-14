@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-import logging
+
 import os
-import fnmatch
-import weakref
 import re
-import codecs
 import traceback
 
 from PyQt5 import QtCore
+
+import logging
 
 # AQSObjects
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
@@ -315,7 +314,9 @@ class Process(QtCore.QProcess):
         super(Process, self).stop()
 
     def writeToStdin(self, stdin_):
-        stdin_as_bytes = stdin_.encode('utf-8')
+        import sys
+        encoding = sys.getfilesystemencoding()
+        stdin_as_bytes = stdin_.encode(encoding)
         self.writeData(stdin_as_bytes)
         # self.closeWriteChannel()
 
@@ -332,6 +333,8 @@ class Process(QtCore.QProcess):
             super(Process, self).__setattr__(name, value)
 
     def execute(comando):
+        import sys
+        encoding = sys.getfilesystemencoding()
 
         pro = QtCore.QProcess()
         array = comando.split(" ")
@@ -341,8 +344,8 @@ class Process(QtCore.QProcess):
         pro.setArguments(argumentos)
         pro.start()
         pro.waitForFinished(30000)
-        Process.stdout = pro.readAllStandardOutput().data().decode()
-        Process.stderr = pro.readAllStandardError().data().decode()
+        Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
+        Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
 
 class Dir(object):
@@ -359,6 +362,7 @@ class Dir(object):
         # p = os.walk(self.path_)
         retorno = []
         try:
+            import fnmatch
             for file in os.listdir(self.path_):
                 if fnmatch.fnmatch(file, patron):
                     retorno.append(file)
@@ -420,7 +424,7 @@ class File(QtCore.QFile):
         else:
             file_ = self.fichero
             encode = self.encode_
-
+        import codecs
         f = codecs.open(file_, encoding=encode)
         ret = ""
         for l in f:
@@ -437,6 +441,7 @@ class File(QtCore.QFile):
         # return in_.readAll()
 
     def write(self, text):
+        import codecs
         f = codecs.open(self.fichero, encoding=self.encode_, mode="w+")
         f.write(text)
         f.seek(0)
