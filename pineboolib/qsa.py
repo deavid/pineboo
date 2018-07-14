@@ -248,7 +248,10 @@ class Date(object):
         super(Date, self).__init__()
         if len(args) == 1:
             date_ = args[0]
-            self.date_ = QtCore.QDate(date_)
+            if isinstance(date_, str):
+                self.date_ = QtCore.QDate.fromString(date_, "yyyy-MM-dd")
+            else:
+                self.date_ = QtCore.QDate(date_)
             self.time_ = QtCore.QTime(0, 0)
         elif not args:
             self.date_ = QtCore.QDate.currentDate()
@@ -258,8 +261,8 @@ class Date(object):
             self.time_ = QtCore.QTime(0, 0)
 
     def toString(self, *args, **kwargs):
-        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("dd"), self.date_.toString("MM"), self.date_.toString(
-            "yyyy"), self.time_.toString("hh"), self.time_.toString("mm"), self.time_.toString("ss"))
+        texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"), self.date_.toString("MM"), self.date_.toString(
+            "dd"), self.time_.toString("hh"), self.time_.toString("mm"), self.time_.toString("ss"))
         return texto
 
     def getYear(self):
