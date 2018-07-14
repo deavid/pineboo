@@ -62,7 +62,7 @@ class FormInternalObj(FormDBWidget):
 
     def interna_main(self):
         util = FLUtil()
-        setting = ustr(u"scripts/sys/modLastDirModules_", sys.nameDB())
+        setting = ustr(u"scripts/sys/modLastDirModules_", sys.nameBD())
         dirAnt = util.readSettingEntry(setting)
         if dirAnt:
             dirMods = FileDialog.getExistingDirectory(dirAnt, util.translate(u"scripts", u"Directorio de Módulos"))
