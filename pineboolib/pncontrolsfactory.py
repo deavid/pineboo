@@ -82,7 +82,7 @@ class SysType(object):
         util = FLUtil()
         return util.getOS()
 
-    def nameDB(self):
+    def nameBD(self):
         return pineboolib.project.conn.DBName()
 
     def setCaptionMainWidget(self, value):
