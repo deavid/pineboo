@@ -45,6 +45,7 @@ class FLManager(QtCore.QObject):
     initCount_ = 0  # Indica el número de veces que se ha llamado a FLManager::init()
     buffer_ = None
     metadataCachedFails = []
+
     def __init__(self, db):
         """
         constructor
@@ -59,7 +60,6 @@ class FLManager(QtCore.QObject):
         self.cacheAction_ = []
         QtCore.QTimer.singleShot(100, self.init)
         self.metadataCachedFails = []
-        
 
     def __del__(self):
         """
@@ -200,7 +200,7 @@ class FLManager(QtCore.QObject):
                         break
 
             if not cacheFound_:
-                
+
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
 
                 if not stream:
@@ -1075,7 +1075,7 @@ class FLManager(QtCore.QObject):
             doc = QDomDocument()
             _path = filedir("..", "share", "pineboo", "tables")
             from pineboolib import qsa
-            dir = qsa.Dir_Class(_path)
+            dir = qsa.Dir(_path)
             _tables = dir.entryList("%s.mtd" % n)
 
             for f in _tables:
