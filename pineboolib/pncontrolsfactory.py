@@ -513,7 +513,6 @@ class FormDBWidget(QWidget):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                print("Creando cursor", self, self._action.table)
                 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
                 self.cursor_ = FLSqlCursor(self._action)
 

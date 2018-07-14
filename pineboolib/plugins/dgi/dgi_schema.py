@@ -130,10 +130,9 @@ class dgi_schema(object):
 
     def __getattr__(self, name):
         return resolveObject(name)
-    
+
 
 class QWidget(Qt.QWidget):
-    
 
     def child(self, name):
         return self.findChild(QtWidgets.QWidget, name)
@@ -751,6 +750,8 @@ class QComboBox(QtWidgets.QComboBox):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_insertStringList" % self.objectName(), strl)
         self.insertItems(len(strl), strl)
+
+
 """
 class QComboBox(QWidget):
 
@@ -790,6 +791,7 @@ class QComboBox(QWidget):
         else:
             return super(QComboBox, self).__getattr__(name)
 """
+
 
 class QLineEdit(QtWidgets.QLineEdit):
 
@@ -952,6 +954,7 @@ class parserJson():
         strJson = " ".join(strJson.split())
         return strJson
 
+
 class CheckBox(QWidget):
     _label = None
     _cb = None
@@ -982,7 +985,8 @@ class CheckBox(QWidget):
             return self._cb.isChecked()
         else:
             return super(CheckBox, self).__getattr__(name)
-        
+
+
 class LineEdit(QWidget):
     _label = None
     _line = None
@@ -1011,7 +1015,8 @@ class LineEdit(QWidget):
         else:
             return super(LineEdit, self).__getattr__(name)
 
-FLDomDocument= QDomDocument
+
+FLDomDocument = QDomDocument
 FLListViewItem = QtWidgets.QListView
 
 
@@ -1036,9 +1041,9 @@ class FileDialog(QtWidgets.QFileDialog):
 
     def getExistingDirectory(basedir=None, caption=None):
         if not basedir:
-            from pinebooolib.utils import filedir
+            from pineboolib.utils import filedir
             basedir = filedir("..")
-        
+
         import pineboolib
         if pineboolib.project._DGI.localDesktop():
             parent = pineboolib.project.main_window.ui_
@@ -1047,6 +1052,7 @@ class FileDialog(QtWidgets.QFileDialog):
                 ret = ret + "/"
 
             return ret
+
 
 class MessageBox(QMessageBox):
     @classmethod
@@ -1093,7 +1099,9 @@ class MessageBox(QMessageBox):
     def critical(cls, *args):
         return cls.msgbox("critical", *args)
 
+
 QColor = QtGui.QColor
+
 
 class RadioButton(QtWidgets.QRadioButton):
 
@@ -1112,7 +1120,6 @@ class RadioButton(QtWidgets.QRadioButton):
     def __getattr__(self, name):
         if name == "checked":
             return self.isChecked()
-
 
 
 class Dialog(QtWidgets.QDialog):
@@ -1142,7 +1149,7 @@ class Dialog(QtWidgets.QDialog):
             self.cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
-        from PyQt5.Qt import QTabWidget 
+        from PyQt5.Qt import QTabWidget
         self._tab = QTabWidget()
         self._tab.hide()
         self._layout.addWidget(self._tab)
@@ -1171,6 +1178,7 @@ class Dialog(QtWidgets.QDialog):
             name = self.setWindowTitle
 
         return getattr(super(Dialog, self), name)
+
 
 class GroupBox(QtWidgets.QGroupBox):
     def __init__(self):
