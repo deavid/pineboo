@@ -86,7 +86,7 @@ class SysType(object):
         return pineboolib.project.conn.DBName()
 
     def setCaptionMainWidget(self, value):
-        self.mainWidget().setWindowTitle("Pineboo - %s" % value)
+        self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, value))
         pass
 
     def toUnicode(self, text, format):
