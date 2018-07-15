@@ -3,11 +3,12 @@ from PyQt5 import QtCore
 from PyQt5 import QtXml
 
 from pineboolib import decorators
-from pineboolib.rml.kut2rml import kut2rml
-from pineboolib.rml.rml2pdf import parsepdf
 from pineboolib.utils import filedir
+ 
+
 
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
+from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
@@ -17,6 +18,8 @@ import datetime
 
 
 class FLReportEngine(object):
+    
+    parser_ = None
 
     class FLReportEnginePrivate(object):
 
@@ -30,6 +33,8 @@ class FLReportEngine(object):
 
             self.qDoubleFieldList_ = []
             self.qImgFields_ = []
+            
+            
 
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
@@ -116,6 +121,8 @@ class FLReportEngine(object):
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
         self.relDpi_ = 78.
         self.rd = None
+        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser") or pineboolib.project.kugarPlugin.defaultParser()
+        self.parser_ = pineboolib.project.kugarPlugin.loadParser(parserName)
 
     def rptXmlData(self):
         return self.rd
@@ -232,13 +239,11 @@ class FLReportEngine(object):
     @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
         if self.rt.find("KugarTemplate") > -1:
-            parser = kut2rml()
-            self.rt = parser.parse(self.d_.template_, self.rt, self.rd.toString(1))
+            self.rt = self.parser_.parse(self.d_.template_, self.rt, self.rd.toString(1))
             if self.rt:
                 pdfname = pineboolib.project.getTempDir()
                 pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-                parser_ = parsepdf()
-                parser_.parse(self.rt, pdfname)
+                self.parser_.parsePDF(self.rt, pdfname)
 
             # print(self.rd.toString(1))
         """
