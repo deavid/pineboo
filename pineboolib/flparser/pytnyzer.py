@@ -170,8 +170,10 @@ class Function(ASTPython):
         withoutself = self.elem.get("withoutself")
         if self.elem.get("parent_").get("parent_").get("name") == "FormInternalObj":
             className = name.split("_")[0]
-            if len(className) > 1 and className not in classesDefined:
-                if className == "" and not classesDefined:
+            if className not in classesDefined:
+                print("class", className)
+                if className == "":
+                    yield "line", ""
                     className = "FormInternalObj"
                 yield "line", "#/** @class_definition %s */" % className
                 classesDefined.append(className)
