@@ -171,7 +171,6 @@ class Function(ASTPython):
         if self.elem.get("parent_").get("parent_").get("name") == "FormInternalObj":
             className = name.split("_")[0]
             if className not in classesDefined:
-                print("class", className)
                 if className == "":
                     yield "line", ""
                     className = "FormInternalObj"
