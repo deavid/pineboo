@@ -4,7 +4,6 @@ from PyQt5 import QtXml
 
 from pineboolib import decorators
 from pineboolib.utils import filedir
- 
 
 
 from pineboolib.fllegacy.FLDiskCache import FLDiskCache
@@ -13,12 +12,13 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
 
+
+import logging
 import os
-import datetime
 
 
 class FLReportEngine(object):
-    
+
     parser_ = None
 
     class FLReportEnginePrivate(object):
@@ -33,8 +33,6 @@ class FLReportEngine(object):
 
             self.qDoubleFieldList_ = []
             self.qImgFields_ = []
-            
-            
 
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
@@ -121,6 +119,7 @@ class FLReportEngine(object):
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
         self.relDpi_ = 78.
         self.rd = None
+        self.logger = logging.getLogger("FLReportEngine")
         parserName = FLSettings().readEntry("ebcomportamiento/kugarParser") or pineboolib.project.kugarPlugin.defaultParser()
         self.parser_ = pineboolib.project.kugarPlugin.loadParser(parserName)
 
@@ -195,11 +194,12 @@ class FLReportEngine(object):
         else:
             mgr = self.d_.qry_.db().managerModules()
 
-        rpt = mgr.contentCached(t + ".kut")
-        if not rpt:
-            rpt = mgr.contentCached(t + ".rlab")
+        self.rt = mgr.contentCached(t + ".kut")
 
-        self.rt = rpt
+        if not self.rt:
+            self.logger.error("No se ha podido cargar %s.kut", t)
+            return False
+
         return True
 
     @decorators.BetaImplementation
@@ -239,12 +239,9 @@ class FLReportEngine(object):
     @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
         if self.rt.find("KugarTemplate") > -1:
-            self.rt = self.parser_.parse(self.d_.template_, self.rt, self.rd.toString(1))
-            if self.rt:
-                pdfname = pineboolib.project.getTempDir()
-                pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-                self.parser_.parsePDF(self.rt, pdfname)
+            self.pdfFile = self.parser_.parse(self.d_.template_, self.rt, self.rd.toString(1))
 
+            return True if self.pdfFile else False
             # print(self.rd.toString(1))
         """
         fr = MReportEngine.RenderReportFlags.FillRecords.value

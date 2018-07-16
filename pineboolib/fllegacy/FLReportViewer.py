@@ -18,10 +18,14 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
+from pineboolib.pncontrolsfactory import SysType
+
 AQ_USRHOME = "."  # FIXME
 
 
 class FLReportViewer(QtWidgets.QMainWindow):
+
+    pdfFile = None
 
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None):
         pParam = 0 if parent and embedInParent else 0
@@ -150,7 +154,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
             print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
             return
 
-        self.show()
+        pineboolib.project.call("sys.openUrl", [self.pdfFile], None, True)
         self.eventloop.exec_()
 
         if self.embedInParent_:
@@ -217,8 +221,9 @@ class FLReportViewer(QtWidgets.QMainWindow):
             return False
         """
         ret = self.rptViewer_.renderReport(initRow, initCol, append_or_flags)
-        self.report_ = self.rptViewer_.reportPages()
-        return ret
+        #self.report_ = self.rptViewer_.reportPages()
+        self.pdfFile = self.rptEngine_.pdfFile
+        return True if ret else False
 
     @decorators.BetaImplementation
     def slotFirstPage(self):
@@ -588,7 +593,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
                 # self.rptEngine_.setStyleName(style)
                 self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
                 return True
-            return False
+
         return False
 
     @decorators.BetaImplementation
