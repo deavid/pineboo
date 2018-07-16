@@ -338,11 +338,12 @@ class Process(QtCore.QProcess):
     def execute(comando):
         import sys
         encoding = sys.getfilesystemencoding()
-
         pro = QtCore.QProcess()
-        array = comando.split(" ")
-        programa = array[0]
-        argumentos = array[1:]
+        if isinstance(comando, str):
+            comando = comando.split(" ")
+
+        programa = comando[0]
+        argumentos = comando[1:]
         pro.setProgram(programa)
         pro.setArguments(argumentos)
         pro.start()

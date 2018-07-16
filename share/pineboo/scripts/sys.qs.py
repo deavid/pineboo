@@ -321,10 +321,10 @@ class AbanQDbDumper(object):
         if sys.osName() == u"WIN32":
             myDump += u".exe"
             command = Array([myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                                                                                                                         db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()])
+                                                                                                                 db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()])
         else:
             command = Array([myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                                                                                                                         db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()])
+                                                                                                                 db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()])
 
         if not self.launchProc(command):
             self.setState(False, sys.translate(u"No se ha podido volcar la base de datos a disco.\n") +
@@ -2052,28 +2052,28 @@ class FormInternalObj(FormDBWidget):
 
     @classmethod
     def openUrl(self, url=None):
-        if not url or (url) != u"string" or url == '':
+        if not url:
             return False
         s07_when = sys.osName()
         s07_do_work, s07_work_done = False, False
         if s07_when == u"LINUX":
             s07_do_work, s07_work_done = True, True
         if s07_do_work:
-            if launchCommand(Array([u"xdg-open", url])):
+            if self.launchCommand([u"xdg-open", url]):
                 return True
-            if launchCommand(Array([u"gnome-open", url])):
+            if self.launchCommand([u"gnome-open", url]):
                 return True
-            if launchCommand(Array([u"kfmclient openURL", url])):
+            if self.launchCommand([u"kfmclient openURL", url]):
                 return True
-            if launchCommand(Array([u"kfmclient exec", url])):
+            if self.launchCommand([u"kfmclient exec", url]):
                 return True
-            if launchCommand(Array([u"firefox", url])):
+            if self.launchCommand([u"firefox", url]):
                 return True
-            if launchCommand(Array([u"mozilla", url])):
+            if self.launchCommand([u"mozilla", url]):
                 return True
-            if launchCommand(Array([u"opera", url])):
+            if self.launchCommand([u"opera", url]):
                 return True
-            if launchCommand(Array([u"google-chrome", url])):
+            if self.launchCommand([u"google-chrome", url]):
                 return True
             s07_do_work = False  # BREAK
 
@@ -2084,22 +2084,20 @@ class FormInternalObj(FormDBWidget):
                 rxp = RegExp(u"&")
                 rxp.global_ = True
                 url = url.replace(rxp, u"^&")
-            return launchCommand(Array([u"cmd.exe", u"/C", u"start", u"", url]))
+            return self.launchCommand([u"cmd.exe", u"/C", u"start", u"", url])
             s07_do_work = False  # BREAK
 
         if s07_when == u"MACX":
             s07_do_work, s07_work_done = True, True
         if s07_do_work:
-            return launchCommand(Array([u"open", url]))
+            return self.launchCommand([u"open", url])
             s07_do_work = False  # BREAK
         return False
 
     @classmethod
-    def launchCommand(self, command=None):
-        if not command or (command) != u"object" or len(command) == 0:
-            return False
+    def launchCommand(self, comando):
         try:
-            Process.execute(command)
+            Process.execute(comando)
             return True
         except Exception as e:
             e = traceback.format_exc()
