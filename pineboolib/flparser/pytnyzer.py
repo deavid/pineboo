@@ -140,15 +140,20 @@ class Source(ASTPython):
             yield "line", "pass"
 
 
+classesDefined = []
+
+
 class Class(ASTPython):
     def generate(self, **kwargs):
         name = self.elem.get("name")
         extends = self.elem.get("extends", "object")
 
+        yield "line", "#/** @class_declaration %s */" % name
         yield "line", "class %s(%s):" % (name, extends)
         yield "begin", "block-class-%s" % (name)
         for source in self.elem.findall("Source"):
             source.set("parent_", self.elem)
+            classesDefined.clear()
             for obj in parse_ast(source).generate():
                 yield obj
         yield "end", "block-class-%s" % (name)
@@ -163,6 +168,13 @@ class Function(ASTPython):
             # Anonima:
             name = "_"
         withoutself = self.elem.get("withoutself")
+        if self.elem.get("parent_").get("parent_").get("name") == "FormInternalObj":
+            className = name.split("_")[0]
+            if len(className) > 1 and className not in classesDefined:
+                if className == "" and not classesDefined:
+                    className = "FormInternalObj"
+                yield "line", "#/** @class_definition %s */" % className
+                classesDefined.append(className)
 
         # returns = self.elem.get("returns", None)
         parent = self.elem.get("parent_")
@@ -1326,6 +1338,8 @@ def file_template(ast):
     yield "line", "# -*- coding: utf-8 -*-"
     yield "line", "from pineboolib.qsa import *"
     # yield "line", "from pineboolib.qsaglobals import *"
+    yield "line", ""
+    yield "line", "#/** @file */"
     yield "line", ""
     sourceclasses = etree.ElementTree.Element("Source")
     for cls in ast.findall("Class"):
