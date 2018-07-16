@@ -25,6 +25,7 @@ from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
+from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
 """
 Almacena los datos del serividor de la BD principal
@@ -67,7 +68,7 @@ class Project(object):
     _DGI = None
     deleteCache = None
     path = None
-
+    kugarPluging = None
     """
     Constructor
     """
@@ -97,8 +98,11 @@ class Project(object):
         self.tables = {}
         self.files = {}
         self.cur = None
+        self.kugarPlugin = PNKugarPlugins()
+        
         if not self._DGI.localDesktop():
             self._DGI.extraProjectInit()
+            
 
     """
     Destructor

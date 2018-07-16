@@ -2,6 +2,7 @@
 from pineboolib.qsa import *
 import traceback
 from PyQt5.QtGui import QPalette
+import pineboolib
 sys = SysType()
 
 
@@ -41,6 +42,8 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
+        w.child(u"cbKugarParser").addItems(pineboolib.project.kugarPlugin.listAvalibles())
+        w.child(u"cbKugarParser").setCurrentText(pineboolib.project.kugarPlugin.defaultParser())
         w.child(u"leCO").hide()
         self.colorActual_ = self.leerValorLocal(u"colorObligatorio")
         if self.colorActual_ is "":
@@ -119,6 +122,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal(u"deleteCache", w.child(u"cbDeleteCache").checked)
         self.grabarValorLocal(u"parseProject", w.child(u"cbParseProject").checked)
         self.grabarValorLocal(u"mobileMode", w.child(u"cbMobile").checked)
+        self.grabarValorLocal(u"kugarParser", w.child(u"cbKugarParser").currentText())
         self.cerrar_clicked()
 
     def seleccionarColor_clicked(self):
