@@ -34,11 +34,26 @@ class PNKugarPlugins(object):
 
         self.defaultParser_ = "kut2rml"
 
+    """
+    Retorna una lista con los nombres de los conversores disponibles
+    @return lista de nombres
+    """
+
     def listAvalibles(self):
         return self.avalibleParsers_
 
+    """
+    Retorna el nombre del parser por defecto
+    @return Nombre del parser por defecto
+    """
+
     def defaultParser(self):
         return self.defaultParser_
+
+    """
+    Carga un parser determinado 
+    @param name. Nombre del parser para usar por defecto
+    """
 
     def loadParser(self, name):
         if not name in self.avalibleParsers_:

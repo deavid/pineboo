@@ -15,7 +15,6 @@ class FLSettings(QtCore.QObject):
         return ret
 
     def readEntry(self, _key, _def=None, retOk=False):
-
         ret = self.s.value(_key, None)  # devuelve un QVariant !!!!
 
         if "geo" in _key:
@@ -25,10 +24,10 @@ class FLSettings(QtCore.QObject):
             if not ret:
                 ret = _def
         else:
-            if str(ret) == "":
+            if ret in ["", None] and _def is not None:
                 ret = _def
 
-        # print("Retornando %s ---> %s" % (_key, ret))
+        #print("Retornando %s ---> %s (%s)" % (_key, ret, type(ret)))
         return ret
 
     @decorators.BetaImplementation
