@@ -328,6 +328,7 @@ class FLFormSearchDB(FLFormDB):
             self.reject()
 
         if self.isHidden():
+            self.saveGeometry()
             self.closed.emit()
             super(FLFormSearchDB, self).closeEvent(e)
             self.deleteLater()

@@ -397,6 +397,19 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.snapShot().save(fi, "PNG")
 
+    def saveGeometry(self):
+        #pW = self.parentWidget()
+        # if not pW:
+        geo = QtCore.QSize(self.width(), self.height())
+        if self.isMinimized():
+            geo.setWidth(1)
+        elif self.isMaximized():
+            geo.setWidth(9999)
+        # else:
+        #    geo = QtCore.QSize(pW.width(), pW.height())
+
+        saveGeometryForm(self.geoName(), geo)
+
     """
     Establece el título de la ventana.
 
@@ -479,13 +492,13 @@ class FLFormDB(QtWidgets.QDialog):
         self.resize(self.mainWidget().size())
         super(FLFormDB, self).show()
 
-    """
-    Maximiza el formulario
-    """
-    @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
-    def setMaximized(self):
-        return True
+    #"""
+    # Maximiza el formulario
+    #"""
+    #@QtCore.pyqtSlot()
+    #@decorators.NotImplementedWarn
+    # def setMaximized(self):
+    #    return True
 
     """
     Muestra el script asociado al formulario en el Workbench para depurar
@@ -668,6 +681,8 @@ class FLFormDB(QtWidgets.QDialog):
                 except Exception:
                     print("closeEvent: Error al ocultar el frame")
 
+        self.saveGeometry()
+
         self.setCursor(None)
         self.closed.emit()
         super(FLFormDB, self).closeEvent(e)
@@ -710,7 +725,7 @@ class FLFormDB(QtWidgets.QDialog):
 
     """
     Captura evento ocultar
-    """
+    
 
     def hideEvent(self, h):
         pW = self.parentWidget()
@@ -723,8 +738,8 @@ class FLFormDB(QtWidgets.QDialog):
         else:
             geo = QtCore.QSize(pW.width(), pW.height())
 
-        saveGeometryForm(self.geoName(), geo)
-
+        #saveGeometryForm(self.geoName(), geo)
+    """
     """
     Captura evento de entrar foco
     """
