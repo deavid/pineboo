@@ -427,7 +427,7 @@ class FormDBWidget(QWidget):
 
     def closeEvent(self, event):
         can_exit = True
-        print("FormDBWidget: closeEvent para accion %r" % self._action.name)
+        self.logger.debug("closeEvent para accion %r", self._action.name)
         check_gc_referrers("FormDBWidget:" + self.__class__.__name__,
                            weakref.ref(self), self._action.name)
         if can_exit:
@@ -481,7 +481,7 @@ class FormDBWidget(QWidget):
             ret = None
         else:
             if ret is None:
-                qWarning("WARN: No se encontro el control %s" % childName)
+                self.logger.warn("WARN: No se encontro el control %s", childName)
 
         # Para inicializar los controles si se llaman desde qsa antes de
         # mostrar el formulario.
