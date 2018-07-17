@@ -289,7 +289,6 @@ class FLTableDB(QtWidgets.QWidget):
             self.cursorAux = None
 
         else:
-
             self.cursor_.setContext(self.cursorAux.context())
             if self.showed:
                 try:
@@ -299,7 +298,7 @@ class FLTableDB(QtWidgets.QWidget):
 
             self.cursorAux.newBuffer.connect(self.refresh)
 
-        if self.cursorAux and isinstance(self.topWidget, FLFormSearchDB):
+        if self.cursorAux and isinstance(self.topWidget, FLFormSearchDB) and not cursorTopWidget:  # Si hay cursorTopWidget no machaco el cursor de topWidget
             self.topWidget.setCaption(self.cursor_.metadata().alias())
             self.topWidget.setCursor(self.cursor_)
 
