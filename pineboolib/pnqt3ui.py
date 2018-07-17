@@ -43,7 +43,7 @@ def loadUi(path, widget, parent=None):
     try:
         tree = etree.ElementTree.parse(path)
     except Exception as e:
-        self.logger.exception("Qt3Ui: Unable to read UI: %r", path)
+        logger.exception("Qt3Ui: Unable to read UI: %r", path)
         raise
     root = tree.getroot()
     ICONS = {}
