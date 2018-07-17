@@ -202,7 +202,11 @@ class FLFieldDB(QtWidgets.QWidget):
         self.cursorBackup_ = False
         self.partDecimal_ = None
         self.initCursor()
-        self.initEditor()
+        if self.tableName_ and not self.cursor_.db().manager().metadata(self.tableName_):
+            self.cursor_ = None
+            self.initFakeEditor()
+        else:
+            self.initEditor()
 
     def setName(self, value):
         self.name = str(value)
@@ -1668,7 +1672,6 @@ class FLFieldDB(QtWidgets.QWidget):
         contenido en el campo (p.e: si el campo contiene una fecha crea
         e inicia un QDataEdit)
         """
-        # print("Inicializando editor", self.fieldName_, self)
         if not self.cursor_:
             return
 
@@ -2708,27 +2711,31 @@ class FLFieldDB(QtWidgets.QWidget):
     def setEnabled(self, enable):
         # print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
         if self.editor_:
-            if hasattr(self.editor_, "setReadOnly"):
-                tMD = self.cursor_.metadata()
-                field = tMD.field(self.fieldName_)
-
-                self.editor_.setReadOnly(not enable)
-                if not enable or not field.editable():
-                    self.editor_.setStyleSheet('background-color: #f0f0f0')
-                else:
-                    # TODO: al re-habilitar un control, restaurar el color que
-                    # le toca
-                    if not field.allowNull() and not (field.type() == "time" or field.type() == "date"):
-                        self.editor_.setStyleSheet(
-                            'background-color:' + self.notNullColor())
-                    else:
-                        self.editor_.setStyleSheet('background-color: #fff')
-
+            if not self.cursor():
+                self.editor_.setDisabled(True)
+                self.editor_.setStyleSheet('background-color: #f0f0f0')
             else:
-                self.editor_.setEnabled(enable)
+
+                if hasattr(self.editor_, "setReadOnly"):
+                    tMD = self.cursor_.metadata()
+                    field = tMD.field(self.fieldName_)
+
+                    self.editor_.setReadOnly(not enable)
+                    if not enable or not field.editable():
+                        self.editor_.setStyleSheet('background-color: #f0f0f0')
+                    else:
+                        # TODO: al re-habilitar un control, restaurar el color que
+                        # le toca
+                        if not field.allowNull() and not (field.type() == "time" or field.type() == "date"):
+                            self.editor_.setStyleSheet('background-color:' + self.notNullColor())
+                        else:
+                            self.editor_.setStyleSheet('background-color: #fff')
+
+                else:
+                    self.editor_.setEnabled(enable)
         if self.pushButtonDB:
             self.pushButtonDB.setEnabled(enable)
-        return
+        return  # Mirar esto!! FIXME
         if enable:
             self.setAttribute(Qt.WA_ForceDisabled, False)
         else:
@@ -2904,7 +2911,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.fieldAlias_ = self.fieldName_
 
         if not self.editor_:
-            self.editor_ = pineboolib.pncontrolsfactory.QLineEdit()
+            self.editor_ = pineboolib.pncontrolsfactory.QLineEdit(self)
             self.editor_.setSizePolicy(
                 QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
             self.textLabelDB.setSizePolicy(
@@ -2933,16 +2940,17 @@ class FLFieldDB(QtWidgets.QWidget):
 
         prty = ""
         if self.tableName_:
-            prty += "tN:" + self.tableName_ + ","
+            prty += "tN:" + str(self.tableName_).upper() + ","
         if self.foreignField_:
-            prty += "fF:" + self.foreignField_ + ","
+            prty += "fF:" + str(self.foreignField_).upper() + ","
         if self.fieldRelation_:
-            prty += "fR:" + self.fieldRelation_ + ","
+            prty += "fR:" + str(self.fieldRelation_).upper() + ","
         if self.actionName_:
-            prty += "aN:" + self.actionName_ + ","
+            prty += "aN:" + str(self.actionName_).upper() + ","
 
         if prty:
             self.editor_.setText(prty)
+            self.setEnabled(False)
             self.editor_.home(False)
 
         if self.maximumSize().width() < 80:
