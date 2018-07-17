@@ -407,9 +407,9 @@ class FormDBWidget(QWidget):
         except KeyError:
             self.logger.exception("Error al eliminar una señal que no se encuentra")
 
-    def __del__(self):
-        # self.doCleanUp()
-        print("FormDBWidget: Borrando form para accion %r" % self._action.name)
+    # def __del__(self):
+    #    self.doCleanUp()
+    #    print("FormDBWidget: Borrando form para accion %r %s %s" % (self._action.name, self.iface, self))
 
     def obj(self):
         return self
@@ -448,11 +448,13 @@ class FormDBWidget(QWidget):
                 self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
         self._formconnections.clear()
 
-        if hasattr(self, 'iface'):
+        if getattr(self, 'iface', None) is not None:
             check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
                                weakref.ref(self.iface), self._action.name)
             del self.iface.ctx
             del self.iface
+            self._action.formrecord_widget = None
+            del self
 
     def child(self, childName):
         try:

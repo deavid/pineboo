@@ -670,7 +670,6 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.setCursor(None)
         self.closed.emit()
-
         super(FLFormDB, self).closeEvent(e)
         self.deleteLater()
         try:
@@ -678,6 +677,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.script.form = None
             self.iface = None
             self.widget.close()
+            del self.known_instances[(self.__class__, self.action)]
             del self.widget
         except Exception:
             pass
