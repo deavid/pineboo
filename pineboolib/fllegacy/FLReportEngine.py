@@ -120,7 +120,7 @@ class FLReportEngine(object):
         self.relDpi_ = 78.
         self.rd = None
         self.logger = logging.getLogger("FLReportEngine")
-        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser") or pineboolib.project.kugarPlugin.defaultParser()
+        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser", pineboolib.project.kugarPlugin.defaultParser())
         self.parser_ = pineboolib.project.kugarPlugin.loadParser(parserName)
 
     def rptXmlData(self):
