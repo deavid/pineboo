@@ -119,8 +119,10 @@ def loadUi(path, widget, parent=None):
                 ifx = widget.iface
             if hasattr(ifx, fn_name):
                 try:
-                    getattr(sender, sg_name).connect(
-                        getattr(ifx, fn_name))
+                    from pineboolib import pncontrolsfactory
+                    # getattr(sender, sg_name).connect(
+                    #    getattr(ifx, fn_name))
+                    pncontrolsfactory.connect(sender, sg_name, ifx, fn_name)
                 except Exception as e:
                     logger.exception("Error connecting:",
                                      sender, signal_name,
