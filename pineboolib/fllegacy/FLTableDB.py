@@ -1980,7 +1980,7 @@ class FLTableDB(QtWidgets.QWidget):
                     self.putFirstCol)
 
         if not textSearch:
-            textSearch = self.cursor_.value(field.name())
+            textSearch = self.cursor_.valueBuffer(field.name())
 
         self.refresh(True)
 

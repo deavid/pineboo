@@ -5,7 +5,7 @@ from PyQt5.Qt import QRegExp
 import pineboolib
 from pineboolib import decorators
 
-from pineboolib.utils import DefFun, XMLStruct
+from pineboolib.utils import XMLStruct
 from pineboolib.pncursortablemodel import PNCursorTableModel
 
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -776,7 +776,9 @@ class FLSqlCursor(QtCore.QObject):
     actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
+        super(FLSqlCursor, self).__init__()
         if name is None:
+            logger.warn("Se está iniciando un cursor Huerfano (%s)", self)
             return
 
         if isinstance(name, XMLStruct):
@@ -785,7 +787,6 @@ class FLSqlCursor(QtCore.QObject):
         else:
             self.actionName_ = name
 
-        super(FLSqlCursor, self).__init__()
         self._valid = False
         self.d = FLSqlCursorPrivate()
         self.d.cursor_ = self
@@ -898,8 +899,8 @@ class FLSqlCursor(QtCore.QObject):
         else:
             return None
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
+    # def __getattr__(self, name):
+    #    return DefFun(self, name)
 
     def setName(self, name, autop):
         self.name = name
@@ -916,6 +917,14 @@ class FLSqlCursor(QtCore.QObject):
             logger.trace("FLSqlCursor(%s) Esta devolviendo un metadata vacio", getattr(self, "curName()", None))
             return None
         return self.d.metadata_
+
+    """
+    Informa del registro seleccionado actualmente por el cursor
+    @retunr int con el número de registro
+    """
+
+    def currentRegister(self):
+        return self.d._currentregister
 
     """
     Para obtener el modo de acceso actual del cursor.
@@ -2736,22 +2745,24 @@ class FLSqlCursor(QtCore.QObject):
         # if self.metadata():
         #     if not self.metadata().inCache():
         #         delMtd = True
+        if hasattr(self, "d"):
+            msg = None
+            mtd = self.metadata()
 
-        msg = None
-        mtd = self.metadata()
-
-        # FIXME: Pongo que tiene que haber mas de una trasaccion abierta
-        if len(self.d.transactionsOpened_) > 0:
-            logger.notice("FLSqlCursor(%s).Transacciones abiertas!! %s", self.curName(), self.d.transactionsOpened_)
-            t = self.curName()
-            if mtd:
-                t = mtd.name()
-            msg = ("Se han detectado transacciones no finalizadas en la última operación.\n"
-                   "Se van a cancelar las transacciones pendientes.\n"
-                   "Los últimos datos introducidos no han sido guardados, por favor\n"
-                   "revise sus últimas acciones y repita las operaciones que no\n"
-                   "se han guardado.\nSqlCursor::~SqlCursor: %s\n" % t)
-            self.rollbackOpened(-1, msg)
+            # FIXME: Pongo que tiene que haber mas de una trasaccion abierta
+            if len(self.d.transactionsOpened_) > 0:
+                logger.notice("FLSqlCursor(%s).Transacciones abiertas!! %s", self.curName(), self.d.transactionsOpened_)
+                t = self.curName()
+                if mtd:
+                    t = mtd.name()
+                msg = ("Se han detectado transacciones no finalizadas en la última operación.\n"
+                       "Se van a cancelar las transacciones pendientes.\n"
+                       "Los últimos datos introducidos no han sido guardados, por favor\n"
+                       "revise sus últimas acciones y repita las operaciones que no\n"
+                       "se han guardado.\nSqlCursor::~SqlCursor: %s\n" % t)
+                self.rollbackOpened(-1, msg)
+        else:
+            logger.warn("Se está eliminando un cursor Huerfano (%s)", self)
 
         # self.d.countRefCursor = self.d.countRefCursor - 1     FIXME
 
