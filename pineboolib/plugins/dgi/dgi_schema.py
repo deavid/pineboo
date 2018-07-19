@@ -325,6 +325,8 @@ class FLPixmapView(QtWidgets.QScrollArea):
         if not self.autoScaled_:
             self.resize(self.pixmap_.size().width(),
                         self.pixmap_.size().height())
+        else:
+            self.pixmapView_.setScaledContents(True)
         self.pixmapView_.clear()
         self.pixmapView_.setPixmap(self.pixmap_)
         self.repaint()

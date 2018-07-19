@@ -1230,7 +1230,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editorImg_ = pineboolib.pncontrolsfactory.FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
-                self.editorImg_.setMaximumSize(self.maximumSize())
+                self.editorImg_.setMaximumSize(150, 22)
                 self.editorImg_.setMinimumSize(self.minimumSize())
                 self.editorImg_.setAutoScaled(True)
                 # self.FLWidgetFieldDBLayout.removeWidget(self.pushButtonDB)
@@ -2386,7 +2386,7 @@ class FLFieldDB(QtWidgets.QWidget):
         v = f.exec_(field.relationM1().foreignField())
         f.close()
         if c:
-            c.deletelater()
+            del c
         if v:
             # self.setValue("")
             self.setValue(v)
