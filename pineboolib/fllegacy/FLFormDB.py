@@ -458,6 +458,7 @@ class FLFormDB(QtWidgets.QDialog):
         super(FLFormDB, self).close()
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_close" % self.__class__.__module__, None)
+        self.isClosing_ = False
 
     """
     Se activa al pulsar el boton aceptar
@@ -682,7 +683,6 @@ class FLFormDB(QtWidgets.QDialog):
                     print("closeEvent: Error al ocultar el frame")
 
         self.saveGeometry()
-
         self.setCursor(None)
         self.closed.emit()
         super(FLFormDB, self).closeEvent(e)
