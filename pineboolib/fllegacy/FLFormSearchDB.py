@@ -305,15 +305,15 @@ class FLFormSearchDB(FLFormDB):
     """
 
     def closeEvent(self, e):
-        self.frameGeometry()
-        if self.focusWidget():
-            fdb = self.focusWidget().parentWidget()
-            try:
-                if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
-                    fdb.autoComFrame_.hide()
-                    return
-            except Exception:
-                pass
+        # self.frameGeometry()
+        # if self.focusWidget():
+        #    fdb = self.focusWidget().parentWidget()
+        #    try:
+        #        if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
+        #            fdb.autoComFrame_.hide()
+        #            return
+        #    except Exception:
+        #        pass
 
         if self.cursor_ and self.pushButtonCancel:
             if not self.pushButtonCancel.isEnabled():
@@ -328,8 +328,8 @@ class FLFormSearchDB(FLFormDB):
             self.reject()
 
         if self.isHidden():
-            self.saveGeometry()
-            self.closed.emit()
+            # self.saveGeometry()
+            # self.closed.emit()
             super(FLFormSearchDB, self).closeEvent(e)
             self.deleteLater()
 
