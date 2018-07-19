@@ -28,7 +28,7 @@ from pineboolib.utils import ustr, ustr1
 
 from pineboolib.pncontrolsfactory import CheckBox, TextEdit, LineEdit, FileDialog, MessageBox, Color, RadioButton, Dialog, GroupBox
 from pineboolib.pncontrolsfactory import FLListViewItem, FLDomDocument
-from pineboolib.pncontrolsfactory import QTextEdit, QWidget, QtWidgets, QDateEdit, QColor, QMessageBox, QComboBox
+from pineboolib.pncontrolsfactory import QTextEdit, QWidget, QtWidgets, QDateEdit, QColor, QMessageBox, QComboBox, QTable
 from pineboolib.pncontrolsfactory import SysType, aqApp, FormDBWidget
 logger = logging.getLogger(__name__)
 
