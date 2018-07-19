@@ -2974,6 +2974,10 @@ class FLSqlCursor(QtCore.QObject):
     def chooseRecord(self):
         return True
 
+    @decorators.Deprecated
+    def setForwardOnly(self, b):
+        pass
+
     """
     Manda el contenido del buffer al cursor, o realiza la acción oportuna para el cursor.
 
