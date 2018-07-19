@@ -1197,13 +1197,12 @@ class FLManager(QtCore.QObject):
         @param largeValue Valor de gran tamaño del campo
         @return Clave de referencia al valor
         """
-
         if largeValue[0:3] == "RK@" or not mtd:
             return None
 
         tableName = mtd.name()
-        if self.isSystemTable(tableName):
-            return None
+        # if self.isSystemTable(tableName):
+        #    return None
 
         tableLarge = None
 
@@ -1229,6 +1228,7 @@ class FLManager(QtCore.QObject):
 
         util = FLUtil()
         sha = str(util.sha1(largeValue))
+        print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
         q = FLSqlQuery()
         q.setSelect("refkey")
