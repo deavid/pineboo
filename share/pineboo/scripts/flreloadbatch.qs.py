@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
-from pineboolib.utils import clearXPM
 
 
 class interna(object):
@@ -201,7 +200,6 @@ class FormInternalObj(FormDBWidget):
         fichIcono = File(ustr(fichero.path, u"/", nombreIcono))
         fichIcono.open(File.ReadOnly)
         icono = fichIcono.read()
-        icono = clearXPM(icono)
         # DEBUG:: Argument 0 not understood
         # DEBUG:: <Value><Constant><regexbody><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/><regexchar arg00="PERIOD"/><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/></regexbody></Constant></Value>
         #versionSys = sys.version().match(unknownarg)
