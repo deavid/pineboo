@@ -291,7 +291,7 @@ class QToolButton(QtWidgets.QToolButton):
         return self.isDown()
 
 
-class FLPixmapView(QtWidgets.QWidget):
+class FLPixmapView(QtWidgets.QScrollArea):
     frame_ = None
     scrollView = None
     autoScaled_ = None
@@ -309,6 +309,9 @@ class FLPixmapView(QtWidgets.QWidget):
         self.lay_ = QtWidgets.QHBoxLayout(self)
         self.pixmap_ = QtGui.QPixmap()
         self.pixmapView_ = QtWidgets.QLabel(self)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.pixmapView_.setSizePolicy(sizePolicy)
         self.lay_.addWidget(self.pixmapView_)
         self._parent = parent
 
