@@ -778,7 +778,7 @@ class FLSqlCursor(QtCore.QObject):
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
         super(FLSqlCursor, self).__init__()
         if name is None:
-            logger.warn("Se está iniciando un cursor Huerfano (%s)", self)
+            logger.warn("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
             return
 
         if isinstance(name, XMLStruct):
