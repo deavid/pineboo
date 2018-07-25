@@ -872,6 +872,7 @@ class FLUtil(QtCore.QObject):
 
         @return Número redondeado
         """
+
         # tmd = self._prj.conn.manager().metadata(table)
         tmd = pineboolib.project.conn.manager().metadata(table)
         if not tmd:
@@ -885,7 +886,7 @@ class FLUtil(QtCore.QObject):
         ret = self.buildNumber(n, 'float', fmd.partDecimal())
         if tmd and not tmd.inCache():
             del tmd
-        return ret
+        return str(ret)
 
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
         """
