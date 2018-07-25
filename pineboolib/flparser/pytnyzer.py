@@ -676,7 +676,7 @@ class Variable(ASTPython):
                 # if parent2.tag == "Source" and parent3.tag == "Class":
                 #    yield "expr", "None"
                 # else:
-                if dtype in ("FLSqlCursor", "FLTable"):
+                if dtype in ("FLSqlCursor", "FLTableDB"):
                     yield "expr", "None"
                 else:
                     yield "expr", "%s()" % dtype
