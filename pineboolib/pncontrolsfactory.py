@@ -30,6 +30,7 @@ def resolveObject(name):
 QComboBox = resolveObject("QComboBox")
 QTable = resolveObject("QTable")
 QLayoutWidget = resolveObject("QLayoutWidget")
+QToolButton = resolveObject("QToolButton")
 QTabWidget = resolveObject("QTabWidget")
 QLabel = resolveObject("QLabel")
 QGroupBox = resolveObject("QGroupBox")
@@ -43,6 +44,7 @@ QWidget = resolveObject("QWidget")
 QtWidgets = resolveObject("QtWidgets")
 QColor = resolveObject("QColor")
 QMessageBox = resolveObject("QMessageBox")
+QButtonGroup = resolveObject("QButtonGroup")
 # Clases FL
 FLLineEdit = resolveObject("FLLineEdit")
 FLTimeEdit = resolveObject("FLTimeEdit")
@@ -50,6 +52,7 @@ FLDateEdit = resolveObject("FLDateEdit")
 FLPixmapView = resolveObject("FLPixmapView")
 FLDomDocument = resolveObject("FLDomDocument")
 FLListViewItem = resolveObject("FLListViewItem")
+FLTable = resolveObject("FLTable")
 # Clases QSA
 CheckBox = resolveObject("CheckBox")
 TextEdit = QTextEdit

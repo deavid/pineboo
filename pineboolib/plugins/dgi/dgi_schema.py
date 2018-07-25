@@ -11,8 +11,11 @@ import pineboolib
 import sys
 import datetime
 import re
+import logging
 from PyQt5.QtXml import QDomDocument
 from PyQt5.Qt import QMessageBox
+
+logger = logging.getLogger(__name__)
 
 
 def resolveObject(name):
@@ -101,19 +104,6 @@ class dgi_schema(object):
 
     def loadReferences(self):
         return
-        """
-        self.FLLineEdit = FLLineEdit
-        self.FLDateEdit = FLDateEdit
-        self.FLTimeEdit = FLTimeEdit
-        self.FLPixmapView = FLPixmapView
-        self.FLSpinBox = FLSpinBox
-
-        self.QPushButton = QPushButton
-        self.QLineEdit = QLineEdit
-        self.QComboBox = QComboBox
-        self.QCheckBox = QCheckBox
-        self.QTextEdit = QTextEdit
-        """
 
     def mobilePlatform(self):
         return self._mobile
@@ -279,16 +269,6 @@ class QPushButton(QtWidgets.QPushButton):
 
     def setOn(self, value):
         self.on_ = value
-
-
-class QToolButton(QtWidgets.QToolButton):
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
-    @QtCore.pyqtProperty(bool)
-    def on(self):
-        return self.isDown()
 
 
 class FLPixmapView(QtWidgets.QScrollArea):
@@ -492,19 +472,23 @@ class QListView(QtWidgets.QListView):
 class QDateEdit(QtWidgets.QDateEdit):
 
     _parent = None
+    _date = None
 
     def __init__(self, parent):
         super(QDateEdit, self).__init__(parent)
         super(QDateEdit, self).setDisplayFormat("dd-MM-yyyy")
         self._parent = parent
+        self.date_ = super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QDateEdit")
 
     @QtCore.pyqtProperty(str)
     def date(self):
-        if super(QDateEdit, self).date().toString(Qt.ISODate) == "2000-01-01":
+        ret = super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
+        if ret != "2000-01-01":
+            return ret
+        else:
             return None
-        return super(QDateEdit, self).date().toString(Qt.ISODate)
 
     @date.setter
     def date(self, v):
@@ -518,6 +502,10 @@ class QDateEdit(QtWidgets.QDateEdit):
         super(QDateEdit, self).setDate(date)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), "QDateEdit")
+
+    def __getattr__(self, name):
+        if name == "date":
+            return super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
 
 
 class FLDateEdit(QDateEdit):
@@ -561,9 +549,6 @@ class FLDateEdit(QDateEdit):
             pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
         else:
             self.setStyleSheet('color: black')
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
 
 
 class QTabWidget(QtWidgets.QTabWidget):
@@ -622,8 +607,29 @@ class QTabWidget(QtWidgets.QTabWidget):
 
 
 class FLTable(QtWidgets.QTableWidget):
-    def __getattr__(self, name):
-        return DefFun(self, name)
+    AlwaysOff = None
+
+    def setNumRows(self, rows):
+        self.setRowCount(rows)
+
+    def setNumCols(self, cols):
+        self.setColumnCount(cols)
+
+    @decorators.NotImplementedWarn
+    def setReadOnly(self, b):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setColumnMovingEnabled(self, b):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setVScrollBarMode(self, mode):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setHScrollBarMode(self, mode):
+        pass
 
 
 class QTable(QtWidgets.QTableWidget):
@@ -875,6 +881,49 @@ class QCheckBox(QtWidgets.QCheckBox):
         super(QCheckBox, self).setChecked(b)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setChecked" % self._parent.objectName(), b)
+
+
+class QToolButton(QtWidgets.QToolButton):
+
+    groupId = None
+
+    def __init__(self, parent):
+        super(QToolButton, self).__init__(parent)
+        self.groupId = None
+
+    def setToggleButton(self, value):
+        self.setDown(value)
+
+    @decorators.Deprecated
+    def setUsesBigPixmap(self, value):
+        pass
+
+    def toggleButton(self):
+        return self.isDown()
+
+    def setOn(self, value):
+        self.setChecked(value)
+
+    @QtCore.pyqtProperty(bool)
+    def on(self):
+        return self.isChecked()
+
+    @decorators.Deprecated
+    def setUsesTextLabel(self, value):
+        pass
+
+    def buttonGroupId(self):
+        return self.groupId
+
+    def setButtonGroupId(self, id):
+        self.groupId = id
+
+
+class QButtonGroup(QtWidgets.QGroupBox):
+
+    @decorators.NotImplementedWarn
+    def setLineWidth(self, w):
+        pass
 
 
 """
