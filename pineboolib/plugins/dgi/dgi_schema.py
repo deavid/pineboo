@@ -231,11 +231,8 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
 class QPushButton(QtWidgets.QPushButton):
 
-    on = True  # FIXME :No se para que es
-
     def __init__(self, *args, **kwargs):
         super(QPushButton, self).__init__(*args, **kwargs)
-        self.on = True
 
     @property
     def pixmap(self):
@@ -262,13 +259,14 @@ class QPushButton(QtWidgets.QPushButton):
     def setToggleButton(self, v):
         return self.setCheckable(v)
 
-    toggleButton = property(getToggleButton, setToggleButton)
-
-    def on(self):
-        return self.on_
+    def getOn(self):
+        return self.isChecked()
 
     def setOn(self, value):
-        self.on_ = value
+        self.setChecked(value)
+
+    toggleButton = property(getToggleButton, setToggleButton)
+    on = property(getOn, setOn)
 
 
 class FLPixmapView(QtWidgets.QScrollArea):
@@ -482,16 +480,14 @@ class QDateEdit(QtWidgets.QDateEdit):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QDateEdit")
 
-    @QtCore.pyqtProperty(str)
-    def date(self):
+    def getDate(self):
         ret = super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
         if ret != "2000-01-01":
             return ret
         else:
             return None
 
-    @date.setter
-    def date(self, v):
+    def setDate(self, v):
         if not isinstance(v, str):
             if hasattr(v, "toString"):
                 v = v.toString()
@@ -502,6 +498,8 @@ class QDateEdit(QtWidgets.QDateEdit):
         super(QDateEdit, self).setDate(date)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), "QDateEdit")
+
+    date = property(getDate, setDate)
 
     def __getattr__(self, name):
         if name == "date":
@@ -523,6 +521,9 @@ class FLDateEdit(QDateEdit):
 
     def setOrder(self, order):
         self.setDisplayFormat(order)
+
+    def getDate(self):
+        return super(FLDateEdit, self).date
 
     def setDate(self, d=None):
         from pineboolib.qsa import Date
@@ -549,6 +550,8 @@ class FLDateEdit(QDateEdit):
             pineboolib.project._DGI._par.addQueque("%s_setDate" % self._parent.objectName(), date.toString())
         else:
             self.setStyleSheet('color: black')
+
+    date = property(getDate, setDate)
 
 
 class QTabWidget(QtWidgets.QTabWidget):
@@ -901,12 +904,13 @@ class QToolButton(QtWidgets.QToolButton):
     def toggleButton(self):
         return self.isDown()
 
+    def getOn(self):
+        return self.isChecked()
+
     def setOn(self, value):
         self.setChecked(value)
 
-    @QtCore.pyqtProperty(bool)
-    def on(self):
-        return self.isChecked()
+    on = property(getOn, setOn)
 
     @decorators.Deprecated
     def setUsesTextLabel(self, value):
