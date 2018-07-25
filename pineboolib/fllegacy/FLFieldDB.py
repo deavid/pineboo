@@ -517,7 +517,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         """
         if isinstance(self.editor_, pineboolib.pncontrolsfactory.FLDateEdit):
-            data = str(self.editor_.date().toString("yyyy-MM-dd"))
+            data = self.editor_.date
             if not data:
                 isNull = True
 
@@ -529,8 +529,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 return
 
             if isNull:
-                self.cursor_.setValueBuffer(self.fieldName_, str(
-                    QtCore.QDate().toString("dd-MM-yyyy")))
+                self.cursor_.setValueBuffer(self.fieldName_, QtCore.QDate().toString("dd-MM-yyyy"))
             else:
                 self.cursor_.setValueBuffer(self.fieldName_, data)
 
@@ -1467,7 +1466,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editorImg_.setPixmap(pix)
 
         elif type_ == "date":
-            if v == str(self.editor_.date()):
+            if v == self.editor_.date:
                 return
 
             try:
