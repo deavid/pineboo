@@ -116,6 +116,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.tdbFilterLastWhere_ = u""
         self.filter_ = u""
         self.iconSize = pineboolib.project._DGI.iconSize()
+        self.tabControlLayout = QtWidgets.QHBoxLayout()
+        self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -582,14 +584,15 @@ class FLTableDB(QtWidgets.QWidget):
 
     @param  h TRUE lo oculta, FALSE lo muestra
     """
-
+    @decorators.Deprecated
     def setFindHidden(self, h):
-        if self.findHidden_ is not h:
-            self.findHidden_ = h
-            if h:
-                self.tabControlLayout.hide()
-            else:
-                self.tabControlLayout.show()
+        # if self.findHidden_ is not h:
+        #    self.findHidden_ = h
+        #    if h:
+        #        self.tabControlLayout.hide()
+        #    else:
+        #        self.tabControlLayout.show()
+        pass
 
     """
     Obtiene si el marco para conmutar entre datos y filtro está oculto
@@ -603,14 +606,15 @@ class FLTableDB(QtWidgets.QWidget):
 
     @param  h TRUE lo oculta, FALSE lo muestra
     """
-
+    @decorators.Deprecated
     def setFilterHidden(self, h):
-        if self.filterHidden_ is not h:
-            self.filterHidden_ = h
-            if h:
-                self.tabFilter.hide()
-            else:
-                self.tabFilter.show()
+        # if self.filterHidden_ is not h:
+        #    self.filterHidden_ = h
+        #    if h:
+        #        self.tabFilter.hide()
+        #    else:
+        #        self.tabFilter.show()
+        pass
 
     """
     Ver FLTableDB::showAllPixmaps_
@@ -835,7 +839,6 @@ class FLTableDB(QtWidgets.QWidget):
         self.tabData = QtWidgets.QGroupBox()  # contiene data
         self.tabData.setSizePolicy(sizePolicyGB)
 
-        self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
         self.tabFilter.setSizePolicy(sizePolicyGB)
 
         dataL = QtWidgets.QVBoxLayout()
@@ -910,8 +913,6 @@ class FLTableDB(QtWidgets.QWidget):
 
         label1.setText("Buscar")
         label2.setText("en")
-
-        self.tabControlLayout = QtWidgets.QHBoxLayout()
 
         self.tabControlLayout.addWidget(label1)
         self.tabControlLayout.addWidget(self.lineEditSearch)
