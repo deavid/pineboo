@@ -1,93 +1,94 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtGui, QtWidgets, uic
-from PyQt5.QtCore import Qt
-from pineboolib.utils import filedir, Struct
-from pineboolib.fllegacy.FLSettings import FLSettings
+
+import sys
+import pineboolib
 import logging
 from binascii import unhexlify
-from PyQt5.QtWidgets import QAction, QTextEdit
-logger = logging.getLogger(__name__)
 
-import pineboolib
-import sys
-
+from pineboolib.utils import filedir, Struct
+from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 
 
-class MainForm(QtWidgets.QMainWindow):
+from PyQt5.QtWidgets import QToolButton, QToolBox, QLayout, QVBoxLayout, QAction, QTextEdit, QMessageBox, QWidget, QMainWindow, QPlainTextEdit, QApplication, QTabWidget, QDockWidget
+from PyQt5 import QtCore, QtGui
+from PyQt5.QtCore import Qt, QObject
+
+logger = logging.getLogger(__name__)
+
+class MainForm(QObject):
     areas = []
     toolBoxs = []
     tab = 0
     ui_ = None
-    areasTab = None
-    formTab = None
     debugLevel = 100
-    dockAreasTab = None
-    dockFavoritos = None
-    dockForm = None
-    dockConsole = None
     mPAreas = {}  # Almacena los nombre de submenus areas de menú pineboo
     mPModulos = {}  # Almacena los nombre de submenus modulos de menú pineboo
     openTabs = []
     favoritosW = None
 
+
+
     @classmethod
     def setDebugLevel(self, q):
         MainForm.debugLevel = q
+        
+    def show(self):
+        self.ui_.show()
 
     def load(self):
         if self.ui_:
             del self.ui_
 
-        self.ui_ = uic.loadUi(
-            filedir('plugins/mainform/pineboo/mainform.ui'), self)
+        self.ui_ = pineboolib.project.conn.managerModules().createUI(
+            filedir('plugins/mainform/pineboo/mainform.ui'), None, QMainWindow())
 
-        frameGm = self.frameGeometry()
-        screen = QtWidgets.QApplication.desktop().screenNumber(
-            QtWidgets.QApplication.desktop().cursor().pos())
-        centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
+        frameGm = self.ui_.frameGeometry()
+        screen = QApplication.desktop().screenNumber(
+            QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
+        self.ui_.move(frameGm.topLeft())
 
-        self.areasTab = QtWidgets.QTabWidget()
-        self.areasTab.setTabPosition(QtWidgets.QTabWidget.West)
-        self.formTab = QtWidgets.QTabWidget()
+        self.ui_.areasTab = QTabWidget()
+        self.ui_.areasTab.setTabPosition(QTabWidget.West)
+        self.ui_.formTab = QTabWidget()
         try:
-            self.areasTab.removeItem = self.areasTab.removeTab
-            self.areasTab.addItem = self.areasTab.addTab
+            self.ui_.areasTab.removeItem = self.ui_.areasTab.removeTab
+            self.ui_.areasTab.addItem = self.ui_.areasTab.addTab
         except Exception:
             pass
 
-        self.dockAreasTab = QtWidgets.QDockWidget()
+        self.dockAreasTab = QDockWidget()
         self.dockAreasTab.setWindowTitle("Módulos")
         #self.dockAreas = QtWidgets.QDockWidget()
-        self.dockFavoritos = QtWidgets.QDockWidget()
+        self.dockFavoritos = QDockWidget()
         self.dockFavoritos.setWindowTitle("Favoritos")
 
-        self.dockForm = QtWidgets.QDockWidget()
+        self.dockForm = QDockWidget()
 
-        self.dockAreasTab.setWidget(self.areasTab)
+        self.dockAreasTab.setWidget(self.ui_.areasTab)
         self.dockAreasTab.setMaximumWidth(400)
         self.dockFavoritos.setMaximumWidth(400)
         self.dockFavoritos.setMaximumHeight(500)
         # self.dockAreasTab.setMinimumWidth(400)
         # self.dockAreasTab.setMaximumHeight(500)
 
-        self.dockForm.setWidget(self.formTab)
+        self.dockForm.setWidget(self.ui_.formTab)
 
-        self.addDockWidget(Qt.RightDockWidgetArea, self.dockForm)
+        self.ui_.addDockWidget(Qt.RightDockWidgetArea, self.dockForm)
         # self.dockForm.setMaximumWidth(950)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.dockFavoritos)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.dockAreasTab)
+        self.ui_.addDockWidget(Qt.LeftDockWidgetArea, self.dockFavoritos)
+        self.ui_.addDockWidget(Qt.LeftDockWidgetArea, self.dockAreasTab)
         # self.dockAreasTab.show()
         # self.dockForm.show()
 
         # self.areasTab.removeItem(0) #Borramos tab de ejemplo.
 
-        self.formTab.setTabsClosable(True)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        self.formTab.tabCloseRequested[int].connect(self.closeFormTab)
-        self.formTab.removeTab(0)
+        self.ui_.formTab.setTabsClosable(True)
+        self.ui_.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.ui_.formTab.tabCloseRequested[int].connect(self.closeFormTab)
+        self.ui_.formTab.removeTab(0)
         #app_icon = QtGui.QIcon('share/icons/pineboo-logo-16.png')
         # app_icon.addFile(filedir('share/icons/pineboo-logo-16.png'),
         #                 QtCore.QSize(16, 16))
@@ -104,18 +105,18 @@ class MainForm(QtWidgets.QMainWindow):
         # app_icon.addFile(filedir('share/icons/pineboo-logo-256.png'),
         #                 QtCore.QSize(256, 256))
         # self.setWindowIcon(app_icon)
-        self.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
-        self.actionAcercaQt.triggered.connect(pineboolib.pnapplication.aboutQt)
-        self.actionAcercaPineboo.triggered.connect(pineboolib.pnapplication.aboutPineboo)
-        self.actionFavoritos.triggered.connect(self.changeStateDockFavoritos)
+        self.ui_.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
+        self.ui_.actionAcercaQt.triggered.connect(pineboolib.pnapplication.aboutQt)
+        self.ui_.actionAcercaPineboo.triggered.connect(pineboolib.pnapplication.aboutPineboo)
+        self.ui_.actionFavoritos.triggered.connect(self.changeStateDockFavoritos)
         self.dockFavoritos.visibilityChanged.connect(self.changeStateActionFavoritos)
-        self.actionModulos.triggered.connect(self.changeStateDockAreas)
+        self.ui_.actionModulos.triggered.connect(self.changeStateDockAreas)
         self.dockAreasTab.visibilityChanged.connect(self.changeStateActionAreas)
-        self.actionTipografia.triggered.connect(pineboolib.pnapplication.fontDialog)
-        self.menuPineboo.addSeparator()
+        self.ui_.actionTipografia.triggered.connect(pineboolib.pnapplication.fontDialog)
+        self.ui_.menuPineboo.addSeparator()
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
-        pineboolib.pnapplication.initStyle(self.configMenu)
-        self.setWindowTitle("Pineboo")
+        pineboolib.pnapplication.initStyle(self.ui_.configMenu)
+        self.ui_.setWindowTitle("Pineboo")
 
         logger.info("Módulos y pestañas ...")
         for k, area in sorted(pineboolib.project.areas.items()):
@@ -133,7 +134,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.restoreOpenedTabs()
 
-        self.loadPreferences()
+        self.loadState()
         # Cargamos nombre de vertical
         util = FLUtil()
         verticalName = util.sqlSelect("flsettings", "valor", "flkey='verticalName'")
@@ -143,11 +144,11 @@ class MainForm(QtWidgets.QMainWindow):
             statusText = verticalName
 
         if cbPosInfo == 'True':
+            from pineboolib.pncontrolsfactory import SysType
             sys_ = SysType()
-            statusText += "\t\t\t" + sys_.nameUser() + "@" + sys_.nameDB()
+            statusText += "\t\t\t" + sys_.nameUser() + "@" + sys_.nameBD()
 
-        if verticalName != None:
-            self.statusBar().showMessage(statusText)
+        self.ui_.statusBar().showMessage(statusText)
 
     def closeFormTab(self, numero):
         if isinstance(numero, str):
@@ -162,7 +163,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         if numero is not None:
             logger.debug("Cerrando pestaña número %s ", numero)
-            self.formTab.removeTab(numero)
+            self.ui_.formTab.removeTab(numero)
 
             i = 0
             for name in self.openTabs:
@@ -179,30 +180,30 @@ class MainForm(QtWidgets.QMainWindow):
         icon = None
         try:
             icon = action.mod.mod.mainform.actions[action.name].icon
-            self.formTab.addTab(widget, icon, widget.windowTitle())
+            self.ui_.formTab.addTab(widget, icon, widget.windowTitle())
         except Exception as e:
             logger.warn("addFormTab: No pude localizar icono para %s: %s", action.name, e)
-            self.formTab.addTab(widget, widget.windowTitle())
+            self.ui_.formTab.addTab(widget, widget.windowTitle())
 
-        self.formTab.setCurrentWidget(widget)
+        self.ui_.formTab.setCurrentWidget(widget)
         self.openTabs.append(action.name)
 
     def loadArea(self, area):
         assert area.idarea not in self.areas
-        vl = QtWidgets.QWidget()
-        vl.layout = QtWidgets.QVBoxLayout()  # layout de la pestaña
+        vl = QWidget()
+        vl.layout = QVBoxLayout()  # layout de la pestaña
         vl.layout.setSpacing(0)
         vl.layout.setContentsMargins(0, 0, 0, 0)
-        vl.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        vl.layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
 
-        moduleToolBox = QtWidgets.QToolBox(self)  # toolbox de cada módulo
+        moduleToolBox = QToolBox(self.ui_)  # toolbox de cada módulo
 
         self.areas.append(area.idarea)
         self.toolBoxs.append(moduleToolBox)
         self.tab = self.tab + 1
         vl.setLayout(vl.layout)
         vl.layout.addWidget(moduleToolBox)
-        self.areasTab.addItem(vl, area.descripcion)
+        self.ui_.areasTab.addItem(vl, area.descripcion)
 
     def loadModule(self, module):
         logger.debug("loadModule: Procesando %s ", module.name)
@@ -213,9 +214,9 @@ class MainForm(QtWidgets.QMainWindow):
 
         moduleToolBox = self.toolBoxs[self.areas.index(module.areaid)]
 
-        vBLayout = QtWidgets.QWidget()
-        vBLayout.layout = QtWidgets.QVBoxLayout()  # layout de cada módulo.
-        vBLayout.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        vBLayout = QWidget()
+        vBLayout.layout = QVBoxLayout()  # layout de cada módulo.
+        vBLayout.layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
 
         vBLayout.layout.setSpacing(0)
         vBLayout.layout.setContentsMargins(0, 0, 0, 0)
@@ -245,7 +246,7 @@ class MainForm(QtWidgets.QMainWindow):
         vBLayout.setContentsMargins(0, 0, 0, 0)
         for key in module.mainform.toolbar:
             action = module.mainform.actions[key]
-            button = QtWidgets.QToolButton()
+            button = QToolButton()
             button.setText(action.text)
             button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
             button.setIconSize(iconsize)
@@ -259,43 +260,31 @@ class MainForm(QtWidgets.QMainWindow):
 
     def closeEvent(self, evnt):
 
-        dialog = QtWidgets.QDialog()
-        dialog.setWindowTitle("Salir de Pineboo")
-        dialog.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
-        dialog.setWindowModality(QtCore.Qt.ApplicationModal)
-        _layout = QtWidgets.QVBoxLayout()
-        dialog.setLayout(_layout)
-        buttonBox = QtWidgets.QDialogButtonBox()
-        OKButton = QtWidgets.QPushButton("&Aceptar")
-        cancelButton = QtWidgets.QPushButton("&Cancelar")
+                        
+        res = QMessageBox.information(
+            QApplication.activeWindow(),
+            "Salir de Pineboo",
+            "¿ Desea salir ?",
+            QMessageBox.Yes, QMessageBox.No)
 
-        buttonBox.addButton(OKButton, QtWidgets.QDialogButtonBox.AcceptRole)
-        buttonBox.addButton(
-            cancelButton, QtWidgets.QDialogButtonBox.RejectRole)
-        label = QtWidgets.QLabel("¿ Desea salir ?")
-        _layout.addWidget(label)
-        _layout.addWidget(buttonBox)
-        OKButton.clicked.connect(dialog.accept)
-        OKButton.clicked.connect(self.saveState)
-        cancelButton.clicked.connect(dialog.reject)
-
-        if not dialog.exec_():
+        if res == QMessageBox.No:
             evnt.ignore()
 
     def saveState(self):
-        sett_ = FLSettings()
-        sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
-        sett_.writeEntry("application/mainForm/viewFavorites", self.dockFavoritos.isVisible())
-        sett_.writeEntry("application/mainForm/FavoritesSize", self.dockFavoritos.size())
-        sett_.writeEntry("application/mainForm/viewAreas", self.dockAreasTab.isVisible())
-        sett_.writeEntry("application/mainForm/AreasSize", self.dockFavoritos.size())
-        sett_.writeEntry("application/mainForm/mainFormSize", self.size())
+        if self.ui_:
+            sett_ = FLSettings()
+            sett_.writeEntryList("application/mainForm/tabsOpened", self.openTabs)
+            sett_.writeEntry("application/mainForm/viewFavorites", self.ui_.dockFavoritos.isVisible())
+            sett_.writeEntry("application/mainForm/FavoritesSize", self.ui_.dockFavoritos.size())
+            sett_.writeEntry("application/mainForm/viewAreas", self.ui_.dockAreasTab.isVisible())
+            sett_.writeEntry("application/mainForm/AreasSize", self.ui_.dockFavoritos.size())
+            sett_.writeEntry("application/mainForm/mainFormSize", self.ui_.size())
 
     def addToMenuPineboo(self, ac, mod):
         #print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
         # Comprueba si el area ya se ha creado
         if mod.areaid not in self.mPAreas.keys():
-            areaM = self.menuPineboo.addMenu(QtGui.QIcon('share/icons/gtk-open.png'), pineboolib.project.areas[mod.areaid].descripcion)
+            areaM = self.ui_.menuPineboo.addMenu(QtGui.QIcon('share/icons/gtk-open.png'), pineboolib.project.areas[mod.areaid].descripcion)
             self.mPAreas[mod.areaid] = areaM
         else:
             areaM = self.mPAreas[mod.areaid]
@@ -329,7 +318,7 @@ class MainForm(QtWidgets.QMainWindow):
                             module.mainform.actions[t].run()
                             break
 
-    def loadPreferences(self):
+    def loadState(self):
         sett_ = FLSettings()
         viewFavorites_ = sett_.readBoolEntry("application/mainForm/viewFavorites", True)
         viewAreas_ = sett_.readBoolEntry("application/mainForm/viewAreas", True)
@@ -343,15 +332,16 @@ class MainForm(QtWidgets.QMainWindow):
             self.dockAreasTab.resize(sizeA_)
 
         if sizeMF_ is not None:
-            self.resize(sizeMF_)
+            self.ui_.resize(sizeMF_)
         else:
             self.showMaximized()
 
-        self.dockFavoritos.setVisible(viewFavorites_)
-        self.actionFavoritos.setChecked(viewFavorites_)
-        self.dockAreasTab.setVisible(viewAreas_)
-        self.actionModulos.setChecked(viewAreas_)
-
+        """
+        self.ui_.dockFavoritos.setVisible(viewFavorites_)
+        self.ui_.actionFavoritos.setChecked(viewFavorites_)
+        self.ui_.dockAreasTab.setVisible(viewAreas_)
+        self.ui_.actionModulos.setChecked(viewAreas_)
+        """
     def changeStateDockFavoritos(self):
         visible_ = self.actionFavoritos.isChecked()
         if visible_:
@@ -364,9 +354,9 @@ class MainForm(QtWidgets.QMainWindow):
 
     def changeStateActionFavoritos(self):
         if self.dockFavoritos.isVisible():
-            self.actionFavoritos.setChecked(True)
+            self.ui_.actionFavoritos.setChecked(True)
         else:
-            self.actionFavoritos.setChecked(False)
+            self.ui_.actionFavoritos.setChecked(False)
 
     def changeStateDockAreas(self):
         visible_ = self.actionModulos.isChecked()
@@ -379,9 +369,9 @@ class MainForm(QtWidgets.QMainWindow):
 
     def changeStateActionAreas(self):
         if self.dockAreasTab.isVisible():
-            self.actionModulos.setChecked(True)
+            self.ui_.actionModulos.setChecked(True)
         else:
-            self.actionModulos.setChecked(False)
+            self.ui_.actionModulos.setChecked(False)
 
     def loadDevelop(self):
         moduleToolBox = self.toolBoxs[self.areas.index("dvl")]
@@ -416,7 +406,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.dockConsole.setVisible(True)
 
 
-class OutputWindow(QtWidgets.QPlainTextEdit):
+class OutputWindow(QPlainTextEdit):
     oldStdout = None
     oldStderr = None
 
