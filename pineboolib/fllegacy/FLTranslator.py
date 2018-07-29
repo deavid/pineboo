@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
-
+import os
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
 
-import os
+from PyQt5 import QtCore
 from PyQt5.Qt import QTranslator
 
 
