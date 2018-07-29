@@ -296,9 +296,11 @@ class FLManagerModules(QtCore.QObject):
         from xml import etree
         tree = etree.ElementTree.parse(form_path)
         root = tree.getroot()
-        if root.get("version") <= "3.3":   
+        if root.get("version") < "4.0":   
             pnqt3ui.loadUi(form_path, w_)
         else:
+            #uic.widgetPluginPath.append(filedir("./fllegacy"))
+            #print(uic.widgetPluginPath)
             uic.loadUi(form_path, w_)
         return w_
 

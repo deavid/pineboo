@@ -37,8 +37,7 @@ class FLTranslations(QtCore.QObject):
             if not os.path.exists(qmFileName):
                 tor.load(tsFileName)
         except Exception:
-            if verbose:
-                self.logger.exception("For some reason, I cannot load '%s'", tsFileName)
+            self.logger.warn("For some reason, I cannot load '%s'", tsFileName)
             return False
 
         return True
