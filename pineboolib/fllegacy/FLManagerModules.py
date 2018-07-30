@@ -296,11 +296,15 @@ class FLManagerModules(QtCore.QObject):
         from xml import etree
         tree = etree.ElementTree.parse(form_path)
         root = tree.getroot()
-        if root.get("version") < "4.0":   
+        UIVersion = root.get("version")
+        logger.info("Procesando ui %s versión %s", n, UIVersion)
+        if UIVersion < "4.0":   
             pnqt3ui.loadUi(form_path, w_)
         else:
-            #uic.widgetPluginPath.append(filedir("./fllegacy"))
-            #print(uic.widgetPluginPath)
+            qtWidgetPlugings = filedir("./plugings/qtwidgetplugins")
+            if not qtWidgetPlugings in uic.widgetPluginPath:
+                logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
+                uic.widgetPluginPath.append(qtWidgetPlugings)
             uic.loadUi(form_path, w_)
         return w_
 
