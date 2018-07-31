@@ -156,12 +156,15 @@ class FLFormDB(QtWidgets.QDialog):
         # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
-
+        self.loaded = False
         try:
             assert (self.__class__, action) not in self.known_instances
         except AssertionError:
-            print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
-                  "Puede que se estén perdiendo datos!")
+            # print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
+            #      "Puede que se estén perdiendo datos!")
+            QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
+                                              QtWidgets.QMessageBox.Yes)
+            return
         self.known_instances[(self.__class__, action)] = self
 
         self.ui_ = {}
@@ -191,7 +194,6 @@ class FLFormDB(QtWidgets.QDialog):
         elif pineboolib.project._DGI.localDesktop():
             self.setWindowTitle(action.alias)
 
-        self.loaded = False
         self.idMDI_ = self.action.name
 
         self.script = None
