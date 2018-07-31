@@ -1068,9 +1068,10 @@ class XMLAction(XMLStruct):
                 "Record action %s is not defined. Canceled !", self.name)
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
-        self.formrecord_widget = FLFormRecordDB(cursor, self, load=True)
-        if not self.formrecord_widget.loaded:
+        fRWidget = FLFormRecordDB(cursor, self, load=True)
+        if not fRWidget.loaded:
             return None
+        self.formrecord_widget = fRWidget
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         self._record_loaded = True
         if self.formrecord_widget:
