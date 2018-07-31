@@ -23,7 +23,6 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
@@ -1068,7 +1067,7 @@ class XMLAction(XMLStruct):
                 "Record action %s is not defined. Canceled !", self.name)
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
-        fRWidget = FLFormRecordDB(cursor, self, load=True)
+        fRWidget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
         if not fRWidget.loaded:
             return None
         self.formrecord_widget = fRWidget
@@ -1091,7 +1090,7 @@ class XMLAction(XMLStruct):
             w = pineboolib.project.main_window
             if not self.mainform_widget:
                 if pineboolib.project._DGI.useDesktop():
-                    self.mainform_widget = FLMainForm(w.ui_, self, load=False)
+                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w.ui_, None)
                 else:
                     from pineboolib.utils import Struct
                     self.mainform_widget = Struct()
@@ -1119,7 +1118,7 @@ class XMLAction(XMLStruct):
         self.logger.debug("Opening default form for Action %s", self.name)
         w = pineboolib.project.main_window
         self.initModule(self.name)
-        self.mainform_widget = FLMainForm(w.ui_, self, load=True)
+        self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w.ui_, None)
         w.addFormTab(self)
 
     """
@@ -1295,11 +1294,6 @@ class XMLAction(XMLStruct):
             pineboolib.project._initModules.append(moduleName)
             pineboolib.project.call("%s.iface.init()" % moduleName, [], None, False)
             return
-
-
-class FLMainForm(FLFormDB):
-    """ Controlador dedicado a las ventanas maestras de búsqueda (en pestaña) """
-    pass
 
 
 def aboutQt():

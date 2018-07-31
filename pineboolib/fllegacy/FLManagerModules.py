@@ -323,17 +323,25 @@ class FLManagerModules(QtCore.QObject):
     @param a Objeto FLAction.
     @return QWidget correspondiente al formulario construido.
     """
-    @decorators.NotImplementedWarn
+
     def createForm(self, a, connector=None, parent=None, name=None):
-        return None
+        from pineboolib.fllegacy.FLFormDB import FLFormDB
+        return FLFormDB(parent, a, load=True)
 
     """
     Esta función es igual a la anterior, sólo se diferencia en que carga
     la descripción de interfaz del formulario de edición de registros.
+    @param a. Action
+    @param connector. Conector usado
+    @param parent_or_cursor. Cursor o parent del form
+    @param name. Nombre del formRecord
     """
-    @decorators.NotImplementedWarn
-    def createFormRecord(self, a, connector=None, parent=None, name=None):
-        return None
+
+    def createFormRecord(self, a, connector=None, parent_or_cursor=None, name=None):
+        from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
+        # Falta implementar conector y name
+
+        return FLFormRecordDB(parent_or_cursor, a, load=True)
 
     """
     Para establecer el módulo activo.
