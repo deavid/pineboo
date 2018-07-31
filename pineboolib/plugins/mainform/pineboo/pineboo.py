@@ -16,6 +16,7 @@ from PyQt5.QtCore import Qt, QObject
 
 logger = logging.getLogger(__name__)
 
+
 class MainForm(QObject):
     areas = []
     toolBoxs = []
@@ -27,12 +28,10 @@ class MainForm(QObject):
     openTabs = []
     favoritosW = None
 
-
-
     @classmethod
     def setDebugLevel(self, q):
         MainForm.debugLevel = q
-        
+
     def show(self):
         self.ui_.show()
 
@@ -139,6 +138,8 @@ class MainForm(QObject):
         util = FLUtil()
         verticalName = util.sqlSelect("flsettings", "valor", "flkey='verticalName'")
         cbPosInfo = util.sqlSelect("flsettings", "valor", "flkey='PosInfo'")
+
+        statusText = ""
 
         if verticalName != None:
             statusText = verticalName
@@ -260,7 +261,6 @@ class MainForm(QObject):
 
     def closeEvent(self, evnt):
 
-                        
         res = QMessageBox.information(
             QApplication.activeWindow(),
             "Salir de Pineboo",
@@ -342,6 +342,7 @@ class MainForm(QObject):
         self.ui_.dockAreasTab.setVisible(viewAreas_)
         self.ui_.actionModulos.setChecked(viewAreas_)
         """
+
     def changeStateDockFavoritos(self):
         visible_ = self.actionFavoritos.isChecked()
         if visible_:
@@ -375,14 +376,14 @@ class MainForm(QObject):
 
     def loadDevelop(self):
         moduleToolBox = self.toolBoxs[self.areas.index("dvl")]
-        vBLayout = QtWidgets.QWidget()
-        vBLayout.layout = QtWidgets.QVBoxLayout()  # layout de cada módulo.
-        vBLayout.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        vBLayout = QWidget()
+        vBLayout.layout = QVBoxLayout()  # layout de cada módulo.
+        vBLayout.layout.setSizeConstraint(QLayout.SetMinAndMaxSize)
         vBLayout.layout.setSpacing(0)
         vBLayout.layout.setContentsMargins(0, 0, 0, 0)
         vBLayout.setLayout(vBLayout.layout)
 
-        button = QtWidgets.QToolButton()
+        button = QToolButton()
         button.setText("Consola")
         button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         iconsize = QtCore.QSize(16, 16)
