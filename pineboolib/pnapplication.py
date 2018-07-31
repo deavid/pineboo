@@ -108,7 +108,7 @@ class Project(object):
     """
 
     def __del__(self):
-        self.writeState()
+        self.main_window.saveState()
 
     """
     Especifica el nivel de debug de la aplicación
@@ -340,17 +340,9 @@ class Project(object):
                 self.logger.error(e)
 
         self.loadTranslations()
-        self.readState()
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
 
-    @decorators.NotImplementedWarn
-    def readState(self):
-        pass
-
-    @decorators.NotImplementedWarn
-    def writeState(self):
-        pass
 
     """
     LLama a una función del projecto.
@@ -1100,7 +1092,7 @@ class XMLAction(XMLStruct):
             w = pineboolib.project.main_window
             if not self.mainform_widget:
                 if pineboolib.project._DGI.useDesktop():
-                    self.mainform_widget = FLMainForm(w, self, load=False)
+                    self.mainform_widget = FLMainForm(w.ui_, self, load=False)
                 else:
                     from pineboolib.utils import Struct
                     self.mainform_widget = Struct()
@@ -1128,7 +1120,7 @@ class XMLAction(XMLStruct):
         self.logger.debug("Opening default form for Action %s", self.name)
         w = pineboolib.project.main_window
         self.initModule(self.name)
-        self.mainform_widget = FLMainForm(w, self, load=True)
+        self.mainform_widget = FLMainForm(w.ui_, self, load=True)
         w.addFormTab(self)
 
     """

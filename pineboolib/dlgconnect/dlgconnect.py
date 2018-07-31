@@ -153,7 +153,6 @@ class DlgConnect(QtWidgets.QWidget):
             else:
                 self.password = ""
 
-        print(self.pNSqlDrivers.isDesktopFile(self.driveralias))
 
         if self.pNSqlDrivers.isDesktopFile(self.driveralias):
             self.database = "tempdata/%s.sqlite3" % self.database

@@ -1,10 +1,15 @@
+
+import os
+import traceback
+import logging
+
+import pineboolib
 from pineboolib import decorators, pnqt3ui
 from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-import os
-import traceback
-from PyQt5 import QtCore
-import pineboolib
+
+from PyQt5 import QtCore, uic
+
 
 """
 Gestor de módulos.
@@ -25,6 +30,8 @@ de AbanQ.
 
 @author InfoSiAL S.L.
 """
+
+logger = logging.getLogger(__name__)
 
 
 class FLInfoMod(object):
@@ -270,17 +277,35 @@ class FLManagerModules(QtCore.QObject):
         if ".ui" not in n:
             n += ".ui"
 
-        form_path = _path(n)
+        form_path = None
+        if os.path.exists(n):
+            form_path = n
+        else:
+            form_path = _path(n)
+        
+        
         if form_path is None:
             raise AttributeError("File %r not found in project" % n)
             return
 
-        if getattr(parent, "widget", None) is None:
+        if not getattr(parent, "widget", None):
             w_ = parent
         else:
             w_ = parent.widget
-
-        pnqt3ui.loadUi(form_path, w_)
+        #Version de ui
+        from xml import etree
+        tree = etree.ElementTree.parse(form_path)
+        root = tree.getroot()
+        UIVersion = root.get("version")
+        logger.info("Procesando ui %s versión %s", n, UIVersion)
+        if UIVersion < "4.0":   
+            pnqt3ui.loadUi(form_path, w_)
+        else:
+            qtWidgetPlugings = filedir("./plugings/qtwidgetplugins")
+            if not qtWidgetPlugings in uic.widgetPluginPath:
+                logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
+                uic.widgetPluginPath.append(qtWidgetPlugings)
+            uic.loadUi(form_path, w_)
         return w_
 
     """

@@ -12,13 +12,13 @@ import pineboolib
 import logging
 
 import zlib
-from PyQt5.Qt import QSpacerItem
+from PyQt5.Qt import QSpacerItem, QLayout
 from PyQt5.QtWidgets import QToolBar, QAction, QSpinBox, QMenuBar, QMenu
 
 Qt = QtCore.Qt
 ICONS = {}
 root = None
-logger = logging.getLogger("qt3ui")
+logger = logging.getLogger("pnqt3ui")
 
 
 class Options:
@@ -108,7 +108,7 @@ def loadUi(path, widget, parent=None):
 
         receiver = None
         if sender is None:
-            logger.warn("Connection sender not found:", sender_name)
+            logger.warn("Connection sender not found:%s", sender_name)
         if receiv_name == formname:
             receiver = widget
             fn_name = slot_name.rstrip("()")
@@ -138,7 +138,7 @@ def loadUi(path, widget, parent=None):
             if receiver is None and wui:
                 receiver = widget.ui_[receiv_name]
         if receiver is None:
-            logger.warn("Connection receiver not found:", receiv_name)
+            logger.warn("Connection receiver not found:%s", receiv_name)
         if sender is None or receiver is None:
             continue
         try:
@@ -348,7 +348,16 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
     layouts_pending_process = []
     properties = []
     unbold_fonts = []
+    
     for c in xml:
+        if c.tag == "layout":
+            logger.warn("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
+            lay_ = getattr(QtWidgets, c.get("class"))()
+            lay_.setObjectName(c.get("name"))
+            widget.setLayout(lay_)
+            continue
+        
+        
         if c.tag == "property":
             properties.append(c)
             continue
@@ -356,7 +365,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             # TODO: layout se solapa con el layout de FormInternalObj
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
                 if Options.DEBUG_LEVEL > 50:
-                    print("qt3ui: Trying to replace layout. Ignoring.",
+                    logger("Trying to replace layout. Ignoring. %s, %s",
                           repr(c.tag), widget.layout)
                 continue
 
