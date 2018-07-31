@@ -20,7 +20,6 @@ from pineboolib.pnconnection import PNConnection
 from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable, _path, coalesce_path, _dir
 
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
