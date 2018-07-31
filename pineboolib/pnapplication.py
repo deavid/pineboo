@@ -99,10 +99,9 @@ class Project(object):
         self.files = {}
         self.cur = None
         self.kugarPlugin = PNKugarPlugins()
-        
+
         if not self._DGI.localDesktop():
             self._DGI.extraProjectInit()
-            
 
     """
     Destructor
@@ -1144,11 +1143,11 @@ class XMLAction(XMLStruct):
         pineboolib.project.call("%s.main" % a.name(), [])
 
     """
-    Retorna el widget del masterform
+    Retorna el widget del formrecord
     """
 
     def formRecord(self):
-        return self.form
+        return self.formrecord
     """
     Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía
     @return wigdet del formRecord.
