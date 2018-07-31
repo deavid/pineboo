@@ -343,7 +343,6 @@ class Project(object):
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
 
-
     """
     LLama a una función del projecto.
     @param function. Nombre de la función a llamar.
@@ -1064,15 +1063,14 @@ class XMLAction(XMLStruct):
     """
 
     def loadRecord(self, cursor):
-        if self.formrecord_widget and hasattr(self.formrecord_widget, "cursor_"):
-            self.logger.warn(
-                "Se está cargando un FLFormRecord, sobre un módulo que ya contenia un cursor inicializado.\nEsto puede ocasionar que no se recojan cambios en el cursor viejo. Form :%s", self.name)
         if not getattr(self, "formrecord", None):
             self.logger.warn(
                 "Record action %s is not defined. Canceled !", self.name)
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
         self.formrecord_widget = FLFormRecordDB(cursor, self, load=True)
+        if not self.formrecord_widget.loaded:
+            return None
         self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
         self._record_loaded = True
         if self.formrecord_widget:
