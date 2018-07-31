@@ -10,6 +10,7 @@ import xml
 
 from pineboolib.pnsqldrivers import PNSqlDrivers
 from pineboolib.utils import filedir
+from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 
 from PyQt5 import QtWidgets, QtCore, uic
 from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox
@@ -45,9 +46,11 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Carga el form dlgconnect
         """
+        mM = FLManagerModules()
         dlg_ = filedir('dlgconnect/dlgconnect.ui')
 
-        self.ui = uic.loadUi(dlg_, self)
+        self.ui = mM.createUI(dlg_, None, self)
+        del mM
 
         # Centrado en pantalla
         frameGm = self.frameGeometry()
@@ -152,7 +155,6 @@ class DlgConnect(QtWidgets.QWidget):
                 self.password = base64.b64decode(ps).decode()
             else:
                 self.password = ""
-
 
         if self.pNSqlDrivers.isDesktopFile(self.driveralias):
             self.database = "tempdata/%s.sqlite3" % self.database
