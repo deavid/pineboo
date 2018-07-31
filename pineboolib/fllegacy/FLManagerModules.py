@@ -112,28 +112,28 @@ class FLManagerModules(QtCore.QObject):
         super(FLManagerModules, self).__init__()
         if db:
             self.db_ = db
-        
+
         self.filesCached_ = {}
-    """
-    destructor
-    """
+    #"""
+    # destructor
+    #"""
 
-    def __del__(self):
-        self.finish()
+    # def __del__(self):
+    #    self.finish()
 
-    """
-    Acciones de inicialización del sistema de módulos.
-    """
-    @decorators.NotImplementedWarn
-    def init(self):
-        pass
+    #"""
+    # Acciones de inicialización del sistema de módulos.
+    #"""
+    #@decorators.NotImplementedWarn
+    # def init(self):
+    #    pass
 
-    """
-    Acciones de finalización del sistema de módulos.
-    """
-    @decorators.NotImplementedWarn
-    def finish(self):
-        pass
+    #"""
+    # Acciones de finalización del sistema de módulos.
+    #"""
+    #@decorators.NotImplementedWarn
+    # def finish(self):
+    #    pass
 
     """
     Obtiene el contenido de un fichero almacenado la base de datos.
@@ -282,8 +282,7 @@ class FLManagerModules(QtCore.QObject):
             form_path = n
         else:
             form_path = _path(n)
-        
-        
+
         if form_path is None:
             raise AttributeError("File %r not found in project" % n)
             return
@@ -292,13 +291,13 @@ class FLManagerModules(QtCore.QObject):
             w_ = parent
         else:
             w_ = parent.widget
-        #Version de ui
+        # Version de ui
         from xml import etree
         tree = etree.ElementTree.parse(form_path)
         root = tree.getroot()
         UIVersion = root.get("version")
         logger.info("Procesando ui %s versión %s", n, UIVersion)
-        if UIVersion < "4.0":   
+        if UIVersion < "4.0":
             pnqt3ui.loadUi(form_path, w_)
         else:
             qtWidgetPlugings = filedir("./plugings/qtwidgetplugins")
