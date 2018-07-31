@@ -1996,7 +1996,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.lineEditSearch.selectAll()
             self.seekCursor()
             QtCore.QTimer.singleShot(
-                0, self.tableRecords_.ensureRowSelectedVisible())
+                0, self.tableRecords_.ensureRowSelectedVisible)
         else:
             self.refreshDelayed()
 
