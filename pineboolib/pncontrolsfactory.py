@@ -5,6 +5,7 @@ from PyQt5 import QtCore
 import pineboolib
 import logging
 import weakref
+
 from pineboolib import decorators
 
 
@@ -45,6 +46,12 @@ QtWidgets = resolveObject("QtWidgets")
 QColor = resolveObject("QColor")
 QMessageBox = resolveObject("QMessageBox")
 QButtonGroup = resolveObject("QButtonGroup")
+QDialog = resolveObject("QDialog")
+QVBoxLayout = resolveObject("QVBoxLayout")
+QHBoxLayout = resolveObject("QHBoxLayout")
+QFrame = resolveObject("QFrame")
+
+
 # Clases FL
 FLLineEdit = resolveObject("FLLineEdit")
 FLTimeEdit = resolveObject("FLTimeEdit")
@@ -63,6 +70,7 @@ RadioButton = resolveObject("RadioButton")
 Color = QColor
 Dialog = resolveObject("Dialog")
 GroupBox = resolveObject("GroupBox")
+
 
 
 class SysType(object):
@@ -109,9 +117,7 @@ class SysType(object):
         return filedir("..")
 
     def __getattr__(self, fun_):
-        ret_ = eval(fun_, pineboolib.qsa.__dict__)
-        if ret_ is not None:
-            return ret_
+        return pineboolib.project.call("sys.iface.%s()" % fun_, [], None, True)
 
     def installACL(self, idacl):
         acl_ = pineboolib.project.acl()
@@ -227,6 +233,12 @@ class SysType(object):
             MessageBox.critical(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
         else:
             print("ERROR ", msg)
+
+class System(object):
+    
+    def setenv( name, val):
+        import os
+        os.environ[name] = val
 
 
 class ProxySlot:
