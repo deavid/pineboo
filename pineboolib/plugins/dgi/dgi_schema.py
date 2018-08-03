@@ -838,10 +838,12 @@ class QLineEdit(QtWidgets.QLineEdit):
 class QTextEdit(QtWidgets.QTextEdit):
 
     _parent = None
+    LogText = 0
 
     def __init__(self, parent):
         self._parent = parent
         super(QTextEdit, self).__init__(parent)
+        self.LogText = 0
 
     def setText(self, text):
         super(QTextEdit, self).setText(text)
@@ -852,9 +854,11 @@ class QTextEdit(QtWidgets.QTextEdit):
     def textFormat(self):
         return
 
-    @decorators.NotImplementedWarn
+    @decorators.Incomplete
     def setTextFormat(self, value):
-        pass
+        if value == 0: #LogText
+            self.setReadOnly(True)
+        
 
     @decorators.NotImplementedWarn
     def setShown(self, value):
@@ -1257,3 +1261,15 @@ class GroupBox(QtWidgets.QGroupBox):
             self.setTitle(str(value))
         else:
             super(GroupBox, self).__setattr__(name, value)
+
+class QDialog(QtWidgets.QDialog):
+    pass
+
+class QVBoxLayout(QtWidgets.QVBoxLayout):
+    pass
+
+class QHBoxLayout(QtWidgets.QHBoxLayout):
+    pass
+
+class QFrame(QtWidgets.QFrame):
+    pass
