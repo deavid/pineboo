@@ -5,7 +5,6 @@ import re
 import traceback
 
 from PyQt5 import QtCore
-
 import logging
 
 # AQSObjects
@@ -26,10 +25,7 @@ from pineboolib.fllegacy.FLReportViewer import FLReportViewer
 
 from pineboolib.utils import ustr, ustr1
 
-from pineboolib.pncontrolsfactory import CheckBox, TextEdit, LineEdit, FileDialog, MessageBox, Color, RadioButton, Dialog, GroupBox
-from pineboolib.pncontrolsfactory import FLListViewItem, FLDomDocument
-from pineboolib.pncontrolsfactory import QTextEdit, QWidget, QtWidgets, QDateEdit, QColor, QMessageBox, QComboBox, QTable
-from pineboolib.pncontrolsfactory import SysType, aqApp, FormDBWidget
+from pineboolib.pncontrolsfactory import *
 logger = logging.getLogger(__name__)
 
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
@@ -68,6 +64,7 @@ function anon(%s) {
 
     # return loc["anon"]
     return getattr(loc["FormInternalObj"], "anon")
+
 
 
 def Object(x=None):
@@ -351,16 +348,17 @@ class Process(QtCore.QProcess):
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
+QProcess = QtCore.QProcess
 
 class Dir(object):
     path_ = None
-    home = None
     Files = "*.*"
+    
+    from os.path import expanduser
+    home = expanduser("~")
 
     def __init__(self, path=None):
         self.path_ = path
-        from pineboolib.utils import filedir
-        self.home = filedir("..")
 
     def entryList(self, patron, type_=None):
         # p = os.walk(self.path_)
@@ -380,6 +378,10 @@ class Dir(object):
 
     def cleanDirPath(name):
         return str(name)
+    
+    def convertSeparators(filename):
+        #Retorno el mismo path del fichero ...
+        return filename
 
     def setCurrent(self, val=None):
         if val is None:
@@ -465,3 +467,6 @@ class QString(str):
 
 def debug(txt):
     logger.message("---> " + ustr(txt))
+
+
+
