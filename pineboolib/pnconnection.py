@@ -127,6 +127,9 @@ class PNConnection(QtCore.QObject):
 
     def driverName(self):
         return self.driver().driverName()
+    
+    def driverNameToDriverAlias(self, name):
+        return self.driverSql.nameToAlias(name)
 
     def lastError(self):
         return self.driver().lastError()
