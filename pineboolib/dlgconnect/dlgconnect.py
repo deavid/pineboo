@@ -177,6 +177,12 @@ class DlgConnect(QtWidgets.QWidget):
         url = self.ui.leURL.text()
         port = self.ui.lePort.text()
         userDB = self.ui.leDBUser.text()
+        if self.ui.leDBPassword.text() != self.ui.leDBPassword2.text():
+            QMessageBox.information(self.ui, "Pineboo", "La contraseña de la BD no coincide")
+            self.ui.leDBPassword.setText("")
+            self.ui.leDBPassword2.setText("")
+            return 
+        
         passwDB = self.ui.leDBPassword.text()  # Base 64?
         nameDB = self.ui.leDBName.text()
         passProfile = self.ui.leProfilePassword.text()  # base 64?

@@ -393,21 +393,67 @@
                 </widget>
                </item>
                <item>
+                <spacer name="horizontalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>28</width>
+                   <height>13</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
                 <widget class="QLineEdit" name="leDBPassword">
                  <property name="minimumSize">
                   <size>
-                   <width>150</width>
+                   <width>117</width>
                    <height>0</height>
                   </size>
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>150</width>
+                   <width>117</width>
                    <height>16777215</height>
                   </size>
                  </property>
                  <property name="echoMode">
                   <enum>QLineEdit::Password</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_13">
+               <item>
+                <widget class="QLabel" name="label_16">
+                 <property name="text">
+                  <string>Rep. Contraseña BD :</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="leDBPassword2">
+                 <property name="minimumSize">
+                  <size>
+                   <width>117</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>117</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="echoMode">
+                  <enum>QLineEdit::Password</enum>
+                 </property>
+                 <property name="clearButtonEnabled">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
