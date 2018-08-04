@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QKeySequence
+
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
@@ -274,7 +276,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonFirst.setSizePolicy(sizePolicy)
                 self.pushButtonFirst.setMaximumSize(pbSize)
                 self.pushButtonFirst.setMinimumSize(pbSize)
-                # pushButtonFirst->setAccel(QKeySequence(Qt::Key_F5)); FIXME
+                self.pushButtonFirst.setShortcut(QKeySequence(self.tr("F5")))
                 self.pushButtonFirst.setWhatsThis(
                     "Aceptar los cambios e ir al primer registro (F5)")
                 self.pushButtonFirst.setToolTip(
@@ -292,7 +294,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonPrevious.setSizePolicy(sizePolicy)
                 self.pushButtonPrevious.setMaximumSize(pbSize)
                 self.pushButtonPrevious.setMinimumSize(pbSize)
-                # pushButtonPrevious->setAccel(QKeySequence(Qt::Key_F6)); FIXME
+                self.pushButtonPrevious.setShortcut(QKeySequence(self.tr("F6")))
                 self.pushButtonPrevious.setWhatsThis(
                     "Aceptar los cambios e ir al registro anterior (F6)")
                 self.pushButtonPrevious.setToolTip(
@@ -310,7 +312,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonNext.setSizePolicy(sizePolicy)
                 self.pushButtonNext.setMaximumSize(pbSize)
                 self.pushButtonNext.setMinimumSize(pbSize)
-                # pushButtonNext->setAccel(QKeySequence(Qt::Key_F7)); FIXME
+                self.pushButtonNext.setShortcut(QKeySequence(self.tr("F7")))
                 self.pushButtonNext.setWhatsThis(
                     "Aceptar los cambios e ir al registro siguiente (F7)")
                 self.pushButtonNext.setToolTip(
@@ -328,7 +330,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonLast.setSizePolicy(sizePolicy)
                 self.pushButtonLast.setMaximumSize(pbSize)
                 self.pushButtonLast.setMinimumSize(pbSize)
-                # pushButtonLast->setAccel(QKeySequence(Qt::Key_F8)); FIXME
+                self.pushButtonLast.setShortcut(QKeySequence(self.tr("F8")))
                 self.pushButtonLast.setWhatsThis(
                     "Aceptar los cambios e ir al último registro (F8)")
                 self.pushButtonLast.setToolTip(
@@ -346,7 +348,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonAcceptContinue.setMaximumSize(pbSize)
                 self.pushButtonAcceptContinue.setMinimumSize(pbSize)
                 self.pushButtonAcceptContinue.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
-                # pushButtonAcceptContinue->setAccel(QKeySequence(Qt::Key_F9)); FIXME
+                self.pushButtonAcceptContinue.setShortcut(QKeySequence(self.tr("F9")))
                 self.pushButtonAcceptContinue.setWhatsThis(
                     "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
                 self.pushButtonAcceptContinue.setToolTip(
@@ -366,7 +368,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonAccept.setMinimumSize(pbSize)
             self.pushButtonAccept.setIcon(
                 QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
-            # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
+            self.pushButtonAccept.setShortcut(QKeySequence(self.tr("F10")))
             self.pushButtonAccept.setWhatsThis(
                 "Aceptar los cambios y cerrar formulario (F10)")
             self.pushButtonAccept.setToolTip(
@@ -388,11 +390,11 @@ class FLFormRecordDB(FLFormDB):
         self.pushButtonCancel.setSizePolicy(sizePolicy)
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
+        self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
         self.pushButtonCancel.setIcon(
             QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
-            # pushButtonCancel->setAccel(4096); FIXME
             self.pushButtonCancel.setWhatsThis(
                 "Cancelar los cambios y cerrar formulario (Esc)")
             self.pushButtonCancel.setToolTip(

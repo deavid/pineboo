@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import qWarning
+from PyQt5.Qt import qWarning, QKeySequence
 
 from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm
 from pineboolib import decorators
@@ -619,8 +619,9 @@ class FLFormDB(QtWidgets.QDialog):
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
             QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
-        self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.pushButtonCancel.setFocus()
+        #self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
+        #self.pushButtonCancel.setFocus()
+        self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
         self.pushButtonCancel.setWhatsThis("Aceptar y cerrar formulario (Esc)")
         self.pushButtonCancel.setToolTip("Aceptar y cerrar formulario (Esc)")
         self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
