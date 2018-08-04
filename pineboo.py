@@ -148,7 +148,7 @@ def parse_options():
     parser.add_option("-c", "--connect", dest="connection",
                       help="connect to database with user and password.", metavar="user:passwd:driver_alias@host:port/database")
     parser.add_option('-v', '--verbose', action='count', default=2,
-                      help="increase verbosity level") #default a 2 para ver los logger.info, 1n o los muestra
+                      help="increase verbosity level") #default a 2 para ver los logger.info, 1 no los muestra
     parser.add_option("-q", "--quiet",
                       action='count', default=0,
                       help="decrease verbosity level")
@@ -322,10 +322,12 @@ def show_splashscreen(project):
     """Show a splashscreen to inform keep the user busy while Pineboo is warming up."""
     from PyQt5 import QtGui, QtCore, QtWidgets
     from pineboolib.utils import filedir
-    splash_pix = QtGui.QPixmap(
-        filedir("../share/splashscreen/splash_%s.png" % project.dbname))
-    splash = QtWidgets.QSplashScreen(
-        splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash_path = filedir("../share/splashscreen/splash_%s.png" % project.dbname)
+    if not os.path.exists(splash_path):
+        splash_path = filedir("../share/splashscreen/splash.png")
+        
+    splash_pix = QtGui.QPixmap(splash_path)
+    splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
 
@@ -434,7 +436,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
     """Initialize the project and start it."""
     from PyQt5 import QtCore
     if DGI.useDesktop() and DGI.localDesktop():
-        splash.showMessage("Iniciando proyecto ...")
+        splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
     logger.info("Iniciando proyecto ...")
 
     # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
@@ -455,7 +457,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
         raise ValueError("Action name %s not found" % options.action)
 
     if DGI.localDesktop():
-        splash.showMessage("Creando interfaz ...")
+        splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
     logger.info("Creando interfaz ...")
     main_window = mainForm.mainWindow
@@ -470,13 +472,14 @@ def init_project(DGI, splash, options, project, mainForm, app):
         return
 
     if DGI.localDesktop():
-        splash.showMessage("Abriendo interfaz ...")
+        splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
     logger.info("Abriendo interfaz ...")
     main_window.show()
     project.call("sys.iface.init()", [], None, True)
     if DGI.localDesktop():
-        splash.showMessage("Listo ...")
-        QtCore.QTimer.singleShot(2000, splash.hide)
+        splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        main_window.ui_.activateWindow()
+        QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:
         objaction.openDefaultForm()
