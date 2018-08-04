@@ -595,7 +595,7 @@ class FLManager(QtCore.QObject):
 
             return n_or_tmd
 
-    @decorators.NotImplementedWarn
+
     def formatValueLike(self, *args, **kwargs):
         """
         Devuelve el contenido del valor de de un campo formateado para ser reconocido
@@ -610,9 +610,14 @@ class FLManager(QtCore.QObject):
         @param v Valor que se quiere formatear para el campo indicado
         @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
         """
-        return True
+        if not isinstance(args[0], str):
+            if not args[0]:
+                return ""
+            
+            self.formatValueLike(args[0].type(), args[1], args[2])
+        else:
+            return self.db_.formatValueLike(args[0], args[1], args[2])
 
-    @decorators.NotImplementedWarn
     def formatAssignValueLike(self, *args, **kwargs):
         """
         Devuelve el contenido del valor de de un campo formateado para ser reconocido
@@ -627,7 +632,67 @@ class FLManager(QtCore.QObject):
         @param v Valor que se quiere formatear para el campo indicado
         @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
         """
-        return True
+        if isinstance(args[0], FLFieldMetaData):
+            #Tipo 1
+            if not args[0]:
+                return "1 = 1"
+            
+            mtd = args[0].metadata()
+            if not mtd:
+                return self.formatAssignValueLike(args[0].name(), args[0].type(), args[1], args[2])
+            
+            if args[0].isPrimaryKey():
+                return self.formatAssignValueLike(mtd.primaryKey(True), args[0].type(), args[1], args[2])
+            
+            fieldName = args[0].name()
+            if mtd.isQuery() and fieldName.find(".") == -1:
+                prefixTable = mtd.name()
+                qry = FLSqlQuery(mtd.query())
+                
+                if qry:
+                    fL = qry.fieldList()
+                
+                for it in fL:
+                    if it.find(".") > -1:
+                        itFieldName = it[it.find(".") + 1:]
+                    else:
+                        itFieldName = it
+                    
+                    if itFieldName == fieldName:
+                        break
+                
+                qry.deleteLater()
+            
+            return self.formatAssignValueLike("%s.%s" % (prefixTable, fieldName), args[0].type(), args[1], args[2])
+        
+        elif isinstance(args[1], FLFieldMetaData):
+            #tipo 2
+            if args[1] == None:
+                return "1 = 1"
+            
+            return self.formatAssignValueLike(args[0], args[1].type(), args[2], args[3])
+        
+        else:
+            #tipo 3
+            if args[0] is None or not args[1]:
+                return "1 = 1"
+            
+            isText = args[1] in ("string","stringlist")
+            formatV = self.formatValueLike(args[1], args[2], args[3])
+            
+            if not formatV:
+                return "1 = 1"
+            
+            fName = "upper(%s)" % args[0] if upper else args[0]
+            return "%s %s" % (fName, formatV)
+            
+            
+            
+            
+        
+        
+        
+        
 
     def formatValue(self, fMD_or_type, v, upper=False):
 
