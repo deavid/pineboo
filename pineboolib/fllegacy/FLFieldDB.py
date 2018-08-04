@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtWidgets import QSpacerItem, QWidget, QVBoxLayout, QStyle, QFrame
 from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
@@ -15,9 +15,12 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib.fllegacy.FLDataTable import FLDataTable
+
 import datetime
 import pineboolib
 import logging
+
 
 DEBUG = False
 
@@ -58,6 +61,7 @@ class FLFieldDB(QtWidgets.QWidget):
     datePickedOn_ = False
     autoComPopup_ = None
     autoComFrame_ = None
+    autoComFieldName_ = None
     accel_ = None
     keepDisabled_ = False
     editorImg_ = None
@@ -68,7 +72,7 @@ class FLFieldDB(QtWidgets.QWidget):
     fieldAlias_ = None
     showEditor_ = True
     fieldMapValue_ = None
-    autoCompMode_ = "OnDemandF4"
+    autoCompMode_ = "OnDemandF4" # NeverAuto, OnDemandF4, AlwaysAuto
     timerAutoComp_ = False
     textFormat_ = QtCore.Qt.AutoText
     initNotNullColor_ = False
@@ -436,11 +440,11 @@ class FLFieldDB(QtWidgets.QWidget):
                 return True
             if isinstance(obj, pineboolib.pncontrolsfactory.FLLineEdit):
                 if k.key() == Qt.Key_F4:
-                    self.keyF4Pressed()
+                    self.keyF4Pressed.emit()
                     return True
             elif isinstance(obj, pineboolib.pncontrolsfactory.QTextEdit):
                 if k.key() == Qt.Key_F4:
-                    self.keyF4Pressed()
+                    self.keyF4Pressed.emit()
                     return True
                 return False
 
@@ -1779,7 +1783,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     if not field.allowNull() and field.editable() and not (type_ == "time" or type_ == "date"):
                         # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                         self.editor_.setStyleSheet(
-                            'background-color:' + self.notNullColor())
+                            'background-color:%s;' % self.notNullColor())
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
@@ -2097,20 +2101,20 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.setTabChangesFocus(True)
             self.editor_.setMinimumHeight(100)
             self.editor_.setMaximumHeight(120)
-            sizePolicy = QtWidgets.QSizePolicy(
-                QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
             # ted.setTexFormat(self.textFormat_)
-
             # if isinstance(self.textFormat_, Qt.RichText) and not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             # self.FLWidgetFieldDBLayout.setDirection(QtGui.QBoxLayout.Down)
             # self.FLWidgetFieldDBLayout.remove(self.textLabelDB)
             # textEditTab_ = AQTextEditBar(self, "extEditTab_", self.textLabelDB) #FIXME
             # textEditTab_.doConnections(ted)
             # self.FLWidgetFieldDBLayout.addWidget(textEditTab_)
-            self.setMinimumHeight(100)
+            self.setMinimumHeight(130)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
+            verticalSpacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+            self.FLLayoutH.addItem(verticalSpacer)
             self.editor_.installEventFilter(self)
 
             if self.showed:
@@ -2223,16 +2227,181 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     @QtCore.pyqtSlot()
     def toggleAutoCompletion(self):
-        print("FIXMEEEE: toggleAutoCompletion")
-        return
+        if self.autoCompMode_ == "neverAuto":
+            return
+        
+        if not self.autoComFrame_ and self.cursor_:
+            self.autoComFrame_ = QWidget(self, Qt.Popup)
+            self.autoComFrame_.setWindowTitle("autoComFrame")
+            #self.autoComFrame_->setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
+            #self.autoComFrame_->setLineWidth(1);
+            self.autoComFrame_.hide()
+            
+            if not self.autoComPopup_:
+                tMD = self.cursor_.metadata()
+                field = tMD.field(self.fieldName_) if tMD else None
+                
+                if field:
+                    self.autoComPopup_ = FLDataTable(self.autoComFrame_, "autoComPopup", True)
+                    cur = None
+                    
+                    if not field.relationM1():
+                        if self.fieldRelation_ is not None and self.foreignField_ is not None:
+                            self.autoComFieldName_ = self.foreignField_
+                            
+                            fRel = tMD.field(self.fieldRelation_) if tMD else None
+                            if not fRel:
+                                return
+                            
+                            self.autoComFieldRelation_ = fRel.relationM1().foreignField()
+                            cur = FLSqlCursor(fRel.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                            tMD = cur.metadata()
+                            field = tMD.field(self.autoCopmFieldName_) if tMD else field
+                        else:
+                            self.autoComFieldName_ = self.fieldName_
+                            self.autoComFieldRelation_ = None
+                            cur = FLSqlCursor(tMD.name(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                        
+                    else:
+                        
+                        self.autoComFieldName_ = field.relationM1().foreignField()
+                        self.autoComFieldRelation_ = None
+                        cur = FLSqlCursor(field.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                        tMD = cur.metadata()
+                        field = tMD.field(self.autoComFieldName_) if tMD else field
+                    
+                    #Añade campo al cursor ...    FIXME!! 
+                    #cur.append(self.autoComFieldName_, field.type(), -1, field.length(), -1)
+                    
+                    #for fieldsNames in tMD.fieldsNames().split(","):
+                    #    field = tMD.field(fieldsNames)
+                    #    if field:
+                    #        cur.append(field.name(), field.type(), -1, field.length(), -1, "Variant", None, True) #qvariant,0,true
+                        
+                    
+                    if self.autoComFieldRelation_ is not None and self.topWidget_:
+                        l = self.topWidget_.queryList("FLFieldDB")
+                        fdb = None
+                        for itf in l:
+                            if itf.fieldName() == self.autoComFieldRelation_:
+                                fdb = itf
+                                break
+                        
+                        if fdb and fdb.filter() is not None:
+                            cur.setMainFilter(fdb.filter())
+                        
+                    self.autoComPopup_.setFLSqlCursor(cur)
+                    #FIXME
+                    #self.autoComPopup_.setTopMargin(0)
+                    #self.autoComPopup_.setLeftMargin(0)
+                    self.autoComPopup_.horizontalHeader().hide()
+                    self.autoComPopup_.verticalHeader().hide()
+                    
+                    cur.newBuffer.connect(self.autoCompletionUpdateValue)
+                    self.autoComPopup_.recordChoosed.connect(self.autoCompletionUpdateValue)
+        
+        
+        if self.autoComPopup_:
+            cur = self.autoComPopup_.cursor()
+            tMD = cur.metadata()
+            field = tMD.field(self.autoComFieldName_) if tMD else None
+            
+            if field:
+                filter = self.cursor_.db().manager().formatAssignValueLike(field, self.value(), True)
+                cur.setFilter(filter)
+                #self.autoComPopup_.setFilter(filter)
+                #self.autoComPopup_.setSort("%s ASC" % self.autoComFieldName_)
+                
+                self.autoComPopup_.cursor().setFilter(filter)
+                self.autoComPopup_.cursor().setSort("%s ASC" % self.autoComFieldName_)
+                
+                self.autoComPopup_.refresh()
+            
+            if not self.autoComFrame_.isVisible() and cur.size() > 1:
+                tmpPoint = None
+                if self.showAlias_:
+                    tmpPoint = self.mapToGlobal(self.textLabelDB.geometry().bottomLeft())
+                elif self.pushButtonDB and self.pushButtonDB.isShown():
+                    tmpPoint = self.mapToGlobal(self.pushButtonDB.geometry().bottomLeft())
+                else:
+                    tmpPoint = self.mapToGlobal(self.editor_.geometry().bottonLeft())
+                
+                frameWidth = self.width()
+                if frameWidth < self.autoComPopup_.width():
+                    frameWidth = self.autoComPopup_.width()
+                
+                if frameWidth < self.autoComFrame_.width():
+                    frameWidth = self.autoComFrame_.width()
+                
+                self.autoComFrame_.setGeometry(tmpPoint.x(), tmpPoint.y(), frameWidth, 300)
+                self.autoComFrame_.show()
+                self.autoComFrame_.setFocus()
+            elif self.autoComFrame_.isVisible() and cur.size() == 1:
+                self.autoComFrame_.hide()
+            
+            cur.first()
+        
+                
+                            
+                            
+            
+            
 
     """
     Actualiza el valor del campo a partir del contenido que
     ofrece el asistente de completado automático.
     """
-    @decorators.NotImplementedWarn
     def autoCompletionUpdateValue(self):
-        return
+        if not self.autoComPopup_ or not self.autoComFrame_:
+            return 
+        
+        cur = self.autoComPopup_.cursor()
+        if not cur or not cur.isValid():
+            return
+        
+        if isinstance(self.sender(), "FLDataTable"):
+            self.setValue(cur.valueBuffer(self.autoComFieldName_))
+            self.autoComFrame_.hide()
+            #ifdef Q_OS_WIN32
+            #if (editor_)
+            #    editor_->releaseKeyboard();
+            #if (autoComPopup_)
+            #    autoComPopup_->releaseKeyboard();
+            #endif
+        elif isinstance(self.editor_, "QTextEdit"):
+            self.setValue(self.autoComFieldName_)
+        else:
+            ed = self.editor_
+            if self.autoComFrame_.isVisible() and not ed.hasFocus():
+                if not self.autoComPopup_.hasFocus():
+                    cval = str(cur.valueBuffer(self.autoComFieldName_))
+                    val = ed.text()
+                    ed.autoSelect = False
+                    ed.setText(cval)
+                    ed.setFocus()
+                    ed.setCursorPosition(cval.length())
+                    ed.cursorBackward(True, cval.length() - val.length())
+                    #ifdef Q_OS_WIN32
+                    #ed->grabKeyboard();
+                    #endif
+                else:
+                    self.setValue(cur.valueBuffer(self.autoComFieldName_))
+            
+            elif not self.autoComFrame_.isVisible():
+                cval = str(cur.valueBuffer(self.autoComFieldName_))
+                val = ed.text()
+                ed.autoSelect = False
+                ed.setText(cval)
+                ed.setFocus()
+                ed.setCursorPosition(cval.length())
+                ed.cursorBackward(True, cval.length() - val.length())
+                
+        
+        if self.autoComFieldRelation_ is not None and not self.autoComFrame_.isVisible():
+            self.cursor_.setValueBuffer(self.fieldRelation_, cur.valueBuffer(self.autoComFieldRelation_))
+    
+                    
+            
 
     """
     Abre un formulario de edición para el valor seleccionado en su acción correspondiente
