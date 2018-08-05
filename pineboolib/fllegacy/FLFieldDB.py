@@ -2311,7 +2311,6 @@ class FLFieldDB(QtWidgets.QWidget):
                 cur.setFilter(filter)
                 #self.autoComPopup_.setFilter(filter)
                 #self.autoComPopup_.setSort("%s ASC" % self.autoComFieldName_)
-                
                 self.autoComPopup_.cursor().setFilter(filter)
                 self.autoComPopup_.cursor().setSort("%s ASC" % self.autoComFieldName_)
                 
@@ -2359,7 +2358,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if not cur or not cur.isValid():
             return
         
-        if isinstance(self.sender(), "FLDataTable"):
+        if isinstance(self.sender(), pineboolib.pncontrolsfactory.FLDataTable):
             self.setValue(cur.valueBuffer(self.autoComFieldName_))
             self.autoComFrame_.hide()
             #ifdef Q_OS_WIN32
@@ -2368,7 +2367,7 @@ class FLFieldDB(QtWidgets.QWidget):
             #if (autoComPopup_)
             #    autoComPopup_->releaseKeyboard();
             #endif
-        elif isinstance(self.editor_, "QTextEdit"):
+        elif isinstance(self.editor_, pineboolib.pncontrolsfactory.QTextEdit):
             self.setValue(self.autoComFieldName_)
         else:
             ed = self.editor_
@@ -2393,8 +2392,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 ed.autoSelect = False
                 ed.setText(cval)
                 ed.setFocus()
-                ed.setCursorPosition(cval.length())
-                ed.cursorBackward(True, cval.length() - val.length())
+                ed.setCursorPosition(len(cval))
+                ed.cursorBackward(True, len(cval) - len(val))
                 
         
         if self.autoComFieldRelation_ is not None and not self.autoComFrame_.isVisible():
