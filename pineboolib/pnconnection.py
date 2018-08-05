@@ -167,6 +167,9 @@ class PNConnection(QtCore.QObject):
 
     def formatValue(self, t, v, upper):
         return self.driverSql.formatValue(t, v, upper)
+    
+    def formatValueLike(self, t, v, upper):
+        return self.driverSql.formatValueLike(t, v, upper)
 
     def canSavePoint(self):
         return True

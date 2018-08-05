@@ -63,6 +63,33 @@ class FLMYSQL_MYISAM(object):
             self.conn_.autocommit(True)
 
         return self.conn_
+    
+    def formatValueLike(self, type_, v, upper):
+        res = "IS NULL"
+        
+        if type_ == "bool":
+            s = str(v[0]).upper()
+            if s == str(QApplication.tr("Sí")[0]).upper():
+                res = "=1"
+            elif str(QApplication.tr("No")[0]).upper():
+                res = "=0"
+        
+        elif type_ == "date":
+            util = FLUtil()
+            res = "LIKE '%%" + util.dateDMAtoAMD(str(v)) + "'"
+        
+        elif type_ == "time":
+            t = v.toTime()
+            res = "LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
+        
+        else:
+            res = str(v)
+            if upper:
+                res = "%s" % res.upper()
+            
+            res = "LIKE '" + res + "%%'"
+        
+        return res
 
     def formatValue(self, type_, v, upper):
 
