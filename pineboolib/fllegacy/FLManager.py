@@ -674,6 +674,11 @@ class FLManager(QtCore.QObject):
         
         else:
             #tipo 3
+            #args[0] = fieldName
+            #args[1] = type
+            #args[2] = valor
+            #args[3] = upper
+            
             if args[0] is None or not args[1]:
                 return "1 = 1"
             
@@ -683,7 +688,7 @@ class FLManager(QtCore.QObject):
             if not formatV:
                 return "1 = 1"
             
-            fName = "upper(%s)" % args[0] if upper else args[0]
+            fName = "upper(%s)" % args[0] if args[3] else args[0]
             return "%s %s" % (fName, formatV)
             
             
