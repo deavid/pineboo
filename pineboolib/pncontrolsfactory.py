@@ -60,6 +60,7 @@ FLPixmapView = resolveObject("FLPixmapView")
 FLDomDocument = resolveObject("FLDomDocument")
 FLListViewItem = resolveObject("FLListViewItem")
 FLTable = resolveObject("FLTable")
+FLDataTable = resolveObject("FLDataTable")
 # Clases QSA
 CheckBox = resolveObject("CheckBox")
 TextEdit = QTextEdit
