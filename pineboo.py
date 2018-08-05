@@ -478,7 +478,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
     project.call("sys.iface.init()", [], None, True)
     if DGI.localDesktop():
         splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        main_window.ui_.activateWindow()
+        main_window.activateWindow()
         QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:

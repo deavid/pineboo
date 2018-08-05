@@ -1089,7 +1089,7 @@ class XMLAction(XMLStruct):
             w = pineboolib.project.main_window
             if not self.mainform_widget:
                 if pineboolib.project._DGI.useDesktop():
-                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w.ui_, None)
+                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
                 else:
                     from pineboolib.utils import Struct
                     self.mainform_widget = Struct()
@@ -1117,7 +1117,7 @@ class XMLAction(XMLStruct):
         self.logger.debug("Opening default form for Action %s", self.name)
         w = pineboolib.project.main_window
         self.initModule(self.name)
-        self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w.ui_, None)
+        self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
         w.addFormTab(self)
 
     """
