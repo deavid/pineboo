@@ -2217,7 +2217,6 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.autoCompMode_ == "neverAuto":
             return
 
-        print("Chiii")
         if not self.autoComFrame_ and self.cursor():
             self.autoComFrame_ = pineboolib.pncontrolsfactory.QWidget(self, Qt.Popup)
             self.autoComFrame_.setWindowTitle("autoComFrame")
