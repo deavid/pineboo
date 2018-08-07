@@ -31,8 +31,6 @@ class Options:
 #      una nueva clase.
 
 def loadUi(path, widget, parent=None):
-    if not pineboolib.project._DGI.localDesktop():
-        pineboolib.project._DGI.loadUI(path, widget)
 
     global ICONS, root
     # parser = etree.XMLParser(
@@ -348,7 +346,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
     layouts_pending_process = []
     properties = []
     unbold_fonts = []
-    
+
     for c in xml:
         if c.tag == "layout":
             logger.warn("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
@@ -356,8 +354,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             lay_.setObjectName(c.get("name"))
             widget.setLayout(lay_)
             continue
-        
-        
+
         if c.tag == "property":
             properties.append(c)
             continue
@@ -366,7 +363,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
                 if Options.DEBUG_LEVEL > 50:
                     logger("Trying to replace layout. Ignoring. %s, %s",
-                          repr(c.tag), widget.layout)
+                           repr(c.tag), widget.layout)
                 continue
 
             widget.layout = QtWidgets.QVBoxLayout()

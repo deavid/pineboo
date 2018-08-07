@@ -296,16 +296,20 @@ class FLManagerModules(QtCore.QObject):
         tree = etree.ElementTree.parse(form_path)
         root = tree.getroot()
         UIVersion = root.get("version")
-        logger.debug("Procesando ui %s versión %s", n, UIVersion)
-        if UIVersion < "4.0":
-            pnqt3ui.loadUi(form_path, w_)
+        logger.info("Procesando ui %s versión %s", n, UIVersion)
+        if not pineboolib.project or pineboolib.project._DGI.localDesktop():
+            if UIVersion < "4.0":
+                pnqt3ui.loadUi(form_path, w_)
+            else:
+                from PyQt5 import uic
+                qtWidgetPlugings = filedir("./plugings/qtwidgetplugins")
+                if not qtWidgetPlugings in uic.widgetPluginPath:
+                    logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
+                    uic.widgetPluginPath.append(qtWidgetPlugings)
+                uic.loadUi(form_path, w_)
         else:
-            from PyQt5 import uic
-            qtWidgetPlugings = filedir("./plugings/qtwidgetplugins")
-            if not qtWidgetPlugings in uic.widgetPluginPath:
-                logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
-                uic.widgetPluginPath.append(qtWidgetPlugings)
-            uic.loadUi(form_path, w_)
+            pineboolib.project._DGI.loadUI(form_path, w_)
+
         return w_
 
     """
