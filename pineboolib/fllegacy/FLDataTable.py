@@ -20,6 +20,8 @@ class FLDataTable(QtWidgets.QTableView):
     constructor
     """
     _parent = None
+    filter_ = None
+    sort_ = None
 
     def __init__(self, parent=None, name=None, popup=False):
         super(FLDataTable, self).__init__(parent)
@@ -107,6 +109,12 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setPersistentFilter(self, pFilter):
         self.persistentFilter_ = pFilter
+
+    def setFilter(self, f):
+        self.filter_ = f
+
+    def setSort(self, s):
+        self.sort_ = s
     """
     Devuelve el cursor
     """
@@ -459,12 +467,22 @@ class FLDataTable(QtWidgets.QTableView):
         # print("FLDataTable:refresh()")
         if self.popup_:
             self.cursor_.refresh()
-
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
         if not self.refreshing_ and self.cursor():
             self.refreshing_ = True
             self.hide()
-            self.cursor_.setFilter(self.persistentFilter_)
+            filter = self.persistentFilter_
+            if self.filter_:
+                if not self.persistentFilter_ or self.filter_ not in self.persistentFilter_:
+                    if self.persistentFilter_:
+                        filter = "%s AND %s" % (filter, self.filter_)
+                    else:
+                        filter = self.filter_
+
+            self.cursor().setFilter(filter)
+            if self.sort_:
+                self.cursor().setSort(self.sort_)
+
             self.cursor().refresh()
             self.marcaRow()
             self.show()
