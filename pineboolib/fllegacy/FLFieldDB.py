@@ -15,19 +15,10 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFormDB import FLFormDB
-from pineboolib.fllegacy.FLDataTable import FLDataTable
 
 import datetime
 import pineboolib
 import logging
-
-
-DEBUG = False
-
-
-class FLNotImplemented():
-    def __init__(self, *args, **kwargs):
-        raise Exception("Not implemented")
 
 
 class FLFieldDB(QtWidgets.QWidget):
@@ -72,7 +63,7 @@ class FLFieldDB(QtWidgets.QWidget):
     fieldAlias_ = None
     showEditor_ = True
     fieldMapValue_ = None
-    autoCompMode_ = "OnDemandF4" # NeverAuto, OnDemandF4, AlwaysAuto
+    autoCompMode_ = "OnDemandF4"  # NeverAuto, OnDemandF4, AlwaysAuto
     timerAutoComp_ = False
     textFormat_ = QtCore.Qt.AutoText
     initNotNullColor_ = False
@@ -99,6 +90,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def __init__(self, parent, *args):
         super(FLFieldDB, self).__init__(parent)
+
+        self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
+        logger = logging.getLogger(__name__)
 
         self.maxPixImages_ = FLSettings().readEntry("ebcomportamiento/maxPixImages", None)
         if self.maxPixImages_ in (None, ""):
@@ -183,22 +177,21 @@ class FLFieldDB(QtWidgets.QWidget):
             new_parent = self.topWidget_.parentWidget()
             if new_parent is None:
                 self.topWidget_ = None
-                print("FLFieldDB : El widget de nivel superior deber ser de la clase FLFormDB o heredar de ella (o fuí demasiado rápido y no lo esperé)")
+                self.logger.warn("FLFieldDB : El widget de nivel superior deber ser de la clase FLFormDB o heredar de ella (o fuí demasiado rápido y no lo esperé)")
                 break
             self.topWidget_ = new_parent
 
         if self.topWidget_:
             self.cursor_ = self.topWidget_.cursor()
             # print("Hay topWidget en %s", self)
-        if DEBUG:
+        if self.DEBUG:
             if self.cursor_ and self.cursor_.d.buffer_:
-                print("*** FLFieldDB::loaded: cursor: %r name: %r at:%r" %
-                      (self.cursor_, self.cursor_.curName(), self.cursor_.at()))
+                self.logger.info("*** FLFieldDB::loaded: cursor: %r name: %r at:%r", self.cursor_, self.cursor_.curName(), self.cursor_.at())
                 cur_values = [
                     f.value for f in self.cursor_.d.buffer_.fieldList_]
-                print("*** cursor Buffer: %r" % cur_values)
+                self.logger.info("*** cursor Buffer: %r", cur_values)
             else:
-                print("*** FLFieldDB::loaded: SIN cursor ??")
+                self.logger.warn("*** FLFieldDB::loaded: SIN cursor ??")
 
         if not self.name:
             self.setName("FLFieldDB")
@@ -373,6 +366,7 @@ class FLFieldDB(QtWidgets.QWidget):
         led = self.editor_
         if isinstance(led, pineboolib.pncontrolsfactory.QLineEdit):
             return led.echoMode()
+
         return pineboolib.pncontrolsfactory.QLineEdit.Normal
 
     def _process_autocomplete_events(self, event):
@@ -438,6 +432,7 @@ class FLFieldDB(QtWidgets.QWidget):
             k = event
             if self._process_autocomplete_events(event):
                 return True
+
             if isinstance(obj, pineboolib.pncontrolsfactory.FLLineEdit):
                 if k.key() == Qt.Key_F4:
                     self.keyF4Pressed.emit()
@@ -639,16 +634,15 @@ class FLFieldDB(QtWidgets.QWidget):
         # self.focusNextPrevChild(True)
 
     def status(self):
-        print("****************STATUS**************")
-        print("FLField:", self.fieldName_)
-        print("FieldAlias:", self.fieldAlias_)
-        print("FieldRelation:", self.fieldRelation_)
-        print("Cursor:", self.cursor_)
-        if self.cursor_:
-            print("CurName:", self.cursor().curName())
-        print("Editor: %s, EditorImg: %s" % (self.editor_, self.editorImg_))
-        print("RefreshLaterEditor:", self._refreshLaterEditor)
-        print("************************************")
+        self.logger.info("****************STATUS**************")
+        self.logger.info("FLField:", self.fieldName_)
+        self.logger.info("FieldAlias:", self.fieldAlias_)
+        self.logger.info("FieldRelation:", self.fieldRelation_)
+        self.logger.info("Cursor:", self.cursor_)
+        self.logger.info("CurName:", self.cursor().curName() if self.cursor_ else None)
+        self.logger.info("Editor: %s, EditorImg: %s" % (self.editor_, self.editorImg_))
+        self.logger.info("RefreshLaterEditor:", self._refreshLaterEditor)
+        self.logger.info("************************************")
 
     """
     Establece el valor contenido en elcampo.
@@ -658,8 +652,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
     def setValue(self, v):
         if not self.cursor_:
-            print("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)" % (
-                self.fieldName_, self))
+            self.logger.error("FLFieldDB(%s):ERROR: El control no tiene cursor todavía. (%s)", self.fieldName_, self)
             return
         # if v:
         #    print("FLFieldDB(%s).setValue(%s) ---> %s" % (self.fieldName_, v, self.editor_))
@@ -673,8 +666,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         field = tMD.field(self.fieldName_)
         if not field:
-            print("FLFieldDB::setValue(%s) : No existe el campo " %
-                  self.fieldName_)
+            self.logger.warn("FLFieldDB::setValue(%s) : No existe el campo ", self.fieldName_)
             return
 
         type_ = field.type()
@@ -819,7 +811,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         field = tMD.field(self.fieldName_)
         if not field:
-            print(FLUtil.tr("FLFieldDB::value() : No existe el campo ") + self.fieldName_)
+            self.logger.warn(FLUtil.tr("FLFieldDB::value() : No existe el campo %s"), self.fieldName_)
             return None
 
         v = None
@@ -1019,7 +1011,7 @@ class FLFieldDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot('QString')
     def refresh(self, fN=None):
         if not self.cursor_ or not isinstance(self.cursor_, FLSqlCursor):
-            print("FLField.refresh() Cancelado")
+            self.logger.debug("FLField.refresh() Cancelado")
             return
         tMD = self.cursor_.metadata()
         if not tMD:
@@ -1062,8 +1054,7 @@ class FLFieldDB(QtWidgets.QWidget):
                         del tmd
 
                 if not field.relationM1():
-                    print(
-                        "FLFieldDB :El campo de la relación debe estar relacionado en M1")
+                    self.logger.info("FLFieldDB :El campo de la relación debe estar relacionado en M1")
                     if tmd and not tmd.inCache():
                         del tmd
                     return
@@ -1127,9 +1118,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
         # if isinstance(v , QString): #Para quitar
         # v = str(v)
-        if DEBUG:
-            print("FLFieldDB:: refresh fN:%r fieldName:%r v:%s" %
-                  (fN, self.fieldName_, repr(v)[:64]))
+        if self.DEBUG:
+            self.logger.info("FLFieldDB:: refresh fN:%r fieldName:%r v:%s" %
+                             (fN, self.fieldName_, repr(v)[:64]))
 
         if (self.keepDisabled_ or self.cursor_.fieldDisabled(self.fieldName_) or
                 (modeAcces == FLSqlCursor.Edit and (field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or
@@ -1161,8 +1152,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 try:
                     self.editor_.textChanged.disconnect(self.updateValue)
                 except Exception:
-                    self.logger.exception(
-                        "Error al desconectar señal textChanged")
+                    self.logger.exception("Error al desconectar señal textChanged")
 
             if v is not None:
                 if ol:
@@ -1283,8 +1273,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 try:
                     self.editor_.dateChanged.disconnect(self.updateValue)
                 except Exception:
-                    self.logger.exception(
-                        "Error al desconectar señal textChanged")
+                    self.logger.exception("Error al desconectar señal textChanged")
 
                 if v:
                     util = FLUtil()
@@ -1310,8 +1299,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 try:
                     self.editor_.timeChanged.disconnect(self.updateValue)
                 except Exception:
-                    self.logger.exception(
-                        "Error al desconectar señal timeChanged")
+                    self.logger.exception("Error al desconectar señal timeChanged")
 
                 if v is not None:
                     self.editor_.setTime(v)
@@ -1476,8 +1464,7 @@ class FLFieldDB(QtWidgets.QWidget):
             try:
                 self.editor_.dateChanged.disconnect(self.updateValue)
             except Exception:
-                self.logger.exception(
-                    "Error al desconectar señal dateChanged")
+                self.logger.exception("Error al desconectar señal dateChanged")
             self.editor_.setDate(v)
             self.editor_.dateChanged.connect(self.updateValue)
 
@@ -1610,14 +1597,12 @@ class FLFieldDB(QtWidgets.QWidget):
                     curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
 
                 fMD.addRelationMD(rMD)
-                print("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
-                      "pero sin embargo se han indicado los campos de relación( %s, %s)"
-                      % (curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_))
-                print("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s" %
-                      (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
+                self.logger.info("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
+                                 "pero sin embargo se han indicado los campos de relación( %s, %s)", curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_)
+                self.logger.info("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
             else:
-                print("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (
-                      self.fieldRelation_, self.tableName_))
+                self.logger.info("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )",
+                                 self.fieldRelation_, self.tableName_)
 
         if self.tableName_:
                 # self.cursor_ = FLSqlCursor(self.tableName_)
@@ -1823,6 +1808,8 @@ class FLFieldDB(QtWidgets.QWidget):
                                 "Completado automático desactivado")
                             self.editor_.setWhatsThis(
                                 "Completado automático desactivado")
+
+                self.editor_.installEventFilter(self)
 
                 if self.showed:
                     try:
@@ -2229,30 +2216,31 @@ class FLFieldDB(QtWidgets.QWidget):
     def toggleAutoCompletion(self):
         if self.autoCompMode_ == "neverAuto":
             return
-        
-        if not self.autoComFrame_ and self.cursor_:
-            self.autoComFrame_ = QWidget(self, Qt.Popup)
+
+        print("Chiii")
+        if not self.autoComFrame_ and self.cursor():
+            self.autoComFrame_ = pineboolib.pncontrolsfactory.QWidget(self, Qt.Popup)
             self.autoComFrame_.setWindowTitle("autoComFrame")
-            #self.autoComFrame_->setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
-            #self.autoComFrame_->setLineWidth(1);
+            # self.autoComFrame_->setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
+            # self.autoComFrame_->setLineWidth(1);
             self.autoComFrame_.hide()
-            
+
             if not self.autoComPopup_:
                 tMD = self.cursor_.metadata()
                 field = tMD.field(self.fieldName_) if tMD else None
-                
+
                 if field:
-                    self.autoComPopup_ = FLDataTable(self.autoComFrame_, "autoComPopup", True)
+                    self.autoComPopup_ = pineboolib.pncontrolsfactory.FLDataTable(self.autoComFrame_, "autoComPopup", True)
                     cur = None
-                    
+
                     if not field.relationM1():
                         if self.fieldRelation_ is not None and self.foreignField_ is not None:
                             self.autoComFieldName_ = self.foreignField_
-                            
+
                             fRel = tMD.field(self.fieldRelation_) if tMD else None
                             if not fRel:
                                 return
-                            
+
                             self.autoComFieldRelation_ = fRel.relationM1().foreignField()
                             cur = FLSqlCursor(fRel.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
                             tMD = cur.metadata()
@@ -2261,24 +2249,23 @@ class FLFieldDB(QtWidgets.QWidget):
                             self.autoComFieldName_ = self.fieldName_
                             self.autoComFieldRelation_ = None
                             cur = FLSqlCursor(tMD.name(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
-                        
+
                     else:
-                        
+
                         self.autoComFieldName_ = field.relationM1().foreignField()
                         self.autoComFieldRelation_ = None
                         cur = FLSqlCursor(field.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
                         tMD = cur.metadata()
                         field = tMD.field(self.autoComFieldName_) if tMD else field
-                    
-                    #Añade campo al cursor ...    FIXME!! 
+
+                    # Añade campo al cursor ...    FIXME!!
                     #cur.append(self.autoComFieldName_, field.type(), -1, field.length(), -1)
-                    
-                    #for fieldsNames in tMD.fieldsNames().split(","):
+
+                    # for fieldsNames in tMD.fieldsNames().split(","):
                     #    field = tMD.field(fieldsNames)
                     #    if field:
                     #        cur.append(field.name(), field.type(), -1, field.length(), -1, "Variant", None, True) #qvariant,0,true
-                        
-                    
+
                     if self.autoComFieldRelation_ is not None and self.topWidget_:
                         l = self.topWidget_.queryList("FLFieldDB")
                         fdb = None
@@ -2286,36 +2273,30 @@ class FLFieldDB(QtWidgets.QWidget):
                             if itf.fieldName() == self.autoComFieldRelation_:
                                 fdb = itf
                                 break
-                        
+
                         if fdb and fdb.filter() is not None:
                             cur.setMainFilter(fdb.filter())
-                        
+
                     self.autoComPopup_.setFLSqlCursor(cur)
-                    #FIXME
-                    #self.autoComPopup_.setTopMargin(0)
-                    #self.autoComPopup_.setLeftMargin(0)
+                    # FIXME
+                    # self.autoComPopup_.setTopMargin(0)
+                    # self.autoComPopup_.setLeftMargin(0)
                     self.autoComPopup_.horizontalHeader().hide()
                     self.autoComPopup_.verticalHeader().hide()
-                    
+
                     cur.newBuffer.connect(self.autoCompletionUpdateValue)
                     self.autoComPopup_.recordChoosed.connect(self.autoCompletionUpdateValue)
-        
-        
+
         if self.autoComPopup_:
             cur = self.autoComPopup_.cursor()
             tMD = cur.metadata()
             field = tMD.field(self.autoComFieldName_) if tMD else None
-            
+
             if field:
-                filter = self.cursor_.db().manager().formatAssignValueLike(field, self.value(), True)
-                cur.setFilter(filter)
-                #self.autoComPopup_.setFilter(filter)
-                #self.autoComPopup_.setSort("%s ASC" % self.autoComFieldName_)
-                self.autoComPopup_.cursor().setFilter(filter)
-                self.autoComPopup_.cursor().setSort("%s ASC" % self.autoComFieldName_)
-                
+                filter = self.cursor().db().manager().formatAssignValueLike(field, self.value(), True)
+                self.autoComPopup_.setFilter(filter)
+                self.autoComPopup_.setSort("%s ASC" % self.autoComFieldName_)
                 self.autoComPopup_.refresh()
-            
             if not self.autoComFrame_.isVisible() and cur.size() > 1:
                 tmpPoint = None
                 if self.showAlias_:
@@ -2324,49 +2305,45 @@ class FLFieldDB(QtWidgets.QWidget):
                     tmpPoint = self.mapToGlobal(self.pushButtonDB.geometry().bottomLeft())
                 else:
                     tmpPoint = self.mapToGlobal(self.editor_.geometry().bottonLeft())
-                
+
                 frameWidth = self.width()
                 if frameWidth < self.autoComPopup_.width():
                     frameWidth = self.autoComPopup_.width()
-                
+
                 if frameWidth < self.autoComFrame_.width():
                     frameWidth = self.autoComFrame_.width()
-                
+
                 self.autoComFrame_.setGeometry(tmpPoint.x(), tmpPoint.y(), frameWidth, 300)
                 self.autoComFrame_.show()
                 self.autoComFrame_.setFocus()
             elif self.autoComFrame_.isVisible() and cur.size() == 1:
                 self.autoComFrame_.hide()
-            
+
             cur.first()
-        
-                
-                            
-                            
-            
-            
+            del cur
 
     """
     Actualiza el valor del campo a partir del contenido que
     ofrece el asistente de completado automático.
     """
+
     def autoCompletionUpdateValue(self):
         if not self.autoComPopup_ or not self.autoComFrame_:
-            return 
-        
+            return
+
         cur = self.autoComPopup_.cursor()
         if not cur or not cur.isValid():
             return
-        
+
         if isinstance(self.sender(), pineboolib.pncontrolsfactory.FLDataTable):
             self.setValue(cur.valueBuffer(self.autoComFieldName_))
             self.autoComFrame_.hide()
-            #ifdef Q_OS_WIN32
-            #if (editor_)
+            # ifdef Q_OS_WIN32
+            # if (editor_)
             #    editor_->releaseKeyboard();
-            #if (autoComPopup_)
+            # if (autoComPopup_)
             #    autoComPopup_->releaseKeyboard();
-            #endif
+            # endif
         elif isinstance(self.editor_, pineboolib.pncontrolsfactory.QTextEdit):
             self.setValue(self.autoComFieldName_)
         else:
@@ -2378,14 +2355,14 @@ class FLFieldDB(QtWidgets.QWidget):
                     ed.autoSelect = False
                     ed.setText(cval)
                     ed.setFocus()
-                    ed.setCursorPosition(cval.length())
-                    ed.cursorBackward(True, cval.length() - val.length())
-                    #ifdef Q_OS_WIN32
-                    #ed->grabKeyboard();
-                    #endif
+                    ed.setCursorPosition(len(cval))
+                    ed.cursorBackward(True, len(cval) - len(val))
+                    # ifdef Q_OS_WIN32
+                    # ed->grabKeyboard();
+                    # endif
                 else:
                     self.setValue(cur.valueBuffer(self.autoComFieldName_))
-            
+
             elif not self.autoComFrame_.isVisible():
                 cval = str(cur.valueBuffer(self.autoComFieldName_))
                 val = ed.text()
@@ -2394,13 +2371,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 ed.setFocus()
                 ed.setCursorPosition(len(cval))
                 ed.cursorBackward(True, len(cval) - len(val))
-                
-        
+
         if self.autoComFieldRelation_ is not None and not self.autoComFrame_.isVisible():
             self.cursor_.setValueBuffer(self.fieldRelation_, cur.valueBuffer(self.autoComFieldRelation_))
-    
-                    
-            
 
     """
     Abre un formulario de edición para el valor seleccionado en su acción correspondiente
@@ -2422,7 +2395,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         if not field.relationM1():
-            print("FLFieldDB : El campo de búsqueda debe tener una relación M1")
+            self.logger.info("FLFieldDB : El campo de búsqueda debe tener una relación M1")
             return
 
         fMD = field.associatedField()
@@ -2481,14 +2454,14 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         if not field.relationM1():
-            print("FLFieldDB : El campo de búsqueda debe tener una relación M1")
+            self.logger.info("FLFieldDB : El campo de búsqueda debe tener una relación M1")
             return
 
         fMD = field.associatedField()
 
         if fMD:
             if not fMD.relationM1():
-                print("FLFieldDB : El campo asociado debe tener una relación M1")
+                self.logger.info("FLFieldDB : El campo asociado debe tener una relación M1")
                 return
             v = self.cursor_.valueBuffer(fMD.name())
             if v is None or self.cursor_.bufferIsNull(fMD.name()):
