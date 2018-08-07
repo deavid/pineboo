@@ -2219,6 +2219,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if not self.autoComFrame_ and self.cursor():
             self.autoComFrame_ = pineboolib.pncontrolsfactory.QWidget(self, Qt.Popup)
+            lay = pineboolib.pncontrolsfactory.QVBoxLayout()
+            self.autoComFrame_.setLayout(lay)
             self.autoComFrame_.setWindowTitle("autoComFrame")
             # self.autoComFrame_->setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
             # self.autoComFrame_->setLineWidth(1);
@@ -2229,7 +2231,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 field = tMD.field(self.fieldName_) if tMD else None
 
                 if field:
-                    self.autoComPopup_ = pineboolib.pncontrolsfactory.FLDataTable(self.autoComFrame_, "autoComPopup", True)
+                    self.autoComPopup_ = pineboolib.pncontrolsfactory.FLDataTable(None, "autoComPopup", True)
+                    lay.addWidget(self.autoComPopup_)
                     cur = None
 
                     if not field.relationM1():
