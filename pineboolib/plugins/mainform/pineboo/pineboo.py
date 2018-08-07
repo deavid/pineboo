@@ -27,16 +27,15 @@ class MainForm(QMainWindow):
     mPModulos = {}  # Almacena los nombre de submenus modulos de menú pineboo
     openTabs = []
     favoritosW = None
-    wid = None #widget principal
-    
-    def __init__(self, parent = None):
+    wid = None  # widget principal
+
+    def __init__(self, parent=None):
         super(MainForm, self).__init__(parent)
         self.ui_ = None
 
     @classmethod
     def setDebugLevel(self, q):
         MainForm.debugLevel = q
-
 
     def load(self):
 
@@ -270,6 +269,8 @@ class MainForm(QMainWindow):
 
         if res == QMessageBox.No:
             evnt.ignore()
+
+        self.saveState()
 
     def saveState(self):
         if self:

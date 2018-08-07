@@ -105,9 +105,6 @@ class Project(object):
     Destructor
     """
 
-    def __del__(self):
-        self.main_window.saveState()
-
     """
     Especifica el nivel de debug de la aplicación
     @param q Número con el nimvel espeficicado
