@@ -14,10 +14,6 @@ import pineboolib
 
 logger = logging.getLogger(__name__)
 
-
-dependences = []
-
-
 checkDependencies({"flup": "flup-py3"})
 
 
