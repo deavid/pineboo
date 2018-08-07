@@ -162,9 +162,10 @@ class FLFormDB(QtWidgets.QDialog):
         except AssertionError:
             # print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
             #      "Puede que se estén perdiendo datos!")
-            QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
-                                              QtWidgets.QMessageBox.Yes)
-            return
+            if type(self).__name__ == "FLFormRecordDB":
+                QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
+                                                  QtWidgets.QMessageBox.Yes)
+                return
         self.known_instances[(self.__class__, action)] = self
 
         self.ui_ = {}
@@ -619,8 +620,8 @@ class FLFormDB(QtWidgets.QDialog):
         self.pushButtonCancel.setMinimumSize(pbSize)
         self.pushButtonCancel.setIcon(
             QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
-        #self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
-        #self.pushButtonCancel.setFocus()
+        # self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
+        # self.pushButtonCancel.setFocus()
         self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
         self.pushButtonCancel.setWhatsThis("Aceptar y cerrar formulario (Esc)")
         self.pushButtonCancel.setToolTip("Aceptar y cerrar formulario (Esc)")
