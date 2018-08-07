@@ -1190,9 +1190,8 @@ class XMLAction(XMLStruct):
     """
 
     def load_script(self, scriptname, parent=None):
-        self.logger.info(
-            "Cargando script %s de %s accion %s",
-            scriptname, parent, self.name)
+        if scriptname:
+            self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
 
         parent_ = parent
         if parent is None:
