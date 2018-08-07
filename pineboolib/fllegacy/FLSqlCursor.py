@@ -2027,7 +2027,6 @@ class FLSqlCursor(QtCore.QObject):
         pKValue = self.valueBuffer(pKN)
 
         pos = -99
-
         if pos == -99:
             # q = FLSqlQuery(None, self.db().db()) FIXME
             # q = FLSqlQuery()
@@ -2064,10 +2063,9 @@ class FLSqlCursor(QtCore.QObject):
                     return pos
 
             if cFilter:
-                sqlWhere = cFilter
-                sql = "%s WHERE %s" % (sql, sqlWhere)
-            else:
-                sqlWhere = "1=1"
+                sql = "%s WHERE %s" % (sql, cFilter)
+            # else:
+            #    sql = "%s WHERE 1=1" % sql
 
             if field:
                 sqlPriKeyValue = self.db().manager().formatAssignValue(field, pKValue, True)
@@ -2771,6 +2769,7 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def select(self, _filter=None, sort=None):  # sort = QtCore.QSqlIndex()
+        _filter = _filter if not None else self.filter()
         if not self.metadata():
             return False
 
@@ -2793,6 +2792,7 @@ class FLSqlCursor(QtCore.QObject):
         if finalFilter:
             self.setFilter(finalFilter)
 
+        self.model().setSortOrder(sort)
         self.model().refresh()
         self.d._currentregister = -1
 
@@ -2810,8 +2810,8 @@ class FLSqlCursor(QtCore.QObject):
     Redefinicion del método sort() de QSqlCursor
     """
     @QtCore.pyqtSlot()
-    def setSort(self, sort):
-        self.d.sort_ = sort
+    def setSort(self, sortO):
+        self.model().setSortOrder(sortO)
 
     """
     Obtiene el filtro base
@@ -2880,7 +2880,7 @@ class FLSqlCursor(QtCore.QObject):
                 if bFilter in f:
                     return f
                 else:
-                    return "%s aND %s" % (bFilter, f)
+                    return "%s AND %s" % (bFilter, f)
 
     """
     Redefinicion del método setFilter() de QSqlCursor
@@ -3512,7 +3512,7 @@ class FLSqlCursor(QtCore.QObject):
         return True
 
     def sort(self):
-        return self.d.sort_
+        return self.model().getSortOrder()
 
     @decorators.NotImplementedWarn
     def list(self):
