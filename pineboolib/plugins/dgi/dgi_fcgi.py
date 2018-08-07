@@ -1,27 +1,24 @@
 # # -*- coding: utf-8 -*-
 
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from flup.server.fcgi import WSGIServer
-import traceback
 import sys
+import traceback
+import logging
+from flup.server.fcgi import WSGIServer
+
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib.fllegacy.pncontrolsfactory import SysType
+from pineboolib.utils import checkDependencies
+
 import pineboolib
+
+
+logger = logging.getLogger(__name__)
+
 
 dependences = []
 
-try:
-    import flup  # noqa
-except ImportError:
-    print(traceback.format_exc())
-    dependences.append("flup-py3")
 
-
-if len(dependences) > 0:
-    print()
-    print("HINT: Dependencias incumplidas:")
-    for dep in dependences:
-        print("HINT: Instale el paquete %s e intente de nuevo" % dep)
-    print()
-    sys.exit(32)
+checkDependencies({"flup": "flup-py3"})
 
 
 class dgi_fcgi(dgi_schema):
@@ -40,9 +37,9 @@ class dgi_fcgi(dgi_schema):
         self.showInitBanner()
 
     def alternativeMain(self, main_):
-        print("=============================================")
-        print("FCGI:INFO: Listening socket", self._fcgiSocket)
-        print("FCGI:INFO: Sending queries to", self._fcgiCall)
+        logger.info("=============================================")
+        logger.info("FCGI:INFO: Listening socket", self._fcgiSocket)
+        logger.info("FCGI:INFO: Sending queries to", self._fcgiCall)
         par_ = parser(main_, self._fcgiCall)
         WSGIServer(par_.call, bindAddress=self._fcgiSocket).run()
 
@@ -53,6 +50,11 @@ class dgi_fcgi(dgi_schema):
             self._fcgiSocket = p[1]
         else:
             self._fcgiCall = param
+
+
+"""
+Esta clase lanza contra el arbol qsa la consulta recibida y retorna la respuesta proporcionada, si procede
+"""
 
 
 class parser(object):
@@ -70,11 +72,10 @@ class parser(object):
         try:
             retorno_ = pineboolib.project.call(self._callScript, aList)
         except Exception:
-            print("No se encuentra la función buscada")
-            print(self._callScript, environ["QUERY_STRING"])
-            retorno_ = (
-                '''<html><head><title>Hello World!</title></head><body><h1>Hello world!</h1></body></html>''')
+            logger.info(self._callScript, environ["QUERY_STRING"])
+            retorno_ = ('''<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>''' %
+                        (SysType().version(), self._callScript))
             pass
-        print("FCGI:INFO: Processing '%s' ..." % environ["QUERY_STRING"])
+        logger.info("FCGI:INFO: Processing '%s' ...", environ["QUERY_STRING"])
 
         return retorno_
