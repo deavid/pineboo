@@ -501,6 +501,7 @@ def ustr1(t):
         logger.exception("ERROR Coercing to string: %s", repr(t))
         return None
 
+
 class StructMyDict(dict):
 
     def __getattr__(self, name):
@@ -511,3 +512,48 @@ class StructMyDict(dict):
 
     def __setattr__(self, name, value):
         self[name] = value
+
+
+def checkDependencies(dict_):
+
+    from importlib import import_module
+
+    dependences = []
+    for key in dict_.keys():
+        try:
+            mod_ = import_module(key)
+            if key == "PIL":
+                v = mod_.__version__
+
+            if key == "ply":
+                version_check("ply", mod_.__version__, '3.9')
+
+            if key == "Pillow":
+                version_check("Pillow", mod_.__version__, '5.1.0')
+            if key == "PyQt5.QtCore":
+                version_check("PyQt5", mod_.QT_VERSION_STR, '5.9')
+
+        except ImportError:
+            dependences.append(dict_[key])
+
+    if len(dependences) > 0:
+        logger.warn("HINT: Dependencias incumplidas:")
+        for dep in dependences:
+            logger.warn("HINT: Instale el paquete %s e intente de nuevo" % dep)
+
+        try:
+            from pdytools import hexversion as pdy_hexversion
+        except ImportError:
+            sys.exit(32)
+
+
+def version_check(modname, modver, minver):
+    """Compare two version numbers and raise a warning if "minver" is not met."""
+    if version_normalize(modver) < version_normalize(minver):
+        logger.warn(
+            "La version de <%s> es %s. La mínima recomendada es %s.", modname, modver, minver)
+
+
+def version_normalize(v):
+    """Normalize version string numbers like 3.10.1 so they can be compared."""
+    return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]

@@ -17,77 +17,21 @@ import importlib
 import logging
 from pineboolib.fllegacy.FLSettings import FLSettings
 
+
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
-def version_check(modname, modver, minver):
-    """Compare two version numbers and raise a warning if "minver" is not met."""
-    if version_normalize(modver) < version_normalize(minver):
-        logger.warn(
-            "La version de <%s> es %s. La mínima recomendada es %s.", modname, modver, minver)
-
-
-def version_normalize(v):
-    """Normalize version string numbers like 3.10.1 so they can be compared."""
-    return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
-
-
 def startup_check_dependencies():
     """Do a preemptive import of the libraries needed and handle errors in a user friendly way."""
+    from pineboolib.utils import checkDependencies
+
+    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "barcode": "python-barcode", "PIL": "Pillow", "z3c.rml": "z3c.rml"}
+    checkDependencies(dict_)
+
     if sys.version_info[0] < 3:
         logger.error("Tienes que usar Python 3 o superior.")
         sys.exit(32)
-
-    dependences = []
-
-    try:
-        import ply
-    except ImportError:
-        logger.exception("El paquete python3-ply no está instalado")
-        dependences.append("python3-ply")
-
-    try:
-        from PyQt5 import QtCore
-    except ImportError:
-        logger.exception("El paquete python3-pyqt5 no está instalado")
-        dependences.append("python3-pyqt5")
-
-    try:
-        import barcode
-    except ImportError:
-        logger.exception("El paquete python-barcode no está instalado")
-        dependences.append("python-barcode")
-
-    try:
-        import PIL
-        v = PIL.__version__
-    except Exception:
-        logger.exception("El paquete Pillow no está instalado")
-        dependences.append("Pillow")
-
-    try:
-        import z3c.rml
-    except ImportError:
-        logger.exception("El paquete z3c.rml no está instalado")
-        dependences.append("z3c.rml")
-
-    if dependences:
-        logger.info("HINT: Dependencias incumplidas:")
-        for dep in dependences:
-            logger.info("HINT: Instale el paquete %s e intente de nuevo" % dep)
-
-        try:
-            from pdytools import hexversion as pdy_hexversion
-        except ImportError:
-            sys.exit(32)
-
-    if "python3-ply" not in dependences:
-        version_check("ply", ply.__version__, '3.9')
-    if "Pillow" not in dependences:
-        version_check("Pillow", PIL.__version__, '5.1.0')
-    if "python3-pyqt5" not in dependences:
-        version_check("pyqt5", QtCore.QT_VERSION_STR, '5.7')
 
 
 def translate_connstring(connstring):
@@ -148,7 +92,7 @@ def parse_options():
     parser.add_option("-c", "--connect", dest="connection",
                       help="connect to database with user and password.", metavar="user:passwd:driver_alias@host:port/database")
     parser.add_option('-v', '--verbose', action='count', default=2,
-                      help="increase verbosity level") #default a 2 para ver los logger.info, 1 no los muestra
+                      help="increase verbosity level")  # default a 2 para ver los logger.info, 1 no los muestra
     parser.add_option("-q", "--quiet",
                       action='count', default=0,
                       help="decrease verbosity level")
@@ -308,7 +252,7 @@ def show_connection_dialog(project, app):
         #    print("Cargando desde ruta %r " % prjpath)
         #    project.load(prjpath)
         # elif connection_window.database:
-        if getattr(connection_window,"database", None):
+        if getattr(connection_window, "database", None):
             logger.info("Cargando credenciales")
             project.deleteCache = FLSettings().readBoolEntry("ebcomportamiento/deleteCache", False)
             project.parseProject = FLSettings().readBoolEntry("ebcomportamiento/parseProject", False)
@@ -325,7 +269,7 @@ def show_splashscreen(project):
     splash_path = filedir("../share/splashscreen/splash_%s.png" % project.dbname)
     if not os.path.exists(splash_path):
         splash_path = filedir("../share/splashscreen/splash.png")
-        
+
     splash_pix = QtGui.QPixmap(splash_path)
     splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
