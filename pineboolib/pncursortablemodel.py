@@ -144,6 +144,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         return self._sortOrder
 
     """
+    Setea el ORDERBY
+    """
+
+    def setSortOrder(self, sO):
+        self._sortOrder = sO
+    """
     Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
     @param index. Posición del registro
     @param role. Tipo de información solicitada
