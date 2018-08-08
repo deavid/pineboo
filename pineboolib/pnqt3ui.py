@@ -142,8 +142,7 @@ def loadUi(path, widget, parent=None):
         try:
             getattr(sender, sg_name).connect(getattr(receiver, sl_name))
         except Exception as e:
-            logger.exception(print("Error connecting:", sender,
-                                   signal_name, receiver, slot_name))
+            logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
 
     if not pineboolib.project._DGI.localDesktop():
         pineboolib.project._DGI.showWidget(widget)
@@ -157,6 +156,7 @@ def createWidget(classname, parent=None):
         getattr(QtWidgets, classname, None) or \
         getattr(FLTableDB, classname, None) or \
         getattr(FLFieldDB, classname, None)
+
     if cls is None:
         logger.warn("WARN: Class name not found in QtWidgets:", classname)
         widgt = QtWidgets.QWidget(parent)
@@ -247,10 +247,11 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             value = 'color:' + loadVariant(xmlprop).name()
 
         else:
-            value = loadVariant(xmlprop)
+            value = loadVariant(xmlprop, widget)
 
         try:
             set_fn(value)
+
         except Exception as e:
             logger.exception(etree.ElementTree.tostring(xmlprop))
             # if Options.DEBUG_LEVEL > 50:
@@ -379,8 +380,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "hbox":
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
                 if Options.DEBUG_LEVEL > 50:
-                    print("qt3ui: Trying to replace layout. Ignoring.",
-                          repr(c.tag), widget.layout)
+                    logger.warn("qt3ui: Trying to replace layout. Ignoring.",
+                                repr(c.tag), widget.layout)
                 continue
 
             widget.layout = QtWidgets.QHBoxLayout()
@@ -395,8 +396,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "grid":
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
                 if Options.DEBUG_LEVEL > 50:
-                    print("qt3ui: Trying to replace layout. Ignoring.",
-                          repr(c.tag), widget.layout)
+                    logger.warn("qt3ui: Trying to replace layout. Ignoring.",
+                                repr(c.tag), widget.layout)
                 continue
 
             widget.layout = QtWidgets.QGridLayout()
@@ -427,8 +428,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if attrs is not None:
                 attrs[k] = v
             else:
-                print("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
-                      (k, v), widget.__class__, repr(c.tag))
+                logger.warn("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
+                            (k, v), widget.__class__, repr(c.tag))
             continue
         if c.tag == "widget":
             # Si dentro del widget hay otro significa
@@ -465,8 +466,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     lay.addWidget(new_widget)
             else:
                 if Options.DEBUG_LEVEL > 50:
-                    print("qt3ui: Unknown container widget xml tag",
-                          widget.__class__, repr(c.tag))
+                    logger.warn("qt3ui: Unknown container widget xml tag",
+                                widget.__class__, repr(c.tag))
             unbold_fonts.append(new_widget)
             continue
 
@@ -484,8 +485,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
 
         if Options.DEBUG_LEVEL > 50:
-            print("qt3ui: Unknown widget xml tag",
-                  widget.__class__, repr(c.tag))
+            logger.warn("qt3ui: Unknown widget xml tag",
+                        widget.__class__, repr(c.tag))
 
     for c in properties:
         process_property(c)
@@ -531,9 +532,9 @@ def loadIcon(xml):
     ICONS[name] = icon
 
 
-def loadVariant(xml):
+def loadVariant(xml, widget=None):
     for variant in xml:
-        return _loadVariant(variant)
+        return _loadVariant(variant, widget)
 
 
 def loadProperty(xml):
@@ -561,11 +562,11 @@ def b(x):
         return True
     if x == "off":
         return False
-    print("Bool?:", repr(x))
+    logger.warn("Bool?:", repr(x))
     return None
 
 
-def _loadVariant(variant):
+def _loadVariant(variant, widget=None):
     text = variant.text or ""
     text = text.strip()
     if variant.tag == "cstring":
@@ -626,28 +627,31 @@ def _loadVariant(variant):
                 elif c.tag == "pointsize":
                     p.setPointSize(int(value))
                 else:
-                    print("unknown font style type", repr(c.tag))
+                    logger.warn("unknown font style type", repr(c.tag))
             except Exception as e:
                 if Options.DEBUG_LEVEL > 50:
-                    print(e)
+                    logger.error(e)
         return p
 
     if variant.tag == "set":
         v = None
+        final = 0
         text = variant.text
         libs = [QtCore.Qt]
-        if text == "WordBreak|AlignVCenter":
-            text = "AlignVCenter"
-        if text == "WordBreak|AlignTop":
-            text = "AlignTop"
-        if text == "AlignVCenter|AlignRight":
-            text = "AlignRight"
-        if text == "AlignVCenter|AlignLeft":
-            text = "AlignLeft"
+
+        if text.find("WordBreak|") > -1:
+            widget.setWordWrap(True)
+            text = text.replace("WordBreak|", "")
+
         for lib in libs:
-            v = getattr(lib, text, None)
-        if v is not None:
-            return v
+            for t in text.split("|"):
+                v = getattr(lib, t, None)
+                if v is not None:
+                    final = final + v
+
+            aF = QtCore.Qt.AlignmentFlag(final)
+
+        return aF
 
     if variant.tag == "enum":
         v = None
@@ -681,4 +685,4 @@ def _loadVariant(variant):
         return c
 
     if Options.DEBUG_LEVEL > 50:
-        print("qt3ui: Unknown variant:", etree.ElementTree.tostring(variant))
+        logger.warn("qt3ui: Unknown variant:", etree.ElementTree.tostring(variant))
