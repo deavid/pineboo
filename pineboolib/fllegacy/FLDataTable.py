@@ -516,26 +516,6 @@ class FLDataTable(QtWidgets.QTableView):
     def setColumnWidth(self, field, w):
         self.widthCols_.insert(field, w)
 
-    """
-    Activado cuando se hace click en el chequeo de la columna de selección
-    
-
-    def setChecked(self, on):
-
-        chk = self.sender()
-        if not chk or not self.cursor_ or self.cursor_.aqWasDeleted() or not self.cursor_.metadata():
-            return
-
-        curAt = self.cursor_.at()
-        posAt = chk.row()
-
-        if self.cursor_.seek(posAt):
-            primaryKeyValue = self.cursor_.value(
-                self.cursor_.metadata().primaryKey())
-            self.setPrimaryKeyChecked(primaryKeyValue, on)
-            self.cursor_.seek(curAt)
-    """
-
     def delayedViewportRepaint(self):
         if not self.timerViewRepaint_:
             self.timerViewRepaint_ = QtCore.QTimer(self)
