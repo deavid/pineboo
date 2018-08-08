@@ -61,6 +61,7 @@ FLDomDocument = resolveObject("FLDomDocument")
 FLListViewItem = resolveObject("FLListViewItem")
 FLTable = resolveObject("FLTable")
 FLDataTable = resolveObject("FLDataTable")
+FLCheckBox = resolveObject("FLCheckBox")
 # Clases QSA
 CheckBox = resolveObject("CheckBox")
 TextEdit = QTextEdit
@@ -71,7 +72,6 @@ RadioButton = resolveObject("RadioButton")
 Color = QColor
 Dialog = resolveObject("Dialog")
 GroupBox = resolveObject("GroupBox")
-
 
 
 class SysType(object):
@@ -235,9 +235,10 @@ class SysType(object):
         else:
             print("ERROR ", msg)
 
+
 class System(object):
-    
-    def setenv( name, val):
+
+    def setenv(name, val):
         import os
         os.environ[name] = val
 

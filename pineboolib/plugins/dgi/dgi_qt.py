@@ -360,9 +360,11 @@ class QDateEdit(QtWidgets.QDateEdit):
     _parent = None
     _date = None
 
-    def __init__(self, parent):
+    def __init__(self, parent, name):
         super(QDateEdit, self).__init__(parent)
         super(QDateEdit, self).setDisplayFormat("dd-MM-yyyy")
+        if name:
+            self.setObjectName(name)
         self._parent = parent
         self.date_ = super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
         if not pineboolib.project._DGI.localDesktop():
@@ -389,6 +391,14 @@ class QDateEdit(QtWidgets.QDateEdit):
 
     date = property(getDate, setDate)
 
+    @decorators.NotImplementedWarn
+    def setAutoAdvance(self, b):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setSeparator(self, separator):
+        pass
+
     def __getattr__(self, name):
         if name == "date":
             return super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
@@ -401,7 +411,7 @@ class FLDateEdit(QDateEdit):
     _parent = None
 
     def __init__(self, parent, name):
-        super(FLDateEdit, self).__init__(parent)
+        super(FLDateEdit, self).__init__(parent, name)
         self.setDisplayFormat("dd-MM-yyyy")
         self.setMinimumWidth(120)
         self.setMaximumWidth(120)
@@ -495,6 +505,10 @@ class QTabWidget(QtWidgets.QTabWidget):
         except ValueError:
             logger.error("ERROR: Tab not found:: QTabWidget, tab name = %r", tab)
         return None
+
+
+class FLCheckBox(QtWidgets.QCheckBox):
+    pass
 
 
 class FLTable(QtWidgets.QTableWidget):

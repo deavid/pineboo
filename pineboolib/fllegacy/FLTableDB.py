@@ -1144,7 +1144,7 @@ class FLTableDB(QtWidgets.QWidget):
                                     if len > 0:
                                         editor_.setMaxLength(len)
                                         if rX:
-                                            editor_.setValidator(rX, editor_)
+                                            editor_.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(rX), editor_))
 
                                     editor_.setAlignment(Qt.AlignLeft)
 
@@ -1169,7 +1169,7 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_.setTime(timeNow)
 
                     if type in (FLFieldMetaData.Unlock, "bool"):
-                        editor_ = FLCheckBox(self)
+                        editor_ = pineboolib.pncontrolsfactory.FLCheckBox(self)
 
                     if editor_:
                         self.tdbFilter.setCellWidget(_linea, j, editor_)
@@ -1311,17 +1311,18 @@ class FLTableDB(QtWidgets.QWidget):
                     arg2 = editorOp1.value()
 
             if type == "date":
+                util = FLUtil()
                 if condType == self.FromTo:
                     editorOp1 = self.tdbFilter.cellWidget(i, 3)
                     editorOp2 = self.tdbFilter.cellWidget(i, 4)
                     arg2 = self.cursor_.db().manager().formatValue(
-                        type, editorOp1.date().toString("dd-MM-yyyy"))
+                        type, util.dateDMAtoAMD(editorOp1.date))
                     arg4 = self.cursor_.db().manager().formatValue(
-                        type, editorOp2.date().toString("dd-MM-yyyy"))
+                        type, util.dateDMAtoAMD(editorOp2.date))
                 else:
                     editorOp1 = self.tdbFilter.cellWidget(i, 2)
                     arg2 = self.cursor_.db().manager().formatValue(
-                        type, editorOp1.date().toString("dd-MM-yyyy"))
+                        type, util.dateDMAtoAMD(editorOp1.date))
 
             if type == "time":
                 if condType == self.FromTo:
