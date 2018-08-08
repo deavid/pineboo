@@ -66,6 +66,8 @@ class MainForm(QMainWindow):
 
         self.dockForm = QDockWidget()
 
+        self.dockConsole = None
+
         self.dockAreasTab.setWidget(self.areasTab)
         self.dockAreasTab.setMaximumWidth(400)
         self.dockFavoritos.setMaximumWidth(400)
@@ -400,7 +402,7 @@ class MainForm(QMainWindow):
 
     def showConsole(self):
         if not self.dockConsole:
-            self.dockConsole = QtWidgets.QDockWidget()
+            self.dockConsole = QDockWidget()
             self.dockConsole.setWindowTitle("Consola")
             self.addDockWidget(Qt.BottomDockWidgetArea, self.dockConsole)
             self.teo_ = OutputWindow()
