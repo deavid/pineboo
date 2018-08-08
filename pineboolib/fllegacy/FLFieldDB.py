@@ -1800,8 +1800,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     else:
                         self.editor_.setMaxValue(len_)
                         if rX:
-                            r = rX
-                            self.editor_.setValidator(QtGui.QRegExpValidator(r, self.editor_))
+                            self.editor_.setValidator(QtGui.QRegExpValidator(QtCore.QRegExp(rX), self.editor_))
 
                         self.editor_.setAlignment(Qt.AlignLeft)
 
