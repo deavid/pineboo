@@ -318,7 +318,7 @@ class PNBuffer(object):
             elif type in ("string", "stringlist"):
                 return not (actual == value)
             elif type in ("int", "uint", "serial"):
-                return not (int(actual) == int(value))
+                return not (str(actual) == str(value))
             elif type == "double":
                 if value == "-":
                     return False
