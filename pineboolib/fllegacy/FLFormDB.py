@@ -680,7 +680,7 @@ class FLFormDB(QtWidgets.QDialog):
             fdb = self.focusWidget().parentWidget()
             if fdb and getattr(fdb, "autoComFrame_", None):
                 try:
-                    if fdb.autoComFrame_.isvisible():
+                    if fdb.autoComFrame_.isVisible():
                         fdb.autoComFrame_.hide()
                         return
                 except Exception:
