@@ -313,9 +313,6 @@ class ProgressDialog(QtWidgets.QWidget):
 
 class QLabel(QtWidgets.QLabel):
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
     @QtCore.pyqtProperty(str)
     def text(self):
         return self.text()
@@ -381,7 +378,7 @@ class QDateEdit(QtWidgets.QDateEdit):
     def setDate(self, v):
         if not isinstance(v, str):
             if hasattr(v, "toString"):
-                v = v.toString()
+                v = v.toString("yyyy-MM-dd")
             else:
                 v = str(v)
 
