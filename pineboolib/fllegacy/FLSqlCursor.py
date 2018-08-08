@@ -267,11 +267,20 @@ class PNBuffer(object):
 
         # if field.type_ in ("bool","unlock") and isinstance(value , str):
         #    value = (value == "true")
+        # if field.type_ == "double" and value:
+        #    if isinstance(value, str):
+        #        punto_ = QtCore.QLocale().decimalPoint()
+        #        value = value.replace(punto_, ".")
+        #    if value == ".":
+        #        value = "0."
+
+        #    if value == "-":
+        #        return True
 
         if self.hasChanged(field.name, value):
 
-                    # if not value == None:
-                    #    value = str(value)
+            # if not value == None:
+            #    value = str(value)
 
             # if field.type_ == "date" and value == None: #Evitamos poner un date a None
             #    pass
@@ -293,6 +302,7 @@ class PNBuffer(object):
     """
 
     def hasChanged(self, name, value):
+
         field = self.field(name)
         if value in (None, "None"):
             return True
@@ -310,6 +320,19 @@ class PNBuffer(object):
             elif type in ("int", "uint", "serial"):
                 return not (int(actual) == int(value))
             elif type == "double":
+                if value == "-":
+                    return False
+
+                if actual == "-":
+                    return True
+
+                punto_ = QtCore.QLocale().decimalPoint()
+                if isinstance(value, str):
+                    value = value.replace(punto_, ".") if not value == "." else "0."
+
+                if isinstance(actual, str):
+                    actual = actual.replace(punto_, ".") if not actual == "." else "0."
+
                 return not (float(actual) == float(value))
             else:
                 return True
