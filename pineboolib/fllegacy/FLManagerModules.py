@@ -296,7 +296,7 @@ class FLManagerModules(QtCore.QObject):
         tree = etree.ElementTree.parse(form_path)
         root = tree.getroot()
         UIVersion = root.get("version")
-        logger.info("Procesando ui %s versión %s", n, UIVersion)
+        logger.info("Procesando %s (v%s)", n, UIVersion)
         if not pineboolib.project or pineboolib.project._DGI.localDesktop():
             if UIVersion < "4.0":
                 pnqt3ui.loadUi(form_path, w_)
