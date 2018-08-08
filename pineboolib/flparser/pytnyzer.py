@@ -590,9 +590,9 @@ class Switch(ASTPython):
 
 
 class With(ASTPython):
-    python_keywords = ["select", "select", "first", "next", "prev", "last", "setValueBuffer", "valueBuffer",
+    python_keywords = ["select", "first", "next", "prev", "last", "setValueBuffer", "valueBuffer",
                        "setTablesList", "setSelect", "setFrom", "setWhere", "setForwardOnly", "setModeAccess",
-                       "commitBuffer", "commit", "refreshBuffer", "setNull", "setUnLock"]
+                       "commitBuffer", "commit", "refreshBuffer", "setNull", "setUnLock", "Del"]
 
     def generate(self, **kwargs):
         # key = "%02x" % random.randint(0, 255)
