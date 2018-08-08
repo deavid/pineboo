@@ -11,11 +11,16 @@ from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib import decorators
 import pineboolib
 
+import datetime
+import sys
+import re
+import logging
+
+
 def resolveObject(name):
     mod_ = import_module(__name__)
     ret_ = getattr(mod_, name, None)
     return ret_
-
 
 
 class dgi_qt(dgi_schema):
@@ -24,7 +29,7 @@ class dgi_qt(dgi_schema):
         super(dgi_qt, self).__init__()  # desktopEnabled y mlDefault a True
         self._name = "qt"
         self._alias = "Qt5"
-    
+
     def __getattr__(self, name):
         return resolveObject(name)
 
@@ -34,8 +39,10 @@ class QWidget(Qt.QWidget):
     def child(self, name):
         return self.findChild(QtWidgets.QWidget, name)
 
+
 class FLDataTable(FLDataTable):
     pass
+
 
 class FLLineEdit(QtWidgets.QLineEdit):
 
@@ -65,40 +72,16 @@ class FLLineEdit(QtWidgets.QLineEdit):
         return DefFun(self, name)
 
     def setText(self, texto, b=True):
-        if self._maxValue:
-            if self._maxValue < int(texto):
-                texto = self._maxValue
+        # if self._maxValue:
+        #    if self._maxValue < int(texto):
+        #        texto = self._maxValue
 
         texto = str(texto)
-
-        # Miramos si le falta digitos a la parte decimal ...
-        if self._tipo == "double" and len(texto) > 0:
-            if texto == "0":
-                d = 0
-                texto = "0."
-                while d < self._partDecimal:
-                    texto = texto + "0"
-                    d = d + 1
-
-            i = None
-            l = len(texto) - 1
-            try:
-                i = texto.index(".")
-            except Exception:
-                pass
-
-            if i:
-                # print("Posicion de . (%s) de %s en %s" % (i, l, texto))
-                f = (i + self._partDecimal) - l
-                # print("Part Decimal = %s , faltan %s" % (self._partDecimal, f))
-                while f > 0:
-                    texto = texto + "0"
-                    f = f - 1
 
         super(FLLineEdit, self).setText(texto)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), texto)
-        self.textChanged.emit(texto)
+        # self.textChanged.emit(texto)
 
     def text(self):
         texto = str(super(FLLineEdit, self).text())
@@ -113,8 +96,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
     """
 
     def setMaxValue(self, value):
-        self._maxValue = value
-
+        self.setMaxLength(value)
     """
     def focusInEvent(self, *f):
         print("focus in!! ---> ", f)
@@ -660,7 +642,7 @@ class QComboBox(QtWidgets.QComboBox):
         self._parent = parent
         super(QComboBox, self).__init__(parent)
 
-    #def __getattr__(self, name):
+    # def __getattr__(self, name):
     #    return DefFun(self, name)
 
     @QtCore.pyqtProperty(str)
@@ -765,9 +747,8 @@ class QTextEdit(QtWidgets.QTextEdit):
 
     @decorators.Incomplete
     def setTextFormat(self, value):
-        if value == 0: #LogText
+        if value == 0:  # LogText
             self.setReadOnly(True)
-        
 
     @decorators.NotImplementedWarn
     def setShown(self, value):
@@ -1083,14 +1064,18 @@ class GroupBox(QtWidgets.QGroupBox):
         else:
             super(GroupBox, self).__setattr__(name, value)
 
+
 class QDialog(QtWidgets.QDialog):
     pass
+
 
 class QVBoxLayout(QtWidgets.QVBoxLayout):
     pass
 
+
 class QHBoxLayout(QtWidgets.QHBoxLayout):
     pass
 
+
 class QFrame(QtWidgets.QFrame):
-    pass       
+    pass
