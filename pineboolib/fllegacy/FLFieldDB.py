@@ -64,7 +64,7 @@ class FLFieldDB(QtWidgets.QWidget):
     showEditor_ = True
     fieldMapValue_ = None
     autoCompMode_ = "OnDemandF4"  # NeverAuto, OnDemandF4, AlwaysAuto
-    timerAutoComp_ = False
+    timerAutoComp_ = None
     textFormat_ = QtCore.Qt.AutoText
     initNotNullColor_ = False
     textLabelDB = None
@@ -95,6 +95,7 @@ class FLFieldDB(QtWidgets.QWidget):
         logger = logging.getLogger(__name__)
 
         self.maxPixImages_ = FLSettings().readEntry("ebcomportamiento/maxPixImages", None)
+        self.autoCompMode_ = FLSettings().readEntry("ebcomportamiento/autoComp", "OnDemandF4")
         if self.maxPixImages_ in (None, ""):
             self.maxPixImages_ = 600
         self.maxPixImages_ = int(self.maxPixImages_)
@@ -389,33 +390,33 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if not self.timerAutoComp_:
                 self.timerAutoComp_ = QtCore.QTimer(self)
-                self.timerAutoComp_.timeout.connect(
-                    self.toggledAutoCompletion)
+                # self.timerAutoComp_.timeout.connect(self.toggleAutoCompletion)
             else:
                 self.timerAutoComp_.stop()
 
-            if not event.key() == Qt.Key_Enter and not event.key() == Qt.Key_Return:
-                timerActive = True
-                self.timerAutoComp_.start(500)
+            if not event.key() in (Qt.Key_Enter, Qt.Key_Return):
+                #timerActive = True
+                # self.timerAutoComp_.start(500)
+                self.timerAutoComp_.singleShot(500, self.toggleAutoCompletion)
             else:
-                timer = QtCore.QTimer(self)
-                timer.singleShot(0, self.autoCompletionUpdateValue)
+                #timer = QtCore.QTimer(self)
+                self.timerAutoComp_.singleShot(0, self.autoCompletionUpdateValue)
                 return True
-        if not timerActive and self.autoCompMode_ == "AlwaysAuto" and not (self.autoComFrame_ or self.autoComFrame_.isvisible()):
-            if event.key() in (Qt.Key_Backspace, Qt.Key_Delete, Qt.Key_ydiaeresis):
+        if not timerActive and self.autoCompMode_ == "AlwaysAuto" and (not self.autoComFrame_ or not self.autoComFrame_.isVisible()):
+            if event.key() in (Qt.Key_Backspace, Qt.Key_Delete, Qt.Key_Space, Qt.Key_ydiaeresis):
                 if not self.timerAutoComp_:
                     self.timerAutoComp_ = QtCore.QTimer(self)
-                    self.timerAutoComp_.timeout.connect(
-                        self.toggledAutoCompletion)
+                    # self.timerAutoComp_.timeout.connect(self.toggleAutoCompletion)
                 else:
                     self.timerAutoComp_.stop()
 
-            if not event.key() == Qt.Key_Enter and not event.key() == Qt.Key_Return:
-                timerActive = True
-                self.timerAutoComp_.start(500)
-            else:
-                timer.singleShot(0, self.autoCompletionUpdateValue)
-                return True
+                if not event.key() in (Qt.Key_Enter, Qt.Key_Return):
+                    #timerActive = True
+                    # self.timerAutoComp_.start(500)
+                    self.timerAutoComp_.singleShot(500, self.toggleAutoCompletion)
+                else:
+                    self.timerAutoComp_.singleShot(0, self.autoCompletionUpdateValue)
+                    return True
 
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int)

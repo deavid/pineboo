@@ -44,6 +44,16 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
         w.child(u"cbKugarParser").addItems(pineboolib.project.kugarPlugin.listAvalibles())
         w.child(u"cbKugarParser").setCurrentText(pineboolib.project.kugarPlugin.defaultParser())
+
+        autoComp = self.leerValorLocal("autoComp")
+        if not autoComp or autoComp == "OnDemandF4":
+            autoComp = "Bajo Demanda (F4)"
+        elif autoComp == "NeverAuto":
+            autoComp = "Nunca"
+        else:
+            autoComp = "Siempre"
+        w.child(u"cbAutoComp").setCurrentText(autoComp)
+
         w.child(u"leCO").hide()
         self.colorActual_ = self.leerValorLocal(u"colorObligatorio")
         if self.colorActual_ is "":
@@ -123,6 +133,15 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal(u"parseProject", w.child(u"cbParseProject").checked)
         self.grabarValorLocal(u"mobileMode", w.child(u"cbMobile").checked)
         self.grabarValorLocal(u"kugarParser", w.child(u"cbKugarParser").currentText())
+        autoComp = w.child(u"cbAutoComp").currentText()
+        if autoComp == "Nunca":
+            autoComp = "NeverAuto"
+        elif autoComp == "Bajo Demanda (F4)":
+            autoComp = "OnDemandF4"
+        else:
+            autoComp = "AlwaysAuto"
+        print("Guardando", autoComp)
+        self.grabarValorLocal("autoComp", autoComp)
         self.cerrar_clicked()
 
     def seleccionarColor_clicked(self):
