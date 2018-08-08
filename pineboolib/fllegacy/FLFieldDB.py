@@ -2227,7 +2227,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
     @QtCore.pyqtSlot()
     def toggleAutoCompletion(self):
-        if self.autoCompMode_ == "neverAuto":
+        if self.autoCompMode_ == "NeverAuto":
             return
 
         if not self.autoComFrame_ and self.cursor():
