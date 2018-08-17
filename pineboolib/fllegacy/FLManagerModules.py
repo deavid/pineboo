@@ -184,16 +184,13 @@ class FLManagerModules(QtCore.QObject):
     """
 
     def contentFS(self, pN, utf8=False):
-        ret = None
+        encode_ = "ISO-8859-15"
+        if utf8:
+            encode_ = "UTF-8"
         try:
-            if utf8:
-                ret = str(open(pN, "rb").read(), "utf-8")
-            else:
-                ret = str(open(pN, "rb").read(), "ISO-8859-15")
+            return str(open(pN, "rb").read(), encode_)
         except Exception:
-            pass
-
-        return ret
+            return None
 
     """
     Obtiene el contenido de un fichero, utilizando la caché de memoria y disco.
@@ -304,7 +301,8 @@ class FLManagerModules(QtCore.QObject):
                 from PyQt5 import uic
                 qtWidgetPlugings = filedir("./plugings/qtwidgetplugins")
                 if not qtWidgetPlugings in uic.widgetPluginPath:
-                    logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
+                    logger.info(
+                        "Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
                     uic.widgetPluginPath.append(qtWidgetPlugings)
                 uic.loadUi(form_path, w_)
         else:
@@ -485,7 +483,8 @@ class FLManagerModules(QtCore.QObject):
 
     def shaOfFile(self, n):
         if pineboolib.project.conn.dbAux() and not n[:3] == "sys" and not pineboolib.project.conn.manager().isSystemTable(n):
-            formatVal = pineboolib.project.conn.manager().formatAssignValue("nombre", "string", n, True)
+            formatVal = pineboolib.project.conn.manager(
+            ).formatAssignValue("nombre", "string", n, True)
             q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
             # q.setForwardOnly(True)
             q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
