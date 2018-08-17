@@ -60,5 +60,6 @@ class PNKugarPlugins(object):
             logger.warn("No se encuentra el plugin %s", name)
             return None
         else:
+            logger.info("PNKUGARPLUGINS:: Cargando kutparser %s", name)
             mod_ = importlib.import_module("pineboolib.plugins.kugar.%s.%s" % (name, name))
             return getattr(mod_, name)()
