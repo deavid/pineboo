@@ -65,7 +65,6 @@ class FLReportEngine(object):
             self.rows_.appendChild(row)
             self.qImgFields_ = imgFieldsBack
 
-        @decorators.BetaImplementation
         def groupBy(self, levelMax, vA):
             if not self.qry_.isValid():
                 return
@@ -82,7 +81,6 @@ class FLReportEngine(object):
 
             self.addRowToReportData(levelMax)
 
-        @decorators.BetaImplementation
         def setQuery(self, qry):
             self.qry_ = qry
 
@@ -114,23 +112,21 @@ class FLReportEngine(object):
                 self.qFieldMtdList_ = []
                 self.qGroupDict_ = {}
 
-    @decorators.BetaImplementation
     def __init__(self, parent):
         self.d_ = FLReportEngine.FLReportEnginePrivate(self)
         self.relDpi_ = 78.
         self.rd = None
         self.logger = logging.getLogger("FLReportEngine")
-        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser", pineboolib.project.kugarPlugin.defaultParser())
+        parserName = FLSettings().readEntry("ebcomportamiento/kugarParser",
+                                            pineboolib.project.kugarPlugin.defaultParser())
         self.parser_ = pineboolib.project.kugarPlugin.loadParser(parserName)
 
     def rptXmlData(self):
         return self.rd
 
-    @decorators.BetaImplementation
     def rptXmlTemplate(self):
         return self.rt
 
-    @decorators.NotImplementedWarn
     def relDpi(self):
         return self.relDpi_
 
@@ -177,12 +173,10 @@ class FLReportEngine(object):
         self.initData()
         return True
 
-    @decorators.NotImplementedWarn
     def setFLReportData(self, n):
         self.d_.setQuery(0)
         return super(FLReportEngine, self).setReportData(n)
 
-    @decorators.BetaImplementation
     def setFLReportTemplate(self, t):
         # buscamos el .kut o el .rlab
 
@@ -194,10 +188,11 @@ class FLReportEngine(object):
         else:
             mgr = self.d_.qry_.db().managerModules()
 
-        self.rt = mgr.contentCached(t + ".kut")
+        self.rt = mgr.contentCached("%s.kut" % t)
 
         if not self.rt:
-            self.logger.error("No se ha podido cargar %s.kut", t)
+            self.logger.error(
+                "FLReportEngine::No se ha podido cargar %s.kut", t)
             return False
 
         return True
@@ -238,11 +233,15 @@ class FLReportEngine(object):
 
     @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
-        if self.rt.find("KugarTemplate") > -1:
-            self.pdfFile = self.parser_.parse(self.d_.template_, self.rt, self.rd.toString(1))
+        if self.rt and self.rt.find("KugarTemplate") > -1:
+            self.pdfFile = self.parser_.parse(
+                self.d_.template_, self.rt, self.rd.toString(1))
 
             return True if self.pdfFile else False
-            # print(self.rd.toString(1))
+
+        return False
+
+        # print(self.rd.toString(1))
         """
         fr = MReportEngine.RenderReportFlags.FillRecords.value
 
