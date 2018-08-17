@@ -140,7 +140,6 @@ class FormInternalObj(FormDBWidget):
             autoComp = "OnDemandF4"
         else:
             autoComp = "AlwaysAuto"
-        print("Guardando", autoComp)
         self.grabarValorLocal("autoComp", autoComp)
         self.cerrar_clicked()
 
