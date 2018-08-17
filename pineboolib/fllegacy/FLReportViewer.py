@@ -112,7 +112,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
         return self.rptEngine_
 
     @decorators.BetaImplementation
-    def setReportEngine(self, r=0):
+    def setReportEngine(self, r=None):
         if self.rptEngine_ == r:
             return
 
@@ -222,8 +222,11 @@ class FLReportViewer(QtWidgets.QMainWindow):
         """
         ret = self.rptViewer_.renderReport(initRow, initCol, append_or_flags)
         #self.report_ = self.rptViewer_.reportPages()
-        self.pdfFile = self.rptEngine_.pdfFile
-        return True if ret else False
+        if ret:
+            self.pdfFile = self.rptEngine_.pdfFile
+            return True
+        else:
+            return False
 
     @decorators.BetaImplementation
     def slotFirstPage(self):
@@ -575,7 +578,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
         return False
 
     @decorators.BetaImplementation
-    def setReportTemplate(self, t, style=""):
+    def setReportTemplate(self, t, style=None):
         if isinstance(t, QtXml.QDomNode):
             self.xmlTemplate_ = t
             self.template_ = ""
@@ -874,4 +877,4 @@ class internalReportViewer(QWidget):
         return self.report_
 
     def renderReport(self, initRow, initCol, flags):
-        self.rptEngine_.renderReport()
+        return self.rptEngine_.renderReport()
