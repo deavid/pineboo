@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+from PyQt5.QtGui import QPixmap
+from pineboolib.utils import filedir, clearXPM
+from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+import os
 import logging
 import datetime
 from xml import etree
@@ -49,12 +53,33 @@ class parsertools(object):
 
         ret_ = field
         if dataType == 5:  # Imagen
-            from pineboolib.plugings.kugar.pnkugarplugins import refkey2cache
-            ret_ = parseKey(field)
+            ret_ = self.parseKey(field)
         elif data:
             ret_ = data.get(field)
 
         return ret_
+
+    def parseKey(self, name=None):
+        ret = None
+
+        if name is not None:
+            value = None
+            q = FLSqlQuery()
+            # q.setForwardOnly(True)
+            q.exec_("SELECT contenido FROM fllarge WHERE refkey='%s'" % name)
+            if q.next():
+                value = clearXPM(q.value(0))
+
+            imgFile = filedir("../tempdata")
+            imgFile += "/%s.png" % name
+            if not os.path.exists(imgFile) and value:
+                pix = QPixmap(value)
+                if not pix.save(imgFile):
+                    self.logger.warn("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, imgFile))
+
+            ret = imgFile
+
+        return ret
 
     def converPageSize(self, size, orientation, Custom=None):
         result_ = None
