@@ -9,7 +9,6 @@ import traceback
 import os
 import sys
 import datetime
-from pineboolib.plugins.kugar.pnkugarparsetools import pnkugarparsetools
 
 canvas_ = None
 header_ = []
@@ -17,7 +16,7 @@ name_ = None
 pageFormat_ = []
 
 
-class kut2rml(pnkugarparsetools):
+class kut2rml(object):
     rml_ = None
     header_ = None
     repeatHeader_ = False
@@ -33,12 +32,11 @@ class kut2rml(pnkugarparsetools):
     maxVSize = {}
     docInitSubElemet_ = None
     registeredFonts = []
-    parseTools_ = None
+    _parser_tools = None
 
     def __init__(self):
         self.rml_ = Element(None)
         self.logger = logging.getLogger("kut2rml")
-        self.correcionAltura_ = 0.927
         self.correccionAncho_ = 0.927
 
     def parse(self, name, kut, dataString):
@@ -47,10 +45,15 @@ class kut2rml(pnkugarparsetools):
         else:
             return None
 
+        from pineboolib.plugins.kugar.parsertools import parsertools
+
+        self._parser_tools = parsertools()
+
         try:
-            self.xmlK_ = etree.ElementTree.fromstring(kut)
+            self.xmlK_ = self._parser_tools.loadKut(kut)
         except Exception:
-            self.logger.exception("KUT2RML: Problema al procesar %s.kut\n" % name)
+            self.logger.exception(
+                "KUT2RML: Problema al procesar %s.kut\n" % name)
             return False
         documment = SubElement(self.rml_, "document")
         # Para definir tipos de letra
@@ -75,7 +78,8 @@ class kut2rml(pnkugarparsetools):
         #self.header_ = self.pageHeader(self.xmlK_.find("PageHeader"))
         # print(etree.ElementTree.tostring(self.rml_))
         res_ = etree.ElementTree.tostring(self.rml_)
-        res_ = '<!DOCTYPE document SYSTEM \"rml_1_0.dtd\">%s' % res_.decode("utf-8")
+        res_ = '<!DOCTYPE document SYSTEM \"rml_1_0.dtd\">%s' % res_.decode(
+            "utf-8")
         pdfname = pineboolib.project.getTempDir()
         pdfname += "/%s.pdf" % datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         pPDF = parsePDF()
@@ -108,14 +112,16 @@ class kut2rml(pnkugarparsetools):
         RM = xml.get("RightMargin")
         TM = xml.get("TopMargin")
         if PS in [30, 31]:
-            Custom = [int(xml.get("CustomHeightMM")), int(xml.get("CustomWidthMM"))]
-        self.pageSize_["W"], self.pageSize_["H"] = self.converPageSize(int(PS), int(PO))
+            Custom = [int(xml.get("CustomHeightMM")),
+                      int(xml.get("CustomWidthMM"))]
+        self.pageSize_["W"], self.pageSize_[
+            "H"] = self._parser_tools.converPageSize(int(PS), int(PO))
         #self.pageSize_["H"] = self.pageSize_["H"] - int(TM)
         self.pageSize_["LM"] = int(LM)
         self.pageSize_["TM"] = int(TM)
         self.pageSize_["RM"] = int(RM)
         self.pageSize_["BM"] = int(BM)
-        pS = self.converPageSize(PS, PO, Custom)
+        pS = self._parser_tools.converPageSize(PS, PO, Custom)
         parent.set("pagesize", "(%s,%s)" % (pS[0], pS[1]))
         parent.set("leftMargin", str(LM))
         parent.set("showBoundary", "1")
@@ -131,15 +137,16 @@ class kut2rml(pnkugarparsetools):
         width = int(xml.get("Width"))
         X1 = int(xml.get("X1"))
         X2 = int(xml.get("X2"))
-        Y1 = int(xml.get("Y1")) * self.correcionAltura_
-        Y2 = int(xml.get("Y2")) * self.correcionAltura_
+        Y1 = self._parser_tools.heightCorrection(int(xml.get("Y1")))
+        Y2 = self._parser_tools.heightCorrection(int(xml.get("Y2")))
 
         X2 = self.fixRMarging(X2)
 
         lineME = SubElement(parent, "lineMode")
         lineME.set("width", str(width))
         lineE = SubElement(parent, "lines")
-        lineE.text = "%s %s %s %s" % (self.getCord("X", X1), self.getCord("Y", Y1), X2, self.getCord("Y", Y2))
+        lineE.text = "%s %s %s %s" % (self.getCord(
+            "X", X1), self.getCord("Y", Y1), X2, self.getCord("Y", Y2))
 
     def processText(self, xml, parent, data=None):
         isImage = False
@@ -156,13 +163,14 @@ class kut2rml(pnkugarparsetools):
             if text == "None":
                 return
         if xml.tag == "Special":
-            text = self.getSpecial(text[1:len(text) - 1])
+            text = self._parser_tools.getSpecial(
+                text[1:len(text) - 1], self.pagina)
 
         if xml.tag == "CalculatedField":
             if xml.get("FunctionName"):
                 fN = xml.get("FunctionName")
                 try:
-                    nodo = self.convertToNode(data)
+                    nodo = self._parser_tools.convertToNode(data)
                     text = str(pineboolib.project.call(fN, [nodo]))
                 except Exception:
                     print(traceback.format_exc())
@@ -177,7 +185,8 @@ class kut2rml(pnkugarparsetools):
                     text = v
 
             if text and xml.get("DataType") is not None:
-                text = self.calculated(text, xml.get("DataType"), xml.get("Precision"), data)
+                text = self._parser_tools.calculated(text, xml.get(
+                    "DataType"), xml.get("Precision"), data)
 
             # else:
             #    text = self.calculated(xml.get("Field"), xml.get("DataType"), xml.get("Precision"), data)
@@ -339,14 +348,16 @@ class kut2rml(pnkugarparsetools):
                     y = y - (H / 8)
 
         obj.set("x", str(self.getCord("X", x)))
-        obj.set("y", str(self.getCord("Y", y * self.correcionAltura_)))
+        obj.set("y", str(self.getCord("Y", self._parser_tools.heightCorrection(y))))
 
     def fixRMarging(self, W, x=None):
         ret = W
 
         if x:
-            if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):  # Controla si se sobrepasa el margen derecho
-                ret = self.pageSize_["W"] - self.pageSize_["RM"] - self.getCord("X", x)
+            # Controla si se sobrepasa el margen derecho
+            if self.pageSize_["W"] - self.pageSize_["RM"] < W + self.getCord("X", x):
+                ret = self.pageSize_["W"] - \
+                    self.pageSize_["RM"] - self.getCord("X", x)
         else:
 
             if self.pageSize_["W"] - self.pageSize_["RM"] < (W + self.pageSize_["LM"]):
@@ -377,10 +388,128 @@ class kut2rml(pnkugarparsetools):
         elif t is "Y":  # Vertical
             #ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
             #ret = int(self.pageSize_["H"]) - int(val) - int(self.actualVSize[str(self.pagina)] * self.correcionAltura_)
-            ret = int(self.pageSize_["H"]) - int(val) - int(self.actualVSize[str(self.pagina)] * self.correcionAltura_)
+            ret = int(self.pageSize_[
+                      "H"]) - int(val) - self._parser_tools.heightCorrection(self.actualVSize[str(self.pagina)])
         return ret
 
         return ret
+
+    def getColor(self, rgb):
+        ret = None
+        if rgb is None:
+            ret = QColor(0, 0, 0)
+        else:
+            if rgb.find(",") > -1:
+                rgb_ = rgb.split(",")
+                ret = QColor(int(rgb_[0]), int(rgb_[1]), int(rgb_[2]))
+            elif len(rgb) == 3:
+                ret = QColor(int(rgb[0]), int(rgb[1]), int(rgb[2]))
+            else:
+                ret = QColor(int(rgb[0:2]), int(rgb[3:5]), int(rgb[6:8]))
+
+        return ret
+
+    def pageFooter(self, xml, parent):
+        frecuencia = int(self.getOption(xml, "PrintFrequency"))
+        if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
+            #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
+            self.actualVSize[str(self.pagina)] = self.maxVSize[str(
+                self.pagina)] + self._parser_tools.heightCorrection(self._parser_tools.getHeight(xml))
+            #self.logger.warn("PAGE_FOOTER BOTTON %s" % self.actualVSize[str(self.pagina)])
+            self.processXML(xml, parent)
+
+    def getOption(self, xml, name):
+        ret = xml.get(name)
+        if ret is None:
+            ret = 0
+
+        return ret
+
+    def pageHeader(self, xml, parent):
+        frecuencia = int(self.getOption(xml, "PrintFrequency"))
+        if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
+            self.processXML(xml, parent)
+
+    def processKutDetails(self, xml, xmlData, parent):
+        pageG = self.newPage(parent)
+        prevLevel = 0
+        for data in xmlData.findall("Row"):
+            level = int(data.get("level"))
+            if prevLevel > level:
+                pageG = self.processData(
+                    "DetailFooter", xml, data, pageG, prevLevel)
+            elif prevLevel < level:
+                pageG = self.processData(
+                    "DetailHeader", xml, data, pageG, level)
+
+            pageG = self.processData("Detail", xml, data, pageG, level, parent)
+
+            prevLevel = level
+
+        for l in reversed(range(level + 1)):
+            pageG = self.processData("DetailFooter", xml, data, pageG, l)
+
+        if xml.find("PageFooter"):
+            pageG = self.pageFooter(xml.find("PageFooter"), pageG)
+        elif xml.find("AddOnFooter"):
+            pageG = self.pageFooter(xml.find("AddOnFooter"), pageG)
+
+    def processData(self, name, xml, data, parent, level, docParent=None):
+        listDF = xml.findall(name)
+        for dF in listDF:
+            if dF.get("Level") == str(level):
+                if name is "Detail" and (dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None):
+                    heightCalculated = self._parser_tools.getHeight(
+                        dF) + self.actualVSize[str(self.pagina)]
+                    # Buscamos si existe DetailFooter y PageFooter y miramos si
+                    # no excede tamaño
+                    for dFooter in xml.findall("DetailFooter"):
+                        if dFooter.get("Level") == str(level):
+                            heightCalculated += self._parser_tools.getHeight(
+                                dFooter)
+                    pageFooter = xml.get("PageFooter")
+                    if pageFooter is not None:
+                        if self.pagina == 1 or pageFooter.get("PrintFrecuency") == "1":
+                            heightCalculated += self._parser_tools.getHeight(
+                                pageFooter)
+
+                    heightCalculated += self.pageSize_["BM"]
+
+                    # Si nos pasamos
+                    if heightCalculated > self.maxVSize[str(self.pagina)]:
+                        self.pageFooter(xml.find("PageFooter"),
+                                        parent)  # Pie de página
+                        parent = self.newPage(docParent)  # Nueva página
+
+                if dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None:
+                    self.processXML(dF, parent, data)
+                    #self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
+        return parent
+
+    def processXML(self, xml, parent, data=None):
+
+        if xml.tag == "DetailFooter":
+            if xml.get("PlaceAtBottom") == "true":
+                self.actualVSize[str(self.pagina)] = self.pageSize_[
+                    "H"] - self._parser_tools.getHeight(xml)
+
+        for child in xml.iter():
+            if child.tag == "Label":
+                self.processText(child, parent, data)
+            elif child.tag == "Line":
+                self.drawLine(child, parent)
+            elif child.tag == "Field":
+                self.processText(child, parent, data)
+            elif child.tag == "Special":
+                # print(etree.ElementTree.tostring(child))
+                self.processText(child, parent)
+            elif child.tag == "CalculatedField":
+                self.processText(child, parent, data)
+            else:
+                if child.tag not in ("PageFooter", "PageHeader", "DetailFooter", "Detail", "AddOnHeader", "AddOnFooter", "DetailHeader"):
+                    self.logger.warn("porcessXML: Unknown tag %s." % child.tag)
+
+        self.actualVSize[str(self.pagina)] += self._parser_tools.getHeight(xml)
 
 
 class parsePDF(object):

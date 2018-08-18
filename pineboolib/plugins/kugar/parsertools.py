@@ -1,29 +1,60 @@
 # -*- coding: utf-8 -*-
 import logging
+import datetime
+from xml import etree
 
-from PyQt5.QtGui import QColor
 
-
-class pnkugarparsetools(object):
+class parsertools(object):
+    _fix_altura = None
 
     def __init__(self):
-        self.logger = logging.getLogger("PNKugarParseTools")
+        self.logger = logging.getLogger("ParseTools")
         self.pagina = 0
+        self._fix_altura = 0.927
 
-    def getColor(self, rgb):
-        ret = None
-        if rgb is None:
-            ret = QColor(0, 0, 0)
+    def loadKut(self, data):
+        data = data.encode("ISO-8859-15")
+        return etree.ElementTree.fromstring(data)
+
+    def heightCorrection(self, value):
+        return value * self._fix_altura
+
+    def convertToNode(self, data):
+
+        node = self._parser_tools.Node()
+        for k in data.keys():
+            node.setAttribute(k, data.get(k))
+
+        return node
+
+    def getHeight(self, xml):
+        h = int(xml.get("Height"))
+        if h:
+            return h
         else:
-            if rgb.find(",") > -1:
-                rgb_ = rgb.split(",")
-                ret = QColor(int(rgb_[0]), int(rgb_[1]), int(rgb_[2]))
-            elif len(rgb) == 3:
-                ret = QColor(int(rgb[0]), int(rgb[1]), int(rgb[2]))
-            else:
-                ret = QColor(int(rgb[0:2]), int(rgb[3:5]), int(rgb[6:8]))
+            return 0
+
+    def getSpecial(self, name, page_num):
+        self.logger.debug("%s:getSpecial %s" % (__name__, name))
+        ret = "None"
+        if name == "Fecha":
+            ret = str(datetime.date.__format__(
+                datetime.date.today(), "%d.%m.%Y"))
+        if name == "NúmPágina":
+            ret = str(page_num)
 
         return ret
+
+    def calculated(self, field, dataType, Precision, data=None):
+
+        ret_ = field
+        if dataType == 5:  # Imagen
+            from pineboolib.plugings.kugar.pnkugarplugins import refkey2cache
+            ret_ = parseKey(field)
+        elif data:
+            ret_ = data.get(field)
+
+        return ret_
 
     def converPageSize(self, size, orientation, Custom=None):
         result_ = None
@@ -85,139 +116,14 @@ class pnkugarparsetools(object):
         elif size in [30, 31]:
             r = Custom  # "CUSTOM"
         if r is None:
-            self.logger.warn("porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
+            self.logger.warn(
+                "porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
             r = [595, 842]
 
         if orientation != 0:
             r = [r[1], r[0]]
 
         return r
-
-    def pageFooter(self, xml, parent):
-        frecuencia = int(self.getOption(xml, "PrintFrequency"))
-        if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
-            #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
-            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self.getHeight(xml) * self.correcionAltura_
-            #self.logger.warn("PAGE_FOOTER BOTTON %s" % self.actualVSize[str(self.pagina)])
-            self.processXML(xml, parent)
-
-    def getSpecial(self, name):
-        self.logger.debug("porcessXML:getSpecial %s" % name)
-        ret = "None"
-        if name == "Fecha":
-            from datetime import date
-            ret = str(date.__format__(date.today(), "%d.%m.%Y"))
-        if name == "NúmPágina":
-            ret = str(self.pagina)
-
-    def getOption(self, xml, name):
-        ret = xml.get(name)
-        if ret is None:
-            ret = 0
-
-        return ret
-
-    def calculated(self, field, dataType, Precision, data=None):
-
-        ret = field
-        if int(dataType) == 5:  # Imagen
-            from pineboolib.plugings.kugar.pnkugarplugins import refkey2cache
-            ret = parseKey(field)
-        elif data:
-            ret = data.get(field)
-
-        return ret
-
-    def convertToNode(self, data):
-        node = Node()
-        for k in data.keys():
-            node.setAttribute(k, data.get(k))
-
-        return node
-
-    def getHeight(self, xml):
-        h = int(xml.get("Height"))
-        if h:
-            return h
-        else:
-            return 0
-
-    def pageHeader(self, xml, parent):
-        frecuencia = int(self.getOption(xml, "PrintFrequency"))
-        if frecuencia == 1 or self.pagina == 1:  # Siempre o si es primera pagina
-            self.processXML(xml, parent)
-
-    def processKutDetails(self, xml, xmlData, parent):
-        pageG = self.newPage(parent)
-        prevLevel = 0
-        for data in xmlData.findall("Row"):
-            level = int(data.get("level"))
-            if prevLevel > level:
-                pageG = self.processData("DetailFooter", xml, data, pageG, prevLevel)
-            elif prevLevel < level:
-                pageG = self.processData("DetailHeader", xml, data, pageG, level)
-
-            pageG = self.processData("Detail", xml, data, pageG, level, parent)
-
-            prevLevel = level
-
-        for l in reversed(range(level + 1)):
-            pageG = self.processData("DetailFooter", xml, data, pageG, l)
-
-        if xml.find("PageFooter"):
-            pageG = self.pageFooter(xml.find("PageFooter"), pageG)
-        elif xml.find("AddOnFooter"):
-            pageG = self.pageFooter(xml.find("AddOnFooter"), pageG)
-
-    def processData(self, name, xml, data, parent, level, docParent=None):
-        listDF = xml.findall(name)
-        for dF in listDF:
-            if dF.get("Level") == str(level):
-                if name is "Detail" and (dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None):
-                    heightCalculated = self.getHeight(dF) + self.actualVSize[str(self.pagina)]
-                    # Buscamos si existe DetailFooter y PageFooter y miramos si no excede tamaño
-                    for dFooter in xml.findall("DetailFooter"):
-                        if dFooter.get("Level") == str(level):
-                            heightCalculated += self.getHeight(dFooter)
-                    pageFooter = xml.get("PageFooter")
-                    if pageFooter is not None:
-                        if self.pagina == 1 or pageFooter.get("PrintFrecuency") == "1":
-                            heightCalculated += self.getHeight(pageFooter)
-
-                    heightCalculated += self.pageSize_["BM"]
-
-                    if heightCalculated > self.maxVSize[str(self.pagina)]:  # Si nos pasamos
-                        self.pageFooter(xml.find("PageFooter"), parent)  # Pie de página
-                        parent = self.newPage(docParent)  # Nueva página
-
-                if dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None:
-                    self.processXML(dF, parent, data)
-                    #self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
-        return parent
-
-    def processXML(self, xml, parent, data=None):
-
-        if xml.tag == "DetailFooter":
-            if xml.get("PlaceAtBottom") == "true":
-                self.actualVSize[str(self.pagina)] = self.pageSize_["H"] - self.getHeight(xml)
-
-        for child in xml.iter():
-            if child.tag == "Label":
-                self.processText(child, parent, data)
-            elif child.tag == "Line":
-                self.drawLine(child, parent)
-            elif child.tag == "Field":
-                self.processText(child, parent, data)
-            elif child.tag == "Special":
-                # print(etree.ElementTree.tostring(child))
-                self.processText(child, parent)
-            elif child.tag == "CalculatedField":
-                self.processText(child, parent, data)
-            else:
-                if child.tag not in ("PageFooter", "PageHeader", "DetailFooter", "Detail", "AddOnHeader", "AddOnFooter", "DetailHeader"):
-                    self.logger.warn("porcessXML: Unknown tag %s." % child.tag)
-
-        self.actualVSize[str(self.pagina)] += self.getHeight(xml)
 
 
 class Node(object):
@@ -244,7 +150,8 @@ def parseKey(name=None):
         if not os.path.exists(imgFile) and value:
             pix = QPixmap(value)
             if not pix.save(imgFile):
-                self.logger.warn("rml:refkey2cache No se ha podido guardar la imagen %s" % imgFile)
+                self.logger.warn(
+                    "rml:refkey2cache No se ha podido guardar la imagen %s" % imgFile)
                 ret = None
 
         ret = imgFile

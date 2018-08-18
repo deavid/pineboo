@@ -21,20 +21,20 @@ class kut2fpdf(object):
     _top_margin = None
     _page_top = {}
     _data_row = None  # Apunta a la fila actual en data
-    _parse_tools = None
+    _parser_tools = None
     _avalible_fonts = []
 
     def __init__(self):
 
         self.logger = logging.getLogger("kut2rml")
         checkDependencies({"fpdf": "fpdf"})
-        from pineboolib.plugins.kugar.pnkugarparsetools import pnkugarparsetools
-        self._parse_tools = pnkugarparsetools()
+        from pineboolib.plugins.kugar.parsertools import parsertools
+        self._parser_tools = parsertools()
 
     def parse(self, name, kut, data):
 
         try:
-            self._xml = etree.ElementTree.fromstring(kut)
+            self._xml = self._parser_tools.loadKut(kut)
         except Exception:
             self.logger.exception(
                 "KUT2FPDF: Problema al procesar %s.kut", name)
@@ -135,14 +135,17 @@ class kut2fpdf(object):
         for dF in listDF:
             if dF.get("Level") == str(data_level):
                 if section_name == "Detail" and (not dF.get("DrawIf") or data.get(dF.get("DrawIf"))):
-                    heightCalculated = self.getHeight(dF) + self.topSection()
+                    heightCalculated = self._parser_tools.getHeight(
+                        dF) + self.topSection()
                     for dFooter in self._xml.findall("DetailFooter"):
                         if dFooter.get("Level") == str(data_level):
-                            heightCalculated += self.getHeight(dFooter)
+                            heightCalculated += self._parser_tools.getHeight(
+                                dFooter)
                     pageFooter = self._xml.get("PageFooter")
                     if pageFooter:
                         if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
-                            heightCalculated += self.getHeight(pageFooter)
+                            heightCalculated += self._parser_tools.getHeight(
+                                pageFooter)
 
                     heightCalculated += self._bottom_margin
 
@@ -155,7 +158,6 @@ class kut2fpdf(object):
                     #self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
 
     def processSection(self, name):
-        self.logger.info("Procesando %s %s", name,  self._document.page_no())
         sec_ = self._xml.find(name)
         if sec_:
             # Siempre o si es primera pagina
@@ -171,21 +173,26 @@ class kut2fpdf(object):
     """
 
     def processXML(self, xml, data=None):
-
+        fix_height = True
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
-                self.setTopSection(self.topSection() + self.getHeight(xml))
+                self.setTopSection(self.topSection() +
+                                   self._parser_tools.getHeight(xml))
+
+        if xml.tag == "PageFooter":
+            fix_height = False
 
         for child in xml.iter():
             if child.tag in ("Label", "Field", "Special", "CalculatedField"):
-                self.processText(child, data)
+                self.processText(child, data, fix_height)
             elif child.tag == "Line":
-                self.processLine(child)
+                self.processLine(child, fix_height)
 
         if xml.get("PlaceAtBottom") != "true":
-            self.setTopSection(self.topSection() + self.getHeight(xml))
+            self.setTopSection(self.topSection() +
+                               self._parser_tools.getHeight(xml))
 
-    def processLine(self, xml):
+    def processLine(self, xml, fix_height=True):
 
         color = xml.get("Color")
         r = 0 if not color else int(color.split(",")[0])
@@ -198,9 +205,10 @@ class kut2fpdf(object):
         X2 = self.calculateRightEnd(xml.get("X2"))
         # Ajustar altura a secciones ya creadas
         Y1 = int(xml.get("Y1")) + self.topSection()
-        # Ajustar altura a secciones ya creadas
         Y2 = int(xml.get("Y2")) + self.topSection()
-
+        if fix_height:
+            Y1 = self._parser_tools.heightCorrection(Y1)
+            Y2 = self._parser_tools.heightCorrection(Y2)
         self._document.set_line_width(width)
         self._document.set_draw_color(r, g, b)
         self._document.line(X1, Y1, X2, Y2)
@@ -221,18 +229,20 @@ class kut2fpdf(object):
 
         return ret_
 
-    def processText(self, xml, data_row=None):
+    def processText(self, xml, data_row=None, fix_height=True):
         isImage = False
         text = xml.get("Text")
         BorderWidth = int(xml.get("BorderWidth"))
         borderColor = xml.get("BorderColor")
 
         W = int(xml.get("Width"))
-        H = int(xml.get("Height"))
+        H = self._parser_tools.getHeight(xml)
 
         x = int(xml.get("X"))
         # Añade la altura que hay ocupada por otras secciones
         y = int(xml.get("Y")) + self.topSection()
+        if fix_height:
+            y = self._parser_tools.heightCorrection(y)
 
         dataType = xml.get("Datatype")
 
@@ -240,13 +250,14 @@ class kut2fpdf(object):
             text = data_row.get(xml.get("Field"))
 
         elif xml.tag == "Special":
-            text = self.getSpecial(text[1:len(text) - 1])
+            text = self._parser_tools.getSpecial(
+                text[1:len(text) - 1], self._document.page_no())
 
         elif xml.tag == "CalculatedField":
             if xml.get("FunctionName"):
                 function_name = xml.get("FunctionName")
                 try:
-                    nodo = self.convertToNode(data_row)
+                    nodo = self._parser_tools.convertToNode(data_row)
                     text = str(pineboolib.project.call(function_name, [nodo]))
                 except Exception:
                     self.logger.exception(
@@ -260,8 +271,7 @@ class kut2fpdf(object):
                         xml.get("Field")) if not "None" else ""
 
             if text and dataType is not None:
-                text = self.calculated(
-                    text, int(dataType), xml.get("Precision"), data_row)
+                text = self._parser_tools.calculated(text, int(dataType), xml.get("Precision"), data_row)
 
             if dataType == "5":
                 isImage = True
@@ -366,35 +376,6 @@ class kut2fpdf(object):
     # def addFont(self, name, style, fname, uni):
     #    self._document.add_font(name, style, fname, uni)
 
-    def calculated(self, field, dataType, Precision, data=None):
-
-        ret_ = field
-        if dataType == 5:  # Imagen
-            from pineboolib.plugings.kugar.pnkugarplugins import refkey2cache
-            ret_ = parseKey(field)
-        elif data:
-            ret_ = data.get(field)
-
-        return ret_
-
-    def getSpecial(self, name):
-        self.logger.debug("KUT2FPDF:getSpecial %s" % name)
-        ret = "None"
-        if name == "Fecha":
-            ret = str(datetime.date.__format__(
-                datetime.date.today(), "%d.%m.%Y"))
-        if name == "NúmPágina":
-            ret = str(self._document.page_no())
-
-        return ret
-
-    def getHeight(self, xml):
-        h = int(xml.get("Height"))
-        if h:
-            return h
-        else:
-            return 0
-
     """
     Define los parámetros de la página
     @param xml: Elemento xml con los datos del fichero .kut a procesar
@@ -417,13 +398,5 @@ class kut2fpdf(object):
 
         self._page_orientation = "P" if page_orientation == "0" else "L"
 
-        self._page_size = self._parse_tools.converPageSize(
+        self._page_size = self._parser_tools.converPageSize(
             page_size, int(page_orientation), custom_size)  # devuelve un array
-
-    def convertToNode(self, data):
-
-        node = self._parse_tools.Node()
-        for k in data.keys():
-            node.setAttribute(k, data.get(k))
-
-        return node
