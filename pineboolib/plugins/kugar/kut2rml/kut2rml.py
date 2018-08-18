@@ -526,9 +526,3 @@ class parsePDF(object):
             w.write(res_)
 
         w.close()
-
-    def setAttribute(self, name, value):
-        self.list_[name] = value
-
-    def attributeValue(self, name):
-        return self.list_[name]

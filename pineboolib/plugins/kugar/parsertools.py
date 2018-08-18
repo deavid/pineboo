@@ -2,10 +2,16 @@
 from PyQt5.QtGui import QPixmap
 from pineboolib.utils import filedir, clearXPM
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+import pineboolib
 import os
 import logging
 import datetime
 from xml import etree
+
+
+"""
+Esta clase ofrece algunas funciones comunes de los diferentes parser de kut.
+"""
 
 
 class parsertools(object):
@@ -14,22 +20,46 @@ class parsertools(object):
     def __init__(self):
         self.logger = logging.getLogger("ParseTools")
         self.pagina = 0
-        self._fix_altura = 0.927
+        self._fix_altura = 0.927  # Corrector de altura
+
+    """
+    Retorna un objecto xml desde una cadena de texto.
+    @param data. Cadena de texto.
+    @return xml.
+    """
 
     def loadKut(self, data):
         data = data.encode("ISO-8859-15")
         return etree.ElementTree.fromstring(data)
 
+    """
+    Corrige la altura para ajustarse a un kut original.
+    @param value. Número a corregir.
+    @return Número corregido.
+    """
+
     def heightCorrection(self, value):
         return value * self._fix_altura
 
+    """
+    Cuando es un calculatedField , se envia un dato al qsa de tipo node.
+    @param data. xml con información de la linea de datos afectada.
+    @return Node con la información facilitada.
+    """
+
     def convertToNode(self, data):
 
-        node = self._parser_tools.Node()
+        node = Node()
         for k in data.keys():
             node.setAttribute(k, data.get(k))
 
         return node
+
+    """
+    Coge la altura especificada en un elemento xml.
+    @param xml. Elemento del que hay que extraer la altura.
+    @return Valor de la altura o 0 si no existe tal dato.
+    """
 
     def getHeight(self, xml):
         h = int(xml.get("Height"))
@@ -38,7 +68,14 @@ class parsertools(object):
         else:
             return 0
 
-    def getSpecial(self, name, page_num):
+    """
+    Devuelve un valor de tipo especial.
+    @param name. Nombre del tipo especial a cargar.
+    @param page_num. Número de página por si es un tipo "NúmPágina".
+    @return Valor requerido según tipo especial especificado.
+    """
+
+    def getSpecial(self, name, page_num=None):
         self.logger.debug("%s:getSpecial %s" % (__name__, name))
         ret = "None"
         if name == "Fecha":
@@ -48,6 +85,15 @@ class parsertools(object):
             ret = str(page_num)
 
         return ret
+
+    """
+    Devuelve un valor de tipo de dato calculado.
+    @param field. Nombre del campo.
+    @param dataType. Tipo de dato. Dependiendo de este se devolvera el valor de una manera u otra.
+    @param precision. Numero de decimales
+    @param data. Linea del xml de datos afectada
+    @return Valor calculado.
+    """
 
     def calculated(self, field, dataType, Precision, data=None):
 
@@ -59,19 +105,30 @@ class parsertools(object):
 
         return ret_
 
-    def parseKey(self, name=None):
-        ret = None
+    """
+    Retorna el nombre de un fichero .png que está cacheado en tempdata. Si no existe lo crea.
+    @param. Nombre de la cadena que especifica la tupla afectada en fllarge.
+    @return. Ruta completa del fichero en tempdata.
+    """
 
-        if name is not None:
+    def parseKey(self, ref_key=None):
+        ret = None
+        table_name = "fllarge"
+        if ref_key is not None:
             value = None
+
+            imgFile = filedir("../tempdata")
+            imgFile += "/%s.png" % ref_key
+
+            if not pineboolib.project.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                table_name += "_%s" % ref_key.split("@")[1]
+
             q = FLSqlQuery()
             # q.setForwardOnly(True)
-            q.exec_("SELECT contenido FROM fllarge WHERE refkey='%s'" % name)
+            q.exec_("SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key))
             if q.next():
                 value = clearXPM(q.value(0))
 
-            imgFile = filedir("../tempdata")
-            imgFile += "/%s.png" % name
             if not os.path.exists(imgFile) and value:
                 pix = QPixmap(value)
                 if not pix.save(imgFile):
@@ -80,6 +137,14 @@ class parsertools(object):
             ret = imgFile
 
         return ret
+
+    """
+    Retorna el tamaño adecuado el código de página especificado en el .kut.
+    @param size. Código de tamaño del documento(0..31).
+    @param orientation. 0 vertical, 1 apaisado.
+    @param custom. Cuando se especifican size (30 o 31), recogemos el valor de custom.
+    @return Array con los valores del tamaño de la página.
+    """
 
     def converPageSize(self, size, orientation, Custom=None):
         result_ = None
@@ -138,7 +203,7 @@ class parsertools(object):
             r = [1255, 791]  # "LEDGER"
         elif size == 29:
             r = [791, 1255]  # "TABLOID"
-        elif size in [30, 31]:
+        elif size in (30, 31):
             r = Custom  # "CUSTOM"
         if r is None:
             self.logger.warn(
@@ -151,34 +216,19 @@ class parsertools(object):
         return r
 
 
+"""
+Clase del tipo node para los calculatedField.
+"""
+
+
 class Node(object):
     list_ = None
 
     def __init__(self):
         self.list_ = {}
 
+    def setAttribute(self, name, value):
+        self.list_[name] = value
 
-def parseKey(name=None):
-    ret = None
-    value = None
-    if name is None:
-        ret = None
-    else:
-        q = FLSqlQuery()
-        # q.setForwardOnly(True)
-        q.exec_("SELECT contenido FROM fllarge WHERE refkey='%s'" % name)
-        if q.next():
-            value = clearXPM(q.value(0))
-
-        imgFile = filedir("../tempdata")
-        imgFile += "/%s.png" % name
-        if not os.path.exists(imgFile) and value:
-            pix = QPixmap(value)
-            if not pix.save(imgFile):
-                self.logger.warn(
-                    "rml:refkey2cache No se ha podido guardar la imagen %s" % imgFile)
-                ret = None
-
-        ret = imgFile
-
-    return ret
+    def attributeValue(self, name):
+        return self.list_[name]

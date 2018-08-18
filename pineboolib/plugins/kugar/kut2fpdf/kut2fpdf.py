@@ -6,6 +6,10 @@ from xml import etree
 import logging
 import datetime
 
+"""
+Conversor de kuts a pyFPDF
+"""
+
 
 class kut2fpdf(object):
 
@@ -30,6 +34,14 @@ class kut2fpdf(object):
         checkDependencies({"fpdf": "fpdf"})
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
+
+    """
+    Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
+    @param name. Nombre de ".kut".
+    @param kut. Cadena de texto que contiene el ".kut".
+    @param data. Cadena de texto que contiene los datos para ser rellenados en el informe.
+    @return Ruta a fichero pdf.
+    """
 
     def parse(self, name, kut, data):
 
@@ -73,8 +85,18 @@ class kut2fpdf(object):
 
         return pdfname
 
+    """
+    Indica el techo para calcular la posición de los objetos de esa sección.
+    @return Número con el techo de la página actual.
+    """
+
     def topSection(self):
         return self._page_top[str(self._document.page_no())]
+
+    """
+    Actualiza el valor del techo de la página actual. Se suele actualizar al procesar una sección.
+    @param value. Numero que elspecifica el nuevo techo.
+    """
 
     def setTopSection(self, value):
         self._page_top[str(self._document.page_no())] = value
@@ -86,26 +108,15 @@ class kut2fpdf(object):
     def newPage(self):
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
-        # self._document.set_margins(
-        #    self._left_margin, self._top_margin, self._right_margin)
+        self._document.set_margins(self._left_margin, self._top_margin,
+                                   self._right_margin)  # Lo dejo pero no se nota nada
         # Corta con el borde inferior ...
         # self._document.set_auto_page_break(
         #    True, self._document.h - self._bottom_margin)
 
         self.processSection("PageHeader")
-
-        # para sacar el número de página se puede usar self._document.page_no()
     """
-    def pageFooter(self, xml, parent):
-        frecuencia = int(self.getOption(xml, "PrintFrequency"))
-        if frecuencia == 1 or self._document.page_no() == 1:  # Siempre o si es primera pagina
-            #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
-            self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + self.getHeight(xml) * self.correcionAltura_
-            #self.logger.warn("PAGE_FOOTER BOTTON %s" % self.actualVSize[str(self.pagina)])
-            self.processXML(xml, parent)
-    """
-    """
-    Procesa la cabecera del documento
+    Procesa las secciones details con sus correspondientes detailHeader y detailFooter.
     """
 
     def processDetails(self):
@@ -129,6 +140,13 @@ class kut2fpdf(object):
             self.processSection("PageFooter")
         elif self._xml.find("AddOnFooter"):
             self.processSection("AddOnFooter")
+
+    """
+    Paso intermedio que calcula si detailHeader + detail + detailFooter entran en el resto de la ṕagina. Si no es así crea nueva página.
+    @param section_name. Nombre de la sección a procesar.
+    @param data. Linea de datos a procesar.
+    @param data_level. Nivel de seccion.
+    """
 
     def processData(self, section_name, data, data_level):
         listDF = self._xml.findall(section_name)
@@ -157,27 +175,30 @@ class kut2fpdf(object):
                     self.processXML(dF, data)
                     #self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
 
+    """
+    Procesa las secciones fuera de detail, pageHeader, pageFooter, AddOnFooter.
+    @param name. Nombre de la sección a procesar.
+    """
+
     def processSection(self, name):
         sec_ = self._xml.find(name)
         if sec_:
-            # Siempre o si es primera pagina
             if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1:
                 if sec_.tag == "PageFooter":
-                    self.setTopSection(self._document.h -
-                                       int(sec_.get("Height")))
+                    self.setTopSection(self._document.h - int(sec_.get("Height")))
                 self.processXML(sec_)
 
     """
-    Procesa un elemento de xml
-    @param xml: El elemento a procesar
+    Procesa un elemento de xml.
+    @param xml: El elemento a procesar.
+    @param. data: Linea de datos afectada.
     """
 
     def processXML(self, xml, data=None):
         fix_height = True
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
-                self.setTopSection(self.topSection() +
-                                   self._parser_tools.getHeight(xml))
+                self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
 
         if xml.tag == "PageFooter":
             fix_height = False
@@ -189,8 +210,13 @@ class kut2fpdf(object):
                 self.processLine(child, fix_height)
 
         if xml.get("PlaceAtBottom") != "true":
-            self.setTopSection(self.topSection() +
-                               self._parser_tools.getHeight(xml))
+            self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
+
+    """
+    Procesa una linea.
+    @param xml. Sección de xml a procesar.
+    @param fix_height. Ajusta la altura a los .kut originales, excepto el pageFooter.
+    """
 
     def processLine(self, xml, fix_height=True):
 
@@ -199,7 +225,7 @@ class kut2fpdf(object):
         g = 0 if not color else int(color.split(",")[1])
         b = 0 if not color else int(color.split(",")[2])
 
-        style = int(xml.get("Style"))
+        #style = int(xml.get("Style"))
         width = int(xml.get("Width"))
         X1 = self.calculateLeftStart(xml.get("X1"))
         X2 = self.calculateRightEnd(xml.get("X2"))
@@ -213,6 +239,12 @@ class kut2fpdf(object):
         self._document.set_draw_color(r, g, b)
         self._document.line(X1, Y1, X2, Y2)
 
+    """
+    Comprueba si excedemos el margen izquierdo de la página actual
+    @param x. Posición a comprobar.
+    @return Valor corregido, si procede.
+    """
+
     def calculateLeftStart(self, x):
         x = int(x)
         ret_ = x
@@ -221,13 +253,25 @@ class kut2fpdf(object):
 
         return ret_
 
-    def calculateRightEnd(self, y):
-        y = int(y)
-        ret_ = y
-        if y > (self._document.w - self._right_margin):
+    """
+    Comprueba si excedemos el margen derecho de la página actual
+    @param x. Posición a comprobar.
+    @return Valor corregido, si procede.
+    """
+
+    def calculateRightEnd(self, x):
+        x = int(x)
+        ret_ = x
+        if x > (self._document.w - self._right_margin):
             ret_ = self._document.w - self._right_margin
 
         return ret_
+
+    """
+    Procesa una etiqueta. Esta peude ser un campo calculado, una etiqueta, un campo especial o una imagen.
+    @param xml. Sección de xml a procesar.
+    @param fix_height. Ajusta la altura a los .kut originales, excepto el pageFooter.
+    """
 
     def processText(self, xml, data_row=None, fix_height=True):
         isImage = False
@@ -235,14 +279,14 @@ class kut2fpdf(object):
         BorderWidth = int(xml.get("BorderWidth"))
         borderColor = xml.get("BorderColor")
 
+        # x,y,W,H se calcula y corrigen aquí para luego estar correctos en los diferentes destinos posibles
         W = int(xml.get("Width"))
         H = self._parser_tools.getHeight(xml)
 
         x = int(xml.get("X"))
-        # Añade la altura que hay ocupada por otras secciones
-        y = int(xml.get("Y")) + self.topSection()
+        y = int(xml.get("Y")) + self.topSection()  # Añade la altura que hay ocupada por otras secciones
         if fix_height:
-            y = self._parser_tools.heightCorrection(y)
+            y = self._parser_tools.heightCorrection(y)  # Corrige la posición con respecto al kut original
 
         dataType = xml.get("Datatype")
 
@@ -292,6 +336,16 @@ class kut2fpdf(object):
         else:
             self.drawImage(x, y, W, H, xml, text)
 
+    """
+    Dibuja un campo texto en la página.
+    @param x. Pos x de la etiqueta.
+    @param y. Pos y de la etiqueta.
+    @param W. Anchura de la etiqueta.
+    @param H. Altura de la etiqueta.
+    @param xml. Sección del xml afectada.
+    @param txt. Texto calculado de la etiqueta a crear.
+    """
+
     def drawText(self, x, y, W, H, xml, txt):
 
         if txt in ("None", None):
@@ -304,16 +358,12 @@ class kut2fpdf(object):
         bg_color = xml.get("BackgroundColor").split(",")
         fg_color = xml.get("ForegroundColor").split(",")
 
-        self._document.set_text_color(
-            int(fg_color[0]), int(fg_color[1]), int(fg_color[2]))
-        self._document.set_fill_color(
-            int(bg_color[0]), int(bg_color[1]), int(bg_color[2]))
+        self._document.set_text_color(int(fg_color[0]), int(fg_color[1]), int(fg_color[2]))
+        self._document.set_fill_color(int(bg_color[0]), int(bg_color[1]), int(bg_color[2]))
 
         if xml.get("BorderStyle") == "1":
             # FIXME: Hay que ajustar los margenes
             self.drawRect(x, y, W, H)
-            # FIXME: Hay que recalcular la posición para dejarlo centrado al
-            # rectangulo
 
         #font_name, font_size, font_style
         font_style = ""
@@ -366,16 +416,30 @@ class kut2fpdf(object):
 
         self._document.text(x, y, txt)
 
+    """
+    Dibuja un cuadrado en la página actual.
+    @param x. Pos x del cuadrado.
+    @param y. Pos y del cuadrado.
+    @param W. Anchura del cuadrado.
+    @param H. Altura del cuadrado.
+    """
+
     def drawRect(self, x, y, W, H):
         self._document.rect(x, y, W, H, "DF")
+
+    """
+    Inserta una imagen en la página actual.
+    @param x. Pos x de la imagen.
+    @param y. Pos y de la imagen.
+    @param W. Anchura de la imagen.
+    @param H. Altura de la imagen.
+    @param xml. Sección del xml afectada.
+    @param file_name. Nombr del fichero de tempdata a usar
+    """
 
     def drawImage(self, x, y, W, H, xml, file_name):
 
         self._document.image(file_name, x, y, W, H, "PNG")
-
-    # def addFont(self, name, style, fname, uni):
-    #    self._document.add_font(name, style, fname, uni)
-
     """
     Define los parámetros de la página
     @param xml: Elemento xml con los datos del fichero .kut a procesar
@@ -393,10 +457,8 @@ class kut2fpdf(object):
         page_orientation = xml.get("PageOrientation")
 
         if page_size in [30, 31]:
-            custom_size = [int(xml.get("CustomHeightMM")),
-                           int(xml.get("CustomWidthMM"))]
+            custom_size = [int(xml.get("CustomHeightMM")), int(xml.get("CustomWidthMM"))]
 
         self._page_orientation = "P" if page_orientation == "0" else "L"
-
         self._page_size = self._parser_tools.converPageSize(
             page_size, int(page_orientation), custom_size)  # devuelve un array
