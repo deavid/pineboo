@@ -74,8 +74,7 @@ class kut2fpdf(object):
         self.processDetails()
 
         pdfname = pineboolib.project.getTempDir()
-        pdfname += "/%s_%s.pdf" % (name,
-                                   datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        pdfname += "/%s_%s.pdf" % (name, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
 
         # Datos del creador del documento
         self._document.set_title(name)
@@ -153,17 +152,14 @@ class kut2fpdf(object):
         for dF in listDF:
             if dF.get("Level") == str(data_level):
                 if section_name == "Detail" and (not dF.get("DrawIf") or data.get(dF.get("DrawIf"))):
-                    heightCalculated = self._parser_tools.getHeight(
-                        dF) + self.topSection()
+                    heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
                     for dFooter in self._xml.findall("DetailFooter"):
                         if dFooter.get("Level") == str(data_level):
-                            heightCalculated += self._parser_tools.getHeight(
-                                dFooter)
+                            heightCalculated += self._parser_tools.getHeight(dFooter)
                     pageFooter = self._xml.get("PageFooter")
                     if pageFooter:
                         if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
-                            heightCalculated += self._parser_tools.getHeight(
-                                pageFooter)
+                            heightCalculated += self._parser_tools.getHeight(pageFooter)
 
                     heightCalculated += self._bottom_margin
 
