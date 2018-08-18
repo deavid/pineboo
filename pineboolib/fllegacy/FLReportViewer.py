@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtXml
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject
 from PyQt5.Qt import QFileDialog, QMessageBox, QWidget
 
 from pineboolib import decorators
@@ -9,7 +9,6 @@ from pineboolib import pnqt3ui
 from pineboolib.utils import filedir
 import pineboolib
 
-from pineboolib.fllegacy.kugar.mreportviewer import MReportViewer
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPicture import FLPicture
@@ -23,17 +22,17 @@ from pineboolib.pncontrolsfactory import SysType
 AQ_USRHOME = "."  # FIXME
 
 
-class FLReportViewer(QtWidgets.QMainWindow):
+class FLReportViewer(QObject):
 
     pdfFile = None
 
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None):
-        pParam = 0 if parent and embedInParent else 0
-        pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
-        pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
-        pParam = pParam | Qt.WindowSystemMenuHint
+        #pParam = 0 if parent and embedInParent else 0
+        #pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
+        #pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
+        #pParam = pParam | Qt.WindowSystemMenuHint
 
-        super(FLReportViewer, self).__init__(parent, pParam)
+        super(FLReportViewer, self).__init__(parent)
 
         self.loop_ = False
         self.eventloop = QtCore.QEventLoop()
@@ -75,8 +74,8 @@ class FLReportViewer(QtWidgets.QMainWindow):
         self.setReportEngine(FLReportEngine(
             self) if rptEngine is None else rptEngine)
 
-        self.setFont(QtWidgets.QApplication.font())
-        self.setFocusPolicy(Qt.StrongFocus)
+        # self.setFont(QtWidgets.QApplication.font())
+        # self.setFocusPolicy(Qt.StrongFocus)
 
         util = FLUtil()
 
@@ -856,7 +855,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
         return self.name_
 
 
-class internalReportViewer(QWidget):
+class internalReportViewer(QObject):
 
     rptEngine_ = None
     dpi_ = 0
