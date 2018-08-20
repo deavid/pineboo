@@ -67,6 +67,7 @@ class Project(object):
     deleteCache = None
     path = None
     kugarPluging = None
+    _splash = None
     """
     Constructor
     """

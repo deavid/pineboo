@@ -330,8 +330,9 @@ def main():
             options.project += ".xml"
         prjpath = filedir("../projects", options.project)
         if not os.path.isfile(prjpath):
-            raise ValueError("el proyecto %s no existe." % options.project)
-        project.load(prjpath)
+            logger.warn("el proyecto %s no existe." % options.project)
+        else:
+            project.load(prjpath)
     elif options.connection:
         user, passwd, driver_alias, host, port, dbname = translate_connstring(
             options.connection)
@@ -348,12 +349,14 @@ def main():
     else:
         splash = None
 
+    project._splash = splash
     project.run()
     if project.conn.conn is False:
-        raise ValueError("No connection was provided. Aborting Pineboo load.")
+        logger.warn("No connection was provided. Aborting Pineboo load.")
+    else:
         # return main()
 
-    init_project(_DGI, splash, options, project, mainForm, app)
+        init_project(_DGI, splash, options, project, mainForm, app)
 
 
 def preload_actions(project, forceload=None):
