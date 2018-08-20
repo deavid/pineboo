@@ -7,6 +7,7 @@ from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import auto_qt_translate_text
 import traceback
+import pineboolib
 from PyQt5.Qt import qWarning, QApplication, qApp, QDomDocument, QRegExp
 from PyQt5.QtWidgets import QMessageBox
 
@@ -62,7 +63,7 @@ class FLQPSQL(object):
         try:
             self.conn_ = psycopg2.connect(conninfostr)
         except psycopg2.OperationalError as e:
-
+            pineboolib.project._splash.hide()
             if "does not exist" in str(e) or "no existe" in str(e):
                 ret = QMessageBox.warning(None, "Pineboo",
                                           "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
@@ -115,34 +116,33 @@ class FLQPSQL(object):
             qWarning(traceback.format_exc())
 
         return self.conn_
-    
+
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
-        
+
         if type_ == "bool":
             s = str(v[0]).upper()
             if s == str(QApplication.tr("Sí")[0]).upper():
                 res = "='t'"
             elif str(QApplication.tr("No")[0]).upper():
                 res = "='f'"
-        
+
         elif type_ == "date":
             util = FLUtil()
             res = "::text LIKE '%%" + util.dateDMAtoAMD(str(v)) + "'"
-        
+
         elif type_ == "time":
             t = v.toTime()
             res = "::text LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
-        
+
         else:
             res = str(v)
             if upper:
                 res = "%s" % res.upper()
-            
+
             res = "::text LIKE '" + res + "%%'"
-        
+
         return res
-            
 
     def formatValue(self, type_, v, upper):
 
