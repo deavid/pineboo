@@ -302,7 +302,7 @@ class FLManagerModules(QtCore.QObject):
                 pnqt3ui.loadUi(form_path, w_)
             else:
                 from PyQt5 import uic
-                qtWidgetPlugings = filedir("./plugings/qtwidgetplugins")
+                qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
                 if not qtWidgetPlugings in uic.widgetPluginPath:
                     logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
                     uic.widgetPluginPath.append(qtWidgetPlugings)
