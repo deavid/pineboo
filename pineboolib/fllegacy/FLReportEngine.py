@@ -23,7 +23,6 @@ class FLReportEngine(object):
 
     class FLReportEnginePrivate(object):
 
-        @decorators.BetaImplementation
         def __init__(self, q):
             self.qry_ = 0
             self.qFieldMtdList_ = 0
@@ -197,11 +196,9 @@ class FLReportEngine(object):
 
         return True
 
-    @decorators.BetaImplementation
     def rptQueryData(self):
         return self.d_.qry_
 
-    @decorators.NotImplementedWarn
     def rptNameTemplate(self):
         return self.d_.template_
 
@@ -231,7 +228,6 @@ class FLReportEngine(object):
 
         super(FLReportEngine, self).exportToOds(pages.pageCollection())
 
-    @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
         if self.rt and self.rt.find("KugarTemplate") > -1:
             self.pdfFile = self.parser_.parse(
@@ -283,7 +279,6 @@ class FLReportEngine(object):
         return pgs
         """
 
-    @decorators.BetaImplementation
     def initData(self):
         n = self.rd.firstChild()
         while not n.isNull():

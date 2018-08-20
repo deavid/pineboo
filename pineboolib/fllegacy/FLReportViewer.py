@@ -102,15 +102,12 @@ class FLReportViewer(QObject):
 
         self.report_ = self.rptViewer_.reportPages()
 
-    @decorators.BetaImplementation
     def rptViewer(self):
         return self.rptViewer_
 
-    @decorators.BetaImplementation
     def rptEngine(self):
         return self.rptEngine_
 
-    @decorators.BetaImplementation
     def setReportEngine(self, r=None):
         if self.rptEngine_ == r:
             return
@@ -147,19 +144,18 @@ class FLReportViewer(QObject):
         if noSigDestroy:
             self.rptViewer_.setReportEngine(self.rptEngine_)
 
-    @decorators.BetaImplementation
     def exec_(self):
-        if self.loop_:
-            print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
-            return
+        # if self.loop_:
+        #    print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
+        #    return
 
         pineboolib.project.call("sys.openUrl", [self.pdfFile], None, True)
-        self.eventloop.exec_()
+        # self.eventloop.exec_()
 
-        if self.embedInParent_:
-            return
+        # if self.embedInParent_:
+        #    return
 
-        self.loop_ = True
+        #self.loop_ = True
         # self.clearWFlags(Qt.WShowModal) # FIXME
 
     @decorators.BetaImplementation
@@ -201,7 +197,6 @@ class FLReportViewer(QObject):
                 if inter.width() * inter.height() > (geodim / 20):
                     self.move(geo.topLeft())
 
-    @decorators.BetaImplementation
     def renderReport(self, initRow=0, initCol=0, append_or_flags=None, dRpt=None):
         """
         flags = None
@@ -556,7 +551,6 @@ class FLReportViewer(QObject):
         self.printing_ = False
         self.setDisabled(False)
 
-    @decorators.BetaImplementation
     def setReportData(self, d):
         if isinstance(d, FLSqlQuery):
             self.qry_ = d
@@ -576,7 +570,6 @@ class FLReportViewer(QObject):
             return self.rptEngine_.setReportData(d)
         return False
 
-    @decorators.BetaImplementation
     def setReportTemplate(self, t, style=None):
         if isinstance(t, QtXml.QDomNode):
             self.xmlTemplate_ = t
