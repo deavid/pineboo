@@ -4,8 +4,10 @@ from pineboolib.utils import filedir, clearXPM
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 import pineboolib
 import os
+import sys
 import logging
 import datetime
+import fnmatch
 from xml import etree
 
 
@@ -214,6 +216,35 @@ class parsertools(object):
             r = [r[1], r[0]]
 
         return r
+
+    """
+    Busca y retorna el path de un tipo de letra dado
+    """
+
+    def find_font(self, font_name, bold=False, italic=False, underline=False):
+        fonts_folders = []
+        if sys.platform.find("win") > -1:
+            windir = os.environ.get("WINDIR")
+            fonts_folders = [os.path.join(windir, "fonts")]
+        elif sys.platform.find("linux") > -1:
+            lindirs = os.environ.get("XDG_DATA_DIRS", "")
+            if not lindirs:
+                lindirs = "usr/share"
+
+            for lin_dir in lindirs.split(":"):
+                fonts_folders.append(os.path.join(lin_dir, "fonts"))
+        elif sys.platform.find("darwin") > -1:
+            fonts_folders = ["/Library/Fonts", "/System/Library/Fonts", "~/Library/Fonts"]
+        else:
+            self.logger.warn("KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform)
+            return False
+
+        for folder in fonts_folders:
+            for root, dirnames, filenames in os.walk(folder):
+                for filename in fnmatch.filter(filenames, '%s.ttf' % font_name):
+                    ret_ = os.path.join(root, filename)
+                    return ret_
+        return None
 
 
 """

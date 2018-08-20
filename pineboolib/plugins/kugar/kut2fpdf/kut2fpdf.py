@@ -64,6 +64,7 @@ class kut2fpdf(object):
 
         from fpdf import FPDF
         self._document = FPDF(self._page_orientation, "pt", self._page_size)
+        # Seteamos rutas a carpetas con tipos de letra ...
 
         # Cargamos las fuentes disponibles
         for f in self._document.core_fonts:
@@ -380,9 +381,15 @@ class kut2fpdf(object):
             font_style += "U"
 
         while font_name not in self._avalible_fonts:
-            self.logger.warning(
-                "KUT2PDF:: Falta el tipo de letra %s", font_name)
-            font_name = "helvetica"
+            font_found = self._parser_tools.find_font(font_name, font_style.find("B") > -1, font_style.find("I") > -1, font_style.find("U") > -1)
+            if font_found:
+                self.logger.info("KUT2FPDF::Añadiendo el tipo de letra %s desde %s", font_name, font_found)
+                self._document.add_font(font_name, "", font_found, True)
+                self._avalible_fonts.append(font_name)
+
+            else:
+                self.logger.warning("KUT2FPDF:: Falta el tipo de letra %s", font_name)
+                font_name = "helvetica"
 
         self._document.set_font(font_name, font_style, font_size)
 
