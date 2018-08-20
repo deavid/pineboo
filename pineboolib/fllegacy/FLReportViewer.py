@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtXml
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject
 from PyQt5.Qt import QFileDialog, QMessageBox, QWidget
 
 from pineboolib import decorators
@@ -9,7 +9,6 @@ from pineboolib import pnqt3ui
 from pineboolib.utils import filedir
 import pineboolib
 
-from pineboolib.fllegacy.kugar.mreportviewer import MReportViewer
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPicture import FLPicture
@@ -23,17 +22,17 @@ from pineboolib.pncontrolsfactory import SysType
 AQ_USRHOME = "."  # FIXME
 
 
-class FLReportViewer(QtWidgets.QMainWindow):
+class FLReportViewer(QObject):
 
     pdfFile = None
 
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None):
-        pParam = 0 if parent and embedInParent else 0
-        pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
-        pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
-        pParam = pParam | Qt.WindowSystemMenuHint
+        #pParam = 0 if parent and embedInParent else 0
+        #pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
+        #pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
+        #pParam = pParam | Qt.WindowSystemMenuHint
 
-        super(FLReportViewer, self).__init__(parent, pParam)
+        super(FLReportViewer, self).__init__(parent)
 
         self.loop_ = False
         self.eventloop = QtCore.QEventLoop()
@@ -75,8 +74,8 @@ class FLReportViewer(QtWidgets.QMainWindow):
         self.setReportEngine(FLReportEngine(
             self) if rptEngine is None else rptEngine)
 
-        self.setFont(QtWidgets.QApplication.font())
-        self.setFocusPolicy(Qt.StrongFocus)
+        # self.setFont(QtWidgets.QApplication.font())
+        # self.setFocusPolicy(Qt.StrongFocus)
 
         util = FLUtil()
 
@@ -112,7 +111,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
         return self.rptEngine_
 
     @decorators.BetaImplementation
-    def setReportEngine(self, r=0):
+    def setReportEngine(self, r=None):
         if self.rptEngine_ == r:
             return
 
@@ -222,8 +221,11 @@ class FLReportViewer(QtWidgets.QMainWindow):
         """
         ret = self.rptViewer_.renderReport(initRow, initCol, append_or_flags)
         #self.report_ = self.rptViewer_.reportPages()
-        self.pdfFile = self.rptEngine_.pdfFile
-        return True if ret else False
+        if ret:
+            self.pdfFile = self.rptEngine_.pdfFile
+            return True
+        else:
+            return False
 
     @decorators.BetaImplementation
     def slotFirstPage(self):
@@ -575,7 +577,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
         return False
 
     @decorators.BetaImplementation
-    def setReportTemplate(self, t, style=""):
+    def setReportTemplate(self, t, style=None):
         if isinstance(t, QtXml.QDomNode):
             self.xmlTemplate_ = t
             self.template_ = ""
@@ -853,7 +855,7 @@ class FLReportViewer(QtWidgets.QMainWindow):
         return self.name_
 
 
-class internalReportViewer(QWidget):
+class internalReportViewer(QObject):
 
     rptEngine_ = None
     dpi_ = 0
@@ -874,4 +876,4 @@ class internalReportViewer(QWidget):
         return self.report_
 
     def renderReport(self, initRow, initCol, flags):
-        self.rptEngine_.renderReport()
+        return self.rptEngine_.renderReport()

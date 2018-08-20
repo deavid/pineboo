@@ -294,18 +294,24 @@ class Project(object):
                 "string", idmodulo, False), self.conn.driver().formatValue("string", nombre, False), self.conn.driver().formatValue("string", sha, False))
             cur2.execute(sql)
             for (contenido,) in cur2:
+
+                encode_ = "ISO-8859-15"
+                if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
+                    encode_ = "UTF-8"
+
                 f2 = open(_dir("cache", fileobj.filekey), "wb")
                 # La cadena decode->encode corrige el bug de guardado de
                 # AbanQ/Eneboo
                 txt = ""
                 try:
                     # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
-                    txt = contenido.encode("ISO-8859-15")
+
+                    txt = contenido.encode(encode_)
                 except Exception:
                     self.logger.exception(
                         "Error al decodificar %s %s", idmodulo, nombre)
                     # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
-                    txt = contenido.encode("ISO-8859-15", "replace")
+                    txt = contenido.encode(encode_, "replace")
 
                 f2.write(txt)
 
@@ -396,7 +402,8 @@ class Project(object):
 
         if fn is None:
             if showException:
-                self.logger.error("No existe la función %s en %s", last_, aFunction[0])
+                self.logger.error(
+                    "No existe la función %s en %s", last_, aFunction[0])
             return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
@@ -522,7 +529,8 @@ class Project(object):
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
             raise IOError
-        python_script_path = (scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
+        python_script_path = (
+            scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             self.logger.info("Convirtiendo a Python . . . %s", scriptname)
             from pineboolib.flparser import postparse
@@ -568,7 +576,8 @@ class Project(object):
         for f in dirlist:
             if not f[0:2] == "__":
                 f = f[:f.find(".py")]
-                mod_ = importlib.import_module("pineboolib.plugins.test.%s" % f)
+                mod_ = importlib.import_module(
+                    "pineboolib.plugins.test.%s" % f)
                 test_ = getattr(mod_, f)
                 testDict[f] = test_
 
@@ -696,7 +705,8 @@ class Module(object):
         if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
             tiempo_3 = time.time()
             if tiempo_3 - tiempo_1 > 0.2:
-                self.logger.debug("Carga del módulo %s : %.3fs ,  %.3fs", self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2)
+                self.logger.debug("Carga del módulo %s : %.3fs ,  %.3fs",
+                                  self.name, tiempo_2 - tiempo_1, tiempo_3 - tiempo_2)
 
         self.loaded = True
         return True
@@ -819,16 +829,19 @@ class ModuleActions(object):
         self.moduleName = modulename
         self.logger = logging.getLogger("main.ModuleActions")
         if not self.path:
-            self.logger.error("El módulo no tiene un path válido %s", self.moduleName)
+            self.logger.error(
+                "El módulo no tiene un path válido %s", self.moduleName)
 
     """
     Carga las actions del módulo en el projecto
     """
 
     def load(self):
-        from pineboolib import qsa as qsa_dict_modules  # Ojo: Almacena un arbol con los módulos cargados
+        # Ojo: Almacena un arbol con los módulos cargados
+        from pineboolib import qsa as qsa_dict_modules
 
-        self.parser = etree.ElementTree.XMLParser(html=0, encoding="ISO-8859-15")
+        self.parser = etree.ElementTree.XMLParser(
+            html=0, encoding="ISO-8859-15")
         self.tree = etree.ElementTree.parse(self.path, self.parser)
         self.root = self.tree.getroot()
 
@@ -928,7 +941,8 @@ class MainForm(object):
             self.tree = etree.ElementTree.parse(self.path)
         except Exception:
             try:
-                self.parser = etree.ElementTree.XMLParser(html=0, encoding="ISO-8859-15")
+                self.parser = etree.ElementTree.XMLParser(
+                    html=0, encoding="ISO-8859-15")
                 self.tree = etree.ElementTree.parse(self.path, self.parser)
                 self.logger.exception(
                     "Formulario %r se cargó con codificación ISO (UTF8 falló)", self.path)
@@ -990,7 +1004,8 @@ class MainForm(object):
             for toolbar_action in self.root.findall("toolbars//action"):
                 self.toolbar.append(toolbar_action.get("name"))
                 if not pineboolib.project._DGI.localDesktop():
-                    pineboolib.project._DGI.mainForm().mainWindow.loadToolBarsAction(toolbar_action.get("name"))
+                    pineboolib.project._DGI.mainForm().mainWindow.loadToolBarsAction(
+                        toolbar_action.get("name"))
         else:
             # FIXME: cargar solo las actions de los menus
             sett_.writeEntry("ebcomportamiento/ActionsMenuRed", False)
@@ -1063,7 +1078,8 @@ class XMLAction(XMLStruct):
                 "Record action %s is not defined. Canceled !", self.name)
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
-        fRWidget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
+        fRWidget = pineboolib.project.conn.managerModules(
+        ).createFormRecord(self, None, cursor, None)
         if not fRWidget.loaded:
             return None
         self.formrecord_widget = fRWidget
@@ -1086,7 +1102,8 @@ class XMLAction(XMLStruct):
             w = pineboolib.project.main_window
             if not self.mainform_widget:
                 if pineboolib.project._DGI.useDesktop():
-                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
+                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self,
+                                                                                               None, w, None)
                 else:
                     from pineboolib.utils import Struct
                     self.mainform_widget = Struct()
@@ -1114,7 +1131,8 @@ class XMLAction(XMLStruct):
         self.logger.debug("Opening default form for Action %s", self.name)
         w = pineboolib.project.main_window
         self.initModule(self.name)
-        self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
+        self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self,
+                                                                                   None, w, None)
         w.addFormTab(self)
 
     """
@@ -1142,7 +1160,8 @@ class XMLAction(XMLStruct):
     def formRecordWidget(self):
         scriptName = getattr(self, "scriptformrecord", None)
         # Si no existe self.form_widget, lo carga con load_script. NUNCA con loadRecord.
-        # Así cuando se haga un loadRecord de verdad (desde openDefaultFormRecord, este se cargara con su cursor de verdad
+        # Así cuando se haga un loadRecord de verdad (desde
+        # openDefaultFormRecord, este se cargara con su cursor de verdad
         if not self.formrecord_widget:
             self.load_script(scriptName, None)
 
@@ -1188,7 +1207,8 @@ class XMLAction(XMLStruct):
 
     def load_script(self, scriptname, parent=None):
         if scriptname:
-            self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
+            self.logger.info("Cargando script %s de %s accion %s",
+                             scriptname, parent, self.name)
 
         parent_ = parent
         if parent is None:
@@ -1254,7 +1274,8 @@ class XMLAction(XMLStruct):
             script_path = script_path_qs
             pineboolib.project.parseScript(script_path)
             self.logger.info("Loading script QS %s . . . ", scriptname)
-            python_script_path = (script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
+            python_script_path = (
+                script_path + ".xml.py").replace(".qs.xml.py", ".qs.py")
             try:
                 self.logger.info(
                     "Cargando %s : %s ", scriptname,
@@ -1287,7 +1308,8 @@ class XMLAction(XMLStruct):
             return
         if moduleName not in pineboolib.project._initModules:
             pineboolib.project._initModules.append(moduleName)
-            pineboolib.project.call("%s.iface.init()" % moduleName, [], None, False)
+            pineboolib.project.call("%s.iface.init()" %
+                                    moduleName, [], None, False)
             return
 
 

@@ -43,7 +43,8 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
         w.child(u"cbActionsMenuRed").checked = self.leerValorLocal(u"ActionsMenuRed")
         w.child(u"cbKugarParser").addItems(pineboolib.project.kugarPlugin.listAvalibles())
-        w.child(u"cbKugarParser").setCurrentText(pineboolib.project.kugarPlugin.defaultParser())
+        w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal(u"kugarParser")
+                                                 if not u"" else pineboolib.project.kugarPlugin.defaultParser())
 
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
@@ -140,7 +141,6 @@ class FormInternalObj(FormDBWidget):
             autoComp = "OnDemandF4"
         else:
             autoComp = "AlwaysAuto"
-        print("Guardando", autoComp)
         self.grabarValorLocal("autoComp", autoComp)
         self.cerrar_clicked()
 
