@@ -724,17 +724,17 @@ class QLineEdit(QtWidgets.QLineEdit):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
 
-    @QtCore.pyqtProperty(str)
-    def text(self):
+    def getText(self):
         return super(QLineEdit, self).text()
 
-    @text.setter
-    def text(self, v):
+    def setText(self, v):
         if not isinstance(v, str):
             v = str(v)
         super(QLineEdit, self).setText(v)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), v)
+
+    text = property(getText, setText)
 
 
 class QTextEdit(QtWidgets.QTextEdit):
@@ -752,6 +752,9 @@ class QTextEdit(QtWidgets.QTextEdit):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
 
+    def getText(self):
+        return super(QTextEdit, sel).toPlainText()
+
     @decorators.NotImplementedWarn
     def textFormat(self):
         return
@@ -768,6 +771,8 @@ class QTextEdit(QtWidgets.QTextEdit):
     @decorators.NotImplementedWarn
     def setAutoFormatting(self, value):
         pass
+
+    text = property(getText, setText)
 
 
 class QCheckBox(QtWidgets.QCheckBox):
