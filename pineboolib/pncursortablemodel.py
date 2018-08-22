@@ -46,7 +46,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         self._action = action
         self._cursorConn = conn
-
         if self._action and self._action.table:
             try:
                 _table = pineboolib.project.tables[self._action.table]
@@ -745,8 +744,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     campos = u"%s,%s" % (campos, b.name)
                     valores = u"%s,%s" % (valores, value)
         if campos:
-            sql = "INSERT INTO %s (%s) VALUES (%s)" % (buffer.cursor_.d.curName_, campos, valores)
-
+            sql = """INSERT INTO %s (%s) VALUES (%s)""" % (buffer.cursor_.d.curName_, campos, valores)
             # conn = self._cursorConn.db()
             try:
                 # print(sql)
