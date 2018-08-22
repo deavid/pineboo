@@ -71,6 +71,10 @@ class FLSQLITE(object):
             print("HINT: Instale el paquete python3-sqlite3 e intente de nuevo")
             sys.exit(0)
 
+        import pineboolib
+        if self.db_filename == getattr(pineboolib.project.conn, "db_name", None):
+            return pineboolib.project.conn.conn
+
         self.conn_ = sqlite3.connect(self.db_filename)
         self.conn_.isolation_level = None
 
@@ -84,34 +88,33 @@ class FLSQLITE(object):
             self.conn_.text_factory = lambda x: str(x, 'latin1')
 
         return self.conn_
-    
+
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
-        
+
         if type_ == "bool":
             s = str(v[0]).upper()
             if s == str(QApplication.tr("Sí")[0]).upper():
                 res = "=1"
             elif str(QApplication.tr("No")[0]).upper():
                 res = "=0"
-        
+
         elif type_ == "date":
             util = FLUtil()
             res = "LIKE '%%" + util.dateDMAtoAMD(str(v)) + "'"
-        
+
         elif type_ == "time":
             t = v.toTime()
             res = "LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
-        
+
         else:
             res = str(v)
             if upper:
                 res = "%s" % res.upper()
-            
+
             res = "LIKE '" + res + "%%'"
-        
+
         return res
-    
 
     def formatValue(self, type_, v, upper):
 
@@ -144,13 +147,14 @@ class FLSQLITE(object):
                 s = ""
 
         elif type_ in ("uint", "int", "double", "serial"):
-            if v:
+            if v is None:
                 s = 0
             else:
                 s = v
 
         else:
-            v = auto_qt_translate_text(v)
+            if type_ == "string":
+                v = auto_qt_translate_text(v)
             if upper and type_ == "string":
                 v = v.upper()
                 # v = v.encode("UTF-8")
@@ -159,7 +163,7 @@ class FLSQLITE(object):
         return s
 
     def DBName(self):
-        return self.db_filename[self.db_filename.rfind("/") + 1:-5]
+        return self.db_filename[self.db_filename.rfind("/") + 1:-8]
 
     def canOverPartition(self):
         return True
@@ -172,7 +176,7 @@ class FLSQLITE(object):
         if not q.exec_():  # FIXME: exec es palabra reservada
             print("not exec sequence")
             return None
-        if q.first():
+        if q.first() and q.value(0) is not None:
             return int(q.value(0)) + 1
         else:
             return None
@@ -804,20 +808,7 @@ class FLSQLITE(object):
         return tl
 
     def normalizeValue(self, text):
-        if text is None:
-            return ""
-
-        ret = ""
-        for c in text:
-            if c == "'":
-                c = "''"
-
-            ret = ret + c
-
-        if self.parseFromLatin:
-            ret = ret  # Estoy hay que arreglarlo si alguien quiere trabajar con latin1
-
-        return ret
+        return None if text is None else str(text).replace("'", "''")
 
     def queryUpdate(self, name, update, filter):
         sql = "UPDATE %s SET %s WHERE %s" % (name, update, filter)
