@@ -340,7 +340,7 @@ def main():
     elif _DGI.useDesktop() and _DGI.localDesktop() and not _DGI.mobilePlatform():
         show_connection_dialog(project, app)
     elif _DGI.useDesktop() and _DGI.localDesktop() and _DGI.mobilePlatform():
-        project.load_db("pineboo.sqlite3", None, None, None, None, "SQLite3")
+        project.load_db("tempdata/pineboo.sqlite3", None, None, None, None, "SQLite3")
 
     # Cargando spashscreen
     # Create and display the splash screen
