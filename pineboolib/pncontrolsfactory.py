@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import os
 from PyQt5 import QtCore
 
 import pineboolib
@@ -239,8 +240,10 @@ class SysType(object):
 class System(object):
 
     def setenv(name, val):
-        import os
         os.environ[name] = val
+
+    def getenv(self, name):
+        return os.environ(name)
 
 
 class ProxySlot:
