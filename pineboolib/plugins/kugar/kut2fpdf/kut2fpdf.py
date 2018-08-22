@@ -381,14 +381,14 @@ class kut2fpdf(object):
             font_style += "U"
 
         while font_name not in self._avalible_fonts:
-            font_found = self._parser_tools.find_font(font_name, font_style.find("B") > -1, font_style.find("I") > -1, font_style.find("U") > -1)
+            font_found = self._parser_tools.find_font(font_name)
             if font_found:
-                self.logger.info("KUT2FPDF::Añadiendo el tipo de letra %s desde %s", font_name, font_found)
+                self.logger.info("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_name, font_found)
                 self._document.add_font(font_name, "", font_found, True)
                 self._avalible_fonts.append(font_name)
 
             else:
-                self.logger.warning("KUT2FPDF:: Falta el tipo de letra %s", font_name)
+                self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica.", font_name)
                 font_name = "helvetica"
 
         self._document.set_font(font_name, font_style, font_size)

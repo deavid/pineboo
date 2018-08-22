@@ -32,6 +32,8 @@ class parsertools(object):
 
     def loadKut(self, data):
         data = data.encode("ISO-8859-15")
+        # TODO: Comrpobación de errores en el string
+
         return etree.ElementTree.fromstring(data)
 
     """
@@ -219,9 +221,11 @@ class parsertools(object):
 
     """
     Busca y retorna el path de un tipo de letra dado
+    @param font_name. Nombre del tipo de letra
+    @return Path del fichero ".ttf" o None 
     """
 
-    def find_font(self, font_name, bold=False, italic=False, underline=False):
+    def find_font(self, font_name):
         fonts_folders = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
