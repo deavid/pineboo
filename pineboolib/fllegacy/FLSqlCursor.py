@@ -1736,8 +1736,7 @@ class FLSqlCursor(QtCore.QObject):
                     q.setTablesList(self.metadata().name())
                     q.setSelect(fiName)
                     q.setFrom(self.metadata().name())
-                    q.setWhere(
-                        self.db().manager().formatAssignValue(field, s, True))
+                    q.setWhere(self.db().manager().formatAssignValue(field, s, True))
                     q.setForwardOnly(True)
                     q.exec_()
                     if q.next():
@@ -2507,8 +2506,10 @@ class FLSqlCursor(QtCore.QObject):
                         self.buffer().setValue(fiName, defVal)
 
                     if type_ == "serial":
-                        self.buffer().setValue(fiName, "%u" % self.db().nextSerialVal(
-                            self.metadata().name(), fiName))
+                        val = self.db().nextSerialVal(self.metadata().name(), fiName)
+                        if val is None:
+                            val = 0
+                        self.buffer().setValue(fiName, "%u" % val)
 
                     if field.isCounter():
                         siguiente = None
