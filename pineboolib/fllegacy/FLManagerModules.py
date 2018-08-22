@@ -234,15 +234,14 @@ class FLManagerModules(QtCore.QObject):
             modId = "sys"
         else:
             modId = pineboolib.project.conn.managerModules().idModuleOfFile(n)
-        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" % (pineboolib.project.dbname, modId, ext_, name_))):
+        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" % (pineboolib.project.conn.DBName(), modId, ext_, name_))):
             utf8_ = False
             if ext_ == "kut":
                 utf8_ = True
             data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %
-                                          (pineboolib.project.dbname, modId, ext_, name_, shaKey, ext_)), utf8_)
+                                          (pineboolib.project.conn.DBName(), modId, ext_, name_, shaKey, ext_)), utf8_)
         elif os.path.exists(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_))):
-            data = self.contentFS(
-                filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
+            data = self.contentFS(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
         else:
             data = self.content(n)
 

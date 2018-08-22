@@ -197,10 +197,10 @@ class Project(object):
         self.emptyscript = emptyscript
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
-        if self.deleteCache and not not os.path.exists(_dir("cache/%s" % self.dbname)):
+        if self.deleteCache and not not os.path.exists(_dir("cache/%s" % self.conn.DBName())):
             self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir(
-                "cache/%s" % self.dbname))
-            for root, dirs, files in os.walk(dir("cache/%s" % self.dbname), topdown=False):
+                "cache/%s" % self.conn.DBName()))
+            for root, dirs, files in os.walk(dir("cache/%s" % self.conn.DBName()), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
                 for name in dirs:
@@ -227,7 +227,7 @@ class Project(object):
             self.conn.manager().createSystemTable(table)
 
         util = FLUtil()
-        util.writeSettingEntry(u"DBA/lastDB", self.dbname)
+        util.writeSettingEntry(u"DBA/lastDB", self.conn.DBName())
         self.cur = self.conn.cursor()
         self.areas = {}
         self.cur.execute(
