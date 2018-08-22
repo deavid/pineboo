@@ -45,11 +45,7 @@ class dgi_schema(object):
         if AQSettings().readBoolEntry(u"ebcomportamiento/mobileMode", False):
             self._mobile = True
 
-        try:
-            from pdytools import hexversion as pdy_hexversion
-            self._deployed = True
-        except ImportError:
-            self._deployed = False
+        self._deployed = getattr(sys, 'frozen', False)
 
     def name(self):
         return self._name
