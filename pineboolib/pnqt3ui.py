@@ -685,4 +685,4 @@ def _loadVariant(variant, widget=None):
         return c
 
     if Options.DEBUG_LEVEL > 50:
-        logger.warn("qt3ui: Unknown variant:", etree.ElementTree.tostring(variant))
+        logger.warn("qt3ui: Unknown variant: %s", etree.ElementTree.tostring(variant))
