@@ -485,8 +485,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
 
         if Options.DEBUG_LEVEL > 50:
-            logger.warn("qt3ui: Unknown widget xml tag",
-                        widget.__class__, repr(c.tag))
+            logger.warn("%s: Unknown widget xml tag %s %s", __name__, widget.__class__, repr(c.tag))
 
     for c in properties:
         process_property(c)
