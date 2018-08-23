@@ -91,7 +91,7 @@ def parse_options():
                       help="load projects/PROJECT.xml and run it", metavar="PROJECT")
     parser.add_option("-c", "--connect", dest="connection",
                       help="connect to database with user and password.", metavar="user:passwd:driver_alias@host:port/database")
-    parser.add_option('-v', '--verbose', action='count', default=2,
+    parser.add_option('-v', '--verbose', action='count', default=1,
                       help="increase verbosity level")  # default a 2 para ver los logger.info, 1 no los muestra
     parser.add_option("-q", "--quiet",
                       action='count', default=0,
