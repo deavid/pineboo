@@ -512,6 +512,7 @@ def checkDependencies(dict_):
     from importlib import import_module
 
     dependences = []
+    error = []
     for key in dict_.keys():
         try:
             mod_ = import_module(key)
@@ -528,17 +529,18 @@ def checkDependencies(dict_):
 
         except ImportError:
             dependences.append(dict_[key])
+            error.append(traceback.format_exc())
 
     msg = ""
     if len(dependences) > 0:
         logger.warn("HINT: Dependencias incumplidas:")
         for dep in dependences:
             logger.warn("HINT: Instale el paquete %s e intente de nuevo" % dep)
-            msg += "Instale el paquete %s.\n" % dep
+            msg += "Instale el paquete %s.\n%s" % (dep, error)
 
         if getattr(pineboolib.project, "_DGI", None):
             if not getattr(sys, 'frozen', False):
-                msg += "El programa se cerrará ahora."
+                msg += "\nEl programa se cerrará ahora."
             if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
                 ret = QtWidgets.QMessageBox.warning(QtWidgets.QWidget(), "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
 
