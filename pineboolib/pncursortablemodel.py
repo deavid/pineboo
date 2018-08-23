@@ -34,6 +34,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     _metadata = None
     _sortOrder = None
     _checkColumn = None
+    _disable_refresh = None
 
     """
     Constructor
@@ -109,7 +110,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.timer.start(1000)
 
         self.canFetchMore = True
-
+        self._disable_refresh = False
         self.refresh()
 
     """
@@ -119,6 +120,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def canFetchMore(self, *args):
         return self.canFetchMore
+
+    """
+    Desactiva el refresco. Ej. FLSqlQuery.setForwardOnly(True)
+    @param disable. True o False
+    """
+
+    def disable_refresh(self, disable):
+        self._disable_refresh = disable
 
     """
     Indica el tipo de orden a usar y sobre que columna
@@ -440,6 +449,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def refresh(self):
+        if self._disable_refresh:
+            return
+
         if not self.metadata():
             self.logger.warn("ERROR: CursorTableModel :: No hay tabla", pineboolib.project.tables[self._action.table].name)
             return
