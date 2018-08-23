@@ -214,17 +214,20 @@ def create_app(DGI):
         if styleA is None:
             styleA = "Fusion"
 
-        QtWidgets.QApplication.setStyle(styleA)
+        app.setStyle(styleA)
 
         fontA = sett_.readEntry("application/font", None)
         if fontA is None:
-            font = QtGui.QFont('Noto Sans', 9)
+            if DGI.mobilePlatform():
+                font = QtGui.QFont('Noto Sans', 20)
+            else:
+                font = QtGui.QFont('Noto Sans', 9)
             font.setBold(False)
             font.setItalic(False)
         else:
             font = QtGui.QFont(fontA[0], int(fontA[1]), int(fontA[2]), fontA[3] == "true")
 
-        QtWidgets.QApplication.setFont(font)
+        app.setFont(font)
 
         if DGI.mobilePlatform():
             pineboolib.pnapplication.Project.mainFormName = "Mobile"
