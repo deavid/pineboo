@@ -113,8 +113,8 @@ def loadUi(path, widget, parent=None):
             logger.warn("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
 
             ifx = widget
-            if hasattr(widget, "iface"):
-                ifx = widget.iface
+            # if hasattr(widget, "iface"):
+            #    ifx = widget.iface
             if hasattr(ifx, fn_name):
                 try:
                     from pineboolib import pncontrolsfactory
