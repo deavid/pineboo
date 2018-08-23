@@ -48,7 +48,6 @@ class FLFormSearchDB(FLFormDB):
         parent = None
         name = None
         action = None
-
         if isinstance(args[0], str):
             # @param actionName Nombre de la acción asociada al formulario
 
@@ -320,14 +319,13 @@ class FLFormSearchDB(FLFormDB):
         else:
             self.isClosing_ = True
 
-        if self.isVisible():
-            self.reject()
-
         if self.isHidden():
             # self.saveGeometry()
             # self.closed.emit()
             super(FLFormSearchDB, self).closeEvent(e)
             self.deleteLater()
+        else:
+            self.reject()
 
     """
     Invoca a la función "init" del script "masterprocess" asociado al formulario
