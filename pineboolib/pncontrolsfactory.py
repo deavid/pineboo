@@ -280,9 +280,9 @@ def proxy_fn(wf, wr, slot):
 
 def connect(sender, signal, receiver, slot, caller=None):
     if caller is not None:
-        logger.debug("* * * Connect::", caller, sender, signal, receiver, slot)
+        logger.debug("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
-        logger.debug("? ? ? Connect::", sender, signal, receiver, slot)
+        logger.debug("? ? ? Connect:: %s %s %s %s", sender, signal, receiver, slot)
     signal_slot = solve_connection(sender, signal, receiver, slot)
     if not signal_slot:
         return False
