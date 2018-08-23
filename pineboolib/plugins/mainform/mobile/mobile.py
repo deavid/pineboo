@@ -19,6 +19,7 @@ class MainForm(MainForm):
 
         super(MainForm, self).load()
         self.setWindowTitle("Pineboo Mobile")
+        self.showConsole()
 
 
 mainWindow = MainForm()
