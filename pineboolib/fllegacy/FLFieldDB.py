@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import DefFun, filedir, aqtt
+from pineboolib.utils import filedir, aqtt
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
@@ -163,11 +163,8 @@ class FLFieldDB(QtWidgets.QWidget):
         self.pushButtonDB.clicked.connect(self.searchValue)
 
         self.timer_1 = QtCore.QTimer(self)
-        self.timer_1.singleShot(120, self.loaded)
+        #self.timer_1.singleShot(120, self.loaded)
         self.cursorAux = None
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
 
     def load(self):
         self._loaded = True
