@@ -2,7 +2,6 @@
 
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import DefFun
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.utils import filedir
 import pineboolib
@@ -196,9 +195,6 @@ class FLFormSearchDB(FLFormDB):
         self.cursor_.setBrowse(False)
         self.cursor_.recordChoosed.connect(self.accept)
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
     """
     Muestra el formulario y entra en un nuevo bucle de eventos
     para esperar, a seleccionar registro.
@@ -324,7 +320,7 @@ class FLFormSearchDB(FLFormDB):
         else:
             self.isClosing_ = True
 
-        if self.isShown():
+        if self.isVisible():
             self.reject()
 
         if self.isHidden():
