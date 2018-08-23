@@ -219,7 +219,7 @@ def create_app(DGI):
         fontA = sett_.readEntry("application/font", None)
         if fontA is None:
             if DGI.mobilePlatform():
-                font = QtGui.QFont('Noto Sans', 20)
+                font = QtGui.QFont('Noto Sans', 14)
             else:
                 font = QtGui.QFont('Noto Sans', 9)
             font.setBold(False)
