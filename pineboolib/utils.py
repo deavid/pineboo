@@ -48,8 +48,6 @@ def filedir(*path):
                 base_dir = ".%s" % base_dir[1:]
 
     ruta_ = os.path.realpath(os.path.join(base_dir, *path))
-    # if ruta_.find(":/pineboolib/forms") > -1 or ruta_.find(":/pineboolib/plugins") > -1 or ruta_.find(":/pineboolib/..") > -1:
-    print("ruta final %s" % ruta_)
     return ruta_
 
 
@@ -178,8 +176,7 @@ class DefFun:
                          self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
 
-        logger.debug("%r: Método no implementado %s %s",
-                     self.parent.__class__.__name__, self.funname, args)
+        logger.debug("%r: Método no implementado %s %s", self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
         return None
 
 
