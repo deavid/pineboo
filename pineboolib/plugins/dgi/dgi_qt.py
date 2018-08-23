@@ -753,7 +753,7 @@ class QTextEdit(QtWidgets.QTextEdit):
             pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
 
     def getText(self):
-        return super(QTextEdit, sel).toPlainText()
+        return super(QTextEdit, self).toPlainText()
 
     @decorators.NotImplementedWarn
     def textFormat(self):
