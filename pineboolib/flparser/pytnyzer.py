@@ -89,8 +89,7 @@ class ASTPython(object, metaclass=ASTPythonFactory):
         else:
             sp = " " * splen
         cname = self.__class__.__name__
-        self.debug_file.write("%04d" % ASTPython.numline +
-                              sp + cname + ": " + text + "\n")
+        self.debug_file.write("%04d%s%s: %s\n" % (ASTPython.numline, sp, cname, text.encode("UTF-8")))
 
     def polish(self):
         return self
@@ -897,7 +896,8 @@ class Member(ASTPython):
             "mid",
             "charAt",
             "charCodeAt",
-            "arg"
+            "arg",
+            "substring"
         ]
         for member in replace_members:
             for idx, arg in enumerate(arguments):
@@ -924,6 +924,11 @@ class Member(ASTPython):
                         value = value[:len(value) - 1]
                         arguments = [
                             "%s[(len(%s) - (%s)):]" % (".".join(part1), ".".join(part1), value)] + part2
+                    elif member == "substring":
+                        value = arg[10:]
+                        value = value[:len(value) - 1]
+                        value = value.replace(",", ":")
+                        arguments = ["%s[ %s]" % (".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
                         arguments[idx - 1] = "QString(%s)" % arguments[idx - 1]
