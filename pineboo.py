@@ -196,6 +196,7 @@ def create_app(DGI):
     from pineboolib.utils import filedir
     import pineboolib
     app = QtWidgets.QApplication(sys.argv)
+    pineboolib.base_dir = filedir(".")  # Almacena base_dir para luego usarlo sobre filedir
     if DGI.localDesktop():
 
         noto_fonts = [

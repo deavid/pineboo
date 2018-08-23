@@ -1,6 +1,5 @@
 # # -*- coding: utf-8 -*-
 import os
-import os.path
 import re
 import logging
 import sys
@@ -40,20 +39,17 @@ Es útil para especificar rutas a recursos del programa.
 
 
 def filedir(*path):
+    base_dir = getattr(pineboolib, "base_dir", None)
+    if not base_dir:
+        base_dir = os.path.dirname(__file__)
 
-    ruta_ = os.path.dirname(__file__)
+        if getattr(sys, 'frozen', False):
+            if base_dir.startswith(":"):
+                base_dir = ".%s" % base_dir[1:]
 
-    try:
-        from pdytools import hexversion as pdy_hexversion
-        if ruta_.startswith(":"):
-            ruta_ = "." + ruta_[1:]
-
-    except ImportError:
-        pass
-
-    ruta_ = os.path.realpath(os.path.join(ruta_, *path))
+    ruta_ = os.path.realpath(os.path.join(base_dir, *path))
     # if ruta_.find(":/pineboolib/forms") > -1 or ruta_.find(":/pineboolib/plugins") > -1 or ruta_.find(":/pineboolib/..") > -1:
-
+    print("ruta final %s" % ruta_)
     return ruta_
 
 
