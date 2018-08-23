@@ -529,14 +529,20 @@ def checkDependencies(dict_):
         except ImportError:
             dependences.append(dict_[key])
 
+    msg = ""
     if len(dependences) > 0:
         logger.warn("HINT: Dependencias incumplidas:")
         for dep in dependences:
             logger.warn("HINT: Instale el paquete %s e intente de nuevo" % dep)
+            msg += "Instale el paquete %s.\n" % dep
 
-        try:
-            from pdytools import hexversion as pdy_hexversion
-        except ImportError:
+        if getattr(pineboolib.project, "_DGI", None):
+            if not getattr(sys, 'frozen', False):
+                msg += "El programa se cerrará ahora."
+            if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
+                ret = QtWidgets.QMessageBox.warning(QtWidgets.QWidget(), "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
+
+        if not getattr(sys, 'frozen', False):
             sys.exit(32)
 
 
