@@ -571,6 +571,7 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
     logging.addLevelName(levelNum, levelName)
     setattr(logging, levelName, levelNum)
     setattr(logging.getLoggerClass(), methodName, logForLevel)
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     setattr(logging, methodName, logToRoot)
 
 
