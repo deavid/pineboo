@@ -552,20 +552,6 @@ class Project(object):
         self.call("sys.widget.init()", [], None, True)
 
     """
-    Devuelve un objecto
-    @param name, Nombre del objecto
-    @return Objeto o None
-    """
-
-    def resolveDGIObject(self, name):
-        obj_ = getattr(self._DGI, name, None)
-        if obj_:
-            return obj_
-
-        self.logger.warn(
-            "Project.resolveSDIObject no puede encontra el objeto %s en %s", name, self._DGI.alias())
-
-    """
     Lanza los test
     @param name, Nombre del test específico. Si no se especifica se lanzan todos los tests disponibles
     @return Texto con la valoración de los test aplicados

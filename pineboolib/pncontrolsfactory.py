@@ -24,8 +24,11 @@ Devuelve un objecto a partir de su nombre
 
 
 def resolveObject(name):
-    ret_ = pineboolib.project.resolveDGIObject(name)
-    return ret_
+    obj_ = getattr(pineboolib._DGI, name, None)
+    if obj_:
+        return obj_
+
+    self.logger.warn("%s.resolveSDIObject no puede encontra el objeto %s en %s", __name__, name, self._DGI.alias())
 
 
 # Clases Qt
@@ -51,6 +54,7 @@ QDialog = resolveObject("QDialog")
 QVBoxLayout = resolveObject("QVBoxLayout")
 QHBoxLayout = resolveObject("QHBoxLayout")
 QFrame = resolveObject("QFrame")
+QMainWindow = resolveObject("QMainWindow")
 
 
 # Clases FL
