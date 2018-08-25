@@ -1095,3 +1095,7 @@ class QHBoxLayout(QtWidgets.QHBoxLayout):
 
 class QFrame(QtWidgets.QFrame):
     pass
+
+
+class QMainWindow(QtWidgets.QMainWindow):
+    pass
