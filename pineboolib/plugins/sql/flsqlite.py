@@ -3,10 +3,12 @@ import sys
 from PyQt5.QtCore import QTime
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import auto_qt_translate_text
+from pineboolib.utils import auto_qt_translate_text, checkDependencies, filedir
 from pineboolib.fllegacy.FLUtil import FLUtil
 import traceback
 from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate, QRegExp
+
+import logging
 
 
 class QApplication:
@@ -35,6 +37,7 @@ class FLSQLITE(object):
     defaultPort_ = None
 
     def __init__(self):
+        self.logger = logging.getLogger("FLSqLite")
         self.version_ = "0.5"
         self.conn_ = None
         self.name_ = "FLsqlite"
@@ -62,14 +65,9 @@ class FLSQLITE(object):
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
 
         self.db_filename = db_name
-        db_is_new = not os.path.exists(self.db_filename)
-
-        try:
-            import sqlite3
-        except ImportError:
-            print(traceback.format_exc())
-            print("HINT: Instale el paquete python3-sqlite3 e intente de nuevo")
-            sys.exit(0)
+        db_is_new = not os.path.exists(filedir("../%s" % self.db_filename))
+        checkDependencies({"sqlite3": "sqlite3"})
+        import sqlite3
 
         import pineboolib
         if self.db_filename == getattr(pineboolib.project.conn, "db_name", None):
@@ -79,7 +77,7 @@ class FLSQLITE(object):
         self.conn_.isolation_level = None
 
         if db_is_new:
-            print("La base de datos %s no existe" % self.db_filename)
+            self.logger.info("La base de datos %s no existe", self.db_filename)
 
         if self.conn_:
             self.open_ = True
@@ -174,7 +172,7 @@ class FLSQLITE(object):
         q.setFrom(table)
         q.setWhere("1 = 1")
         if not q.exec_():  # FIXME: exec es palabra reservada
-            print("not exec sequence")
+            self.logger.warn("not exec sequence")
             return None
         if q.first() and q.value(0) is not None:
             return int(q.value(0)) + 1
@@ -183,7 +181,7 @@ class FLSQLITE(object):
 
     def savePoint(self, n):
         if not self.isOpen():
-            print("SQL3Driver::savePoint: Database not open")
+            self.logger.warn("%s::savePoint: Database not open", __name__)
             return False
 
         cursor = self.conn_.cursor()
@@ -192,8 +190,7 @@ class FLSQLITE(object):
         except Exception:
             self.setLastError(
                 "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            print("SQL3Driver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s" %
-                  n, traceback.format_exc())
+            self.logger.error("%s:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s", __name__,  n)
             return False
 
         return True
@@ -203,7 +200,7 @@ class FLSQLITE(object):
 
     def rollbackSavePoint(self, n):
         if not self.isOpen():
-            print("SQL3Driver::rollbackSavePoint: Database not open")
+            self.logger.warn("%s::rollbackSavePoint: Database not open", __name__)
             return False
 
         cursor = self.conn_.cursor()
@@ -212,8 +209,7 @@ class FLSQLITE(object):
         except Exception:
             self.setLastError(
                 "No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            print("SQL3Driver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s" %
-                  n, traceback.format_exc())
+            self.logger.error("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s", __name__, n)
             return False
 
         return True
@@ -226,15 +222,14 @@ class FLSQLITE(object):
 
     def commitTransaction(self):
         if not self.isOpen():
-            print("SQL3Driver::commitTransaction: Database not open")
+            self.logger.warn("%s::commitTransaction: Database not open", __name__)
 
         cursor = self.conn_.cursor()
         try:
             cursor.execute("COMMIT TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            print("SQL3Driver:: No se pudo aceptar la transacción COMMIT",
-                  traceback.format_exc())
+            self.logger.error("%s:: No se pudo aceptar la transacción COMMIT", __name__)
             return False
 
         return True
