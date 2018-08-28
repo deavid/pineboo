@@ -498,7 +498,7 @@ class ForIn(ASTPython):
         list_elem, main_list = myelems
         yield "debug", "FOR-IN: " + repr(myelems)
         yield "line", "for %s in %s:" % (list_elem, main_list)
-        for source in self.elem.xpath("Source"):
+        for source in self.elem.findall("Source"):
             yield "begin", "block-for-in"
             for obj in parse_ast(source).generate(include_pass=False):
                 yield obj
