@@ -110,12 +110,10 @@ class AbanQDbDumper(object):
         import sys
         self.encoding = sys.getfilesystemencoding()
 
-
     def init(self):
         if self.showGui_:
             self.buildGui()
             self.w_.exec_()
-
 
     def buildGui(self):
         self.w_ = QDialog()
@@ -186,20 +184,18 @@ class AbanQDbDumper(object):
             if gui:
                 sys.errorMsgBox(self.state_.msg)
 
-
     def genFileName(self):
         now = Date()
         timeStamp = parseString(now)
-        regExp = ["-",":"]
+        regExp = ["-", ":"]
         #regExp.global_ = True
         for rE in regExp:
             timeStamp = timeStamp.replace(rE, u"")
-        
+
         fileName = ustr(self.dirBase_, u"/dump_", self.db_.database(), u"_", timeStamp)
         fileName = Dir.cleanDirPath(fileName)
         fileName = Dir.convertSeparators(fileName)
         return fileName
-
 
     def changeDirBase(self, dir_=None):
         dirBasePath = dir_
@@ -212,50 +208,42 @@ class AbanQDbDumper(object):
             self.lblDirBase_.text = sys.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
         self.fileName_ = self.genFileName()
 
-
     def addLog(self, msg=None):
         if self.showGui_ and self.tedLog_ != None:
             self.tedLog_.append(msg)
         else:
             debug(msg)
 
-
     def setState(self, ok=None, msg=None):
         self.state_.ok = ok
         self.state_.msg = msg
 
-
     def state(self):
         return self.state_
-
 
     def launchProc(self, command):
         self.proc_ = QProcess()
         self.proc_.setProgram(command[0])
         self.proc_.setArguments(command[1:])
-        #FIXME: Mejorar lectura linea a linea
+        # FIXME: Mejorar lectura linea a linea
         self.proc_.readyReadStandardOutput.connect(self.readFromStdout)
         self.proc_.readyReadStandardError.connect(self.readFromStderr)
         self.proc_.start()
-        
+
         while self.proc_.Running:
             sys.processEvents()
-        
-        
-        return self.proc_.exitcode() == self.proc_.normalExit 
 
+        return self.proc_.exitcode() == self.proc_.normalExit
 
     def readFromStdout(self):
         t = self.proc_.readLine().data().decode(self.encoding)
         if t not in (None, ""):
             self.funLog_(t)
 
-
     def readFromStderr(self):
         t = self.proc_.readLine().data().decode(self.encoding)
         if t not in (None, ""):
             self.funLog_(t)
-
 
     def dumpDatabase(self):
         driver = self.db_.driverName()
@@ -276,7 +264,6 @@ class AbanQDbDumper(object):
         try:
             if not os.path.exists(self.fileName_):
                 dir_ = Dir(self.fileName_)
-
 
         except Exception as e:
             e = traceback.format_exc()
@@ -302,7 +289,6 @@ class AbanQDbDumper(object):
 
         return ok
 
-
     def dumpPostgreSQL(self):
         pgDump = u"pg_dump"
         command = None
@@ -324,7 +310,6 @@ class AbanQDbDumper(object):
         self.setState(True, u"")
         return True
 
-
     def dumpMySQL(self):
         myDump = u"mysqldump"
         command = None
@@ -333,10 +318,10 @@ class AbanQDbDumper(object):
         if sys.osName() == u"WIN32":
             myDump += u".exe"
             command = [myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
+                                                                                                           db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
         else:
             command = [myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
+                                                                                                           db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
 
         if not self.launchProc(command):
             self.setState(False, sys.translate(u"No se ha podido volcar la base de datos a disco.\n") +
@@ -345,7 +330,6 @@ class AbanQDbDumper(object):
             return False
         self.setState(True, u"")
         return True
-
 
     def dumpTableToCsv(self, table=None, dirBase=None):
         fileName = ustr(dirBase, table, u".csv")
@@ -410,7 +394,6 @@ class AbanQDbDumper(object):
         AQUtil.destroyProgressDialog()
         return True
 
-
     def dumpAllTablesToCsv(self):
         fileName = self.fileName_
         db = self.db_
@@ -435,7 +418,7 @@ class FormInternalObj(FormDBWidget):
             util = FLUtil()
             codEjercicio = flfactppal.iface.pub_ejercicioActual()
             nombreEjercicio = util.sqlSelect(u"ejercicios", u"nombre", ustr(u"codejercicio='", codEjercicio, u"'"))
-            if AQUtil().sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == u"true":
+            if AQUtil.sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == u"true":
                 texto = ""
                 if nombreEjercicio:
                     texto = ustr(u"[ ", nombreEjercicio, u" ]")
