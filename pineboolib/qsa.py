@@ -9,7 +9,7 @@ import logging
 
 # AQSObjects
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
-from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil
+from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil as AQUtil_class
 from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
 from pineboolib.fllegacy.aqsobjects.AQS import AQS
 # FLObjects
@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 sys = SysType()
 AQS = AQS()
+AQUtil = AQUtil_class()
 
 
 def Function(args, source):
@@ -64,7 +65,6 @@ function anon(%s) {
 
     # return loc["anon"]
     return getattr(loc["FormInternalObj"], "anon")
-
 
 
 def Object(x=None):
@@ -348,12 +348,14 @@ class Process(QtCore.QProcess):
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
+
 QProcess = QtCore.QProcess
+
 
 class Dir(object):
     path_ = None
     Files = "*.*"
-    
+
     from os.path import expanduser
     home = expanduser("~")
 
@@ -378,9 +380,9 @@ class Dir(object):
 
     def cleanDirPath(name):
         return str(name)
-    
+
     def convertSeparators(filename):
-        #Retorno el mismo path del fichero ...
+        # Retorno el mismo path del fichero ...
         return filename
 
     def setCurrent(self, val=None):
@@ -467,6 +469,3 @@ class QString(str):
 
 def debug(txt):
     logger.message("---> " + ustr(txt))
-
-
-
