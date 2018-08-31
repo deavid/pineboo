@@ -13,7 +13,8 @@ import logging
 
 import zlib
 from PyQt5.Qt import QSpacerItem, QLayout
-from PyQt5.QtWidgets import QToolBar, QAction, QSpinBox, QMenuBar, QMenu
+from PyQt5.QtGui import QIcon
+
 
 Qt = QtCore.Qt
 ICONS = {}
@@ -55,19 +56,6 @@ def loadUi(path, widget, parent=None):
     for xmlimage in root.findall("images//image"):
         loadIcon(xmlimage)
 
-    xmlmenubar = root.find("menubar")
-    if xmlmenubar:
-        nameMB_ = xmlmenubar.find("./property[@name='name']/cstring").text
-        bar = widget.menuBar()
-        for itemM in xmlmenubar.findall("item"):
-            menubar = bar.addMenu(itemM.get("text"))
-            loadWidget(itemM, menubar, parent, widget)
-
-    for xmltoolbar in root.findall("toolbars//toolbar"):
-        nameTB_ = xmltoolbar.find("./property[@name='name']/cstring").text
-        toolbar = widget.addToolBar(nameTB_)
-        loadWidget(xmltoolbar, toolbar, parent, widget)
-
     for xmlwidget in root.findall("widget"):
         loadWidget(xmlwidget, widget, parent)
 
@@ -79,75 +67,191 @@ def loadUi(path, widget, parent=None):
     # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     formname = widget.objectName()
     logger.info("form: %s", formname)
-    for xmlconnection in root.findall("connections//connection"):
-        sender_name = xmlconnection.find("sender").text
-        signal_name = xmlconnection.find("signal").text
-        receiv_name = xmlconnection.find("receiver").text
-        slot_name = xmlconnection.find("slot").text
 
-        if sender_name == formname:
-            sender = widget
-        else:
-            sender = widget.findChild(QtWidgets.QWidget, sender_name)
+    # Cargamos actions...
+    for action in root.findall("actions//action"):
+        loadAction(action, widget)
 
-        if not pineboolib.project._DGI.localDesktop():
-            wui = hasattr(widget, "ui_") and sender_name in widget.ui_
-            if sender is None and wui:
-                sender = widget.ui_[sender_name]
+    if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
+        for xmlconnection in root.findall("connections//connection"):
+            sender_name = xmlconnection.find("sender").text
+            signal_name = xmlconnection.find("signal").text
+            receiv_name = xmlconnection.find("receiver").text
+            slot_name = xmlconnection.find("slot").text
 
-        sg_name = signal_name.replace("()", "")
-        sg_name = sg_name.replace("(bool)", "")
-        sg_name = sg_name.replace("(int)", "")
-        sg_name = sg_name.replace("(const QString&)", "")
-        sl_name = slot_name.replace("()", "")
-        sl_name = sl_name.replace("(bool)", "")
-        sl_name = sl_name.replace("(int)", "")
-        sl_name = sl_name.replace("(const QString&)", "")
+            if sender_name == formname:
+                sender = widget
+            else:
+                sender = widget.findChild(QtWidgets.QWidget, sender_name)
 
-        receiver = None
-        if sender is None:
-            logger.warn("Connection sender not found:%s", sender_name)
-        if receiv_name == formname:
-            receiver = widget
-            fn_name = slot_name.rstrip("()")
-            logger.warn("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
+            if not pineboolib.project._DGI.localDesktop():
+                wui = hasattr(widget, "ui_") and sender_name in widget.ui_
+                if sender is None and wui:
+                    sender = widget.ui_[sender_name]
 
-            ifx = widget
-            # if hasattr(widget, "iface"):
-            #    ifx = widget.iface
-            if hasattr(ifx, fn_name):
-                try:
-                    from pineboolib import pncontrolsfactory
-                    # getattr(sender, sg_name).connect(
-                    #    getattr(ifx, fn_name))
-                    pncontrolsfactory.connect(sender, sg_name, ifx, fn_name)
-                except Exception as e:
-                    logger.exception("Error connecting:",
-                                     sender, signal_name,
-                                     receiver, slot_name,
-                                     getattr(ifx, fn_name))
+            sg_name = signal_name.replace("()", "")
+            sg_name = sg_name.replace("(bool)", "")
+            sg_name = sg_name.replace("(int)", "")
+            sg_name = sg_name.replace("(const QString&)", "")
+            sl_name = slot_name.replace("()", "")
+            sl_name = sl_name.replace("(bool)", "")
+            sl_name = sl_name.replace("(int)", "")
+            sl_name = sl_name.replace("(const QString&)", "")
+
+            receiver = None
+            if sender is None:
+                logger.warn("Connection sender not found:%s", sender_name)
+            if receiv_name == formname:
+                receiver = widget
+                fn_name = slot_name.rstrip("()")
+                logger.warn("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
+
+                ifx = widget
+                # if hasattr(widget, "iface"):
+                #    ifx = widget.iface
+                if hasattr(ifx, fn_name):
+                    try:
+                        from pineboolib import pncontrolsfactory
+                        # getattr(sender, sg_name).connect(
+                        #    getattr(ifx, fn_name))
+                        pncontrolsfactory.connect(sender, sg_name, ifx, fn_name)
+                    except Exception as e:
+                        logger.exception("Error connecting:",
+                                         sender, signal_name,
+                                         receiver, slot_name,
+                                         getattr(ifx, fn_name))
+                    continue
+
+            if receiver is None:
+                receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
+
+            if not pineboolib.project._DGI.localDesktop():
+                wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
+                if receiver is None and wui:
+                    receiver = widget.ui_[receiv_name]
+            if receiver is None:
+                logger.warn("Connection receiver not found:%s", receiv_name)
+            if sender is None or receiver is None:
                 continue
+            try:
+                getattr(sender, sg_name).connect(getattr(receiver, sl_name))
+            except Exception as e:
+                logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
 
-        if receiver is None:
-            receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
+    # Cargamos menubar ...
+    xmlmenubar = root.find("menubar")
+    if xmlmenubar:
+        #nameMB_ = xmlmenubar.find("./property[@name='name']/cstring").text
+        #bar = widget.menuBar()
+        # for itemM in xmlmenubar.findall("item"):
+        #    menubar = bar.addMenu(itemM.get("text"))
+        #    loadWidget(itemM, menubar, parent, widget)
+        loadMenuBar(xmlmenubar, widget)
 
-        if not pineboolib.project._DGI.localDesktop():
-            wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
-            if receiver is None and wui:
-                receiver = widget.ui_[receiv_name]
-        if receiver is None:
-            logger.warn("Connection receiver not found:%s", receiv_name)
-        if sender is None or receiver is None:
-            continue
-        try:
-            getattr(sender, sg_name).connect(getattr(receiver, sl_name))
-        except Exception as e:
-            logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
+    # Cargamos toolbars ...
+    for xmltoolbar in root.findall("toolbars//toolbar"):
+        #nameTB_ = xmltoolbar.find("./property[@name='name']/cstring").text
+        #toolbar = widget.addToolBar(nameTB_)
+        loadToolBar(xmltoolbar, widget)
 
     if not pineboolib.project._DGI.localDesktop():
         pineboolib.project._DGI.showWidget(widget)
-    else:
-        widget.show()
+    # else:
+    #    widget.show()
+
+
+def loadToolBar(xml, widget):
+    name = xml.find("./property[@name='name']/cstring").text
+    label = xml.find("./property[@name='label']/string").text
+
+    tb = pineboolib.pncontrolsfactory.QToolBar(name)
+    tb.label = label
+    for a in xml:
+        if a.tag == "action":
+            name = a.get("name")
+            ac_ = tb.addAction(name)
+            ac_.setObjectName(name)
+            load_action(ac_, widget)
+
+            # FIXME!!, meter el icono y resto de datos!!
+        elif a.tag == "separator":
+            # FIXME: Añadimos action en modo separator
+            ac_ = tb.addAction("separator")
+            ac_.setSeparator(True)
+
+    widget.addToolBar(tb)
+
+
+def loadMenuBar(xml, widget):
+    mB = QtWidgets.QMenuBar(widget)
+    for x in xml:
+        if x.tag == "property":
+            name = x.get("name")
+            if name == "name":
+                mB.setObjectName(x.find("cstring").text)
+            elif name == "geometry":
+                geo_ = x.find("rect")
+                x = int(geo_.find("x").text)
+                y = int(geo_.find("y").text)
+                w = int(geo_.find("width").text)
+                h = int(geo_.find("height").text)
+                mB.setGeometry(x, y, w, h)
+            elif name == "acceptDrops":
+                mB.setAcceptDrops(x.find("bool").text == "true")
+            elif name == "frameShape":
+                continue
+            elif name == "defaultUp":
+                mB.setDefaultUp(x.find("bool").text == "true")
+        elif x.tag == "item":
+            process_item(x, mB, widget)
+
+
+def process_item(xml, parent, widget):
+    name = xml.get("name")
+    text = xml.get("text")
+    #accel = xml.get("accel")
+
+    menu_ = parent.addMenu(text)
+    menu_.setObjectName(name)
+    for x in xml:
+        if x.tag == "action":
+            name = x.get("name")
+            ac_ = menu_.addAction(name)
+            ac_.setObjectName(name)
+            load_action(ac_, widget)
+        elif x.tag == "item":
+            process_item(x, menu_, widget)
+
+
+def load_action(action, widget):
+    real_action = widget.findChild(QtWidgets.QAction, action.objectName())
+    if real_action is not None:
+        action.setText(real_action.text())
+        action.setIcon(real_action.icon())
+        action.setToolTip(real_action.toolTip())
+        action.setStatusTip(real_action.statusTip())
+        action.setWhatsThis(real_action.whatsThis())
+
+
+def loadAction(action, widget):
+    global ICONS
+    act_ = QtWidgets.QAction(widget)
+    for p in action.findall("property"):
+        name = p.get("name")
+        if name == "name":
+            act_.setObjectName(p.find("cstring").text)
+        elif name == "text":
+            act_.setText(p.find("string").text)
+        # elif name == "menuText":
+        #    act_.setMenuText(p.find("string").text)
+        elif name == "iconSet":
+            act_.setIcon(ICONS[p.find("iconset").text])
+        elif name == "toolTip":
+            act_.setToolTip(p.find("string").text)
+        elif name == "statusTip":
+            act_.setStatusTip(p.find("string").text)
+        elif name == "whatsThis":
+            act_.setWhatsThis(p.find("string").text)
 
 
 def createWidget(classname, parent=None):
@@ -199,8 +303,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         elif pname in ("paletteBackgroundColor", "paletteForegroundColor"):
             set_fn = widget.setStyleSheet
         elif pname == "menuText":
-            if not isinstance(widget, QAction):
-                set_fn = widget.setText
+            if not isinstance(widget, pineboolib.pncontrolsfactory.QAction):
+                set_fn = widget.menuText
             else:
                 return
         elif pname == "movingEnabled":
@@ -340,7 +444,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if xml.get("class"):
             class_ = xml.get("class")
         else:
-            class_ = "QToolBar"
+            class_ = type(widget).__name__
 
         nwidget = createWidget(class_, parent=origWidget)
         parent = nwidget

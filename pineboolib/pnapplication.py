@@ -11,7 +11,7 @@ from xml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qApp
 from PyQt5.QtCore import Qt, QSignalMapper
-from PyQt5.QtWidgets import QMenu, QActionGroup
+from PyQt5.QtWidgets import QMenu, QActionGroup, QApplication
 
 import pineboolib
 
@@ -54,7 +54,7 @@ class Project(object):
     logger = logging.getLogger("main.Project")
     conn = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
-    mainFormName = "Pineboo"
+    mainFormName = "Eneboo"
     version = "0.3"
     _initModules = None
     main_window = None
@@ -604,6 +604,63 @@ class Project(object):
     def getTempDir(self):
         return self.tmpdir
 
+    def aboutQt(self):
+        QtWidgets.QMessageBox.aboutQt(QtWidgets.QWidget())
+
+    def aboutPineboo(self):
+        msg = "Texto Acerca de Pineboo"
+        QtWidgets.QMessageBox.information(QtWidgets.QWidget(), "Pineboo", msg)
+
+    def chooseFont(self):
+        font_ = QtWidgets.QFontDialog().getFont()
+        if font_:
+            QtWidgets.QApplication.setFont(font_[0])
+            save_ = []
+            save_.append(font_[0].family())
+            save_.append(font_[0].pointSize())
+            save_.append(font_[0].weight())
+            save_.append(font_[0].italic())
+
+            sett_ = FLSettings()
+            sett_.writeEntry("application/font", save_)
+
+    @QtCore.pyqtSlot(int)
+    def setStyle(self, n):
+        style_ = styleMapper.mapping(n).text()
+        if style_:
+            sett_ = FLSettings()
+            sett_.writeEntry("application/style", style_)
+            QtWidgets.QApplication.setStyle(style_)
+
+    def showStyles(self):
+        sett_ = FLSettings()
+        styleS = sett_.readEntry("application/style", None)
+        if styleS is None:
+            styleS = "Fusion"
+        # TODO: marcar estilo usado...
+        for style_ in QtWidgets.QStyleFactory.keys():
+            action_ = menuStyle.addAction(style_)
+            action_.setCheckable(True)
+            ag.addAction(action_)
+            if style_ == styleS:
+                action_.setChecked(True)
+
+            action_.triggered.connect(styleMapper.map)
+            styleMapper.setMapping(action_, i)
+            i = i + 1
+
+        ag.setExclusive(True)
+
+    def helpIndex(self):
+        print("**** helIndex ****")
+
+    def urlPineboo(self):
+        print("**** urlPineboo ****")
+
+    @decorators.Deprecated
+    def setMainWidget(self, w):
+        pass
+
 
 """
 Esta clase almacena la información de los módulos cargados
@@ -1086,11 +1143,10 @@ class XMLAction(XMLStruct):
             if self._loaded:
                 return self.mainform_widget
             self.logger.debug("Loading action %s . . . ", self.name)
-            w = pineboolib.project.main_window
+            w = pineboolib.project.main_window.w_
             if not self.mainform_widget:
                 if pineboolib.project._DGI.useDesktop():
-                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self,
-                                                                                               None, w, None)
+                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
                 else:
                     from pineboolib.utils import Struct
                     self.mainform_widget = Struct()
@@ -1298,62 +1354,6 @@ class XMLAction(XMLStruct):
             pineboolib.project.call("%s.iface.init()" %
                                     moduleName, [], None, False)
             return
-
-
-def aboutQt():
-    QtWidgets.QMessageBox.aboutQt(QtWidgets.QWidget())
-
-
-def aboutPineboo():
-    msg = "Texto Acerca de Pineboo"
-    QtWidgets.QMessageBox.information(QtWidgets.QWidget(), "Pineboo", msg)
-
-
-def fontDialog():
-    font_ = QtWidgets.QFontDialog().getFont()
-    if font_:
-        QtWidgets.QApplication.setFont(font_[0])
-        save_ = []
-        save_.append(font_[0].family())
-        save_.append(font_[0].pointSize())
-        save_.append(font_[0].weight())
-        save_.append(font_[0].italic())
-
-        sett_ = FLSettings()
-        sett_.writeEntry("application/font", save_)
-
-
-@QtCore.pyqtSlot(int)
-def setStyle(n):
-    style_ = styleMapper.mapping(n).text()
-    if style_:
-        sett_ = FLSettings()
-        sett_.writeEntry("application/style", style_)
-        QtWidgets.QApplication.setStyle(style_)
-
-
-def initStyle(menu):
-    menuStyle = menu.addMenu("Estilo")
-    ag = QActionGroup(menuStyle)
-    styleMapper.mapped.connect(setStyle)
-    i = 0
-    sett_ = FLSettings()
-    styleS = sett_.readEntry("application/style", None)
-    if styleS is None:
-        styleS = "Fusion"
-    # TODO: marcar estilo usado...
-    for style_ in QtWidgets.QStyleFactory.keys():
-        action_ = menuStyle.addAction(style_)
-        action_.setCheckable(True)
-        ag.addAction(action_)
-        if style_ == styleS:
-            action_.setChecked(True)
-
-        action_.triggered.connect(styleMapper.map)
-        styleMapper.setMapping(action_, i)
-        i = i + 1
-
-    ag.setExclusive(True)
 
 
 styleMapper = QSignalMapper()

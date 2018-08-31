@@ -8,6 +8,7 @@ import logging
 import weakref
 
 from pineboolib import decorators
+from PyQt5.QtCore import QObject
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -28,7 +29,8 @@ def resolveObject(name):
     if obj_:
         return obj_
 
-    self.logger.warn("%s.resolveSDIObject no puede encontra el objeto %s en %s", __name__, name, self._DGI.alias())
+    logger.warn("%s.resolveSDIObject no puede encontra el objeto %s en %s",
+                __name__, name, pineboolib._DGI.alias())
 
 
 # Clases Qt
@@ -55,8 +57,23 @@ QVBoxLayout = resolveObject("QVBoxLayout")
 QHBoxLayout = resolveObject("QHBoxLayout")
 QFrame = resolveObject("QFrame")
 QMainWindow = resolveObject("QMainWindow")
-
-
+QSignalMapper = resolveObject("QSignalMapper")
+QDomDocument = resolveObject("QDomDocument")
+QMenu = resolveObject("QMenu")
+QToolBar = resolveObject("QToolBar")
+QListWidgetItem = resolveObject("QListWidgetItem")
+QListViewWidget = resolveObject("QListViewWidget")
+QPixmap = resolveObject("QPixmap")
+QImage = resolveObject("QImage")
+QIcon = resolveObject("QIcon")
+QAction = resolveObject("QAction")
+QActionGroup = resolveObject("QActionGroup")
+QTreeWidget = resolveObject("QTreeWidget")
+QTreeWidgetItem = resolveObject("QTreeWidgetItem")
+QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
+"""
+QIconSet = resolveObject("QIconSet")
+"""
 # Clases FL
 FLLineEdit = resolveObject("FLLineEdit")
 FLTimeEdit = resolveObject("FLTimeEdit")
@@ -112,7 +129,7 @@ class SysType(object):
 
     def mainWidget(self):
         if pineboolib.project._DGI.localDesktop():
-            return pineboolib.project.main_window.ui_
+            return pineboolib.project.main_window.w_
         else:
             return None
 
@@ -159,8 +176,20 @@ class SysType(object):
     def updateAreas(self):
         pineboolib.project.initToolBox()
 
-    @decorators.NotImplementedWarn
     def isDebuggerMode(self):
+        from pineboolib.fllegacy.FLSettings import FLSettings
+        return FLSettings().readBoolEntry("application/isDebuggerMode")
+
+    def isNebulaBuild(self):
+        return False
+
+    def isQuickBuild(self):
+        return False
+
+    def isDebuggerEnabled(self):
+        return True
+
+    def isUserBuild(self):
         return False
 
     def nameDriver(self, connName="default"):
@@ -374,10 +403,30 @@ def solve_connection(sender, signal, receiver, slot):
     return False
 
 
-class aqApp(object):
+class aqApp_class(QObject):
 
-    def db():
+    def __init__(self):
+        super(aqApp_class, self).__init__()
+
+    def db(self):
         return pineboolib.project.conn
+
+    def classType(self, n):
+        return type(resolveObject(n)())
+
+    def __getattr__(self, name):
+        return getattr(pineboolib.project, name, None)
+
+    @decorators.NotImplementedWarn
+    def execMainScript(self, action_name):
+        pass
+
+    @decorators.NotImplementedWarn
+    def openDefaultForm(self):
+        pass
+
+
+aqApp = aqApp_class()
 
 
 class FormDBWidget(QWidget):

@@ -1,6 +1,5 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore, QtGui, Qt
-from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
 from PyQt5.Qt import QMessageBox
 
 from importlib import import_module
@@ -40,8 +39,39 @@ class QWidget(Qt.QWidget):
         return self.findChild(QtWidgets.QWidget, name)
 
 
+class QTreeWidget(QtWidgets.QTreeWidget):
+    pass
+
+
+class QTreeWidgetItem(QtWidgets.QTreeWidgetItem):
+    pass
+
+
+class QTreeWidgetItemIterator(QtWidgets.QTreeWidgetItemIterator):
+    pass
+
+
 class FLDataTable(FLDataTable):
     pass
+
+
+class QToolBar(QtWidgets.QToolBar):
+    _label = None
+
+    def setLabel(self, l):
+        self._label = l
+
+    def getLabel(self):
+        return self._label
+
+    label = property(getLabel, setLabel)
+
+
+class QSignalMapper(QtCore.QSignalMapper):
+
+    def __init__(self, parent, name):
+        super(QSignalMapper, self).__init__(parent)
+        self.setObjectName(name)
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
@@ -186,7 +216,8 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
     def setPixmap(self, pix):
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
+            pineboolib.project._DGI._par.addQueque("%s_setPixmap" % self._parent.objectName(
+            ), self._parent.cursor_.valueBuffer(self._parent.fieldName_))
             return
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
@@ -275,13 +306,32 @@ class QGroupBox(QtWidgets.QGroupBox):
 class QAction(QtWidgets.QAction):
 
     activated = QtCore.pyqtSignal()
+    _menuText = None
+    _objectName = None
 
-    def __init__(self, *args, **kwargs):
-        super(QAction, self).__init__(*args, **kwargs)
+    def __init__(self, parent=None):
+        super(QAction, self).__init__(parent)
         self.triggered.connect(self.send_activated)
+        self._name = None
+        self._menuText = None
 
     def send_activated(self, b=None):
         self.activated.emit()
+
+    def getName(self):
+        return self.objectName()
+
+    def setName(self, n):
+        self.setObjectName(n)
+
+    def getMenuText(self):
+        return self._menuText
+
+    def setMenuText(self, t):
+        self._menuText = t
+
+    name = property(getName, setName)
+    menuText = property(getMenuText, setMenuText)
 
 
 class ProgressDialog(QtWidgets.QWidget):
@@ -329,30 +379,89 @@ class QLabel(QtWidgets.QLabel):
         super(QLabel, self).setText(text)
 
 
+class QListWidgetItem(QtWidgets.QListWidgetItem):
+    pass
+
+
+class QListViewWidget(QtWidgets.QListWidget):
+    pass
+
+
 class QListView(QtWidgets.QListView):
 
-    model = None
+    _model = None
 
     def __init__(self, *args, **kwargs):
         super(QListView, self).__init__(*args, **kwargs)
 
-        self.model = QtGui.QStandardItemModel(self)
-
-    def __getattr__(self, name):
-        return self.defaultFunction
+        self._model = QtGui.QStandardItemModel(self)
 
     def addItem(self, item):
         it = QtGui.QStandardItem(item)
-        self.model.appendRow(it)
-        self.setModel(self.model)
+        self._model.appendRow(it)
+        self.setModel(self._model)
 
     @decorators.Deprecated
     def setItemMargin(self, margin):
         pass
 
-    @decorators.NotImplementedWarn
-    def defaultFunction(self, *args, **kwargs):
-        pass
+    def clear(self):
+        self._model = None
+        self._model = QtGui.QStandardItemModel(self)
+
+
+"""
+class QActionGroup(Qt.QActionGroup):
+
+    _name = None
+    _text = None
+    _menuText = None
+    activated = QtCore.pyqtSignal()
+
+    def __init__(self, parent, name=None):
+        super(QActionGroup, self).__init__(parent)
+        self.triggered.connect(self.send_activated)
+        self._name = name
+
+    def addTo(self, menu):
+        for ac in self.actions():
+            action_ = menu.addAction(ac.icon(), ac.menuText, ac.trigger)
+
+    def addSeparator(self):
+        ac_ = QAction()
+        ac_.setSeparator(True)
+        self.addAction(ac_)
+
+    def getName(self):
+        return self._name
+
+    def setName(self, n):
+        self._name = n
+
+    def getText(self):
+        return self._text
+
+    def setText(self, t):
+        self._text = t
+
+    def getMenuText(self):
+        return self._menuText
+
+    def setMenuText(self, t):
+        self._menuText = t
+
+    def send_activated(self, b=None):
+        self.activated.emit()
+
+    name = property(getName, setName)
+    text = property(getText, setText)
+    menuText = property(getMenuText, setMenuText)
+"""
+QActionGroup = QtWidgets.QActionGroup
+
+
+class QDomDocument(QtXml.QDomDocument):
+    pass
 
 
 class QDateEdit(QtWidgets.QDateEdit):
@@ -505,6 +614,10 @@ class QTabWidget(QtWidgets.QTabWidget):
         except ValueError:
             logger.error("ERROR: Tab not found:: QTabWidget, tab name = %r", tab)
         return None
+
+    def removePage(self, idx):
+        if isinstance(idx, int):
+            self.removeTab(idx)
 
 
 class FLCheckBox(QtWidgets.QCheckBox):
@@ -932,7 +1045,8 @@ class FileDialog(QtWidgets.QFileDialog):
         import pineboolib
         if pineboolib.project._DGI.localDesktop():
             parent = pineboolib.project.main_window.ui_
-            ret = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
+            ret = QtWidgets.QFileDialog.getExistingDirectory(
+                parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
             if ret:
                 ret = ret + "/"
 
@@ -1098,4 +1212,39 @@ class QFrame(QtWidgets.QFrame):
 
 
 class QMainWindow(QtWidgets.QMainWindow):
+
+    def child(self, n, c=None):
+        ret = None
+
+        if c is None:
+            c = QtCore.QObject
+        ret = self.findChild(c, n)
+        print("Retornando..", ret)
+        return ret
+
+
+class QMenu(Qt.QMenu):
     pass
+
+
+QPixmap = QtGui.QPixmap
+QImage = QtGui.QImage
+QIcon = QtGui.QIcon
+"""
+class QPixmap(QtGui.QPixmap):
+
+    def convertToImage(self):
+        return QImage(self.toImage())
+
+
+class QImage(QtGui.QImage):
+
+    def smoothScale(self, w, h):
+        self = self.scaled(w, h)
+
+
+class QIconSet(object):
+
+    def __init__(self, icon):
+        self = icon
+"""
