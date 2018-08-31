@@ -417,13 +417,9 @@ class aqApp_class(QObject):
     def __getattr__(self, name):
         return getattr(pineboolib.project, name, None)
 
-    @decorators.NotImplementedWarn
     def execMainScript(self, action_name):
-        pass
-
-    @decorators.NotImplementedWarn
-    def openDefaultForm(self):
-        pass
+        if action_name in pineboolib.project.actions.keys():
+            pineboolib.project.actions[action_name].execMainScript(action_name)
 
 
 aqApp = aqApp_class()
@@ -593,27 +589,6 @@ class FormDBWidget(QWidget):
                 self.cursor_ = FLSqlCursor(self._action)
 
         return self.cursor_
-
-    """
-    FIX: Cuando usamos this como cursor o execMainscript... todo esto tiene que buscarse en cursor o action ... (dentro de un __getattr__)
-    """
-    """
-    def valueBuffer(self, name):
-        return self.cursor().valueBuffer(name)
-
-    def isNull(self, name):
-        return self.cursor().isNull(name)
-
-    def table(self):
-        return self.cursor().table()
-
-    def cursorRelation(self):
-        return self.cursor().cursorRelation()
-
-    def execMainScript(self, name):
-        self._action.execMainScript(name)
-    
-    """
 
     def __getattr__(self, name):
         ret_ = getattr([self._action, self.cursor_], name, None)
