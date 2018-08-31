@@ -3,7 +3,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qWarning, QKeySequence
 
-from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm
+from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm, convertFLAction
 from pineboolib import decorators
 import pineboolib
 
@@ -156,6 +156,10 @@ class FLFormDB(QtWidgets.QDialog):
         # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
+
+        if isinstance(action, pineboolib.fllegacy.FLAction.FLAction):
+            action = convertFLAction(action)
+
         self.loaded = False
         try:
             assert (self.__class__, action) not in self.known_instances
@@ -325,6 +329,7 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def setMainWidget(self, w=None):
+        """
         if not w:
             if not self.cursor_:
                 self.setMainWidget(
@@ -376,6 +381,8 @@ class FLFormDB(QtWidgets.QDialog):
             # self.cursor_.setEdition(False)
             # self.cursor_.setBrowse(False)
             # self.cursor_.recordChoosed.emit(self.acepted)
+        """
+        self.mainWidget_ = self
 
     """
     Obtiene la imagen o captura de pantalla del formulario.
@@ -552,10 +559,20 @@ class FLFormDB(QtWidgets.QDialog):
             acl.process(self)
 
         self.loadControls()
+        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+        cursor = FLSqlCursor(self._action)
+        self.setCursor(cursor)
+
+        v = None
+
+        if getattr(self.iface, "preloadMainFilter", None):
+            v = self.iface.preloadMainFilter()
+
+        if v:
+            self.cursor_.setMainFilter(v, False)
 
         if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
             pineboolib.project.conn.managerModules().loadFLTableDBs(self)
-
         """
         if self.cursor_ and self.cursor_.metadata():
             caption = None
@@ -709,14 +726,6 @@ class FLFormDB(QtWidgets.QDialog):
         if not self.showed:
             self.showed = True
             v = None
-            if self.cursor_ and self.iface:
-                try:
-                    v = self.iface.preloadMainFilter()
-                except Exception:
-                    pass
-
-                if v:
-                    self.cursor_.setMainFilter(v, False)
 
             self.initMainWidget()
             self.callInitScript()
