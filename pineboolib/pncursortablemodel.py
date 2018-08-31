@@ -24,7 +24,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     logger = logging.getLogger("CursorTableModel")
     rows = 15
     cols = 5
-    _cursor = None
+    _cursor_db = None
     _cursorConn = None
     USE_THREADS = False
     USE_TIMER = False
@@ -111,6 +111,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         self.canFetchMore = True
         self._disable_refresh = False
+
+        self._cursor_db = self._cursorConn.cursor()
         # self.refresh()
 
     """
@@ -503,8 +505,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # print("Filtro final(%s) --> %s" % (self._action.table, self.where_filter))
 
         # print("Filtro", where_filter)
-
-        self._cursor = self._cursorConn.cursor()
 
         if not self.metadata():
             return
@@ -945,4 +945,4 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def cursorDB(self):
-        return self._cursor
+        return self._cursor_db
