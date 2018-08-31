@@ -156,8 +156,8 @@ def loadUi(path, widget, parent=None):
 
     if not pineboolib.project._DGI.localDesktop():
         pineboolib.project._DGI.showWidget(widget)
-    # else:
-    #    widget.show()
+    else:
+        widget.show()
 
 
 def loadToolBar(xml, widget):
@@ -514,7 +514,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             # process_layout_box(c, mode="grid")
             continue
         if c.tag == "item":
-            if isinstance(widget, QMenu):
+            if isinstance(widget, pineboolib.pncontrolsfactory.QMenu):
                 continue
             else:
                 prop1 = {}
