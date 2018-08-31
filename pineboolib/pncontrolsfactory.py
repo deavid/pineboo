@@ -592,9 +592,7 @@ class FormDBWidget(QWidget):
 
     def __getattr__(self, name):
         ret_ = getattr([self._action, self.cursor_], name, None)
-        if ret_ is not None:
-            print(name, type(ret_))
-            print("Retornando", tpye(ret_))
+        if ret_:
             return ret_
 
 
