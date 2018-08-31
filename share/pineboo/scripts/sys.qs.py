@@ -61,7 +61,8 @@ class AbanQUpdater(object):
         self.prBar_.setTotalSteps(100)
         lay.addWidget(self.prBar_)
         self.data_ = u""
-        self.urlOp_ = QUrlOperator(sys.decryptFromBase64(u"lKvF+hkDxk2dS6hrf0jVURL4EceyJIFPeigGw6lZAU/3ovk/v0iZfhklru4Q6t6M"))
+        self.urlOp_ = QUrlOperator(sys.decryptFromBase64(
+            u"lKvF+hkDxk2dS6hrf0jVURL4EceyJIFPeigGw6lZAU/3ovk/v0iZfhklru4Q6t6M"))
         connect(self.urlOp_, u"finished(QNetworkOperation*)", self, u"transferFinished()")
         connect(self.urlOp_, u"dataTransferProgress(int,int,QNetworkOperation*)", self, u"transferProgress()")
         connect(self.urlOp_, u"data(const QByteArray&,QNetworkOperation*)", self, u"transferData()")
@@ -110,12 +111,10 @@ class AbanQDbDumper(object):
         import sys
         self.encoding = sys.getfilesystemencoding()
 
-
     def init(self):
         if self.showGui_:
             self.buildGui()
             self.w_.exec_()
-
 
     def buildGui(self):
         self.w_ = QDialog()
@@ -186,20 +185,18 @@ class AbanQDbDumper(object):
             if gui:
                 sys.errorMsgBox(self.state_.msg)
 
-
     def genFileName(self):
         now = Date()
         timeStamp = parseString(now)
-        regExp = ["-",":"]
+        regExp = ["-", ":"]
         #regExp.global_ = True
         for rE in regExp:
             timeStamp = timeStamp.replace(rE, u"")
-        
+
         fileName = ustr(self.dirBase_, u"/dump_", self.db_.database(), u"_", timeStamp)
         fileName = Dir.cleanDirPath(fileName)
         fileName = Dir.convertSeparators(fileName)
         return fileName
-
 
     def changeDirBase(self, dir_=None):
         dirBasePath = dir_
@@ -212,50 +209,42 @@ class AbanQDbDumper(object):
             self.lblDirBase_.text = sys.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
         self.fileName_ = self.genFileName()
 
-
     def addLog(self, msg=None):
         if self.showGui_ and self.tedLog_ != None:
             self.tedLog_.append(msg)
         else:
             debug(msg)
 
-
     def setState(self, ok=None, msg=None):
         self.state_.ok = ok
         self.state_.msg = msg
 
-
     def state(self):
         return self.state_
-
 
     def launchProc(self, command):
         self.proc_ = QProcess()
         self.proc_.setProgram(command[0])
         self.proc_.setArguments(command[1:])
-        #FIXME: Mejorar lectura linea a linea
+        # FIXME: Mejorar lectura linea a linea
         self.proc_.readyReadStandardOutput.connect(self.readFromStdout)
         self.proc_.readyReadStandardError.connect(self.readFromStderr)
         self.proc_.start()
-        
+
         while self.proc_.Running:
             sys.processEvents()
-        
-        
-        return self.proc_.exitcode() == self.proc_.normalExit 
 
+        return self.proc_.exitcode() == self.proc_.normalExit
 
     def readFromStdout(self):
         t = self.proc_.readLine().data().decode(self.encoding)
         if t not in (None, ""):
             self.funLog_(t)
 
-
     def readFromStderr(self):
         t = self.proc_.readLine().data().decode(self.encoding)
         if t not in (None, ""):
             self.funLog_(t)
-
 
     def dumpDatabase(self):
         driver = self.db_.driverName()
@@ -277,7 +266,6 @@ class AbanQDbDumper(object):
             if not os.path.exists(self.fileName_):
                 dir_ = Dir(self.fileName_)
 
-
         except Exception as e:
             e = traceback.format_exc()
             self.setState(False, ustr(u"", e))
@@ -297,11 +285,11 @@ class AbanQDbDumper(object):
             self.setState(False, sys.translate(u"No se ha podido realizar la copia de seguridad."))
             self.funLog_(self.state_.msg)
         else:
-            self.setState(True, sys.translate(u"Copia de seguridad realizada con éxito en:\n%s") % (str(self.fileName_)))
+            self.setState(True, sys.translate(u"Copia de seguridad realizada con éxito en:\n%s") %
+                          (str(self.fileName_)))
             self.funLog_(self.state_.msg)
 
         return ok
-
 
     def dumpPostgreSQL(self):
         pgDump = u"pg_dump"
@@ -314,7 +302,8 @@ class AbanQDbDumper(object):
             command = [pgDump, u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U", db.user(), db.database()]
         else:
             System.setenv(u"PGPASSWORD", db.password())
-            command = [pgDump, u"-v", u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U", db.user(), db.database()]
+            command = [pgDump, u"-v", u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U",
+                       db.user(), db.database()]
 
         if not self.launchProc(command):
             self.setState(False, sys.translate(u"No se ha podido volcar la base de datos a disco.\n") +
@@ -324,7 +313,6 @@ class AbanQDbDumper(object):
         self.setState(True, u"")
         return True
 
-
     def dumpMySQL(self):
         myDump = u"mysqldump"
         command = None
@@ -333,10 +321,10 @@ class AbanQDbDumper(object):
         if sys.osName() == u"WIN32":
             myDump += u".exe"
             command = [myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
+                                                                                                           db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
         else:
             command = [myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
+                                                                                                           db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
 
         if not self.launchProc(command):
             self.setState(False, sys.translate(u"No se ha podido volcar la base de datos a disco.\n") +
@@ -345,7 +333,6 @@ class AbanQDbDumper(object):
             return False
         self.setState(True, u"")
         return True
-
 
     def dumpTableToCsv(self, table=None, dirBase=None):
         fileName = ustr(dirBase, table, u".csv")
@@ -410,7 +397,6 @@ class AbanQDbDumper(object):
         AQUtil.destroyProgressDialog()
         return True
 
-
     def dumpAllTablesToCsv(self):
         fileName = self.fileName_
         db = self.db_
@@ -435,7 +421,7 @@ class FormInternalObj(FormDBWidget):
             util = FLUtil()
             codEjercicio = flfactppal.iface.pub_ejercicioActual()
             nombreEjercicio = util.sqlSelect(u"ejercicios", u"nombre", ustr(u"codejercicio='", codEjercicio, u"'"))
-            if AQUtil().sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == u"true":
+            if AQUtil.sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == True:
                 texto = ""
                 if nombreEjercicio:
                     texto = ustr(u"[ ", nombreEjercicio, u" ]")
@@ -531,7 +517,8 @@ class FormInternalObj(FormDBWidget):
                     break
 
             headInfo += u"</tr>"
-            headRecord = ustr(u"<table border=\"1\"><tr><td><b>", util.translate(u"scripts", u"Registro bloqueado"), u"</b></td></tr>")
+            headRecord = ustr(u"<table border=\"1\"><tr><td><b>", util.translate(
+                u"scripts", u"Registro bloqueado"), u"</b></td></tr>")
             i = 1
             while_pass = True
             while i < len(locks):
@@ -850,7 +837,8 @@ class FormInternalObj(FormDBWidget):
                 size += 1
             else:
                 if arrNew[key].shatext != arrOld[key].shatext or arrNew[key].shabinary != arrOld[key].shabinary:
-                    info = Array([key, u"mod", arrOld[key].shatext, arrOld[key].shabinary, arrNew[key].shatext, arrNew[key].shabinary])
+                    info = Array([key, u"mod", arrOld[key].shatext, arrOld[key].shabinary,
+                                  arrNew[key].shatext, arrNew[key].shabinary])
                     ret[key] = u'@'.join(info)
                     size += 1
 
@@ -1281,7 +1269,8 @@ class FormInternalObj(FormDBWidget):
         caption = sys.translate(u"AbanQ Información")
         regExp = RegExp(u"\n")
         regExp.global_ = True
-        msgHtml = ustr(u"<img source=\"about.png\" align=\"right\">", u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+        msgHtml = ustr(u"<img source=\"about.png\" align=\"right\">", u"<b><u>", caption,
+                       u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
         sys.popupWarn(msgHtml, [])
 
     @classmethod
@@ -1291,7 +1280,8 @@ class FormInternalObj(FormDBWidget):
         caption = sys.translate(u"AbanQ Aviso")
         regExp = RegExp(u"\n")
         regExp.global_ = True
-        msgHtml = ustr(u"<img source=\"bug.png\" align=\"right\">", u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+        msgHtml = ustr(u"<img source=\"bug.png\" align=\"right\">", u"<b><u>", caption,
+                       u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
         sys.popupWarn(msgHtml, [])
 
     @classmethod
@@ -1301,7 +1291,8 @@ class FormInternalObj(FormDBWidget):
         caption = sys.translate(u"AbanQ Error")
         regExp = RegExp(u"\n")
         regExp.global_ = True
-        msgHtml = ustr(u"<img source=\"remove.png\" align=\"right\">", u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+        msgHtml = ustr(u"<img source=\"remove.png\" align=\"right\">", u"<b><u>", caption,
+                       u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
         sys.popupWarn(msgHtml, [])
 
     @classmethod
@@ -1370,7 +1361,8 @@ class FormInternalObj(FormDBWidget):
 
     @classmethod
     def updateAbanQ(self):
-        MessageBox.warning(sys.translate(u"Funcionalidad no soportada aún en Eneboo."), MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
+        MessageBox.warning(sys.translate(u"Funcionalidad no soportada aún en Eneboo."),
+                           MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
         return
 
     @classmethod
@@ -1379,7 +1371,8 @@ class FormInternalObj(FormDBWidget):
         if not dirBasePath:
             return
         dataBaseName = aqApp.db().database()
-        dirBasePath = Dir.cleanDirPath(ustr(dirBasePath, u"/modulos_exportados_", QString(dataBaseName).mid(dataBaseName.rfind(u"/") + 1)))
+        dirBasePath = Dir.cleanDirPath(ustr(dirBasePath, u"/modulos_exportados_",
+                                            QString(dataBaseName).mid(dataBaseName.rfind(u"/") + 1)))
         dir = Dir()
         if not dir.fileExists(dirBasePath):
             try:
@@ -1595,7 +1588,8 @@ class FormInternalObj(FormDBWidget):
 
         key = ustr(u"scripts/sys/modLastDirModules_", sys.nameBD())
         dirAnt = AQUtil.readSettingEntry(key)
-        dirMods = FileDialog.getExistingDirectory((dirAnt if dirAnt else False), sys.translate(u"Directorio de Módulos"))
+        dirMods = FileDialog.getExistingDirectory(
+            (dirAnt if dirAnt else False), sys.translate(u"Directorio de Módulos"))
         if not dirMods:
             return
         dirMods = Dir.cleanDirPath(dirMods)
