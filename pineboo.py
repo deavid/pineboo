@@ -406,8 +406,11 @@ def init_project(DGI, splash, options, project, mainForm, app):
         except Exception as err:
             logger.error("%s: %s", err.__class__.__name__, str(err))
             continue
-        if options.action in module.actions:
-            objaction = module.actions[options.action]
+
+        if options.action:
+            objaction = project.conn.manager(options.action)
+        # if options.action in module.actions:
+        #    objaction = module.actions[options.action]
 
     if options.action and not objaction:
         raise ValueError("Action name %s not found" % options.action)
@@ -438,7 +441,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
         QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:
-        objaction.openDefaultForm()
+        project.openDefaultForm(objaction.form())
 
     if DGI.localDesktop():
         ret = app.exec_()
