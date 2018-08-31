@@ -841,7 +841,7 @@ class FLUtil(QtCore.QObject):
         where = "flkey = '%s'" % key
         found = self.readDBSettingEntry(key)
         cursor = pineboolib.project.conn.cursor()
-        if not found:
+        if found is None:
             sql = "INSERT INTO flsettings (flkey, valor) VALUES ('%s', '%s')" % (
                 key, value)
         else:

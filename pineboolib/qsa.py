@@ -9,7 +9,7 @@ import logging
 
 # AQSObjects
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
-from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil
+from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil as AQUtil_class
 from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
 from pineboolib.fllegacy.aqsobjects.AQS import AQS
 # FLObjects
@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 sys = SysType()
 AQS = AQS()
-AQUtil = AQUtil()
 undefined = None
+AQUtil = AQUtil_class()
 
 
 def Function(args, source):
