@@ -787,7 +787,7 @@ class FLUtil(QtCore.QObject):
             ret = float(ret)
         return ret
 
-    def readSettingEntry(self, key, def_=u"", ok=False):
+    def readSettingEntry(self, key, def_=u""):
         """
         Lee el valor de un setting en el directorio de la instalación de AbanQ
 
@@ -797,10 +797,7 @@ class FLUtil(QtCore.QObject):
 
         @return Valor del setting
         """
-        value = FLSettings().readEntry(key, def_, ok)
-        if value is None:
-            value = def_
-        return value
+        return FLSettings().readEntry(key, def_)
 
     def writeSettingEntry(self, key, value):
         """
