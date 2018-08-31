@@ -50,12 +50,6 @@ class FLFormDB(QtWidgets.QDialog):
     Widget principal del formulario
     """
     mainWidget_ = None
-
-    """
-    Acción asociada al formulario
-    """
-    action_ = None
-
     """
     Identificador de ventana MDI.
 
@@ -174,7 +168,7 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.ui_ = {}
 
-        self.action = action
+        self._action = action
         if type(self).__name__ == "FLFormRecordDB":
             self.actionName_ = "formRecord" + action.name
         else:
@@ -199,7 +193,7 @@ class FLFormDB(QtWidgets.QDialog):
         elif pineboolib.project._DGI.localDesktop():
             self.setWindowTitle(action.alias)
 
-        self.idMDI_ = self.action.name
+        self.idMDI_ = self._action.name
 
         self.script = None
         self.iface = None
@@ -207,7 +201,7 @@ class FLFormDB(QtWidgets.QDialog):
             script = self._scriptForm or None
         except AttributeError:
             script = None
-        self.action.load_script(script, self)
+        self._action.load_script(script, self)
 
         self.iconSize = pineboolib.project._DGI.iconSize()
 
@@ -560,46 +554,37 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.loadControls()
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-        cursor = FLSqlCursor(self._action)
-        self.setCursor(cursor)
+        if self._action.table:
 
-        v = None
+            cursor = FLSqlCursor(self._action)
+            cursor.setAction(self._action)
+            self.setCursor(cursor)
 
-        if getattr(self.iface, "preloadMainFilter", None):
-            v = self.iface.preloadMainFilter()
+            v = None
 
-        if v:
-            self.cursor_.setMainFilter(v, False)
+            if getattr(self.iface, "preloadMainFilter", None):
+                v = self.iface.preloadMainFilter()
+
+            if v:
+                self.cursor_.setMainFilter(v, False)
 
         if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
             pineboolib.project.conn.managerModules().loadFLTableDBs(self)
-        """
-        if self.cursor_ and self.cursor_.metadata():
-            caption = None
-            if self.action_:
-                #self.cursor_.setAction(self.action_)
-                caption = self.action_.name
-                if self.action.description:
-                    self.setWhatsThis(self.action_.description)
 
-                self.idMDI_ = self.action_.name
+            from pineboolib.fllegacy.FLAction import FLAction
+            fl_action = FLAction(self._action.name)
 
-            if not caption:
-                caption = self.cursor_.metadata().alias()
+            if fl_action.description():
+                self.setWhatsThis(fl_action.description())
 
+            caption = fl_action.caption()
+
+            if caption is None and self.cursor() and self.cursor().metadata():
+                caption = self.cursor().metadata().alias()
+
+            if caption is None:
+                caption = "No hay metadatos"
             self.setCaptionWidget(caption)
-
-            #self.bindIface()
-            #self.setCursor(self.cursor_)
-
-
-
-
-        else:
-
-            self.setCaptionWidget("No hay metadatos")
-
-        """
 
     def loadControls(self):
         if self.pushButtonCancel:
@@ -713,7 +698,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.script.form = None
             self.iface = None
             self.widget.close()
-            del self.known_instances[(self.__class__, self.action)]
+            del self.known_instances[(self.__class__, self._action)]
             del self.widget
         except Exception:
             pass

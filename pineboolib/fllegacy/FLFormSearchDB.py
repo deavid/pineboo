@@ -57,7 +57,7 @@ class FLFormSearchDB(FLFormDB):
             name = args[0]
 
             self.setAction(name)
-            action = self.action
+            action = self._action
             if action is None:
                 return
 
@@ -93,6 +93,7 @@ class FLFormSearchDB(FLFormDB):
         self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
+        self.eventloop = QtCore.QEventLoop()
         if not name:
             print("FLFormSearchDB : Nombre de acción vacío")
             return
@@ -101,18 +102,11 @@ class FLFormSearchDB(FLFormDB):
             print("FLFormSearchDB : No existe la acción", name)
             return
 
-        self.eventloop = QtCore.QEventLoop()
         # self.initForm()
 
     def setAction(self, a):
-        if not isinstance(a, str):
-            self.action = None
-            return
-
-        try:
-            self.action = pineboolib.project.actions[str(a)]
-        except KeyError:
-            self.action = None
+        if a in pineboolib.project.actions.keys():
+            self._action = pineboolib.project.actions[a]
 
     """
     destructor

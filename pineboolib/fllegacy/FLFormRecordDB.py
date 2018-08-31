@@ -188,12 +188,14 @@ class FLFormRecordDB(FLFormDB):
         if self.cursor_ and self.cursor_.metadata():
 
             caption = None
-            if self.action_:
-                self.cursor_.setAction(self.action_)
-                caption = self.action_.name
-                if self.action_.description:
-                    self.setWhatsThis(self.action_.description)
-                self.idMDI_ = self.action_.name
+            if self._action:
+                self.cursor_.setAction(self._action)
+                from pineboolib.fllegacy.FLAction import FLAction
+                fl_action = FLAction(self._action.name)
+                caption = self._action.name
+                if fl_action.description():
+                    self.setWhatsThis(fl_action.description())
+                self.idMDI_ = self._action.name
 
             # self.bindIface()
             # self.setCursor(self.cursor_)
@@ -675,8 +677,8 @@ class FLFormRecordDB(FLFormDB):
                 self.cursor_.setModeAccess(FLSqlCursor.Insert)
                 self.accepted_ = False
                 caption = None
-                if self.action_:
-                    caption = self.action_.name
+                if self._action:
+                    caption = self._action.name
                 if not caption:
                     caption = self.cursor_.metadata().alias()
                 self.cursor_.transaction()
