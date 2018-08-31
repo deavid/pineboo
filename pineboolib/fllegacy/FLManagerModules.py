@@ -290,10 +290,7 @@ class FLManagerModules(object):
 
         form_path = None
 
-        if os.path.exists(n):
-            form_path = n
-        else:
-            form_path = _path(n)
+        form_path = n if os.path.exists(n) else _path(n)
 
         if form_path is None:
             raise AttributeError("File %r not found in project" % n)
