@@ -7,11 +7,6 @@ import traceback
 from PyQt5 import QtCore
 import logging
 
-# AQSObjects
-from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
-from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil as AQUtil_class
-from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
-from pineboolib.fllegacy.aqsobjects.AQS import AQS
 # FLObjects
 from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
@@ -26,13 +21,14 @@ from pineboolib.fllegacy.FLReportViewer import FLReportViewer
 from pineboolib.utils import ustr, ustr1
 
 from pineboolib.pncontrolsfactory import *
+from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
+
 logger = logging.getLogger(__name__)
 
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 sys = SysType()
-AQS = AQS()
+
 undefined = None
-AQUtil = AQUtil_class()
 
 
 def Function(args, source):
