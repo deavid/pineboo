@@ -55,7 +55,7 @@ class Project(object):
     debugLevel = 100
     mainFormName = "Eneboo"
     version = "0.3"
-    _initModules = None
+    #_initModules = None
     main_window = None
     translators = None
     multiLangEnabled_ = False
@@ -81,7 +81,7 @@ class Project(object):
         self.apppath = None
         self.tmpdir = None
         self.parser = None
-        self._initModules = []
+        #self._initModules = []
         if self._DGI.useDesktop():
             if self._DGI.localDesktop():
                 self.main_window = import_module("pineboolib.plugins.mainform.%s.%s" % (
@@ -1133,7 +1133,7 @@ class XMLAction(XMLStruct):
                 "End of record action load %s (iface:%s ; widget:%s)",
                 self.name, self.formrecord_widget.iface, self.formrecord_widget.widget)
 
-        self.initModule(self.name)
+        # self.initModule(self.name)
 
         return self.formrecord_widget
 
@@ -1172,7 +1172,7 @@ class XMLAction(XMLStruct):
     def openDefaultForm(self):
         self.logger.debug("Opening default form for Action %s", self.name)
         w = pineboolib.project.main_window
-        self.initModule(self.name)
+        # self.initModule(self.name)
         self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self,
                                                                                    None, w, None)
         w.addFormTab(self)
@@ -1208,7 +1208,7 @@ class XMLAction(XMLStruct):
             self.load_script(scriptName, None)
 
             self.formrecord_widget = self.script.form
-            self.initModule(self.name)
+            # self.initModule(self.name)
 
         return self.formrecord_widget
 
@@ -1235,7 +1235,7 @@ class XMLAction(XMLStruct):
         self.load_script(self.scriptform, None)
 
         self.mainform_widget = self.script.form
-        self.initModule(self.name)
+        # self.initModule(self.name)
         if self.mainform_widget.iface:
             self.mainform_widget.iface.main()
         else:
@@ -1343,16 +1343,15 @@ class XMLAction(XMLStruct):
     Inicializa el módulo del form en caso de que no se inicializara ya
     """
 
-    def initModule(self, name):
+    # def initModule(self, name):
 
-        moduleName = pineboolib.project.actions[name].mod.moduleName
-        if moduleName in (None, "sys"):
-            return
-        if moduleName not in pineboolib.project._initModules:
-            pineboolib.project._initModules.append(moduleName)
-            pineboolib.project.call("%s.iface.init()" %
-                                    moduleName, [], None, False)
-            return
+    #    moduleName = pineboolib.project.actions[name].mod.moduleName
+    #    if moduleName in (None, "sys"):
+    #        return
+    #    if moduleName not in pineboolib.project._initModules:
+    #        pineboolib.project._initModules.append(moduleName)
+    #        pineboolib.project.call("%s.iface.init()" % moduleName, [], None, False)
+    #        return
 
 
 styleMapper = QSignalMapper()
