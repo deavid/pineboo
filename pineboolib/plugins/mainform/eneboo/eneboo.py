@@ -275,16 +275,17 @@ class MainForm(object):
                 tw.widget(i).close()
 
         fm = AQFormDB(action_name, tw, None)
-        # fm.setMainWidget()
-        if fm.mainWidget == None:
+        fm.setMainWidget()
+        if fm.mainWidget() == None:
             return
 
         tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.caption)
         fm.setIdMDI(action_name)
         fm.show()
 
-        idx = tw.indexOf(fm)
-        self.tw_.setCurrentPage(idx)
+        #idx = tw.indexOf(fm)
+        # self.tw_.setCurrentPage(idx)
+        self.tw_.setCurrentWidget(fm)
         fm.installEventFilter(self.w_)
         # if len(tw.pages()) == 1 and self.tw_corner is not None:
         #    self.tw_corner.show()
