@@ -26,7 +26,8 @@ def startup_check_dependencies():
     """Do a preemptive import of the libraries needed and handle errors in a user friendly way."""
     from pineboolib.utils import checkDependencies
 
-    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "barcode": "python-barcode", "PIL": "Pillow", "z3c.rml": "z3c.rml"}
+    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5",
+             "barcode": "python-barcode", "PIL": "Pillow", "z3c.rml": "z3c.rml"}
     checkDependencies(dict_)
 
     if sys.version_info[0] < 3:
@@ -392,7 +393,8 @@ def init_project(DGI, splash, options, project, mainForm, app):
     logger.info("Iniciando proyecto ...")
 
     # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
-    project.conn.manager().db_.managerModules().loadAllIdModules()
+    project.conn.managerModules().loadIdAreas()
+    project.conn.managerModules().loadAllIdModules()
 
     objaction = None
     for k, module in list(project.modules.items()):
@@ -430,7 +432,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
     project.call("sys.iface.init()", [], None, True)
     if DGI.localDesktop():
         splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        main_window.activateWindow()
+        main_window.w_.activateWindow()
         QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:

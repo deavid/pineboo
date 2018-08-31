@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
+from pineboolib import decorators
 from PyQt5 import QtWidgets
 
 
@@ -24,6 +25,13 @@ class MainForm(object):
         self.ui_ = None
         self.w_ = QMainWindow()
         #self.app_ = QApplication
+
+    def activateWindow(self):
+        self.w_.activateWindow()
+
+    @decorators.Deprecated
+    def load(self):
+        self.initScript()
 
     def eventFilter(self, o, e):
         if e.type() == AQS.ContextMenu:
