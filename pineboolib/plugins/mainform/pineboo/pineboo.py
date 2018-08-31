@@ -42,6 +42,7 @@ class MainForm(QMainWindow):
         self.ui_ = pineboolib.project.conn.managerModules().createUI(
             filedir('plugins/mainform/pineboo/mainform.ui'), None, self)
 
+        self.w_ = self
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(
             QApplication.desktop().cursor().pos())
@@ -107,16 +108,16 @@ class MainForm(QMainWindow):
         #                 QtCore.QSize(256, 256))
         # self.setWindowIcon(app_icon)
         self.setWindowIcon(QtGui.QIcon('share/icons/pineboo-logo-16.png'))
-        self.actionAcercaQt.triggered.connect(pineboolib.pnapplication.aboutQt)
-        self.actionAcercaPineboo.triggered.connect(pineboolib.pnapplication.aboutPineboo)
+        self.actionAcercaQt.triggered.connect(pineboolib.project.aboutQt)
+        self.actionAcercaPineboo.triggered.connect(pineboolib.project.aboutPineboo)
         self.actionFavoritos.triggered.connect(self.changeStateDockFavoritos)
         self.dockFavoritos.visibilityChanged.connect(self.changeStateActionFavoritos)
         self.actionModulos.triggered.connect(self.changeStateDockAreas)
         self.dockAreasTab.visibilityChanged.connect(self.changeStateActionAreas)
-        self.actionTipografia.triggered.connect(pineboolib.pnapplication.fontDialog)
+        self.actionTipografia.triggered.connect(pineboolib.project.chooseFont)
         self.menuPineboo.addSeparator()
         # self.actionEstilo.triggered.connect(pineboolib.main.styleDialog)
-        pineboolib.pnapplication.initStyle(self.configMenu)
+        # pineboolib.pnapplication.initStyle(self.configMenu)
         self.setWindowTitle("Pineboo")
 
         logger.info("Módulos y pestañas ...")
@@ -288,7 +289,8 @@ class MainForm(QMainWindow):
         #print(mod.name, ac.name, pineboolib.project.areas[mod.areaid].descripcion)
         # Comprueba si el area ya se ha creado
         if mod.areaid not in self.mPAreas.keys():
-            areaM = self.menuPineboo.addMenu(QtGui.QIcon('share/icons/gtk-open.png'), pineboolib.project.areas[mod.areaid].descripcion)
+            areaM = self.menuPineboo.addMenu(QtGui.QIcon('share/icons/gtk-open.png'),
+                                             pineboolib.project.areas[mod.areaid].descripcion)
             self.mPAreas[mod.areaid] = areaM
         else:
             areaM = self.mPAreas[mod.areaid]
