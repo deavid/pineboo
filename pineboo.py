@@ -306,7 +306,9 @@ def main():
     options = parse_options()
 
     _DGI = load_dgi(options.dgi)
+
     if _DGI.isDeployed():
+        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
         download_files()
 
     pineboolib.no_python_cache = options.no_python_cache
@@ -574,7 +576,6 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
     logging.addLevelName(levelNum, levelName)
     setattr(logging, levelName, levelNum)
     setattr(logging.getLoggerClass(), methodName, logForLevel)
-    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     setattr(logging, methodName, logToRoot)
 
 
