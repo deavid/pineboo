@@ -279,7 +279,7 @@ class MainForm(object):
         if fm.mainWidget() == None:
             return
 
-        tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.caption)
+        tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.windowTitle())
         fm.setIdMDI(action_name)
         fm.show()
 
