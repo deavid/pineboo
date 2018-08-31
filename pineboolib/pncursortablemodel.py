@@ -111,7 +111,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         self.canFetchMore = True
         self._disable_refresh = False
-        self.refresh()
+        # self.refresh()
 
     """
     Indica si se pueden recoger mas datos del la tabla
@@ -453,7 +453,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         if not self.metadata():
-            self.logger.warn("ERROR: CursorTableModel :: No hay tabla", pineboolib.project.tables[self._action.table].name)
+            self.logger.warn("ERROR: CursorTableModel :: No hay tabla",
+                             pineboolib.project.tables[self._action.table].name)
             return
 
         parent = QtCore.QModelIndex()
@@ -490,7 +491,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             where_filter = "1 = 1"
 
         self.where_filter = where_filter
-        if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():  # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
+        # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
+        if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():
             if self.where_filter.find(";") > -1:  # Si el where termina en ; ...
                 self.where_filter = self.where_filter.replace(";", " ORDER BY %s;" % self.getSortOrder())
             else:
