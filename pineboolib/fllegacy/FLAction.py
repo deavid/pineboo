@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
 
 
-class FLAction(QtCore.QObject):
+class FLAction(object):
 
     """
     Esta clase contiene información de acciones para abrir formularios.
