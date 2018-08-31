@@ -9,6 +9,7 @@ from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import QWidget
 
 
 """
@@ -43,7 +44,7 @@ class FLInfoMod(object):
     areaDescripcion = None
 
 
-class FLManagerModules(QtCore.QObject):
+class FLManagerModules(object):
 
     """
     Mantiene el identificador del area a la que pertenece el módulo activo.
@@ -73,7 +74,7 @@ class FLManagerModules(QtCore.QObject):
     """
     Lista de todas los identificadores de areas cargadas, para optimizar lecturas
     """
-    listIdAreas_ = {}
+    listIdAreas_ = []
 
     """
     Diccionario con información de los módulos
@@ -203,7 +204,6 @@ class FLManagerModules(QtCore.QObject):
     """
 
     def contentCached(self, n, shaKey=None):
-
         if n in self.filesCached_.items():
             return self.filesCached_[n]
 
@@ -211,6 +211,21 @@ class FLManagerModules(QtCore.QObject):
         modId = None
         name_ = n[:n.index(".")]
         ext_ = n[n.index(".") + 1:]
+        type_ = None
+        if ext_ == "kut":
+            type_ = "reports/"
+        elif ext_ == "qs":
+            type_ = "scritps/"
+        elif ext_ == "mtd":
+            type_ = "tables/"
+        elif ext_ == "ui":
+            type_ = "forms/"
+        elif ext_ == "qry":
+            type_ = "queries/"
+        elif ext_ == "ts":
+            type_ = "translations/"
+        elif ext_ == "xml":
+            type_ = ""
 
         if not shaKey and not pineboolib.project.conn.manager().isSystemTable(name_):
             query = "SELECT sha FROM flfiles WHERE nombre='%s'" % n
@@ -240,8 +255,8 @@ class FLManagerModules(QtCore.QObject):
                 utf8_ = True
             data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %
                                           (pineboolib.project.conn.DBName(), modId, ext_, name_, shaKey, ext_)), utf8_)
-        elif os.path.exists(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_))):
-            data = self.contentFS(filedir("../share/pineboo/tables/%s.%s" % (name_, ext_)))
+        elif os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):
+            data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))
         else:
             data = self.content(n)
 
@@ -274,6 +289,7 @@ class FLManagerModules(QtCore.QObject):
             n += ".ui"
 
         form_path = None
+
         if os.path.exists(n):
             form_path = n
         else:
@@ -283,15 +299,19 @@ class FLManagerModules(QtCore.QObject):
             raise AttributeError("File %r not found in project" % n)
             return
 
-        if not getattr(parent, "widget", None):
-            w_ = parent
-        else:
-            w_ = parent.widget
         # Version de ui
         from xml import etree
         tree = etree.ElementTree.parse(form_path)
         root = tree.getroot()
         UIVersion = root.get("version")
+        if parent is None:
+            wid = root.find("widget")
+            parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
+
+        if not getattr(parent, "widget", None):
+            w_ = parent
+        else:
+            w_ = parent.widget
         logger.info("Procesando %s (v%s)", n, UIVersion)
         if not pineboolib.project or pineboolib.project._DGI.localDesktop():
             if UIVersion < "4.0":
@@ -353,9 +373,17 @@ class FLManagerModules(QtCore.QObject):
 
     @param id Identificador del módulo
     """
-    @decorators.NotImplementedWarn
-    def setActiveIdModule(self, _id):
-        pass
+
+    def setActiveIdModule(self, _id=None):
+        if _id is None or not self.dictInfoMods:
+            self.activeIdArea_ = None
+            self.activeIdModule_ = None
+            return
+
+        if _id.upper() in self.dictInfoMods.keys():
+            im = self.dictInfoMods[_id.upper()]
+            self.activeIdArea_ = im.idArea
+            self.activeIdModule_ = _id
 
     """
     Para obtener el area del módulo activo.
@@ -380,9 +408,9 @@ class FLManagerModules(QtCore.QObject):
 
     @return Lista de identificadores de areas
     """
-    @decorators.NotImplementedWarn
+
     def listIdAreas(self):
-        return None
+        return self.listIdAreas_
 
     """
     Obtiene la lista de identificadores de módulos cargados en el sistema de una area dada.
@@ -393,9 +421,9 @@ class FLManagerModules(QtCore.QObject):
 
     def listIdModules(self, idA):
         list_ = []
-        for name, mod in self.dictInfoMods:
-            if self.dictInfoMods[name].idArea == idA:
-                list_.append(name)
+        for mod in self.dictInfoMods.keys():
+            if self.dictInfoMods[mod].idArea == idA:
+                list_.append(self.dictInfoMods[mod].idModulo)
 
         return list_
 
@@ -414,9 +442,13 @@ class FLManagerModules(QtCore.QObject):
     @param idA Identificador del área.
     @return Texto de descripción del área, si lo encuentra o idA si no lo encuentra.
     """
-    @decorators.NotImplementedWarn
+
     def idAreaToDescription(self, idA):
-        return None
+        for area in self.dictInfoMods.keys():
+            if self.dictInfoMods[area].idArea.upper() == idA.upper():
+                return self.dictInfoMods[area].areaDescripcion
+
+        return idA
 
     """
     Obtiene la descripción de un módulo a partir de su identificador.
@@ -424,9 +456,12 @@ class FLManagerModules(QtCore.QObject):
     @param idM Identificador del módulo.
     @return Texto de descripción del módulo, si lo encuentra o idM si no lo encuentra.
     """
-    @decorators.NotImplementedWarn
+
     def idModuleToDescription(self, idM):
-        return None
+        if idM.upper() in self.dictInfoMods.keys():
+            return self.dictInfoMods[idM.upper()].descripcion
+
+        return idM
 
     """
     Para obtener el icono asociado a un módulo.
@@ -434,9 +469,15 @@ class FLManagerModules(QtCore.QObject):
     @param idM Identificador del módulo del que obtener el icono
     @return QPixmap con el icono
     """
-    @decorators.NotImplementedWarn
+
     def iconModule(self, idM):
-        return None
+        from pineboolib.pncontrolsfactory import QPixmap
+        if idM.upper() in self.dictInfoMods.keys():
+            from pineboolib.utils import clearXPM
+            icono = clearXPM(self.dictInfoMods[idM.upper()].icono)
+            return QPixmap(icono)
+
+        return QPixmap()
 
     """
     Para obtener la versión de un módulo.
@@ -570,7 +611,8 @@ class FLManagerModules(QtCore.QObject):
         while q.next():
             self.listIdAreas_.append(str(q.value(0)))
 
-        self.listIdAreas_.append("sys")
+        if not "sys" in self.listIdAreas_:
+            self.listIdAreas_.append("sys")
 
     """
     Comprueba las firmas para un modulo dado
