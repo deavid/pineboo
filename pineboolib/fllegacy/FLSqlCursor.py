@@ -981,7 +981,7 @@ class FLSqlCursor(QtCore.QObject):
         ret = None
         if hasattr(self._action, "name"):
             action = FLAction(self._action)
-            ret = str(action.name())
+            action.name()
 
         return ret
 
@@ -1007,28 +1007,31 @@ class FLSqlCursor(QtCore.QObject):
             except KeyError:
                 # logger.notice("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
                 self._action.table = a
-                # logger.notice("setAction(): Action no encontrada %s en %s actions. Es posible que la tabla no exista" % (a, len(pineboolib.project.actions)))
-                # return False
+        elif isinstance(a, FLAction):
+            from pineboolib.utils import convertFLAction
+            self._action = convertFLAction(a)
+        else:
+            self._action = a
+
+        if not self._action.table:
+            return None
+
+            # logger.notice("setAction(): Action no encontrada %s en %s actions. Es posible que la tabla no exista" % (a, len(pineboolib.project.actions)))
+            # return False
             # self._action = pineboolib.project.actions["articulos"]
 
-            if getattr(self._action, "table", None):
-                self.d._model = PNCursorTableModel(self._action, self.conn())
-                if not self.model():
-                    return None
+        self.d._model = PNCursorTableModel(self._action, self.conn())
+        if not self.model():
+            return None
 
-                self._selection = QtCore.QItemSelectionModel(self.model())
-                self.selection().currentRowChanged.connect(
-                    self.selection_currentRowChanged)
-                self._currentregister = self.selection().currentIndex().row()
-                self.d.metadata_ = self.db().manager().metadata(self._action.table)
-            else:
-                return False
+        self._selection = QtCore.QItemSelectionModel(self.model())
+        self.selection().currentRowChanged.connect(self.selection_currentRowChanged)
+        self._currentregister = self.selection().currentIndex().row()
+        self.d.metadata_ = self.db().manager().metadata(self._action.table)
 
-            self.d.activatedCheckIntegrity_ = True
-            self.d.activatedCommitActions_ = True
-            return True
-        else:
-            self.d.action_ = str(a)
+        self.d.activatedCheckIntegrity_ = True
+        self.d.activatedCommitActions_ = True
+        return True
 
     """
     Establece el filtro principal del cursor.
@@ -1207,7 +1210,8 @@ class FLSqlCursor(QtCore.QObject):
 
         field = self.metadata().field(fN)
         if not field:
-            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s", self.curName(), fN, self.metadata().name())
+            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s",
+                        self.curName(), fN, self.metadata().name())
             return None
 
         type_ = field.type()
@@ -1758,7 +1762,8 @@ class FLSqlCursor(QtCore.QObject):
                         q.setWhere(self.db().manager().formatAssignValue(
                             r.foreignField(), field, s, True))
                         q.setForwardOnly(True)
-                        logger.debug("SQL linea = %s conn name = %s", q.sql(), str(pineboolib.project.conn.connectionName()))
+                        logger.debug("SQL linea = %s conn name = %s", q.sql(),
+                                     str(pineboolib.project.conn.connectionName()))
                         q.exec_()
                         if not q.next():
                             # msg = msg + "\n" + self.metadata().name() + ":" + field.alias() +
@@ -3064,7 +3069,8 @@ class FLSqlCursor(QtCore.QObject):
                     try:
                         v = self.context().calculateField(field.name())
                     except Exception:
-                        logger.exception("commitBuffer(): Campo calculado %s, pero no se ha calculado nada", field.name())
+                        logger.exception(
+                            "commitBuffer(): Campo calculado %s, pero no se ha calculado nada", field.name())
 
                     if v:
                         self.setValueBuffer(field.name(), v)
