@@ -11,7 +11,6 @@ from xml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qApp
 from PyQt5.QtCore import Qt, QSignalMapper
-from PyQt5.QtWidgets import QMenu, QActionGroup, QApplication
 
 import pineboolib
 
@@ -614,7 +613,7 @@ class Project(object):
     def chooseFont(self):
         font_ = QtWidgets.QFontDialog().getFont()
         if font_:
-            QtWidgets.QApplication.setFont(font_[0])
+            qApp.setFont(font_[0])
             save_ = []
             save_.append(font_[0].family())
             save_.append(font_[0].pointSize())
@@ -630,7 +629,7 @@ class Project(object):
         if style_:
             sett_ = FLSettings()
             sett_.writeEntry("application/style", style_)
-            QtWidgets.QApplication.setStyle(style_)
+            qApp.setStyle(style_)
 
     def showStyles(self):
         sett_ = FLSettings()
