@@ -57,7 +57,7 @@ class FLManager(QtCore.QObject):
         self.initCount_ = 0
         self.cacheMetaData_ = []
         self.cacheMetaDataSys_ = []
-        self.cacheAction_ = []
+        self.cacheAction_ = {}
         QtCore.QTimer.singleShot(100, self.init)
         self.metadataCachedFails = []
 
@@ -123,7 +123,7 @@ class FLManager(QtCore.QObject):
             self.cacheMetaData_ = []
 
         if not self.cacheAction_:
-            self.cacheAction_ = []
+            self.cacheAction_ = {}
 
         if not self.cacheMetaDataSys_:
             self.cacheMetaDataSys_ = []
@@ -135,7 +135,7 @@ class FLManager(QtCore.QObject):
         self.dictKeyMetaData_ = {}
         self.listTables_ = []
         self.cacheMetaData_ = []
-        self.cacheAction_ = []
+        self.cacheAction_ = {}
 
     def metadata(self, n, quick=False):
         """
@@ -378,7 +378,8 @@ class FLManager(QtCore.QObject):
 
                         # if not (not fieldsEmpty and table == name and fields.find(field.lower())) != fields.end():
                         # print("Tabla %s nombre %s campo %s buscando en %s" % (table, name, field, fields))
-                        # if not fieldsEmpty and table == name and (field.lower() in fields): Asi esta en Eneboo, pero incluye campos repetidos
+                        # if not fieldsEmpty and table == name and (field.lower() in fields): Asi
+                        # esta en Eneboo, pero incluye campos repetidos
                         if not fieldsEmpty and (field.lower() in fields):
                             continue
 
@@ -479,8 +480,7 @@ class FLManager(QtCore.QObject):
 
         return q
 
-    @decorators.Incomplete
-    def action(self, n):
+    def action(self, n=None):
         """
         Obtiene la definición de una acción a partir de su nombre.
 
@@ -496,15 +496,135 @@ class FLManager(QtCore.QObject):
 
         name = str(n)
 
-        for action in self.cacheAction_:
-            if action.name() == name:
-                return action
+        if name in self.cacheAction_.keys():
+            return self.cacheAction_[name]
 
-        actionN = FLAction()
-        actionN.setName(name)
-        actionN.setTable(name)
-        self.cacheAction_.append(actionN)
-        return actionN
+        a = FLAction()
+        util = FLUtil()
+        doc = QDomDocument(n)
+        list_modules = self.db_.managerModules().listAllIdModules()
+        content_actions = None
+
+        for it in list_modules:
+            content_actions = self.db_.managerModules().contentCached("%s.xml" % it)
+            if content_actions.find("<name>%s</name>" % n) > -1:
+                break
+
+        if not util.domDocumentSetContent(doc, content_actions):
+            self.logger.warn("FLManager : " + QApplication.tr("Error al cargar la accion %s" % n))
+
+            return None
+
+        doc_elem = doc.documentElement()
+        no = doc_elem.firstChild()
+
+        a.setName(n)
+        a.setTable(n)
+        while not no.isNull():
+            e = no.toElement()
+
+            if not e.isNull():
+                if e.tagName() == "action":
+                    nl = e.elementsByTagName("name")
+                    if nl.count() == 0:
+                        self.logger.warn("Debe indicar la etiqueta <name> en acción '%s'" % n)
+                        no = no.nextSibling()
+                        continue
+                    else:
+                        it = nl.item(0).toElement()
+                        if it.text() != n:
+                            no = no.nextSibling()
+                            continue
+
+                    no2 = e.firstChild()
+                    e2 = no2.toElement()
+
+                    is_valid_name = False
+
+                    while not no2.isNull():
+                        e2 = no2.toElement()
+                        if not e2.isNull():
+                            if e2.tagName() == "name":
+                                is_valid_name = (e2.text() == n)
+                                break
+                        no2 = no2.nextSibling()
+
+                    no2 = e.firstChild()
+                    e2 = no2.toElement()
+                    if is_valid_name:
+                        if not e2.isNull():
+                            if e2.tagName() != "name":
+                                self.logger.debug(
+                                    "WARN: El primer tag de la acción '%s' no es name, se encontró '%s'." % (n, e2.tagName()))
+                        else:
+                            self.logger.debug("WARN: Se encontró una acción vacia para '%s'." % n)
+
+                    while is_valid_name and not no2.isNull():
+                        e2 = no2.toElement()
+
+                        if not e2.isNull():
+                            if e2.tagName() == "name":
+                                a.setName(e2.text())
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "scriptformrecord":
+                                a.setScriptFormRecord(e2.text())
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "scriptform":
+                                a.setScriptForm(e2.text())
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "table":
+                                a.setTable(e2.text())
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "form":
+                                a.setForm(e2.text())
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "formrecord":
+                                a.setFormRecord(e2.text())
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "caption":
+                                txt_ = e2.text()
+                                if txt_.find("QT_TRANSLATE_NOOP") > -1:
+                                    txt_ = txt_[30: len(txt_) - 32]
+                                    txt_ = util.translate("Metadata", txt_)
+
+                                a.setCaption(txt_)
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "description":
+                                txt_ = e2.text()
+                                if txt_.find("QT_TRANSLATE_NOOP") > -1:
+                                    txt_ = txt_[30: len(txt_) - 32]
+                                    txt_ = util.translate("Metadata", txt_)
+
+                                if a.caption() == "":
+                                    a.setDescription(txt_)
+                                no2 = no2.nextSibling()
+                                continue
+                            if e2.tagName() == "alias":
+                                txt_ = e2.text()
+                                if txt_.find("QT_TRANSLATE_NOOP") > -1:
+                                    txt_ = txt_[30: len(txt_) - 32]
+                                    txt_ = util.translate("Metadata", txt_)
+
+                                a.setCaption(txt_)
+                                no2 = no2.nextSibling()
+                                continue
+
+                        no2.nextSibling()
+
+                    no = no.nextSibling()
+                    continue
+
+            no = no.nextSibling()
+
+        self.cacheAction_[n] = a
+        return a
 
     def existsTable(self, n, cache=True):
         """
@@ -595,7 +715,6 @@ class FLManager(QtCore.QObject):
 
             return n_or_tmd
 
-
     def formatValueLike(self, *args, **kwargs):
         """
         Devuelve el contenido del valor de de un campo formateado para ser reconocido
@@ -613,7 +732,7 @@ class FLManager(QtCore.QObject):
         if not isinstance(args[0], str):
             if not args[0]:
                 return ""
-            
+
             self.formatValueLike(args[0].type(), args[1], args[2])
         else:
             return self.db_.formatValueLike(args[0], args[1], args[2])
@@ -633,71 +752,63 @@ class FLManager(QtCore.QObject):
         @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
         """
         if isinstance(args[0], FLFieldMetaData):
-            #Tipo 1
+            # Tipo 1
             if not args[0]:
                 return "1 = 1"
-            
+
             mtd = args[0].metadata()
             if not mtd:
                 return self.formatAssignValueLike(args[0].name(), args[0].type(), args[1], args[2])
-            
+
             if args[0].isPrimaryKey():
                 return self.formatAssignValueLike(mtd.primaryKey(True), args[0].type(), args[1], args[2])
-            
+
             fieldName = args[0].name()
             if mtd.isQuery() and fieldName.find(".") == -1:
                 prefixTable = mtd.name()
                 qry = FLSqlQuery(mtd.query())
-                
+
                 if qry:
                     fL = qry.fieldList()
-                
+
                 for it in fL:
                     if it.find(".") > -1:
                         itFieldName = it[it.find(".") + 1:]
                     else:
                         itFieldName = it
-                    
+
                     if itFieldName == fieldName:
                         break
-                
+
                 qry.deleteLater()
-            
+
             return self.formatAssignValueLike("%s.%s" % (prefixTable, fieldName), args[0].type(), args[1], args[2])
-        
+
         elif isinstance(args[1], FLFieldMetaData):
-            #tipo 2
+            # tipo 2
             if args[1] == None:
                 return "1 = 1"
-            
+
             return self.formatAssignValueLike(args[0], args[1].type(), args[2], args[3])
-        
+
         else:
-            #tipo 3
+            # tipo 3
             #args[0] = fieldName
             #args[1] = type
             #args[2] = valor
             #args[3] = upper
-            
+
             if args[0] is None or not args[1]:
                 return "1 = 1"
-            
-            isText = args[1] in ("string","stringlist")
+
+            isText = args[1] in ("string", "stringlist")
             formatV = self.formatValueLike(args[1], args[2], args[3])
-            
+
             if not formatV:
                 return "1 = 1"
-            
+
             fName = "upper(%s)" % args[0] if args[3] else args[0]
             return "%s %s" % (fName, formatV)
-            
-            
-            
-            
-        
-        
-        
-        
 
     def formatValue(self, fMD_or_type, v, upper=False):
 
