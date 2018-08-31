@@ -74,7 +74,8 @@ def coalesce_path(*filenames):
             return None
         if filename in pineboolib.project.files:
             return pineboolib.project.files[filename].path()
-    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False)
+    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s",
+                 repr(filenames), stack_info=False)
 
 
 """
@@ -176,7 +177,8 @@ class DefFun:
                          self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
 
-        logger.debug("%r: Método no implementado %s %s", self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
+        logger.debug("%r: Método no implementado %s %s",
+                     self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
         return None
 
 
@@ -542,7 +544,8 @@ def checkDependencies(dict_):
             if not getattr(sys, 'frozen', False):
                 msg += "\nEl programa se cerrará ahora."
             if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-                ret = QtWidgets.QMessageBox.warning(QtWidgets.QWidget(), "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
+                ret = QtWidgets.QMessageBox.warning(
+                    QtWidgets.QWidget(), "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
 
         if not getattr(sys, 'frozen', False):
             sys.exit(32)
@@ -558,3 +561,10 @@ def version_check(modname, modver, minver):
 def version_normalize(v):
     """Normalize version string numbers like 3.10.1 so they can be compared."""
     return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
+
+
+def convertFLAction(action):
+    if action.name() in pineboolib.project.actions.keys():
+        return pineboolib.project.actions[action.name()]
+    else:
+        return None
