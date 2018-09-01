@@ -54,7 +54,7 @@ class Project(object):
     conn = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
     mainFormName = "Eneboo"
-    version = "0.3"
+    version = "0.4"
     #_initModules = None
     main_window = None
     translators = None
@@ -376,10 +376,20 @@ class Project(object):
             return False
 
         funAction = self.actions[aFunction[0]]
-
         if aFunction[1] == "iface" or len(aFunction) == 2:
             mW = funAction.load()
-            funScript = mW.iface
+            if len(aFunction) == 2:
+                funScript = None
+                if hasattr(mW, "iface"):
+                    if hasattr(mW.iface, aFunction[1]):
+                        funScript = mW.iface
+
+                if not funScript:
+                    funScript = mW
+
+            else:
+                funScript = mW.iface
+
         elif aFunction[1] == "widget":
             fR = None
             funAction.load_script(aFunction[0], fR)
