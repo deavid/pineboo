@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
 from pineboolib import decorators
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QTreeWidgetItem
 
 
-class MainForm(object):
+class MainForm(QtCore.QObject):
 
     MAX_RECENT = 10
     app_ = None
@@ -22,6 +23,9 @@ class MainForm(object):
     lista_tabs_ = []
 
     def __init__(self):
+
+        super(MainForm, self).__init__()
+
         self.ui_ = None
         self.w_ = QMainWindow()
         #self.app_ = QApplication
@@ -34,20 +38,20 @@ class MainForm(object):
         self.initScript()
 
     def eventFilter(self, o, e):
-        if e.type() == AQS.ContextMenu:
+        if isinstance(e, AQS.ContextMenu):
             if o == getattr(self.dck_mod_, "w_", None):
-                return self.addMarkFromItem(self.dck_mod_.lw_.currentItem(), e.eventData.globalPos)
+                return self.addMarkFromItem(self.dck_mod_.lw_.currentItem(), e.globalPos())
             elif o == getattr(self.dck_rec_, "w_", None):
-                return self.addMarkFromItem(self.dck_rec_.lw_.currentItem(), e.eventData.globalPos)
+                return self.addMarkFromItem(self.dck_rec_.lw_.currentItem(), e.globalPos())
             elif o == getattr(self.dck_mar_, "w_", None):
-                return self.addMarkFromItem(self.dck_mar_.lw_.currentItem(), e.eventData.globalPos)
+                return self.addMarkFromItem(self.dck_mar_.lw_.currentItem(), e.globalPos())
 
-            pinebooMenu = self.w_.child("pinebooMenu")
-            pinebooMenu.exec(e.eventData.globalPos)
+            #pinebooMenu = self.w_.child("pinebooMenu")
+            # pinebooMenu.exec_(e.globalPos)
             return True
 
-        elif e.type() == AQS.Close:
-            if aqApp.mainWidget() and o == aqApp.mainWidget():
+        elif isinstance(e, AQS.Close):
+            if isinstance(o, QMainWindow):
                 self.w_.setDisabled(True)
                 ret = self.exit()
                 if not ret:
@@ -77,13 +81,13 @@ class MainForm(object):
         self.w_.setObjectName("container")
 
     def exit(self):
-        res = MessageBox.Information(sys.translate("¿Quiere salir de la aplicación?"),
-                                     MessageBox.Yes, MessageBox.No, MessageBox.NoButton, "Pineboo")
+        res = QMessageBox.information(self.w_, "Pineboo",
+                                      "¿ Desea salir ?", QMessageBox.Yes, QMessageBox.No)
         doExit = True if res == MessageBox.Yes else False
         if doExit:
             self.writeState()
             self.w_.removeEventFilter(self.w_)
-            aqApp.generalExit(false)
+            aqApp.generalExit(False)
             self.removeAllPages()
 
         return doExit
@@ -92,12 +96,12 @@ class MainForm(object):
         w = self.w_
         self.dck_mod_.writeState()
         self.dck_rec_.writeState()
-        self.dck_mar_.wirteState()
+        self.dck_mar_.writeState()
 
-        setting = AQSettings
+        settings = AQSettings()
         key = "MainWindow/"
 
-        settings.writeEntry("%smaximized" % key, w.maximized())
+        settings.writeEntry("%smaximized" % key, w.isMaximized())
         settings.writeEntry("%sx" % key, w.x())
         settings.writeEntry("%sy" % key, w.y())
         settings.writeEntry("%swidth" % key, w.width())
@@ -107,24 +111,24 @@ class MainForm(object):
 
         open_actions = []
 
-        for i in len(self.tw_):
-            open_actions.append(tw.page(i).idMDI())
+        for i in range(self.tw_.count()):
+            open_actions.append(self.tw_.widget(i).idMDI())
 
         settings.writeEntry("%sopenActions" % key, open_actions)
-        settings.writeEntry("%scurrentPageIndex" % key, self.tw_.currentPageIndex())
+        settings.writeEntry("%scurrentPageIndex" % key, self.tw_.currentIndex())
 
         recent_actions = []
-        item = self.dck_rec_.lw_.firstChild()
-        while item:
-            recent_actions.append(item.text(1))
-            item = item.nextSibling()
+        root_recent = self.dck_rec_.lw_.invisibleRootItem()
+        count_recent = root_recent.childCount()
+        for i in range(count_recent):
+            recent_actions.append(root_recent.child(i).text(1))
         settings.writeEntry("%srecentActions" % key, open_actions)
 
         mark_actions = []
-        item = self.dck_mar_.lw_.firstChild()
-        while item:
-            mark_actions.append(item.text(1))
-            item = item.nextSibling()
+        root_mark = self.dck_mar_.lw_.invisibleRootItem()
+        count_mark = root_mark.childCount()
+        for i in range(count_mark):
+            mark_actions.append(root_mark.child(i).text(1))
         settings.writeEntry("%smarkActions" % key, mark_actions)
 
     def readState(self):
@@ -163,14 +167,14 @@ class MainForm(object):
                 i += 1
 
             for open_action in open_actions:
-                action = self.ag_menu_.child(open_action, "QAction")
+                action = self.ag_menu_.findChild(QtWidgets.QAction, open_action)
                 if not action:
                     continue
                 module_name = aqApp.db().managerModules().idModuleOfFile("%s.ui" % action.name)
                 if module_name:
                     self.initModule(module_name)
 
-                self.addForm(open_actions[i], action.iconSet().pixmap())
+                self.addForm(open_actions[i], action.icon().pixmap(16, 16))
 
             idx = settings.readNumEntry("%scurrentPageIndex" % key)
             if idx > 0 and idx < len(self.tw_):
@@ -178,11 +182,11 @@ class MainForm(object):
 
             recent_actions = settings.readListEntry("%srecentActions" % key)
             for recent in reversed(recent_actions):
-                self.addRecent(self.ag_menu_.child(recent), "QAction")
+                self.addRecent(self.ag_menu_.findChild(QtWidgets.QAction, recent))
 
-            mark_actions = settings.readListEntry("%srecentActions" % key)
+            mark_actions = settings.readListEntry("%smarkActions" % key)
             for mark in reversed(mark_actions):
-                self.addMark(self.ag_menu_.child(mark), "QAction")
+                self.addMark(self.ag_menu_.findChild(QtWidgets.QAction, mark))
 
     def init(self):
         self.w_.statusBar().hide()
@@ -224,11 +228,11 @@ class MainForm(object):
         else:
             self.w_.allow_events = [AQS.ContextMenu, AQS.Close, AQS.WindowStatechange]
 
-        self.w_.installEventFilter(self.w_)
+        self.w_.installEventFilter(self)
 
-        self.dck_mod_.w_.installEventFilter(self.w_)
-        self.dck_rec_.w_.installEventFilter(self.w_)
-        self.dck_mar_.w_.installEventFilter(self.w_)
+        self.dck_mod_.w_.installEventFilter(self)
+        self.dck_rec_.w_.installEventFilter(self)
+        self.dck_mar_.w_.installEventFilter(self)
 
     def initModule(self, module):
 
@@ -245,23 +249,25 @@ class MainForm(object):
         mng = aqApp.db().managerModules()
         mng.setActiveIdModule(module)
 
-    def removeCurrentPage(self):
-        page = self.tw_.currentPage()
+    def removeCurrentPage(self, n=None):
+        if n is None:
+            page = self.tw_.currentWidget()
+        else:
+            page = self.tw_.widget(n)
+
         if not page:
             return
 
-        if page.rtti() == "FormDB":
-            page.close()
+        # if page.rtti() == "FormDB":
+        page.close()
 
     def removeAllPages(self):
-        tw = self.tw_
 
         # if len(tw):
         #    self.tw_corner.hide()
 
-        for page in tw.pages():
-            if page.rtti() == "FLFormDB":
-                page.close()
+        for i in range(self.tw_.count()):
+            self.tw_.widget(i).close()
 
     def formClosed(self):
         if len(self.tw_.pages()) == 1 and self.tw_corner:
@@ -298,34 +304,33 @@ class MainForm(object):
             self.ag_rec_ = QActionGroup(self.w_)
             self.ag_rec_.setObjectName("pinebooAgRec")
 
-        agr = self.ag_rec_
-        ac = agr.findChild(QtWidgets.QAction, action.objectName())
+        ac_old = self.ag_rec_.findChild(QtWidgets.QAction, action.objectName())
         check_max = True
-        if ac:
-            agr.removeAction(ac)
+
+        if ac_old:
+            self.ag_rec_.removeAction(ac_old)
+            del ac_old
+
             check_max = False
 
-        ac = self.cloneAction(action, agr)
-        ac.triggered.connect(action.activate)
+        ac = self.cloneAction(action, self.ag_rec_)
 
         lw = self.dck_rec_.lw_
-        item_len = 0
-        it = lw.headerItem()
-        while lw.itemBelow(it):
-            item_len += 1
-
-        if check_max and item_len >= self.MAX_RECENT:
-            ac = agr.findChild(QtWidgets.QAction, lw.lastItem().text(1))
+        if check_max and lw.topLevelItemCount() >= self.MAX_RECENT:
+            last_name = lw.topLevelItem(lw.topLevelItemCount() - 1).text(1)
+            ac = self.ag_rec_.findChild(QtWidgets.QAction, last_name)
             if ac:
-                agr.removeAction(ac)
+                self.ag_rec_.removeAction(ac)
+                del ac
 
-        self.dck_rec_.update(agr, True)
+        self.dck_rec_.update(self.ag_rec_, True)
 
     def addMark(self, action):
         if not action:
             return
-        if not self.ag_mar:
-            self.ag_mar_ = QActionGroup(self.w_, "pinebooAgMar")
+        if not self.ag_mar_:
+            self.ag_mar_ = QActionGroup(self.w_)
+            self.ag_mar_.setObjectName("pinebooAgMar")
 
         ac = self.cloneAction(action, self.ag_mar_)
         ac.triggered.connect(action.activate)
@@ -339,10 +344,12 @@ class MainForm(object):
         if item.text(1) is None:
             return True
 
-        popMenu = QPopupMenu()
-        popMenu.insertItem(sys.translate("Añadir Marcadores"), 1)
-        if popMenu.exec_(pos) == 1:
-            ac = self.ag_menu_.child(item.text(1))
+        popMenu = QMenu()
+        popMenu.move(pos)
+        ac_menu = popMenu.addAction(sys.translate("Añadir Marcadores"))
+        res = popMenu.exec_()
+        if res:
+            ac = self.ag_menu_.findChild(QtWidgets.QAction, item.text(1))
             if ac:
                 self.addMark(ac)
 
@@ -445,7 +452,7 @@ class MainForm(object):
                         staticLoad = QAction(ag)
                         staticLoad.setObjectName("staticLoaderSetupAction")
                         staticLoad.setText(sys.translate("Configurar carga estática"))
-                        staticLoad.setIcon(QIconSet(AQS.pixmap_fromMineSource("folder_update.png")))
+                        staticLoad.setIcon(QIcon(AQS.Pixmap_fromMineSource("folder_update.png")))
                         staticLoad.triggered.connect(self.act_sig_map_.map)
                         self.act_sig_map_.setMapping(
                             staticLoad, "triggered():staticLoaderSetup():%s" % staticLoad.objectName())
@@ -453,7 +460,7 @@ class MainForm(object):
                         reInit = QAction(ag)
                         reInit.setObjectName("reinitAction")
                         reInit.setText(sys.translate("Recargar scripts"))
-                        reInit.setIcon(QIconSet(AQS.pixmap_fromMineSource("reload.png")))
+                        reInit.setIcon(QIcon(AQS.Pixmap_fromMineSource("reload.png")))
                         reInit.triggered.connect(self.act_sig_map_.map)
                         self.act_sig_map_.setMapping(reInit, "triggered():reinit():%s" % reInit.objectName())
 
@@ -473,6 +480,8 @@ class MainForm(object):
 
     def initTabWidget(self):
         self.tw_ = self.w_.findChild(QtWidgets.QTabWidget, "tabWidget")
+        self.tw_.setTabsClosable(True)
+        self.tw_.tabCloseRequested[int].connect(self.removeCurrentPage)
         self.tw_.removeTab(0)
         """
         tb = self.tw_corner = QToolButton(tw, "tabWidgetCorner")
@@ -584,13 +593,14 @@ class MainForm(object):
             return None
 
         w = mng.createUI(ui_file)
-        if not w or not w.inherits("QMainWindow"):
+
+        if not w or not isinstance(w, QMainWindow):
             if w:
-                self.main_widgets_[w.name] = w
+                self.main_widgets_[w.objectName()] = w
 
             return None
 
-        w.name = parent.objectName()
+        w.setObjectName(parent.objectName())
         # aqApp.setMainWidget(w)
         # if (sys.isNebulaBuild()):
         #    w.show()
@@ -789,15 +799,16 @@ class DockListView(object):
     w_ = None
     lw_ = None
     ag_ = None
+    _name = None
 
     def __init__(self, parent, name, title):
         if parent is None:
             return
 
         self.w_ = QtWidgets.QDockWidget(name, parent)
-
+        self._name = "%sListView" % name
         self.lw_ = QTreeWidget(self.w_)
-        self.lw_.setObjectName("%sListView" % name)
+        self.lw_.setObjectName(self._name)
 
         # this.lw_.addColumn("");
         # this.lw_.addColumn("");
@@ -826,25 +837,29 @@ class DockListView(object):
 
         settings = AQSettings()
         key = "MainWindow/%s/" % self.w_.objectName()
-        settings.writeEntry("%splace" % key, self.w_.place())  # Donde está emplazado
+        # FIXME
+        # settings.writeEntry("%splace" % key, self.w_.place())  # Donde está emplazado
+
         settings.writeEntry("%svisible" % key, self.w_.isVisible())
-        settings.writeEntry("%sx", key, self.w_.x())
-        settings.writeEntry("%sy", key, self.w_.y())
-        settings.writeEntry("%swidth", key, self.w_.width())
-        settings.writeEntry("%sheight", key, self.w_.height())
+        settings.writeEntry("%sx" % key, self.w_.x())
+        settings.writeEntry("%sy" % key, self.w_.y())
+        settings.writeEntry("%swidth" % key, self.w_.width())
+        settings.writeEntry("%sheight" % key, self.w_.height())
+        # FIXME
         #settings.writeEntry("%soffset", key, self.offset())
-        area = self.area()
-        settings.writeEntry("%sindex", key, area.findDockWindow(self.w_) if area else None)
+        #area = self.area()
+        #settings.writeEntry("%sindex" % key, area.findDockWindow(self.w_) if area else None)
 
     def readState(self):
 
         settings = AQSettings()
         key = "MainWindow/%s/" % self.w_.objectName()
-        place = settings.readNumEntry("%splace" % key, AQS.InDock)
-        if place == AQS.OutSideDock:
-            self.w_.setFloating(True)
-            self.w_.move(settings.readNumEntry("%sx" % key, self.w_.x()),
-                         settings.readNumEntry("%sy" % key, self.w_.y()))
+        # FIXME
+        #place = settings.readNumEntry("%splace" % key, AQS.InDock)
+        # if place == AQS.OutSideDock:
+        #    self.w_.setFloating(True)
+        #    self.w_.move(settings.readNumEntry("%sx" % key, self.w_.x()),
+        #                 settings.readNumEntry("%sy" % key, self.w_.y()))
 
         #self.w_.offset = settings.readNumEntry("%soffset" % key, self.offset)
         index = settings.readNumEntry("%sindex" % key, None)
@@ -857,8 +872,8 @@ class DockListView(object):
         width = settings.readNumEntry("%swidth" % key, self.w_.width())
         height = settings.readNumEntry("%sheight" % key, self.w_.height())
         self.lw_.resize(width, height)
-        self.w_.resize(width, height)
-        visible = settings.readNumEntry("%svisible" % key, True)
+        #self.w_.resize(width, height)
+        visible = settings.readBoolEntry("%svisible" % key, True)
         if visible:
             self.w_.show()
         else:
@@ -881,12 +896,15 @@ class DockListView(object):
         if ac:
             ac.triggered.emit()
 
-    def update(self, action_group, reverse=False):
+    def update(self, action_group=None, reverse=False):
         self.ag_ = action_group
-        self.lw_.clear()
-        if not action_group:
+
+        if not self.ag_:
             return
-        self.buildListView(self.lw_, AQS.toXml(action_group), action_group, reverse)
+
+        self.lw_.clear()
+
+        self.buildListView(self.lw_, AQS.toXml(self.ag_), self.ag_, reverse)
 
     def buildListView(self, parent_item, parent_element, ag, reverse):
         this_item = None
@@ -927,6 +945,7 @@ class DockListView(object):
                             this_item = parent_item
                         else:
                             this_item = QTreeWidgetItem(parent_item)
+
                         this_item.setIcon(0, ac.icon())  # Code el icono mal!!
                         if class_name == "QAction":
                             this_item.setText(1, action_name)
