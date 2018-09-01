@@ -300,7 +300,8 @@ class FLTableDB(QtWidgets.QWidget):
 
             self.cursorAux.newBuffer.connect(self.refresh)
 
-        if self.cursorAux and isinstance(self.topWidget, FLFormSearchDB) and not cursorTopWidget:  # Si hay cursorTopWidget no machaco el cursor de topWidget
+        # Si hay cursorTopWidget no machaco el cursor de topWidget
+        if self.cursorAux and isinstance(self.topWidget, FLFormSearchDB) and not cursorTopWidget:
             self.topWidget.setCaption(self.cursor_.metadata().alias())
             self.topWidget.setCursor(self.cursor_)
 
@@ -469,7 +470,8 @@ class FLTableDB(QtWidgets.QWidget):
             self.moveCol(_index, i)
             i = i + 1
 
-        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), QtCore.Qt.AscendingOrder)
+        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(
+            self.sortColumn_), QtCore.Qt.AscendingOrder)
         textSearch = self.lineEditSearch.text()
         self.refresh(True)
 
@@ -646,7 +648,7 @@ class FLTableDB(QtWidgets.QWidget):
     def setFunctionGetColor(self, f):
         self.functionGetColor_ = f
         if self.topWidget:
-            if f.contains('.'):
+            if f.find('.') > -1:
                 self.tableRecords().setFunctionGetColor(f)
             else:
                 self.tableRecords().setFunctionGetColor("%s.%s" % (self.topWidget.name(), f))
@@ -1103,7 +1105,8 @@ class FLTableDB(QtWidgets.QWidget):
                     if not type == "bool":
                         condList = [
                             util.tr("Todos"), util.tr("Igual a Valor"), util.tr("Distinto de Valor"), util.tr("Vacío"),
-                            util.tr("No Vacío"), util.tr("Contiene Valor"), util.tr("Empieza por Valor"), util.tr("Acaba por Valor"),
+                            util.tr("No Vacío"), util.tr("Contiene Valor"), util.tr(
+                                "Empieza por Valor"), util.tr("Acaba por Valor"),
                             util.tr("Mayor que Valor"), util.tr("Menor que Valor"), util.tr("Desde - Hasta")]
                     cond.insertStringList(condList)
                     self.tdbFilter.setCellWidget(_linea, 1, cond)
@@ -1890,7 +1893,8 @@ class FLTableDB(QtWidgets.QWidget):
             return False
 
         self.moveCol(_index, self.sortColumn_)
-        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), QtCore.Qt.AscendingOrder)
+        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(
+            self.sortColumn_), QtCore.Qt.AscendingOrder)
         return True
 
     """
