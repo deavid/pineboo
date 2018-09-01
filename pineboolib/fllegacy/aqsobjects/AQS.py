@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QColor, QCloseEvent, QPixmap
+from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy
 from PyQt5.QtCore import Qt
+from PyQt5 import QtGui
+
 from pineboolib.utils import filedir
 
 import logging
@@ -12,7 +14,6 @@ logger = logging.getLogger("AQS")
 
 class AQS(object):
 
-    Close = None
     Box = None
     Plain = None
     AlignTop = None
@@ -20,7 +21,6 @@ class AQS(object):
     InDock = None
 
     def __init__(self):
-        self.Close = QCloseEvent
         self.InDock = "InDock"
         self.OutSideDock = "OutSideDock"
 
@@ -82,9 +82,9 @@ class AQS(object):
         if includeChildren == True:
 
             for child in obj_.children():
+
                 itd = self.toXml(child, includeChildren, includeComplexTypes)
                 xml_.firstChild().appendChild(itd.firstChild())
-
         return xml_
 
     def Pixmap_fromMineSource(self, name):
@@ -92,14 +92,17 @@ class AQS(object):
 
     def __getattr__(self, name):
 
+        ret_ = getattr(QtGui, "Q%sEvent" % name, None)
+        if ret_:
+            return ret_
+
         if name in self.translate:
             if name == "DockLeft":
                 name = "LeftDockWidgetArea"
-            elif name == "ContextMenu":
-                name = "CustomContextMenu"
 
         for lib in [QFrame, QLabel, QSizePolicy, Qt]:
             ret_ = getattr(lib, name, None)
+
             if ret_ is not None:
                 return ret_
 
