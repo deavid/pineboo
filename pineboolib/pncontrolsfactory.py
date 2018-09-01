@@ -421,6 +421,10 @@ class aqApp_class(QObject):
         if action_name in pineboolib.project.actions.keys():
             pineboolib.project.actions[action_name].execMainScript(action_name)
 
+    @decorators.NotImplementedWarn
+    def generalExit(self, ask=True):
+        pass
+
 
 aqApp = aqApp_class()
 
@@ -496,6 +500,8 @@ class FormDBWidget(QWidget):
 
     def closeEvent(self, event):
         can_exit = True
+        if not self._action:
+            self._action = getattr(self.parent(), "_action")
         self.logger.debug("closeEvent para accion %r", self._action.name)
         check_gc_referrers("FormDBWidget:" + self.__class__.__name__,
                            weakref.ref(self), self._action.name)
