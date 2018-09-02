@@ -340,6 +340,8 @@ class Project(object):
             except Exception as e:
                 self.logger.error(e)
 
+        if self._splash:
+            self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         self.loadTranslations()
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
