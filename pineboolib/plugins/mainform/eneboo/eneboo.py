@@ -44,7 +44,7 @@ class MainForm(QtCore.QObject):
             elif o == getattr(self.dck_rec_, "w_", None):
                 return self.addMarkFromItem(self.dck_rec_.lw_.currentItem(), e.globalPos())
             elif o == getattr(self.dck_mar_, "w_", None):
-                return self.addMarkFromItem(self.dck_mar_.lw_.currentItem(), e.globalPos())
+                return self.removeMarkFromItem(self.dck_mar_.lw_.currentItem(), e.globalPos())
 
             #pinebooMenu = self.w_.child("pinebooMenu")
             # pinebooMenu.exec_(e.globalPos)
@@ -82,7 +82,7 @@ class MainForm(QtCore.QObject):
 
     def exit(self):
         res = QMessageBox.information(self.w_, "Pineboo",
-                                      "¿ Desea salir ?", QMessageBox.Yes, QMessageBox.No)
+                                      "¿ Quiere salir de la aplicación ?", QMessageBox.Yes, QMessageBox.No)
         doExit = True if res == MessageBox.Yes else False
         if doExit:
             self.writeState()
@@ -356,30 +356,60 @@ class MainForm(QtCore.QObject):
         return True
 
     def removeMarkFromItem(self, item, pos):
-        if not item or not self.ag_mar_ or self.dck_mar_.lw_.childCount == 0:
+        if not item or not self.ag_mar_ or self.dck_mar_.lw_.invisibleRootItem().childCount() == 0:
             return False
 
         if item.text(1) is None:
             return True
 
-        popMenu = QPopupMenu()
-        popMenu.insertItem(sys.translate("Eliminar Marcador"), 1)
-        if popMenu.exec_(pos) == 1:
-            ac = self.ag_mar_.child(item.text(1))
+        popMenu = QMenu()
+        popMenu.move(pos)
+        ac_menu = popMenu.addAction(sys.translate("Eliminar Marcador"))
+        res = popMenu.exec_()
+        if res:
+            ac = self.ag_mar_.findChild(QtWidgets.QAction, item.text(1))
             if ac:
-                self.ag_mar_.removeChild(ac)
+                self.ag_mar_.removeAction(ac)
+                del ac
                 self.dck_mar_.update(self.ag_mar_)
 
         return True
+
+    def updateMenu(self, action_group, parent):
+
+        object_list = action_group.children()
+        for obj_ in object_list:
+            o_name = obj_.objectName()
+            if isinstance(obj_, QActionGroup):
+                new_parent = parent
+
+                ac_name = obj_.findChild(QtWidgets.QAction, "%s_actiongroup_name" % o_name)
+                if ac_name:
+                    if not o_name.endswith("Actions") or o_name.endswith("MoreActions"):
+                        new_parent = parent.addMenu(ac_name.icon(), ac_name.text())
+
+                self.updateMenu(obj_, new_parent)
+                continue
+
+            if o_name.endswith("_actiongroup_name"):
+                continue
+
+            if o_name == "separator":
+                a_ = parent.addAction("")
+                a_.setSeparator(True)
+            else:
+                a_ = parent.addAction(obj_.text())
+                a_.setIcon(obj_.icon())
+                a_.triggered.connect(obj_.activate)
+
+            a_.setObjectName(o_name)
 
     def updateMenuAndDocks(self):
 
         self.updateActionGroup()
         pinebooMenu = self.w_.findChild(QtWidgets.QMenu, "menuPineboo")
         pinebooMenu.clear()
-        for ac in self.ag_menu_.actions():
-            a_ = pinebooMenu.addAction(ac.text())
-            self.cloneAction(a_, ac)
+        self.updateMenu(self.ag_menu_, pinebooMenu)
 
         aqApp.setMainWidget(self.w_)
 
