@@ -192,7 +192,7 @@ class FLFormRecordDB(FLFormDB):
                 self.cursor_.setAction(self._action)
                 from pineboolib.fllegacy.FLAction import FLAction
                 fl_action = FLAction(self._action.name)
-                caption = self._action.name
+                caption = fl_action.caption()
                 if fl_action.description():
                     self.setWhatsThis(fl_action.description())
                 self.idMDI_ = self._action.name
