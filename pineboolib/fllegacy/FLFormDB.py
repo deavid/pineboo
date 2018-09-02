@@ -170,11 +170,11 @@ class FLFormDB(QtWidgets.QDialog):
 
         self._action = action
         if type(self).__name__ == "FLFormRecordDB":
-            self.actionName_ = "formRecord" + action.name
+            self.actionName_ = "formRecord" + self._action.name
         else:
-            self.actionName_ = "form" + action.name
+            self.actionName_ = "form" + self._action.name
 
-        self.mod = action.mod
+        self.mod = self._action.mod
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setContentsMargins(1, 1, 1, 1)
@@ -183,15 +183,15 @@ class FLFormDB(QtWidgets.QDialog):
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         self.setLayout(self.layout)
         if not self._uiName:
-            self._uiName = action.form
+            self._uiName = self._action.form
 
-        if not self._scriptForm and getattr(action, "scriptform", None):
-            self._scriptForm = action.scriptform
+        if not self._scriptForm and getattr(self._action, "scriptform", None):
+            self._scriptForm = self._action.scriptform
 
-        if not getattr(action, "alias", None):
+        if not getattr(self._action, "alias", None):
             qWarning("FLFormDB::Cargando un action XML")
         elif pineboolib.project._DGI.localDesktop():
-            self.setWindowTitle(action.alias)
+            self.setWindowTitle(self._action.alias)
 
         self.idMDI_ = self._action.name
 
