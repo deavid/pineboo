@@ -1267,7 +1267,7 @@ class XMLAction(XMLStruct):
             parent = self
             action_ = self
         else:
-            action_ = parent.action
+            action_ = parent._action
 
         # Si ya esta cargado se reusa...
         # if getattr(self, "script", None) and parent_:
