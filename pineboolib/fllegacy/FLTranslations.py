@@ -9,6 +9,8 @@ from PyQt5.Qt import QFile, QTextStream, qApp
 """
 Esta clase gestiona las diferenetes trducciones de módulos y aplicación
 """
+
+
 class FLTranslations(QtCore.QObject):
 
     TML = None
@@ -17,6 +19,7 @@ class FLTranslations(QtCore.QObject):
     """
     Constructor
     """
+
     def __init__(self):
         super(FLTranslations, self).__init__()
         self.logger = logging.getLogger("FLTranslations")
@@ -28,11 +31,12 @@ class FLTranslations(QtCore.QObject):
     @param verbose. Muestra verbose (True, False)
     @return Boolean. Proceso realizado correctamente
     """
+
     def loadTsFile(self, tor, tsFileName, verbose):
         qmFileName = tsFileName
-        qmFileName = qmFileName.replace(".ts", "")
+        qmFileName = qmFileName[:-3]
         qmFileName = "%s.qm" % qmFileName
-
+        print("qm", qmFileName)
         try:
             if not os.path.exists(qmFileName):
                 tor.load(tsFileName)
@@ -42,7 +46,6 @@ class FLTranslations(QtCore.QObject):
 
         return True
 
-    
     """
     Comprueba si el .qm se ha creado
     @param tor. Metatranslator
@@ -50,11 +53,11 @@ class FLTranslations(QtCore.QObject):
     @param verbose. Muestra verbose (True, False)
     @param stripped. No usado
     """
+
     def releaseMetaTranslator(self, tor, qmFileName, verbose, stripped):
         if verbose:
             self.logger.debug("Checking '%s'...", qmFileName)
-            
-        
+
         if not os.path.exists(qmFileName):
             self.logger.warn("For some reason, i cannot save '%s'", qmFileName)
 
@@ -64,6 +67,7 @@ class FLTranslations(QtCore.QObject):
     @param verbose. Muestra verbose (True, False)
     @param stripped. no usado
     """
+
     def releaseTsFile(self, tsFileName, verbose, stripped):
         tor = None
         if self.loadTsFile(tor, tsFileName, verbose):
@@ -78,6 +82,7 @@ class FLTranslations(QtCore.QObject):
     @param qmOutputFile. Nombre del fichero .qm destino
     @param stripped. No usado
     """
+
     def lrelease(self, tsInputFile, qmOutputFile, stripped=True):
         import pineboolib
         verbose = pineboolib.project.debugLevel > 200
@@ -121,9 +126,12 @@ class FLTranslations(QtCore.QObject):
         if qmOutputFile:
             self.releaseMetaTranslator(tor, qmOutputFile, verbose, stripped)
 
+
 """
 Esta clase llama al conversor  de fichero .qs
 """
+
+
 class metaTranslator(object):
 
     # TODO: Esto en producción seria necesario hacerlo desde el programa.
@@ -131,12 +139,16 @@ class metaTranslator(object):
     Conversor
     @param nombre fichero origen
     """
+
     def load(self, filename):
         return call(["lrelease", filename])
+
 
 """
 Devuelve la traducción si existe
 """
+
+
 class FLTranslate(QtCore.QObject):
 
     group_ = None
@@ -150,6 +162,7 @@ class FLTranslate(QtCore.QObject):
     @param Translate. Boolean que indica si se traduce realmente el texto pasado
     @param pos. Posición en la que se empieza a sustituir los argumentos pasados
     """
+
     def __init__(self, group, context, translate=True, pos=1):
         super(FLTranslate, self).__init__()
         self.pos_ = pos
@@ -163,6 +176,7 @@ class FLTranslate(QtCore.QObject):
     Argumento pasado a la traducción
     @param value. Texto a añadir a la traducción
     """
+
     def arg(self, value):
         if isinstance(value, list):
             for f in value:
@@ -179,5 +193,6 @@ class FLTranslate(QtCore.QObject):
     Retorna el valor traducido
     @return traducción completada con los argumentos
     """
+
     def __str__(self):
         return self.context_
