@@ -36,7 +36,6 @@ class FLTranslations(QtCore.QObject):
         qmFileName = tsFileName
         qmFileName = qmFileName[:-3]
         qmFileName = "%s.qm" % qmFileName
-        print("qm", qmFileName)
         try:
             if not os.path.exists(qmFileName):
                 tor.load(tsFileName)
