@@ -62,11 +62,8 @@ class FormInternalObj(FormDBWidget):
     def interna_main(self):
         util = FLUtil()
         setting = ustr(u"scripts/sys/modLastDirModules_", sys.nameBD())
-        dirAnt = util.readSettingEntry(setting)
-        if dirAnt:
-            dirMods = FileDialog.getExistingDirectory(dirAnt, util.translate(u"scripts", u"Directorio de Módulos"))
-        else:
-            dirMods = FileDialog.getExistingDirectory(False, util.translate(u"scripts", u"Directorio de Módulos"))
+        dirAnt = util.readSettingEntry(setting, False)
+        dirMods = FileDialog.getExistingDirectory(dirAnt, util.translate(u"scripts", u"Directorio de Módulos"))
 
         if not dirMods:
             return
@@ -200,6 +197,8 @@ class FormInternalObj(FormDBWidget):
         fichIcono = File(ustr(fichero.path, u"/", nombreIcono))
         fichIcono.open(File.ReadOnly)
         icono = fichIcono.read()
+
+        print(icono, type(icono))
         # DEBUG:: Argument 0 not understood
         # DEBUG:: <Value><Constant><regexbody><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/><regexchar arg00="PERIOD"/><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/></regexbody></Constant></Value>
         #versionSys = sys.version().match(unknownarg)

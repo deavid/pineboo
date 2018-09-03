@@ -1160,7 +1160,7 @@ class FLSqlCursor(QtCore.QObject):
         # fltype = field.flDecodeType(type_)
         vv = v
 
-        if vv and type_ == "pixmap":
+        if vv and type_ == "pixmap" and not self.db().manager().isSystemTable(self.table()):
             vv = self.db().normalizeValue(vv)
             largeValue = self.db().manager().storeLargeValue(self.metadata(), vv)
             if largeValue:
@@ -1174,7 +1174,6 @@ class FLSqlCursor(QtCore.QObject):
             if pK:
                 pKV = self.buffer().value(pK)
                 q = FLSqlQuery(None, "Aux")
-
                 q.exec_("UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
                 ).formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
             else:

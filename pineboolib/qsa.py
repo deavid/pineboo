@@ -383,9 +383,7 @@ class Dir(object):
         return filename
 
     def setCurrent(self, val=None):
-        if val is None:
-            val = filedir(".")
-        os.chdir(val)
+        os.chdir(val or filedir("."))
 
     def mkdir(self, name=None):
         if name is None:
