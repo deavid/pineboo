@@ -1151,8 +1151,7 @@ class XMLAction(XMLStruct):
 
     def load(self):
         if self.mainform_widget:
-            if getattr(self.mainform_widget, "loaded", None) == False:
-                self._loaded = False
+            self._loaded = getattr(self.mainform_widget, "loaded", False)
 
         if self._loaded:
             return self.mainform_widget
@@ -1171,7 +1170,8 @@ class XMLAction(XMLStruct):
             self.logger.debug(
                 "End of action load %s (iface:%s ; widget:%s)",
                 self.name, getattr(self.mainform_widget, "iface", None), getattr(self.mainform_widget, "widget", None))
-            return self.mainform_widget
+
+        return self.mainform_widget
     """
     Abre el FLFormDB por defecto
     """
