@@ -241,7 +241,7 @@ class FLFieldDB(QtWidgets.QWidget):
     def setFilter(self, f):
         if not self.filter_ == f:
             self.filter_ = f
-            self.setMaValue()
+            self.setMapValue()
 
     """
     Para obtener el filtro del cursor.
