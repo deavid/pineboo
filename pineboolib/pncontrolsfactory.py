@@ -125,7 +125,7 @@ class SysType(object):
         pass
 
     def toUnicode(self, text, format):
-        return u"%s" % text
+        return "%s" % text.encode(format).decode("utf-8")
 
     def mainWidget(self):
         if pineboolib.project._DGI.localDesktop():
@@ -421,6 +421,9 @@ class aqApp_class(QObject):
         if action_name in pineboolib.project.actions.keys():
             pineboolib.project.actions[action_name].execMainScript(action_name)
 
+    def mainWidget(self):
+        return SysType().mainWidget()
+
     @decorators.NotImplementedWarn
     def generalExit(self, ask=True):
         pass
@@ -569,7 +572,7 @@ class FormDBWidget(QWidget):
 
         from pineboolib.fllegacy.FLTableDB import FLTableDB
         if isinstance(ret, FLTableDB):
-            if not ret.tableRecords_:
+            if not ret.tableRecords_ and self.cursor_:
                 ret.tableRecords()
                 ret.setTableRecordsCursor()
 
