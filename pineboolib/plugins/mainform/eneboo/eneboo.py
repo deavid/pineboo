@@ -918,7 +918,7 @@ class DockListView(object):
         if item is None:
             return
 
-        action_name = item.siblingAtColumn(1).data()
+        action_name = item.sibling(item.row(), 1).data()
         if action_name == "":
             return
 
