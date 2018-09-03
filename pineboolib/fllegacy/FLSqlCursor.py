@@ -1001,17 +1001,23 @@ class FLSqlCursor(QtCore.QObject):
 
         if isinstance(a, str):
             # logger.trace("FLSqlCursor(%s): setAction(%s)" % (self.d.curName_, a))
-            self._action = XMLStruct()
+            action = XMLStruct()
             try:
-                self._action = pineboolib.project.actions[str(a)]
+                action = pineboolib.project.actions[str(a)]
             except KeyError:
                 # logger.notice("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
-                self._action.table = a
+                action.table = a
         elif isinstance(a, FLAction):
             from pineboolib.utils import convertFLAction
-            self._action = convertFLAction(a)
+            action = convertFLAction(a)
         else:
-            self._action = a
+            action = a
+
+        if not getattr(self, "_action", None):
+            self._action = action
+        else:
+            if self._action.name == action.name:
+                return True
 
         if not self._action.table:
             return None
