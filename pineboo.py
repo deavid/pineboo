@@ -231,8 +231,8 @@ def create_app(DGI):
 
         app.setFont(font)
 
-        if DGI.mobilePlatform():
-            pineboolib.pnapplication.Project.mainFormName = "Mobile"
+        # if DGI.mobilePlatform():
+        #    pineboolib.pnapplication.Project.mainFormName = "Mobile"
 
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # construido antes que cualquier widget

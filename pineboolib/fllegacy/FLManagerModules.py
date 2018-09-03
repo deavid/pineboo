@@ -296,13 +296,14 @@ class FLManagerModules(object):
             raise AttributeError("File %r not found in project" % n)
             return
 
-        # Version de ui
-        from xml import etree
-        tree = etree.ElementTree.parse(form_path)
-        root = tree.getroot()
-        UIVersion = root.get("version")
+        from xml.etree import ElementTree as ET
+
+        ui_data = self.contentFS(form_path, True)
+        root_ = ET.fromstring(ui_data)
+
+        UIVersion = root_.get("version")
         if parent is None:
-            wid = root.find("widget")
+            wid = root_.find("widget")
             parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
 
         if not getattr(parent, "widget", None):
