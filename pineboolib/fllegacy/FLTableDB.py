@@ -128,12 +128,7 @@ class FLTableDB(QtWidgets.QWidget):
         # print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
         parent_cursor = None
         while True:  # Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
-            if isinstance(self.topWidget.parentWidget(), FLFormSearchDB):
-                self.topWidget = self.topWidget.parentWidget()
-            try:
-                parent_cursor = self.topWidget.cursor()
-            except Exception:
-                logger.exception("Error ignorado al intentar encontrar el cursor padre")
+            parent_cursor = getattr(self.topWidget, "cursor_", None)
             if not isinstance(parent_cursor, FLSqlCursor):
                 parent_cursor = None
             if parent_cursor:
@@ -147,7 +142,7 @@ class FLTableDB(QtWidgets.QWidget):
             print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
             return
 
-        self.cursor_ = self.topWidget.cursor_
+        self.cursor_ = parent_cursor
         self.setFont(QtWidgets.QApplication.font())
 
         if not self._name:
