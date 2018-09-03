@@ -3,6 +3,7 @@ from pineboolib.qsa import *
 import traceback
 from PyQt5.QtGui import QPalette
 import pineboolib
+from PyQt5 import QtCore
 sys = SysType()
 
 
@@ -12,7 +13,7 @@ class FormInternalObj(FormDBWidget):
 
     def main(self):
         mng = aqApp.db().managerModules()
-        self.w_ = QWidget()
+        self.w_ = QWidget(sys.mainWidget(), QtCore.Qt.Dialog)
         self.w_ = mng.createUI(u"ebcomportamiento.ui", None, self.w_)
         w = self.w_
         botonAceptar = w.child(u"pbnAceptar")
