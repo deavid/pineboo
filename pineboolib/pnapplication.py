@@ -1029,7 +1029,7 @@ class MainForm(object):
             action.mod = self.mod
             iconSet = getattr(action, "iconSet", None)
             action.icon = None
-            if iconSet:
+            if iconSet in self.pixmaps.keys():
                 try:
                     action.icon = self.pixmaps[iconSet]
                 except Exception as e:
