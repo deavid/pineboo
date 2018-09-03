@@ -1150,33 +1150,28 @@ class XMLAction(XMLStruct):
         return self.formrecord_widget
 
     def load(self):
-        try:
-            if self._loaded:
-                return self.mainform_widget
-            self.logger.debug("Loading action %s . . . ", self.name)
-            w = pineboolib.project.main_window.w_
-            if not self.mainform_widget:
-                if pineboolib.project._DGI.useDesktop():
-                    self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
-                else:
-                    from pineboolib.utils import Struct
-                    self.mainform_widget = Struct()
-                    self.mainform_widget.action = self
-                    try:
-                        self.load_script(
-                            getattr(self, "scriptform", None), self.mainform_widget)
-                    except Exception:
-                        self.logger.exception(
-                            "Error trying to load scriptform for %s", self.name)
+        if self.mainform_widget:
+            if getattr(self.mainform_widget, "loaded", None) == False:
+                self._loaded = False
+
+        if self._loaded:
+            return self.mainform_widget
+        self.logger.debug("Loading action %s . . . ", self.name)
+        w = pineboolib.project.main_window.w_
+        if not self._loaded:
+            if pineboolib.project._DGI.useDesktop():
+                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
+            else:
+                from pineboolib.utils import Struct
+                self.mainform_widget = Struct()
+                self.mainform_widget.action = self
+                self.load_script(getattr(self, "scriptform", None), self.mainform_widget)
 
             self._loaded = True
             self.logger.debug(
                 "End of action load %s (iface:%s ; widget:%s)",
                 self.name, getattr(self.mainform_widget, "iface", None), getattr(self.mainform_widget, "widget", None))
             return self.mainform_widget
-        except Exception as e:
-            self.logger.exception("While loading action %s", self.name)
-            return None
     """
     Abre el FLFormDB por defecto
     """

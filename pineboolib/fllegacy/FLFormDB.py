@@ -206,11 +206,8 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.script = None
         self.iface = None
-        try:
-            script = self._scriptForm or None
-        except AttributeError:
-            script = None
-        self._action.load_script(script, self)
+        self._scriptForm or None
+        self._action.load_script(self._scriptForm or None, self)
 
         self.iconSize = pineboolib.project._DGI.iconSize()
 
@@ -702,6 +699,8 @@ class FLFormDB(QtWidgets.QDialog):
             del self.widget
         except Exception:
             pass
+
+        self.loaded = False
 
     """
     Captura evento mostrar
