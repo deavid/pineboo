@@ -220,7 +220,7 @@ class FLFormSearchDB(FLFormDB):
         self.inExec_ = True
         self.acceptingRejecting_ = False
 
-        super(FLFormDB, self).show()
+        super(FLFormSearchDB, self).show()
         if self.initFocusWidget_:
             self.initFocusWidget_.setFocus()
 

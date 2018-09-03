@@ -806,3 +806,6 @@ class FLFormRecordDB(FLFormDB):
     def disablePushButtonCancel(self):
         if self.pushButtonCancel:
             self.pushButtonCancel.setDisabled(True)
+
+    def show(self):
+        super(FLFormRecordDB, self).show()
