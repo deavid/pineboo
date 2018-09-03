@@ -104,7 +104,7 @@ def loadUi(path, widget, parent=None):
             if receiv_name == formname:
                 receiver = widget
                 fn_name = slot_name.rstrip("()")
-                logger.warn("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
+                logger.debug("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
 
                 ifx = widget
                 # if hasattr(widget, "iface"):
