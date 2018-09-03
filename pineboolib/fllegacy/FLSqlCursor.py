@@ -1241,9 +1241,14 @@ class FLSqlCursor(QtCore.QObject):
             v = 0
 
         if v and type_ == "pixmap":
-            vLarge = self.db().manager().fetchLargeValue(v)
-            if vLarge:
-                return vLarge
+            v_large = None
+            if not self.db().manager().isSystemTable(self.table()):
+                v_large = self.db().manager().fetchLargeValue(v)
+            else:
+                v_large = self.db().normalizeValue(v)
+
+            if v_large:
+                v = v_large
 
         return v
 

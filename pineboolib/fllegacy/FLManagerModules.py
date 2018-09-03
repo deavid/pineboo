@@ -469,12 +469,13 @@ class FLManagerModules(object):
 
     def iconModule(self, idM):
         from pineboolib.pncontrolsfactory import QPixmap
+        pix = None
         if idM.upper() in self.dictInfoMods.keys():
             from pineboolib.utils import clearXPM
             icono = clearXPM(self.dictInfoMods[idM.upper()].icono)
-            return QPixmap(icono)
+            pix = QPixmap(icono)
 
-        return QPixmap()
+        return pix or QPixmap()
 
     """
     Para obtener la versión de un módulo.
@@ -562,9 +563,14 @@ class FLManagerModules(object):
         self.dictInfoMods = {}
 
         q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
-        # q.setForwardOnly(True)
-        q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion "
-                "FROM flmodules left join flareas on flmodules.idarea = flareas.idarea")
+        q.setTablesList("flmodules,flareas")
+        q.setSelect("idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion")
+        q.setFrom("flmodules left join flareas on flmodules.idarea = flareas.idarea")
+        q.setWhere("1 = 1")
+        q.setForwardOnly(True)
+        q.exec_()
+        # q.exec_("SELECT idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion "
+        #        "FROM flmodules left join flareas on flmodules.idarea = flareas.idarea")
 
         sysModuleFound = False
         while q.next():
