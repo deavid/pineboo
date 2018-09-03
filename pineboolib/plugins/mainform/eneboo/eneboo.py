@@ -716,7 +716,8 @@ class MainForm(QtCore.QObject):
         #img_.smoothScale(16, 16)
         #ret = QIconSet(QPixmap(img_))
         img_ = QImage(p_)
-        img_ = img_.scaled(16, 16)
+        if not img_.isNull():
+            img_ = img_.scaled(16, 16)
         ret = QIcon(QPixmap(img_))
         return ret
 
