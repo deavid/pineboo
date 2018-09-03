@@ -1007,6 +1007,9 @@ class FLSqlCursor(QtCore.QObject):
             except KeyError:
                 # logger.notice("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
                 action.table = a
+                if not getattr(action, "name", None):
+                    action.name = a
+
         elif isinstance(a, FLAction):
             from pineboolib.utils import convertFLAction
             action = convertFLAction(a)
@@ -1018,6 +1021,8 @@ class FLSqlCursor(QtCore.QObject):
         else:
             if self._action.name == action.name:
                 return True
+            else:
+                self._action = action
 
         if not self._action.table:
             return None
