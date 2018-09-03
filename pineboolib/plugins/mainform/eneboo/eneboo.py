@@ -574,9 +574,16 @@ class MainForm(QtCore.QObject):
         self.w_.addDockWidget(AQS.DockLeft, self.dck_mod_.w_)
 
         windowMenu = self.w_.findChild(QtWidgets.QMenu, "windowMenu")
-        # FIXMENU
-        #windowMenu.insertItem(sys.translate("&Vistas"), self.w_.createDockWindowMenu(AQS.NoToolBars))
-        windowMenu.addMenu(sys.translate("&Vistas"))
+        sub_menu = windowMenu.addMenu(sys.translate("&Vistas"))
+
+        docks = self.w_.findChildren(QtWidgets.QDockWidget)
+        for dock in docks:
+            print(dock.windowTitle())
+            ac = sub_menu.addAction(dock.windowTitle())
+            ac.setCheckable(True)
+            # FIXME: Comprobar si estoy visible o no
+            ac.setChecked(True)
+            # ac.triggered.connect(dock.close)
 
     def cloneAction(self, act, parent):
         ac = QAction(parent)
