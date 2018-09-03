@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-
+import time
+import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qWarning, QKeySequence
 
 from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm, convertFLAction
 from pineboolib import decorators
 import pineboolib
+
 
 """
 Representa un formulario que enlaza con una tabla.
@@ -147,6 +149,13 @@ class FLFormDB(QtWidgets.QDialog):
     ui_ = {}
 
     def __init__(self, parent, action, load=False):
+        logger = logging.getLogger("FLFormDB")
+        self.tiempo_ini = time.time()
+
+        if not parent:
+            from pineboolib.pncontrolsfactory import aqApp
+            parent = aqApp.mainWidget()
+
         # if pineboolib.project._DGI.localDesktop():  # Si es local Inicializa
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
@@ -678,15 +687,6 @@ class FLFormDB(QtWidgets.QDialog):
 
     def closeEvent(self, e):
         self.frameGeometry()
-        if self.focusWidget():
-            fdb = self.focusWidget().parentWidget()
-            if fdb and getattr(fdb, "autoComFrame_", None):
-                try:
-                    if fdb.autoComFrame_.isVisible():
-                        fdb.autoComFrame_.hide()
-                        return
-                except Exception:
-                    print("closeEvent: Error al ocultar el frame")
 
         self.saveGeometry()
         self.setCursor(None)
@@ -753,6 +753,14 @@ class FLFormDB(QtWidgets.QDialog):
     @param w Widget a inicializar. Si no se establece utiliza
             por defecto el widget principal actual
     """
+
+    def show(self):
+        if not self.tiempo_ini:
+            self.tiempo_ini = time.time()
+        super(FLFormDB, self).show()
+        tiempo_fin = time.time()
+        self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs" % (self.actionName_, tiempo_fin - self.tiempo_ini))
+        self.tiempo_ini = None
 
     def initMainWidget(self, w=None):
         if not self.showed:
