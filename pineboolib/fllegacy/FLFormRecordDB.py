@@ -127,7 +127,8 @@ class FLFormRecordDB(FLFormDB):
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.name_ = action.name
-        if self.cursor_:
+
+        if self.cursor():
             self.initialModeAccess = self.cursor_.modeAccess()
             if DEBUG:
                 print("*** FLFormRecordDB::__init__: cursor: %r name: %r at:%r" %
@@ -185,11 +186,11 @@ class FLFormRecordDB(FLFormDB):
 
     def initForm(self):
 
-        if self.cursor_ and self.cursor_.metadata():
+        if self.cursor() and self.cursor().metadata():
 
             caption = None
             if self._action:
-                self.cursor_.setAction(self._action)
+                self.cursor().setAction(self._action)
                 from pineboolib.fllegacy.FLAction import FLAction
                 fl_action = FLAction(self._action.name)
                 caption = fl_action.caption()
@@ -201,17 +202,18 @@ class FLFormRecordDB(FLFormDB):
             # self.setCursor(self.cursor_)
 
             if not caption:
-                caption = self.cursor_.metadata().alias()
+                caption = self.cursor().metadata().alias()
 
-            if (self.cursor_.modeAccess() == FLSqlCursor.Insert or
-                    self.cursor_.modeAccess() == FLSqlCursor.Edit or
-                    self.cursor_.modeAccess() == FLSqlCursor.Browse):
-                self.cursor_.transaction()
-                self.initTransLevel = self.cursor_.transactionLevel()
+            if not self.cursor().isValid():
+                self.cursor().model().refresh()
+
+            if self.cursor().modeAccess() in (FLSqlCursor.Insert, FLSqlCursor.Edit, FLSqlCursor.Browse):
+                self.cursor().transaction()
+                self.initTransLevel = self.cursor().transactionLevel()
                 self.setCaptionWidget(caption)
-                self.cursor_.setContext(self.iface)
+                self.cursor().setContext(self.iface)
 
-            if self.cursor_.modeAccess() == FLSqlCursor.Insert:
+            if self.cursor().modeAccess() == FLSqlCursor.Insert:
                 self.showAcceptContinue_ = True
             else:
                 self.showAcceptContinue_ = False
