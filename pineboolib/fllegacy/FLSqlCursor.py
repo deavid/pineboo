@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.Qt import QRegExp
+
 
 import pineboolib
 from pineboolib import decorators
 
-from pineboolib.utils import XMLStruct
 from pineboolib.pncursortablemodel import PNCursorTableModel
 
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
@@ -678,6 +677,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
                 condTrue_ = (self.cursor_.value(
                     self.acosCondName_) == self.acosCondVal_)
             elif self.acosCond_ == FLSqlCursor.RegExp:
+                from PyQt5.Qt import QRegExp
                 condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(
                     str(self.cursor_.value(self.acosCondName_))))
             elif self.acosCond_ == FLSqlCursor.Function:
@@ -796,7 +796,7 @@ class FLSqlCursor(QtCore.QObject):
     _selection = None
 
     _refreshDelayedTimer = None
-    actionName_ = None
+    #actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
         super(FLSqlCursor, self).__init__()
@@ -804,17 +804,26 @@ class FLSqlCursor(QtCore.QObject):
             logger.warn("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
             return
 
+        name_action = None
+
+        # FIXME: XMLAction Tiene que ser eliminado de fuera de pnapplication
+        from pineboolib.utils import XMLStruct
         if isinstance(name, XMLStruct):
-            self.actionName_ = name.name
-            name = name.table
+            print("FIXME::__init__ XMLSTRUCT", __name__)
+            name_action = name.name
         else:
-            self.actionName_ = name
+            name_action = name
+
+        act_ = pineboolib.project.conn.manager().action(name_action)
+        #self.actionName_ = name.name
+        #name = name.table
+        # else:
+        #self.actionName_ = name
 
         self._valid = False
         self.d = FLSqlCursorPrivate()
         self.d.cursor_ = self
-        self.d.nameCursor_ = "%s_%s" % (
-            name, QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
+        self.d.nameCursor_ = "%s_%s" % (act_.name(), QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
         if connectionName_or_db is None:
             self.d.db_ = pineboolib.project.conn
@@ -830,7 +839,7 @@ class FLSqlCursor(QtCore.QObject):
         #        if action.name == name:
         #            self.d.action_ = action
         #            break
-        self.init(name, autopopulate, cR, r)
+        self.init(act_.name(), autopopulate, cR, r)
 
     """
     Código de inicialización común para los constructores
@@ -843,7 +852,7 @@ class FLSqlCursor(QtCore.QObject):
         # self.metadata().inCache():
 
         self.d.curName_ = name
-        if self.setAction(self.actionName_):
+        if self.setAction(name):
             self.d.countRefCursor = self.d.countRefCursor + 1
         else:
             # logger.trace("FLSqlCursor(%s).init(): ¿La tabla no existe?" % name)
@@ -978,15 +987,10 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def action(self):
-        ret = None
-        if hasattr(self._action, "name"):
-            action = FLAction(self._action)
-            action.name()
-
-        return ret
+        return self._action
 
     def actionName(self):
-        return self.curName()
+        return self._action.name()
 
     """
     Establece la accion asociada al cursor.
@@ -998,33 +1002,36 @@ class FLSqlCursor(QtCore.QObject):
         # if isinstance(a, str) or isinstance(a, QString):
 
         # a = str(a) # FIXME: Quitar cuando se quite QString
+        action = None
 
         if isinstance(a, str):
             # logger.trace("FLSqlCursor(%s): setAction(%s)" % (self.d.curName_, a))
-            action = XMLStruct()
-            try:
-                action = pineboolib.project.actions[str(a)]
-            except KeyError:
-                # logger.notice("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
-                action.table = a
-                if not getattr(action, "name", None):
-                    action.name = a
+            action = self.db().manager().action(a)
+            # try:
+            #    action = pineboolib.project.actions[str(a)]
+            # except KeyError:
+            # logger.notice("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
+            #    action.table = a
+            #    if not getattr(action, "name", None):
+            #        action.name = a
+            if action is None:
+                action = FLAction()
+                action.setName(a)
+                action.setTable(a)
 
-        elif isinstance(a, FLAction):
-            from pineboolib.utils import convertFLAction
-            action = convertFLAction(a)
+        elif not isinstance(a, FLAction):
+            print("FIXME::setAction", __name__)
+            action = self.db().manager().action(a.name)
         else:
             action = a
 
         if not getattr(self, "_action", None):
             self._action = action
         else:
-            if self._action.name == action.name:
+            if self._action.name() != action.name():
                 return True
-            else:
-                self._action = action
 
-        if not self._action.table:
+        if not self._action.table():
             return None
 
             # logger.notice("setAction(): Action no encontrada %s en %s actions. Es posible que la tabla no exista" % (a, len(pineboolib.project.actions)))
@@ -1038,8 +1045,7 @@ class FLSqlCursor(QtCore.QObject):
         self._selection = QtCore.QItemSelectionModel(self.model())
         self.selection().currentRowChanged.connect(self.selection_currentRowChanged)
         self._currentregister = self.selection().currentIndex().row()
-        self.d.metadata_ = self.db().manager().metadata(self._action.table)
-
+        self.d.metadata_ = self.db().manager().metadata(self._action.table())
         self.d.activatedCheckIntegrity_ = True
         self.d.activatedCommitActions_ = True
         return True
@@ -1569,7 +1575,7 @@ class FLSqlCursor(QtCore.QObject):
             if m != self.Insert:
                 self.updateBufferCopy()
 
-            self._action.openDefaultFormRecord(self)
+            pineboolib.project.actions[self._action.name()].openDefaultFormRecord(self)
 
             # if m != self.Insert and self.refreshBuffer():
             #     self.updateBufferCopy()
@@ -2342,7 +2348,7 @@ class FLSqlCursor(QtCore.QObject):
         self.d._current_changed.emit(self.at())
         # agregado para que FLTableDB actualice el buffer al pulsar.
         self.refreshBuffer()
-        logger.debug("cursor:%s , row:%s:: %s", self._action.table, self.d._currentregister, self)
+        logger.debug("cursor:%s , row:%s:: %s", self._action.table(), self.d._currentregister, self)
 
     def selection_pk(self, value):
 
@@ -2955,7 +2961,7 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def insertRecord(self):
-        logger.trace("insertRecord %s", self._action.name)
+        logger.trace("insertRecord %s", self._action.name())
         self.openFormInMode(self.Insert)
 
     """

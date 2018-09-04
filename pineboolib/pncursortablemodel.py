@@ -47,11 +47,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         self._action = action
         self._cursorConn = conn
-        if self._action and self._action.table:
+        if self._action and self._action.table():
             try:
-                _table = pineboolib.project.tables[self._action.table]
+                _table = pineboolib.project.tables[self._action.table()]
             except Exception as e:
-                self.logger.info("Tabla %s no declarada en project.tables", self._action.table)
+                self.logger.info("Tabla %s no declarada en project.tables", self._action.table())
                 return None
 
             self._metadata = self._cursorConn.manager().metadata(_table.name)
@@ -456,7 +456,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         if not self.metadata():
             self.logger.warn("ERROR: CursorTableModel :: No hay tabla",
-                             pineboolib.project.tables[self._action.table].name)
+                             pineboolib.project.tables[self._action.table()].name)
             return
 
         parent = QtCore.QModelIndex()
@@ -499,12 +499,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 self.where_filter = self.where_filter.replace(";", " ORDER BY %s;" % self.getSortOrder())
             else:
                 self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
-        # for f in self.where_filters.keys():
-        #    print("Filtro (%s).%s --> %s" % (self._action.table , f, self.where_filters[f]))
-
-        # print("Filtro final(%s) --> %s" % (self._action.table, self.where_filter))
-
-        # print("Filtro", where_filter)
 
         if not self.metadata():
             return
