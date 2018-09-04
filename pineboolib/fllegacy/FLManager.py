@@ -7,6 +7,7 @@ from PyQt5.QtXml import QDomDocument
 from pineboolib import decorators
 from pineboolib.utils import filedir, auto_qt_translate_text, clearXPM
 
+
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
@@ -506,12 +507,12 @@ class FLManager(QtCore.QObject):
         content_actions = None
 
         for it in list_modules:
-            content_actions = self.db_.managerModules().contentCached("%s.xml" % it)
+            content_actions = self.db_.managerModules().contentCached("%s.xml" % it) or ""
             if content_actions.find("<name>%s</name>" % n) > -1:
                 break
 
         if not util.domDocumentSetContent(doc, content_actions):
-            self.logger.warn("FLManager : " + QApplication.tr("Error al cargar la accion %s" % n))
+            logger.warn("FLManager : " + QApplication.translate("application", "Error al cargar la accion ") + n)
 
             return None
 
