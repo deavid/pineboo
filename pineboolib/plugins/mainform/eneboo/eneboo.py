@@ -54,8 +54,9 @@ class MainForm(QtCore.QObject):
             if isinstance(o, QMainWindow):
                 self.w_.setDisabled(True)
                 ret = self.exit()
-                if not ret:
+                if ret == False:
                     self.w_.setDisabled(False)
+                    e.ignore()
 
                 return True
 
