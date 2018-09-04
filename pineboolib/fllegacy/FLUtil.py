@@ -1105,7 +1105,7 @@ class FLUtil(QtCore.QObject):
         @return FALSE si hubo fallo, TRUE en caso contrario
         """
         if not content:
-            logger.warn("Se ha intentado cargar un fichero XML vacío", stack_info=True)
+            logger.warn("Se ha intentado cargar un fichero XML vacío", stack_info=False)
             return False
 
         ErrMsg = ""
