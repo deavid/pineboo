@@ -345,7 +345,13 @@ class FLQPSQL(object):
         return False
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
-        return cursor.fetchall()
+        ret_ = []
+        try:
+            ret_ = cursor.fetchall()
+        except Exception:
+            qWarning("PSQLDriver.fetchAll\n %s" % traceback.format_exc())
+
+        return ret_
 
     def existsTable(self, name):
         if not self.isOpen():
@@ -563,8 +569,7 @@ class FLQPSQL(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                print(
-                    "FLManager : " + qApp.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
+                print("FLManager : " + qApp.tr("Error al cargar los metadatos para la tabla") + tablename)
 
                 return self.recordInfo2(tablename)
 
