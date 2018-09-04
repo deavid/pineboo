@@ -578,7 +578,6 @@ class MainForm(QtCore.QObject):
 
         docks = self.w_.findChildren(QtWidgets.QDockWidget)
         for dock in docks:
-            print(dock.windowTitle())
             ac = sub_menu.addAction(dock.windowTitle())
             ac.setCheckable(True)
             # FIXME: Comprobar si estoy visible o no
@@ -747,7 +746,7 @@ class MainForm(QtCore.QObject):
 
     def reinitSript(self):
         main_wid = aqApp.mainWidget() if mainWindow.w_ is None else mainWindow.w_
-        if not main_wid or main_wid.name is not "container" or main_wid is mainWindow.w_:
+        if not main_wid or main_wid.objectName() is not "container" or main_wid is mainWindow.w_:
             return
 
         mw = mainWindow
@@ -809,7 +808,7 @@ class MainForm(QtCore.QObject):
             aqApp.staticLoaderSetup()
 
         elif fn_ == "reinit()":
-            sys.reinit()
+            aqApp.reinit()
 
         elif fn_ == "mrProper()":
             sys.Mr_Proper()
