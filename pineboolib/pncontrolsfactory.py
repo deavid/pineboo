@@ -600,9 +600,19 @@ class FormDBWidget(QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
-        ret_ = getattr([self._action, self.cursor_], name, None)
-        if ret_:
-            return ret_
+        ret_ = None
+        if name == "self":
+            ret_ = self
+
+        elif name == "ui_":
+            ret_ = self.parentWidget()
+
+        if ret_ is None:
+            ret_ = getattr(self._action, name, None)
+        if ret_ is None and self.cursor_:
+            ret_ = getattr(self.self.cursor_, name, None)
+
+        return ret_
 
 
 def check_gc_referrers(typename, w_obj, name):
