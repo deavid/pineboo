@@ -556,11 +556,50 @@ class Project(object):
     fixme: Reinicializa????
     """
 
-    def reinitP(self):
-        if self.acl_:
-            self.acl_.init_()
+    def reinit(self):
+        if self.initializing_ or self.destroying_:
+            return
 
-        self.call("sys.widget.init()", [], None, True)
+        self.stopTimerIdle()
+        self.apAppIdle()
+        self.initializing_ = True
+        self.writeState()
+        self.writeStateModule()
+        time = QtCore.QTimer()
+        time.singleShot(0, self.reinitP)
+
+    def reinitP(self):
+        self.db().managerModules().__del__()
+        self.db().manager().__del__()
+        self.setMainWidget(None)
+        self.db().managerModules().setActiveIdModule("")
+
+        if self.dictMainWidgets:
+            self.dictMainWidgets = {}
+
+        self.clearProject()
+
+        self.db().manager().init()
+        self.db().managerModules().init()
+        self.db().managerModules().cleanupMetaData()
+
+        if self.acl_:
+            self.ac_.init()
+
+        self.loadScritps()
+        self.db().managerModules().setShaFromGlobal()
+        self.call("sys.init()", [])
+        self.initToolBox()
+        self.readState()
+
+        if self.container:
+            self.container.installEventFilter(self)
+            self.container.setDisable(False)
+
+        self.callScriptEntryFunction()
+
+        self.initializing_ = False
+        self.startTimerIdle()
 
     """
     Lanza los test

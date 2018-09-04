@@ -8,7 +8,7 @@ import logging
 import weakref
 
 from pineboolib import decorators
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, Qt
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -84,6 +84,7 @@ FLListViewItem = resolveObject("FLListViewItem")
 FLTable = resolveObject("FLTable")
 FLDataTable = resolveObject("FLDataTable")
 FLCheckBox = resolveObject("FLCheckBox")
+FLTextEditOutput = resolveObject("FLTextEditOutput")
 # Clases QSA
 CheckBox = resolveObject("CheckBox")
 TextEdit = QTextEdit
@@ -152,17 +153,6 @@ class SysType(object):
 
     def processEvents(self):
         QtWidgets.qApp.processEvents()
-
-    @decorators.BetaImplementation
-    def reinit(self):
-        self.processEvents()
-        pineboolib.project.main_window.saveState()
-        pineboolib.project.run()
-        pineboolib.project.main_window.areas = []
-        # FIXME: Limpiar el ui para no duplicar controles
-        pineboolib.project.main_window.load()
-        pineboolib.project.main_window.show()
-        pineboolib.project.call("sys.iface._class_init()", [], None, True)
 
     def write(self, encode_, dir_, contenido):
         f = codecs.open(dir_, encoding=encode_, mode="w+")
@@ -405,8 +395,13 @@ def solve_connection(sender, signal, receiver, slot):
 
 class aqApp_class(QObject):
 
+    initializing_ = None
+    destroying_ = None
+    tedOutput_ = None
+
     def __init__(self):
         super(aqApp_class, self).__init__()
+        self.initializing_ = False
 
     def db(self):
         return pineboolib.project.conn
@@ -427,6 +422,25 @@ class aqApp_class(QObject):
     @decorators.NotImplementedWarn
     def generalExit(self, ask=True):
         pass
+
+    def urlPineboo(self):
+        self.call("sys.openUrl", ["http://eneboo.org/"])
+
+    def helpIndex(self):
+        self.call("sys.openUrl", ["http://manuales-eneboo-pineboo.org/"])
+
+    def showConsole(self):
+        mw = self.mainWidget()
+        if mw and not self.tedOutput_:
+            dw = QtWidgets.QDockWidget("tedOutputDock", mw)
+            self.tedOutput_ = FLTextEditOutput(dw)
+            dw.setWidget(self.tedOutput_)
+            dw.setWindowTitle(self.tr("Mensajes de Eneboo"))
+            mw.addDockWidget(Qt.BottomDockWidgetArea, dw)
+
+    @decorators.NotImplementedWarn
+    def tr(self, text):
+        return text
 
 
 aqApp = aqApp_class()
