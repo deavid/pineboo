@@ -149,6 +149,12 @@ class FLFormDB(QtWidgets.QDialog):
     ui_ = {}
 
     def __init__(self, parent, action, load=False):
+
+        from pineboolib.utils import XMLStruct
+        if isinstance(action, XMLStruct):
+            print("FIXME::__init__ XMLSTRUCT", __name__)
+            action = pineboolib.project.conn.manager().action(action.name)
+
         logger = logging.getLogger("FLFormDB")
         self.tiempo_ini = time.time()
 
@@ -160,12 +166,9 @@ class FLFormDB(QtWidgets.QDialog):
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
 
-        if isinstance(action, pineboolib.fllegacy.FLAction.FLAction):
-            action = convertFLAction(action)
-
         self.loaded = False
         try:
-            assert (self.__class__, action) not in self.known_instances
+            assert (self.__class__, action.name()) not in self.known_instances
         except AssertionError:
             # print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
             #      "Puede que se estén perdiendo datos!")
@@ -173,17 +176,17 @@ class FLFormDB(QtWidgets.QDialog):
                 QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
                                                   QtWidgets.QMessageBox.Yes)
                 return
-        self.known_instances[(self.__class__, action)] = self
+        self.known_instances[(self.__class__, action.name())] = self
 
         self.ui_ = {}
 
         self._action = action
         if type(self).__name__ == "FLFormRecordDB":
-            self.actionName_ = "formRecord" + self._action.name
+            self.actionName_ = "formRecord" + self._action.name()
         else:
-            self.actionName_ = "form" + self._action.name
+            self.actionName_ = "form" + self._action.name()
 
-        self.mod = self._action.mod
+        #self.mod = self._action.mod
 
         self.layout = QtWidgets.QVBoxLayout()
         self.layout.setContentsMargins(1, 1, 1, 1)
@@ -192,22 +195,26 @@ class FLFormDB(QtWidgets.QDialog):
         self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         self.setLayout(self.layout)
         if not self._uiName:
-            self._uiName = self._action.form
+            self._uiName = self._action.form()
 
-        if not self._scriptForm and getattr(self._action, "scriptform", None):
-            self._scriptForm = self._action.scriptform
+        # if not self._scriptForm and self._action.scriptForm():
+        #    self._scriptForm = self._action.scriptForm()
 
-        if not getattr(self._action, "alias", None):
-            qWarning("FLFormDB::Cargando un action XML")
-        elif pineboolib.project._DGI.localDesktop():
-            self.setWindowTitle(self._action.alias)
+        # if not getattr(self._action, "alias", None):
+        #    qWarning("FLFormDB::Cargando un action XML")
+        # elif pineboolib.project._DGI.localDesktop():
+        # self.setWindowTitle(self._action.alias)
 
-        self.idMDI_ = self._action.name
+        self.idMDI_ = self._action.name()
 
         self.script = None
         self.iface = None
-        self._scriptForm or None
-        self._action.load_script(self._scriptForm or None, self)
+        script_name = self._action.scriptFormRecord() if type(self).__name__ == "FLFormRecordDB" else self._action.scriptForm()
+
+        if script_name is None:
+            script_name = self._action.name()
+
+        pineboolib.project.actions[self._action.name()].load_script(script_name, self)
 
         self.iconSize = pineboolib.project._DGI.iconSize()
 
@@ -560,10 +567,10 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.loadControls()
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-        if self._action.table:
+        if self._action.table():
 
-            cursor = FLSqlCursor(self._action)
-            cursor.setAction(self._action)
+            cursor = FLSqlCursor(self._action.name())
+            cursor.setAction(self._action.name())
             self.setCursor(cursor)
 
             v = None
@@ -578,7 +585,7 @@ class FLFormDB(QtWidgets.QDialog):
             pineboolib.project.conn.managerModules().loadFLTableDBs(self)
 
             from pineboolib.fllegacy.FLAction import FLAction
-            fl_action = FLAction(self._action.name)
+            fl_action = FLAction(self._action.name())
 
             if fl_action.description():
                 self.setWhatsThis(fl_action.description())

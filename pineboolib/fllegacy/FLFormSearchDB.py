@@ -4,6 +4,7 @@ from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.utils import filedir
+
 import pineboolib
 
 
@@ -56,17 +57,18 @@ class FLFormSearchDB(FLFormDB):
 
             name = args[0]
 
-            self.setAction(name)
-            action = self._action
-            if action is None:
+            ac = pineboolib.project.conn.manager().action(name)
+            self.setAction(ac)
+            if self._action is None:
                 return
 
-            table = action.table
-            if not table:
+            if not self._action.table():
+                # if not table:
                 return
 
-            self.cursor_ = FLSqlCursor(table, True, "default", None, None, self)
+            self.cursor_ = FLSqlCursor(self._action.table(), True, "default", None, None, self)
             self.accepted_ = False
+            action = self._action
 
         elif isinstance(args[0], FLSqlCursor):
             # @param cursor Objeto FLSqlCursor para asignar a este formulario
@@ -77,20 +79,19 @@ class FLFormSearchDB(FLFormDB):
                 name = args[1]
 
             self.cursor_ = args[0]
-            action = self.cursor_._action
+            action = self.cursor_.action()
 
         elif len(args) == 2:
             action = args[0]
             parent = args[1]
             name = action.name()
-            self.cursor_ = FLSqlCursor(
-                action.table(), True, "default", None, None, self)
+            self.cursor_ = FLSqlCursor(action.table(), True, "default", None, None, self)
 
-        if not parent:
-            parent = QtWidgets.QApplication.activeModalWidget()
+        from pineboolib.pncontrolsfactory import aqApp
+        parent = parent or aqApp.mainWidget()
 
         super(FLFormSearchDB, self).__init__(parent, action, load=True)
-        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        # self.setWindowModality(QtCore.Qt.ApplicationModal)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.eventloop = QtCore.QEventLoop()
@@ -105,8 +106,7 @@ class FLFormSearchDB(FLFormDB):
         # self.initForm()
 
     def setAction(self, a):
-        if a in pineboolib.project.actions.keys():
-            self._action = pineboolib.project.actions[a]
+        self._action = a
 
     """
     destructor

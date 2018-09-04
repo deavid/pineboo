@@ -113,8 +113,13 @@ class FLFormRecordDB(FLFormDB):
 
     def __init__(self, parent_or_cursor, action, load=False):
 
-        self._uiName = action.formrecord
-        self._scriptForm = getattr(action, "scriptformrecord", "emptyscript")
+        from pineboolib.utils import XMLStruct
+        if isinstance(action, XMLStruct):
+            print("FIXME::__init__ XMLSTRUCT", __name__)
+            action = pineboolib.project.conn.manager().action(action.name)
+
+        self._uiName = action.formRecord()
+        self._scriptForm = action.scriptFormRecord() or "emptyscript"
 
         if isinstance(parent_or_cursor, FLSqlCursor):
             parent = None
@@ -126,7 +131,7 @@ class FLFormRecordDB(FLFormDB):
 
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
-        self.name_ = action.name
+        self.name_ = action.name()
 
         if self.cursor():
             self.initialModeAccess = self.cursor_.modeAccess()
@@ -191,12 +196,10 @@ class FLFormRecordDB(FLFormDB):
             caption = None
             if self._action:
                 self.cursor().setAction(self._action)
-                from pineboolib.fllegacy.FLAction import FLAction
-                fl_action = FLAction(self._action.name)
-                caption = fl_action.caption()
-                if fl_action.description():
-                    self.setWhatsThis(fl_action.description())
-                self.idMDI_ = self._action.name
+                caption = self._action.caption()
+                if self._action.description():
+                    self.setWhatsThis(self._action.description())
+                self.idMDI_ = self._action.name()
 
             # self.bindIface()
             # self.setCursor(self.cursor_)
@@ -680,7 +683,7 @@ class FLFormRecordDB(FLFormDB):
                 self.accepted_ = False
                 caption = None
                 if self._action:
-                    caption = self._action.name
+                    caption = self._action.name()
                 if not caption:
                     caption = self.cursor_.metadata().alias()
                 self.cursor_.transaction()

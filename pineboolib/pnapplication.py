@@ -1232,7 +1232,7 @@ class XMLAction(XMLStruct):
         if not a:
             self.logger.warn("No existe la acción %s", name)
             return
-        pineboolib.project.call("%s.main" % a.name(), [])
+        pineboolib.project.call("%s.main" % a.name(), [], None, True)
 
     """
     Retorna el widget del formrecord
@@ -1295,6 +1295,8 @@ class XMLAction(XMLStruct):
 
     def load_script(self, scriptname, parent=None):
         if scriptname:
+            scriptname = scriptname.replace(".qs", "")
+        if scriptname:
             self.logger.info("Cargando script %s de %s accion %s",
                              scriptname, parent, self.name)
 
@@ -1316,6 +1318,10 @@ class XMLAction(XMLStruct):
         #        return
 
             # import aqui para evitar dependencia ciclica
+        from pineboolib.utils import convertFLAction
+        if not isinstance(action_, XMLAction):
+            action_ = convertFLAction(action_)
+
         python_script_path = None
         # primero default, luego sobreescribimos
         parent.script = pineboolib.project.emptyscript
