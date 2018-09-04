@@ -106,7 +106,7 @@ class FormInternalObj(FormDBWidget):
                 break
 
         util.writeSettingEntry(setting, dirMods)
-        sys.reinit()
+        aqApp.reinit()
 
     def oficial_ejecutarComando(self, comando=None):
         res = Array()
@@ -198,7 +198,6 @@ class FormInternalObj(FormDBWidget):
         fichIcono.open(File.ReadOnly)
         icono = fichIcono.read()
 
-        print(icono, type(icono))
         # DEBUG:: Argument 0 not understood
         # DEBUG:: <Value><Constant><regexbody><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/><regexchar arg00="PERIOD"/><regexchar arg00="LBRACKET"/><regexchar arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar arg00="PLUS"/></regexbody></Constant></Value>
         #versionSys = sys.version().match(unknownarg)
