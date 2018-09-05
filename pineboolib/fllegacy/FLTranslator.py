@@ -41,8 +41,9 @@ class FLTranslator(QTranslator):
             tsFile = filedir("../share/pineboo/translations/%s.%s" %
                              (self.idM_, self.lang_))
         else:
+            from pineboolib.pncontrolsfactory import aqApp
             tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %
-                             (self._prj.conn.database(), self.idM_, self.idM_, self.lang_, key))
+                             (aqApp.db().database(), self.idM_, self.idM_, self.lang_, key))
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         qmFile = "%s.qm" % tsFile
 
