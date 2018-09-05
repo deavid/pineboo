@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore
-from pineboolib import decorators
 
 
 class FLSettings(QtCore.QObject):
