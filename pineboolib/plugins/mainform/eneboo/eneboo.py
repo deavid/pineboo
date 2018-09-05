@@ -638,7 +638,7 @@ class MainForm(QtCore.QObject):
             return None
 
         w.setObjectName(parent.objectName())
-        # aqApp.setMainWidget(w)
+        aqApp.setMainWidget(w)
         # if (sys.isNebulaBuild()):
         #    w.show()
 
