@@ -115,7 +115,7 @@ class MainForm(QtCore.QObject):
         for i in range(self.tw_.count()):
             open_actions.append(self.tw_.widget(i).idMDI())
 
-        settings.writeEntry("%sopenActions" % key, open_actions)
+        settings.writeEntryList("%sopenActions" % key, open_actions)
         settings.writeEntry("%scurrentPageIndex" % key, self.tw_.currentIndex())
 
         recent_actions = []
@@ -123,14 +123,14 @@ class MainForm(QtCore.QObject):
         count_recent = root_recent.childCount()
         for i in range(count_recent):
             recent_actions.append(root_recent.child(i).text(1))
-        settings.writeEntry("%srecentActions" % key, open_actions)
+        settings.writeEntryList("%srecentActions" % key, open_actions)
 
         mark_actions = []
         root_mark = self.dck_mar_.lw_.invisibleRootItem()
         count_mark = root_mark.childCount()
         for i in range(count_mark):
             mark_actions.append(root_mark.child(i).text(1))
-        settings.writeEntry("%smarkActions" % key, mark_actions)
+        settings.writeEntryList("%smarkActions" % key, mark_actions)
 
     def readState(self):
         w = self.w_

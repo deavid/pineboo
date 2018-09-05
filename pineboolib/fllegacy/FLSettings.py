@@ -11,6 +11,8 @@ class FLSettings(QtCore.QObject):
 
     def readListEntry(self, key):
         ret = self.s.value(key)
+        if isinstance(ret, str):
+            ret = [ret]
         if ret is None:
             ret = []
         return ret
@@ -56,6 +58,10 @@ class FLSettings(QtCore.QObject):
     def writeEntry(self, key, value):
         self.s.setValue(key, value)
 
-    @decorators.BetaImplementation
     def writeEntryList(self, key, value):
-        self.s.setValue(key, value)
+        if len(value) == 1:
+            val = value[0]
+        else:
+            val = value
+
+        self.s.setValue(key, val)
