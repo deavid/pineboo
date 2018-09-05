@@ -9,6 +9,7 @@ import weakref
 
 from pineboolib import decorators
 from PyQt5.QtCore import QObject, Qt
+from pineboolib.fllegacy.FLApplication import FLApplication
 
 
 logger = logging.getLogger("PNControlsFactory")
@@ -121,18 +122,8 @@ class SysType(object):
     def nameBD(self):
         return pineboolib.project.conn.DBName()
 
-    def setCaptionMainWidget(self, value):
-        self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, value))
-        pass
-
     def toUnicode(self, text, format):
         return "%s" % text.encode(format).decode("utf-8")
-
-    def mainWidget(self):
-        if pineboolib.project._DGI.localDesktop():
-            return pineboolib.project.main_window.w_
-        else:
-            return None
 
     def Mr_Proper(self):
         pineboolib.project.conn.Mr_Proper()
@@ -393,57 +384,7 @@ def solve_connection(sender, signal, receiver, slot):
     return False
 
 
-class aqApp_class(QObject):
-
-    initializing_ = None
-    destroying_ = None
-    tedOutput_ = None
-
-    def __init__(self):
-        super(aqApp_class, self).__init__()
-        self.initializing_ = False
-
-    def db(self):
-        return pineboolib.project.conn
-
-    def classType(self, n):
-        return type(resolveObject(n)())
-
-    def __getattr__(self, name):
-        return getattr(pineboolib.project, name, None)
-
-    def execMainScript(self, action_name):
-        if action_name in pineboolib.project.actions.keys():
-            pineboolib.project.actions[action_name].execMainScript(action_name)
-
-    def mainWidget(self):
-        return SysType().mainWidget()
-
-    @decorators.NotImplementedWarn
-    def generalExit(self, ask=True):
-        pass
-
-    def urlPineboo(self):
-        self.call("sys.openUrl", ["http://eneboo.org/"])
-
-    def helpIndex(self):
-        self.call("sys.openUrl", ["http://manuales-eneboo-pineboo.org/"])
-
-    def showConsole(self):
-        mw = self.mainWidget()
-        if mw and not self.tedOutput_:
-            dw = QtWidgets.QDockWidget("tedOutputDock", mw)
-            self.tedOutput_ = FLTextEditOutput(dw)
-            dw.setWidget(self.tedOutput_)
-            dw.setWindowTitle(self.tr("Mensajes de Eneboo"))
-            mw.addDockWidget(Qt.BottomDockWidgetArea, dw)
-
-    @decorators.NotImplementedWarn
-    def tr(self, text):
-        return text
-
-
-aqApp = aqApp_class()
+aqApp = FLApplication()
 
 
 class FormDBWidget(QWidget):
