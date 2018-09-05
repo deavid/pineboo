@@ -71,6 +71,10 @@ class PNConnection(QtCore.QObject):
 
         self.driver().db_ = self
 
+    @decorators.NotImplementedWarn
+    def finish(self):
+        pass
+
     def connectionName(self):
         """Get the current connection name for this cursor."""
         return self.name
@@ -127,7 +131,7 @@ class PNConnection(QtCore.QObject):
 
     def driverName(self):
         return self.driver().driverName()
-    
+
     def driverNameToDriverAlias(self, name):
         return self.driverSql.nameToAlias(name)
 
@@ -167,7 +171,7 @@ class PNConnection(QtCore.QObject):
 
     def formatValue(self, t, v, upper):
         return self.driverSql.formatValue(t, v, upper)
-    
+
     def formatValueLike(self, t, v, upper):
         return self.driverSql.formatValueLike(t, v, upper)
 
