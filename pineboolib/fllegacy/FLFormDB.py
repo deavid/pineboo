@@ -152,7 +152,7 @@ class FLFormDB(QtWidgets.QDialog):
 
         from pineboolib.utils import XMLStruct
         if isinstance(action, XMLStruct):
-            print("FIXME::__init__ XMLSTRUCT", __name__)
+            print("FIXME::__init__ XMLSTRUCT", __name__, action.name)
             action = pineboolib.project.conn.manager().action(action.name)
 
         logger = logging.getLogger("FLFormDB")
@@ -566,9 +566,9 @@ class FLFormDB(QtWidgets.QDialog):
             acl.process(self)
 
         self.loadControls()
-        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-        if self._action.table():
 
+        if self._action.table():
+            from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
             cursor = FLSqlCursor(self._action.name())
             cursor.setAction(self._action.name())
             self.setCursor(cursor)

@@ -495,10 +495,8 @@ class FLManager(QtCore.QObject):
         if not n:
             return None
 
-        name = str(n)
-
-        if name in self.cacheAction_.keys():
-            return self.cacheAction_[name]
+        if n in self.cacheAction_.keys():
+            return self.cacheAction_[n]
 
         a = FLAction()
         util = FLUtil()
@@ -520,7 +518,7 @@ class FLManager(QtCore.QObject):
         no = doc_elem.firstChild()
 
         a.setName(n)
-        a.setTable(n)
+        # a.setTable(n)
         while not no.isNull():
             e = no.toElement()
 
