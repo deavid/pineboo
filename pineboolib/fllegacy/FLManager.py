@@ -62,12 +62,6 @@ class FLManager(QtCore.QObject):
         QtCore.QTimer.singleShot(100, self.init)
         self.metadataCachedFails = []
 
-    def __del__(self):
-        """
-        destructor
-        """
-        self.finish()
-
     def init(self):
         """
         Acciones de inicialización.
@@ -130,9 +124,6 @@ class FLManager(QtCore.QObject):
             self.cacheMetaDataSys_ = []
 
     def finish(self):
-        """
-        Acciones de finalización.
-        """
         self.dictKeyMetaData_ = {}
         self.listTables_ = []
         self.cacheMetaData_ = []

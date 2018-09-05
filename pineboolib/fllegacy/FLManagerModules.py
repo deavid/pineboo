@@ -69,7 +69,7 @@ class FLManagerModules(object):
     """
     Lista de todos los identificadores de módulos cargados, para optimizar lecturas
     """
-    listAllIdModules_ = {}
+    listAllIdModules_ = []
 
     """
     Lista de todas los identificadores de areas cargadas, para optimizar lecturas
@@ -115,12 +115,6 @@ class FLManagerModules(object):
             self.db_ = db
 
         self.filesCached_ = {}
-    #"""
-    # destructor
-    #"""
-
-    # def __del__(self):
-    #    self.finish()
 
     #"""
     # Acciones de inicialización del sistema de módulos.
@@ -129,12 +123,35 @@ class FLManagerModules(object):
     # def init(self):
     #    pass
 
-    #"""
-    # Acciones de finalización del sistema de módulos.
-    #"""
-    #@decorators.NotImplementedWarn
-    # def finish(self):
-    #    pass
+    """
+     Acciones de finalización del sistema de módulos.
+    """
+
+    def finish(self):
+        if self.listAllIdModules_:
+            del self.listAllIdModules_
+            self.listAllIdModules_ = []
+
+        if self.listIdAreas_:
+            del self.listIdAreas_
+            self.listIdAreas_ = []
+
+        if self.dictInfoMods:
+            del self.dictInfoMods
+            self.dictInfoMods = {}
+
+        if self.dictModFiles:
+            del self.dictModFiles
+            self.dictModFiles = {}
+
+        if self.staticBdInfo_:
+            del self.staticBdInfo_
+            self.staticBdInfo_ = None
+
+        if self.dictKeyFiles:
+            self.writeState()
+            del self.dictKeyFiles
+            self.dictKeyFiles = {}
 
     """
     Obtiene el contenido de un fichero almacenado la base de datos.
