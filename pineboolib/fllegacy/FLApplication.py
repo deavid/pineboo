@@ -181,7 +181,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def setMainWidget(self, w):
-        self.main_widget_ = w
+
         if not self.container_:
             return
 
@@ -199,7 +199,7 @@ class FLApplication(QtCore.QObject):
             return
 
         if self.toogle_bars_:
-            tbg = self.container_.findChild(QtWidgets.QActionGroup, "agtoggleBars")
+            tbg = self.container_.findChild(QtWidgets.QActionGroup, "agToggleBars")
             a = tgb.findChild(QtWidgets.QAction, "Herramientas")
             b = tgb.findChild(QtWidgets.QAction, "Estado")
             tb = mw.findChild(QtWidgets.QToolBar, "toolBar")

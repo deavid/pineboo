@@ -28,7 +28,8 @@ class MainForm(QtCore.QObject):
 
         self.ui_ = None
         self.w_ = QMainWindow()
-        #self.app_ = QApplication
+
+        aqApp.main_widget_ = self.w_  # FIXME: Supongo que se podrá quitar en el futuro, para setMainWidget con contenedor
 
     def activateWindow(self):
         self.w_.activateWindow()
@@ -413,7 +414,6 @@ class MainForm(QtCore.QObject):
         self.updateMenu(self.ag_menu_, pinebooMenu)
 
         aqApp.setMainWidget(self.w_)
-
         self.dck_mod_.update(self.ag_menu_)
         self.dck_rec_.update(self.ag_rec_)
         self.dck_mar_.update(self.ag_mar_)
