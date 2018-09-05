@@ -57,10 +57,6 @@ class Project(object):
     version = "0.4"
     #_initModules = None
     main_window = None
-    translators = None
-    multiLangEnabled_ = False
-    multiLangId_ = QtCore.QLocale().name()[:2].upper()
-    translator_ = None
     acl_ = None
     _DGI = None
     deleteCache = None
@@ -342,7 +338,9 @@ class Project(object):
 
         if self._splash:
             self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        self.loadTranslations()
+
+        from pineboolib.pncontrolsfactory import aqApp
+        aqApp.loadTranslations()
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
 
@@ -428,106 +426,6 @@ class Project(object):
                 self.logger.exception("js.call: error al llamar %s", function)
 
         return None
-
-    """
-    Instala las traducciones cargadas
-    """
-
-    def loadTranslations(self):
-        translatorsCopy = None
-        # if self.translators:
-        #     translatorsCopy = copy.copy(self.translators)
-        #     for it in translatorsCopy:
-        #         self.removeTranslator(it)
-
-        lang = QtCore.QLocale().name()[:2]
-        for module in self.modules.keys():
-            self.loadTranslationFromModule(module, lang)
-
-        if translatorsCopy:
-            for it in translatorsCopy:
-                item = it
-                if item.sysTrans_:
-                    self.installTranslator(item)
-                else:
-                    item.deletelater()
-
-    """
-    Busca la traducción de un texto a un Idioma dado
-    @param s, Cadena de texto
-    @param l, Idioma.
-    @return Cadena de texto traducida. 
-    """
-    @decorators.BetaImplementation
-    def trMulti(self, s, l):
-        backMultiEnabled = self.multiLangEnabled_
-        ret = self.translate("%s_MULTILANG" % l.upper(), s)
-        self.multiLangEnabled_ = backMultiEnabled
-        return ret
-
-    """
-    Cambia el estado de la opción MultiLang
-    @param enable, Boolean con el nuevo estado
-    @param langid, Identificador del leguaje a activar
-    """
-    @decorators.BetaImplementation
-    def setMultiLang(self, enable, langid):
-        self.multiLangEnabled_ = enable
-        if enable and langid:
-            self.multiLangId_ = langid.upper()
-
-    """
-    Carga una traducción desde un módulo dado
-    @param idM, Identificador del módulo donde buscar
-    @param lang, Lenguaje a buscar
-    """
-
-    def loadTranslationFromModule(self, idM, lang):
-        self.installTranslator(self.createModTranslator(idM, lang, True))
-        # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
-
-    """
-    Instala una traducción para la aplicación
-    @param tor, Objeto con la traducción a cargar
-    """
-
-    def installTranslator(self, tor):
-        if not tor:
-            return
-        else:
-            qApp.installTranslator(tor)
-            self.translator_.append(tor)
-
-    """
-    Crea una traducción para sys
-    @param lang, Idioma a usar
-    @param loadDefault, Boolean para cargar los datos por defecto
-    @return objeto traducción
-    """
-    @decorators.NotImplementedWarn
-    def createSysTranslator(self, lang, loadDefault):
-        pass
-
-    """
-    Crea una traducción para un módulo especificado
-    @param idM, Identificador del módulo
-    @param lang, Idioma a usar
-    @param loadDefault, Boolean para cargar los datos por defecto
-    @return objeto traducción
-    """
-
-    def createModTranslator(self, idM, lang, loadDefault=False):
-        fileTs = "%s.%s.ts" % (idM, lang)
-        key = self.conn.managerModules().shaOfFile(fileTs)
-
-        if key is not None or idM == "sys":
-            tor = FLTranslator(self, "%s_%s" %
-                               (idM, lang), lang == "multilang")
-
-            if tor.loadTsContent(key):
-                return tor
-
-        return self.createModTranslator(idM, "es") if loadDefault else None
 
     #@decorators.NotImplementedWarn
     # def initToolBox(self):
@@ -653,13 +551,6 @@ class Project(object):
 
     def getTempDir(self):
         return self.tmpdir
-
-    def aboutQt(self):
-        QtWidgets.QMessageBox.aboutQt(QtWidgets.QWidget())
-
-    def aboutPineboo(self):
-        msg = "Texto Acerca de Pineboo"
-        QtWidgets.QMessageBox.information(QtWidgets.QWidget(), "Pineboo", msg)
 
     def chooseFont(self):
         font_ = QtWidgets.QFontDialog().getFont()
