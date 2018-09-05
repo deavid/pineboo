@@ -175,11 +175,11 @@ class MainForm(QtCore.QObject):
                 if module_name:
                     self.initModule(module_name)
 
-                self.addForm(open_actions[i], action.icon().pixmap(16, 16))
+                self.addForm(open_action, action.icon().pixmap(16, 16))
 
             idx = settings.readNumEntry("%scurrentPageIndex" % key)
             if idx > 0 and idx < len(self.tw_):
-                self.tw_.setCurrentPage(idx)
+                self.tw_.setCurrentWidget(self.tw_.widget(idx))
 
             recent_actions = settings.readListEntry("%srecentActions" % key)
             for recent in reversed(recent_actions):
