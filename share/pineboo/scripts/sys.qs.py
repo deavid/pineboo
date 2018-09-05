@@ -431,7 +431,7 @@ class FormInternalObj(FormDBWidget):
 
             else:
                 if nombreEjercicio:
-                    sys.setCaptionMainWidget(nombreEjercicio)
+                    aqApp.setCaptionMainWidget(nombreEjercicio)
 
             settings = AQSettings()
             oldApi = settings.readBoolEntry(u"application/oldApi")
