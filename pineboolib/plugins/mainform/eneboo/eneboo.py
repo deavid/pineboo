@@ -428,7 +428,7 @@ class MainForm(QtCore.QObject):
         self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
         self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
         self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(aqApp.chooseFont)
-        self.w_.findChild(QtWidgets.QAction, "styleAction").triggered.connect(aqApp.showStyles)
+        #self.w_.findChild(QtWidgets.QAction, "style").triggered.connect(aqApp.showStyles)
         self.w_.findChild(QtWidgets.QAction, "helpIndexAction").triggered.connect(aqApp.helpIndex)
         self.w_.findChild(QtWidgets.QAction, "urlEnebooAction").triggered.connect(aqApp.urlPineboo)
 
@@ -556,7 +556,8 @@ class MainForm(QtCore.QObject):
         font.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("font.png")))
         # font.triggered.connect(aqApp.chooseFont)
 
-        style = self.w_.findChild(QtWidgets.QAction, "styleAction")
+        style = self.w_.findChild(QtWidgets.QMenu, "style")
+        aqApp.initStyles()
         style.setIcon(self.iconSet16x16(AQS.Pixmap_fromMineSource("estilo.png")))
         # style.triggered.connect(aqApp.showStyles)
 

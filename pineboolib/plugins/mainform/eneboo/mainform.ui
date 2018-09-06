@@ -93,8 +93,13 @@
     <property name="title">
      <string>&amp;Configuración</string>
     </property>
+    <widget class="QMenu" name="style">
+     <property name="title">
+      <string>&amp;Estilo</string>
+     </property>
+    </widget>
     <addaction name="fontAction"/>
-    <addaction name="styleAction"/>
+    <addaction name="style"/>
    </widget>
    <widget class="QMenu" name="windowMenu">
     <property name="title">
@@ -123,11 +128,6 @@
     <string>&amp;Fuente</string>
    </property>
   </action>
-  <action name="styleAction">
-   <property name="text">
-    <string>&amp;Estilo</string>
-   </property>
-  </action>
   <action name="aboutQtAction">
    <property name="text">
     <string>Acerca de Qt</string>
@@ -146,6 +146,11 @@
   <action name="helpIndexAction">
    <property name="text">
     <string>Indice</string>
+   </property>
+  </action>
+  <action name="actionperune">
+   <property name="text">
+    <string>perune</string>
    </property>
   </action>
  </widget>

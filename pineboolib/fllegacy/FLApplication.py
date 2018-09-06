@@ -7,7 +7,6 @@ from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib import decorators
 import pineboolib
-from PyQt5.Qt import QApplication
 
 logger = logging.getLogger("FLApplication")
 
@@ -209,16 +208,27 @@ class FLApplication(QtCore.QObject):
             b.setOn(mw.statusBar().isVisible())
 
     @decorators.NotImplementedWarn
-    def makeStyle(self, stype):
+    def makeStyle(self, style_):
         pass
 
-    @decorators.NotImplementedWarn
     def chooseFont(self):
-        pass
+        font_ = QtWidgets.QFontDialog().getFont()
+        if font_:
+            QtWidgets.QApplication.setFont(font_[0])
+            save_ = []
+            save_.append(font_[0].family())
+            save_.append(font_[0].pointSize())
+            save_.append(font_[0].weight())
+            save_.append(font_[0].italic())
 
-    @decorators.NotImplementedWarn
+            sett_ = FLSettings()
+            sett_.writeEntry("application/font", save_)
+
     def showStyles(self):
-        pass
+        if not self.style:
+            self.initStyles()
+        # if self.style:
+        #    self.style.exec_()
 
     @decorators.NotImplementedWarn
     def showToggleBars(self):
@@ -248,9 +258,35 @@ class FLApplication(QtCore.QObject):
     def initview(self):
         pass
 
-    @decorators.NotImplementedWarn
+    def setStyle(self, style_):
+        if style_:
+            sett_ = FLSettings()
+            sett_.writeEntry("application/style", style_)
+            QtWidgets.QApplication.setStyle(style_)
+
     def initStyles(self):
-        pass
+        sett_ = FLSettings()
+        self.style_mapper = QtCore.QSignalMapper()
+        self.style_mapper.mapped[str].connect(self.setStyle)
+        style_read = sett_.readEntry("application/style", None)
+        if not style_read:
+            style_read = "Fusion"
+
+        style_menu = self.mainWidget().findChild(QtWidgets.QMenu, "style")
+
+        if style_menu:
+            ag = QtWidgets.QActionGroup(style_menu)
+            for style_ in QtWidgets.QStyleFactory.keys():
+                action_ = style_menu.addAction(style_)
+                action_.setObjectName("style_%s" % style_)
+                action_.setCheckable(True)
+                if style_ == style_read:
+                    action_.setChecked(True)
+
+                action_.triggered.connect(self.style_mapper.map)
+                self.style_mapper.setMapping(action_, style_)
+                ag.addAction(action_)
+            ag.setExclusive(True)
 
     @decorators.NotImplementedWarn
     def getTabWidgetPages(self, wn, n):
