@@ -47,16 +47,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         self._action = action
         self._cursorConn = conn
-        if self._action and self._action.table():
-            try:
-                _table = pineboolib.project.tables[self._action.table()]
-            except Exception as e:
-                self.logger.info("Tabla %s no declarada en project.tables", self._action.table())
-                return None
-
-            self._metadata = self._cursorConn.manager().metadata(_table.name)
+        if self._action.table():
+            self._metadata = self._cursorConn.manager().metadata(self._action.table())
         else:
-            raise AssertionError
+            return
 
         self.USE_THREADS = self._cursorConn.driver().useThreads()
         self.USE_TIMER = self._cursorConn.driver().useTimer()
