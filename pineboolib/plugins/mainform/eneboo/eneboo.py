@@ -304,18 +304,22 @@ class MainForm(QtCore.QObject):
 
         if not self.ag_rec_:
             self.ag_rec_ = QActionGroup(self.w_)
-            self.ag_rec_.setObjectName("pinebooAgRec")
 
-        ac_old = self.ag_rec_.findChild(QtWidgets.QAction, action.objectName())
         check_max = True
 
-        if ac_old:
-            self.ag_rec_.removeAction(ac_old)
-            del ac_old
+        new_ag_rec_ = QActionGroup(self.w_)
+        new_ag_rec_.setObjectName("pinebooAgRec")
 
-            check_max = False
+        for ac in self.ag_rec_.actions():
+            if ac.objectName() == action.objectName():
+                check_max = False
+                continue
 
-        ac = self.cloneAction(action, self.ag_rec_)
+            self.cloneAction(ac, new_ag_rec_)
+
+        self.cloneAction(action, new_ag_rec_)
+
+        self.ag_rec_ = new_ag_rec_
 
         lw = self.dck_rec_.lw_
         if check_max and lw.topLevelItemCount() >= self.MAX_RECENT:
@@ -333,6 +337,9 @@ class MainForm(QtCore.QObject):
         if not self.ag_mar_:
             self.ag_mar_ = QActionGroup(self.w_)
             self.ag_mar_.setObjectName("pinebooAgMar")
+
+        if self.ag_mar_.findChild(QtWidgets.QAction, action.objectName()):
+            return
 
         ac = self.cloneAction(action, self.ag_mar_)
         ac.triggered.connect(action.activate)
