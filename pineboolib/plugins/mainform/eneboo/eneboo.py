@@ -195,7 +195,6 @@ class MainForm(QtCore.QObject):
         self.main_widgets_ = []
         self.initialized_mods_ = {}
         self.act_sig_map_ = QSignalMapper(self.w_, "pinebooActSignalMap")
-        # self.act_sig_map_.mapped.connect(self.app_.triggerAction)
         self.act_sig_map_.mapped[str].connect(self.triggerAction)
         self.initTabWidget()
         self.initHelpMenu()
@@ -210,8 +209,6 @@ class MainForm(QtCore.QObject):
         self.initialized_mods_ = {}
         self.act_sig_map_ = QSignalMapper(self.w_, "pinebooActSignalMap")
         self.tw_ = w.findChild(QtWidgets.QTabWidget, "tabWidget")
-        #self.tw_corner = self.tw_.child("tabWidgetCorner","Qtoolbutton")
-        # self.tw_corner.clicked.connect(self.removeCurrentPage)
         self.agMenu_ = w.child("pinebooActionGroup", "QActionGroup")
         self.dck_mod_ = DockListView()
         self.dck_mod_.initFromWidget(w.child("pinebooDockModules", "QDockWindow"))
@@ -253,15 +250,15 @@ class MainForm(QtCore.QObject):
 
     def removeCurrentPage(self, n=None):
         if n is None:
-            page = self.tw_.currentWidget()
+            widget = self.tw_.currentWidget()
         else:
-            page = self.tw_.widget(n)
+            widget = self.tw_.widget(n)
 
-        if not page:
+        if not widget:
             return
 
-        # if page.rtti() == "FormDB":
-        page.close()
+        if widget.__class__.__name__ == "FLFormDB":
+            widget.close()
 
     def removeAllPages(self):
 
