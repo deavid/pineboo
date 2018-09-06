@@ -796,6 +796,7 @@ class FLSqlCursor(QtCore.QObject):
     _selection = None
 
     _refreshDelayedTimer = None
+    _action = None
     #actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
@@ -987,7 +988,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def action(self):
-        return self._action
+        return self._action or None
 
     def actionName(self):
         return self._action.name()
@@ -999,6 +1000,9 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setAction(self, a):
+
+        if a is self.action():
+            return
         # if isinstance(a, str) or isinstance(a, QString):
 
         # a = str(a) # FIXME: Quitar cuando se quite QString
@@ -1018,17 +1022,13 @@ class FLSqlCursor(QtCore.QObject):
                 action = FLAction()
                 action.setName(a)
                 action.setTable(a)
-
-        elif not isinstance(a, FLAction):
-            print("FIXME::setAction", __name__)
-            action = self.db().manager().action(a.name)
         else:
             action = a
 
-        if not getattr(self, "_action", None):
+        if not self.action():
             self._action = action
         else:
-            if self._action.name() != action.name():
+            if self.action().name() == action.name():
                 return True
 
         if not self._action.table():
@@ -3132,6 +3132,7 @@ class FLSqlCursor(QtCore.QObject):
             # MEJORABLE: Esto es un parche para evitar doble commitBuffer cuando usamos cursores relacionados.
 
             # El segundo peta diciendo que ya existe el registro
+            print(self.selection_pk(self.buffer().value(self.buffer().pK())))
             if not self.selection_pk(self.buffer().value(self.buffer().pK())):
                 self.model().refresh()  # <- Solo seria necesaria esta parte
                 self.selection_pk(self.buffer().value(self.buffer().pK()))
