@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
+import logging
+
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.utils import filedir
-
 import pineboolib
 
 
@@ -41,69 +42,35 @@ class FLFormSearchDB(FLFormDB):
     cursor_ = None
 
     eventloop = None
+
+    logger = logging.getLogger("FLFormSearchDB")
     """
     constructor.
     """
 
-    def __init__(self, *args, **kwargs):
-        parent = None
-        name = None
-        action = None
-        if isinstance(args[0], str):
-            # @param actionName Nombre de la acción asociada al formulario
+    def __init__(self, name_or_cursor, parent=None):
 
-            if len(args) == 2:
-                parent = args[1]
-
-            name = args[0]
-
-            ac = pineboolib.project.conn.manager().action(name)
-            self.setAction(ac)
-            if self._action is None:
-                return
-
-            if not self._action.table():
-                # if not table:
-                return
-
-            self.cursor_ = FLSqlCursor(self._action.table(), True, "default", None, None, self)
-            self.accepted_ = False
-            action = self._action
-
-        elif isinstance(args[0], FLSqlCursor):
-            # @param cursor Objeto FLSqlCursor para asignar a este formulario
-            # @param actionName Nombre de la acción asociada al formulario
-
-            if len(args) == 3:
-                parent = args[2]
-                name = args[1]
-
-            self.cursor_ = args[0]
-            action = self.cursor_.action()
-
-        elif len(args) == 2:
-            action = args[0]
-            parent = args[1]
-            name = action.name()
-            self.cursor_ = FLSqlCursor(action.table(), True, "default", None, None, self)
+        if not name_or_cursor:
+            self.logger.warn("Se ha llamado a FLFormSearchDB sin name_or_cursor")
+            return
 
         from pineboolib.pncontrolsfactory import aqApp
         parent = parent or aqApp.mainWidget()
 
-        super(FLFormSearchDB, self).__init__(parent, action, load=True)
-        # self.setWindowModality(QtCore.Qt.ApplicationModal)
+        if isinstance(name_or_cursor, str):
+            action = pineboolib.project.conn.manager().action(name_or_cursor)
+            self.setAction(action)
+            self.cursor_ = FLSqlCursor(action.table(), True, "default", None, None, self)
+        else:
+            self.cursor_ = name_or_cursor
+            self.setAction(self.cursor_.action())
+
+        self.accepted_ = False
+        super(FLFormSearchDB, self).__init__(parent, self._action, load=True)
+
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.eventloop = QtCore.QEventLoop()
-        if not name:
-            print("FLFormSearchDB : Nombre de acción vacío")
-            return
-
-        if not action:
-            print("FLFormSearchDB : No existe la acción", name)
-            return
-
-        # self.initForm()
 
     def setAction(self, a):
         self._action = a
