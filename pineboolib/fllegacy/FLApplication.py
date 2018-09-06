@@ -341,9 +341,8 @@ class FLApplication(QtCore.QObject):
     def timeUser(self):
         return self.time_user_
 
-    @decorators.NotImplementedWarn
-    def call(self, function, arumentList=[], object_contect=None):
-        pass
+    def call(self, function, argument_list=[], object_content=None):
+        return pineboolib.project.call(function, argument_list, object_content)
 
     def setCaptionMainWidget(self, value):
         self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, value))
@@ -486,7 +485,6 @@ class FLApplication(QtCore.QObject):
     def showDebug(self):
         return self.show_debug_
 
-    @decorators.NotImplementedWarn
     def db(self):
         return pineboolib.project.conn
 
