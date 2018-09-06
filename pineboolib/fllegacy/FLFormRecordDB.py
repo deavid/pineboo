@@ -113,20 +113,17 @@ class FLFormRecordDB(FLFormDB):
 
     def __init__(self, parent_or_cursor, action, load=False):
 
+        from pineboolib.pncontrolsfactory import aqApp
+
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
-
+        parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
         if isinstance(parent_or_cursor, FLSqlCursor):
-            parent = None
             self.setCursor(parent_or_cursor)
         else:
-            parent = parent_or_cursor
+            load = True  # Para que cargue el FormDB heredado un cursor
 
         super(FLFormRecordDB, self).__init__(parent, action, load)
-
-        self.setFocusPolicy(QtCore.Qt.NoFocus)
-
-        self.name_ = action.name()
 
         if self.cursor():
             self.initialModeAccess = self.cursor_.modeAccess()
@@ -141,6 +138,9 @@ class FLFormRecordDB(FLFormDB):
             if DEBUG:
                 print("*** FLFormRecordDB::__init__ -> Sin cursor??")
             self.initialModeAccess = FLSqlCursor.Browse
+
+        self.load()
+        self.initForm()
 
         if self.loaded:
             pineboolib.project.conn.managerModules().loadFLTableDBs(self)
@@ -185,9 +185,7 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def initForm(self):
-
         if self.cursor() and self.cursor().metadata():
-
             caption = None
             if self._action:
                 self.cursor().setAction(self._action)
@@ -198,7 +196,6 @@ class FLFormRecordDB(FLFormDB):
 
             # self.bindIface()
             # self.setCursor(self.cursor_)
-
             if not caption:
                 caption = self.cursor().metadata().alias()
 
@@ -210,7 +207,6 @@ class FLFormRecordDB(FLFormDB):
                 self.initTransLevel = self.cursor().transactionLevel()
                 self.setCaptionWidget(caption)
                 self.cursor().setContext(self.iface)
-
             if self.cursor().modeAccess() == FLSqlCursor.Insert:
                 self.showAcceptContinue_ = True
             else:
@@ -219,7 +215,6 @@ class FLFormRecordDB(FLFormDB):
             self.loadControls()
         else:
             self.setCaptionWidget("No hay metadatos")
-
         acl = pineboolib.project.acl()
         if acl:
             acl.process(self)

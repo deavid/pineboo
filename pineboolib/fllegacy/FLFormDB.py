@@ -565,7 +565,6 @@ class FLFormDB(QtWidgets.QDialog):
         if self._action.table():
             from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
             cursor = FLSqlCursor(self._action.name())
-            cursor.setAction(self._action.name())
             self.setCursor(cursor)
 
             v = None
@@ -579,18 +578,15 @@ class FLFormDB(QtWidgets.QDialog):
         if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
             pineboolib.project.conn.managerModules().loadFLTableDBs(self)
 
-            from pineboolib.fllegacy.FLAction import FLAction
-            fl_action = FLAction(self._action.name())
+            if self._action.description() not in ("", None):
+                self.setWhatsThis(self._action.description())
 
-            if fl_action.description():
-                self.setWhatsThis(fl_action.description())
+            caption = self._action.caption()
 
-            caption = fl_action.caption()
-
-            if caption is None and self.cursor() and self.cursor().metadata():
+            if caption in ("", None) and self.cursor() and self.cursor().metadata():
                 caption = self.cursor().metadata().alias()
 
-            if caption is None:
+            if caption in ("", None):
                 caption = "No hay metadatos"
             self.setCaptionWidget(caption)
 

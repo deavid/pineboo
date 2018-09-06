@@ -384,7 +384,7 @@ class FLManagerModules(object):
         if not isinstance(a, FLAction):
             a = pineboolib.utils.convert2FLAction(a)
 
-        return FLFormRecordDB(parent_or_cursor, a, load=True)
+        return FLFormRecordDB(parent_or_cursor, a, load=False)
 
     """
     Para establecer el módulo activo.
