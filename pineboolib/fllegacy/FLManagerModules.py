@@ -7,6 +7,7 @@ import pineboolib
 from pineboolib import decorators, pnqt3ui
 from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLAction import FLAction
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget
@@ -363,6 +364,9 @@ class FLManagerModules(object):
 
     def createForm(self, a, connector=None, parent=None, name=None):
         from pineboolib.fllegacy.FLFormDB import FLFormDB
+        if not isinstance(a, FLAction):
+            a = pineboolib.utils.convert2FLAction(a)
+
         return FLFormDB(parent, a, load=True)
 
     """
@@ -377,6 +381,8 @@ class FLManagerModules(object):
     def createFormRecord(self, a, connector=None, parent_or_cursor=None, name=None):
         from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
         # Falta implementar conector y name
+        if not isinstance(a, FLAction):
+            a = pineboolib.utils.convert2FLAction(a)
 
         return FLFormRecordDB(parent_or_cursor, a, load=True)
 
