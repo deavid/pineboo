@@ -113,11 +113,6 @@ class FLFormRecordDB(FLFormDB):
 
     def __init__(self, parent_or_cursor, action, load=False):
 
-        from pineboolib.utils import XMLStruct
-        if isinstance(action, XMLStruct):
-            print("FIXME::__init__ XMLSTRUCT", __name__)
-            action = pineboolib.project.conn.manager().action(action.name)
-
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
 

@@ -150,11 +150,6 @@ class FLFormDB(QtWidgets.QDialog):
 
     def __init__(self, parent, action, load=False):
 
-        from pineboolib.utils import XMLStruct
-        if isinstance(action, XMLStruct):
-            print("FIXME::__init__ XMLSTRUCT", __name__, action.name)
-            action = pineboolib.project.conn.manager().action(action.name)
-
         logger = logging.getLogger("FLFormDB")
         self.tiempo_ini = time.time()
 
