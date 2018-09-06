@@ -552,19 +552,7 @@ class Project(object):
     def getTempDir(self):
         return self.tmpdir
 
-    def chooseFont(self):
-        font_ = QtWidgets.QFontDialog().getFont()
-        if font_:
-            qApp.setFont(font_[0])
-            save_ = []
-            save_.append(font_[0].family())
-            save_.append(font_[0].pointSize())
-            save_.append(font_[0].weight())
-            save_.append(font_[0].italic())
-
-            sett_ = FLSettings()
-            sett_.writeEntry("application/font", save_)
-
+    """
     @QtCore.pyqtSlot(int)
     def setStyle(self, n):
         style_ = styleMapper.mapping(n).text()
@@ -572,7 +560,8 @@ class Project(object):
             sett_ = FLSettings()
             sett_.writeEntry("application/style", style_)
             qApp.setStyle(style_)
-
+    """
+    """
     def showStyles(self):
         sett_ = FLSettings()
         styleS = sett_.readEntry("application/style", None)
@@ -591,6 +580,7 @@ class Project(object):
             i = i + 1
 
         ag.setExclusive(True)
+    """
 
     def helpIndex(self):
         print("**** helIndex ****")
@@ -1295,6 +1285,3 @@ class XMLAction(XMLStruct):
     #        pineboolib.project._initModules.append(moduleName)
     #        pineboolib.project.call("%s.iface.init()" % moduleName, [], None, False)
     #        return
-
-
-styleMapper = QSignalMapper()
