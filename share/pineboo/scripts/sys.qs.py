@@ -427,7 +427,7 @@ class FormInternalObj(FormDBWidget):
                     texto = ustr(u"[ ", nombreEjercicio, u" ]")
                 texto = ustr(texto, u" [ ", aqApp.db().driverNameToDriverAlias(aqApp.db().driverName()),
                              u" ] * [ ", sys.nameBD(), u" ] * [ ", sys.nameUser(), u" ] ")
-                sys.setCaptionMainWidget(texto)
+                aqApp.setCaptionMainWidget(texto)
 
             else:
                 if nombreEjercicio:
