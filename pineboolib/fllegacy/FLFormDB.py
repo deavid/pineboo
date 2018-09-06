@@ -697,7 +697,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.script.form = None
             self.iface = None
             self.widget.close()
-            del self.known_instances[(self.__class__, self._action)]
+            del self.known_instances[(self.__class__, self._action.name())]
             del self.widget
         except Exception:
             pass
