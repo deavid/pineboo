@@ -193,10 +193,11 @@ def load_dgi(name):
 
 def create_app(DGI):
     """Create a MainForm using the DGI or the core."""
-    from PyQt5 import QtGui, QtWidgets
+    from PyQt5 import QtGui, QtWidgets, QtCore
     from pineboolib.utils import filedir
     import pineboolib
     app = QtWidgets.QApplication(sys.argv)
+    app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
     pineboolib.base_dir = filedir(".")  # Almacena base_dir para luego usarlo sobre filedir
     pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
     if DGI.localDesktop():
