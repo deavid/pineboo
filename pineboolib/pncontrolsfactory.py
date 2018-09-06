@@ -164,6 +164,9 @@ class SysType(object):
     def isNebulaBuild(self):
         return False
 
+    def setCaptionMainWidget(self, t):
+        aqApp.setCaptionMainWidget(t)
+
     def isQuickBuild(self):
         return False
 
