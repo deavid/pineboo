@@ -7,6 +7,7 @@ from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib import decorators
 import pineboolib
+from PyQt5.QtWidgets import QWhatsThis
 
 logger = logging.getLogger("FLApplication")
 
@@ -357,17 +358,54 @@ class FLApplication(QtCore.QObject):
     def activateModule(self, idm=None):  # dos funciones
         pass
 
-    @decorators.NotImplementedWarn
     def reinit(self):
-        pass
+        if self.initializing_ or self.destroying_:
+            return
+
+        self.stopTimerIdle()
+        self.apAppIdle()
+        self.initializing_ = True
+        self.writeState()
+        self.writeStateModule()
+        time = QtCore.QTimer()
+        time.singleShot(0, self.reinitP)
 
     @decorators.NotImplementedWarn
     def clearProject(self):
         pass
 
-    @decorators.NotImplementedWarn
     def reinitP(self):
-        pass
+        self.db().managerModules().__del__()
+        self.db().manager().__del__()
+        self.setMainWidget(None)
+        self.db().managerModules().setActiveIdModule("")
+
+        if self.dictMainWidgets:
+            self.dictMainWidgets = {}
+
+        self.clearProject()
+
+        self.db().manager().init()
+        self.db().managerModules().init()
+        self.db().managerModules().cleanupMetaData()
+
+        if self.acl_:
+            self.ac_.init()
+
+        self.loadScritps()
+        self.db().managerModules().setShaFromGlobal()
+        self.call("sys.init()", [])
+        self.initToolBox()
+        self.readState()
+
+        if self.container:
+            self.container.installEventFilter(self)
+            self.container.setDisable(False)
+
+        self.callScriptEntryFunction()
+
+        self.initializing_ = False
+        self.startTimerIdle()
 
     @decorators.NotImplementedWarn
     def showDocPage(self, url):
@@ -377,8 +415,8 @@ class FLApplication(QtCore.QObject):
     def timeUser(self):
         return self.time_user_
 
-    def call(self, function, argument_list=[], object_content=None):
-        return pineboolib.project.call(function, argument_list, object_content)
+    def call(self, function, argument_list=[], object_content=None, show_exceptions=True):
+        return pineboolib.project.call(function, argument_list, object_content, show_exceptions)
 
     def setCaptionMainWidget(self, value):
         self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, value))
@@ -868,3 +906,24 @@ class FLWidget(QtWidgets.QWidget):
     @decorators.NotImplementedWarn
     def paintEvent(self, pe):
         super(FLWidget, self.paintEvent(pe))
+
+
+class FLPopuWarn(QtWidgets.QWhatsThis):
+
+    script_calls_ = {}
+
+    def __init__(self, parent):
+        self.script_calls_ = {}
+        super(FLPopuWarn, self).__init__(parent)
+
+    def clicked(self, href):
+        if href:
+
+            from pineboolib.pncontrols import aqApp
+
+            if href.find(":") > -1:
+                h = href.split(":")[1]
+            if h.find(".") == 1:
+                aqApp.call(h.split(".")[1], self.script_calls_[href], h.split(".")[0])
+            else:
+                aqApp.call(h, self.script_calls_[href], None)
