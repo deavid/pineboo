@@ -112,18 +112,25 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def __init__(self, parent_or_cursor, action, load=False):
-
+        print("Inicializando!")
         from pineboolib.pncontrolsfactory import aqApp
+        if isinstance(action, str):
+            aqApp.db().manager().action(action)
 
+        print(5)
+        parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
+        cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
+        if not cursor:
+            load = True
+
+        print(4)
+        super(FLFormRecordDB, self).__init__(parent, action, load)
+        if cursor:
+            self.setCursor(parent_or_cursor)
+
+        print(3)
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
-        parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
-        if isinstance(parent_or_cursor, FLSqlCursor):
-            self.setCursor(parent_or_cursor)
-        else:
-            load = True  # Para que cargue el FormDB heredado un cursor
-
-        super(FLFormRecordDB, self).__init__(parent, action, load)
 
         if self.cursor():
             self.initialModeAccess = self.cursor_.modeAccess()
@@ -142,11 +149,8 @@ class FLFormRecordDB(FLFormDB):
         self.load()
         self.initForm()
 
-        if self.loaded:
-            pineboolib.project.conn.managerModules().loadFLTableDBs(self)
-
-    def loaded(self):
-        return self.loaded
+        if not self.load:
+            self.load_fl_controls.emit()
 
     """
     Reimplementado, añade un widget como principal del formulario
@@ -218,6 +222,8 @@ class FLFormRecordDB(FLFormDB):
         acl = pineboolib.project.acl()
         if acl:
             acl.process(self)
+
+        self.fl_form_loaded.emit()
 
     # Al no usar setMainWidget cargo la botonera aqui
     def loadControls(self):
@@ -456,6 +462,7 @@ class FLFormRecordDB(FLFormDB):
                 pass
 
         if self.cursor_:
+
             try:
                 levels = self.cursor_.transactionLevel() - self.initTransLevel
                 if levels > 0:
@@ -486,7 +493,7 @@ class FLFormRecordDB(FLFormDB):
             self.closed.emit()
 
         super(FLFormRecordDB, self).closeEvent(e)
-        # self.deleteLater()
+        self.deleteLater()
 
     """
     Validación de formulario.

@@ -126,6 +126,7 @@ class FLFormDB(QtWidgets.QDialog):
     """
     oldFormObjDestroyed = QtCore.pyqtSignal()
     cursorDestroyed = QtCore.pyqtSignal()
+    fl_form_loaded = QtCore.pyqtSignal()
 
     # signals:
 
@@ -161,7 +162,7 @@ class FLFormDB(QtWidgets.QDialog):
         #    super(QtWidgets.QWidget, self).__init__(parent)
         super(QtWidgets.QWidget, self).__init__(parent)
 
-        self.loaded = False
+        self._loaded = False
         try:
             assert (self.__class__, action.name()) not in self.known_instances
         except AssertionError:
@@ -178,8 +179,10 @@ class FLFormDB(QtWidgets.QDialog):
         self._action = action
         if type(self).__name__ == "FLFormRecordDB":
             self.actionName_ = "formRecord" + self._action.name()
+            script_name = self._action.scriptFormRecord()
         else:
             self.actionName_ = "form" + self._action.name()
+            script_name = self._action.scriptForm()
 
         #self.mod = self._action.mod
 
@@ -204,7 +207,6 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.script = None
         self.iface = None
-        script_name = self._action.scriptFormRecord() if type(self).__name__ == "FLFormRecordDB" else self._action.scriptForm()
 
         if script_name is None:
             script_name = self._action.name()
@@ -218,7 +220,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.initForm()
 
     def load(self):
-        if self.loaded:
+        if self._loaded:
             return
 
         # self.resize(550,350)
@@ -230,14 +232,17 @@ class FLFormDB(QtWidgets.QDialog):
         if self._uiName:
             pineboolib.project.conn.managerModules().createUI(self._uiName, None, self)
 
-        self.loaded = True
+        self._loaded = True
+
+    def loaded(self):
+        return self._loaded
 
     """
     Invoca a la función "init" del script "masterprocess" asociado al formulario
     """
     @QtCore.pyqtSlot()
     def initScript(self):
-        if self.loaded:
+        if self._loaded:
             if not getattr(self.widget, "iface", None):
                 self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
 
@@ -281,8 +286,21 @@ class FLFormDB(QtWidgets.QDialog):
 
         self.unbindIface()
 
-    def setCursor(self, cursor):
+    def setCursor(self, cursor=None):
+        if cursor is not self.cursor_ and self.cursor_ and self.oldCursorCtxt:
+            self.cursor_.setContext(self.oldCursorCtxt)
+
+        if not cursor:
+            return
+
+        if self.cursor_:
+            self.cursor_.destroyed.disconnect(self.cursorDestroyed)
+
         self.cursor_ = cursor
+        self.cursor_.destroyed.connect(self.cursorDestroyed)
+        if self.iface and self.cursor_:
+            self.oldCursorCtxt = self.cursor().context()
+            self.cursor_.setContext(self.iface)
 
     """
     Para obtener el cursor utilizado por el formulario.
@@ -567,6 +585,9 @@ class FLFormDB(QtWidgets.QDialog):
             cursor = FLSqlCursor(self._action.name())
             self.setCursor(cursor)
 
+            if self.loaded():
+                self.fl_form_loaded.emit()
+
             v = None
 
             if getattr(self.iface, "preloadMainFilter", None):
@@ -575,8 +596,8 @@ class FLFormDB(QtWidgets.QDialog):
             if v:
                 self.cursor_.setMainFilter(v, False)
 
-        if self.loaded and not self.__class__.__name__ == "FLFormRecordDB":
-            pineboolib.project.conn.managerModules().loadFLTableDBs(self)
+        # if self._loaded and not self.__class__.__name__ == "FLFormRecordDB":
+            # pineboolib.project.conn.managerModules().loadFLTableDBs(self)
 
             if self._action.description() not in ("", None):
                 self.setWhatsThis(self._action.description())
@@ -695,16 +716,20 @@ class FLFormDB(QtWidgets.QDialog):
             self.widget.close()
             del self.known_instances[(self.__class__, self._action.name())]
             del self.widget
+            del self.script
         except Exception:
             pass
 
-        self.loaded = False
+        self._loaded = False
 
     """
     Captura evento mostrar
     """
 
     def showEvent(self, e):
+        if not self.loaded():
+            return
+
         if not self.showed:
             self.showed = True
             v = None
@@ -756,7 +781,7 @@ class FLFormDB(QtWidgets.QDialog):
             self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
         tiempo_fin = time.time()
-        self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs" % (self.actionName_, tiempo_fin - self.tiempo_ini))
+        self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s" % (self.actionName_, tiempo_fin - self.tiempo_ini, self))
         self.tiempo_ini = None
 
     def initMainWidget(self, w=None):
