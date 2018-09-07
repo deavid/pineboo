@@ -72,6 +72,10 @@ Compilar qt cruzado para qmake:
     export ANDROID_NDK_TOOLCHAIN_VERSION=4.9
     
 
+Compilación cruzada ios (en desarrollo)
+============================================
+http://docs.godotengine.org/en/3.0/development/compiling/cross-compiling_for_ios_on_linux.html
+https://vedanamedia.com/wp-content/uploads/2017/07/LIBS-README.txt
 
 
 
