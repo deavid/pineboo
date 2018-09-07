@@ -467,8 +467,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             # TODO: layout se solapa con el layout de FormInternalObj
             if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
                 if Options.DEBUG_LEVEL > 50:
-                    logger("Trying to replace layout. Ignoring. %s, %s",
-                           repr(c.tag), widget.layout)
+                    logger.warn("Trying to replace layout. Ignoring. %s, %s",
+                                repr(c.tag), widget.layout)
                 continue
 
             widget.layout = QtWidgets.QVBoxLayout()
@@ -613,11 +613,11 @@ Llama al método load de los FLTableDB de un widget
 """
 
 
-def loadFLTableDBs(w):
-    for table_db in w.findChildren(FLTableDB.FLTableDB):
-        table_db.load()
-    for field_db in w.findChildren(FLFieldDB.FLFieldDB):
-        field_db.load()
+# def loadFLTableDBs(w):
+#    for table_db in w.findChildren(FLTableDB.FLTableDB):
+#        table_db.load()
+#    for field_db in w.findChildren(FLFieldDB.FLFieldDB):
+#        field_db.load()
 
 
 def loadIcon(xml):

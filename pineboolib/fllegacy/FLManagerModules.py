@@ -346,14 +346,6 @@ class FLManagerModules(object):
         return w_
 
     """
-    Llama al método load de los FLTableDB de un widget
-    @param w Widget que contiene los FLTableDB
-    """
-
-    def loadFLTableDBs(self, w):
-        pnqt3ui.loadFLTableDBs(w)
-
-    """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
 
     Utiliza el método FLManagerModules::createUI() para obtener el formulario construido.
@@ -385,7 +377,6 @@ class FLManagerModules(object):
             a = pineboolib.utils.convert2FLAction(a)
 
         return FLFormRecordDB(parent_or_cursor, a, load=False)
-
     """
     Para establecer el módulo activo.
 
