@@ -166,19 +166,19 @@ class FLFieldDB(QtWidgets.QWidget):
         #self.timer_1.singleShot(120, self.loaded)
         self.cursorAux = None
 
-    def load(self):
-        self._loaded = True
-        while True:  # Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
-            parent = getattr(self.topWidget_, "cursor", None)()
-            if parent and isinstance(self.topWidget_, FLSqlCursor) or isinstance(self.topWidget_, FLFormDB):
+        while not isinstance(self.topWidget_, FLFormDB):
+            self.topWidget_ = self.topWidget_.parentWidget()
+            if not self.topWidget_:
                 break
-            new_parent = self.topWidget_.parentWidget()
-            if new_parent is None:
-                self.topWidget_ = None
-                self.logger.warn("FLFieldDB : El widget de nivel superior deber ser de la clase FLFormDB o heredar de ella (o fuí demasiado rápido y no lo esperé)")
-                break
-            self.topWidget_ = new_parent
 
+        self.topWidget_.fl_form_loaded.connect(self.load)
+
+    def load(self):
+
+        if self._loaded:
+            return
+
+        self._loaded = True
         if self.topWidget_:
             self.cursor_ = self.topWidget_.cursor()
             # print("Hay topWidget en %s", self)

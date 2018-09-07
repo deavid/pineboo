@@ -8,10 +8,11 @@ from pineboolib.utils import DefFun, filedir
 
 
 from pineboolib.fllegacy.FLDataTable import FLDataTable
-from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
+from pineboolib.fllegacy.FLFormRecordDB import FLFormRecordDB
+from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSettings import FLSettings
@@ -88,7 +89,7 @@ class FLTableDB(QtWidgets.QWidget):
     tdbFilterBuildWhere_ = None
     filterHidden_ = False
     findHidden_ = False
-
+    _loaded = False
     """
     Tamaño de icono por defecto
     """
@@ -111,7 +112,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.autoSortColumn_ = True
         self.tabFilterLoaded = False
         self.timer_1 = QtCore.QTimer(self)
-        self._name = name
+        if name:
+            self.setObjectName(name)
         self.checkColumnVisible_ = False
         self.tdbFilterLastWhere_ = u""
         self.filter_ = u""
@@ -119,34 +121,35 @@ class FLTableDB(QtWidgets.QWidget):
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
 
+        while not isinstance(self.topWidget, FLFormDB):
+            self.topWidget = self.topWidget.parentWidget()
+            if not self.topWidget:
+                break
+
+        self._loaded = False
+        self.topWidget.fl_form_loaded.connect(self.load)
+
     def __getattr__(self, name):
         return DefFun(self, name)
 
     def load(self):
+
         # Es necesario pasar a modo interactivo lo antes posible
         # Sino, creamos un bug en el cierre de ventana: se recarga toda la tabla para saber el tamaño
-        # print("FLTableDB(%s): setting columns in interactive mode" % self._tableName)
-        parent_cursor = None
-        while True:  # Ahora podemos buscar el cursor ... porque ya estamos añadidos al formulario
-            parent_cursor = getattr(self.topWidget, "cursor_", None)
-            if not isinstance(parent_cursor, FLSqlCursor):
-                parent_cursor = None
-            if parent_cursor:
-                break
-            new_parent = self.topWidget.parentWidget()
-            if new_parent is None:
-                break
-            self.topWidget = new_parent
+        # print("FLTableDB(%s): setting columns in interactive mode" % self._tableName))
+        if self.loaded():
+            return
 
-        if not parent_cursor:
+        if not self.topWidget.cursor():
             print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
             return
 
-        self.cursor_ = parent_cursor
-        self.setFont(QtWidgets.QApplication.font())
+        self.cursor_ = self.topWidget.cursor()
+        self.initCursor()
+        # self.setFont(QtWidgets.QApplication.font())
 
-        if not self._name:
-            self.setName("FLTableDB")
+        if not self.objectName():
+            self.setObjectName("FLTableDB")
 
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self.refreshDelayed)
@@ -157,7 +160,6 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.mapCondType = []
 
-        self.initCursor()
         self._loaded = True
         self.showWidget()
 
@@ -165,9 +167,8 @@ class FLTableDB(QtWidgets.QWidget):
             print("**FLTableDB::name: %r cursor: %r" %
                   (self.objectName(), self.cursor_.d.nameCursor_))
 
-    def setName(self, name):
-        self._name = name
-
+    def loaded(self):
+        return self._loaded
     """
     Inicia el cursor segun este campo sea de la tabla origen o de
     una tabla relacionada
@@ -727,7 +728,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     def showEvent(self, e):
         super(FLTableDB, self).showEvent(e)
-        if self._loaded == True:
+        if self.loaded():
             self.showWidget()
 
     """
@@ -735,7 +736,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def showWidget(self):
-        if not self._loaded:
+        if not self.loaded():
             return
 
         if not self.showed and self.cursor_ and self.tableRecords_:
@@ -2176,7 +2177,8 @@ class FLTableDB(QtWidgets.QWidget):
             msec_refresh = 200
             ret = ""
             try:
-                ret = self.cursor_._prj.call(functionQSA, vargs, None)
+                from pineboolib.pncontrolsfactory import aqApp
+                ret = aqApp.call(functionQSA, vargs, None)
                 print("functionQSA:%s:" % functionQSA)
             except Exception:
                 pass
