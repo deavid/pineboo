@@ -112,23 +112,19 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def __init__(self, parent_or_cursor, action, load=False):
-        print("Inicializando!")
         from pineboolib.pncontrolsfactory import aqApp
         if isinstance(action, str):
             aqApp.db().manager().action(action)
 
-        print(5)
         parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
         cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
         if not cursor:
             load = True
 
-        print(4)
         super(FLFormRecordDB, self).__init__(parent, action, load)
         if cursor:
             self.setCursor(parent_or_cursor)
 
-        print(3)
         self._uiName = action.formRecord()
         self._scriptForm = action.scriptFormRecord() or "emptyscript"
 

@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qWarning, QKeySequence
 
 from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm, convertFLAction
+from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
 
@@ -125,7 +126,6 @@ class FLFormDB(QtWidgets.QDialog):
     Uso interno
     """
     oldFormObjDestroyed = QtCore.pyqtSignal()
-    cursorDestroyed = QtCore.pyqtSignal()
     fl_form_loaded = QtCore.pyqtSignal()
 
     # signals:
@@ -742,6 +742,13 @@ class FLFormDB(QtWidgets.QDialog):
         size = loadGeometryForm(self.geoName())
         if size:
             self.resize(size)
+
+    @QtCore.pyqtSlot(FLSqlCursor)
+    def cursorDestroyed(self, obj_):
+        if not obj_ or obj_ is self.cursor_:
+            return
+
+        self.cursor_ = None
 
     """
     Captura evento ocultar

@@ -39,7 +39,6 @@ class FLFormSearchDB(FLFormDB):
     acceptingRejecting_ = None
     inExec_ = None
     accepted_ = None
-    cursor_ = None
 
     eventloop = None
 
@@ -56,18 +55,21 @@ class FLFormSearchDB(FLFormDB):
 
         from pineboolib.pncontrolsfactory import aqApp
         parent = parent or aqApp.mainWidget()
-
         if isinstance(name_or_cursor, str):
             action = pineboolib.project.conn.manager().action(name_or_cursor)
-            self.setAction(action)
-            self.cursor_ = FLSqlCursor(action.table(), True, "default", None, None, self)
+            cursor = FLSqlCursor(action.table(), True, "default", None, None, self)
         else:
-            self.cursor_ = name_or_cursor
-            self.setAction(self.cursor_.action())
+            action = name_or_cursor.action()
+            cursor = name_or_cursor
+
+        super(FLFormSearchDB, self).__init__(parent, action, load=False)
+
+        self.setCursor(cursor)
 
         self.accepted_ = False
-        super(FLFormSearchDB, self).__init__(parent, self._action, load=True)
 
+        self.load()
+        self.initForm()
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.eventloop = QtCore.QEventLoop()
@@ -89,9 +91,6 @@ class FLFormSearchDB(FLFormDB):
     """
     formReady = QtCore.pyqtSignal()
     """
-
-    def initForm(self):
-        super(FLFormSearchDB, self).initForm()
 
     def loadControls(self):
 

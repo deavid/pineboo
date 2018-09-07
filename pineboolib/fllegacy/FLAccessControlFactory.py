@@ -4,7 +4,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 from pineboolib.fllegacy.FLAccessControl import FLAccessControl
-from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib import decorators
 import pineboolib
@@ -41,6 +40,7 @@ class FLAccessControlFactory(QtCore.QObject):
         if not obj:
             print("NO OBJ")
 
+        from pineboolib.fllegacy.FLFormDB import FLFormDB
         if isinstance(obj, QtWidgets.QMainWindow):
             return "mainwindow"
         if isinstance(obj, FLTableMetaData):
