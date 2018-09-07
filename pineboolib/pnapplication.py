@@ -353,67 +353,70 @@ class Project(object):
     @return Boolean con el resultado.
     """
 
-    def call(self, function, aList, objectContext=None, showException=True):
+    def call(self, function, aList, object_context=None, showException=True):
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s",
-                          function, aList, objectContext, stack_info=True)
+                          function, aList, object_context, stack_info=True)
 
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
         if function[-2:] == "()":
             function = function[:-2]
 
         aFunction = function.split(".")
-        if not aFunction[0] in self.actions:
-            if len(aFunction) > 1:
+
+        if not object_context:
+            if not aFunction[0] in self.actions:
+                if len(aFunction) > 1:
+                    if showException:
+                        self.logger.error("No existe la acción %s en el módulo %s", aFunction[1], aFunction[0])
+                else:
+                    if showException:
+                        self.logger.error("No existe la acción %s", aFunction[0])
+                return False
+
+            funAction = self.actions[aFunction[0]]
+            if aFunction[1] == "iface" or len(aFunction) == 2:
+                mW = funAction.load()
+                if len(aFunction) == 2:
+                    object_context = None
+                    if hasattr(mW, "iface"):
+                        if hasattr(mW.iface, aFunction[1]):
+                            object_context = mW.iface
+
+                    if not object_context:
+                        object_context = mW
+
+                else:
+                    object_context = mW.iface
+
+            elif aFunction[1] == "widget":
+                fR = None
+                funAction.load_script(aFunction[0], fR)
+                object_context = fR.iface
+            else:
+                return False
+
+            if not object_context:
                 if showException:
                     self.logger.error(
-                        "No existe la acción %s en el módulo %s", aFunction[1], aFunction[0])
-            else:
-                if showException:
-                    self.logger.error(
-                        "No existe la acción %s", aFunction[0])
-            return False
+                        "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
+                return False
 
-        funAction = self.actions[aFunction[0]]
-        if aFunction[1] == "iface" or len(aFunction) == 2:
-            mW = funAction.load()
-            if len(aFunction) == 2:
-                funScript = None
-                if hasattr(mW, "iface"):
-                    if hasattr(mW.iface, aFunction[1]):
-                        funScript = mW.iface
+        if len(aFunction) == 1:  # Si no hay puntos en la llamada a functión
+            function_name = aFunction[0]
 
-                if not funScript:
-                    funScript = mW
-
-            else:
-                funScript = mW.iface
-
-        elif aFunction[1] == "widget":
-            fR = None
-            funAction.load_script(aFunction[0], fR)
-            funScript = fR.iface
+        elif len(aFunction) > 2:  # si existe self.iface por ejemplo
+            function_name = aFunction[2]
         else:
-            return False
+            function_name = aFunction[1]  # si no exite self.iiface
 
-        if not funScript:
-            if showException:
-                self.logger.error(
-                    "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
-            return False
-
-        if len(aFunction) > 2:
-            last_ = aFunction[2]
-        else:
-            last_ = aFunction[1]
-
-        fn = getattr(funScript, last_, None)
+        fn = getattr(object_context, function_name, None)
 
         if fn is None:
             if showException:
                 self.logger.error(
-                    "No existe la función %s en %s", last_, aFunction[0])
+                    "No existe la función %s en %s", function_name, aFunction[0])
             return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
         try:
@@ -423,7 +426,7 @@ class Project(object):
                 return fn()
         except Exception:
             if showException:
-                self.logger.exception("js.call: error al llamar %s", function)
+                self.logger.exception("js.call: error al llamar %s de %s", function, object_context)
 
         return None
 
@@ -449,55 +452,6 @@ class Project(object):
             except Exception as e:
                 self.logger.warn(
                     "El fichero %s no se ha podido convertir: %s", scriptname, e)
-
-    """
-    fixme: Reinicializa????
-    """
-
-    def reinit(self):
-        if self.initializing_ or self.destroying_:
-            return
-
-        self.stopTimerIdle()
-        self.apAppIdle()
-        self.initializing_ = True
-        self.writeState()
-        self.writeStateModule()
-        time = QtCore.QTimer()
-        time.singleShot(0, self.reinitP)
-
-    def reinitP(self):
-        self.db().managerModules().__del__()
-        self.db().manager().__del__()
-        self.setMainWidget(None)
-        self.db().managerModules().setActiveIdModule("")
-
-        if self.dictMainWidgets:
-            self.dictMainWidgets = {}
-
-        self.clearProject()
-
-        self.db().manager().init()
-        self.db().managerModules().init()
-        self.db().managerModules().cleanupMetaData()
-
-        if self.acl_:
-            self.ac_.init()
-
-        self.loadScritps()
-        self.db().managerModules().setShaFromGlobal()
-        self.call("sys.init()", [])
-        self.initToolBox()
-        self.readState()
-
-        if self.container:
-            self.container.installEventFilter(self)
-            self.container.setDisable(False)
-
-        self.callScriptEntryFunction()
-
-        self.initializing_ = False
-        self.startTimerIdle()
 
     """
     Lanza los test
@@ -1053,8 +1007,7 @@ class XMLAction(XMLStruct):
                 "Record action %s is not defined. Canceled !", self.name)
             return None
         self.logger.debug("Loading record action %s . . . ", self.name)
-        fRWidget = pineboolib.project.conn.managerModules(
-        ).createFormRecord(self, None, cursor, None)
+        fRWidget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
         if not fRWidget.loaded:
             return None
         self.formrecord_widget = fRWidget
@@ -1267,6 +1220,8 @@ class XMLAction(XMLStruct):
             parent.widget = parent.script.form
             if getattr(parent.widget, "iface", None):
                 parent.iface = parent.widget.iface
+
+        return
 
     def unknownSlot(self):
         self.logger.error("Executing unknown script for Action %s", self.name)
