@@ -660,6 +660,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
             del self.transactionsOpened_
 
     def doAcl(self):
+        from pineboolib.pncontrolsfactory import aqApp
         if not self.acTable_:
             self.acTable_ = FLAccessControlFactory().create("table")
             self.acTable_.setFromObject(self.metadata_)
@@ -681,7 +682,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
                 condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(
                     str(self.cursor_.value(self.acosCondName_))))
             elif self.acosCond_ == FLSqlCursor.Function:
-                condTrue_ = pineboolib.project.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
+                condTrue_ = aqApp.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
 
             if condTrue_:
                 if not self.acTable_.name() == self.id_:
@@ -1100,6 +1101,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setAtomicValueBuffer(self, fN, functionName):
+        from pineboolib.pncontrolsfactory import aqApp
         if not self.buffer() or not fN or not self.metadata():
             return
 
@@ -1127,7 +1129,7 @@ class FLSqlCursor(QtCore.QObject):
             arglist = []
             arglist.append(fN)
             arglist.append(self.buffer().value(fN))
-            v = pineboolib.project.call(functionName, arglist, self.d.ctxt_)
+            v = aqApp.call(functionName, arglist, self.context())
 
             q = FLSqlQuery(None, self.db().dbAux())
             ret = q.exec_("UPDATE  %s SET %s = %s WHERE %s" % (
@@ -1401,14 +1403,14 @@ class FLSqlCursor(QtCore.QObject):
             self.d.browseStates_.erase(i)
 
     """
-    Establece el contexto de ejecución de scripts
+    Establece el contexto de ejecución de scripts, este puede ser del master o del form_record
 
     Ver FLSqlCursor::ctxt_.
 
     @param c Contexto de ejecucion
     """
 
-    def setContext(self, c):
+    def setContext(self, c=None):
         if c:
             self.d.ctxt_ = weakref.ref(c)
 
@@ -2501,6 +2503,8 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
+        from pineboolib.pncontrolsfactory import aqApp
+
         if not self.metadata():
             return False
 
@@ -2541,8 +2545,10 @@ class FLSqlCursor(QtCore.QObject):
                         siguiente = None
                         try:
                             # siguiente = self.context().calculateCounter()
-                            functionCounter = self.actionName() + ".widget.calculateCounter"
-                            siguiente = pineboolib.project.call(functionCounter, None, self.context(), True)
+
+                            # Este lo hago sin context() porque no se ha especificado todavía en el cursor y continue el de master
+                            functionCounter = "%s.widget.calculateCounter" % self.action().scriptFormRecord()[:-3]
+                            siguiente = aqApp.call(functionCounter, None, None, True)
                         except Exception:
                             util = FLUtil()
                             siguiente = util.nextCounter(
@@ -3051,6 +3057,7 @@ class FLSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def commitBuffer(self, emite=True, checkLocks=False):
+        from pineboolib.pncontrolsfactory import aqApp
         if not self.buffer() or not self.metadata():
             return False
 
@@ -3112,8 +3119,7 @@ class FLSqlCursor(QtCore.QObject):
                 functionAfter = "sys.iface.afterCommit_%s" % self.metadata().name()
 
             if functionBefore:
-                cI = self.context()
-                v = pineboolib.project.call(functionBefore, [self], cI, False)
+                v = aqApp.call(functionBefore, [self], self.context(), False)
                 if v and not isinstance(v, bool):
                     return False
 
@@ -3174,8 +3180,7 @@ class FLSqlCursor(QtCore.QObject):
                     self.cursorRelation().setAskForCancelChanges(True)
 
             recordDelBefore = "recordDelBefore%s" % self.metadata().name()
-            cI = self.context()
-            v = pineboolib.project.call(recordDelBefore, [self], cI, False)
+            v = aqApp.call(recordDelBefore, [self], self.context(), False)
             if v and not isinstance(v, bool):
                 return False
 
@@ -3218,8 +3223,7 @@ class FLSqlCursor(QtCore.QObject):
             self.model().Delete(self)
 
             recordDelAfter = "recordDelAfter%s" % self.metadata().name()
-            cI = self.context()
-            v = pineboolib.project.call(recordDelAfter, [self], cI, False)
+            v = aqApp.call(recordDelAfter, [self], self.context(), False)
 
             updated = True
 
@@ -3227,8 +3231,7 @@ class FLSqlCursor(QtCore.QObject):
             return False
 
         if not self.modeAccess() == self.Browse and functionAfter and self.activatedCommitActions():
-            cI = self.context()
-            v = pineboolib.project.call(functionAfter, [self], cI, False)
+            v = aqApp.call(functionAfter, [self], self.context(), False)
             if v and not isinstance(v, bool):
                 return False
 
