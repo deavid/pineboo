@@ -502,6 +502,10 @@ class FormDBWidget(QWidget):
                 if not ret:
                     parent = parent.parentWidget()
 
+                if hasattr(ret, "loaded()"):
+                    if not ret.loaded():
+                        logger.warn("El control %s no está listo todavía", childName)
+
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
@@ -522,18 +526,18 @@ class FormDBWidget(QWidget):
 
         # Para inicializar los controles si se llaman desde qsa antes de
         # mostrar el formulario.
-        from pineboolib.fllegacy.FLFieldDB import FLFieldDB
-        if isinstance(ret, FLFieldDB):
-            if not ret.cursor():
-                ret.initCursor()
-            if not ret.editor_ and not ret.editorImg_:
-                ret.initEditor()
+        #from pineboolib.fllegacy.FLFieldDB import FLFieldDB
+        # if isinstance(ret, FLFieldDB):
+        #    if not ret.cursor():
+        #        ret.initCursor()
+        #    if not ret.editor_ and not ret.editorImg_:
+        #        ret.initEditor()
 
-        from pineboolib.fllegacy.FLTableDB import FLTableDB
-        if isinstance(ret, FLTableDB):
-            if not ret.tableRecords_ and self.cursor_:
-                ret.tableRecords()
-                ret.setTableRecordsCursor()
+        #from pineboolib.fllegacy.FLTableDB import FLTableDB
+        # if isinstance(ret, FLTableDB):
+        #    if not ret.tableRecords_ and self.cursor_:
+        #        ret.tableRecords()
+        #        ret.setTableRecordsCursor()
 
         # else:
         #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
