@@ -24,6 +24,7 @@ from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
 from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
+import sys
 """
 Almacena los datos del serividor de la BD principal
 """
@@ -293,14 +294,14 @@ class Project(object):
 
                 encode_ = "ISO-8859-15"
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
-                    encode_ = "UTF-8"
+                    encode_ = "utf-8" if "utf-8" == sys.getdefaultencoding() else encode_
 
                 f2 = open(_dir("cache", fileobj.filekey), "wb")
                 # La cadena decode->encode corrige el bug de guardado de
                 # AbanQ/Eneboo
                 txt = ""
                 try:
-                    # txt = contenido.decode("UTF-8").encode("ISO-8859-15")
+                    #txt = contenido.decode("UTF-8").encode("ISO-8859-15")
 
                     txt = contenido.encode(encode_)
                 except Exception:
