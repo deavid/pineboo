@@ -316,9 +316,10 @@ class FLManagerModules(object):
 
         from xml.etree import ElementTree as ET
 
-        ui_data = self.contentFS(form_path, True)
-        root_ = ET.fromstring(ui_data)
-
+        #ui_data = self.contentFS(form_path, True)
+        #root_ = ET.fromstring(ui_data)
+        tree_ = ET.parse(form_path)
+        root_ = tree_.getroot()
         UIVersion = root_.get("version")
         if parent is None:
             wid = root_.find("widget")
