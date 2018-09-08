@@ -518,17 +518,19 @@ def checkDependencies(dict_):
     for key in dict_.keys():
         try:
             mod_ = import_module(key)
-            if key == "PIL":
-                v = mod_.__version__
-
+            mod_ver = None
             if key == "ply":
                 version_check("ply", mod_.__version__, '3.9')
-
-            if key == "Pillow":
+            elif key == "Pillow":
                 version_check("Pillow", mod_.__version__, '5.1.0')
-            if key == "PyQt5.QtCore":
+            elif key == "PyQt5.QtCore":
                 version_check("PyQt5", mod_.QT_VERSION_STR, '5.9')
+                mod_ver = mod_.QT_VERSION_STR
 
+            if not mod_ver:
+                mod_ver = getattr(mod_, "__version__", "???")
+
+            logger.warn("Versión de %s: %s", key, mod_ver)
         except ImportError:
             dependences.append(dict_[key])
             error.append(traceback.format_exc())
@@ -552,7 +554,6 @@ def checkDependencies(dict_):
 
 
 def version_check(mod_name, mod_ver, min_ver):
-    logger.warn("Versión de %s: %s", mod_name, mod_ver)
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
         logger.warn("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
