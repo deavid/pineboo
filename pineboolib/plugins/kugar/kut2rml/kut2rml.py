@@ -35,6 +35,9 @@ class kut2rml(object):
     _parser_tools = None
 
     def __init__(self):
+        from pineboolib.utils import checkDependencies
+        dict_ = {"z3c.rml": "z3c.rml"}
+        checkDependencies(dict_)
         self.rml_ = Element(None)
         self.logger = logging.getLogger("kut2rml")
         self.correccionAncho_ = 0.927
