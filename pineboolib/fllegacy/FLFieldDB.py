@@ -184,7 +184,8 @@ class FLFieldDB(QtWidgets.QWidget):
             # print("Hay topWidget en %s", self)
         if self.DEBUG:
             if self.cursor_ and self.cursor_.d.buffer_:
-                self.logger.info("*** FLFieldDB::loaded: cursor: %r name: %r at:%r", self.cursor_, self.cursor_.curName(), self.cursor_.at())
+                self.logger.info("*** FLFieldDB::loaded: cursor: %r name: %r at:%r",
+                                 self.cursor_, self.cursor_.curName(), self.cursor_.at())
                 cur_values = [
                     f.value for f in self.cursor_.d.buffer_.fieldList_]
                 self.logger.info("*** cursor Buffer: %r", cur_values)
@@ -1525,11 +1526,13 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.tableName_ and not self.foreignField_ and not self.fieldRelation_:
             self.cursorBackup_ = self.cursor_
             if self.cursor_:
-                self.cursor_ = FLSqlCursor(self.tableName_, True, pineboolib.project.conn.db().connectionName(), None, None, self)
+                self.cursor_ = FLSqlCursor(self.tableName_, True,
+                                           pineboolib.project.conn.db().connectionName(), None, None, self)
             else:
                 if not self.topWidget_:
                     return
-                self.cursor_ = FLSqlCursor(self.tableName_, True, pineboolib.project.conn.database().connectionName(), None, None, self)
+                self.cursor_ = FLSqlCursor(self.tableName_, True,
+                                           pineboolib.project.conn.database().connectionName(), None, None, self)
             self.cursor_.setModeAccess(FLSqlCursor.Browse)
             if self.showed:
                 try:
@@ -1611,7 +1614,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 fMD.addRelationMD(rMD)
                 self.logger.info("FLFieldDB : La relación entre la tabla del formulario ( %s ) y la tabla ( %s ) de este campo ( %s ) no existe, "
                                  "pero sin embargo se han indicado los campos de relación( %s, %s)", curName, self.tableName_, self.fieldName_, self.fieldRelation_, self.foreignField_)
-                self.logger.info("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
+                self.logger.info("FLFieldDB : Creando automáticamente %s.%s --1M--> %s.%s",
+                                 self.tableName_, self.fieldRelation_, curName, self.foreignField_)
             else:
                 self.logger.info("FLFieldDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )",
                                  self.fieldRelation_, self.tableName_)
@@ -1792,7 +1796,8 @@ class FLFieldDB(QtWidgets.QWidget):
                         self.editor_.setValidator(FLUIntValidator(0, pow(10, partInteger), 0, self.editor_))
                         pass
                     elif type_ == "int":
-                        self.editor_.setValidator(FLIntValidator(((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_))
+                        self.editor_.setValidator(FLIntValidator(
+                            ((pow(10, partInteger) - 1) * -1), pow(10, partInteger) - 1, self.editor_))
                         self.editor_.setAlignment(Qt.AlignRight)
                     else:
                         self.editor_.setMaxValue(len_)
@@ -2097,7 +2102,8 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_.setTabChangesFocus(True)
             self.editor_.setMinimumHeight(100)
             self.editor_.setMaximumHeight(120)
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
+                                               QtWidgets.QSizePolicy.MinimumExpanding)
             sizePolicy.setHeightForWidth(True)
             self.editor_.setSizePolicy(sizePolicy)
             # ted.setTexFormat(self.textFormat_)
@@ -2109,7 +2115,8 @@ class FLFieldDB(QtWidgets.QWidget):
             # self.FLWidgetFieldDBLayout.addWidget(textEditTab_)
             self.setMinimumHeight(130)
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
-            verticalSpacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+            verticalSpacer = QtWidgets.QSpacerItem(
+                20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
             self.FLLayoutH.addItem(verticalSpacer)
             self.editor_.installEventFilter(self)
 
@@ -2253,19 +2260,22 @@ class FLFieldDB(QtWidgets.QWidget):
                                 return
 
                             self.autoComFieldRelation_ = fRel.relationM1().foreignField()
-                            cur = FLSqlCursor(fRel.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                            cur = FLSqlCursor(fRel.relationM1().foreignTable(), False,
+                                              self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
                             tMD = cur.metadata()
                             field = tMD.field(self.autoCopmFieldName_) if tMD else field
                         else:
                             self.autoComFieldName_ = self.fieldName_
                             self.autoComFieldRelation_ = None
-                            cur = FLSqlCursor(tMD.name(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                            cur = FLSqlCursor(tMD.name(), False, self.cursor_.db(
+                            ).connectionName(), None, None, self.autoComFrame_)
 
                     else:
 
                         self.autoComFieldName_ = field.relationM1().foreignField()
                         self.autoComFieldRelation_ = None
-                        cur = FLSqlCursor(field.relationM1().foreignTable(), False, self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
+                        cur = FLSqlCursor(field.relationM1().foreignTable(), False,
+                                          self.cursor_.db().connectionName(), None, None, self.autoComFrame_)
                         tMD = cur.metadata()
                         field = tMD.field(self.autoComFieldName_) if tMD else field
 
@@ -2275,7 +2285,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     # for fieldsNames in tMD.fieldsNames().split(","):
                     #    field = tMD.field(fieldsNames)
                     #    if field:
-                    #        cur.append(field.name(), field.type(), -1, field.length(), -1, "Variant", None, True) #qvariant,0,true
+                    # cur.append(field.name(), field.type(), -1, field.length(), -1,
+                    # "Variant", None, True) #qvariant,0,true
 
                     if self.autoComFieldRelation_ is not None and self.topWidget_:
                         l = self.topWidget_.queryList("FLFieldDB")
@@ -2509,7 +2520,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 a.setTable(field.relationM1().foreignTable())
             c = FLSqlCursor(a.table())
             # f = FLFormSearchDB(c, a.name(), self.topWidget_)
-            f = FLFormSearchDB(c, c.action(), None)
+            f = FLFormSearchDB(c, self.topWidget_)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
 
         f.setMainWidget()
