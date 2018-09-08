@@ -306,12 +306,11 @@ class FLApplication(QtCore.QObject):
         pass
 
     def aboutQt(self):
-        QtWidgets.QMessageBox.aboutQt(QtWidgets.QWidget())
+        QtWidgets.QMessageBox.aboutQt(self.mainWidget())
 
-    @decorators.NotImplementedWarn
     def aboutPineboo(self):
         msg = "Texto Acerca de Pineboo"
-        QtWidgets.QMessageBox.information(QtWidgets.QWidget(), "Pineboo", msg)
+        QtWidgets.QMessageBox.information(self.mainWidget(), "Pineboo", msg)
 
     @decorators.NotImplementedWarn
     def statusHelpMsg(self, text):
@@ -590,7 +589,6 @@ class FLApplication(QtCore.QObject):
                 self.db().manager().finish()
                 QtCore.QTimer().singleShot(0, self.quit)
 
-    @decorators.NotImplementedWarn
     def quit(self):
         pass
 
@@ -601,7 +599,8 @@ class FLApplication(QtCore.QObject):
         if not self.db().interactiveGui():
             return True
 
-        ret = QMessageBox.information(self.mainWidget(), self.tr("Salir ..."), self.tr("¿ Quiere salir de la aplicación ?"), QMessageBox.Yes, QMessageBox.No)
+        ret = QMessageBox.information(self.mainWidget(), self.tr("Salir ..."), self.tr(
+            "¿ Quiere salir de la aplicación ?"), QMessageBox.Yes, QMessageBox.No)
         return ret == QMessageBox.Yes
 
     def writeState(self):
@@ -747,17 +746,14 @@ class FLApplication(QtCore.QObject):
 
         self.restoreOverrideCursor()
 
-    @decorators.NotImplementedWarn
     def urlPineboo(self):
         self.call("sys.openUrl", ["http://eneboo.org/"])
 
-    @decorators.NotImplementedWarn
     def helpIndex(self):
         self.call("sys.openUrl", ["http://manuales-eneboo-pineboo.org/"])
 
-    @decorators.NotImplementedWarn
     def tr(self, text):
-        return text
+        return QtWidgets.QApplication.translate("system", text, _1)
 
         """
     Instala las traducciones cargadas
