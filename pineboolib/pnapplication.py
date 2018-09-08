@@ -294,7 +294,7 @@ class Project(object):
 
                 encode_ = "ISO-8859-15"
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
-                    encode_ = "utf-8" if "utf-8" == sys.getdefaultencoding() else encode_
+                    encode_ = "utf-8"
 
                 f2 = open(_dir("cache", fileobj.filekey), "wb")
                 # La cadena decode->encode corrige el bug de guardado de
@@ -305,8 +305,7 @@ class Project(object):
 
                     txt = contenido.encode(encode_)
                 except Exception:
-                    self.logger.exception(
-                        "Error al decodificar %s %s", idmodulo, nombre)
+                    self.logger.wanr("El fichero %s contiene caracteres no %s", nombre, encode_)
                     # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
                     txt = contenido.encode(encode_, "replace")
 
@@ -317,8 +316,7 @@ class Project(object):
 
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
-            self.logger.info(
-                "Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
+            self.logger.info("Descarga del proyecto completo a disco duro: %.3fs", (tiempo_fin - tiempo_ini))
 
         # Cargar el núcleo común del proyecto
         idmodulo = 'sys'
@@ -451,8 +449,7 @@ class Project(object):
             try:
                 postparse.pythonify(scriptname)
             except Exception as e:
-                self.logger.warn(
-                    "El fichero %s no se ha podido convertir: %s", scriptname, e)
+                self.logger.warn("El fichero %s no se ha podido convertir: %s", scriptname, e)
 
     """
     Lanza los test
@@ -506,46 +503,6 @@ class Project(object):
 
     def getTempDir(self):
         return self.tmpdir
-
-    """
-    @QtCore.pyqtSlot(int)
-    def setStyle(self, n):
-        style_ = styleMapper.mapping(n).text()
-        if style_:
-            sett_ = FLSettings()
-            sett_.writeEntry("application/style", style_)
-            qApp.setStyle(style_)
-    """
-    """
-    def showStyles(self):
-        sett_ = FLSettings()
-        styleS = sett_.readEntry("application/style", None)
-        if styleS is None:
-            styleS = "Fusion"
-        # TODO: marcar estilo usado...
-        for style_ in QtWidgets.QStyleFactory.keys():
-            action_ = menuStyle.addAction(style_)
-            action_.setCheckable(True)
-            ag.addAction(action_)
-            if style_ == styleS:
-                action_.setChecked(True)
-
-            action_.triggered.connect(styleMapper.map)
-            styleMapper.setMapping(action_, i)
-            i = i + 1
-
-        ag.setExclusive(True)
-    """
-
-    def helpIndex(self):
-        print("**** helIndex ****")
-
-    def urlPineboo(self):
-        print("**** urlPineboo ****")
-
-    @decorators.Deprecated
-    def setMainWidget(self, w):
-        pass
 
 
 """
