@@ -551,11 +551,11 @@ def checkDependencies(dict_):
             sys.exit(32)
 
 
-def version_check(modname, modver, minver):
+def version_check(mod_name, mod_ver, min_ver):
+    logger.warn("Versión de %s: %s", mod_name, mod_ver)
     """Compare two version numbers and raise a warning if "minver" is not met."""
-    if version_normalize(modver) < version_normalize(minver):
-        logger.warn(
-            "La version de <%s> es %s. La mínima recomendada es %s.", modname, modver, minver)
+    if version_normalize(mod_ver) < version_normalize(min_ver):
+        logger.warn("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
 
 
 def version_normalize(v):
