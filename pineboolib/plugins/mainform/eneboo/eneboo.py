@@ -823,7 +823,7 @@ class MainForm(QtCore.QObject):
             aqApp.showConsole()
 
         elif fn_ == "exit()":
-            mw.close()
+            aqApp.close()
 
         else:
             debug("tiggerAction: Unhandled slot : %s" % signature)
