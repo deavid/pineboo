@@ -4,7 +4,6 @@ from PyQt5.QtGui import QPixmapCache, QPixmap, QColor
 from PyQt5.QtWidgets import qApp
 from pineboolib import decorators
 
-import barcode
 import traceback
 import logging
 
@@ -39,6 +38,9 @@ class FLCodBar(object):
 
     @decorators.BetaImplementation
     def __init__(self, value=None, type_=None, margin=None, scale=None, cut=None, rotation=None, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72):
+        dict_ = {"barcode": "python-barcode", "PIL": "Pillow"}
+        from pineboolib.utils import checkDependencies
+        checkDependencies(dict_)
 
         self.barcode["value"] = ""
 
@@ -297,6 +299,7 @@ class FLCodBar(object):
         }
 
         try:
+            import barcode
             from barcode.writer import ImageWriter
             from PIL.ImageQt import ImageQt
             barC = barcode.get_barcode_class(type_.lower())
