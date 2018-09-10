@@ -297,17 +297,8 @@ class Project(object):
                     encode_ = "utf-8"
 
                 f2 = open(_dir("cache", fileobj.filekey), "wb")
-                # La cadena decode->encode corrige el bug de guardado de
-                # AbanQ/Eneboo
-                txt = ""
-                try:
-                    #txt = contenido.decode("UTF-8").encode("ISO-8859-15")
 
-                    txt = contenido.encode(encode_)
-                except Exception:
-                    self.logger.wanr("El fichero %s contiene caracteres no %s", nombre, encode_)
-                    # txt = contenido.decode("UTF-8","replace").encode("ISO-8859-15","replace")
-                    txt = contenido.encode(encode_, "replace")
+                txt = contenido.encode(encode_, "replace")
 
                 f2.write(txt)
 
