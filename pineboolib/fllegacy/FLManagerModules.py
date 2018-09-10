@@ -318,8 +318,14 @@ class FLManagerModules(object):
 
         #ui_data = self.contentFS(form_path, True)
         #root_ = ET.fromstring(ui_data)
-        tree_ = ET.parse(form_path)
-        root_ = tree_.getroot()
+        try:
+            tree_ = ET.parse(form_path)
+            root_ = tree_.getroot()
+        except:
+            logger.warn("Se ha producido un problema al cargar %s. Usando métido alternativo")
+            ui_data = self.contentFS(form_path, True)
+            root_ = ET.fromstring(ui_data)
+
         UIVersion = root_.get("version")
         if parent is None:
             wid = root_.find("widget")
