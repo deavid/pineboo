@@ -825,7 +825,8 @@ class FLSqlCursor(QtCore.QObject):
         self._valid = False
         self.d = FLSqlCursorPrivate()
         self.d.cursor_ = self
-        self.d.nameCursor_ = "%s_%s" % (act_.name(), QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
+        self.d.nameCursor_ = "%s_%s" % (
+            act_.name(), QtCore.QDateTime.currentDateTime().toString("dd.MM.yyyyThh:mm:ss.zzz"))
 
         if connectionName_or_db is None:
             self.d.db_ = pineboolib.project.conn
@@ -2546,7 +2547,8 @@ class FLSqlCursor(QtCore.QObject):
                         try:
                             # siguiente = self.context().calculateCounter()
 
-                            # Este lo hago sin context() porque no se ha especificado todavía en el cursor y continue el de master
+                            # Este lo hago sin context() porque no se ha especificado todavía en el
+                            # cursor y continue el de master
                             functionCounter = "%s.widget.calculateCounter" % self.action().scriptFormRecord()[:-3]
                             siguiente = aqApp.call(functionCounter, None, None, True)
                         except Exception:
@@ -3138,7 +3140,6 @@ class FLSqlCursor(QtCore.QObject):
             # MEJORABLE: Esto es un parche para evitar doble commitBuffer cuando usamos cursores relacionados.
 
             # El segundo peta diciendo que ya existe el registro
-            print(self.selection_pk(self.buffer().value(self.buffer().pK())))
             if not self.selection_pk(self.buffer().value(self.buffer().pK())):
                 self.model().refresh()  # <- Solo seria necesaria esta parte
                 self.selection_pk(self.buffer().value(self.buffer().pK()))
