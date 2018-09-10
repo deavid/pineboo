@@ -487,10 +487,11 @@ class FLApplication(QtCore.QObject):
         mw = self.mainWidget()
         if mw and not self.ted_output_:
             dw = QtWidgets.QDockWidget("tedOutputDock", mw)
+            from pineboolib.pncontrolsfactory import FLTextEditOutput
             self.ted_output_ = FLTextEditOutput(dw)
             dw.setWidget(self.ted_output_)
             dw.setWindowTitle(self.tr("Mensajes de Eneboo"))
-            mw.addDockWidget(Qt.BottomDockWidgetArea, dw)
+            mw.addDockWidget(QtCore.Qt.BottomDockWidgetArea, dw)
 
     def consoleShown(self):
         return (self.ted_output_ and self.ted_output_.isVisible())
@@ -753,7 +754,7 @@ class FLApplication(QtCore.QObject):
         self.call("sys.openUrl", ["http://manuales-eneboo-pineboo.org/"])
 
     def tr(self, text):
-        return QtWidgets.QApplication.translate("system", text, _1)
+        return QtWidgets.QApplication.translate("system", text)
 
         """
     Instala las traducciones cargadas
