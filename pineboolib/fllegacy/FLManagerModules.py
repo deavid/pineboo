@@ -315,16 +315,9 @@ class FLManagerModules(object):
             return
 
         from xml.etree import ElementTree as ET
-
-        #ui_data = self.contentFS(form_path, True)
-        #root_ = ET.fromstring(ui_data)
-        try:
-            tree_ = ET.parse(form_path)
-            root_ = tree_.getroot()
-        except:
-            logger.warn("Se ha producido un problema al cargar %s. Usando métido alternativo")
-            ui_data = self.contentFS(form_path, True)
-            root_ = ET.fromstring(ui_data)
+        ui_data = self.contentFS(form_path, True)
+        # por si viene algún caracter no utf-8 ,hacemos replace
+        root_ = ET.fromstring(ui_data.encode("UTF-8", "replace"))
 
         UIVersion = root_.get("version")
         if parent is None:
