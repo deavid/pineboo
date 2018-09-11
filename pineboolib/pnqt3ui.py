@@ -31,7 +31,7 @@ class Options:
 #      una variable de ésta. Para cada nuevo formulario se debería instanciar
 #      una nueva clase.
 
-def loadUi(path, widget, parent=None):
+def loadUi(form_path, widget, parent=None):
 
     global ICONS, root
     # parser = etree.XMLParser(
@@ -39,11 +39,12 @@ def loadUi(path, widget, parent=None):
     #    encoding="UTF-8",
     #    remove_blank_text=True,
     #)
-    try:
-        tree = etree.ElementTree.parse(path)
-    except Exception as e:
-        logger.exception("Qt3Ui: Unable to read UI: %r", path)
-        raise
+
+    tree = pineboolib.utils.loadUI2xml(form_path)
+
+    if not tree:
+        return parent
+
     root = tree.getroot()
     ICONS = {}
 
@@ -351,6 +352,12 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         elif pname == "paletteForegroundColor":
             value = 'color:' + loadVariant(xmlprop).name()
 
+        elif pname == "windowIcon":
+            value = loadVariant(xmlprop, widget)
+            if isinstance(value, str):
+                logger.warn("Icono %s no encontrado.", value)
+                return
+
         else:
             value = loadVariant(xmlprop, widget)
 
@@ -358,6 +365,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn(value)
 
         except Exception as e:
+            print(pname)
             logger.exception(etree.ElementTree.tostring(xmlprop))
             # if Options.DEBUG_LEVEL > 50:
             #    print(e, repr(value))

@@ -306,36 +306,28 @@ class FLManagerModules(object):
         if ".ui" not in n:
             n += ".ui"
 
-        form_path = None
-
         form_path = n if os.path.exists(n) else _path(n)
 
         if form_path is None:
             raise AttributeError("File %r not found in project" % n)
             return
 
-        from xml.etree import ElementTree as ET
-        ui_data = self.contentFS(form_path, True)
+        tree = pineboolib.utils.loadUI2xml(form_path)
 
-        if ui_data:
-            # por si viene algún caracter no utf-8 ,hacemos replace
-            root_ = ET.fromstring(ui_data.encode("UTF-8", "replace"))
+        if not tree:
+            return parent
 
-            UIVersion = root_.get("version")
+        root_ = tree.getroot()
 
-            if parent is None:
-                wid = root_.find("widget")
-                parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
+        UIVersion = root_.get("version")
+        if parent is None:
+            wid = root_.find("widget")
+            parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
 
         if not getattr(parent, "widget", None):
             w_ = parent
         else:
             w_ = parent.widget
-
-        if not ui_data:
-            logger.warn("No se ha podido procesar %s", n)
-            return w_
-
         logger.info("Procesando %s (v%s)", n, UIVersion)
         if not pineboolib.project or pineboolib.project._DGI.localDesktop():
             if UIVersion < "4.0":

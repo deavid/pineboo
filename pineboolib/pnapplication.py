@@ -429,13 +429,16 @@ class Project(object):
     """
 
     def parseScript(self, scriptname):
+        from pineboolib.pncontrolsfactory import aqApp
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
             raise IOError
         python_script_path = (
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
-            self.logger.info("Convirtiendo a Python . . . %s", scriptname)
+            msg = "Convirtiendo a Python . . . %s" % scriptname
+            self.logger.info(msg)
+            aqApp.popupWarn(msg)
             from pineboolib.flparser import postparse
             try:
                 postparse.pythonify(scriptname)
@@ -815,19 +818,7 @@ class MainForm(object):
     """
 
     def load(self):
-        try:
-            self.tree = etree.ElementTree.parse(self.path)
-        except Exception:
-            try:
-                self.parser = etree.ElementTree.XMLParser(
-                    html=0, encoding="ISO-8859-15")
-                self.tree = etree.ElementTree.parse(self.path, self.parser)
-                self.logger.exception(
-                    "Formulario %r se cargó con codificación ISO (UTF8 falló)", self.path)
-            except Exception:
-                self.logger.exception(
-                    "Error cargando UI después de intentar con UTF8 y ISO", self.path)
-
+        self.tree = pineboolib.utils.loadUI2xml(self.path)
         self.root = self.tree.getroot()
         self.actions = {}
         self.pixmaps = {}
