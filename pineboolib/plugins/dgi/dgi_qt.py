@@ -16,6 +16,9 @@ import re
 import logging
 
 
+logger = logging.getLogger(__name__)
+
+
 def resolveObject(name):
     mod_ = import_module(__name__)
     ret_ = getattr(mod_, name, None)
