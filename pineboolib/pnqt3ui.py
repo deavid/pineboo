@@ -245,7 +245,8 @@ def loadAction(action, widget):
         # elif name == "menuText":
         #    act_.setMenuText(p.find("string").text)
         elif name == "iconSet":
-            act_.setIcon(ICONS[p.find("iconset").text])
+            if p.find("iconset").text in ICONS.keys():
+                act_.setIcon(ICONS[p.find("iconset").text])
         elif name == "toolTip":
             act_.setToolTip(p.find("string").text)
         elif name == "statusTip":
