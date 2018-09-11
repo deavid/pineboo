@@ -323,9 +323,9 @@ class FLManagerModules(object):
 
             UIVersion = root_.get("version")
 
-        if parent is None:
-            wid = root_.find("widget")
-            parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
+            if parent is None:
+                wid = root_.find("widget")
+                parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
 
         if not getattr(parent, "widget", None):
             w_ = parent
