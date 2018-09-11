@@ -544,7 +544,7 @@ class FLManager(QtCore.QObject):
                     if is_valid_name:
                         if not e2.isNull():
                             if e2.tagName() != "name":
-                                self.logger.debug(
+                                logger.debug(
                                     "WARN: El primer tag de la acción '%s' no es name, se encontró '%s'." % (n, e2.tagName()))
                         else:
                             self.logger.debug("WARN: Se encontró una acción vacia para '%s'." % n)
