@@ -404,9 +404,12 @@ class MainForm(QtCore.QObject):
                 a_ = parent.addAction("")
                 a_.setSeparator(True)
             else:
-                a_ = parent.addAction(obj_.text())
-                a_.setIcon(obj_.icon())
-                a_.triggered.connect(obj_.activate)
+                if isinstance(obj_, QAction):
+                    a_ = parent.addAction(obj_.text())
+                    a_.setIcon(obj_.icon())
+                    a_.triggered.connect(obj_.activate)
+                else:
+                    continue
 
             a_.setObjectName(o_name)
 
