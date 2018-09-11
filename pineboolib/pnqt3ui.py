@@ -357,7 +357,6 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if isinstance(value, str):
                 logger.warn("Icono %s no encontrado.", value)
                 return
-
         else:
             value = loadVariant(xmlprop, widget)
 
@@ -365,7 +364,6 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn(value)
 
         except Exception as e:
-            print(pname)
             logger.exception(etree.ElementTree.tostring(xmlprop))
             # if Options.DEBUG_LEVEL > 50:
             #    print(e, repr(value))
@@ -773,7 +771,7 @@ def _loadVariant(variant, widget=None):
             v = getattr(lib, text, None)
             if v is not None:
                 return v
-        if text == "GroupBoxPanel":
+        if text in ["GroupBoxPanel", "LineEditPanel"]:
             return QtWidgets.QFrame.StyledPanel
         if text == "Single":
             return QtWidgets.QAbstractItemView.SingleSelection
