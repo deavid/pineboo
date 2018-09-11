@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib import decorators
 import pineboolib
-from PyQt5.QtWidgets import QWhatsThis
 
 logger = logging.getLogger("FLApplication")
 
@@ -70,6 +69,7 @@ class FLApplication(QtCore.QObject):
         self.notify_begin_transaction_ = False
         self.notify_end_transaction_ = False
         self.notify_roll_back_transaction_ = False
+        self.popup_warn_ = None
 
         self.ted_output_ = None
         self.style = None
@@ -77,7 +77,6 @@ class FLApplication(QtCore.QObject):
         self.init_single_fl_large = False
         self.show_debug_ = True  # FIXME
 
-        self.container_ = None
         # self.fl_factory_ = FLObjectFactory() #FIXME para un futuro
         self.time_user_ = QtCore.QDateTime.currentDateTime()
         self.multi_lang_enabled_ = False
@@ -397,9 +396,9 @@ class FLApplication(QtCore.QObject):
         self.initToolBox()
         self.readState()
 
-        if self.container:
-            self.container.installEventFilter(self)
-            self.container.setDisable(False)
+        if self.container_:
+            self.container_.installEventFilter(self)
+            self.container_.setDisable(False)
 
         self.callScriptEntryFunction()
 
@@ -445,9 +444,31 @@ class FLApplication(QtCore.QObject):
     def setDatabaseLockDetection(self, on, msec_lapsus, lim_checks, show_warn, msg_warn, connection_name):
         pass
 
-    @decorators.NotImplementedWarn
-    def popupWarn(selfmsg_warn, script_calls=[]):
-        pass
+    def popupWarn(self, msg_warn, script_calls=[]):
+        mw = self.container_ or self.main_widget_
+        wi = QtWidgets.QWhatsThis
+        if not pineboolib.project._DGI.localDesktop():
+            return
+
+        if script_calls:
+            if not mw:
+                self.container_ = QMainWindow(QtWidgets.QApplication.desktop())
+
+            if not self.popup_warn_:
+                self.popup_warn_ = FLPopupWarn(mw)
+
+            self.popup_warn_.script_calls_ = script_calls
+            wi.showText(QtWidgets.QApplication.desktop(
+            ).mapToGlobal(QtCore.QPoint(5, 5)), msg_warn,  mw)
+
+        else:
+
+            if not mw:
+                return
+
+        wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width(), 0)), msg_warn, mw)
+        QtCore.QTimer().singleShot(4000, wi.hideText)
+        QtWidgets.qApp.processEvents()
 
     @decorators.NotImplementedWarn
     def checkDatabaseLocks(self, timer_):
@@ -907,10 +928,10 @@ class FLWidget(QtWidgets.QWidget):
 
 class FLPopuWarn(QtWidgets.QWhatsThis):
 
-    script_calls_ = {}
+    script_calls_ = []
 
     def __init__(self, parent):
-        self.script_calls_ = {}
+        self.script_calls_ = []
         super(FLPopuWarn, self).__init__(parent)
 
     def clicked(self, href):
