@@ -120,6 +120,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.iconSize = pineboolib.project._DGI.iconSize()
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
+        self.functionGetColor_ = None
 
         while not isinstance(self.topWidget, FLFormDB):
             self.topWidget = self.topWidget.parentWidget()
@@ -642,12 +643,13 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def setFunctionGetColor(self, f):
-        self.functionGetColor_ = f
-        if self.topWidget:
-            if f.find('.') > -1:
-                self.tableRecords().setFunctionGetColor(f)
-            else:
-                self.tableRecords().setFunctionGetColor("%s.%s" % (self.topWidget.name(), f))
+        if f.find('.') > -1:
+            self.functionGetColor_ = f
+        else:
+            self.functionGetColor_ = "%s.%s" % (self.topWidget.name(), f)
+
+        if self.tableRecords_:
+            self.tableRecords().setFunctionGetColor("%s.%s" % (self.topWidget.name(), f))
 
     """
     Asigna el nombre de función a llamar cuando cambia el filtro.
@@ -922,6 +924,8 @@ class FLTableDB(QtWidgets.QWidget):
         self.masterLayout.addLayout(self.dataLayout)
 
         self.tableRecords_ = FLDataTable(self, "tableRecords")
+        if self.functionGetColor_:
+            self.tableRecords_.setFunctionGetColor(self.functionGetColor_)
         self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setFocusProxy(self.tableRecords_)
         # metemos el tablerecord en el datalayout

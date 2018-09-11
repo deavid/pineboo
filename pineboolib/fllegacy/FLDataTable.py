@@ -213,6 +213,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def setFunctionGetColor(self, f):
+
         self.functionGetColor_ = f
 
     def functionGetColor(self):
@@ -464,11 +465,15 @@ class FLDataTable(QtWidgets.QTableView):
     """
     @decorators.Incomplete
     def refresh(self):
-        # print("FLDataTable:refresh()")
         if self.popup_:
             self.cursor_.refresh()
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
         if not self.refreshing_ and self.cursor():
+
+            if self.functionGetColor_ and self.cursor().model():
+                if self.cursor().model().color_function_ != self.functionGetColor_:
+                    self.cursor().model().setColorFunction(self.functionGetColor_)
+
             self.refreshing_ = True
             self.hide()
             filter = self.persistentFilter_

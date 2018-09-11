@@ -10,7 +10,7 @@ from pineboolib.utils import filedir
 import pineboolib
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QCheckBox
+
 
 DEBUG = False
 
@@ -35,18 +35,21 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     _sortOrder = None
     _checkColumn = None
     _disable_refresh = None
-
+    color_function_ = None
+    color_dict_ = None
+    _parent = None
     """
     Constructor
     @param action. action relacionada al cursor
     @param conn. Objeto PNConnection
     """
 
-    def __init__(self, action, conn):
+    def __init__(self, action, conn, parent):
         super(PNCursorTableModel, self).__init__()
 
         self._action = action
         self._cursorConn = conn
+        self._parent = parent
         if self._action.table():
             self._metadata = self._cursorConn.manager().metadata(self._action.table())
         else:
@@ -88,6 +91,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.lastFetch = 0
         self.fetchedRows = 0
         self._showPixmap = True
+        self.color_function_ = None
+        self.color_dict_ = {}
 
         self.where_filters = {}
         self.where_filters["main-filter"] = None
@@ -153,6 +158,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def setSortOrder(self, sO):
         self._sortOrder = sO
+
+    def setColorFunction(self, f):
+        self.color_function_ = f
+
+    def dict_color_function(self):
+        return self.color_function_
     """
     Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
     @param index. Posición del registro
@@ -161,6 +172,17 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def data(self, index, role):
+        if self.dict_color_function():
+            if not index in self.color_dict_.keys():
+                from pineboolib.pncontrolsfactory import aqApp
+                field_name = None
+                field_value = None
+                cursor = self._parent
+                selected = False
+                type = None
+
+                self.color_dict_[index] = aqApp.call(
+                    self.dict_color_function(), [field_name, field_value, cursor, selected, type], None)
         # print("Data ", index, role)
         # print("Registros", self.rowCount())
         # roles
