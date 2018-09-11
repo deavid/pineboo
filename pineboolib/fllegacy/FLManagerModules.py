@@ -316,10 +316,13 @@ class FLManagerModules(object):
 
         from xml.etree import ElementTree as ET
         ui_data = self.contentFS(form_path, True)
-        # por si viene algún caracter no utf-8 ,hacemos replace
-        root_ = ET.fromstring(ui_data.encode("UTF-8", "replace"))
 
-        UIVersion = root_.get("version")
+        if ui_data:
+            # por si viene algún caracter no utf-8 ,hacemos replace
+            root_ = ET.fromstring(ui_data.encode("UTF-8", "replace"))
+
+            UIVersion = root_.get("version")
+
         if parent is None:
             wid = root_.find("widget")
             parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
@@ -328,6 +331,11 @@ class FLManagerModules(object):
             w_ = parent
         else:
             w_ = parent.widget
+
+        if not ui_data:
+            logger.warn("No se ha podido procesar %s", n)
+            return w_
+
         logger.info("Procesando %s (v%s)", n, UIVersion)
         if not pineboolib.project or pineboolib.project._DGI.localDesktop():
             if UIVersion < "4.0":
