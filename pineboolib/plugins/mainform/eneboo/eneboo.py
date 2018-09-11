@@ -61,7 +61,7 @@ class MainForm(QtCore.QObject):
 
                 return True
 
-            if o.rtti() == "FormDB":
+            if isinstance(o, pineboolib.fllegacy.FLFormDB.FLFormDB):
                 self.formClosed(o)
 
         elif e.type() == AQS.WindowStateChange:
@@ -582,13 +582,15 @@ class MainForm(QtCore.QObject):
         windowMenu = self.w_.findChild(QtWidgets.QMenu, "windowMenu")
         sub_menu = windowMenu.addMenu(sys.translate("&Vistas"))
 
-        docks = self.w_.findChildren(QtWidgets.QDockWidget)
+        docks = self.w_.findChildren(DockListView)
         for dock in docks:
-            ac = sub_menu.addAction(dock.windowTitle())
+            ac = sub_menu.addAction(dock.w_.windowTitle())
             ac.setCheckable(True)
             # FIXME: Comprobar si estoy visible o no
-            ac.setChecked(True)
-            # ac.triggered.connect(dock.close)
+            # ac.setChecked(dock.w_.isVisible())
+            dock.set_visible.connect(ac.setChecked)
+            ac.triggered.connect(dock.change_state)
+            # dock.w_.Close.connect(ac.setChecked)
 
     def cloneAction(self, act, parent):
         ac = QAction(parent)
@@ -837,22 +839,24 @@ class MainForm(QtCore.QObject):
         MainForm.debugLevel = q
 
 
-class DockListView(object):
+class DockListView(QtCore.QObject):
 
     w_ = None
     lw_ = None
     ag_ = None
     _name = None
+    set_visible = QtCore.pyqtSignal(bool)
 
     def __init__(self, parent, name, title):
         if parent is None:
             return
 
+        super(DockListView, self).__init__(parent)
+
         self.w_ = QtWidgets.QDockWidget(name, parent)
-        self._name = "%sListView" % name
+        self.w_.setObjectName("%sListView" % name)
         self.lw_ = QTreeWidget(self.w_)
         self.lw_.setObjectName(self._name)
-
         # this.lw_.addColumn("");
         # this.lw_.addColumn("");
         self.lw_.setColumnCount(2)
@@ -919,13 +923,24 @@ class DockListView(object):
         visible = settings.readBoolEntry("%svisible" % key, True)
         if visible:
             self.w_.show()
+
         else:
             self.w_.hide()
+
+        self.set_visible.emit(not self.w_.isHidden())
+
+        self.w_.close
 
     def initFromWidget(self, w):
         self.w_ = w
         self.lw_ = w.widget()
         self.lw_.doubleClicked.connect(self.activateAction)
+
+    def change_state(self, s):
+        if s == True:
+            self.w_.show()
+        else:
+            self.w_.close()
 
     def activateAction(self, item):
         if item is None:
