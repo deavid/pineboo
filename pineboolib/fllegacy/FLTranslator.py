@@ -51,6 +51,8 @@ class FLTranslator(QTranslator):
             if tsFile in (None, ""):
                 return False
 
+            return True
+
         trans = FLTranslations()
         trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)
         return self.load(qmFile)

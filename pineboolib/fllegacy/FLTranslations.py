@@ -33,14 +33,13 @@ class FLTranslations(QtCore.QObject):
 
     def loadTsFile(self, tor, ts_file_name, verbose):
         qm_file_name = "%s.qm" % ts_file_name[:-3]
-        ok = True
-        if not os.path.exists(qm_file_name):
+        ok = False
+        if os.path.exists(ts_file_name):
             ok = tor.load(ts_file_name)
-            if not ok:
-                self.logger.warn("For some reason, I cannot load '%s'", ts_file_name)
-            return ok
 
-        return True
+        if not ok:
+            self.logger.warn("For some reason, I cannot load '%s'", ts_file_name)
+        return ok
 
     """
     Comprueba si el .qm se ha creado
@@ -66,9 +65,11 @@ class FLTranslations(QtCore.QObject):
 
     def releaseTsFile(self, ts_file_name, verbose, stripped):
         tor = None
+
         if self.loadTsFile(tor, ts_file_name, verbose):
             qm_file_name = "%s.qm" % ts_file_name[:-3]
-            self.releaseMetaTranslator(tor, qm_file_name, verbose, stripped)
+            if not os.path.exists(qm_file_name):
+                self.releaseMetaTranslator(tor, qm_file_name, verbose, stripped)
 
     """
     Convierte el fichero .ts en .qm
@@ -118,7 +119,7 @@ class FLTranslations(QtCore.QObject):
                 self.logger.warn("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
 
         if qm_output_file:
-            print("***", qm_output_file)
+            print("*** FAKE :: ", qm_output_file)
             self.releaseMetaTranslator(tor, qm_output_file, verbose, stripped)
 
 
