@@ -645,11 +645,9 @@ class FLSqlQuery(object):
     def isForwardOnly(self):
         pass
 
+    @decorators.NotImplementedWarn
     def setForwardOnly(self, forward):
-        if not self._cursor:
-            return
-
-        self._cursor.model().disable_refresh(forward)
+        pass
 
     @decorators.NotImplementedWarn
     def QSqlQuery_value(self, i):
