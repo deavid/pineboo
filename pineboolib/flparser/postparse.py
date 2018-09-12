@@ -720,7 +720,8 @@ def execute(options, args):
                       (repr(filename)), e)
                 continue
             prog = flscriptparse.parse(filecontent)
-            sys.stdout.write("\r")
+            if options.verbose:
+                sys.stdout.write("\r")
             if not prog:
                 print("Error: No se pudo abrir %-35s          \n" %
                       (repr(filename)))
