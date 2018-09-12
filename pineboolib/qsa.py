@@ -178,7 +178,7 @@ def isNaN(x):
 
 class Input(object):
     @classmethod
-    def getText(cls, question, prevtxt, title):
+    def getText(cls, question, prevtxt="", title="Pineboo"):
         text, ok = QtWidgets.QInputDialog.getText(None, title,
                                                   question, QtWidgets.QLineEdit.Normal, prevtxt)
         if not ok:
