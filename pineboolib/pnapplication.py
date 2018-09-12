@@ -436,9 +436,16 @@ class Project(object):
         python_script_path = (
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
+            settings = FLSettings()
+
             msg = "Convirtiendo a Python . . . %s" % scriptname
-            self.logger.info(msg)
-            aqApp.popupWarn(msg)
+
+            if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
+                self.logger.info(msg)
+
+            if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
+                aqApp.popupWarn(msg)
+
             from pineboolib.flparser import postparse
             try:
                 postparse.pythonify(scriptname)
