@@ -17,7 +17,6 @@ from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLStylePainter import FLStylePainter
 from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
-from pineboolib.pncontrolsfactory import SysType
 
 AQ_USRHOME = "."  # FIXME
 
