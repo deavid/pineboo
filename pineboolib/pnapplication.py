@@ -189,14 +189,23 @@ class Project(object):
     """
 
     def run(self):
-        from pineboolib import emptyscript
-        self.emptyscript = emptyscript
+
+        if not self.conn:
+            self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port,
+                                     self.dbauth.username, self.dbauth.password, self.dbserver.type)
+
+        if self.conn.conn is False:
+            return False
+
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
+
         if self.deleteCache and not not os.path.exists(_dir("cache/%s" % self.conn.DBName())):
+            if self._splash:
+                self._splash.showMessage("Borrando caché ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir(
                 "cache/%s" % self.conn.DBName()))
-            for root, dirs, files in os.walk(dir("cache/%s" % self.conn.DBName()), topdown=False):
+            for root, dirs, files in os.walk(_dir("cache/%s" % self.conn.DBName()), topdown=False):
                 for name in files:
                     os.remove(os.path.join(root, name))
                 for name in dirs:
@@ -211,12 +220,6 @@ class Project(object):
             os.makedirs(_dir("cache"))
 
         # Conectar:
-
-        if not self.conn:
-            self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port,
-                                     self.dbauth.username, self.dbauth.password, self.dbserver.type)
-        if self.conn.conn is False:
-            return False
 
         # Se verifica que existen estas tablas
         for table in ("flareas", "flmodules", "flfiles", "flgroups", "fllarge", "flserial", "flusers", "flvar", "flmetadata"):
@@ -254,6 +257,7 @@ class Project(object):
         self.cur.execute(
             """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
         size_ = len(self.cur.fetchall())
+
         self.cur.execute(
             """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
         f1 = open(_dir("project.txt"), "w")
@@ -266,6 +270,7 @@ class Project(object):
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             util.createProgressDialog("Pineboo", size_)
         p = 0
+        pos_qs = 1
         for idmodulo, nombre, sha in self.cur:
             p = p + 1
             if self._DGI.useDesktop() and self._DGI.localDesktop():
@@ -290,6 +295,7 @@ class Project(object):
             sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue(
                 "string", idmodulo, False), self.conn.driver().formatValue("string", nombre, False), self.conn.driver().formatValue("string", sha, False))
             cur2.execute(sql)
+            qs_count = 0
             for (contenido,) in cur2:
 
                 encode_ = "ISO-8859-15"
@@ -303,7 +309,12 @@ class Project(object):
                 f2.write(txt)
 
             if self.parseProject and nombre.endswith(".qs"):
+                if self._splash:
+                    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
+                                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
                 self.parseScript(_dir("cache", fileobj.filekey))
+
+                pos_qs += 1
 
         if self._DGI.useDesktop() and self._DGI.localDesktop():
             tiempo_fin = time.time()
@@ -437,7 +448,6 @@ class Project(object):
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             settings = FLSettings()
-
             msg = "Convirtiendo a Python . . . %s" % scriptname
 
             if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
@@ -1105,7 +1115,8 @@ class XMLAction(XMLStruct):
 
         python_script_path = None
         # primero default, luego sobreescribimos
-        parent.script = pineboolib.project.emptyscript
+        from pineboolib import emptyscript
+        parent.script = emptyscript
 
         if scriptname is None:
             parent.script.form = parent.script.FormInternalObj(
