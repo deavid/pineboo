@@ -417,7 +417,7 @@
                                                 <cstring>cbSLInterface</cstring>
                                             </property>
                                             <property name="text">
-                                                <string>Mostrar carga estática en interface gráfico</string>
+                                                <string>Mostrar carga estática y parser en interface gráfico</string>
                                             </property>
                                         </widget>
                                     </hbox>
