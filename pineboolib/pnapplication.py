@@ -313,10 +313,12 @@ class Project(object):
 
                     f2.write(txt)
 
+                    f2.close()
+
             if self.parseProject and nombre.endswith(".qs"):
-                if self._splash:
-                    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
-                                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
+                # if self._splash:
+                #    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
+                #                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
                 self.parseScript(_dir("cache", fileobj.filekey))
 
                 pos_qs += 1
