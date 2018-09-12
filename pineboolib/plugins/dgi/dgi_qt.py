@@ -489,7 +489,7 @@ class QDateEdit(QtWidgets.QDateEdit):
     _parent = None
     _date = None
 
-    def __init__(self, parent, name):
+    def __init__(self, parent, name=None):
         super(QDateEdit, self).__init__(parent)
         super(QDateEdit, self).setDisplayFormat("dd-MM-yyyy")
         if name:
