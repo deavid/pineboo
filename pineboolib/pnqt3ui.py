@@ -777,8 +777,10 @@ def _loadVariant(variant, widget=None):
             return QtWidgets.QAbstractItemView.SingleSelection
         if text == "FollowStyle":
             return "QtWidgets.QTableView {selection-background-color: red;}"
-        if text == "Password":
-            return QtWidgets.QLineEdit.Password
+
+        att_found = getattr(widget, text, None)
+        if att_found:
+            return att_found
 
     if variant.tag == "color":
         c = QtGui.QColor()
