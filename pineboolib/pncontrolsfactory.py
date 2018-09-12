@@ -11,7 +11,6 @@ from pineboolib import decorators
 from PyQt5.QtCore import QObject, Qt
 from pineboolib.fllegacy.FLApplication import FLApplication
 
-
 logger = logging.getLogger("PNControlsFactory")
 
 """
@@ -563,7 +562,7 @@ class FormDBWidget(QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
-        ret_ = getattr([self._action, self.cursor_], name, None)
+        ret_ = getattr([self._action, self.cursor_, aqApp], name, None)
         if ret_:
             return ret_
 
