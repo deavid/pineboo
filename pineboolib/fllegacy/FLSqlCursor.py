@@ -3020,7 +3020,40 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def copyRecord(self):
-        return True
+        if not self.d.metadata_ or not self.d.buffer_:
+            return
+
+        if not self.isValid() or self.size() <= 0:
+            QtWidgets.QMessageBox.warning(
+                QtWidget.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QtWidgets.QMessageBox.Ok)
+            return
+
+        field_list = self.d.metadata_.fieldList()
+        if not field_list:
+            return
+
+        # ifdef AQ_MD5_CHECK
+        if self.d.needUpdate():
+            pkn = self.d.metadata_.primaryKey()
+            pk_value = self.valueBuffer(pkn)
+            self.refresh()
+            pos = self.atFromBinarySearch(pkn, str(pk_value))
+            if pos != self.at():
+                self.seek(pos, False, True)
+        # endif
+
+        buffer_aux = self.d.buffer_
+        self.insertRecord()
+
+        for it in field_list:
+            if it is None:
+                continue
+
+            if self.d.buffer_.isNull(it.name()) and not it.isPrimaryKey() and not self.d.metadata_.fieldListOfCompoundKey(it.name()) and not it.calculated():
+                self.d.buffer_.setValue(it.name(), buffer_aux.value(it.name()))
+
+            del buffer_aux
+            self.newBuffer.emit()
 
     """
     Realiza la acción asociada a elegir un registro del cursor, por defecto se abre el formulario de
@@ -3032,9 +3065,15 @@ class FLSqlCursor(QtCore.QObject):
     def chooseRecord(self):
         return True
 
-    @decorators.Deprecated
+    """
+    Evita el refresco del model() asociado.
+    """
+
     def setForwardOnly(self, b):
-        pass
+        if not self.model():
+            return
+
+        self.model().disable_refresh(b)
 
     """
     Manda el contenido del buffer al cursor, o realiza la acción oportuna para el cursor.
