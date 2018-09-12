@@ -313,13 +313,13 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn = widget.setMovable
         elif pname == "toggleAction":
             set_fn = widget.setChecked
-        elif pname == "label" and isinstance(widget, QToolBar):
+        elif pname == "label" and isinstance(widget, pineboolib.pncontrolsfactory.QToolBar):
             return
-        elif pname == "maxValue" and isinstance(widget, QSpinBox):
+        elif pname == "maxValue" and isinstance(widget, pineboolib.pncontrolsfactory.QSpinBox):
             set_fn = widget.setMaximum
-        elif pname == "minValue" and isinstance(widget, QSpinBox):
+        elif pname == "minValue" and isinstance(widget, pineboolib.pncontrolsfactory.QSpinBox):
             set_fn = widget.setMinimum
-        elif pname == "lineStep" and isinstance(widget, QSpinBox):
+        elif pname == "lineStep" and isinstance(widget, pineboolib.pncontrolsfactory.QSpinBox):
             set_fn = widget.setSingleStep
         elif pname == "newLine":
             set_fn = origWidget.addToolBarBreak
@@ -564,11 +564,11 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 widget.addTab(new_widget, title)
             elif gb or wd:
                 lay = getattr(widget, "layout")()
-                if not lay and not isinstance(widget, QToolBar):
+                if not lay and not isinstance(widget, pineboolib.pncontrolsfactory.QToolBar):
                     lay = QtWidgets.QVBoxLayout()
                     widget.setLayout(lay)
 
-                if isinstance(widget, QToolBar):
+                if isinstance(widget, pineboolib.pncontrolsfactory.QToolBar):
                     if isinstance(new_widget, QAction):
                         widget.addAction(new_widget)
                     else:
