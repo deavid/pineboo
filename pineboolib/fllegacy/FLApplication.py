@@ -466,9 +466,10 @@ class FLApplication(QtCore.QObject):
             if not mw:
                 return
 
-        wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width(), 0)), msg_warn, mw)
-        QtCore.QTimer().singleShot(4000, wi.hideText)
-        QtWidgets.qApp.processEvents()
+        if not mw.isHidden():
+            wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width(), 0)), msg_warn, mw)
+            QtCore.QTimer().singleShot(4000, wi.hideText)
+            QtWidgets.qApp.processEvents()
 
     @decorators.NotImplementedWarn
     def checkDatabaseLocks(self, timer_):
