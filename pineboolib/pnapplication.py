@@ -302,11 +302,16 @@ class Project(object):
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
                     encode_ = "utf-8"
 
-                f2 = open(_dir("cache", fileobj.filekey), "wb")
+                if not os.path.exists(_dir("cache", fileobj.filekey)):
+                    if self._splash:
+                        self._splash.showMessage("Volcando a caché %s..." %
+                                                 nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
-                txt = contenido.encode(encode_, "replace")
+                    f2 = open(_dir("cache", fileobj.filekey), "wb")
 
-                f2.write(txt)
+                    txt = contenido.encode(encode_, "replace")
+
+                    f2.write(txt)
 
             if self.parseProject and nombre.endswith(".qs"):
                 if self._splash:
@@ -448,13 +453,25 @@ class Project(object):
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             settings = FLSettings()
-            msg = "Convirtiendo a Python . . . %s" % scriptname
+            from pineboolib.fllegacy.FLUtil import FLUtil
+            util = FLUtil()
+            if util.getOS() == "WIN32":
+                file_name = scriptname.split("\\")
+            else:
+                file_name = scriptname.split("/")
 
+            file_name = file_name[len(file_name) - 2]
+
+            msg = "Convirtiendo a Python . . . %s.qs" % file_name
             if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
                 self.logger.info(msg)
 
-            if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
-                aqApp.popupWarn(msg)
+            if self._splash:
+                self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
+
+            else:
+                if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
+                    aqApp.popupWarn(msg)
 
             from pineboolib.flparser import postparse
             try:
