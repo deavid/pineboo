@@ -167,7 +167,12 @@ class Function(ASTPython):
             # Anonima:
             name = "_"
         withoutself = self.elem.get("withoutself")
-        if self.elem.get("parent_").get("parent_").get("name") == "FormInternalObj":
+        parent = self.elem.get("parent_")
+        grandparent = None
+        if parent is not None:
+            grandparent = parent.get("parent_")
+
+        if grandparent and grandparent.get("name") == "FormInternalObj":
             className = name.split("_")[0]
             if className not in classesDefined:
                 if className == "":
@@ -177,10 +182,7 @@ class Function(ASTPython):
                 classesDefined.append(className)
 
         # returns = self.elem.get("returns", None)
-        parent = self.elem.get("parent_")
-        grandparent = None
-        if parent is not None:
-            grandparent = parent.get("parent_")
+
         arguments = []
         if not withoutself:
             if grandparent is not None:
