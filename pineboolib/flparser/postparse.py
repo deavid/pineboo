@@ -596,18 +596,22 @@ def main():
     execute(options, args)
 
 
-def pythonify(filelist):
+def pythonify(filelist, verbose=False):
     options, args = parseArgs([])
     options.full = True
+    if not verbose:
+        options.verbose = False
     if isinstance(filelist, str):
         filelist = [filelist]
     execute(options, filelist)
-    print(filelist)
+    if options.verbose:
+        print(filelist)
 
 
 def execute(options, args):
     if options.optdebug:
-        print(options, args)
+        if options.verbose:
+            print(options, args)
     if options.full:
         execpython = options.exec_python
         options.exec_python = False
@@ -643,7 +647,8 @@ def execute(options, args):
                 print("Error al ejecutar Python:")
                 print(traceback.format_exc())
 
-        print("Done.")
+        if options.verbose:
+            print("Done.")
 
     elif options.exec_python:
         # import qsatype
