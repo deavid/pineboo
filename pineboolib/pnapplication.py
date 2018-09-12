@@ -980,8 +980,9 @@ class XMLAction(XMLStruct):
         return self.formrecord_widget
 
     def load(self):
+        self._loaded = False
         if self.mainform_widget:
-            self._loaded = getattr(self.mainform_widget, "loaded", False)
+            self._loaded = getattr(self.mainform_widget, "_loaded", False)
 
         if self._loaded:
             return self.mainform_widget

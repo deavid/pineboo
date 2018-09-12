@@ -151,7 +151,7 @@ class FLFormDB(QtWidgets.QDialog):
 
     def __init__(self, parent, action, load=False):
 
-        logger = logging.getLogger("FLFormDB")
+        self.logger = logging.getLogger("FLFormDB")
         self.tiempo_ini = time.time()
 
         if not parent:
@@ -708,7 +708,10 @@ class FLFormDB(QtWidgets.QDialog):
         self.setCursor(None)
         self.closed.emit()
         super(FLFormDB, self).closeEvent(e)
+        self._action.mainform_widget = None
         self.deleteLater()
+        self._loaded = False
+
         try:
             # self.script.form.close()
             self.script.form = None
@@ -718,9 +721,7 @@ class FLFormDB(QtWidgets.QDialog):
             del self.widget
             del self.script
         except Exception:
-            pass
-
-        self._loaded = False
+            self.logger.warn("El FLFormDB %s no se cerró correctamente", self.formName())
 
     """
     Captura evento mostrar
@@ -788,7 +789,8 @@ class FLFormDB(QtWidgets.QDialog):
             self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
         tiempo_fin = time.time()
-        self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s" % (self.actionName_, tiempo_fin - self.tiempo_ini, self))
+        self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s" %
+                         (self.actionName_, tiempo_fin - self.tiempo_ini, self))
         self.tiempo_ini = None
 
     def initMainWidget(self, w=None):
