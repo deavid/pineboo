@@ -11,6 +11,7 @@ import xml
 from pineboolib.pnsqldrivers import PNSqlDrivers
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
+from pineboolib.fllegacy.FLSettings import FLSettings
 
 from PyQt5 import QtWidgets, QtCore, uic
 from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox
@@ -69,6 +70,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.cbAutoLogin.stateChanged.connect(self.enableProfilePassword)
         self.showOptions()
         self.loadProfiles()
+        self.ui.leDescription.textChanged.connect(self.updateDBName)
 
     def cleanProfileForm(self):
         """
@@ -99,6 +101,11 @@ class DlgConnect(QtWidgets.QWidget):
         for file in files:
             fileName = file.split(".")[0]
             self.ui.cbProfiles.addItem(fileName)
+
+        settings = FLSettings()
+        last_profile = settings.readEntry("DBA/last_profile", None)
+        if last_profile:
+            self.ui.cbProfiles.setCurrentText(last_profile)
 
     """
     SLOTS
@@ -132,6 +139,10 @@ class DlgConnect(QtWidgets.QWidget):
         fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
         tree = xml.etree.ElementTree.parse(fileName)
         root = tree.getroot()
+        last_profile = self.ui.cbProfiles.currentText()
+        if last_profile not in (None, ""):
+            settings = FLSettings()
+            settings.writeEntry("DBA/last_profile", last_profile)
 
         for profile in root.findall("profile-data"):
             if getattr(profile.find("password"), "text", None):
@@ -181,8 +192,8 @@ class DlgConnect(QtWidgets.QWidget):
             QMessageBox.information(self.ui, "Pineboo", "La contraseña de la BD no coincide")
             self.ui.leDBPassword.setText("")
             self.ui.leDBPassword2.setText("")
-            return 
-        
+            return
+
         passwDB = self.ui.leDBPassword.text()  # Base 64?
         nameDB = self.ui.leDBName.text()
         passProfile = self.ui.leProfilePassword.text()  # base 64?
@@ -258,6 +269,12 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.lePassword.setEnabled(False)
         else:
             self.ui.lePassword.setEnabled(True)
+
+    def updateDBName(self):
+        """
+        Actualiza el nombre de la BD con el nombre de la descripción
+        """
+        self.ui.leDBName.setText(self.ui.leDescription.text())
 
     @QtCore.pyqtSlot(int)
     def enableProfilePassword(self):
