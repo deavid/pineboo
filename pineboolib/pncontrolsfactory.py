@@ -501,9 +501,9 @@ class FormDBWidget(QWidget):
                 if not ret:
                     parent = parent.parentWidget()
 
-                loaded = getattr(ret, "loaded()", None)
+                loaded = getattr(ret, "_loaded", None)
                 if loaded is False:
-                    logger.warn("El control %s no está listo todavía", childName)
+                    ret.load()
 
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
