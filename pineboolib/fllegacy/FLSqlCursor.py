@@ -8,6 +8,7 @@ from pineboolib import decorators
 from pineboolib.pncursortablemodel import PNCursorTableModel
 
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
@@ -3061,9 +3062,19 @@ class FLSqlCursor(QtCore.QObject):
     indica TRUE, si indica FALSE este método no hace nada
     """
     @QtCore.pyqtSlot()
-    @decorators.NotImplementedWarn
     def chooseRecord(self):
-        return True
+        settings = FLSettings()
+        if not settings.readBoolEntry("ebcomportamiento/FLTableDoubleClick", False):
+            if self.d.edition_:
+                self.editRecord()
+            else:
+                if self.d.browse_:
+                    self.browseRecord()
+        else:
+            if self.d.browse_:
+                self.browseRecord()
+
+        self.recordChoosed.emit()
 
     """
     Evita el refresco del model() asociado.
