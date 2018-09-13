@@ -128,6 +128,7 @@ class FLTableDB(QtWidgets.QWidget):
                 break
 
         self._loaded = False
+        self.createFLTableDBWidget()
 
     def __getattr__(self, name):
         return DefFun(self, name)
@@ -729,7 +730,8 @@ class FLTableDB(QtWidgets.QWidget):
 
     def showEvent(self, e):
         super(FLTableDB, self).showEvent(e)
-        if self.loaded():
+        self.load()
+        if not self.loaded():
             self.showWidget()
 
     """
@@ -737,92 +739,66 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def showWidget(self):
-        if not self.loaded():
+        if self.showed:
             return
 
-        if not self.showed and self.cursor_ and self.tableRecords_:
-            if not self.topWidget:
-                self.initFakeEditor()
-                self.showed = True
+        if not self.topWidget:
+            self.initFakeEditor()
+            self.showed = True
+            return
+
+        if not self.cursor_:
+            return
+
+        self.showed = True
+
+        own_tmd = False
+        if self.tableName_:
+            own_tmd = True
+            if not self.cursor_.db().manager().existsTable(self.tableName_):
+                tmd = self.cursor_.db().manager().createTable(self.tableName_)
+            else:
+                tmd = self.cursor_.db().manager().metadata(self.tableName_)
+
+            if not tmd:
                 return
 
-            tMD = None
-            ownTMD = None
-            if self.tableName_:
-                if not self.cursor_.db().manager().existsTable(self.tableName_):
-                    ownTMD = True
-                    tMD = self.cursor_.db().manager().createTable(self.tableName_)
+        self.tableRecords()
+        if not self.cursorAux:
+            if not self.initSearch_:
+                self.refresh(True, True)
+                QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+            else:
+                self.refresh(True)
+                if self.tableRecords_.numRows() <= 0:
+                    self.refresh(False, True)
                 else:
-                    ownTMD = True
-                    tMD = self.cursor_.db().manager().metadata(self.tableName_)
+                    self.refreshDelayed()
 
-                if not tMD:
-                    return
+            if not self.topWidget.objectName() == "FLFormRecordDB":
+                self.lineEditSearch.setFocus()
 
-            if not self.cursorAux:
-                if self.initSearch_:
-                    self.refresh(True, True)
-                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
-                else:
-                    self.refresh(True)
-                    if self.tableRecords_.numRows() <= 0:
-                        self.refresh(False, True)
-                    else:
-                        self.refreshDelayed()
-
-                if not isinstance(self.topWidget, FLFormRecordDB):
-                    self.lineEditSearch.setFocus()
-
-            if self.cursorAux:
-                if isinstance(self.topWidget, FLFormRecordDB) and self.cursorAux.modeAccess() == FLSqlCursor.Browse:
-                    self.cursor_.setEdition(False)
-                    self.setReadOnly(True)
-
-                if self.initSearch_:
-                    self.refresh(True, True)
-                    QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
-                else:
-                    self.refresh(True)
-                    if self.tableRecords_.numRows() <= 0:
-                        self.refresh(False, True)
-                    else:
-                        self.refreshDelayed()
-
-            elif isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess() == FLSqlCursor.Browse and (tMD and not tMD.isQuery()):
+        if self.cursorAux:
+            if self.topWidget.objectName() == "FLFormSearchDB" and self.cursor_.modeAccess == FLSqlCursor.Browse:
                 self.cursor_.setEdition(False)
                 self.setReadOnly(True)
 
-            if ownTMD and tMD:
-                if not tMD.inCache():
-                    del tMD
+            if self.initSearch_:
+                self.refresh(True, True)
+                QtCore.QTimer.singleShot(0, self.tableRecords_.ensureRowSelectedVisible)
+            else:
+                self.refresh(True)
+                if self.tableRecords_.numRows() <= 0:
+                    self.refresh(False, True)
+                else:
+                    self.refreshDelayed()
+        elif self.topWidget.objectName() == "FLformRecordDB" and self.cursor_.modeAccess() == FLSqlCursor.Browse and tmd and not tmd.isQuery():
+            self.cursor_.setEdition(False)
+            self.setReadOnly(True)
+        if own_tmd and tmd and not tmd.inCache():
+            del tmd
 
-        if not self.tableRecords_:
-            if not self.tableName_:
-                if not self.cursor_:
-                    self.initCursor()
-                    self.showWidget()
-                    return
-                self.tableRecords()
-                self.setTableRecordsCursor()
-                self.showWidget()
-            elif self.tableName_:
-                if not self.cursor_:
-                    self.initCursor()
-                    self.showWidget()
-                    return
-
-                if self.tableName_ == self.cursor_.curName():
-                    self.tableRecords()
-                    if self.cursor_.model():
-                        self.setTableRecordsCursor()
-                        self.showWidget()
-
-    """
-    Crear self.tableRecords_
-    """
-
-    def createTableRecors(self):
-
+    def createFLTableDBWidget(self):
         sizePolicy = QtWidgets.QSizePolicy(
             QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         sizePolicy.setHeightForWidth(True)
@@ -840,9 +816,9 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.tabFilter.setSizePolicy(sizePolicyGB)
 
-        dataL = QtWidgets.QVBoxLayout()
+        self.tabDataLayout = QtWidgets.QVBoxLayout()
         filterL = QtWidgets.QVBoxLayout()
-        self.tabData.setLayout(dataL)
+        self.tabData.setLayout(self.tabDataLayout)
         self.tabFilter.setLayout(filterL)
 
         # Contiene botones lateral (datos, filtros, odf)
@@ -852,7 +828,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbData = QtWidgets.QPushButton(self)
         self.pbData.setSizePolicy(sizePolicy)
         self.pbData.setMinimumSize(self.iconSize)
-        self.pbData.setFocusPolicy(Qt.NoFocus)
+        self.pbData.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbData.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-data.png")))
         self.pbData.setText("")
@@ -864,7 +840,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbFilter = QtWidgets.QPushButton(self)
         self.pbFilter.setSizePolicy(sizePolicy)
         self.pbFilter.setMinimumSize(self.iconSize)
-        self.pbFilter.setFocusPolicy(Qt.NoFocus)
+        self.pbFilter.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbFilter.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-filter.png")))
         self.pbFilter.setText("")
@@ -876,7 +852,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbOdf = QtWidgets.QPushButton(self)
         self.pbOdf.setSizePolicy(sizePolicy)
         self.pbOdf.setMinimumSize(self.iconSize)
-        self.pbOdf.setFocusPolicy(Qt.NoFocus)
+        self.pbOdf.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbOdf.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-odf.png")))
         self.pbOdf.setText("")
@@ -890,7 +866,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.pbClean = QtWidgets.QPushButton(self)
         self.pbClean.setSizePolicy(sizePolicyClean)
         self.pbClean.setMinimumSize(self.iconSize)
-        self.pbClean.setFocusPolicy(Qt.NoFocus)
+        self.pbClean.setFocusPolicy(QtCore.Qt.NoFocus)
         self.pbClean.setIcon(QtGui.QIcon(
             filedir("../share/icons", "fltable-clean.png")))
         self.pbClean.setText("")
@@ -906,6 +882,8 @@ class FLTableDB(QtWidgets.QWidget):
         from pineboolib.pncontrolsfactory import QComboBox
         self.comboBoxFieldToSearch = QComboBox()
         self.comboBoxFieldToSearch2 = QComboBox()
+        self.comboBoxFieldToSearch.addItem("*")
+        self.comboBoxFieldToSearch2.addItem("*")
         self.lineEditSearch = QtWidgets.QLineEdit()
         label1 = QtWidgets.QLabel()
         label2 = QtWidgets.QLabel()
@@ -921,91 +899,79 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.masterLayout.addLayout(self.tabControlLayout)
         self.masterLayout.addLayout(self.dataLayout)
-
-        self.tableRecords_ = FLDataTable(self, "tableRecords")
-        if self.functionGetColor_:
-            self.tableRecords_.setFunctionGetColor(self.functionGetColor_)
-        self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setFocusProxy(self.tableRecords_)
-        # metemos el tablerecord en el datalayout
-        dataL.addWidget(self.tableRecords_)
-
-        self.lineEditSearch.installEventFilter(self)
-        self.tableRecords_.installEventFilter(self)
-
         self.setLayout(self.masterLayout)
-        # self.setTabOrder(self.tableRecords_, self.lineEditSearch)
-        self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
-        self.setTabOrder(self.comboBoxFieldToSearch,
-                         self.comboBoxFieldToSearch2)
-        self.tableRecords_.recordChoosed.connect(self.currentChanged)
-
-        self.lineEditSearch.textChanged.connect(self.filterRecords)
-        model = self.cursor_.model()
 
         # Se añade data, filtros y botonera
         self.dataLayout.addWidget(self.tabData)
         self.dataLayout.addWidget(self.tabFilter)
         self.tabFilter.hide()
         self.dataLayout.addLayout(self.buttonsLayout)
-
-        if model:
-            for column in range(model.columnCount()):
-                if model.metadata() is None:
-                    return
-                field = model.metadata().indexFieldObject(column)
-                if not field.visibleGrid():
-                    self.tableRecords_.setColumnHidden(column, True)
-                else:
-                    self.comboBoxFieldToSearch.addItem(model.headerData(
-                        column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                    self.comboBoxFieldToSearch2.addItem(model.headerData(
-                        column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-            self.comboBoxFieldToSearch.addItem("*")
-            self.comboBoxFieldToSearch2.addItem("*")
-            self.comboBoxFieldToSearch.setCurrentIndex(self.sortColumn_)
-            self.comboBoxFieldToSearch2.setCurrentIndex(self.sortColumn2_)
-            self.comboBoxFieldToSearch.currentIndexChanged.connect(
-                self.putFirstCol)
-            self.comboBoxFieldToSearch2.currentIndexChanged.connect(
-                self.putSecondCol)
-            self._controlsInit = True
-
-        else:
-            self.comboBoxFieldToSearch.addItem("*")
-            self.comboBoxFieldToSearch2.addItem("*")
+        self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
+        self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
 
         from pineboolib.pncontrolsfactory import QTable
         self.tdbFilter = QTable()
         filterL.addWidget(self.tdbFilter)
-
-        return self.tableRecords_
 
     """
     Obtiene el componente tabla de registros
     """
 
     def tableRecords(self):
-        if self.tableRecords_:
-            return self.tableRecords_
-        else:
-            return self.createTableRecors()
+        if not self.tableRecords_:
+            self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
+            self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
+            self.setFocusProxy(self.tableRecords_)
+            self.tabDataLayout.addWidget(self.tableRecords_)
+            self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+            self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
+            self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+            self.lineEditSearch.installEventFilter(self)
+            self.tableRecords_.installEventFilter(self)
+            if self.autoSortColumn_:
+                self.tableRecords_._h_header.sectionClicked.connect(self.switchSortOrder)
+
+        t_cursor = self.tableRecords_.cursor()
+        if self.cursor_ and self.cursor_ is not t_cursor and self.cursor_.metadata() and (not t_cursor or (t_cursor and t_cursor.metadata() and t_cursor.metadata().name() != self.cursor_.metadata().name())):
+
+            self.setTableRecordsCursor()
+
+        return self.tableRecords_
 
     """
     Asigna el cursor actual del componente a la tabla de registros
     """
 
     def setTableRecordsCursor(self):
-        self.tableRecords().setFLSqlCursor(self.cursor_)
-        try:
-            self.tableRecords().doubleClicked.disconnect(self.chooseRecord)
-        except Exception:
-            pass
-        if FLSettings().readEntry("ebcomportamiento/FLTableDoubleClick", "false") == "false":
-            self.tableRecords().doubleClicked.connect(self.chooseRecord)
+
+        if not self.tableRecords_:
+            self.tableRecords_ = FLDataTable(self.tabData, "tableRecords")
+            self.tableRecords_.setFocusPolicy(QtCore.Qt.StrongFocus)
+            self.setFocusProxy(self.tableRecords_)
+            self.tabDataLayout.addWidget(self.tableRecords_)
+            self.setTabOrder(self.tableRecords_, self.lineEditSearch)
+            self.setTabOrder(self.lineEditSearch, self.comboBoxFieldToSearch)
+            self.setTabOrder(self.comboBoxFieldToSearch, self.comboBoxFieldToSearch2)
+            self.lineEditSearch.installEventFilter(self)
+            self.tableRecords_.installEventFilter(self)
 
         if self.checkColumnEnabled_:
-            self.tableRecords().clicked.connect(self.tableRecords().setChecked)
+            self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
+
+        t_cursor = self.tableRecords_.cursor()
+        self.tableRecords_.setFLSqlCursor(self.cursor_)
+        if self.showed:
+            try:
+                self.tableRecords_.currentChanged.disconnect(self.currentChangedSlot)
+            except:
+                pass
+        self.tableRecords_.currentChanged.connect(self.currentChangedSlot)
+        if t_cursor:
+            try:
+                self.tableRecords_.recordChoosed.disconnect(t_cursor.chooseRecord)
+            except:
+                pass
+        self.tableRecords_.recordChoosed.connect(self.cursor_.chooseRecord)
 
     """
     Refresca la pestaña datos aplicando el filtro
@@ -1661,7 +1627,6 @@ class FLTableDB(QtWidgets.QWidget):
         tMD = self.cursor_.metadata()
         if not tMD:
             return
-
         if not self.tableName_:
             self.tableName_ = tMD.name()
 
@@ -1677,10 +1642,12 @@ class FLTableDB(QtWidgets.QWidget):
                         tMD.addFieldMD(fieldCheck)
                     else:
                         fieldCheck = tMD.field(self.fieldNameCheckColumn_)
+
                 self.tableRecords().cursor().model().updateColumnsCount()
                 self.tableRecords().header().reset()
                 self.tableRecords().header().swapSections(self.tableRecords().realColumnIndex(fieldCheck.name()), self.sortColumn_)
                 self.checkColumnVisible_ = True
+                self.setTableRecordsCursor()
                 self.sortColumn_ = 1
                 self.sortColumn2_ = 2
                 self.sortColumn3_ = 3
@@ -1689,14 +1656,15 @@ class FLTableDB(QtWidgets.QWidget):
                 #    buffer_.setGenerated(i, True)
 
         else:
+            self.setTableRecordsCursor()
             self.sortColumn_ = 0
             self.sortColumn2_ = 1
             self.sortColumn3_ = 2
             self.checkColumnVisible_ = False
 
         if refreshHead:
-            if not self.tableRecords_.isHidden():
-                self.tableRecords_.hide()
+            if not self.tableRecords_.header().isHidden():
+                self.tableRecords_.header().hide()
 
             model = self.cursor_.model()
             for column in range(model.columnCount()):
@@ -1706,17 +1674,66 @@ class FLTableDB(QtWidgets.QWidget):
                 else:
                     self.tableRecords_.setColumnHidden(column, False)
 
-            # FIXME FIX: Esto lo he implementado en otro lado manualmente. A elminar, o mover algo de aquel código aquí.
+            if self.autoSortColumn_:
+                s = []
+                s.append(tMD.indexFieldObject(self.sortColumn_).name() + " ASC" if self.orderAsc_ else " DESC")
+                s.append(tMD.indexFieldObject(self.sortColumn2_).name() + " ASC" if self.orderAsc2_ else " DESC")
+                s.append(tMD.indexFieldObject(self.sortColumn3_).name() + " ASC" if self.orderAsc3_ else " DESC")
 
-            # FIXME: Este proceso es MUY LENTO. No deberíamos hacer esto.
-            # Hay que buscar alguna forma manual de iterar las primeras N filas, o calcular un
-            # valor por defecto rápidamente.
-            # self.tableRecords_._h_header.setResizeMode(QtGui.QHeaderView.ResizeToContents)
-            # if model.rows * model.cols > 500*10:
-            #    # Esto evitará que se calcule para las que tienen más de 500*10 celdas.
-            #    self.tableRecords_._h_header.setResizeMode(0)
-            # ... de todos modos tendríamos que, con un timer o algo para desactivar el modo. Una vez
-            # ... ya redimensionadas inicialmente, lo único que hace es lastrar Pineboo mucho.
+                id_mod = self.cursor_.db().managerModules().idModuleOfFile("%s.mtd" % self.cursor_.metadata().name())
+                function_qsa = "%s.tabeDB_setSort_%s" % (id_mod, self.cursor_.metadata().name())
+
+                vars = []
+                vars.append(s)
+                vars.append(tMD.indexFieldObject(self.sortColumn_).name())
+                vars.append(self.orderAsc_)
+                vars.append(tMD.indexFieldObject(self.sortColumn2_).name())
+                vars.append(self.orderAsc2_)
+                vars.append(tMD.indexFieldObject(self.sortColumn3_).name())
+                vars.append(self.orderAsc3_)
+                from pineboolib.pncontrolsfactory import aqApp
+                ret = aqApp.call(function_qsa, vars, None, False)
+                if not isinstance(ret, bool):
+                    s = ret
+                    logger.warn("functionQSA: %s %s" % (function_qsa, ret.join(", ")))
+                else:
+                    logger.warn("functionQSA: %s -> NULL" % (function_qsa))
+
+                self.tableRecords_.setSort(s)
+
+            if model:
+                self.comboBoxFieldToSearch.currentIndexChanged.disconnect(
+                    self.putFirstCol)
+                self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(
+                    self.putSecondCol)
+
+                self.comboBoxFieldToSearch.clear()
+                self.comboBoxFieldToSearch2.clear()
+                for column in range(model.columnCount()):
+                    if model.metadata() is None:
+                        return
+                    field = model.metadata().indexFieldObject(column)
+                    if not field.visibleGrid():
+                        self.tableRecords_.setColumnHidden(column, True)
+                    else:
+                        self.comboBoxFieldToSearch.addItem(model.headerData(
+                            column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                        self.comboBoxFieldToSearch2.addItem(model.headerData(
+                            column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                self.comboBoxFieldToSearch.addItem("*")
+                self.comboBoxFieldToSearch2.addItem("*")
+                self.comboBoxFieldToSearch.setCurrentIndex(self.sortColumn_)
+                self.comboBoxFieldToSearch2.setCurrentIndex(self.sortColumn2_)
+                self.comboBoxFieldToSearch.currentIndexChanged.connect(
+                    self.putFirstCol)
+                self.comboBoxFieldToSearch2.currentIndexChanged.connect(
+                    self.putSecondCol)
+
+            else:
+                self.comboBoxFieldToSearch.addItem("*")
+                self.comboBoxFieldToSearch2.addItem("*")
+
+            self.tableRecords_.header().show()
 
         if refreshData or self.sender():
 
