@@ -2977,7 +2977,9 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def showEvent(self, e):
-        self.showWidget()
+        self.load()
+        if self._loaded:
+            self.showWidget()
         super(FLFieldDB, self).showEvent(e)
     """
     Redefinida por conveniencia
