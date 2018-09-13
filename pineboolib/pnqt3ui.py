@@ -352,11 +352,12 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         elif pname == "paletteForegroundColor":
             value = 'color:' + loadVariant(xmlprop).name()
 
-        elif pname == "windowIcon":
+        elif pname in ["windowIcon", "icon"]:
             value = loadVariant(xmlprop, widget)
             if isinstance(value, str):
                 logger.warn("Icono %s no encontrado.", value)
                 return
+
         else:
             value = loadVariant(xmlprop, widget)
 
@@ -777,6 +778,8 @@ def _loadVariant(variant, widget=None):
             return QtWidgets.QAbstractItemView.SingleSelection
         if text == "FollowStyle":
             return "QtWidgets.QTableView {selection-background-color: red;}"
+        if text == "MultiRow":
+            return QtWidgets.QAbstractItemView.MultiSelection
 
         att_found = getattr(widget, text, None)
         if att_found:
