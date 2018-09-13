@@ -31,13 +31,6 @@ class MainForm(QtCore.QObject):
 
         aqApp.main_widget_ = self.w_  # FIXME: Supongo que se podrá quitar en el futuro, para setMainWidget con contenedor
 
-    def activateWindow(self):
-        self.w_.activateWindow()
-
-    @decorators.Deprecated
-    def load(self):
-        self.initScript()
-
     def eventFilter(self, o, e):
         if isinstance(e, AQS.ContextMenu):
             if o == getattr(self.dck_mod_, "w_", None):
@@ -64,7 +57,7 @@ class MainForm(QtCore.QObject):
             if isinstance(o, pineboolib.fllegacy.FLFormDB.FLFormDB):
                 self.formClosed(o)
 
-        elif e.type() == AQS.WindowStateChange:
+        elif isinstance(e, AQS.WindowStateChange):
             if sys.isNebulaBuild() and o == self.w_:
                 if self.w_.minimized():
                     self.w_.showNormal()
@@ -159,8 +152,12 @@ class MainForm(QtCore.QObject):
             w.showFullScreen()
             aqApp.setProxyDesktop(w)
 
+        self.loadTabs()
+
+    def loadTabs(self):
         if self.ag_menu_:
-            key += "%s/" % aqApp.db().database()
+            settings = AQSettings()
+            key = "MainWindow/%s/" % aqApp.db().database()
 
             open_actions = settings.readListEntry("%sopenActions" % key)
             i = 0
@@ -740,6 +737,7 @@ class MainForm(QtCore.QObject):
 
     def show(self):
         self.w_.show()
+        self.w_.activateWindow()
 
     def close(self):
         self.w_.close()
@@ -749,10 +747,13 @@ class MainForm(QtCore.QObject):
 
         mw = mainWindow
         mw.createUi(filedir('plugins/mainform/eneboo/mainform.ui'))
+
         mw.init()
+
         mw.updateMenuAndDocks()
         mw.initModule("sys")
-        # mw.show()
+        mw.show()
+
         mw.readState()
 
     def reinitSript(self):
