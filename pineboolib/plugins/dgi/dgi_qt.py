@@ -669,6 +669,10 @@ class FLTable(QtWidgets.QTableWidget):
     def setHScrollBarMode(self, mode):
         pass
 
+    @decorators.NotImplementedWarn
+    def setFocusStyle(self, b):
+        pass
+
 
 class QTable(QtWidgets.QTableWidget):
 
