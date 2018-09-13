@@ -172,31 +172,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def data(self, index, role):
-        if self.dict_color_function():
-            if not index in self.color_dict_.keys():
-                from pineboolib.pncontrolsfactory import aqApp
-                field_name = None
-                field_value = None
-                cursor = self._parent
-                selected = False
-                type = None
-
-                self.color_dict_[index] = aqApp.call(
-                    self.dict_color_function(), [field_name, field_value, cursor, selected, type], None)
-        # print("Data ", index, role)
-        # print("Registros", self.rowCount())
-        # roles
-        # 0 QtCore.Qt.DisplayRole
-        # 1 QtCore.Qt.DecorationRole
-        # 2 QtCore.Qt.EditRole
-        # 3 QtCore.Qt.ToolTipRole
-        # 4 QtCore.Qt.StatusTipRole
-        # 5 QtCore.Qt.WhatThisRole
-        # 6 QtCore.Qt.FontRole
-        # 7 QtCore.Qt.TextAlignmentRole
-        # 8 QtCore.Qt.BackgroundRole
-        # 9 QtCore.Qt.ForegroundRole
-
         row = index.row()
         col = index.column()
         field = self.metadata().indexFieldObject(col)
@@ -211,6 +186,33 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if not pK in self._checkColumn.keys():
                 d = QtWidgets.QCheckBox()
                 self._checkColumn[pK] = d
+
+        if self.dict_color_function():
+            if not index in self.color_dict_.keys():
+                from pineboolib.pncontrolsfactory import aqApp
+                field_name = field.name()
+                field_value = d
+                cursor = self._parent
+                selected = False
+                type = _type
+
+                self.color_dict_["%d_%d" % (row, col)] = aqApp.call(
+                    self.dict_color_function(), [field_name, field_value, cursor, selected, type], None)
+
+                self.logger.warn("******** functionGetColor!!! %s", self.dict_color_function())
+        # print("Data ", index, role)
+        # print("Registros", self.rowCount())
+        # roles
+        # 0 QtCore.Qt.DisplayRole
+        # 1 QtCore.Qt.DecorationRole
+        # 2 QtCore.Qt.EditRole
+        # 3 QtCore.Qt.ToolTipRole
+        # 4 QtCore.Qt.StatusTipRole
+        # 5 QtCore.Qt.WhatThisRole
+        # 6 QtCore.Qt.FontRole
+        # 7 QtCore.Qt.TextAlignmentRole
+        # 8 QtCore.Qt.BackgroundRole
+        # 9 QtCore.Qt.ForegroundRole
 
         if role == QtCore.Qt.CheckStateRole and _type == "check":
             if pK in self._checkColumn.keys():
@@ -548,6 +550,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # self.threadFetcher = threading.Thread(target=self.threadFetch)
         # self.threadFetcherStop = threading.Event()
         # self.threadFetcher.start()
+        self.color_dict_ = {}  # Limpiamos diccionario de colores
         self.fetchMore(parent, self.metadata().name(), self.where_filter)
         # print("%s:: rows: %s" % (self._curname, self.rows))
 
