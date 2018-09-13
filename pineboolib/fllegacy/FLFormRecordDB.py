@@ -145,9 +145,8 @@ class FLFormRecordDB(FLFormDB):
         self.load()
         self.initForm()
 
-        if not self.load:
-            self.load_fl_controls.emit()
-
+        if not load:
+            self.fl_form_loaded.emit()
     """
     Reimplementado, añade un widget como principal del formulario
     """
@@ -213,15 +212,13 @@ class FLFormRecordDB(FLFormDB):
                 self.showAcceptContinue_ = False
 
             self.loadControls()
+
         else:
             self.setCaptionWidget("No hay metadatos")
         acl = pineboolib.project.acl()
         if acl:
             acl.process(self)
 
-        self.fl_form_loaded.emit()
-
-    # Al no usar setMainWidget cargo la botonera aqui
     def loadControls(self):
         if self.pushButtonAcceptContinue:
             self.pushButtonAcceptContinue.hide()
