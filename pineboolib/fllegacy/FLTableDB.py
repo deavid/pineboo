@@ -128,7 +128,6 @@ class FLTableDB(QtWidgets.QWidget):
                 break
 
         self._loaded = False
-        self.topWidget.fl_form_loaded.connect(self.load)
 
     def __getattr__(self, name):
         return DefFun(self, name)
