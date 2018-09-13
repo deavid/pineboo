@@ -420,7 +420,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
 
     logger.info("Creando interfaz ...")
     main_window = mainForm.mainWindow
-    main_window.load()
+    main_window.initScript()
     ret = 0
 
     if options.preload:
@@ -437,7 +437,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
     project.call("sys.iface.init()", [], None, True)
     if DGI.localDesktop():
         splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        main_window.w_.activateWindow()
+        # main_window.w_.activateWindow()
         QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:
