@@ -145,8 +145,6 @@ class FLFormRecordDB(FLFormDB):
         self.load()
         self.initForm()
 
-        if not load:
-            self.fl_form_loaded.emit()
     """
     Reimplementado, añade un widget como principal del formulario
     """

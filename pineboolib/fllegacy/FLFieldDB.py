@@ -171,8 +171,6 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.topWidget_:
                 break
 
-        self.topWidget_.fl_form_loaded.connect(self.load)
-
     def load(self):
 
         if self._loaded:

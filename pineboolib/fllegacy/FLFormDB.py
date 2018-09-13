@@ -126,7 +126,6 @@ class FLFormDB(QtWidgets.QDialog):
     Uso interno
     """
     oldFormObjDestroyed = QtCore.pyqtSignal()
-    fl_form_loaded = QtCore.pyqtSignal()
 
     # signals:
 
@@ -584,9 +583,6 @@ class FLFormDB(QtWidgets.QDialog):
             from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
             cursor = FLSqlCursor(self._action.name())
             self.setCursor(cursor)
-
-            if self.loaded():
-                self.fl_form_loaded.emit()
 
             v = None
 
