@@ -23,6 +23,88 @@ class FLDataTable(QtWidgets.QTableView):
     filter_ = None
     sort_ = None
 
+    """
+    Numero de la fila (registro) seleccionada actualmente
+    """
+    rowSelected = -1
+
+    """
+    Numero de la columna (campo) seleccionada actualmente
+    """
+    colSelected = -1
+
+    """
+    Cursor, con los registros
+    """
+    cursor_ = None
+
+    """
+    Almacena la tabla está en modo sólo lectura
+    """
+    readonly_ = None
+
+    """
+    Almacena la tabla está en modo sólo edición
+    """
+    editonly_ = None
+
+    """
+    Indica si la tabla está en modo sólo inserción
+    """
+    insertonly_ = None
+
+    """
+    Texto del último campo dibujado en la tabla
+    """
+    lastTextPainted_ = None
+
+    """
+    Pixmap precargados
+    """
+    pixOk_ = None
+    pixNo_ = None
+
+    """
+    Lista con las claves primarias de los registros seleccionados por chequeo
+    """
+    primarysKeysChecked_ = []
+
+    """
+    Filtro persistente para el cursor
+    """
+    persistentFilter_ = None
+
+    """
+    Indicador para evitar refrescos anidados
+    """
+    refreshing_ = False
+    refresh_timer_ = None
+
+    """
+    Indica si el componente es emergente ( su padre es un widget del tipo Popup )
+    """
+    popup_ = None
+
+    """
+    Indica el ancho de las columnas establecidas explícitamente con FLDataTable::setColumnWidth
+    """
+    widthCols_ = []
+
+    """
+    Indica si se deben mostrar los campos tipo pixmap en todas las filas
+    """
+    showAllPixmaps_ = None
+
+    """
+    Nombre de la función de script a invocar para obtener el color de las filas y celdas
+    """
+    functionGetColor_ = None
+
+    """
+    Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
+    """
+    onlyTable_ = None
+
     def __init__(self, parent=None, name=None, popup=False):
         super(FLDataTable, self).__init__(parent)
 
@@ -84,7 +166,6 @@ class FLDataTable(QtWidgets.QTableView):
                 curChg = True
 
             self.cursor_ = c
-
             if self.cursor_:
                 if curChg:
                     self.setFLReadOnly(self.readonly_)
@@ -93,7 +174,6 @@ class FLDataTable(QtWidgets.QTableView):
                     self.setOnlyTable(self.onlyTable_)
 
                 self.cursor().bufferCommited.connect(self.ensureRowSelectedVisible)
-
             self.setModel(self.cursor_.model())
             self.setSelectionModel(self.cursor_.selection())
             self.model().sort(self.visualIndexToRealIndex(0), 0)
@@ -112,6 +192,13 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setFilter(self, f):
         self.filter_ = f
+
+    """
+    retorna el número de columnas
+    """
+
+    def numCols(self):
+        return self._h_header.count()
 
     def setSort(self, s):
         self.sort_ = s
@@ -330,88 +417,6 @@ class FLDataTable(QtWidgets.QTableView):
     def drawContents(self, p, cx, cy, cw, ch):
         pass
 
-    """
-    Numero de la fila (registro) seleccionada actualmente
-    """
-    rowSelected = -1
-
-    """
-    Numero de la columna (campo) seleccionada actualmente
-    """
-    colSelected = -1
-
-    """
-    Cursor, con los registros
-    """
-    cursor_ = None
-
-    """
-    Almacena la tabla está en modo sólo lectura
-    """
-    readonly_ = None
-
-    """
-    Almacena la tabla está en modo sólo edición
-    """
-    editonly_ = None
-
-    """
-    Indica si la tabla está en modo sólo inserción
-    """
-    insertonly_ = None
-
-    """
-    Texto del último campo dibujado en la tabla
-    """
-    lastTextPainted_ = None
-
-    """
-    Pixmap precargados
-    """
-    pixOk_ = None
-    pixNo_ = None
-
-    """
-    Lista con las claves primarias de los registros seleccionados por chequeo
-    """
-    primarysKeysChecked_ = []
-
-    """
-    Filtro persistente para el cursor
-    """
-    persistentFilter_ = None
-
-    """
-    Indicador para evitar refrescos anidados
-    """
-    refreshing_ = False
-    refresh_timer_ = None
-
-    """
-    Indica si el componente es emergente ( su padre es un widget del tipo Popup )
-    """
-    popup_ = None
-
-    """
-    Indica el ancho de las columnas establecidas explícitamente con FLDataTable::setColumnWidth
-    """
-    widthCols_ = []
-
-    """
-    Indica si se deben mostrar los campos tipo pixmap en todas las filas
-    """
-    showAllPixmaps_ = None
-
-    """
-    Nombre de la función de script a invocar para obtener el color de las filas y celdas
-    """
-    functionGetColor_ = None
-
-    """
-    Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
-    """
-    onlyTable_ = None
-
     """ Uso interno """
     changingNumRows_ = None
 
@@ -548,11 +553,11 @@ class FLDataTable(QtWidgets.QTableView):
     Indica que se ha elegido un registro
     """
     recordChoosed = QtCore.pyqtSignal()
+    currentChanged = QtCore.pyqtSignal()
 
-    def currentChanged(self, row, row2):
+    def currentChangedSlot(self, row, row2):
         self.cursor_.selection_currentRowChanged(row, row2)
-        self.recordChoosed.emit()
-
+        self.currentChanged.emit()
     """
     Indica que ha cambiado el estado del campo de selección de un registro. Es decir
     se ha incluido o eliminado su clave primaria de la lista de claves primarias seleccionadas.
@@ -596,6 +601,15 @@ class FLDataTable(QtWidgets.QTableView):
     @param c posicion de la columna visible.
     @return posicion real de la columna
     """
+
+    def mouseDoubleClickEvent(self, e):
+        if e.button() != QtCore.Qt.LeftButton:
+            return
+
+        from pineboolib.fllegacy.FLSettings import FLSettings
+        settings = FLSettings()
+        if settings.readEntry("ebcomportamiento/FLTableDoubleClick", "false") == "false":
+            self.recordChoosed.emit()
 
     def visualIndexToRealIndex(self, c):
         # print("FLDataTable:visualIndexToRealIndex")
