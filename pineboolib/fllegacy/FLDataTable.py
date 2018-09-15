@@ -529,7 +529,7 @@ class FLDataTable(QtWidgets.QTableView):
     def delayedViewportRepaint(self):
         if not self.timerViewRepaint_:
             self.timerViewRepaint_ = QtCore.QTimer(self)
-            self.timerViewRepaint_.timeout.connect(self.repaintViewportSlot())
+            self.timerViewRepaint_.timeout.connect(self.repaintViewportSlot)
 
         if not self.timerViewRepaint_.isActive():
             self.setUpdatesEnabled(False)

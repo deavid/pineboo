@@ -336,7 +336,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setTableName(self, fT):
         self.tableName_ = fT
-        if self.topwidget:
+        if self.topWidget:
             self.initCursor()
         else:
             self.initFakeEditor()
@@ -358,7 +358,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setForeignField(self, fN):
         self.foreignField_ = fN
-        if self.topwidget:
+        if self.topWidget:
             self.initCursor()
         else:
             self.initFakeEditor()
@@ -379,7 +379,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setFieldRelation(self, fN):
         self.fieldRelation_ = fN
-        if self.topwidget:
+        if self.topWidget:
             self.initCursor()
         else:
             self.initFakeEditor()
@@ -721,7 +721,7 @@ class FLTableDB(QtWidgets.QWidget):
             if k.text() == "'" or k.text() == "\\":
                 return True
 
-        if isinstance(obj, FLDataTable) or isinstance(obj, pineboolib.pncontrolsfactory.FLLineEdit):
+        if obj in (self.tableRecords_, self.lineEditSearch):
             return False
         else:
             return super(FLTableDB, self).eventFilter(obj, ev)
@@ -777,11 +777,11 @@ class FLTableDB(QtWidgets.QWidget):
                 else:
                     self.refreshDelayed()
 
-            if not self.topWidget.objectName() == "FLFormRecordDB":
+            if not isinstance(self.topWidget, FLFormRecordDB):
                 self.lineEditSearch.setFocus()
 
         if self.cursorAux:
-            if self.topWidget.objectName() == "FLFormSearchDB" and self.cursor_.modeAccess == FLSqlCursor.Browse:
+            if isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess == FLSqlCursor.Browse:
                 self.cursor_.setEdition(False)
                 self.setReadOnly(True)
 
@@ -794,11 +794,11 @@ class FLTableDB(QtWidgets.QWidget):
                     self.refresh(False, True)
                 else:
                     self.refreshDelayed()
-        elif self.topWidget.objectName() == "FLformRecordDB" and self.cursor_.modeAccess() == FLSqlCursor.Browse and tmd and not tmd.isQuery():
+        elif isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess() == FLSqlCursor.Browse and tmd and not tmd.isQuery():
             self.cursor_.setEdition(False)
             self.setReadOnly(True)
-        if own_tmd and tmd and not tmd.inCache():
-            del tmd
+        # if own_tmd and tmd and not tmd.inCache():
+        #    del tmd
 
     def createFLTableDBWidget(self):
         sizePolicy = QtWidgets.QSizePolicy(
@@ -961,20 +961,32 @@ class FLTableDB(QtWidgets.QWidget):
         if self.checkColumnEnabled_:
             self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
 
-        t_cursor = self.tableRecords_.cursor()
+        #t_cursor = self.tableRecords_.cursor()
         self.tableRecords_.setFLSqlCursor(self.cursor_)
-        if self.showed:
-            try:
-                self.tableRecords_.currentChanged.disconnect(self.currentChangedSlot)
-            except:
-                pass
-        self.tableRecords_.currentChanged.connect(self.currentChangedSlot)
-        if t_cursor:
-            try:
-                self.tableRecords_.recordChoosed.disconnect(t_cursor.chooseRecord)
-            except:
-                pass
-        self.tableRecords_.recordChoosed.connect(self.cursor_.chooseRecord)
+        # if self.showed:
+        #    try:
+        #        self.tableRecords_.currentChanged.disconnect(self.currentChangedSlot)
+        #    except:
+        #        pass
+        # self.tableRecords_.currentChanged.connect(self.currentChangedSlot)
+        # if t_cursor:
+        #    try:
+        #        self.tableRecords_.recordChoosed.disconnect(t_cursor.chooseRecord)
+        #    except:
+        #        pass
+        # self.tableRecords_.recordChoosed.connect(self.cursor_.chooseRecord)
+        try:
+            self.tableRecords_.recordChoosed.disconnect(self.recordChoosedSlot)
+        except:
+            pass
+        self.tableRecords_.recordChoosed.connect(self.recordChoosedSlot)
+
+    @QtCore.pyqtSlot()
+    def recordChoosedSlot(self):
+        if isinstance(self.topWidget, FLFormSearchDB) and self.topWidget.inExec_:
+            self.topWidget.accept()
+        else:
+            self.cursor_.chooseRecord()
 
     """
     Refresca la pestaña datos aplicando el filtro
