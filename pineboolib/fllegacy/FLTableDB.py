@@ -118,8 +118,8 @@ class FLTableDB(QtWidgets.QWidget):
         if name:
             self.setObjectName(name)
         self.checkColumnVisible_ = False
-        self.tdbFilterLastWhere_ = u""
-        self.filter_ = u""
+        self.tdbFilterLastWhere_ = ""
+        self.filter_ = ""
         self.iconSize = pineboolib.project._DGI.iconSize()
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
@@ -887,6 +887,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.comboBoxFieldToSearch.addItem("*")
         self.comboBoxFieldToSearch2.addItem("*")
         self.lineEditSearch = QtWidgets.QLineEdit()
+        self.lineEditSearch.textChanged.connect(self.filterRecords)
         label1 = QtWidgets.QLabel()
         label2 = QtWidgets.QLabel()
 
@@ -1426,7 +1427,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Mantiene el filtro de la tabla
     """
-    filter_ = None
+    filter_ = ""
 
     """
     Almacena si el componente está en modo sólo lectura
@@ -2203,15 +2204,15 @@ class FLTableDB(QtWidgets.QWidget):
             try:
                 from pineboolib.pncontrolsfactory import aqApp
                 ret = aqApp.call(functionQSA, vargs, None)
-                print("functionQSA:%s:" % functionQSA)
+                logger.debug("functionQSA:%s:", functionQSA)
             except Exception:
                 pass
 
-            if ret:
+            if ret is not isinstance(ret, bool):
                 bFilter = ret
             else:
                 if p == "":
-                    bFilter = None
+                    bFilter = ""
 
         self.refreshDelayed(msec_refresh, refreshData)
         self.filter_ = bFilter
