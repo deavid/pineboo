@@ -154,29 +154,26 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setFLSqlCursor(self, c):
         if c and c.metadata():
-            curChg = None
+            cur_chg = False
             if self.cursor_ and not self.cursor_ == c:
                 self.cursor_.restoreEditionFlag(self)
                 self.cursor_.restoreBrowseFlag(self)
-                try:
-                    self.cursor().bufferCommited.disconnect(self.ensureRowSelectedVisible)
-                except:
-                    pass
+                self.cursor_.bufferCommited.disconnect(self.ensureRowSelectedVisible)
 
-                curChg = True
+                cur_chg = True
 
-            self.cursor_ = c
-            if self.cursor_:
-                if curChg:
-                    self.setFLReadOnly(self.readonly_)
-                    self.setEditOnly(self.editonly_)
-                    self.setInsertOnly(self.insertonly_)
-                    self.setOnlyTable(self.onlyTable_)
+            if not self.cursor_ or cur_chg:
+                self.cursor_ = c
+                self.setFLReadOnly(self.readonly_)
+                self.setEditOnly(self.editonly_)
+                self.setInsertOnly(self.insertonly_)
+                self.setOnlyTable(self.onlyTable_)
 
-                self.cursor().bufferCommited.connect(self.ensureRowSelectedVisible)
-            self.setModel(self.cursor_.model())
-            self.setSelectionModel(self.cursor_.selection())
-            self.model().sort(self.visualIndexToRealIndex(0), 0)
+                self.cursor_.bufferCommited.connect(self.ensureRowSelectedVisible)
+
+                self.setModel(self.cursor_.model())
+                self.setSelectionModel(self.cursor_.selection())
+                self.model().sort(self.visualIndexToRealIndex(0), 0)
             # if self.cursor_.at() >= 0:
             #    QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
     """
@@ -309,9 +306,14 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Ver FLDataTable::onlyTable_
     """
-    @decorators.NotImplementedWarn
+
     def setOnlyTable(self, on=True):
-        pass
+        if not self.cursor_ or self.cursor_.aqWasDeleted():
+            return
+
+        self.cursor_.setEdition(not on, self)
+        self.cursor_.setBrowse(not on, self)
+        self.onlyTable_ = on
 
     def onlyTable(self):
         return self.onlyTable_
@@ -344,18 +346,6 @@ class FLDataTable(QtWidgets.QTableView):
 
     def eventFilter(self, *args, **kwargs):
         return super(FLDataTable, self).eventFilter(*args, **kwargs)
-
-    def dataChanged(self, *args, **kwargs):
-        return super(FLDataTable, self).dataChanged(*args, **kwargs)
-        # Código antiguo
-        from pineboolib.CursorTableModel import CursorTableModel
-        model = self.model()
-        if isinstance(model, CursorTableModel):
-            for col, width in enumerate(model._column_hints):
-                self.setColumnWidth(col, width)
-                self._h_header.resizeSection(col, width)
-            self._h_header.setSectionResizeMode(
-                QtWidgets.QHeaderView.Interactive)
 
     """
     Redefinido por conveniencia para pintar la celda
@@ -535,6 +525,7 @@ class FLDataTable(QtWidgets.QTableView):
             self.setUpdatesEnabled(False)
             self.timerViewRepaint_.start(50)
 
+    @QtCore.pyqtSlot()
     def repaintViewportSlot(self):
 
         vw = self.viewport()
@@ -612,7 +603,6 @@ class FLDataTable(QtWidgets.QTableView):
             self.recordChoosed.emit()
 
     def visualIndexToRealIndex(self, c):
-        # print("FLDataTable:visualIndexToRealIndex")
         if not isinstance(c, int) or not self.cursor_:
             return
 

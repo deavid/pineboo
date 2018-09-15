@@ -423,7 +423,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords_.setInsertOnly(mode)
             self.insertOnlyChanged.emit(mode)
 
-        self.reqInsertOnly = mode
+        self.reqInsertOnly_ = mode
 
     def insertOnly(self):
         return self.reqInsertOnly_
@@ -797,6 +797,7 @@ class FLTableDB(QtWidgets.QWidget):
         elif isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess() == FLSqlCursor.Browse and tmd and not tmd.isQuery():
             self.cursor_.setEdition(False)
             self.setReadOnly(True)
+
         # if own_tmd and tmd and not tmd.inCache():
         #    del tmd
 
@@ -884,8 +885,8 @@ class FLTableDB(QtWidgets.QWidget):
         from pineboolib.pncontrolsfactory import QComboBox
         self.comboBoxFieldToSearch = QComboBox()
         self.comboBoxFieldToSearch2 = QComboBox()
-        self.comboBoxFieldToSearch.addItem("*")
-        self.comboBoxFieldToSearch2.addItem("*")
+        # self.comboBoxFieldToSearch.addItem("*")
+        # self.comboBoxFieldToSearch2.addItem("*")
         self.lineEditSearch = QtWidgets.QLineEdit()
         self.lineEditSearch.textChanged.connect(self.filterRecords)
         label1 = QtWidgets.QLabel()
@@ -961,24 +962,20 @@ class FLTableDB(QtWidgets.QWidget):
         if self.checkColumnEnabled_:
             self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
 
-        #t_cursor = self.tableRecords_.cursor()
+        t_cursor = self.tableRecords_.cursor()
         self.tableRecords_.setFLSqlCursor(self.cursor_)
-        # if self.showed:
-        #    try:
-        #        self.tableRecords_.currentChanged.disconnect(self.currentChangedSlot)
-        #    except:
-        #        pass
-        # self.tableRecords_.currentChanged.connect(self.currentChangedSlot)
-        # if t_cursor:
-        #    try:
-        #        self.tableRecords_.recordChoosed.disconnect(t_cursor.chooseRecord)
-        #    except:
-        #        pass
-        # self.tableRecords_.recordChoosed.connect(self.cursor_.chooseRecord)
+        if self.showed:
+            try:
+                self.tableRecords_.currentChanged.disconnect(self.currentChangedSlot)
+            except:
+                pass
+        self.tableRecords_.currentChanged.connect(self.currentChangedSlot)
+
         try:
             self.tableRecords_.recordChoosed.disconnect(self.recordChoosedSlot)
         except:
             pass
+
         self.tableRecords_.recordChoosed.connect(self.recordChoosedSlot)
 
     @QtCore.pyqtSlot()
@@ -988,6 +985,9 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             self.cursor_.chooseRecord()
 
+    @QtCore.pyqtSlot()
+    def currentChangedSlot(self):
+        self.currentChanged.emit()
     """
     Refresca la pestaña datos aplicando el filtro
     """
@@ -1724,7 +1724,15 @@ class FLTableDB(QtWidgets.QWidget):
 
                 self.comboBoxFieldToSearch.clear()
                 self.comboBoxFieldToSearch2.clear()
+
+                cb1 = None
+                cb2 = None
                 for column in range(model.columnCount()):
+                    if self.tableRecords_.header().visualIndex(column) == 0:
+                        cb1 = column
+                    else:
+                        if self.tableRecords_.header().visualIndex(column) == 1:
+                            cb2 = column
                     if model.metadata() is None:
                         return
                     field = model.metadata().indexFieldObject(column)
@@ -1735,12 +1743,11 @@ class FLTableDB(QtWidgets.QWidget):
                             column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
                         self.comboBoxFieldToSearch2.addItem(model.headerData(
                             column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+
                 self.comboBoxFieldToSearch.addItem("*")
                 self.comboBoxFieldToSearch2.addItem("*")
-                self.comboBoxFieldToSearch.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(
-                    self.sortColumn_))
-                self.comboBoxFieldToSearch2.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(
-                    self.sortColumn2_))
+                self.comboBoxFieldToSearch.setCurrentIndex(cb1)
+                self.comboBoxFieldToSearch2.setCurrentIndex(cb2)
                 self.comboBoxFieldToSearch.currentIndexChanged.connect(
                     self.putFirstCol)
                 self.comboBoxFieldToSearch2.currentIndexChanged.connect(
@@ -1793,6 +1800,8 @@ class FLTableDB(QtWidgets.QWidget):
         if self.tableRecords_ and self.tableRecords_.isHidden():
             self.tableRecords_.show()
 
+        QtCore.QTimer.singleShot(50, self.setSortOrder)
+
     """
     Actualiza el conjunto de registros con un retraso.
 
@@ -1832,7 +1841,7 @@ class FLTableDB(QtWidgets.QWidget):
         if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
             relationLock = self.cursor_.cursorRelation().isLocked()
 
-        if w and self.browseOnly() or self.onlyTable() or self.editOnly() or relationLock:
+        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or relationLock):
             w.setDisabled(True)
             return
 
@@ -1853,7 +1862,7 @@ class FLTableDB(QtWidgets.QWidget):
         if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
             relationLock = self.cursor_.cursorRelation().isLocked()
 
-        if w and self.cursor().isLocked() or self.browseOnly() or self.onlyTable() or relationLock:
+        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqInsertOnly_ or self.reqOnlyTable_ or relationLock):
             w.setDisabled(True)
             return
 
@@ -2038,28 +2047,9 @@ class FLTableDB(QtWidgets.QWidget):
             self.refreshDelayed()
 
         from_ = self.tableRecords_.visualIndexToRealIndex(from_)
-        self.tableRecords_._h_header.swapSections(from_, to)
+        self.tableRecords_.header().swapSections(from_, to)
 
         self.refresh(True)
-
-        """
-        if textSearch:
-            self.refresh(False, True)
-
-            if firstSearch:
-                self.lineEditSearch.textChanged.disconnect(self.filterRecords)
-                self.lineEditSearch.setText(textSearch)
-                self.lineEditSearch.textChanged.connect(self.filterRecords)
-                self.lineEditSearch.selectAll()
-
-            self.seekCursor()
-            QtCore.QTimer.singleShot(0,self.tableRecords_.ensureRowSelectedVisible)
-        else:
-            self.refreshDelayed()
-            if not self.sender():
-                self.lineEditSearch.setFocus()
-
-        """
         # self.tableRecords_.show()
 
     """
@@ -2297,25 +2287,6 @@ class FLTableDB(QtWidgets.QWidget):
     Señal emitida cuando se establece cambia el registro seleccionado.
     """
     currentChanged = QtCore.pyqtSignal()
-
-    @QtCore.pyqtSlot()
-    def chooseRecord(self):
-        if isinstance(self.topWidget, FLFormSearchDB):
-            if self.topWidget.inExec_:
-                self.topWidget.accept()
-                return
-
-        relationLock = False
-
-        if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
-            relationLock = self.cursor_.cursorRelation().isLocked()
-
-        if self.cursor().isLocked() or self.browseOnly() or relationLock:
-            print("FLTable(%s):Registro bloqueado. Modo Solo lectura." %
-                  self.cursor().curName())
-            self.cursor().browseRecord()
-        else:
-            self.cursor().editRecord()
 
     def primarysKeysChecked(self):
         return self.tableRecords().primarysKeysChecked()
