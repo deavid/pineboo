@@ -3,7 +3,7 @@ from pineboolib import decorators
 
 from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
 from pineboolib.fllegacy.FLCompoundKey import FLCompoundKey
-
+import logging
 import copy
 from PyQt5 import QtCore
 
@@ -23,7 +23,7 @@ los metadatos de una consulta, ver FLTableMetaData::query().
 
 
 class FLTableMetaData(QtCore.QObject):
-
+    logger = logging.getLogger("CursorTableModel")
     d = None
 
     """
@@ -716,17 +716,19 @@ class FLTableMetaData(QtCore.QObject):
 
         self.d = copy.copy(other.d)
 
-    def indexFieldObject(self, position):
-        i = -1
+    def indexFieldObject(self, position, show_exception=True):
+        i = 0
+        ret = None
         for field in self.d.fieldList_:
-            i = i + 1
             if position == i:
-                # print("FLTableMetaData.indexField(%s) = %s" % (position, field.name()))
-                return field
+                ret = field
+                break
 
-        print("FLTableMetaData.indexField(%s) Posicion %s de %s no encontrado" % (
-            self.d.name_, position, i))
-        return None
+            i += 1
+
+        if not ret and show_exception:
+            self.logger.warn("FLTableMetadata(%s).indexField() Posicion %s no encontrado", self.name(), position)
+        return ret
 
 
 class FLTableMetaDataPrivate():

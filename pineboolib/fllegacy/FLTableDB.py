@@ -1691,21 +1691,27 @@ class FLTableDB(QtWidgets.QWidget):
 
             if self.autoSortColumn_:
                 s = []
-                s.append(tMD.indexFieldObject(self.sortColumn_).name() + " ASC" if self.orderAsc_ else " DESC")
-                s.append(tMD.indexFieldObject(self.sortColumn2_).name() + " ASC" if self.orderAsc2_ else " DESC")
-                s.append(tMD.indexFieldObject(self.sortColumn3_).name() + " ASC" if self.orderAsc3_ else " DESC")
+                if tMD.indexFieldObject(self.sortColumn_, False):
+                    s.append(tMD.indexFieldObject(self.sortColumn_).name() + " ASC" if self.orderAsc_ else " DESC")
+                if tMD.indexFieldObject(self.sortColumn2_, False):
+                    s.append(tMD.indexFieldObject(self.sortColumn2_).name() + " ASC" if self.orderAsc2_ else " DESC")
+                if tMD.indexFieldObject(self.sortColumn3_, False):
+                    s.append(tMD.indexFieldObject(self.sortColumn3_).name() + " ASC" if self.orderAsc3_ else " DESC")
 
                 id_mod = self.cursor_.db().managerModules().idModuleOfFile("%s.mtd" % self.cursor_.metadata().name())
                 function_qsa = "%s.tabeDB_setSort_%s" % (id_mod, self.cursor_.metadata().name())
 
                 vars = []
                 vars.append(s)
-                vars.append(tMD.indexFieldObject(self.sortColumn_).name())
-                vars.append(self.orderAsc_)
-                vars.append(tMD.indexFieldObject(self.sortColumn2_).name())
-                vars.append(self.orderAsc2_)
-                vars.append(tMD.indexFieldObject(self.sortColumn3_).name())
-                vars.append(self.orderAsc3_)
+                if tMD.indexFieldObject(self.sortColumn_, False):
+                    vars.append(tMD.indexFieldObject(self.sortColumn_).name())
+                    vars.append(self.orderAsc_)
+                if tMD.indexFieldObject(self.sortColumn2_, False):
+                    vars.append(tMD.indexFieldObject(self.sortColumn2_).name())
+                    vars.append(self.orderAsc2_)
+                if tMD.indexFieldObject(self.sortColumn3_, False):
+                    vars.append(tMD.indexFieldObject(self.sortColumn3_).name())
+                    vars.append(self.orderAsc3_)
                 from pineboolib.pncontrolsfactory import aqApp
                 ret = aqApp.call(function_qsa, vars, None, False)
                 if not isinstance(ret, bool):
