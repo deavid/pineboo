@@ -110,6 +110,9 @@ class FLTableDB(QtWidgets.QWidget):
         self.sortColumn2_ = 1
         self.sortColumn3_ = 2
         self.autoSortColumn_ = True
+        self.orderAsc_ = True
+        self.orderAsc2_ = True
+        self.orderAsc3_ = True
         self.tabFilterLoaded = False
         self.timer_1 = QtCore.QTimer(self)
         if name:
@@ -467,8 +470,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.moveCol(_index, i)
             i = i + 1
 
-        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(
-            self.sortColumn_), QtCore.Qt.AscendingOrder)
+        self.setSortOrder(True)
         textSearch = self.lineEditSearch.text()
         self.refresh(True)
 
@@ -929,7 +931,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.lineEditSearch.installEventFilter(self)
             self.tableRecords_.installEventFilter(self)
             if self.autoSortColumn_:
-                self.tableRecords_._h_header.sectionClicked.connect(self.switchSortOrder)
+                self.tableRecords_.header().sectionClicked.connect(self.switchSortOrder)
 
         t_cursor = self.tableRecords_.cursor()
         if self.cursor_ and self.cursor_ is not t_cursor and self.cursor_.metadata() and (not t_cursor or (t_cursor and t_cursor.metadata() and t_cursor.metadata().name() != self.cursor_.metadata().name())):
@@ -1663,8 +1665,8 @@ class FLTableDB(QtWidgets.QWidget):
             self.checkColumnVisible_ = False
 
         if refreshHead:
-            if not self.tableRecords_.header().isHidden():
-                self.tableRecords_.header().hide()
+            if not self.tableRecords().header().isHidden():
+                self.tableRecords().header().hide()
 
             model = self.cursor_.model()
             for column in range(model.columnCount()):
@@ -1722,8 +1724,10 @@ class FLTableDB(QtWidgets.QWidget):
                             column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
                 self.comboBoxFieldToSearch.addItem("*")
                 self.comboBoxFieldToSearch2.addItem("*")
-                self.comboBoxFieldToSearch.setCurrentIndex(self.sortColumn_)
-                self.comboBoxFieldToSearch2.setCurrentIndex(self.sortColumn2_)
+                self.comboBoxFieldToSearch.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(
+                    self.sortColumn_))
+                self.comboBoxFieldToSearch2.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(
+                    self.sortColumn2_))
                 self.comboBoxFieldToSearch.currentIndexChanged.connect(
                     self.putFirstCol)
                 self.comboBoxFieldToSearch2.currentIndexChanged.connect(
@@ -1909,8 +1913,7 @@ class FLTableDB(QtWidgets.QWidget):
             return False
 
         self.moveCol(_index, self.sortColumn_)
-        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(
-            self.sortColumn_), QtCore.Qt.AscendingOrder)
+        self.tableRecords_.sortByColumn(_index, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
         return True
 
     """
@@ -2148,13 +2151,14 @@ class FLTableDB(QtWidgets.QWidget):
         if self.checkColumnVisible_:
             col = col - 1
 
-        if col == self.sortColumn_:
+        if col == self.tableRecords_.visualIndexToRealIndex(self.sortColumn_):
             self.orderAsc_ = not self.orderAsc_
-        elif col == self.sortColumn2_:
-            self.orderAsc2_ = not self.orderAsc2_
 
-        self.tableRecords().hide()
-        self.refresh(True, True)
+        self.setSortOrder(self.orderAsc_)
+
+        # elif col == self.sortColumn2_:
+        #    self.orderAsc2_ = not self.orderAsc2_
+        #    self.tableRecords_.sortByColumn(col, self.setSortOrder(self.orderAsc2_))
 
     """
     Filtra los registros de la tabla utilizando el primer campo, según el patrón dado.
@@ -2218,7 +2222,7 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             order = Qt.DescendingOrder
 
-        self.tableRecords_.sortByColumn(self.sortColumn_, order)
+        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), order)
 
     def isSortOrderAscending(self):
         return self.orderAsc_
