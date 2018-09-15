@@ -1734,11 +1734,6 @@ class FLTableDB(QtWidgets.QWidget):
                 cb1 = None
                 cb2 = None
                 for column in range(model.columnCount()):
-                    if self.tableRecords_.header().visualIndex(column) == 0:
-                        cb1 = column
-                    else:
-                        if self.tableRecords_.header().visualIndex(column) == 1:
-                            cb2 = column
                     if model.metadata() is None:
                         return
                     field = model.metadata().indexFieldObject(column)
@@ -1752,12 +1747,10 @@ class FLTableDB(QtWidgets.QWidget):
 
                 self.comboBoxFieldToSearch.addItem("*")
                 self.comboBoxFieldToSearch2.addItem("*")
-                self.comboBoxFieldToSearch.setCurrentIndex(cb1)
-                self.comboBoxFieldToSearch2.setCurrentIndex(cb2)
-                self.comboBoxFieldToSearch.currentIndexChanged.connect(
-                    self.putFirstCol)
-                self.comboBoxFieldToSearch2.currentIndexChanged.connect(
-                    self.putSecondCol)
+                self.comboBoxFieldToSearch.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_))
+                self.comboBoxFieldToSearch2.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_))
+                self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
+                self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
 
             else:
                 self.comboBoxFieldToSearch.addItem("*")
@@ -2010,7 +2003,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.comboBoxFieldToSearch2.currentIndexChanged.connect(
                 self.putSecondCol)
 
-        if (to == 1):  # Si es la segunda columna ...
+        if to == 1:  # Si es la segunda columna ...
             try:
                 self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(
                     self.putSecondCol)
@@ -2052,11 +2045,10 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             self.refreshDelayed()
 
-        from_ = self.tableRecords_.visualIndexToRealIndex(from_)
-        self.tableRecords_.header().swapSections(from_, to)
+        new_from_ = self.tableRecords_.header().visualIndex(from_)
+        self.tableRecords_.header().swapSections(new_from_, to)
 
         self.refresh(True)
-        # self.tableRecords_.show()
 
     """
     Posiciona el cursor en un registro valido
