@@ -606,21 +606,10 @@ class FLDataTable(QtWidgets.QTableView):
         if not isinstance(c, int) or not self.cursor_:
             return
 
-        model = self.cursor_.model()
-        posReal = 0
-        posVisual = 0
-        _return = None
-        for column in range(model.columnCount()):
-            field = model.metadata().indexFieldObject(column)
-            if not field.visibleGrid():
-                posVisual = posVisual - 1
-            else:
-                if c == posVisual:
-                    _return = posReal
-                    break
+        ret_ = None
+        for column in range(self.model().columnCount()):
+            if self.header().visualIndex(column) == c:
+                ret_ = column
+                break
 
-            posVisual = posVisual + 1
-            posReal = posReal + 1
-
-        _return = self._h_header.visualIndex(posReal)
-        return _return
+        return ret_
