@@ -562,7 +562,7 @@ class FormDBWidget(QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
-        ret_ = getattr([self._action, self.cursor_, aqApp], name, None)
+        ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None)
         if ret_:
             return ret_
 
