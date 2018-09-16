@@ -185,6 +185,13 @@ class Input(object):
             return None
         return text
 
+    @classmethod
+    def getItem(cls, question, items_list=[], title="Pineboo", editable=True):
+        text, ok = QtWidgets.QInputDialog.getItem(None, title, question, items_list, 0, editable)
+        if not ok:
+            return None
+        return text
+
 
 def qsa_length(obj):
     lfn = getattr(obj, "length", None)
@@ -451,7 +458,10 @@ class File(QtCore.QFile):
         f.close()
 
     def exists(name):
-        return os.path.isfile(name)
+        return os.path.exists(name)
+
+    def isDir(dir_name):
+        return os.path.isdir(dir_name)
 
 
 class QString(str):
