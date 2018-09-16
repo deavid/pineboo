@@ -660,7 +660,6 @@ class Variable(ASTPython):
                 yield "expr", "None"
 
         dtype = self.elem.get("type", None)
-
         if (values == 0) and force_value:
             yield "expr", "="
             if dtype is None:
@@ -695,6 +694,8 @@ class InstructionUpdate(ASTPython):
                 if dtype == "expr":
                     if data is None:
                         raise ValueError(etree.ElementTree.tostring(arg))
+                    if data == "[]":
+                        data = "Array()"
                     expr.append(data)
                 else:
                     yield dtype, data
