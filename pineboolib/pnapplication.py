@@ -306,7 +306,8 @@ class Project(object):
                     settings = FLSettings()
                     if settings.readBoolEntry("application/isDebuggerMode", False):
                         if self._splash:
-                            self._splash.showMessage("Volcando a caché %s..." % nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
+                            self._splash.showMessage("Volcando a caché %s..." %
+                                                     nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
                     f2 = open(_dir("cache", fileobj.filekey), "wb")
 
@@ -316,7 +317,7 @@ class Project(object):
 
                     f2.close()
 
-            if self.parseProject and nombre.endswith(".qs"):
+            if self.parseProject and nombre.endswith(".qs") and settings.readBoolEntry("application/isDebuggerMode", False):
                 # if self._splash:
                 #    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
                 #                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
