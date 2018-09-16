@@ -530,7 +530,9 @@ def checkDependencies(dict_):
             if not mod_ver:
                 mod_ver = getattr(mod_, "__version__", "???")
 
-            logger.warn("Versión de %s: %s", key, mod_ver)
+            settings = FLSettings()
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                logger.warn("Versión de %s: %s", key, mod_ver)
         except ImportError:
             dependences.append(dict_[key])
             error.append(traceback.format_exc())
