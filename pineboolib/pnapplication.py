@@ -303,9 +303,10 @@ class Project(object):
                     encode_ = "utf-8"
 
                 if not os.path.exists(_dir("cache", fileobj.filekey)):
-                    if self._splash:
-                        self._splash.showMessage("Volcando a caché %s..." %
-                                                 nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
+                    settings = FLSettings()
+                    if settings.readBoolEntry("application/isDebuggerMode", False):
+                        if self._splash:
+                            self._splash.showMessage("Volcando a caché %s..." % nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
                     f2 = open(_dir("cache", fileobj.filekey), "wb")
 
@@ -447,7 +448,7 @@ class Project(object):
     """
 
     def parseScript(self, scriptname):
-        from pineboolib.pncontrolsfactory import aqApp
+
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
             raise IOError
@@ -455,25 +456,24 @@ class Project(object):
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             settings = FLSettings()
-            from pineboolib.fllegacy.FLUtil import FLUtil
-            util = FLUtil()
-            if util.getOS() == "WIN32":
-                file_name = scriptname.split("\\")
-            else:
-                file_name = scriptname.split("/")
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                from pineboolib.fllegacy.FLUtil import FLUtil
+                util = FLUtil()
+                file_name = scriptname.split("\\") if util.getOS() == "WIN32" else scriptname.split("/")
 
-            file_name = file_name[len(file_name) - 2]
+                file_name = file_name[len(file_name) - 2]
 
-            msg = "Convirtiendo a Python . . . %s.qs" % file_name
-            if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
-                self.logger.info(msg)
+                msg = "Convirtiendo a Python . . . %s.qs" % file_name
+                if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
+                    self.logger.info(msg)
 
-            if self._splash:
-                self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
+                if self._splash:
+                    self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
-            else:
-                if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
-                    aqApp.popupWarn(msg)
+                else:
+                    if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
+                        from pineboolib.pncontrolsfactory import aqApp
+                        aqApp.popupWarn(msg)
 
             from pineboolib.flparser import postparse
             try:

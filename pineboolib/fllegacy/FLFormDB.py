@@ -6,6 +6,7 @@ from PyQt5.Qt import qWarning, QKeySequence
 
 from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm, convertFLAction
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib import decorators
 import pineboolib
 
@@ -785,8 +786,9 @@ class FLFormDB(QtWidgets.QDialog):
             self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
         tiempo_fin = time.time()
-        self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s" %
-                         (self.actionName_, tiempo_fin - self.tiempo_ini, self))
+        settings = FLSettings()
+        if settings.readBoolEntry("application/isDebuggerMode", False):
+            self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s" % (self.actionName_, tiempo_fin - self.tiempo_ini, self))
         self.tiempo_ini = None
 
     def initMainWidget(self, w=None):
