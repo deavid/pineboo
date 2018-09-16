@@ -266,16 +266,10 @@ class Project(object):
             tiempo_ini = time.time()
         if not os.path.exists(_dir("cache")):
             raise AssertionError
-        # if self.parseProject:
-        if self._DGI.useDesktop() and self._DGI.localDesktop():
-            util.createProgressDialog("Pineboo", size_)
         p = 0
         pos_qs = 1
         for idmodulo, nombre, sha in self.cur:
             p = p + 1
-            if self._DGI.useDesktop() and self._DGI.localDesktop():
-                util.setProgress(p)
-                util.setLabelText("Convirtiendo %s." % nombre)
             if idmodulo not in self.modules:
                 continue  # I
             fileobj = File(idmodulo, nombre, sha)
@@ -321,7 +315,7 @@ class Project(object):
                 # if self._splash:
                 #    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
                 #                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
-                self.parseScript(_dir("cache", fileobj.filekey))
+                self.parseScript(_dir("cache", fileobj.filekey), "(%d de %d)" % (p, size_))
 
                 pos_qs += 1
 
@@ -339,12 +333,6 @@ class Project(object):
                     self.modules[idmodulo].add_project_file(fileobj)
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
-
-        if self._DGI.useDesktop() and self._DGI.localDesktop():
-            try:
-                util.destroyProgressDialog()
-            except Exception as e:
-                self.logger.error(e)
 
         if self._splash:
             self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
@@ -448,7 +436,7 @@ class Project(object):
     @param scriptname, Nombre del script a convertir
     """
 
-    def parseScript(self, scriptname):
+    def parseScript(self, scriptname, txt_=None):
 
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
@@ -464,7 +452,7 @@ class Project(object):
 
                 file_name = file_name[len(file_name) - 2]
 
-                msg = "Convirtiendo a Python . . . %s.qs" % file_name
+                msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
                 if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
                     self.logger.info(msg)
 
