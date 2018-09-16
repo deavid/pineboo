@@ -1716,9 +1716,9 @@ class FLTableDB(QtWidgets.QWidget):
                 ret = aqApp.call(function_qsa, vars, None, False)
                 if not isinstance(ret, bool):
                     s = ret
-                    logger.warn("functionQSA: %s %s" % (function_qsa, ret.join(", ")))
+                    logger.debug("functionQSA: %s %s" % (function_qsa, ret.join(", ")))
                 else:
-                    logger.warn("functionQSA: %s -> NULL" % (function_qsa))
+                    logger.debug("functionQSA: %s -> NULL" % (function_qsa))
 
                 self.tableRecords_.setSort(s)
 
@@ -1934,7 +1934,9 @@ class FLTableDB(QtWidgets.QWidget):
             return False
 
         self.moveCol(_index, self.sortColumn_)
-        self.tableRecords_.sortByColumn(_index, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
+        # Marca la primera columna visible con el triangulito
+        self.tableRecords_.sortByColumn(self.sortColumn_, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
+
         return True
 
     """
