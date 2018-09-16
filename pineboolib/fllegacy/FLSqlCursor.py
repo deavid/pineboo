@@ -797,6 +797,8 @@ class FLSqlCursor(QtCore.QObject):
 
     _selection = None
 
+    _iter_current = None
+
     _refreshDelayedTimer = None
     _action = None
     #actionName_ = None
@@ -3682,6 +3684,19 @@ class FLSqlCursor(QtCore.QObject):
 
     def lastError(self):
         return self.db().lastError()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self._iter_current = 0 if self._iter_current is None else self._iter_current + 1
+
+        list_ = [attr for attr in dir(self) if not attr[0] == "_"]
+        if self._iter_current >= len(list_):
+            raise StopIteration
+
+        return list_[self._iter_current]
+
     """
     signals:
     """
