@@ -3686,6 +3686,7 @@ class FLSqlCursor(QtCore.QObject):
         return self.db().lastError()
 
     def __iter__(self):
+        self._iter_current = None
         return self
 
     def __next__(self):
