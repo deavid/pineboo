@@ -544,11 +544,6 @@ class FLDataTable(QtWidgets.QTableView):
     Indica que se ha elegido un registro
     """
     recordChoosed = QtCore.pyqtSignal()
-    currentChanged = QtCore.pyqtSignal()
-
-    def currentChangedSlot(self, row, row2):
-        self.cursor_.selection_currentRowChanged(row, row2)
-        self.currentChanged.emit()
     """
     Indica que ha cambiado el estado del campo de selección de un registro. Es decir
     se ha incluido o eliminado su clave primaria de la lista de claves primarias seleccionadas.

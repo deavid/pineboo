@@ -964,12 +964,6 @@ class FLTableDB(QtWidgets.QWidget):
 
         t_cursor = self.tableRecords_.cursor()
         self.tableRecords_.setFLSqlCursor(self.cursor_)
-        if self.showed:
-            try:
-                self.tableRecords_.currentChanged.disconnect(self.currentChangedSlot)
-            except:
-                pass
-        self.tableRecords_.currentChanged.connect(self.currentChangedSlot)
 
         try:
             self.tableRecords_.recordChoosed.disconnect(self.recordChoosedSlot)
@@ -1157,16 +1151,16 @@ class FLTableDB(QtWidgets.QWidget):
                     if editor_:
                         self.tdbFilter.setCellWidget(_linea, j, editor_)
 
-                    j = j + 1
+                    j += 1
 
-                i = i + 1
-                _linea = _linea + 1
+                i += 1
+                _linea += 1
 
         k = 0
 
         while k < 5:
             self.tdbFilter.adjustColumn(k)
-            k = k + 1
+            k += 1
 
         self.tabFilterLoaded = True  # Con esto no volvemos a cargar y reescribir el filtro
 
