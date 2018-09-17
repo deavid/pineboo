@@ -323,7 +323,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def indexOf(self, i):
-        return super(FLDataTable, self).indexOf(i)
+        return self.header().visualIndex(i)
 
     """
     @return El nombre del campo en la tabla de una columna dada
@@ -608,3 +608,6 @@ class FLDataTable(QtWidgets.QTableView):
                 break
 
         return ret_
+
+    def currentRow(self):
+        return self.currentIndex().row()

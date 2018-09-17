@@ -5,6 +5,7 @@ from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
 from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil as AQUtil_class
 from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
 from pineboolib.fllegacy.aqsobjects.AQS import AQS as AQS_class
+from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor
 
 from pineboolib.utils import convertFLAction
 import pineboolib

@@ -21,6 +21,7 @@ from pineboolib.fllegacy.FLFieldDB import FLDoubleValidator,\
 
 import pineboolib
 import logging
+from PyQt5.QtGui import QPixmap
 logger = logging.getLogger(__name__)
 
 DEBUG = False
@@ -2131,9 +2132,126 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Exporta a una hoja de cálculo ODS y la visualiza
     """
-    @decorators.NotImplementedWarn
+
     def exportToOds(self):
-        pass
+        if not self.cursor_:
+            return
+
+        settings = FLSettings()
+        if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
+            QtWidgets.QMessageBox.information(self.topWidget, self.tr("Opción deshabilitada"), self.tr(
+                "Esta opción ha sido deshabilitada por el administrador"), QtWidgets.QMessageBox.Ok)
+            return
+
+        mtd = self.cursor_.metadata()
+        if not mtd:
+            return
+
+        tdb = self.tableRecords()
+        if not tdb or not tdb.cursor():
+            return
+
+        hor_header = tdb.horizontalHeader()
+        title_style = None
+        border_bot = None
+        border_right = None
+        border_left = None
+        italic = None
+        from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor
+        ods_gen = AQOdsGenerator
+        spread_sheet = AQOdsSpreadSheet(ods_gen)
+        sheet = AQOdsSheet(spread_sheet, mtd.alias())
+        tdb_num_rows = tdb.numRows()
+        tdb_num_cols = tdb.numCols()
+
+        from pineboolib.fllegacy.FLUtil import FLUtil
+        util = FLUtil()
+
+        pd = util.createProgressDialog("Procesando", tdb_num_rows)
+        util.setProgress(1)
+        row = AQOdsRow(sheet)
+        row.addBgColor(AQOdsColor(0xe7e7e7))
+        for i in range(hor_header.count()):
+            row.opIn(title_style)
+            row.opIn(border_bot)
+            row.opIn(border_left)
+            row.opIn(border_right)
+            row.opIn(mtd.indexFieldObject(tdb.visualIndexToRealIndex(i)).name())
+
+        row.close()
+
+        cur = tdb.cursor()
+        cur_row = tdb.currentRow()
+
+        cur.first()
+
+        for r in range(tdb_num_rows):
+            if pd.wasCanceled():
+                break
+
+            row = AQOdsRow(sheet)
+            for c in range(tdb_num_cols):
+                idx = tdb.indexOf(c)  # Busca si la columna se ve
+                print(idx)
+                if idx == -1:
+                    continue
+                field = mtd.indexFieldObject(tdb.visualIndexToRealIndex(c))
+                val = cur.valueBuffer(field.name())
+                if field.type() == "double":
+                    row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))
+                    row.opIn(double(val))
+
+                elif field.type() == "date":
+                    str_ = val
+                    if not str_:
+                        row.coveredCell()
+                    else:
+                        row.opIn(str_)
+
+                elif field.type() == "bool":
+                    str_ = self.tr("Sí") if val == True else self.tr("No")
+                    row.opIn(italic)
+                    row.opIn(srt_)
+
+                else:
+                    str_ = val
+                    if str_:
+                        if str_.startswith("RK@"):
+                            cs = self.cursor_.db().manager().fetchLargeValue(str_)
+                            if cs:
+                                pix = QPixmap(cs)
+
+                            if not pix.isNull():
+
+                                pix_name = "pix%s_" % pix.serialNumber()
+                                pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
+                                                               QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+                                pix.save(pix_file_name, "PNG")
+                                row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
+                                                    double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
+                            else:
+                                row.coveredCell()
+                        else:
+                            row.opIn(str_)
+                    else:
+                        row.coveredCell()
+            row.close()
+            if not r % 4:
+                util.setProgress(r)
+            cur.next()
+
+        cur.seek(cur_row)
+        sheet.close()
+        spread_sheet.close()
+
+        util.setProgress(tdb_num_rows)
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        file_name = "%s/%s%s.ods" % (pineboolib.project.getTempDir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+        ods_gen.generateOds(file_name)
+        from pineboolib.pncontrolsfactory import aqApp
+        aqApp.call("sys.openUrl", [file_name], None)
+
+        QtWidgets.QApplication.restoreOverrideCursor()
 
     """
     Conmuta el sentido de la ordenación de los registros de la tabla, de ascendente a descendente y
