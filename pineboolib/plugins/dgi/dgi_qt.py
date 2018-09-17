@@ -488,12 +488,14 @@ class QDateEdit(QtWidgets.QDateEdit):
 
     _parent = None
     _date = None
+    separator_ = None
 
     def __init__(self, parent, name=None):
         super(QDateEdit, self).__init__(parent)
         super(QDateEdit, self).setDisplayFormat("dd-MM-yyyy")
         if name:
             self.setObjectName(name)
+        self.setSeparator("-")
         self._parent = parent
         self.date_ = super(QDateEdit, self).date().toString(QtCore.Qt.ISODate)
         if not pineboolib.project._DGI.localDesktop():
@@ -509,7 +511,7 @@ class QDateEdit(QtWidgets.QDateEdit):
     def setDate(self, v):
         if not isinstance(v, str):
             if hasattr(v, "toString"):
-                v = v.toString("yyyy-MM-dd")
+                v = v.toString("yyyy%sMM%sdd" % (self.separator(), self.separator()))
             else:
                 v = str(v)
 
@@ -524,9 +526,12 @@ class QDateEdit(QtWidgets.QDateEdit):
     def setAutoAdvance(self, b):
         pass
 
-    @decorators.NotImplementedWarn
-    def setSeparator(self, separator):
-        pass
+    def setSeparator(self, c):
+        self.separator_ = c
+        self.setDisplayFormat("dd%sMM%syyyy" % (self.separator(), self.separator()))
+
+    def separator(self):
+        return self.separator_
 
     def __getattr__(self, name):
         if name == "date":
@@ -541,9 +546,9 @@ class FLDateEdit(QDateEdit):
 
     def __init__(self, parent, name):
         super(FLDateEdit, self).__init__(parent, name)
-        self.setDisplayFormat("dd-MM-yyyy")
-        self.setMinimumWidth(120)
-        self.setMaximumWidth(120)
+
+        self.setMinimumWidth(90)
+        self.setMaximumWidth(90)
         self._parent = parent
 
     def setOrder(self, order):
