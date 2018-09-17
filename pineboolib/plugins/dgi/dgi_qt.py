@@ -679,6 +679,8 @@ class QTable(QtWidgets.QTableWidget):
     lineaActual = None
     currentChanged = QtCore.pyqtSignal(int, int)
     doubleClicked = QtCore.pyqtSignal(int, int)
+    read_only_cols = None
+    read_only_rows = None
 
     def __init__(self, parent=None):
         super(QTable, self).__init__(parent)
@@ -688,6 +690,8 @@ class QTable(QtWidgets.QTableWidget):
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
         self.cellDoubleClicked.connect(self.doubleClicked_)
+        self.read_only_cols = []
+        self.read_only_rows = []
 
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
         self.currentChanged.emit(currentRow, currentColumn)
@@ -713,10 +717,6 @@ class QTable(QtWidgets.QTableWidget):
         else:
             self.setEditTriggers(QtWidgets.QAbstractItemView.EditTriggers)
 
-    @decorators.NotImplementedWarn
-    def setColumnReadOnly(self, n, b):
-        pass
-
     def selectionMode(self):
         return super(QTable, self).selectionMode()
 
@@ -733,17 +733,53 @@ class QTable(QtWidgets.QTableWidget):
     def text(self, row, col):
         return self.item(row, col).text()
 
-    def setText(self, linea, col, value):
+    def setText(self, row, col, value):
         # self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
-        self.setItem(linea, col, QtWidgets.QTableWidgetItem(str(value)))
+        self.setItem(row, col, QtWidgets.QTableWidgetItem(str(value)))
+        if row in self.read_only_rows:
+            self.setRowReadOnly(row, True)
 
-    @decorators.NotImplementedWarn
+        if col in self.read_only_cols:
+            self.setColumnReadOnly(col, True)
+
     def adjustColumn(self, k):
-        pass
+        self.horizontalHeader().setSectionResizeMode(k, QtWidgets.QHeaderView.ResizeToContents)
 
-    @decorators.NotImplementedWarn
     def setRowReadOnly(self, row, b):
-        pass
+        if b:
+            self.read_only_rows.append(row)
+        else:
+            for r in self.read_only_rows:
+                if r == row:
+                    del r
+                    break
+
+        for col in range(self.columnCount()):
+            item = self.item(row, col)
+            if item:
+                if b:
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                else:
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+
+    def setColumnReadOnly(self, col, b):
+        if b:
+            self.read_only_cols.append(col)
+        else:
+            for c in self.read_only_cols:
+                if c == col:
+                    del c
+                    break
+
+        for row in range(self.rowCount()):
+            item = self.item(row, col)
+            if item:
+                if b:
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                else:
+                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+
+        # setItemDelegateForColumn(c, new NotEditableDelegate(view))
 
     # def __getattr__(self, name):
         # return DefFun(self, name)
