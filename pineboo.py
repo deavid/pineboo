@@ -230,19 +230,7 @@ def create_app(DGI):
             font = QtGui.QFont(fontA[0], int(fontA[1]), int(fontA[2]), fontA[3] == "true")
 
         app.setFont(font)
-
-        if DGI.mobilePlatform():
-            pineboolib.pnapplication.Project.mainFormName = "Mobile"
-
-        # Es necesario importarlo a esta altura, QApplication tiene que ser
-        # construido antes que cualquier widget
-        mainForm = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
-            pineboolib.pnapplication.Project.mainFormName.lower(), pineboolib.pnapplication.Project.mainFormName.lower()))
-    else:
-        mainForm = DGI.mainForm()
-    # mainForm = getattr(module_, "MainForm")()
-    # from pineboolib import mainForm
-    return app, mainForm
+    return app
 
 
 def show_connection_dialog(project, app):
@@ -325,13 +313,17 @@ def main():
     if not _DGI.useMLDefault():
         return _DGI.alternativeMain(options)
 
-    if _DGI.useDesktop():
-        app, mainForm = create_app(_DGI)
-
     project = pineboolib.pnapplication.Project(_DGI)
+
+    if _DGI.useDesktop():
+        app = create_app(_DGI)
+        project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+            project.main_form_name, project.main_form_name)) if _DGI.localDesktop() else _DGI.mainForm()
+        project.main_window = project.main_form.mainWindow
+
     project.setDebugLevel(options.debug_level)
     if _DGI.useDesktop():
-        mainForm.MainForm.setDebugLevel(options.debug_level)
+        project.main_form.MainForm.setDebugLevel(options.debug_level)
 
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
         if not options.project.endswith(".xml"):
@@ -364,7 +356,7 @@ def main():
     else:
         # return main()
 
-        init_project(_DGI, splash, options, project, mainForm, app)
+        init_project(_DGI, splash, options, project, project.main_form, app)
 
 
 def preload_actions(project, forceload=None):

@@ -54,8 +54,7 @@ class Project(object):
     logger = logging.getLogger("main.Project")
     conn = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
-    mainFormName = "Eneboo"
-    version = "0.4"
+
     #_initModules = None
     main_window = None
     acl_ = None
@@ -78,13 +77,9 @@ class Project(object):
         self.apppath = None
         self.tmpdir = None
         self.parser = None
-        #self._initModules = []
-        if self._DGI.useDesktop():
-            if self._DGI.localDesktop():
-                self.main_window = import_module("pineboolib.plugins.mainform.%s.%s" % (
-                    self.mainFormName.lower(), self.mainFormName.lower())).mainWindow
-            else:
-                self.main_window = self._DGI.mainForm().mainWindow
+        self.version = 0.5
+        self.main_form_name = "eneboo" if not self._DGI.mobilePlatform() else "mobile"
+
         self.deleteCache = False
         self.parseProject = False
 
