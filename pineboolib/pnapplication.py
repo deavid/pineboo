@@ -430,7 +430,7 @@ class Project(object):
     @param scriptname, Nombre del script a convertir
     """
 
-    def parseScript(self, scriptname, txt_=None):
+    def parseScript(self, scriptname, txt_=""):
 
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
