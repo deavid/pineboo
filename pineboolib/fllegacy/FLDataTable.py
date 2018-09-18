@@ -563,7 +563,7 @@ class FLDataTable(QtWidgets.QTableView):
         if not self.cursor_:
             return -1
 
-        return self.cursor_.model().columnCount()
+        return self.cursor_.model().rowCount()
 
     def indexVisualColumn(self, name):
 
