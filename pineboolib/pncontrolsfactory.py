@@ -164,6 +164,9 @@ class SysType(object):
     def isNebulaBuild(self):
         return False
 
+    def reinit(self):
+        aqApp.reinit()
+
     def setCaptionMainWidget(self, t):
         aqApp.setCaptionMainWidget(t)
 
