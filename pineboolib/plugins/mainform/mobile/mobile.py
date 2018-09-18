@@ -162,9 +162,8 @@ class MainForm(QtCore.QObject):
 
             open_actions = settings.readListEntry("%sopenActions" % key)
             i = 0
-            while i < self.tw_.count():
-                self.tw_.page(i).close()
-                i += 1
+            for i in range(self.tw_.count()):
+                self.tw_.widget(i).close()
 
             for open_action in open_actions:
                 action = self.ag_menu_.findChild(QtWidgets.QAction, open_action)
@@ -266,7 +265,7 @@ class MainForm(QtCore.QObject):
             self.tw_.widget(i).close()
 
     def formClosed(self):
-        if len(self.tw_.pages()) == 1 and self.tw_corner:
+        if len(self.tw_.widgets()) == 1 and self.tw_corner:
             self.tw_corner.hide()
 
     def addForm(self, action_name, icono):
@@ -390,6 +389,7 @@ class MainForm(QtCore.QObject):
                 if ac_name:
                     if not o_name.endswith("Actions") or o_name.endswith("MoreActions"):
                         new_parent = parent.addMenu(ac_name.icon(), ac_name.text())
+                        new_parent.triggered.connect(ac_name.trigger)
 
                 self.updateMenu(obj_, new_parent)
                 continue
@@ -432,11 +432,13 @@ class MainForm(QtCore.QObject):
     def updateActionGroup(self):
 
         if self.ag_menu_:
-            list_ = AQObjectQueryList(self.ag_menu_, "QAction", "", True, True)
+            list_ = self.ag_menu_.children()
             for obj in list_:
-                self.ag_menu_.removeChild(obj)
+                if isinstance(obj, QtWidgets.QAction):
+                    self.ag_menu_.removeAction(obj)
+                    del obj
 
-            self.w_.removeChild(self.ag_menu_)
+            self.ag_menu_.deleteLater()
             self.ag_menu_ = None
 
         self.ag_menu_ = QActionGroup(self.w_)
@@ -758,11 +760,11 @@ class MainForm(QtCore.QObject):
 
     def reinitSript(self):
         main_wid = aqApp.mainWidget() if mainWindow.w_ is None else mainWindow.w_
-        if not main_wid or main_wid.objectName() is not "container" or main_wid is mainWindow.w_:
+        if main_wid is None or main_wid.objectName() != "container":
             return
 
         mw = mainWindow
-        mw.initFormWidget(main_wid)
+        # mw.initFormWidget(main_wid)
         mw.writeState()
         mw.removeAllPages()
         mw.updateMenuAndDocks()
@@ -820,7 +822,7 @@ class MainForm(QtCore.QObject):
             aqApp.staticLoaderSetup()
 
         elif fn_ == "reinit()":
-            aqApp.reinit()
+            sys.reinit()
 
         elif fn_ == "mrProper()":
             sys.Mr_Proper()
