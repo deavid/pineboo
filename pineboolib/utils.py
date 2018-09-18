@@ -316,6 +316,8 @@ def download_files():
 
     copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
     copy_dir_recursive(":/share", filedir("../share"))
+    if not os.path.exists(filedir("../tempdata")):
+        os.mkdir(filedir("../tempdata"))
 
 
 def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
