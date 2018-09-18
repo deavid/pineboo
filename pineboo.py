@@ -231,8 +231,8 @@ def create_app(DGI):
 
         app.setFont(font)
 
-        # if DGI.mobilePlatform():
-        #    pineboolib.pnapplication.Project.mainFormName = "Mobile"
+        if DGI.mobilePlatform():
+            pineboolib.pnapplication.Project.mainFormName = "Mobile"
 
         # Es necesario importarlo a esta altura, QApplication tiene que ser
         # construido antes que cualquier widget
@@ -399,16 +399,12 @@ def init_project(DGI, splash, options, project, mainForm, app):
     project.conn.managerModules().loadAllIdModules()
 
     objaction = None
-    for k, module in list(project.modules.items()):
-        try:
-            if not module.load():
-                continue
-        except Exception as err:
-            logger.error("%s: %s", err.__class__.__name__, str(err))
-            continue
 
-        if options.action:
-            objaction = project.conn.manager(options.action)
+    for module_name in project.modules.keys():
+        project.modules[module_name].load()
+
+    if options.action:
+        objaction = project.conn.manager(options.action)
         # if options.action in module.actions:
         #    objaction = module.actions[options.action]
 
