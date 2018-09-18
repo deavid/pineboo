@@ -21,7 +21,6 @@ from pineboolib.fllegacy.FLReportViewer import FLReportViewer
 from pineboolib.utils import ustr, ustr1
 
 from pineboolib.pncontrolsfactory import *
-from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 
 logger = logging.getLogger(__name__)
 
