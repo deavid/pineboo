@@ -190,7 +190,7 @@ class MainForm(QtCore.QObject):
     def init(self):
         self.w_.statusBar().hide()
         self.main_widgets_ = []
-        self.initialized_mods_ = {}
+        self.initialized_mods_ = []
         self.act_sig_map_ = QSignalMapper(self.w_, "pinebooActSignalMap")
         self.act_sig_map_.mapped[str].connect(self.triggerAction)
         self.initTabWidget()
@@ -203,7 +203,7 @@ class MainForm(QtCore.QObject):
     def initFromWidget(self, w):
         self.w_ = w
         self.main_widgets_ = []
-        self.initialized_mods_ = {}
+        self.initialized_mods_ = []
         self.act_sig_map_ = QSignalMapper(self.w_, "pinebooActSignalMap")
         self.tw_ = w.findChild(QtWidgets.QTabWidget, "tabWidget")
         self.agMenu_ = w.child("pinebooActionGroup", "QActionGroup")
@@ -231,15 +231,14 @@ class MainForm(QtCore.QObject):
         self.dck_mar_.w_.installEventFilter(self)
 
     def initModule(self, module):
-
         if module in self.main_widgets_:
             mwi = self.main_widgets_[module]
             mwi.name = module
             aqApp.name = module
             mwi.show()
 
-        if module not in self.initialized_mods_ or self.initialized_mods_[module] is not True:
-            self.initialized_mods_[module] = True
+        if module not in self.initialized_mods_:
+            self.initialized_mods_.append(module)
             aqApp.call("%s.iface.init" % module, [])
 
         mng = aqApp.db().managerModules()
