@@ -79,7 +79,7 @@ class Project(object):
         self.parser = None
         self.version = 0.5
         self.main_form_name = "eneboo" if not self._DGI.mobilePlatform() else "mobile"
-
+        pineboolib.project = self
         self.deleteCache = False
         self.parseProject = False
 
@@ -149,7 +149,6 @@ class Project(object):
 
         self.actions = {}
         self.tables = {}
-        pineboolib.project = self
 
     """
     def load(self, filename):
