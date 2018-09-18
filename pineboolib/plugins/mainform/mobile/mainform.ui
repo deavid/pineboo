@@ -1,168 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>mainwindow</class>
+ <widget class="QMainWindow" name="mainwindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>450</height>
+    <width>800</width>
+    <height>631</height>
    </rect>
   </property>
-  <property name="maximumSize">
+  <property name="minimumSize">
    <size>
-    <width>300</width>
-    <height>450</height>
+    <width>89</width>
+    <height>229</height>
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Pineboo</string>
   </property>
-  <widget class="QMenuBar" name="menubar">
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../../../share/icono_pi/Symbol_pi2_256.png</normaloff>../../../../share/icono_pi/Symbol_pi2_256.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Tab 1</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="tLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="tLabel2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="MenuBar">
    <property name="geometry">
     <rect>
-     <x>9</x>
-     <y>9</y>
-     <width>413</width>
-     <height>25</height>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>22</height>
     </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="defaultUp">
-    <bool>false</bool>
-   </property>
-   <property name="nativeMenuBar">
-    <bool>false</bool>
    </property>
    <widget class="QMenu" name="menuPineboo">
     <property name="title">
      <string>Pineboo</string>
     </property>
-    <addaction name="separator"/>
-    <addaction name="actionSalir"/>
    </widget>
    <widget class="QMenu" name="configMenu">
     <property name="title">
-     <string>Configuración</string>
+     <string>&amp;Configuración</string>
     </property>
-    <addaction name="actionTipografia"/>
-    <addaction name="separator"/>
-    <addaction name="actionModulos"/>
-    <addaction name="actionFavoritos"/>
+    <widget class="QMenu" name="style">
+     <property name="title">
+      <string>&amp;Estilo</string>
+     </property>
+    </widget>
+    <addaction name="fontAction"/>
+    <addaction name="style"/>
    </widget>
-   <widget class="QMenu" name="menuAyuda">
+   <widget class="QMenu" name="windowMenu">
     <property name="title">
-     <string>Ayuda</string>
+     <string>&amp;Ventana</string>
     </property>
-    <addaction name="actionAcercaPineboo"/>
-    <addaction name="actionAcercaQt"/>
+   </widget>
+   <widget class="QMenu" name="helpMenu">
+    <property name="title">
+     <string>A&amp;yuda</string>
+    </property>
+    <addaction name="aboutQtAction"/>
+    <addaction name="separator"/>
+    <addaction name="aboutPinebooAction"/>
+    <addaction name="urlEnebooAction"/>
+    <addaction name="separator"/>
+    <addaction name="helpIndexAction"/>
    </widget>
    <addaction name="menuPineboo"/>
    <addaction name="configMenu"/>
-   <addaction name="menuAyuda"/>
+   <addaction name="windowMenu"/>
+   <addaction name="helpMenu"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar">
-   <property name="geometry">
-    <rect>
-     <x>9</x>
-     <y>569</y>
-     <width>20</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-  </widget>
-  <action name="actionSalir">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="icon">
-    <iconset theme="exit">
-     <normaloff>.</normaloff>.</iconset>
-   </property>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="fontAction">
    <property name="text">
-    <string>Salir</string>
+    <string>&amp;Fuente</string>
    </property>
   </action>
-  <action name="actionEstilo">
-   <property name="text">
-    <string>Estilo</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::PreferencesRole</enum>
-   </property>
-  </action>
-  <action name="actionTipografia">
-   <property name="text">
-    <string>Tipografía</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::PreferencesRole</enum>
-   </property>
-  </action>
-  <action name="actionAcercaPineboo">
-   <property name="text">
-    <string>Acerca  de Pineboo</string>
-   </property>
-  </action>
-  <action name="actionAcercaQt">
+  <action name="aboutQtAction">
    <property name="text">
     <string>Acerca de Qt</string>
    </property>
-   <property name="menuRole">
-    <enum>QAction::AboutQtRole</enum>
+  </action>
+  <action name="aboutPinebooAction">
+   <property name="text">
+    <string>Acerca de Pineboo</string>
    </property>
   </action>
-  <action name="actionFavoritos">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="urlEnebooAction">
    <property name="text">
-    <string>Favoritos</string>
+    <string>Visita Eneboo.org</string>
    </property>
   </action>
-  <action name="actionModulos">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="helpIndexAction">
    <property name="text">
-    <string>Modulos</string>
+    <string>Indice</string>
    </property>
   </action>
-  <action name="actionAlinear">
+  <action name="actionperune">
    <property name="text">
-    <string>Alinear</string>
+    <string>perune</string>
    </property>
   </action>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>actionSalir</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>Form</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>399</x>
-     <y>299</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
