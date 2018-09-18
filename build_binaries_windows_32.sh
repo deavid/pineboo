@@ -3,7 +3,7 @@ TARGET="win-64"
 SYSROOT=""
 LOCALDIR="$(pwd)"
 MXE_FOLDER="win64-mxe"
-MXE_TARGET="x86_64-w64-mingw32.static" #i686-w64-mingw32.static x86_64-w64-mingw32.static
+MXE_TARGET="i686-w64-mingw32.static" #i686-w64-mingw32.static x86_64-w64-mingw32.static
 #mkdir ./sysroot-$TARGET
 #cp ./src/qt-everywhere-opensource-src-5.*.*.tar.xz ./sysroot-$TARGET
 #cd ./sysroot-$TARGET

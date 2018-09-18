@@ -99,12 +99,15 @@ for file_name in script_files:
 # Anchor everything from the directory containing this script.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-sysroot_dir = 'sysroot-' + target
-build_dir = 'build-' + target
+sysroot_dir = 'sysroots/' + target
+build_dir = 'builds/' + target
 host_bin_dir = os.path.abspath(os.path.join(sysroot_dir, 'host', 'bin'))
 
 # Build sysroot.
 if build_sysroot:
+    if not os.path.exists("sysroots"):
+        os.mkdir("sysroots")
+
     args = ['pyqtdeploy-sysroot', '--target', target, '--sysroot', sysroot_dir,
             '--source-dir', sources]
 
@@ -129,6 +132,8 @@ if build_sysroot:
 else:
     print("INFO::sysroot-%s ya existe, omitiendo ..." % target)
 # Build the demo.
+if not os.path.exists("builds"):
+    os.mkdir("builds")
 run(['pyqtdeploy-build', '--target', target, '--sysroot', sysroot_dir,
      '--build-dir', build_dir, 'pyqt-pineboo.pdy'])
 

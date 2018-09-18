@@ -6,7 +6,7 @@ LOCALDIR="$(pwd)"
 export CROSS='i686-apple-darwin8-'
 export PATH=$PATH:/opt/mac/bin
 
-if [ -e "sysroot-$TARGET" ]; then
+if [ -e "sysroots/$TARGET" ]; then
 SYSROOT="--no-sysroot"
 else
 

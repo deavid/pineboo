@@ -11,7 +11,7 @@ export ANDROID_NDK_PLATFORM=android-26
 export ANDROID_NDK_TOOLCHAIN_VERSION=4.9
 export TOOLCHAIN_PREFIX=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/arm-linux-androideabi/bin
 
-if [ -e "sysroot-$TARGET" ]; then
+if [ -e "sysroots/$TARGET" ]; then
 SYSROOT="--no-sysroot"
 else
 

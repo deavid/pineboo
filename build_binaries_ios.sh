@@ -6,7 +6,7 @@ LOCALDIR="$(pwd)"
 
 
 
-if [ -e "sysroot-$TARGET" ]; then
+if [ -e "sysroots/$TARGET" ]; then
 SYSROOT="--no-sysroot"
 else
 
