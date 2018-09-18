@@ -586,18 +586,18 @@ def convert2FLAction(action):
     return aqApp.db().manager().action(name)
 
 
-def loadUI2xml(form_path):
+def load2xml(form_path):
     from xml.etree import ElementTree as ET
 
     try:
-        tree = ET.parse(form_path)
+        ret = ET.parse(form_path)
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
-            tree = ET.parse(form_path, parser)
+            ret = ET.parse(form_path, parser)
             #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
         except Exception:
             logger.exception("Error cargando UI después de intentar con UTF8 y ISO", form_path)
             ret = None
 
-    return tree
+    return ret

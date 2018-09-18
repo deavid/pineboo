@@ -40,7 +40,7 @@ def loadUi(form_path, widget, parent=None):
     #    remove_blank_text=True,
     #)
 
-    tree = pineboolib.utils.loadUI2xml(form_path)
+    tree = pineboolib.utils.load2xml(form_path)
 
     if not tree:
         return parent

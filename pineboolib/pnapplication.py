@@ -6,7 +6,7 @@ import zlib
 
 from importlib import machinery, import_module
 from binascii import unhexlify
-from xml import etree
+
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qApp
@@ -746,9 +746,7 @@ class ModuleActions(object):
         # Ojo: Almacena un arbol con los módulos cargados
         from pineboolib import qsa as qsa_dict_modules
 
-        self.parser = etree.ElementTree.XMLParser(
-            html=0, encoding="ISO-8859-15")
-        self.tree = etree.ElementTree.parse(self.path, self.parser)
+        self.tree = pineboolib.utils.load2xml(self.path)
         self.root = self.tree.getroot()
 
         action = XMLAction()
@@ -843,7 +841,7 @@ class MainForm(object):
     """
 
     def load(self):
-        self.tree = pineboolib.utils.loadUI2xml(self.path)
+        self.tree = pineboolib.utils.load2xml(self.path)
         self.root = self.tree.getroot()
         self.actions = {}
         self.pixmaps = {}

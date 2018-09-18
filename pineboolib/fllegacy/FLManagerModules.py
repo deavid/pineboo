@@ -312,7 +312,7 @@ class FLManagerModules(object):
             raise AttributeError("File %r not found in project" % n)
             return
 
-        tree = pineboolib.utils.loadUI2xml(form_path)
+        tree = pineboolib.utils.load2xml(form_path)
 
         if not tree:
             return parent
