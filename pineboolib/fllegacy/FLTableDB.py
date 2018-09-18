@@ -2151,13 +2151,13 @@ class FLTableDB(QtWidgets.QWidget):
         if not tdb or not tdb.cursor():
             return
 
+        from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle
         hor_header = tdb.horizontalHeader()
-        title_style = None
-        border_bot = None
-        border_right = None
-        border_left = None
-        italic = None
-        from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor
+        title_style = [AQOdsStyle.Align_center, AQOdsStyle.Text_bold]
+        border_bot = AQOdsStyle.Border_bottom
+        border_right = AQOdsStyle.Border_right
+        border_left = AQOdsStyle.Border_lext
+        italic = AQOdsStyle.Text_italic
         ods_gen = AQOdsGenerator
         spread_sheet = AQOdsSpreadSheet(ods_gen)
         sheet = AQOdsSheet(spread_sheet, mtd.alias())
@@ -2171,12 +2171,12 @@ class FLTableDB(QtWidgets.QWidget):
         util.setProgress(1)
         row = AQOdsRow(sheet)
         row.addBgColor(AQOdsColor(0xe7e7e7))
-        for i in range(hor_header.count()):
+        for i in range(tdb_num_cols):
             row.opIn(title_style)
             row.opIn(border_bot)
             row.opIn(border_left)
             row.opIn(border_right)
-            row.opIn(mtd.indexFieldObject(tdb.visualIndexToRealIndex(i)).name())
+            row.opIn(mtd.indexFieldObject(tdb.visualIndexToRealIndex(i)).alias())
 
         row.close()
 
@@ -2192,7 +2192,6 @@ class FLTableDB(QtWidgets.QWidget):
             row = AQOdsRow(sheet)
             for c in range(tdb_num_cols):
                 idx = tdb.indexOf(c)  # Busca si la columna se ve
-                print(idx)
                 if idx == -1:
                     continue
                 field = mtd.indexFieldObject(tdb.visualIndexToRealIndex(c))
@@ -2208,33 +2207,33 @@ class FLTableDB(QtWidgets.QWidget):
                     else:
                         row.opIn(str_)
 
-                elif field.type() == "bool":
+                elif field.type() in ("bool", "unlock"):
                     str_ = self.tr("Sí") if val == True else self.tr("No")
                     row.opIn(italic)
-                    row.opIn(srt_)
+                    row.opIn(str_)
 
                 else:
                     str_ = val
-                    if str_:
+                    if str_ is not None:
                         if str_.startswith("RK@"):
                             cs = self.cursor_.db().manager().fetchLargeValue(str_)
                             if cs:
                                 pix = QPixmap(cs)
 
-                            if not pix.isNull():
+                                if not pix.isNull():
 
-                                pix_name = "pix%s_" % pix.serialNumber()
-                                pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
-                                                               QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
-                                pix.save(pix_file_name, "PNG")
-                                row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
-                                                    double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
+                                    pix_name = "pix%s_" % pix.serialNumber()
+                                    pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
+                                                                   QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+                                    pix.save(pix_file_name, "PNG")
+                                    row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
+                                                        double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
+                                else:
+                                    row.coveredCell()
                             else:
                                 row.coveredCell()
                         else:
                             row.opIn(str_)
-                    else:
-                        row.coveredCell()
             row.close()
             if not r % 4:
                 util.setProgress(r)
