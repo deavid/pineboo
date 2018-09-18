@@ -98,13 +98,13 @@ class FLManagerModules(object):
     """
     staticBdInfo_ = None
 
-    rootDir_ = None
-    scriptsDir_ = None
-    tablesDir_ = None
-    formsDir_ = None
-    reportsDir_ = None
-    queriesDir_ = None
-    transDir_ = None
+    root_dir_ = None
+    scripts_dir_ = None
+    tables_dir_ = None
+    forms_dir_ = None
+    reports_dir_ = None
+    queries_dir_ = None
+    trans_dir_ = None
     filesCached_ = {}
     """
     constructor
@@ -153,6 +153,8 @@ class FLManagerModules(object):
             self.writeState()
             del self.dictKeyFiles
             self.dictKeyFiles = {}
+
+        del self
 
     """
     Obtiene el contenido de un fichero almacenado la base de datos.
