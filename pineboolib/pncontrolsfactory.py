@@ -132,7 +132,6 @@ class SysType(object):
         return filedir("..")
 
     def __getattr__(self, fun_):
-        QtWidgets.QMessageBox.information(self.mainWidget(), "Pineboo", fun_)
         return pineboolib.project.call("sys.iface.%s()" % fun_, [], None, True)
 
     def installACL(self, idacl):
