@@ -43,6 +43,7 @@ class FLApplication(QtCore.QObject):
     init_single_fl_large = None
     show_debug_ = None
     time_user_ = None
+    script_entry_function_ = None
 
     def __init__(self):
         super(FLApplication, self).__init__()
@@ -76,6 +77,7 @@ class FLApplication(QtCore.QObject):
         self.timer_idle_ = None
         self.init_single_fl_large = False
         self.show_debug_ = True  # FIXME
+        self.script_entry_function_ = None
 
         # self.fl_factory_ = FLObjectFactory() #FIXME para un futuro
         self.time_user_ = QtCore.QDateTime.currentDateTime()
@@ -348,9 +350,9 @@ class FLApplication(QtCore.QObject):
     def windowClose(self):
         pass
 
-    @decorators.NotImplementedWarn
     def loadScriptsFromModule(self, idm):
-        pass
+        if idm in pineboolib.project.modules.keys():
+            pineboolib.project.modules[idm].load()
 
     @decorators.NotImplementedWarn
     def activateModule(self, idm=None):  # dos funciones
@@ -361,37 +363,54 @@ class FLApplication(QtCore.QObject):
             return
 
         self.stopTimerIdle()
-        self.apAppIdle()
+        # self.apAppIdle()
         self.initializing_ = True
         self.writeState()
         self.writeStateModule()
         time = QtCore.QTimer()
         time.singleShot(0, self.reinitP)
 
-    @decorators.NotImplementedWarn
     def clearProject(self):
-        pass
+        pineboolib.project.actions = {}
+        pineboolib.project.areas = {}
+        pineboolib.project.modules = {}
+        pineboolib.project.tables = {}
 
     def reinitP(self):
-        self.db().managerModules().__del__()
-        self.db().manager().__del__()
+        self.db().managerModules().finish()
+        self.db().manager().finish()
         self.setMainWidget(None)
         self.db().managerModules().setActiveIdModule("")
 
-        if self.dictMainWidgets:
-            self.dictMainWidgets = {}
+        if self.dict_main_widgets_:
+            self.dict_main_widgets_ = {}
 
         self.clearProject()
+        project = pineboolib.project
+
+        # if project._DGI.useDesktop():
+        #    import importlib
+        #    project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+        #        project.main_form_name, project.main_form_name)) if project._DGI.localDesktop() else project._DGI.mainForm()
+
+        project.main_window.initialized_mods_ = []
+
+        project.run()
+        project.conn.managerModules().loadIdAreas()
+        project.conn.managerModules().loadAllIdModules()
+
+        for module_name in project.modules.keys():
+            project.modules[module_name].load()
 
         self.db().manager().init()
-        self.db().managerModules().init()
-        self.db().managerModules().cleanupMetaData()
+        self.db().managerModules()
+        self.db().manager().cleanupMetaData()
 
         if self.acl_:
             self.ac_.init()
 
-        self.loadScritps()
-        self.db().managerModules().setShaFromGlobal()
+        self.loadScripts()
+        # self.db().managerModules().setShaFromGlobal()
         self.call("sys.init()", [])
         self.initToolBox()
         self.readState()
@@ -404,6 +423,9 @@ class FLApplication(QtCore.QObject):
 
         self.initializing_ = False
         self.startTimerIdle()
+
+        if hasattr(project.main_window, "reinitSript"):
+            project.main_window.reinitSript()
 
     @decorators.NotImplementedWarn
     def showDocPage(self, url):
@@ -436,9 +458,8 @@ class FLApplication(QtCore.QObject):
     def addSysCode(self, code, scritp_entry_function):
         pass
 
-    @decorators.NotImplementedWarn
     def setScriptEntryFunction(self, script_enttry_function):
-        pass
+        self.script_entry_function_ = script_enttry_function
 
     @decorators.NotImplementedWarn
     def setDatabaseLockDetection(self, on, msec_lapsus, lim_checks, show_warn, msg_warn, connection_name):
@@ -507,7 +528,10 @@ class FLApplication(QtCore.QObject):
 
     def showConsole(self):
         mw = self.mainWidget()
-        if mw and not self.ted_output_:
+        if mw:
+            if self.ted_output_:
+                self.ted_output_.parentWidget().close()
+
             dw = QtWidgets.QDockWidget("tedOutputDock", mw)
             from pineboolib.pncontrolsfactory import FLTextEditOutput
             self.ted_output_ = FLTextEditOutput(dw)
@@ -522,13 +546,13 @@ class FLApplication(QtCore.QObject):
     def modMainWidget(self, id_modulo):
         pass
 
-    @decorators.NotImplementedWarn
     def evaluateProject(self):
-        pass
+        QtCore.QTimer.singleShot(0, self.callScriptEntryFunction)
 
-    @decorators.NotImplementedWarn
     def callScriptEntryFunction(self):
-        pass
+        if self.script_entry_function_:
+            self.call(self.script_entry_function_, [], self)
+            self.script_entry_function_ = None
 
     @decorators.NotImplementedWarn
     def emitTransactionBegin(self, o):
@@ -759,15 +783,14 @@ class FLApplication(QtCore.QObject):
 
             self.activateModule(active_id_module)
 
-    @decorators.BetaImplementation
     def loadScripts(self):
-
-        self.setOverrideCursor(QtCore.Qt.WaitCursor)
-        list_modules = self.mngLoader_.listAllIdModules()
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
+        #list_modules = self.mng_loader_.listAllIdModules()
+        list_modules = self.db().managerModules().listAllIdModules()
         for it in list_modules:
-            self.loadScriptFormModule(it)
+            self.loadScriptsFromModule(it)
 
-        self.restoreOverrideCursor()
+        QtWidgets.QApplication.restoreOverrideCursor()
 
     def urlPineboo(self):
         self.call("sys.openUrl", ["http://eneboo.org/"])
