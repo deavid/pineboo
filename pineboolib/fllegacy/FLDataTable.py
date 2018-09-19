@@ -493,9 +493,10 @@ class FLDataTable(QtWidgets.QTableView):
     """
     @QtCore.pyqtSlot()
     def ensureRowSelectedVisible(self):
-        if not self.selectedIndexes():
-            self.selectRow(self.cursor().at())
-        self.scrollTo(self.cursor().model().index(self.cursor().at(), 0))
+        if self.cursor():
+            if not self.selectedIndexes():
+                self.selectRow(self.cursor().at())
+            self.scrollTo(self.cursor().model().index(self.cursor().at(), 0))
         # FIXME: Asegurarme de que esté pintada la columna seleccionada
 
     """
