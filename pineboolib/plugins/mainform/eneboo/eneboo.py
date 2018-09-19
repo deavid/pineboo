@@ -933,7 +933,6 @@ class DockListView(QtCore.QObject):
             self.w_.hide()
 
         self.set_visible.emit(not self.w_.isHidden())
-        self.w_.close()
 
     def initFromWidget(self, w):
         self.w_ = w
