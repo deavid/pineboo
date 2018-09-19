@@ -2251,6 +2251,7 @@ class FLTableDB(QtWidgets.QWidget):
         aqApp.call("sys.openUrl", [file_name], None)
 
         QtWidgets.QApplication.restoreOverrideCursor()
+        util.destroyProgressDialog()
 
     """
     Conmuta el sentido de la ordenación de los registros de la tabla, de ascendente a descendente y
