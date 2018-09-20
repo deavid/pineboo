@@ -687,11 +687,12 @@ class DelayedObjectProxyLoader(object):
     """
 
     def __load(self):
-        if not self.loaded_obj:
-            self.logger.debug(
+        settings = FLSettings()
+        if settings.readBoolEntry("application/isDebuggerMode", False):
+            self.logger.warn(
                 "DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
                 self._name, self._obj, self._args, self._kwargs)
-            self.loaded_obj = self._obj(*self._args, **self._kwargs)
+        self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
 
     """
@@ -980,6 +981,7 @@ class XMLAction(XMLStruct):
         return self.formrecord_widget
 
     def load(self):
+
         self._loaded = False
         if self.mainform_widget:
             self._loaded = getattr(self.mainform_widget, "_loaded", False)
