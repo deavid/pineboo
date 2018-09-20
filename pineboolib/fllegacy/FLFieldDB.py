@@ -1133,6 +1133,9 @@ class FLFieldDB(QtWidgets.QWidget):
             except Exception:
                 self.logger.exception("Error al desconectar señal textChanged")
             s = None
+            if isinstance(v, int):  # Esto hace que el campo aparezca vació y evita poner el 0 por defecto en numérico
+                if v == 0:
+                    v = None
             if v not in (None, ""):
                 s = round(float(v), partDecimal)
                 self.editor_.setText(str(s))
@@ -2687,7 +2690,6 @@ class FLFieldDB(QtWidgets.QWidget):
         clb = QtWidgets.QApplication.clipboard()
         img = clb.image()
 
-        print(type(img))
         if not isinstance(img, QtGui.QImage):
             return
 
@@ -3136,7 +3138,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
 class FLDoubleValidator(QtGui.QDoubleValidator):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args):
         if len(args) == 4:
             super(FLDoubleValidator, self).__init__(args[0], args[1], args[2], args[3])
         else:
