@@ -1137,8 +1137,11 @@ class FLFieldDB(QtWidgets.QWidget):
                 if v == 0:
                     v = None
             if v not in (None, ""):
-                s = round(float(v), partDecimal)
-                self.editor_.setText(str(s))
+                s = str(round(float(v), partDecimal))
+                if s.find(".") > -1:
+                    while len(s[s.find(".") + 1:]) < partDecimal:
+                        s = "%s0" % s
+                self.editor_.setText(s)
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
 
@@ -3176,7 +3179,6 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
             #        state = (self.Invalid, input_, i)
             # else:
             #    state = (self.Acceptable, input_, i)
-
             # Comprueba decimales
             if input_.find(punto_) > -1:
 
