@@ -546,7 +546,7 @@ class FLDateEdit(QDateEdit):
 
     def __init__(self, parent, name):
         super(FLDateEdit, self).__init__(parent, name)
-
+        print("nuevo", self)
         self.setMinimumWidth(90)
         self.setMaximumWidth(90)
         self._parent = parent
@@ -562,18 +562,18 @@ class FLDateEdit(QDateEdit):
 
         if d in (None, "NAN"):
             d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
-        if isinstance(d, str):
+        elif isinstance(d, str):
             if "T" in d:
                 d = d[:d.find("T")]
 
-        if isinstance(d, Date):
+        elif isinstance(d, Date):
             d = d.date_
 
-        if isinstance(d, datetime.date):
+        elif isinstance(d, datetime.date):
             d = QtCore.QDate.fromString(str(d), "yyyy-MM-dd")
 
         if not isinstance(d, QtCore.QDate):
-            date = QtCore.QDate.fromString(d, "dd-MM-yyyy")
+            date = QtCore.QDate.fromString(d, "yyyy-MM-dd")
         else:
             date = d
 
