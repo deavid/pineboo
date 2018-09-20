@@ -11,6 +11,7 @@ from pineboolib import decorators, pnsqldrivers
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.FLSettings import FLSettings
 import pineboolib
 
 import sys
@@ -183,7 +184,9 @@ class PNConnection(QtCore.QObject):
             return False
 
         if self.transaction_ == 0:
-            logger.info("Iniciando Transacción...")
+            settings = FLSettings()
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                logger.warn("Iniciando Transacción... %s", self.transaction_)
             if self.transaction():
                 self.savePoint(self.transaction_)
                 self.lastActiveCursor_ = cursor
@@ -290,7 +293,9 @@ class PNConnection(QtCore.QObject):
             return True
 
         if self.transaction_ == 0:
-            logger.info("Terminando transacción...")
+            settings = FLSettings()
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                logger.warn("Terminando transacción... %s", self.transaction_)
             try:
                 # self.conn.commit()
                 self.releaseSavePoint(self.transaction_)
@@ -301,7 +306,6 @@ class PNConnection(QtCore.QObject):
                     cur.d.modeAccess_ = FLSqlCursor.Browse
 
                 # aqApp.emitTransactionEnd(cur)
-
                 return True
             except Exception as e:
                 logger.error(
