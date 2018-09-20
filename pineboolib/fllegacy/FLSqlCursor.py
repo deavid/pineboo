@@ -109,7 +109,6 @@ class PNBuffer(object):
             # if val == "None":
             #    val = None
             # self.setValue(field.name, val)
-
             field.originalValue = copy.copy(field.value)
             # self.cursor().bufferChanged.emit(field.name)
 
@@ -262,6 +261,9 @@ class PNBuffer(object):
         if field is None:
             return False
 
+        if field.type_ == "double" and isinstance(value, str):
+            value = float(value.replace(",", "."))
+
         if field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
 
@@ -276,7 +278,6 @@ class PNBuffer(object):
 
         #    if value == "-":
         #        return True
-
         if self.hasChanged(field.name, value):
 
             # if not value == None:
@@ -304,7 +305,10 @@ class PNBuffer(object):
     def hasChanged(self, name, value):
 
         field = self.field(name)
-        if value in (None, "None"):
+        if value is None and field.value is None:
+            return False
+
+        elif value in (None, "None"):
             return True
 
         if field.name == name:
