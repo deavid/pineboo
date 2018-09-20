@@ -56,61 +56,53 @@ class AQOdsRow(object):
     sheet_ = None
     row_ = None
     cells_list_ = None
-    temp_cell_ = None
-    style_row_ = None
-    styles_list_ = None
     style_cell_text_ = None
-    style_cell_ = None
     fix_precision_ = None
+    row_color_ = None
+    property_cell_ = None
 
     def __init__(self, sheet):
         self.sheet_ = sheet
-        from odf import table, style
+        from odf import table
         self.row_ = table.TableRow()
         self.cells_list_ = []
-        self.temp_cell_ = None
-        self.style_cell_ = None
         self.fix_precision_ = None
-        self.styles_list_ = []
-
-        self.style_row_ = style.Style(name="stylecell_%s_%s" % (
-            len(self.cells_list_), self.sheet_.rowsCount()), family="table-cell")
+        self.row_color_ = None
+        self.property_cell_ = []
 
     def addBgColor(self, color):
-        import odf
-        if isinstance(color, odf.element.Element):
-            self.style_row_.addElement(color)
+        self.row_color_ = color
 
     def opIn(self, opt):
-        self.__checkNewCell__()
         if isinstance(opt, float):
             if self.fix_precision_ is not None:
                 opt = "%s" % round(opt, self.fix_precision_)
             else:
                 opt = "%s" % opt
-
-        if isinstance(opt, str):
+        if isinstance(opt, str):  # Último paso
+            cell, style = self.__newCell__()
             from odf.text import P, Span
             if self.style_cell_text_:
-                elem = P(text="")
+                text_elem = P(text="")
                 txt_ = Span(stylename=self.style_cell_text_, text=opt)
-                elem.addElement(txt_)
+                text_elem.addElement(txt_)
             else:
-                elem = P(text=opt)
+                text_elem = P(text=opt)
 
-            self.sheet_.spread_sheet_parent_.automaticstyles.addElement(self.style_cell_)
-            self.temp_cell_.addElement(elem)
-            self.cells_list_.append(self.temp_cell_)
-            self.temp_cell_ = None  # El siguiente opIn
+            self.sheet_.spread_sheet_parent_.automaticstyles.addElement(style)
+            cell.addElement(text_elem)
+            self.cells_list_.append(cell)
             self.fix_precision_ = None
+            self.style_cell_text_ = None
 
         else:
             import odf
 
             if isinstance(opt, odf.element.Element):
                 if opt.tagName in ("style:paragraph-properties", "style:table-cell-properties"):
-                    # FIXME:Esto se aplica luego a toda la linea
-                    self.style_cell_.addElement(opt)
+                    import copy
+                    prop = copy.copy(opt)
+                    self.property_cell_.append(prop)
                 elif opt.tagName == "style:style":
                     self.sheet_.spread_sheet_parent_.automaticstyles.addElement(opt)
                     self.style_cell_text_ = opt
@@ -121,15 +113,18 @@ class AQOdsRow(object):
                 for l in opt:
                     self.opIn(l)
 
-        # FIXME: Añadir bordes, cursiva
+    def __newCell__(self):
+        from odf import table, style
+        style_cell = style.Style(name="stylecell_%s_%s" % (
+            len(self.cells_list_), self.sheet_.rowsCount()), family="table-cell")
+        if self.row_color_:  # Guardo color si hay
+            style_cell.addElement(style.TableCellProperties(backgroundcolor="#%s" % self.row_color_))
 
-    def __checkNewCell__(self):
-        if self.temp_cell_ is None:
-            self.style_cell_text_ = None
-            self.style_cell_ = None
-            from odf import table
-            self.style_cell_ = self.style_row_
-            self.temp_cell_ = table.TableCell(valuetype='string', stylename=self.style_cell_)
+        for prop in self.property_cell_:  # Guardo prop cell si hay
+            style_cell.addElement(prop)
+
+        self.property_cell_ = []
+        return table.TableCell(valuetype='string', stylename=style_cell), style_cell
 
     def close(self):
         for cell in self.cells_list_:  # Meto las celdas en la linea
@@ -146,8 +141,7 @@ class AQOdsRow(object):
 
 
 def AQOdsColor(color):
-    from odf.style import TableCellProperties
-    return TableCellProperties(backgroundcolor="#%s" % hex(color)[2:])
+    return hex(color)[2:]
 
 
 class AQOdsStyle_class(object):
@@ -193,7 +187,7 @@ class AQOdsStyle_class(object):
         return style.TableCellProperties(bordertop="1pt solid #000000")
 
     Align_center = property(alignCenter, None)
-    Align_rigth = property(alignRight, None)
+    Align_right = property(alignRight, None)
     Align_left = property(alignLeft, None)
     Text_bold = property(textBold, None)
     Text_italic = property(textItalic, None)
