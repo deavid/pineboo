@@ -21,7 +21,7 @@ class FLMYSQL_MYISAM(object):
     defaultPort_ = None
 
     def __init__(self):
-        self.version_ = "0.3"
+        self.version_ = "0.4"
         self.conn_ = None
         self.name_ = "FLMYSQL_MyISAM"
         self.open_ = False
@@ -63,32 +63,32 @@ class FLMYSQL_MYISAM(object):
             self.conn_.autocommit(True)
 
         return self.conn_
-    
+
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
-        
+
         if type_ == "bool":
             s = str(v[0]).upper()
             if s == str(QApplication.tr("Sí")[0]).upper():
                 res = "=1"
             elif str(QApplication.tr("No")[0]).upper():
                 res = "=0"
-        
+
         elif type_ == "date":
             util = FLUtil()
             res = "LIKE '%%" + util.dateDMAtoAMD(str(v)) + "'"
-        
+
         elif type_ == "time":
             t = v.toTime()
             res = "LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
-        
+
         else:
             res = str(v)
             if upper:
                 res = "%s" % res.upper()
-            
+
             res = "LIKE '" + res + "%%'"
-        
+
         return res
 
     def formatValue(self, type_, v, upper):
@@ -261,7 +261,7 @@ class FLMYSQL_MYISAM(object):
         except Exception:
             self.setLastError(
                 "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s " % (
+            qWarning("MySQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s " % (
                 n, traceback.format_exc()))
             return False
 
@@ -350,7 +350,7 @@ class FLMYSQL_MYISAM(object):
         except Exception:
             self.setLastError(
                 "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (
+            qWarning("MySQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (
                 n, traceback.format_exc()))
 
             return False
@@ -508,3 +508,18 @@ class FLMYSQL_MYISAM(object):
 
     def desktopFile(self):
         return False
+
+    def execute_query(self, q):
+
+        if not self.isOpen():
+            qWarning("MySQLDriver::execute_query. DB is closed")
+            return False
+
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute(q)
+        except Exception:
+            self.setLastError(
+                "No se puedo ejecutar la siguiente query %s" % q)
+            qWarning("MySQLDriver:: No se puedo ejecutar la siguiente query %s % q\n %s" % (
+                q, traceback.format_exc()))

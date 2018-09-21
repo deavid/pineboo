@@ -1248,3 +1248,18 @@ class FLQPSQL(object):
 
     def desktopFile(self):
         return False
+
+    def execute_query(self, q):
+
+        if not self.isOpen():
+            qWarning("PSQLDriver::execute_query. DB is closed")
+            return False
+
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute(q)
+        except Exception:
+            self.setLastError(
+                "No se puedo ejecutar la siguiente query %s" % q)
+            qWarning("PSQLDriver:: No se puedo ejecutar la siguiente query %s % q\n %s" % (
+                q, traceback.format_exc()))
