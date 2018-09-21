@@ -498,14 +498,17 @@ class FLManager(QtCore.QObject):
         content_actions = None
 
         for it in list_modules:
-            content_actions = self.db_.managerModules().contentCached("%s.xml" % it) or ""
+
+            content_actions = self.db_.managerModules().contentCached("%s.xml" % it)
+            if not content_actions:
+                continue
+
             if content_actions.find("<name>%s</name>" % n) > -1:
                 break
 
-        if not util.domDocumentSetContent(doc, content_actions):
-            logger.warn("FLManager : " + QApplication.translate("application", "Error al cargar la accion ") + n)
-
-            return None
+        if not n in list_modules:
+            if not util.domDocumentSetContent(doc, content_actions):
+                logger.warn("FLManager : " + QApplication.translate("application", "Error al cargar la accion ") + n)
 
         doc_elem = doc.documentElement()
         no = doc_elem.firstChild()
