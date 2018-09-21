@@ -912,17 +912,14 @@ class FLFieldMetaDataPrivate(object):
         self.trimmed_ = False
 
         if self.type_ == -1:
-            from pineboolib.fllegacy.FLSettings import FLSettings
-            settings = FLSettings()
             if self.partDecimal_ > 0:
                 self.type_ = "double"
             elif self.length_ > 0:
                 self.type_ = "string"
             else:
                 self.type_ = "uint"
-            if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warn("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s",
-                            __name__, self.fieldName_, self.type_)
+            logger.debug("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s",
+                         __name__, self.fieldName_, self.type_)
 
         if int(l) < 0:
             self.length_ = 0
