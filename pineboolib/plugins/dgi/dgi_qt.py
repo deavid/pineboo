@@ -546,7 +546,6 @@ class FLDateEdit(QDateEdit):
 
     def __init__(self, parent, name):
         super(FLDateEdit, self).__init__(parent, name)
-        print("nuevo", self)
         self.setMinimumWidth(90)
         self.setMaximumWidth(90)
         self._parent = parent
