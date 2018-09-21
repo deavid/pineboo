@@ -280,7 +280,8 @@ class FLManagerModules(object):
         else:
             data = self.content(n)
 
-        self.filesCached_[n] = data
+        if data:
+            self.filesCached_[n] = data
         return data
 
     """
@@ -361,6 +362,8 @@ class FLManagerModules(object):
         if not isinstance(a, FLAction):
             a = pineboolib.utils.convert2FLAction(a)
 
+        if not a:
+            return None
         return FLFormDB(parent, a, load=True)
 
     """
@@ -377,6 +380,9 @@ class FLManagerModules(object):
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
             a = pineboolib.utils.convert2FLAction(a)
+
+        if not a:
+            return None
 
         return FLFormRecordDB(parent_or_cursor, a, load=False)
     """
