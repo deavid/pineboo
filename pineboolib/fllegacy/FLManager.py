@@ -120,13 +120,6 @@ class FLManager(QtCore.QObject):
         if not self.cacheAction_:
             self.cacheAction_ = {}
 
-            # Creamos la action flmetadata
-            ac = FLAction()
-            ac.setName("flmetadata")
-            ac.setTable("flmetadata")
-            ac.setCaption("flmetadata")
-            self.cacheAction_[ac.name()] = ac
-
         if not self.cacheMetaDataSys_:
             self.cacheMetaDataSys_ = []
 
