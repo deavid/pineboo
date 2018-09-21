@@ -82,7 +82,7 @@ class FLSQLITE(object):
         if self.db_filename == getattr(pineboolib.project.conn, "db_name", None):
             return pineboolib.project.conn.conn
 
-        self.conn_ = sqlite3.connect(self.db_filename, timeout=10)
+        self.conn_ = sqlite3.connect(self.db_filename)
         self.conn_.isolation_level = None
 
         if db_is_new:
