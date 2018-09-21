@@ -708,7 +708,7 @@ class FLFormDB(QtWidgets.QDialog):
         self._action.mainform_widget = None
         self.deleteLater()
         self._loaded = False
-
+        QtWidgets.QApplication.processEvents()
         try:
             # self.script.form.close()
             self.script.form = None
@@ -788,7 +788,8 @@ class FLFormDB(QtWidgets.QDialog):
         tiempo_fin = time.time()
         settings = FLSettings()
         if settings.readBoolEntry("application/isDebuggerMode", False):
-            self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s" % (self.actionName_, tiempo_fin - self.tiempo_ini, self))
+            self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s (iface %s)" %
+                             (self.actionName_, tiempo_fin - self.tiempo_ini, self, self.iface))
         self.tiempo_ini = None
 
     def initMainWidget(self, w=None):
@@ -803,5 +804,4 @@ class FLFormDB(QtWidgets.QDialog):
         if getattr(self.script, "form", None):
             return getattr(self.script.form, name)
         else:
-            qWarning("%s:No se encuentra el atributo %s" %
-                     (self.formClassName(), name))
+            qWarning("%s (%s):No se encuentra el atributo %s" % (self, self.iface, name))
