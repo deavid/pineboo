@@ -391,14 +391,23 @@ class FLApplication(QtCore.QObject):
         # if project._DGI.useDesktop():
         #    import importlib
         #    project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
-        #        project.main_form_name, project.main_form_name)) if project._DGI.localDesktop() else project._DGI.mainForm()
+        # project.main_form_name, project.main_form_name)) if
+        # project._DGI.localDesktop() else project._DGI.mainForm()
 
         project.main_window.initialized_mods_ = []
+
+        from pineboolib import qsa as qsa_dict_modules
+        list_ = [attr for attr in dir(qsa_dict_modules) if not attr[0] == "_"]
+        for name in list_:
+            att = getattr(qsa_dict_modules, name)
+            if isinstance(att, pineboolib.pnapplication.DelayedObjectProxyLoader):
+                setattr(qsa_dict_modules, name, None)
+                att = None
+                del att
 
         project.run()
         project.conn.managerModules().loadIdAreas()
         project.conn.managerModules().loadAllIdModules()
-
         for module_name in project.modules.keys():
             project.modules[module_name].load()
 
