@@ -63,7 +63,7 @@ class Project(object):
     path = None
     kugarPluging = None
     _splash = None
-    sql_manager = None
+    sql_drivers_manager = None
     """
     Constructor
     """
@@ -71,7 +71,6 @@ class Project(object):
     def __init__(self, DGI):
 
         from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
-        from pineboolib.pnsqldrivers import PNSqlDrivers
 
         self._DGI = DGI
         self.tree = None
@@ -94,7 +93,6 @@ class Project(object):
         self.files = {}
         self.cur = None
         self.kugarPlugin = PNKugarPlugins()
-        self.sql_drivers_manager = PNSqlDrivers()
 
         if not self._DGI.localDesktop():
             self._DGI.extraProjectInit()

@@ -199,6 +199,7 @@ def create_app(DGI):
     app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
     pineboolib.base_dir = filedir(".")  # Almacena base_dir para luego usarlo sobre filedir
     pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
+
     if DGI.localDesktop():
 
         noto_fonts = [
@@ -287,6 +288,7 @@ def main():
     import pineboolib.pnapplication
     import pineboolib.dlgconnect
     from pineboolib.utils import download_files, filedir
+    from pineboolib.pnsqldrivers import PNSqlDrivers
 
     # FIXME: This function should not initialize the program
 
@@ -321,6 +323,7 @@ def main():
             project.main_form_name, project.main_form_name)) if _DGI.localDesktop() else _DGI.mainForm()
         project.main_window = project.main_form.mainWindow
 
+    project.sql_drivers_manager = PNSqlDrivers()
     project.setDebugLevel(options.debug_level)
     if _DGI.useDesktop():
         project.main_form.MainForm.setDebugLevel(options.debug_level)
