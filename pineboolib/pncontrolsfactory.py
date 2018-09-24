@@ -313,7 +313,7 @@ def connect(sender, signal, receiver, slot, caller=None):
     try:
         signal.connect(slot, type=conntype)
     except Exception:
-        logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
+        #logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return False
 
     return signal_slot
