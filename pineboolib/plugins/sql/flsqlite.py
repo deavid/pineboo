@@ -1,6 +1,6 @@
 import os
 import sys
-from PyQt5.QtCore import QTime
+from PyQt5.QtCore import QTime, QTimer
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import auto_qt_translate_text, checkDependencies, filedir
@@ -22,6 +22,7 @@ class FLSQLITE(object):
     version_ = None
     conn_ = None
     name_ = None
+    cursor_ = None
     alias_ = None
     errorList = None
     lastError_ = None
@@ -38,7 +39,7 @@ class FLSQLITE(object):
 
     def __init__(self):
         self.logger = logging.getLogger("FLSqLite")
-        self.version_ = "0.5"
+        self.version_ = "0.6"
         self.conn_ = None
         self.name_ = "FLsqlite"
         self.open_ = False
@@ -52,6 +53,7 @@ class FLSQLITE(object):
         self.parseFromLatin = False
         self.mobile_ = True
         self.defaultPort_ = 0
+        self.cursor_ = None
 
     def version(self):
         return self.version_
@@ -61,6 +63,13 @@ class FLSQLITE(object):
 
     def isOpen(self):
         return self.open_
+
+    def cursor(self):
+        if not self.cursor_:
+            self.cursor_ = self.conn_.cursor()
+            #self.cursor_.execute("PRAGMA journal_mode = WAL")
+            #self.cursor_.execute("PRAGMA synchronous = NORMAL")
+        return self.cursor_
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
 
@@ -180,12 +189,16 @@ class FLSQLITE(object):
             return None
 
     def savePoint(self, n):
+        if n == 0:
+            return True
+
         if not self.isOpen():
             self.logger.warn("%s::savePoint: Database not open", __name__)
             return False
 
-        cursor = self.conn_.cursor()
+        cursor = self.cursor()
         try:
+            print("Creando savepoint sv_%s" % n)
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError(
@@ -203,7 +216,7 @@ class FLSQLITE(object):
             self.logger.warn("%s::rollbackSavePoint: Database not open", __name__)
             return False
 
-        cursor = self.conn_.cursor()
+        cursor = self.cursor()
         try:
             cursor.execute("ROLLBACK TRANSACTION TO SAVEPOINT sv_%s" % n)
         except Exception:
@@ -224,21 +237,34 @@ class FLSQLITE(object):
         if not self.isOpen():
             self.logger.warn("%s::commitTransaction: Database not open", __name__)
 
-        cursor = self.conn_.cursor()
+        cursor = self.cursor()
         try:
-            cursor.execute("COMMIT TRANSACTION")
+            cursor.execute("END TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            self.logger.error("%s:: No se pudo aceptar la transacción COMMIT", __name__)
+            self.logger.error("%s:: No se pudo aceptar la transacción COMMIT. %s", __name__, traceback.format_exc())
             return False
 
         return True
+
+    def inTransaction(self):
+        return self.conn_.in_transaction
+
+    def execute_query(self, q):
+        if not self.isOpen():
+            self.logger.warn("%s::execute_query: Database not open", __name__)
+
+        cursor = self.cursor()
+        try:
+            cursor.execute(q)
+        except Exception:
+            self.setLastError("%s::No se pudo ejecutar la query.\n%s", __name__, q)
 
     def rollbackTransaction(self):
         if not self.isOpen():
             print("SQL3Driver::rollbackTransaction: Database not open")
 
-        cursor = self.conn_.cursor()
+        cursor = self.cursor()
         try:
             cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
@@ -252,8 +278,7 @@ class FLSQLITE(object):
     def transaction(self):
         if not self.isOpen():
             print("SQL3Driver::transaction: Database not open")
-
-        cursor = self.conn_.cursor()
+        cursor = self.cursor()
         try:
             cursor.execute("BEGIN TRANSACTION")
         except Exception:
@@ -265,12 +290,13 @@ class FLSQLITE(object):
         return True
 
     def releaseSavePoint(self, n):
-
+        if n == 0:
+            return True
         if not self.isOpen():
             print("SQL3Driver::releaseSavePoint: Database not open")
             return False
 
-        cursor = self.conn_.cursor()
+        cursor = self.cursor()
         try:
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:

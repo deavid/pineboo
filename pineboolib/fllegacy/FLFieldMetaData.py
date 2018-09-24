@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from pineboolib.utils import aqtt
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+import logging
+
+logger = logging.getLogger("FLFieldMetadata")
 
 
 class FLFieldMetaData(object):
@@ -907,6 +910,16 @@ class FLFieldMetaDataPrivate(object):
         self.mtd_ = None
         self.fullyCalculated_ = False
         self.trimmed_ = False
+
+        if self.type_ == -1:
+            if self.partDecimal_ > 0:
+                self.type_ = "double"
+            elif self.length_ > 0:
+                self.type_ = "string"
+            else:
+                self.type_ = "uint"
+            logger.debug("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s",
+                         __name__, self.fieldName_, self.type_)
 
         if int(l) < 0:
             self.length_ = 0

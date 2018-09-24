@@ -250,6 +250,8 @@ class Date(object):
             date_ = args[0]
             if isinstance(date_, str):
                 self.date_ = QtCore.QDate.fromString(date_, "yyyy-MM-dd")
+            elif isinstance(date_, QtCore.QDate):
+                self.date_ = date_
             else:
                 self.date_ = QtCore.QDate(date_)
             self.time_ = QtCore.QTime(0, 0)
@@ -288,7 +290,7 @@ class Date(object):
 
     @classmethod
     def parse(cls, value):
-        return QtCore.QDate.fromString(value)
+        return QtCore.QDate.fromString(value, "yyyy-MM-dd")
 
 
 class Process(QtCore.QProcess):

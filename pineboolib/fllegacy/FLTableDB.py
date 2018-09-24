@@ -1743,7 +1743,8 @@ class FLTableDB(QtWidgets.QWidget):
                 self.comboBoxFieldToSearch.addItem("*")
                 self.comboBoxFieldToSearch2.addItem("*")
                 self.comboBoxFieldToSearch.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_))
-                self.comboBoxFieldToSearch2.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_))
+                self.comboBoxFieldToSearch2.setCurrentIndex(
+                    self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_))
                 self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
                 self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
 
@@ -1930,7 +1931,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.moveCol(_index, self.sortColumn_)
         # Marca la primera columna visible con el triangulito
-        self.tableRecords_.sortByColumn(self.sortColumn_, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
+        self.tableRecords_.sortByColumn(
+            self.sortColumn_, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
 
         return True
 
@@ -2156,7 +2158,7 @@ class FLTableDB(QtWidgets.QWidget):
         title_style = [AQOdsStyle.Align_center, AQOdsStyle.Text_bold]
         border_bot = AQOdsStyle.Border_bottom
         border_right = AQOdsStyle.Border_right
-        border_left = AQOdsStyle.Border_lext
+        border_left = AQOdsStyle.Border_left
         italic = AQOdsStyle.Text_italic
         ods_gen = AQOdsGenerator
         spread_sheet = AQOdsSpreadSheet(ods_gen)
@@ -2172,11 +2174,13 @@ class FLTableDB(QtWidgets.QWidget):
         row = AQOdsRow(sheet)
         row.addBgColor(AQOdsColor(0xe7e7e7))
         for i in range(tdb_num_cols):
-            row.opIn(title_style)
-            row.opIn(border_bot)
-            row.opIn(border_left)
-            row.opIn(border_right)
-            row.opIn(mtd.indexFieldObject(tdb.visualIndexToRealIndex(i)).alias())
+            field = mtd.indexFieldObject(tdb.visualIndexToRealIndex(i))
+            if field.visibleGrid():
+                row.opIn(title_style)
+                row.opIn(border_bot)
+                row.opIn(border_left)
+                row.opIn(border_right)
+                row.opIn(field.alias())
 
         row.close()
 
@@ -2195,10 +2199,12 @@ class FLTableDB(QtWidgets.QWidget):
                 if idx == -1:
                     continue
                 field = mtd.indexFieldObject(tdb.visualIndexToRealIndex(c))
+                if not field.visibleGrid():
+                    continue
                 val = cur.valueBuffer(field.name())
                 if field.type() == "double":
                     row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))
-                    row.opIn(double(val))
+                    row.opIn(float(val))
 
                 elif field.type() == "date":
                     str_ = val
@@ -2215,25 +2221,30 @@ class FLTableDB(QtWidgets.QWidget):
                 else:
                     str_ = val
                     if str_ is not None:
-                        if str_.startswith("RK@"):
+                        cs = None
+                        if isinstance(str_, list):
+                            cs = ",".join(str_)
+                        elif str_.startswith("RK@"):
                             cs = self.cursor_.db().manager().fetchLargeValue(str_)
-                            if cs:
-                                pix = QPixmap(cs)
 
-                                if not pix.isNull():
+                        if cs:
+                            pix = QPixmap(cs)
 
-                                    pix_name = "pix%s_" % pix.serialNumber()
-                                    pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
-                                                                   QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
-                                    pix.save(pix_file_name, "PNG")
-                                    row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
-                                                        double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
-                                else:
-                                    row.coveredCell()
+                            if not pix.isNull():
+
+                                pix_name = "pix%s_" % pix.serialNumber()
+                                pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
+                                                               QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+                                pix.save(pix_file_name, "PNG")
+                                print("Metiendo imagen")
+                                row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
+                                                    double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
                             else:
                                 row.coveredCell()
                         else:
-                            row.opIn(str_)
+                            row.opIn(str(str_))
+                    else:
+                        row.coveredCell()
             row.close()
             if not r % 4:
                 util.setProgress(r)
@@ -2245,7 +2256,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         util.setProgress(tdb_num_rows)
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-        file_name = "%s/%s%s.ods" % (pineboolib.project.getTempDir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+        file_name = "%s/%s%s.ods" % (pineboolib.project.getTempDir(), mtd.name(),
+                                     QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
         ods_gen.generateOds(file_name)
         from pineboolib.pncontrolsfactory import aqApp
         aqApp.call("sys.openUrl", [file_name], None)

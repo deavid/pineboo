@@ -11,6 +11,7 @@ from pineboolib import decorators, pnsqldrivers
 from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.FLSettings import FLSettings
 import pineboolib
 
 import sys
@@ -182,8 +183,10 @@ class PNConnection(QtCore.QObject):
         if not cursor or not self.db():
             return False
 
+        settings = FLSettings()
         if self.transaction_ == 0:
-            logger.info("Iniciando Transacción...")
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                logger.warn("Iniciando Transacción... %s", self.transaction_)
             if self.transaction():
                 self.savePoint(self.transaction_)
                 self.lastActiveCursor_ = cursor
@@ -192,11 +195,13 @@ class PNConnection(QtCore.QObject):
                 cursor.d.transactionsOpened_.append(self.transaction_)
                 return True
             else:
+
                 logger.warn(
                     "doTransaction: Fallo al intentar iniciar la transacción")
                 return False
         else:
-            logger.info("Creando punto de salvaguarda %s", self.transaction_)
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                logger.warn("Creando punto de salvaguarda %s", self.transaction_)
             self.savePoint(self.transaction_)
 
             self.transaction_ = self.transaction_ + 1
@@ -290,7 +295,9 @@ class PNConnection(QtCore.QObject):
             return True
 
         if self.transaction_ == 0:
-            logger.info("Terminando transacción...")
+            settings = FLSettings()
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                logger.warn("Terminando transacción... %s", self.transaction_)
             try:
                 # self.conn.commit()
                 self.releaseSavePoint(self.transaction_)
@@ -301,7 +308,6 @@ class PNConnection(QtCore.QObject):
                     cur.d.modeAccess_ = FLSqlCursor.Browse
 
                 # aqApp.emitTransactionEnd(cur)
-
                 return True
             except Exception as e:
                 logger.error(
@@ -402,7 +408,9 @@ class PNConnection(QtCore.QObject):
         sql = self.driver().sqlCreateTable(tmd)
         if not sql:
             return False
-        self.transaction()
+        if self.transaction_ == 0:
+            self.transaction()
+            self.transaction_ += 1
         q = self.cursor()
         for singleSql in sql.split(";"):
             try:
@@ -412,7 +420,10 @@ class PNConnection(QtCore.QObject):
                     "createTable: Error happened executing sql: %s...", singleSql[:80])
                 self.rollbackTransaction()
                 return False
-        self.commitTransaction()
+        if self.transaction_ > 0:
+            self.commitTransaction()
+            self.transaction_ -= 1
+
         return True
 
     def mismatchedTable(self, tablename, tmd):
@@ -434,3 +445,9 @@ class PNConnection(QtCore.QObject):
             return None
 
         return self.driver().queryUpdate(name, update, filter)
+
+    def execute_query(self, q):
+        if not self.db():
+            return None
+
+        self.driver().execute_query(q)

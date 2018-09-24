@@ -3,6 +3,10 @@ from pineboolib.qsa import *
 from pineboolib import decorators
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QTreeWidgetItem
+import logging
+
+
+logging.getLogger("mainForm_%s" % __name__)
 
 
 class MainForm(QtCore.QObject):
@@ -634,7 +638,7 @@ class MainForm(QtCore.QObject):
         doc = QDomDocument()
         cc = mng.contentCached(ui_file)
         if not cc or not doc.setContent(cc):
-            print("WARN::%s::widgetActions::No se ha podido cargar %s" % (__name__, ui_file))
+            logger.warn("No se ha podido cargar %s" % (ui_file))
             return None
 
         w = mng.createUI(ui_file)

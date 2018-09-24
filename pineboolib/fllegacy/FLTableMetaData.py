@@ -376,12 +376,12 @@ class FLTableMetaData(QtCore.QObject):
     """
 
     def fieldTableM1(self, fN):
-        if fN.isEmpty():
+        if not fN:
             return False
 
         field = None
 
-        for f in self.d.fieldName_:
+        for f in self.fieldList():
             if f.name() == fN.lower():
                 field = f
                 break
@@ -401,12 +401,12 @@ class FLTableMetaData(QtCore.QObject):
     """
 
     def fieldForeignFieldM1(self, fN):
-        if fN.isEmpty():
+        if not fN:
             return False
 
         field = None
 
-        for f in self.d.fieldName_:
+        for f in self.fieldList():
             if f.name() == fN.lower():
                 field = f
                 break
@@ -432,8 +432,8 @@ class FLTableMetaData(QtCore.QObject):
 
         field = None
 
-        for f in self.d.fieldList_:
-            if f.name() == str(fN).lower():
+        for f in self.fieldList():
+            if f.name() == fN.lower():
                 field = f
                 break
 
@@ -460,15 +460,9 @@ class FLTableMetaData(QtCore.QObject):
         if not fN:
             return
 
-        field = None
-
-        for f in self.d.fieldName_:
-            if f.name() == str(fN).lower():
-                field = f
-                break
-
-        if field:
-            return field.length()
+        for f in self.fieldList():
+            if f.name() == fN.lower():
+                return f.length()
 
         return
 
@@ -479,18 +473,12 @@ class FLTableMetaData(QtCore.QObject):
     """
 
     def fieldPartInteger(self, fN):
-        if fN.isEmpty():
+        if not fN:
             return
 
-        field = None
-
-        for f in self.d.fieldName_:
+        for f in self.fieldList():
             if f.name() == fN.lower():
-                field = f
-                break
-
-        if field:
-            return field.d.partInteger_
+                return f.partInteger()
 
         return
 
@@ -501,18 +489,12 @@ class FLTableMetaData(QtCore.QObject):
     """
 
     def fieldPartDecimal(self, fN):
-        if fN.isEmpty():
+        if not fN:
             return
 
-        field = None
-
-        for f in self.d.fieldName_:
+        for f in self.fieldList():
             if f.name() == fN.lower():
-                field = f
-                break
-
-        if field:
-            return field.d.partDecimal_
+                return f.partDecimal()
 
         return
 
@@ -523,20 +505,14 @@ class FLTableMetaData(QtCore.QObject):
     """
 
     def fieldCalculated(self, fN):
-        if fN.isEmpty():
+        if not fN:
             return
 
-        field = None
-
-        for f in self.d.fieldName_:
+        for f in self.fieldList():
             if f.name() == fN.lower():
-                field = f
-                break
+                return f.calculated()
 
-        if field:
-            return field.d.calculated_
-
-        return False
+        return
 
     """
     Obtiene si un campo es visible.
@@ -546,20 +522,14 @@ class FLTableMetaData(QtCore.QObject):
 
     def fieldVisible(self, fN):
 
-        if fN.isEmpty():
+        if not fN:
             return
 
-        field = None
-
-        for f in self.d.fieldName_:
+        for f in self.fieldList():
             if f.name() == fN.lower():
-                field = f
-                break
+                f.visible()
 
-        if field:
-            return field.d.visible_
-
-        return False
+        return
 
     """ Obtiene los metadatos de un campo.
 
@@ -571,12 +541,12 @@ class FLTableMetaData(QtCore.QObject):
         if not fN:
             return
 
-        for f in self.d.fieldList_:
+        for f in self.fieldList():
             # print("comprobando ", f.name())
             if f.name() == str(fN).lower():
                 return f
 
-        return None
+        return
 
     """
     Para obtener la lista de definiciones de campos.
@@ -595,7 +565,7 @@ class FLTableMetaData(QtCore.QObject):
 
     def fieldList(self, prefixTable=None):
 
-        if prefixTable is None:
+        if not prefixTable:
             return self.d.fieldList_
 
         listado = []

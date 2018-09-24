@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../share/icono_pi/Symbol_pi2_256.png</normaloff>../../../../share/icono_pi/Symbol_pi2_256.png</iconset>
+    <normaloff>../../../../share/icono_pi/Symbol_pi_256.png</normaloff>../../../../share/icono_pi/Symbol_pi_256.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
