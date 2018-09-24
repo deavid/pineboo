@@ -687,17 +687,10 @@ class DelayedObjectProxyLoader(object):
     """
 
     def __load(self):
-        if not self.loaded_obj or getattr(self.loaded_obj, "_loaded", None) is False:
-            if getattr(self.loaded_obj, "_loaded", None) is False:
-                self.logger.warn("DelayedObjectProxyLoader: El widget esta borrado/cerrado %s", self.loaded_obj._action)
-            settings = FLSettings()
-
-            if settings.readBoolEntry("application/isDebuggerMode", False):
-                self.logger.warn(
-                    "DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
-                    self._name, self._obj, self._args, self._kwargs)
-            self.loaded_obj = self._obj(*self._args, **self._kwargs)
-
+        self.logger.debug(
+            "DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
+            self._name, self._obj, self._args, self._kwargs)
+        self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
 
     """
@@ -758,37 +751,37 @@ class ModuleActions(object):
         action.table = None
         action.scriptform = self.mod.name
         pineboolib.project.actions[action.name] = action
-        if getattr(qsa_dict_modules, action.name, None):
-            self.logger.debug(
+        if hasattr(qsa_dict_modules, action.name):
+            self.logger.warn(
                 "No se sobreescribe variable de entorno %s", action.name)
-        else:
+        else:  # Se crea la action del módulo
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
 
         for xmlaction in self.root:
             action = XMLAction(xmlaction)
             action.mod = self
-            try:
-                name = action.name
-            except AttributeError:
-                name = "unnamed"
+            name = action.name
             pineboolib.project.actions[name] = action
             if name != "unnamed":
-                if getattr(qsa_dict_modules, "form" + name, None):
-                    self.logger.debug(
+                if hasattr(qsa_dict_modules, "form" + name):
+                    self.logger.warn(
                         "No se sobreescribe variable de entorno %s", "form" + name)
-                else:
+                else:  # Se crea la action del form
                     delayed_action = DelayedObjectProxyLoader(
                         action.load,
                         name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
                     setattr(qsa_dict_modules, "form" + name, delayed_action)
 
-                if getattr(qsa_dict_modules, "formRecord" + name, None):
+                if hasattr(qsa_dict_modules, "formRecord" + name):
                     self.logger.debug(
                         "No se sobreescribe variable de entorno %s", "formRecord" + name)
-                else:
-                    setattr(qsa_dict_modules, "formRecord" + name, DelayedObjectProxyLoader(
-                        action.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name)))
+                else:  # Se crea la action del formRecord
+                    delayed_action = DelayedObjectProxyLoader(
+                        action.formRecordWidget,
+                        name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name))
+
+                    setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
 
     """
     Busca si es propietario de una action
@@ -956,7 +949,6 @@ class XMLAction(XMLStruct):
         self.mainform_widget = None
         self.formrecord_widget = None
         self._loaded = False
-        self._record_loaded = False
 
     """
     Carga FLFormRecordDB por defecto
@@ -965,62 +957,34 @@ class XMLAction(XMLStruct):
     """
 
     def loadRecord(self, cursor):
-        if not getattr(self, "formrecord", None):
-            self.logger.warn(
-                "Record action %s is not defined. Canceled !", self.name)
-            return None
-        self.logger.debug("Loading record action %s . . . ", self.name)
-        fRWidget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
-        if not fRWidget.loaded:
-            return None
-        self.formrecord_widget = fRWidget
-        self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
-        self._record_loaded = True
-        if self.formrecord_widget:
-            self.logger.debug(
-                "End of record action load %s (iface:%s ; widget:%s)",
-                self.name, self.formrecord_widget.iface, self.formrecord_widget.widget)
-
-        # self.initModule(self.name)
+        self._loaded = getattr(self.formrecord_widget, "_loaded", False)
+        if not self._loaded:
+            self.logger.warn("Loading record action %s . . . ", self.name)
+            self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
+            # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
+            if self.formrecord_widget:
+                self.logger.warn("End of record action load %s (iface:%s ; widget:%s)", self.name, getattr(
+                    self.formrecord_widget, "iface", None), getattr(self.formrecord_widget, "widget", None))
 
         return self.formrecord_widget
 
     def load(self):
-
-        self._loaded = False
-        if self.mainform_widget:
-            self._loaded = getattr(self.mainform_widget, "_loaded", False)
-
-        if self._loaded:
-            return self.mainform_widget
-        self.logger.debug("Loading action %s . . . ", self.name)
-        w = pineboolib.project.main_window.w_
+        self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
+            self.logger.debug("Loading action %s . . . ", self.name)
             if pineboolib.project._DGI.useDesktop():
-                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, w, None)
+                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, pineboolib.project.main_window.w_, None)
             else:
                 from pineboolib.utils import Struct
                 self.mainform_widget = Struct()
                 self.mainform_widget.action = self
                 self.load_script(getattr(self, "scriptform", None), self.mainform_widget)
+                self.mainform_widget._loaded = True
 
-            self._loaded = True
-            self.logger.debug(
-                "End of action load %s (iface:%s ; widget:%s)",
-                self.name, getattr(self.mainform_widget, "iface", None), getattr(self.mainform_widget, "widget", None))
+            self.logger.debug("End of action load %s (iface:%s ; widget:%s)", self.name, getattr(
+                self.mainform_widget, "iface", None), getattr(self.mainform_widget, "widget", None))
 
         return self.mainform_widget
-    """
-    Abre el FLFormDB por defecto
-    """
-
-    def openDefaultForm(self):
-        self.logger.debug("Opening default form for Action %s", self.name)
-        w = pineboolib.project.main_window
-        # self.initModule(self.name)
-        self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self,
-                                                                                   None, w, None)
-        w.addFormTab(self)
 
     """
     Llama a la función main de una action
@@ -1030,31 +994,21 @@ class XMLAction(XMLStruct):
         a = pineboolib.project.conn.manager().action(name)
         if not a:
             self.logger.warn("No existe la acción %s", name)
-            return
+            return True
         pineboolib.project.call("%s.main" % a.name(), [], None, True)
 
-    """
-    Retorna el widget del formrecord
-    """
+    #"""
+    # Retorna el widget del formrecord
+    #"""
 
-    def formRecord(self):
-        return self.formrecord
+    # def formRecord(self):
+    #    return self.formrecord
     """
     Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía
     @return wigdet del formRecord.
     """
 
     def formRecordWidget(self):
-        scriptName = getattr(self, "scriptformrecord", None)
-        # Si no existe self.form_widget, lo carga con load_script. NUNCA con loadRecord.
-        # Así cuando se haga un loadRecord de verdad (desde
-        # openDefaultFormRecord, este se cargara con su cursor de verdad
-        if not self.formrecord_widget:
-            self.load_script(scriptName, None)
-
-            self.formrecord_widget = self.script.form
-            # self.initModule(self.name)
-
         return self.formrecord_widget
 
     """
@@ -1075,12 +1029,11 @@ class XMLAction(XMLStruct):
     """
 
     def execDefaultScript(self):
-        self.logger.debug("Executing default script for Action %s", self.name)
+        self.logger.info("Executing default script for Action %s", self.name)
         self.scriptform = getattr(self, "scriptform", None)
         self.load_script(self.scriptform, None)
 
         self.mainform_widget = self.script.form
-        # self.initModule(self.name)
         if self.mainform_widget.iface:
             self.mainform_widget.iface.main()
         else:
