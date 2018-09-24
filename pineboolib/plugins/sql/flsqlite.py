@@ -63,9 +63,6 @@ class FLSQLITE(object):
     def mobile(self):
         return self.mobile_
 
-    def can_load(self):
-        return checkDependencies({"sqlite3": "sqlite3"}, False)
-
     def version(self):
         return self.version_
 
@@ -87,21 +84,21 @@ class FLSQLITE(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
 
+        checkDependencies({"sqlite3": "sqlite3"})
         self.db_filename = db_name
         db_is_new = not os.path.exists(filedir("../%s" % self.db_filename))
-        checkDependencies({"sqlite3": "sqlite3"})
 
         import sqlite3
 
         import pineboolib
         if self.db_filename == getattr(pineboolib.project.conn, "db_name", None):
-            return pineboolib.project.conn.conn
+            self.conn_ = pineboolib.project.conn.conn
+        else:
+            self.conn_ = sqlite3.connect(self.db_filename)
+            self.conn_.isolation_level = None
 
-        self.conn_ = sqlite3.connect(self.db_filename)
-        self.conn_.isolation_level = None
-
-        if db_is_new:
-            self.logger.info("La base de datos %s no existe", self.db_filename)
+            if db_is_new:
+                self.logger.warn("La base de datos %s no existe", self.db_filename)
 
         if self.conn_:
             self.open_ = True
