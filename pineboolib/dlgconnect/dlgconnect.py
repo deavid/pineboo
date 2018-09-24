@@ -7,10 +7,10 @@ import logging
 import base64
 
 import xml
+from xml.etree import ElementTree as ET
 
-from pineboolib.pnsqldrivers import PNSqlDrivers
-from pineboolib.utils import filedir
-from pineboolib.fllegacy.FLManagerModules import FLManagerModules
+
+from pineboolib.utils import filedir, indent
 from pineboolib.fllegacy.FLSettings import FLSettings
 
 from PyQt5 import QtWidgets, QtCore, uic
@@ -41,12 +41,14 @@ class DlgConnect(QtWidgets.QWidget):
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
         self.profileDir = filedir("../profiles")
-        self.pNSqlDrivers = PNSqlDrivers()
+        import pineboolib
+        self.pNSqlDrivers = pineboolib.project.sql_drivers_manager
 
     def load(self):
         """
         Carga el form dlgconnect
         """
+        from pineboolib.fllegacy.FLManagerModules import FLManagerModules
         mM = FLManagerModules()
         dlg_ = filedir('dlgconnect/dlgconnect.ui')
 
@@ -137,7 +139,7 @@ class DlgConnect(QtWidgets.QWidget):
         Abre la conexión seleccionada
         """
         fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
-        tree = xml.etree.ElementTree.parse(fileName)
+        tree = ET.parse(fileName)
         root = tree.getroot()
         last_profile = self.ui.cbProfiles.currentText()
         if last_profile not in (None, ""):
@@ -177,7 +179,7 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Guarda la conexión
         """
-        profile = xml.etree.ElementTree.Element("Profile")
+        profile = ET.Element("Profile")
         description = self.ui.leDescription.text()
 
         if os.path.exists(os.path.join(self.profileDir, "%s.xml" % description)):
@@ -199,29 +201,31 @@ class DlgConnect(QtWidgets.QWidget):
         passProfile = self.ui.leProfilePassword.text()  # base 64?
         autoLogin = self.ui.cbAutoLogin.isChecked()
 
-        name = xml.etree.ElementTree.SubElement(profile, "name")
+        name = ET.SubElement(profile, "name")
         name.text = description
-        dbs = xml.etree.ElementTree.SubElement(profile, "database-server")
-        dbstype = xml.etree.ElementTree.SubElement(dbs, "type")
+        dbs = ET.SubElement(profile, "database-server")
+        dbstype = ET.SubElement(dbs, "type")
         dbstype.text = dbt
-        dbshost = xml.etree.ElementTree.SubElement(dbs, "host")
+        dbshost = ET.SubElement(dbs, "host")
         dbshost.text = url
-        dbsport = xml.etree.ElementTree.SubElement(dbs, "port")
+        dbsport = ET.SubElement(dbs, "port")
         dbsport.text = port
 
-        dbc = xml.etree.ElementTree.SubElement(profile, "database-credentials")
-        dbcuser = xml.etree.ElementTree.SubElement(dbc, "username")
+        dbc = ET.SubElement(profile, "database-credentials")
+        dbcuser = ET.SubElement(dbc, "username")
         dbcuser.text = userDB
-        dbcpasswd = xml.etree.ElementTree.SubElement(dbc, "password")
+        dbcpasswd = ET.SubElement(dbc, "password")
         dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
-        dbname = xml.etree.ElementTree.SubElement(profile, "database-name")
+        dbname = ET.SubElement(profile, "database-name")
         dbname.text = nameDB
-        profile_user = xml.etree.ElementTree.SubElement(profile, "profile-data")
+        profile_user = ET.SubElement(profile, "profile-data")
         if not autoLogin:
-            profile_password = xml.etree.ElementTree.SubElement(profile_user, "password")
+            profile_password = ET.SubElement(profile_user, "password")
             profile_password.text = base64.b64encode(passProfile.encode()).decode()
 
-        tree = xml.etree.ElementTree.ElementTree(profile)
+        indent(profile)
+
+        tree = ET.ElementTree(profile)
 
         tree.write(os.path.join(self.profileDir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
         # self.cleanProfileForm()
@@ -259,7 +263,7 @@ class DlgConnect(QtWidgets.QWidget):
             return
         password = None
         fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
-        tree = xml.etree.ElementTree.parse(fileName)
+        tree = ET.parse(fileName)
         root = tree.getroot()
 
         for profile in root.findall("profile-data"):
