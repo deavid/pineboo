@@ -570,9 +570,6 @@ class Module(object):
         try:
             self.actions = ModuleActions(self, pathxml, self.name)
             self.actions.load()
-            if pineboolib.project._DGI.useDesktop():
-                self.mainform = MainForm(self, pathui)
-                self.mainform.load()
         except Exception as e:
             self.logger.exception("Al cargar módulo %s:", self.name)
             return False
@@ -808,92 +805,6 @@ class ModuleActions(object):
     def __setitem__(self, name, action_):
         raise NotImplementedError("Actions are not writable!")
         #pineboolib.project.actions[name] = action_
-
-
-"""
-Continene la información del mainForm de cada módulo
-"""
-
-
-class MainForm(object):
-    logger = logging.getLogger("main.MainForm")
-
-    """
-    Constructor
-    @param module. Módulo al que pertenece el mainForm
-    @param path. Ruta del módulo
-    """
-
-    def __init__(self, module, path):
-        self.mod = module
-        self.path = path
-        assert path
-
-    """
-    Carga los actions del mainForm del módulo
-    """
-
-    def load(self):
-        self.tree = pineboolib.utils.load2xml(self.path)
-        self.root = self.tree.getroot()
-        self.actions = {}
-        self.pixmaps = {}
-        if pineboolib.project._DGI.useDesktop():
-            for image in self.root.findall("images//image[@name]"):
-                name = image.get("name")
-                xmldata = image.find("data")
-                img_format = xmldata.get("format")
-                data = unhexlify(xmldata.text.strip())
-                if img_format == "XPM.GZ":
-                    data = zlib.decompress(data, 15)
-                    img_format = "XPM"
-
-                pixmap = QtGui.QPixmap()
-                pixmap.loadFromData(data, img_format)
-                icon = QtGui.QIcon(pixmap)
-                self.pixmaps[name] = icon
-
-        for xmlaction in self.root.findall("actions//action"):
-            action = XMLMainFormAction(xmlaction)
-            action.mainform = self
-            action.mod = self.mod
-            iconSet = getattr(action, "iconSet", None)
-            action.icon = None
-            if iconSet in self.pixmaps.keys():
-                try:
-                    action.icon = self.pixmaps[iconSet]
-                except Exception as e:
-                    if pineboolib.project._DGI.useDesktop():
-                        self.logger.exception(
-                            "main.Mainform: Error al intentar decodificar icono de accion. No existe.")
-            else:
-                action.iconSet = None
-
-            self.actions[action.name] = action
-            if not pineboolib.project._DGI.localDesktop():
-                pineboolib.project._DGI.mainForm().mainWindow.loadAction(action)
-
-            # Asignamos slot a action
-            for slots in self.root.findall("connections//connection"):
-                slot = XMLStruct(slots)
-                if slot._v("sender") == action.name:
-                    action.slot = slot._v("slot")
-                    action.slot = action.slot.replace('(', '')
-                    action.slot = action.slot.replace(')', '')
-                if not pineboolib.project._DGI.localDesktop():
-                    pineboolib.project._DGI.mainForm().mainWindow.loadConnection(action)
-
-        self.toolbar = []
-        sett_ = FLSettings()
-        if not sett_.readBoolEntry("ebcomportamiento/ActionsMenuRed", False):
-            for toolbar_action in self.root.findall("toolbars//action"):
-                self.toolbar.append(toolbar_action.get("name"))
-                if not pineboolib.project._DGI.localDesktop():
-                    pineboolib.project._DGI.mainForm().mainWindow.loadToolBarsAction(
-                        toolbar_action.get("name"))
-        else:
-            # FIXME: cargar solo las actions de los menus
-            sett_.writeEntry("ebcomportamiento/ActionsMenuRed", False)
 
 
 """
