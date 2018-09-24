@@ -31,10 +31,6 @@ class PNSqlDrivers(object):
         self.driversdict = {}
         self.driversDefaultPort = {}
         self.desktopFile = {}
-        # if not os.path.exists("pineboolib/plugins"):
-        #    os.makedirs("pineboolib/plugins")
-        if not os.path.exists("pineboolib/plugins/sql"):
-            os.makedirs("pineboolib/plugins/sql")
 
         dirlist = os.listdir(filedir("plugins/sql"))
         for f in dirlist:
