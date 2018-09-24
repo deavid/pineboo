@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import logging
 import importlib
 
@@ -17,16 +18,15 @@ Esta clase gestiona los diferentes controladores de BD.
 class PNSqlDrivers(object):
     driverName = None
     driver_ = None
-    _mobile = None
+    only_pure_python_ = None
 
     """
     Constructor
     """
 
     def __init__(self, _DGI=None):
-        self._mobile = False
-        if _DGI:
-            self._mobile = _DGI.mobilePlatform()
+        self.only_pure_python_ = getattr(sys, 'frozen', False)
+        print("Solo python", self.only_pure_python_)
 
         self.driversdict = {}
         self.driversDefaultPort = {}
@@ -38,7 +38,7 @@ class PNSqlDrivers(object):
                 f = f[:f.find(".py")]
                 mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % f)
                 driver_ = getattr(mod_, f.upper())()
-                if driver_.mobile_ or not self._mobile:
+                if driver_.pure_python() or driver_.safe_load():
                     self.driversdict[f] = driver_.alias_
                     self.driversDefaultPort[driver_.alias_] = driver_.defaultPort_
                     self.desktopFile[driver_.alias_] = driver_.desktopFile()

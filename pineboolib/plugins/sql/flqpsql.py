@@ -5,7 +5,7 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import text2bool
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import auto_qt_translate_text
+from pineboolib.utils import auto_qt_translate_text, checkDependencies
 import traceback
 import pineboolib
 from PyQt5.Qt import qWarning, QApplication, qApp, QDomDocument, QRegExp
@@ -49,6 +49,9 @@ class FLQPSQL(object):
     def pure_python(self):
         return self.pure_python_
 
+    def safe_load(self):
+        return checkDependencies({"psycopg2": "python3-psycopg2"}, False)
+
     def mobile(self):
         return self.mobile_
 
@@ -57,12 +60,8 @@ class FLQPSQL(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        try:
-            import psycopg2
-        except ImportError:
-            qWarning(traceback.format_exc())
-            qWarning("HINT: Instale el paquete python3-psycopg2 e intente de nuevo")
-            sys.exit(0)
+        checkDependencies({"psycopg2": "python3-psycopg2"})
+        import psycopg2
 
         conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
             db_name, db_host, db_port,

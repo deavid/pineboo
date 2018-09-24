@@ -2,7 +2,7 @@ import sys
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.utils import text2bool
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.utils import auto_qt_translate_text
+from pineboolib.utils import auto_qt_translate_text, checkDependencies
 import traceback
 from PyQt5.Qt import qWarning, QApplication
 
@@ -44,6 +44,9 @@ class FLMYSQL_MYISAM(object):
     def pure_python(self):
         return self.pure_python_
 
+    def safe_load(self):
+        return checkDependencies({"MySQLdb": "python3-mysqldb "}, False)
+
     def mobile(self):
         return self.mobile_
 
@@ -55,13 +58,8 @@ class FLMYSQL_MYISAM(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-
-        try:
-            import MySQLdb
-        except ImportError:
-            print(traceback.format_exc())
-            print("HINT: Instale el paquete python3-mysqldb e intente de nuevo")
-            sys.exit(0)
+        checkDependencies({"MySQLdb": "python3-mysqldb "})
+        import MySQLdb
 
         self.conn_ = MySQLdb.connect(
             db_host, db_userName, db_password, db_name)

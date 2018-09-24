@@ -511,7 +511,7 @@ class StructMyDict(dict):
         self[name] = value
 
 
-def checkDependencies(dict_):
+def checkDependencies(dict_, exit=True):
 
     from importlib import import_module
 
@@ -543,18 +543,20 @@ def checkDependencies(dict_):
     if len(dependences) > 0:
         logger.warn("HINT: Dependencias incumplidas:")
         for dep in dependences:
-            logger.warn("HINT: Instale el paquete %s e intente de nuevo" % dep)
+            logger.warn("HINT: Instale el paquete %s" % dep)
             msg += "Instale el paquete %s.\n%s" % (dep, error)
 
         if getattr(pineboolib.project, "_DGI", None):
-            if not getattr(sys, 'frozen', False):
-                msg += "\nEl programa se cerrará ahora."
             if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-                ret = QtWidgets.QMessageBox.warning(
-                    QtWidgets.QWidget(), "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
+                try:
+                    ret = QtWidgets.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
+                except Exception:
+                    logger.error("No se puede mostrar el diálogo de dependecias incumplidas")
 
-        if not getattr(sys, 'frozen', False):
+        if not getattr(sys, 'frozen', False) and exit:
             sys.exit(32)
+
+    return len(dependences) == 0
 
 
 def version_check(mod_name, mod_ver, min_ver):

@@ -63,11 +63,17 @@ class FLSQLITE(object):
     def mobile(self):
         return self.mobile_
 
+    def can_load(self):
+        return checkDependencies({"sqlite3": "sqlite3"}, False)
+
     def version(self):
         return self.version_
 
     def driverName(self):
         return self.name_
+
+    def safe_load(self):
+        return checkDependencies({"sqlite3": "sqlite3"}, False)
 
     def isOpen(self):
         return self.open_
@@ -84,6 +90,7 @@ class FLSQLITE(object):
         self.db_filename = db_name
         db_is_new = not os.path.exists(filedir("../%s" % self.db_filename))
         checkDependencies({"sqlite3": "sqlite3"})
+
         import sqlite3
 
         import pineboolib
