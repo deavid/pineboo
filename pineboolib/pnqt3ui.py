@@ -596,6 +596,19 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             widget.addSeparator()
             continue
 
+        if c.tag == "column":
+            prop1 = {}
+            for p in c.findall("property"):
+                k, v = loadProperty(p)
+                if k == "text":
+                    widget.setHeaderLabel(v)
+                elif k == "clickable":
+                    widget.setClickable(bool(v))
+                elif k == "resizable":
+                    widget.setResizable(bool(v))
+
+            continue
+
         if Options.DEBUG_LEVEL > 50:
             logger.warn("%s: Unknown widget xml tag %s %s", __name__, widget.__class__, repr(c.tag))
 

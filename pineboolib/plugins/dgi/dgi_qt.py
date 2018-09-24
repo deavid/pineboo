@@ -425,6 +425,18 @@ class QListView(QtWidgets.QListView):
     def setItemMargin(self, margin):
         pass
 
+    @decorators.NotImplementedWarn
+    def setClickable(self, c):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setResizable(self, r):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setHeaderLabel(self, l):
+        pass
+
     def clear(self):
         self._model = None
         self._model = QtGui.QStandardItemModel(self)
