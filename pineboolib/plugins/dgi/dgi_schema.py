@@ -6,7 +6,6 @@ from importlib import import_module
 
 from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
 import pineboolib
-import sys
 import re
 import logging
 
@@ -45,7 +44,8 @@ class dgi_schema(object):
         if AQSettings().readBoolEntry(u"ebcomportamiento/mobileMode", False):
             self._mobile = True
 
-        self._deployed = getattr(sys, 'frozen', False)
+        from pineboolib.utils import imFrozen
+        self._deployed = imFrozen()
 
     def name(self):
         return self._name

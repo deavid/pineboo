@@ -601,3 +601,7 @@ def load2xml(form_path):
             ret = None
 
     return ret
+
+
+def imFrozen():
+    return getattr(sys, 'frozen', False)
