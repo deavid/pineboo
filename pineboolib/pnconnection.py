@@ -48,7 +48,7 @@ class PNConnection(QtCore.QObject):
         self.db_port = db_port
         self.db_userName = db_userName
         self.db_password = db_password
-        self.driverSql = pnsqldrivers.PNSqlDrivers()
+        self.driverSql = pineboolib.project.sql_drivers_manager
 
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
 

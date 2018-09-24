@@ -22,7 +22,7 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
-from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
+
 
 import sys
 """
@@ -63,11 +63,16 @@ class Project(object):
     path = None
     kugarPluging = None
     _splash = None
+    sql_manager = None
     """
     Constructor
     """
 
     def __init__(self, DGI):
+
+        from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
+        from pineboolib.pnsqldrivers import PNSqlDrivers
+
         self._DGI = DGI
         self.tree = None
         self.root = None
@@ -89,6 +94,7 @@ class Project(object):
         self.files = {}
         self.cur = None
         self.kugarPlugin = PNKugarPlugins()
+        self.sql_drivers_manager = PNSqlDrivers()
 
         if not self._DGI.localDesktop():
             self._DGI.extraProjectInit()
