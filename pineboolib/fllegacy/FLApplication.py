@@ -401,17 +401,15 @@ class FLApplication(QtCore.QObject):
         for name in list_:
             att = getattr(qsa_dict_modules, name)
             if isinstance(att, pineboolib.pnapplication.DelayedObjectProxyLoader):
-                setattr(qsa_dict_modules, name, None)
-                att = None
-                del att
+                delattr(qsa_dict_modules, name)
 
         project.run()
         project.conn.managerModules().loadIdAreas()
         project.conn.managerModules().loadAllIdModules()
-        for module_name in project.modules.keys():
-            project.modules[module_name].load()
-
+        # for module_name in project.modules.keys():
+        #    project.modules[module_name].load()
         self.db().manager().init()
+
         self.db().managerModules()
         self.db().manager().cleanupMetaData()
 
