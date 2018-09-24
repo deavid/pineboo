@@ -32,6 +32,7 @@ class FLSQLITE(object):
     rowsFetched = None
     db_ = None
     mobile_ = True
+    pure_python_ = False
     # True por defecto, convierte los datos de entrada y salida a UTF-8 desde
     # Latin1
     parseFromLatin = None
@@ -52,8 +53,15 @@ class FLSQLITE(object):
         self.db_ = None
         self.parseFromLatin = False
         self.mobile_ = True
+        self.pure_python_ = False
         self.defaultPort_ = 0
         self.cursor_ = None
+
+    def pure_python(self):
+        return self.pure_python_
+
+    def mobile(self):
+        return self.mobile_
 
     def version(self):
         return self.version_

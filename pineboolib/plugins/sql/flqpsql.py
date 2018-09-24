@@ -22,6 +22,7 @@ class FLQPSQL(object):
     lastError_ = None
     db_ = None
     mobile_ = False
+    pure_python_ = False
     defaultPort_ = None
 
     def __init__(self):
@@ -33,6 +34,7 @@ class FLQPSQL(object):
         self.alias_ = "PostgreSQL"
         self._dbname = None
         self.mobile_ = False
+        self.pure_python_ = False
         self.defaultPort_ = 5432
 
     def version(self):
@@ -43,6 +45,12 @@ class FLQPSQL(object):
 
     def isOpen(self):
         return self.open_
+
+    def pure_python(self):
+        return self.pure_python_
+
+    def mobile(self):
+        return self.mobile_
 
     def DBName(self):
         return self._dbname

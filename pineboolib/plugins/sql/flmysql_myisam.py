@@ -18,6 +18,7 @@ class FLMYSQL_MYISAM(object):
     cursorsArray_ = None
     noInnoDB = None
     mobile_ = False
+    pure_python_ = False
     defaultPort_ = None
 
     def __init__(self):
@@ -31,6 +32,7 @@ class FLMYSQL_MYISAM(object):
         self.noInnoDB = True
         self._dbname = None
         self.mobile_ = False
+        self.pure_python_ = False
         self.defaultPort_ = 3306
 
     def version(self):
@@ -38,6 +40,12 @@ class FLMYSQL_MYISAM(object):
 
     def driverName(self):
         return self.name_
+
+    def pure_python(self):
+        return self.pure_python_
+
+    def mobile(self):
+        return self.mobile_
 
     def isOpen(self):
         return self.open_
