@@ -595,7 +595,7 @@ class FLDataTable(QtWidgets.QTableView):
 
         from pineboolib.fllegacy.FLSettings import FLSettings
         settings = FLSettings()
-        if settings.readEntry("ebcomportamiento/FLTableDoubleClick", "false") == "false":
+        if not settings.readBoolEntry("ebcomportamiento/FLTableDoubleClick", False):
             self.recordChoosed.emit()
 
     def visualIndexToRealIndex(self, c):
