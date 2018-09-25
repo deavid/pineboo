@@ -4,7 +4,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy import FLSqlCursor
+from pineboolib.fllegacy.FLSettings import FLSettings
 from PyQt5.QtWidgets import QApplication, QCheckBox
+import pineboolib
 
 
 class FLDataTable(QtWidgets.QTableView):
@@ -174,6 +176,7 @@ class FLDataTable(QtWidgets.QTableView):
                 self.setModel(self.cursor_.model())
                 self.setSelectionModel(self.cursor_.selection())
                 self.model().sort(self.visualIndexToRealIndex(0), 0)
+                self.installEventFilter(self)
             # if self.cursor_.at() >= 0:
             #    QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
     """
@@ -195,7 +198,8 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def numCols(self):
-        return self._h_header.count()
+
+        return self.horizontalHeader().count()
 
     def setSort(self, s):
         self.sort_ = s
@@ -344,8 +348,86 @@ class FLDataTable(QtWidgets.QTableView):
     Filtrado de eventos
     """
 
-    def eventFilter(self, *args, **kwargs):
-        return super(FLDataTable, self).eventFilter(*args, **kwargs)
+    def eventFilter(self, o, e):
+        r = self.currentRow()
+        c = self.currentColumn()
+        nr = self.numRows()
+        nc = self.numCols()
+
+        if e.type() == QtCore.QEvent.KeyPress:
+            key_event = e
+
+            if key_event.key() == QtCore.Qt.Key_Escape and self.popup_ and self.parentWidget():
+                self.parentWidget().hide()
+                return True
+
+            if key_event.key() == QtCore.Qt.Key_Insert:
+                return True
+
+            if key_event.key() == QtCore.Qt.Key_F2:
+                return True
+
+            if key_event.key() == QtCore.Qt.Key_Up and r == 0:
+                return True
+
+            if key_event.key() == QtCore.Qt.Key_Left and c == 0:
+                return True
+
+            if key_event.key() == QtCore.Qt.Key_Down and r == nr - 1:
+                return True
+
+            if key_event.key() == QtCore.Qt.Key_Right and c == nc - 1:
+                return True
+
+            if key_event.key() in (QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return) and r > -1:
+                self.recordChoosed.emit()
+                return True
+
+            if key_event.key() == QtCore.Qt.Key_Space:
+                from pineboolib.pncontrolsfactory import FLCheckBox
+                chk = FLCheckBox(self.cellWidget(r, c))
+                if chk:
+                    chk.animateClick()
+
+            settings = FLSettings()
+            if not settings.readBoolEntry("ebcomportamiento/FLTableShortCut", False):
+                if key_event.key() == QtCore.Qt.Key_A and not self.popup_:
+                    if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
+
+                        self.cursor_.insertRecord()
+                        return True
+                    else:
+                        return False
+
+                if key_event.key() == QtCore.Qt.Key_C and not self.popup_:
+                    if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
+                        self.cursor_.copyRecord()
+                        return True
+                    else:
+                        return False
+
+                if key_event.key() == QtCore.Qt.Key_M and not self.popup_:
+                    if self.cursor_ and not self.readonly_ and not self.onlyTable_:
+                        self.cursor_.editRecord()
+                        return True
+                    else:
+                        return False
+
+                if key_event.key() == QtCore.Qt.Key_Delete and not self.popup_:
+                    if self.cursor_ and not self.readonly_ and not self.editonly_ and not self.onlyTable_:
+                        self.cursor_.deleteRecord()
+                        return True
+                    else:
+                        return False
+
+                if key_event.key() == QtCore.Qt.Key_V and not self.popup_:
+                    if self.cursor_ and not self.onlyTable_:
+                        self.cursor_.browseRecord()
+                        return True
+
+            return False
+
+        return super(FLDataTable, self).eventFilter(o, e)
 
     """
     Redefinido por conveniencia para pintar la celda
@@ -365,9 +447,78 @@ class FLDataTable(QtWidgets.QTableView):
     Redefinido por conveniencia, para evitar que aparezca el menu contextual
     con las opciones para editar registros
     """
-    @decorators.NotImplementedWarn
-    def contentsContextMenuEvent(self, e):
-        pass
+
+    def contextMenuEvent(self, e):
+        super(FLDataTable, self).contextMenuEvent(e)
+
+        if not self.cursor_ or not self.cursor_.isValid() or not self.cursor_.metadata():
+            return
+
+        mtd = self.cursor_.metadata()
+        pri_key = mtd.primaryKey()
+
+        field = mtd.field(pri_key)
+        if not field:
+            return
+
+        rel_list = field.relationList()
+        if not rel_list:
+            return
+
+        db = self.cursor_.db()
+        pri_key_val = self.cursor_.valueBuffer(pri_key)
+        popup = pineboolib.pncontrolsfactory.QMenu(self)
+
+        menu_frame = pineboolib.pncontrolsfactory.QWidget(self, QtCore.Qt.Popup)
+
+        lay = pineboolib.pncontrolsfactory.QVBoxLayout()
+        menu_frame.setLayout(lay)
+
+        tmp_pos = e.globalPos()
+
+        for rel in rel_list:
+            cur = FLSqlCursor.FLSqlCursor(rel.foreignTable(), True, db.connectionName(), None, None, popup)
+
+            if cur.metadata():
+                mtd = cur.metadata()
+                field = mtd.field(rel.foreignField())
+                if not field:
+                    continue
+
+                sub_popup = pineboolib.pncontrolsfactory.QMenu(self)
+                sub_popup.setTitle(mtd.alias())
+                sub_popup_frame = pineboolib.pncontrolsfactory.QWidget(sub_popup, QtCore.Qt.Popup)
+                lay_popup = pineboolib.pncontrolsfactory.QVBoxLayout(sub_popup)
+                sub_popup_frame.setLayout(lay_popup)
+
+                dt = pineboolib.pncontrolsfactory.FLDataTable(None, "FLDataTable", True)
+                lay_popup.addWidget(dt)
+
+                dt.setFLSqlCursor(cur)
+                filter = db.manager().formatAssignValue(field, pri_key_val, False)
+                cur.setFilter(filter)
+                dt.setFilter(filter)
+                dt.refresh()
+
+                horiz_header = dt.header()
+                for i in range(dt.numCols()):
+                    field = mtd.indexFieldObject(i)
+                    if not field:
+                        continue
+
+                    if not field.visibleGrid():
+                        dt.setColumnHidden(i, True)
+
+                sub_menu = popup.addMenu(sub_popup)
+                sub_menu.hovered.connect(sub_popup_frame.show)
+                sub_popup_frame.move(tmp_pos.x() + 200, tmp_pos.y())  # FIXME: Hay que mejorar esto ...
+
+        popup.move(tmp_pos.x(), tmp_pos.y())
+
+        popup.exec_(e.globalPos())
+        del popup
+        e.accept()
+
     """
     Redefine por conveniencia, el comportamiento al hacer clic sobre una
     celda
@@ -593,7 +744,6 @@ class FLDataTable(QtWidgets.QTableView):
         if e.button() != QtCore.Qt.LeftButton:
             return
 
-        from pineboolib.fllegacy.FLSettings import FLSettings
         settings = FLSettings()
         if not settings.readBoolEntry("ebcomportamiento/FLTableDoubleClick", False):
             self.recordChoosed.emit()
@@ -612,3 +762,6 @@ class FLDataTable(QtWidgets.QTableView):
 
     def currentRow(self):
         return self.currentIndex().row()
+
+    def currentColumn(self):
+        return self.currentIndex().column()
