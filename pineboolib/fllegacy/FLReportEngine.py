@@ -143,25 +143,21 @@ class FLReportEngine(object):
         self.d_.rows_ = tmpDoc.createDocumentFragment()
         self.d_.setQuery(q)
         q.setForwardOnly(True)
-        if not q.exec_():
-            return False
-        if not q.next():
-            return False
-
-        g = self.d_.qGroupDict_
-        if not g:
-            while True:
-                self.d_.addRowToReportData(0)
-                if not q.next():
-                    break
-        else:
-            vA = []
-            for i in range(10):
-                vA.append(None)
-            while True:
-                self.d_.groupBy(len(g), vA)
-                if not q.next():
-                    break
+        if q.exec_() and q.next():
+            g = self.d_.qGroupDict_
+            if not g:
+                while True:
+                    self.d_.addRowToReportData(0)
+                    if not q.next():
+                        break
+            else:
+                vA = []
+                for i in range(10):
+                    vA.append(None)
+                while True:
+                    self.d_.groupBy(len(g), vA)
+                    if not q.next():
+                        break
 
         data = QtXml.QDomElement(tmpDoc.createElement("queryData"))
         data.appendChild(self.d_.rows_)
@@ -230,8 +226,8 @@ class FLReportEngine(object):
 
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
         if self.rt and self.rt.find("KugarTemplate") > -1:
-            self.pdfFile = self.parser_.parse(
-                self.d_.template_, self.rt, self.rd.toString(1))
+            data = self.rd.toString(1)
+            self.pdfFile = self.parser_.parse(self.d_.template_, self.rt, data)
 
             return True if self.pdfFile else False
 

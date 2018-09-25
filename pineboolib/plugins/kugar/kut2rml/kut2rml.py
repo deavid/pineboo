@@ -436,6 +436,7 @@ class kut2rml(object):
     def processKutDetails(self, xml, xmlData, parent):
         pageG = self.newPage(parent)
         prevLevel = 0
+        level = None
         for data in xmlData.findall("Row"):
             level = int(data.get("level"))
             if prevLevel > level:
@@ -449,8 +450,9 @@ class kut2rml(object):
 
             prevLevel = level
 
-        for l in reversed(range(level + 1)):
-            pageG = self.processData("DetailFooter", xml, data, pageG, l)
+        if level:
+            for l in reversed(range(level + 1)):
+                pageG = self.processData("DetailFooter", xml, data, pageG, l)
 
         if xml.find("PageFooter"):
             pageG = self.pageFooter(xml.find("PageFooter"), pageG)

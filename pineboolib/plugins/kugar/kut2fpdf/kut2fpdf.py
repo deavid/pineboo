@@ -122,6 +122,7 @@ class kut2fpdf(object):
     def processDetails(self):
         # Procesamos la cabecera si procede ..
         prevLevel = 0
+        level = None
         for data in self._xml_data.findall("Row"):
             level = int(data.get("level"))
             if prevLevel > level:
@@ -133,8 +134,9 @@ class kut2fpdf(object):
 
             prevLevel = level
 
-        for l in reversed(range(level + 1)):
-            self.processData("DetailFooter", data, l)
+        if level:
+            for l in reversed(range(level + 1)):
+                self.processData("DetailFooter", data, l)
 
         if self._xml.find("PageFooter"):
             self.processSection("PageFooter")
