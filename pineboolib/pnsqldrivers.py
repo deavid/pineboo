@@ -26,22 +26,20 @@ class PNSqlDrivers(object):
 
     def __init__(self, _DGI=None):
         self.only_pure_python_ = getattr(sys, 'frozen', False)
-        print("Solo python", self.only_pure_python_)
 
         self.driversdict = {}
         self.driversDefaultPort = {}
         self.desktopFile = {}
 
-        dirlist = os.listdir(filedir("plugins/sql"))
-        for f in dirlist:
-            if not f[0:2] == "__":
-                f = f[:f.find(".py")]
-                mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % f)
-                driver_ = getattr(mod_, f.upper())()
-                if driver_.pure_python() or driver_.safe_load():
-                    self.driversdict[f] = driver_.alias_
-                    self.driversDefaultPort[driver_.alias_] = driver_.defaultPort_
-                    self.desktopFile[driver_.alias_] = driver_.desktopFile()
+        dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.endswith(".py")]
+        for item in dir_list:
+            file_name = item[:item.find(".py")]
+            mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % file_name)
+            driver_ = getattr(mod_, file_name.upper())()
+            if driver_.pure_python() or driver_.safe_load():
+                self.driversdict[file_name] = driver_.alias_
+                self.driversDefaultPort[driver_.alias_] = driver_.defaultPort_
+                self.desktopFile[driver_.alias_] = driver_.desktopFile()
 
         self.defaultDriverName = "FLsqlite"
 
