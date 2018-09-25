@@ -122,6 +122,7 @@ class FLFormRecordDB(FLFormDB):
             load = True
 
         super(FLFormRecordDB, self).__init__(parent, action, load)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
         if cursor:
             self.setCursor(parent_or_cursor)
 
