@@ -338,7 +338,6 @@ class MainForm(QtCore.QObject):
             return
 
         ac = self.cloneAction(action, self.ag_mar_)
-        # ac.triggered.connect(action.activate)
 
         self.dck_mar_.update(self.ag_mar_)
 
