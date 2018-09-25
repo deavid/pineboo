@@ -511,6 +511,9 @@ class StructMyDict(dict):
         self[name] = value
 
 
+DEPENDECIE_CHECKED = []
+
+
 def checkDependencies(dict_, exit=True):
 
     from importlib import import_module
@@ -518,26 +521,29 @@ def checkDependencies(dict_, exit=True):
     dependences = []
     error = []
     for key in dict_.keys():
-        try:
-            mod_ = import_module(key)
-            mod_ver = None
-            if key == "ply":
-                version_check("ply", mod_.__version__, '3.9')
-            elif key == "Pillow":
-                version_check("Pillow", mod_.__version__, '5.1.0')
-            elif key == "PyQt5.QtCore":
-                version_check("PyQt5", mod_.QT_VERSION_STR, '5.9')
-                mod_ver = mod_.QT_VERSION_STR
+        if not key in DEPENDECIE_CHECKED:
+            try:
+                mod_ = import_module(key)
+                mod_ver = None
+                if key == "ply":
+                    version_check("ply", mod_.__version__, '3.9')
+                elif key == "Pillow":
+                    version_check("Pillow", mod_.__version__, '5.1.0')
+                elif key == "PyQt5.QtCore":
+                    version_check("PyQt5", mod_.QT_VERSION_STR, '5.9')
+                    mod_ver = mod_.QT_VERSION_STR
 
-            if not mod_ver:
-                mod_ver = getattr(mod_, "__version__", "???")
+                if not mod_ver:
+                    mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
 
-            settings = FLSettings()
-            if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warn("Versión de %s: %s", key, mod_ver)
-        except ImportError:
-            dependences.append(dict_[key])
-            error.append(traceback.format_exc())
+                settings = FLSettings()
+                if settings.readBoolEntry("application/isDebuggerMode", False):
+                    logger.warn("Versión de %s: %s", key, mod_ver)
+            except ImportError:
+                dependences.append(dict_[key])
+                error.append(traceback.format_exc())
+
+            DEPENDECIE_CHECKED.append(key)
 
     msg = ""
     if len(dependences) > 0:
@@ -546,15 +552,16 @@ def checkDependencies(dict_, exit=True):
             logger.warn("HINT: Instale el paquete %s" % dep)
             msg += "Instale el paquete %s.\n%s" % (dep, error)
 
-        if getattr(pineboolib.project, "_DGI", None):
-            if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
-                try:
-                    ret = QtWidgets.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
-                except Exception:
-                    logger.error("No se puede mostrar el diálogo de dependecias incumplidas")
+        if exit:
+            if getattr(pineboolib.project, "_DGI", None):
+                if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
+                    try:
+                        ret = QtWidgets.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
+                    except Exception:
+                        logger.error("No se puede mostrar el diálogo de dependecias incumplidas")
 
-        if not getattr(sys, 'frozen', False) and exit:
-            sys.exit(32)
+            if not getattr(sys, 'frozen', False):
+                sys.exit(32)
 
     return len(dependences) == 0
 
