@@ -964,14 +964,13 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
 
         t_cursor = self.tableRecords_.cursor()
-        self.tableRecords_.setFLSqlCursor(self.cursor_)
+        if t_cursor is not self.cursor_:
+            self.tableRecords_.setFLSqlCursor(self.cursor_)
 
-        try:
-            self.tableRecords_.recordChoosed.disconnect(self.recordChoosedSlot)
-        except:
-            pass
+            if t_cursor:
+                self.tableRecords_.recordChoosed.disconnect(self.recordChoosedSlot)
 
-        self.tableRecords_.recordChoosed.connect(self.recordChoosedSlot)
+            self.tableRecords_.recordChoosed.connect(self.recordChoosedSlot)
 
     @QtCore.pyqtSlot()
     def recordChoosedSlot(self):
