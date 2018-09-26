@@ -322,6 +322,10 @@ class QGroupBox(QtWidgets.QGroupBox):
     def selectedId(self):
         return 0
 
+    @decorators.NotImplementedWarn
+    def setShown(self, b):
+        pass
+
 
 class QAction(QtWidgets.QAction):
 
