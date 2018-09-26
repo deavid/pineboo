@@ -689,6 +689,10 @@ class FLTable(QtWidgets.QTableWidget):
     def setFocusStyle(self, b):
         pass
 
+    @decorators.NotImplementedWarn
+    def setColumnLabels(self, sep, labels_list):
+        pass
+
 
 class QTable(QtWidgets.QTableWidget):
 
