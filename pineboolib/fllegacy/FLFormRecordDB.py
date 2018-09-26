@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QKeySequence
+
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib import decorators
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+import pineboolib
 
 DEBUG = False
 
@@ -109,26 +112,24 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def __init__(self, parent_or_cursor, action, load=False):
+        from pineboolib.pncontrolsfactory import aqApp
+        if isinstance(action, str):
+            aqApp.db().manager().action(action)
 
-        self._uiName = action.formrecord
-
-        if getattr(action, "scriptformrecord", None):
-            self._scriptForm = action.scriptformrecord
-
-        if not isinstance(parent_or_cursor, FLSqlCursor):
-            parent = parent_or_cursor
-        else:
-            parent = None
-
-        if isinstance(parent_or_cursor, FLSqlCursor):
-            self.setCursor(parent_or_cursor)
+        parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
+        cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
+        if not cursor:
+            load = True
 
         super(FLFormRecordDB, self).__init__(parent, action, load)
+        self.setWindowModality(QtCore.Qt.ApplicationModal)
+        if cursor:
+            self.setCursor(parent_or_cursor)
 
-        self.setFocusPolicy(QtCore.Qt.NoFocus)
+        self._uiName = action.formRecord()
+        self._scriptForm = action.scriptFormRecord() or "emptyscript"
 
-        self.name_ = action.name
-        if self.cursor_:
+        if self.cursor():
             self.initialModeAccess = self.cursor_.modeAccess()
             if DEBUG:
                 print("*** FLFormRecordDB::__init__: cursor: %r name: %r at:%r" %
@@ -142,11 +143,8 @@ class FLFormRecordDB(FLFormDB):
                 print("*** FLFormRecordDB::__init__ -> Sin cursor??")
             self.initialModeAccess = FLSqlCursor.Browse
 
-        if self.loaded:
-            self.prj.conn.managerModules().loadFLTableDBs(self)
-
-    def loaded(self):
-        return self.loaded
+        self.load()
+        self.initForm()
 
     """
     Reimplementado, añade un widget como principal del formulario
@@ -185,45 +183,41 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def initForm(self):
-
-        if self.cursor_ and self.cursor_.metadata():
-
+        if self.cursor() and self.cursor().metadata():
             caption = None
-            if self.action_:
-                self.cursor_.setAction(self.action_)
-                caption = self.action_.name
-                if self.action_.description:
-                    self.setWhatsThis(self.action_.description)
-                self.idMDI_ = self.action_.name
+            if self._action:
+                self.cursor().setAction(self._action)
+                caption = self._action.caption()
+                if self._action.description():
+                    self.setWhatsThis(self._action.description())
+                self.idMDI_ = self._action.name()
 
             # self.bindIface()
             # self.setCursor(self.cursor_)
-
             if not caption:
-                caption = self.cursor_.metadata().alias()
+                caption = self.cursor().metadata().alias()
 
-            if (self.cursor_.modeAccess() == FLSqlCursor.Insert or
-                    self.cursor_.modeAccess() == FLSqlCursor.Edit or
-                    self.cursor_.modeAccess() == FLSqlCursor.Browse):
-                self.cursor_.transaction()
-                self.initTransLevel = self.cursor_.transactionLevel()
+            if not self.cursor().isValid():
+                self.cursor().model().refresh()
+
+            if self.cursor().modeAccess() in (FLSqlCursor.Insert, FLSqlCursor.Edit, FLSqlCursor.Browse):
+                self.cursor().transaction()
+                self.initTransLevel = self.cursor().transactionLevel()
                 self.setCaptionWidget(caption)
-                self.cursor_.setContext(self.iface)
-
-            if self.cursor_.modeAccess() == FLSqlCursor.Insert:
+                self.cursor().setContext(self.iface)
+            if self.cursor().modeAccess() == FLSqlCursor.Insert:
                 self.showAcceptContinue_ = True
             else:
                 self.showAcceptContinue_ = False
 
             self.loadControls()
+
         else:
             self.setCaptionWidget("No hay metadatos")
-
-        acl = self.prj.acl()
+        acl = pineboolib.project.acl()
         if acl:
             acl.process(self)
 
-    # Al no usar setMainWidget cargo la botonera aqui
     def loadControls(self):
         if self.pushButtonAcceptContinue:
             self.pushButtonAcceptContinue.hide()
@@ -249,8 +243,7 @@ class FLFormRecordDB(FLFormDB):
         if self.bottomToolbar:
             self.toolButtonClose.hide()
         self.bottomToolbar = QtWidgets.QFrame()
-        self.bottomToolbar.setMaximumHeight(64)
-        self.bottomToolbar.setMinimumHeight(16)
+        self.bottomToolbar.setMinimumSize(self.iconSize)
         self.bottomToolbar.layout = QtWidgets.QHBoxLayout()
         self.bottomToolbar.setLayout(self.bottomToolbar.layout)
         self.bottomToolbar.layout.setContentsMargins(0, 0, 0, 0)
@@ -266,7 +259,7 @@ class FLFormRecordDB(FLFormDB):
             QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
-        pbSize = QtCore.QSize(22, 22)
+        pbSize = self.iconSize
 
         if self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if not self.pushButtonFirst:
@@ -278,7 +271,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonFirst.setSizePolicy(sizePolicy)
                 self.pushButtonFirst.setMaximumSize(pbSize)
                 self.pushButtonFirst.setMinimumSize(pbSize)
-                # pushButtonFirst->setAccel(QKeySequence(Qt::Key_F5)); FIXME
+                self.pushButtonFirst.setShortcut(QKeySequence(self.tr("F5")))
                 self.pushButtonFirst.setWhatsThis(
                     "Aceptar los cambios e ir al primer registro (F5)")
                 self.pushButtonFirst.setToolTip(
@@ -296,7 +289,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonPrevious.setSizePolicy(sizePolicy)
                 self.pushButtonPrevious.setMaximumSize(pbSize)
                 self.pushButtonPrevious.setMinimumSize(pbSize)
-                # pushButtonPrevious->setAccel(QKeySequence(Qt::Key_F6)); FIXME
+                self.pushButtonPrevious.setShortcut(QKeySequence(self.tr("F6")))
                 self.pushButtonPrevious.setWhatsThis(
                     "Aceptar los cambios e ir al registro anterior (F6)")
                 self.pushButtonPrevious.setToolTip(
@@ -314,7 +307,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonNext.setSizePolicy(sizePolicy)
                 self.pushButtonNext.setMaximumSize(pbSize)
                 self.pushButtonNext.setMinimumSize(pbSize)
-                # pushButtonNext->setAccel(QKeySequence(Qt::Key_F7)); FIXME
+                self.pushButtonNext.setShortcut(QKeySequence(self.tr("F7")))
                 self.pushButtonNext.setWhatsThis(
                     "Aceptar los cambios e ir al registro siguiente (F7)")
                 self.pushButtonNext.setToolTip(
@@ -332,7 +325,7 @@ class FLFormRecordDB(FLFormDB):
                 self.pushButtonLast.setSizePolicy(sizePolicy)
                 self.pushButtonLast.setMaximumSize(pbSize)
                 self.pushButtonLast.setMinimumSize(pbSize)
-                # pushButtonLast->setAccel(QKeySequence(Qt::Key_F8)); FIXME
+                self.pushButtonLast.setShortcut(QKeySequence(self.tr("F8")))
                 self.pushButtonLast.setWhatsThis(
                     "Aceptar los cambios e ir al último registro (F8)")
                 self.pushButtonLast.setToolTip(
@@ -343,19 +336,14 @@ class FLFormRecordDB(FLFormDB):
 
         if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             if self.showAcceptContinue_:
-                if not self.pushButtonAcceptContinue:
-                    self.pushButtonAcceptContinue = QtWidgets.QToolButton()
-                    self.pushButtonAcceptContinue.setObjectName(
-                        "pushButtonAcceptContinue")
-                    self.pushButtonAcceptContinue.clicked.connect(
-                        self.acceptContinue)
-
+                self.pushButtonAcceptContinue = QtWidgets.QToolButton()
+                self.pushButtonAcceptContinue.setObjectName("pushButtonAcceptContinue")
+                self.pushButtonAcceptContinue.clicked.connect(self.acceptContinue)
                 self.pushButtonAcceptContinue.setSizePolicy(sizePolicy)
                 self.pushButtonAcceptContinue.setMaximumSize(pbSize)
                 self.pushButtonAcceptContinue.setMinimumSize(pbSize)
-                self.pushButtonAcceptContinue.setIcon(
-                    QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
-                # pushButtonAcceptContinue->setAccel(QKeySequence(Qt::Key_F9)); FIXME
+                self.pushButtonAcceptContinue.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
+                self.pushButtonAcceptContinue.setShortcut(QKeySequence(self.tr("F9")))
                 self.pushButtonAcceptContinue.setWhatsThis(
                     "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
                 self.pushButtonAcceptContinue.setToolTip(
@@ -375,7 +363,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonAccept.setMinimumSize(pbSize)
             self.pushButtonAccept.setIcon(
                 QtGui.QIcon(filedir("../share/icons", "gtk-save.png")))
-            # pushButtonAccept->setAccel(QKeySequence(Qt::Key_F10)); FIXME
+            self.pushButtonAccept.setShortcut(QKeySequence(self.tr("F10")))
             self.pushButtonAccept.setWhatsThis(
                 "Aceptar los cambios y cerrar formulario (F10)")
             self.pushButtonAccept.setToolTip(
@@ -397,11 +385,11 @@ class FLFormRecordDB(FLFormDB):
         self.pushButtonCancel.setSizePolicy(sizePolicy)
         self.pushButtonCancel.setMaximumSize(pbSize)
         self.pushButtonCancel.setMinimumSize(pbSize)
+        self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
         self.pushButtonCancel.setIcon(
             QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
         if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
             self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
-            # pushButtonCancel->setAccel(4096); FIXME
             self.pushButtonCancel.setWhatsThis(
                 "Cancelar los cambios y cerrar formulario (Esc)")
             self.pushButtonCancel.setToolTip(
@@ -466,6 +454,7 @@ class FLFormRecordDB(FLFormDB):
                 pass
 
         if self.cursor_:
+
             try:
                 levels = self.cursor_.transactionLevel() - self.initTransLevel
                 if levels > 0:
@@ -496,7 +485,7 @@ class FLFormRecordDB(FLFormDB):
             self.closed.emit()
 
         super(FLFormRecordDB, self).closeEvent(e)
-        # self.deleteLater()
+        self.deleteLater()
 
     """
     Validación de formulario.
@@ -682,8 +671,8 @@ class FLFormRecordDB(FLFormDB):
                 self.cursor_.setModeAccess(FLSqlCursor.Insert)
                 self.accepted_ = False
                 caption = None
-                if self.action_:
-                    caption = self.action_.name
+                if self._action:
+                    caption = self._action.name()
                 if not caption:
                     caption = self.cursor_.metadata().alias()
                 self.cursor_.transaction()
@@ -811,3 +800,6 @@ class FLFormRecordDB(FLFormDB):
     def disablePushButtonCancel(self):
         if self.pushButtonCancel:
             self.pushButtonCancel.setDisabled(True)
+
+    def show(self):
+        super(FLFormRecordDB, self).show()

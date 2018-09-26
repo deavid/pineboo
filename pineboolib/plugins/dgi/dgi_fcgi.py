@@ -1,26 +1,20 @@
 # # -*- coding: utf-8 -*-
 
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from flup.server.fcgi import WSGIServer
-import traceback
 import sys
+import traceback
+import logging
+from flup.server.fcgi import WSGIServer
 
-dependences = []
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib.fllegacy.pncontrolsfactory import SysType
+from pineboolib.utils import checkDependencies
 
-try:
-    import flup  # noqa
-except ImportError:
-    print(traceback.format_exc())
-    dependences.append("flup-py3")
+import pineboolib
 
 
-if len(dependences) > 0:
-    print()
-    print("HINT: Dependencias incumplidas:")
-    for dep in dependences:
-        print("HINT: Instale el paquete %s e intente de nuevo" % dep)
-    print()
-    sys.exit(32)
+logger = logging.getLogger(__name__)
+
+checkDependencies({"flup": "flup-py3"})
 
 
 class dgi_fcgi(dgi_schema):
@@ -33,15 +27,15 @@ class dgi_fcgi(dgi_schema):
         self._name = "fcgi"
         self._alias = "FastCGI"
         self._fcgiCall = "flfactppal.iface.fcgiProcessRequest"
-        self._fcgiSocket = "/tmp/pineboo-fastcgi.socket"
+        self._fcgiSocket = "%s/pineboo-fastcgi.socket" % pineboolib.project.getTempDir()
         self.setUseDesktop(False)
         self.setUseMLDefault(False)
         self.showInitBanner()
 
     def alternativeMain(self, main_):
-        print("=============================================")
-        print("FCGI:INFO: Listening socket", self._fcgiSocket)
-        print("FCGI:INFO: Sending queries to", self._fcgiCall)
+        logger.info("=============================================")
+        logger.info("FCGI:INFO: Listening socket", self._fcgiSocket)
+        logger.info("FCGI:INFO: Sending queries to", self._fcgiCall)
         par_ = parser(main_, self._fcgiCall)
         WSGIServer(par_.call, bindAddress=self._fcgiSocket).run()
 
@@ -52,6 +46,11 @@ class dgi_fcgi(dgi_schema):
             self._fcgiSocket = p[1]
         else:
             self._fcgiCall = param
+
+
+"""
+Esta clase lanza contra el arbol qsa la consulta recibida y retorna la respuesta proporcionada, si procede
+"""
 
 
 class parser(object):
@@ -65,18 +64,14 @@ class parser(object):
     def call(self, environ, start_response):
         start_response('200 OK', [('Content-Type', 'text/html')])
         fn = None
-        try:
-            import pineboolib.qsaglobals
-            fn = eval(self._callScript, pineboolib.qsaglobals.__dict__)
-        except Exception:
-            print("No se encuentra la función buscada")
-            print(self._callScript, environ["QUERY_STRING"])
-            retorno_ = (
-                '''<html><head><title>Hello World!</title></head><body><h1>Hello world!</h1></body></html>''')
-            pass
-        print("FCGI:INFO: Processing '%s' ..." % environ["QUERY_STRING"])
         aList = environ["QUERY_STRING"]
-        if aList and fn:
-            retorno_ = fn(aList)
+        try:
+            retorno_ = pineboolib.project.call(self._callScript, aList)
+        except Exception:
+            logger.info(self._callScript, environ["QUERY_STRING"])
+            retorno_ = ('''<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>''' %
+                        (SysType().version(), self._callScript))
+            pass
+        logger.info("FCGI:INFO: Processing '%s' ...", environ["QUERY_STRING"])
 
         return retorno_

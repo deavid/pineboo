@@ -1,9 +1,9 @@
 #!/usr/bin/python3 -u
 # -*# -*- coding: utf-8 -*-
-"""Start the application and give control to pineboolib.main().
+"""Start the application and give control to pineboolib.pnapplication().
 
 Bootstrap. Se encarga de inicializar la aplicación y ceder el control a
-pineboolib.main(); para ello acepta los parámetros necesarios de consola
+pineboolib.pnapplication(); para ello acepta los parámetros necesarios de consola
 y configura el programa adecuadamente.
 """
 import sys
@@ -11,62 +11,27 @@ import re
 import traceback
 import os
 import gc
-import linecache
 from optparse import OptionParser
 import signal
 import importlib
-import pineboo
 import logging
-from PyQt5.QtCore import QCoreApplication
+from pineboolib.fllegacy.FLSettings import FLSettings
+
+
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 
-def version_check(modname, modver, minver):
-    """Compare two version numbers and raise a warning if "minver" is not met."""
-    if version_normalize(modver) < version_normalize(minver):
-        logger.warn("La version de <%s> es %s. La mínima recomendada es %s.", modname, modver, minver)
-
-
-def version_normalize(v):
-    """Normalize version string numbers like 3.10.1 so they can be compared."""
-    return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
-
-
 def startup_check_dependencies():
     """Do a preemptive import of the libraries needed and handle errors in a user friendly way."""
+    from pineboolib.utils import checkDependencies
+
+    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5"}
+    checkDependencies(dict_)
+
     if sys.version_info[0] < 3:
         logger.error("Tienes que usar Python 3 o superior.")
         sys.exit(32)
-
-    dependences = []
-    try:
-        from lxml import etree
-    except ImportError:
-        logger.exception("El paquete python3-lxml no está instalado")
-        dependences.add("python3-lxml")
-
-    try:
-        import ply
-    except ImportError:
-        logger.exception("El paquete python3-ply no está instalado")
-        dependences.add("python3-ply")
-
-    try:
-        from PyQt5 import QtCore
-    except ImportError:
-        logger.exception("El paquete python3-pyqt5 no está instalado")
-        dependences.add("python3-pyqt5")
-
-    if dependences:
-        logger.info("HINT: Dependencias incumplidas:")
-        for dep in dependences:
-            logger.info("HINT: Instale el paquete %s e intente de nuevo" % dep)
-        sys.exit(32)
-
-    version_check("lxml.etree", etree.__version__, '3.7.0')
-    version_check("ply", ply.__version__, '3.9')
-    version_check("pyqt5", QtCore.QT_VERSION_STR, '5.7')
 
 
 def translate_connstring(connstring):
@@ -77,7 +42,7 @@ def translate_connstring(connstring):
     valores por defecto y las diferentes formas de abreviar que existen.
     """
     user = "postgres"
-    passwd = "passwd"
+    passwd = None
     host = "127.0.0.1"
     port = "5432"
     dbname = ""
@@ -99,7 +64,8 @@ def translate_connstring(connstring):
         user_pass = user_pass.split(":") + [None, None, None]
         user, passwd, driver_alias = user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias
         if user_pass[3]:
-            raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
+            raise ValueError(
+                "La cadena de usuario debe tener el formato user:pass:driver.")
 
     if host_port:
         host_port = host_port.split(":") + [None]
@@ -125,8 +91,8 @@ def parse_options():
                       help="load projects/PROJECT.xml and run it", metavar="PROJECT")
     parser.add_option("-c", "--connect", dest="connection",
                       help="connect to database with user and password.", metavar="user:passwd:driver_alias@host:port/database")
-    parser.add_option('-v', '--verbose', action='count', default=1,
-                      help="increase verbosity level")
+    parser.add_option('-v', '--verbose', action='count', default=0,
+                      help="increase verbosity level")  # default a 2 para ver los logger.info, 1 no los muestra
     parser.add_option("-q", "--quiet",
                       action='count', default=0,
                       help="decrease verbosity level")
@@ -156,6 +122,9 @@ def parse_options():
     parser.add_option("--dgi_parameter",
                       dest="dgi_parameter",
                       help="Change the gdi mode by default", metavar="DGIPARAMETER")
+    parser.add_option("--test",
+                      action="store_true", dest="test", default=False,
+                      help="Launch all test")
 
     (options, args) = parser.parse_args()
 
@@ -164,16 +133,26 @@ def parse_options():
         options.no_python_cache = True
         options.preload = True
 
-    options.loglevel = 30 + (options.quiet - options.verbose) * 10
-    options.debug_level = 50 - (options.quiet - options.verbose) * 25
+    options.loglevel = 30 + (options.quiet - options.verbose) * 5
+    options.debug_level = 200  # 50 - (options.quiet - options.verbose) * 25
 
     # ---- LOGGING -----
-    log_format = '%(name)s:%(levelname)s: %(message)s'
+    if options.loglevel > 30:
+        log_format = '%(name)s:%(levelname)s: %(message)s'
+    else:
+        log_format = '%(levelname)s: %(message)s'
+
     if options.log_time:
         log_format = '%(asctime)s - %(name)s:%(levelname)s: %(message)s'
 
+    addLoggingLevel('TRACE', logging.DEBUG - 5)
+    addLoggingLevel('NOTICE', logging.INFO - 5)
+    addLoggingLevel('HINT', logging.INFO - 2)
+    addLoggingLevel('MESSAGE', logging.WARN - 5)
+
     logging.basicConfig(format=log_format, level=options.loglevel)
-    logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s", options.loglevel, options.debug_level)
+    logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s",
+                 options.loglevel, options.debug_level)
 
     disable_loggers = [
         "PyQt5.uic.uiparser",
@@ -196,12 +175,14 @@ def load_dgi(name):
 
     dgi_entrypoint = getattr(dgi_pymodule, modname, None)
     if dgi_entrypoint is None:
-        raise ImportError("Fallo al cargar el punto de entrada al módulo DGI %s" % modpath)
+        raise ImportError(
+            "Fallo al cargar el punto de entrada al módulo DGI %s" % modpath)
 
     try:
         dgi = dgi_entrypoint()  # FIXME: Necesitamos ejecutar código dinámico tan pronto?
     except Exception:
-        logger.exception("Error inesperado al cargar el módulo DGI %s" % modpath)
+        logger.exception(
+            "Error inesperado al cargar el módulo DGI %s" % modpath)
         sys.exit(32)
 
     logger.info("DGI loaded: %s", name)
@@ -211,11 +192,15 @@ def load_dgi(name):
 
 def create_app(DGI):
     """Create a MainForm using the DGI or the core."""
-    from PyQt5 import QtGui, QtWidgets
+    from PyQt5 import QtGui, QtWidgets, QtCore
     from pineboolib.utils import filedir
     import pineboolib
+    app = QtWidgets.QApplication(sys.argv)
+    app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    pineboolib.base_dir = filedir(".")  # Almacena base_dir para luego usarlo sobre filedir
+    pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
+
     if DGI.localDesktop():
-        app = QtWidgets.QApplication(sys.argv)
 
         noto_fonts = [
             "NotoSans-BoldItalic.ttf",
@@ -226,27 +211,33 @@ def create_app(DGI):
             QtGui.QFontDatabase.addApplicationFont(
                 filedir("../share/fonts/Noto_Sans", fontfile))
 
-        QtWidgets.QApplication.setStyle("QtCurve")
-        font = QtGui.QFont('Noto Sans', 9)
-        font.setBold(False)
-        font.setItalic(False)
-        QtWidgets.QApplication.setFont(font)
+        sett_ = FLSettings()
 
-        # Es necesario importarlo a esta altura, QApplication tiene que ser construido antes que cualquier widget
-        mainForm = importlib.import_module("pineboolib.plugins.mainForm.%s.%s" % (
-            pineboolib.main.Project.mainFormName, pineboolib.main.Project.mainFormName))
-    else:
-        mainForm = DGI.mainForm()
-        app = QCoreApplication(sys.argv)
-    # mainForm = getattr(module_, "MainForm")()
-    # from pineboolib import mainForm
-    return app, mainForm
+        styleA = sett_.readEntry("application/style", None)
+        if styleA is None:
+            styleA = "Fusion"
+
+        app.setStyle(styleA)
+
+        fontA = sett_.readEntry("application/font", None)
+        if fontA is None:
+            if DGI.mobilePlatform():
+                font = QtGui.QFont('Noto Sans', 14)
+            else:
+                font = QtGui.QFont('Noto Sans', 9)
+            font.setBold(False)
+            font.setItalic(False)
+        else:
+            font = QtGui.QFont(fontA[0], int(fontA[1]), int(fontA[2]), fontA[3] == "true")
+
+        app.setFont(font)
+    return app
 
 
 def show_connection_dialog(project, app):
     """Show the connection dialog, and configure the project accordingly."""
-    from pineboolib import DlgConnect
-    connection_window = DlgConnect.DlgConnect()
+    from pineboolib.dlgconnect import dlgconnect
+    connection_window = dlgconnect.DlgConnect(project._DGI)
     connection_window.load()
     connection_window.show()
     ret = app.exec_()
@@ -256,24 +247,26 @@ def show_connection_dialog(project, app):
         #    print("Cargando desde ruta %r " % prjpath)
         #    project.load(prjpath)
         # elif connection_window.database:
-        if connection_window.database:
+        if getattr(connection_window, "database", None):
             logger.info("Cargando credenciales")
-            project.deleteCache = connection_window.deleteCache
-            project.parseProject = connection_window.parseProject
+            project.deleteCache = FLSettings().readBoolEntry("ebcomportamiento/deleteCache", False)
+            project.parseProject = FLSettings().readBoolEntry("ebcomportamiento/parseProject", False)
             project.load_db(connection_window.database, connection_window.hostname, connection_window.portnumber,
                             connection_window.username, connection_window.password, connection_window.driveralias)
-
-    if not connection_window.ruta and not connection_window.database:
-        sys.exit(ret)
+        else:
+            sys.exit(ret)
 
 
 def show_splashscreen(project):
     """Show a splashscreen to inform keep the user busy while Pineboo is warming up."""
     from PyQt5 import QtGui, QtCore, QtWidgets
     from pineboolib.utils import filedir
-    splash_pix = QtGui.QPixmap(filedir("../share/splashscreen/splash_%s.png" % project.dbname))
-    splash = QtWidgets.QSplashScreen(
-        splash_pix, QtCore.Qt.WindowStaysOnTopHint)
+    splash_path = filedir("../share/splashscreen/splash_%s.png" % project.dbname)
+    if not os.path.exists(splash_path):
+        splash_path = filedir("../share/splashscreen/splash.png")
+
+    splash_pix = QtGui.QPixmap(splash_path)
+    splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
     splash.show()
 
@@ -292,62 +285,81 @@ def main():
     Handles optionlist and help.
     Also initializes all the objects
     """
-    # FIXME: This function should not initialize the program
-    from pineboolib.utils import filedir
-    import pineboolib.DlgConnect
+    import pineboolib.pnapplication
+    import pineboolib.dlgconnect
+    from pineboolib.utils import download_files, filedir
+    from pineboolib.pnsqldrivers import PNSqlDrivers
 
-    import pineboolib
-    import pineboolib.main
+    # FIXME: This function should not initialize the program
 
     # TODO: Refactorizar función en otras más pequeñas
     options = parse_options()
+
+    _DGI = load_dgi(options.dgi)
+
+    if _DGI.isDeployed():
+        logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+        download_files()
+
     pineboolib.no_python_cache = options.no_python_cache
 
     if options.trace_debug:
+        from pineboolib.utils import traceit
         sys.settrace(traceit)
     if options.trace_signals:
         monkey_patch_connect()
 
-    DGI = load_dgi(options.dgi)
-    pineboo.DGI = DGI
-
     if options.dgi_parameter:
-        DGI.setParameter(options.dgi_parameter)
+        _DGI.setParameter(options.dgi_parameter)
 
-    if DGI.useDesktop():
-        app, mainForm = create_app(DGI)
+    if not _DGI.useMLDefault():
+        return _DGI.alternativeMain(options)
 
-    project = pineboolib.main.Project(DGI)
+    project = pineboolib.pnapplication.Project(_DGI)
+
+    if _DGI.useDesktop():
+        app = create_app(_DGI)
+        project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
+            project.main_form_name, project.main_form_name)) if _DGI.localDesktop() else _DGI.mainForm()
+        project.main_window = project.main_form.mainWindow
+
+    project.sql_drivers_manager = PNSqlDrivers()
     project.setDebugLevel(options.debug_level)
-    if DGI.useDesktop():
-        mainForm.MainForm.setDebugLevel(options.debug_level)
+    if _DGI.useDesktop():
+        project.main_form.MainForm.setDebugLevel(options.debug_level)
 
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
         if not options.project.endswith(".xml"):
             options.project += ".xml"
         prjpath = filedir("../projects", options.project)
         if not os.path.isfile(prjpath):
-            raise ValueError("el proyecto %s no existe." % options.project)
-        project.load(prjpath)
+            logger.warn("el proyecto %s no existe." % options.project)
+        else:
+            project.load(prjpath)
     elif options.connection:
         user, passwd, driver_alias, host, port, dbname = translate_connstring(
             options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
-    elif DGI.useDesktop() and DGI.localDesktop():
+    elif _DGI.useDesktop() and _DGI.localDesktop() and not _DGI.mobilePlatform():
         show_connection_dialog(project, app)
+    elif _DGI.useDesktop() and _DGI.localDesktop() and _DGI.mobilePlatform():
+        project.load_db("tempdata/pineboo.sqlite3", None, None, None, None, "SQLite3")
 
     # Cargando spashscreen
     # Create and display the splash screen
-    if DGI.useDesktop() and DGI.localDesktop():
+    if _DGI.useDesktop() and _DGI.localDesktop():
         splash = show_splashscreen(project)
     else:
         splash = None
 
+    project._splash = splash
     project.run()
     if project.conn.conn is False:
-        raise ValueError("No connection was provided. Aborting Pineboo load.")
+        logger.warn("No connection was provided. Aborting Pineboo load.")
+    else:
         # return main()
-    init_project(DGI, splash, options, project, mainForm, app)
+
+        init_project(_DGI, splash, options, project, project.main_form, app)
 
 
 def preload_actions(project, forceload=None):
@@ -374,52 +386,53 @@ def init_project(DGI, splash, options, project, mainForm, app):
     """Initialize the project and start it."""
     from PyQt5 import QtCore
     if DGI.useDesktop() and DGI.localDesktop():
-        splash.showMessage("Iniciando proyecto ...")
+        splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
     logger.info("Iniciando proyecto ...")
 
+    # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
+    project.conn.managerModules().loadIdAreas()
+    project.conn.managerModules().loadAllIdModules()
+
     objaction = None
-    for k, module in list(project.modules.items()):
-        try:
-            if not module.load():
-                continue
-        except Exception as err:
-            logger.error("%s: %s", err.__class__.__name__, str(err))
-            continue
-        if options.action in module.actions:
-            objaction = module.actions[options.action]
+
+    for module_name in project.modules.keys():
+        project.modules[module_name].load()
+
+    if options.action:
+        objaction = project.conn.manager(options.action)
+        # if options.action in module.actions:
+        #    objaction = module.actions[options.action]
 
     if options.action and not objaction:
         raise ValueError("Action name %s not found" % options.action)
 
     if DGI.localDesktop():
-        splash.showMessage("Creando interfaz ...")
+        splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
     logger.info("Creando interfaz ...")
     main_window = mainForm.mainWindow
-    main_window.load()
+    main_window.initScript()
     ret = 0
-    if DGI.localDesktop():
-        splash.showMessage("Módulos y pestañas ...")
 
-    logger.info("Módulos y pestañas ...")
-    for k, area in sorted(project.areas.items()):
-        main_window.loadArea(area)
-    for k, module in sorted(project.modules.items()):
-        main_window.loadModule(module)
     if options.preload:
         preload_actions(project, options.forceload)
 
+    if options.test:
+        print(project.test())
+        return
+
     if DGI.localDesktop():
-        splash.showMessage("Abriendo interfaz ...")
+        splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
     logger.info("Abriendo interfaz ...")
     main_window.show()
-    project.call("sys.widget._class_init()", [], None, True)
+    project.call("sys.iface.init()", [], None, True)
     if DGI.localDesktop():
-        splash.showMessage("Listo ...")
-        QtCore.QTimer.singleShot(2000, splash.hide)
+        splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        # main_window.w_.activateWindow()
+        QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:
-        objaction.openDefaultForm()
+        project.openDefaultForm(objaction.form())
 
     if DGI.localDesktop():
         ret = app.exec_()
@@ -432,37 +445,16 @@ def init_project(DGI, splash, options, project, mainForm, app):
     return ret
 
 
-def traceit(frame, event, arg):
-    """Print a trace line for each Python line executed or call.
-
-    This function is intended to be the callback of sys.settrace.
-    """
-    if event != "line":
-        return traceit
-    try:
-        lineno = frame.f_lineno
-        filename = frame.f_globals["__file__"]
-        if "pineboo" not in filename:
-            return traceit
-        if (filename.endswith(".pyc") or
-                filename.endswith(".pyo")):
-            filename = filename[:-1]
-        name = frame.f_globals["__name__"]
-        line = linecache.getline(filename, lineno)
-        print("%s:%s: %s" % (name, lineno, line.rstrip()))
-    except Exception:
-        pass
-    return traceit
-
-
 def monkey_patch_connect():
     """Patch Qt5 signal/event functions for tracing them.
 
     This is not stable and should be used with care
     """
     from PyQt5 import QtCore
-    logger.warn("--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
-    logger.warn("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
+    logger.warn(
+        "--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
+    logger.warn(
+        "... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
 
     class BoundSignal():
         _CONNECT = QtCore.pyqtBoundSignal.connect
@@ -480,13 +472,16 @@ def monkey_patch_connect():
                     # print("Calling slot: %r %r" % (slot, args))
                     ret = slot(*args)
                 except Exception:
-                    print("Unhandled exception in slot %r (%r): %r" % (slot, self, args))
+                    print("Unhandled exception in slot %r (%r): %r" %
+                          (slot, self, args))
                     print("-- Connection --")
                     print(traceback.format_list(connect_stack)[-2].rstrip())
-                    last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(selfid, None)
+                    last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(
+                        selfid, None)
                     if last_emit_stack:
                         print("-- Last signal emmitted --")
-                        print(traceback.format_list(last_emit_stack)[-2].rstrip())
+                        print(traceback.format_list(
+                            last_emit_stack)[-2].rstrip())
                     print("-- Slot traceback --")
                     print(traceback.format_exc())
                 return ret
@@ -503,7 +498,8 @@ def monkey_patch_connect():
             no_receiver_check is True to disable the check that the receiver's C++
             instance still exists when the signal is emitted.
             """
-            clname = getattr(getattr(slot, "__class__", {}), "__name__", "not a class")
+            clname = getattr(getattr(slot, "__class__", {}),
+                             "__name__", "not a class")
             # print("Connect: %s -> %s" % (type(self), slot))
             if clname == "method":
                 stack = traceback.extract_stack()
@@ -523,6 +519,60 @@ def monkey_patch_connect():
     QtCore.pyqtBoundSignal.emit = BoundSignal.emit
 
 
+def addLoggingLevel(levelName, levelNum, methodName=None):
+    """
+    Comprehensively adds a new logging level to the `logging` module and the
+    currently configured logging class.
+
+    `levelName` becomes an attribute of the `logging` module with the value
+    `levelNum`. `methodName` becomes a convenience method for both `logging`
+    itself and the class returned by `logging.getLoggerClass()` (usually just
+    `logging.Logger`). If `methodName` is not specified, `levelName.lower()` is
+    used.
+
+    To avoid accidental clobberings of existing attributes, this method will
+    raise an `AttributeError` if the level name is already an attribute of the
+    `logging` module or if the method name is already present
+
+    Example
+    -------
+    >>> addLoggingLevel('TRACE', logging.DEBUG - 5)
+    >>> logging.getLogger(__name__).setLevel("TRACE")
+    >>> logging.getLogger(__name__).trace('that worked')
+    >>> logging.trace('so did this')
+    >>> logging.TRACE
+    5
+
+    """
+    if not methodName:
+        methodName = levelName.lower()
+
+    if hasattr(logging, levelName):
+        raise AttributeError(
+            '{} already defined in logging module'.format(levelName))
+    if hasattr(logging, methodName):
+        raise AttributeError(
+            '{} already defined in logging module'.format(methodName))
+    if hasattr(logging.getLoggerClass(), methodName):
+        raise AttributeError(
+            '{} already defined in logger class'.format(methodName))
+
+    # This method was inspired by the answers to Stack Overflow post
+    # http://stackoverflow.com/q/2183233/2988730, especially
+    # http://stackoverflow.com/a/13638084/2988730
+    def logForLevel(self, message, *args, **kwargs):
+        if self.isEnabledFor(levelNum):
+            self._log(levelNum, message, args, **kwargs)
+
+    def logToRoot(message, *args, **kwargs):
+        logging.log(levelNum, message, *args, **kwargs)
+
+    logging.addLevelName(levelNum, levelName)
+    setattr(logging, levelName, levelNum)
+    setattr(logging.getLoggerClass(), methodName, logForLevel)
+    setattr(logging, methodName, logToRoot)
+
+
 if __name__ == "__main__":
     # PyQt 5.5 o superior aborta la ejecución si una excepción en un slot()
     # no es capturada dentro de la misma; el programa falla con SegFault.
@@ -533,13 +583,9 @@ if __name__ == "__main__":
     startup_check_dependencies()
     sys.excepthook = traceback.print_exception
     ret = main()
-    if pineboo.DGI.useMLDefault():  # FIXME: Esto debería manejarlo main()
-        gc.collect()
-        print("Closing Pineboo...")
-        if ret:
-            sys.exit(ret)
-        else:
-            sys.exit(0)
-
+    gc.collect()
+    print("Closing Pineboo...")
+    if ret:
+        sys.exit(ret)
     else:
-        pineboo.DGI.alternativeMain(ret)
+        sys.exit(0)

@@ -2,24 +2,21 @@
 
 from PyQt5 import QtCore
 
-from pineboolib.flcontrols import ProjectClass
-from pineboolib import decorators
 
-
-class FLSettings(ProjectClass):
+class FLSettings(QtCore.QObject):
 
     s = QtCore.QSettings(QtCore.QSettings.NativeFormat,
                          QtCore.QSettings.UserScope, "Eneboo", "Pineboo")
 
-    @decorators.BetaImplementation
-    def readListEntry(self, key, retOk=False):
-        ret = []
-        if key in self.s:
-            ret = self.s.value(key)
+    def readListEntry(self, key):
+        ret = self.s.value(key)
+        if isinstance(ret, str):
+            ret = [ret]
+        if ret is None:
+            ret = []
         return ret
 
-    def readEntry(self, _key, _def=None, retOk=False):
-
+    def readEntry(self, _key, _def=None):
         ret = self.s.value(_key, None)  # devuelve un QVariant !!!!
 
         if "geo" in _key:
@@ -29,23 +26,26 @@ class FLSettings(ProjectClass):
             if not ret:
                 ret = _def
         else:
-            if str(ret) == "":
+            if ret in ["", None]:
                 ret = _def
 
-        # print("Retornando %s ---> %s" % (_key, ret))
+        #print("Retornando %s ---> %s (%s)" % (_key, ret, type(ret)))
         return ret
 
-    @decorators.BetaImplementation
-    def readNumEntry(self, key, _def=0, retOk=False):
+    def readNumEntry(self, key, _def=0):
         ret = self.s.value(key)
-        return int(ret)
+        if ret is not None:
+            return int(ret)
+        else:
+            return _def
 
-    @decorators.BetaImplementation
-    def readDoubleEntry(self, key, _def=0, retOk=False):
+    def readDoubleEntry(self, key, _def=0):
         ret = self.s.value(key)
+        if ret is None:
+            ret = _def
         return float(ret)
 
-    def readBoolEntry(self, key, _def=False, retOk=False):
+    def readBoolEntry(self, key, _def=False):
         ret = self.s.value(key)
         if isinstance(ret, str):
             ret = ret == "true"
@@ -57,6 +57,10 @@ class FLSettings(ProjectClass):
     def writeEntry(self, key, value):
         self.s.setValue(key, value)
 
-    @decorators.BetaImplementation
     def writeEntryList(self, key, value):
-        self.s.setValue(key, value)
+        if len(value) == 1:
+            val = value[0]
+        else:
+            val = value
+
+        self.s.setValue(key, val)

@@ -1,79 +1,111 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
-from PyQt5.Qt import QFile, QTextStream, qApp
-from pineboolib.flcontrols import ProjectClass
-# from pineboolib.utils import filedir
-from subprocess import call
 import os
+import logging
+
+from PyQt5 import QtCore, Qt
 
 
-class FLTranslations(ProjectClass):
+"""
+Esta clase gestiona las diferenetes trducciones de módulos y aplicación
+"""
+
+
+class FLTranslations(QtCore.QObject):
 
     TML = None
     qmFileName = None
 
+    """
+    Constructor
+    """
+
     def __init__(self):
         super(FLTranslations, self).__init__()
+        self.logger = logging.getLogger("FLTranslations")
 
-    def loadTsFile(self, tor, tsFileName, verbose):
-        qmFileName = tsFileName
-        qmFileName = qmFileName.replace(".ts", "")
-        qmFileName = "%s.qm" % qmFileName
-        # dir_ = tsFileName[0:len(tsFileName) - 44]
-        # fileName_ = tsFileName[len(tsFileName) - 43:]
+    """
+    Si no existe el .qm convierte el .ts que le damos a .qm
+    @param tor. Objeto clase metatranslator.
+    @param tsFileName. Nombre del fichero .ts a convertir
+    @param verbose. Muestra verbose (True, False)
+    @return Boolean. Proceso realizado correctamente
+    """
 
-        try:
-            if not os.path.exists(qmFileName):
-                tor.load(tsFileName)
-        except Exception:
-            print("lrelease warning: For some reason, I cannot load '%s'" %
-                  tsFileName)
-            return False
+    def loadTsFile(self, tor, ts_file_name, verbose):
+        qm_file_name = "%s.qm" % ts_file_name[:-3]
+        ok = False
+        if os.path.exists(ts_file_name):
+            ok = tor.load(ts_file_name)
 
-        return True
+        if not ok:
+            self.logger.warn("For some reason, I cannot load '%s'", ts_file_name)
+        return ok
 
-    def releaseMetaTranslator(self, tor, qmFileName, verbose, stripped):
+    """
+    Comprueba si el .qm se ha creado
+    @param tor. Metatranslator
+    @param qmFileName. Nombre del fichero .qm a comprobar
+    @param verbose. Muestra verbose (True, False)
+    @param stripped. No usado
+    """
+
+    def releaseMetaTranslator(self, tor, qm_file_name, verbose, stripped):
         if verbose:
-            print("Checking '%s'..." % qmFileName)
+            self.logger.debug("Updating '%s'...", qm_file_name)
 
-        if not os.path.exists(qmFileName):
-            print("lrelease warning: For some reason, i cannot save '%s'" %
-                  qmFileName)
+        if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
+            self.logger.warn("For some reason, i cannot save '%s'", qm_file_name)
 
-    def releaseTsFile(self, tsFileName, verbose, stripped):
+    """
+    Libera el fichero .ts
+    @param tsFileName. Nombre del fichero .ts
+    @param verbose. Muestra verbose (True, False)
+    @param stripped. no usado
+    """
+
+    def releaseTsFile(self, ts_file_name, verbose, stripped):
         tor = None
-        if self.loadTsFile(tor, tsFileName, verbose):
-            qmFileName = tsFileName
-            qmFileName = qmFileName.replace(".ts", "")
-            qmFileName = "%s.qm" % qmFileName
-            self.releaseMetaTranslator(tor, qmFileName, verbose, stripped)
 
-    def lrelease(self, tsInputFile, qmOutputFile, stripped=True):
+        if self.loadTsFile(tor, ts_file_name, verbose):
+            qm_file_name = "%s.qm" % ts_file_name[:-3]
+            if not os.path.exists(qm_file_name):
+                self.releaseMetaTranslator(tor, qm_file_name, verbose, stripped)
+
+    """
+    Convierte el fichero .ts en .qm
+    @param tsImputFile. Nombre del fichero .ts origen
+    @param qmOutputFile. Nombre del fichero .qm destino
+    @param stripped. No usado
+    """
+
+    def lrelease(self, ts_input_file, qm_output_file, stripped=True):
+        from pineboolib.translator.metatranslator import metaTranslator
         verbose = False
         metTranslations = False
         tor = metaTranslator()
 
-        f = QFile(tsInputFile)
+        f = Qt.QFile(ts_input_file)
         if not f.open(QtCore.QIODevice.ReadOnly):
-            print("lrelease error: Cannot open file '%s'" % tsInputFile)
+            self.logger.warn("Cannot open file '%s'", ts_input_file)
             return
 
-        t = QTextStream(f)
-        fullText = t.readAll()
+        t = Qt.QTextStream(f)
+        full_text = t.readAll()
         f.close()
 
-        if fullText.find("<!DOCTYPE TS>") >= 0:
-            if qmOutputFile is None:
-                self.releaseTsFile(tsInputFile, verbose, stripped)
+        if full_text.find("<!DOCTYPE TS>") >= 0:
+            if qm_output_file is None:
+                self.releaseTsFile(ts_input_file, verbose, stripped)
             else:
-                self.loadTsFile(tor, tsInputFile, verbose)
+                if not self.loadTsFile(tor, ts_input_file, verbose):
+                    return
 
         else:
             # modId = self.db_.managerModules().idModuleOfFile(tsInputFile)
-            key = self.db_.managerModules().shaOfFile(tsInputFile)
+            key = self.db_.managerModules().shaOfFile(ts_input_file)
             # dir = filedir("../tempdata/cache/%s/%s/file.ts/%s" %
             #               (self._prj.conn.db_name, modId, key))
-            tagMap = fullText
+            tagMap = full_text
             # TODO: hay que cargar todo el contenido del fichero en un diccionario
             for key, value in tagMap:
                 toks = value.split(" ")
@@ -84,46 +116,67 @@ class FLTranslations(ProjectClass):
                         self.releaseTsFile(t, verbose, stripped)
 
             if not metTranslations:
-                print(
-                    "lrelease warning: Met no 'TRANSLATIONS' entry in project file '%s'" % tsInputFile)
+                self.logger.warn("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
 
-        if qmOutputFile:
-            self.releaseMetaTranslator(tor, qmOutputFile, verbose, stripped)
-
-
-class metaTranslator(object):
-
-    # TODO: Esto en producción seria necesario hacerlo desde el programa.
-    def load(self, filename):
-        return call(["lrelease", filename])
+        if qm_output_file:
+            print("*** FAKE :: ", qm_output_file)
+            self.releaseMetaTranslator(tor, qm_output_file, verbose, stripped)
 
 
-class FLTranslate(ProjectClass):
+"""
+Esta clase llama al conversor  de fichero .qs
+"""
+
+
+"""
+Devuelve la traducción si existe
+"""
+
+
+class FLTranslate(QtCore.QObject):
 
     group_ = None
     context_ = None
     pos_ = 0
+
+    """
+    Constructor
+    @param Group. Grupo al que pertenece la traducción
+    @param context. Texto a traducir
+    @param Translate. Boolean que indica si se traduce realmente el texto pasado
+    @param pos. Posición en la que se empieza a sustituir los argumentos pasados
+    """
 
     def __init__(self, group, context, translate=True, pos=1):
         super(FLTranslate, self).__init__()
         self.pos_ = pos
         self.group_ = group
         if translate:
-            self.context_ = qApp.translate(group, context)
+            self.context_ = Qt.qApp.translate(group, context)
         else:
             self.context_ = context
+
+    """
+    Argumento pasado a la traducción
+    @param value. Texto a añadir a la traducción
+    """
 
     def arg(self, value):
         if isinstance(value, list):
             for f in value:
                 self.context_ = self.context_.replace(
-                    "%" + str(self.pos_), str(f))
+                    "%s" % self.pos_, str(f))
                 self.pos_ = self.pos_ + 1
         else:
             self.context_ = self.context_.replace(
-                "%" + str(self.pos_), str(value))
+                "%s" % self.pos_, str(value))
 
         return FLTranslate(self.group_, self.context_, False, self.pos_ + 1)
+
+    """
+    Retorna el valor traducido
+    @return traducción completada con los argumentos
+    """
 
     def __str__(self):
         return self.context_

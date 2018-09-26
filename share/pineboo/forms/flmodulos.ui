@@ -399,7 +399,7 @@
                                 <iconset>image2</iconset>
                             </property>
                             <property name="toolTip" stdset="0">
-                                <string>Eliminar registro (E)</string>
+                                <string>Eliminar registro (Supr)</string>
                             </property>
                             <property name="whatsThis" stdset="0">
                                 <string>Elimina el registro actual de la tabla</string>
@@ -492,8 +492,8 @@
                             <property name="text">
                                 <string></string>
                             </property>
-                            <property name="iconSet">
-                                <iconset>image4</iconset>
+                            <property name="pixmap">
+                                <pixmap>image4</pixmap>
                             </property>
                             <property name="accel">
                                 <string>C</string>
@@ -535,8 +535,8 @@
                             <property name="text">
                                 <string></string>
                             </property>
-                            <property name="iconSet">
-                                <iconset>image5</iconset>
+                            <property name="pixmap">
+                                <pixmap>image5</pixmap>
                             </property>
                             <property name="accel">
                                 <string>X</string>

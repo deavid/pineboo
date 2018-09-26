@@ -1,0 +1,37 @@
+
+
+requiere:
+
+json-rpc 1.10.8
+werkzeug 0.14.1
+
+
+
+pruebas:
+Lanzar servicio:
+
+./pineboo --load p --dgi jsonrpc
+
+python3 ./cliente_json-rpc.py -m mainWindow -p areas
+python3 ./cliente_json-rpc.py -m mainWindow -p modules
+python3 ./cliente_json-rpc.py -m mainWindow -p modules:F
+
+
+
+
+
+
+
+
+
+
+
+python3 ./cliente_json-rpc.py -m mainForm -p launch:clientes
+python3 ./cliente_json-rpc.py -m queqe
+python3 ./cliente_json-rpc.py -m action -p masterclientes:toolButtonEdit:clicked
+python3 ./cliente_json-rpc.py -m queqe
+python3 ./cliente_json-rpc.py -m action -p clientes:fdbNombre:setText:jose
+python3 ./cliente_json-rpc.py -m queqe
+python3 ./cliente_json-rpc.py -m action -p clientes:pushButtonCancel:clicked
+
+python3 ./cliente_json-rpc.py -m callFunction -p flfactppal.iface.valorDefectoEmpresa

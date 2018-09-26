@@ -28,6 +28,8 @@ import argparse
 import os
 import subprocess
 import sys
+import shutil
+import traceback
 
 
 def run(args):
@@ -61,6 +63,8 @@ target = cmd_line_args.target
 quiet = cmd_line_args.quiet
 verbose = cmd_line_args.verbose
 
+print("TARGET %s\n" % target)
+
 if sources:
     sources = os.path.abspath(sources)
 else:
@@ -82,15 +86,28 @@ if not target:
         print("Unsupported platform:", sys.platform, file=sys.stderr)
         sys.exit(2)
 
+# rename al files in scripts for deploy
+path_ = "%s/share/pineboo/scripts" % os.path.dirname(os.path.abspath(__file__))
+script_files = os.listdir(path_)
+i = 1
+
+for file_name in script_files:
+    if str(file_name).endswith(".py"):
+        file_name_dest = file_name.replace(".py", ".py.src")
+        shutil.copy(os.path.join(path_, file_name), os.path.join(path_, file_name_dest))
+    i = i + 1
 # Anchor everything from the directory containing this script.
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-sysroot_dir = 'sysroot-' + target
-build_dir = 'build-' + target
+sysroot_dir = 'sysroots/' + target
+build_dir = 'builds/' + target
 host_bin_dir = os.path.abspath(os.path.join(sysroot_dir, 'host', 'bin'))
 
 # Build sysroot.
 if build_sysroot:
+    if not os.path.exists("sysroots"):
+        os.mkdir("sysroots")
+
     args = ['pyqtdeploy-sysroot', '--target', target, '--sysroot', sysroot_dir,
             '--source-dir', sources]
 
@@ -103,8 +120,20 @@ if build_sysroot:
     args.append('sysroot.json')
 
     run(args)
-
+    if target == "android-32":
+        try:
+            os.symlink("%s/../../src/bzip2-android/lib/include/bzlib.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/bzlib.h" % sysroot_dir)
+            os.symlink("%s/../../src/bzip2-android/lib/lib/armeabi/libbz2.so" % os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libbz2.so" % sysroot_dir)
+            os.symlink("%s/../../src/sqlite3-android/build/sqlite3.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3.h" % sysroot_dir)
+            os.symlink("%s/../../src/sqlite3-android/obj/local/armeabi/libsqlite3.so" %
+                       os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libsqlite3.so" % sysroot_dir)
+        except:
+            pass
+else:
+    print("INFO::sysroot-%s ya existe, omitiendo ..." % target)
 # Build the demo.
+if not os.path.exists("builds"):
+    os.mkdir("builds")
 run(['pyqtdeploy-build', '--target', target, '--sysroot', sysroot_dir,
      '--build-dir', build_dir, 'pyqt-pineboo.pdy'])
 
@@ -123,13 +152,15 @@ else:
 
     if target.startswith('android'):
         run([make, 'INSTALL_ROOT=deploy', 'install'])
+        #os.symlink("%s/../../build_android.xml" % os.path.abspath("deploy"),"%s/build.xml" % os.path.abspath("deploy"))
+        #os.symlink("%s/../../project.properties" % os.path.abspath("deploy"), "%s/project.properties" % os.path.abspath("deploy"))
         run([os.path.join(host_bin_dir, 'androiddeployqt'), '--input',
-             'android-libpyqt-pineboo.so-deployment-settings.json', '--output',
-             'deploy'])
+             'android-libpineboo.so-deployment-settings.json', '--output',
+             'deploy', '--deployment', 'bundled', '--android-platform', os.environ.get('ANDROID_NDK_PLATFORM'), '--gradle'])
 
 # Tell the user where the demo is.
 if target.startswith('android'):
-    apk_dir = os.path.join(build_dir, 'deploy', 'bin')
+    apk_dir = os.path.join(build_dir, 'deploy', 'build', 'outputs', 'apk')
     print("""The QtApp-debug.apk file can be found in the '{0}'
 directory.  Run adb to install it to a simulator.""".format(apk_dir))
 
@@ -145,3 +176,11 @@ elif target.startswith('win') or sys.platform == 'win32':
 else:
     print("The Pineboo executable can be found in the '{0}' directory.".format(
         build_dir))
+
+# Limpiar y completar build_dir
+lstDir = os.walk(build_dir)
+for root, dirs, files in lstDir:
+    for fichero in files:
+        (nombreFichero, extension) = os.path.splitext(fichero)
+        if extension in [".o", ".h", ".cpp"]:
+            os.remove(fichero)

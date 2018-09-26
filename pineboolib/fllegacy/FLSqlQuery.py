@@ -1,16 +1,11 @@
-from pineboolib.flcontrols import ProjectClass
 from pineboolib import decorators
 from PyQt5 import QtWidgets
-from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
 import pineboolib
 import traceback
 import datetime
 
 
-class FLSqlQuery(ProjectClass):
-
-    countRefQuery = 0
-    invalidTables = False
+class FLSqlQuery(object):
     """
     Maneja consultas con características específicas para AbanQ, hereda de QSqlQuery.
 
@@ -20,11 +15,14 @@ class FLSqlQuery(ProjectClass):
     @author InfoSiAL S.L.
     """
 
+    countRefQuery = 0
+    invalidTables = False
+
     def __init__(self, name=None, connection_name=None):
-        super(FLSqlQuery, self).__init__()
+        # super(FLSqlQuery, self).__init__()
 
         self.d = FLSqlQueryPrivate(name)
-        self.d.db_ = self._prj.conn.useConn(connection_name)
+        self.d.db_ = pineboolib.project.conn.useConn(connection_name)
 
         self.countRefQuery = self.countRefQuery + 1
         self._row = None
@@ -34,14 +32,14 @@ class FLSqlQuery(ProjectClass):
         self.invalidTablesList = False
         self.d.select_ = None
         self.d.fieldList_ = []
-        self.d.fieldMetaDataList_ = []
+        #self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
         if name:
             retornoQry = pineboolib.project.conn.manager().query(name, self)
 
         if retornoQry:
-            self = retornoQry
+            self.d = retornoQry.d
 
     def __del__(self):
         try:
@@ -61,26 +59,20 @@ class FLSqlQuery(ProjectClass):
     def exec_(self, sql=None):
         if self.invalidTablesList:
             return False
-
         if not sql:
             sql = self.sql()
-
         if not sql:
             return False
 
-        """
-        En algunas consultas va con ';' , esto lo limpio
-        """
         sql = sql.replace(";", "")
-
         # micursor=self.__damecursor()
         conn = self.__dameConn()
         micursor = conn.cursor()
         try:
             micursor.execute(sql)
             self._cursor = micursor
+            self._posicion = None
         except Exception:
-
             print(traceback.format_exc())
             # conn.rollback()
             return False
@@ -88,7 +80,14 @@ class FLSqlQuery(ProjectClass):
 
         return True
 
-    exec = exec_  # FIXME: En python no se puede llamar una variable "exec".
+    # exec = exec_  # FIXME: En python no se puede llamar una variable "exec".
+
+    """
+    def exec_(self, sql=None, conn=None):
+        if conn:
+            self.d.db_ = conn
+        return self.exec(sql)
+    """
 
     @classmethod
     def __damecursor(self):
@@ -99,7 +98,7 @@ class FLSqlQuery(ProjectClass):
         return cursor
 
     def __dameConn(self):
-        from pineboolib.PNConnection import PNConnection
+        from pineboolib.pnconnection import PNConnection
         if getattr(self.d, "db_", None):
             if isinstance(self.d.db_, PNConnection):
                 conn = self.d.db_.conn
@@ -115,23 +114,15 @@ class FLSqlQuery(ProjectClass):
         else:
             self._datos = self._cursor.fetchall()
 
-    def exec_(self, conn=None, sql=None):
-        if conn:
-            self.d.db_ = conn
-        return self.exec(sql)
-
     """
     Añade la descripción parámetro al diccionario de parámetros.
 
     @param p Objeto FLParameterQuery con la descripción del parámetro a añadir
     """
 
-    def addParameter(self, p):
-        if not self.d.parameterDict_:
-            self.d.parameterDict_ = {}
-
-        if p:
-            self.d.parameterDict_.insert(p.name(), p)
+    def addParameter(self, p=None):
+        if p is not None:
+            self.d.parameterDict_[p.name()] = p
 
     """
     Añade la descripción de un grupo al diccionario de grupos.
@@ -335,15 +326,14 @@ class FLSqlQuery(ProjectClass):
             res = res + " ORDER BY " + self.d.orderBy_
 
         if self.d.parameterDict_:
-            for pD in self.d.parameterDict_:
-                v = pD.value()
+            for pD in self.d.parameterDict_.keys():
+                v = self.d.parameterDict_[pD]
 
                 if not v:
                     v = QtWidgets.QInputDialog.getText(
-                        QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD.alias(), None, None)
+                        QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
 
-                res = res.replace(
-                    pD.key(), self.d.db_.manager().formatValue(pD.type(), v))
+                res = res.replace("[%s]" % pD, "\'%s\'" % v)
 
         return res
 
@@ -449,7 +439,7 @@ class FLSqlQuery(ProjectClass):
             name = self.posToFieldName(pos)
 
         if raw:
-            return self.d.db_.fetchLargeValue(self._row[pos])
+            return self.d.db_.manager().fetchLargeValue(self._row[pos])
         else:
 
             try:
@@ -531,8 +521,7 @@ class FLSqlQuery(ProjectClass):
     def setTablesList(self, tl):
         self.d.tablesList_ = []
         for tabla in tl.split(","):
-
-            if not self._prj.conn.manager().metadata(tabla):
+            if not pineboolib.project.conn.manager().existsTable(tabla):
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
@@ -545,8 +534,7 @@ class FLSqlQuery(ProjectClass):
     """
 
     def setValueParam(self, name, v):
-        if self.d.parameterDict_:
-            self.d.parameterDict_[name] = v
+        self.d.parameterDict_[name] = v
 
     """
     Obtiene el valor de un parámetro.
@@ -555,7 +543,7 @@ class FLSqlQuery(ProjectClass):
     """
 
     def valueParam(self, name):
-        if self.d.parameterDict_:
+        if name in self.d.parameterDict_.keys():
             return self.d.parameterDict_[name]
         else:
             return None
@@ -579,7 +567,7 @@ class FLSqlQuery(ProjectClass):
 
     def fieldMetaDataList(self):
         if not self.d.fieldMetaDataList_:
-            self.d.fieldMetaDataList_ = FLTableMetaData()
+            self.d.fieldMetaDataList_ = {}
         table = None
         field = None
         for f in self.d.fieldList_:
@@ -590,7 +578,7 @@ class FLSqlQuery(ProjectClass):
                 continue
             fd = mtd.field(field)
             if fd:
-                self.d.fieldMetaDataList_.insert(field.lower(), fd)
+                self.d.fieldMetaDataList_[field.lower()] = fd
 
             if not mtd.inCache():
                 del mtd
@@ -615,7 +603,7 @@ class FLSqlQuery(ProjectClass):
 
     @decorators.NotImplementedWarn
     def isValid(self):
-        pass
+        return True
 
     @decorators.NotImplementedWarn
     def isActive(self):
@@ -657,9 +645,9 @@ class FLSqlQuery(ProjectClass):
     def isForwardOnly(self):
         pass
 
-    @decorators.Deprecated
+    @decorators.NotImplementedWarn
     def setForwardOnly(self, forward):
-        pass  # No hace nada
+        pass
 
     @decorators.NotImplementedWarn
     def QSqlQuery_value(self, i):
@@ -765,9 +753,7 @@ class FLSqlQueryPrivate():
     from_ = None
     where_ = None
     orderBy_ = None
-    parameterDict_ = []
     groupDict_ = []
-    fieldMetaDataList_ = []
 
     def __init__(self, name=None):
         self.name_ = name
@@ -775,9 +761,9 @@ class FLSqlQueryPrivate():
         self.from_ = None
         self.where_ = None
         self.orderBy_ = None
-        self.parameterDict_ = []
+        self.parameterDict_ = {}
         self.groupDict_ = []
-        self.fieldMetaDataList_ = []
+        self.fieldMetaDataList_ = {}
         self.db_ = None
 
     def __del__(self):
@@ -834,7 +820,7 @@ class FLSqlQueryPrivate():
     """
     Lista de con los metadatos de los campos de la consulta
     """
-    fieldMetaDataList_ = []
+    fieldMetaDataList_ = {}
 
     """
     Base de datos sobre la que trabaja
@@ -842,13 +828,12 @@ class FLSqlQueryPrivate():
     db_ = None
 
 
-class FLGroupByQuery(ProjectClass):
+class FLGroupByQuery(object):
 
     level_ = None
     field_ = None
 
     def __init__(self, n, v):
-        super(FLGroupByQuery, self).__init__()
         self.level_ = n
         self.field_ = v
 

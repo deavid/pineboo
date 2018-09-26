@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+import logging
+
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import DefFun
-from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib.utils import filedir
+import pineboolib
 
 
 class FLFormSearchDB(FLFormDB):
@@ -37,64 +39,43 @@ class FLFormSearchDB(FLFormDB):
     acceptingRejecting_ = None
     inExec_ = None
     accepted_ = None
-    cursor_ = None
 
     eventloop = None
+
+    logger = logging.getLogger("FLFormSearchDB")
     """
     constructor.
     """
 
-    def __init__(self, *args, **kwargs):
-        parent = None
-        name = None
-        action = None
+    def __init__(self, name_or_cursor, parent=None):
 
-        if isinstance(args[0], str):
-            # @param actionName Nombre de la acción asociada al formulario
+        if not name_or_cursor:
+            self.logger.warn("Se ha llamado a FLFormSearchDB sin name_or_cursor")
+            return
 
-            if len(args) == 2:
-                parent = args[1]
+        from pineboolib.pncontrolsfactory import aqApp
+        parent = parent or aqApp.mainWidget()
+        if isinstance(name_or_cursor, str):
+            action = pineboolib.project.conn.manager().action(name_or_cursor)
+            cursor = FLSqlCursor(action.table(), True, "default", None, None, self)
+        else:
+            action = name_or_cursor.action()
+            cursor = name_or_cursor
 
-            name = args[0]
+        super(FLFormSearchDB, self).__init__(parent, action, load=False)
 
-            self.cursor_ = FLSqlCursor(name, True, "default", None, None, self)
-            action = self.cursor_._action
-            self.accepted_ = False
+        self.setCursor(cursor)
 
-        elif isinstance(args[0], FLSqlCursor):
-            # @param cursor Objeto FLSqlCursor para asignar a este formulario
-            # @param actionName Nombre de la acción asociada al formulario
+        self.accepted_ = False
 
-            if len(args) == 3:
-                parent = args[2]
-                name = args[1]
-
-            self.cursor_ = args[0]
-            action = self.cursor_._action
-
-        elif len(args) == 2:
-            action = args[0]
-            parent = args[1]
-            name = action.name()
-            self.cursor_ = FLSqlCursor(
-                action.table(), True, "default", None, None, self)
-
-        if not parent:
-            parent = QtWidgets.QApplication.activeModalWidget()
-
-        super(FLFormSearchDB, self).__init__(parent, action, load=True)
+        self.load()
+        self.initForm()
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
-        if not name:
-            print("FLFormSearchDB : Nombre de acción vacío")
-            return
-
-        if not action:
-            print("FLFormSearchDB : No existe la acción", name)
-            return
-
         self.eventloop = QtCore.QEventLoop()
-        # self.initForm()
+
+    def setAction(self, a):
+        self._action = a
 
     """
     destructor
@@ -110,9 +91,6 @@ class FLFormSearchDB(FLFormDB):
     """
     formReady = QtCore.pyqtSignal()
     """
-
-    def initForm(self):
-        super(FLFormSearchDB, self).initForm()
 
     def loadControls(self):
 
@@ -131,7 +109,7 @@ class FLFormSearchDB(FLFormDB):
             QtWidgets.QSizePolicy.Policy(0), QtWidgets.QSizePolicy.Policy(0))
         sizePolicy.setHeightForWidth(True)
 
-        pbSize = QtCore.QSize(22, 22)
+        pbSize = self.iconSize
 
         if not self.pushButtonAccept:
             self.pushButtonAccept = QtWidgets.QToolButton()
@@ -176,9 +154,6 @@ class FLFormSearchDB(FLFormDB):
         self.cursor_.setBrowse(False)
         self.cursor_.recordChoosed.connect(self.accept)
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
     """
     Muestra el formulario y entra en un nuevo bucle de eventos
     para esperar, a seleccionar registro.
@@ -191,7 +166,7 @@ class FLFormSearchDB(FLFormDB):
     @return El valor del campo si se acepta, o QVariant::Invalid si se cancela
     """
 
-    def exec_(self, valor):
+    def exec_(self, valor=None):
         if not self.cursor_:
             return None
 
@@ -206,12 +181,12 @@ class FLFormSearchDB(FLFormDB):
 
             return None
 
-        self.load()  # Extra
+        # self.load()  # Extra
 
         self.inExec_ = True
         self.acceptingRejecting_ = False
 
-        super(FLFormDB, self).show()
+        super(FLFormSearchDB, self).show()
         if self.initFocusWidget_:
             self.initFocusWidget_.setFocus()
 
@@ -285,15 +260,15 @@ class FLFormSearchDB(FLFormDB):
     """
 
     def closeEvent(self, e):
-        self.frameGeometry()
-        if self.focusWidget():
-            fdb = self.focusWidget().parentWidget()
-            try:
-                if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
-                    fdb.autoComFrame_.hide()
-                    return
-            except Exception:
-                pass
+        # self.frameGeometry()
+        # if self.focusWidget():
+        #    fdb = self.focusWidget().parentWidget()
+        #    try:
+        #        if fdb and fdb.autoComFrame_ and fdb.autoComFrame_.isvisible():
+        #            fdb.autoComFrame_.hide()
+        #            return
+        #    except Exception:
+        #        pass
 
         if self.cursor_ and self.pushButtonCancel:
             if not self.pushButtonCancel.isEnabled():
@@ -304,13 +279,13 @@ class FLFormSearchDB(FLFormDB):
         else:
             self.isClosing_ = True
 
-        if self.isShown():
-            self.reject()
-
         if self.isHidden():
-            self.closed.emit()
+            # self.saveGeometry()
+            # self.closed.emit()
             super(FLFormSearchDB, self).closeEvent(e)
             self.deleteLater()
+        else:
+            self.reject()
 
     """
     Invoca a la función "init" del script "masterprocess" asociado al formulario

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from pineboolib.utils import aqtt
 from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+import logging
+
+logger = logging.getLogger("FLFieldMetadata")
 
 
 class FLFieldMetaData(object):
@@ -31,7 +34,7 @@ class FLFieldMetaData(object):
 
     Serial = "serial"
     Unlock = "unlock"
-    Check = "bool"
+    Check = "check"
     count_ = 0
 
     def __init__(self, *args, **kwargs):
@@ -265,7 +268,8 @@ class FLFieldMetaData(object):
     """
     Tipo de datos lista de relaciones
     """
-    # typedef QPtrList<FLRelationMetaData> FLRelationMetaDataList; // FLRelationMetaDataList.py
+    # typedef QPtrList<FLRelationMetaData> FLRelationMetaDataList; //
+    # FLRelationMetaDataList.py
 
     """
     Añade una relacion con otra tabla para este campo.
@@ -446,6 +450,9 @@ class FLFieldMetaData(object):
     """
 
     def getIndexOptionsList(self, name):
+        if name is None:
+            return None
+
         i = 0
         for option in self.d.optionsList_:
             if option == str(name):
@@ -648,6 +655,7 @@ class FLFieldMetaData(object):
 
         if upper and isText:
             fName = "upper(%s)" % fieldName
+            formatV = formatV.upper()
         else:
             fName = fieldName
 
@@ -902,6 +910,16 @@ class FLFieldMetaDataPrivate(object):
         self.mtd_ = None
         self.fullyCalculated_ = False
         self.trimmed_ = False
+
+        if self.type_ == -1:
+            if self.partDecimal_ > 0:
+                self.type_ = "double"
+            elif self.length_ > 0:
+                self.type_ = "string"
+            else:
+                self.type_ = "uint"
+            logger.debug("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s",
+                         __name__, self.fieldName_, self.type_)
 
         if int(l) < 0:
             self.length_ = 0

@@ -1,111 +1,113 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
+from PyQt5 import QtXml
+from PyQt5.QtCore import Qt, QObject
+from PyQt5.Qt import QFileDialog, QMessageBox, QWidget
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
+from pineboolib import pnqt3ui
+from pineboolib.utils import filedir
+import pineboolib
 
-from pineboolib.kugar.mreportviewer import MReportViewer
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLPicture import FLPicture
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLStylePainter import FLStylePainter
-# from pineboolib.fllegacy.FLWidgetReportViewer import FLWidgetReportViewer
 from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
 from pineboolib.fllegacy.FLReportEngine import FLReportEngine
+
 AQ_USRHOME = "."  # FIXME
 
 
-# class FLReportViewer(ProjectClass, FLWidgetReportViewer):
-class FLReportViewer(ProjectClass):
+class FLReportViewer(QObject):
 
-    def __init__(self, parent=0, name=0, embedInParent=False, rptEngine=0):
-        # if parent and embedInParent:
-        #     pParam = Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint | Qt.Dialog | Qt.WindowModal | Qt.WindowSystemMenuHint
-        # else:
-        #     pParam = 0
-        # super(FLReportViewer, self).__init__(parent, name, pParam)
-        super(FLReportViewer, self).__init__()
-        print("FLReportViewer:: skipped because kugar is not working on Pineboo")
-        return
+    pdfFile = None
+
+    def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None):
+        #pParam = 0 if parent and embedInParent else 0
+        #pParam = pParam | Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint
+        #pParam = pParam | 0 | Qt.Dialog | Qt.WindowModal
+        #pParam = pParam | Qt.WindowSystemMenuHint
+
+        super(FLReportViewer, self).__init__(parent)
+
         self.loop_ = False
+        self.eventloop = QtCore.QEventLoop()
         self.reportPrinted_ = False
         self.rptViewer_ = 0
-        self.rptEngine_ = 0
+        self.rptEngine_ = None
         self.report_ = 0
         self.qry_ = 0
         self.slotsPrintDisabled_ = False
         self.slotsExportedDisabled_ = False
         self.printing_ = False
+        self.embedInParent_ = True if parent and embedInParent else False
+        self.ui_ = {}
 
-        if not name:
-            self.setName("FLReportViewer")
+        #qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
 
-        self.embedInParent_ = (parent and embedInParent)
+        # if not name:
+        #    self.setName("FLReportViewer")
 
-        if self.embedInParent_:
-            self.autoClose_ = False
-            self.menubar.hide()
-            self.chkAutoClose.hide()
-            self.spnResolution.hide()
-            self.spnPixel.hide()
-            self.salir.setVisible(False)
+        # if self.embedInParent_:
+        #    self.autoClose_ = False
+        #    self.ui_["menubar"].hide()
+        #    self.ui_["chkAutoClose"].hide()
+        #    self.ui_["spnResolution"].hide()
+        #    self.ui_["spnPixel"].hide()
+        #    self.ui_["salir"].setVisible(False)
 
-            if not parent.layout():
-                lay = Qt.QVBoxLayout(parent)
-                lay.addWidget(self)
-            else:
-                parent.layout().add(self)
-        else:
-            self.autoClose_ = bool(FLUtil.readSettingEntry(
-                "rptViewer/autoClose", "false"))
-            # FIXME: self.chkAutoClose.setChecked(self.autoClose_)
+        #   if not parent.layout():
+        #        lay = QtCore.QVBoxLayout(parent)
+        #        lay.addWidget(self)
+        #    else:
+        #        parent.layout().add(self)
+        # else:
+        #    self.autoClose_ = bool(FLUtil().readSettingEntry(
+        #        "rptViewer/autoClose", "false"))
+        #    self.ui_["chkAutoClose"].setChecked(self.autoClose_)
 
-        self.rptViewer_ = MReportViewer(self)
+        self.rptViewer_ = internalReportViewer(self)
         self.setReportEngine(FLReportEngine(
-            self) if rptEngine == 0 else rptEngine)
+            self) if rptEngine is None else rptEngine)
 
-        self.setFont(QtWidgets.QApplication.font())
-        self.setFocusPolicy(Qt.QWidget.FocusPolicy.StrongFocus)
+        # self.setFont(QtWidgets.QApplication.font())
+        # self.setFocusPolicy(Qt.StrongFocus)
 
-        self.lePara.setText(str(FLUtil.readSettingEntry("email/to")))
-        self.leDe.setText(str(FLUtil.readSettingEntry("email/from")))
-        self.leMailServer.setText(
-            str(FLUtil.readSettingEntry("email/mailserver")))
+        util = FLUtil()
 
-        self.initCentralWidget_ = self.centralWidget()
+        # self.ui_["lePara"].setText(str(util.readSettingEntry("email/to")))
+        # self.ui_["leDe"].setText(str(util.readSettingEntry("email/from")))
+        # self.ui_["leMailServer"].setText(
+        #    str(util.readSettingEntry("email/mailserver")))
 
-        self.smtpClient_ = FLSmtpClient(self)
-        self.smtpClient_.status.connect(self.lblEstado.setText)
+        #wrv = self.ui_["FLWidgetReportViewer"]
+        #self.initCentralWidget_ = wrv.centralWidget()
 
-        self.setCentralWidget(self.rptViewer_)
-        self.frEmail.hide()
-        self.initCentralWidget.hide()
+        #self.smtpClient_ = FLSmtpClient(self)
+        # self.smtpClient_.status.connect(self.ui_["lblEstado"].setText)
 
-        if not self.embedInParent_:
-            self.spnResolution.setValue(int(FLUtil.readDBSettingEntry(
-                "rptViewer/dpi", str(self.rptViewer_.resolution()))))
-            self.spnPixel.setValue(float(FLUtil.readDBSettingEntry(
-                "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
+        # wrv.setCentralWidget(self.rptViewer_)
+        # self.ui_["frEMail"].hide()
+        # if self.initCentralWidget_:
+        #    self.initCentralWidget_.hide()
+        # if not self.embedInParent_:
+        #    self.ui_["spnResolution"].setValue(int(util.readSettingEntry(
+        #        "rptViewer/dpi", str(self.rptViewer_.resolution()))))
+        #    self.ui_["spnPixel"].setValue(float(util.readSettingEntry(
+        #        "rptViewer/pixel", float(self.rptEngine_.relDpi()))) * 10.)
 
         self.report_ = self.rptViewer_.reportPages()
 
-    @decorators.NotImplementedWarn
-    def setName(self, name):
-        # Emulacion, este código no funciona:
-        self.name = name
-
-    @decorators.BetaImplementation
     def rptViewer(self):
         return self.rptViewer_
 
-    @decorators.BetaImplementation
     def rptEngine(self):
         return self.rptEngine_
 
-    @decorators.BetaImplementation
-    def setReportEngine(self, r=0):
+    def setReportEngine(self, r=None):
         if self.rptEngine_ == r:
             return
 
@@ -122,39 +124,38 @@ class FLReportViewer(ProjectClass):
         if self.rptEngine_:
             self.template_ = self.rptEngine_.rptNameTemplate()
             self.qry_ = self.rptEngine_.rptQueryData()
-            if self.rptEngine_.rptXmlTemplate():
-                self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
-            if self.rptEngine_.rptXmlTemplate():
-                self.xmlData_ = self.rptEngine_.rptXmlTemplate()
-            self.rptEngine_.destroyed.connect(self.setReportEngine)
+            # if self.rptEngine_.rptXmlTemplate():
+            #    self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
+            # if self.rptEngine_.rptXmlTemplate():
+            #    self.xmlData_ = self.rptEngine_.rptXmlTemplate()
+            # self.rptEngine_.destroyed.connect(self.setReportEngine)
 
-            self.ledStyle.setDisabled(False)
-            self.save_page_SVG.setDisabled(False)
-            self.save_page_tpl_SVG.setDisabled(False)
-            self.load_tpl_SVG.setDisabled(False)
-        else:
-            self.ledStyle.setDisabled(True)
-            self.save_page_SVG.setDisabled(True)
-            self.save_page_tpl_SVG.setDisabled(True)
-            self.load_tpl_SVG.setDisabled(True)
+            # self.ui_["ledStyle"].setDisabled(False)
+            # self.ui_["save_page_SVG"].setDisabled(False)
+            # self.ui_["save_page_tpl_SVG"].setDisabled(False)
+            # self.ui_["load_tpl_SVG"].setDisabled(False)
+        # else:
+            # self.ui_["ledStyle"].setDisabled(True)
+            # self.ui_["save_page_SVG"].setDisabled(True)
+            # self.ui_["save_page_tpl_SVG"].setDisabled(True)
+            # self.ui_["load_tpl_SVG"].setDisabled(True)
 
         if noSigDestroy:
             self.rptViewer_.setReportEngine(self.rptEngine_)
 
-    @decorators.BetaImplementation
     def exec_(self):
-        if self.loop_:
-            return
+        # if self.loop_:
+        #    print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
+        #    return
 
-        # Qt.QWidget.show() #FIXME
-        self.show()
+        pineboolib.project.call("sys.openUrl", [self.pdfFile], None, True)
+        # self.eventloop.exec_()
 
-        if self.embedInParent_:
-            return
+        # if self.embedInParent_:
+        #    return
 
-        self.loop_ = True
-        QtWidgets.QApplication.eventLoop().enterLoop()
-        self.clearWFlags(Qt.WShowModal)
+        #self.loop_ = True
+        # self.clearWFlags(Qt.WShowModal) # FIXME
 
     @decorators.BetaImplementation
     def csvData(self):
@@ -165,53 +166,60 @@ class FLReportViewer(ProjectClass):
         if self.printing_:
             return
 
-        # Qt.QWidget.show() #FIXME
         self.show()
         self.frameGeometry()
-        # Qt.QWidget.hide() #FIXME
         self.hide()
 
         if not self.embedInParent_:
-            geo = Qt.QRect(self.x(), self.y(), self.width(), self.height())
-            QtWidgets.QApplication.saveGeometryForm(self.name(), geo)
+            geo = QtCore.QRect(self.x(), self.y(), self.width(), self.height())
+            pineboolib.project.saveGeometryForm(self.name(), geo)
 
         if self.loop_ and not self.embedInParent_:
             self.loop_ = False
-            QtWidgets.QApplication.eventLoop().exitLoop()
 
-        # Qt.QWidget.closeEvent() #FIXME
-        self.closeEvent(e)
+        self.eventloop.exit()
+
+        super(FLReportViewer, self).closeEvent(e)
         self.deleteLater()
 
     @decorators.BetaImplementation
     def showEvent(self, e):
-        # Qt.QWidget.showEvent() #FIXME
-        self.showEvent(e)
+        super(FLReportViewer, self).showEvent(e)
 
         if not self.embedInParent_:
-            geo = Qt.QRect(QtWidgets.QApplication.geometryForm(self.name()))
-            if geo.isValid():
+            geo = QtCore.QRect(self.geometry())
+            if geo and geo.isValid():
                 desk = QtWidgets.QApplication.desktop().availableGeometry(self)
-                inter = desk.intersect(geo)
+                inter = desk.intersected(geo)
                 self.resize(geo.size())
-                if inter.width() * inter.height() > (geo.width() * geo.height() / 20):
+                geodim = geo.width() * geo.height()
+                if inter.width() * inter.height() > (geodim / 20):
                     self.move(geo.topLeft())
 
-    @decorators.BetaImplementation
-    def renderReport(self, initRow, initCol, append, displayReport=None):
+    def renderReport(self, initRow=0, initCol=0, append_or_flags=None, dRpt=None):
+        """
         flags = None
-        if displayReport is None:
-            flags = append
+        ap = MReportViewer.RenderReportFlags.Append.value
+        dp = MReportViewer.RenderReportFlags.Display.value
+
+        if dRpt is None:
+            if append_or_flags is None:
+                flags = dp
+            else:
+                flags = append_or_flags
         else:
-            flags = MReportViewer.RenderReportFlags.Append if append else 0 | int(
-                MReportViewer.RenderReportFlags.Display if displayReport else 0)
+            flags = ap if append_or_flags else 0 | int(dp) if dRpt else 0
 
         if not self.rptEngine_:
             return False
-
-        ret = self.rptViewer_.renderReport(initRow, initCol, flags)
-        self.report_ = self.rptViewer_.reportPages()
-        return ret
+        """
+        ret = self.rptViewer_.renderReport(initRow, initCol, append_or_flags)
+        #self.report_ = self.rptViewer_.reportPages()
+        if ret:
+            self.pdfFile = self.rptEngine_.pdfFile
+            return True
+        else:
+            return False
 
     @decorators.BetaImplementation
     def slotFirstPage(self):
@@ -242,12 +250,12 @@ class FLReportViewer(ProjectClass):
         if self.slotsExportedDisabled_:
             return
 
-        fileName = Qt.QFileDialog.getSaveFileName(
-            "",
-            FLUtil.translate(self, "app", "Fichero CSV (*.csv *.txt)"),
+        util = FLUtil()
+        fileName = QFileDialog.getSaveFileName(
             self,
-            FLUtil.translate(self, "app", "Exportar a CSV"),
-            FLUtil.translate(self, "app", "Exportar a CSV")
+            util.translate("app", "Exportar a CSV"),
+            "",
+            util.translate("app", "Fichero CSV (*.csv *.txt)")
         )
 
         if not fileName or fileName == "":
@@ -256,81 +264,97 @@ class FLReportViewer(ProjectClass):
         if not fileName.upper().contains(".CSV"):
             fileName = fileName + ".csv"
 
-        q = Qt.QMessageBox.question(
+        q = QtCore.QMessageBox.question(
             self,
-            FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(
-                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
-            FLUtil.translate(self, "app", "&Sí"),
-            FLUtil.translate(self, "app", "&No"),
+            util.translate("app", "Sobreescribir {}").format(fileName),
+            util.translate(
+                self,
+                "app",
+                "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
+            util.translate("app", "&Sí"),
+            util.translate("app", "&No"),
             "",
             0,
             1
         )
 
-        if Qt.QFile.exists(fileName) and q:
+        if QtCore.QFile.exists(fileName) and q:
             return
 
-        file = Qt.QFile(fileName)
+        file = QtCore.QFile(fileName)
 
         if file.open(Qt.IO_WriteOnly):
-            stream = Qt.QTextStream(file)
+            stream = QtCore.QTextStream(file)
             stream << self.csvData() << "\n"
             file.close()
         else:
-            Qt.QMessageBox.critical(
+            QtCore.QMessageBox.critical(
                 self,
-                FLUtil.translate(self, "app", "Error abriendo fichero"),
-                FLUtil.translate(self, "app", "No se pudo abrir el fichero {} para escribir: {}").arg(
-                    fileName, QtWidgets.QApplication.translate("QFile", file.errorString()))
+                util.translate("app", "Error abriendo fichero"),
+                util.translate(
+                    "app",
+                    "No se pudo abrir el fichero {} para escribir: {}"
+                ).format(
+                    fileName,
+                    QtWidgets.QApplication.translate(
+                        "QFile", file.errorString()
+                    )
+                )
             )
 
     @decorators.BetaImplementation
-    def exportToPdf(self):
+    @QtCore.pyqtSlot()
+    def exportToPDF(self):
         if self.slotsExportedDisabled_:
             return
 
-        fileName = Qt.QFileDialog.getSaveFileName(
-            "",
-            FLUtil.translate(self, "app", "Fichero PDF (*.pdf)"),
+        util = FLUtil()
+        fileName = QFileDialog.getSaveFileName(
             self,
-            FLUtil.translate(self, "app", "Exportar a PDF"),
-            FLUtil.translate(self, "app", "Exportar a PDF")
+            util.translate("app", "Exportar a PDF"),
+            "",
+            util.translate("app", "Fichero PDF (*.pdf)")
         )
 
-        if not fileName or fileName == "":
+        if fileName[0] == '':
             return
 
-        if not fileName.upper().contains(".PDF"):
-            fileName = fileName + ".pdf"
+        if fileName[0].upper().find(".PDF") == -1:
+            fileName = fileName[0] + ".pdf"
 
-        q = Qt.QMessageBox.question(
-            self,
-            FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(
-                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
-            FLUtil.translate(self, "app", "&Sí"),
-            FLUtil.translate(self, "app", "&No"),
-            "",
-            0,
-            1
-        )
+        if QtCore.QFile.exists(fileName):
 
-        if Qt.QFile.exists(fileName) and q:
-            return
+            q = QMessageBox.question(
+                self,
+                util.translate("app", "Sobreescribir {}").format(fileName),
+                util.translate(
+                    "app",
+                    "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
+                util.translate("app", "&Sí"),
+                util.translate("app", "&No"),
+                "",
+                0,
+                1
+            )
+            if q:
+                return
 
-        self.slotPrintReportToPDF(fileName)
+        self.slotPrintReportToPdf(fileName)
 
     @decorators.BetaImplementation
-    def sendEMailPdf(self):
-        t = self.leDocumento.text()
+    @QtCore.pyqtSlot()
+    def sendEMailPDF(self):
+        t = self.ui_.leDocumento.text()
+        util = FLUtil()
         name = "informe.pdf" if not t or t == "" else t
-        fileName = Qt.QFileDialog.getSaveFileName(
+        fileName = QtCore.QFileDialog.getSaveFileName(
             AQ_USRHOME + "/" + name + ".pdf",
-            FLUtil.translate(self, "app", "Fichero PDF a enviar (*.pdf)"),
+            util.translate("app", "Fichero PDF a enviar (*.pdf)"),
             self,
-            FLUtil.translate(self, "app", "Exportar a PDF para enviar"),
-            FLUtil.translate(self, "app", "Exportar a PDF para enviar")
+            util.translate("app", "Exportar a PDF para enviar"),
+            util.translate("app", "Exportar a PDF para enviar")
         )
 
         if not fileName or fileName == "":
@@ -339,69 +363,80 @@ class FLReportViewer(ProjectClass):
         if not fileName.upper().contains(".PDF"):
             fileName = fileName + ".pdf"
 
-        q = Qt.QMessageBox.question(
+        q = QtCore.QMessageBox.question(
             self,
-            FLUtil.translate(self, "app", "Sobreescribir {}").format(fileName),
-            FLUtil.translate(
-                self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
-            FLUtil.translate(self, "app", "&Sí"),
-            FLUtil.translate(self, "app", "&No"),
+            util.translate("app", "Sobreescribir {}").format(fileName),
+            util.translate(
+                self,
+                "app",
+                "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+            ).format(fileName),
+            util.translate("app", "&Sí"),
+            util.translate("app", "&No"),
             "",
             0,
             1
         )
 
-        if Qt.QFile.exists(fileName) and q:
+        if QtCore.QFile.exists(fileName) and q:
             return
 
         autoCloseSave = self.autoClose_
-        self.slotPrintReportToPDF(fileName)
+        self.slotPrintReportToPdf(fileName)
         self.autoClose_ = autoCloseSave
 
-        FLUtil.writeSettingEntry("email/to", self.lePara.text())
-        FLUtil.writeSettingEntry("email/from", self.leDe.text())
-        FLUtil.writeSettingEntry("email/mailserver", self.leMailServer.text())
+        util.writeSettingEntry("email/to", self.ui_["lePara"].text())
+        util.writeSettingEntry("email/from", self.ui_["leDe"].text())
+        util.writeSettingEntry(
+            "email/mailserver", self.ui_["leMailServer"].text()
+        )
 
-        fi = Qt.QFileInfo(fileName)
+        fi = QtCore.QFileInfo(fileName)
         name = fi.fileName()
 
-        self.smtpClient_.setMailServer(self.leMailServer.text())
-        self.smtpClient_.setTo(self.lePara.text())
-        self.smtpClient_.setFrom(self.leDe.text())
-        self.smtpClient_.setSubject(
-            name if self.leAsunto.text() == "" else self.leAsunto.text())
-        self.smtpClient_.setBody(self.leCuerpo.text() + "\n\n")
+        self.smtpClient_.setMailServer(self.ui_["leMailServer"].text())
+        self.smtpClient_.setTo(self.ui_["lePara"].text())
+        self.smtpClient_.setFrom(self.ui_["leDe"].text())
+        asutxt = self.ui_["leAsunto"].text()
+        self.smtpClient_.setSubject(name if asutxt == "" else asutxt)
+        self.smtpClient_.setBody(self.ui_["leCuerpo"].text() + "\n\n")
 
         html = "<html><body><a href=\"http://abanq.org/\">"
-        html = html + "<img src=\"cid:logo.png@3d8b627b6292\"/></a><br/><br/></body></html>"
+        html += "<img src=\"cid:logo.png@3d8b627b6292\"/>"
+        html += "</a><br/><br/></body></html>"
         self.smtpClient_.addTextPart(html, "text/html")
         self.smtpClient_.addAttachment(fileName)
         self.smtpClient_.startSend()
 
     @decorators.BetaImplementation
     def showInitCentralWidget(self, show):
+        wrv = self.ui_["FLWidgetReportViewer"]
         if show:
             self.rptViewer_.hide()
-            self.setCentralWidget(self.initCentralWidget_)
-            self.leDocumento.setText(
-                "doc-" + str(Qt.QDateTime.currentDateTime()).replace(":", ",").replace(" ", ""))
-            self.frEMail.show()
+            wrv.setCentralWidget(self.initCentralWidget_)
+            self.ui["leDocumento"].setText(
+                "doc-" + str(
+                    QtCore.QDateTime.currentDateTime()
+                ).replace(":", ",").replace(" ", "")
+            )
+            self.ui_["frEMail"].show()
             self.initCentralWidget_.show()
         else:
             self.initCentralWidget_.hide()
-            self.frEMail.hide()
-            self.setCentralWidget(self.rptViewer_)
+            self.ui_["frEMail"].hide()
+            wrv.setCentralWidget(self.rptViewer_)
             self.rptViewer_.show()
 
     @decorators.BetaImplementation
     def saveSVGStyle(self):
+        util = FLUtil()
         if self.report_:
-            fileName = Qt.QFileDialog.getSaveFileName(
+            fileName = QtCore.QFileDialog.getSaveFileName(
                 "",
-                FLUtil.translate(self, "app", "Fichero SVG (*.svg)"),
+                util.translate(self, "app", "Fichero SVG (*.svg)"),
                 self,
-                FLUtil.translate(self, "app", "Guardar en SVG"),
-                FLUtil.translate(self, "app", "Guardar en SVG")
+                util.translate(self, "app", "Guardar en SVG"),
+                util.translate(self, "app", "Guardar en SVG")
             )
 
             if not fileName or fileName == "":
@@ -410,20 +445,23 @@ class FLReportViewer(ProjectClass):
             if not fileName.upper().contains(".SVG"):
                 fileName = fileName + ".svg"
 
-            q = Qt.QMessageBox.question(
+            q = QtCore.QMessageBox.question(
                 self,
-                FLUtil.translate(
+                util.translate(
                     self, "app", "Sobreescribir {}").format(fileName),
-                FLUtil.translate(
-                    self, "app", "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?").format(fileName),
-                FLUtil.translate(self, "app", "&Sí"),
-                FLUtil.translate(self, "app", "&No"),
+                util.translate(
+                    self,
+                    "app",
+                    "Ya existe un fichero llamado {}. ¿Desea sobreescribirlo?"
+                ).format(fileName),
+                util.translate(self, "app", "&Sí"),
+                util.translate(self, "app", "&No"),
                 "",
                 0,
                 1
             )
 
-            if Qt.QFile.exists(fileName) and q:
+            if QtCore.QFile.exists(fileName) and q:
                 return
 
             FLStylePainter.setSVGMode(True)
@@ -437,7 +475,7 @@ class FLReportViewer(ProjectClass):
                 fileNames.append(fname)
                 page = self.report_.getPageAt(i)
                 psize = self.report_.pageDimensions()
-                page.setBoundingRect(Qt.QRect(Qt.QPoint(0, 0), psize))
+                page.setBoundingRect(QtCore.QRect(QtCore.QPoint(0, 0), psize))
                 page.save(fname, "svg")
 
             FLStylePainter.normalizeSVGFile(fileName, fileNames)
@@ -454,23 +492,23 @@ class FLReportViewer(ProjectClass):
 
     @decorators.BetaImplementation
     def loadSVGStyle(self):
-        fileName = Qt.QFileDialog.getOpenFileName(
+        util = FLUtil()
+        fileName = QtCore.QFileDialog.getOpenFileName(
             "",
-            FLUtil.translate(self, "app", "Fichero SVG (*.svg)"),
+            util.translate(self, "app", "Fichero SVG (*.svg)"),
             self,
-            FLUtil.translate(self, "app", "Cargar estilo SVG"),
-            FLUtil.translate(self, "app", "Cargar estilo SVG")
+            util.translate(self, "app", "Cargar estilo SVG"),
+            util.translate(self, "app", "Cargar estilo SVG")
         )
 
         if not fileName or fileName == "":
             return
 
-        self.ledStyle.setText("file:" + fileName)
+        self.ui_["ledStyle"].setText("file:" + fileName)
         self.updateReport()
 
     @decorators.BetaImplementation
     def slotExit(self):
-        # Qt.QWidget.close()
         self.close()
 
     @decorators.BetaImplementation
@@ -482,7 +520,7 @@ class FLReportViewer(ProjectClass):
         self.printing_ = True
         self.reportPrinted_ = self.rptViewer_.printReportToPs(outPsFile)
         if self.reportPrinted_ and self.autoClose_:
-            Qt.QTimer.singleShot(0, self.slotExit)
+            QtCore.QTimer.singleShot(0, self.slotExit)
         self.printing_ = False
         self.setDisabled(False)
 
@@ -495,7 +533,7 @@ class FLReportViewer(ProjectClass):
         self.printing_ = True
         self.reportPrinted_ = self.rptViewer_.printReportToPdf(outPdfFile)
         if self.reportPrinted_ and self.autoClose_:
-            Qt.QTimer.singleShot(0, self.slotExit)
+            QtCore.QTimer.singleShot(0, self.slotExit)
         self.printing_ = False
         self.setDisabled(False)
 
@@ -508,11 +546,10 @@ class FLReportViewer(ProjectClass):
         self.printing_ = True
         self.reportPrinted_ = self.rptViewer_.printReport()
         if self.reportPrinted_ and self.autoClose_:
-            Qt.QTimer.singleShot(0, self.slotExit)
+            QtCore.QTimer.singleShot(0, self.slotExit)
         self.printing_ = False
         self.setDisabled(False)
 
-    @decorators.BetaImplementation
     def setReportData(self, d):
         if isinstance(d, FLSqlQuery):
             self.qry_ = d
@@ -521,16 +558,19 @@ class FLReportViewer(ProjectClass):
                 return True
             return False
         elif isinstance(d, FLSqlCursor):
-            return self.rptEngine_.setReportData(d) if self.rptEngine_ else False
-        elif isinstance(d, Qt.QDomNode):
+            if not self.rptEngine_:
+                return False
+            return self.rptEngine_.setReportData(d)
+        elif isinstance(d, QtXml.QDomNode):
             self.xmlData_ = d
             self.qry_ = 0
-            return self.rptEngine_.setReportData(d) if self.rptEngine_ else False
+            if not self.rptEngine_:
+                return False
+            return self.rptEngine_.setReportData(d)
         return False
 
-    @decorators.BetaImplementation
-    def setReportTemplate(self, t, style=""):
-        if isinstance(t, Qt.QDomNode):
+    def setReportTemplate(self, t, style=None):
+        if isinstance(t, QtXml.QDomNode):
             self.xmlTemplate_ = t
             self.template_ = ""
             self.styleName_ = style
@@ -544,10 +584,10 @@ class FLReportViewer(ProjectClass):
             self.template_ = t
             self.styleName_ = style
             if self.rptEngine_ and self.rptEngine_.setFLReportTemplate(t):
-                self.rptEngine_.setStyleName(style)
+                # self.rptEngine_.setStyleName(style)
                 self.xmlTemplate_ = self.rptEngine_.rptXmlTemplate()
                 return True
-            return False
+
         return False
 
     @decorators.BetaImplementation
@@ -577,14 +617,18 @@ class FLReportViewer(ProjectClass):
         else:
             self.autoClose_ = b
 
+    @QtCore.pyqtSlot(int)
     @decorators.BetaImplementation
     def setResolution(self, dpi):
-        FLUtil.writeSettingEntry("rptViewer/dpi", str(dpi))
+        util = FLUtil()
+        util.writeSettingEntry("rptViewer/dpi", str(dpi))
         self.rptViewer_.setResolution(dpi)
 
+    @QtCore.pyqtSlot(int)
     @decorators.BetaImplementation
     def setPixel(self, relDpi):
-        FLUtil.writeSettingEntry("rptViewer/pixel", str(float(relDpi / 10.)))
+        util = FLUtil()
+        util.writeSettingEntry("rptViewer/pixel", str(float(relDpi / 10.)))
         if self.rptEngine_:
             self.rptEngine_.setRelDpi(relDpi / 10.)
 
@@ -719,7 +763,7 @@ class FLReportViewer(ProjectClass):
     def pageDimensions(self):
         if self.report_:
             return self.report_.pageDimensions()
-        return Qt.QSize()
+        return QtCore.QSize()
 
     @decorators.BetaImplementation
     def pageCount(self):
@@ -736,11 +780,11 @@ class FLReportViewer(ProjectClass):
         if not parentFrame:
             return
 
-        self.setCentralWidget(0)
-        self.rptViewer_.reparent(parentFrame, 0, Qt.QPoint(0, 0))
+        self.ui_["FLWidgetReportViewer"].setCentralWidget(0)
+        self.rptViewer_.reparent(parentFrame, 0, QtCore.QPoint(0, 0))
 
         if not parentFrame.layout():
-            lay = Qt.QVBoxLayout(parentFrame)
+            lay = QtCore.QVBoxLayout(parentFrame)
             lay.addWidget(self.rptViewer_)
         else:
             parentFrame.layout().add(self.rptViewer_)
@@ -752,14 +796,14 @@ class FLReportViewer(ProjectClass):
         if not parentFrame:
             return
 
-        actExit = Qt.QAction(self.child("salir", "QAction"))
+        actExit = QtCore.QAction(self.child("salir", "QAction"))
         if actExit:
             actExit.setVisible(False)
 
-        self.reparent(parentFrame, 0, Qt.QPoint(0, 0))
+        self.reparent(parentFrame, 0, QtCore.QPoint(0, 0))
 
         if not parentFrame.layout():
-            lay = Qt.QVBoxLayout(parentFrame)
+            lay = QtCore.QVBoxLayout(parentFrame)
             lay.addWidget(self)
         else:
             parentFrame.layout().add(self)
@@ -770,7 +814,7 @@ class FLReportViewer(ProjectClass):
     def setReportPages(self, pgs):
         self.setReportEngine(0)
         self.qry_ = 0
-        self.xmlData_ = Qt.QDomNode()
+        self.xmlData_ = QtXml.QDomNode()
         self.rptViewer_.setReportPages(pgs.pageCollection() if pgs else 0)
         self.report_ = self.rptViewer_.reportPages()
 
@@ -783,9 +827,9 @@ class FLReportViewer(ProjectClass):
         return self.rptViewer_.colorMode()
 
     @decorators.BetaImplementation
-    def disableSlotsPrintExports(self, disablePrints=True, disableExports=True):
-        self.slotsPrintDisabled_ = disablePrints
-        self.slotsExportedDisabled_ = disableExports
+    def disableSlotsPrintExports(self, dPrints=True, dExports=True):
+        self.slotsPrintDisabled_ = dPrints
+        self.slotsExportedDisabled_ = dExports
 
     @decorators.BetaImplementation
     def exportToOds(self):
@@ -793,3 +837,35 @@ class FLReportViewer(ProjectClass):
             return
 
         self.rptViewer_.exportToOds()
+
+    @decorators.BetaImplementation
+    def setName(self, n):
+        self.name_ = n
+
+    @decorators.BetaImplementation
+    def name(self):
+        return self.name_
+
+
+class internalReportViewer(QObject):
+
+    rptEngine_ = None
+    dpi_ = 0
+    report_ = []
+
+    def __init__(self, parent):
+        super(internalReportViewer, self).__init__(parent)
+        self.dpi_ = 300
+        self.report_ = []
+
+    def setReportEngine(self, rptEngine):
+        self.rptEngine_ = rptEngine
+
+    def resolution(self):
+        return self.dpi_
+
+    def reportPages(self):
+        return self.report_
+
+    def renderReport(self, initRow, initCol, flags):
+        return self.rptEngine_.renderReport()

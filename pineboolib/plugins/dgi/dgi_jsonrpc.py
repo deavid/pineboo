@@ -2,16 +2,21 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
+from pineboolib.fllegacy.FLFieldDB import FLFieldDB
+from pineboolib.fllegacy.FLTableDB import FLTableDB
 from pineboolib import decorators
-
 import pineboolib
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 
 from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
 from json import dumps
-from lxml import etree
+from xml import etree
+
+
+from importlib import import_module
+
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
@@ -21,11 +26,18 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 import traceback
 
 
+logger = logging.getLogger(__name__)
+
+
 class parser(object):
     _mainForm = None
+    _queqe = {}
 
     def __init__(self, mainForm):
         self._mainForm = mainForm
+
+    def addQueque(self, name, value):
+        self._queqe[name] = value
 
     @Request.application
     def receive(self, request):
@@ -40,9 +52,12 @@ class parser(object):
 
     @dispatcher.add_method
     def mainWindow(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         if not args:
             return "needArguments"
-        obj_ = getattr(pineboolib.project.main_window, "json_%s" % args[0], None)
+        obj_ = getattr(pineboolib.project.main_window,
+                       "json_%s" % args[0], None)
         if obj_:
             return obj_(args)
         else:
@@ -51,6 +66,8 @@ class parser(object):
 
     @dispatcher.add_method
     def mainForm(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
         if not args:
             return "needArguments"
         try:
@@ -60,11 +77,94 @@ class parser(object):
             print(traceback.format_exc())
             return "notFound"
 
+    @dispatcher.add_method
+    def callFunction(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
+
+        fun_ = args[0]
+        param_ = None
+        fn = None
+        if len(args) > 1:
+            param_ = ",".join(args[1:])
+        else:
+            param_ = [args[0]]
+
+        try:
+            pineboolib.project.call(fun_, param_)
+        except Exception:
+            return "notFound"
+        # if param_:
+        #    return fn(param_)
+        # else:
+        #    return fn()
+
+    @dispatcher.add_method
+    def queqe(*args):
+        if len(args) == 1:
+            if args[0] == "clean":
+                pineboolib.project._DGI._par._queqe = {}
+                return True
+            elif args[0] in pineboolib.project._DGI._par._queqe.keys():
+                ret = []
+                for q in pineboolib.project._DGI._par._queqe.keys():
+                    if q.find(args[0]) > -1:
+                        ret.append(q, pineboolib.project._DGI._par._queqe[q])
+                        del pineboolib.project._DGI._par._queqe[q]
+            else:
+                ret = "Not Found"
+        else:
+            ret = pineboolib.project._DGI._par._queqe
+            pineboolib.project._DGI._par._queqe = {}
+
+        return ret
+
+    @dispatcher.add_method
+    def action(*args):
+        if pineboolib.project._DGI._par._queqe:
+            return "queqePending"
+        arguments = args
+        actionName = arguments[0]
+        control = arguments[1]
+        emite = arguments[2]
+        if actionName in pineboolib.project._DGI._WJS.keys():
+            ac = pineboolib.project._DGI._W[actionName]
+
+            cr = ac.child(control)
+            if cr:
+                em = getattr(cr, emite, None)
+                if isinstance(cr, FLFieldDB):
+                    if emite == "setText":
+                        cr.editor_.setText(arguments[3])
+                        return True
+                    else:
+                        print("Función desconocida", emite)
+                        return False
+
+                elif isinstance(cr, FLTableDB):
+                    if emite == "data":
+                        print("Recoge data!!!")
+
+                elif em:
+                    getattr(cr, emite).emit()
+                    return True
+
+            return False
+
+        return "notFound"
+
+
+def resolveObject(name):
+
+    mod_ = import_module(__name__)
+    ret_ = getattr(mod_, name, None)
+    return ret_
+
 
 class dgi_jsonrpc(dgi_schema):
     _par = None
-    _reject_widgets = []
     _W = {}
+    _WJS = {}
 
     def __init__(self):
         # desktopEnabled y mlDefault a True
@@ -75,20 +175,14 @@ class dgi_jsonrpc(dgi_schema):
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
         self.showInitBanner()
-        self.loadReferences()
         self._mainForm = None
-        self._reject_widgets = ["QFrame"]
+        self.parserDGI = parserJson()
 
     def extraProjectInit(self):
         pass
 
     def setParameter(self, param):
         self._listenSocket = param
-
-    def loadReferences(self):
-        self.FLLineEdit = FLLineEdit
-        self.QPushButton = PushButton
-        self.QLineEdit = LineEdit
 
     def mainForm(self):
         if not self._mainForm:
@@ -104,38 +198,118 @@ class dgi_jsonrpc(dgi_schema):
         # print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         # WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
 
-    @decorators.NotImplementedWarn
-    def child(self, parent, name):
-        return self._W[parent._action.name]
-
     @decorators.BetaImplementation
     def loadUI(self, path, widget):
-        """Convertir a .json el ui."""
-        self._W[widget._action.name] = widget
+        self._WJS[widget.__class__.__module__] = self.parserDGI.parse(path)
+        self._W[widget.__class__.__module__] = widget
 
-    @decorators.NotImplementedWarn
     def showWidget(self, widget):
-        print("Mostrando", widget)
+        self._par.addQueque(
+            "%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
-    @decorators.NotImplementedWarn
-    def createWidget(self, classname, parent):
-        """Carga un objecto del tipo classname y lo añade a self._W[widget._action.name]."""
-        if classname not in self.reject_widgets():
-            print("%s acepted !!!!(%s)" % (classname, parent))
-            # FIXME: Undefined var "widget":: return self._W[widget._action.name].remote_widgets[classname]
-        else:
-            print("%s rejected !!!!" % classname)
-            return parent
-
-    def reject_widgets(self):
-        return self._reject_widgets
+    def __getattr__(self, name):
+        return resolveObject(name)
 
 
-class mainForm(object):
+"""
+Exportador UI a JSON
+"""
+
+
+class parserJson():
+
+    def __init__(self):
+        # TODO: se puede ampliar con propiedades y objetos de qt4
+        self.aPropsForbidden = ['images', 'includehints', 'layoutdefaults',
+                                'slots', 'stdsetdef', 'stdset', 'version', 'spacer', 'connections']
+        self.aObjsForbidden = ['geometry', 'sizePolicy', 'margin', 'spacing', 'frameShadow',
+                               'frameShape', 'maximumSize', 'minimumSize', 'font', 'focusPolicy', 'iconSet', 'author', 'comment', 'forwards', 'includes', 'sizepolicy', 'horstretch', 'verstretch']
+
+    def isInDgi(self, property, type):
+        if type == "prop":
+            if property in self.aPropsForbidden:
+                return False
+            else:
+                if property in self.aObjsForbidden:
+                    return False
+
+        return True
+
+    def manageProperties(self, obj):
+        if isinstance(obj, dict):
+            for property in list(obj):
+                if self.isInDgi(property, "prop"):
+                    if property == "name" and not self.isInDgi(obj[property], "obj"):
+                        del obj
+                        return None
+                    else:
+                        prop = self.manageProperties(obj[property])
+                        if prop:
+                            obj[property] = prop
+                        else:
+                            del obj[property]
+                else:
+                    del obj[property]
+        elif isinstance(obj, list):
+            ind = 0
+            while ind < len(obj):
+                it = self.manageProperties(obj[ind])
+                if it:
+                    obj[ind] = it
+                    ind += 1
+                else:
+                    del obj[ind]
+        return obj
+
+    def parse(self, name):
+        inputFile = name
+        outputFile = re.search("\w+.ui", inputFile)
+
+        if outputFile is None:
+            print("Error. El fichero debe tener extension .ui")
+            return None
+
+        # ret_out = outputFile
+
+        outputFile = re.sub(".ui", ".dgi", inputFile)
+
+        try:
+            ui = open(inputFile, 'r')
+            xml = ui.read()
+
+        except Exception:
+            print("Error. El fichero no existe o no tiene formato XML")
+            sys.exit()
+
+        json = xml2json.data(fromstring(xml))
+        json = self.manageProperties(json)
+        strJson = dumps(json, sort_keys=True, indent=2)
+
+        """
+        try:
+            dgi = open(outputFile, 'w')
+            dgi.write(strJson)
+            dgi.close()
+        except:
+            print("Error. Ha habido un problema durante la escritura del fichero")
+            return None
+        """
+        strJson = strJson.replace("\n", "")
+        strJson = " ".join(strJson.split())
+        return strJson
+
+
+"""
+FIXME: Estas clases de abajo ,deberian de ser tipo object para poder levantar la aplicación sin entorno gráfico
+"""
+
+
+class mainForm(QtWidgets.QMainWindow):
     mainWindow = None
     MainForm = None
 
     def __init__(self):
+        super(mainForm, self).__init__()
         self.mainWindow = json_mainWindow()
         self.MainForm = json_MainForm()
 
@@ -144,7 +318,6 @@ class mainForm(object):
             _action = args[0]
 
             if _action == "launch":
-                print("Lanzando", args[1])
                 return self.runAction(args[1])
         except Exception:
             print(traceback.format_exc())
@@ -159,7 +332,7 @@ class mainForm(object):
             return False
 
 
-class json_mainWindow():
+class json_mainWindow(QtWidgets.QMainWindow):
     areas_ = {}
     modules_ = {}
     _actionsConnects = {}
@@ -168,6 +341,7 @@ class json_mainWindow():
     _images = {}
 
     def __init__(self):
+        super(json_mainWindow, self).__init__()
         self.areas_ = {}
         self.modules_ = {}
         self._actionsConnects = {}
@@ -178,6 +352,9 @@ class json_mainWindow():
     def load(self):
         pass
         # Aquí se genera el json con las acciones disponibles
+
+    def addFormTab(self, f):
+        pass
 
     def loadArea(self, area):
         self.areas_[area.idarea] = area.descripcion
@@ -221,7 +398,8 @@ class json_mainWindow():
         self._toolBarActions.append(name)
 
     def addToJson(self, xml):
-        _json = xml2json.data(fromstring(etree.tostring(xml, pretty_print=True)))
+        _json = xml2json.data(fromstring(
+            etree.tostring(xml, pretty_print=True)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 
@@ -279,93 +457,3 @@ class json_mainWindow():
 class json_MainForm(object):
     def setDebugLevel(self, number):
         pass
-
-
-"""
-class parser(object):
-    _mainForm = None
-
-    def __init__(self, mainForm):
-        self._mainForm = mainForm
-
-    def query(self, environ, start_response):
-        _received = environ["QUERY_STRING"]
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        print("JSON-RPC:INFO: Processing '%s' ..." % _received)
-        #if _received == "mainWindow":
-        #    return self._mainForm.mainWindow._json
-        #elif _received[0:7] == "action:":
-        #    try:
-        #        _action = _received[7:]
-        #        print("Loading action", _action)
-        #        self._mainForm.runAction(_action)
-        #
-        #
-        #        return "OK!"
-        #    except Exception:
-        #        print(traceback.format_exc())
-        retorno = self.proccess_rpc(_received)
-        print("_________>", retorno)
-        return retorno
-
-    def proccess_rpc(self, json_data):
-        return json_data
-
-"""
-
-
-class PushButton(object):
-    def __getattr__(self, name):
-        print("Pushbutton necesita", name)
-
-
-class LineEdit(object):
-    def __getattr__(self, name):
-        print("LineEdit necesita", name)
-
-
-class FLLineEdit(object):
-
-    _tipo = None
-    _partDecimal = 0
-    _partInteger = 0
-    _maxValue = None
-    autoSelect = True
-    _name = None
-    _longitudMax = None
-    _parent = None
-    _name = None
-    lostFocus = QtCore.pyqtSignal()
-    parentObj_ = None
-
-    def __init__(self, parent, name=None):
-        if self.name:
-            self._name = name
-
-        if isinstance(parent.fieldName_, str):
-            self._fieldName = parent.fieldName_
-            self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
-            self._partDecimal = parent.partDecimal_
-            self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
-            self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
-            # self.textChanged.connect(self.controlFormato)
-            self._parent = parent
-
-    # def __getattr__(self, name):
-    #     return DefFun(self, name)
-
-    def controlFormato(self):
-        pass
-
-    # def setText(self, texto, b=True):
-    #     push(self, texto)
-    #
-    # def text(self):
-    #     return pull(self, "text")
-
-    """
-    Especifica un valor máximo para el text (numérico)
-    """
-
-    def setMaxValue(self, value):
-        self._maxValue = value

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
-
+import os
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.FLTranslations import FLTranslations
 from pineboolib import decorators
 
-import os
+from PyQt5 import QtCore
 from PyQt5.Qt import QTranslator
 
 
@@ -42,14 +41,17 @@ class FLTranslator(QTranslator):
             tsFile = filedir("../share/pineboo/translations/%s.%s" %
                              (self.idM_, self.lang_))
         else:
+            from pineboolib.pncontrolsfactory import aqApp
             tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %
-                             (self._prj.conn.database(), self.idM_, self.idM_, self.lang_, key))
+                             (aqApp.db().database(), self.idM_, self.idM_, self.lang_, key))
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         qmFile = "%s.qm" % tsFile
 
         if os.path.exists(qmFile):
             if tsFile in (None, ""):
                 return False
+
+            return True
 
         trans = FLTranslations()
         trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)

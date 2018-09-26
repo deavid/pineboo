@@ -1,13 +1,14 @@
 from enum import Enum
 
-from PyQt5.QtCore import Qt
+from PyQt5 import QtGui
+from PyQt5 import QtCore
 from PyQt5.QtCore import QObject
+from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
-from pineboolib.flcontrols import ProjectClass
 
 
-class FLPicture(ProjectClass, QObject):
+class FLPicture(QObject):
 
     class FLPenStyle(Enum):
         NoPen = 0
@@ -83,12 +84,14 @@ class FLPicture(ProjectClass, QObject):
         AlignHorizontal_Mask = Qt.AlignHorizontal_Mask
         AlignVertical_Mask = Qt.AlignVertical_Mask
 
-    class FLPicturePrivate(ProjectClass):
+    class FLPicturePrivate(QtCore.QObject):
 
         @decorators.BetaImplementation
         def __init__(self, *args):
-            self.pic_ = Qt.QPicture()
-            self.pte_ = Qt.QPainter()
+            super(FLPicture.FLPicturePrivate, self).__init__()
+
+            self.pic_ = QtGui.QPicture()
+            self.pte_ = QtGui.QPainter()
             self.ownerPic_ = True
             self.ownerPte_ = True
             self.endPte_ = True
@@ -97,6 +100,12 @@ class FLPicture(ProjectClass, QObject):
         def begin(self):
             if not self.pte_.isActive():
                 return self.pte_.begin(self.pic_)
+            return False
+
+        @decorators.BetaImplementation
+        def play(self, painter):
+            if self.pic_:
+                return self.pic_.play(painter)
             return False
 
         @decorators.BetaImplementation
@@ -120,28 +129,28 @@ class FLPicture(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def __init__(self, *args):
+        self.d_ = 0
+
         if len(args) and isinstance(args[0], FLPicture):
-            super(FLPicture, self).__init__(0)
+            super(FLPicture, self).__init__()
             otherPic = args[0]
             if otherPic and otherPic != self and otherPic.d_ and otherPic.d_.pic_:
                 self.d_ = self.FLPicturePrivate()
                 self.d_.pic_ = otherPic.d_.pic_
 
-        elif len(args) and isinstance(args[0], Qt.QPicture):
-            if len(args) == 1:
-                super(FLPicture, self).__init__(0)
-            elif len(args) == 3:
+        elif len(args) and isinstance(args[0], QtGui.QPicture):
+            if len(args) >= 3:
                 super(FLPicture, self).__init__(args[1], args[2])
+            else:
+                super(FLPicture, self).__init__()
             self.setPicture(args[0])
 
-        elif len(args) > 1 and isinstance(args[1], Qt.QPainter):
+        elif len(args) > 1 and isinstance(args[1], QtGui.QPainter):
             self.d_.setPainter(args[1])
             super(FLPicture, self).__init__(args[2], args[3])
 
         else:
             super(FLPicture, self).__init__(args[0], args[1])
-
-        self.d_ = 0
 
     @decorators.BetaImplementation
     def PIC_NEW_D(self):
@@ -188,7 +197,7 @@ class FLPicture(ProjectClass, QObject):
     @decorators.BetaImplementation
     def boundingRect(self, *args):
         if not self.PIC_CHK_D():
-            return Qt.QRect()
+            return QtCore.QRect()
         self.d_.pte_.boundingRect(args)
 
     @decorators.BetaImplementation
@@ -209,7 +218,7 @@ class FLPicture(ProjectClass, QObject):
 
     @decorators.BetaImplementation
     def cleanup(self):
-        if self.d_:
+        if hasattr(self, "d_") and self.d_:
             del self.d_
         self.d_ = 0
 
@@ -218,6 +227,12 @@ class FLPicture(ProjectClass, QObject):
         if not self.PIC_CHK_D():
             return False
         return self.d_.pte_.isActive()
+
+    @decorators.BetaImplementation
+    def play(self, painter):
+        if self.d_:
+            return self.d_.play(painter)
+        return False
 
     @decorators.BetaImplementation
     def flush(self):
@@ -240,7 +255,7 @@ class FLPicture(ProjectClass, QObject):
     @decorators.BetaImplementation
     def font(self):
         if not self.PIC_CHK_D():
-            return Qt.QFont()
+            return QtGui.QFont()
         return self.d_.pte_.font()
 
     @decorators.BetaImplementation
@@ -253,18 +268,18 @@ class FLPicture(ProjectClass, QObject):
     def setPen(self, color, width=0, style=FLPenStyle.SolidLine):
         if not self.PIC_CHK_D():
             return None
-        self.d_.pte_.setPen(Qt.QPen(color, width, style))
+        self.d_.pte_.setPen(QtGui.QPen(color, width, style))
 
     @decorators.BetaImplementation
     def setBrush(self, color, style=FLBrushStyle.SolidPattern):
         if not self.PIC_CHK_D():
             return None
-        self.d_.pte_.setBrush(Qt.QBrush(color, style))
+        self.d_.pte_.setBrush(QtGui.QBrush(color, style))
 
     @decorators.BetaImplementation
     def backgroundColor(self):
         if not self.PIC_CHK_D():
-            return Qt.QColor()
+            return QtGui.QColor()
         return self.d_.pte_.backgroundColor()
 
     @decorators.BetaImplementation
@@ -300,7 +315,7 @@ class FLPicture(ProjectClass, QObject):
     @decorators.BetaImplementation
     def brushOrigin(self):
         if not self.PIC_CHK_D():
-            return Qt.QPoint()
+            return QtCore.QPoint()
         return self.d_.pte_.brushOrigin()
 
     @decorators.BetaImplementation
@@ -312,7 +327,7 @@ class FLPicture(ProjectClass, QObject):
     @decorators.BetaImplementation
     def window(self):
         if not self.PIC_CHK_D():
-            return Qt.QRect()
+            return QtCore.QRect()
         return self.d_.pte_.window()
 
     @decorators.BetaImplementation
@@ -324,7 +339,7 @@ class FLPicture(ProjectClass, QObject):
     @decorators.BetaImplementation
     def viewport(self):
         if not self.PIC_CHK_D():
-            return Qt.QRect()
+            return QtCore.QRect()
         return self.d_.pte_.viewport()
 
     @decorators.BetaImplementation
@@ -506,9 +521,9 @@ class FLPicture(ProjectClass, QObject):
         if not pix:
             return 0
         self.end()
-        cpyPic = Qt.QPicture()
+        cpyPic = QtGui.QPicture()
         cpyPic.setData(self.d_.pic_.data(), self.d_.pic_.size())
-        pa = Qt.QPainter(pix)
+        pa = QtGui.QPainter(pix)
         pa.setClipRect(0, 0, pix.width(), pix.height())
         cpyPic.play(pa)
         pa.end()
@@ -522,9 +537,9 @@ class FLPicture(ProjectClass, QObject):
             return 0
         if pic and pic.picture():
             self.end()
-            cpyPic = Qt.QPicture()
+            cpyPic = QtGui.QPicture()
             cpyPic.setData(self.d_.pic_.data(), self.d_.pic_.size())
-            pa = Qt.QPainter(pic.picture())
+            pa = QtGui.QPainter(pic.picture())
             cpyPic.play(pa)
             pa.end()
             self.begin()

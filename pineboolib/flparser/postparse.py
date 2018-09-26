@@ -7,7 +7,7 @@ import os.path
 import sys
 import imp
 import traceback
-from lxml import etree
+from xml import etree
 
 
 try:
@@ -83,7 +83,7 @@ class TagObject(object, metaclass=TagObjectFactory):
 
     def __init__(self, tagname):
         self.astname = tagname
-        self.xml = etree.Element(self.tagname(tagname))
+        self.xml = etree.ElementTree.Element(self.tagname(tagname))
         self.xmlname = None
         self.subelems = []
         self.values = []
@@ -91,7 +91,7 @@ class TagObject(object, metaclass=TagObjectFactory):
             self.xml.set("name", "")
 
     def adopt_children(self, argn, subelem):
-        for child in subelem.xml.iterchildren():
+        for child in list(subelem.xml):
             if self.set_child_argn:
                 child.set("argn", str(argn))
             else:
@@ -596,18 +596,22 @@ def main():
     execute(options, args)
 
 
-def pythonify(filelist):
+def pythonify(filelist, verbose=False):
     options, args = parseArgs([])
     options.full = True
+    if not verbose:
+        options.verbose = False
     if isinstance(filelist, str):
         filelist = [filelist]
     execute(options, filelist)
-    print(filelist)
+    if options.verbose:
+        print(filelist)
 
 
 def execute(options, args):
     if options.optdebug:
-        print(options, args)
+        if options.verbose:
+            print(options, args)
     if options.full:
         execpython = options.exec_python
         options.exec_python = False
@@ -643,7 +647,8 @@ def execute(options, args):
                 print("Error al ejecutar Python:")
                 print(traceback.format_exc())
 
-        print("Done.")
+        if options.verbose:
+            print("Done.")
 
     elif options.exec_python:
         # import qsatype
@@ -679,7 +684,7 @@ def execute(options, args):
             if options.verbose:
                 sys.stdout.write(
                     "Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname, 100.0 * (nf + 1.0) / nfs))
-            if options.verbose:
+            if options.verbose and hasattr(sys.stdout, "flush"):
                 sys.stdout.flush()
             old_stderr = sys.stdout
             stream = io.StringIO()
@@ -705,7 +710,7 @@ def execute(options, args):
             if options.verbose:
                 sys.stdout.write(
                     "Parsing File: %-35s . . . .        (%.1f%%)    " % (bname, 100.0 * (nf + 1.0) / nfs))
-            if options.verbose:
+            if options.verbose and hasattr(sys.stdout, "flush"):
                 sys.stdout.flush()
             try:
                 filecontent = open(filename, "r", encoding="latin-1").read()
@@ -715,7 +720,8 @@ def execute(options, args):
                       (repr(filename)), e)
                 continue
             prog = flscriptparse.parse(filecontent)
-            sys.stdout.write("\r")
+            if options.verbose:
+                sys.stdout.write("\r")
             if not prog:
                 print("Error: No se pudo abrir %-35s          \n" %
                       (repr(filename)))
@@ -749,7 +755,7 @@ def execute(options, args):
             else:
                 destname = filename + ".xml"
             f1 = open(destname, "wb")
-            f1.write(etree.tostring(ast, pretty_print=True))
+            f1.write(etree.ElementTree.tostring(ast))
             f1.close()
 
 

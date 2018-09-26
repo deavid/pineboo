@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from pineboolib.flcontrols import ProjectClass
 
 
-class FLAction(ProjectClass):
+class FLAction(object):
 
     """
     Esta clase contiene información de acciones para abrir formularios.

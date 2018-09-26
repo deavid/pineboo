@@ -1,9 +1,17 @@
 # # -*- coding: utf-8 -*-
-from PyQt5.QtCore import QObject, QVariant
 import os
-import os.path
 import re
-DEBUG = False
+import logging
+import sys
+import traceback
+from io import StringIO
+from xml import etree
+
+import pineboolib
+
+from pineboolib.fllegacy.FLSettings import FLSettings
+
+logger = logging.getLogger(__name__)
 
 
 def auto_qt_translate_text(text):
@@ -21,24 +29,67 @@ def auto_qt_translate_text(text):
 
 aqtt = auto_qt_translate_text
 
-# Convertir una ruta relativa, a una ruta relativa a este fichero.
+
+"""  
+filedir(path1[, path2, path3 , ...])
+@param array de carpetas de la ruta
+@return devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
+Es útil para especificar rutas a recursos del programa.
+"""
 
 
 def filedir(*path):
-    """  filedir(path1[, path2, path3 , ...])
+    base_dir = getattr(pineboolib, "base_dir", None)
+    if not base_dir:
+        base_dir = os.path.dirname(__file__)
 
-            Filedir devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
-            Es útil para especificar rutas a recursos del programa.
-    """
-    ruta_ = os.path.realpath(os.path.join(os.path.dirname(__file__), *path))
+        if getattr(sys, 'frozen', False):
+            if base_dir.startswith(":"):
+                base_dir = ".%s" % base_dir[1:]
 
-    """
-    Esto es para cuando está compilado, para poder acceder a ficheros fuera del ejecutable
-    """
-    if ruta_.find(":/") > -1:
-        ruta_ = ruta_.replace(":/", "")
-
+    ruta_ = os.path.realpath(os.path.join(base_dir, *path))
     return ruta_
+
+
+"""
+Calcula la ruta de una carpeta
+@param x. str o array con la ruta de la carpeta
+@return str con ruta absoluta a una carpeta
+"""
+
+
+def _dir(*x):
+    return os.path.join(pineboolib.project.tmpdir, *x)
+
+
+"""
+Retorna el primer fichero existente de un grupo de ficheros
+@return ruta al primer fichero encontrado
+"""
+
+
+def coalesce_path(*filenames):
+    for filename in filenames:
+        if filename is None:
+            return None
+        if filename in pineboolib.project.files:
+            return pineboolib.project.files[filename].path()
+    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s",
+                 repr(filenames), stack_info=False)
+
+
+"""
+Retorna el primer fichero existente de un grupo de ficheros
+@return ruta al fichero
+"""
+
+
+def _path(filename, showNotFound=True):
+    if filename not in pineboolib.project.files:
+        if showNotFound:
+            logger.error("Fichero %s no encontrado en el proyecto.", filename, stack_info=False)
+        return None
+    return pineboolib.project.files[filename].path()
 
 
 def one(x, default=None):
@@ -73,7 +124,7 @@ class XMLStruct(Struct):
             for child in xmlobj:
                 if child.tag == "property":
                     # Se importa aquí para evitar error de importación cíclica.
-                    from pineboolib.qt3ui import loadProperty
+                    from pineboolib.pnqt3ui import loadProperty
 
                     key, text = loadProperty(child)
                 else:
@@ -112,40 +163,477 @@ class DefFun:
 
     def __str__(self):
         if self.realfun:
-            if DEBUG:
-                print("%r: Redirigiendo Propiedad a función %r" %
-                      (self.parent.__class__, self.funname))
+            logger.debug("%r: Redirigiendo Propiedad a función %r",
+                         self.parent.__class__.__name__, self.funname)
             return self.realfun()
-        if DEBUG:
-            print("WARN: %r: Propiedad no implementada %r" %
-                  (self.parent.__class__, self.funname))
+
+        logger.debug("WARN: %r: Propiedad no implementada %r",
+                     self.parent.__class__.__name__, self.funname)
         return 0
 
     def __call__(self, *args):
-
         if self.realfun:
-            if DEBUG:
-                print("%r: Redirigiendo Llamada a función %r %r" %
-                      (self.parent.__class__, self.funname, args))
+            logger.debug("%r: Redirigiendo Llamada a función %s %s",
+                         self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
 
-        if DEBUG:
-            print("WARN: %r: Método no implementado %r %r" %
-                  (self.parent.__class__, self.funname, args))
+        logger.debug("%r: Método no implementado %s %s",
+                     self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
         return None
 
 
-def bind(objectName, propertyName, type):
+def traceit(frame, event, arg):
+    """Print a trace line for each Python line executed or call.
+
+    This function is intended to be the callback of sys.settrace.
     """
-        Utilidad para crear propiedades de estilo Qt fácilmente.
-        Actualmente en desuso. Python tiene su propio sistema de propiedades y funciona bien.
-    """
+    import linecache
+    # if event != "line":
+    #    return traceit
+    try:
+        lineno = frame.f_lineno
+        filename = frame.f_globals["__file__"]
+        # if "pineboo" not in filename:
+        #     return traceit
+        if (filename.endswith(".pyc") or
+                filename.endswith(".pyo")):
+            filename = filename[:-1]
+        name = frame.f_globals["__name__"]
+        line = linecache.getline(filename, lineno)
+        print("%s:%s:%s %s" % (name, lineno, event, line.rstrip()))
+    except Exception:
+        pass
+    return traceit
 
-    def getter(self):
-        return type(self.findChild(QObject, objectName).property(propertyName).toPyObject())
 
-    def setter(self, value):
-        self.findChild(QObject, objectName).setProperty(
-            propertyName, QVariant(value))
+class TraceBlock():
+    def __enter__(self):
+        sys.settrace(traceit)
+        return traceit
 
-    return property(getter, setter)
+    def __exit__(self, type, value, traceback):
+        sys.settrace(None)
+
+
+def trace_function(f):
+    def wrapper(*args):
+        with TraceBlock():
+            return f(*args)
+    return wrapper
+
+
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QByteArray,\
+    QDir
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply,\
+    QNetworkRequest
+
+
+class downloadManager(QObject):
+    manager = None
+    currentDownload = None
+    reply = None
+    url = None
+    result = None
+    filename = None
+    dir_ = None
+    url_ = None
+
+    def __init__(self):
+        super(downloadManager, self).__init__()
+        self.manager = QNetworkAccessManager()
+        self.currentDownload = []
+        self.manager.finished.connect(self.downloadFinished)
+
+    def setLE(self, filename, dir_, urllineedit):
+        self.filename = filename
+        self.dir_ = dir_
+        self.url_ = urllineedit
+
+    def doDownload(self):
+        request = QNetworkRequest(QUrl("%s/%s/%s" % (self.url_.text(), self.dir_, self.filename)))
+        self.reply = self.manager.get(request)
+        # self.reply.sslErrors.connect(self.sslErrors)
+        self.currentDownload.append(self.reply)
+
+    def saveFileName(self, url):
+        path = url.path()
+        basename = QFileInfo(path).fileName()
+
+        if not basename:
+            basename = "download"
+
+        if QFile.exists(basename):
+            i = 0
+            basename = basename + "."
+            while QFile.exists("%s%s" % (basename, i)):
+                i = i + 1
+
+            basename = "%s%s" % (basename, i)
+
+        return basename
+
+    def saveToDisk(self, filename, data):
+        fi = "%s/%s" % (self.dir_, filename)
+        if not os.path.exists(self.dir_):
+            os.makedirs(self.dir_)
+        file = QFile(fi)
+        if not file.open(QIODevice.WriteOnly):
+            return False
+
+        file.write(data.readAll())
+        file.close()
+
+        return True
+
+    def isHttpRedirect(self, reply):
+        statusCode = reply.attribute(QNetworkRequest.HttpStatusCodeAttribute)
+        return statusCode in [301, 302, 303, 305, 307, 308]
+
+    @QtCore.pyqtSlot(QNetworkReply)
+    def downloadFinished(self, reply):
+        url = reply.url()
+        if not reply.error():
+            if not self.isHttpRedirect(reply):
+                filename = self.saveFileName(url)
+                filename = filename.replace(":", "")
+                self.saveToDisk(filename, reply)
+                self.result = "%s ---> %s/%s" % (url, self.dir_, filename)
+            else:
+                self.result = "Redireccionado ... :("
+        else:
+            self.result = reply.errorString()
+
+
+def download_files():
+    import sysconfig
+    from PyQt5.QtWidgets import (QApplication, QLabel, QTreeView, QVBoxLayout,
+                                 QWidget)
+
+    dir_ = filedir("forms")
+    if os.path.exists(dir_):
+        return
+
+    copy_dir_recursive(":/pineboolib", filedir("../pineboolib"))
+    copy_dir_recursive(":/share", filedir("../share"))
+    if not os.path.exists(filedir("../tempdata")):
+        os.mkdir(filedir("../tempdata"))
+
+
+def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
+    dir = QDir()
+    dir.setPath(from_dir)
+
+    from_dir += QDir.separator()
+    to_dir += QDir.separator()
+
+    if not os.path.exists(to_dir):
+        os.makedirs(to_dir)
+
+    for file_ in dir.entryList(QDir.Files):
+        from_ = from_dir + file_
+        to_ = to_dir + file_
+        if str(to_).endswith(".src"):
+            to_ = str(to_).replace(".src", "")
+
+        if os.path.exists(to_):
+            if replace_on_conflict:
+                if not QFile.remove(to_):
+                    return False
+            else:
+                continue
+
+        if not QFile.copy(from_, to_):
+            return False
+
+    for dir_ in dir.entryList(QDir.Dirs | QDir.NoDotAndDotDot):
+        from_ = from_dir + dir_
+        to_ = to_dir + dir_
+
+        if not os.path.exists(to_):
+            os.makedirs(to_)
+
+        if not copy_dir_recursive(from_, to_, replace_on_conflict):
+            return False
+
+    return True
+
+
+def clearXPM(text):
+    v = text
+    if v.find("{"):
+        v = v[v.find("{") + 3:]
+        v = v[:v.find("};") + 1]
+        v = v.replace("\n", "")
+        v = v.replace("\t", "    ")
+    v = v.split('","')
+    return v
+
+
+def text2bool(text):
+    text = str(text).strip().lower()
+    if text.startswith("t"):
+        return True
+    if text.startswith("f"):
+        return False
+
+    if text.startswith("y"):
+        return True
+    if text.startswith("n"):
+        return False
+
+    if text.startswith("1"):
+        return True
+    if text.startswith("0"):
+        return False
+
+    if text == "on":
+        return True
+    if text == "off":
+        return False
+
+    if text.startswith("s"):
+        return True
+    raise ValueError("Valor booleano no comprendido '%s'" % text)
+
+
+def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
+    file_alike = StringIO(contenido)
+
+    # parser = etree.XMLParser(
+    #    ns_clean=True,
+    #    encoding=encoding,
+    #    recover=False,
+    #    remove_blank_text=remove_blank_text,
+    #)
+    try:
+        #tree = etree.parse(file_alike, parser)
+        tree = etree.ElementTree.parse(file_alike)
+    except Exception as e:
+        print("Error al procesar tabla:", nombre)
+        print(traceback.format_exc())
+        return None
+    root = tree.getroot()
+
+    obj_name = root.find("name")
+    query = root.find("query")
+    if query is not None:
+        if query.text != nombre:
+            logger.warn("WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (
+                obj_name.text, nombre))
+            query.text = nombre
+    elif obj_name.text != nombre:
+        logger.warn("WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (
+            obj_name.text, nombre))
+        obj_name.text = nombre
+    return getTableObj(tree, root)
+
+
+def getTableObj(tree, root):
+    table = Struct()
+    table.xmltree = tree
+    table.xmlroot = root
+    query_name = None
+    if table.xmlroot.find("query"):
+        query_name = one(table.xmlroot.find("query").text, None)
+    name = table.xmlroot.find("name").text
+    table.tablename = name
+    if query_name:
+        table.name = query_name
+        table.query_table = name
+    else:
+        table.name = name
+        table.query_table = None
+    table.fields = []
+    table.pk = []
+    table.fields_idx = {}
+    return table
+
+
+"""
+Guarda la geometría de una ventana
+@param name, Nombre de la ventana
+@param geo, QSize con los valores de la ventana
+"""
+
+
+def saveGeometryForm(name, geo):
+    name = "geo/%s" % name
+    FLSettings().writeEntry(name, geo)
+
+
+"""
+Carga la geometría de una ventana
+@param name, Nombre de la ventana
+@return QSize con los datos de la geometríca de la ventana guardados.
+"""
+
+
+def loadGeometryForm(name):
+    name = "geo/%s" % name
+    return FLSettings().readEntry(name, None)
+
+
+def ustr(*t1):
+
+    return "".join([ustr1(t) for t in t1])
+
+
+def ustr1(t):
+    if isinstance(t, str):
+        return t
+
+    if isinstance(t, float):
+        try:
+            t = int(t)
+        except Exception:
+            pass
+
+    # if isinstance(t, QtCore.QString): return str(t)
+    if isinstance(t, str):
+        return str(t, "UTF-8")
+    try:
+        return str(t)
+    except Exception as e:
+        logger.exception("ERROR Coercing to string: %s", repr(t))
+        return None
+
+
+class StructMyDict(dict):
+
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError as e:
+            raise AttributeError(e)
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+
+DEPENDECIE_CHECKED = []
+
+
+def checkDependencies(dict_, exit=True):
+
+    from importlib import import_module
+
+    dependences = []
+    error = []
+    for key in dict_.keys():
+        if not key in DEPENDECIE_CHECKED:
+            try:
+                mod_ = import_module(key)
+                mod_ver = None
+                if key == "ply":
+                    version_check("ply", mod_.__version__, '3.9')
+                elif key == "Pillow":
+                    version_check("Pillow", mod_.__version__, '5.1.0')
+                elif key == "PyQt5.QtCore":
+                    version_check("PyQt5", mod_.QT_VERSION_STR, '5.9')
+                    mod_ver = mod_.QT_VERSION_STR
+
+                if not mod_ver:
+                    mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
+
+                settings = FLSettings()
+                if settings.readBoolEntry("application/isDebuggerMode", False):
+                    logger.warn("Versión de %s: %s", key, mod_ver)
+            except ImportError:
+                dependences.append(dict_[key])
+                error.append(traceback.format_exc())
+
+            DEPENDECIE_CHECKED.append(key)
+
+    msg = ""
+    if len(dependences) > 0:
+        logger.warn("HINT: Dependencias incumplidas:")
+        for dep in dependences:
+            logger.warn("HINT: Instale el paquete %s" % dep)
+            msg += "Instale el paquete %s.\n%s" % (dep, error)
+
+        if exit:
+            if getattr(pineboolib.project, "_DGI", None):
+                if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
+                    try:
+                        ret = QtWidgets.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
+                    except Exception:
+                        logger.error("No se puede mostrar el diálogo de dependecias incumplidas")
+
+            if not getattr(sys, 'frozen', False):
+                sys.exit(32)
+
+    return len(dependences) == 0
+
+
+def version_check(mod_name, mod_ver, min_ver):
+    """Compare two version numbers and raise a warning if "minver" is not met."""
+    if version_normalize(mod_ver) < version_normalize(min_ver):
+        logger.warn("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
+
+
+def version_normalize(v):
+    """Normalize version string numbers like 3.10.1 so they can be compared."""
+    return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
+
+
+def convertFLAction(action):
+    if action.name() in pineboolib.project.actions.keys():
+        return pineboolib.project.actions[action.name()]
+    else:
+        return None
+
+
+def convert2FLAction(action):
+    name = None
+    if isinstance(action, str):
+        name = str
+    else:
+        name = action.name
+
+    from pineboolib.pncontrolsfactory import aqApp
+    return aqApp.db().manager().action(name)
+
+
+def load2xml(form_path):
+    from xml.etree import ElementTree as ET
+
+    try:
+        ret = ET.parse(form_path)
+    except Exception:
+        try:
+            parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
+            ret = ET.parse(form_path, parser)
+            #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
+        except Exception:
+            logger.exception("Error cargando UI después de intentar con UTF8 y ISO", form_path)
+            ret = None
+
+    return ret
+
+
+def imFrozen():
+    return getattr(sys, 'frozen', False)
+
+
+"""
+copy and paste from http://effbot.org/zone/element-lib.htm#prettyprint
+it basically walks your tree and adds spaces and newlines so the tree is
+printed in a nice way
+"""
+
+
+def indent(elem, level=0):
+    i = "\n" + level * "  "
+    if len(elem):
+        if not elem.text or not elem.text.strip():
+            elem.text = i + "  "
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+        for elem in elem:
+            indent(elem, level + 1)
+        if not elem.tail or not elem.tail.strip():
+            elem.tail = i
+    else:
+        if level and (not elem.tail or not elem.tail.strip()):
+            elem.tail = i

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-# Completa Si
-from pineboolib.flcontrols import ProjectClass
+from PyQt5 import QtCore
 
 """
 Clase para definir claves compuestas.
@@ -13,7 +12,7 @@ es decir objetos FLFieldMetaData.
 """
 
 
-class FLCompoundKey(ProjectClass):
+class FLCompoundKey(QtCore.QObject):
 
     """
     Lista de con los metadatos de los campos que componen la clave
