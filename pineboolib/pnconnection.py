@@ -12,6 +12,7 @@ from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLManagerModules import FLManagerModules
 from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
 from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.pnsqldrivers import PNSqlDrivers
 import pineboolib
 
 import sys
@@ -48,7 +49,7 @@ class PNConnection(QtCore.QObject):
         self.db_port = db_port
         self.db_userName = db_userName
         self.db_password = db_password
-        self.driverSql = pineboolib.project.sql_drivers_manager
+        self.driverSql = PNSqlDrivers()
 
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
 
