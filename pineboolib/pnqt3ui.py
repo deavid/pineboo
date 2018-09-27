@@ -90,14 +90,14 @@ def loadUi(form_path, widget, parent=None):
                 if sender is None and wui:
                     sender = widget.ui_[sender_name]
 
-            sg_name = signal_name.replace("()", "")
-            sg_name = sg_name.replace("(bool)", "")
-            sg_name = sg_name.replace("(int)", "")
-            sg_name = sg_name.replace("(const QString&)", "")
-            sl_name = slot_name.replace("()", "")
-            sl_name = sl_name.replace("(bool)", "")
-            sl_name = sl_name.replace("(int)", "")
-            sl_name = sl_name.replace("(const QString&)", "")
+            sg_name = signal_name
+
+            if signal_name.find("(") > -1:
+                sg_name = signal_name[:signal_name.find("(")]
+
+            sl_name = slot_name
+            if slot_name.find("(") > -1:
+                sl_name = slot_name[:slot_name.find("(")]
 
             receiver = None
             if sender is None:
@@ -115,7 +115,7 @@ def loadUi(form_path, widget, parent=None):
                         from pineboolib import pncontrolsfactory
                         # getattr(sender, sg_name).connect(
                         #    getattr(ifx, fn_name))
-                        pncontrolsfactory.connect(sender, sg_name, ifx, fn_name)
+                        pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
                     except Exception as e:
                         logger.exception("Error connecting:",
                                          sender, signal_name,
@@ -787,7 +787,7 @@ def _loadVariant(variant, widget=None):
                 return v
         if text in ["GroupBoxPanel", "LineEditPanel"]:
             return QtWidgets.QFrame.StyledPanel
-        if text == "Single":
+        if text in ("Single", "SingleRow"):
             return QtWidgets.QAbstractItemView.SingleSelection
         if text == "FollowStyle":
             return "QtWidgets.QTableView {selection-background-color: red;}"
