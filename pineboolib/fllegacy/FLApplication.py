@@ -511,9 +511,8 @@ class FLApplication(QtCore.QObject):
     def geometryForm(self, name):
         pass
 
-    @decorators.NotImplementedWarn
     def staticLoaderSetup(self):
-        pass
+        self.db().managerModules().staticLoaderSetup()
 
     def loadModules(self):
         self.call("sys.loadModules", [], None)

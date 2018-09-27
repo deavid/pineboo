@@ -115,6 +115,9 @@ class FLManagerModules(object):
         if db:
             self.db_ = db
 
+            from pineboolib.fllegacy.FLModulesStaticLoader import AQStaticBdInfo
+            self.staticBdInfo_ = AQStaticBdInfo(self.db_)
+
         self.filesCached_ = {}
 
     #"""
@@ -331,6 +334,7 @@ class FLManagerModules(object):
             w_ = parent
         else:
             w_ = parent.widget
+
         logger.info("Procesando %s (v%s)", n, UIVersion)
         if not pineboolib.project or pineboolib.project._DGI.localDesktop():
             if UIVersion < "4.0":
@@ -692,14 +696,44 @@ class FLManagerModules(object):
     @param n Nombre del fichero.
     @return QString con el contenido del fichero o vacía en caso de error.
     """
-    @decorators.NotImplementedWarn
+
     def contentStatic(self, n):
-        return None
+        str_ret = FLModulesStaticLoader.content(n, self.staticBdInfo_)
+        if str_ret:
+            from pineboolib.fllegacy.FLUtil import FLUtil
+            util = FLUtil()
+            sha = util.sha1(str_ret)
+            if n in self.dictKeyFiles.keys():
+                s = self.dictKeyFiles[n]
+
+            if self.dictKeyFiles and s == sha:
+                return None
+            elif self.dictKeyFiles and n.find(".qs") > -1:
+                self.dictKeyFiles[n] = sha
+
+                if n.endswith(".mtd"):
+                    from PyQt5.QtXml import QDomDocument
+                    doc = QDomDocument(n)
+                    if util.domDocumentSetContent(doc, str_ret):
+                        mng = self.db_.manager()
+                        docElem = doc.documentElement()
+                        mtd = mng.metadata(docElem, True)
+
+                        if not mtd or mtd.isQuery():
+                            return str_ret
+
+                        if not mng.existTable(mtd.name()):
+                            mng.createTable(mng)
+                        elif (self.db_.canRegenTables()):
+                            self.db_.regenTable(mtd.name(), mtd)
+
+        return str_ret
 
     """
     Uso interno.
     Muestra cuadro de dialogo para configurar la carga estatica desde el disco local
     """
-    @decorators.NotImplementedWarn
+
     def staticLoaderSetup(self):
-        pass
+        from pineboolib.fllegacy.FLModulesStaticLoader import FLStaticLoaderSetup
+        FLStaticLoaderSetup.setup(self.staticBdInfo_)
