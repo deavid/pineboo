@@ -915,8 +915,8 @@ class QLineEdit(QtWidgets.QLineEdit):
 
     _parent = None
 
-    def __init__(self, parent):
-        super(QLineEdit, self).__init__(parent)
+    def __init__(self, parent=None):
+        super(QLineEdit, self).__init__(parent=None)
         self._parent = parent
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
