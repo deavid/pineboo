@@ -338,7 +338,7 @@ class PNConnection(QtCore.QObject):
 
     def managerModules(self):
         if not self._managerModules:
-            self._managerModules = FLManagerModules(self.conn)
+            self._managerModules = FLManagerModules(self)
 
         return self._managerModules
 
