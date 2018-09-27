@@ -582,7 +582,7 @@ class FLFormDB(QtWidgets.QDialog):
 
         if self._action.table():
             from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-            cursor = FLSqlCursor(self._action.name())
+            cursor = FLSqlCursor(self._action.table())
             self.setCursor(cursor)
 
             v = None
