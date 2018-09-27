@@ -402,6 +402,16 @@ class QLabel(QtWidgets.QLabel):
             text = str(text)
         super(QLabel, self).setText(text)
 
+    def setPixmap(self, pix):
+
+        if isinstance(pix, QIcon):
+            pix = pix.pixmap(32, 32)
+        super(QLabel, self).setPixmap(pix)
+
+    @QtCore.pyqtSlot(bool)
+    def setShown(self, b):
+        self.setVisible(b)
+
 
 class QListWidgetItem(QtWidgets.QListWidgetItem):
     pass
@@ -661,7 +671,9 @@ class QTabWidget(QtWidgets.QTabWidget):
 
 
 class FLCheckBox(QtWidgets.QCheckBox):
-    pass
+
+    def __init__(self, parent=None, num_rows=None):
+        super(FLCheckBox, self).__init__(parent)
 
 
 class FLTable(QtWidgets.QTableWidget):
@@ -705,12 +717,14 @@ class QTable(QtWidgets.QTableWidget):
     doubleClicked = QtCore.pyqtSignal(int, int)
     read_only_cols = None
     read_only_rows = None
+    cols_list = None
 
     def __init__(self, parent=None):
         super(QTable, self).__init__(parent)
         if not parent:
             self.setParent(self.parentWidget())
 
+        self.cols_list = []
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
         self.cellDoubleClicked.connect(self.doubleClicked_)
@@ -750,6 +764,10 @@ class QTable(QtWidgets.QTableWidget):
     def setColumnLabels(self, separador, lista):
         array_ = lista.split(separador)
         self.setHorizontalHeaderLabels(array_)
+
+    def setHeaderLabel(self, l):
+        self.cols_list.append(l)
+        self.setColumnLabels(",", ",".join(self.cols_list))
 
     def insertRows(self, numero):
         self.insertRow(numero)
@@ -802,6 +820,10 @@ class QTable(QtWidgets.QTableWidget):
                     item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
                 else:
                     item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+
+    @decorators.NotImplementedWarn
+    def setLeftMargin(self, n):
+        pass
 
         # setItemDelegateForColumn(c, new NotEditableDelegate(view))
 
@@ -1279,8 +1301,7 @@ class GroupBox(QtWidgets.QGroupBox):
             super(GroupBox, self).__setattr__(name, value)
 
 
-class QDialog(QtWidgets.QDialog):
-    pass
+QDialog = QtWidgets.QDialog
 
 
 class QVBoxLayout(QtWidgets.QVBoxLayout):
@@ -1303,7 +1324,6 @@ class QMainWindow(QtWidgets.QMainWindow):
         if c is None:
             c = QtCore.QObject
         ret = self.findChild(c, n)
-        print("Retornando..", ret)
         return ret
 
 
