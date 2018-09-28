@@ -420,22 +420,23 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 for p in c.findall("property"):
                     pname, value = loadProperty(p)
                     if pname == "sizeHint":
-                        sH = value.width()
-                        sV = value.height()
+                        width = value.width()
+                        height = value.height()
                     elif pname == "orientation":
-                        if value == 0:
-                            orient_ = 0
+                        if value == 1:  # Horizontal
+                            orient_ = 1  # Horizontal
                         else:
-                            orient_ = 1
+                            orient_ = 2  # Vertical
                     elif pname == "sizeType":
+                        #print("Convirtiendo %s a %s" % (p.find("enum").text, value))
                         policy_ = QtWidgets.QSizePolicy.Policy(value)
 
-                if orient_ == 0:
-                    vPolicy = policy_
-                else:
+                if orient_ == 1:
                     hPolicy = policy_
+                else:
+                    vPolicy = policy_
 
-                new_spacer = QSpacerItem(sH, sV, hPolicy, vPolicy)
+                new_spacer = QSpacerItem(width, height, hPolicy, vPolicy)
                 widget.layout.addItem(new_spacer)
 
             else:
