@@ -348,7 +348,6 @@ class Date(object):
 
 class Process(QtCore.QProcess):
 
-    running = None
     stderr = None
     stdout = None
 
@@ -364,11 +363,9 @@ class Process(QtCore.QProcess):
             self.setArguments(argumentos)
 
     def start(self):
-        self.running = True
         super(Process, self).start()
 
     def stop(self):
-        self.running = False
         super(Process, self).stop()
 
     def writeToStdin(self, stdin_):
@@ -384,11 +381,17 @@ class Process(QtCore.QProcess):
     def stderrReady(self):
         self.stderr = str(self.readAllStandardError())
 
+    def readStderr(self):
+        return self.stderr
+
     def __setattr__(self, name, value):
         if name == "workingDirectory":
             self.setWorkingDirectory(value)
         else:
             super(Process, self).__setattr__(name, value)
+
+    def getIsRunning(self):
+        return self.state() in (self.Running, self.Starting)
 
     def execute(comando):
         import sys
@@ -405,6 +408,8 @@ class Process(QtCore.QProcess):
         pro.waitForFinished(30000)
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
+
+    running = property(getIsRunning)
 
 
 QProcess = QtCore.QProcess
