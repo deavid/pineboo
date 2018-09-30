@@ -633,6 +633,23 @@ class FLFormDB(QtWidgets.QDialog):
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
+        settings = FLSettings()
+        if settings.readBoolEntry("application/isDebuggerMode", False):
+
+            pushButtonExport = QtWidgets.QToolButton()
+            pushButtonExport.setObjectName("pushButtonExport")
+            pushButtonExport.setSizePolicy(sizePolicy)
+            pushButtonExport.setMinimumSize(pbSize)
+            pushButtonExport.setMaximumSize(pbSize)
+            pushButtonExport.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-properties.png")))
+            pushButtonExport.setShortcut(QKeySequence(self.tr("F3")))
+            pushButtonExport.setWhatsThis("Exportar a XML(F3)")
+            pushButtonExport.setToolTip("Exportar a XML(F3)")
+            pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
+            self.bottomToolbar.layout.addWidget(pushButtonExport)
+            pushButtonExport.clicked.connect(self.exportToXml)
+            spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            self.bottomToolbar.layout.addItem(spacer)
 
         if not self.pushButtonCancel:
             self.pushButtonCancel = QtWidgets.QToolButton()
@@ -647,8 +664,8 @@ class FLFormDB(QtWidgets.QDialog):
         # self.pushButtonCancel.setFocusPolicy(QtCore.Qt.StrongFocus)
         # self.pushButtonCancel.setFocus()
         self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
-        self.pushButtonCancel.setWhatsThis("Aceptar y cerrar formulario (Esc)")
-        self.pushButtonCancel.setToolTip("Aceptar y cerrar formulario (Esc)")
+        self.pushButtonCancel.setWhatsThis("Cerrar formulario (Esc)")
+        self.pushButtonCancel.setToolTip("Cerrar formulario (Esc)")
         self.bottomToolbar.layout.addWidget(self.pushButtonCancel)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
@@ -805,3 +822,10 @@ class FLFormDB(QtWidgets.QDialog):
             return getattr(self.script.form, name)
         else:
             qWarning("%s (%s):No se encuentra el atributo %s" % (self, self.iface, name))
+
+    @decorators.NotImplementedWarn
+    def exportToXml(self, b):
+        from pineboolib.pncontrolsfactory import AQS
+        xml = AQS.toXml(self, True, True)
+        print(xml.toString(2))
+        pass
