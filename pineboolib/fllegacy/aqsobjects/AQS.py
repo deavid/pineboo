@@ -43,7 +43,7 @@ class AQS(object):
         if not obj_:
             return xml_
 
-        e = xml_.createElement("object")
+        e = xml_.createElement(type(obj_).__name__)
         e.setAttribute("class", type(obj_).__name__)
         xml_.appendChild(e)
 

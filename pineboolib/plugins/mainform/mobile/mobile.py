@@ -976,7 +976,7 @@ class DockListView(QtCore.QObject):
                 node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
                 continue
             class_name = node.attribute("class")
-            if node.tagName() == "object" and class_name.startswith("QAction"):
+            if class_name.startswith("QAction"):
                 if node.attribute("visible") == "false":
                     node = node.previousSibling().toElement() if reverse else node.nextSibling().toElement()
                     continue
