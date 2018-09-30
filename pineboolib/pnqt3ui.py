@@ -389,8 +389,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 row = col = None
 
             if c.tag == "property":
-                if pineboolib.project._DGI.localDesktop():
-                    process_property(c, widget.layout)
+                continue
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c, new_widget, parent, origWidget)
@@ -422,10 +421,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         width = value.width()
                         height = value.height()
                     elif pname == "orientation":
-                        if value == 1:  # Horizontal
-                            orient_ = 1  # Horizontal
-                        else:
-                            orient_ = 2  # Vertical
+                        orient_ = 1 if value == 1 else 2  # 1 Horizontal, 2 Vertical
+
                     elif pname == "sizeType":
                         #print("Convirtiendo %s a %s" % (p.find("enum").text, value))
                         policy_name = p.find("enum").text
