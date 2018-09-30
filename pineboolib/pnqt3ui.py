@@ -12,8 +12,6 @@ import pineboolib
 import logging
 
 import zlib
-from PyQt5.Qt import QSpacerItem, QLayout
-from PyQt5.QtGui import QIcon
 
 
 Qt = QtCore.Qt
@@ -416,7 +414,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 vPolicy = QtWidgets.QSizePolicy.Fixed
                 orient_ = None
                 policy_ = None
-
+                policy_name = None
+                spacer_name = None
                 for p in c.findall("property"):
                     pname, value = loadProperty(p)
                     if pname == "sizeHint":
@@ -429,23 +428,27 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                             orient_ = 2  # Vertical
                     elif pname == "sizeType":
                         #print("Convirtiendo %s a %s" % (p.find("enum").text, value))
+                        policy_name = p.find("enum").text
                         policy_ = QtWidgets.QSizePolicy.Policy(value)
+                    elif pname == "name":
+                        spacer_name = value
 
                 if orient_ == 1:
                     hPolicy = policy_
                 else:
                     vPolicy = policy_
 
-                new_spacer = QSpacerItem(width, height, hPolicy, vPolicy)
+                #print("Nuevo spacer(%s,%s,(%s,%s), %s, %s" % ("Horizontal" if orient_ == 1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
+                new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
                 widget.layout.addItem(new_spacer)
-
+                #print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
             else:
                 logger.warn("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
-        widget.layout.setContentsMargins(1, 1, 1, 1)
-        widget.layout.setSpacing(1)
-        widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        #widget.layout.setContentsMargins(1, 1, 1, 1)
+        # widget.layout.setSpacing(1)
+        # widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
     nwidget = None
     if widget == origWidget:
@@ -472,56 +475,32 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "property":
             properties.append(c)
             continue
-        if c.tag == "vbox":
-            # TODO: layout se solapa con el layout de FormInternalObj
-            if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
-                if Options.DEBUG_LEVEL > 50:
-                    logger.warn("Trying to replace layout. Ignoring. %s, %s",
-                                repr(c.tag), widget.layout)
-                continue
+        if c.tag in ("vbox", "hbox", "grid"):
 
-            widget.layout = QtWidgets.QVBoxLayout()
-            widget.layout.setSizeConstraint(
-                QtWidgets.QLayout.SetMinAndMaxSize
-            )
-            widget.layout.setSpacing(3)
-            widget.layout.setContentsMargins(3, 3, 3, 3)
+            layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
+            widget.layout = getattr(QtWidgets, layout_type)()
 
-            layouts_pending_process += [(c, "box")]
-            # process_layout_box(c, mode="box")
+            lay_name = None
+            lay_margin = 3
+            lay_spacing = 3
+            for p in c.findall("property"):
+                p_name = p.get("name")
+                if p_name == "name":
+                    lay_name = p.find("cstring").text
+                elif p_name == "margin":
+                    lay_margin = int(p.find("number").text)
+                elif p_name == "spacing":
+                    lay_spacing = int(p.find("number").text)
+
+            widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+            widget.layout.setObjectName(lay_name)
+            widget.layout.setContentsMargins(lay_margin, lay_margin, lay_margin, lay_margin)
+            widget.layout.setSpacing(lay_spacing)
+
+            lay_type = "grid" if c.tag == "grid" else "box"
+            layouts_pending_process += [(c, lay_type)]
             continue
-        if c.tag == "hbox":
-            if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
-                if Options.DEBUG_LEVEL > 50:
-                    logger.warn("qt3ui: Trying to replace layout. Ignoring.",
-                                repr(c.tag), widget.layout)
-                continue
 
-            widget.layout = QtWidgets.QHBoxLayout()
-            widget.layout.setSizeConstraint(
-                QtWidgets.QLayout.SetMinAndMaxSize
-            )
-            widget.layout.setSpacing(3)
-            widget.layout.setContentsMargins(3, 3, 3, 3)
-            layouts_pending_process += [(c, "box")]
-            # process_layout_box(c, mode="box")
-            continue
-        if c.tag == "grid":
-            if isinstance(getattr(widget, "layout", None), QtWidgets.QLayout):
-                if Options.DEBUG_LEVEL > 50:
-                    logger.warn("qt3ui: Trying to replace layout. Ignoring.",
-                                repr(c.tag), widget.layout)
-                continue
-
-            widget.layout = QtWidgets.QGridLayout()
-            widget.layout.setSizeConstraint(
-                QtWidgets.QLayout.SetMinAndMaxSize
-            )
-            widget.layout.setSpacing(3)
-            widget.layout.setContentsMargins(3, 3, 3, 3)
-            layouts_pending_process += [(c, "grid")]
-            # process_layout_box(c, mode="grid")
-            continue
         if c.tag == "item":
             if isinstance(widget, pineboolib.pncontrolsfactory.QMenu):
                 continue
