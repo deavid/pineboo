@@ -489,8 +489,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             widget.layout = getattr(QtWidgets, layout_type)()
 
             lay_name = None
-            lay_margin = 0
-            lay_spacing = 0
+            lay_margin = 2
+            lay_spacing = 2
             for p in c.findall("property"):
                 p_name = p.get("name")
                 if p_name == "name":
