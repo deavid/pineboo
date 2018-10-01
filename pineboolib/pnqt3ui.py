@@ -388,7 +388,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             except Exception:
                 row = col = None
 
-            if c.tag == "property":
+            if c.tag == "property":  # Ya se han procesado previamente ...
                 continue
             elif c.tag == "widget":
                 new_widget = createWidget(c.get("class"), parent=widget)
@@ -435,7 +435,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 else:
                     vPolicy = policy_
 
-                #print("Nuevo spacer(%s,%s,(%s,%s), %s, %s" % ("Horizontal" if orient_ == 1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
+                # print("Nuevo spacer %s (%s,%s,(%s,%s), %s, %s" % (spacer_name, "Horizontal" if orient_ ==
+                #                                                  1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
                 new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
                 widget.layout.addItem(new_spacer)
                 #print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
@@ -463,7 +464,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
     for c in xml:
         if c.tag == "layout":
-            logger.warn("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
+            #logger.warn("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
             lay_ = getattr(QtWidgets, c.get("class"))()
             lay_.setObjectName(c.get("name"))
             widget.setLayout(lay_)
@@ -472,14 +473,18 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if c.tag == "property":
             properties.append(c)
             continue
-        if c.tag in ("vbox", "hbox", "grid"):
 
-            layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
+        if c.tag in ("vbox", "hbox", "grid"):
+            if c.tag.find("box") > -1:
+                layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
+            else:
+                layout_type = "QGridLayout"
+
             widget.layout = getattr(QtWidgets, layout_type)()
 
             lay_name = None
-            lay_margin = 3
-            lay_spacing = 3
+            lay_margin = 0
+            lay_spacing = 0
             for p in c.findall("property"):
                 p_name = p.get("name")
                 if p_name == "name":
