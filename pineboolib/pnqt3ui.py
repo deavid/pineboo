@@ -425,8 +425,14 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
                     elif pname == "sizeType":
                         #print("Convirtiendo %s a %s" % (p.find("enum").text, value))
-                        policy_name = p.find("enum").text
-                        policy_ = QtWidgets.QSizePolicy.Policy(value)
+                        from pineboolib.fllegacy.FLSettings import FLSettings
+                        settings = FLSettings()
+
+                        if settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
+                            policy_ = QtWidgets.QSizePolicy.Policy(value)
+                        else:
+                            policy_ = 7  # Siempre Expanding
+
                     elif pname == "name":
                         spacer_name = value
 
