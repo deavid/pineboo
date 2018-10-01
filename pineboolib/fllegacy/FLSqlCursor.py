@@ -1009,9 +1009,6 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setAction(self, a):
-
-        if a is self.action():
-            return
         # if isinstance(a, str) or isinstance(a, QString):
 
         # a = str(a) # FIXME: Quitar cuando se quite QString
@@ -1033,6 +1030,9 @@ class FLSqlCursor(QtCore.QObject):
                 action.setTable(a)
         else:
             action = a
+
+        if a is self.action():
+            return
 
         if not self.action():
             self._action = action
