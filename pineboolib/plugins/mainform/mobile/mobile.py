@@ -560,17 +560,18 @@ class MainForm(QtCore.QObject):
         # style.triggered.connect(aqApp.showStyles)
 
     def initTextLabels(self):
-
         tL = self.w_.findChild(QtWidgets.QLabel, "tLabel")
         tL2 = self.w_.findChild(QtWidgets.QLabel, "tLabel2")
         texto = AQUtil.sqlSelect("flsettings", "valor", "flkey='verticalName'")
         if texto:
-            tL.text = texto
+            tL.setText(texto)
 
-        if not AQUtil.sqlSelect("flsettings", "valor", "flkey='PosInfo'"):
-            tL2.text = "%s@%s" % (sys.nameUser(), sys.nameBD())
+        if AQUtil.sqlSelect("flsettings", "valor", "flkey='PosInfo'") == 'True':
+            text_ = "%s@%s" % (sys.nameUser(), sys.nameBD())
             if sys.osName() == "MACX":
-                tL2.text += "     "
+                text_ += "     "
+
+            tL2.setText(text_)
 
     def initDocks(self):
         self.dck_mar_ = DockListView(self.w_, "pinebooDockMarks", sys.translate("Marcadores"))
