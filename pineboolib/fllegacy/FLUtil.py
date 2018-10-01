@@ -985,13 +985,10 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
-        c.setForwardOnly(True)
-
-        # if not c.select(w):
-        #     return False
         c.select(w)
-
+        c.setForwardOnly(True)
         while c.next():
+
             c.setModeAccess(FLSqlCursor.Edit)
             c.refreshBuffer()
 
