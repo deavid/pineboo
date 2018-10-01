@@ -28,7 +28,7 @@ class FormInternalObj(FormDBWidget):
 
     def cargarConfiguracion(self):
         w = self.w_
-        w.child(u"leNombreVertical").text = self.leerValorGlobal("verticalName")
+
         w.child(u"cbFLTableDC").checked = self.leerValorLocal("FLTableDoubleClick")
         w.child(u"cbFLTableSC").checked = self.leerValorLocal("FLTableShortCut")
         w.child(u"cbFLTableCalc").checked = self.leerValorLocal("FLTableExport2Calc")
@@ -37,6 +37,7 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbSLInterface").checked = self.leerValorLocal("SLInterface")
         w.child(u"leCallFunction").text = self.leerValorLocal("ebCallFunction")
         w.child(u"leMaxPixImages").text = self.leerValorLocal("maxPixImages")
+        w.child(u"leNombreVertical").text = self.leerValorGlobal("verticalName")
         w.child(u"cbFLLarge").checked = (self.leerValorGlobal("FLLargeMode") == 'True')
         w.child(u"cbPosInfo").checked = (self.leerValorGlobal("PosInfo") == 'True')
         w.child(u"cbMobile").checked = self.leerValorLocal("mobileMode")
@@ -64,20 +65,21 @@ class FormInternalObj(FormDBWidget):
         w.child(u"leCO").setStyleSheet('background-color:' + self.colorActual_)
         w.child(u"leCO").show()
 
-    def leerValorGlobal(self, valorName=None):
+    def leerValorGlobal(self, valor_name=None):
         util = FLUtil()
-        valor = util.sqlSelect(u"flsettings", u"valor", ustr(u"flkey='", valorName, u"'"))
-        if valor is None:
-            valor = ""
+        value = util.sqlSelect("flsettings", "valor", "flkey='%s'" % valor_name)
 
-        return valor
+        if value is None:
+            value = ""
 
-    def grabarValorGlobal(self, valorName=None, value=None):
+        return value
+
+    def grabarValorGlobal(self, valor_name=None, value=None):
         util = FLUtil()
-        if not util.sqlSelect(u"flsettings", u"flkey", ustr(u"flkey='", valorName, u"'")):
-            util.sqlInsert(u"flsettings", u"flkey,valor", ustr(valorName, u",", value))
+        if not util.sqlSelect("flsettings", "flkey", "flkey='%s'" % valor_name):
+            util.sqlInsert("flsettings", "flkey,valor", "%s,%s" % (valor_name, value))
         else:
-            util.sqlUpdate(u"flsettings", u"valor", value, ustr(u"flkey = '", valorName, u"'"))
+            util.sqlUpdate("flsettings", u"valor", value, "flkey = '%s'" % valor_name)
 
     def leerValorLocal(self, valor_name):
         util = FLUtil()
