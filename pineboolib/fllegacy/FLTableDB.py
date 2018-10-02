@@ -2034,7 +2034,7 @@ class FLTableDB(QtWidgets.QWidget):
                 self.lineEditSearch.textChanged.disconnect(self.filterRecords)
             except Exception:
                 pass
-            self.lineEditSearch.setText(textSearch)
+            self.lineEditSearch.setText(str(textSearch))
             self.lineEditSearch.textChanged.connect(self.filterRecords)
             self.lineEditSearch.selectAll()
             self.seekCursor()
