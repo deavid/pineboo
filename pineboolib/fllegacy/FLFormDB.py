@@ -817,11 +817,11 @@ class FLFormDB(QtWidgets.QDialog):
     def child(self, childName):
         return False
 
-    def __getattr__(self, name):
-        if getattr(self.script, "form", None):
-            return getattr(self.script.form, name)
-        else:
-            qWarning("%s (%s):No se encuentra el atributo %s" % (self, self.iface, name))
+    # def __getattr__(self, name):
+        # if getattr(self.script, "form", None):
+        #    return getattr(self.script.form, name)
+        # else:
+        #    qWarning("%s (%s):No se encuentra el atributo %s" % (self, self.iface, name))
 
     @decorators.NotImplementedWarn
     def exportToXml(self, b):
