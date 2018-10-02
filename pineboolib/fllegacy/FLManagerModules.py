@@ -8,6 +8,7 @@ from pineboolib import decorators, pnqt3ui
 from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 from pineboolib.fllegacy.FLAction import FLAction
+from pineboolib.fllegacy.FLModulesStaticLoader import FLStaticLoader, AQStaticBdInfo
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget
@@ -115,7 +116,6 @@ class FLManagerModules(object):
         if db:
             self.db_ = db
 
-            from pineboolib.fllegacy.FLModulesStaticLoader import AQStaticBdInfo
             self.staticBdInfo_ = AQStaticBdInfo(self.db_)
 
         self.filesCached_ = {}
@@ -227,6 +227,13 @@ class FLManagerModules(object):
     """
 
     def contentCached(self, n, shaKey=None):
+
+        not_sys_table = (self.db_.dbAux() and n[0:3] is not "sys" and not self.db_.manager().isSystemTable(n))
+        if not_sys_table and self.staticBdInfo_ and self.staticBdInfo_.enabled_:
+            str_ret = self.contentStatic(n)
+            if str_ret:
+                return str_ret
+
         if n in self.filesCached_.items():
             return self.filesCached_[n]
 
@@ -698,7 +705,8 @@ class FLManagerModules(object):
     """
 
     def contentStatic(self, n):
-        str_ret = FLModulesStaticLoader.content(n, self.staticBdInfo_)
+
+        str_ret = FLStaticLoader.content(n, self.staticBdInfo_)
         if str_ret:
             from pineboolib.fllegacy.FLUtil import FLUtil
             util = FLUtil()
@@ -735,5 +743,4 @@ class FLManagerModules(object):
     """
 
     def staticLoaderSetup(self):
-        from pineboolib.fllegacy.FLModulesStaticLoader import FLStaticLoaderSetup
-        FLStaticLoaderSetup.setup(self.staticBdInfo_)
+        FLStaticLoader.setup(self.staticBdInfo_)

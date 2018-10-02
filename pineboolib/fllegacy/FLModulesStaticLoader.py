@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.pncontrolsfactory import FLCheckBox
 from pineboolib import decorators
 
 from PyQt5 import QtWidgets, Qt, QtCore
@@ -38,7 +37,8 @@ class AQStaticBdInfo(object):
         self.db_ = database.DBName()
 
         self.key_ = "StaticLoader/%s/" % self.db_
-        self.enabled_ = False
+        settings = FLSettings()
+        self.enabled_ = settings.readBoolEntry("%senabled" % self.key_, False)
 
     def findPath(self, p):
 
@@ -52,7 +52,6 @@ class AQStaticBdInfo(object):
         settings = FLSettings()
         self.enabled_ = settings.readBoolEntry("%senabled" % self.key_, False)
         self.dirs_.clear()
-
         dirs = settings.readListEntry("%sdirs" % self.key_)
         i = 0
 
@@ -80,7 +79,7 @@ class AQStaticBdInfo(object):
         settings.writeEntry("%sactiveDirs" % self.key_, ",".join(active_dirs))
 
 
-class FLStaticLoaderSetup(QtCore.QObject):
+class FLStaticLoader(QtCore.QObject):
 
     warn_ = None
     ui_ = None
@@ -88,7 +87,7 @@ class FLStaticLoaderSetup(QtCore.QObject):
 
     def __init__(self, b):
 
-        super(FLStaticLoaderSetup, self).__init__()
+        super(FLStaticLoader, self).__init__()
 
         from pineboolib.fllegacy.FLManagerModules import FLManagerModules
         from pineboolib.utils import filedir
@@ -128,8 +127,10 @@ class FLStaticLoaderSetup(QtCore.QObject):
             n_rows = len(self.b_.dirs_)
             self.tblDirs.setNumRows(n_rows)
             row = 0
+            from pineboolib.pncontrolsfactory import FLCheckBox
             for info in self.b_.dirs_:
                 self.tblDirs.setText(row, 0, info.path_)
+
                 chk = FLCheckBox(self.tblDirs, row)
                 chk.setChecked(info.active_ == "True")
                 chk.toggled.connect(self.setChecked)
@@ -147,6 +148,7 @@ class FLStaticLoaderSetup(QtCore.QObject):
         dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
 
         if dir:
+            from pineboolib.pncontrolsfactory import FLCheckBox
             n_rows = self.tblDirs.numRows()
             self.tblDirs.setNumRows(n_rows + 1)
             self.tblDirs.setText(n_rows, 0, dir)
@@ -216,38 +218,39 @@ class FLStaticLoaderSetup(QtCore.QObject):
             info.active_ = on
 
     def setup(b):
-        diag_setup = FLStaticLoaderSetup(b)
+        diag_setup = FLStaticLoader(b)
         if (QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_()):
             b.writeSettings()
 
-    def content(self, n, b):
+    def content(n, b):
+        b.readSettings()
         util = FLUtil()
-        separator = "/" if util.getOS().find("WIN") > -1 else ""
-
-        for info in self.b.dirs_:
+        separator = "\\" if util.getOS().find("WIN") > -1 else "/"
+        warn_ = None
+        for info in b.dirs_:
             if info.active_ and os.path.exists(info.path_ + separator + n):
-                if not self.warn_:
+                if not warn_:
                     timer = QtCore.QTimer()
 
-                    self.warn_ = FLStaticLoaderWarning()
+                    warn_ = FLStaticLoaderWarning()
                     settings = FLSettings()
-                    if not self.warn_.warns_ and settings.readBoolEntry("ebcomportamiento/SLInterface", True):
-                        time.singleShot(500, self.warn_.popupWarnings)
+                    if not warn_.warns_ and settings.readBoolEntry("ebcomportamiento/SLInterface", True):
+                        time.singleShot(500, warn_.popupWarnings)
 
-                    if not self.warn_.paths_:
-                        timer.singleShot(1500, self.warn_.updateScripts)
+                    if not warn_.paths_:
+                        timer.singleShot(1500, warn_.updateScripts)
 
                     msg = "%s -> ...%s" % (n[:-20], info.path_[0:40])
 
-                    if not msg in self.warn_.warns_:
-                        self.warn_.warns_.append(msg)
-                        self.warn_.paths_.append("%s:%s" % (n, info.path_))
+                    if not msg in warn_.warns_:
+                        warn_.warns_.append(msg)
+                        warn_.paths_.append("%s:%s" % (n, info.path_))
                         if settings.readBoolEntry("ebcomportamiento/SLConsola", True):
                             logger.warn("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
 
                     return aqApp.db().managerModules().contentFS(info.path_ + separator + n)
 
-        return ""
+        return None
 
     def __getattr__(self, name):
         return self.ui_.findChild(QtWidgets.QWidget, name)
