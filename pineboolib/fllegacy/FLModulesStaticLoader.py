@@ -200,7 +200,7 @@ class FLStaticLoader(QtCore.QObject):
     def setEnabled(self, on):
         self.b_.enabled_ = on
 
-    #@QtCore.pyqtSlot(bool)
+    @QtCore.pyqtSlot(bool)
     def setChecked(self, on):
 
         chk = self.sender()
@@ -235,7 +235,7 @@ class FLStaticLoader(QtCore.QObject):
                     warn_ = FLStaticLoaderWarning()
                     settings = FLSettings()
                     if not warn_.warns_ and settings.readBoolEntry("ebcomportamiento/SLInterface", True):
-                        time.singleShot(500, warn_.popupWarnings)
+                        timer.singleShot(500, warn_.popupWarnings)
 
                     if not warn_.paths_:
                         timer.singleShot(1500, warn_.updateScripts)
@@ -245,9 +245,10 @@ class FLStaticLoader(QtCore.QObject):
                     if not msg in warn_.warns_:
                         warn_.warns_.append(msg)
                         warn_.paths_.append("%s:%s" % (n, info.path_))
-                        if settings.readBoolEntry("ebcomportamiento/SLConsola", True):
+                        if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
                             logger.warn("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
 
+                    from pineboolib.pncontrolsfactory import aqApp
                     return aqApp.db().managerModules().contentFS(info.path_ + separator + n)
 
         return None
