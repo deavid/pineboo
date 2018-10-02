@@ -676,44 +676,10 @@ class FLCheckBox(QtWidgets.QCheckBox):
         super(FLCheckBox, self).__init__(parent)
 
 
-class FLTable(QtWidgets.QTableWidget):
-    AlwaysOff = None
-
-    def setNumRows(self, rows):
-        self.setRowCount(rows)
-
-    def setNumCols(self, cols):
-        self.setColumnCount(cols)
-
-    @decorators.NotImplementedWarn
-    def setReadOnly(self, b):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setColumnMovingEnabled(self, b):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setVScrollBarMode(self, mode):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setHScrollBarMode(self, mode):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setFocusStyle(self, b):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setColumnLabels(self, sep, labels_list):
-        pass
-
-
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
-    currentChanged = QtCore.pyqtSignal(int, int)
+    CurrentChanged = QtCore.pyqtSignal(int, int)
     doubleClicked = QtCore.pyqtSignal(int, int)
     read_only_cols = None
     read_only_rows = None
@@ -732,7 +698,7 @@ class QTable(QtWidgets.QTableWidget):
         self.read_only_rows = []
 
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
-        self.currentChanged.emit(currentRow, currentColumn)
+        self.CurrentChanged.emit(currentRow, currentColumn)
 
     def doubleClicked_(self, f, c):
         self.doubleClicked.emit(f, c)
@@ -745,6 +711,7 @@ class QTable(QtWidgets.QTableWidget):
 
     def setNumCols(self, n):
         self.setColumnCount(n)
+        self.setColumnLabels(",", ",".join(self.cols_list))
 
     def setNumRows(self, n):
         self.setRowCount(n)
@@ -763,7 +730,16 @@ class QTable(QtWidgets.QTableWidget):
 
     def setColumnLabels(self, separador, lista):
         array_ = lista.split(separador)
-        self.setHorizontalHeaderLabels(array_)
+        labels_ = []
+        for i in range(self.columnCount()):
+            labels_.append(array_[i])
+        self.setHorizontalHeaderLabels(labels_)
+
+    def setColumnStrechable(self, col, b):
+        if b:
+            self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.Stretch)
+        else:
+            self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.AdjustToContents)
 
     def setHeaderLabel(self, l):
         self.cols_list.append(l)
@@ -829,6 +805,22 @@ class QTable(QtWidgets.QTableWidget):
 
     # def __getattr__(self, name):
         # return DefFun(self, name)
+
+
+class FLTable(QTable):
+    AlwaysOff = None
+
+    @decorators.NotImplementedWarn
+    def setColumnMovingEnabled(self, b):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setVScrollBarMode(self, mode):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setHScrollBarMode(self, mode):
+        pass
 
 
 class FLTimeEdit(QtWidgets.QTimeEdit):
