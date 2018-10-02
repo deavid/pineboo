@@ -209,7 +209,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.iface = None
 
         if script_name is None:
-            script_name = self._action.scriptForm()
+            script_name = self._action.scriptForm() if self._action.table() else self._action.name()
 
         pineboolib.project.actions[self._action.name()].load_script(script_name, self)
 
