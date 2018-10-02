@@ -8,7 +8,6 @@ from PyQt5 import QtWidgets, Qt, QtCore
 
 import os
 import logging
-from PyQt5.QtWidgets import QHeaderView
 
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class AQStaticBdInfo(object):
     def __init__(self, database):
         self.db_ = database.DBName()
 
-        self.key = "StaticLoader/%s/" % self.db_
+        self.key_ = "StaticLoader/%s/" % self.db_
         self.enabled_ = False
 
     def findPath(self, p):
@@ -55,8 +54,14 @@ class AQStaticBdInfo(object):
         self.dirs_.clear()
 
         dirs = settings.readListEntry("%sdirs" % self.key_)
-        for it in dirs:
-            self.dirs_.append(it)
+        i = 0
+
+        while i < len(dirs):
+            active_ = dirs[i]
+            i += 1
+            path_ = dirs[i]
+            i += 1
+            self.dirs_.append(AQStaticDirInfo(active_, path_))
 
     def writeSettings(self):
         settings = FLSettings()
@@ -64,14 +69,15 @@ class AQStaticBdInfo(object):
         settings.writeEntry("%senabled" % self.key_, self.enabled_)
         dirs = []
         active_dirs = []
+
         for info in self.dirs_:
-            dirs.append(info.active_)
+            dirs.append(str(info.active_))
             dirs.append(info.path_)
             if info.active_:
                 active_dirs.append(info.path_)
 
         settings.writeEntry("%sdirs" % self.key_, dirs)
-        settings.writeEntry("%sactiveDirs" % self.key_, active_dirs)
+        settings.writeEntry("%sactiveDirs" % self.key_, ",".join(active_dirs))
 
 
 class FLStaticLoaderSetup(QtCore.QObject):
@@ -88,14 +94,14 @@ class FLStaticLoaderSetup(QtCore.QObject):
         from pineboolib.utils import filedir
         self.ui_ = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
         self.b_ = b
-
         self.pixOn.setVisible(False)
         self.tblDirs.verticalHeader().setVisible(False)
         self.tblDirs.setLeftMargin(0)
-        self.tblDirs.horizontalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.tblDirs.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
         self.tblDirs.horizontalHeader().setSectionsClickable(False)
-        #self.tblDirs.setColumnStrechable(0, True)
-        # self.tblDirs.adjustColumn(1)
+        self.tblDirs.setColumnStrechable(0, True)
+        self.tblDirs.adjustColumn(1)
+        self.tblDirs.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
         self.load()
 
@@ -119,26 +125,24 @@ class FLStaticLoaderSetup(QtCore.QObject):
 
                 self.tblDirs.removeRows(rows)
 
-            n_rows = 0
-            self.tblDirs.setNumRows(len(self.b_.dirs_))
-
+            n_rows = len(self.b_.dirs_)
+            self.tblDirs.setNumRows(n_rows)
+            row = 0
             for info in self.b_.dirs_:
-                self.tblDirs.setText(n_rows, 0, info.path_)
-
-                chk = FLCheckBox(self.tblDirs, n_rows)
-                chk.setChecked(info.active_)
+                self.tblDirs.setText(row, 0, info.path_)
+                chk = FLCheckBox(self.tblDirs, row)
+                chk.setChecked(info.active_ == "True")
                 chk.toggled.connect(self.setChecked)
+                self.tblDirs.setCellWidget(row, 1, chk)
+                row += 1
 
-                self.tblDirs.setCellWidget(n_rows, 1, chk)
-                n_rows += 1
-
-            self.tblDirs.setCurrentCell(0, 0)
+            self.tblDirs.setCurrentCell(n_rows, 0)
 
     @QtCore.pyqtSlot(bool)
     def addDir(self):
 
         cur_row = self.tblDirs.currentRow()
-        dir_init = self.tblDirs.text(cur_row, 0).dirPath(True) if cur_row is not -1 else ""
+        dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
         dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a insertar"), dir_init)
 
@@ -163,9 +167,9 @@ class FLStaticLoaderSetup(QtCore.QObject):
         if cur_row == -1:
             return
 
-        dir_init = self.tblDirs.text(cur_row, 0).dirPath(True)
+        dir_init = self.tblDirs.text(cur_row, 0) if cur_row > -1 else ""
 
-        dir = QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a modificar"), dir_init)
+        dir = Qt.QFileDialog.getExistingDirectory(None, self.tr("Selecciones el directorio a modificar"), dir_init)
 
         if dir:
             info = self.b_.findPath(self.tblDirs.text(cur_row, 0))
@@ -181,14 +185,12 @@ class FLStaticLoaderSetup(QtCore.QObject):
         if cur_row == -1:
             return
 
-        dir_init = self.tblDirs.text(cur_row, 0).dirPath(True)
-
-        if QtWidgets.QMessageBox.No == QFileDialog.getExistingDirectory(None, self.tr("El registro activo será borrado. ¿ Está seguro ?"), dir_init, QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape):
+        if QtWidgets.QMessageBox.No == QtWidgets.QMessageBox.warning(None, self.tr("Borrar registro"), self.tr("El registro activo será borrado. ¿ Está seguro ?"), QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No):
             return
 
         info = self.b_.findPath(self.tblDirs.text(cur_row, 0))
         if info:
-            self.b_.dirs_.removeRef(info)
+            del info
 
         self.tblDirs.removeRow(cur_row)
 
@@ -196,23 +198,27 @@ class FLStaticLoaderSetup(QtCore.QObject):
     def setEnabled(self, on):
         self.b_.enabled_ = on
 
-    @QtCore.pyqtSlot(bool)
+    #@QtCore.pyqtSlot(bool)
     def setChecked(self, on):
 
         chk = self.sender()
         if not chk:
             return
 
-        info = self.b_.findPath(self.tblDirs.text(chk.row(), 0))
+        rows = self.tblDirs.rowCount()
+
+        info = None
+        for r in range(rows):
+            if self.tblDirs.cellWidget(r, 1) is chk:
+                info = self.b_.findPath(self.tblDirs.text(r, 0))
+
         if info:
             info.active_ = on
 
     def setup(b):
         diag_setup = FLStaticLoaderSetup(b)
-        if (QtWidgets.QDialog.Accepted == diag_setup.exec_()):
-            self.b_.writeSettings()
-
-        del diag_setup
+        if (QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_()):
+            b.writeSettings()
 
     def content(self, n, b):
         util = FLUtil()
