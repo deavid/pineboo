@@ -192,7 +192,7 @@ class FLStaticLoader(QtCore.QObject):
 
         info = self.b_.findPath(self.tblDirs.text(cur_row, 0))
         if info:
-            del info
+            self.b_.dirs_.remove(info)
 
         self.tblDirs.removeRow(cur_row)
 
