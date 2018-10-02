@@ -141,7 +141,27 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         ord = "ASC"
         if order == 1:
             ord = "DESC"
-        self._sortOrder = "%s %s" % (self.metadata().indexFieldObject(col).name(), ord)
+
+        col_name = self.metadata().indexFieldObject(col).name()
+        order_list = []
+        found_ = False
+        if self._sortOrder:
+            for column in self._sortOrder.split(","):
+                if col_name in column:
+                    found_ = True
+                    order_list.append("%s %s" % (col_name, ord))
+                else:
+                    order_list.append(column)
+
+            if not found_:
+                self.logger.warn("%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). El order by previo se perderá" % (
+                    __name__, col_name, self._sortOrder))
+            else:
+                self._sortOrder = ",".join(order_list)
+
+        if not found_:
+            self._sortOrder = "%s %s" % (col_name, ord)
+
         self.refresh()
 
     """
@@ -156,8 +176,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     Setea el ORDERBY
     """
 
-    def setSortOrder(self, sO):
-        self._sortOrder = sO
+    def setSortOrder(self, sort_order):
+        self._sortOrder = ""
+        if isinstance(sort_order, list):
+            self._sortOrder = ",".join(sort_order)
+
+        else:
+            self._sortOrder = sort_order
 
     def setColorFunction(self, f):
         self.color_function_ = f

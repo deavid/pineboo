@@ -2143,10 +2143,10 @@ class FLSqlCursor(QtCore.QObject):
 
             if self.d.isQuery_ and self.d.queryOrderBy_:
                 sqlOrderBy = self.d.queryOrderBy_
-                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+                sql = "%s ORDER BY %s" % (sql, sqlOrderBy)
             elif self.sort() and len(self.sort()) > 0:
                 sqlOrderBy = self.sort()
-                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+                sql = "%s ORDER BY %s" % (sql, sqlOrderBy)
 
             # FIXME: solo compatible con PostgreSQL!
             # if sqlPriKeyValue and self.db().canOverPartition():
@@ -2857,7 +2857,8 @@ class FLSqlCursor(QtCore.QObject):
         if finalFilter:
             self.setFilter(finalFilter)
 
-        self.model().setSortOrder(sort)
+        if sort:
+            self.model().setSortOrder(sort)
         self.model().refresh()
         self.d._currentregister = -1
 
@@ -2876,6 +2877,9 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def setSort(self, sortO):
+        if not sortO:
+            return
+
         self.model().setSortOrder(sortO)
 
     """
