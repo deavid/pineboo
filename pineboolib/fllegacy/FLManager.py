@@ -1347,8 +1347,11 @@ class FLManager(QtCore.QObject):
         @return TRUE si es una tabla de sistema
         """
 
-        # if not n[0:2] == "fl":
-        #    return False
+        if n[0:2] != "fl":
+            return False
+
+        if n.endswith(".mtd"):
+            n = n[:-4]
 
         if n in ("flfiles", "flmetadata", "flmodules", "flareas", "flserial", "flvar", "flsettings", "flseqs", "flupdates"):
             return True
