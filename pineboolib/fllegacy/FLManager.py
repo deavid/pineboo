@@ -5,7 +5,7 @@ from PyQt5.QtXml import QDomDocument
 
 
 from pineboolib import decorators
-from pineboolib.utils import filedir, auto_qt_translate_text, clearXPM
+from pineboolib.utils import filedir, auto_qt_translate_text, cacheXPM
 
 
 from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
@@ -1457,8 +1457,9 @@ class FLManager(QtCore.QObject):
             v = q.value(0)
             del q
             # print(v)
-            v = clearXPM(v)
+            v = cacheXPM(v)
             # print(v)
+
             return v
 
     def initCount(self):

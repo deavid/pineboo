@@ -505,8 +505,8 @@ class FLManagerModules(object):
         from pineboolib.pncontrolsfactory import QPixmap
         pix = None
         if idM.upper() in self.dictInfoMods.keys():
-            from pineboolib.utils import clearXPM
-            icono = clearXPM(self.dictInfoMods[idM.upper()].icono)
+            from pineboolib.utils import cacheXPM
+            icono = cacheXPM(self.dictInfoMods[idM.upper()].icono)
             pix = QPixmap(icono)
 
         return pix or QPixmap()

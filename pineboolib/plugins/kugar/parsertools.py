@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QPixmap
-from pineboolib.utils import filedir, clearXPM
+from pineboolib.utils import filedir, cacheXPM
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 import pineboolib
 import os
@@ -116,13 +116,13 @@ class parsertools(object):
     """
 
     def parseKey(self, ref_key=None):
+        print(ref_key)
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
             value = None
-
-            imgFile = filedir("../tempdata")
-            imgFile += "/%s.png" % ref_key
+            from pineboolib.pncontrolsfactory import aqApp
+            imgFile = filedir("../tempdata/cache/%s/%s.png" % (aqApp.db().DBName(), ref_key))
 
             if not pineboolib.project.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                 table_name += "_%s" % ref_key.split("@")[1]
@@ -131,7 +131,7 @@ class parsertools(object):
             # q.setForwardOnly(True)
             q.exec_("SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key))
             if q.next():
-                value = clearXPM(q.value(0))
+                value = cacheXPM(q.value(0))
 
             if not os.path.exists(imgFile) and value:
                 pix = QPixmap(value)

@@ -359,15 +359,23 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
     return True
 
 
-def clearXPM(text):
-    v = text
-    if v.find("{"):
-        v = v[v.find("{") + 3:]
-        v = v[:v.find("};") + 1]
-        v = v.replace("\n", "")
-        v = v.replace("\t", "    ")
-    v = v.split('","')
-    return v
+def cacheXPM(value):
+
+    xpm_name = value[:value.find("[]")]
+    xpm_name = xpm_name[xpm_name.rfind(" ") + 1:]
+    from pineboolib.pncontrolsfactory import aqApp
+
+    cache_dir = filedir("../tempdata/cache/%s/cacheXPM" % aqApp.db().DBName())
+    if not os.path.exists(cache_dir):
+        os.mkdir(cache_dir)
+
+    file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
+    if not os.path.exists(file_name):
+        f = open(file_name, "w")
+        f.write(value)
+        f.close()
+
+    return file_name
 
 
 def text2bool(text):
@@ -637,3 +645,24 @@ def indent(elem, level=0):
     else:
         if level and (not elem.tail or not elem.tail.strip()):
             elem.tail = i
+
+
+def format_double(d, field_meta):
+    from PyQt5 import QtCore
+    p_int = field_meta.partInteger()
+    p_decimal = field_meta.partDecimal()
+    comma_ = "."
+
+    d = round(d, p_decimal)
+
+    str_d = str(d)
+    str_integer = str_d[0:str_d.find(comma_)] if str_d.find(comma_) > -1 else str_d
+    str_decimal = "" if str_d.find(comma_) == -1 else str_d[str_d.find(comma_) + 1:]
+
+    while p_decimal > len(str_decimal):
+        str_decimal += "0"
+
+    # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
+
+    ret_ = "%s.%s" % (str_integer, str_decimal)
+    return ret_
