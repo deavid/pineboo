@@ -48,14 +48,20 @@ class FLReportEngine(object):
                     if strVal in ["", "None"]:
                         row.setAttribute(it, strVal)
                         continue
-                    imgFile = filedir("../tempdata")
-                    imgFile += "/%s.png" % strVal
-                    if not os.path.exists(imgFile):
-                        #print("Creando", imgFile)
-                        #print(self.qry_.value(i, True))
-                        pix = QtGui.QPixmap(self.qry_.value(i, True))
-                        if not pix.save(imgFile):
-                            print("FLReportEngine::No se ha podido guardar", imgFile)
+
+                    from pineboolib.plugins.kugar.parsertools import parsertools
+                    parser = parsertools()
+                    key = self.qry_.value(i, False)
+                    imgFile = parser.parseKey(key)
+                    #from pineboolib.pncontrolsfactory import aqApp
+                    #imgFile = filedir("../tempdata/cache/%s/cacheXPM" % aqApp.db().DBName())
+                    #imgFile += "/%s.png" % strVal
+                    # if not os.path.exists(imgFile):
+                    #print("Creando", imgFile)
+                    #print(self.qry_.value(i, True))
+                    #    pix = QtGui.QPixmap(self.qry_.value(i, True))
+                    #    if not pix.save(imgFile):
+                    #        print("FLReportEngine::No se ha podido guardar", imgFile)
                     row.setAttribute(it, imgFile)
                 else:
                     row.setAttribute(it, strVal)
