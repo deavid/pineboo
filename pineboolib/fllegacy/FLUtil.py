@@ -883,7 +883,7 @@ class FLUtil(QtCore.QObject):
         ret = self.buildNumber(n, 'float', fmd.partDecimal())
         if tmd and not tmd.inCache():
             del tmd
-        return str(ret)
+        return ret
 
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
         """
