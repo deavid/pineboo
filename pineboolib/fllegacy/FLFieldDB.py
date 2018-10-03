@@ -2507,7 +2507,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 a = mng.action(self.actionName_)
                 a.setTable(field.relationM1().foreignField())
 
-            f = FLFormSearchDB(c, a.name(), None)
+            f = FLFormSearchDB(a.name(), self)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
             f.setFilter(mng.formatAssignValue(
                 fMD.relationM1().foreignField(), fMD, v, True))
