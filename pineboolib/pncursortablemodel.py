@@ -6,7 +6,7 @@ import logging
 import time
 import itertools
 
-from pineboolib.utils import filedir
+from pineboolib.utils import filedir, format_double
 import pineboolib
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -246,17 +246,19 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             return QtCore.Qt.Unchecked
 
-        if role == QtCore.Qt.TextAlignmentRole:
+        elif role == QtCore.Qt.TextAlignmentRole:
             if _type in ("int", "double", "uint"):
                 d = QtCore.Qt.AlignRight
-            elif _type in ("bool", "unlock", "date", "time", "pixmap", "check"):
+            elif _type in ("bool", "date", "time"):
                 d = QtCore.Qt.AlignCenter
+            elif _type in ("unlock", "pixmap"):
+                d = QtCore.Qt.AlignHCenter
             else:
                 d = None
 
             return d
 
-        if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
+        elif role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             # r = self._vdata[row]
             if _type is "bool":
                 if d in (True, "1"):
@@ -265,6 +267,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     d = "No"
 
             elif _type in ("unlock", "pixmap"):
+
                 d = None
 
             elif _type in ("string", "stringlist") and not d:
@@ -276,23 +279,30 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             elif _type is "check":
                 return
 
+            elif _type is "double":
+                d = format_double(d, field)
+
             return d
 
-        if role == QtCore.Qt.DecorationRole:
+        elif role == QtCore.Qt.DecorationRole:
             icon = None
-            if _type == "unlock":
+            if _type in ("unlock", "pixmap"):
+                label_icon = QtWidgets.QLabel()
 
-                if d in (True, "1"):
-                    icon = QtGui.QIcon(filedir("../share/icons", "unlock.png"))
-                else:
-                    icon = QtGui.QIcon(filedir("../share/icons", "lock.png"))
+                if _type == "unlock":
+                    if d in (True, "1"):
+                        icon = QtGui.QIcon(filedir("../share/icons", "unlock.png"))
+                    else:
+                        icon = QtGui.QIcon(filedir("../share/icons", "lock.png"))
 
-            if _type == "pixmap" and self._showPixmap:
-                pass
+                if _type == "pixmap" and self._showPixmap:
+                    d = self.db().manager().fetchLargeValue(d)
+                    if d:
+                        icon = QtGui.QPixmap(d)
 
             return icon
 
-        if role == QtCore.Qt.BackgroundRole:
+        elif role == QtCore.Qt.BackgroundRole:
             if _type == "bool":
                 if d in (True, "1"):
                     d = QtGui.QBrush(QtCore.Qt.green)
@@ -311,7 +321,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             return d
 
-        if role == QtCore.Qt.ForegroundRole:
+        elif role == QtCore.Qt.ForegroundRole:
             if _type == "bool":
                 if d in (True, "1"):
                     d = QtGui.QBrush(QtCore.Qt.black)
@@ -321,6 +331,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 d = None
 
             return d
+
+        # else:
+        #    print("role desconocido", role)
 
         return None
 
