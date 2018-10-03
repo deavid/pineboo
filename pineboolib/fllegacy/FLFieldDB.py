@@ -3055,6 +3055,9 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 self.showed = True
 
+    def editor(self):
+        return self.editor_
+
     """
     Inicializa un editor falso y no funcional.
 
