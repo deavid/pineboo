@@ -217,6 +217,9 @@ class Project(object):
         if not os.path.exists(_dir("cache")):
             os.makedirs(_dir("cache"))
 
+        if not os.path.exists(_dir("cache/%s" % self.conn.DBName())):
+            os.makedirs(_dir("cache/%s" % self.conn.DBName()))
+
         # Conectar:
 
         # Se verifica que existen estas tablas
