@@ -919,8 +919,7 @@ class FLUtil(QtCore.QObject):
                 valor = str(valor)
             return valor
 
-        if size:
-            return False
+        return False
 
     @decorators.BetaImplementation
     def quickSqlSelect(self, f, s, w, connName="default"):
