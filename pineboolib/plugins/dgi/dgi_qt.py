@@ -118,6 +118,9 @@ class FLLineEdit(QtWidgets.QLineEdit):
             self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
             self._parent = parent
 
+            if self._tipo in ("int", "uint", "double"):
+                self.setAlignment(QtCore.Qt.AlignRight)
+
     def __getattr__(self, name):
         return DefFun(self, name)
 
