@@ -874,7 +874,7 @@ class FLManager(QtCore.QObject):
                 return "1 = 1"
 
             formatV = self.formatValue(args[1], args[2], args[3])
-            if not formatV:
+            if formatV is None:
                 return "1 = 1"
 
             if len(args) == 4 and args[1] == "string":
