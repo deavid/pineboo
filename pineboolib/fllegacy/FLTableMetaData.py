@@ -546,7 +546,7 @@ class FLTableMetaData(QtCore.QObject):
             if f.name() == str(fN).lower():
                 return f
 
-        return
+        return None
 
     """
     Para obtener la lista de definiciones de campos.
