@@ -586,14 +586,14 @@ class FLTableMetaData(QtCore.QObject):
     #    #print("FiledList count", len(self.d.fieldList_))
     #    return self.d.fieldList_
 
-    def indexPos(self, position):
+    def indexPos(self, field_name):
         i = 0
         for field in self.d.fieldList_:
-            if field.name() == position:
+            if field.name() == field_name:
                 return i
             i = i + 1
 
-        print("FLTableMetaData.indexPos(%s) No encontrado" % position)
+        self.logger.warn("FLTableMetaData.indexPos(%s) No encontrado", field_name)
         return None
 
     """
