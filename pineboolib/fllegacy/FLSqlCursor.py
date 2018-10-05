@@ -3181,7 +3181,7 @@ class FLSqlCursor(QtCore.QObject):
                 functionAfter = "sys.iface.afterCommit_%s" % self.metadata().name()
 
             if functionBefore:
-                v = aqApp.call(functionBefore, [self], self.context(), False)
+                v = aqApp.call(functionBefore, [self], None, False)
                 if v and not isinstance(v, bool):
                     return False
 
@@ -3292,7 +3292,7 @@ class FLSqlCursor(QtCore.QObject):
             return False
 
         if not self.modeAccess() == self.Browse and functionAfter and self.activatedCommitActions():
-            v = aqApp.call(functionAfter, [self], self.context(), False)
+            v = aqApp.call(functionAfter, [self], None, False)
             if v and not isinstance(v, bool):
                 return False
 
