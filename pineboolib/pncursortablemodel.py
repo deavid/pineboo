@@ -9,7 +9,7 @@ import itertools
 from pineboolib.utils import filedir, format_double
 import pineboolib
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 
 DEBUG = False
@@ -219,10 +219,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 field_value = d
                 cursor = self._parent
                 selected = False
-                type = _type
 
                 self.color_dict_["%d_%d" % (row, col)] = aqApp.call(
-                    self.dict_color_function(), [field_name, field_value, cursor, selected, type], None)
+                    self.dict_color_function(), [field_name, field_value, cursor, selected, _type], None)
 
                 self.logger.warn("******** functionGetColor!!! %s", self.dict_color_function())
         # print("Data ", index, role)
@@ -287,13 +286,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         elif role == QtCore.Qt.DecorationRole:
             icon = None
             if _type in ("unlock", "pixmap"):
-                label_icon = QtWidgets.QLabel()
 
                 if _type == "unlock":
                     if d in (True, "1"):
-                        icon = QtGui.QIcon(filedir("../share/icons", "unlock.png"))
+                        icon = QtGui.QPixmap(filedir("../share/icons", "unlock.png"))
                     else:
-                        icon = QtGui.QIcon(filedir("../share/icons", "lock.png"))
+                        icon = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
 
                 if _type == "pixmap" and self._showPixmap:
                     d = self.db().manager().fetchLargeValue(d)
