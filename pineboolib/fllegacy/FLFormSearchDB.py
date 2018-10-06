@@ -260,7 +260,7 @@ class FLFormSearchDB(FLFormDB):
     """
 
     def closeEvent(self, e):
-        # self.frameGeometry()
+        self.frameGeometry()
         # if self.focusWidget():
         #    fdb = self.focusWidget().parentWidget()
         #    try:
@@ -322,6 +322,7 @@ class FLFormSearchDB(FLFormDB):
                 pass
         self.acceptingRejecting_ = True
         self.accepted_ = True
+        self.saveGeometry()
         self.hide()
 
     """

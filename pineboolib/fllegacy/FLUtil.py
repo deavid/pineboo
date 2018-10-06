@@ -883,7 +883,7 @@ class FLUtil(QtCore.QObject):
         ret = self.buildNumber(n, 'float', fmd.partDecimal())
         if tmd and not tmd.inCache():
             del tmd
-        return str(ret)
+        return ret
 
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
         """
@@ -919,8 +919,7 @@ class FLUtil(QtCore.QObject):
                 valor = str(valor)
             return valor
 
-        if size:
-            return False
+        return False
 
     @decorators.BetaImplementation
     def quickSqlSelect(self, f, s, w, connName="default"):
@@ -985,13 +984,10 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
-        c.setForwardOnly(True)
-
-        # if not c.select(w):
-        #     return False
         c.select(w)
-
+        c.setForwardOnly(True)
         while c.next():
+
             c.setModeAccess(FLSqlCursor.Edit)
             c.refreshBuffer()
 
@@ -1019,11 +1015,11 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
-        c.setForwardOnly(True)
 
         # if not c.select(w):
         #     return False
         c.select(w)
+        c.setForwardOnly(True)
 
         while c.next():
             c.setModeAccess(FLSqlCursor.Del)

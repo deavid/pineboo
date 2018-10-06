@@ -118,6 +118,9 @@ class FLLineEdit(QtWidgets.QLineEdit):
             self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
             self._parent = parent
 
+            if self._tipo in ("int", "uint", "double"):
+                self.setAlignment(QtCore.Qt.AlignRight)
+
     def __getattr__(self, name):
         return DefFun(self, name)
 
@@ -402,6 +405,16 @@ class QLabel(QtWidgets.QLabel):
             text = str(text)
         super(QLabel, self).setText(text)
 
+    def setPixmap(self, pix):
+
+        if isinstance(pix, QIcon):
+            pix = pix.pixmap(32, 32)
+        super(QLabel, self).setPixmap(pix)
+
+    @QtCore.pyqtSlot(bool)
+    def setShown(self, b):
+        self.setVisible(b)
+
 
 class QListWidgetItem(QtWidgets.QListWidgetItem):
     pass
@@ -661,56 +674,26 @@ class QTabWidget(QtWidgets.QTabWidget):
 
 
 class FLCheckBox(QtWidgets.QCheckBox):
-    pass
 
-
-class FLTable(QtWidgets.QTableWidget):
-    AlwaysOff = None
-
-    def setNumRows(self, rows):
-        self.setRowCount(rows)
-
-    def setNumCols(self, cols):
-        self.setColumnCount(cols)
-
-    @decorators.NotImplementedWarn
-    def setReadOnly(self, b):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setColumnMovingEnabled(self, b):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setVScrollBarMode(self, mode):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setHScrollBarMode(self, mode):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setFocusStyle(self, b):
-        pass
-
-    @decorators.NotImplementedWarn
-    def setColumnLabels(self, sep, labels_list):
-        pass
+    def __init__(self, parent=None, num_rows=None):
+        super(FLCheckBox, self).__init__(parent)
 
 
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
-    currentChanged = QtCore.pyqtSignal(int, int)
+    CurrentChanged = QtCore.pyqtSignal(int, int)
     doubleClicked = QtCore.pyqtSignal(int, int)
     read_only_cols = None
     read_only_rows = None
+    cols_list = None
 
     def __init__(self, parent=None):
         super(QTable, self).__init__(parent)
         if not parent:
             self.setParent(self.parentWidget())
 
+        self.cols_list = []
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
         self.cellDoubleClicked.connect(self.doubleClicked_)
@@ -718,7 +701,7 @@ class QTable(QtWidgets.QTableWidget):
         self.read_only_rows = []
 
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
-        self.currentChanged.emit(currentRow, currentColumn)
+        self.CurrentChanged.emit(currentRow, currentColumn)
 
     def doubleClicked_(self, f, c):
         self.doubleClicked.emit(f, c)
@@ -731,6 +714,7 @@ class QTable(QtWidgets.QTableWidget):
 
     def setNumCols(self, n):
         self.setColumnCount(n)
+        self.setColumnLabels(",", ",".join(self.cols_list))
 
     def setNumRows(self, n):
         self.setRowCount(n)
@@ -749,7 +733,20 @@ class QTable(QtWidgets.QTableWidget):
 
     def setColumnLabels(self, separador, lista):
         array_ = lista.split(separador)
-        self.setHorizontalHeaderLabels(array_)
+        labels_ = []
+        for i in range(self.columnCount()):
+            labels_.append(array_[i])
+        self.setHorizontalHeaderLabels(labels_)
+
+    def setColumnStrechable(self, col, b):
+        if b:
+            self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.Stretch)
+        else:
+            self.horizontalHeader().setSectionResizeMode(col, Qt.QHeaderView.AdjustToContents)
+
+    def setHeaderLabel(self, l):
+        self.cols_list.append(l)
+        self.setColumnLabels(",", ",".join(self.cols_list))
 
     def insertRows(self, numero):
         self.insertRow(numero)
@@ -803,10 +800,30 @@ class QTable(QtWidgets.QTableWidget):
                 else:
                     item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
+    @decorators.NotImplementedWarn
+    def setLeftMargin(self, n):
+        pass
+
         # setItemDelegateForColumn(c, new NotEditableDelegate(view))
 
     # def __getattr__(self, name):
         # return DefFun(self, name)
+
+
+class FLTable(QTable):
+    AlwaysOff = None
+
+    @decorators.NotImplementedWarn
+    def setColumnMovingEnabled(self, b):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setVScrollBarMode(self, mode):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setHScrollBarMode(self, mode):
+        pass
 
 
 class FLTimeEdit(QtWidgets.QTimeEdit):
@@ -915,8 +932,8 @@ class QLineEdit(QtWidgets.QLineEdit):
 
     _parent = None
 
-    def __init__(self, parent):
-        super(QLineEdit, self).__init__(parent)
+    def __init__(self, parent=None):
+        super(QLineEdit, self).__init__(parent=None)
         self._parent = parent
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
@@ -1279,8 +1296,7 @@ class GroupBox(QtWidgets.QGroupBox):
             super(GroupBox, self).__setattr__(name, value)
 
 
-class QDialog(QtWidgets.QDialog):
-    pass
+QDialog = QtWidgets.QDialog
 
 
 class QVBoxLayout(QtWidgets.QVBoxLayout):
@@ -1303,7 +1319,6 @@ class QMainWindow(QtWidgets.QMainWindow):
         if c is None:
             c = QtCore.QObject
         ret = self.findChild(c, n)
-        print("Retornando..", ret)
         return ret
 
 
@@ -1332,3 +1347,7 @@ class QIconSet(object):
     def __init__(self, icon):
         self = icon
 """
+
+
+class QDoubleValidator(QtGui.QDoubleValidator):
+    pass

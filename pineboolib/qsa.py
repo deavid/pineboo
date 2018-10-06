@@ -192,6 +192,59 @@ class Input(object):
         return text
 
 
+class NumberEdit(QtWidgets.QWidget):
+
+    def __init__(self):
+        self.line_edit = QLineEdit(self)
+        self.validator = QDoubleValidator
+
+    @decorators.NotImplementedWarn
+    def getValue(self):
+        return float(self.line_edit.text())
+
+    @decorators.NotImplementedWarn
+    def setValue(self, value):
+        self.line_edit.setText(value)
+
+    @decorators.NotImplementedWarn
+    def getDecimals(self):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setDecimals(self, decimals):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setMinimum(self, minimum):
+        pass
+
+    @decorators.NotImplementedWarn
+    def getMinimum(self):
+        pass
+
+    @decorators.NotImplementedWarn
+    def getMaximum(self):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setMaximum(self, maximum):
+        pass
+
+    @decorators.NotImplementedWarn
+    def getLabel(self):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setLabel(self, label):
+        pass
+
+    label = property(getLabel, setLabel)
+    value = property(getValue, setValue)
+    decimals = property(getDecimals, setDecimals)
+    mimimum = property(getMinimum, setMinimum)
+    maximum = property(getMaximum, setMaximum)
+
+
 def qsa_length(obj):
     lfn = getattr(obj, "length", None)
     if lfn:
@@ -295,7 +348,6 @@ class Date(object):
 
 class Process(QtCore.QProcess):
 
-    running = None
     stderr = None
     stdout = None
 
@@ -311,11 +363,9 @@ class Process(QtCore.QProcess):
             self.setArguments(argumentos)
 
     def start(self):
-        self.running = True
         super(Process, self).start()
 
     def stop(self):
-        self.running = False
         super(Process, self).stop()
 
     def writeToStdin(self, stdin_):
@@ -331,11 +381,17 @@ class Process(QtCore.QProcess):
     def stderrReady(self):
         self.stderr = str(self.readAllStandardError())
 
+    def readStderr(self):
+        return self.stderr
+
     def __setattr__(self, name, value):
         if name == "workingDirectory":
             self.setWorkingDirectory(value)
         else:
             super(Process, self).__setattr__(name, value)
+
+    def getIsRunning(self):
+        return self.state() in (self.Running, self.Starting)
 
     def execute(comando):
         import sys
@@ -352,6 +408,8 @@ class Process(QtCore.QProcess):
         pro.waitForFinished(30000)
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
+
+    running = property(getIsRunning)
 
 
 QProcess = QtCore.QProcess

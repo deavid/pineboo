@@ -541,16 +541,12 @@ class FLFormRecordDB(FLFormDB):
                         if res == QtWidgets.QMessageBox.No:
                             self.cursor_.setValueBuffer(field, q.value(i))
 
-            if self.iface and self.cursor_.modeAccess() == FLSqlCursor.Insert or self.cursor_.modeAccess() == FLSqlCursor.Edit:
-                if self.iface:
-                    try:
-                        v = self.iface.validateForm()
-                    except Exception:
-                        pass
+        if self.iface and self.cursor_.modeAccess() == FLSqlCursor.Insert or self.cursor_.modeAccess() == FLSqlCursor.Edit:
+            ret_ = True
+            if hasattr(self.iface, "validateForm"):
+                ret_ = self.iface.validateForm()
 
-                if v and not isinstance(v, bool):
-                    return False
-
+            return ret_ if isinstance(ret_, bool) else False
         return True
     """
     Aceptación de formulario.

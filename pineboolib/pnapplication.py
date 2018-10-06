@@ -16,7 +16,7 @@ import pineboolib
 
 from pineboolib import decorators, pnqt3ui
 from pineboolib.pnconnection import PNConnection
-from pineboolib.utils import filedir, one, Struct, XMLStruct, clearXPM, parseTable, _path, coalesce_path, _dir
+from pineboolib.utils import filedir, one, Struct, XMLStruct, cacheXPM, parseTable, _path, coalesce_path, _dir
 
 from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSettings import FLSettings
@@ -217,6 +217,9 @@ class Project(object):
         if not os.path.exists(_dir("cache")):
             os.makedirs(_dir("cache"))
 
+        if not os.path.exists(_dir("cache/%s" % self.conn.DBName())):
+            os.makedirs(_dir("cache/%s" % self.conn.DBName()))
+
         # Conectar:
 
         # Se verifica que existen estas tablas
@@ -239,14 +242,14 @@ class Project(object):
                          self.conn.driver().formatValue("bool", "True", False))
         self.modules = {}
         for idarea, idmodulo, descripcion, icono in self.cur:
-            icono = clearXPM(icono)
+            icono = cacheXPM(icono)
             self.modules[idmodulo] = Module(
                 idarea, idmodulo, descripcion, icono)
 
         file_object = open(filedir("..", "share", "pineboo", "sys.xpm"), "r")
         icono = file_object.read()
         file_object.close()
-        icono = clearXPM(icono)
+        #icono = clearXPM(icono)
 
         self.modules["sys"] = Module("sys", "sys", "Administración", icono)
 
@@ -376,9 +379,10 @@ class Project(object):
                 mW = funAction.load()
                 if len(aFunction) == 2:
                     object_context = None
-                    if hasattr(mW, "iface"):
-                        if hasattr(mW.iface, aFunction[1]):
-                            object_context = mW.iface
+                    if hasattr(mW.widget, aFunction[1]):
+                        object_context = mW.widget
+                    if hasattr(mW.iface, aFunction[1]):
+                        object_context = mW.iface
 
                     if not object_context:
                         object_context = mW

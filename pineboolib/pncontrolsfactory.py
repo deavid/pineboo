@@ -359,7 +359,7 @@ def solve_connection(sender, signal, receiver, slot):
         return
 
     if remote_fn:
-        if receiver.__class__.__name__ == "FLFormSearchDB" and slot == "accept":
+        if receiver.__class__.__name__ in ("FLFormSearchDB", "QDialog") and slot in ("accept", "reject"):
             return oSignal, remote_fn
 
         pS = ProxySlot(remote_fn, receiver, slot)
@@ -566,7 +566,7 @@ class FormDBWidget(QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
-        ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None)
+        ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None)
         if ret_:
             return ret_
 

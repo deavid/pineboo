@@ -1009,9 +1009,6 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setAction(self, a):
-
-        if a is self.action():
-            return
         # if isinstance(a, str) or isinstance(a, QString):
 
         # a = str(a) # FIXME: Quitar cuando se quite QString
@@ -1033,6 +1030,9 @@ class FLSqlCursor(QtCore.QObject):
                 action.setTable(a)
         else:
             action = a
+
+        if a is self.action():
+            return
 
         if not self.action():
             self._action = action
@@ -2143,10 +2143,10 @@ class FLSqlCursor(QtCore.QObject):
 
             if self.d.isQuery_ and self.d.queryOrderBy_:
                 sqlOrderBy = self.d.queryOrderBy_
-                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+                sql = "%s ORDER BY %s" % (sql, sqlOrderBy)
             elif self.sort() and len(self.sort()) > 0:
                 sqlOrderBy = self.sort()
-                sql = "%s ORDERBY %s" % (sql, sqlOrderBy)
+                sql = "%s ORDER BY %s" % (sql, sqlOrderBy)
 
             # FIXME: solo compatible con PostgreSQL!
             # if sqlPriKeyValue and self.db().canOverPartition():
@@ -2857,7 +2857,8 @@ class FLSqlCursor(QtCore.QObject):
         if finalFilter:
             self.setFilter(finalFilter)
 
-        self.model().setSortOrder(sort)
+        if sort:
+            self.model().setSortOrder(sort)
         self.model().refresh()
         self.d._currentregister = -1
 
@@ -2876,6 +2877,9 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def setSort(self, sortO):
+        if not sortO:
+            return
+
         self.model().setSortOrder(sortO)
 
     """
@@ -3177,7 +3181,7 @@ class FLSqlCursor(QtCore.QObject):
                 functionAfter = "sys.iface.afterCommit_%s" % self.metadata().name()
 
             if functionBefore:
-                v = aqApp.call(functionBefore, [self], self.context(), False)
+                v = aqApp.call(functionBefore, [self], None, False)
                 if v and not isinstance(v, bool):
                     return False
 
@@ -3288,7 +3292,7 @@ class FLSqlCursor(QtCore.QObject):
             return False
 
         if not self.modeAccess() == self.Browse and functionAfter and self.activatedCommitActions():
-            v = aqApp.call(functionAfter, [self], self.context(), False)
+            v = aqApp.call(functionAfter, [self], None, False)
             if v and not isinstance(v, bool):
                 return False
 

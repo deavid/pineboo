@@ -6,10 +6,10 @@ import logging
 import time
 import itertools
 
-from pineboolib.utils import filedir
+from pineboolib.utils import filedir, format_double
 import pineboolib
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 
 DEBUG = False
@@ -141,7 +141,27 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         ord = "ASC"
         if order == 1:
             ord = "DESC"
-        self._sortOrder = "%s %s" % (self.metadata().indexFieldObject(col).name(), ord)
+
+        col_name = self.metadata().indexFieldObject(col).name()
+        order_list = []
+        found_ = False
+        if self._sortOrder:
+            for column in self._sortOrder.split(","):
+                if col_name in column:
+                    found_ = True
+                    order_list.append("%s %s" % (col_name, ord))
+                else:
+                    order_list.append(column)
+
+            if not found_:
+                self.logger.warn("%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). El order by previo se perderá" % (
+                    __name__, col_name, self._sortOrder))
+            else:
+                self._sortOrder = ",".join(order_list)
+
+        if not found_:
+            self._sortOrder = "%s %s" % (col_name, ord)
+
         self.refresh()
 
     """
@@ -156,8 +176,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     Setea el ORDERBY
     """
 
-    def setSortOrder(self, sO):
-        self._sortOrder = sO
+    def setSortOrder(self, sort_order):
+        self._sortOrder = ""
+        if isinstance(sort_order, list):
+            self._sortOrder = ",".join(sort_order)
+
+        else:
+            self._sortOrder = sort_order
 
     def setColorFunction(self, f):
         self.color_function_ = f
@@ -194,10 +219,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 field_value = d
                 cursor = self._parent
                 selected = False
-                type = _type
 
                 self.color_dict_["%d_%d" % (row, col)] = aqApp.call(
-                    self.dict_color_function(), [field_name, field_value, cursor, selected, type], None)
+                    self.dict_color_function(), [field_name, field_value, cursor, selected, _type], None)
 
                 self.logger.warn("******** functionGetColor!!! %s", self.dict_color_function())
         # print("Data ", index, role)
@@ -221,17 +245,19 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             return QtCore.Qt.Unchecked
 
-        if role == QtCore.Qt.TextAlignmentRole:
+        elif role == QtCore.Qt.TextAlignmentRole:
             if _type in ("int", "double", "uint"):
                 d = QtCore.Qt.AlignRight
-            elif _type in ("bool", "unlock", "date", "time", "pixmap", "check"):
+            elif _type in ("bool", "date", "time"):
                 d = QtCore.Qt.AlignCenter
+            elif _type in ("unlock", "pixmap"):
+                d = QtCore.Qt.AlignHCenter
             else:
                 d = None
 
             return d
 
-        if role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
+        elif role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             # r = self._vdata[row]
             if _type is "bool":
                 if d in (True, "1"):
@@ -240,6 +266,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     d = "No"
 
             elif _type in ("unlock", "pixmap"):
+
                 d = None
 
             elif _type in ("string", "stringlist") and not d:
@@ -251,23 +278,29 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             elif _type is "check":
                 return
 
+            elif _type is "double":
+                d = format_double(d, field)
+
             return d
 
-        if role == QtCore.Qt.DecorationRole:
+        elif role == QtCore.Qt.DecorationRole:
             icon = None
-            if _type == "unlock":
+            if _type in ("unlock", "pixmap"):
 
-                if d in (True, "1"):
-                    icon = QtGui.QIcon(filedir("../share/icons", "unlock.png"))
-                else:
-                    icon = QtGui.QIcon(filedir("../share/icons", "lock.png"))
+                if _type == "unlock":
+                    if d in (True, "1"):
+                        icon = QtGui.QPixmap(filedir("../share/icons", "unlock.png"))
+                    else:
+                        icon = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
 
-            if _type == "pixmap" and self._showPixmap:
-                pass
+                if _type == "pixmap" and self._showPixmap:
+                    d = self.db().manager().fetchLargeValue(d)
+                    if d:
+                        icon = QtGui.QPixmap(d)
 
             return icon
 
-        if role == QtCore.Qt.BackgroundRole:
+        elif role == QtCore.Qt.BackgroundRole:
             if _type == "bool":
                 if d in (True, "1"):
                     d = QtGui.QBrush(QtCore.Qt.green)
@@ -286,7 +319,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             return d
 
-        if role == QtCore.Qt.ForegroundRole:
+        elif role == QtCore.Qt.ForegroundRole:
             if _type == "bool":
                 if d in (True, "1"):
                     d = QtGui.QBrush(QtCore.Qt.black)
@@ -296,6 +329,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 d = None
 
             return d
+
+        # else:
+        #    print("role desconocido", role)
 
         return None
 

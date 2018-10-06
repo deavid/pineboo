@@ -1186,16 +1186,15 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.textChanged.disconnect(self.updateValue)
             except Exception:
                 self.logger.exception("Error al desconectar señal textChanged")
-            # s = None
+
             if v is not None:
                 self.editor_.setText(str(v))
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
+            else:
+                self.editor_.setText("")
 
             self.editor_.textChanged.connect(self.updateValue)
-
-            if v is None and not nulo:
-                self.editor_.setText("0")
 
         elif type_ == "int":
             try:
@@ -1207,11 +1206,10 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.setText(str(v))
             elif not nulo:
                 self.editor_.setText(field.defaultValue())
+            else:
+                self.editor_.setText("")
 
             self.editor_.textChanged.connect(self.updateValue)
-
-            if v is None and not nulo:
-                self.editor_.setText("0")
 
         elif type_ == "serial":
             try:
@@ -2507,7 +2505,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 a = mng.action(self.actionName_)
                 a.setTable(field.relationM1().foreignField())
 
-            f = FLFormSearchDB(c, a.name(), None)
+            f = FLFormSearchDB(a.name(), self)
             f.setWindowModality(QtCore.Qt.ApplicationModal)
             f.setFilter(mng.formatAssignValue(
                 fMD.relationM1().foreignField(), fMD, v, True))
@@ -3054,6 +3052,9 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.initFakeEditor()
 
                 self.showed = True
+
+    def editor(self):
+        return self.editor_
 
     """
     Inicializa un editor falso y no funcional.

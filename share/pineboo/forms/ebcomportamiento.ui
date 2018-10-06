@@ -493,6 +493,44 @@
                                 <property name="name">
                                     <cstring>unnamed</cstring>
                                 </property>
+                                <widget class="QGroupBox">
+                                    <property name="name">
+                                        <cstring>groupBox5</cstring>
+                                    </property>
+                                    <property name="title">
+                                        <string>Qt3UI</string>
+                                    </property>
+                                    <vbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cbSpacerLegacy</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>No usar el spacer en modo legacy (Abanq/Eneboo)</string>
+                                            </property>
+                                        </widget>
+                                    </vbox>
+                                </widget>
+                                <spacer>
+                                    <property name="name">
+                                        <cstring>spacer15</cstring>
+                                    </property>
+                                    <property name="orientation">
+                                        <enum>Vertical</enum>
+                                    </property>
+                                    <property name="sizeType">
+                                        <enum>Expanding</enum>
+                                    </property>
+                                    <property name="sizeHint">
+                                        <size>
+                                            <width>31</width>
+                                            <height>291</height>
+                                        </size>
+                                    </property>
+                                </spacer>
                             </vbox>
                         </widget>
                         <widget class="QWidget">

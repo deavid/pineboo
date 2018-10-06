@@ -37,6 +37,11 @@
 	</action>
 
 	<action>
+		<name>flsettings</name>
+		<table>flsettings</table>
+	</action>
+
+	<action>
 		<name>flusers</name>
 		<alias>QT_TRANSLATE_NOOP("MetaData","Usuarios")</alias>
 		<table>flusers</table>
