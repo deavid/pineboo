@@ -14,7 +14,6 @@ import hashlib
 import re
 import ply.yacc as yacc
 import ply.lex as lex
-import pineboolib
 
 try:
     from pineboolib.flparser import flex
@@ -26,7 +25,7 @@ except ImportError:
 try:
     import pineboolib
     tempDir = pineboolib.project.getTempDir()
-except ImportError:
+except (ImportError, AttributeError):
     tempDir = "/tmp"
 
 # Get the token map
@@ -186,6 +185,12 @@ def p_error(t):
 
 
 p_parse.__doc__ = '''
+
+    inlinestoreinstruction  : PLUSPLUS variable
+                            | MINUSMINUS variable
+                            | variable PLUSPLUS
+                            | variable MINUSMINUS
+
     exprval : constant
             | variable
             | funccall
@@ -357,11 +362,6 @@ p_parse.__doc__ = '''
 
     array_member : variable_1 LBRACKET expression RBRACKET
                  | funccall_1 LBRACKET expression RBRACKET
-
-    inlinestoreinstruction  : PLUSPLUS variable
-                            | MINUSMINUS variable
-                            | variable PLUSPLUS
-                            | variable MINUSMINUS
 
         updateoperator : EQUALS
                        | PLUSEQUAL
@@ -695,14 +695,14 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
     nuevalinea = False
     name = ""
     lines = []
-    l = 0
+    L = 0
 
     for ctype, value in tree['content']:
         if nuevalinea and ctype in closingtokens:
             nuevalinea = False
 
         if nuevalinea:
-            for i in range(int(math.ceil(l / 2.0))):
+            for i in range(int(math.ceil(L / 2.0))):
                 lines.append(sep * depth)
             nuevalinea = False
 
@@ -713,11 +713,11 @@ def printtree(tree, depth=0, otype="source", mode=None, output=sys.stdout):
 
             lines += tlines
         elif type(value) is dict:
-            l = 0
+            L = 0
             if ctype in marginblocks:
-                l = marginblocks[ctype]
+                L = marginblocks[ctype]
 
-            for i in range(int(math.floor(l / 2.0))):
+            for i in range(int(math.floor(L / 2.0))):
                 lines.append(sep * depth)
             tname, tlines, trange = printtree(value, depth + 1, ctype)
             # lines.append(sep * depth + "<!-- %d -->" % (len("".join(tlines))))
