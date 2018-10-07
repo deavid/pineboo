@@ -280,8 +280,7 @@ class Project(object):
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
-            if os.path.exists(_dir("cache", fileobj.filekey)):
-                continue
+
             fileobjdir = os.path.dirname(_dir("cache", fileobj.filekey))
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
@@ -297,8 +296,9 @@ class Project(object):
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
                     encode_ = "utf-8"
 
+                settings = FLSettings()
                 if not os.path.exists(_dir("cache", fileobj.filekey)):
-                    settings = FLSettings()
+
                     if settings.readBoolEntry("application/isDebuggerMode", False):
                         if self._splash:
                             self._splash.showMessage("Volcando a caché %s..." %
@@ -892,7 +892,8 @@ class XMLAction(XMLStruct):
         if not self._loaded:
             self.logger.debug("Loading action %s . . . ", self.name)
             if pineboolib.project._DGI.useDesktop():
-                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, pineboolib.project.main_window.w_, None)
+                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
+                    self, None, pineboolib.project.main_window.w_, None)
             else:
                 from pineboolib.utils import Struct
                 self.mainform_widget = Struct()
