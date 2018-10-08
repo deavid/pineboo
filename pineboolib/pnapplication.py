@@ -22,6 +22,7 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
+from pineboolib.fllegacy.FLModulesStaticLoader import FLStaticLoader
 
 
 import sys
@@ -1006,23 +1007,20 @@ class XMLAction(XMLStruct):
             parent.iface = parent.widget.iface
             return
 
-        script_path_qs = _path(scriptname + ".qs", False)
-        script_path_py = coalesce_path(
-            scriptname + ".py", scriptname + ".qs.py", None)
+        script_path_qs = _path("%s.qs" % scriptname, False)
+        script_path_py = coalesce_path("%s.py" % scriptname, "%s.qs.py" % scriptname, None)
 
-        overload_pyfile = os.path.join(
-            pineboolib.project.tmpdir, "overloadpy", scriptname + ".py")
-        if os.path.isfile(overload_pyfile):
-            self.logger.warn(
-                "Cargando %s desde overload en lugar de la base de datos!!", scriptname)
-            try:
-                parent.script = machinery.SourceFileLoader(
-                    scriptname, overload_pyfile).load_module()
-            except Exception as e:
-                self.logger.exception(
-                    "ERROR al cargar script OVERLOADPY para la accion %s:", action_.name)
+        mng_modules = pineboolib.project.conn.managerModules()
+        if mng_modules.staticBdInfo_ and mng_modules.staticBdInfo_.enabled_:
+            ret_py = FLStaticLoader.content("%s.qs.py" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
+            if ret_py:
+                script_path_py = ret_py
+            else:
+                ret_qs = FLStaticLoader.content("%s.qs" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
+                if ret_qs:
+                    script_path_qs = ret_qs
 
-        elif script_path_py:
+        if script_path_py:
             script_path = script_path_py
             self.logger.info("Loading script PY %s . . . ", scriptname)
             if not os.path.isfile(script_path):
