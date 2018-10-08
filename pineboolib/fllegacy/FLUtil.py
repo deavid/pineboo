@@ -739,24 +739,31 @@ class FLUtil(QtCore.QObject):
         @return Número de días entre d1 y d2. Será negativo si d2 es anterior a d1.
         """
         from pineboolib.qsa import Date
+        from datetime import date
         if isinstance(d1, Date):
             d1 = d1.toString()
+
+        if isinstance(d1, date):
+            d1 = str(d1)
 
         if isinstance(d1, str):
             d1 = d1[:10]
 
         if not isinstance(d1, str):
-            logger.error("addYears: No reconozco el tipo de dato %s", type(d1))
+            logger.error("daysTo: No reconozco el tipo de dato %s", type(d1))
             return None
 
         if isinstance(d2, Date):
             d2 = d2.toString()
 
+        if isinstance(d2, date):
+            d2 = str(d2)
+
         if isinstance(d2, str):
             d2 = d2[:10]
 
         if not isinstance(d2, str):
-            logger.error("addYears: No reconozco el tipo de dato %s", type(d2))
+            logger.error("dausTo: No reconozco el tipo de dato %s", type(d2))
             return None
 
         d1 = datetime.datetime.strptime(d1, "%Y-%m-%d").date()
