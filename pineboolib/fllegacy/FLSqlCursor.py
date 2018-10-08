@@ -3706,6 +3706,10 @@ class FLSqlCursor(QtCore.QObject):
 
         return list_[self._iter_current]
 
+    def primaryKey(self):
+        if self.buffer():
+            return self.buffer().pK()
+
     """
     signals:
     """
