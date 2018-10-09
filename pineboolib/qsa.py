@@ -80,6 +80,7 @@ class Array(object):
     def __init__(self, *args):
         self.names_ = []
         self.dict_ = {}
+        self.list_ = []
 
         if not len(args):
             return
@@ -114,6 +115,9 @@ class Array(object):
     def __getattr__(self, k):
         if k == 'length':
             return len(self.dict_)
+        elif k == 'append':
+            return self.list_.append
+
         else:
             return self.dict_[k]
 
