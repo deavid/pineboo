@@ -38,8 +38,8 @@ def id_translate(name):
     #    name = "qsatype.File"
     # if name == "Dir":
     #    name = "qsatype.Dir"
-    if name == "findRev":
-        name = "find"
+    # if name == "findRev":
+    #    name = "find"
     if name == "toLowerCase":
         name = "lower"
     if name == "toUpperCase":
@@ -900,7 +900,8 @@ class Member(ASTPython):
             "charAt",
             "charCodeAt",
             "arg",
-            "substring"
+            "substring",
+            "findRev"
         ]
         for member in replace_members:
             for idx, arg in enumerate(arguments):
@@ -956,6 +957,11 @@ class Member(ASTPython):
                         value = value[:len(value) - 1]
                         arguments = ["%s[%s]" %
                                      (".".join(part1), value)] + part2
+                    elif member == "findRev":
+                        value = arg[8:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s.find(%s) if %s.find(%s) > -1 else False" % (".".join(part1), value,  ".".join(part1), value)]
+
                     elif member == "charCodeAt":
                         value = arg[11:]
                         value = value[:len(value) - 1]
