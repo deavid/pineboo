@@ -603,18 +603,56 @@ def convert2FLAction(action):
     return aqApp.db().manager().action(name)
 
 
-def load2xml(form_path):
+def load2xml(form_path_or_str):
     from xml.etree import ElementTree as ET
 
+    class xml_parser(ET.TreeBuilder):
+
+        def __init__(self):
+            super(ET.TreeBuilder, self).__init__()
+            self.attrs_ = []
+
+        def start(self, tag, attrs):
+            #print("iniciando", tag)
+            ret = super(xml_parser, self).start(tag, attrs)
+
+            if not ret in self.attrs_:
+                self.attrs_.append(ret)
+                # for at in ret.items():
+                #    print("****", at)
+                # print(ret)
+            else:
+                if len(self.attrs_ > 0):
+                    return
+
+            return ret
+
+        def end(self, tag):
+            #print("Terminando", tag)
+            return super(xml_parser, self).end(tag)
+
+        def data(self, data):
+            super(xml_parser, self).data(data)
+
+        def close(self):
+            return super(xml_parser, self).close()
+
     try:
-        ret = ET.parse(form_path)
+        parser = ET.XMLParser(html=0, target=xml_parser())
+        if form_path_or_str.find("KugarTemplate") > -1:
+            ret = ET.fromstringlist(form_path_or_str, parser)
+        else:
+            ret = ET.parse(form_path_or_str, parser)
     except Exception:
         try:
-            parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
-            ret = ET.parse(form_path, parser)
+            parser = ET.XMLParser(html=0, encoding="ISO-8859-15", target=xml_parser())
+            if form_path_or_str.find("KugarTemplate") > -1:
+                ret = ET.fromstringlist(form_path_or_str, parser)
+            else:
+                ret = ET.parse(form_path_or_str, parser)
             #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
         except Exception:
-            logger.exception("Error cargando UI después de intentar con UTF8 y ISO", form_path)
+            logger.exception("Error cargando UI después de intentar con UTF8 y ISO", form_path_or_str)
             ret = None
 
     return ret
