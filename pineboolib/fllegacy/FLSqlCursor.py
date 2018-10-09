@@ -202,7 +202,7 @@ class PNBuffer(object):
         if field.type_ in ("bool", "unlock"):
             return not (self.value(field.name) in (True, False))
 
-        return self.value(field.name) is None
+        return self.value(field.name) in (None, "")
 
     """
     Retorna el valor de un campo
