@@ -46,6 +46,10 @@ class FLReportViewer(QObject):
         self.embedInParent_ = True if parent and embedInParent else False
         self.ui_ = {}
 
+        self.Display = 1
+        self.Append = 1
+        self.PageBreak = 1
+
         #qt3ui.loadUi(filedir('forms/FLWidgetReportViewer.ui'), self)
 
         # if not name:
