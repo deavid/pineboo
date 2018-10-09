@@ -279,7 +279,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 return
 
             elif _type is "double":
-                d = format_double(d, field)
+                if d is not None:
+                    d = format_double(d, field)
 
             return d
 
