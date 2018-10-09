@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QPixmap
-from pineboolib.utils import filedir, cacheXPM
+from pineboolib.utils import filedir, cacheXPM, load2xml
 from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 import pineboolib
 import os
@@ -31,10 +31,7 @@ class parsertools(object):
     """
 
     def loadKut(self, data):
-        data = data.encode("ISO-8859-15")
-        # TODO: Comrpobación de errores en el string
-
-        return etree.ElementTree.fromstring(data)
+        return load2xml(data)
 
     """
     Corrige la altura para ajustarse a un kut original.
