@@ -606,48 +606,46 @@ def convert2FLAction(action):
 def load2xml(form_path_or_str):
     from xml.etree import ElementTree as ET
 
-    class xml_parser(ET.TreeBuilder):
+    class xml_parser():
+
+        builder_ = None
 
         def __init__(self):
-            super(ET.TreeBuilder, self).__init__()
-            self.attrs_ = []
+            self.builder_ = ET.TreeBuilder()
 
         def start(self, tag, attrs):
-            #print("iniciando", tag)
-            ret = super(xml_parser, self).start(tag, attrs)
+            #print("iniciando", tag, attrs)
+            ret = self.builder_.start(tag, attrs)
 
-            if not ret in self.attrs_:
-                self.attrs_.append(ret)
-                # for at in ret.items():
-                #    print("****", at)
-                # print(ret)
-            else:
-                if len(self.attrs_ > 0):
-                    return
+            # for at in ret.items():
+            #    print("****", at)
+            # print(ret)
 
             return ret
 
         def end(self, tag):
             #print("Terminando", tag)
-            return super(xml_parser, self).end(tag)
+            return self.builder_.end(tag)
 
         def data(self, data):
-            super(xml_parser, self).data(data)
+            #print("data!!", repr(data))
+            self.builder_.data(data)
 
         def close(self):
-            return super(xml_parser, self).close()
+            return self.builder_.close()
 
     try:
         parser = ET.XMLParser(html=0, target=xml_parser())
-        if form_path_or_str.find("KugarTemplate") > -1:
-            ret = ET.fromstringlist(form_path_or_str, parser)
+        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
+            print(form_path_or_str)
+            ret = ET.fromstring(form_path_or_str, parser)
         else:
             ret = ET.parse(form_path_or_str, parser)
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15", target=xml_parser())
-            if form_path_or_str.find("KugarTemplate") > -1:
-                ret = ET.fromstringlist(form_path_or_str, parser)
+            if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
+                ret = ET.fromstring(form_path_or_str, parser)
             else:
                 ret = ET.parse(form_path_or_str, parser)
             #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
