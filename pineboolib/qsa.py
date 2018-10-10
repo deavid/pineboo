@@ -152,6 +152,9 @@ class Math(object):
     def pow(x, y):
         return math.pow(x, y)
 
+    def round(x):
+        return round(x, 2)
+
 
 def parseFloat(x):
     if x is None:
