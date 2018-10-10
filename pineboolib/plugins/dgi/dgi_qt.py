@@ -735,7 +735,8 @@ class QTable(QtWidgets.QTableWidget):
         array_ = lista.split(separador)
         labels_ = []
         for i in range(self.columnCount()):
-            labels_.append(array_[i])
+            if len(array_) > i:
+                labels_.append(array_[i])
         self.setHorizontalHeaderLabels(labels_)
 
     def setColumnStrechable(self, col, b):
