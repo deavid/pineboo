@@ -1410,10 +1410,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not self.editor_.text():
                     doHome = True
 
-            try:
+            if not ol:
                 self.editor_.textChanged.disconnect(self.updateValue)
-            except Exception:
-                self.logger.exception("Error al desconectar señal textChanged")
 
             if v:
                 if ol:
@@ -1432,7 +1430,9 @@ class FLFieldDB(QtWidgets.QWidget):
             if not ol and doHome:
                 self.editor_.home(False)
 
-            self.editor_.textChanged.connect(self.updateValue)
+            if not ol:
+
+                self.editor_.textChanged.connect(self.updateValue)
 
         elif type_ == "uint" or type_ == "int" or type_ == "serial":
             if v == self.editor_.text():
