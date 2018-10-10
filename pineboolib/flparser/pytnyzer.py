@@ -297,6 +297,7 @@ class If(ASTPython):
             yield "end", "block-if"
 
         for source in self.elem.findall("Else/Source"):
+            source.set("parent_", self.elem)
             yield "line", "else:"
             yield "begin", "block-else"
             for obj in parse_ast(source).generate(break_mode=break_mode):
