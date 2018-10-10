@@ -12,22 +12,6 @@ import pineboolib
 DEBUG = False
 
 """
-
-    def validateForm(self):
-        if self.iface:
-            try:
-                if self.iface.validateForm():
-                    self.close()
-                else:
-                    print("ValidateForm no es válido")
-            except Exception as e:
-                print("ERROR en validateForm de la accion %r:" % self.action.name, e)
-                print(traceback.format_exc(),"---")
-
-
-"""
-
-"""
 class FLFormRecordDBInterface;
 
 Subclase de FLFormDB pensada para editar registros.
@@ -799,3 +783,13 @@ class FLFormRecordDB(FLFormDB):
 
     def show(self):
         super(FLFormRecordDB, self).show()
+        self.inicializeControls()
+
+    def inicializeControls(self):
+        from pineboolib.fllegacy.FLFieldDB import FLFieldDB
+        from pineboolib.fllegacy.FLTableDB import FLTableDB
+        for child_ in self.findChildren(QtWidgets.QWidget):
+            if isinstance(child_, FLFieldDB) or isinstance(child_, FLTableDB):
+                loaded = getattr(child_, "_loaded", None)
+                if loaded is False:
+                    child_.load()
