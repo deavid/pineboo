@@ -388,11 +388,11 @@ class Process(QtCore.QProcess):
     def readStderr(self):
         return self.stderr
 
-    def __setattr__(self, name, value):
-        if name == "workingDirectory":
-            self.setWorkingDirectory(value)
-        else:
-            super(Process, self).__setattr__(name, value)
+    def getWorkingDirectory(self):
+        return super(Process, self).workingDirectory()
+
+    def setWorkingDirectory(self, wd):
+        super(Process, self).setWorkingDirectory(wd)
 
     def getIsRunning(self):
         return self.state() in (self.Running, self.Starting)
@@ -414,6 +414,7 @@ class Process(QtCore.QProcess):
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
     running = property(getIsRunning)
+    workingDirectory = property(getWorkingDirectory, setWorkingDirectory)
 
 
 QProcess = QtCore.QProcess
@@ -536,4 +537,4 @@ class QString(str):
 
 
 def debug(txt):
-    logger.message("---> " + ustr(txt))
+    logger.warn("---> " + ustr(txt))
