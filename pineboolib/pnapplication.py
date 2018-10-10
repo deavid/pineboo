@@ -708,7 +708,8 @@ class DelayedObjectProxyLoader(object):
     def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
         obj = self.__load()
         if obj:
-            return getattr(obj, name)
+
+            return getattr(obj, name, getattr(obj.widget, name, None))
         else:
             return None
 
