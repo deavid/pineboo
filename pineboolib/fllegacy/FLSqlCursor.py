@@ -985,10 +985,12 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def mainFilter(self):
-        if getattr(self.model(), "where_filters", None):
-            return self.model().where_filters["main-filter"]
+        if hasattr(self.model(), "where_filters"):
+            ret_ = self.model().where_filters["main-filter"]
         else:
-            return None
+            ret_ = ""
+
+        return ret_
 
     """
     Para obtener la accion asociada al cursor.
