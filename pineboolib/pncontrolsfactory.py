@@ -294,7 +294,11 @@ def proxy_fn(wf, wr, slot):
         if args == (False,):
             return f()
 
-        return f(*args, **kwargs)
+        try:
+            return f(*args, **kwargs)
+        except:
+            return f(*args[:-1])
+
     return fn
 
 
