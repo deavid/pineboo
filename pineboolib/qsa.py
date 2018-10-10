@@ -129,6 +129,10 @@ class Array(object):
 
         return len_
 
+    def __str__(self):
+        ret = " ".join(self.list_) if len(self.list_) > 0 else " ".join(self.dict_.keys())
+        return ret
+
 
 def Boolean(x=False):
     return bool(x)
