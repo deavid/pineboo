@@ -121,9 +121,6 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if self._tipo in ("int", "uint", "double"):
                 self.setAlignment(QtCore.Qt.AlignRight)
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
     def setText(self, texto, b=True):
         # if self._maxValue:
         #    if self._maxValue < int(texto):
