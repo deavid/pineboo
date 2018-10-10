@@ -706,12 +706,8 @@ class DelayedObjectProxyLoader(object):
     """
 
     def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
-        obj = self.__load()
-        if obj:
-
-            return getattr(obj, name, getattr(obj.widget, name, None))
-        else:
-            return None
+        obj_ = self.__load()
+        return getattr(obj_, name, getattr(obj_.widget, name, None)) if obj_ else None
 
 
 """
@@ -862,11 +858,11 @@ class XMLAction(XMLStruct):
         super(XMLAction, self).__init__(*args, **kwargs)
         self.form = self._v("form")
         self.name = self._v("name")
-        self.script = self._v("script")
+        self.script = self._v("script")  # script_form_record
         self.table = self._v("table")
         self.mainform = self._v("mainform")
-        self.mainscript = self._v("mainscript")
-        self.formrecord = self._v("formrecord")
+        self.mainscript = self._v("mainscript")  # script_form
+        self.formrecord = self._v("formrecord")  # form_record
         self.mainform_widget = None
         self.formrecord_widget = None
         self._loaded = False
