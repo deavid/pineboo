@@ -381,6 +381,7 @@ p_parse.__doc__ = '''
 
 
     flowinstruction : RETURN expression
+                    | RETURN expression COMMA
                     | THROW expression
                     | RETURN
                     | BREAK
