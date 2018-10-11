@@ -412,7 +412,7 @@ class For(ASTPython):
                     expr.append(data)
                 else:
                     yield dtype, data
-            if len(expr) > 0:
+            if len(expr) > 1:
                 init_expr.append(" ".join(expr))
         if init_expr:
             yield "line", " ".join(init_expr)
