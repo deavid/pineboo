@@ -499,6 +499,7 @@ p_parse.__doc__ = '''
 
     for_initialize  : storeinstruction
                     | VAR vardecl
+                    | vardecl
                     | for_initialize COMMA for_initialize
                     | empty
 
