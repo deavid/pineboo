@@ -1415,7 +1415,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if v:
                 if ol:
-                    self.editor_.setCurrentIndex(field.optionsList().index(v))
+                    self.editor_.setCurrentText(v)
 
                 else:
                     self.editor_.setText(v, False)
