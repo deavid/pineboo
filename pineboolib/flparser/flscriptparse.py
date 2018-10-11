@@ -298,6 +298,7 @@ p_parse.__doc__ = '''
                     |  STATIC VAR vardecl_list
 
     vardecl  :  ID optvartype EQUALS expression
+             |  vardecl EQUALS expression
     vardecl  :  ID optvartype
 
     vardecl_list    : vardecl
