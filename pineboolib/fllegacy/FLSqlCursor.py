@@ -1049,6 +1049,9 @@ class FLSqlCursor(QtCore.QObject):
             # return False
             # self._action = pineboolib.project.actions["articulos"]
 
+        if self.model() and self._action.table() is self.model()._action.table():
+            return True
+
         self.d._model = PNCursorTableModel(self._action, self.conn(), self)
         if not self.model():
             return None
