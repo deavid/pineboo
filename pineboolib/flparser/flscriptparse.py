@@ -327,7 +327,6 @@ p_parse.__doc__ = '''
                 | base_expression
 
     member_var  : varmemcall PERIOD variable_1
-                | varmemcall LPAREN variable RPAREN
                 
     member_call : LPAREN member_var RPAREN PERIOD funccall_1
 
