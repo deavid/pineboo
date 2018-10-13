@@ -340,6 +340,8 @@ p_parse.__doc__ = '''
     funccall_1  : ID LPAREN callargs RPAREN
                 | ID LPAREN RPAREN
                 | TYPEOF LPAREN callargs RPAREN
+                | variable LPAREN callargs RPAREN
+                | variable LPAREN RPAREN
 
     mathoperator    : PLUS
                     | MINUS

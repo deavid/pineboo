@@ -228,6 +228,27 @@ class FunctionCall(ASTPython):
         name = id_translate(self.elem.get("name"))
         parent = self.elem.get("parent_")
         # data_ = None
+        if name == "":
+            arg = self.elem[0]
+            arg.set("parent_", self.elem)
+            expr = []
+            for dtype, data in parse_ast(arg).generate(isolate=False):
+                # data_ = data
+                if dtype == "expr":
+                    expr.append(data)
+                else:
+                    yield dtype, data
+            if len(expr) == 0:
+                name = "unknownFn"
+                yield "debug", "Function name not understood"
+                yield "debug", etree.ElementTree.tostring(arg)
+            elif len(expr) > 1:
+                name = "unknownFn"
+                yield "debug", "Multiple function names"
+                yield "debug", repr(expr)
+            else:
+                name = expr[0]
+
         if parent and parent.tag == "InstructionCall":
             class_ = None
             p_ = parent
