@@ -80,6 +80,7 @@ class Array(object):
     def __init__(self, *args):
         self.names_ = []
         self.dict_ = {}
+        self.list_ = []
 
         if not len(args):
             return
@@ -114,6 +115,9 @@ class Array(object):
     def __getattr__(self, k):
         if k == 'length':
             return len(self.dict_)
+        elif k == 'append':
+            return self.list_.append
+
         else:
             return self.dict_[k]
 
@@ -124,6 +128,10 @@ class Array(object):
             len_ = len_ + 1
 
         return len_
+
+    def __str__(self):
+        ret = " ".join(self.list_) if len(self.list_) > 0 else " ".join(self.dict_.keys())
+        return ret
 
 
 def Boolean(x=False):
@@ -143,6 +151,9 @@ class Math(object):
 
     def pow(x, y):
         return math.pow(x, y)
+
+    def round(x):
+        return round(x, 2)
 
 
 def parseFloat(x):
@@ -384,11 +395,11 @@ class Process(QtCore.QProcess):
     def readStderr(self):
         return self.stderr
 
-    def __setattr__(self, name, value):
-        if name == "workingDirectory":
-            self.setWorkingDirectory(value)
-        else:
-            super(Process, self).__setattr__(name, value)
+    def getWorkingDirectory(self):
+        return super(Process, self).workingDirectory()
+
+    def setWorkingDirectory(self, wd):
+        super(Process, self).setWorkingDirectory(wd)
 
     def getIsRunning(self):
         return self.state() in (self.Running, self.Starting)
@@ -410,6 +421,7 @@ class Process(QtCore.QProcess):
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
 
     running = property(getIsRunning)
+    workingDirectory = property(getWorkingDirectory, setWorkingDirectory)
 
 
 QProcess = QtCore.QProcess
@@ -532,4 +544,4 @@ class QString(str):
 
 
 def debug(txt):
-    logger.message("---> " + ustr(txt))
+    logger.warn("---> " + ustr(txt))

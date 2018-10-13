@@ -121,9 +121,6 @@ class FLLineEdit(QtWidgets.QLineEdit):
             if self._tipo in ("int", "uint", "double"):
                 self.setAlignment(QtCore.Qt.AlignRight)
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
-
     def setText(self, texto, b=True):
         # if self._maxValue:
         #    if self._maxValue < int(texto):
@@ -735,7 +732,8 @@ class QTable(QtWidgets.QTableWidget):
         array_ = lista.split(separador)
         labels_ = []
         for i in range(self.columnCount()):
-            labels_.append(array_[i])
+            if len(array_) > i:
+                labels_.append(array_[i])
         self.setHorizontalHeaderLabels(labels_)
 
     def setColumnStrechable(self, col, b):
@@ -1157,25 +1155,30 @@ class FileDialog(QtWidgets.QFileDialog):
 class MessageBox(QMessageBox):
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
-        if title or form:
-            logger.warn("MessageBox: Se intentó usar título y/o form, y no está implementado.")
+        if form:
+            logger.warn("MessageBox: Se intentó usar form, y no está implementado.")
         icon = QMessageBox.NoIcon
-        title = "Message"
+        if not title:
+            title = "Pineboo"
         if typename == "question":
             icon = QMessageBox.Question
-            title = "Question"
+            if not title:
+                title = "Question"
         elif typename == "information":
             icon = QMessageBox.Information
-            title = "Information"
+            if not title:
+                title = "Information"
         elif typename == "warning":
             icon = QMessageBox.Warning
-            title = "Warning"
+            if not title:
+                title = "Warning"
         elif typename == "critical":
             icon = QMessageBox.Critical
-            title = "Critical"
+            if not title:
+                title = "Critical"
         # title = unicode(title,"UTF-8")
         # text = unicode(text,"UTF-8")
-        msg = QMessageBox(icon, str(title), str(text))
+        msg = QMessageBox(icon, title, text)
         msg.addButton(button0)
         if button1:
             msg.addButton(button1)

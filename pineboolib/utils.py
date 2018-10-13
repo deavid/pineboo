@@ -603,18 +603,54 @@ def convert2FLAction(action):
     return aqApp.db().manager().action(name)
 
 
-def load2xml(form_path):
+def load2xml(form_path_or_str):
     from xml.etree import ElementTree as ET
 
+    class xml_parser():
+
+        builder_ = None
+
+        def __init__(self):
+            self.builder_ = ET.TreeBuilder()
+
+        def start(self, tag, attrs):
+            #print("iniciando", tag, attrs)
+            ret = self.builder_.start(tag, attrs)
+
+            # for at in ret.items():
+            #    print("****", at)
+            # print(ret)
+
+            return ret
+
+        def end(self, tag):
+            #print("Terminando", tag)
+            return self.builder_.end(tag)
+
+        def data(self, data):
+            #print("data!!", repr(data))
+            self.builder_.data(data)
+
+        def close(self):
+            return self.builder_.close()
+
     try:
-        ret = ET.parse(form_path)
+        parser = ET.XMLParser(html=0, target=xml_parser())
+        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
+            print(form_path_or_str)
+            ret = ET.fromstring(form_path_or_str, parser)
+        else:
+            ret = ET.parse(form_path_or_str, parser)
     except Exception:
         try:
-            parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
-            ret = ET.parse(form_path, parser)
+            parser = ET.XMLParser(html=0, encoding="ISO-8859-15", target=xml_parser())
+            if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
+                ret = ET.fromstring(form_path_or_str, parser)
+            else:
+                ret = ET.parse(form_path_or_str, parser)
             #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
         except Exception:
-            logger.exception("Error cargando UI después de intentar con UTF8 y ISO", form_path)
+            logger.exception("Error cargando UI después de intentar con UTF8 y ISO", form_path_or_str)
             ret = None
 
     return ret

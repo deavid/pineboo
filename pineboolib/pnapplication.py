@@ -22,6 +22,7 @@ from pineboolib.fllegacy.FLUtil import FLUtil
 from pineboolib.fllegacy.FLSettings import FLSettings
 from pineboolib.fllegacy.FLTranslator import FLTranslator
 from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
+from pineboolib.fllegacy.FLModulesStaticLoader import FLStaticLoader
 
 
 import sys
@@ -280,8 +281,7 @@ class Project(object):
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
-            if os.path.exists(_dir("cache", fileobj.filekey)):
-                continue
+
             fileobjdir = os.path.dirname(_dir("cache", fileobj.filekey))
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
@@ -297,8 +297,9 @@ class Project(object):
                 if str(nombre).endswith(".kut") or str(nombre).endswith(".ts"):
                     encode_ = "utf-8"
 
+                settings = FLSettings()
                 if not os.path.exists(_dir("cache", fileobj.filekey)):
-                    settings = FLSettings()
+
                     if settings.readBoolEntry("application/isDebuggerMode", False):
                         if self._splash:
                             self._splash.showMessage("Volcando a caché %s..." %
@@ -705,11 +706,8 @@ class DelayedObjectProxyLoader(object):
     """
 
     def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
-        obj = self.__load()
-        if obj:
-            return getattr(obj, name)
-        else:
-            return None
+        obj_ = self.__load()
+        return getattr(obj_, name, getattr(obj_.widget, name, None)) if obj_ else None
 
 
 """
@@ -860,11 +858,11 @@ class XMLAction(XMLStruct):
         super(XMLAction, self).__init__(*args, **kwargs)
         self.form = self._v("form")
         self.name = self._v("name")
-        self.script = self._v("script")
+        self.script = self._v("script")  # script_form_record
         self.table = self._v("table")
         self.mainform = self._v("mainform")
-        self.mainscript = self._v("mainscript")
-        self.formrecord = self._v("formrecord")
+        self.mainscript = self._v("mainscript")  # script_form
+        self.formrecord = self._v("formrecord")  # form_record
         self.mainform_widget = None
         self.formrecord_widget = None
         self._loaded = False
@@ -892,7 +890,8 @@ class XMLAction(XMLStruct):
         if not self._loaded:
             self.logger.debug("Loading action %s . . . ", self.name)
             if pineboolib.project._DGI.useDesktop():
-                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, pineboolib.project.main_window.w_, None)
+                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
+                    self, None, pineboolib.project.main_window.w_, None)
             else:
                 from pineboolib.utils import Struct
                 self.mainform_widget = Struct()
@@ -1005,23 +1004,20 @@ class XMLAction(XMLStruct):
             parent.iface = parent.widget.iface
             return
 
-        script_path_qs = _path(scriptname + ".qs", False)
-        script_path_py = coalesce_path(
-            scriptname + ".py", scriptname + ".qs.py", None)
+        script_path_qs = _path("%s.qs" % scriptname, False)
+        script_path_py = coalesce_path("%s.py" % scriptname, "%s.qs.py" % scriptname, None)
 
-        overload_pyfile = os.path.join(
-            pineboolib.project.tmpdir, "overloadpy", scriptname + ".py")
-        if os.path.isfile(overload_pyfile):
-            self.logger.warn(
-                "Cargando %s desde overload en lugar de la base de datos!!", scriptname)
-            try:
-                parent.script = machinery.SourceFileLoader(
-                    scriptname, overload_pyfile).load_module()
-            except Exception as e:
-                self.logger.exception(
-                    "ERROR al cargar script OVERLOADPY para la accion %s:", action_.name)
+        mng_modules = pineboolib.project.conn.managerModules()
+        if mng_modules.staticBdInfo_ and mng_modules.staticBdInfo_.enabled_:
+            ret_py = FLStaticLoader.content("%s.qs.py" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
+            if ret_py:
+                script_path_py = ret_py
+            else:
+                ret_qs = FLStaticLoader.content("%s.qs" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
+                if ret_qs:
+                    script_path_qs = ret_qs
 
-        elif script_path_py:
+        if script_path_py:
             script_path = script_path_py
             self.logger.info("Loading script PY %s . . . ", scriptname)
             if not os.path.isfile(script_path):

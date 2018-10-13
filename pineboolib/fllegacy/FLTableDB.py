@@ -969,8 +969,10 @@ class FLTableDB(QtWidgets.QWidget):
 
             if t_cursor:
                 self.tableRecords_.recordChoosed.disconnect(self.recordChoosedSlot)
+                t_cursor.newBuffer.disconnect(self.currentChangedSlot)
 
             self.tableRecords_.recordChoosed.connect(self.recordChoosedSlot)
+            self.cursor_.newBuffer.connect(self.currentChangedSlot)
 
     @QtCore.pyqtSlot()
     def recordChoosedSlot(self):

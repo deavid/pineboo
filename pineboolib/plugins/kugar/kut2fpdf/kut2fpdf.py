@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pineboolib.utils import checkDependencies, filedir
+from pineboolib.utils import checkDependencies, filedir, load2xml
 import pineboolib
 
 from xml import etree
@@ -53,7 +53,7 @@ class kut2fpdf(object):
             return False
 
         try:
-            self._xml_data = etree.ElementTree.fromstring(data)
+            self._xml_data = load2xml(data)
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False

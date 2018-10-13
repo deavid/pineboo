@@ -202,7 +202,7 @@ class PNBuffer(object):
         if field.type_ in ("bool", "unlock"):
             return not (self.value(field.name) in (True, False))
 
-        return self.value(field.name) is None
+        return self.value(field.name) in (None, "")
 
     """
     Retorna el valor de un campo
@@ -985,10 +985,12 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def mainFilter(self):
-        if getattr(self.model(), "where_filters", None):
-            return self.model().where_filters["main-filter"]
+        if hasattr(self.model(), "where_filters"):
+            ret_ = self.model().where_filters["main-filter"]
         else:
-            return None
+            ret_ = ""
+
+        return ret_
 
     """
     Para obtener la accion asociada al cursor.
@@ -1046,6 +1048,9 @@ class FLSqlCursor(QtCore.QObject):
             # logger.notice("setAction(): Action no encontrada %s en %s actions. Es posible que la tabla no exista" % (a, len(pineboolib.project.actions)))
             # return False
             # self._action = pineboolib.project.actions["articulos"]
+
+        if self.model() and self._action.table() is self.model()._action.table():
+            return True
 
         self.d._model = PNCursorTableModel(self._action, self.conn(), self)
         if not self.model():
@@ -3705,6 +3710,10 @@ class FLSqlCursor(QtCore.QObject):
             raise StopIteration
 
         return list_[self._iter_current]
+
+    def primaryKey(self):
+        if self.buffer():
+            return self.buffer().pK()
 
     """
     signals:

@@ -79,9 +79,11 @@ class AQStaticBdInfo(object):
         settings.writeEntry("%sactiveDirs" % self.key_, ",".join(active_dirs))
 
 
+warn_ = []
+
+
 class FLStaticLoader(QtCore.QObject):
 
-    warn_ = None
     ui_ = None
     b_ = None
 
@@ -222,32 +224,36 @@ class FLStaticLoader(QtCore.QObject):
         if (QtWidgets.QDialog.Accepted == diag_setup.ui_.exec_()):
             b.writeSettings()
 
-    def content(n, b):
+    def content(n, b, only_path=False):
+        global warn_
         b.readSettings()
         util = FLUtil()
         separator = "\\" if util.getOS().find("WIN") > -1 else "/"
-        warn_ = None
         for info in b.dirs_:
-            if info.active_ and os.path.exists(info.path_ + separator + n):
+            content_path = info.path_ + separator + n
+            if info.active_ and os.path.exists(content_path):
                 if not warn_:
-                    timer = QtCore.QTimer()
-
                     warn_ = FLStaticLoaderWarning()
-                    settings = FLSettings()
-                    if not warn_.warns_ and settings.readBoolEntry("ebcomportamiento/SLInterface", True):
-                        timer.singleShot(500, warn_.popupWarnings)
 
-                    if not warn_.paths_:
-                        timer.singleShot(1500, warn_.updateScripts)
+                timer = QtCore.QTimer()
+                settings = FLSettings()
+                if not warn_.warns_ and settings.readBoolEntry("ebcomportamiento/SLInterface", True):
+                    timer.singleShot(500, warn_.popupWarnings)
 
-                    msg = "%s -> ...%s" % (n[:-20], info.path_[0:40])
+                if not warn_.paths_:
+                    timer.singleShot(1500, warn_.updateScripts)
 
-                    if not msg in warn_.warns_:
-                        warn_.warns_.append(msg)
-                        warn_.paths_.append("%s:%s" % (n, info.path_))
-                        if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
-                            logger.warn("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
+                msg = "%s -> ...%s" % (n, info.path_[0:40])
 
+                if not msg in warn_.warns_:
+                    warn_.warns_.append(msg)
+                    warn_.paths_.append("%s:%s" % (n, info.path_))
+                    if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
+                        logger.warn("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
+
+                if only_path:
+                    return content_path
+                else:
                     from pineboolib.pncontrolsfactory import aqApp
                     return aqApp.db().managerModules().contentFS(info.path_ + separator + n)
 

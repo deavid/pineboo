@@ -133,50 +133,5 @@ Devuelve la traducción si existe
 """
 
 
-class FLTranslate(QtCore.QObject):
-
-    group_ = None
-    context_ = None
-    pos_ = 0
-
-    """
-    Constructor
-    @param Group. Grupo al que pertenece la traducción
-    @param context. Texto a traducir
-    @param Translate. Boolean que indica si se traduce realmente el texto pasado
-    @param pos. Posición en la que se empieza a sustituir los argumentos pasados
-    """
-
-    def __init__(self, group, context, translate=True, pos=1):
-        super(FLTranslate, self).__init__()
-        self.pos_ = pos
-        self.group_ = group
-        if translate:
-            self.context_ = Qt.qApp.translate(group, context)
-        else:
-            self.context_ = context
-
-    """
-    Argumento pasado a la traducción
-    @param value. Texto a añadir a la traducción
-    """
-
-    def arg(self, value):
-        if isinstance(value, list):
-            for f in value:
-                self.context_ = self.context_.replace(
-                    "%s" % self.pos_, str(f))
-                self.pos_ = self.pos_ + 1
-        else:
-            self.context_ = self.context_.replace(
-                "%s" % self.pos_, str(value))
-
-        return FLTranslate(self.group_, self.context_, False, self.pos_ + 1)
-
-    """
-    Retorna el valor traducido
-    @return traducción completada con los argumentos
-    """
-
-    def __str__(self):
-        return self.context_
+def FLTranslate(group, context, translate=True):
+    return Qt.qApp.translate(group, context) if translate else context

@@ -347,9 +347,13 @@ class FLManager(QtCore.QObject):
                 if not aBy:
                     aBy = it
                     continue
+
                 if not tmd.field(it):
                     continue
+
                 tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
+                aWith = None
+                aBy = None
 
             if q and not quick:
                 qry = self.query(q, tmd)

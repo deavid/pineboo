@@ -298,6 +298,7 @@ p_parse.__doc__ = '''
                     |  STATIC VAR vardecl_list
 
     vardecl  :  ID optvartype EQUALS expression
+             |  vardecl EQUALS expression
     vardecl  :  ID optvartype
 
     vardecl_list    : vardecl
@@ -326,6 +327,8 @@ p_parse.__doc__ = '''
                 | base_expression
 
     member_var  : varmemcall PERIOD variable_1
+                | varmemcall LPAREN variable RPAREN
+                
     member_call : LPAREN member_var RPAREN PERIOD funccall_1
 
     member_call : varmemcall PERIOD funccall_1
@@ -383,6 +386,7 @@ p_parse.__doc__ = '''
 
 
     flowinstruction : RETURN expression
+                    | RETURN expression COMMA
                     | THROW expression
                     | RETURN
                     | BREAK
@@ -501,6 +505,7 @@ p_parse.__doc__ = '''
 
     for_initialize  : storeinstruction
                     | VAR vardecl
+                    | vardecl
                     | for_initialize COMMA for_initialize
                     | empty
 
@@ -538,8 +543,8 @@ p_parse.__doc__ = '''
 parser = yacc.yacc(method='LALR', debug=0,
                    optimize=1, write_tables=1, debugfile='%s/yaccdebug.txt' % tempDir, outputdir='%s/' % tempDir)
 
-# parser = yacc.yacc(method='LALR',debug=1,
-#      optimize = 0, write_tables = 0, debugfile = 'yaccdebug.txt',outputdir='.')
+# parser = yacc.yacc(method='LALR', debug=1,
+#                   optimize=0, write_tables=0, debugfile='%s/yaccdebug.txt' % tempDir, outputdir='%s/' % tempDir)
 
 # profile.run("yacc.yacc(method='LALR')")
 

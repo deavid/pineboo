@@ -95,8 +95,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.color_dict_ = {}
 
         self.where_filters = {}
-        self.where_filters["main-filter"] = None
-        self.where_filters["filter"] = None
+        self.where_filters["main-filter"] = ""
+        self.where_filters["filter"] = ""
 
         if self.USE_THREADS:
             self.fetchLock = threading.Lock()
@@ -279,7 +279,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 return
 
             elif _type is "double":
-                d = format_double(d, field)
+                if d is not None:
+                    d = format_double(d, field)
 
             return d
 
