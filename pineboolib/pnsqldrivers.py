@@ -31,7 +31,7 @@ class PNSqlDrivers(object):
         self.driversDefaultPort = {}
         self.desktopFile = {}
 
-        dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.endswith(".py")]
+        dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.find(".py") > -1]
         for item in dir_list:
             file_name = item[:item.find(".py")]
             mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % file_name)
