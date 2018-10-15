@@ -563,19 +563,13 @@ class FLTableMetaData(QtCore.QObject):
     @return Cadena de caracteres con los nombres de los campos separados por comas
     """
 
-    def fieldList(self, prefixTable=None):
+    def fieldList(self, prefix_table=False):
 
-        if not prefixTable:
+        if not prefix_table:
             return self.d.fieldList_
 
         listado = []
-
-        cadena = None
-
-        if prefixTable:
-            cadena = "%s." % self.name()
-        else:
-            cadena = ""
+        cadena = "%s." % self.name() if prefix_table else ""
 
         for field in self.d.fieldList_:
             listado.append("%s%s" % (cadena, field.name()))
