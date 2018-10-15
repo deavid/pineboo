@@ -1687,26 +1687,26 @@ class FLTableDB(QtWidgets.QWidget):
 
             if self.autoSortColumn_:
                 s = []
-                if tMD.indexFieldObject(self.sortColumn_, False):
-                    s.append(tMD.indexFieldObject(self.sortColumn_).name() + " ASC" if self.orderAsc_ else " DESC")
-                if tMD.indexFieldObject(self.sortColumn2_, False):
-                    s.append(tMD.indexFieldObject(self.sortColumn2_).name() + " ASC" if self.orderAsc2_ else " DESC")
-                if tMD.indexFieldObject(self.sortColumn3_, False):
-                    s.append(tMD.indexFieldObject(self.sortColumn3_).name() + " ASC" if self.orderAsc3_ else " DESC")
+                if tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), False):
+                    s.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_)).name() + " ASC" if self.orderAsc_ else " DESC")
+                if tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_), False):
+                    s.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_)).name() + " ASC" if self.orderAsc2_ else " DESC")
+                if tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn3_), False):
+                    s.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn3_)).name() + " ASC" if self.orderAsc3_ else " DESC")
 
                 id_mod = self.cursor_.db().managerModules().idModuleOfFile("%s.mtd" % self.cursor_.metadata().name())
                 function_qsa = "%s.tabeDB_setSort_%s" % (id_mod, self.cursor_.metadata().name())
 
                 vars = []
                 vars.append(s)
-                if tMD.indexFieldObject(self.sortColumn_, False):
-                    vars.append(tMD.indexFieldObject(self.sortColumn_).name())
+                if tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), False):
+                    vars.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_)).name())
                     vars.append(self.orderAsc_)
-                if tMD.indexFieldObject(self.sortColumn2_, False):
-                    vars.append(tMD.indexFieldObject(self.sortColumn2_).name())
+                if tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_), False):
+                    vars.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_)).name())
                     vars.append(self.orderAsc2_)
-                if tMD.indexFieldObject(self.sortColumn3_, False):
-                    vars.append(tMD.indexFieldObject(self.sortColumn3_).name())
+                if tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn3_), False):
+                    vars.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToRealIndex(self.sortColumn3_)).name())
                     vars.append(self.orderAsc3_)
                 from pineboolib.pncontrolsfactory import aqApp
                 ret = aqApp.call(function_qsa, vars, None, False)
@@ -1730,6 +1730,7 @@ class FLTableDB(QtWidgets.QWidget):
                 cb1 = None
                 cb2 = None
                 for column in range(model.columnCount()):
+                    # FIXME: ordenar por posicion visual de columna
                     if model.metadata() is None:
                         return
                     field = model.metadata().indexFieldObject(column)
@@ -1743,9 +1744,8 @@ class FLTableDB(QtWidgets.QWidget):
 
                 self.comboBoxFieldToSearch.addItem("*")
                 self.comboBoxFieldToSearch2.addItem("*")
-                self.comboBoxFieldToSearch.setCurrentIndex(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_))
-                self.comboBoxFieldToSearch2.setCurrentIndex(
-                    self.tableRecords_.visualIndexToRealIndex(self.sortColumn2_))
+                self.comboBoxFieldToSearch.setCurrentIndex(self.sortColumn_)
+                self.comboBoxFieldToSearch2.setCurrentIndex(self.sortColumn2_)
                 self.comboBoxFieldToSearch.currentIndexChanged.connect(self.putFirstCol)
                 self.comboBoxFieldToSearch2.currentIndexChanged.connect(self.putSecondCol)
 
@@ -1980,11 +1980,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         if to == 0:  # Si ha cambiado la primera columna
 
-            try:
-                self.comboBoxFieldToSearch.currentIndexChanged.disconnect(
-                    self.putFirstCol)
-            except Exception:
-                pass
+            self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
 
             self.comboBoxFieldToSearch.setCurrentIndex(from_)
             self.comboBoxFieldToSearch.currentIndexChanged.connect(
@@ -2045,10 +2041,12 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             self.refreshDelayed()
 
-        new_from_ = self.tableRecords_.header().visualIndex(from_)
+        new_from_ = self.tableRecords_.visualIndexToRealIndex(from_)
+        new_to = self.tableRecords_.visualIndexToRealIndex(to)
+        print("******", from_, to, "-->", new_from_, new_to)
         self.tableRecords_.header().swapSections(new_from_, to)
 
-        self.refresh(True)
+        self.refresh(True, False)
 
     """
     Posiciona el cursor en un registro valido
@@ -2309,7 +2307,7 @@ class FLTableDB(QtWidgets.QWidget):
         # if p.endswith("%"): refreshData = True
 
         msec_refresh = 400
-        column = self.tableRecords_._h_header.logicalIndex(self.sortColumn_)
+        column = self.tableRecords_.header().logicalIndex(self.sortColumn_)
         field = self.cursor_.model().metadata().indexFieldObject(column)
 
         bFilter = self.cursor_.db().manager().formatAssignValue(field, p, True)
@@ -2345,12 +2343,10 @@ class FLTableDB(QtWidgets.QWidget):
         self.filter_ = bFilter
 
     def setSortOrder(self, ascending=True):
-        if ascending:
-            order = Qt.AscendingOrder
-        else:
-            order = Qt.DescendingOrder
-
-        self.tableRecords_.sortByColumn(self.tableRecords_.visualIndexToRealIndex(self.sortColumn_), order)
+        order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
+        column = self.tableRecords_.visualIndexToRealIndex(self.sortColumn_)
+        print("setSortOrder", self.sortColumn_, column)
+        self.tableRecords_.sortByColumn(column, order)
 
     def isSortOrderAscending(self):
         return self.orderAsc_
