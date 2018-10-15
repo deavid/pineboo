@@ -1730,17 +1730,15 @@ class FLTableDB(QtWidgets.QWidget):
                 cb1 = None
                 cb2 = None
                 for column in range(model.columnCount()):
-                    # FIXME: ordenar por posicion visual de columna
-                    if model.metadata() is None:
-                        return
-                    field = model.metadata().indexFieldObject(column)
-                    if not field.visibleGrid():
-                        self.tableRecords_.setColumnHidden(column, True)
-                    else:
-                        self.comboBoxFieldToSearch.addItem(model.headerData(
-                            column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                        self.comboBoxFieldToSearch2.addItem(model.headerData(
-                            column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                    visual_column = self.tableRecords_.header().logicalIndex(column)
+                    if visual_column is not None:
+                        field = model.metadata().indexFieldObject(visual_column)
+                        if not field.visibleGrid():
+                            continue
+                        #    self.tableRecords_.setColumnHidden(column, True)
+                        # else:
+                        self.comboBoxFieldToSearch.addItem(model.headerData(visual_column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                        self.comboBoxFieldToSearch2.addItem(model.headerData(visual_column, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
 
                 self.comboBoxFieldToSearch.addItem("*")
                 self.comboBoxFieldToSearch2.addItem("*")
@@ -2041,10 +2039,9 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             self.refreshDelayed()
 
-        new_from_ = self.tableRecords_.visualIndexToRealIndex(from_)
-        new_to = self.tableRecords_.visualIndexToRealIndex(to)
-        print("******", from_, to, "-->", new_from_, new_to)
-        self.tableRecords_.header().swapSections(new_from_, to)
+        new_from = self.tableRecords_.visualIndexToRealIndex(from_)
+        #new_to = self.tableRecords_.visualIndexToRealIndex(to)
+        self.tableRecords_.header().swapSections(new_from, to)
 
         self.refresh(True, False)
 
@@ -2344,8 +2341,7 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setSortOrder(self, ascending=True):
         order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
-        column = self.tableRecords_.visualIndexToRealIndex(self.sortColumn_)
-        print("setSortOrder", self.sortColumn_, column)
+        column = self.tableRecords_.header().logicalIndex(self.sortColumn_)
         self.tableRecords_.sortByColumn(column, order)
 
     def isSortOrderAscending(self):
