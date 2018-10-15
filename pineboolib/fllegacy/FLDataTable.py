@@ -734,12 +734,6 @@ class FLDataTable(QtWidgets.QTableView):
 
         return self.cursor_.model().metadata().fieldIsIndex(name)
 
-    """
-    Retorna el index real (incusive columnas ocultas) a partir de un index de columnas visibles.
-    @param c posicion de la columna visible.
-    @return posicion real de la columna
-    """
-
     def mouseDoubleClickEvent(self, e):
         if e.button() != QtCore.Qt.LeftButton:
             return
@@ -748,13 +742,24 @@ class FLDataTable(QtWidgets.QTableView):
         if not settings.readBoolEntry("ebcomportamiento/FLTableDoubleClick", False):
             self.recordChoosed.emit()
 
+    """
+    Retorna el index real a partir de un index de columnas visibles.
+    @param c posicion de la columna visible.
+    @return posicion real de la columna
+    """
+
     def visualIndexToRealIndex(self, c):
         if not isinstance(c, int) or not self.cursor_:
             return
 
+        visible_id = -1
         ret_ = None
         for column in range(self.model().columnCount()):
-            if self.header().visualIndex(column) == c:
+            visible_id += 1
+            if self.isColumnHidden(column):
+                visible_id -= 1
+
+            if self.header().visualIndex(visible_id) == c:
                 ret_ = column
                 break
 
