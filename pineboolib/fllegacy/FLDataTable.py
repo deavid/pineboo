@@ -755,13 +755,12 @@ class FLDataTable(QtWidgets.QTableView):
         visible_id = -1
         ret_ = None
         for column in range(self.model().columnCount()):
-            visible_id += 1
-            if self.isColumnHidden(column):
-                visible_id -= 1
+            if not self.isColumnHidden(self.header().visualIndex(column)):
+                visible_id += 1
 
-            if self.header().visualIndex(visible_id) == c:
-                ret_ = column
-                break
+                if visible_id == c:
+                    ret_ = column
+                    break
 
         return ret_
 
