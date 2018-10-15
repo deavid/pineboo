@@ -583,24 +583,13 @@ class FLDateEdit(QDateEdit):
         return super(FLDateEdit, self).date
 
     def setDate(self, d=None):
-        from pineboolib.qsa import Date
+
+        from pineboolib.utils import convert_to_qdate
 
         if d in (None, "NAN"):
-            d = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
-        elif isinstance(d, str):
-            if "T" in d:
-                d = d[:d.find("T")]
-
-        elif isinstance(d, Date):
-            d = d.date_
-
-        elif isinstance(d, datetime.date):
-            d = QtCore.QDate.fromString(str(d), "yyyy-MM-dd")
-
-        if not isinstance(d, QtCore.QDate):
-            date = QtCore.QDate.fromString(d, "yyyy-MM-dd")
+            date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:
-            date = d
+            date = convert_to_qdate(d)
 
         super(FLDateEdit, self).setDate(date)
         if not pineboolib.project._DGI.localDesktop():

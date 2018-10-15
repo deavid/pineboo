@@ -702,3 +702,31 @@ def format_double(d, field_meta):
 
     ret_ = "%s.%s" % (str_integer, str_decimal)
     return ret_
+
+
+"""
+Convierte diferentes formatos de fecha a QDate
+@param date: Fecha a convertir
+@return QDate con el valor de la fecha dada 
+"""
+
+
+def convert_to_qdate(date):
+    from pineboolib.qsa import Date
+    from pineboolib.fllegacy.FLUtil import FLUtil
+    import datetime
+
+    if isinstance(date, Date):
+        date = date.date_  # str
+    elif isinstance(date, datetime.date):
+        date = str(date)
+
+    if isinstance(date, str):
+        if "T" in date:
+            date = date[:date.find("T")]
+
+        util = FLUtil()
+        date = util.dateAMDtoDMA(date) if len(date.split("-")[0]) == 4 else date
+        date = QtCore.QDate.fromString(date, "dd-MM-yyyy")
+
+    return date
