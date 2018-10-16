@@ -16,6 +16,7 @@ from pineboolib.fllegacy.FLManager import FLManager
 from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
 from pineboolib.fllegacy.FLFormDB import FLFormDB
 
+
 import datetime
 import pineboolib
 import logging
@@ -3145,11 +3146,50 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
     def __init__(self, *args):
         if len(args) == 4:
             super(FLDoubleValidator, self).__init__(args[0], args[1], args[2], args[3])
+            # 1 inferior
+            # 2 superior
+            # 3 partDecimal
+            # 4 editor
         else:
             super(FLDoubleValidator, self).__init__(args[0], args[1])
 
-    def validate(self, input_, i):
+        self.setNotation(self.StandardNotation)
 
+    def validate(self, input_, input_length):
+
+        if input_ is None:
+            return (self.Acceptable, input_, input_length)
+        input_.replace(",", ".")
+
+        state = super(FLDoubleValidator, self).validate(input_, input_length)
+        print("state", state, "decimales", self.decimals())
+
+        # 0 Invalid
+        # 1 Intermediate
+        # 2 Acceptable
+        ret_0 = None
+        ret_1 = None
+        ret_2 = state[2]
+
+        if state[0] in (self.Invalid, self.Intermediate) and len(input_) > 0:
+            s = input_[1:]
+            if input_[0] == "-" and super(FLDoubleValidator, self).validate(s, input_length)[0] == self.Acceptable or s == "":
+                ret_0 = self.Acceptable
+            else:
+                ret_0 = self.Invalid
+        else:
+            ret_0 = self.Acceptable
+
+        from pineboolib.pncontrolsfactory import aqApp
+
+        if state[1]:
+            if aqApp.commaSeparator() == ",":
+                ret_1 = state[1].replace(".", ",")
+            else:
+                ret_1 = state[1].replace(",", ".")
+
+        return (ret_0, ret_1, ret_2)
+        """
         if not input_:
             state = (self.Acceptable, input_, i)
         else:
@@ -3194,6 +3234,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         # else:
         #    state[1] = state[1].replace(",", ".")
         return state
+        """
 
 
 class FLIntValidator(QtGui.QIntValidator):
