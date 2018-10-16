@@ -927,6 +927,9 @@ class XMLAction(XMLStruct):
     """
 
     def formRecordWidget(self):
+        if not self.formrecord_widget:
+            self.loadRecord(None)
+
         return self.formrecord_widget
 
     """
