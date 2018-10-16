@@ -111,8 +111,14 @@ class SysType(object):
     def isLoadedModule(self, modulename):
         return modulename in pineboolib.project.conn.managerModules().listAllIdModules()
 
-    def translate(self, text):
-        return text
+    def translate(self, *args):
+        from pineboolib.fllegacy.FLUtil import FLUtil
+        util = FLUtil()
+
+        group = args[0] if len(args) == 2 else "scripts"
+        text = args[1] if len(args) == 2 else args[0]
+
+        return util.translate(group, text)
 
     def osName(self):
         from pineboolib.fllegacy.FLUtil import FLUtil
