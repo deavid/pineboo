@@ -261,7 +261,7 @@ class PNBuffer(object):
         if field is None:
             return False
 
-        if field.type_ == "double" and isinstance(value, str):
+        if field.type_ == "double" and value not in ("", "-") and isinstance(value, str):
             value = float(value.replace(",", "."))
 
         if field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
