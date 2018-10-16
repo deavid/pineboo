@@ -1796,7 +1796,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editor_.setAlignment(Qt.AlignRight)
                 else:
                     if type_ == "uint":
-                        self.editor_.setValidator(FLUIntValidator(0, pow(10, partInteger), 0, self.editor_))
+                        self.editor_.setValidator(FLUIntValidator(0, pow(10, partInteger), self.editor_))
                         pass
                     elif type_ == "int":
                         self.editor_.setValidator(FLIntValidator(
@@ -3150,9 +3150,6 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
             # 2 superior
             # 3 partDecimal
             # 4 editor
-        else:
-            super(FLDoubleValidator, self).__init__(args[0], args[1])
-
         self.setNotation(self.StandardNotation)
 
     def validate(self, input_, input_length):
@@ -3162,7 +3159,6 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         input_.replace(",", ".")
 
         state = super(FLDoubleValidator, self).validate(input_, input_length)
-        print("state", state, "decimales", self.decimals())
 
         # 0 Invalid
         # 1 Intermediate
@@ -3189,52 +3185,6 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
                 ret_1 = state[1].replace(",", ".")
 
         return (ret_0, ret_1, ret_2)
-        """
-        if not input_:
-            state = (self.Acceptable, input_, i)
-        else:
-            #    input_ = input_.replace(",", ".")
-            punto_ = QtCore.QLocale().decimalPoint()
-
-            if punto_ == ",":
-                input_ = input_.replace(".", punto_)
-            else:
-                input_ = input_.replace(",", punto_)
-
-            if input_ == punto_:
-                input_ = "0%s" % punto_
-                i = i + 1
-
-            if input_ == "-%s" % punto_:
-                input_ = "-0%s" % punto_
-                i = i + 1
-
-            state = super(FLDoubleValidator, self).validate(input_, i)
-
-            # if state[0] in (self.Invalid, self.Intermediate):
-            #    #    print("*", state)
-            #    s = input_[0:(len(input_) - 1) - 1]
-            #    if input_[0] == "-" and (super(FLDoubleValidator, self).validate(s, i) == self.Acceptable or not s):
-            #        state = (self.Acceptable, input_, i)
-            #    else:
-            #        state = (self.Invalid, input_, i)
-            # else:
-            #    state = (self.Acceptable, input_, i)
-            # Comprueba decimales
-            if input_.find(punto_) > -1:
-
-                if self.decimals() < len(input_[input_.find(punto_) + 1:]):
-                    state = (self.Invalid, input_, i)
-
-                    if input_.endswith(punto_):
-                        state = (self.Acceptable, input_, i)
-
-        # if punto_ == ",":
-        #    state[1] = state[1].replace(".", ",")
-        # else:
-        #    state[1] = state[1].replace(",", ".")
-        return state
-        """
 
 
 class FLIntValidator(QtGui.QIntValidator):
@@ -3242,49 +3192,45 @@ class FLIntValidator(QtGui.QIntValidator):
     def __init__(self, *args, **kwargs):
         super(FLIntValidator, self).__init__(args[0], args[1], args[2])
 
-    def validate(self, input_, i):
-        """
+    def validate(self, input_, input_length):
+
         if not input_:
-            return QtGui.QValidator.Acceptable
-        if QtCore.QLocale().decimalPoint() == ",":
-            input_ = input_.replace(".", QtCore.QLocale().decimalPoint())
-        else:
-            input_ = input_.replace(",", QtCore.QLocale().decimalPoint())
+            return (self.Acceptable, input_, input_length)
 
-        iV = QtGui.QIntValidator()
-        state = super(FLIntValidator, self).validate(input_, i)
-        if state == QtGui.QValidator.Invalid or state == QtGui.QValidator.Intermediate:
+        state = super(FLIntValidator, self).validate(input_, input_length)
+
+        ret_0 = None
+        ret_1 = state[1]
+        ret_2 = state[2]
+
+        if state[0] in (self.Invalid, self.Intermediate) and len(input_) > 0:
             s = input_[1:]
-            if input_[0] == "-" and super(FLIntValidator, self).validate(self, s, i) == QtGui.QValidator.Acceptable:
-                state = QtGui.QValidator.Acceptable
+            if input_[0] == "-" and super(FLIntValidator, self).validate(s, input_length)[0] == self.Acceptable or s == "":
+                ret_0 = self.Acceptable
             else:
-                state = QtGui.QValidator.Invalid
+                ret_0 = self.Invalid
         else:
+            ret_0 = self.Acceptable
 
-            state = QtGui.QValidator.Acceptable
-        return state
-        """
-        return super(FLIntValidator, self).validate(input_, i)
+        return (ret_0, ret_1, ret_2)
 
 
-class FLUIntValidator(QtGui.QDoubleValidator):
+class FLUIntValidator(QtGui.QIntValidator):
 
     def __init__(self, *args, **kwargs):
-        if len(args) == 4:
-            super(FLUIntValidator, self).__init__(args[0], args[1], args[2], args[3])
-        else:
-            super(FLUIntValidator, self).__init__(args[0], args[1])
+        if len(args) == 3:
+            super(FLUIntValidator, self).__init__(args[0], args[1], args[2])
 
-    def validate(self, input_, i):
-        """
+    def validate(self, input_, input_length):
+
         if not input_:
-            return QtGui.QValidator.Acceptable
+            return (self.Acceptable, input_, input_length)
 
-        iV = QtGui.QIntValidator()
-        state = iV.validate(input_, i)
-        if state == QtGui.QValidator.Intermediate:
-            state = QtGui.QValidator.Invalid
+        i_v = QtGui.QIntValidator(0, 1000000000, self)
+        state = i_v.validate(input_, input_length)
 
-        return state
-        """
-        return super(FLUIntValidator, self).validate(input_, i)
+        ret_0 = self.Invalid if state[0] is self.Intermediate else state[0]
+        ret_1 = state[1]
+        ret_2 = state[2]
+
+        return (ret_0, ret_1, ret_2)
