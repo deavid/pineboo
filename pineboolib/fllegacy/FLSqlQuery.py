@@ -3,6 +3,9 @@ from PyQt5 import QtWidgets
 import pineboolib
 import traceback
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FLSqlQuery(object):
@@ -73,7 +76,7 @@ class FLSqlQuery(object):
             self._cursor = micursor
             self._posicion = None
         except Exception:
-            print(traceback.format_exc())
+            logger.warn("Error en consulta %s", sql, stack_info=True)
             # conn.rollback()
             return False
         # conn.commit()
