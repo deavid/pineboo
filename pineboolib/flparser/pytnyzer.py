@@ -636,17 +636,24 @@ class With(ASTPython):
         yield "line", " #WITH_START"
         for obj in parse_ast(source).generate(break_mode=True):
             obj_ = None
+
+            # para sustituir los this sueltos por var_expr
+            if obj[1].find("self") > -1 and obj[1].find("self.") == -1:
+                obj_1 = obj[1].replace("self", " ".join(var_expr))
+            else:
+                obj_1 = obj[1]
+
             for t in self.python_keywords:
-                if obj[1].startswith(t):
-                    obj_ = (obj[0], "%s.%s" % (" ".join(var_expr), obj[1]))
+                if obj_1.startswith(t):
+                    obj_ = (obj[0], "%s.%s" % (" ".join(var_expr), obj_1))
                     break
-                elif obj[1].find(".") == -1 and obj[1].find(t) > -1:
-                    obj_ = (obj[0], obj[1].replace(t, "%s.%s" %
-                                                   (" ".join(var_expr), t)))
+                elif obj_1.find(".") == -1 and obj[1].find(t) > -1:
+                    obj_ = (obj[0], obj_1.replace(t, "%s.%s" %
+                                                  (" ".join(var_expr), t)))
                     break
 
             if not obj_:
-                obj_ = obj
+                obj_ = (obj[0], obj_1)
 
             yield obj_
         # yield "line", "del %s" % name
