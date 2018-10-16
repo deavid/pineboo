@@ -668,7 +668,7 @@ class FLCheckBox(QtWidgets.QCheckBox):
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
-    CurrentChanged = QtCore.pyqtSignal(int, int)
+    currentChanged = QtCore.pyqtSignal(int, int)
     doubleClicked = QtCore.pyqtSignal(int, int)
     read_only_cols = None
     read_only_rows = None
@@ -686,8 +686,10 @@ class QTable(QtWidgets.QTableWidget):
         self.read_only_cols = []
         self.read_only_rows = []
 
+    @decorators.needRevision
     def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
-        self.CurrentChanged.emit(currentRow, currentColumn)
+        # FIXME: esto produce un TypeError: native Qt signal is not callable
+        self.currentChanged.emit(currentRow, currentColumn)
 
     def doubleClicked_(self, f, c):
         self.doubleClicked.emit(f, c)
@@ -739,7 +741,7 @@ class QTable(QtWidgets.QTableWidget):
         self.insertRow(numero)
 
     def text(self, row, col):
-        return self.item(row, col).text()
+        return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
         # self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
