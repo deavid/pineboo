@@ -163,15 +163,6 @@ class FLFormDB(QtWidgets.QDialog):
         super(QtWidgets.QWidget, self).__init__(parent)
 
         self._loaded = False
-        try:
-            assert (self.__class__, action.name()) not in self.known_instances
-        except AssertionError:
-            # print("WARN: Clase %r ya estaba instanciada, reescribiendo!. " % ((self.__class__, action),) +
-            #      "Puede que se estén perdiendo datos!")
-            if type(self).__name__ == "FLFormRecordDB":
-                QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
-                                                  QtWidgets.QMessageBox.Yes)
-                return
         self.known_instances[(self.__class__, action.name())] = self
 
         self.ui_ = {}
@@ -800,6 +791,10 @@ class FLFormDB(QtWidgets.QDialog):
 
     def show(self):
         if not self.tiempo_ini:
+            if self.showed:
+                QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
+                                                  QtWidgets.QMessageBox.Yes)
+                return
             self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
         tiempo_fin = time.time()
