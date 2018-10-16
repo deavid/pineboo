@@ -909,6 +909,9 @@ class FLApplication(QtCore.QObject):
     def modules(self):
         return pineboolib.project.modules
 
+    def commaSeparator(self):
+        return self.comma_separator
+
 
 class FLWorkSpace(QtWidgets.QWidget):
 
