@@ -2255,8 +2255,7 @@ class FLSqlCursor(QtCore.QObject):
         return True
 
     def setNull(self, name):
-        if self.buffer().setNull(name):
-            self.bufferChanged.emit(name)
+        self.buffer().setNull(name)
 
     """
     Para obtener la base de datos sobre la que trabaja
