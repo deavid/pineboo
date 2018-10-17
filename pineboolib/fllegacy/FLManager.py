@@ -214,7 +214,7 @@ class FLManager(QtCore.QObject):
 
                 docElem = doc.documentElement()
                 ret = self.metadata(docElem, quick)
-                if not ret or ret.name() != n:
+                if ret is None:
                     return None
 
                 if not isSysTable:
@@ -1325,23 +1325,22 @@ class FLManager(QtCore.QObject):
         c = FLSqlCursor("flmetadata", True, self.db_.dbAux())
 
         q2 = FLSqlQuery(None, self.db_.dbAux())
-        q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd'")
+        q2.exec_("SELECT nombre,sha FROM flfiles WHERE nombre LIKE '%.mtd' and nombre not like '%%alteredtable%'")
         while q2.next():
             table = str(q2.value(0))
             table = table.replace(".mtd", "")
             tmd = self.metadata(table)
-            if not tmd:
-                #qWarning("FLManager::cleanupMetaData " + QApplication.tr(self, "No se ha podido crear los metadatatos para la tabla %s") % table)
-                continue
             if not self.existsTable(table):
                 self.createTable(table)
+            if not tmd:
+                logger.warn("FLManager::cleanupMetaData %s", QApplication.tr(self, "No se ha podido crear los metadatatos para la tabla %s") % table)
 
             c.select("tabla='%s'" % table)
             if c.next():
                 buffer = c.primeUpdate()
-                buffer.setValue("xml", str(q2.value(1)))
+                buffer.setValue("xml", q2.value(1))
                 c.update()
-            self.dictKeyMetaData_[table] = str(q2.value(1))
+            self.dictKeyMetaData_[table] = q2.value(1)
 
     def isSystemTable(self, n):
         """
