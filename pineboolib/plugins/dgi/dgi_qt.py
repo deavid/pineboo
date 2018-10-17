@@ -971,9 +971,10 @@ class QTextEdit(QtWidgets.QTextEdit):
     def setShown(self, value):
         pass
 
-    @decorators.NotImplementedWarn
     def setAutoFormatting(self, value):
-        pass
+        if value == 0:
+            value = QtWidgets.QTextEdit.AutoAll
+        super(QTextEdit, self).setAutoFormatting(value)
 
     text = property(getText, setText)
 
