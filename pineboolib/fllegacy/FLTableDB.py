@@ -2341,7 +2341,13 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setSortOrder(self, ascending=True):
         order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
-        column = self.tableRecords_.header().logicalIndex(self.sortColumn_)
+        col = self.sortColumn_
+        while True:
+            column = self.tableRecords_.header().logicalIndex(col)
+            if not self.tableRecords_.isColumnHidden(column):
+                break
+            col += 1
+        print(self.sortColumn_, "Columna =", column)
         self.tableRecords_.sortByColumn(column, order)
 
     def isSortOrderAscending(self):
