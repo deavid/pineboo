@@ -10,6 +10,10 @@ import traceback
 import pineboolib
 from PyQt5.Qt import qWarning, QApplication, qApp, QDomDocument, QRegExp
 from PyQt5.QtWidgets import QMessageBox
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class FLQPSQL(object):
@@ -336,6 +340,8 @@ class FLQPSQL(object):
         try:
             cursor.execute(sql)
         except Exception:
+            logger.warn("Error en consulta %s", sql, stack_info=True)
+            return
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
