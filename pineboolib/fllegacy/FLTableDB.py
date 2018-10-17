@@ -2347,7 +2347,6 @@ class FLTableDB(QtWidgets.QWidget):
             if not self.tableRecords_.isColumnHidden(column):
                 break
             col += 1
-        print(self.sortColumn_, "Columna =", column)
         self.tableRecords_.sortByColumn(column, order)
 
     def isSortOrderAscending(self):
