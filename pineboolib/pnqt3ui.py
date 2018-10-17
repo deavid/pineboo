@@ -783,7 +783,7 @@ def _loadVariant(variant, widget=None):
             return QtWidgets.QAbstractItemView.MultiSelection
 
         att_found = getattr(widget, text, None)
-        if att_found:
+        if att_found is not None:
             return att_found
 
     if variant.tag == "color":
@@ -803,4 +803,4 @@ def _loadVariant(variant, widget=None):
         return c
 
     if Options.DEBUG_LEVEL > 50:
-        logger.warn("qt3ui: Unknown variant: %s", etree.ElementTree.tostring(variant))
+        logger.warn("qt3ui: Unknown variant: %s --> %s ", repr(widget),  etree.ElementTree.tostring(variant))
