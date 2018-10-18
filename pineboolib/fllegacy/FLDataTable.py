@@ -177,6 +177,7 @@ class FLDataTable(QtWidgets.QTableView):
                 self.setSelectionModel(self.cursor_.selection())
                 self.model().sort(self.visualIndexToRealIndex(0), 0)
                 self.installEventFilter(self)
+                self.model().set_parent_view(self)
             # if self.cursor_.at() >= 0:
             #    QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
     """
@@ -353,7 +354,6 @@ class FLDataTable(QtWidgets.QTableView):
         c = self.currentColumn()
         nr = self.numRows()
         nc = self.numCols()
-
         if e.type() == QtCore.QEvent.KeyPress:
             key_event = e
 
@@ -580,7 +580,6 @@ class FLDataTable(QtWidgets.QTableView):
     paintFieldMtd_ = None
 
     def paintFieldMtd(self, f, t):
-
         if self.paintFieldMtd_ and self.paintFieldName_ == f:
             return self.paintFieldMtd_
 

@@ -10,6 +10,7 @@ from pineboolib.utils import filedir, format_double
 import pineboolib
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+from PyQt5.Qt import QPainter, QRect
 
 
 DEBUG = False
@@ -38,6 +39,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     color_function_ = None
     color_dict_ = None
     _parent = None
+    parent_view = None
     """
     Constructor
     @param action. action relacionada al cursor
@@ -285,21 +287,34 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return d
 
         elif role == QtCore.Qt.DecorationRole:
-            icon = None
+            pixmap = None
             if _type in ("unlock", "pixmap"):
 
                 if _type == "unlock":
                     if d in (True, "1"):
-                        icon = QtGui.QPixmap(filedir("../share/icons", "unlock.png"))
+                        pixmap = QtGui.QPixmap(filedir("../share/icons", "unlock.png"))
                     else:
-                        icon = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
+                        pixmap = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
 
                 if _type == "pixmap" and self._showPixmap:
                     d = self.db().manager().fetchLargeValue(d)
                     if d:
-                        icon = QtGui.QPixmap(d)
+                        pixmap = QtGui.QPixmap(d)
 
-            return icon
+                if pixmap and not pixmap.isNull():
+                    #print("Dibuja", self.headerData(col, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                    row_height = self.parent_view.rowHeight(row)  # Altura row
+                    row_width = self.parent_view.columnWidth(col)
+                    new_pixmap = QtGui.QPixmap(row_width, row_height)  # w , h
+                    center_width = (row_width - pixmap.width()) / 2
+                    center_height = (row_height - pixmap.height()) / 2
+                    new_pixmap.fill()
+                    painter = QPainter(new_pixmap)
+                    painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
+
+                    pixmap = new_pixmap
+
+            return pixmap
 
         elif role == QtCore.Qt.BackgroundRole:
             if _type == "bool":
@@ -999,3 +1014,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def db(self):
         return self._cursorConn
+
+    def set_parent_view(self, parent_view):
+        self.parent_view = parent_view
