@@ -72,6 +72,7 @@ QActionGroup = resolveObject("QActionGroup")
 QTreeWidget = resolveObject("QTreeWidget")
 QTreeWidgetItem = resolveObject("QTreeWidgetItem")
 QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
+QDataView = resolveObject("QDataView")
 """
 QIconSet = resolveObject("QIconSet")
 """

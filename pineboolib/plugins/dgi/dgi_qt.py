@@ -815,6 +815,12 @@ class FLTable(QTable):
         pass
 
 
+@decorators.NotImplementedWarn
+class QDataView(QtWidgets.QWidget):
+
+    pass
+
+
 class FLTimeEdit(QtWidgets.QTimeEdit):
 
     def __init__(self, parent):
