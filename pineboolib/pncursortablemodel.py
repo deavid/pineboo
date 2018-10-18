@@ -301,7 +301,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     if d:
                         pixmap = QtGui.QPixmap(d)
 
-                if pixmap and not pixmap.isNull():
+                if pixmap and not pixmap.isNull()and self.parent_view:
                     #print("Dibuja", self.headerData(col, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
                     row_height = self.parent_view.rowHeight(row)  # Altura row
                     row_width = self.parent_view.columnWidth(col)
