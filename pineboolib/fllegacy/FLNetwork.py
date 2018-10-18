@@ -74,10 +74,9 @@ class FLNetwork(QtCore.QObject):
         self.dataTransferProgress.emit(bDone, bTotal)
         data_ = None
         reply_ = self.reply.readAll().data()
-        print("Progress", reply_)
         try:
-            data_ = str(reply_, encoding="utf-8")
-        except:
             data_ = str(reply_, encoding="iso-8859-15")
+        except:
+            data_ = str(reply_, encoding="utf-8")
 
         self.data.emit(data_)
