@@ -65,17 +65,19 @@ class FLNetwork(QtCore.QObject):
     def _slotNetworkFinished(self, reply=None):
         self.finished.emit()
 
-    @QtCore.pyqtSlot(QtCore.QByteArray)
-    def _slotNetWorkData(self, b):
-        buffer = b
-        self.data.emit(b)
+    #@QtCore.pyqtSlot(QtCore.QByteArray)
+    # def _slotNetWorkData(self, b):
+    #    buffer = b
+    #    self.data.emit(b)
 
     def _slotNetworkProgress(self, bDone, bTotal):
         self.dataTransferProgress.emit(bDone, bTotal)
         data_ = None
+        reply_ = self.reply.readAll().data()
+        print("Progress", reply_)
         try:
-            data_ = str(self.reply.readAll().data(), encoding="utf-8")
+            data_ = str(reply_, encoding="utf-8")
         except:
-            data_ = str(self.reply.readAll().data(), encoding="iso-8859-15")
+            data_ = str(reply_, encoding="iso-8859-15")
 
         self.data.emit(data_)
