@@ -1,11 +1,10 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
 from pineboolib import decorators
-from PyQt5.QtCore import QByteArray, QUrl
 from PyQt5.QtNetwork import QNetworkRequest, QNetworkAccessManager
 
 
-class FLNetwork(object):
+class FLNetwork(QtCore.QObject):
 
     url = None
     request = None
@@ -19,18 +18,19 @@ class FLNetwork(object):
     dataTransferProgress = QtCore.pyqtSignal(int, int)
 
     def __init__(self, url):
-        self.url = QUrl(url)
+        super(FLNetwork, self).__init__()
+        self.url = url
         self.request = QNetworkRequest()
 
         self.manager = QNetworkAccessManager()
-        self.manager.readyRead.connect(self._slotNetworkStart)
-        self.manager.finished.connect(self._slotNetworkFinished)
+        # self.manager.readyRead.connect(self._slotNetworkStart)
+        self.manager.finished['QNetworkReply*'].connect(self._slotNetworkFinished)
         # self.data.connect(self._slotNetWorkData)
         # self.dataTransferProgress.connect(self._slotNetworkProgress)
 
     @decorators.BetaImplementation
     def get(self, location):
-        self.request.setUrl("%s%s" % (self.url, localtion))
+        self.request.setUrl(QtCore.QUrl("%s%s" % (self.url, location)))
         self.reply = self.manager.get(self.request)
         try:
             self.reply.uploadProgress.disconnect(self._slotNetworkProgress)
@@ -38,11 +38,11 @@ class FLNetwork(object):
         except:
             pass
 
-        self.reply.downloadProgress.connect(self.slotNetworkProgress)
+        self.reply.downloadProgress.connect(self._slotNetworkProgress)
 
     @decorators.BetaImplementation
     def put(self, data, location):
-        self.request.setUrl("%s%s" % (self.url, localtion))
+        self.request.setUrl(QtCore.QUrl("%s%s" % (self.url, localtion)))
         self.reply = self.manager.put(data, self.request)
         try:
             self.reply.uploadProgress.disconnect(self._slotNetworkProgress)
@@ -62,15 +62,20 @@ class FLNetwork(object):
         self.start.emit()
 
     @QtCore.pyqtSlot()
-    def _slotNetworkFinished(self):
+    def _slotNetworkFinished(self, reply=None):
         self.finished.emit()
 
-    @QtCore.pyqtSlot(QByteArray)
+    @QtCore.pyqtSlot(QtCore.QByteArray)
     def _slotNetWorkData(self, b):
         buffer = b
         self.data.emit(b)
 
-    @QtCore.pyqtSlot(int, int)
     def _slotNetworkProgress(self, bDone, bTotal):
-        self.dataTransferProgress(bDone, bTotal).emit()
-        self.data.emit(self.reply.read())
+        self.dataTransferProgress.emit(bDone, bTotal)
+        data_ = None
+        try:
+            data_ = str(self.reply.readAll().data(), encoding="utf-8")
+        except:
+            data_ = str(self.reply.readAll().data(), encoding="iso-8859-15")
+
+        self.data.emit(data_)
