@@ -782,6 +782,11 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonCancel.setDisabled(True)
 
     def show(self):
+        if self.showed:
+            QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
+                                              QtWidgets.QMessageBox.Yes)
+            return
+
         super(FLFormRecordDB, self).show()
         self.inicializeControls()
 
