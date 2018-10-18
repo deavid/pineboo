@@ -10,7 +10,6 @@ from pineboolib.utils import filedir, format_double
 import pineboolib
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from PyQt5.Qt import QPainter, QRect
 
 
 DEBUG = False
@@ -309,7 +308,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     center_width = (row_width - pixmap.width()) / 2
                     center_height = (row_height - pixmap.height()) / 2
                     new_pixmap.fill()
-                    painter = QPainter(new_pixmap)
+                    painter = Qt.QPainter(new_pixmap)
                     painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
 
                     pixmap = new_pixmap
