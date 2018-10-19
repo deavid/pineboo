@@ -228,11 +228,13 @@ class FLPixmapView(QtWidgets.QScrollArea):
         self.lay_ = QtWidgets.QHBoxLayout(self)
         self.pixmap_ = QtGui.QPixmap()
         self.pixmapView_ = QtWidgets.QLabel(self)
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        self.pixmapView_.setSizePolicy(sizePolicy)
+        # sizePolicy = QtWidgets.QSizePolicy(
+        #    QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        # self.pixmapView_.setSizePolicy(sizePolicy)
         self.lay_.addWidget(self.pixmapView_)
         self._parent = parent
+
+        # FIXME: Bordes romos, tamaño imagen
 
     def setPixmap(self, pix):
         if not pineboolib.project._DGI.localDesktop():
