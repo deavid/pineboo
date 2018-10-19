@@ -427,8 +427,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         #print("Convirtiendo %s a %s" % (p.find("enum").text, value))
                         from pineboolib.fllegacy.FLSettings import FLSettings
                         settings = FLSettings()
-
-                        if settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
+                        if settings.readBoolEntry("ebcomportamiento/spacerLegacy", False) or orient_ == 1:
                             policy_ = QtWidgets.QSizePolicy.Policy(value)
                         else:
                             policy_ = 7  # Siempre Expanding
