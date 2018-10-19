@@ -226,15 +226,16 @@ class FLPixmapView(QtWidgets.QScrollArea):
         # self.scrollView = QtWidgets.QScrollArea(parent)
         self.autoScaled_ = False
         self.lay_ = QtWidgets.QHBoxLayout(self)
+        self.lay_.setContentsMargins(0, 2, 0, 2)
         self.pixmap_ = QtGui.QPixmap()
-        self.pixmapView_ = QtWidgets.QLabel(self)
+        self.pixmapView_ = QLabel(self)
         # sizePolicy = QtWidgets.QSizePolicy(
         #    QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         # self.pixmapView_.setSizePolicy(sizePolicy)
         self.lay_.addWidget(self.pixmapView_)
+        self.pixmapView_.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter)
+        self.pixmapView_.installEventFilter(self)
         self._parent = parent
-
-        # FIXME: Bordes romos, tamaño imagen
 
     def setPixmap(self, pix):
         if not pineboolib.project._DGI.localDesktop():
@@ -244,39 +245,37 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         self.pixmap_ = pix
-        if not self.autoScaled_:
-            self.resize(self.pixmap_.size().width(),
-                        self.pixmap_.size().height())
-        else:
-            self.pixmapView_.setScaledContents(True)
+
+        # Aliear al centro
+
         self.pixmapView_.clear()
         self.pixmapView_.setPixmap(self.pixmap_)
         self.repaint()
         QtWidgets.QApplication.restoreOverrideCursor()
 
-    def drawContents(self, p, cx, cy, cw, ch):
-        p.setBrush(QtGui.QPalette.Background)
-        p.drawRect(cx, cy, cw, ch)
+    def eventFilter(self, obj, ev):
+
+        if isinstance(obj, QLabel) and isinstance(ev, QtGui.QResizeEvent):
+            self.resizeContents()
+
+        return super(FLPixmapView, self).eventFilter(obj, ev)
+
+    def resizeContents(self):
+        new_pix = self.pixmap_
         if self.autoScaled_:
-            newWidth = self.width() - 2
-            newHeight = self.height() - 2
+            if self.pixmap_.height() > self.pixmapView_.height() or self.pixmap_.width() > self.pixmapView_.width():
+                new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
-            if self.pixmapWiev_ is not None and self.pixmapView_.width() == newWidth and self.pixmapView_.height() == newHeight:
-                return
+            elif self.pixmap_.height() < self.pixmapView_.height() or self.pixmap_.width() < self.pixmapView_.width():
+                new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
-            img = self.pixmap_
-            if img.width() > newWidth or img.height() > newHeight:
-                self.pixmapView_.convertFromImage(img.scaled(
-                    newWidth, newHeight, QtCore.Qt.KeepAspectRatio))
-            else:
-                self.pixmapView_.convertFromImage(img)
-
-            if self.pixmapView_ is not None:
-                p.drawPixmap((self.width() / 2) - (self.pixmapView_.width() / 2),
-                             (self.height() / 2) - (self.pixmapView_.height() / 2), self.pixmapView_)
-            elif self.pixmap_ is not None:
-                p.drawPixmap((self.width() / 2) - (self.pixmap_.width() / 2),
-                             (self.height() / 2) - (self.pixmap_.height() / 2), self.pixmap_)
+        self.pixmapView_.clear()
+        self.pixmapView_.setPixmap(new_pix)
+        # if not self.autoScaled_:
+        #    self.resize(self.pixmap_.size().width(),
+        #                self.pixmap_.size().height())
+        # else:
+        #    self.pixmapView_.setScaledContents(True)
 
     def previewUrl(self, url):
         u = QtCore.QUrl(url)
