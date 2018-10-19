@@ -106,8 +106,7 @@ class FLFieldDB(QtWidgets.QWidget):
         self.iconSize = pineboolib.project._DGI.iconSize()
         self.FLLayoutH = QtWidgets.QVBoxLayout(self)
         self.FLLayoutH.setContentsMargins(0, 0, 0, 0)
-        self.FLLayoutH.setSpacing(0)
-        self.FLLayoutH.setContentsMargins(0, 0, 0, 0)
+        self.FLLayoutH.setSpacing(1)
         # self.FLLayoutH.setSizeConstraint(QtGui.QLayout.SetMinAndMaxSize)
 
         self.lytButtons = QtWidgets.QHBoxLayout()
@@ -119,10 +118,9 @@ class FLFieldDB(QtWidgets.QWidget):
         # self.lytButtons.SetMaximumSize(22,22)
 
         self.FLWidgetFieldDBLayout = QtWidgets.QHBoxLayout()
-        self.FLWidgetFieldDBLayout.setSpacing(0)
+        self.FLWidgetFieldDBLayout.setSpacing(1)
         self.FLWidgetFieldDBLayout.setContentsMargins(0, 0, 0, 0)
-        self.FLWidgetFieldDBLayout.setSizeConstraint(
-            QtWidgets.QLayout.SetMinAndMaxSize)
+        self.FLWidgetFieldDBLayout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         self.FLLayoutH.addLayout(self.lytButtons)
         self.FLLayoutH.addLayout(self.FLWidgetFieldDBLayout)
         self.tableName_ = None
@@ -1226,7 +1224,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editorImg_ = pineboolib.pncontrolsfactory.FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
-                self.editorImg_.setMaximumSize(150, 22)
+                self.editorImg_.setMaximumSize(147, 26)
                 self.editorImg_.setMinimumSize(self.minimumSize())
                 self.editorImg_.setAutoScaled(True)
                 # self.FLWidgetFieldDBLayout.removeWidget(self.pushButtonDB)
@@ -1453,7 +1451,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editorImg_ = pineboolib.pncontrolsfactory.FLPixmapView(self)
                 self.editorImg_.setFocusPolicy(QtCore.Qt.NoFocus)
                 self.editorImg_.setSizePolicy(self.sizePolicy())
-                self.editorImg_.setMaximumSize(self.maximumSize())
+                self.editorImg_.setMaximumSize(147, 26)
                 self.editorImg_.setMinimumSize(self.minimumSize())
                 self.editorImg_.setAutoScaled(True)
                 self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
@@ -1904,6 +1902,8 @@ class FLFieldDB(QtWidgets.QWidget):
                     self.editorImg_.setSizePolicy(self.sizePolicy())
                     self.editorImg_.setMaximumSize(self.maximumSize())
                     self.editorImg_.setMinimumSize(self.minimumSize())
+                    self.setMinimumHeight(self.iconSize.height() + self.minimumHeight() + 1)
+                    self.setMinimumWidth(self.iconSize.width() * 4)
                     self.editorImg_.setAutoScaled(True)
                     self.FLWidgetFieldDBLayout.removeWidget(self.pushButtonDB)
                     self.FLWidgetFieldDBLayout.addWidget(self.editorImg_)
@@ -1911,7 +1911,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
                 sizePolicy = QtWidgets.QSizePolicy(
                     QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-                sizePolicy.setHeightForWidth(True)
+                # sizePolicy.setHeightForWidth(True)
 
                 if not self.pbAux3_:
                     spcBut = QtWidgets.QSpacerItem(
