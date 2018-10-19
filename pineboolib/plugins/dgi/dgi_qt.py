@@ -223,18 +223,15 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
     def __init__(self, parent):
         super(FLPixmapView, self).__init__(parent)
-        # self.scrollView = QtWidgets.QScrollArea(parent)
         self.autoScaled_ = False
         self.lay_ = QtWidgets.QHBoxLayout(self)
         self.lay_.setContentsMargins(0, 2, 0, 2)
         self.pixmap_ = QtGui.QPixmap()
         self.pixmapView_ = QLabel(self)
-        # sizePolicy = QtWidgets.QSizePolicy(
-        #    QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        # self.pixmapView_.setSizePolicy(sizePolicy)
         self.lay_.addWidget(self.pixmapView_)
         self.pixmapView_.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignCenter)
         self.pixmapView_.installEventFilter(self)
+        self.setStyleSheet("QScrollArea { border: 1px solid darkgray; border-radius: 3px; }")
         self._parent = parent
 
     def setPixmap(self, pix):
@@ -245,8 +242,6 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
         self.pixmap_ = pix
-
-        # Aliear al centro
 
         self.pixmapView_.clear()
         self.pixmapView_.setPixmap(self.pixmap_)
@@ -261,6 +256,10 @@ class FLPixmapView(QtWidgets.QScrollArea):
         return super(FLPixmapView, self).eventFilter(obj, ev)
 
     def resizeContents(self):
+
+        if self.pixmap_.isNull():
+            return
+
         new_pix = self.pixmap_
         if self.autoScaled_:
             if self.pixmap_.height() > self.pixmapView_.height() or self.pixmap_.width() > self.pixmapView_.width():
@@ -271,11 +270,6 @@ class FLPixmapView(QtWidgets.QScrollArea):
 
         self.pixmapView_.clear()
         self.pixmapView_.setPixmap(new_pix)
-        # if not self.autoScaled_:
-        #    self.resize(self.pixmap_.size().width(),
-        #                self.pixmap_.size().height())
-        # else:
-        #    self.pixmapView_.setScaledContents(True)
 
     def previewUrl(self, url):
         u = QtCore.QUrl(url)
@@ -326,6 +320,12 @@ class QGroupBox(QtWidgets.QGroupBox):
     @decorators.NotImplementedWarn
     def setShown(self, b):
         pass
+
+    def __setattr__(self, name, value):
+        if name == "title":
+            self.setTitle(str(value))
+        else:
+            super(QGroupBox, self).__setattr__(name, value)
 
 
 class QAction(QtWidgets.QAction):
@@ -1044,7 +1044,10 @@ class QToolButton(QtWidgets.QToolButton):
         self.groupId = id
 
 
-class QButtonGroup(QtWidgets.QGroupBox):
+class QButtonGroup(QGroupBox):
+
+    def __init__(self, *args):
+        super(QButtonGroup, self).__init__(*args)
 
     @decorators.NotImplementedWarn
     def setLineWidth(self, w):
@@ -1282,20 +1285,14 @@ class Dialog(QtWidgets.QDialog):
         return getattr(super(Dialog, self), name)
 
 
-class GroupBox(QtWidgets.QGroupBox):
-    def __init__(self):
-        super(GroupBox, self).__init__()
+class GroupBox(QGroupBox):
+    def __init__(self, *args):
+        super(GroupBox, self).__init__(*args)
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
 
     def add(self, _object):
         self._layout.addWidget(_object)
-
-    def __setattr__(self, name, value):
-        if name == "title":
-            self.setTitle(str(value))
-        else:
-            super(GroupBox, self).__setattr__(name, value)
 
 
 QDialog = QtWidgets.QDialog
