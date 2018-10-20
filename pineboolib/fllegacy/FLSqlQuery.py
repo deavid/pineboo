@@ -452,7 +452,9 @@ class FLSqlQuery(object):
 
             if isinstance(retorno, datetime.time):
                 retorno = str(retorno)[:8]
-            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, datetime.date)):
+            elif isinstance(retorno, datetime.date):
+                retorno = str(retorno)
+            elif retorno is not None and not isinstance(retorno, (str, int, bool, float)):
                 print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" %
                       (name, type(retorno), retorno))
                 retorno = float(retorno)
