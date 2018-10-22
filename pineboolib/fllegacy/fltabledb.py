@@ -2161,7 +2161,6 @@ class FLTableDB(QtWidgets.QWidget):
         tdb_num_rows = tdb.numRows()
         tdb_num_cols = tdb.numCols()
 
-        from pineboolib.fllegacy.FLUtil import FLUtil
         util = FLUtil()
 
         pd = util.createProgressDialog("Procesando", tdb_num_rows)
@@ -2170,7 +2169,7 @@ class FLTableDB(QtWidgets.QWidget):
         row.addBgColor(AQOdsColor(0xe7e7e7))
         for i in range(tdb_num_cols):
             field = mtd.indexFieldObject(tdb.visualIndexToRealIndex(i))
-            if field.visibleGrid():
+            if field and field.visibleGrid():
                 row.opIn(title_style)
                 row.opIn(border_bot)
                 row.opIn(border_left)
@@ -2194,52 +2193,53 @@ class FLTableDB(QtWidgets.QWidget):
                 if idx == -1:
                     continue
                 field = mtd.indexFieldObject(tdb.visualIndexToRealIndex(c))
-                if not field.visibleGrid():
-                    continue
-                val = cur.valueBuffer(field.name())
-                if field.type() == "double":
-                    row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))
-                    row.opIn(float(val))
+                if field:
+                    if not field.visibleGrid():
+                        continue
+                    val = cur.valueBuffer(field.name())
+                    if field.type() == "double":
+                        row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))
+                        row.opIn(float(val))
 
-                elif field.type() == "date":
-                    str_ = val
-                    if not str_:
-                        row.coveredCell()
-                    else:
+                    elif field.type() == "date":
+                        str_ = val
+                        if not str_:
+                            row.coveredCell()
+                        else:
+                            row.opIn(str_)
+
+                    elif field.type() in ("bool", "unlock"):
+                        str_ = self.tr("Sí") if val == True else self.tr("No")
+                        row.opIn(italic)
                         row.opIn(str_)
 
-                elif field.type() in ("bool", "unlock"):
-                    str_ = self.tr("Sí") if val == True else self.tr("No")
-                    row.opIn(italic)
-                    row.opIn(str_)
-
-                else:
-                    str_ = val
-                    if str_ is not None:
-                        cs = None
-                        if isinstance(str_, list):
-                            cs = ",".join(str_)
-                        elif str_.startswith("RK@"):
-                            cs = self.cursor_.db().manager().fetchLargeValue(str_)
-
-                        if cs:
-                            pix = QPixmap(cs)
-
-                            if not pix.isNull():
-
-                                pix_name = "pix%s_" % pix.serialNumber()
-                                pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
-                                                               QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
-                                pix.save(pix_file_name, "PNG")
-                                print("Metiendo imagen")
-                                row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
-                                                    double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
-                            else:
-                                row.coveredCell()
-                        else:
-                            row.opIn(str(str_))
                     else:
-                        row.coveredCell()
+                        str_ = val
+                        if str_ is not None:
+                            cs = None
+                            if isinstance(str_, list):
+                                cs = ",".join(str_)
+                            elif str(str_).startswith("RK@"):
+                                cs = self.cursor_.db().manager().fetchLargeValue(str_)
+
+                            if cs:
+                                pix = QPixmap(cs)
+
+                                if not pix.isNull():
+                                    
+                                    pix_name = "pix%s_" % pix.serialNumber()
+                                    pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
+                                                               QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+                                    pix.save(pix_file_name, "PNG")
+                                    print("Metiendo imagen")
+                                    row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
+                                                        double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
+                                else:
+                                    row.coveredCell()
+                            else:
+                                row.opIn(str(str_))
+                        else:
+                            row.coveredCell()
             row.close()
             if not r % 4:
                 util.setProgress(r)
