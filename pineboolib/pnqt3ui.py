@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
-from builtins import str
-from binascii import unhexlify
 
-from xml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
-
 
 from pineboolib.fllegacy import fltabledb as FLTableDB
 from pineboolib.fllegacy import flfielddb as FLFieldDB
+
+from xml.etree import ElementTree as ET
+from binascii import unhexlify
 import pineboolib
 import logging
-
 import zlib
 
 
-Qt = QtCore.Qt
 ICONS = {}
 root = None
 logger = logging.getLogger("pnqt3ui")
@@ -256,6 +253,7 @@ def loadAction(action, widget):
 
 def createWidget(classname, parent=None):
     from pineboolib import pncontrolsfactory
+    
     cls = getattr(pncontrolsfactory, classname, None) or \
         getattr(QtWidgets, classname, None) or \
         getattr(FLTableDB, classname, None) or \
@@ -363,7 +361,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn(value)
 
         except Exception as e:
-            logger.exception(etree.ElementTree.tostring(xmlprop))
+            logger.exception(ET.tostring(xmlprop))
             # if Options.DEBUG_LEVEL > 50:
             #    print(e, repr(value))
             # if Options.DEBUG_LEVEL > 50:
@@ -614,22 +612,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             origWidget.ui_[origWidget.objectName()] = nwidget
 
 
-"""
-Llama al método load de los FLTableDB de un widget
-
-@param w Widget que contiene los FLTableDB
-"""
-
-
-# def loadFLTableDBs(w):
-#    for table_db in w.findChildren(FLTableDB.FLTableDB):
-#        table_db.load()
-#    for field_db in w.findChildren(FLFieldDB.FLFieldDB):
-#        field_db.load()
-
-
 def loadIcon(xml):
     global ICONS
+    
     name = xml.get("name")
     xmldata = xml.find("data")
     img_format = xmldata.get("format")
@@ -766,7 +751,7 @@ def _loadVariant(variant, widget=None):
 
     if variant.tag == "enum":
         v = None
-        libs = [Qt, QtWidgets.QFrame,
+        libs = [QtCore.Qt, QtWidgets.QFrame,
                 QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
         for lib in libs:
             v = getattr(lib, text, None)
@@ -802,4 +787,4 @@ def _loadVariant(variant, widget=None):
         return c
 
     if Options.DEBUG_LEVEL > 50:
-        logger.warn("qt3ui: Unknown variant: %s --> %s ", repr(widget),  etree.ElementTree.tostring(variant))
+        logger.warn("qt3ui: Unknown variant: %s --> %s ", repr(widget),  ET.tostring(variant))
