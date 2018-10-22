@@ -8,7 +8,7 @@ class AQUtil(object):
     logger = None
 
     def __init__(self):
-        from pineboolib.fllegacy.FLUtil import FLUtil
+        from pineboolib.fllegacy.flutil import FLUtil
         self.util = FLUtil()
         self.logger = logging.getLogger(__name__)
 

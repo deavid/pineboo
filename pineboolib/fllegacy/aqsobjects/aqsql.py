@@ -1,17 +1,29 @@
 # -*- coding: utf-8 -*-
 import pineboolib
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+import logging
 
 
+logger = logging.getLogger(__name__)
+"""
+Provee consultas a DB
+"""
 class AQSql(object):
+    
+    Insert = 0
+    Edit = 1
+    Del = 2
+    Browse = 3
+    
+    
     """
     Obtiene la base de datos de una conexion.
 
     @param connectionNmae Nombre de la conexion
     @return La base de datos correspondiente al nombre de conexion indicado
     """
-    def database(connectionName="default"):
-        return pineboolib.project.conn.useConn(connectionName)
+    def database(connection_name="default"):
+        return pineboolib.project.conn.useConn(connection_name)
 
     """
     Actualiza un conjunto de registros de un cursor con nuevos valores
@@ -69,6 +81,22 @@ class AQSql(object):
 
         return ok
 
+    """
+    Inserta un registro en un cursor
+
+    Si hay un error SQL, eleva una excepción con el mensaje de error
+
+    Ejemplo:
+
+    var cur = new AQSqlCursor("clientes");
+    try {
+        AQSql.insert(cur,
+            ["codcliente","nombre","cifnif","codserie"],
+            ["1","pepe","XYZ","A"]);
+        } catch (e) {
+            sys.errorMsgBox("Error SQL: " + e);
+            }
+    """
     def insert(table_or_cursor, fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
@@ -102,6 +130,73 @@ class AQSql(object):
         cur.setActivatedCheckIntegrity(actCheck)
 
         return ok
+    
+    
+    
+    
+    """
+    Elimina un conjunto de registros de un cursor
+
+    Si hay un error SQL, eleva una excepción con el mensaje de error
+
+    Ejemplo:
+
+    var cur = new AQSqlCursor("clientes");
+    try {
+        AQSql.del_(cur, "codcliente='1'");
+        } catch (e) {
+        sys.errorMsgBox("Error SQL: " + e);
+        }
+    """
+    
+    
+    def del_(self, cur_or_table, where = "", conn_name = "default"):
+        
+        if not isinstance(cur_or_table, str):
+        
+            if not cur:
+                return False
+        
+            if not cur.metadata():
+                from pineboolib.fllegacy.flutil import FLUtil
+                util = FLUtil()
+                logger.warn(util.translate("No hay metadatos para '%s%s'"), cur.curName(), cur.db())
+                return False
+        
+            if not cur.select(where):
+                return False
+        
+            ok = True
+            msg_check = ""
+            act_check = cur.activatedCheckIntegrity()
+        
+            while(ok and cur.next()):
+                cur.setModeAccess(self.Del)
+                if not cur.refreshBuffer():
+                    ok = False
+                    break
+            
+                msg_check = cur.msgCheckIntegrity()
+                if msg_check is None:
+                    ok = False
+                    logger.warn(msg_check, cur.db())
+                    break
+            
+                cur.setActivatedCheckIntegrity(False)
+                ok = cur.commitBuffer()
+                cur.setActivatedCheckIntegrity(act_check)
+        
+            return ok
+        else:
+            cur = AQSqlCursor(cur_or_table, True, conn_name);
+            cur.setForwardOnly(true);
+            return cur.del_(where)
+
+    
+    
+    
+    
+    
 
 
 """

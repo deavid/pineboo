@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # AQSObjects
-from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
-from pineboolib.fllegacy.aqsobjects.AQSqlQuery import AQSqlQuery
-from pineboolib.fllegacy.aqsobjects.AQUtil import AQUtil as AQUtil_class
-from pineboolib.fllegacy.aqsobjects.AQSql import AQSql
-from pineboolib.fllegacy.aqsobjects.AQS import AQS as AQS_class
+from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
+from pineboolib.fllegacy.aqsobjects.aqsqlquery import AQSqlQuery
+from pineboolib.fllegacy.aqsobjects.aqsqlcursor import AQSqlCursor
+from pineboolib.fllegacy.aqsobjects.aqutil import AQUtil as AQUtil_class
+from pineboolib.fllegacy.aqsobjects.aqsql import AQSql
+from pineboolib.fllegacy.aqsobjects.aqs import AQS as AQS_class
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle
 
 import pineboolib
@@ -13,7 +14,9 @@ import pineboolib
 AQUtil = AQUtil_class()
 AQS = AQS_class()
 
-
+"""
+FLFormDB
+"""
 def AQFormDB(action_name, parent, other):
     ac_flaction = pineboolib.project.conn.manager().action(action_name)
     from pineboolib.utils import convertFLAction
