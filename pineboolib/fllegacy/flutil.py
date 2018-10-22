@@ -2,7 +2,6 @@
 from pineboolib import decorators
 from PyQt5 import QtCore, QtWidgets
 import pineboolib
-from pineboolib.utils import DefFun
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
 import platform
@@ -36,8 +35,6 @@ class FLUtil(QtCore.QObject):
     vecCentenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos',
                    'setecientos', 'ochocientos', 'novecientos']
 
-    def __getattr__(self, name):
-        return DefFun(self, name)
 
     def partInteger(self, n):
         """
