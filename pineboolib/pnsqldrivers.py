@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
 import logging
 import importlib
-
-from pineboolib.utils import filedir
-
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +20,16 @@ class PNSqlDrivers(object):
     """
 
     def __init__(self, _DGI=None):
+        from pineboolib.utils import filedir
+        import os
+        import sys
+        
         self.only_pure_python_ = getattr(sys, 'frozen', False)
 
         self.driversdict = {}
         self.driversDefaultPort = {}
         self.desktopFile = {}
-
+        
         dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.find(".py") > -1]
         for item in dir_list:
             file_name = item[:item.find(".py")]
