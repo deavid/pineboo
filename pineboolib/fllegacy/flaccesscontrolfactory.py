@@ -2,12 +2,12 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
-from pineboolib.fllegacy.FLAccessControl import FLAccessControl
-from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
+from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
+from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib import decorators
 import pineboolib
-from PyQt5.Qt import qApp
+
 
 try:
     QString = unicode
@@ -16,10 +16,7 @@ except NameError:
     QString = str
 
 
-class FLAccessControlFactory(QtCore.QObject):
-
-    def __init__(self):
-        super(FLAccessControlFactory, self).__init__()
+class FLAccessControlFactory(object):
 
     @decorators.BetaImplementation
     def create(self, type_):
@@ -118,6 +115,7 @@ class FLAccessControlForm(FLAccessControl):
         if pineboolib.project._DGI.localDesktop():
             self.pal = QtGui.QPalette()
             # cg = QtGui.QPalette()
+            from PyQt5.Qt import qApp
             bg = QtGui.QColor(qApp.palette().color(
                 QtGui.QPalette.Active, QtGui.QPalette.Background))
             # cg.setColor(QtGui.QPalette.Foreground, bg)

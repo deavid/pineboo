@@ -58,7 +58,7 @@ como el selector de módulos, o cada una de las ventanas principales de los mód
 """
 
 
-class FLAccessControl(QtCore.QObject):
+class FLAccessControl(object):
 
     """
     Almacena el nombre del objeto de alto nivel.
@@ -81,12 +81,6 @@ class FLAccessControl(QtCore.QObject):
     """
     acosPerms_ = []
 
-    """
-    Constructor
-    """
-
-    def __ini__(self):
-        pass
 
     """
     Destructor

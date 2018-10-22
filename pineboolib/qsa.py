@@ -8,15 +8,15 @@ from PyQt5 import QtCore
 import logging
 
 # FLObjects
-from pineboolib.fllegacy.FLPosPrinter import FLPosPrinter
-from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLTableDB import FLTableDB
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLCodBar import FLCodBar
-from pineboolib.fllegacy.FLNetwork import FLNetwork
-from pineboolib.fllegacy.FLReportViewer import FLReportViewer
+from pineboolib.fllegacy.flposprinter import FLPosPrinter
+from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.fltabledb import FLTableDB
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flcodbar import FLCodBar
+from pineboolib.fllegacy.flnetwork import FLNetwork
+from pineboolib.fllegacy.flreportviewer import FLReportViewer
 
 from pineboolib.utils import ustr, ustr1
 

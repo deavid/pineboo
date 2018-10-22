@@ -5,8 +5,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import qWarning, QKeySequence
 
 from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm, convertFLAction
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 import pineboolib
 
@@ -572,7 +572,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.loadControls()
 
         if self._action.table():
-            from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+            from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
             cursor = FLSqlCursor(self._action.table())
             self.setCursor(cursor)
 

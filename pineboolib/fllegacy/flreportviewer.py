@@ -10,13 +10,13 @@ from pineboolib.utils import filedir
 import pineboolib
 
 
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLPicture import FLPicture
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLStylePainter import FLStylePainter
-from pineboolib.fllegacy.FLSmtpClient import FLSmtpClient
-from pineboolib.fllegacy.FLReportEngine import FLReportEngine
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flpicture import FLPicture
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flstylepainter import FLStylePainter
+from pineboolib.fllegacy.flsmtpclient import FLSmtpClient
+from pineboolib.fllegacy.flreportengine import FLReportEngine
 
 AQ_USRHOME = "."  # FIXME
 

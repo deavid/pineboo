@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
+from PyQt5 import QtWidgets, QtCore, uic
+from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox
+from PyQt5.QtCore import QFileInfo, QSize
+from PyQt5.Qt import QWidget
+
+from pineboolib.utils import filedir, indent
+from pineboolib.fllegacy.flsettings import FLSettings
+
 from builtins import str
 import os
 import sys
 import traceback
 import logging
 import base64
-
 import xml
 from xml.etree import ElementTree as ET
-
-
-from pineboolib.utils import filedir, indent
-from pineboolib.fllegacy.FLSettings import FLSettings
-
-from PyQt5 import QtWidgets, QtCore, uic
-from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox
-from PyQt5.QtCore import QFileInfo, QSize
-from PyQt5.Qt import QWidget
 
 
 class DlgConnect(QtWidgets.QWidget):
@@ -48,7 +46,7 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Carga el form dlgconnect
         """
-        from pineboolib.fllegacy.FLManagerModules import FLManagerModules
+        from pineboolib.fllegacy.flmanagermodules import FLManagerModules
         mM = FLManagerModules()
         dlg_ = filedir('dlgconnect/dlgconnect.ui')
 

@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-import re
-import os
+
 from PyQt5 import QtCore
+from PyQt5.QtCore import QObject, Qt
+
+from pineboolib import decorators
+
+from pineboolib.fllegacy.flapplication import FLApplication
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 
 import pineboolib
 import logging
 import weakref
-
-from pineboolib import decorators
-from PyQt5.QtCore import QObject, Qt
-from pineboolib.fllegacy.FLApplication import FLApplication
-from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
+import re
+import os
 
 logger = logging.getLogger("PNControlsFactory")
 
@@ -113,7 +116,6 @@ class SysType(object):
         return modulename in pineboolib.project.conn.managerModules().listAllIdModules()
 
     def translate(self, *args):
-        from pineboolib.fllegacy.FLUtil import FLUtil
         util = FLUtil()
 
         group = args[0] if len(args) == 2 else "scripts"
@@ -122,7 +124,6 @@ class SysType(object):
         return util.translate(group, text)
 
     def osName(self):
-        from pineboolib.fllegacy.FLUtil import FLUtil
         util = FLUtil()
         return util.getOS()
 
@@ -165,7 +166,7 @@ class SysType(object):
         pineboolib.project.initToolBox()
 
     def isDebuggerMode(self):
-        from pineboolib.fllegacy.FLSettings import FLSettings
+        from pineboolib.fllegacy.flsettings import FLSettings
         return FLSettings().readBoolEntry("application/isDebuggerMode")
 
     def isNebulaBuild(self):

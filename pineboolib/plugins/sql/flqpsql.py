@@ -1,15 +1,17 @@
-import sys
+
 from PyQt5.QtCore import QTime, QDate, QDateTime
-from PyQt5.QtWidgets import QProgressDialog
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.utils import text2bool
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.utils import auto_qt_translate_text, checkDependencies
+from PyQt5.Qt import qWarning, QApplication, qApp, QDomDocument, QRegExp
+from PyQt5.QtWidgets import QMessageBox, QProgressDialog 
+
+from pineboolib.utils import text2bool, auto_qt_translate_text, checkDependencies
+
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+
 import traceback
 import pineboolib
-from PyQt5.Qt import qWarning, QApplication, qApp, QDomDocument, QRegExp
-from PyQt5.QtWidgets import QMessageBox
+import sys
 import logging
 
 

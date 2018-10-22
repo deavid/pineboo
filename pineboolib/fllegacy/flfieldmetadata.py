@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib.utils import aqtt
-from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
+from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 import logging
 
 logger = logging.getLogger("FLFieldMetadata")

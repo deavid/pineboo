@@ -5,16 +5,16 @@ from PyQt5.QtWidgets import QSpacerItem, QWidget, QVBoxLayout, QStyle, QFrame
 from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.utils import filedir, aqtt
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
-from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLManager import FLManager
-from pineboolib.fllegacy.FLFormSearchDB import FLFormSearchDB
-from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
+from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flmanager import FLManager
+from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB
+from pineboolib.fllegacy.flformdb import FLFormDB
 
 
 import datetime

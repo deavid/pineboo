@@ -6,9 +6,9 @@ from pineboolib import decorators
 from pineboolib.utils import filedir
 
 
-from pineboolib.fllegacy.FLDiskCache import FLDiskCache
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.fldiskcache import FLDiskCache
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
 

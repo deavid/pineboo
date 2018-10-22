@@ -8,10 +8,10 @@ from PyQt5 import QtCore, QtWidgets
 
 from pineboolib import decorators, pnsqldrivers
 
-from pineboolib.fllegacy.FLManager import FLManager
-from pineboolib.fllegacy.FLManagerModules import FLManagerModules
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.flmanager import FLManager
+from pineboolib.fllegacy.flmanagermodules import FLManagerModules
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.pnsqldrivers import PNSqlDrivers
 import pineboolib
 

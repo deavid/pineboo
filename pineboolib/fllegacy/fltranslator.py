@@ -2,7 +2,7 @@
 
 import os
 from pineboolib.utils import filedir
-from pineboolib.fllegacy.FLTranslations import FLTranslations
+from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib import decorators
 
 from PyQt5 import QtCore

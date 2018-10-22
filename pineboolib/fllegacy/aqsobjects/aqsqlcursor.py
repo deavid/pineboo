@@ -3,5 +3,5 @@
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 
-class AQSqlCursor(FLSqlQuery):
+class AQSqlCursor(FLSqlCursor):
     pass

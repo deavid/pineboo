@@ -4,7 +4,7 @@ from PyQt5.Qt import QMessageBox
 
 from importlib import import_module
 
-from pineboolib.fllegacy.FLDataTable import FLDataTable
+from pineboolib.fllegacy.fldatatable import FLDataTable
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib import decorators

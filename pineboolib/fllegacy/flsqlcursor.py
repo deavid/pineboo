@@ -7,13 +7,13 @@ from pineboolib import decorators
 
 from pineboolib.pncursortablemodel import PNCursorTableModel
 
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLSqlSavePoint import FLSqlSavePoint
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.fllegacy.FLAccessControlFactory import FLAccessControlFactory
-from pineboolib.fllegacy.FLAction import FLAction
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
+from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
+from pineboolib.fllegacy.flaction import FLAction
 
 import weakref
 import copy

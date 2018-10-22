@@ -18,11 +18,11 @@ from pineboolib import decorators, pnqt3ui
 from pineboolib.pnconnection import PNConnection
 from pineboolib.utils import filedir, one, Struct, XMLStruct, cacheXPM, parseTable, _path, coalesce_path, _dir
 
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLTranslator import FLTranslator
-from pineboolib.fllegacy.FLAccessControlLists import FLAccessControlLists
-from pineboolib.fllegacy.FLModulesStaticLoader import FLStaticLoader
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.fltranslator import FLTranslator
+from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
+from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader
 
 
 import sys

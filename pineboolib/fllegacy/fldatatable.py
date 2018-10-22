@@ -3,8 +3,8 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from pineboolib import decorators
 from pineboolib.utils import filedir
-from pineboolib.fllegacy import FLSqlCursor
-from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flsettings import FLSettings
 from PyQt5.QtWidgets import QApplication, QCheckBox
 import pineboolib
 
@@ -477,7 +477,7 @@ class FLDataTable(QtWidgets.QTableView):
         tmp_pos = e.globalPos()
 
         for rel in rel_list:
-            cur = FLSqlCursor.FLSqlCursor(rel.foreignTable(), True, db.connectionName(), None, None, popup)
+            cur = FLSqlCursor(rel.foreignTable(), True, db.connectionName(), None, None, popup)
 
             if cur.metadata():
                 mtd = cur.metadata()

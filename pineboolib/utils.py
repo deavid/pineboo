@@ -9,7 +9,7 @@ from xml import etree
 
 import pineboolib
 
-from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.flsettings import FLSettings
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
 
 """
 Clase para definir claves compuestas.
@@ -10,9 +9,7 @@ En la lista de campos se guardan los metadatos de estos,
 es decir objetos FLFieldMetaData.
 
 """
-
-
-class FLCompoundKey(QtCore.QObject):
+class FLCompoundKey(object):
 
     """
     Lista de con los metadatos de los campos que componen la clave

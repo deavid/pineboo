@@ -2,11 +2,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QKeySequence
 
-from pineboolib.fllegacy.FLFormDB import FLFormDB
+from pineboolib.fllegacy.flformdb import FLFormDB
 from pineboolib import decorators
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.utils import filedir
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 import pineboolib
 
 DEBUG = False
@@ -791,8 +791,8 @@ class FLFormRecordDB(FLFormDB):
         self.inicializeControls()
 
     def inicializeControls(self):
-        from pineboolib.fllegacy.FLFieldDB import FLFieldDB
-        from pineboolib.fllegacy.FLTableDB import FLTableDB
+        from pineboolib.fllegacy.flfielddb import FLFieldDB
+        from pineboolib.fllegacy.fltabledb import FLTableDB
         for child_ in self.findChildren(QtWidgets.QWidget):
             if isinstance(child_, FLFieldDB) or isinstance(child_, FLTableDB):
                 loaded = getattr(child_, "_loaded", None)

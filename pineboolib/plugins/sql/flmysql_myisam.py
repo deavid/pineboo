@@ -1,10 +1,14 @@
-import sys
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.utils import text2bool
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.utils import auto_qt_translate_text, checkDependencies
-import traceback
 from PyQt5.Qt import qWarning, QApplication
+
+from pineboolib.utils import auto_qt_translate_text, checkDependencies
+
+from pineboolib.utils import text2bool
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flutil import FLUtil
+
+import sys
+import traceback
+
 
 
 class FLMYSQL_MYISAM(object):

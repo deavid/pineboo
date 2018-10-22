@@ -10,7 +10,7 @@ Esta clase gestiona las diferenetes trducciones de módulos y aplicación
 """
 
 
-class FLTranslations(QtCore.QObject):
+class FLTranslations(object):
 
     TML = None
     qmFileName = None

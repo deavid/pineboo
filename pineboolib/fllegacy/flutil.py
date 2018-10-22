@@ -3,8 +3,8 @@ from pineboolib import decorators
 from PyQt5 import QtCore, QtWidgets
 import pineboolib
 from pineboolib.utils import DefFun
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsettings import FLSettings
 import platform
 import hashlib
 import datetime
@@ -450,7 +450,7 @@ class FLUtil(QtCore.QObject):
         @param s Cadena de texto a traducir
         @return Devuelve la cadena traducida al idioma local
         """
-        from pineboolib.fllegacy.FLTranslations import FLTranslate
+        from pineboolib.fllegacy.fltranslations import FLTranslate
         return str(FLTranslate(group, string))
 
     @decorators.NotImplementedWarn
@@ -955,7 +955,7 @@ class FLUtil(QtCore.QObject):
         @param connName Nombre de la conexion
         @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
         """
-        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
         fL = fL.split(",")
         vL = vL.split(",")

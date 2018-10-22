@@ -6,8 +6,8 @@ from xml import etree
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-from pineboolib.fllegacy import FLTableDB
-from pineboolib.fllegacy import FLFieldDB
+from pineboolib.fllegacy import fltabledb as FLTableDB
+from pineboolib.fllegacy import flfielddb as FLFieldDB
 import pineboolib
 import logging
 
@@ -425,7 +425,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
                     elif pname == "sizeType":
                         #print("Convirtiendo %s a %s" % (p.find("enum").text, value))
-                        from pineboolib.fllegacy.FLSettings import FLSettings
+                        from pineboolib.fllegacy.flsettings import FLSettings
                         settings = FLSettings()
                         if settings.readBoolEntry("ebcomportamiento/spacerLegacy", False) or orient_ == 1:
                             policy_ = QtWidgets.QSizePolicy.Policy(value)

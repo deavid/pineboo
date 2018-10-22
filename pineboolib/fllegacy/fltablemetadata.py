@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from pineboolib import decorators
 
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.fllegacy.FLCompoundKey import FLCompoundKey
+from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 import logging
 import copy
 from PyQt5 import QtCore

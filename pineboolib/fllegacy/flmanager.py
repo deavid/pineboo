@@ -8,14 +8,14 @@ from pineboolib import decorators
 from pineboolib.utils import filedir, auto_qt_translate_text, cacheXPM
 
 
-from pineboolib.fllegacy.FLTableMetaData import FLTableMetaData
-from pineboolib.fllegacy.FLRelationMetaData import FLRelationMetaData
-from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
-from pineboolib.fllegacy.FLCompoundKey import FLCompoundKey
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery, FLGroupByQuery
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
-from pineboolib.fllegacy.FLAction import FLAction
-from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
+from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
+from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
+from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery, FLGroupByQuery
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flaction import FLAction
+from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 
 from xml import etree

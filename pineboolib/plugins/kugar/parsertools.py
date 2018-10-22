@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QPixmap
 from pineboolib.utils import filedir, cacheXPM, load2xml
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 import pineboolib
 import os
 import sys

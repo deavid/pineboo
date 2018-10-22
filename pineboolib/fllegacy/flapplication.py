@@ -3,8 +3,8 @@ import logging
 
 from PyQt5 import QtCore, QtWidgets, QtGui
 
-from pineboolib.fllegacy.FLTranslator import FLTranslator
-from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.fltranslator import FLTranslator
+from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 import pineboolib
 

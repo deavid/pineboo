@@ -4,7 +4,7 @@ from PyQt5 import QtCore
 
 from importlib import import_module
 
-from pineboolib.fllegacy.aqsobjects.AQSettings import AQSettings
+from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
 import pineboolib
 import re
 import logging

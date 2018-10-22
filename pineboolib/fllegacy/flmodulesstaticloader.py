@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from pineboolib.fllegacy.FLSettings import FLSettings
-from pineboolib.fllegacy.FLUtil import FLUtil
+from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib import decorators
 
 from PyQt5 import QtWidgets, Qt, QtCore

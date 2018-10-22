@@ -1,9 +1,9 @@
 from PyQt5.QtXml import QDomDocument
 from PyQt5 import QtCore
 
-from pineboolib.fllegacy.FLUtil import FLUtil
-from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
-from pineboolib.fllegacy.FLAccessControlFactory import FLAccessControlFactory
+from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 from pineboolib import decorators
 import pineboolib
 
@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class FLAccessControlLists(QtCore.QObject):
+class FLAccessControlLists(object):
     """Gestionar las listas de acceso para limitar la aplicación a los usuarios."""
 
     """

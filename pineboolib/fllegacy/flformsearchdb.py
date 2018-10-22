@@ -3,8 +3,8 @@ import logging
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pineboolib.fllegacy.FLFormDB import FLFormDB
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.flformdb import FLFormDB
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.utils import filedir
 import pineboolib
 
