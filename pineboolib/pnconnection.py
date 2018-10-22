@@ -2,23 +2,17 @@
 """Defines the PNConnection class.
 
 """
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.Qt import qWarning
 from PyQt5 import QtCore, QtWidgets
 
-from pineboolib import decorators, pnsqldrivers
-
-from pineboolib.fllegacy.flmanager import FLManager
-from pineboolib.fllegacy.flmanagermodules import FLManagerModules
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.pnsqldrivers import PNSqlDrivers
-import pineboolib
+from pineboolib import decorators
 
-import sys
+
+
 import logging
-logger = logging.getLogger("PNConnection")
 
+logger = logging.getLogger(__name__)
 
 class PNConnection(QtCore.QObject):
     """Wrapper for database cursors which are used to emulate FLSqlCursor."""
@@ -41,7 +35,8 @@ class PNConnection(QtCore.QObject):
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
         super(PNConnection, self).__init__()
-
+        from pineboolib.pnsqldrivers import PNSqlDrivers
+        
         self.connAux = {}
         self.name = name
         self.db_name = db_name
@@ -64,6 +59,7 @@ class PNConnection(QtCore.QObject):
         else:
             logger.error(
                 "PNConnection.ERROR: No se encontro el driver '%s'", driverAlias)
+            import sys
             sys.exit(0)
 
         self.transaction_ = 0
@@ -157,6 +153,7 @@ class PNConnection(QtCore.QObject):
 
     def manager(self):
         if not self._manager:
+            from pineboolib.fllegacy.flmanager import FLManager
             self._manager = FLManager(self)
 
         return self._manager
@@ -216,19 +213,15 @@ class PNConnection(QtCore.QObject):
             return False
 
         cancel = False
-        if (self.interactiveGUI() and
-            (cur.d.modeAccess_ == FLSqlCursor.Insert or cur.d.modeAccess_ == FLSqlCursor.Edit) and
-                cur.isModifiedBuffer() and cur.d.askForCancelChanges_):
-            # res = QMessageBox.information(QtWidgets.QApplication, "Cancelar Cambios",
-            #                "Todos los cambios se cancelarán.¿Está seguro?", QMessageBox.Yes,
-            #                [QMessageBox.No, QMessageBox.Default, QMessageBox.Escape])
+        if self.interactiveGUI() and cur.d.modeAccess_ in (FLSqlCursor.Insert, FLSqlCursor.Edit) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
+            import pineboolib
             if pineboolib.project._DGI.localDesktop():
                 res = QtWidgets.QMessageBox.information(
                     QtWidgets.QApplication.activeWindow(),
                     "Cancelar Cambios",
                     "Todos los cambios se cancelarán.¿Está seguro?",
-                    QMessageBox.Yes, QMessageBox.No)
-                if res == QMessageBox.No:
+                    QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+                if res == QtWidgets.QMessageBox.No:
                     return False
 
             cancel = True
@@ -338,6 +331,7 @@ class PNConnection(QtCore.QObject):
 
     def managerModules(self):
         if not self._managerModules:
+            from pineboolib.fllegacy.flmanagermodules import FLManagerModules
             self._managerModules = FLManagerModules(self)
 
         return self._managerModules
@@ -437,8 +431,7 @@ class PNConnection(QtCore.QObject):
         if getattr(self.driver(), "normalizeValue", None):
             return self.driver().normalizeValue(text)
 
-        qWarning("PNConnection: El driver %s no dispone de normalizeValue(text)" %
-                 self.driverName())
+        logger.warn("PNConnection: El driver %s no dispone de normalizeValue(text)", self.driverName())
         return text
 
     def queryUpdate(self, name, update, filter):
