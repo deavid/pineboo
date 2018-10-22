@@ -1,39 +1,26 @@
 # -*- coding: utf-8 -*-
+from PyQt5 import QtCore, QtGui, QtWidgets
+
 import time
 import os
 import logging
 import zlib
-
-from importlib import machinery, import_module
-from binascii import unhexlify
-
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import qApp
-from PyQt5.QtCore import Qt, QSignalMapper
+import sys
 
 import pineboolib
-
-from pineboolib import decorators, pnqt3ui
-from pineboolib.pnconnection import PNConnection
 from pineboolib.utils import filedir, one, Struct, XMLStruct, cacheXPM, parseTable, _path, coalesce_path, _dir
 
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.fllegacy.fltranslator import FLTranslator
-from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
-from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader
 
-
-import sys
 """
 Almacena los datos del serividor de la BD principal
 """
 
 
 class DBServer(XMLStruct):
-    host = "127.0.0.1"
-    port = "5432"
+    host = None
+    port = None
 
 
 """
@@ -42,7 +29,7 @@ Almacena los datos de autenticación de la BD principal
 
 
 class DBAuth(XMLStruct):
-    username = "postgres"
+    username = None
     password = None
 
 
@@ -72,7 +59,6 @@ class Project(object):
     def __init__(self, DGI):
 
         from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
-
         self._DGI = DGI
         self.tree = None
         self.root = None
@@ -108,6 +94,7 @@ class Project(object):
     """
 
     def setDebugLevel(self, q):
+        from pineboolib import pnqt3ui
         Project.debugLevel = q
         pnqt3ui.Options.DEBUG_LEVEL = q
 
@@ -156,40 +143,13 @@ class Project(object):
         self.tables = {}
 
     """
-    def load(self, filename):
-        self.parser = etree.elementTree.XMLParser(html=0, encoding="UTF-8")
-        self.tree = etree.ElementTree.parse(filename, self.parser)
-        self.root = self.tree.getroot()
-        self.dbserver = DBServer(one(self.root.find("database-server")))
-        self.dbauth = DBAuth(one(self.root.find("database-credentials")))
-        self.dbname = one(self.root.find("database-name").text)
-        self.apppath = one(self.root.find("application-path").text)
-        self.tmpdir = filedir("../tempdata")
-        if not getattr(self.dbserver, "host", None):
-            self.dbserver.host = None
-
-        if not getattr(self.dbserver, "port", None):
-            self.dbserver.port = None
-
-        if not getattr(self.dbserver, "type", None):
-            self.dbserver.type = None
-
-        if not self.dbauth:
-            self.dbauth.username = None
-            self.dbauth.password = None
-
-        self.actions = {}
-        self.tables = {}
-        pineboolib.project = self
-    """
-
-    """
     Arranca el projecto. Conecta a la BD y carga los datos
     """
 
     def run(self):
 
         if not self.conn:
+            from pineboolib.pnconnection import PNConnection
             self.conn = PNConnection(self.dbname, self.dbserver.host, self.dbserver.port,
                                      self.dbauth.username, self.dbauth.password, self.dbserver.type)
 
@@ -209,11 +169,6 @@ class Project(object):
                     os.remove(os.path.join(root, name))
                 for name in dirs:
                     os.rmdir(os.path.join(root, name))
-            # borrando de share
-            # for root, dirs, files in os.walk(_dir("../share/pineboo"), topdown=False):
-            #    for name in files:
-            #        if name.endswith("qs.py") or name.endswith("qs.py.debug") or name.endswith("qs.xml"):
-            #            os.remove(os.path.join(root, name))
 
         if not os.path.exists(_dir("cache")):
             os.makedirs(_dir("cache"))
@@ -341,6 +296,7 @@ class Project(object):
 
         from pineboolib.pncontrolsfactory import aqApp
         aqApp.loadTranslations()
+        from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
 
@@ -430,10 +386,6 @@ class Project(object):
                 self.logger.exception("js.call: error al llamar %s de %s", function, object_context)
 
         return None
-
-    #@decorators.NotImplementedWarn
-    # def initToolBox(self):
-    #    pass
     """
     Convierte un script .qs a .py lo deja al lado
     @param scriptname, Nombre del script a convertir
@@ -449,7 +401,6 @@ class Project(object):
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             settings = FLSettings()
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                from pineboolib.fllegacy.flutil import FLUtil
                 util = FLUtil()
                 file_name = scriptname.split("\\") if util.getOS() == "WIN32" else scriptname.split("/")
 
@@ -480,6 +431,7 @@ class Project(object):
     """
 
     def test(self, name=None):
+        from importlib import import_module
         dirlist = os.listdir(filedir("../pineboolib/plugins/test"))
         testDict = {}
         for f in dirlist:
@@ -915,12 +867,6 @@ class XMLAction(XMLStruct):
             return True
         pineboolib.project.call("%s.main" % a.name(), [], None, True)
 
-    #"""
-    # Retorna el widget del formrecord
-    #"""
-
-    # def formRecord(self):
-    #    return self.formrecord
     """
     Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía
     @return wigdet del formRecord.
@@ -967,6 +913,7 @@ class XMLAction(XMLStruct):
     """
 
     def load_script(self, scriptname, parent=None):
+        from importlib import machinery
         if scriptname:
             scriptname = scriptname.replace(".qs", "")
         if scriptname:
@@ -979,16 +926,6 @@ class XMLAction(XMLStruct):
             action_ = self
         else:
             action_ = parent._action
-
-        # Si ya esta cargado se reusa...
-        # if getattr(self, "script", None) and parent_:
-        #    if getattr(self.script, "form", None):
-        #        parent.script = self.script
-        #        parent.widget = self.script.form
-        #    else:
-        #        if getattr(self.script.form, "iface", None):
-        #            parent.iface = self.script.form.iface
-        #        return
 
             # import aqui para evitar dependencia ciclica
         from pineboolib.utils import convertFLAction
@@ -1009,9 +946,10 @@ class XMLAction(XMLStruct):
 
         script_path_qs = _path("%s.qs" % scriptname, False)
         script_path_py = coalesce_path("%s.py" % scriptname, "%s.qs.py" % scriptname, None)
-
+        
         mng_modules = pineboolib.project.conn.managerModules()
         if mng_modules.staticBdInfo_ and mng_modules.staticBdInfo_.enabled_:
+            from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader
             ret_py = FLStaticLoader.content("%s.qs.py" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
             if ret_py:
                 script_path_py = ret_py
@@ -1062,18 +1000,3 @@ class XMLAction(XMLStruct):
 
     def unknownSlot(self):
         self.logger.error("Executing unknown script for Action %s", self.name)
-        # Aquí debería arrancar el script
-
-    """
-    Inicializa el módulo del form en caso de que no se inicializara ya
-    """
-
-    # def initModule(self, name):
-
-    #    moduleName = pineboolib.project.actions[name].mod.moduleName
-    #    if moduleName in (None, "sys"):
-    #        return
-    #    if moduleName not in pineboolib.project._initModules:
-    #        pineboolib.project._initModules.append(moduleName)
-    #        pineboolib.project.call("%s.iface.init()" % moduleName, [], None, False)
-    #        return
