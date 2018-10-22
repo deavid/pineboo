@@ -443,8 +443,9 @@ class kut2fpdf(object):
     """
 
     def drawImage(self, x, y, W, H, xml, file_name):
-
-        self._document.image(file_name, x, y, W, H, "PNG")
+        import os
+        if os.path.exists(file_name):
+            self._document.image(file_name, x, y, W, H, "PNG")
     """
     Define los parámetros de la página
     @param xml: Elemento xml con los datos del fichero .kut a procesar
