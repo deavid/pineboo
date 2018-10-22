@@ -989,7 +989,7 @@ class FLUtil(QtCore.QObject):
         @param connName Nombre de la conexion
         @return Verdadero en caso de realizar la inserción con éxito, falso en cualquier otro caso
         """
-        from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+        from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
         c = FLSqlCursor(t, True, connName)
         c.select(w)
         c.setForwardOnly(True)

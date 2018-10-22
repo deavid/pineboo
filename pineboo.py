@@ -15,7 +15,7 @@ from optparse import OptionParser
 import signal
 import importlib
 import logging
-from pineboolib.fllegacy.FLSettings import FLSettings
+from pineboolib.fllegacy.flsettings import FLSettings
 
 
 logger = logging.getLogger("pineboo.__main__")
