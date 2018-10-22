@@ -10,12 +10,12 @@ Compilación básica (Linux64 - Linux64)
 ============================================
 https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
 https://www.openssl.org/source/openssl-1.0.2n.tar.gz
-https://download.qt.io/archive/qt/5.10/5.10.1/single/qt-everywhere-src-5.10.1.tar.xz (Renombrar a qt-everywhere-opensource-src-5.10.1.tar.xz)
 https://sourceforge.net/projects/pyqt/files/sip/sip-4.19.6/sip-4.19.6.tar.gz/download
 https://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.10/PyQt5_gpl-5.10.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQtDataVisualization/PyQtDataVisualization-5.10/PyQtDataVisualization_gpl-5.10.tar.gz/download
-https://sourceforge.net/projects/pyqt/files/PyQt3D/PyQt3D-5.10/PyQt3D_gpl-5.10.tar.gz/download
 
+http://download.qt.io/official_releases/qt/5.11/5.11.2/qt-opensource-linux-x64-5.11.2.run (Instalar en /opt/Qt5.11.2 o modificar sysroot.json)
+
+sudo apt-get install build-essential
 sudo apt-get install libbz2-dev
 sudo apt-get install libsqlite3-dev
 sudo apt-get install pkg-config
@@ -24,17 +24,16 @@ sudo apt-get install bison
 sudo apt-get install gperf
 sudo apt-get install dbus-*dev
 sudo apt-get install libssl-dev
-
-
-https://github.com/lxml/lxml.git a carpeta src tb y extraemos
+sudo apt-get install qt5-default
 
 Ejecutar:
 build_binaries_linux_64.sh
 
 
 
-Compilación cruzada andorid-32 (en desarrollo)
+Compilación cruzada andorid-32 
 ============================================
+https://dl.google.com/android/repository/android-ndk-r15b-linux-x86_64.zip (extraer en ./src)
 https://developer.android.com/studio/index.html (en ./src y ejecutar studio.sh. Configurar compiladores y descargar SDK)
 
 configure -> sdk manager -> Appearance & Behavior -> System Settings -> Android SDK -> SDK Tools
@@ -46,15 +45,15 @@ configure -> sdk manager -> Appearance & Behavior -> System Settings -> Android 
     Google Repository
 
 
-https://dl.google.com/android/repository/android-ndk-r15b-linux-x86_64.zip (extraer en ./src)
-https://www.openssl.org/source/openssl-1.0.2n.tar.gz
-http://download.qt.io/official_releases/qt/5.10/5.10.1/qt-opensource-linux-x64-5.10.1.run (Instalar en /opt/Qt5.10.1 o modificar sysroot.json)
+
 
 Ejecutar:
 build_binaries_android.sh
 
+Compilación cruzada windows-64
+============================================
 
-
+sudo apt-get install autoconf
 
 
 Compilar qt cruzado para qmake:
@@ -77,14 +76,6 @@ Compilación cruzada ios (en desarrollo)
 http://docs.godotengine.org/en/3.0/development/compiling/cross-compiling_for_ios_on_linux.html
 https://vedanamedia.com/wp-content/uploads/2017/07/LIBS-README.txt
 
-
-
-Ejecutamos:
-python3 build-pineboo-binaries.py (para linux_64)
-
-o
-
-python3 build-pineboo-binaries.py --target PLATAFORMA
 
 Plataformas soportadas:
 win-32
