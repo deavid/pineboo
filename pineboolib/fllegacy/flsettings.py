@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
-
-
-class FLSettings(QtCore.QObject):
-
-    s = QtCore.QSettings(QtCore.QSettings.NativeFormat,
-                         QtCore.QSettings.UserScope, "Eneboo", "Pineboo")
+class FLSettings(object):
+    s = None
+    def __init__(self):
+        from PyQt5.QtCore import QSettings
+        self.s = QSettings(QSettings.NativeFormat,QSettings.UserScope, "Eneboo", "Pineboo")
 
     def readListEntry(self, key):
         ret = self.s.value(key)
