@@ -449,7 +449,7 @@ class Project(object):
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             settings = FLSettings()
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                from pineboolib.fllegacy.FLUtil import FLUtil
+                from pineboolib.fllegacy.flutil import FLUtil
                 util = FLUtil()
                 file_name = scriptname.split("\\") if util.getOS() == "WIN32" else scriptname.split("/")
 
