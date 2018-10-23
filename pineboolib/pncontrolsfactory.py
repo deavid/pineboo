@@ -76,6 +76,7 @@ QTreeWidget = resolveObject("QTreeWidget")
 QTreeWidgetItem = resolveObject("QTreeWidgetItem")
 QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
 QDataView = resolveObject("QDataView")
+QProcess = resolveObject("QProcess")
 """
 QIconSet = resolveObject("QIconSet")
 """
@@ -100,6 +101,7 @@ RadioButton = resolveObject("RadioButton")
 Color = QColor
 Dialog = resolveObject("Dialog")
 GroupBox = resolveObject("GroupBox")
+Process = resolveObject("Process")
 
 
 class SysType(object):
