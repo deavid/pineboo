@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QColor, QPixmap
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
 from PyQt5 import QtGui
 
 from pineboolib.utils import filedir
@@ -18,7 +18,6 @@ class AQS(object):
 
     Box = None
     Plain = None
-    AlignTop = None
     translate = ["DockLeft", "ContextMenu"]
     InDock = None
 
@@ -122,7 +121,7 @@ class AQS(object):
             if name == "DockLeft":
                 name = "LeftDockWidgetArea"
 
-        for lib in [QFrame, QLabel, QSizePolicy, Qt]:
+        for lib in [QFrame, QLabel, QSizePolicy, QtCore.Qt]:
             ret_ = getattr(lib, name, None)
 
             if ret_ is not None:
