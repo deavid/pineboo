@@ -865,7 +865,7 @@ class XMLAction(XMLStruct):
         if not a:
             self.logger.warn("No existe la acción %s", name)
             return True
-        pineboolib.project.call("%s.main" % a.name(), [], None, True)
+        pineboolib.project.call("%s.main" % a.name(), [], None, False)
 
     """
     Retorna el widget del formRecord. Esto es necesario porque a veces no hay un FLformRecordDB inicialidado todavía
