@@ -713,7 +713,7 @@ Convierte diferentes formatos de fecha a QDate
 
 def convert_to_qdate(date):
     from pineboolib.qsa import Date
-    from pineboolib.fllegacy.FLUtil import FLUtil
+    from pineboolib.fllegacy.flutil import FLUtil
     import datetime
 
     if isinstance(date, Date):
