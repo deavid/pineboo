@@ -8,21 +8,21 @@ class AQGlobalFunctions(object):
     mappers_ = Array()
     count_ = 0
 
-    @classmethod
+    
     def set(self, functionName=None, globalFunction=None):
         functions_[functionName] = globalFunction
 
-    @classmethod
+    
     def get(self, functionName=None):
         return functions_[functionName]
 
-    @classmethod
+    
     def exec_(self, functionName=None):
         fn = functions_[functionName]
         if fn != None:
             fn()
 
-    @classmethod
+    
     def mapConnect(self, obj=None, signal=None, functionName=None):
         c = self.count_ % 100
         sigMap = AQSignalMapper(obj)
@@ -68,20 +68,20 @@ class AbanQUpdater(object):
         connect(self.urlOp_, u"data(const QByteArray&,QNetworkOperation*)", self, u"transferData()")
         self.urlOp_.get(sys.decryptFromBase64(u"wYZ6GifNhk4W+qnjzToiKooKL24mrW5bt0+RS6hQzW0="))
 
-    @classmethod
+    
     def transferFinished(self, netOp=None):
         self.state_ = netOp.state()
         self.w_.close()
         if self.state_ == AQS.StFailed:
             self.errorMsgBox(netOp.protocolDetail())
 
-    @classmethod
+    
     def transferProgress(self, bytesDone=None, bytesTotal=None, netOp=None):
         if bytesTotal > 0:
             self.prBar_.setTotalSteps(bytesTotal)
         self.prBar_.setProgress(bytesDone)
 
-    @classmethod
+    
     def transferData(self, data=None, netOp=None):
         dat = QByteArray(data)
         self.data_ += dat.toVariant
@@ -149,7 +149,8 @@ class AbanQDbDumper(object):
         lbl.text = sys.translate(u"Usuario: %s") % (str(self.db_.user()))
         lbl.alignment = AQS.AlignTop
         layFrm.addWidget(lbl)
-        layAux = QHBoxLayout(frm)
+        layAux = QHBoxLayout()
+        layFrm.addLayout(layAux)
         self.lblDirBase_ = QLabel(frm)
         self.lblDirBase_.text = sys.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
         self.lblDirBase_.alignment = AQS.AlignVCenter
@@ -179,7 +180,7 @@ class AbanQDbDumper(object):
             self.w_.enabled = True
         if self.state_.ok:
             if gui:
-                self.infoMsgBox(self.state_.msg)
+                sys.infoMsgBox(self.state_.msg)
             self.w_.close()
         else:
             if gui:
@@ -231,9 +232,9 @@ class AbanQDbDumper(object):
         self.proc_.readyReadStandardError.connect(self.readFromStderr)
         self.proc_.start()
 
-        while self.proc_.Running:
+        while self.proc_.running:
             sys.processEvents()
-
+        
         return self.proc_.exitcode() == self.proc_.normalExit
 
     def readFromStdout(self):
@@ -254,13 +255,12 @@ class AbanQDbDumper(object):
         else:
             if driver.startswith(u"FLQMYSQL"):
                 typeBd = 2
-
+        
         if typeBd == 0:
             self.setState(False, sys.translate(u"Este tipo de base de datos no soporta el volcado a disco."))
             self.funLog_(self.state_.msg)
             self.dumpAllTablesToCsv()
             return False
-
         file = File(self.fileName_)
         try:
             if not os.path.exists(self.fileName_):
@@ -288,7 +288,7 @@ class AbanQDbDumper(object):
             self.setState(True, sys.translate(u"Copia de seguridad realizada con éxito en:\n%s") %
                           (str(self.fileName_)))
             self.funLog_(self.state_.msg)
-
+        
         return ok
 
     def dumpPostgreSQL(self):
@@ -304,7 +304,7 @@ class AbanQDbDumper(object):
             System.setenv(u"PGPASSWORD", db.password())
             command = [pgDump, u"-v", u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U",
                        db.user(), db.database()]
-
+        
         if not self.launchProc(command):
             self.setState(False, sys.translate(u"No se ha podido volcar la base de datos a disco.\n") +
                           sys.translate(u"Es posible que no tenga instalada la herramienta ") + pgDump)
@@ -445,7 +445,7 @@ class FormInternalObj(FormDBWidget):
                         e = traceback.format_exc()
                         debug(e)
 
-    @classmethod
+    
     def afterCommit_flfiles(self, curFiles=None):
         if curFiles.modeAccess() != curFiles.Browse:
             qry = FLSqlQuery()
@@ -484,7 +484,7 @@ class FormInternalObj(FormDBWidget):
 
         return True
 
-    @classmethod
+    
     def statusDbLocksDialog(self, locks=None):
         util = FLUtil()
         diag = Dialog()
@@ -576,12 +576,12 @@ class FormInternalObj(FormDBWidget):
         diag.add(txtEdit)
         diag.exec_()
 
-    @classmethod
+    
     def terminateChecksLocks(self, sqlCursor=None):
         if sqlCursor != None:
             sqlCursor.checkRisksLocks(True)
 
-    @classmethod
+    
     def execQSA(self, fileQSA=None, args=None):
         file = File(fileQSA)
         try:
@@ -594,7 +594,7 @@ class FormInternalObj(FormDBWidget):
         fn = Function(file.read())
         fn(args)
 
-    @classmethod
+    
     def mvProjectXml(self):
         docRet = QDomDocument()
         strXml = AQUtil.sqlSelect(u"flupdates", u"modulesdef", u"actual='true'")
@@ -632,7 +632,7 @@ class FormInternalObj(FormDBWidget):
         docRet.setContent(strXml)
         return docRet
 
-    @classmethod
+    
     def mvProjectModules(self):
         ret = Array()
         doc = mvProjectXml()
@@ -659,7 +659,7 @@ class FormInternalObj(FormDBWidget):
 
         return ret
 
-    @classmethod
+    
     def mvProjectExtensions(self):
         ret = Array()
         doc = mvProjectXml()
@@ -686,7 +686,7 @@ class FormInternalObj(FormDBWidget):
 
         return ret
 
-    @classmethod
+    
     def calculateShaGlobal(self):
         v = u""
         qry = AQSqlQuery()
@@ -698,7 +698,7 @@ class FormInternalObj(FormDBWidget):
                 v = AQUtil.sha1(v + parseString(qry.value(0)))
         return v
 
-    @classmethod
+    
     def registerUpdate(self, input_=None):
         if not input_:
             return
@@ -739,7 +739,7 @@ class FormInternalObj(FormDBWidget):
         AQSql.insert(u"flupdates", Array([u"fecha", u"hora", u"nombre", u"modulesdef", u"filesdef", u"shaglobal"]), Array(
             [now, parseString(now)[(len(parseString(now)) - (8)):], fileName, modulesDef, filesDef, shaGlobal]))
 
-    @classmethod
+    
     def warnLocalChanges(self, changes=None):
         if changes == None:
             changes = localChanges()
@@ -785,7 +785,7 @@ class FormInternalObj(FormDBWidget):
         connect(pbCancel, u"clicked()", diag, u"reject()")
         return (False if (diag.exec_() == 0) else True)
 
-    @classmethod
+    
     def reportChanges(self, changes=None):
         ret = u""
         # DEBUG:: FOR-IN: ['key', 'changes']
@@ -801,7 +801,7 @@ class FormInternalObj(FormDBWidget):
 
         return ret
 
-    @classmethod
+    
     def localChanges(self):
         ret = Array()
         ret[u"size"] = 0
@@ -816,7 +816,7 @@ class FormInternalObj(FormDBWidget):
         ret = diffXmlFilesDef(docBd, docUpt)
         return ret
 
-    @classmethod
+    
     def diffXmlFilesDef(self, xmlOld=None, xmlNew=None):
         arrOld = filesDefToArray(xmlOld)
         arrNew = filesDefToArray(xmlNew)
@@ -845,7 +845,7 @@ class FormInternalObj(FormDBWidget):
         ret[u"size"] = size
         return ret
 
-    @classmethod
+    
     def filesDefToArray(self, xml=None):
         root = xml.firstChild()
         files = root.childNodes()
@@ -873,7 +873,7 @@ class FormInternalObj(FormDBWidget):
 
         return ret
 
-    @classmethod
+    
     def xmlFilesDefBd(self):
         doc = QDomDocument(u"files_def")
         root = doc.createElement(u"files")
@@ -990,15 +990,15 @@ class FormInternalObj(FormDBWidget):
         root.appendChild(ns)
         return doc
 
-    @classmethod
+    
     def textPacking(self, ext=None):
         return ext.endswith(u".ui") or ext.endswith(u".qry") or ext.endswith(u".kut") or ext.endswith(u".jrxml") or ext.endswith(u".ar") or ext.endswith(u".mtd") or ext.endswith(u".ts") or ext.endswith(u".qs") or ext.endswith(u".xml") or ext.endswith(u".xpm") or ext.endswith(u".svg")
 
-    @classmethod
+    
     def binaryPacking(self, ext=None):
         return ext.endswith(u".qs")
 
-    @classmethod
+    
     def loadModules(self, input_=None, warnBackup=None):
         if input_ == None:
             dir_ = Dir(ustr(sys.installPrefix(), u"/share/eneboo/packages"))
@@ -1010,7 +1010,7 @@ class FormInternalObj(FormDBWidget):
         if input_:
             self.loadAbanQPackage(input_, warnBackup)
 
-    @classmethod
+    
     def loadAbanQPackage(self, input_=None, warnBackup=None):
         if warnBackup and interactiveGUI():
             txt = u""
@@ -1070,7 +1070,7 @@ class FormInternalObj(FormDBWidget):
                 tmpVar = FLVar()
                 tmpVar.set(u"mrproper", u"dirty")
 
-    @classmethod
+    
     def loadFilesDef(self, un=None):
         filesDef = sys.toUnicode(un.getText(), u"utf8")
         doc = QDomDocument()
@@ -1110,7 +1110,7 @@ class FormInternalObj(FormDBWidget):
         AQUtil.destroyProgressDialog()
         return ok
 
-    @classmethod
+    
     def registerFile(self, fil=None, un=None):
         if fil.id.endswith(u".xpm"):
             cur = AQSqlCursor(u"flmodules")
@@ -1141,7 +1141,7 @@ class FormInternalObj(FormDBWidget):
             un.getBinary()
         return cur.commitBuffer()
 
-    @classmethod
+    
     def checkProjectName(self, proName=None):
         if not proName or proName == None:
             proName = u""
@@ -1168,7 +1168,7 @@ class FormInternalObj(FormDBWidget):
         txt += sys.translate(u"¿Desea continuar?")
         return (MessageBox.Yes == MessageBox.warning(txt, MessageBox.No, MessageBox.Yes, MessageBox.NoButton, u"AbanQ"))
 
-    @classmethod
+    
     def loadModulesDef(self, un=None):
         modulesDef = sys.toUnicode(un.getText(), u"utf8")
         doc = QDomDocument()
@@ -1208,7 +1208,7 @@ class FormInternalObj(FormDBWidget):
         AQUtil.destroyProgressDialog()
         return ok
 
-    @classmethod
+    
     def registerArea(self, mod=None):
         cur = AQSqlCursor(u"flareas")
         if not cur.select(ustr(u"idarea='", mod.area, u"'")):
@@ -1219,7 +1219,7 @@ class FormInternalObj(FormDBWidget):
         cur.setValueBuffer(u"descripcion", mod.areaname)
         return cur.commitBuffer()
 
-    @classmethod
+    
     def registerModule(self, mod=None):
         cur = AQSqlCursor(u"flmodules")
         if not cur.select(ustr(u"idmodulo='", mod.id, u"'")):
@@ -1232,7 +1232,6 @@ class FormInternalObj(FormDBWidget):
         cur.setValueBuffer(u"version", mod.version)
         return cur.commitBuffer()
 
-    @classmethod
     def infoMsgBox(self, msg=None):
         if (msg) != u"string":
             return
@@ -1242,7 +1241,6 @@ class FormInternalObj(FormDBWidget):
         else:
             debug(ustr(u"INFO: ", msg))
 
-    @classmethod
     def warnMsgBox(self, msg=None):
         if (msg) != u"string":
             return
@@ -1252,7 +1250,6 @@ class FormInternalObj(FormDBWidget):
         else:
             debug(ustr(u"WARN: ", msg))
 
-    @classmethod
     def errorMsgBox(self, msg=None):
         if (msg) != u"string":
             return
@@ -1262,7 +1259,6 @@ class FormInternalObj(FormDBWidget):
         else:
             debug(ustr(u"ERROR: ", msg))
 
-    @classmethod
     def infoPopup(self, msg=None):
         if (msg) != u"string":
             return
@@ -1273,7 +1269,6 @@ class FormInternalObj(FormDBWidget):
                        u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
         sys.popupWarn(msgHtml, [])
 
-    @classmethod
     def warnPopup(self, msg=None):
         if (msg) != u"string":
             return
@@ -1284,7 +1279,6 @@ class FormInternalObj(FormDBWidget):
                        u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
         sys.popupWarn(msgHtml, [])
 
-    @classmethod
     def errorPopup(self, msg=None):
         if (msg) != u"string":
             return
@@ -1295,7 +1289,6 @@ class FormInternalObj(FormDBWidget):
                        u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
         sys.popupWarn(msgHtml, [])
 
-    @classmethod
     def trTagText(self, tagText=None):
         if not tagText.startswith(u"QT_TRANSLATE_NOOP"):
             return tagText
@@ -1304,7 +1297,6 @@ class FormInternalObj(FormDBWidget):
         arr = ast.literal_eval(txt)
         return sys.translate(arr[0], arr[1])
 
-    @classmethod
     def questionMsgBox(self, msg=None, keyRemember=None, txtRemember=None, forceShow=None, txtCaption=None, txtYes=None, txtNo=None):
         settings = AQSettings()
         key = u"QuestionMsgBox/"
@@ -1353,19 +1345,19 @@ class FormInternalObj(FormDBWidget):
             settings.writeEntry(key + keyRemember, chkRemember.checked)
         return ret
 
-    @classmethod
+    
     def decryptFromBase64(self, str_=None):
         ba = QByteArray()
         ba.string = str_
         return parseString(AQS.decryptInternal(AQS.fromBase64(ba)))
 
-    @classmethod
+    
     def updateAbanQ(self):
         MessageBox.warning(sys.translate(u"Funcionalidad no soportada aún en Eneboo."),
                            MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
         return
 
-    @classmethod
+    
     def exportModules(self):
         dirBasePath = FileDialog.getExistingDirectory(Dir.home)
         if not dirBasePath:
@@ -1427,7 +1419,7 @@ class FormInternalObj(FormDBWidget):
         AQUtil.destroyProgressDialog()
         self.infoMsgBox(sys.translate(u"Módulos exportados en:\n") + dirBasePath)
 
-    @classmethod
+    
     def xmlModule(self, idMod=None):
         qry = AQSqlQuery()
         qry.setSelect(u"descripcion,idarea,version")
@@ -1464,7 +1456,7 @@ class FormInternalObj(FormDBWidget):
         tagMod.appendChild(tag)
         return doc
 
-    @classmethod
+    
     def fileWriteIso(self, fileName=None, content=None):
         fileISO = QFile(fileName)
         if not fileISO.open(File.WriteOnly):
@@ -1475,7 +1467,7 @@ class FormInternalObj(FormDBWidget):
         tsISO.opIn(content)
         fileISO.close()
 
-    @classmethod
+    
     def fileWriteUtf8(self, fileName=None, content=None):
         fileUTF = QFile(fileName)
         if not fileUTF.open(File.WriteOnly):
@@ -1486,7 +1478,7 @@ class FormInternalObj(FormDBWidget):
         tsUTF.opIn(content)
         fileUTF.close()
 
-    @classmethod
+    
     def exportModule(self, idMod=None, dirBasePath=None):
         dir = Dir()
         dirPath = Dir.cleanDirPath(ustr(dirBasePath, u"/", idMod))
@@ -1570,7 +1562,7 @@ class FormInternalObj(FormDBWidget):
                 sys.fileWriteIso(ustr(dirPath, u"/translations/", name), content)
                 s02_do_work = False  # BREAK
 
-    @classmethod
+    
     def importModules(self, warnBackup=None):
         if warnBackup == None:
             warnBackup = True
@@ -1623,7 +1615,7 @@ class FormInternalObj(FormDBWidget):
         self.infoMsgBox(sys.translate(u"Importación de módulos finalizada."))
         sys.AQTimer.singleShot(0, sys.reinit)
 
-    @classmethod
+    
     def selectModsDialog(self, listFilesMod=None):
         dialog = Dialog()
         dialog.okButtonText = sys.translate(u"Aceptar")
@@ -1674,7 +1666,7 @@ class FormInternalObj(FormDBWidget):
 
         return res
 
-    @classmethod
+    
     def importModule(self, modPath=None):
         fileMod = File(modPath)
         contentMod = u""
@@ -1725,7 +1717,7 @@ class FormInternalObj(FormDBWidget):
 
         return True
 
-    @classmethod
+    
     def importFiles(self, dirPath=None, ext=None, idMod=None):
         ok = True
         listFiles = AQUtil.findFiles(Array([dirPath]), ext, False)
@@ -1755,7 +1747,7 @@ class FormInternalObj(FormDBWidget):
         AQUtil.destroyProgressDialog()
         return ok
 
-    @classmethod
+    
     def importFile(self, filePath=None, idMod=None):
         file = File(filePath)
         content = u""
@@ -1816,7 +1808,7 @@ class FormInternalObj(FormDBWidget):
 
         return ok
 
-    @classmethod
+    
     def importReportAr(self, filePath=None, idMod=None, content=None):
         if not sys.isLoadedModule(u"flar2kut"):
             return False
@@ -1841,12 +1833,12 @@ class FormInternalObj(FormDBWidget):
 
         return False
 
-    @classmethod
+    
     def dumpDatabase(self):
         aqDumper = AbanQDbDumper()
         aqDumper.init()
 
-    @classmethod
+    
     def setObjText(self, container=None, component=None, value=None):
         c = self.testObj(container, component)
         if not c:
@@ -1878,7 +1870,7 @@ class FormInternalObj(FormDBWidget):
             return False
         return True
 
-    @classmethod
+    
     def disableObj(self, container=None, component=None):
         c = testObj(container, component)
         if not c:
@@ -1906,7 +1898,7 @@ class FormInternalObj(FormDBWidget):
             return False
         return True
 
-    @classmethod
+    
     def enableObj(self, container=None, component=None):
         c = testObj(container, component)
         if not c:
@@ -1934,7 +1926,7 @@ class FormInternalObj(FormDBWidget):
             return False
         return True
 
-    @classmethod
+    
     def filterObj(self, container=None, component=None, filter=None):
         c = testObj(container, component)
         if not c:
@@ -1957,7 +1949,7 @@ class FormInternalObj(FormDBWidget):
             return False
         return True
 
-    @classmethod
+    
     def testObj(self, container=None, component=None):
         if not container or container == None:
             return False
@@ -1967,7 +1959,7 @@ class FormInternalObj(FormDBWidget):
             return False
         return c
 
-    @classmethod
+    
     def testAndRun(self, container=None, component=None, method=None, param=None):
         c = testObj(container, component)
         if not c:
@@ -1976,7 +1968,7 @@ class FormInternalObj(FormDBWidget):
             return False
         return True
 
-    @classmethod
+    
     def runObjMethod(self, container=None, component=None, method=None, param=None):
         c = container.child(component)
         if method in c:
@@ -1992,14 +1984,14 @@ class FormInternalObj(FormDBWidget):
 
         return True
 
-    @classmethod
+    
     def connectSS(self, ssSender=None, ssSignal=None, ssReceiver=None, ssSlot=None):
         if not ssSender:
             return False
         connect(ssSender, ssSignal, ssReceiver, ssSlot)
         return True
 
-    @classmethod
+    
     def runTransaction(self, f=None, oParam=None):
         curT = FLSqlCursor(u"flfiles")
         curT.transaction(False)
@@ -2056,7 +2048,7 @@ class FormInternalObj(FormDBWidget):
 
         return valor
 
-    @classmethod
+    
     def openUrl(self, url=None):
         if not url:
             return False
@@ -2100,7 +2092,7 @@ class FormInternalObj(FormDBWidget):
             s07_do_work = False  # BREAK
         return False
 
-    @classmethod
+    
     def launchCommand(self, comando):
         try:
             Process.execute(comando)
@@ -2109,23 +2101,23 @@ class FormInternalObj(FormDBWidget):
             e = traceback.format_exc()
             return False
 
-    @classmethod
+    
     def isUserBuild(self):
         return sys.version().upper().indexOf(u"USER") != - 1
 
-    @classmethod
+    
     def isDeveloperBuild(self):
         return sys.version().upper().indexOf(u"DEVELOPER") != - 1
 
-    @classmethod
+    
     def interactiveGUI(self):
         return aqApp.db().interactiveGUI()
 
-    @classmethod
+    
     def qsaExceptions(self):
         return aqApp.db().qsaExceptions()
 
-    @classmethod
+    
     def serverTime(self):
         db = aqApp.db().db()
         sql = u"select current_time"
