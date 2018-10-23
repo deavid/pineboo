@@ -613,9 +613,9 @@ class Switch(ASTPython):
 
 
 class With(ASTPython):
-    python_keywords = ["select", "first", "next", "prev", "last", "setValueBuffer", "valueBuffer",
+    python_keywords = ["Insert","Edit","Del","Browse", "select", "first", "next", "prev", "last", "setValueBuffer", "valueBuffer",
                        "setTablesList", "setSelect", "setFrom", "setWhere", "setForwardOnly", "setModeAccess",
-                       "commitBuffer", "commit", "refreshBuffer", "setNull", "setUnLock", "Del"]
+                       "commitBuffer", "commit", "refreshBuffer", "setNull", "setUnLock"]
 
     def generate(self, **kwargs):
         # key = "%02x" % random.randint(0, 255)
@@ -642,15 +642,13 @@ class With(ASTPython):
                 obj_1 = obj[1].replace("self", " ".join(var_expr))
             else:
                 obj_1 = obj[1]
-
+            
             for t in self.python_keywords:
                 if obj_1.startswith(t):
-                    obj_ = (obj[0], "%s.%s" % (" ".join(var_expr), obj_1))
-                    break
-                elif obj_1.find(".") == -1 and obj[1].find(t) > -1:
-                    obj_ = (obj[0], obj_1.replace(t, "%s.%s" %
-                                                  (" ".join(var_expr), t)))
-                    break
+                    obj_1 = "%s.%s" % (" ".join(var_expr), obj_1)
+                elif obj_1.find(".") == -1 and obj_1.find(t) > -1:
+                    obj_1 = obj_1.replace(t, "%s.%s" % (" ".join(var_expr), t))
+            
 
             if not obj_:
                 obj_ = (obj[0], obj_1)
