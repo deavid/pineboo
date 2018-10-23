@@ -848,9 +848,11 @@ class FLTimeEdit(QtWidgets.QTimeEdit):
         super(FLTimeEdit, self).setTime(time)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setTime" % self._parent.objectName(), date.toString())
-
-    def __getattr__(self, name):
-        return DefFun(self, name)
+    
+    def getTime(self):
+        return super(FLTimeEdit).time
+    
+    time = property(getTime, setTime)
 
 
 class FLSpinBox(QtWidgets.QSpinBox):
@@ -889,47 +891,6 @@ class QComboBox(QtWidgets.QComboBox):
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_insertStringList" % self.objectName(), strl)
         self.insertItems(len(strl), strl)
-
-
-"""
-class QComboBox(QWidget):
-
-    _label = None
-    _combo = None
-
-    def __init__(self):
-        super(QComboBox, self).__init__()
-
-        self._label = QtWidgets.QLabel(self)
-        self._combo = QtWidgets.QComboBox(self)
-        self._combo.setMinimumHeight(25)
-        _lay = QtWidgets.QHBoxLayout()
-        _lay.addWidget(self._label)
-        _lay.addWidget(self._combo)
-
-        sizePolicy = QtWidgets.QSizePolicy(
-            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHeightForWidth(True)
-        self._combo.setSizePolicy(sizePolicy)
-
-        self.setLayout(_lay)
-
-    def __setattr__(self, name, value):
-        if name == "label":
-            self._label.setText(str(value))
-        elif name == "itemList":
-            self._combo.insertItems(len(value), value)
-        elif name == "currentItem":
-            self._combo.setCurrentText(str(value))
-        else:
-            super(QComboBox, self).__setattr__(name, value)
-
-    def __getattr__(self, name):
-        if name == "currentItem":
-            return self._combo.currentText()
-        else:
-            return super(QComboBox, self).__getattr__(name)
-"""
 
 
 class QLineEdit(QtWidgets.QLineEdit):
