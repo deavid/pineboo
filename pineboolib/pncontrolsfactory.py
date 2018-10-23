@@ -188,6 +188,10 @@ class SysType(object):
 
     def isUserBuild(self):
         return False
+    
+    @decorators.NotImplementedWarn
+    def isCloudMode(self):
+        return False
 
     def nameDriver(self, connName="default"):
         return pineboolib.project.conn.database(connName).driverName()
