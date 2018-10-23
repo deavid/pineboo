@@ -840,11 +840,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "date":
             if self.editor_:
-                v = self.editor_.date().toString(Qt.ISODate)
+                v = self.editor_.date
 
         elif type_ == "time":
             if self.editor_:
-                v = self.editor_.time().toString(Qt.ISODate)
+                v = self.editor_.time
 
         elif type_ == "bool":
             if self.editor_:
@@ -2495,21 +2495,24 @@ class FLFieldDB(QtWidgets.QWidget):
                 return
 
             mng = self.cursor_.db().manager()
-            c = FLSqlCursor(field.relationM1().foreignTable())
-            # c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
+            c = FLSqlCursor(fMD.relationM1().foreignTable(), True, self.cursor_.db().connectionName())
+            c.select(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
+            if c.size() > 0:
+                c.first()
+            
+            c2 = FLSqlCursor(field.relationM1().foreignTable(), True, self.cursor_.db().connectionName(), c, fMD.relationM1())
+            
+            #if self.actionName_ is None:
+            #    a = mng.action(field.relationM1().foreignTable())
+            #else:
+            #    a = mng.action(self.actionName_)
+            #    if not a:
+            #        return
+            #    a.setTable(field.relationM1().foreignField())
 
-            # if c.size() > 0:
-            #    c.next()
-            if not self.actionName_:
-                a = mng.action(field.relationM1().foreignTable())
-            else:
-                a = mng.action(self.actionName_)
-                a.setTable(field.relationM1().foreignField())
+            f = FLFormSearchDB(c2, self.topWidget_)
 
-            f = FLFormSearchDB(a.name(), self)
-            f.setWindowModality(QtCore.Qt.ApplicationModal)
-            f.setFilter(mng.formatAssignValue(
-                fMD.relationM1().foreignField(), fMD, v, True))
+            f.setFilter(mng.formatAssignValue(fMD.relationM1().foreignField(), fMD, v, True))
         else:
             mng = self.cursor_.db().manager()
             if not self.actionName_:
@@ -2521,12 +2524,30 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not a:
                     return
                 a.setTable(field.relationM1().foreignTable())
-            c = FLSqlCursor(a.table())
+            c = FLSqlCursor(a.table(), True, self.cursor_.db().connectionName())
             # f = FLFormSearchDB(c, a.name(), self.topWidget_)
             f = FLFormSearchDB(c, self.topWidget_)
-            f.setWindowModality(QtCore.Qt.ApplicationModal)
 
         f.setMainWidget()
+        list_objs = f.findChildren(pineboolib.fllegacy.fltabledb.FLTableDB)
+        obj_tdb = list_objs[0]
+        if fMD and obj_tdb:
+            #obj_tdb.setTableName(field.relationM1().foreignTable())
+            #obj_tdb.setFieldRelation(field.associatedFieldFilterTo())
+            #obj_tdb.setForeignField(fMD.relationM1().foreignField())
+            if fMD.relationM1().foreignTable() == tMD.name():
+                obj_tdb.setReadOnly(True)
+        
+        
+        f.setFilter(self.filter_)
+        if f.mainWidget():
+            if obj_tdb:
+                cur_value = self.value()
+                if field.type() == "string" and cur_value:
+                    obj_tdb.setInitSearch(cur_value)
+                    obj_tdb.putFisrtCol(field.relationM1().foreignField())
+                
+                QtCore.QTimer().singleShot(0, obj_tdb.lineEditSearch, self.setFocus)
         """
         lObjs = f.queryList("FLTableDB")
         obj = lObjs.first()
