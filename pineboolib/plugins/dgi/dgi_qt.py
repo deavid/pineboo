@@ -1248,7 +1248,6 @@ class Process(QtCore.QProcess):
         self.crashExit = self.CrashExit
         
         if args:
-            self.running = False
             self.setProgram(args[0])
             argumentos = args[1:]
             self.setArguments(argumentos)
