@@ -337,7 +337,6 @@ class FLApplication(QtCore.QObject):
     def openDefaultForm(self):
         pass
 
-    @decorators.BetaImplementation
     def execMainScript(self, action_name):
         if action_name in pineboolib.project.actions.keys():
             pineboolib.project.actions[action_name].execMainScript(action_name)
