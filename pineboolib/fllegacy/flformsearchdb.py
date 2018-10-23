@@ -234,13 +234,15 @@ class FLFormSearchDB(FLFormDB):
             return
         previousF = self.cursor_.mainFilter()
         newF = None
-        if not previousF:
+        if previousF is "":
             newF = f
-        elif previousF.contains(f):
+        elif f is None or previousF.find(f) > -1:
             return
         else:
             newF = "%s AND %s" % (previousF, f)
         self.cursor_.setMainFilter(newF)
+    
+    
 
     """
     Devuelve el nombre de la clase del formulario en tiempo de ejecución
