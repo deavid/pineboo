@@ -399,6 +399,7 @@ class FLFormRecordDB(FLFormDB):
         # self.toolButtonAccept.setIcon(QtGui.QIcon(filedir("../share/icons","gtk-add.png")))
         # self.toolButtonAccept.clicked.connect(self.validateForm)
         # self.bottomToolbar.layout.addWidget(self.toolButtonAccept)
+        self.inicializeControls()
 
     """
     Nombre interno del formulario
@@ -788,7 +789,6 @@ class FLFormRecordDB(FLFormDB):
             return
 
         super(FLFormRecordDB, self).show()
-        self.inicializeControls()
 
     def inicializeControls(self):
         from pineboolib.fllegacy.flfielddb import FLFieldDB
@@ -797,4 +797,4 @@ class FLFormRecordDB(FLFormDB):
             if isinstance(child_, FLFieldDB) or isinstance(child_, FLTableDB):
                 loaded = getattr(child_, "_loaded", None)
                 if loaded is False:
-                    child_.load()
+                    QtCore.QTimer().singleShot(0,child_.load)
