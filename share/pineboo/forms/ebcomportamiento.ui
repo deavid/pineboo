@@ -39,8 +39,8 @@
                     </property>
                     <property name="geometry">
                         <rect>
-                            <x>11</x>
-                            <y>11</y>
+                            <x>10</x>
+                            <y>10</y>
                             <width>522</width>
                             <height>403</height>
                         </rect>
@@ -412,6 +412,14 @@
                                             <string>Parsear todo el QSA al iniciar</string>
                                         </property>
                                     </widget>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>cbParseModulesOnLoad</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Convertir a Python los script QSA al cargar un módulo en la BD</string>
+                                        </property>
+                                    </widget>
                                 </vbox>
                             </widget>
                             <spacer>
@@ -427,7 +435,7 @@
                                 <property name="sizeHint">
                                     <size>
                                         <width>21</width>
-                                        <height>160</height>
+                                        <height>110</height>
                                     </size>
                                 </property>
                             </spacer>

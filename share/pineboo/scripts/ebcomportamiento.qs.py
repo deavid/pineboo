@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
-import traceback
-from PyQt5.QtGui import QPalette
 import pineboolib
 from PyQt5 import QtCore
-sys = SysType()
 
 
 class FormInternalObj(FormDBWidget):
@@ -47,6 +44,7 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbKugarParser").addItems(pineboolib.project.kugarPlugin.listAvalibles())
         w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal("kugarParser") if not "" else pineboolib.project.kugarPlugin.defaultParser())
         w.child(u"cbSpacerLegacy").checked = self.leerValorLocal("spacerLegacy")
+        w.child(u"cbParseModulesOnLoad").checked = self.leerValorLocal("parseModulesOnLoad")
 
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
@@ -123,7 +121,7 @@ class FormInternalObj(FormDBWidget):
         self.w_.close()
 
     def guardar_clicked(self):
-        w = self.w_
+        w = self.w_            
         self.grabarValorGlobal("verticalName", w.child(u"leNombreVertical").text)
         self.grabarValorLocal("FLTableDoubleClick", w.child(u"cbFLTableDC").checked)
         self.grabarValorLocal("FLTableShortCut", w.child(u"cbFLTableSC").checked)
@@ -142,6 +140,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("mobileMode", w.child(u"cbMobile").checked)
         self.grabarValorLocal("kugarParser", w.child(u"cbKugarParser").currentText())
         self.grabarValorLocal("spacerLegacy", w.child(u"cbSpacerLegacy").checked)
+        self.grabarValorLocal("parseModulesOnLoad", w.child(u"cbParseModulesOnLoad").checked)
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"

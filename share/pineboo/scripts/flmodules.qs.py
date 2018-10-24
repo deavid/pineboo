@@ -90,6 +90,9 @@ class FormInternalObj(FormDBWidget):
         ficheros = dir.entryList(extension, Dir.Files)
         log = self.child(u"log")
         i = 0
+        from pineboolib.fllegacy.flsettings import FLSettings
+        from pineboolib.flparser import postparse
+        settings= FLSettings()
         while_pass = True
         while i < len(ficheros):
             if not while_pass:
@@ -98,6 +101,14 @@ class FormInternalObj(FormDBWidget):
                 continue
             while_pass = False
             path_ = Dir.cleanDirPath(ustr(directorio, u"/", ficheros[i]))
+            if settings.readBoolEntry("ebcomportamiento/parseModulesOnLoad", False):
+                file_py_path_ = "%s.py" % path_
+                if path_.endswith(".qs") and not os.path.exists(file_py_path_):
+                    postparse.pythonify(path_)
+                    if os.path.exists(file_py_path_):
+                        value_py = File(file_py_path_).read()
+                        self.cargarFicheroEnBD("%s.py" % ficheros[i], value_py, log, directorio)
+                
             value = File(path_).read()
             self.cargarFicheroEnBD(ficheros[i], value, log, directorio)
             sys.processEvents()
