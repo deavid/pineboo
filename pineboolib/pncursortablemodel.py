@@ -155,15 +155,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     order_list.append(column)
 
             if not found_:
-                self.logger.warn("%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). El order by previo se perderá" % (
+                self.logger.debug("%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). El order by previo se perderá" % (
                     __name__, col_name, self._sortOrder))
             else:
                 self._sortOrder = ",".join(order_list)
 
         if not found_:
             self._sortOrder = "%s %s" % (col_name, ord)
-
-        self.refresh()
+            self.refresh()
 
     """
     Retorna una cadena de texto con el valor de sortOrder
