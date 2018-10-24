@@ -73,12 +73,15 @@ class Project(object):
         pineboolib.project = self
         self.deleteCache = False
         self.parseProject = False
-
         self.translator_ = []
         self.actions = {}
         self.tables = {}
         self.files = {}
         self.cur = None
+        self.apppath = filedir("..")
+        self.tmpdir = filedir("../tempdata")
+        if not os.path.exists(self.tmpdir):
+            os.mkdir(self.tmpdir)
         self.kugarPlugin = PNKugarPlugins()
 
         if not self._DGI.localDesktop():
@@ -136,8 +139,6 @@ class Project(object):
         self.dbauth.username = user
         self.dbauth.password = passwd
         self.dbname = dbname
-        self.apppath = filedir("..")
-        self.tmpdir = filedir("../tempdata")
 
         self.actions = {}
         self.tables = {}
