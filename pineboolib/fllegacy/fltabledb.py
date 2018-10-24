@@ -2040,7 +2040,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         new_from = self.tableRecords_.visualIndexToRealIndex(from_)
         #new_to = self.tableRecords_.visualIndexToRealIndex(to)
-        self.tableRecords_.header().swapSections(new_from, to)
+        if new_from is not None:
+            self.tableRecords_.header().swapSections(new_from, to)
 
         self.refresh(True, False)
 
