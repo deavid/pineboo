@@ -105,9 +105,9 @@ class FormInternalObj(FormDBWidget):
                 file_py_path_ = "%s.py" % path_
                 if path_.endswith(".qs") and not os.path.exists(file_py_path_):
                     postparse.pythonify(path_)
-                    if os.path.exists(file_py_path_):
-                        value_py = File(file_py_path_).read()
-                        self.cargarFicheroEnBD("%s.py" % ficheros[i], value_py, log, directorio)
+                if os.path.exists(file_py_path_):
+                    value_py = File(file_py_path_).read()
+                    self.cargarFicheroEnBD("%s.py" % ficheros[i], value_py, log, directorio)
                 
             value = File(path_).read()
             self.cargarFicheroEnBD(ficheros[i], value, log, directorio)
