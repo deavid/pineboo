@@ -856,7 +856,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def init(self, name, autopopulate, cR, r):
-        # logger.trace("FLSqlCursor(%s): Init() %s (%s, %s)" % (name, self, cR, r))
+        #logger.warn("FLSqlCursor(%s): Init() %s (%s, %s)" , name, self, cR, r, stack_info=True)
 
         # if self.metadata() and not self.metadata().aqWasDeleted() and not
         # self.metadata().inCache():
@@ -1381,7 +1381,7 @@ class FLSqlCursor(QtCore.QObject):
 
         stateChanges = (not b == self.d.browse_)
 
-        if stateChanges and not self.d.borwseStates_:
+        if stateChanges and not self.d.browseStates_:
             self.d.browseStates_ = AQBoolFlagStateList()
 
         if not self.d.browseStates_:
