@@ -917,12 +917,9 @@ class QLineEdit(QtWidgets.QLineEdit):
 
 
 class QTextEdit(QtWidgets.QTextEdit):
-
-    _parent = None
     LogText = 0
 
-    def __init__(self, parent):
-        self._parent = parent
+    def __init__(self, parent = None):
         super(QTextEdit, self).__init__(parent)
         self.LogText = 0
 
