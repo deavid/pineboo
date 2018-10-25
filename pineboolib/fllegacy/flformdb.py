@@ -717,7 +717,8 @@ class FLFormDB(QtWidgets.QDialog):
         self._action.mainform_widget = None
         self.deleteLater()
         self._loaded = False
-        QtWidgets.QApplication.processEvents()
+        from pineboolib.pncontrolsfactory import SysType
+        SysType().processEvents()
         try:
             # self.script.form.close()
             self.script.form = None
