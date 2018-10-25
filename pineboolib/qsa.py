@@ -18,7 +18,7 @@ from pineboolib.fllegacy.flcodbar import FLCodBar
 from pineboolib.fllegacy.flnetwork import FLNetwork
 from pineboolib.fllegacy.flreportviewer import FLReportViewer
 
-from pineboolib.utils import ustr, ustr1
+from pineboolib.utils import ustr, ustr1, filedir
 
 from pineboolib.pncontrolsfactory import *
 
