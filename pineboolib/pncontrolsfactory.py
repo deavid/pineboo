@@ -578,7 +578,7 @@ class FormDBWidget(QWidget):
             self.cursor_ = cursor
         else:
             if not self.cursor_:
-                from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+                from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
                 self.cursor_ = FLSqlCursor(self._action)
 
         return self.cursor_
