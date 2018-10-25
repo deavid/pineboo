@@ -1336,7 +1336,7 @@ def decryptFromBase64(str_=None):
     return parseString(AQS.decryptInternal(AQS.fromBase64(ba)))
 
     
-def updateAbanQ():
+def updatePineboo():
     MessageBox.warning(sys.translate(u"Funcionalidad no soportada aún en Pineboo."),
                         MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Pineboo")
     return
