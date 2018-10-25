@@ -107,6 +107,7 @@ Process = resolveObject("Process")
 class SysType(object):
     def __init__(self):
         self._name_user = None
+        self.sys_widget = None
 
     def nameUser(self):
         return pineboolib.project.conn.user()
@@ -139,18 +140,21 @@ class SysType(object):
         pineboolib.project.conn.Mr_Proper()
 
     def installPrefix(self):
+        from pineboolib.utils import filedir
         return filedir("..")
 
     def __getattr__(self, fun_):
-        return pineboolib.project.call("sys.iface.%s()" % fun_, [], None, True)
-
+        if self.sys_widget is None:
+            self.sys_widget = pineboolib.project.actions["sys"].load().widget
+        return getattr(self.sys_widget, fun_)
+        
     def installACL(self, idacl):
         acl_ = pineboolib.project.acl()
         if acl_:
             acl_.installACL(idacl)
 
     def version(self):
-        return pineboolib.project.version
+        return str(pineboolib.project.version)
 
     def processEvents(self):
         QtWidgets.qApp.processEvents()
@@ -171,27 +175,16 @@ class SysType(object):
         from pineboolib.fllegacy.flsettings import FLSettings
         return FLSettings().readBoolEntry("application/isDebuggerMode")
 
-    def isNebulaBuild(self):
-        return False
-
     def reinit(self):
         aqApp.reinit()
 
     def setCaptionMainWidget(self, t):
         aqApp.setCaptionMainWidget(t)
 
-    def isQuickBuild(self):
-        return False
+
 
     def isDebuggerEnabled(self):
         return True
-
-    def isUserBuild(self):
-        return False
-    
-    @decorators.NotImplementedWarn
-    def isCloudMode(self):
-        return False
 
     def nameDriver(self, connName="default"):
         return pineboolib.project.conn.database(connName).driverName()
@@ -239,36 +232,6 @@ class SysType(object):
         # if gui:
         #   AQS.Application_restoreOverrideCursor();
         return valor
-
-    def infoMsgBox(self, msg):
-
-        if not isinstance(msg, str):
-            return
-        msg += "\n"
-        if self.interactiveGUI():
-            MessageBox.information(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
-        else:
-            print("INFO ", msg)
-
-    def warnMsgBox(self, msg):
-
-        if not isinstance(msg, str):
-            return
-        msg += "\n"
-        if self.interactiveGUI():
-            MessageBox.warning(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
-        else:
-            print("WARN ", msg)
-
-    def errorMsgBox(self, msg):
-
-        if not isinstance(msg, str):
-            return
-        msg += "\n"
-        if self.interactiveGUI():
-            MessageBox.critical(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, "Pineboo")
-        else:
-            print("ERROR ", msg)
 
 
 class System(object):
@@ -584,7 +547,7 @@ class FormDBWidget(QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
-        ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None)
+        ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None) or getattr(self.parent().script, name, None)
         if ret_:
             return ret_
 
