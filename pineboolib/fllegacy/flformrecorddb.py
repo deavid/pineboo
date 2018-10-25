@@ -102,8 +102,8 @@ class FLFormRecordDB(FLFormDB):
 
         parent = aqApp.mainWidget() if isinstance(parent_or_cursor, FLSqlCursor) else parent_or_cursor
         cursor = parent_or_cursor if isinstance(parent_or_cursor, FLSqlCursor) else None
-        if not cursor:
-            load = True
+        #if not cursor:
+        #    load = True
 
         super(FLFormRecordDB, self).__init__(parent, action, load)
         self.setWindowModality(QtCore.Qt.ApplicationModal)
