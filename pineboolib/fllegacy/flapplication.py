@@ -513,21 +513,6 @@ class FLApplication(QtCore.QObject):
     def staticLoaderSetup(self):
         self.db().managerModules().staticLoaderSetup()
 
-    def loadModules(self):
-        self.call("sys.loadModules", [], None)
-
-    def exportModules(self):
-        self.call("sys.exportModules", [], None)
-
-    def importModules(self):
-        self.call("sys.importModules", [], None)
-
-    def updatePineboo(self):
-        self.call("sys.uddatePineboo", [], None)
-
-    def dumpDataBase(self):
-        self.call("sys.dumpDataBase", [], None)
-
     def mrProper(self):
         self.db().conn.Mr_Proper()
 
