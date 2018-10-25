@@ -439,7 +439,7 @@ class File(QtCore.QFile):
             file_ = self.fichero
             encode = self.encode_
         import codecs
-        f = codecs.open(file_, encoding=encode)
+        f = codecs.open(file_,"r", encoding=encode)
         ret = ""
         for l in f:
             ret = ret + l
