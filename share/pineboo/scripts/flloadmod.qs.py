@@ -150,6 +150,7 @@ class FormInternalObj(FormDBWidget):
             formRecordflmodules.accept()
             setting = ustr(u"scripts/sys/modLastModule_", sys.nameBD())
             util.writeSettingEntry(setting, nombreFichero)
+            aqApp.reinit()
 
 def dameValor(self, linea=None):
     return linea
