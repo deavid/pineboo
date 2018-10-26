@@ -1373,7 +1373,6 @@ class FLFieldDB(QtWidgets.QWidget):
         ol = field.hasOptionsList()
 
         if type_ == "double":
-
             if isinstance(v, str):
                 v = v.replace(",", ".")
 
@@ -1395,6 +1394,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.logger.exception("Error al desconectar señal textChanged")
 
             if not nulo:
+                if field.partDecimal() is not None:
+                    v = str(round(float(v), self.partDecimal_))
+                
                 self.editor_.setText(v, False)
 
             self.editor_.textChanged.connect(self.updateValue)
