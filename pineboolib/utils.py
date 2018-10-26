@@ -685,6 +685,8 @@ def indent(elem, level=0):
 
 def format_double(d, field_meta):
     from PyQt5 import QtCore
+    from pineboolib.pncontrolsfactory import aqApp
+    #import locale
     p_int = field_meta.partInteger()
     p_decimal = field_meta.partDecimal()
     comma_ = "."
@@ -697,10 +699,15 @@ def format_double(d, field_meta):
 
     while p_decimal > len(str_decimal):
         str_decimal += "0"
+    
+    str_integer = "{:,d}".format(int(str_integer))
 
+    if aqApp.commaSeparator() == ",":
+        str_integer = str_integer.replace(",",".")
+    
+    
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-
-    ret_ = "%s.%s" % (str_integer, str_decimal)
+    ret_ = "%s%s%s" % (str_integer,aqApp.commaSeparator(), str_decimal)
     return ret_
 
 
