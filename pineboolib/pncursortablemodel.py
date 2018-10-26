@@ -286,11 +286,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     list_ = d.split("-")
                     d = date(int(list_[2]), int(list_[1]), int(list_[0]))
                 
-                
-                #Cogemos el locale para presentar lo mejor posible la fecha
-                locale.setlocale(locale.LC_ALL, "%s.utf8" % QtCore.QLocale().name())
-                d = d.strftime('%x')
-                d = d.replace("/","-")
+                if d:
+                    #Cogemos el locale para presentar lo mejor posible la fecha
+                    locale.setlocale(locale.LC_TIME, '')
+                    date_format = locale.nl_langinfo(locale.D_FMT)
+                    date_format = date_format.replace("y", "Y") #Año con 4 dígitos
+                    d = d.strftime(date_format)
+                    d = d.replace("/","-")
 
             elif _type is "check":
                 return
