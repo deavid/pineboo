@@ -291,8 +291,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     locale.setlocale(locale.LC_TIME, '')
                     date_format = locale.nl_langinfo(locale.D_FMT)
                     date_format = date_format.replace("y", "Y") #Año con 4 dígitos
+                    date_format = date_format.replace("/","-") #Separadores
                     d = d.strftime(date_format)
-                    d = d.replace("/","-")
 
             elif _type is "check":
                 return
