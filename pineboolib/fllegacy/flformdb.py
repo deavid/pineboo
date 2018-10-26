@@ -572,7 +572,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.loadControls()
 
         if self._action.table():
-            if not self.cursor() or self.cursor().action().table() is not self._action.table():
+            if not self.cursor() or self.cursor()._action.table() is not self._action.table():
                 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
                 cursor = FLSqlCursor(self._action.table())
                 self.setCursor(cursor)

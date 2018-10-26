@@ -59,7 +59,7 @@ class FLFormSearchDB(FLFormDB):
             action = pineboolib.project.conn.manager().action(name_or_cursor)
             cursor = FLSqlCursor(action.table(), True, "default", None, None, self)
         else:
-            action = name_or_cursor.action()
+            action = name_or_cursor._action
             cursor = name_or_cursor
 
         super(FLFormSearchDB, self).__init__(parent, action, load=False)

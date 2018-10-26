@@ -2451,7 +2451,7 @@ class FLFieldDB(QtWidgets.QWidget):
         c.next()
 
         if not self.actionName_:
-            a = c.action()
+            a = c._action
         else:
             a = self.actionName_
 

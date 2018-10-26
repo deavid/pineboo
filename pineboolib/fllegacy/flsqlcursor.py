@@ -999,7 +999,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def action(self):
-        return self._action or None
+        return self._action.name() if self._action else None
 
     def actionName(self):
         return self._action.name()
@@ -1033,13 +1033,13 @@ class FLSqlCursor(QtCore.QObject):
         else:
             action = a
 
-        if a is self.action():
+        if a is self._action:
             return
 
-        if not self.action():
+        if not self._action:
             self._action = action
         else:
-            if self.action().name() == action.name():
+            if self.action() == action.name():
                 return True
 
         if not self._action.table():
@@ -2560,7 +2560,7 @@ class FLSqlCursor(QtCore.QObject):
 
                             # Este lo hago sin context() porque no se ha especificado todavía en el
                             # cursor y continue el de master
-                            functionCounter = "%s.widget.calculateCounter" % self.action().scriptFormRecord()[:-3]
+                            functionCounter = "%s.widget.calculateCounter" % self._action.scriptFormRecord()[:-3]
                             siguiente = aqApp.call(functionCounter, None, None, True)
                         except Exception:
                             util = FLUtil()
