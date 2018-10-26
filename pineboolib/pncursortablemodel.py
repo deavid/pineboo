@@ -5,12 +5,15 @@ import threading
 import logging
 import time
 import itertools
+from datetime import date
 
 from pineboolib.utils import filedir, format_double
 import pineboolib
 
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+from pineboolib.fllegacy.flutil import FLUtil
 
+from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+import locale
 
 DEBUG = False
 
@@ -246,15 +249,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return QtCore.Qt.Unchecked
 
         elif role == QtCore.Qt.TextAlignmentRole:
+            d =  QtCore.Qt.AlignVCenter
             if _type in ("int", "double", "uint"):
-                d = QtCore.Qt.AlignRight
+                d = d | QtCore.Qt.AlignRight 
             elif _type in ("bool", "date", "time"):
-                d = QtCore.Qt.AlignCenter
+                d = d | QtCore.Qt.AlignCenter
             elif _type in ("unlock", "pixmap"):
-                d = QtCore.Qt.AlignHCenter
-            else:
-                d = None
-
+                d = d | QtCore.Qt.AlignHCenter
+                
             return d
 
         elif role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
@@ -272,8 +274,23 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             elif _type in ("string", "stringlist") and not d:
                 d = ""
 
-            elif _type in ("date", "time") and d:
+            elif _type is "time" and d:
                 d = str(d)
+            
+            elif _type is "date":
+                 # Si es str lo paso a datetime.date
+                if isinstance(d, str):
+                    if len(d.split("-")[0]) == 4:
+                        d = FLUtil().dateAMDtoDMA(d)
+                    
+                    list_ = d.split("-")
+                    d = date(int(list_[2]), int(list_[1]), int(list_[0]))
+                
+                
+                #Cogemos el locale para presentar lo mejor posible la fecha
+                locale.setlocale(locale.LC_ALL, "%s.utf8" % QtCore.QLocale().name())
+                d = d.strftime('%x')
+                d = d.replace("/","-")
 
             elif _type is "check":
                 return
