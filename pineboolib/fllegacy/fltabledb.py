@@ -2270,18 +2270,12 @@ class FLTableDB(QtWidgets.QWidget):
     def switchSortOrder(self, col=0):
         if not self.autoSortColumn_:
             return
+        #FIXME: ORDER logicalindex
+        
+        #Si es columna uno o dos y pasar columna
+        self.orderAsc_ = not self.orderAsc_
 
-        if self.checkColumnVisible_:
-            col = col - 1
-
-        if col == self.tableRecords_.visualIndexToRealIndex(self.sortColumn_):
-            self.orderAsc_ = not self.orderAsc_
-
-        self.setSortOrder(self.orderAsc_)
-
-        # elif col == self.sortColumn2_:
-        #    self.orderAsc2_ = not self.orderAsc2_
-        #    self.tableRecords_.sortByColumn(col, self.setSortOrder(self.orderAsc2_))
+        self.setSortOrder(self.orderAsc_,  col)
 
     """
     Filtra los registros de la tabla utilizando el primer campo, según el patrón dado.
@@ -2339,9 +2333,10 @@ class FLTableDB(QtWidgets.QWidget):
         self.refreshDelayed(msec_refresh, refreshData)
         self.filter_ = bFilter
 
-    def setSortOrder(self, ascending=True):
+    def setSortOrder(self, ascending=True, col_order = None):
         order = Qt.AscendingOrder if ascending else Qt.DescendingOrder
         col = self.sortColumn_
+        print(col_order, col, order)
         while True:
             column = self.tableRecords_.header().logicalIndex(col)
             if not self.tableRecords_.isColumnHidden(column):
