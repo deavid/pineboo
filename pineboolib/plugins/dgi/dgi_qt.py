@@ -186,8 +186,10 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
             val, ok = aqApp.localeSystem().toDouble(text_)
             if ok:
-                text_ = aqApp.localeSystem().toString(val,'f',self.partDecimal)
+                #text_ = aqApp.localeSystem().toString(val,'f',self.partDecimal)
+                text_ = str(val)
             
+                    
             if minus:
                 text_ = "-%s" % text_
         
@@ -208,13 +210,21 @@ class FLLineEdit(QtWidgets.QLineEdit):
         self._maxValue = max_value
     
     def focusOutEvent(self, f):
-        v = self.validator()
-        if v:
-            s = self.text()
-            #v.fixup(s)
-            self.setText(self.text())
-        elif self._tipo in ("double","int","uint"):
-            self.setText(self.text())
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        if self._tipo in ("double","int","uint"):
+            text_ = super(FLLineEdit, self).text()
+            
+            if self._tipo == "double":
+                if aqApp.commaSeparator() == ",":
+                    text_ = text_.replace(".",",")
+                val, ok = aqApp.localeSystem().toDouble(text_)
+                if ok:
+                    text_ = aqApp.localeSystem().toString(val,'f',self.partDecimal)
+            
+            
+                
+            self.setText(text_)
         super(FLLineEdit, self).focusOutEvent(f)
     
     def focusInEvent(self, f):
