@@ -7,7 +7,7 @@ import time
 import itertools
 from datetime import date
 
-from pineboolib.utils import filedir, format_double
+from pineboolib.utils import filedir, format_double, format_int
 import pineboolib
 
 from pineboolib.fllegacy.flutil import FLUtil
@@ -299,7 +299,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type is "double":
                 if d is not None:
-                    d = format_double(d, field)
+                    d = format_double(d, field.partInteger(), field.partDecimal())
+            elif _type in ("int", "uint"):
+                    d = format_int(d)
 
             return d
 

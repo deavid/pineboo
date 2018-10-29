@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 
 from pineboolib import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.utils import filedir, aqtt
+from pineboolib.utils import filedir, aqtt, format_double
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
@@ -193,7 +193,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.setName("FLFieldDB")
 
         self.cursorBackup_ = False
-        self.partDecimal_ = None
+        self._partDecimal = None
         self.initCursor()
         if self.tableName_ and not self.cursor_.db().manager().metadata(self.tableName_):
             self.cursor_ = None
@@ -743,8 +743,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if self.editor_:
                 s = None
                 if v is not None:
-                    if self.partDecimal_:
-                        s = round(float(v), self.partDecimal_)
+                    if self._partDecimal:
+                        s = round(float(v), self._partDecimal)
                     else:
                         s = round(float(v), field.partDecimal())
                     self.editor_.setText(str(s))
@@ -982,7 +982,7 @@ class FLFieldDB(QtWidgets.QWidget):
     """
 
     def setPartDecimal(self, d):
-        self.partDecimal_ = d
+        self._partDecimal = d
         self.refreshQuick(self.fieldName_)
         # self.editor_.setText(self.editor_.text(),False)
 
@@ -1105,11 +1105,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
         modeAcces = self.cursor_.modeAccess()
         partDecimal = None
-        if self.partDecimal_:
-            partDecimal = self.partDecimal_
+        if self._partDecimal:
+            partDecimal = self._partDecimal
         else:
             partDecimal = field.partDecimal()
-            self.partDecimal_ = field.partDecimal()
+            self._partDecimal = field.partDecimal()
 
         ol = field.hasOptionsList()
 
@@ -1351,6 +1351,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if not fN or not fN == self.fieldName_ or not self.cursor_:
             return
 
+        from pineboolib.pncontrolsfactory import aqApp
         tMD = self.cursor_.metadata()
         field = tMD.field(self.fieldName_)
 
@@ -1367,26 +1368,20 @@ class FLFieldDB(QtWidgets.QWidget):
         v = self.cursor_.valueBuffer(self.fieldName_)
         nulo = self.cursor_.bufferIsNull(self.fieldName_)
 
-        if self.partDecimal_ == -1:
-            self.partDecimal_ = field.partDecimal()
+        if self._partDecimal < 0:
+            self._partDecimal = field.partDecimal()
 
         ol = field.hasOptionsList()
 
         if type_ == "double":
-            if isinstance(v, str):
-                v = v.replace(",", ".")
+            
+            part_decimal = self._partDecimal if self._partDecimal > -1 else field.partDecimal()
+            
+            e_text = self.editor_.text();
+            if e_text is not "":
+                if float(e_text) == float(v):
 
-            text = self.editor_.text().replace(",", ".")
-            # if text.endswith(".") and len(text) > 1:
-            #    text += "0"
-            # PAra comprobar que le string recibido no equivale al double del campo
-            if (text == "" and v == 0.0) or (float(v) == float(text if not "." else "0")):
-                return
-            try:
-                if int(text) == int(v):
                     return
-            except:
-                pass
 
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
@@ -1394,10 +1389,9 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.logger.exception("Error al desconectar señal textChanged")
 
             if not nulo:
-                if field.partDecimal() is not None:
-                    v = str(round(float(v), self.partDecimal_))
-                
-                self.editor_.setText(v, False)
+                v = round(v, self._partDecimal)
+            
+            self.editor_.setText(v, False)
 
             self.editor_.textChanged.connect(self.updateValue)
 
@@ -1705,11 +1699,11 @@ class FLFieldDB(QtWidgets.QWidget):
         partInteger = field.partInteger()
         partDecimal = None
         if type_ == "double":
-            if self.partDecimal_:
-                partDecimal = self.partDecimal_
+            if self._partDecimal:
+                partDecimal = self._partDecimal
             else:
                 partDecimal = field.partDecimal()
-                self.partDecimal_ = field.partDecimal()
+                self._partDecimal = field.partDecimal()
 
         rX = field.regExpValidator()
         ol = field.hasOptionsList()
@@ -3167,7 +3161,8 @@ class FLFieldDB(QtWidgets.QWidget):
 
 
 class FLDoubleValidator(QtGui.QDoubleValidator):
-
+    logger = logging.getLogger(__name__)
+    _formatting = None
     def __init__(self, *args):
         if len(args) == 4:
             super(FLDoubleValidator, self).__init__(args[0], args[1], args[2], args[3])
@@ -3176,50 +3171,48 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
             # 3 partDecimal
             # 4 editor
         self.setNotation(self.StandardNotation)
+        self._formatting = False
 
     def validate(self, input_, input_length):
-
-        if input_ is None:
-            return (self.Acceptable, input_, input_length)
-        input_.replace(",", ".")
-
-        state = super(FLDoubleValidator, self).validate(input_, input_length)
+        value_in = input_
+        if value_in is None or self._formatting == True:
+            return (self.Acceptable, value_in, input_length)
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        
+            
+        input_length= len(value_in)
+        state = super(FLDoubleValidator, self).validate(value_in, input_length)
 
         # 0 Invalid
         # 1 Intermediate
         # 2 Acceptable
         ret_0 = None
-        ret_1 = None
         ret_2 = state[2]
 
-        if state[0] in (self.Invalid, self.Intermediate) and len(input_) > 0:
-            s = input_[1:]
-            if input_[0] == "-" and super(FLDoubleValidator, self).validate(s, input_length)[0] == self.Acceptable or s == "":
+        if state[0] in (self.Invalid, self.Intermediate) and len(value_in) > 0:
+            s = value_in[1:]
+            if value_in[0] == "-" and super(FLDoubleValidator, self).validate(s, input_length)[0] == self.Acceptable or s == "":
                 ret_0 = self.Acceptable
             else:
                 ret_0 = self.Invalid
         else:
             ret_0 = self.Acceptable
-
-        from pineboolib.pncontrolsfactory import aqApp
-
-        if state[1]:
-            if aqApp.commaSeparator() == ",":
-                ret_1 = state[1].replace(".", ",")
-            else:
-                ret_1 = state[1].replace(",", ".")
-
+        
+        ret_1 = state[1]
+        
         return (ret_0, ret_1, ret_2)
 
 
 class FLIntValidator(QtGui.QIntValidator):
-
+    _formatting = None
     def __init__(self, *args, **kwargs):
         super(FLIntValidator, self).__init__(args[0], args[1], args[2])
-
+        self._formatting = False
+        
     def validate(self, input_, input_length):
 
-        if not input_:
+        if not input_ or self._formatting == True:
             return (self.Acceptable, input_, input_length)
 
         state = super(FLIntValidator, self).validate(input_, input_length)
@@ -3237,18 +3230,21 @@ class FLIntValidator(QtGui.QIntValidator):
         else:
             ret_0 = self.Acceptable
 
+        #FIXME:Salir formateado
         return (ret_0, ret_1, ret_2)
 
 
 class FLUIntValidator(QtGui.QIntValidator):
-
+    _formatting = None
     def __init__(self, *args, **kwargs):
         if len(args) == 3:
             super(FLUIntValidator, self).__init__(args[0], args[1], args[2])
+        
+        self._formatting = False
 
     def validate(self, input_, input_length):
 
-        if not input_:
+        if not input_ or self._formatting == True:
             return (self.Acceptable, input_, input_length)
 
         i_v = QtGui.QIntValidator(0, 1000000000, self)
@@ -3258,4 +3254,5 @@ class FLUIntValidator(QtGui.QIntValidator):
         ret_1 = state[1]
         ret_2 = state[2]
 
+        #FIXME: Salir formateado
         return (ret_0, ret_1, ret_2)

@@ -95,15 +95,17 @@ class QSignalMapper(QtCore.QSignalMapper):
 
 
 class FLLineEdit(QtWidgets.QLineEdit):
-
+    logger = logging.getLogger(__name__)
     _tipo = None
-    _partDecimal = 0
-    _partInteger = 0
+    partDecimal = 0
+    partInteger = 0
     _maxValue = None
     autoSelect = True
     _name = None
     _longitudMax = None
     _parent = None
+    _last_text = None
+    _formating = False
 
     lostFocus = QtCore.pyqtSignal()
 
@@ -113,61 +115,127 @@ class FLLineEdit(QtWidgets.QLineEdit):
         if isinstance(parent.fieldName_, str):
             self._fieldName = parent.fieldName_
             self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
-            self._partDecimal = parent.partDecimal_
-            self._partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
+            self.partDecimal = 0
+            self.autoSelect = True
+            self.partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
             self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
             self._parent = parent
+            #self.textChanged.connect(self.format_value)
 
             if self._tipo in ("int", "uint", "double"):
                 self.setAlignment(QtCore.Qt.AlignRight)
+            
+            
 
-    def setText(self, texto, b=True):
-        # if self._maxValue:
-        #    if self._maxValue < int(texto):
-        #        texto = self._maxValue
-
-        texto = str(texto)
-
-        super(FLLineEdit, self).setText(texto)
+    def setText(self, text_, check_focus=True):  
+        from pineboolib.pncontrolsfactory import aqApp
+        text_ = str(text_)
         if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), texto)
-        # self.textChanged.emit(texto)
+            pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text_)
+        else:
+            if check_focus:
+                
+                if text_ in ("", None) or self.hasFocus():
+                    super(FLLineEdit, self).setText(text_)
+                    return
+            
+            ok = False
+            s = text_
+            minus = False
+            
+            if self._tipo == "double":
+                if s[0] == "-":
+                    minus = True
+                    s = s[1:]
+                    
+                val, ok = aqApp.localeSystem().toDouble(s)
+                if ok:
+                    s = aqApp.localeSystem().toString(val,'f',self.partDecimal)
+                if minus:
+                    s = "-%s" % s
+                
+            elif self._tipo in ("int"):
+                val, ok = aqApp.localeSystem().toInt(s)
+                if ok:
+                    s = aqApp.localeSystem().toString(val)
+            
+            elif self._tipo in ("uint"):
+                val, ok = aqApp.localeSystem().toUInt(s)
+                if ok:
+                    s = aqApp.localeSystem().toString(val)
+                    
+            super(FLLineEdit, self).setText(s)    
+                        
+        
+            
+    
 
     def text(self):
-        texto = str(super(FLLineEdit, self).text())
+        from pineboolib.pncontrolsfactory import aqApp
+        text_ = super(FLLineEdit, self).text()
+        if text_ == "":
+            return text_
+        
+        ok = False
+        minus = False
+        
+        if self._tipo == "double":
+            if text_[0] == "-":
+                minus = True
+                text_ = text_[1:]
 
-        if texto is None:
-            texto = ""
-
-        return str(texto)
-
-    """
-    Especifica un valor máximo para el text (numérico)
-    """
-
-    def setMaxValue(self, value):
-        self.setMaxLength(value)
-    """
-    def focusInEvent(self, *f):
-        print("focus in!! ---> ", f)
-        if self._tipo == "double" or self._tipo == "int" or self._tipo == "Uint":
-            self.blockSignals(True)
-            s = self.text()
-            super(FLLineEdit,self).setText(s)
-            self.blockSignals(False)
-        if self.autoSelect and self.selectedText().isEmpty() and not self.isReadOnly():
-            self.selectAll()
-
-        QtGui.QLineEdit.focusInEvent(f)
-
+            val, ok = aqApp.localeSystem().toDouble(text_)
+            if ok:
+                text_ = aqApp.localeSystem().toString(val,'f',self.partDecimal)
+            
+            if minus:
+                text_ = "-%s" % text_
+        
+        elif self._tipo == "uint":
+            val, ok = aqApp.localeSystem().toUInt(text_)                
+            if ok:
+                text_ = str(val)
+        
+        elif self._tipo == "int":
+            val, ok = aqApp.localeSystem().toInt(text_)
+                
+            if ok:
+                text_ = str(val)
+        
+        return text_
+    
+    def setMaxValue(self, max_value):
+        self._maxValue = max_value
+    
     def focusOutEvent(self, f):
-        print("Adios --->", f)
-        if self._tipo == "double" or self._tipo == "int" or self._tipo == "Uint":
+        v = self.validator()
+        if v:
+            s = self.text()
+            #v.fixup(s)
             self.setText(self.text())
+        elif self._tipo in ("double","int","uint"):
+            self.setText(self.text())
+        super(FLLineEdit, self).focusOutEvent(f)
+    
+    def focusInEvent(self, f):
+        if self._tipo in ("double","int","uint"):
+            self.blockSignals(True)
+            s= self.text()
+            v = self.validator()
+            if v:
+                pos = 0
+                v.validate(s, pos)
+            
+            super(FLLineEdit, self).setText(s)
+            self.blockSignals(False)
+        
+        if self.autoSelect and not self.selectedText() and not self.isReadOnly():
+            self.selectAll()
+        
+        super(FLLineEdit, self).focusInEvent(f)
+        
 
-        super(FLLineEdit,self).focusOutEvent(self, f)
-
-    """
+        
 
 
 class QPushButton(QtWidgets.QPushButton):

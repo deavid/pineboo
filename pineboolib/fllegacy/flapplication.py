@@ -168,6 +168,9 @@ class FLApplication(QtCore.QObject):
     @decorators.NotImplementedWarn
     def endfcgi(self):
         pass
+    
+    def localeSystem(self):
+        return self.locale_system_
 
     @decorators.NotImplementedWarn
     def openQSWorkbench(self):

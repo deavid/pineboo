@@ -683,34 +683,92 @@ def indent(elem, level=0):
             elem.tail = i
 
 
-def format_double(d, field_meta):
+def format_double(d, part_integer, part_decimal):
     from PyQt5 import QtCore
     from pineboolib.pncontrolsfactory import aqApp
+    
+    if d is "":
+        return d
     #import locale
-    p_int = field_meta.partInteger()
-    p_decimal = field_meta.partDecimal()
+    #p_int = field_meta.partInteger()
+    #p_decimal = field_meta.partDecimal()
     comma_ = "."
+    d = str(d)
+    found_comma = True if d.find(comma_) > -1 else False
+    #if aqApp.commaSeparator() == comma_:
+    #    d = d.replace(",", "")
+    #else:
+    #    d = d.replace(".","")
+    #    d = d.replace(",",".")
 
-    d = round(d, p_decimal)
+    d = round(float(d), part_decimal)
 
     str_d = str(d)
     str_integer = str_d[0:str_d.find(comma_)] if str_d.find(comma_) > -1 else str_d
     str_decimal = "" if str_d.find(comma_) == -1 else str_d[str_d.find(comma_) + 1:]
 
-    while p_decimal > len(str_decimal):
-        str_decimal += "0"
-    
-    str_integer = "{:,d}".format(int(str_integer))
+    if part_decimal > 0:
+        while part_decimal > len(str_decimal):
+            str_decimal += "0"
 
-    if aqApp.commaSeparator() == ",":
-        str_integer = str_integer.replace(",",".")
     
-    
+    str_integer = format_int(str_integer, part_integer)
+  
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (str_integer,aqApp.commaSeparator(), str_decimal)
+    ret_ = "%s%s%s" % (str_integer,aqApp.commaSeparator() if found_comma else "", str_decimal if part_decimal > 0 else "")
     return ret_
 
 
+def format_int(value, part_intenger = None):
+    from pineboolib.pncontrolsfactory import aqApp
+    str_integer = value
+    if value is not None:
+        str_integer = "{:,d}".format(int(value))
+
+        if aqApp.commaSeparator() == ",":
+            str_integer = str_integer.replace(",",".")
+        else:
+            str_integer = str_integer.replace(".",",")
+    
+    return str_integer
+
+def unformat_number(new_str, old_str, type_):
+    ret_ = new_str
+    if old_str is not None:
+    
+        if type_ in ("int","uint"):
+            new_str = new_str.replace(",","")
+            new_str = new_str.replace(".", "")
+    
+            ret_ = new_str
+        
+        else:
+            end_comma = False
+            if new_str.endswith(",") or new_str.endswith("."):
+                #Si acaba en coma, lo guardo
+                end_comma = True
+                
+            ret_ = new_str.replace(",","")
+            ret_ = ret_.replace(".", "")
+            if end_comma:
+                ret_ = ret_ + "."
+            #else:
+            #    comma_pos = old_str.find(".")
+            #    if comma_pos > -1:   
+            print("Desformateando", new_str, ret_)       
+ 
+        #else:
+            #pos_comma = old_str.find(".")
+    
+            #if pos_comma > -1:
+            #    if pos_comma > new_str.find("."):
+            #        new_str = new_str.replace(".", "")
+                            
+            #        ret_ = new_str[0:pos_comma] + "." + new_str[pos_comma:] 
+    
+    #print("l2", ret_)
+    return ret_
+    
 """
 Convierte diferentes formatos de fecha a QDate
 @param date: Fecha a convertir
