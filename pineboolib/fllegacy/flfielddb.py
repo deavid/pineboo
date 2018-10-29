@@ -570,7 +570,6 @@ class FLFieldDB(QtWidgets.QWidget):
             if not self.cursor_.bufferIsNull(self.fieldName_):
                 if data == self.cursor_.valueBuffer(self.fieldName_):
                     return
-
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
         elif isinstance(self.editor_, pineboolib.pncontrolsfactory.QComboBox):
@@ -1377,12 +1376,9 @@ class FLFieldDB(QtWidgets.QWidget):
             
             part_decimal = self._partDecimal if self._partDecimal > -1 else field.partDecimal()
             
-            e_text = self.editor_.text();
-            if e_text is not "":
-                if float(e_text) == float(v):
-
-                    return
-
+            e_text = self.editor_.text() if self.editor_.text() != "" else 0.0;
+            if float(e_text) == float(v):
+                return
             try:
                 self.editor_.textChanged.disconnect(self.updateValue)
             except Exception:
@@ -1390,7 +1386,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             if not nulo:
                 v = round(v, self._partDecimal)
-            
+
             self.editor_.setText(v, False)
 
             self.editor_.textChanged.connect(self.updateValue)
