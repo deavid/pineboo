@@ -201,8 +201,8 @@ class PNBuffer(object):
 
         if field.type_ in ("bool", "unlock"):
             return not (self.value(field.name) in (True, False))
-
-        return self.value(field.name) in (None, "")
+        
+        return self.value(field.name) in (None,"")
 
     """
     Retorna el valor de un campo
@@ -212,7 +212,6 @@ class PNBuffer(object):
 
     def value(self, n):
         field = self.field(n)
-
         v = field.value
         if field.value is None:
             v = None
@@ -223,20 +222,22 @@ class PNBuffer(object):
                 except Exception:
                     v = ""
 
-            if field.type_ in ("int", "uint", "serial"):
+            elif field.type_ in ("int", "uint", "serial"):
                 try:
                     v = int(field.value)
                 except Exception:
                     v = 0
 
-            if field.type_ == "double":
+            elif field.type_ == "double":
                 try:
                     v = float(field.value)
                 except Exception:
                     v = 0.0
-
-        if field.type_ in ("bool", "unlock"):
-            v = field.value in (True, "true")
+                
+            elif field.type_ in ("bool", "unlock"):
+                v = field.value in (True, "true")
+        
+        
         # ret = self.convertToType(field.value, field.type_)
         # logger.trace("---->retornando %s %s %s",v , type(v), field.value, field.name)
         return v
@@ -249,7 +250,6 @@ class PNBuffer(object):
     """
 
     def setValue(self, name, value, mark_=True):
-        # logger.trace("**** %s *** ->%s previo ->%s" % (name, value, self.value(name)))
         if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date)):
             raise ValueError(
                 "No se admite el tipo %r , en setValue %r" % (type(value), value))
@@ -261,31 +261,15 @@ class PNBuffer(object):
         if field is None:
             return False
 
-        if field.type_ == "double" and value not in ("", "-") and isinstance(value, str):
-            value = float(value.replace(",", "."))
+        if field.type_ == "double" and value not in ("", "-",None):
+            value = float(value)
+
 
         if field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
 
-        # if field.type_ in ("bool","unlock") and isinstance(value , str):
-        #    value = (value == "true")
-        # if field.type_ == "double" and value:
-        #    if isinstance(value, str):
-        #        punto_ = QtCore.QLocale().decimalPoint()
-        #        value = value.replace(punto_, ".")
-        #    if value == ".":
-        #        value = "0."
 
-        #    if value == "-":
-        #        return True
         if self.hasChanged(field.name, value):
-
-            # if not value == None:
-            #    value = str(value)
-
-            # if field.type_ == "date" and value == None: #Evitamos poner un date a None
-            #    pass
-            # else:
             field.value = value
 
             if mark_:
@@ -329,15 +313,11 @@ class PNBuffer(object):
 
                 if actual == "-":
                     return True
-
-                punto_ = QtCore.QLocale().decimalPoint()
-                if isinstance(value, str):
-                    value = value.replace(punto_, ".") if not value == "." else "0."
-
-                if isinstance(actual, str):
-                    actual = actual.replace(punto_, ".") if not actual == "." else "0."
-
-                return not (float(actual) == float(value))
+                try:
+                    return not (float(actual) == float(value))
+                except Exception:
+                    print("****************************************Error al comparar buffer", actual, value)
+                    return True
             else:
                 return True
 
@@ -1217,6 +1197,7 @@ class FLSqlCursor(QtCore.QObject):
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         self.bufferChanged.emit(fN)
+
 
     """
     Devuelve el valor de un campo del buffer.
