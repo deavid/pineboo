@@ -1197,7 +1197,8 @@ class FLSqlCursor(QtCore.QObject):
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         self.bufferChanged.emit(fN)
-
+        from pineboolib.pncontrolsfactory import SysType
+        SysType.processEvents(self)
 
     """
     Devuelve el valor de un campo del buffer.
