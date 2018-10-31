@@ -501,7 +501,7 @@ def ustr1(t):
     if isinstance(t, str):
         return str(t, "UTF-8")
     try:
-        return repr(t)
+        return "%s" % t
     except Exception as e:
         logger.exception("ERROR Coercing to string: %s", repr(t))
         return None
