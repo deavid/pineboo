@@ -3171,6 +3171,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
     def validate(self, input_, input_length):
         value_in = input_
+        
         if value_in is None or self._formatting == True:
             return (self.Acceptable, value_in, input_length)
         
@@ -3179,7 +3180,6 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
             
         input_length= len(value_in)
         state = super(FLDoubleValidator, self).validate(value_in, input_length)
-
         # 0 Invalid
         # 1 Intermediate
         # 2 Acceptable
@@ -3197,6 +3197,14 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         
         ret_1 = state[1]
         
+        if aqApp.commaSeparator() == "," and ret_1.endswith("."):
+            ret_1 = ret_1[0:len(ret_1) - 1] + ","
+        
+        if len(ret_1) == 1 and ret_1 not in ("0","1","2","3","4","5","6", "7","8","9",",","."):
+            ret_0 = 0
+            ret_1 = ""
+            ret_2 = 0
+            
         return (ret_0, ret_1, ret_2)
 
 
