@@ -267,9 +267,13 @@ class PNBuffer(object):
 
         if field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
-
+        
+        if field.type_ is "time" and value is not None:
+            if value.find("T") > -1:
+                value = value[value.find("T") + 1:]
 
         if self.hasChanged(field.name, value):
+            
             field.value = value
 
             if mark_:
@@ -1247,12 +1251,18 @@ class FLSqlCursor(QtCore.QObject):
 
         else:
             v = self.buffer().value(fN)
-
+        
+        if type_ in ("date") and v:
+            from pineboolib.qsa import Date
+            v = Date(v)
         # Por compatibilidad con Eneboo no devolvemos None nunca
-        if type_ in ("string", "stringlist") and v is None:
+        if type_ in ("string", "stringlist", "date") and v is None:
             v = ""
         elif type_ in ("double", "int", "uint") and v is None:
             v = 0
+        
+        
+            
 
         if v and type_ == "pixmap":
             v_large = None
@@ -2525,7 +2535,7 @@ class FLSqlCursor(QtCore.QObject):
                     # fltype = FLFieldMetaData.flDecodeType(type_)
                     # fltype = self.metadata().field(fiName).flDecodeType(type_)
                     defVal = field.defaultValue()
-                    if defVal:
+                    if defVal is not None:
                         # defVal.cast(fltype)
                         self.buffer().setValue(fiName, defVal)
 
@@ -3695,6 +3705,12 @@ class FLSqlCursor(QtCore.QObject):
     def primaryKey(self):
         if self.buffer():
             return self.buffer().pK()
+    
+    def fieldType(self, field_name = None):
+        ret_ = None
+        if field_name:
+            ret_ =  self.metadata().fieldType(field_name)        
+        return ret_
 
     """
     signals:
