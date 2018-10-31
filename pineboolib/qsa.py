@@ -312,13 +312,18 @@ class Date(object):
         super(Date, self).__init__()
         if len(args) == 1:
             date_ = args[0]
+            self.time_ = None
             if isinstance(date_, str):
-                self.date_ = QtCore.QDate.fromString(date_, "yyyy-MM-dd")
+                if len(date_) == 10:
+                    self.date_ = QtCore.QDate.fromString(date_, "yyyy-MM-dd")
+                else:
+                    self.date_ = QtCore.QDate.fromString(date_[0:10], "yyyy-MM-dd")
+                    self.time_ = QtCore.QTime.fromString(date_[11:], "hh:mm:ss")
+                    
             elif isinstance(date_, QtCore.QDate):
                 self.date_ = date_
-            else:
-                self.date_ = QtCore.QDate(date_)
-            self.time_ = QtCore.QTime(0, 0)
+            if not self.time_:    
+                self.time_ = QtCore.QTime(0, 0)
         elif not args:
             self.date_ = QtCore.QDate.currentDate()
             self.time_ = QtCore.QTime.currentTime()
@@ -351,10 +356,34 @@ class Date(object):
 
     def getMilliseconds(self):
         return self.time_.msec()
+    
+    def setDate(self, *args):
+        if len(args) == 1:
+            year_ = self.date_.toString("yyyy")
+            month_ = self.date_.toString("MM")
+            day_ = str(args[0])
+            if len(day_) == 1:
+                day_ = "0" + day_
+            str_ = "%s-%s-%s" % (year_, month_, day_)
+            self.date_ = QtCore.QDate.fromString(str_, "yyyy-MM-dd")
+        else:
+            logger.warn("DATE.setDate: Se han especificado %s", len(args))
+    
+    def addDays(self, d):
+        return Date(self.date_.addDays(d).toString("yyyy-MM-dd"))
+    
+    def addMonths(self, m):
+        return Date(self.date_.addMonths(m).toString("yyyy-MM-dd"))
+    
+    def addYears(self, y):
+        return Date(self.date_.addYears(y).toString("yyyy-MM-dd"))      
 
     @classmethod
     def parse(cls, value):
         return QtCore.QDate.fromString(value, "yyyy-MM-dd")
+    
+    def __str__(self):
+        return self.toString()
 
 
 
