@@ -679,15 +679,12 @@ class FLUtil(QtCore.QObject):
         @return Fecha con el desplazamiento de dias
         """
         from pineboolib.qsa import Date
-        if isinstance(fecha, Date):
-            fecha = fecha.date_
-
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
-        if not isinstance(fecha, QtCore.QDate):
-            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha))
+            fecha = Date(fecha, "yyyy-MM-dd")
+        if not isinstance(fecha, Date):
+            logger.error("addDays: No reconozco el tipo de dato %s", type(fecha), stack_info=True)
             return None
-        return fecha.addDays(offset).toString("yyyy-MM-dd")
+        return fecha.addDays(offset)
 
     def addMonths(self, fecha, offset):
         """
@@ -698,15 +695,12 @@ class FLUtil(QtCore.QObject):
         @return Fecha con el desplazamiento de meses
         """
         from pineboolib.qsa import Date
-        if isinstance(fecha, Date):
-            fecha = fecha.date_
-
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
-        if not isinstance(fecha, QtCore.QDate):
-            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha))
+            fecha = Date(fecha)
+        if not isinstance(fecha, Date):
+            logger.error("addMonths: No reconozco el tipo de dato %s", type(fecha), stack_info=True)
             return None
-        return fecha.addMonths(offset).toString("yyyy-MM-dd")
+        return fecha.addMonths(offset)
 
     def addYears(self, fecha, offset):
         """
@@ -717,16 +711,12 @@ class FLUtil(QtCore.QObject):
         @return Fecha con el desplazamiento de años
         """
         from pineboolib.qsa import Date
-        if isinstance(fecha, Date):
-            fecha = fecha.date_
-
         if isinstance(fecha, str):
-            fecha = QtCore.QDate.fromString(fecha, "yyyy-MM-dd")
-        if not isinstance(fecha, QtCore.QDate):
-            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha))
-        return fecha.addYears(offset).toString("yyyy-MM-dd")
+            fecha = Date(fecha)
+        if not isinstance(fecha, Date):
+            logger.error("addYears: No reconozco el tipo de dato %s", type(fecha), stack_info=True)
+        return fecha.addYears(offset)
 
-    @decorators.NotImplementedWarn
     def daysTo(self, d1, d2):
         """
         Diferencia de dias desde una fecha a otra.
@@ -746,8 +736,9 @@ class FLUtil(QtCore.QObject):
         if isinstance(d1, str):
             d1 = d1[:10]
 
-        if not isinstance(d1, str):
-            logger.error("daysTo: No reconozco el tipo de dato %s", type(d1))
+        if not isinstance(d1, str) or d1 is "":
+            if d1 not in (None, ""):
+                logger.error("daysTo: No reconozco el tipo de dato %s", type(d1))
             return None
 
         if isinstance(d2, Date):
@@ -759,10 +750,10 @@ class FLUtil(QtCore.QObject):
         if isinstance(d2, str):
             d2 = d2[:10]
 
-        if not isinstance(d2, str):
-            logger.error("dausTo: No reconozco el tipo de dato %s", type(d2))
+        if not isinstance(d2, str) or d2 is "":
+            if d2 not in (None, ""):
+                logger.error("daysTo: No reconozco el tipo de dato %s", type(d2))
             return None
-
         d1 = datetime.datetime.strptime(d1, "%Y-%m-%d").date()
         d2 = datetime.datetime.strptime(d2, "%Y-%m-%d").date()
         return (d2 - d1).days
