@@ -686,7 +686,7 @@ class FLDateEdit(QDateEdit):
 
         from pineboolib.utils import convert_to_qdate
 
-        if d in (None, "NAN"):
+        if d in (None, "NAN", ""):
             date = QtCore.QDate.fromString(str("01-01-2000"), "dd-MM-yyyy")
         else:
             date = convert_to_qdate(d)
