@@ -10,6 +10,7 @@ from datetime import date
 from pineboolib.utils import filedir, format_double, format_int
 import pineboolib
 
+
 from pineboolib.fllegacy.flutil import FLUtil
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
@@ -260,6 +261,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return d
 
         elif role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
+            from pineboolib.pncontrolsfactory import aqApp
             # r = self._vdata[row]
             if _type is "bool":
                 if d in (True, "1"):
@@ -299,9 +301,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
             elif _type is "double":
                 if d is not None:
-                    d = format_double(d, field.partInteger(), field.partDecimal())
+                    d = aqApp.localeSystem().toString(float(d),'f',field.partDecimal())
             elif _type in ("int", "uint"):
-                    d = format_int(d)
+                if d is not None:
+                    d = aqApp.localeSystem().toString(int(d))
 
             return d
 
