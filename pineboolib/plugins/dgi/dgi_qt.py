@@ -230,6 +230,9 @@ class FLLineEdit(QtWidgets.QLineEdit):
         super(FLLineEdit, self).focusOutEvent(f)
     
     def focusInEvent(self, f):
+        if self.isReadOnly():
+            return
+        
         from pineboolib.pncontrolsfactory import aqApp
         if self._tipo in ("double","int","uint"):
             self.blockSignals(True)
