@@ -983,6 +983,9 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def currentChangedSlot(self):
         self.currentChanged.emit()
+    
+    def currentRow(self):
+        return self.cursor().at()
     """
     Refresca la pestaña datos aplicando el filtro
     """
@@ -1923,12 +1926,9 @@ class FLTableDB(QtWidgets.QWidget):
         _index = c
         if isinstance(c, str):
             _index = self.tableRecords_.realColumnIndex(c)
-
         if _index < 0:
             return False
-
         self.moveCol(_index, self.sortColumn_)
-        # Marca la primera columna visible con el triangulito
         self.tableRecords_.sortByColumn(
             self.sortColumn_, QtCore.Qt.AscendingOrder if self.orderAsc_ else QtCore.Qt.DescendingOrder)
 
@@ -2038,10 +2038,8 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             self.refreshDelayed()
 
-        new_from = self.tableRecords_.visualIndexToRealIndex(from_)
-        #new_to = self.tableRecords_.visualIndexToRealIndex(to)
-        if new_from is not None:
-            self.tableRecords_.header().swapSections(new_from, to)
+
+        self.tableRecords_.header().swapSections(from_, to) #Usamos realColumnIndex
 
         self.refresh(True, False)
 
