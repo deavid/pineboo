@@ -3169,17 +3169,17 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
         self.setNotation(self.StandardNotation)
         self._formatting = False
 
-    def validate(self, input_, input_length):
+    def validate(self, input_, pos_cursor):
         value_in = input_
         
         if value_in is None or self._formatting == True:
-            return (self.Acceptable, value_in, input_length)
+            return (self.Acceptable, value_in, pos_cursor)
         
         from pineboolib.pncontrolsfactory import aqApp
         
             
-        input_length= len(value_in)
-        state = super(FLDoubleValidator, self).validate(value_in, input_length)
+        #pos_cursor= len(value_in)
+        state = super(FLDoubleValidator, self).validate(value_in, pos_cursor)
         # 0 Invalid
         # 1 Intermediate
         # 2 Acceptable
@@ -3188,7 +3188,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
         if state[0] in (self.Invalid, self.Intermediate) and len(value_in) > 0:
             s = value_in[1:]
-            if value_in[0] == "-" and super(FLDoubleValidator, self).validate(s, input_length)[0] == self.Acceptable or s == "":
+            if value_in[0] == "-" and super(FLDoubleValidator, self).validate(s, pos_cursor)[0] == self.Acceptable or s == "":
                 ret_0 = self.Acceptable
             else:
                 ret_0 = self.Invalid
@@ -3214,12 +3214,12 @@ class FLIntValidator(QtGui.QIntValidator):
         super(FLIntValidator, self).__init__(args[0], args[1], args[2])
         self._formatting = False
         
-    def validate(self, input_, input_length):
+    def validate(self, input_, pos_cursor):
 
         if not input_ or self._formatting == True:
-            return (self.Acceptable, input_, input_length)
+            return (self.Acceptable, input_, pos_cursor)
 
-        state = super(FLIntValidator, self).validate(input_, input_length)
+        state = super(FLIntValidator, self).validate(input_, pos_cursor)
 
         ret_0 = None
         ret_1 = state[1]
@@ -3227,7 +3227,7 @@ class FLIntValidator(QtGui.QIntValidator):
 
         if state[0] in (self.Invalid, self.Intermediate) and len(input_) > 0:
             s = input_[1:]
-            if input_[0] == "-" and super(FLIntValidator, self).validate(s, input_length)[0] == self.Acceptable or s == "":
+            if input_[0] == "-" and super(FLIntValidator, self).validate(s, pos_cursor)[0] == self.Acceptable or s == "":
                 ret_0 = self.Acceptable
             else:
                 ret_0 = self.Invalid
@@ -3246,13 +3246,13 @@ class FLUIntValidator(QtGui.QIntValidator):
         
         self._formatting = False
 
-    def validate(self, input_, input_length):
+    def validate(self, input_, pos_cursor):
 
         if not input_ or self._formatting == True:
-            return (self.Acceptable, input_, input_length)
+            return (self.Acceptable, input_, pos_cursor)
 
         i_v = QtGui.QIntValidator(0, 1000000000, self)
-        state = i_v.validate(input_, input_length)
+        state = i_v.validate(input_, pos_cursor)
 
         ret_0 = self.Invalid if state[0] is self.Intermediate else state[0]
         ret_1 = state[1]
