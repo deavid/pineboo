@@ -309,7 +309,7 @@ class FLMYSQL_MYISAM(object):
 
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("COMMIT TRANSACTION")
+            cursor.execute("COMMIT")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
             qWarning("%s:: No se pudo aceptar la transacción COMMIT\n %s" %
@@ -324,7 +324,7 @@ class FLMYSQL_MYISAM(object):
 
         cursor = self.conn_.cursor()
         try:
-            cursor.execute("ROLLBACK TRANSACTION")
+            cursor.execute("ROLLBACK")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
             qWarning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s" % (
