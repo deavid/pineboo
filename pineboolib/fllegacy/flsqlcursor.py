@@ -200,9 +200,9 @@ class PNBuffer(object):
             return True
 
         if field.type_ in ("bool", "unlock"):
-            return not (self.value(field.name) in (True, False))
-        
-        return self.value(field.name) in (None,"")
+            return not (self.value(field.name) in (True, False)) 
+              
+        return field.value in (None,"")
 
     """
     Retorna el valor de un campo
@@ -226,7 +226,7 @@ class PNBuffer(object):
                 try:
                     v = int(field.value)
                 except Exception:
-                    v = 0
+                    v = 0.0
 
             elif field.type_ == "double":
                 try:
@@ -250,6 +250,7 @@ class PNBuffer(object):
     """
 
     def setValue(self, name, value, mark_=True):
+        
         if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date)):
             raise ValueError(
                 "No se admite el tipo %r , en setValue %r" % (type(value), value))
@@ -260,7 +261,7 @@ class PNBuffer(object):
         field = self.field(name)
         if field is None:
             return False
-
+        
         if field.type_ == "double" and value not in ("", "-",None):
             value = float(value)
 
