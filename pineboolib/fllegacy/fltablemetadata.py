@@ -256,11 +256,37 @@ class FLTableMetaData(QtCore.QObject):
         if not fN:
             return None
         fN = str(fN)
+        type_ = None
         for f in self.d.fieldList_:
             if f.name() == fN.lower():
-                return f.type()
-
-        return None
+                type_ = f.type()
+                break
+        
+        ret_ = None
+        if type_ is not None:
+            if type_ in ("string","counter"):
+                ret_ = 3
+            elif type_ == "uint":
+                ret_ = 17
+            elif type_ == "bool":
+                ret_ = 18
+            elif type_ == "double":
+                ret_ = 19
+            elif type_ == "date":
+                ret_ = 26
+            elif type_ == "time":
+                ret_ = 27
+            elif type_ == "serial":
+                ret_ = 100
+            elif type_ == "unlock":
+                ret_ = 200
+            elif type_ == "check":
+                ret_ = 300
+            else:
+                #FIXME: Falta stringlist e int
+                logger.warn("FIXME:: No hay definido un valor numérico para el tipo %s", self.d.type_)
+        
+        return ret_
 
     """
     Obtiene si un campo es clave primaria partir de su nombre.

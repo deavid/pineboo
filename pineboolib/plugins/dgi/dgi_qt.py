@@ -114,7 +114,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
         self._name = name
         if isinstance(parent.fieldName_, str):
             self._fieldName = parent.fieldName_
-            self._tipo = parent.cursor_.metadata().fieldType(self._fieldName)
+            self._tipo = parent.cursor_.metadata().field(self._fieldName).type()
             self.partDecimal = 0
             self.autoSelect = True
             self.partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
@@ -401,9 +401,12 @@ class QGroupBox(QtWidgets.QGroupBox):
 
     def __init__(self, *args, **kwargs):
         super(QGroupBox, self).__init__(*args, **kwargs)
+        self.setStyleSheet("QGroupBox { font-weight: bold; } ")
+        self.setContentsMargins(0, 0, 0, 0)
 
+    @decorators.NotImplementedWarn
     def setLineWidth(self, width):
-        self.setContentsMargins(width, width, width, width)
+        pass
 
     @property
     def selectedId(self):
@@ -764,6 +767,7 @@ class FLCheckBox(QtWidgets.QCheckBox):
 
     def __init__(self, parent=None, num_rows=None):
         super(FLCheckBox, self).__init__(parent)
+        self.setContentsMargins(0, 0, 0, 0)
 
 
 class QTable(QtWidgets.QTableWidget):

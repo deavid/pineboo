@@ -1755,7 +1755,7 @@ class FLSqlCursor(QtCore.QObject):
                         q.setSelect(fiName)
                         q.setFrom(self.metadata().name())
                         q.setWhere("%s AND %s <> %s" % (self.db().manager().formatAssignValue(field, s, True), self.metadata().primaryKey(
-                            self.d.isQuery_), self.db().manager().formatValue(self.metadata().fieldType(pK), pKV)))
+                            self.d.isQuery_), self.db().manager().formatValue(self.metadata().field(pK).type(), pKV)))
                         q.setForwardOnly(True)
                         q.exec_()
                         if (q.next()):
@@ -1974,7 +1974,7 @@ class FLSqlCursor(QtCore.QObject):
     def setUnLock(self, fN, v):
         if not self.metadata() or not self.modeAccess() == self.Browse:
             return
-        if not self.metadata().fieldType(fN) == FLFieldMetaData.Unlock:
+        if not self.metadata().field(fN).type() == FLFieldMetaData.Unlock:
             logger.warn("setUnLock sólo permite modificar campos del tipo Unlock")
             return
         self.d.buffer_ = self.primeUpdate()

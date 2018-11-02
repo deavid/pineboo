@@ -279,7 +279,8 @@ class FLUtil(QtCore.QObject):
         @param tabla. Nombre de la tabla
         @return Lista de campos
         """
-        campos = pineboolib.project.conn.manager().metadata(tablename).fieldsNames()
+        from pineboolib.pncontrolsfactory import aqApp
+        campos = aqApp.db().manager().metadata(tablename).fieldsNames()
         return [len(campos)] + campos
 
     def calcularDC(self, n):
@@ -864,9 +865,8 @@ class FLUtil(QtCore.QObject):
 
         @return Número redondeado
         """
-
-        # tmd = self._prj.conn.manager().metadata(table)
-        tmd = pineboolib.project.conn.manager().metadata(table)
+        from pineboolib.pncontrolsfactory import aqApp
+        tmd = aqApp.db().manager().metadata(table)
         if not tmd:
             return 0
         fmd = tmd.field(field)
@@ -1261,3 +1261,19 @@ class FLUtil(QtCore.QObject):
         @author Silix
         """
         pass
+    
+    def fieldType(self, field_name, table_name):
+        """
+        Retorna el tipo numérico de un field
+        @param field_name. Nombre del campo
+        @param table_name. Nombre de la tabla que contiene el campo
+        @return id del tipo de campo
+        """
+        ret_ = None
+        from pineboolib.pncontrolsfactory import aqApp
+        table_metadata = aqApp.db().manager().metadata(table_name)
+        if table_metadata:
+            ret_ = table_metadata.fieldType(field_name)
+        
+        return ret_
+        
