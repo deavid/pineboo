@@ -206,48 +206,53 @@ class Input(object):
 class NumberEdit(QtWidgets.QWidget):
 
     def __init__(self):
+        super(NumberEdit, self).__init__()
+        
+        from PyQt5.Qt import QDoubleValidator
         self.line_edit = QLineEdit(self)
-        self.validator = QDoubleValidator
+        self.label_line_edit = QLabel(self)
+        self.label_line_edit.setMinimumWidth(150)
+        lay = QHBoxLayout()
+        lay.addWidget(self.label_line_edit)
+        lay.addWidget(self.line_edit)
+        lay.setContentsMargins(0,0,0,0)
+        self.setLayout(lay)
+        self.validator = QDoubleValidator()
+        self.line_edit.setValidator(self.validator)
+        
 
-    @decorators.NotImplementedWarn
     def getValue(self):
-        return float(self.line_edit.text())
+        return float(self.line_edit.text)
 
-    @decorators.NotImplementedWarn
     def setValue(self, value):
         self.line_edit.setText(value)
 
-    @decorators.NotImplementedWarn
     def getDecimals(self):
-        pass
+        return self.line_edit.validator().decimals()
 
-    @decorators.NotImplementedWarn
     def setDecimals(self, decimals):
-        pass
+        self.line_edit.validator().setDecimals(int(decimals))
 
-    @decorators.NotImplementedWarn
-    def setMinimum(self, minimum):
-        pass
 
-    @decorators.NotImplementedWarn
+    def setMinimum(self, min):
+        self.line_edit.validator().setBottom(float(min))
+
     def getMinimum(self):
-        pass
+        return self.line_edit.validator().bottom()
 
-    @decorators.NotImplementedWarn
+
     def getMaximum(self):
-        pass
+        return self.line_edit.validator().top()
 
-    @decorators.NotImplementedWarn
-    def setMaximum(self, maximum):
-        pass
+    def setMaximum(self, max):
+        return self.line_edit.validator().setTop(float(max))
 
-    @decorators.NotImplementedWarn
     def getLabel(self):
-        pass
+        self.label_line_edit.text()
 
-    @decorators.NotImplementedWarn
     def setLabel(self, label):
-        pass
+        
+        self.label_line_edit.setText(label)
 
     label = property(getLabel, setLabel)
     value = property(getValue, setValue)
