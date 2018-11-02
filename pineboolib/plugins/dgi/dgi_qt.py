@@ -238,7 +238,8 @@ class FLLineEdit(QtWidgets.QLineEdit):
             self.blockSignals(True)
             s= self.text()
             if self._tipo is ("double"):
-                s = aqApp.localeSystem().toString(float(s),'f',self.partDecimal)
+                if s is not "":
+                    s = aqApp.localeSystem().toString(float(s),'f',self.partDecimal)
                 if aqApp.commaSeparator() == ",":
                     s = s.replace(".", "")
                 else:
