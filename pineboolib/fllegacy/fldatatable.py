@@ -204,6 +204,10 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setSort(self, s):
         self.sort_ = s
+    
+    def sortByColumn(self, col, order):
+        print("Ordenando por columna Logica", col, "%s" % ("Ascendente" if order is QtCore.Qt.AscendingOrder else "Descencente"))
+        return super(FLDataTable, self).sortByColumn(col, order)
     """
     Devuelve el cursor
     """
