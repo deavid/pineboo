@@ -2041,21 +2041,21 @@ def openUrl(url=None):
     if s07_when == u"LINUX":
         s07_do_work, s07_work_done = True, True
     if s07_do_work:
-        if self.launchCommand([u"xdg-open", url]):
+        if launchCommand([u"xdg-open", url]):
             return True
-        if self.launchCommand([u"gnome-open", url]):
+        if launchCommand([u"gnome-open", url]):
             return True
-        if self.launchCommand([u"kfmclient openURL", url]):
+        if launchCommand([u"kfmclient openURL", url]):
             return True
-        if self.launchCommand([u"kfmclient exec", url]):
+        if launchCommand([u"kfmclient exec", url]):
             return True
-        if self.launchCommand([u"firefox", url]):
+        if launchCommand([u"firefox", url]):
             return True
-        if self.launchCommand([u"mozilla", url]):
+        if launchCommand([u"mozilla", url]):
             return True
-        if self.launchCommand([u"opera", url]):
+        if launchCommand([u"opera", url]):
             return True
-        if self.launchCommand([u"google-chrome", url]):
+        if launchCommand([u"google-chrome", url]):
             return True
         s07_do_work = False  # BREAK
 
@@ -2066,13 +2066,13 @@ def openUrl(url=None):
             rxp = RegExp(u"&")
             rxp.global_ = True
             url = url.replace(rxp, u"^&")
-        return self.launchCommand([u"cmd.exe", u"/C", u"start", u"", url])
+        return launchCommand([u"cmd.exe", u"/C", u"start", u"", url])
         s07_do_work = False  # BREAK
 
     if s07_when == u"MACX":
         s07_do_work, s07_work_done = True, True
     if s07_do_work:
-        return self.launchCommand([u"open", url])
+        return launchCommand([u"open", url])
         s07_do_work = False  # BREAK
     return False
 
