@@ -175,7 +175,7 @@ class FLDataTable(QtWidgets.QTableView):
 
                 self.setModel(self.cursor_.model())
                 self.setSelectionModel(self.cursor_.selection())
-                self.model().sort(self.visualIndexToRealIndex(0), 0)
+                self.model().sort(self.visualIndexToLogicalIndex(0), 0)
                 self.installEventFilter(self)
                 self.model().set_parent_view(self)
             # if self.cursor_.at() >= 0:
@@ -716,10 +716,6 @@ class FLDataTable(QtWidgets.QTableView):
 
         return self.cursor_.model().rowCount()
 
-    def indexVisualColumn(self, name):
-
-        return
-
     """
     Retorna el index real (incusive columnas ocultas) a partir de un nombre de un campo
     @param name El nombre del campo a buscar en la tabla
@@ -747,7 +743,7 @@ class FLDataTable(QtWidgets.QTableView):
     @return posicion real de la columna
     """
 
-    def visualIndexToRealIndex(self, c):
+    def visualIndexToLogicalIndex(self, c):
         if not isinstance(c, int) or not self.cursor_:
             return
 
@@ -762,6 +758,31 @@ class FLDataTable(QtWidgets.QTableView):
                     break
 
         return ret_
+    
+    def realIndexToLogicalIndex(self, c):
+        return self.header().logicalIndex(c)
+    
+    def logicalIndexToVisualIndex(self, c):
+        if not isinstance(c, int) or not self.cursor_:
+            return
+        
+        ret_ = None
+        logical_id = 0
+        for column in range(self.model().columnCount()):
+            if self.isColumnHidden(self.header().visualIndex(column)):
+                continue
+            else:
+                if column == c:
+                    ret_ = logical_id
+                    break
+                
+                logical_id += 1
+        
+        return ret_
+    
+                
+            
+        
 
     def currentRow(self):
         return self.currentIndex().row()
