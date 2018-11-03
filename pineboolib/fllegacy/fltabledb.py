@@ -2271,8 +2271,7 @@ class FLTableDB(QtWidgets.QWidget):
     def switchSortOrder(self, col=0):
         if not self.autoSortColumn_:
             return
-        
-        if self.tableRecords_.logicalIndexToVisualIndex(col) == self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_): 
+        if self.tableRecords_.real_index_to_visual_index(col) == self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_): 
         
             self.orderAsc_ = not self.orderAsc_
 

@@ -175,7 +175,7 @@ class FLDataTable(QtWidgets.QTableView):
 
                 self.setModel(self.cursor_.model())
                 self.setSelectionModel(self.cursor_.selection())
-                self.model().sort(self.columnIndexToVisualIndex(0), 0)
+                self.model().sort(self.header().logicalIndex(0), 0)
                 self.installEventFilter(self)
                 self.model().set_parent_view(self)
             # if self.cursor_.at() >= 0:
@@ -761,10 +761,10 @@ class FLDataTable(QtWidgets.QTableView):
 
         return ret_
     
-    def realIndexToLogicalIndex(self, c):
+    def visual_index_to_logical_index(self, c):
         return self.header().logicalIndex(c)
     
-    def logicalIndexToVisualIndex(self, c):
+    def real_index_to_visual_index(self, c):
         return self.header().visualIndex(c)
         """
         if not isinstance(c, int) or not self.cursor_:
