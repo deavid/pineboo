@@ -152,7 +152,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         found_ = False
         if self._sortOrder:
             for column in self._sortOrder.split(","):
-                if col_name in column:
+                if col_name in column and ord in column:
                     found_ = True
                     order_list.append("%s %s" % (col_name, ord))
                 else:

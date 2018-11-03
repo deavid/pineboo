@@ -175,7 +175,7 @@ class FLDataTable(QtWidgets.QTableView):
 
                 self.setModel(self.cursor_.model())
                 self.setSelectionModel(self.cursor_.selection())
-                self.model().sort(self.visualIndexToLogicalIndex(0), 0)
+                self.model().sort(self.columnIndexToVisualIndex(0), 0)
                 self.installEventFilter(self)
                 self.model().set_parent_view(self)
             # if self.cursor_.at() >= 0:
@@ -203,11 +203,9 @@ class FLDataTable(QtWidgets.QTableView):
         return self.horizontalHeader().count()
 
     def setSort(self, s):
+        print("FLDataTable:: Seteando sort", s)
         self.sort_ = s
-    
-    def sortByColumn(self, col, order):
-        print("Ordenando por columna Logica", col, "%s" % ("Ascendente" if order is QtCore.Qt.AscendingOrder else "Descencente"))
-        return super(FLDataTable, self).sortByColumn(col, order)
+         
     """
     Devuelve el cursor
     """
@@ -747,7 +745,7 @@ class FLDataTable(QtWidgets.QTableView):
     @return posicion real de la columna
     """
 
-    def visualIndexToLogicalIndex(self, c):
+    def columnIndexToVisualIndex(self, c):
         if not isinstance(c, int) or not self.cursor_:
             return
 
@@ -767,10 +765,12 @@ class FLDataTable(QtWidgets.QTableView):
         return self.header().logicalIndex(c)
     
     def logicalIndexToVisualIndex(self, c):
+        return self.header().visualIndex(c)
+        """
         if not isinstance(c, int) or not self.cursor_:
             return
         
-        ret_ = None
+        ret_ = 0
         logical_id = 0
         for column in range(self.model().columnCount()):
             if self.isColumnHidden(self.header().visualIndex(column)):
@@ -783,7 +783,7 @@ class FLDataTable(QtWidgets.QTableView):
                 logical_id += 1
         
         return ret_
-    
+        """
                 
             
         

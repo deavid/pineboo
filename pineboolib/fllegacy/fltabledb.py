@@ -1689,26 +1689,27 @@ class FLTableDB(QtWidgets.QWidget):
 
             if self.autoSortColumn_:
                 s = []
-                if tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn_), False):
-                    s.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn_)).name() + " ASC" if self.orderAsc_ else " DESC")
-                if tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn2_), False):
-                    s.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn2_)).name() + " ASC" if self.orderAsc2_ else " DESC")
-                if tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn3_), False):
-                    s.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn3_)).name() + " ASC" if self.orderAsc3_ else " DESC")
+                print("FIXME:: el sort_order_no_es_correcto")
+                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_), False):
+                    s.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_)).name() + " ASC" if self.orderAsc_ else " DESC")
+                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_), False):
+                    s.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_)).name() + " ASC" if self.orderAsc2_ else " DESC")
+                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_), False):
+                    s.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_)).name() + " ASC" if self.orderAsc3_ else " DESC")
 
                 id_mod = self.cursor_.db().managerModules().idModuleOfFile("%s.mtd" % self.cursor_.metadata().name())
                 function_qsa = "%s.tabeDB_setSort_%s" % (id_mod, self.cursor_.metadata().name())
 
                 vars = []
                 vars.append(s)
-                if tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn_), False):
-                    vars.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn_)).name())
+                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_), False):
+                    vars.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_)).name())
                     vars.append(self.orderAsc_)
-                if tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn2_), False):
-                    vars.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn2_)).name())
+                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_), False):
+                    vars.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_)).name())
                     vars.append(self.orderAsc2_)
-                if tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn3_), False):
-                    vars.append(tMD.indexFieldObject(self.tableRecords_.visualIndexToLogicalIndex(self.sortColumn3_)).name())
+                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_), False):
+                    vars.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_)).name())
                     vars.append(self.orderAsc3_)
                 from pineboolib.pncontrolsfactory import aqApp
                 ret = aqApp.call(function_qsa, vars, None, False)
@@ -2039,7 +2040,7 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             self.refreshDelayed()
 
-        new_from = self.tableRecords_.visualIndexToLogicalIndex(from_)
+        new_from = self.tableRecords_.columnIndexToVisualIndex(from_)
         if new_from is not None:
             self.tableRecords_.header().swapSections(new_from, to)
 
@@ -2169,7 +2170,7 @@ class FLTableDB(QtWidgets.QWidget):
         row = AQOdsRow(sheet)
         row.addBgColor(AQOdsColor(0xe7e7e7))
         for i in range(tdb_num_cols):
-            field = mtd.indexFieldObject(tdb.visualIndexToLogicalIndex(i))
+            field = mtd.indexFieldObject(tdb.columnIndexToVisualIndex(i))
             if field and field.visibleGrid():
                 row.opIn(title_style)
                 row.opIn(border_bot)
@@ -2193,7 +2194,7 @@ class FLTableDB(QtWidgets.QWidget):
                 idx = tdb.indexOf(c)  # Busca si la columna se ve
                 if idx == -1:
                     continue
-                field = mtd.indexFieldObject(tdb.visualIndexToLogicalIndex(c))
+                field = mtd.indexFieldObject(tdb.columnIndexToVisualIndex(c))
                 if field:
                     if not field.visibleGrid():
                         continue
@@ -2270,10 +2271,10 @@ class FLTableDB(QtWidgets.QWidget):
     def switchSortOrder(self, col=0):
         if not self.autoSortColumn_:
             return
-        #FIXME: ORDER logicalindex
         
-        #Si es columna uno o dos y pasar columna
-        self.orderAsc_ = not self.orderAsc_
+        if self.tableRecords_.logicalIndexToVisualIndex(col) == self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_): 
+        
+            self.orderAsc_ = not self.orderAsc_
 
         self.setSortOrder(self.orderAsc_,  col)
 
