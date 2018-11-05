@@ -193,7 +193,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.setName("FLFieldDB")
 
         self.cursorBackup_ = False
-        self._partDecimal = None
+        self._partDecimal = 0
         self.initCursor()
         if self.tableName_ and not self.cursor_.db().manager().metadata(self.tableName_):
             self.cursor_ = None
