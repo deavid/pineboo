@@ -13,10 +13,10 @@ from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.fltabledb import FLTableDB
-from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flcodbar import FLCodBar
 from pineboolib.fllegacy.flnetwork import FLNetwork
 from pineboolib.fllegacy.flreportviewer import FLReportViewer
+from pineboolib.fllegacy.flvar import FLVar
 
 from pineboolib.utils import ustr, ustr1, filedir
 
@@ -457,7 +457,7 @@ class File(QtCore.QFile):
         self.fichero = str(rutaFichero)
         super(File, self).__init__(rutaFichero)
         self.path = os.path.dirname(self.fichero)
-
+        
         if encode is not None:
             self.encode_ = encode
 
@@ -500,6 +500,11 @@ class File(QtCore.QFile):
 
     def isDir(dir_name):
         return os.path.isdir(dir_name)
+    
+    def getName(self):
+        return super(File, self).fileName()
+    
+    name = property(getName)
 
 
 class QString(str):
