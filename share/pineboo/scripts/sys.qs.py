@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
 import ast
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AQGlobalFunctions(object):
@@ -741,7 +744,7 @@ def registerUpdate(input_=None):
 def warnLocalChanges(changes=None):
     if changes == None:
         changes = localChanges()
-    if changes.size == 0:
+    if changes["size"] == 0:
         return True
     diag = QDialog()
     diag.caption = sys.translate(u"Detectados cambios locales")
@@ -767,20 +770,21 @@ def warnLocalChanges(changes=None):
     ted.append(reportChanges(changes))
     lay.addWidget(ted)
     lbl2 = QLabel(diag)
-    lbl2.text = sys.translate(u"¿Que desea hacer?")
+    lbl2.text = sys.translate("¿Que desea hacer?")
     lbl2.alignment = AQS.AlignTop or AQS.WordBreak
     lay.addWidget(lbl2)
-    lay2 = QHBoxLayout(lay)
+    lay2 = QHBoxLayout()
     lay2.margin = 6
     lay2.spacing = 6
+    lay.addLayout(lay2)
     pbCancel = QPushButton(diag)
     pbCancel.text = sys.translate(u"Cancelar")
     pbAccept = QPushButton(diag)
     pbAccept.text = sys.translate(u"continue")
     lay2.addWidget(pbCancel)
     lay2.addWidget(pbAccept)
-    connect(pbAccept, u"clicked()", diag, u"accept()")
-    connect(pbCancel, u"clicked()", diag, u"reject()")
+    connect(pbAccept, "clicked()", diag, "accept()")
+    connect(pbCancel, "clicked()", diag, "reject()")
     return (False if (diag.exec_() == 0) else True)
 
     
@@ -790,11 +794,11 @@ def reportChanges(changes=None):
     for key in changes:
         if key == u"size":
             continue
-        chg = changes[key].split(u'@')
-        ret += ustr(u"Nombre: ", chg[0], u"\n")
-        ret += ustr(u"Estado: ", chg[1], u"\n")
-        ret += ustr(u"ShaOldTxt: ", chg[2], u"\n")
-        ret += ustr(u"ShaNewTxt: ", chg[4], u"\n")
+        chg = changes[key].split('@')
+        ret += "Nombre: %s \n" % chg[0]
+        ret += "Estado: %s \n" % chg[1]
+        ret += "ShaOldTxt: %s \n" % chg[2]
+        ret += "ShaNewTxt: %s \n" % chg[4]
         ret += u"###########################################\n"
 
     return ret
@@ -806,36 +810,36 @@ def reportChanges(changes=None):
 def diffXmlFilesDef(xmlOld=None, xmlNew=None):
     arrOld = filesDefToArray(xmlOld)
     arrNew = filesDefToArray(xmlNew)
-    ret = Array()
+    ret = {}
     size = 0
     # DEBUG:: FOR-IN: ['key', 'arrOld']
     for key in arrOld:
         if not (key in arrNew):
-            info = Array([key, u"del", arrOld[key].shatext, arrOld[key].shabinary, u"", u""])
-            ret[key] = u'@'.join(info)
+            info = [key, "del", arrOld[key]["shatext"], arrOld[key]["shabinary"], "", ""]
+            ret[key] = '@'.join(info)
             size += 1
     # DEBUG:: FOR-IN: ['key', 'arrNew']
 
     for key in arrNew:
-        if not (key in arrOld):
-            info = Array([key, u"new", u"", u"", arrNew[key].shatext, arrNew[key].shabinary])
-            ret[key] = u'@'.join(info)
+        if not key in arrOld:
+            info = [key, "new", "", "", arrNew[key]["shatext"], arrNew[key]["shabinary"]]
+            ret[key] = '@'.join(info)
             size += 1
         else:
-            if arrNew[key].shatext != arrOld[key].shatext or arrNew[key].shabinary != arrOld[key].shabinary:
-                info = Array([key, u"mod", arrOld[key].shatext, arrOld[key].shabinary,
-                                arrNew[key].shatext, arrNew[key].shabinary])
-                ret[key] = u'@'.join(info)
+            if arrNew[key]["shatext"] != arrOld[key]["shatext"] or arrNew[key]["shabinary"] != arrOld[key]["shabinary"]:
+                info = [key, "mod", arrOld[key]["shatext"], arrOld[key]["shabinary"],
+                                arrNew[key]["shatext"], arrNew[key]["shabinary"]]
+                ret[key] = '@'.join(info)
                 size += 1
 
-    ret[u"size"] = size
+    ret["size"] = size
     return ret
 
     
 def filesDefToArray(xml=None):
     root = xml.firstChild()
     files = root.childNodes()
-    ret = Array()
+    ret = {}
     i = 0
     while_pass = True
     while i < len(files):
@@ -845,11 +849,16 @@ def filesDefToArray(xml=None):
             continue
         while_pass = False
         it = files.item(i)
-        fil = {id: (it.namedItem(u"name").toElement().text()), module: (it.namedItem(u"module").toElement().text()), text: (it.namedItem(u"text").toElement().text()), shatext: (
-            it.namedItem(u"shatext").toElement().text()), binary: (it.namedItem(u"binary").toElement().text()), shabinary: (it.namedItem(u"shabinary").toElement().text()), }
-        if len(fil.id) == 0:
+        fil = {"id": it.namedItem(u"name").toElement().text(),
+               "module": it.namedItem(u"module").toElement().text(),
+               "text": it.namedItem(u"text").toElement().text(),
+               "shatext": it.namedItem(u"shatext").toElement().text(),
+               "binary": it.namedItem(u"binary").toElement().text(),
+               "shabinary": it.namedItem(u"shabinary").toElement().text()
+               }
+        if len(fil["id"]) == 0:
             continue
-        ret[fil.id] = fil
+        ret[fil["id"]] = fil
         i += 1
         while_pass = True
         try:
@@ -989,12 +998,15 @@ def loadModules(input_=None, warnBackup=None):
     if input_ == None:
         dir_ = Dir(ustr(sys.installPrefix(), u"/share/eneboo/packages"))
         dir_.setCurrent()
-        input_ = FileDialog.getOpenFileName(u"Eneboo Packages (*.eneboopkg)\nAbanQ Packages (*.abanq)",
-                                                AQUtil.translate(u"scripts", u"Seleccionar Fichero"))
+        input_ = FileDialog.getOpenFileName(u"Eneboo/AbanQ Packages",
+                                                AQUtil.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg")
     if warnBackup == None:
         warnBackup = True
     if input_:
-        self.loadAbanQPackage(input_, warnBackup)
+        try:
+            loadAbanQPackage(input_, warnBackup)
+        except Exception:
+            logger.warn("*******", traceback.format_exc())
 
     
 def loadAbanQPackage(input_=None, warnBackup=None):
@@ -1011,7 +1023,7 @@ def loadAbanQPackage(input_=None, warnBackup=None):
     if input_:
         ok = True
         changes = localChanges()
-        if changes.size != 0:
+        if changes["size"] != 0:
             if not warnLocalChanges(changes):
                 return
         if ok:
@@ -1036,7 +1048,7 @@ def loadAbanQPackage(input_=None, warnBackup=None):
                     except Exception:
                         break
 
-                self.errorMsgBox(msg)
+                errorMsgBox(msg)
                 ok = False
 
             unpacker.jump()
@@ -1048,10 +1060,10 @@ def loadAbanQPackage(input_=None, warnBackup=None):
                 ok = loadFilesDef(unpacker)
 
         if not ok:
-            self.errorMsgBox(sys.translate(u"No se ha podido realizar la carga de los módulos."))
+            errorMsgBox(sys.translate(u"No se ha podido realizar la carga de los módulos."))
         else:
-            self.registerUpdate(input)
-            self.infoMsgBox(sys.translate(u"La carga de módulos se ha realizado con éxito."))
+            registerUpdate(input_)
+            infoMsgBox(sys.translate(u"La carga de módulos se ha realizado con éxito."))
             sys.AQTimer.singleShot(0, sys.reinit)
             tmpVar = FLVar()
             tmpVar.set(u"mrproper", u"dirty")
@@ -1076,13 +1088,13 @@ def loadFilesDef(un=None):
             continue
         while_pass = False
         it = files.item(i)
-        fil = {id: (it.namedItem(u"name").toElement().text()), skip: (it.namedItem(u"skip").toElement().text()), module: (it.namedItem(u"module").toElement().text()), text: (it.namedItem(u"text").toElement().text()), shatext: (it.namedItem(u"shatext").toElement().text()), binary: (it.namedItem(u"binary").toElement().text()), shabinary: (it.namedItem(u"shabinary").toElement().text()), }
+        fil = {"id": it.namedItem(u"name").toElement().text(), "skip": it.namedItem(u"skip").toElement().text(), "module": it.namedItem(u"module").toElement().text(), "text": it.namedItem(u"text").toElement().text(), "shatext": it.namedItem(u"shatext").toElement().text(), "binary": it.namedItem(u"binary").toElement().text(), "shabinary": it.namedItem(u"shabinary").toElement().text()}
         AQUtil.setProgress(i)
-        AQUtil.setLabelText(ustr(sys.translate(u"Registrando fichero"), u" ", fil.id))
-        if len(fil.id) == 0 or fil.skip == u"true":
+        AQUtil.setLabelText(ustr(sys.translate(u"Registrando fichero"), u" ", fil["id"]))
+        if len(fil["id"]) == 0 or fil["skip"] == u"true":
             continue
         if not registerFile(fil, un):
-            self.errorMsgBox(ustr(sys.translate(u"Error registrando el fichero"), u" ", fil.id))
+            self.errorMsgBox(ustr(sys.translate(u"Error registrando el fichero"), u" ", fil["id"]))
             ok = False
             break
         i += 1
@@ -1097,9 +1109,9 @@ def loadFilesDef(un=None):
 
     
 def registerFile(fil=None, un=None):
-    if fil.id.endswith(u".xpm"):
+    if fil["id"].endswith(u".xpm"):
         cur = AQSqlCursor(u"flmodules")
-        if not cur.select(ustr(u"idmodulo='", fil.module, u"'")):
+        if not cur.select(ustr(u"idmodulo='", fil["module"], u"'")):
             return False
         if not cur.first():
             return False
@@ -1109,20 +1121,20 @@ def registerFile(fil=None, un=None):
         return cur.commitBuffer()
 
     cur = AQSqlCursor(u"flfiles")
-    if not cur.select(ustr(u"nombre='", fil.id, u"'")):
+    if not cur.select(ustr(u"nombre='", fil["id"], u"'")):
         return False
     cur.setModeAccess((AQSql.Edit if cur.first() else AQSql.Insert))
     cur.refreshBuffer()
-    cur.setValueBuffer(u"nombre", fil.id)
-    cur.setValueBuffer(u"idmodulo", fil.module)
-    cur.setValueBuffer(u"sha", fil.shatext)
-    if len(fil.text) > 0:
-        if fil.id.endswith(u".qs"):
-            cur.setValueBuffer(u"contenido", sys.toUnicode(un.getText(), u"ISO8859-15"))
+    cur.setValueBuffer(u"nombre", fil["id"])
+    cur.setValueBuffer(u"idmodulo", fil["module"])
+    cur.setValueBuffer(u"sha", fil["shatext"])
+    if len(fil["text"]) > 0:
+        if fil["id"].endswith(u".qs"):
+            cur.setValueBuffer(u"contenido", sys.toUnicode(un.getText(), u"iso-8859-15"))
         else:
             cur.setValueBuffer(u"contenido", un.getText())
 
-    if len(fil.binary) > 0:
+    if len(fil["binary"]) > 0:
         un.getBinary()
     return cur.commitBuffer()
 
@@ -1175,11 +1187,11 @@ def loadModulesDef(un=None):
             continue
         while_pass = False
         it = modules.item(i)
-        mod = {id: (it.namedItem(u"name").toElement().text()), alias: (trTagText(it.namedItem(u"alias").toElement().text())), area: (it.namedItem(u"area").toElement().text()), areaname: (trTagText(it.namedItem(u"areaname").toElement().text())), version: (it.namedItem(u"version").toElement().text()), }
+        mod = {"id": it.namedItem(u"name").toElement().text(), "alias": trTagText(it.namedItem(u"alias").toElement().text()), "area": it.namedItem(u"area").toElement().text(), "areaname": trTagText(it.namedItem(u"areaname").toElement().text()), "version": it.namedItem(u"version").toElement().text() }
         AQUtil.setProgress(i)
-        AQUtil.setLabelText(ustr(sys.translate(u"Registrando módulo"), u" ", mod.id))
+        AQUtil.setLabelText(ustr(sys.translate(u"Registrando módulo"), u" ", mod["id"]))
         if not registerArea(mod) or not registerModule(mod):
-            self.errorMsgBox(ustr(sys.translate(u"Error registrando el módulo"), u" ", mod.id))
+            self.errorMsgBox(ustr(sys.translate(u"Error registrando el módulo"), u" ", mod["id"]))
             ok = False
             break
         i += 1
@@ -1195,25 +1207,25 @@ def loadModulesDef(un=None):
     
 def registerArea(mod=None):
     cur = AQSqlCursor(u"flareas")
-    if not cur.select(ustr(u"idarea='", mod.area, u"'")):
+    if not cur.select(ustr(u"idarea='", mod["area"], u"'")):
         return False
     cur.setModeAccess((AQSql.Edit if cur.first() else AQSql.Insert))
     cur.refreshBuffer()
-    cur.setValueBuffer(u"idarea", mod.area)
-    cur.setValueBuffer(u"descripcion", mod.areaname)
+    cur.setValueBuffer(u"idarea", mod["area"])
+    cur.setValueBuffer(u"descripcion", mod["areaname"])
     return cur.commitBuffer()
 
     
 def registerModule(mod=None):
     cur = AQSqlCursor(u"flmodules")
-    if not cur.select(ustr(u"idmodulo='", mod.id, u"'")):
+    if not cur.select(ustr(u"idmodulo='", mod["id"], u"'")):
         return False
     cur.setModeAccess((AQSql.Edit if cur.first() else AQSql.Insert))
     cur.refreshBuffer()
-    cur.setValueBuffer(u"idmodulo", mod.id)
-    cur.setValueBuffer(u"idarea", mod.area)
-    cur.setValueBuffer(u"descripcion", mod.alias)
-    cur.setValueBuffer(u"version", mod.version)
+    cur.setValueBuffer(u"idmodulo", mod["id"])
+    cur.setValueBuffer(u"idarea", mod["area"])
+    cur.setValueBuffer(u"descripcion", mod["alias"])
+    cur.setValueBuffer(u"version", mod["version"])
     return cur.commitBuffer()
 
 def infoMsgBox(msg=None):
@@ -1276,8 +1288,8 @@ def errorPopup(msg=None):
 def trTagText(tagText=None):
     if not tagText.startswith(u"QT_TRANSLATE_NOOP"):
         return tagText
-    txt = QString(tagText).mid(len(String(u"QT_TRANSLATE_NOOP")) + 1)
-    txt = ustr(u"[", QString(txt).mid(0, len(txt) - 1), u"]")
+    txt = tagText[len("QT_TRANSLATE_NOOP") + 1:]
+    txt = "[%s]" % txt[0: len(txt) - 1]
     arr = ast.literal_eval(txt)
     return sys.translate(arr[0], arr[1])
 
@@ -2117,9 +2129,9 @@ def serverTime():
     return ahora
 
 def localChanges():
-    ret = Array()
+    ret = {}
     ret[u"size"] = 0
-    strXmlUpt = AQUtil.sqlSelect(u"flupdates", u"filesdef", u"actual='true'")
+    strXmlUpt = AQUtil.sqlSelect("flupdates", "filesdef", "actual='true'")
     if not strXmlUpt:
         return ret
     docUpt = QDomDocument()
