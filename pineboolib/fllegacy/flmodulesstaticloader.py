@@ -91,7 +91,7 @@ class FLStaticLoader(QtCore.QObject):
 
         super(FLStaticLoader, self).__init__()
 
-        from pineboolib.fllegacy.FLManagerModules import FLManagerModules
+        from pineboolib.fllegacy.flmanagermodules import FLManagerModules
         from pineboolib.utils import filedir
         self.ui_ = FLManagerModules().createUI(filedir("../share/pineboo/forms/FLStaticLoaderUI.ui"))
         self.b_ = b
