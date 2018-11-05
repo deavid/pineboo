@@ -110,6 +110,12 @@ class AQS(object):
         import os
         file_name = filedir("../share/icons", name)
         return QPixmap(file_name) if os.path.exists(file_name) else None
+    
+    def sha1(self, byte_array):
+        from pineboolib.pncontrolsfacory import QByteArray
+        ba = QByteArray(byte_array)
+        return ba.sha1()
+        
 
     def __getattr__(self, name):
 
