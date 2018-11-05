@@ -315,14 +315,15 @@ class Date(object):
 
     def __init__(self, *args):
         super(Date, self).__init__()
-        if len(args) == 1:
+        if len(args) <= 2:
             date_ = args[0]
+            format_ = args[1] if len(args) == 2 else "yyyy-MM-dd"
             self.time_ = None
             if isinstance(date_, str):
                 if len(date_) == 10:
-                    self.date_ = QtCore.QDate.fromString(date_, "yyyy-MM-dd")
+                    self.date_ = QtCore.QDate.fromString(date_, format_)
                 else:
-                    self.date_ = QtCore.QDate.fromString(date_[0:10], "yyyy-MM-dd")
+                    self.date_ = QtCore.QDate.fromString(date_[0:10], format_)
                     self.time_ = QtCore.QTime.fromString(date_[11:], "hh:mm:ss")
                     
             elif isinstance(date_, QtCore.QDate):
