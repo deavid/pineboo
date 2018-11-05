@@ -360,20 +360,21 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
 
 
 def cacheXPM(value):
+    file_name = None
+    if value:
+        xpm_name = value[:value.find("[]")]
+        xpm_name = xpm_name[xpm_name.rfind(" ") + 1:]
+        from pineboolib.pncontrolsfactory import aqApp
 
-    xpm_name = value[:value.find("[]")]
-    xpm_name = xpm_name[xpm_name.rfind(" ") + 1:]
-    from pineboolib.pncontrolsfactory import aqApp
+        cache_dir = filedir("../tempdata/cache/%s/cacheXPM" % aqApp.db().DBName())
+        if not os.path.exists(cache_dir):
+            os.mkdir(cache_dir)
 
-    cache_dir = filedir("../tempdata/cache/%s/cacheXPM" % aqApp.db().DBName())
-    if not os.path.exists(cache_dir):
-        os.mkdir(cache_dir)
-
-    file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
-    if not os.path.exists(file_name):
-        f = open(file_name, "w")
-        f.write(value)
-        f.close()
+        file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
+        if not os.path.exists(file_name):
+            f = open(file_name, "w")
+            f.write(value)
+            f.close()
 
     return file_name
 
