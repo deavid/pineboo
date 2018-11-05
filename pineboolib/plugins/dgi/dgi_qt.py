@@ -297,9 +297,16 @@ class QPushButton(QtWidgets.QPushButton):
 
     def setOn(self, value):
         self.setChecked(value)
+    
+    def getText(self):
+        return self.text()
+    
+    def setText(self, val):
+        super(QPushButton, self).setText(val)
 
     toggleButton = property(getToggleButton, setToggleButton)
     on = property(getOn, setOn)
+    text = property(getText, setText)
 
 
 class FLPixmapView(QtWidgets.QScrollArea):
@@ -1269,6 +1276,22 @@ class MessageBox(QMessageBox):
 
 QColor = QtGui.QColor
 
+class QByteArray (QtCore.QByteArray):
+
+    def sha1(self):
+        hash = QtCore.QCryptographicHash(QtCore.QCryptographicHash.Sha1)
+        hash.addData(self.data())
+        return hash.result().toHex().data().decode("utf-8").upper()
+    
+    def setString(self, val):
+        self.append(val)
+    
+    def getString(self):
+        return self.data().decode("utf-8").upper()
+    
+    string = property(getString, setString)   
+    
+
 
 class RadioButton(QtWidgets.QRadioButton):
 
@@ -1400,8 +1423,8 @@ class Dialog(QDialog):
         self._layout = QtWidgets.QVBoxLayout()
         self.setLayout(self._layout)
         self.buttonBox = QtWidgets.QDialogButtonBox()
-        self.okButton = QtWidgets.QPushButton("&Aceptar")
-        self.cancelButton = QtWidgets.QPushButton("&Cancelar")
+        self.okButton = QPushButton("&Aceptar")
+        self.cancelButton = QPushButton("&Cancelar")
         self.buttonBox.addButton(
             self.okButton, QtWidgets.QDialogButtonBox.AcceptRole)
         self.buttonBox.addButton(
