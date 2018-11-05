@@ -7,6 +7,7 @@ from pineboolib import decorators
 
 from pineboolib.fllegacy.flapplication import FLApplication
 from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.packager.aqunpacker import AQUnpacker
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 
 import pineboolib
@@ -77,6 +78,7 @@ QTreeWidgetItem = resolveObject("QTreeWidgetItem")
 QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
 QDataView = resolveObject("QDataView")
 QProcess = resolveObject("QProcess")
+QByteArray = resolveObject("QByteArray")
 """
 QIconSet = resolveObject("QIconSet")
 """
@@ -133,8 +135,11 @@ class SysType(object):
     def nameBD(self):
         return pineboolib.project.conn.DBName()
 
-    def toUnicode(self, text, format):
-        return "%s" % text.encode(format).decode("utf-8")
+    def toUnicode(self, val, format):        
+        return val.encode(format).decode("utf-8",'replace')
+    
+    def fromUnicode(self, val, format):
+        return val.encode("utf-8").decode(format, 'replace')
 
     def Mr_Proper(self):
         pineboolib.project.conn.Mr_Proper()
