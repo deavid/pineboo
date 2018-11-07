@@ -950,11 +950,6 @@ class FLTimeEdit(QtWidgets.QTimeEdit):
         super(FLTimeEdit, self).setTime(time)
         if not pineboolib.project._DGI.localDesktop():
             pineboolib.project._DGI._par.addQueque("%s_setTime" % self._parent.objectName(), date.toString())
-    
-    def getTime(self):
-        return super(FLTimeEdit).time
-    
-    time = property(getTime, setTime)
 
 
 class FLSpinBox(QtWidgets.QSpinBox):
