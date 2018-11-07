@@ -88,6 +88,7 @@ FLTimeEdit = resolveObject("FLTimeEdit")
 FLDateEdit = resolveObject("FLDateEdit")
 FLPixmapView = resolveObject("FLPixmapView")
 FLDomDocument = resolveObject("FLDomDocument")
+FLDomElement = resolveObject("FLDomElement")
 FLListViewItem = resolveObject("FLListViewItem")
 FLTable = resolveObject("FLTable")
 FLDataTable = resolveObject("FLDataTable")
@@ -482,24 +483,24 @@ class FormDBWidget(QWidget):
             self._action.formrecord_widget = None
             del self
 
-    def child(self, childName):
+    def child(self, child_name):
         try:
             parent = self
             ret = None
             while parent and not ret:
-                ret = parent.findChild(QtWidgets.QWidget, childName)
+                ret = parent.findChild(QtWidgets.QWidget, child_name)
                 if not ret:
                     parent = parent.parentWidget()
 
-                loaded = getattr(ret, "_loaded", None)
-                if loaded is False:
-                    ret.load()
+            loaded = getattr(ret, "_loaded", None)
+            if loaded is False:
+                ret.load()
 
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
             print("ERROR: Al buscar el control %r encontramos el error %r" %
-                  (childName, rte))
+                  (child_name, rte))
             print_stack(8)
             import gc
             gc.collect()
@@ -511,25 +512,7 @@ class FormDBWidget(QWidget):
             ret = None
         else:
             if ret is None:
-                self.logger.warn("WARN: No se encontro el control %s", childName)
-
-        # Para inicializar los controles si se llaman desde qsa antes de
-        # mostrar el formulario.
-        #from pineboolib.fllegacy.FLFieldDB import FLFieldDB
-        # if isinstance(ret, FLFieldDB):
-        #    if not ret.cursor():
-        #        ret.initCursor()
-        #    if not ret.editor_ and not ret.editorImg_:
-        #        ret.initEditor()
-
-        #from pineboolib.fllegacy.FLTableDB import FLTableDB
-        # if isinstance(ret, FLTableDB):
-        #    if not ret.tableRecords_ and self.cursor_:
-        #        ret.tableRecords()
-        #        ret.setTableRecordsCursor()
-
-        # else:
-        #    print("DEBUG: Encontrado el control %r: %r" % (childName, ret))
+                self.logger.warn("WARN: No se encontro el control %s", child_name)
         return ret
 
     def cursor(self):
