@@ -227,7 +227,6 @@ class FLFormDB(QtWidgets.QDialog):
 
     def loaded(self):
         return self._loaded
-
     """
     Invoca a la función "init" del script "masterprocess" asociado al formulario
     """
@@ -552,7 +551,7 @@ class FLFormDB(QtWidgets.QDialog):
             QtCore.QTimer(self).singleShot(0, self.emitFormReady)
 
     def emitFormReady(self):
-        self.formReady
+        self.formReady.emit()
         from pineboolib.pncontrolsfactory import SysType
         sys_ = SysType()
         if sys_.isLoadedModule('fltesttest'):
@@ -783,6 +782,7 @@ class FLFormDB(QtWidgets.QDialog):
         super(FLFormDB, self).focusInEvent(f)
         if not self.isIfaceBind():
             self.bindIface()
+           
 
     """
     Inicializa componenentes del widget principal
@@ -792,6 +792,14 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def show(self):
+               
+        if self.initFocusWidget_ is None:          
+            self.initFocusWidget_ = self.focusWidget()
+              
+        if (self.initFocusWidget_):
+            self.initFocusWidget_.setFocus()
+        
+        
         if not self.tiempo_ini:
             self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
