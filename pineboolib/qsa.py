@@ -315,7 +315,10 @@ class Date(object):
 
     def __init__(self, *args):
         super(Date, self).__init__()
-        if len(args) <= 2:
+        if not args:
+            self.date_ = QtCore.QDate.currentDate()
+            self.time_ = QtCore.QTime.currentTime()
+        elif len(args) <= 2:
             date_ = args[0]
             format_ = args[1] if len(args) == 2 else "yyyy-MM-dd"
             self.time_ = None
@@ -330,9 +333,6 @@ class Date(object):
                 self.date_ = date_
             if not self.time_:    
                 self.time_ = QtCore.QTime(0, 0)
-        elif not args:
-            self.date_ = QtCore.QDate.currentDate()
-            self.time_ = QtCore.QTime.currentTime()
         else:
             self.date_ = QtCore.QDate(args[0], args[1], args[2])
             self.time_ = QtCore.QTime(0, 0)
