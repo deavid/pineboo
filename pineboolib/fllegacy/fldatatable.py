@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -90,7 +90,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Indica el ancho de las columnas establecidas explícitamente con FLDataTable::setColumnWidth
     """
-    widthCols_ = []
+    widthCols_ = {}
 
     """
     Indica si se deben mostrar los campos tipo pixmap en todas las filas
@@ -298,6 +298,9 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setShowAllPixmaps(self, s):
         self.showAllPixmaps_ = s
+    
+    def showAllPixmap(self):
+        return self.showAllPixmaps_
 
     """
     Ver FLDataTable::functionGetColor_
@@ -667,7 +670,34 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def setColumnWidth(self, field, w):
-        self.widthCols_.insert(field, w)
+        self.widthCols_[field] =  w
+    
+    def resize_column(self, col, str_text):
+        if str_text is None:
+            return str_text
+        
+        str_text = str(str_text)
+        
+        field = self.model().metadata().indexFieldObject(col)
+        if field.name() in self.widthCols_.keys():
+            if self.columnWidth(col) < self.widthCols_[field.name()]:
+                self.header().resizeSection(col, self.widthCols_[field.name()])
+        else:
+            wC = self.header().sectionSize(col)
+            
+            fm = Qt.QFontMetrics(self.header().font())
+            wH = fm.horizontalAdvance(field.alias() + "W")
+            if wH < wC:
+                wH = wC
+            
+            wC = fm.horizontalAdvance(str_text) + fm.maxWidth()
+            if wC > wH:
+                self.header().resizeSection(col, wC)
+                if col == 0 and self.popup_:
+                    pw = self.parentWidget()
+                    if pw and pw.width() < wC:
+                        self.resize(wC, pw.height())
+                        pw.resize(wC, pw.height())
 
     def delayedViewportRepaint(self):
         if not self.timerViewRepaint_:

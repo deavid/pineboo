@@ -630,8 +630,6 @@ class FLTableDB(QtWidgets.QWidget):
 
     def setShowAllPixmaps(self, s):
         self.showAllPixmaps_ = s
-        if self.tableRecords_:
-            self.tableRecords_.model().setShowPixmap(self.showAllPixmaps_)
 
     """
     Ver FLTableDB::functionGetColor_
@@ -1686,6 +1684,7 @@ class FLTableDB(QtWidgets.QWidget):
                     self.tableRecords_.setColumnHidden(column, True)
                 else:
                     self.tableRecords_.setColumnHidden(column, False)
+                    
 
             if self.autoSortColumn_:
                 s = []
@@ -1768,7 +1767,7 @@ class FLTableDB(QtWidgets.QWidget):
 
             self.tableRecords_.setPersistentFilter(finalFilter)
 
-            self.tableRecords_.model().setShowPixmap(self.showAllPixmaps_)
+            self.tableRecords_.setShowAllPixmaps(self.showAllPixmaps_)
             self.tableRecords_.refresh()
 
         if self.initSearch_:

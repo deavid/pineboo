@@ -305,7 +305,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             elif _type in ("int", "uint"):
                 if d is not None:
                     d = aqApp.localeSystem().toString(int(d))
-
+            
+        
+            self.parent_view.resize_column(col, d)
+                        
             return d
 
         elif role == QtCore.Qt.DecorationRole:
@@ -318,23 +321,25 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     else:
                         pixmap = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
 
-                if _type == "pixmap" and self._showPixmap:
+                if _type == "pixmap" and self.parent_view:
                     d = self.db().manager().fetchLargeValue(d)
                     if d:
                         pixmap = QtGui.QPixmap(d)
+                
+                if _type == "unlock" or self.parent_view.showAllPixmap() or row == self.parent_view.cursor().at():
 
-                if pixmap and not pixmap.isNull()and self.parent_view:
-                    #print("Dibuja", self.headerData(col, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                    row_height = self.parent_view.rowHeight(row)  # Altura row
-                    row_width = self.parent_view.columnWidth(col)
-                    new_pixmap = QtGui.QPixmap(row_width, row_height)  # w , h
-                    center_width = (row_width - pixmap.width()) / 2
-                    center_height = (row_height - pixmap.height()) / 2
-                    new_pixmap.fill(QtCore.Qt.transparent)
-                    painter = Qt.QPainter(new_pixmap)
-                    painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
+                    if pixmap and not pixmap.isNull()and self.parent_view:
+                        #print("Dibuja", self.headerData(col, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
+                        row_height = self.parent_view.rowHeight(row)  # Altura row
+                        row_width = self.parent_view.columnWidth(col)
+                        new_pixmap = QtGui.QPixmap(row_width, row_height)  # w , h
+                        center_width = (row_width - pixmap.width()) / 2
+                        center_height = (row_height - pixmap.height()) / 2
+                        new_pixmap.fill(QtCore.Qt.transparent)
+                        painter = Qt.QPainter(new_pixmap)
+                        painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
 
-                    pixmap = new_pixmap
+                        pixmap = new_pixmap
 
             return pixmap
 
@@ -372,14 +377,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         #    print("role desconocido", role)
 
         return None
-
-    """
-    Setea si se muestran los pixmap en el grid de datos
-    @param show. Boolean.
-    """
-
-    def setShowPixmap(self, show):
-        self._showPixmap = show
 
     """
     Cuando el driver SQL soporta Threa, recoge info de la tabla
@@ -996,7 +993,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 if not self.col_aliases:
-                    self.loadColAliases()
+                    self.loadColAliases()      
                 return self.col_aliases[section]
             elif orientation == QtCore.Qt.Vertical:
                 return section + 1
@@ -1008,7 +1005,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def loadColAliases(self):
         self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
-
+        
     """
     Devuelve el FLFieldMetadata de un campo
     @param fieldName. Nombre del campo
