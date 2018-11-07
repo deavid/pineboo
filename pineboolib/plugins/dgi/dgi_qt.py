@@ -617,9 +617,8 @@ class QActionGroup(Qt.QActionGroup):
 QActionGroup = QtWidgets.QActionGroup
 
 
-class QDomDocument(QtXml.QDomDocument):
-    pass
-
+QDomDocument = QtXml.QDomDocument
+QDomElement = QtXml.QDomElement
 
 class QDateEdit(QtWidgets.QDateEdit):
 
@@ -1185,6 +1184,7 @@ class LineEdit(QWidget):
 
 
 FLDomDocument = QDomDocument
+FLDomElement = QDomElement
 FLListViewItem = QtWidgets.QListView
 
 
