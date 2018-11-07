@@ -1688,7 +1688,7 @@ class FLTableDB(QtWidgets.QWidget):
 
             if self.autoSortColumn_:
                 s = []
-                print("FIXME:: el sort_order_no_es_correcto")
+                print("FIXME:: el sort_order_no_es_correcto", self)
                 if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_), False):
                     s.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_)).name() + " ASC" if self.orderAsc_ else " DESC")
                 if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_), False):
@@ -1923,9 +1923,13 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot(int)
     @QtCore.pyqtSlot(str)
     def putFirstCol(self, c):
+        
+        
         _index = c
         if isinstance(c, str):
             _index = self.tableRecords_.realColumnIndex(c)
+        else:
+            print("FIXME:revisar que realmente se mueve a firstCol", c)
             
         if _index < 0:
             return False
@@ -1946,6 +1950,8 @@ class FLTableDB(QtWidgets.QWidget):
         _index = c
         if isinstance(c, str):
             _index = self.tableRecords_.realColumnIndex(c)
+        else:
+            print("FIXME:revisar que realmente se mueve a secondCol", c)
 
         if _index < 0:
             return False
@@ -1963,6 +1969,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
     @decorators.BetaImplementation
     def moveCol(self, from_, to, firstSearch=True):
+        print(self, "moveeee", from_, to)
         if from_ < 0 or to < 0:
             return
 
@@ -2039,9 +2046,7 @@ class FLTableDB(QtWidgets.QWidget):
         else:
             self.refreshDelayed()
 
-        new_from = self.tableRecords_.columnIndexToVisualIndex(from_)
-        if new_from is not None:
-            self.tableRecords_.header().swapSections(new_from, to)
+        self.tableRecords_.header().swapSections(from_, to)
 
         self.refresh(True, False)
 
