@@ -161,6 +161,7 @@ class FLDataTable(QtWidgets.QTableView):
                 self.cursor_.restoreEditionFlag(self)
                 self.cursor_.restoreBrowseFlag(self)
                 self.cursor_.bufferCommited.disconnect(self.ensureRowSelectedVisible)
+                self.cursor_.cursorUpdated.disconnect(self.refresh)
 
                 cur_chg = True
 
@@ -172,6 +173,7 @@ class FLDataTable(QtWidgets.QTableView):
                 self.setOnlyTable(self.onlyTable_)
 
                 self.cursor_.bufferCommited.connect(self.ensureRowSelectedVisible)
+                self.cursor_.cursorUpdated.connect(self.refresh)
 
                 self.setModel(self.cursor_.model())
                 self.setSelectionModel(self.cursor_.selection())

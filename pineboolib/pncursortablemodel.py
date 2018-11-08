@@ -753,7 +753,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.logger.exception("ERROR: CursorTableModel.Update %s:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
             return
-
+        
         try:
             returning_fields = [x[0] for x in self.cursorDB().description]
 
@@ -879,7 +879,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         # conn.commit()
-        self.refresh()
 
     """
     Delvuelve el index de un registro a raíz de Su Primary Key
