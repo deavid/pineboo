@@ -854,12 +854,11 @@ class FLSqlCursor(QtCore.QObject):
             return None
 
         self.d.modeAccess_ = FLSqlCursor.Browse
-
-        if name:
-            if not self.db().manager().existsTable(name):
-                self.d.metadata_ = self.db().manager().createTable(name)
-            else:
-                self.d.metadata_ = self.db().manager().metadata(name)
+        table_name = self._action.table()
+        if not self.db().manager().existsTable(table_name):
+            self.d.metadata_ = self.db().manager().createTable(table_name)
+        else:
+            self.d.metadata_ = self.db().manager().metadata(table_name)
         self.d.cursorRelation_ = cR
         if r:  # FLRelationMetaData
             if self.relation() and self.relation().deref():
@@ -1011,9 +1010,7 @@ class FLSqlCursor(QtCore.QObject):
             #    action.table = a
             #    if not getattr(action, "name", None):
             #        action.name = a
-            if action is None:
-                action = FLAction()
-                action.setName(a)
+            if action.table() is None:
                 action.setTable(a)
         else:
             action = a
