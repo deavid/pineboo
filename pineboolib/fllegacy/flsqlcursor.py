@@ -705,28 +705,13 @@ class FLSqlCursorPrivate(QtCore.QObject):
             self.acTable_.setAcos(self.acosBackupTable_)
             self.acTable_.processObject(self.metadata_)
 
-    @decorators.NotImplementedWarn
     def needUpdate(self):
         return False
 
         if self.isQuery_:
             return False
 
-        md5Str = str(self.db_.md5TuplesStateTable(self.curName_))
-
-        if md5Str.isEmpty():
-            return False
-
-        if self.md5Tuples_.isEmpty():
-            self.md5Tuples_ = md5Str
-            return True
-
-        need = False
-
-        if not md5Str == self.md5Tuples_:
-            need = True
-
-        self.md5Tuples_ = md5Str
+        need = self._model.need_update
         return need
 
     def msgBoxWarning(self, msg, throwException=False):
@@ -1317,7 +1302,7 @@ class FLSqlCursor(QtCore.QObject):
 
     def setEdition(self, b, m=None):
 
-        if not m:
+        if m is None:
             self.d.edition_ = b
             return
 
@@ -1579,7 +1564,7 @@ class FLSqlCursor(QtCore.QObject):
         if self.refreshBuffer():  # Hace doTransaction antes de abrir formulario y crear savepoint
             if m != self.Insert:
                 self.updateBufferCopy()
-
+            
             pineboolib.project.actions[self._action.name()].openDefaultFormRecord(self)
 
             # if m != self.Insert and self.refreshBuffer():

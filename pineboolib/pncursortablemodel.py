@@ -43,6 +43,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     color_dict_ = None
     _parent = None
     parent_view = None
+    need_update = False
     """
     Constructor
     @param action. action relacionada al cursor
@@ -612,6 +613,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                                         from_, self.where_filter, self.cursorDB(), self.db().db())
 
         self.refreshFetch(1000)
+        self.need_update = False
         self.rows = 0
         self.canFetchMore = True
         # print("rows:", self.rows)
@@ -755,14 +757,17 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
         
         try:
-            returning_fields = [x[0] for x in self.cursorDB().description]
+            if self.cursorDB().description:
+                returning_fields = [x[0] for x in self.cursorDB().description]
 
-            for orow in self.cursorDB():
-                dict_update = dict(zip(returning_fields, orow))
-                self.setValuesDict(row, dict_update)
+                for orow in self.cursorDB():
+                    dict_update = dict(zip(returning_fields, orow))
+                    self.setValuesDict(row, dict_update)
 
         except Exception:
             self.logger.exception("updateValuesDB: Error al assignar los valores de vuelta al buffer")
+        
+        self.need_update = True
 
     """
     Asigna un valor una fila usando un diccionario
@@ -850,6 +855,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 # self.refresh()
                 if pKValue is not None:
                     fl_cursor.move(self.findPKRow((pKValue, )))
+                
+                self.need_update = True
             except Exception as e:
                 self.logger.exception("CursorTableModel.%s.Insert() :: ERROR:", self.metadata().name())
                 # self._cursor.execute("ROLLBACK")
@@ -858,6 +865,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             # conn.commit()
 
             return True
+        
+        
 
     """
     Borra una linea en el tableModel
@@ -873,6 +882,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # conn = self._cursorConn.db()
         try:
             self.db().execute_query(sql)
+            self.need_update = True
         except Exception as e:
             self.logger.exception("CursorTableModel.%s.Delete() :: ERROR:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
