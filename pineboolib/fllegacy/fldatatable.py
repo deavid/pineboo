@@ -767,9 +767,7 @@ class FLDataTable(QtWidgets.QTableView):
         if e.button() != QtCore.Qt.LeftButton:
             return
 
-        settings = FLSettings()
-        if not settings.readBoolEntry("ebcomportamiento/FLTableDoubleClick", False):
-            self.recordChoosed.emit()
+        self.recordChoosed.emit()
 
     """
     Retorna el index real a partir de un index de columnas visibles.
