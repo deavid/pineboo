@@ -136,7 +136,18 @@ class FLFormRecordDB(FLFormDB):
     @decorators.NotImplementedWarn
     def setMainWidget(self, w=None):
         pass
-
+    
+    
+    def setCursor(self, cursor):
+        need_init_form = False
+        if not self.cursor():
+            need_init_form = True
+        
+        super(FLFormRecordDB, self).setCursor(cursor)
+        
+        if need_init_form:
+            self.initForm()
+        
     """
     Establece el título de la ventana.
 
@@ -145,14 +156,15 @@ class FLFormRecordDB(FLFormDB):
     """
 
     def setCaptionWidget(self, text):
-        if not text or not self.cursor_:
+        if not text or not self.cursor():
             return
-
-        if self.cursor_.modeAccess() == FLSqlCursor.Insert:
+        
+        
+        if self.cursor().modeAccess() == self.cursor().Insert:
             self.setWindowTitle("Insertar %s" % text)
-        elif self.cursor_.modeAccess() == FLSqlCursor.Edit:
+        elif self.cursor().modeAccess() == self.cursor().Edit:
             self.setWindowTitle("Editar %s" % text)
-        elif self.cursor_.modeAccess() == FLSqlCursor.Browse:
+        elif self.cursor().modeAccess() == self.cursor().Browse:
             self.setWindowTitle("Visualizar %s" % text)
 
     """
@@ -180,11 +192,11 @@ class FLFormRecordDB(FLFormDB):
             # self.setCursor(self.cursor_)
             if not caption:
                 caption = self.cursor().metadata().alias()
-
+            
             if not self.cursor().isValid():
                 self.cursor().model().refresh()
 
-            if self.cursor().modeAccess() in (FLSqlCursor.Insert, FLSqlCursor.Edit, FLSqlCursor.Browse):
+            if self.cursor().modeAccess() in (self.cursor().Insert, self.cursor().Edit, self.cursor().Browse):
                 self.cursor().transaction()
                 self.initTransLevel = self.cursor().transactionLevel()
                 self.setCaptionWidget(caption)
