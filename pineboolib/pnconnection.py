@@ -84,10 +84,13 @@ class PNConnection(QtCore.QObject):
         """
         if name == "default" or name is None:
             return self
-
-        for k in self.connAux.keys():
-            if k == name:
-                return self.connAux[name]
+        
+        if name in self.connAux.keys():
+            for k in self.connAux.keys():
+                if k == name:
+                    return self.connAux[name]
+        else:
+            logger.warn("PNConnection::database : No existe la conexión '%s', se devuelve la conexión por defecto 'default'", name)
 
         logger.info("PNConnection::Creando nueva conexión %s", name)
 
