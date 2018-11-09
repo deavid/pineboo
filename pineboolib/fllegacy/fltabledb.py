@@ -2174,7 +2174,7 @@ class FLTableDB(QtWidgets.QWidget):
         row = AQOdsRow(sheet)
         row.addBgColor(AQOdsColor(0xe7e7e7))
         for i in range(tdb_num_cols):
-            field = mtd.indexFieldObject(tdb.columnIndexToVisualIndex(i))
+            field = mtd.indexFieldObject(tdb.visual_index_to_logical_index(i))
             if field and field.visibleGrid():
                 row.opIn(title_style)
                 row.opIn(border_bot)
@@ -2195,24 +2195,29 @@ class FLTableDB(QtWidgets.QWidget):
 
             row = AQOdsRow(sheet)
             for c in range(tdb_num_cols):
-                idx = tdb.indexOf(c)  # Busca si la columna se ve
-                if idx == -1:
-                    continue
-                field = mtd.indexFieldObject(tdb.columnIndexToVisualIndex(c))
-                if field:
-                    if not field.visibleGrid():
-                        continue
+                #idx = tdb.indexOf(c)  # Busca si la columna se ve
+                #if idx == -1:
+                #    continue
+                
+                field = mtd.indexFieldObject(tdb.visual_index_to_logical_index(c))
+                if field and field.visibleGrid():
                     val = cur.valueBuffer(field.name())
                     if field.type() == "double":
                         row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))
                         row.opIn(float(val))
 
                     elif field.type() == "date":
-                        str_ = val
-                        if not str_:
-                            row.coveredCell()
+                        if val is not None:
+                            val = str(val)
+                            if val.find("T") > -1:
+                                val = val[0:val.find("T")]
+                                
+                            row.opIn(val)
                         else:
-                            row.opIn(str_)
+                            row.coveredCell()
+                            
+                        
+                            
 
                     elif field.type() in ("bool", "unlock"):
                         str_ = self.tr("Sí") if val == True else self.tr("No")
