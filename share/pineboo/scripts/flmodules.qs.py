@@ -109,7 +109,6 @@ class FormInternalObj(FormDBWidget):
                     postparse.pythonify(path_)
                 if os.path.exists(file_py_path_):
                     value_py = File(file_py_path_).read()
-                    print(1, file_py_path_)
                     self.cargarFicheroEnBD("%s.py" % ficheros[i], value_py, log, directorio)
                 
             value = File(path_).read()
