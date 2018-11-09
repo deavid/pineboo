@@ -137,16 +137,6 @@ class FLFormRecordDB(FLFormDB):
     def setMainWidget(self, w=None):
         pass
     
-    
-    def setCursor(self, cursor):
-        need_init_form = False
-        if not self.cursor():
-            need_init_form = True
-        
-        super(FLFormRecordDB, self).setCursor(cursor)
-        
-        if need_init_form:
-            self.initForm()
         
     """
     Establece el título de la ventana.
@@ -257,7 +247,7 @@ class FLFormRecordDB(FLFormDB):
 
         pbSize = self.iconSize
 
-        if self.cursor_.modeAccess() == FLSqlCursor.Edit or self.cursor_.modeAccess() == FLSqlCursor.Browse:
+        if self.cursor().modeAccess() in (self.cursor().Edit, self.cursor().Browse):
             if not self.pushButtonFirst:
                 self.pushButtonFirst = QtWidgets.QToolButton()
                 self.pushButtonFirst.setObjectName("pushButtonFirst")
@@ -330,7 +320,7 @@ class FLFormRecordDB(FLFormDB):
                 self.bottomToolbar.layout.addWidget(self.pushButtonLast)
                 # self.pushButtonLast.show()
 
-        if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
+        if not self.cursor().modeAccess() == self.cursor().Browse:
             if self.showAcceptContinue_:
                 self.pushButtonAcceptContinue = QtWidgets.QToolButton()
                 self.pushButtonAcceptContinue.setObjectName("pushButtonAcceptContinue")
@@ -372,7 +362,7 @@ class FLFormRecordDB(FLFormDB):
             self.pushButtonCancel = QtWidgets.QToolButton()
             self.pushButtonCancel.setObjectName("pushButtonCancel")
             try:
-                self.cursor_.autocommit.connect(self.disablePushButtonCancel)
+                self.cursor().autocommit.connect(self.disablePushButtonCancel)
             except Exception:
                 pass
 
@@ -384,7 +374,7 @@ class FLFormRecordDB(FLFormDB):
         self.pushButtonCancel.setShortcut(QKeySequence(self.tr("Esc")))
         self.pushButtonCancel.setIcon(
             QtGui.QIcon(filedir("../share/icons", "gtk-stop.png")))
-        if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
+        if not self.cursor().modeAccess() == self.cursor().Browse:
             self.pushButtonCancel.setFocusPolicy(QtCore.Qt.NoFocus)
             self.pushButtonCancel.setWhatsThis(
                 "Cancelar los cambios y cerrar formulario (Esc)")
