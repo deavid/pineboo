@@ -1929,7 +1929,7 @@ class FLTableDB(QtWidgets.QWidget):
         if isinstance(c, str):
             _index = self.tableRecords_.realColumnIndex(c)
         else:
-            print("FIXME:revisar que realmente se mueve a firstCol", c)
+            _index = self.tableRecords_.columnIndexToVisualIndex(c)
             
         if _index < 0:
             return False
@@ -1951,7 +1951,7 @@ class FLTableDB(QtWidgets.QWidget):
         if isinstance(c, str):
             _index = self.tableRecords_.realColumnIndex(c)
         else:
-            print("FIXME:revisar que realmente se mueve a secondCol", c)
+            _index = self.tableRecords_.columnIndexToVisualIndex(c)
 
         if _index < 0:
             return False
