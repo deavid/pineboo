@@ -291,11 +291,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 
                 if d:
                     #Cogemos el locale para presentar lo mejor posible la fecha
-                    locale.setlocale(locale.LC_TIME, '')
-                    date_format = locale.nl_langinfo(locale.D_FMT)
-                    date_format = date_format.replace("y", "Y") #Año con 4 dígitos
-                    date_format = date_format.replace("/","-") #Separadores
-                    d = d.strftime(date_format)
+                    try:
+                        locale.setlocale(locale.LC_TIME, '')
+                        date_format = locale.nl_langinfo(locale.D_FMT)
+                        date_format = date_format.replace("y", "Y") #Año con 4 dígitos
+                        date_format = date_format.replace("/","-") #Separadores
+                        d = d.strftime(date_format)
+                    except AttributeError:
+                        import platform
+                        self.logger.warn("locale specific date format is not yet implemented for %s", platform.system())
 
             elif _type is "check":
                 return
