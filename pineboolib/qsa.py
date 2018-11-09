@@ -328,7 +328,12 @@ class Date(object):
                 else:
                     self.date_ = QtCore.QDate.fromString(date_[0:10], format_)
                     self.time_ = QtCore.QTime.fromString(date_[11:], "hh:mm:ss")
-                    
+            
+            elif isinstance(date_, Date):
+                self.date_ = date_.date_
+                self.time_ = date_.time_
+                
+               
             elif isinstance(date_, QtCore.QDate):
                 self.date_ = date_
             if not self.time_:    
