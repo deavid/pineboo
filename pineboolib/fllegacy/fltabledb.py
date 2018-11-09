@@ -1930,6 +1930,7 @@ class FLTableDB(QtWidgets.QWidget):
             _index = self.tableRecords_.realColumnIndex(c)
         else:
             _index = self.tableRecords_.columnIndexToVisualIndex(c)
+            print("REVISAME:",c, "puede no ser", _index)
             
         if _index < 0:
             return False
