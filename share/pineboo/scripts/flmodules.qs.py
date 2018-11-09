@@ -103,10 +103,13 @@ class FormInternalObj(FormDBWidget):
             path_ = Dir.cleanDirPath(ustr(directorio, u"/", ficheros[i]))
             if settings.readBoolEntry("ebcomportamiento/parseModulesOnLoad", False):
                 file_py_path_ = "%s.py" % path_
-                if path_.endswith(".qs") and not os.path.exists(file_py_path_):
+                if os.path.exists(file_py_path_):
+                    os.remove(file_py_path_)
+                if path_.endswith(".qs"):
                     postparse.pythonify(path_)
                 if os.path.exists(file_py_path_):
                     value_py = File(file_py_path_).read()
+                    print(1, file_py_path_)
                     self.cargarFicheroEnBD("%s.py" % ficheros[i], value_py, log, directorio)
                 
             value = File(path_).read()
