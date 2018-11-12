@@ -266,12 +266,19 @@ class FormInternalObj(FormDBWidget):
                             sys.write(u"ISO-8859-1", ustr(directorio, u"/forms/", file), contenido)
                             log.append(util.translate(u"scripts", ustr(u"* Exportando ", file, u".")))
                             s01_do_work = False  # BREAK
-                        if s01_when in (u".qs", u".qs.py"):
+                        if s01_when == u".qs":
                             s01_do_work, s01_work_done = True, True
                         if s01_do_work:
                             sys.write(u"ISO-8859-1", ustr(directorio, u"/scripts/", file), contenido)
                             log.append(util.translate(u"scripts", ustr(u"* Exportando ", file, u".")))
                             s01_do_work = False  # BREAK
+                        if s01_when == u".py":
+                            s01_do_work, s01_work_done = True, True
+                        if s01_do_work:
+                            sys.write(u"UTF-8", ustr(directorio, u"/scripts/", file), contenido)
+                            log.append(util.translate(u"scripts", ustr(u"* Exportando ", file, u".")))
+                            s01_do_work = False  # BREAK
+                        
                         if s01_when == u".qry":
                             s01_do_work, s01_work_done = True, True
                         if s01_do_work:
