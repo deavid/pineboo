@@ -166,6 +166,7 @@ class SysType(object):
         QtWidgets.qApp.processEvents()
 
     def write(self, encode_, dir_, contenido):
+        import codecs
         f = codecs.open(dir_, encoding=encode_, mode="w+")
         f.write(contenido)
         f.seek(0)
