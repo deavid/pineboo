@@ -1019,6 +1019,7 @@ class QTextEdit(QtWidgets.QTextEdit):
     def __init__(self, parent = None):
         super(QTextEdit, self).__init__(parent)
         self.LogText = 0
+        self.setTextColor(QtCore.Qt.white)
 
     def setText(self, text):
         super(QTextEdit, self).setText(text)
