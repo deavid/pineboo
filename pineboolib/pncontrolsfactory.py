@@ -240,14 +240,19 @@ class SysType(object):
         return valor
 
 
-class System(object):
+class System_class(object):
 
     def setenv(name, val):
         os.environ[name] = val
 
     def getenv(self, name):
-        return os.environ(name)
+        ret_ = ""
+        if name in os.environ.keys():
+            ret_ = os.environ[name]
+        
+        return ret_
 
+System = System_class()
 
 class ProxySlot:
     PROXY_FUNCTIONS = {}
