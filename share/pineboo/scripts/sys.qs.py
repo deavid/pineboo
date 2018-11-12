@@ -1836,7 +1836,7 @@ def dumpDatabase():
 
     
 def setObjText( container=None, component=None, value=None):
-    c = self.testObj(container, component)
+    c = testObj(container, component)
     if not c:
         return False
     clase = (u"FLFieldDB" if (u"editor" in c) else c.className())
