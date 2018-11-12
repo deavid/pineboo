@@ -146,7 +146,7 @@ class FormInternalObj(FormDBWidget):
                 comando = ustr(sys.installPrefix(), u"/bin/teddy")
 
             self.setDisabled(True)
-            Process.execute(Array([comando, temporal]))
+            Process.execute([comando,temporal])
             self.child(u"contenido").text = File.read(temporal)
             self.setDisabled(False)
 
