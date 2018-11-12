@@ -650,8 +650,8 @@ class FLSqlQuery(object):
     def isForwardOnly(self):
         pass
 
-    @decorators.NotImplementedWarn
     def setForwardOnly(self, forward):
+        #No sirve para nada , por ahora
         pass
 
     @decorators.NotImplementedWarn
