@@ -494,9 +494,19 @@ class File(QtCore.QFile):
         #in_ = QTextStream(self)
         # return in_.readAll()
 
-    def write(self, text):
+    def write(*args):
+        
+        if not isinstance(args[0], str):
+            fichero = self.fichero
+            encode = self.encode_
+        else:
+            fichero = args[0]
+            encode = "iso-8859-15"
+        
+        text = args[1]
+            
         import codecs
-        f = codecs.open(self.fichero, encoding=self.encode_, mode="w+")
+        f = codecs.open(fichero, encoding=encode, mode="w+")
         f.write(text)
         f.seek(0)
         f.close()
