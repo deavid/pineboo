@@ -895,6 +895,14 @@ class XMLAction(XMLStruct):
         if w:
             if pineboolib.project._DGI.localDesktop():
                 w.show()
+    
+    def openDefaultForm(self):
+        self.logger.info("Opening default form for Action %s", self.name)
+        w = self.load()
+        
+        if w:
+            if pineboolib.project._DGI.localDesktop():
+                w.show()
 
     """
     Ejecuta el script por defecto
