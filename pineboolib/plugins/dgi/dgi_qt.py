@@ -1019,7 +1019,6 @@ class QTextEdit(QtWidgets.QTextEdit):
     def __init__(self, parent = None):
         super(QTextEdit, self).__init__(parent)
         self.LogText = 0
-        self.setTextColor(QtCore.Qt.white)
 
     def setText(self, text):
         super(QTextEdit, self).setText(text)
@@ -1048,6 +1047,7 @@ class QTextEdit(QtWidgets.QTextEdit):
     def setAutoFormatting(self, value):
         if value == 0:
             value = QtWidgets.QTextEdit.AutoAll
+            self.setTextColor(QtCore.Qt.white)
         super(QTextEdit, self).setAutoFormatting(value)
 
     text = property(getText, setText)
