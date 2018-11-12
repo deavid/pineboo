@@ -153,7 +153,7 @@ class FLFormDB(QtWidgets.QDialog):
     def __init__(self, parent, action, load=False):
 
         self.logger = logging.getLogger("FLFormDB")
-        self.tiempo_ini = time.time()
+        #self.tiempo_ini = time.time()
 
         if not parent:
             from pineboolib.pncontrolsfactory import aqApp
@@ -792,15 +792,15 @@ class FLFormDB(QtWidgets.QDialog):
             self.initFocusWidget_.setFocus()
         
         
-        if not self.tiempo_ini:
-            self.tiempo_ini = time.time()
+        #if not self.tiempo_ini:
+        #    self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
-        tiempo_fin = time.time()
+        #tiempo_fin = time.time()
         settings = FLSettings()
-        if settings.readBoolEntry("application/isDebuggerMode", False):
-            self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s (iface %s)" %
-                             (self.actionName_, tiempo_fin - self.tiempo_ini, self, self.iface))
-        self.tiempo_ini = None
+        #if settings.readBoolEntry("application/isDebuggerMode", False):
+        #    self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s (iface %s)" %
+        #                     (self.actionName_, tiempo_fin - self.tiempo_ini, self, self.iface))
+        #self.tiempo_ini = None
 
     def initMainWidget(self, w=None):
         if not self.showed:
