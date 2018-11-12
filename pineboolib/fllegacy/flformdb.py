@@ -9,6 +9,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 import pineboolib
+import traceback
 
 
 """
@@ -719,16 +720,6 @@ class FLFormDB(QtWidgets.QDialog):
         self._loaded = False
         from pineboolib.pncontrolsfactory import SysType
         SysType().processEvents()
-        try:
-            # self.script.form.close()
-            self.script.form = None
-            self.iface = None
-            self.widget.close()
-            del self.known_instances[(self.__class__, self._action.name())]
-            del self.widget
-            del self.script
-        except Exception:
-            self.logger.warn("El FLFormDB %s no se cerró correctamente", self.formName())
 
     """
     Captura evento mostrar
