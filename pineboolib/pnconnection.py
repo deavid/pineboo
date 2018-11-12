@@ -82,8 +82,14 @@ class PNConnection(QtCore.QObject):
 
         Permite seleccionar una conexion que no es la default, Si no existe la crea
         """
-        if name == "default" or name is None:
+        if isinstance(name , PNConnection):
+            name = name.connectionName()
+        
+        if name in ("default", None):
             return self
+        
+        
+        
         
         if name in self.connAux.keys():
             for k in self.connAux.keys():
