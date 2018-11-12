@@ -1,0 +1,22 @@
+Instalación:
+
+Eliminamos pyqt5 y sip instalados por pip3
+
+Instalamos por apt-get python3-pyqt5 qttools5-dev-tools. Esto añade designer y el plugin para poder cargar nuestros plugins hechos en py.
+
+
+Ejecutar Designer:
+
+export PYTHONPATH=/usr/bin/python3
+export PYQTDESIGNERPATH=/ruta_a_pineboo/plugins_deisgner/
+
+# designer
+
+
+TODO:
+ * Ver como tragarse el customWidget con el uic.
+ * Crear widget funcionales FLFieldDB, FLTableDB, FLTable
+ * Cambiar iconos y poner clásicos
+ 
+
+
