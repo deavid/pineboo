@@ -5,7 +5,7 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QTreeWidgetItem
 
 
-class MainForm(QtCore.QObject):
+class MainForm(QtWidgets.QMainWindow):
 
     MAX_RECENT = 10
     app_ = None
@@ -29,7 +29,7 @@ class MainForm(QtCore.QObject):
         self.ui_ = None
         self.w_ = QMainWindow()
 
-        aqApp.main_widget_ = self.w_  # FIXME: Supongo que se podrá quitar en el futuro, para setMainWidget con contenedor
+        aqApp.main_widget_ = self
 
     def eventFilter(self, o, e):
         if isinstance(e, AQS.ContextMenu):
@@ -45,7 +45,7 @@ class MainForm(QtCore.QObject):
             return True
 
         elif isinstance(e, AQS.Close):
-            if isinstance(o, QMainWindow):
+            if isinstance(o, MainForm):
                 self.w_.setDisabled(True)
                 ret = self.exit()
                 if ret == False:
@@ -54,8 +54,8 @@ class MainForm(QtCore.QObject):
 
                 return True
 
-            if isinstance(o, pineboolib.fllegacy.FLFormDB.FLFormDB):
-                self.formClosed(o)
+            if isinstance(o, pineboolib.fllegacy.flformdb.FLFormDB):
+                self.formClosed()
 
         elif isinstance(e, AQS.WindowStateChange):
             if sys.isNebulaBuild() and o == self.w_:
@@ -72,7 +72,7 @@ class MainForm(QtCore.QObject):
 
     def createUi(self, ui_file):
         mng = aqApp.db().managerModules()
-        self.w_ = mng.createUI(ui_file, None, self.w_)
+        self.w_ = mng.createUI(ui_file, None, self)
         self.w_.setObjectName("container")
 
     def exit(self):
@@ -265,7 +265,7 @@ class MainForm(QtCore.QObject):
             self.tw_.widget(i).close()
 
     def formClosed(self):
-        if len(self.tw_.widgets()) == 1 and self.tw_corner:
+        if self.tw_.count() == 1 and self.tw_corner:
             self.tw_corner.hide()
 
     def addForm(self, action_name, icono):
@@ -738,11 +738,9 @@ class MainForm(QtCore.QObject):
         return ret
 
     def show(self):
-        self.w_.show()
+        super(MainForm, self).show()
         self.w_.activateWindow()
 
-    def close(self):
-        self.w_.close()
 
     def initScript(self):
         from pineboolib.utils import filedir
