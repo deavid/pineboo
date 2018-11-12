@@ -1040,6 +1040,9 @@ class QTextEdit(QtWidgets.QTextEdit):
     @decorators.NotImplementedWarn
     def setShown(self, value):
         pass
+    
+    def getPlainText(self):
+        return super(QTextEdit, self).toPlainText()
 
     def setAutoFormatting(self, value):
         if value == 0:
@@ -1047,6 +1050,7 @@ class QTextEdit(QtWidgets.QTextEdit):
         super(QTextEdit, self).setAutoFormatting(value)
 
     text = property(getText, setText)
+    PlainText = property(getPlainText, setText)
 
 
 class QCheckBox(QtWidgets.QCheckBox):
