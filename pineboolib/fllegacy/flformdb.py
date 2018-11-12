@@ -555,7 +555,8 @@ class FLFormDB(QtWidgets.QDialog):
         from pineboolib.pncontrolsfactory import SysType
         sys_ = SysType()
         if sys_.isLoadedModule('fltesttest'):
-            self._prj.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
+            from pineboolib.pncontrolsfactory import aqApp
+            aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
 
     # protected_:
 
