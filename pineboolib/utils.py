@@ -539,7 +539,7 @@ def checkDependencies(dict_, exit=True):
                 elif key == "Pillow":
                     version_check("Pillow", mod_.__version__, '5.1.0')
                 elif key == "PyQt5.QtCore":
-                    version_check("PyQt5", mod_.QT_VERSION_STR, '5.9')
+                    version_check("PyQt5", mod_.QT_VERSION_STR, '5.11')
                     mod_ver = mod_.QT_VERSION_STR
 
                 if not mod_ver:
