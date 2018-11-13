@@ -20,10 +20,24 @@ class AQS(object):
     Plain = None
     translate = ["DockLeft", "ContextMenu"]
     InDock = None
+     
 
     def __init__(self):
         self.InDock = "InDock"
         self.OutSideDock = "OutSideDock"
+        self.SmtpSslConnection = 1
+        self.SmtpTlsConnection = 2
+        self.SmtpAuthPlain = 1
+        self.SmtpAuthLogin = 2
+        self.SmtpSendOk = 11
+        self.SmtpError = 7
+        self.SmtpMxDnsError = 10
+        self.SmtpSocketError = 12
+        self.SmtpAttachError = 15
+        self.SmtpServerError = 16
+        self.SmtpClientError = 17
+        
+        
 
     """
     Muestra el dialog de selección de color
