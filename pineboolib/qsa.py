@@ -291,12 +291,15 @@ class qsaRegExp(object):
     result_ = None
 
     def __init__(self, strRE):
-        print("Nuevo Objeto RegExp de " + strRE)
-        self.strRE_ = strRE
+        print("Nuevo Objeto RegExp de " + repr(strRE))
+        self.strRE_ = repr(strRE)
 
     def search(self, text):
         print("Buscando " + self.strRE_ + " en " + text)
         self.result_ = re.search(self.strRE_, text)
+    
+    def replace(self, old_value , new_value):
+        return self.strRE_.replace(old_value, new_value)
 
     def cap(self, i):
         if self.result_ is None:
@@ -306,6 +309,10 @@ class qsaRegExp(object):
             return self.result_.group(i)
         except Exception:
             return None
+    
+    def __str__(self):
+        print("devolviendo", self.strRE_)
+        return self.strRE_
 
 
 class Date(object):
