@@ -449,6 +449,9 @@ class FLUtil(QtCore.QObject):
         @return Devuelve la cadena traducida al idioma local
         """
         from pineboolib.fllegacy.fltranslations import FLTranslate
+        
+        string = string.replace(" % ", " %% ")
+        
         return str(FLTranslate(group, string))
 
     @decorators.NotImplementedWarn
