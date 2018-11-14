@@ -120,7 +120,7 @@ class MainForm(QtWidgets.QMainWindow):
         count_recent = root_recent.childCount()
         for i in range(count_recent):
             recent_actions.append(root_recent.child(i).text(1))
-        settings.writeEntryList("%srecentActions" % key, open_actions)
+        settings.writeEntryList("%srecentActions" % key, recent_actions)
 
         mark_actions = []
         root_mark = self.dck_mar_.lw_.invisibleRootItem()
@@ -953,7 +953,7 @@ class DockListView(QtCore.QObject):
         if action_name == "":
             return
 
-        ac = self.ag_.findChild(QtWidgets.QAction, action_name)
+        ac = self.ag_.findChild(pineboolib.pncontrolsfactory.QAction , action_name)
         if ac:
             ac.triggered.emit()
 
