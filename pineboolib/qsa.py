@@ -298,8 +298,9 @@ class qsaRegExp(object):
         print("Buscando " + self.strRE_ + " en " + text)
         self.result_ = re.search(self.strRE_, text)
     
-    def replace(self, old_value , new_value):
-        return self.strRE_.replace(old_value, new_value)
+    def replace(self, target , new_value):
+        import re
+        return re.sub(r"%s" % self.strRE_, new_value, target)
 
     def cap(self, i):
         if self.result_ is None:
