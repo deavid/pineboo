@@ -552,13 +552,13 @@ class FLFormDB(QtWidgets.QDialog):
             QtCore.QTimer(self).singleShot(0, self.emitFormReady)
 
     def emitFormReady(self):
-        self.formReady.emit()
         from pineboolib.pncontrolsfactory import SysType
         sys_ = SysType()
         if sys_.isLoadedModule('fltesttest'):
             from pineboolib.pncontrolsfactory import aqApp
             aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
-
+        
+        self.formReady.emit()
     # protected_:
 
     """
