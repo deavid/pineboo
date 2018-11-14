@@ -140,6 +140,7 @@ class FLFormDB(QtWidgets.QDialog):
     Señal emitida cuando el formulario ya ha sido inicializado y está listo para usarse
     """
     formReady = QtCore.pyqtSignal()
+    formClosed = QtCore.pyqtSignal()
 
     known_instances = {}
     cursor_ = None
@@ -557,9 +558,17 @@ class FLFormDB(QtWidgets.QDialog):
         if sys_.isLoadedModule('fltesttest'):
             from pineboolib.pncontrolsfactory import aqApp
             aqApp.call("fltesttest.iface.recibeEvento", ("formReady", self.actionName_), None)
-        
         self.formReady.emit()
     # protected_:
+    
+    def emitFormClosed(self):
+        from pineboolib.pncontrolsfactory import SysType
+        sys_ = SysType()
+        if sys_.isLoadedModule('fltesttest'):
+            from pineboolib.pncontrolsfactory import aqApp
+            aqApp.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
+        self.formClosed.emit()
+        
     
     def action(self):
         return self._action
@@ -717,6 +726,7 @@ class FLFormDB(QtWidgets.QDialog):
         self.saveGeometry()
         self.setCursor(None)
         self.closed.emit()
+        self.emitFormClosed()
         super(FLFormDB, self).closeEvent(e)
         self._action.mainform_widget = None
         self.deleteLater()
