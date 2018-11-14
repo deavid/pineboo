@@ -272,7 +272,7 @@ class MainForm(QtWidgets.QMainWindow):
         tw = self.tw_
 
         for i in range(tw.count()):
-            if tw.widget(i).objectName() == action_name:
+            if tw.widget(i).action().name() == action_name:
                 tw.widget(i).close()
 
         fm = AQFormDB(action_name, tw, None)
