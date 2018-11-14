@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from pineboolib import decorators
 from PyQt5 import QtCore, Qt
-from enum import Enum
 from os.path import basename
 import logging
 
 import smtplib
-import mimetypes
 
-from email import encoders
-from email.message import Message
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -299,14 +293,13 @@ class FLSmtpClient(QtCore.QObject):
             if self.connection_type_ == ConnectionType.TlsConnection:
                 s.starttls()
             
-            helo_response = None
             
             if self.user_ and self.password_:
                 status_msg = "login."
                 if self.auth_method_ == State.SendAuthLogin:
-                    self.changeStatus(status_msg, State.SendAuthLogin)                    
+                    self.changeStatus(status_msg, State.SendAuthLogin)
                 elif self.auth_method_ == State.SendAuthPlain:
-                    self.changeStatus(status_msg, State.SendAuthPlain) 
+                    self.changeStatus(status_msg, State.SendAuthPlain)
                 
                 s.login(self.user_, self.password_)
                         
@@ -327,10 +320,6 @@ class FLSmtpClient(QtCore.QObject):
             status_msg = "El tipo de autenticación no está soportada por el servidor."
             self.changeStatus(status_msg, State.ClientError)
             return False
-        except smtplib.SMTPException:
-            status_msg = "Error desconocido"
-            self.changeStatus(status_msg, State.ClientError)  
-            return False
         except smtplib.SMTPConnectError:
             status_msg = "No se puede conectar al servidor SMTP."
             self.changeStatus(status_msg, State.ServerError)
@@ -350,6 +339,10 @@ class FLSmtpClient(QtCore.QObject):
         except smtplib.SMTPServerDisconnected:
             status_msg = "El servidor se desconecta inesperadamente."
             self.changeStatus(status_msg, State.ServerError)
+            return False
+        except smtplib.SMTPException:
+            status_msg = "Error desconocido"
+            self.changeStatus(status_msg, State.ClientError)  
             return False
         except smtplib.socket.gaierror:
             status_msg = "Servidor SMTP no encontrado.Verifique el nombre de host de su servidor SMTP."
