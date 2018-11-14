@@ -560,6 +560,9 @@ class FLFormDB(QtWidgets.QDialog):
         
         self.formReady.emit()
     # protected_:
+    
+    def action(self):
+        return self._action
 
     """
     Inicialización
