@@ -53,11 +53,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def __init__(self, action, conn, parent):
         super(PNCursorTableModel, self).__init__()
 
-        self._action = action
         self._cursorConn = conn
         self._parent = parent
-        if self._action.table():
-            self._metadata = self.db().manager().metadata(self._action.table())
+        
+        if self._parent.metadata():
+            self._metadata = self._parent.metadata()
         else:
             return
 
@@ -549,8 +549,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         if not self.metadata():
-            self.logger.warn("ERROR: CursorTableModel :: No hay tabla",
-                             pineboolib.project.tables[self._action.table()].name)
+            self.logger.warn("ERROR: CursorTableModel :: No hay tabla %s", self.metadata().name())
             return
 
         parent = QtCore.QModelIndex()

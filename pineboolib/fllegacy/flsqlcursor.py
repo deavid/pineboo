@@ -839,11 +839,7 @@ class FLSqlCursor(QtCore.QObject):
             return None
 
         self.d.modeAccess_ = FLSqlCursor.Browse
-        table_name = self._action.table()
-        if not self.db().manager().existsTable(table_name):
-            self.d.metadata_ = self.db().manager().createTable(table_name)
-        else:
-            self.d.metadata_ = self.db().manager().metadata(table_name)
+        
         self.d.cursorRelation_ = cR
         if r:  # FLRelationMetaData
             if self.relation() and self.relation().deref():
@@ -1012,12 +1008,14 @@ class FLSqlCursor(QtCore.QObject):
         if not self._action.table():
             return None
 
+        
+        self.d.metadata_ = self.db().manager().metadata(self._action.table())
             # logger.notice("setAction(): Action no encontrada %s en %s actions. Es posible que la tabla no exista" % (a, len(pineboolib.project.actions)))
             # return False
             # self._action = pineboolib.project.actions["articulos"]
 
-        if self.model() and self._action.table() is self.model()._action.table():
-            return True
+        #if self.model() and self._action.table() is self.model()._action.table():
+        #    return True
 
         self.d._model = PNCursorTableModel(self._action, self.conn(), self)
         if not self.model():

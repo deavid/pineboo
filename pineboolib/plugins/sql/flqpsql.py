@@ -588,8 +588,8 @@ class FLQPSQL(object):
 
                 return self.recordInfo2(tablename)
 
-            docElem = doc.documentElement()
-            mtd = self.db_.manager().metadata(docElem, True)
+            #docElem = doc.documentElement()
+            mtd = self.db_.manager().metadata(tablename, True)
             if not mtd:
                 return self.recordInfo2(tablename)
             fL = mtd.fieldList()

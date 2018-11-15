@@ -56,8 +56,8 @@ class FLManager(QtCore.QObject):
         self.listTables_ = []
         self.dictKeyMetaData_ = {}
         self.initCount_ = 0
-        self.cacheMetaData_ = []
-        self.cacheMetaDataSys_ = []
+        self.cacheMetaData_ = {}
+        self.cacheMetaDataSys_ = {}
         self.cacheAction_ = {}
         QtCore.QTimer.singleShot(100, self.init)
         self.metadataCachedFails = []
@@ -115,18 +115,18 @@ class FLManager(QtCore.QObject):
                 c.insert()
         """
         if not self.cacheMetaData_:
-            self.cacheMetaData_ = []
+            self.cacheMetaData_ = {}
 
         if not self.cacheAction_:
             self.cacheAction_ = {}
 
         if not self.cacheMetaDataSys_:
-            self.cacheMetaDataSys_ = []
+            self.cacheMetaDataSys_ = {}
 
     def finish(self):
         self.dictKeyMetaData_ = {}
         self.listTables_ = []
-        self.cacheMetaData_ = []
+        self.cacheMetaData_ = {}
         self.cacheAction_ = {}
 
         del self
@@ -181,17 +181,13 @@ class FLManager(QtCore.QObject):
             #        key = n
             cacheFound_ = False
             if isSysTable:
-                for fi in self.cacheMetaDataSys_:
-                    if fi.name() == key:
-                        ret = fi
-                        cacheFound_ = True
-                        break
+                if key in self.cacheMetaDataSys_.keys():
+                    ret = self.cacheMetaDataSys_[key]
+                    cacheFound_ = True
             else:
-                for fi in self.cacheMetaData_:
-                    if fi.name() == key:
-                        ret = fi
-                        cacheFound_ = True
-                        break
+                if key in self.cacheMetaData_.keys():
+                    ret = self.cacheMetaData_[key]
+                    cacheFound_ = True
 
             if not cacheFound_:
 
@@ -205,6 +201,7 @@ class FLManager(QtCore.QObject):
                     return None
 
                 doc = QDomDocument(n)
+                
                 if not util.domDocumentSetContent(doc, stream):
                     if not n in self.metadataCachedFails:
                         qWarning(
@@ -218,12 +215,12 @@ class FLManager(QtCore.QObject):
                     return None
 
                 if not isSysTable:
-                    self.cacheMetaData_.append(ret)
+                    self.cacheMetaData_[key] = ret
                     if not ret.isQuery() and not self.existsTable(n):
                         self.createTable(ret)
 
                 elif isSysTable:
-                    self.cacheMetaDataSys_.append(ret)
+                    self.cacheMetaDataSys_[key] = ret
 
             else:
                 acl = pineboolib.project.acl()
@@ -254,7 +251,6 @@ class FLManager(QtCore.QObject):
             ed = True
             cw = False
             dl = False
-
             no = n.firstChild()
             while not no.isNull():
                 e = no.toElement()
@@ -303,7 +299,7 @@ class FLManager(QtCore.QObject):
                         ftsfun = (e.text() == "true")
                         no = no.nextSibling()
                         continue
-
+                
                 no = no.nextSibling()
             tmd = FLTableMetaData(name, a, q)
             cK = None
