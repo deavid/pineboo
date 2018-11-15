@@ -410,6 +410,10 @@ class QGroupBox(QtWidgets.QGroupBox):
         super(QGroupBox, self).__init__(*args, **kwargs)
         self.setStyleSheet("QGroupBox { font-weight: bold; } ")
         self.setContentsMargins(0, 0, 0, 0)
+        from pineboolib.fllegacy.flsettings import FLSettings
+        settings = FLSettings()
+        if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
+            self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
     @decorators.NotImplementedWarn
     def setLineWidth(self, width):
