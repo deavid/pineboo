@@ -696,7 +696,8 @@ class FLManager(QtCore.QObject):
                 self.listTables_.append(n_or_tmd)
                 return tmd
             else:
-                qWarning("FLMAnager :: No existe tabla %s" % n_or_tmd)
+                if not tmd.isQuery():
+                    qWarning("FLMAnager :: No existe tabla %s" % n_or_tmd)
 
             return self.createTable(tmd)
         else:
