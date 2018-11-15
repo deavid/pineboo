@@ -364,7 +364,7 @@ class FLPixmapView(QtWidgets.QScrollArea):
             if self.pixmap_.height() > self.pixmapView_.height() or self.pixmap_.width() > self.pixmapView_.width():
                 new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
-            elif self.pixmap_.height() < self.pixmapView_.height() or self.pixmap_.width() < self.pixmapView_.width():
+            elif self.pixmap_.height() < self.pixmapView_.pixmap().height() or self.pixmap_.width() < self.pixmapView_.pixmap().width():
                 new_pix = self.pixmap_.scaled(self.pixmapView_.size(), QtCore.Qt.KeepAspectRatio)
 
         self.pixmapView_.clear()
