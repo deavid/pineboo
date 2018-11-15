@@ -976,21 +976,11 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setAction(self, a):
-        # if isinstance(a, str) or isinstance(a, QString):
-
-        # a = str(a) # FIXME: Quitar cuando se quite QString
         action = None
 
         if isinstance(a, str):
-            # logger.trace("FLSqlCursor(%s): setAction(%s)" % (self.d.curName_, a))
             action = self.db().manager().action(a)
-            # try:
-            #    action = pineboolib.project.actions[str(a)]
-            # except KeyError:
-            # logger.notice("FLSqlCursor.setAction(): Action no encontrada. Usando %s como action.table" % a)
-            #    action.table = a
-            #    if not getattr(action, "name", None):
-            #        action.name = a
+
             if action.table() is None:
                 action.setTable(a)
         else:
@@ -1010,12 +1000,6 @@ class FLSqlCursor(QtCore.QObject):
 
         
         self.d.metadata_ = self.db().manager().metadata(self._action.table())
-            # logger.notice("setAction(): Action no encontrada %s en %s actions. Es posible que la tabla no exista" % (a, len(pineboolib.project.actions)))
-            # return False
-            # self._action = pineboolib.project.actions["articulos"]
-
-        #if self.model() and self._action.table() is self.model()._action.table():
-        #    return True
 
         self.d._model = PNCursorTableModel(self._action, self.conn(), self)
         if not self.model():
