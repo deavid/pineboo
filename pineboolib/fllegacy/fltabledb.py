@@ -466,7 +466,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         i = 0
         for fi in fieldsList:
-            _index = self.tableRecords_.realColumnIndex(fi)
+            _index = self.tableRecords_.column_name_to_column_index(fi)
             self.moveCol(_index, i)
             i = i + 1
 
@@ -1688,28 +1688,32 @@ class FLTableDB(QtWidgets.QWidget):
 
             if self.autoSortColumn_:
                 s = []
-                print("FIXME:: el sort_order_no_es_correcto", self)
-                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_), False):
-                    s.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_)).name() + " ASC" if self.orderAsc_ else " DESC")
-                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_), False):
-                    s.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_)).name() + " ASC" if self.orderAsc2_ else " DESC")
-                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_), False):
-                    s.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_)).name() + " ASC" if self.orderAsc3_ else " DESC")
+                field_1 = self.tableRecords_.visual_index_to_field(self.sortColumn_)
+                field_2 = self.tableRecords_.visual_index_to_field(self.sortColumn2_)
+                field_3 = self.tableRecords_.visual_index_to_field(self.sortColumn3_)
+                
+                if field_1:
+                    s.append(field_1.name() + " ASC" if self.orderAsc_ else " DESC")
+                if field_2:
+                    s.append(field_2.name() + " ASC" if self.orderAsc2_ else " DESC")
+                if field_3:
+                    s.append(field_3.name() + " ASC" if self.orderAsc3_ else " DESC")
 
                 id_mod = self.cursor_.db().managerModules().idModuleOfFile("%s.mtd" % self.cursor_.metadata().name())
                 function_qsa = "%s.tabeDB_setSort_%s" % (id_mod, self.cursor_.metadata().name())
 
                 vars = []
                 vars.append(s)
-                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_), False):
-                    vars.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_)).name())
+                if field_1:
+                    vars.append(field_1.name())
                     vars.append(self.orderAsc_)
-                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_), False):
-                    vars.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn2_)).name())
+                if field_2:
+                    vars.append(field_2.name())
                     vars.append(self.orderAsc2_)
-                if tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_), False):
-                    vars.append(tMD.indexFieldObject(self.tableRecords_.columnIndexToVisualIndex(self.sortColumn3_)).name())
+                if field_3:
+                    vars.append(field_3.name())
                     vars.append(self.orderAsc3_)
+                    
                 from pineboolib.pncontrolsfactory import aqApp
                 ret = aqApp.call(function_qsa, vars, None, False)
                 if not isinstance(ret, bool):
@@ -1922,15 +1926,9 @@ class FLTableDB(QtWidgets.QWidget):
     """
     @QtCore.pyqtSlot(int)
     @QtCore.pyqtSlot(str)
-    def putFirstCol(self, c):
-        
-        
-        _index = c
-        if isinstance(c, str):
-            _index = self.tableRecords_.realColumnIndex(c)
-        else:
-            _index = self.tableRecords_.columnIndexToVisualIndex(c)
-            print("REVISAME:",c, "puede no ser", _index)
+    def putFirstCol(self, col):
+        _index = self.tableRecords_.column_name_to_column_index(col) if isinstance(col, str) else self.tableRecords_.visual_index_to_column_index(col)
+
             
         if _index < 0:
             return False
@@ -1947,12 +1945,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     @QtCore.pyqtSlot(int)
     @QtCore.pyqtSlot(str)
-    def putSecondCol(self, c):
-        _index = c
-        if isinstance(c, str):
-            _index = self.tableRecords_.realColumnIndex(c)
-        else:
-            _index = self.tableRecords_.columnIndexToVisualIndex(c)
+    def putSecondCol(self, col):
+        _index = self.tableRecords_.column_name_to_column_index(col) if isinstance(col, str) else self.tableRecords_.visual_index_to_column_index(col)
 
         if _index < 0:
             return False
@@ -1970,7 +1964,6 @@ class FLTableDB(QtWidgets.QWidget):
     """
     @decorators.BetaImplementation
     def moveCol(self, from_, to, firstSearch=True):
-        print(self, "moveeee", from_, to)
         if from_ < 0 or to < 0:
             return
 
@@ -2281,7 +2274,7 @@ class FLTableDB(QtWidgets.QWidget):
     def switchSortOrder(self, col=0):
         if not self.autoSortColumn_:
             return
-        if self.tableRecords_.real_index_to_visual_index(col) == self.tableRecords_.columnIndexToVisualIndex(self.sortColumn_): 
+        if self.tableRecords_.logical_index_to_visual_index(col) == self.tableRecords_.visual_index_to_column_index(self.sortColumn_): 
         
             self.orderAsc_ = not self.orderAsc_
 

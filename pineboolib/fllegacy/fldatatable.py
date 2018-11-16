@@ -205,7 +205,6 @@ class FLDataTable(QtWidgets.QTableView):
         return self.horizontalHeader().count()
 
     def setSort(self, s):
-        print("FLDataTable:: Seteando sort", s)
         self.sort_ = s
          
     """
@@ -756,8 +755,12 @@ class FLDataTable(QtWidgets.QTableView):
     @return posicion de la columna en la tabla
     """
 
-    def realColumnIndex(self, name):
-        # print("FLDataTable:realColumnIndex")
+    def column_name_to_column_index(self, name):
+        """
+        Retorna el index real (incusive columnas ocultas) a partir de un nombre de un campo
+        @param name El nombre del campo a buscar en la tabla
+        @return posicion de la columna en la tabla
+        """
         if not isinstance(name, str) or not self.cursor_:
             return -1
 
@@ -769,20 +772,21 @@ class FLDataTable(QtWidgets.QTableView):
 
         self.recordChoosed.emit()
 
-    """
-    Retorna el index real a partir de un index de columnas visibles.
-    @param c posicion de la columna visible.
-    @return posicion real de la columna
-    """
 
-    def columnIndexToVisualIndex(self, c):
+
+    def visual_index_to_column_index(self, c):
+        """
+        Retorna el column index a partir de un index de columnas visibles.
+        @param c posicion de la columna visible.
+        @return index column de la columna
+        """
         if not isinstance(c, int) or not self.cursor_:
             return
 
         visible_id = -1
         ret_ = None
         for column in range(self.model().columnCount()):
-            if not self.isColumnHidden(self.header().visualIndex(column)):
+            if not self.isColumnHidden(self.logical_index_to_visual_index(column)):
                 visible_id += 1
 
                 if visible_id == c:
@@ -792,34 +796,30 @@ class FLDataTable(QtWidgets.QTableView):
         return ret_
     
     def visual_index_to_logical_index(self, c):
+        """
+        Index visual a lógico
+        """
         return self.header().logicalIndex(c)
     
-    def real_index_to_visual_index(self, c):
+    def logical_index_to_visual_index(self, c):
+        """
+        Index lógico a Index Visual
+        """
         return self.header().visualIndex(c)
-        """
-        if not isinstance(c, int) or not self.cursor_:
-            return
-        
-        ret_ = 0
-        logical_id = 0
-        for column in range(self.model().columnCount()):
-            if self.isColumnHidden(self.header().visualIndex(column)):
-                continue
-            else:
-                if column == c:
-                    ret_ = logical_id
-                    break
+
                 
-                logical_id += 1
-        
-        return ret_
-        """
-                
-            
-        
+    def visual_index_to_field(self, pos_):
+        return self.model().metadata().indexFieldObject(self.visual_index_to_logical_index(pos_))
+    
 
     def currentRow(self):
+        """
+        Devuelve la fila actual
+        """
         return self.currentIndex().row()
 
     def currentColumn(self):
+        """
+        Devuelve la columna actual
+        """
         return self.currentIndex().column()
