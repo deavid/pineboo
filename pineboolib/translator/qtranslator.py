@@ -131,7 +131,7 @@ class QTranslator(QtCore.QObject):
             print("Control 3 tamaño", len(context_set.items()))
             
             for item in context_set.items():
-                h_dict.append(item)
+                h_dict.append(item) #Fixme Aquí sacamos elfHash
             
             print("Control 4: %s " % (len(h_dict)))
             
@@ -181,7 +181,7 @@ class QTranslator(QtCore.QObject):
             
             t.device().at(2)
             for j in h_table_size:
-                t << h_table[j]
+                t.writeUInt16(h_table[j])
             
             h_table.clear()
             del h_table
@@ -215,19 +215,22 @@ class QTranslator(QtCore.QObject):
             if self.d.offsetArray != 0:
                 tag = QTranslatorPrivate.Hashes
                 oas = self.d.offsetArray.size()
-                s << tag << oas
+                s.writeUInt8(tag)
+                s.writeUInt32(oas)
                 s.writeBytes(self.d.offsetArray.data())
         
             if self.d.messageArray != 0:
                 tag = QTranslatorPrivate.Messages
                 mas = self.d.messageArray.sizez()
-                s << tag << mas
+                s.writeUInt8(tag)
+                s.writeUInt32(mas)
                 s.writeBytes(self.d.messageArray.data())
         
             if self.d.contextArray != 0:
                 tag = QTranslatorPrivate.Contexts
                 cas = self.d.contextArray.size()
-                s << tag << cas
+                s.writeUInt8(tag)
+                s.writeUInt32(cas)
                 s.writeBytes(self.d.contextArray.data())
         
             return True
