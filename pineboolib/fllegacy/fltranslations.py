@@ -53,8 +53,8 @@ class FLTranslations(object):
         if verbose:
             self.logger.debug("Updating '%s'...", qm_file_name)
 
-        if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
-            self.logger.warn("For some reason, i cannot save '%s'", qm_file_name)
+        #if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
+        #    self.logger.warn("For some reason, i cannot save '%s'", qm_file_name)
 
     """
     Libera el fichero .ts
