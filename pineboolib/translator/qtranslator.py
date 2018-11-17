@@ -3,6 +3,7 @@ from PyQt5 import QtCore
 import logging
 
 
+
 class QTranslator(QtCore.QObject):
     d = None
 
@@ -33,154 +34,171 @@ class QTranslator(QtCore.QObject):
             return
 
         s = QtCore.QDataStream(self.d.messageArray, QtCore.QIODevice.ReadOnly)
-        """
-        for ( ;; ) {
-            QTranslatorMessage m( s );
-            if ( m.hash() == 0 )
-                break;
-            d->messages->insert( m, (void *) 0 );
-            }
-        """
+        
+        while True:
+            if s.__hash__() == 0:
+                break
+            
+            self.d.messages.append(m)
+
+    def elfHash(self, name):
+        
+        k = None
+        h = 0
+        g = None
+        
+        if name:
+            for k in range(len(name)):
+                h = (h << 4 ) + (k + 1)
+                g = (h & 0xf0000000)
+                if g != 0:
+                    h ^= g >> 24
+                
+                h &= ~g
+        
+        if not h:
+            h = 1
+        
+        return h 
+
+
 
     def squeeze(self, mode):
-        """
-        {
-    if ( !d->messages ) {
-    if ( mode == Stripped )
-        unsqueeze();
-    else
-        return;
-    }
+        if not self.d.messages:
+            if mode == "Stripped":
+                self.unsquezze()
+            else:
+                return
+        
+        messages = []
+        for m in self.d.messages:
+            messages.append(m)
+            
+        self.d.messages.clear()
+        
+        self.clear()
+        
+        self.d.messageArray = QtCore.QByteArray()
+        self.d.offsetArray = QtCore.QByteArray()
+        print("Control 1-1. Squeeze", messages)
+        offsets = {}
+        
+        ms = QtCore.QDataStream(self.d.messageArray, QtCore.QIODevice.WriteOnly)
+        
+        cp_prev = 0
+        cp_next = 0
+        
 
-    QMap<QTranslatorMessage, void *> * messages = d->messages;
+        for i in range(len(messages)):
+            it = messages[i]
+            cp_prev = cp_next
+            next = it
+            
+            if i == len(messages) -1:
+                cp_next = 0
+            else:
+                cp_next = i
+                offsets[i] = cp_prev if cp_prev > (cp_next + 1) else cp_next + 1
+            
+        self.d.offsetArray.resize(0)
+        
+        ds = QtCore.QDataStream(self.d.offsetArray, QtCore.QIODevice.WriteOnly)
+        for key in offsets.keys():
+            offset = offsets[key]
+            ds.writeUInt32(key)
+            ds.writeUInt32(offset)
+        
+        if mode == "Stripped":
+            context_set = {} #1511
+            baudelaire = None
+            
+            for i in range(len(messages)):
+                it = messages[i]
+                context_set[i] = it.context()
+                
+            h_table_size = None
+            
+            print("Control 2 tamaño", len(context_set.keys()))
+            if len(context_set.keys()) < 200:
+                h_table_size = 151 if len(context_set.keys()) < 60 else 503
+            elif len(context_set.keys()) < 2500:
+                h_table_size = 1511 if len(context_set.keys()) < 750 else 5003
+            else:
+                h_table_size = 15013
+        
+            h_dict = [] 
+                        
+            print("Control 3 tamaño", len(context_set.items()))
+            
+            for item in context_set.items():
+                h_dict.append(item)
+            
+            print("Control 4: %s " % (len(h_dict)))
+            
+            self.d.contextArray = QtCore.QByteArray()
+            self.d.contextArray.resize(2 + (h_table_size << 1))
+            t = QtCore.QDataStream(self.d.contextArray, QtCore.QIODevice.WriteOnly)
+            h_table = {}
 
-    d->messages = 0;
-    clear();
-
-    d->messageArray = new QByteArray;
-    d->offsetArray = new QByteArray;
-
-    QMap<QTranslatorPrivate::Offset, void *> offsets;
-
-    QDataStream ms( *d->messageArray, IO_WriteOnly );
-    QMap<QTranslatorMessage, void *>::Iterator it = messages->begin(), next;
-    int cpPrev = 0, cpNext = 0;
-    for ( it = messages->begin(); it != messages->end(); ++it ) {
-    cpPrev = cpNext;
-    next = it;
-    ++next;
-    if ( next == messages->end() )
-        cpNext = 0;
-    else
-        cpNext = (int) it.key().commonPrefix( next.key() );
-    offsets.replace( QTranslatorPrivate::Offset(it.key(),
-             ms.device()->at()), (void*)0 );
-    it.key().write( ms, mode == Stripped,
-            (QTranslatorMessage::Prefix) QMAX(cpPrev, cpNext + 1) );
-    }
-
-    d->offsetArray->resize( 0 );
-    QMap<QTranslatorPrivate::Offset, void *>::Iterator offset;
-    offset = offsets.begin();
-    QDataStream ds( *d->offsetArray, IO_WriteOnly );
-    while ( offset != offsets.end() ) {
-    QTranslatorPrivate::Offset k = offset.key();
-    ++offset;
-    ds << (Q_UINT32)k.h << (Q_UINT32)k.o;
-    }
-
-    if ( mode == Stripped ) {
-    QAsciiDict<int> contextSet( 1511 );
-    int baudelaire;
-
-    for ( it = messages->begin(); it != messages->end(); ++it )
-        contextSet.replace( it.key().context(), &baudelaire );
-
-    Q_UINT16 hTableSize;
-    if ( contextSet.count() < 200 )
-        hTableSize = ( contextSet.count() < 60 ) ? 151 : 503;
-    else if ( contextSet.count() < 2500 )
-        hTableSize = ( contextSet.count() < 750 ) ? 1511 : 5003;
-    else
-        hTableSize = 15013;
-
-    QIntDict<char> hDict( hTableSize );
-    QAsciiDictIterator<int> c = contextSet;
-    while ( c.current() != 0 ) {
-        hDict.insert( (long) (elfHash(c.currentKey()) % hTableSize),
-              c.currentKey() );
-        ++c;
-    }
-
-    /*
-      The contexts found in this translator are stored in a hash
-      table to provide fast lookup. The context array has the
-      following format:
-
-          Q_UINT16 hTableSize;
-          Q_UINT16 hTable[hTableSize];
-          Q_UINT8  contextPool[...];
-
-      The context pool stores the contexts as Pascal strings:
-
-          Q_UINT8  len;
-          Q_UINT8  data[len];
-
-      Let's consider the look-up of context "FunnyDialog".  A
-      hash value between 0 and hTableSize - 1 is computed, say h.
-      If hTable[h] is 0, "FunnyDialog" is not covered by this
-      translator. Else, we check in the contextPool at offset
-      2 * hTable[h] to see if "FunnyDialog" is one of the
-      contexts stored there, until we find it or we meet the
-      empty string.
-    */
-    d->contextArray = new QByteArray;
-    d->contextArray->resize( 2 + (hTableSize << 1) );
-    QDataStream t( *d->contextArray, IO_WriteOnly );
-    Q_UINT16 *hTable = new Q_UINT16[hTableSize];
-    memset( hTable, 0, hTableSize * sizeof(Q_UINT16) );
-
-    t << hTableSize;
-    t.device()->at( 2 + (hTableSize << 1) );
-    t << (Q_UINT16) 0; // the entry at offset 0 cannot be used
-    uint upto = 2;
-
-    for ( int i = 0; i < hTableSize; i++ ) {
-        const char *con = hDict.find( i );
-        if ( con == 0 ) {
-        hTable[i] = 0;
-        } else {
-        hTable[i] = (Q_UINT16) ( upto >> 1 );
-        do {
-            uint len = (uint) qstrlen( con );
-            len = QMIN( len, 255 );
-            t << (Q_UINT8) len;
-            t.writeRawBytes( con, len );
-            upto += 1 + len;
-            hDict.remove( i );
-        } while ( (con = hDict.find(i)) != 0 );
-        do {
-            t << (Q_UINT8) 0; // empty string (at least one)
-            upto++;
-        } while ( (upto & 0x1) != 0 ); // offsets have to be even
-        }
-    }
-    t.device()->at( 2 );
-    for ( int j = 0; j < hTableSize; j++ )
-        t << hTable[j];
-    delete [] hTable;
-
-    if ( upto > 131072 ) {
-        qWarning( "QTranslator::squeeze: Too many contexts" );
-        delete d->contextArray;
-        d->contextArray = 0;
-    }
-    }
-    delete messages;
-}
-        """
+            for i in range(h_table_size):
+                h_table[i] = 0
+            
+            t.writeUInt16(h_table_size)
+            t.device().seek(2 + (h_table_size << 1))
+            t.writeUInt16(0) 
+            upto = 2
+            
+            print("Control 4 tamaño", h_table_size, len(h_dict))
+            for i in range(h_table_size):
+                if i in range(len(h_dict)):
+                    print("*******", h_dict[i])
+                    con = h_dict[i]
+                else:
+                    con = 0
+                    
+                if con == 0:
+                    h_table[i] = 0
+                else:
+                    h_table[i] = (upto >> 1)
+                    first = False
+                    #Esta maaaaalll
+                    while con != 0 or not fisrt:
+                        len_ = len(con)
+                        len_ = len_ if len_ < 255 else 255
+                        t.writeUInt8(len_)
+                        print("*", con[1])
+                        t.writeQString(con[1])
+                        upto += 1 + len_
+                        del h_dict[i]
+                        first = True
+                    
+                    first = False
+                    while upto & 0x1 != 0 or first:
+                    
+                        t.writeUInt8(0)
+                        upto += 1
+                        first = True
+            
+            t.device().at(2)
+            for j in h_table_size:
+                t << h_table[j]
+            
+            h_table.clear()
+            del h_table
+            
+            if upto > 131072:
+                QtCore.qWarning("QTranslator::squeeze: Too many contexts")
+                self.d.contextArray.clear()
+        
+        del messages
+    
+    def clear(self):
         pass
+    
+    
 
+                
+            
     def save_qm(self, file_name, mode):
 
         magic = {0x3c, 0xb8, 0x64, 0x18, 0xca, 0xef, 0x9c, 0x95, 0xcd, 0x21, 0x1c, 0xbf, 0x60, 0xa1, 0xbd, 0xdd}
@@ -189,158 +207,129 @@ class QTranslator(QtCore.QObject):
         if f.open(QtCore.QIODevice.WriteOnly):
             self.squeeze(mode)
 
-        s = QtCore.QDataStream(f)
-        # s.writeRawData(magic)
+            s = QtCore.QDataStream(f)
+            s.writeBytes(magic)
 
-        tag = None
-
-        """
-        qtranslator.cpp
-        {
-    QFile f( filename );
-    if ( f.open( IO_WriteOnly ) ) {
-    squeeze( mode );
-
-    QDataStream s( &f );
-    s.writeRawBytes( (const char *)magic, MagicLength );
-    Q_UINT8 tag;
-
-    if ( d->offsetArray != 0 ) {
-        tag = (Q_UINT8) QTranslatorPrivate::Hashes;
-        Q_UINT32 oas = (Q_UINT32) d->offsetArray->size();
-        s << tag << oas;
-        s.writeRawBytes( d->offsetArray->data(), oas );
-    }
-    if ( d->messageArray != 0 ) {
-        tag = (Q_UINT8) QTranslatorPrivate::Messages;
-        Q_UINT32 mas = (Q_UINT32) d->messageArray->size();
-        s << tag << mas;
-        s.writeRawBytes( d->messageArray->data(), mas );
-    }
-    if ( d->contextArray != 0 ) {
-        tag = (Q_UINT8) QTranslatorPrivate::Contexts;
-        Q_UINT32 cas = (Q_UINT32) d->contextArray->size();
-        s << tag << cas;
-        s.writeRawBytes( d->contextArray->data(), cas );
-    }
-    return TRUE;
-    }
-    return FALSE;
-}
-        """
-        return True
+            tag = None
+        
+            if self.d.offsetArray != 0:
+                tag = QTranslatorPrivate.Hashes
+                oas = self.d.offsetArray.size()
+                s << tag << oas
+                s.writeBytes(self.d.offsetArray.data())
+        
+            if self.d.messageArray != 0:
+                tag = QTranslatorPrivate.Messages
+                mas = self.d.messageArray.sizez()
+                s << tag << mas
+                s.writeBytes(self.d.messageArray.data())
+        
+            if self.d.contextArray != 0:
+                tag = QTranslatorPrivate.Contexts
+                cas = self.d.contextArray.size()
+                s << tag << cas
+                s.writeBytes(self.d.contextArray.data())
+        
+            return True
+    
+        return False
 
     def findMessage(self, context, source_text, comment):
-        pass
-        """
-QTranslatorMessage QTranslator::findMessage( const char* context,
-                         const char* sourceText,
-                         const char* comment ) const
-{
-    if ( context == 0 )
-    context = "";
-    if ( sourceText == 0 )
-    sourceText = "";
-    if ( comment == 0 )
-    comment = "";
+        
+        if context == 0:
+            context = ""
+        if source_text == 0:
+            source_text = ""
+        if comment == 0:
+            comment = ""
+        
+        if self.d.messages:
+            
+            it = self.d.messages.find([context, source_text, comment])
+            
+            if it != self.d.messages[len(self.d.messages) -1 ]:
+                return it.key()
+            
+            if (comment[0]):
+                it = self.d.messages.find([context, source_text, comment])
+                
+                if it != self.d.messages[len(self.d.messages) -1]:
+                    return it.key()
+            
+            return None
+        
+        if not self.d.offsetArray:
+            return None
+        
+        
+        if self.d.contextArray:
+            h_table_size = 0
+            t = QtCore.QDataStream(self.d.contextArray, QtCore.QIODevice.ReadOnly)
+            t >> h_table_size
+            g = elfHash(context) % h_table_size
+            t.device().at(2 + (g << 1))
+            off = None
+            t >> off
+            if off == 0:
+                return None
+            
+            t.device().at(2 + (h_table_size << 1 ) + (off << 1))
+            
+            len = None
+            con = []
+            while True:
+                t >> len
+                if (len == 0):
+                    return None
+                t.readUInt8()
+                con[len] = "\0"
+                if con == context:
+                    break
+            
+        number_items = len(self.d.offsetArray) / (2 * sizeof(Q_UINT32))
+        if not number_items:
+            return None
+        
+        if systemWordSize == 0:
+            qSysInfo( systemWordSize, systemBigEndian )
 
-#ifndef QT_NO_TRANSLATION_BUILDER
-    if ( d->messages ) {
-    QMap<QTranslatorMessage, void *>::ConstIterator it;
-
-    it = d->messages->find( QTranslatorMessage(context, sourceText,
-                           comment) );
-    if ( it != d->messages->end() )
-        return it.key();
-
-    if ( comment[0] ) {
-        it = d->messages->find( QTranslatorMessage(context, sourceText,
-                               "") );
-        if ( it != d->messages->end() )
-        return it.key();
-    }
-    return QTranslatorMessage();
-    }
-#endif
-
-    if ( !d->offsetArray )
-    return QTranslatorMessage();
-
-    /*
-      Check if the context belongs to this QTranslator.  If many translators are
-      installed, this step is necessary.
-    */
-    if ( d->contextArray ) {
-    Q_UINT16 hTableSize = 0;
-    QDataStream t( *d->contextArray, IO_ReadOnly );
-    t >> hTableSize;
-    uint g = elfHash( context ) % hTableSize;
-    t.device()->at( 2 + (g << 1) );
-    Q_UINT16 off;
-    t >> off;
-    if ( off == 0 )
-        return QTranslatorMessage();
-    t.device()->at( 2 + (hTableSize << 1) + (off << 1) );
-
-    Q_UINT8 len;
-    char con[256];
-    for ( ;; ) {
-        t >> len;
-        if ( len == 0 )
-        return QTranslatorMessage();
-        t.readRawBytes( con, len );
-        con[len] = '\0';
-        if ( qstrcmp(con, context) == 0 )
-        break;
-    }
-    }
-
-    size_t numItems = d->offsetArray->size() / ( 2 * sizeof(Q_UINT32) );
-    if ( !numItems )
-    return QTranslatorMessage();
-
-    if ( systemWordSize == 0 )
-    qSysInfo( &systemWordSize, &systemBigEndian );
-
-    for ( ;; ) {
-    Q_UINT32 h = elfHash( QCString(sourceText) + comment );
-
-    char *r = (char *) bsearch( &h, d->offsetArray->data(), numItems,
-                    2 * sizeof(Q_UINT32),
-                    systemBigEndian ? cmp_uint32_big
-                    : cmp_uint32_little );
-    if ( r != 0 ) {
-        // go back on equal key
-        while ( r != d->offsetArray->data() &&
-            cmp_uint32_big(r - 8, r) == 0 )
-        r -= 8;
-
-        QDataStream s( *d->offsetArray, IO_ReadOnly );
-        s.device()->at( r - d->offsetArray->data() );
-
-        Q_UINT32 rh, ro;
-        s >> rh >> ro;
-
-        QDataStream ms( *d->messageArray, IO_ReadOnly );
-        while ( rh == h ) {
-        ms.device()->at( ro );
-        QTranslatorMessage m( ms );
-        if ( match(m.context(), context)
-            && match(m.sourceText(), sourceText)
-            && match(m.comment(), comment) )
-            return m;
-        if ( s.atEnd() )
-            break;
-        s >> rh >> ro;
-        }
-    }
-    if ( !comment[0] )
-        break;
-    comment = "";
-    }
-    return QTranslatorMessage();
-}
-        """
+            
+        while True:
+            h = elfHash(source_text + comment)
+        
+            r = bsearch(h, self.d.offsetArray.data(), numItems, 2 * sizeof(Q_UINT32), cmp_uint32_big if systemBigEndian else cmp_uint32_lite)
+        
+            if r != 0:
+                while r != self.d.offsetArray.data() and cmp_uint32_big(r -8, r) == 0:
+                    r -= 8
+                
+            
+                s = QtCore.QDataStream(self.d.offsetArray, QtCore.QIODevice.ReadOnly)
+                s.device().at(r - self.d.offsetArray.data())
+            
+                rh = None
+                ro = None
+            
+                s >> rh >> ro
+            
+                ms = QtCore.QDataStream(self.d.messageArray, QtCore.QIODevice.ReadOnly)
+                while rh == h:
+                    ms.device().at(ro)
+                    m = ms
+                    if m.context() == context and m.sourceText() == source_text and m.comment() == comment:
+                        return m
+                
+                    if s.atEnd():
+                        break
+                
+                    s >> rh >> ro
+        
+            if not comment[0]:
+                break
+            
+            comment = ""
+        
+        return None
 
 
 class QTranslatorPrivate(QtCore.QObject):
