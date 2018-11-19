@@ -46,20 +46,31 @@ class FLTranslator(QTranslator):
                              (aqApp.db().database(), self.idM_, self.idM_, self.lang_, key))
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         qmFile = "%s.qm" % tsFile
-
+        print("*", qmFile)
         if os.path.exists(qmFile):
             if tsFile in (None, ""):
                 return False
 
-            return True
+        else:
 
-        trans = FLTranslations()
-        trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)
+            trans = FLTranslations()
+            trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)
+        
         return self.load(qmFile)
+    
 
     @decorators.BetaImplementation
-    def findMessage(self, context, sourceText, comment=None):
+    def translate(self, *args):
+        context = args[0]
+        source_text = args[1]
+        print("Buscando", context, source_text)
+        ret_ = super(FLTranslator, self).translate(*args)
+        if ret_ == "":
+            ret_ = source_text
+        return ret_
+        """
         if not comment:
             return QtCore.QTranslator.findMessage(context, sourceText)
         else:
             return QtCore.QTranslator.findMessage(context, sourceText, comment)
+        """

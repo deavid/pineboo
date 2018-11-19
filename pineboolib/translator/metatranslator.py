@@ -137,7 +137,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
                         base = 16
                         value = value[1:]
 
-                    n = int(0, base)
+                    n = int(base)
                     if n is not 0:
                         self.accum += str(n)
 

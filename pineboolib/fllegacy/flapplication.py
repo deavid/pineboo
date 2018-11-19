@@ -18,7 +18,7 @@ class FLApplication(QtCore.QObject):
     not_exit_ = None  # No salir de la aplicación
     multi_lang_enabled_ = None  # Activado multiLang
     multi_lang_id_ = None
-    translator_ = None  # Traductor
+    translator_ = []  # Traductor
     dict_main_widgets_ = None
     container_ = None  # Contenedor actual??
     map_geometry_form_ = None  # Gemotria de lis mainForm en sdi?
@@ -799,11 +799,14 @@ class FLApplication(QtCore.QObject):
     """
     @decorators.BetaImplementation
     def loadTranslations(self):
-        translatorsCopy = None
-        # if self.translators:
-        #     translatorsCopy = copy.copy(self.translators)
-        #     for it in translatorsCopy:
-        #         self.removeTranslator(it)
+        print("****** loadTranslations")
+        translatorsCopy = []
+        if self.translator_:
+            for t in self.translator_:
+                print("**", t)
+                translatorsCopy.append(t) 
+            for it in translatorsCopy:
+                self.removeTranslator(it)
 
         lang = QtCore.QLocale().name()[:2]
         for module in self.modules().keys():
@@ -811,11 +814,11 @@ class FLApplication(QtCore.QObject):
 
         if translatorsCopy:
             for it in translatorsCopy:
-                item = it
-                if item.sysTrans_:
-                    self.installTranslator(item)
+                print(it, it.sysTrans_)
+                if it.sysTrans_:
+                    self.installTranslator(it)
                 else:
-                    item.deletelater()
+                    it.deletelater()
 
     """
     Busca la traducción de un texto a un Idioma dado
@@ -848,6 +851,7 @@ class FLApplication(QtCore.QObject):
     """
     @decorators.BetaImplementation
     def loadTranslationFromModule(self, idM, lang):
+        print("**", self.createModTranslator(idM, lang, True))
         self.installTranslator(self.createModTranslator(idM, lang, True))
         # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
 
@@ -857,7 +861,8 @@ class FLApplication(QtCore.QObject):
     """
     @decorators.BetaImplementation
     def installTranslator(self, tor):
-        if not tor:
+        print("Install", tor)
+        if tor is None:
             return
         else:
             QtWidgets.qApp.installTranslator(tor)
