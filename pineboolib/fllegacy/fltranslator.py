@@ -8,6 +8,7 @@ from pineboolib import decorators
 
 from PyQt5 import QtCore
 from PyQt5.Qt import QTranslator
+import logging
 
 
 class FLTranslator(QTranslator):
@@ -22,6 +23,7 @@ class FLTranslator(QTranslator):
     ts_translation_contexts = {}
     def __init__(self, parent=None, name=None, multiLang=False, sysTrans=False):
         super(FLTranslator, self).__init__()
+        self.logger = logging.getLogger("FLTranslator")
         self._prj = parent
         self.idM_ = name[0:len(name) - 3]
         self.lang_ = name[len(name) - 2:]
@@ -58,11 +60,17 @@ class FLTranslator(QTranslator):
             trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)
         
         settings = FLSettings()
+        ret_ = None
         if not settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
-            return self.load_ts("%s.ts" % tsFile)
-            
+            ret_ = self.load_ts("%s.ts" % tsFile)
+            if not ret_:
+                self.logger.warn("For some reason, i cannot load '%s.ts'", tsFile)
         else:
-            return self.load(qmFile)
+            ret_ = self.load(qmFile)
+            if not ret_:
+                self.logger.warn("For some reason, i cannot load '%s'", qmFile)
+        
+        return ret_
 
     @decorators.BetaImplementation
     def translate(self, *args):
