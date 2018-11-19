@@ -88,7 +88,7 @@ class QTranslator(QtCore.QObject):
         for m in self.d.messages: 
             
             if m.type_() > 0 and m.sourceText() is not "":#Si Terminada
-                print("mensaje", m.context(), m.sourceText(), m.translation(), len(m.sourceText()), m.sourceText() == "", m.type_())
+                #print("mensaje", m.context(), m.sourceText(), m.translation(), len(m.sourceText()), m.sourceText() == "", m.type_())
                 messages.append(m) # Añado mensaje
                  
                 if m.context() not in contexts: #Si el context es nuevo

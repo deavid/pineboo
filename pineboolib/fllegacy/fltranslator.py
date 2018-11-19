@@ -19,7 +19,7 @@ class FLTranslator(QTranslator):
     AQ_DISKCACHE_DIRPATH = None  # FIXME
     idM_ = None
     lang_ = None
-
+    translation_from_ = None
     ts_translation_contexts = {}
     def __init__(self, parent=None, name=None, multiLang=False, sysTrans=False):
         super(FLTranslator, self).__init__()
@@ -29,6 +29,8 @@ class FLTranslator(QTranslator):
         self.lang_ = name[len(name) - 2:]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
+        settings = FLSettings()
+        self.translation_from_qm = settings.readBoolEntry("ebcomportamiento/translations_from_qm", False)
 
     """
     Carga en el traductor el contenido de un fichero de traducciones existente en la caché de disco
@@ -59,9 +61,8 @@ class FLTranslator(QTranslator):
             trans = FLTranslations()
             trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)
         
-        settings = FLSettings()
         ret_ = None
-        if not settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
+        if not self.translation_from_qm:
             ret_ = self.load_ts("%s.ts" % tsFile)
             if not ret_:
                 self.logger.warn("For some reason, i cannot load '%s.ts'", tsFile)
@@ -72,13 +73,11 @@ class FLTranslator(QTranslator):
         
         return ret_
 
-    @decorators.BetaImplementation
     def translate(self, *args):
         context = args[0]
         source_text = args[1]
-        settings = FLSettings()
         ret_ = None
-        if settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
+        if self.translation_from_qm:
             ret_ = super(FLTranslator, self).translate(*args)
             if ret_ == "":
                 ret_ = None
