@@ -75,6 +75,8 @@ class FLTranslator(QTranslator):
 
     def translate(self, *args):
         context = args[0]
+        if context.endswith("PlatformTheme"):
+            context = "QMessageBox"
         source_text = args[1]
         ret_ = None
         if self.translation_from_qm:
@@ -85,7 +87,7 @@ class FLTranslator(QTranslator):
             if context in self.ts_translation_contexts.keys():
                 if source_text in self.ts_translation_contexts[context]:
                     ret_ =  self.ts_translation_contexts[context][source_text]       
-              
+        
         return ret_
     
     def load_ts(self, file_name):
