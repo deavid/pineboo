@@ -50,11 +50,15 @@ class FLTranslations(object):
     """
 
     def releaseMetaTranslator(self, tor, qm_file_name, verbose, stripped):
+        from pineboolib.fllegacy.flsettings import FLSettings
         if verbose:
             self.logger.debug("Updating '%s'...", qm_file_name)
-
-        if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
-            self.logger.warn("For some reason, i cannot save '%s'", qm_file_name)
+        
+        settings = FLSettings()
+        if settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
+            print("*** FAKE :: ", qm_file_name)
+            if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
+                self.logger.warn("For some reason, i cannot save '%s'", qm_file_name)
 
     """
     Libera el fichero .ts
@@ -119,7 +123,6 @@ class FLTranslations(object):
                 self.logger.warn("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
 
         if qm_output_file:
-            print("*** FAKE :: ", qm_output_file)
             self.releaseMetaTranslator(tor, qm_output_file, verbose, stripped)
 
 

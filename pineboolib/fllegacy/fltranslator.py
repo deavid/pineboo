@@ -3,6 +3,7 @@
 import os
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.fltranslations import FLTranslations
+from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 
 from PyQt5 import QtCore
@@ -18,6 +19,7 @@ class FLTranslator(QTranslator):
     idM_ = None
     lang_ = None
 
+    ts_translation_contexts = {}
     def __init__(self, parent=None, name=None, multiLang=False, sysTrans=False):
         super(FLTranslator, self).__init__()
         self._prj = parent
@@ -46,7 +48,6 @@ class FLTranslator(QTranslator):
                              (aqApp.db().database(), self.idM_, self.idM_, self.lang_, key))
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
         qmFile = "%s.qm" % tsFile
-        print("*", qmFile)
         if os.path.exists(qmFile):
             if tsFile in (None, ""):
                 return False
@@ -56,21 +57,50 @@ class FLTranslator(QTranslator):
             trans = FLTranslations()
             trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)
         
-        return self.load(qmFile)
-    
+        settings = FLSettings()
+        if not settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
+            return self.load_ts("%s.ts" % tsFile)
+            
+        else:
+            return self.load(qmFile)
 
     @decorators.BetaImplementation
     def translate(self, *args):
         context = args[0]
         source_text = args[1]
-        print("Buscando", context, source_text)
-        ret_ = super(FLTranslator, self).translate(*args)
-        if ret_ == "":
-            ret_ = source_text
-        return ret_
-        """
-        if not comment:
-            return QtCore.QTranslator.findMessage(context, sourceText)
+        settings = FLSettings()
+        ret_ = None
+        if settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
+            ret_ = super(FLTranslator, self).translate(*args)
+            if ret_ == "":
+                ret_ = None
         else:
-            return QtCore.QTranslator.findMessage(context, sourceText, comment)
-        """
+            if context in self.ts_translation_contexts.keys():
+                if source_text in self.ts_translation_contexts[context]:
+                    ret_ =  self.ts_translation_contexts[context][source_text]       
+              
+        return ret_
+    
+    def load_ts(self, file_name):
+        try:
+            from pineboolib.utils import load2xml
+            root_ = load2xml(file_name)
+            for context in root_.findall("context"):
+                context_dict_key = context.find("name").text
+                if not context_dict_key in self.ts_translation_contexts.keys():
+                    self.ts_translation_contexts[context_dict_key] = {} 
+                for message in context.findall("message"):
+                    translation = getattr(message, "translation", None)
+                    translation_text = message.find("translation").text
+                    if translation_text is not None:
+                        source_text = message.find("source").text
+                        self.ts_translation_contexts[context_dict_key][source_text] = translation_text
+            
+            return True
+        except Exception:
+            return False
+        
+                    
+        
+    
+    

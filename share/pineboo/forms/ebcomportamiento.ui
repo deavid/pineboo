@@ -570,6 +570,57 @@
                             </spacer>
                         </vbox>
                     </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>TabTranslate</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Traducciones</string>
+                        </attribute>
+                        <vbox>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QGroupBox">
+                                <property name="name">
+                                    <cstring>groupBox8</cstring>
+                                </property>
+                                <property name="title">
+                                    <string>Traducciones</string>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>cb_traducciones</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Usar traducciones QM</string>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                            <spacer>
+                                <property name="name">
+                                    <cstring>spacer13_2</cstring>
+                                </property>
+                                <property name="orientation">
+                                    <enum>Vertical</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>Expanding</enum>
+                                </property>
+                                <property name="sizeHint">
+                                    <size>
+                                        <width>31</width>
+                                        <height>181</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                        </vbox>
+                    </widget>
                 </widget>
             </widget>
             <widget class="QWidget">

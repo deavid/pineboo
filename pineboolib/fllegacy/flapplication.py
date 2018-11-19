@@ -799,11 +799,9 @@ class FLApplication(QtCore.QObject):
     """
     @decorators.BetaImplementation
     def loadTranslations(self):
-        print("****** loadTranslations")
         translatorsCopy = []
         if self.translator_:
             for t in self.translator_:
-                print("**", t)
                 translatorsCopy.append(t) 
             for it in translatorsCopy:
                 self.removeTranslator(it)
@@ -814,7 +812,6 @@ class FLApplication(QtCore.QObject):
 
         if translatorsCopy:
             for it in translatorsCopy:
-                print(it, it.sysTrans_)
                 if it.sysTrans_:
                     self.installTranslator(it)
                 else:
@@ -851,7 +848,6 @@ class FLApplication(QtCore.QObject):
     """
     @decorators.BetaImplementation
     def loadTranslationFromModule(self, idM, lang):
-        print("**", self.createModTranslator(idM, lang, True))
         self.installTranslator(self.createModTranslator(idM, lang, True))
         # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
 
@@ -861,7 +857,6 @@ class FLApplication(QtCore.QObject):
     """
     @decorators.BetaImplementation
     def installTranslator(self, tor):
-        print("Install", tor)
         if tor is None:
             return
         else:

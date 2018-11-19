@@ -45,6 +45,7 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbKugarParser").setCurrentText(self.leerValorLocal("kugarParser") if not "" else pineboolib.project.kugarPlugin.defaultParser())
         w.child(u"cbSpacerLegacy").checked = self.leerValorLocal("spacerLegacy")
         w.child(u"cbParseModulesOnLoad").checked = self.leerValorLocal("parseModulesOnLoad")
+        w.child(u"cb_traducciones").checked = self.leerValorLocal("translations_from_qm")
 
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
@@ -141,6 +142,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("kugarParser", w.child(u"cbKugarParser").currentText())
         self.grabarValorLocal("spacerLegacy", w.child(u"cbSpacerLegacy").checked)
         self.grabarValorLocal("parseModulesOnLoad", w.child(u"cbParseModulesOnLoad").checked)
+        self.grabarValorLocal("translations_from_qm"),  w.child(u"cb_traducciones").checked)
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"
