@@ -607,38 +607,26 @@ def convert2FLAction(action):
 def load2xml(form_path_or_str):
     from xml.etree import ElementTree as ET
 
-    class xml_parser():
+    class xml_parser(ET.TreeBuilder):
 
-        builder_ = None
-
-        def __init__(self):
-            self.builder_ = ET.TreeBuilder()
 
         def start(self, tag, attrs):
-            #print("iniciando", tag, attrs)
-            ret = self.builder_.start(tag, attrs)
-
-            # for at in ret.items():
-            #    print("****", at)
-            # print(ret)
-
-            return ret
+            return super(xml_parser, self).start(tag, attrs)
 
         def end(self, tag):
-            #print("Terminando", tag)
-            return self.builder_.end(tag)
+            return super(xml_parser, self).end(tag)
 
         def data(self, data):
-            #print("data!!", repr(data))
-            self.builder_.data(data)
+            super(xml_parser, self).data(data)
 
         def close(self):
-            return self.builder_.close()
+            return super(xml_parser, self).close()
 
     try:
         parser = ET.XMLParser(html=0, target=xml_parser())
         if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
-            print(form_path_or_str)
+            form_path_or_str = form_path_or_str.replace("+","__PLUS__")
+            form_path_or_str = parse_for_duplicates(form_path_or_str)
             ret = ET.fromstring(form_path_or_str, parser)
         else:
             ret = ET.parse(form_path_or_str, parser)
@@ -646,16 +634,57 @@ def load2xml(form_path_or_str):
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15", target=xml_parser())
             if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
+                form_path_or_str = form_path_or_str.replace("+","__PLUS__")
+                form_path_or_str = parse_for_duplicates(form_path_or_str)
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
                 ret = ET.parse(form_path_or_str, parser)
             #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
         except Exception:
-            logger.exception("Error cargando UI después de intentar con UTF8 y ISO", form_path_or_str)
+            logger.exception("Error cargando UI después de intentar con UTF8 y ISO \n%s", form_path_or_str)
             ret = None
 
     return ret
 
+def parse_for_duplicates(text):
+    ret_ = ""
+    for section in text.split(">"):
+        #print("section", section)
+        duplicate_ = False
+        attr_list = []
+        for attribute_ in section.split(" "):
+            
+            #print("attribute", attribute_)
+            if attribute_.find("=") > -1:
+                attr_name = attribute_[0:attribute_.find("=")]
+                if attr_name not in attr_list:
+                    attr_list.append(attr_name)
+                else:
+                    if attr_name is not "":
+                        #print("Eliminado attributo duplicado", attr_name)
+                        duplicate_ = True
+            
+            if not duplicate_:
+                if not section.endswith(attribute_):
+                    ret_ += "%s " % attribute_
+                else:
+                    ret_ += "%s" % attribute_
+            else:
+                if attribute_.endswith("/"):
+                    ret_ += "/"
+            
+            duplicate_ = False
+            
+        
+        if (section.find(">") == -1 and section.find("<") > -1) or section.endswith("--"):
+            ret_ += ">"
+        
+    #print(ret_)
+    return ret_
+        
+                    
+    
+    
 
 def imFrozen():
     return getattr(sys, 'frozen', False)
