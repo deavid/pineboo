@@ -197,7 +197,7 @@ class kut2fpdf(object):
         fix_height = True
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
-                self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
+                self.setTopSection(self._document.h - self._parser_tools.getHeight(xml))
 
         if xml.tag == "PageFooter":
             fix_height = False
@@ -227,7 +227,9 @@ class kut2fpdf(object):
         #style = int(xml.get("Style"))
         width = int(xml.get("Width"))
         X1 = self.calculateLeftStart(xml.get("X1"))
-        X2 = self.calculateRightEnd(xml.get("X2"))
+        X1 = self.calculateRightEnd(X1)
+        X2 = self.calculateLeftStart(xml.get("X2"))
+        X2 = self.calculateRightEnd(X2)
         # Ajustar altura a secciones ya creadas
         Y1 = int(xml.get("Y1")) + self.topSection()
         Y2 = int(xml.get("Y2")) + self.topSection()
@@ -275,7 +277,7 @@ class kut2fpdf(object):
     def processText(self, xml, data_row=None, fix_height=True):
         isImage = False
         text = xml.get("Text")
-        BorderWidth = int(xml.get("BorderWidth"))
+        BorderWidth = int(xml.get("BorderWidth") if xml.get("BorderWidth") else 1)
         borderColor = xml.get("BorderColor")
 
         # x,y,W,H se calcula y corrigen aquí para luego estar correctos en los diferentes destinos posibles
@@ -299,9 +301,10 @@ class kut2fpdf(object):
         elif xml.tag == "CalculatedField":
             if xml.get("FunctionName"):
                 function_name = xml.get("FunctionName")
+                field_name = xml.get("Field")
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
-                    text = str(pineboolib.project.call(function_name, [nodo]))
+                    text = str(pineboolib.project.call(function_name, [nodo, field_name]))
                 except Exception:
                     self.logger.exception(
                         "KUT2FPDF:: Error llamando a function %s", function_name)
@@ -354,15 +357,15 @@ class kut2fpdf(object):
         x = self.calculateLeftStart(x)
         W = self.calculateRightEnd(x + W) - x
 
-        bg_color = xml.get("BackgroundColor").split(",")
+        #bg_color = xml.get("BackgroundColor").split(",")
         fg_color = xml.get("ForegroundColor").split(",")
 
         self._document.set_text_color(int(fg_color[0]), int(fg_color[1]), int(fg_color[2]))
-        self._document.set_fill_color(int(bg_color[0]), int(bg_color[1]), int(bg_color[2]))
+        self._document.set_draw_color(255, 255, 255)
 
-        if xml.get("BorderStyle") == "1":
+        #if xml.get("BorderStyle") == "1":
             # FIXME: Hay que ajustar los margenes
-            self.drawRect(x, y, W, H)
+        self.drawRect(x, y, W, H, xml)
 
         #font_name, font_size, font_style
         font_style = ""
@@ -429,9 +432,50 @@ class kut2fpdf(object):
     @param H. Altura del cuadrado.
     """
 
-    def drawRect(self, x, y, W, H):
-        self._document.rect(x, y, W, H, "DF")
-
+    def drawRect(self, x, y, W, H, xml = None):
+        style_ = ""
+        if xml is not None:
+            if xml.get("BorderStyle") == "1":
+                style_ += "D"
+                border_color = xml.get("BorderColor").split(",")
+                r_b = None
+                g_b = None
+                b_b = None
+                if border_color is not None:
+                    if len(border_color) == 3:
+                        r_b = int(border_color[0])
+                        g_b = int(border_color[1])
+                        b_b = int(border_color[2])
+                    else:
+                        r_b = int(border_color[0:2])
+                        g_b = int(border_color[3:5])
+                        b_b = int(border_color[6:8])
+                    
+                    self._document.set_draw_color(r_b, g_b, b_b)
+                    
+                        
+                    
+                    
+            bg_color = xml.get("BackgroundColor").split(",")
+            r = None
+            g = None
+            b = None
+            if bg_color is not None:
+                if len(bg_color) == 3:
+                    r = int(bg_color[0])
+                    g = int(bg_color[1])
+                    b = int(bg_color[2])
+                else:
+                    r = int(bg_color[0:2])
+                    g = int(bg_color[3:5])
+                    b = int(bg_color[6:8])
+                
+                style_ +=  "F"
+                self._document.set_fill_color(r, g, b)
+                
+        self._document.rect(x, y, W, H, style_)
+        #self._document.set_draw_color(255, 255, 255)
+        #self._document.set_fill_color(0, 0, 0)
     """
     Inserta una imagen en la página actual.
     @param x. Pos x de la imagen.
@@ -444,7 +488,10 @@ class kut2fpdf(object):
 
     def drawImage(self, x, y, W, H, xml, file_name):
         import os
-        if os.path.exists(file_name):
+        if os.path.exists(file_name):            
+            limit_right = self.calculateRightEnd(x + W)
+            W = W - ((x + W) - limit_right )
+            
             self._document.image(file_name, x, y, W, H, "PNG")
     """
     Define los parámetros de la página

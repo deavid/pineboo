@@ -623,6 +623,7 @@ QActionGroup = QtWidgets.QActionGroup
 
 QDomDocument = QtXml.QDomDocument
 QDomElement = QtXml.QDomElement
+QDomNode = QtXml.QDomNode
 
 class QDateEdit(QtWidgets.QDateEdit):
 
@@ -1189,6 +1190,7 @@ class LineEdit(QWidget):
 
 FLDomDocument = QDomDocument
 FLDomElement = QDomElement
+FLDomNode = QDomNode
 FLListViewItem = QtWidgets.QListView
 
 
