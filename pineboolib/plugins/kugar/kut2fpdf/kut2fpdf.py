@@ -26,7 +26,8 @@ class kut2fpdf(object):
     _page_top = {}
     _data_row = None  # Apunta a la fila actual en data
     _parser_tools = None
-    _avalible_fonts = []
+    _avalible_fonts = None
+    design_mode = None
 
     def __init__(self):
 
@@ -34,6 +35,9 @@ class kut2fpdf(object):
         checkDependencies({"fpdf": "fpdf"})
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
+        self._avalible_fonts = []
+        self.design_mode = False
+        
 
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
@@ -277,7 +281,6 @@ class kut2fpdf(object):
     def processText(self, xml, data_row=None, fix_height=True):
         isImage = False
         text = xml.get("Text")
-        BorderWidth = int(xml.get("BorderWidth") if xml.get("BorderWidth") else 1)
         borderColor = xml.get("BorderColor")
 
         # x,y,W,H se calcula y corrigen aquí para luego estar correctos en los diferentes destinos posibles
@@ -313,8 +316,7 @@ class kut2fpdf(object):
                 if data_row is None:
                     data_row = self._xml_data[0]
                 if xml.get("Field"):
-                    text = data_row.get(
-                        xml.get("Field")) if not "None" else ""
+                    text = data_row.get(xml.get("Field"))
 
             if text and dataType is not None:
                 text = self._parser_tools.calculated(text, int(dataType), xml.get("Precision"), data_row)
@@ -352,21 +354,23 @@ class kut2fpdf(object):
 
         if txt in ("None", None):
             return
-
+        
+        orig_x = x
+        orig_y = y
+        orig_W = W
+        orig_H = H
         # Corregimos margenes:
         x = self.calculateLeftStart(x)
         W = self.calculateRightEnd(x + W) - x
-
+        W = W - (x - orig_x)
         #bg_color = xml.get("BackgroundColor").split(",")
-        fg_color = xml.get("ForegroundColor").split(",")
-
-        self._document.set_text_color(int(fg_color[0]), int(fg_color[1]), int(fg_color[2]))
-        self._document.set_draw_color(255, 255, 255)
+        fg_color = self.get_color(xml.get("ForegroundColor"))
+        self._document.set_text_color(fg_color[0], fg_color[1], fg_color[2])
+        #self._document.set_draw_color(255, 255, 255)
 
         #if xml.get("BorderStyle") == "1":
             # FIXME: Hay que ajustar los margenes
-        self.drawRect(x, y, W, H, xml)
-
+        
         #font_name, font_size, font_style
         font_style = ""
         font_size = int(xml.get("FontSize"))
@@ -414,16 +418,29 @@ class kut2fpdf(object):
 
         if VAlignment == "1":  # sobre Y
             # Centrado
-            y = (y + H / 2) + (self._document.font_size_pt / 2)
+            y = (y + H / 2) + (self._document.font_size_pt / 2) / 2
         elif VAlignment == "2":
             # Abajo
             y = y + W - font_size
         else:
             # Arriba
             y = y
+        
+        self.drawRect(orig_x, orig_y, orig_W, orig_H, xml)
 
+        #prev_x = self._document.get_x()
+        #prev_y = self._document.get_y()
+        #self._document.set_xy(x, y)
+        #self._document.write(0, txt)
+        #self._document.set_xy(prev_x, prev_y)
+        if self.design_mode:
+            self.write_debug(x, y, "Hal:%s, Val:%s, T:%s" % (HAlignment, VAlignment, txt), 6, "green")
+            if xml.tag == "CalculatedField":
+                self.write_debug(x, y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
         self._document.text(x, y, txt)
 
+                
+        
     """
     Dibuja un cuadrado en la página actual.
     @param x. Pos x del cuadrado.
@@ -431,51 +448,97 @@ class kut2fpdf(object):
     @param W. Anchura del cuadrado.
     @param H. Altura del cuadrado.
     """
+    def get_color(self, value):
+        value = value.split(",")
+        r = None
+        g = None
+        b = None
+        if len(value) == 3:
+            r = int(value[0])
+            g = int(value[1])
+            b = int(value[2])
+        else:
+            r = int(value[0:2])
+            g = int(value[3:5])
+            b = int(value[6:8])
+        
+        return [r,g,b]
 
     def drawRect(self, x, y, W, H, xml = None):
         style_ = ""
-        if xml is not None:
+        border_color = None
+        bg_color = None
+        line_width = self._document.line_width
+        border_width = 0.2
+        #Calculamos borde  y restamos del ancho
+        orig_x = x
+        orig_y = y
+        orig_w = W
+        x = self.calculateLeftStart(orig_x)
+        W = self.calculateRightEnd(x + orig_w) - x
+        W = W - (x - orig_x)
+        
+        if xml is not None and not self.design_mode:
             if xml.get("BorderStyle") == "1":
-                style_ += "D"
-                border_color = xml.get("BorderColor").split(",")
-                r_b = None
-                g_b = None
-                b_b = None
-                if border_color is not None:
-                    if len(border_color) == 3:
-                        r_b = int(border_color[0])
-                        g_b = int(border_color[1])
-                        b_b = int(border_color[2])
-                    else:
-                        r_b = int(border_color[0:2])
-                        g_b = int(border_color[3:5])
-                        b_b = int(border_color[6:8])
-                    
-                    self._document.set_draw_color(r_b, g_b, b_b)
-                    
-                        
-                    
-                    
-            bg_color = xml.get("BackgroundColor").split(",")
-            r = None
-            g = None
-            b = None
-            if bg_color is not None:
-                if len(bg_color) == 3:
-                    r = int(bg_color[0])
-                    g = int(bg_color[1])
-                    b = int(bg_color[2])
-                else:
-                    r = int(bg_color[0:2])
-                    g = int(bg_color[3:5])
-                    b = int(bg_color[6:8])
                 
-                style_ +=  "F"
-                self._document.set_fill_color(r, g, b)
-                
-        self._document.rect(x, y, W, H, style_)
+                border_color = self.get_color(xml.get("BorderColor"))
+                if not (border_color[0] is 0 and border_color[1] is 0 and border_color[2] is 0):
+                    self._document.set_draw_color(border_color[0], border_color[1], border_color[2])
+                    style_ += "D"
+                    
+            
+            bg_color = self.get_color(xml.get("BackgroundColor"))
+            if not (bg_color[0] is 255 and bg_color[1] is 255 and bg_color[2] is 255):
+                self._document.set_fill_color(bg_color[0], bg_color[1], bg_color[2])
+                style_ =  "F" + style_
+            
+            border_width = int(xml.get("BorderWidth") if xml.get("BorderWidth") else 0.2)
+        else:
+            self.write_cords_debug(x,y,W,H)
+            style_ = "D"
+            self._document.set_draw_color(0, 0, 0)
+            
+        if style_ is not "":
+            self._document.set_line_width(border_width)
+            self._document.rect(x, y, W, H, style_)
+            self._document.set_line_width(line_width)
+            
+            self._document.set_xy(orig_x, orig_y)
         #self._document.set_draw_color(255, 255, 255)
         #self._document.set_fill_color(0, 0, 0)
+    
+    def write_cords_debug(self, x, y, w, h):
+        self.write_debug(x,y,"X:%s Y:%s W:%s H:%s" % (round(x, 2),round(y, 2),round(w, 2),round(h, 2)), 2, "red")
+        
+    
+    def write_debug(self, x,y,text, h, color = None):
+        orig_color = self._document.text_color
+        r = None
+        g = None
+        b = None
+        current_font_family = self._document.font_family
+        current_font_size = self._document.font_size_pt
+        current_font_style = self._document.font_style
+        if color is "red":
+            r = 255
+            g = 0
+            b = 0
+        elif color is "green":
+            r = 0
+            g = 255
+            b = 0
+        elif color is "blue":
+            r = 0
+            g = 0
+            b = 255
+        
+        self._document.set_text_color(r,g,b)
+        self._document.set_font_size(4)
+        self._document.text(x, y + h, text) 
+        self._document.text_color = orig_color
+        #self._document.set_xy(orig_x, orig_y)
+        self._document.set_font(current_font_family, current_font_style, current_font_size)
+        
     """
     Inserta una imagen en la página actual.
     @param x. Pos x de la imagen.
