@@ -292,7 +292,8 @@ class kut2fpdf(object):
         isImage = False
         text = xml.get("Text")
         borderColor = xml.get("BorderColor")
-
+        field_name = xml.get("Field")
+        
         # x,y,W,H se calcula y corrigen aquí para luego estar correctos en los diferentes destinos posibles
         W = int(xml.get("Width"))
         H = self._parser_tools.getHeight(xml)
@@ -302,19 +303,20 @@ class kut2fpdf(object):
         if fix_height:
             y = self._parser_tools.heightCorrection(y)  # Corrige la posición con respecto al kut original
 
-        dataType = xml.get("Datatype")
-
+        data_type = xml.get("DataType")
+        
         if xml.tag == "Field" and data_row is not None:
-            text = data_row.get(xml.get("Field"))
+            text = data_row.get(field_name)
 
         elif xml.tag == "Special":
             text = self._parser_tools.getSpecial(
                 text[1:len(text) - 1], self._document.page_no())
 
         elif xml.tag == "CalculatedField":
-            if xml.get("FunctionName"):
+            calculation_type = xml.get("CalculationType")
+            
+            if calculation_type == "6":
                 function_name = xml.get("FunctionName")
-                field_name = xml.get("Field")
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
                     text = str(pineboolib.project.call(function_name, [nodo, field_name]))
@@ -322,19 +324,19 @@ class kut2fpdf(object):
                     self.logger.exception(
                         "KUT2FPDF:: Error llamando a function %s", function_name)
                     return
-            else:
+            elif calculation_type in ("1", "5"):
                 if data_row is None:
                     data_row = self._xml_data[0]
-                if xml.get("Field"):
-                    text = data_row.get(xml.get("Field"))
+                
+                text = data_row.get(field_name)
+            
+        if data_type is not None:
+            text = self._parser_tools.calculated(text, int(data_type), int(xml.get("Precision")), data_row)
 
-            if text and dataType is not None:
-                text = self._parser_tools.calculated(text, int(dataType), xml.get("Precision"), data_row)
-
-            if dataType == "5":
-                isImage = True
+        if data_type == "5":
+            isImage = True
         
-        if xml.get("BlankZero") == "1":
+        if xml.get("BlankZero") == "1" and text is not None:
             res_ = re.findall(r'\d+', text)
             res_ = "".join(res_)
             if int(res_) == 0:
@@ -345,7 +347,6 @@ class kut2fpdf(object):
         if text and text.startswith(filedir("../tempdata")):
             isImage = True
 
-        precision = xml.get("Precision")
         negValueColor = xml.get("NegValueColor")
         Currency = xml.get("Currency")
 
