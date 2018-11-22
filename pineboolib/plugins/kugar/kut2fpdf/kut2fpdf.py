@@ -33,11 +33,11 @@ class kut2fpdf(object):
     def __init__(self):
 
         self.logger = logging.getLogger("kut2rml")
-        checkDependencies({"fpdf": "fpdf"})
+        checkDependencies({"fpdf": "pyfpdf"})
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
         self._avalible_fonts = []
-        self.design_mode = False
+        self.design_mode = True
         
 
     """
@@ -395,11 +395,22 @@ class kut2fpdf(object):
         font_size = int(xml.get("FontSize"))
         font_name = xml.get("FontFamily").lower()
 
-        fontW = int(xml.get("FontWeight"))
+        font_w = xml.get("FontWeight")
+        
+        if font_w is None:
+            font_w = 100
+        else:
+            font_w = int(font_w) #Ajuste de streching en pyfpdf
+            if font_w == 65:
+                font_w = 90
+            elif font_w == 50:
+                font_w = 85
+        
+        
         fontI = xml.get("FontItalic")
         fontU = xml.get("FontUnderlined")  # FIXME: hay que ver si es así
 
-        if fontW > 60 and font_size > 10:
+        if font_size > 10:
             font_style += "B"
 
         if fontI == "1":
@@ -418,9 +429,9 @@ class kut2fpdf(object):
             else:
                 self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica.", font_name)
                 font_name = "helvetica"
-
+                
         self._document.set_font(font_name, font_style, font_size)
-
+        self._document.set_stretching(font_w)
         # Corregir alineación
         VAlignment = xml.get("VAlignment")  # 0 izquierda, 1 centrado,2 derecha
         HAlignment = xml.get("HAlignment")
@@ -453,7 +464,7 @@ class kut2fpdf(object):
         #self._document.write(0, txt)
         #self._document.set_xy(prev_x, prev_y)
         if self.design_mode:
-            self.write_debug(x, y, "Hal:%s, Val:%s, T:%s" % (HAlignment, VAlignment, txt), 6, "green")
+            self.write_debug(x, y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
             if xml.tag == "CalculatedField":
                 self.write_debug(x, y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
         self._document.text(x, y, txt)
