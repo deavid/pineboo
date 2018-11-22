@@ -37,7 +37,7 @@ class kut2fpdf(object):
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
         self._avalible_fonts = []
-        self.design_mode = False
+        self.design_mode = True
         
 
     """
@@ -393,8 +393,8 @@ class kut2fpdf(object):
         orig_H = H
         # Corregimos margenes:
         x = self.calculateLeftStart(x)
-        W = self.calculateRightEnd(x + W) - x
-        W = W - (x - orig_x)
+        dif_orig_x = x - orig_x
+        W = self.calculateRightEnd((x + orig_W) - dif_orig_x) - x
         #bg_color = xml.get("BackgroundColor").split(",")
         fg_color = self.get_color(xml.get("ForegroundColor"))
         self._document.set_text_color(fg_color[0], fg_color[1], fg_color[2])
@@ -476,9 +476,9 @@ class kut2fpdf(object):
         #self._document.write(0, txt)
         #self._document.set_xy(prev_x, prev_y)
         if self.design_mode:
-            self.write_debug(x, y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
+            self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
             if xml.tag == "CalculatedField":
-                self.write_debug(x, y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
+                self.write_debug(self.calculateLeftStart(orig_x), y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
         self._document.text(x, y, txt)
 
                 
@@ -517,8 +517,9 @@ class kut2fpdf(object):
         orig_y = y
         orig_w = W
         x = self.calculateLeftStart(orig_x)
-        W = self.calculateRightEnd(x + orig_w) - x
-        W = W - (x - orig_x)
+        dif_orig_x = x - orig_x
+        W = self.calculateRightEnd((x + orig_w) - dif_orig_x) - x
+        #W = W - dif_orig_x
         
         if xml is not None and not self.design_mode:
             if xml.get("BorderStyle") == "1":
@@ -536,7 +537,7 @@ class kut2fpdf(object):
             
             border_width = int(xml.get("BorderWidth") if xml.get("BorderWidth") else 0.2)
         else:
-            self.write_cords_debug(x,y,W,H)
+            self.write_cords_debug(x,y,W,H, orig_x, orig_w)
             style_ = "D"
             self._document.set_draw_color(0, 0, 0)
             
@@ -549,8 +550,8 @@ class kut2fpdf(object):
         #self._document.set_draw_color(255, 255, 255)
         #self._document.set_fill_color(0, 0, 0)
     
-    def write_cords_debug(self, x, y, w, h):
-        self.write_debug(x,y,"X:%s Y:%s W:%s H:%s" % (round(x, 2),round(y, 2),round(w, 2),round(h, 2)), 2, "red")
+    def write_cords_debug(self, x, y, w, h, ox, ow):
+        self.write_debug(x,y,"X:%s Y:%s W:%s H:%s orig_x:%s, orig_W:%s" % (round(x, 2),round(y, 2),round(w, 2),round(h, 2), round(ox, 2), round(ow, 2)), 2, "red")
         
     
     def write_debug(self, x,y,text, h, color = None):
