@@ -408,7 +408,8 @@ class kut2fpdf(object):
         fontI = xml.get("FontItalic")
         fontU = xml.get("FontUnderlined")  # FIXME: hay que ver si es así
 
-        if font_size > 10:
+        background_color = self.get_color(xml.get("BackgroundColor"))
+        if background_color != [255,255,255]: #Los textos que llevan fondo no blanco van en negrita
             font_style += "B"
 
         if fontI == "1":
@@ -418,10 +419,10 @@ class kut2fpdf(object):
             font_style += "U"
 
         while font_name not in self._avalible_fonts:
-            font_found = self._parser_tools.find_font(font_name)
+            font_found = self._parser_tools.find_font("%s%s" % (font_name, font_style))
             if font_found:
-                self.logger.info("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_name, font_found)
-                self._document.add_font(font_name, "", font_found, True)
+                self.logger.warn("KUT2FPDF::Añadiendo el tipo de letra %s%s (%s)", font_name, font_style, font_found)
+                self._document.add_font("%s%s" % (font_name, font_style), "", font_found, True)
                 self._avalible_fonts.append(font_name)
 
             else:
