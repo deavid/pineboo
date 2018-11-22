@@ -5,6 +5,7 @@ import pineboolib
 from xml import etree
 import logging
 import datetime
+import re
 
 """
 Conversor de kuts a pyFPDF
@@ -332,6 +333,14 @@ class kut2fpdf(object):
 
             if dataType == "5":
                 isImage = True
+        
+        if xml.get("BlankZero") == "1":
+            res_ = re.findall(r'\d+', text)
+            res_ = "".join(res_)
+            if int(res_) == 0:
+                return
+            
+            
 
         if text and text.startswith(filedir("../tempdata")):
             isImage = True
