@@ -76,7 +76,7 @@ class kut2fpdf(object):
             self.logger.debug("KUT2FPDF :: Adding font %s", f)
             self._avalible_fonts.append(f)
 
-        self.newPage()
+        self.newPage(0)
         self.processDetails()
 
         pdfname = pineboolib.project.getTempDir()
@@ -110,7 +110,7 @@ class kut2fpdf(object):
     Añade una nueva página al documento.
     """
 
-    def newPage(self):
+    def newPage(self, data_level = None):
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
         self._document.set_margins(self._left_margin, self._top_margin,
@@ -120,6 +120,9 @@ class kut2fpdf(object):
         #    True, self._document.h - self._bottom_margin)
 
         self.processSection("PageHeader")
+        if data_level is not None:
+            self.processSection("AddOnHeader", str(data_level))
+        
     """
     Procesa las secciones details con sus correspondientes detailHeader y detailFooter.
     """
@@ -179,7 +182,7 @@ class kut2fpdf(object):
                     if heightCalculated > self._document.h:  # Si nos pasamos
                         self.processSection("AddOnFooter", str(data_level))
                         self.processSection("PageFooter")  # Pie de página
-                        self.newPage()
+                        self.newPage(data_level)
 
                 if not dF.get("DrawIf") or data.get(dF.get("DrawIf")):
                     self.processXML(dF, data)
