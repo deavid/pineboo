@@ -37,7 +37,7 @@ class kut2fpdf(object):
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
         self._avalible_fonts = []
-        self.design_mode = True
+        self.design_mode = False
         
 
     """
@@ -215,12 +215,25 @@ class kut2fpdf(object):
 
         if xml.tag == "PageFooter":
             fix_height = False
-
-        for child in xml.iter():
-            if child.tag in ("Label", "Field", "Special", "CalculatedField"):
-                self.processText(child, data, fix_height)
-            elif child.tag == "Line":
-                self.processLine(child, fix_height)
+        
+        #Lineas , labels, fields, clculatedFields
+        for line in xml.iter("Line"):
+            self.processLine(line, fix_height)
+            
+        for label in xml.iter("Label"):
+            self.processText(label, data, fix_height)
+        
+        for field in xml.iter("Field"):
+            self.processText(field, data, fix_height)
+        
+        for calculated in xml.iter("CalculatedField"):
+            self.processText(calculated, data, fix_height)
+        
+        #for child in xml.iter():
+        #    if child.tag in ("Label", "Field", "Special", "CalculatedField"):
+        #        self.processText(child, data, fix_height)
+        #    elif child.tag == "Line":
+        #        self.processLine(child, fix_height)
 
         if xml.get("PlaceAtBottom") != "true":
             self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
@@ -401,7 +414,7 @@ class kut2fpdf(object):
             font_w = 100
         else:
             font_w = int(font_w) #Ajuste de streching en pyfpdf
-            factor = (100 -font_w) / 10
+            factor = (100 -font_w) / 13
             font_w = 100 - (5 * factor)
         
         
