@@ -401,7 +401,7 @@ class kut2fpdf(object):
             font_w = 100
         else:
             font_w = int(font_w) #Ajuste de streching en pyfpdf
-            factor = (100 -font_w) / 15
+            factor = (100 -font_w) / 10
             font_w = 100 - (5 * factor)
         
         
