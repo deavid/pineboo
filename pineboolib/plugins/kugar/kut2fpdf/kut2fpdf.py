@@ -403,10 +403,6 @@ class kut2fpdf(object):
             font_w = int(font_w) #Ajuste de streching en pyfpdf
             factor = (100 -font_w) / 15
             font_w = 100 - (5 * factor)
-            if font_w == 65:
-                font_w = 90
-            elif font_w == 50:
-                font_w = 85
         
         
         fontI = xml.get("FontItalic")
