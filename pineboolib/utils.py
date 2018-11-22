@@ -535,9 +535,11 @@ def checkDependencies(dict_, exit=True):
                 mod_ = import_module(key)
                 mod_ver = None
                 if key == "ply":
-                    version_check("ply", mod_.__version__, '3.9')
+                    version_check(key, mod_.__version__, '3.9')
                 elif key == "Pillow":
-                    version_check("Pillow", mod_.__version__, '5.1.0')
+                    version_check(key, mod_.__version__, '5.1.0')
+                elif key == "fpdf":
+                    version_check(key, mod_.__version__, "1.7.3")
                 elif key == "PyQt5.QtCore":
                     version_check("PyQt5", mod_.QT_VERSION_STR, '5.11')
                     mod_ver = mod_.QT_VERSION_STR
@@ -560,6 +562,8 @@ def checkDependencies(dict_, exit=True):
         for dep in dependences:
             logger.warn("HINT: Instale el paquete %s" % dep)
             msg += "Instale el paquete %s.\n%s" % (dep, error)
+            if dep == "pyfpdf":
+                msg +="\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
 
         if exit:
             if getattr(pineboolib.project, "_DGI", None):
@@ -627,6 +631,9 @@ def load2xml(form_path_or_str):
         if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
             form_path_or_str = form_path_or_str.replace("+","__PLUS__")
             form_path_or_str = parse_for_duplicates(form_path_or_str)
+            if form_path_or_str.find("DOCTYPE QUERY_DATA") >  -1:
+                print(form_path_or_str)
+            
             ret = ET.fromstring(form_path_or_str, parser)
         else:
             ret = ET.parse(form_path_or_str, parser)
