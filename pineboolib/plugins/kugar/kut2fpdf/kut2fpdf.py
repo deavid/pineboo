@@ -37,7 +37,7 @@ class kut2fpdf(object):
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
         self._avalible_fonts = []
-        self.design_mode = True
+        self.design_mode = False
         
 
     """
@@ -229,6 +229,9 @@ class kut2fpdf(object):
         for field in xml.iter("Field"):
             self.processText(field, data, fix_height)
         
+        for special in xml.iter("Special"):
+            self.processText(special, data, fix_height)
+        
         for calculated in xml.iter("CalculatedField"):
             self.processText(calculated, data, fix_height)
         
@@ -325,8 +328,11 @@ class kut2fpdf(object):
             text = data_row.get(field_name)
 
         elif xml.tag == "Special":
-            text = self._parser_tools.getSpecial(
-                text[1:len(text) - 1], self._document.page_no())
+            if text == "":
+                if xml.get("Type") == "1":
+                    text = "PageNo"
+            print(text.encode())
+            text = self._parser_tools.getSpecial( text, self._document.page_no())
 
         elif xml.tag == "CalculatedField":
             calculation_type = xml.get("CalculationType")

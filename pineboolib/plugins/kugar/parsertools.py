@@ -79,10 +79,12 @@ class parsertools(object):
     def getSpecial(self, name, page_num=None):
         self.logger.debug("%s:getSpecial %s" % (__name__, name))
         ret = "None"
+        if name[0] == "[":
+            name = name[1: len(name) -1]
         if name in ("Fecha", "Date"):
             ret = str(datetime.date.__format__(
                 datetime.date.today(), "%d.%m.%Y"))
-        if name in ("NúmPágina", "PageNo"):
+        if name in ("NúmPágina", "PageNo", "NÃºmPÃ¡gina"):
             ret = str(page_num)
 
         return ret
