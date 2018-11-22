@@ -144,8 +144,8 @@ class kut2fpdf(object):
 
         if self._xml.find("PageFooter"):
             self.processSection("PageFooter")
-        elif self._xml.find("AddOnFooter"):
-            self.processSection("AddOnFooter")
+        #elif self._xml.find("AddOnFooter"):
+        #    self.processSection("AddOnFooter")
 
     """
     Paso intermedio que calcula si detailHeader + detail + detailFooter entran en el resto de la ṕagina. Si no es así crea nueva página.
@@ -163,6 +163,11 @@ class kut2fpdf(object):
                     for dFooter in self._xml.findall("DetailFooter"):
                         if dFooter.get("Level") == str(data_level):
                             heightCalculated += self._parser_tools.getHeight(dFooter)
+                    
+                    #for addFooter in self._xml.findall("AddOnFooter"):
+                    #    if addFooter.get("Level") == str(data_level):
+                    #        heightCalculated += self._parser_tools.getHeight(addFooter)
+                    
                     pageFooter = self._xml.get("PageFooter")
                     if pageFooter:
                         if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
@@ -171,6 +176,7 @@ class kut2fpdf(object):
                     heightCalculated += self._bottom_margin
 
                     if heightCalculated > self._document.h:  # Si nos pasamos
+                        self.processSection("AddOnFooter", str(data_level))
                         self.processSection("PageFooter")  # Pie de página
                         self.newPage()
 
@@ -183,9 +189,12 @@ class kut2fpdf(object):
     @param name. Nombre de la sección a procesar.
     """
 
-    def processSection(self, name):
+    def processSection(self, name, level = None):
         sec_ = self._xml.find(name)
         if sec_:
+            if level is not None and sec_.get("Level") is not level:
+                return
+                
             if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1:
                 if sec_.tag == "PageFooter":
                     self.setTopSection(self._document.h - int(sec_.get("Height")))
