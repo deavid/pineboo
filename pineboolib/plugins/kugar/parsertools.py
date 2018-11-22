@@ -96,13 +96,19 @@ class parsertools(object):
     @return Valor calculado.
     """
 
-    def calculated(self, field, dataType, Precision, data=None):
-
-        ret_ = field
-        if dataType == 5:  # Imagen
-            ret_ = self.parseKey(field)
+    def calculated(self, value, data_type, p, data):
+        from pineboolib.pncontrolsfactory import aqApp
+        ret_ = value
+        if data_type == 2: # Double
+            ret_ = aqApp.localeSystem().toString(float(value),'f', p)
+        
+        elif data_type == 5:  # Imagen
+            pass
+        elif data_type == 0:
+            pass
+        
         elif data:
-            ret_ = data.get(field)
+            ret_ = data.get(value)
 
         return ret_
 
