@@ -628,12 +628,8 @@ def load2xml(form_path_or_str):
 
     try:
         parser = ET.XMLParser(html=0, target=xml_parser())
-        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
-            form_path_or_str = form_path_or_str.replace("+","__PLUS__")
-            form_path_or_str = parse_for_duplicates(form_path_or_str)
-            if form_path_or_str.find("DOCTYPE QUERY_DATA") >  -1:
-                print(form_path_or_str)
-            
+        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:           
+            form_path_or_str = parse_for_duplicates(form_path_or_str)         
             ret = ET.fromstring(form_path_or_str, parser)
         else:
             ret = ET.parse(form_path_or_str, parser)
@@ -641,8 +637,6 @@ def load2xml(form_path_or_str):
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15", target=xml_parser())
             if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
-                form_path_or_str = form_path_or_str.replace("+","__PLUS__")
-                form_path_or_str = parse_for_duplicates(form_path_or_str)
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
                 ret = ET.parse(form_path_or_str, parser)
@@ -655,6 +649,8 @@ def load2xml(form_path_or_str):
 
 def parse_for_duplicates(text):
     ret_ = ""
+    text = text.replace("+","__PLUS__")
+    
     for section in text.split(">"):
         #print("section", section)
         duplicate_ = False
