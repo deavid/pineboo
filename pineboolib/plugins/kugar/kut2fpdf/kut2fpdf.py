@@ -35,6 +35,7 @@ class kut2fpdf(object):
     _no_print_footer = False
     _actual_section_size = None
     increase_section_size = None
+    last_detail = False
 
     def __init__(self):
 
@@ -124,7 +125,7 @@ class kut2fpdf(object):
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
         self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
-        
+        self.last_detail = False
         self._no_print_footer = False
         # Corta con el borde inferior ...
         # self._document.set_auto_page_break(
@@ -143,6 +144,9 @@ class kut2fpdf(object):
         # Procesamos la cabecera si procede ..
         prevLevel = 0
         level = None
+        
+        rows_array = self._xml_data.findall("Row")
+        
         for data in self._xml_data.findall("Row"):
             self._actual_data_line = data
             level = int(data.get("level"))
@@ -151,6 +155,10 @@ class kut2fpdf(object):
                     self.processData("DetailFooter", data, prevLevel)
             elif prevLevel < level:
                 self.processData("DetailHeader",  data, level)
+            
+            if rows_array[len(rows_array) - 1] is data:
+                self.last_detail = True
+            
             
             self.processData("Detail", data, level)
 
@@ -200,7 +208,7 @@ class kut2fpdf(object):
                         #Vemos el tope por abajo 
                         limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter"))
                         actual_size = self._parser_tools.getHeight(dF) + self.topSection()
-                        if actual_size > limit_bottom:
+                        if (actual_size > limit_bottom) or self.last_detail:
                             self.processSection("AddOnFooter", str(data_level))
                             #self.processSection("PageFooter")  # Pie de página
                             self.newPage(data_level)
