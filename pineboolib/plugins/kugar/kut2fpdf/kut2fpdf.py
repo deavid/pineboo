@@ -29,6 +29,7 @@ class kut2fpdf(object):
     _data_row = None  # Apunta a la fila actual en data
     _parser_tools = None
     _avalible_fonts = None
+    _unavalible_fonts = None
     design_mode = None
     _actual_data_line = None
     _no_print_footer = False
@@ -42,6 +43,7 @@ class kut2fpdf(object):
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
         self._avalible_fonts = []
+        self._unavalible_fonts = []
         self.design_mode = False
         self._actual_data_line = None
         self._no_print_footer = False
@@ -364,7 +366,6 @@ class kut2fpdf(object):
             if text == "":
                 if xml.get("Type") == "1":
                     text = "PageNo"
-            print(text.encode())
             text = self._parser_tools.getSpecial( text, self._document.page_no())
 
         elif xml.tag == "CalculatedField":
@@ -479,14 +480,18 @@ class kut2fpdf(object):
 
         while font_name not in self._avalible_fonts:
             font_found = self._parser_tools.find_font("%s%s" % (font_name, font_style))
+            font_full_name = "%s%s" % (font_name, font_style)
             if font_found:
-                self.logger.warn("KUT2FPDF::Añadiendo el tipo de letra %s%s (%s)", font_name, font_style, font_found)
-                self._document.add_font("%s%s" % (font_name, font_style), "", font_found, True)
-                self._avalible_fonts.append(font_name)
+                self.logger.warn("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_full_name, font_found)
+                self._document.add_font(font_full_name, "", font_found, True)
+                self._avalible_fonts.append(font_full_name)
 
             else:
-                self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica.", font_name)
+                if font_full_name not in self._unavalible_fonts:
+                    self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s%s. Sustituido por helvetica.", font_name, font_style)
+                    self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
+                    
                 
         self._document.set_font(font_name, font_style, font_size)
         self._document.set_stretching(font_w)
