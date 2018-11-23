@@ -22,7 +22,7 @@ class parsertools(object):
     def __init__(self):
         self.logger = logging.getLogger("ParseTools")
         self.pagina = 0
-        self._fix_altura = 0.927  # Corrector de altura
+        self._fix_altura = 0.947  # Corrector de altura 0.927
 
     """
     Retorna un objecto xml desde una cadena de texto.

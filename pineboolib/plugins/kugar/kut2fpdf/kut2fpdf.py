@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.utils import checkDependencies, filedir, load2xml
 import pineboolib
-
+from pineboolib.fllegacy.flsettings import FLSettings
 from xml import etree
 import logging
 import datetime
@@ -45,7 +45,7 @@ class kut2fpdf(object):
         self._parser_tools = parsertools()
         self._avalible_fonts = []
         self._unavalible_fonts = []
-        self.design_mode = False
+        self.design_mode = FLSettings().readBoolEntry("ebcomportamiento/kugar_debug_mode")
         self._actual_data_line = None
         self._no_print_footer = False
         self.increase_section_size = 0
@@ -79,6 +79,7 @@ class kut2fpdf(object):
 
         from fpdf import FPDF
         self._document = FPDF(self._page_orientation, "pt", self._page_size)
+        
         # Seteamos rutas a carpetas con tipos de letra ...
 
         # Cargamos las fuentes disponibles
@@ -89,7 +90,7 @@ class kut2fpdf(object):
         self.newPage(0)
         self.processDetails()
 
-        pdfname = pineboolib.project.getTempDir()
+        pdfname = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
         pdfname += "/%s_%s.pdf" % (name, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
 
         # Datos del creador del documento
@@ -127,6 +128,8 @@ class kut2fpdf(object):
         self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
         self.last_detail = False
         self._no_print_footer = False
+        if self.design_mode:
+            self.draw_margins()
         # Corta con el borde inferior ...
         # self._document.set_auto_page_break(
         #    True, self._document.h - self._bottom_margin)
@@ -161,7 +164,7 @@ class kut2fpdf(object):
             
             
             self.processData("Detail", data, level)
-
+            
             prevLevel = level
 
         if level:
@@ -214,18 +217,18 @@ class kut2fpdf(object):
                             self.newPage(data_level)
 
                 if not dF.get("DrawIf") or data.get(dF.get("DrawIf")):
+                    
                     self.processXML(dF, data)
                     #self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
 
     """
-    Procesa las secciones fuera de detail, pageHeader, pageFooter, AddOnFooter.
+    Procesa las secciones fuera de detail
     @param name. Nombre de la sección a procesar.
     """
 
     def processSection(self, name, level = None):
         sec_ = self._xml.find(name)
-
-        
+            
         if sec_:
             if level is not None and sec_.get("Level") != level:
                 return
@@ -251,10 +254,11 @@ class kut2fpdf(object):
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
                 self.setTopSection(self._document.h - self._parser_tools.getHeight(xml))
-                
+        
+               
         if xml.tag == "PageFooter":
             fix_height = False
-            
+
         self.fix_extra_size()
         
         #Lineas , labels, fields, clculatedFields
@@ -281,6 +285,9 @@ class kut2fpdf(object):
 
         if xml.get("PlaceAtBottom") != "true":
             self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
+        
+        
+                    
 
     
     def fix_extra_size(self):
@@ -756,13 +763,35 @@ class kut2fpdf(object):
         self._left_margin = int(xml.get("LeftMargin"))
         self._right_margin = int(xml.get("RightMargin"))
         self._top_margin = int(xml.get("TopMargin"))
-
+        
         page_size = int(xml.get("PageSize"))
         page_orientation = xml.get("PageOrientation")
-
+        
         if page_size in [30, 31]:
             custom_size = [int(xml.get("CustomHeightMM")), int(xml.get("CustomWidthMM"))]
 
         self._page_orientation = "P" if page_orientation == "0" else "L"
         self._page_size = self._parser_tools.converPageSize(
             page_size, int(page_orientation), custom_size)  # devuelve un array
+        
+        
+    
+    def draw_margins(self):
+        self.draw_debug_line(0 + self._left_margin , 0, 0+ self._left_margin  , self._page_size[1]) #Vertical derecha
+        self.draw_debug_line(self._page_size[0] - self._right_margin , 0, self._page_size[0] - self._right_margin  , self._page_size[1])#Vertical izquierda
+        self.draw_debug_line(0, 0 + self._top_margin, self._page_size[0], 0 + self._top_margin) #Horizontal superior
+        self.draw_debug_line(0, self._page_size[1] - self._bottom_margin, self._page_size[0], self._page_size[1] - self._bottom_margin) #Horizontal inferior
+    def draw_debug_line(self, X1, Y1, X2, Y2, title= None, color="GREY"):
+        dash_length = 2
+        space_length = 2
+        
+        r = 0
+        g = 0
+        b = 0
+        if color == "GREY":
+            r = 220
+            g = 220
+            b = 220
+        self._document.set_line_width(1)
+        self._document.set_draw_color(r, g, b)
+        self._document.dashed_line(X1, Y1, X2, Y2, dash_length, space_length)
