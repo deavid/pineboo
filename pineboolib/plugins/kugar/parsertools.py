@@ -63,11 +63,15 @@ class parsertools(object):
     """
 
     def getHeight(self, xml):
-        h = int(xml.get("Height"))
-        if h:
-            return h
+        ret_ = 0
+        if xml is None:
+            pass
         else:
-            return 0
+            h = int(xml.get("Height"))
+            if h:
+                ret_ =  h
+
+        return ret_
 
     """
     Devuelve un valor de tipo especial.

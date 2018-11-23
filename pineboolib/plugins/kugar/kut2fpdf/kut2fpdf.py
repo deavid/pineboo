@@ -29,6 +29,9 @@ class kut2fpdf(object):
     _parser_tools = None
     _avalible_fonts = None
     design_mode = None
+    _actual_data_line = None
+    _no_print_footer = False
+    _actual_section_size = None
 
     def __init__(self):
 
@@ -38,6 +41,8 @@ class kut2fpdf(object):
         self._parser_tools = parsertools()
         self._avalible_fonts = []
         self.design_mode = False
+        self._actual_data_line = None
+        self._no_print_footer = False
         
 
     """
@@ -104,6 +109,7 @@ class kut2fpdf(object):
     """
 
     def setTopSection(self, value):
+        self._actual_section_size = value - self._page_top[str(self._document.page_no())]
         self._page_top[str(self._document.page_no())] = value
 
     """
@@ -113,13 +119,15 @@ class kut2fpdf(object):
     def newPage(self, data_level = None):
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
-        self._document.set_margins(self._left_margin, self._top_margin,
-                                   self._right_margin)  # Lo dejo pero no se nota nada
+        self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
+        
+        self._no_print_footer = False
         # Corta con el borde inferior ...
         # self._document.set_auto_page_break(
         #    True, self._document.h - self._bottom_margin)
-
+        self._actual_section_size = 0
         self.processSection("PageHeader")
+        
         if data_level is not None:
             self.processSection("AddOnHeader", str(data_level))
         
@@ -132,9 +140,11 @@ class kut2fpdf(object):
         prevLevel = 0
         level = None
         for data in self._xml_data.findall("Row"):
+            self._actual_data_line = data
             level = int(data.get("level"))
             if prevLevel > level:
-                self.processData("DetailFooter", data, prevLevel)
+                if not self._no_print_footer:
+                    self.processData("DetailFooter", data, prevLevel)
             elif prevLevel < level:
                 self.processData("DetailHeader",  data, level)
 
@@ -143,8 +153,9 @@ class kut2fpdf(object):
             prevLevel = level
 
         if level:
-            for l in reversed(range(level + 1)):
-                self.processData("DetailFooter", data, l)
+            if not self._no_print_footer:
+                for l in reversed(range(level + 1)):
+                    self.processData("DetailFooter", data, l)
 
         if self._xml.find("PageFooter"):
             self.processSection("PageFooter")
@@ -160,6 +171,7 @@ class kut2fpdf(object):
 
     def processData(self, section_name, data, data_level):
         listDF = self._xml.findall(section_name)
+        data_size = len(listDF)
         for dF in listDF:
             if dF.get("Level") == str(data_level):
                 if section_name == "Detail" and (not dF.get("DrawIf") or data.get(dF.get("DrawIf"))):
@@ -180,9 +192,14 @@ class kut2fpdf(object):
                     heightCalculated += self._bottom_margin
 
                     if heightCalculated > self._document.h:  # Si nos pasamos
-                        self.processSection("AddOnFooter", str(data_level))
-                        self.processSection("PageFooter")  # Pie de página
-                        self.newPage(data_level)
+                        self._no_print_footer = True
+                        #Vemos el tope por abajo 
+                        limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter"))
+                        actual_size = self._parser_tools.getHeight(dF) + self.topSection()
+                        if actual_size > limit_bottom:
+                            self.processSection("AddOnFooter", str(data_level))
+                            #self.processSection("PageFooter")  # Pie de página
+                            self.newPage(data_level)
 
                 if not dF.get("DrawIf") or data.get(dF.get("DrawIf")):
                     self.processXML(dF, data)
@@ -195,14 +212,21 @@ class kut2fpdf(object):
 
     def processSection(self, name, level = None):
         sec_ = self._xml.find(name)
+
+        
         if sec_:
-            if level is not None and sec_.get("Level") is not level:
+            if level is not None and sec_.get("Level") != level:
                 return
-                
-            if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1:
-                if sec_.tag == "PageFooter":
+            
+            if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1 or name is "AddOnFooter" or (self._document.page_no() > 1 and name is "AddOnHeader"):
+                if name is "PageFooter":
                     self.setTopSection(self._document.h - int(sec_.get("Height")))
-                self.processXML(sec_)
+                    
+                data = None
+                if name in ("AddOnFooter", "AddOnHeader"):
+                    data = self._actual_data_line
+                    
+                self.processXML(sec_, data)
 
     """
     Procesa un elemento de xml.
@@ -396,6 +420,7 @@ class kut2fpdf(object):
         if txt in ("None", None):
             return
         
+        height_resized = False
         orig_x = x
         orig_y = y
         orig_W = W
@@ -407,6 +432,9 @@ class kut2fpdf(object):
         #bg_color = xml.get("BackgroundColor").split(",")
         fg_color = self.get_color(xml.get("ForegroundColor"))
         self._document.set_text_color(fg_color[0], fg_color[1], fg_color[2])
+        
+        
+        
         #self._document.set_draw_color(255, 255, 255)
 
         #if xml.get("BorderStyle") == "1":
@@ -456,41 +484,82 @@ class kut2fpdf(object):
         # Corregir alineación
         VAlignment = xml.get("VAlignment")  # 0 izquierda, 1 centrado,2 derecha
         HAlignment = xml.get("HAlignment")
-
-        if HAlignment == "1":  # sobre X
-            # Centrado
-            x = x + (W / 2) - (self._document.get_string_width(txt) / 2)
-        elif HAlignment == "2":
-            # Derecha
-            x = x + W - self._document.get_string_width(txt)
-        else:
-            # Izquierda
-            x = x
-
-        if VAlignment == "1":  # sobre Y
-            # Centrado
-            y = (y + H / 2) + (self._document.font_size_pt / 2) / 2
-        elif VAlignment == "2":
-            # Abajo
-            y = y + W - font_size
-        else:
-            # Arriba
-            y = y
         
-        self.drawRect(orig_x, orig_y, orig_W, orig_H, xml)
+        start_section_size = self._actual_section_size
+        result_section_size = 0
+        #Miramos si el texto sobrepasa el ancho
+        str_width = self._document.get_string_width(txt)
+        array_text = []
+        if str_width > W:
+            height_resized = True
+            array_text = self.split_text(txt, W)
+        else:
+            
+            array_text.append(txt)
+        
+        calculated_h = orig_H * len(array_text)
+        self.drawRect(orig_x, orig_y, orig_W, calculated_h, xml)
+        
+        processed_lines = 0
+        for actual_text in array_text:
+            processed_lines += 1
+            if HAlignment == "1":  # sobre X
+                # Centrado
+                x = x + (W / 2) - (self._document.get_string_width(actual_text) / 2)
+                #x = x + (W / 2) - (str_width if not height_resized else W / 2)
+            elif HAlignment == "2":
+                # Derecha
+                x = x + W - self._document.get_string_width(actual_text)
+                #x = x + W - str_width if not height_resized else W
+            else:
+                # Izquierda
+                x = x
 
-        #prev_x = self._document.get_x()
-        #prev_y = self._document.get_y()
-        #self._document.set_xy(x, y)
-        #self._document.write(0, txt)
-        #self._document.set_xy(prev_x, prev_y)
-        if self.design_mode:
-            self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
-            if xml.tag == "CalculatedField":
-                self.write_debug(self.calculateLeftStart(orig_x), y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
-        self._document.text(x, y, txt)
+            if VAlignment == "1":  # sobre Y
+                # Centrado
+                y = (y + ((H / 2) / processed_lines)) + (((self._document.font_size_pt / 2) / 2) * processed_lines) 
+            elif VAlignment == "2":
+                # Abajo
+                y = y + H - font_size
+            else:
+                # Arriba
+                y = y
+        
+            if self.design_mode:
+                self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
+                if xml.tag == "CalculatedField":
+                    self.write_debug(self.calculateLeftStart(orig_x), y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
+            
+            self._document.text(x, y, actual_text)
+            result_section_size += start_section_size
+        
+        result_section_size = result_section_size - start_section_size
+        self.setTopSection(self.topSection() + result_section_size)  #Actualizo tamaño ...
 
+    
+    def split_text(self, texto, limit_w):
+        list_ = []
+        linea_ = None   
+        
+        for t in texto.split(" "):
+            if linea_  is None and t == "":
+                continue
+            
+            if linea_ is not None:
+                if self._document.get_string_width(linea_ + t) > limit_w:
+                    list_.append(linea_)
+                    linea_ = ""
+            else:
+                linea_ = ""
+            
+            linea_ += "%s " % t
+        
+        list_.append(linea_)
+        
+        return list_
                 
+            
+                   
         
     """
     Dibuja un cuadrado en la página actual.
