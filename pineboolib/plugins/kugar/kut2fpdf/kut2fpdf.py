@@ -261,9 +261,8 @@ class kut2fpdf(object):
 
         self.fix_extra_size()
         
-        #Lineas , labels, fields, clculatedFields
-        for line in xml.iter("Line"):
-            self.processLine(line, fix_height)
+        #labels, fields, clculatedFields, Lineas
+        
             
         for label in xml.iter("Label"):
             self.processText(label, data, fix_height)
@@ -282,6 +281,8 @@ class kut2fpdf(object):
         #        self.processText(child, data, fix_height)
         #    elif child.tag == "Line":
         #        self.processLine(child, fix_height)
+        for line in xml.iter("Line"):
+            self.processLine(line, fix_height)
 
         if xml.get("PlaceAtBottom") != "true":
             self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
@@ -677,9 +678,8 @@ class kut2fpdf(object):
                     
             
             bg_color = self.get_color(xml.get("BackgroundColor"))
-            if not (bg_color[0] is 255 and bg_color[1] is 255 and bg_color[2] is 255):
-                self._document.set_fill_color(bg_color[0], bg_color[1], bg_color[2])
-                style_ =  "F" + style_
+            self._document.set_fill_color(bg_color[0], bg_color[1], bg_color[2])
+            style_ =  "F" + style_
             
             border_width = int(xml.get("BorderWidth") if xml.get("BorderWidth") else 0.2)
         else:
