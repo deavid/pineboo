@@ -461,6 +461,9 @@ class kut2fpdf(object):
         x = self.calculateLeftStart(x)
         dif_orig_x = x - orig_x
         W = self.calculateRightEnd((x + orig_W) - dif_orig_x) - x
+        
+        dif_orig_w = W - orig_W
+        
         #bg_color = xml.get("BackgroundColor").split(",")
         fg_color = self.get_color(xml.get("ForegroundColor"))
         self._document.set_text_color(fg_color[0], fg_color[1], fg_color[2])
@@ -540,6 +543,8 @@ class kut2fpdf(object):
         extra_size = 0
         for actual_text in array_text:
             
+            if dif_orig_x > 0:
+                x += 2
 
             
             processed_lines += 1
@@ -553,16 +558,16 @@ class kut2fpdf(object):
                 #x = x + (W / 2) - (str_width if not height_resized else W / 2)
             elif HAlignment == "2":
                 # Derecha
-                x = x + W - self._document.get_string_width(actual_text)
+                x = x + W - self._document.get_string_width(actual_text) - 2 # -2 de margen
                 #x = x + W - str_width if not height_resized else W
             else:
                 # Izquierda
-                x = x
-
+                x = x + 2 # +2 de margen 
+                
             if VAlignment == "1":  # sobre Y
                 # Centrado
                 #y = (y + ((H / 2) / processed_lines)) + (((self._document.font_size_pt / 2) / 2) * processed_lines) 
-                y = ( orig_y  + ( orig_H / 2))
+                y = ( orig_y  + ( orig_H / 2))+ ((self._document.font_size_pt / 2) /2)
             elif VAlignment == "2":
                 # Abajo
                 y = orig_y + orig_H - font_size
@@ -576,6 +581,9 @@ class kut2fpdf(object):
                 self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
                 if xml.tag == "CalculatedField":
                     self.write_debug(self.calculateLeftStart(orig_x), y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
+            
+            
+            
             
             self._document.text(x, y, actual_text)
             result_section_size += start_section_size
