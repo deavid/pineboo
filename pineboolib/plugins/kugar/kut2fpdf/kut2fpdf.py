@@ -6,6 +6,7 @@ from xml import etree
 import logging
 import datetime
 import re
+from concurrent.futures import process
 
 """
 Conversor de kuts a pyFPDF
@@ -32,6 +33,7 @@ class kut2fpdf(object):
     _actual_data_line = None
     _no_print_footer = False
     _actual_section_size = None
+    increase_section_size = None
 
     def __init__(self):
 
@@ -43,7 +45,7 @@ class kut2fpdf(object):
         self.design_mode = False
         self._actual_data_line = None
         self._no_print_footer = False
-        
+        self.increase_section_size = 0
 
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
@@ -109,7 +111,7 @@ class kut2fpdf(object):
     """
 
     def setTopSection(self, value):
-        self._actual_section_size = value - self._page_top[str(self._document.page_no())]
+        self._actual_section_size = value - self.topSection()
         self._page_top[str(self._document.page_no())] = value
 
     """
@@ -147,7 +149,7 @@ class kut2fpdf(object):
                     self.processData("DetailFooter", data, prevLevel)
             elif prevLevel < level:
                 self.processData("DetailHeader",  data, level)
-
+            
             self.processData("Detail", data, level)
 
             prevLevel = level
@@ -239,9 +241,11 @@ class kut2fpdf(object):
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
                 self.setTopSection(self._document.h - self._parser_tools.getHeight(xml))
-
+                
         if xml.tag == "PageFooter":
             fix_height = False
+            
+        self.fix_extra_size()
         
         #Lineas , labels, fields, clculatedFields
         for line in xml.iter("Line"):
@@ -268,6 +272,11 @@ class kut2fpdf(object):
         if xml.get("PlaceAtBottom") != "true":
             self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
 
+    
+    def fix_extra_size(self):
+        if self.increase_section_size > 0:
+            self.setTopSection(self.topSection() + self.increase_section_size)
+            self.increase_section_size = 0    
     """
     Procesa una linea.
     @param xml. Sección de xml a procesar.
@@ -501,8 +510,16 @@ class kut2fpdf(object):
         self.drawRect(orig_x, orig_y, orig_W, calculated_h, xml)
         
         processed_lines = 0
+        extra_size = 0
         for actual_text in array_text:
+            
+
+            
             processed_lines += 1
+            
+            if processed_lines > 1:
+                extra_size += orig_H - (orig_H - font_size) / 2
+            
             if HAlignment == "1":  # sobre X
                 # Centrado
                 x = x + (W / 2) - (self._document.get_string_width(actual_text) / 2)
@@ -517,14 +534,17 @@ class kut2fpdf(object):
 
             if VAlignment == "1":  # sobre Y
                 # Centrado
-                y = (y + ((H / 2) / processed_lines)) + (((self._document.font_size_pt / 2) / 2) * processed_lines) 
+                #y = (y + ((H / 2) / processed_lines)) + (((self._document.font_size_pt / 2) / 2) * processed_lines) 
+                y = ( orig_y  + ( orig_H / 2))
             elif VAlignment == "2":
                 # Abajo
-                y = y + H - font_size
+                y = orig_y + orig_H - font_size
             else:
                 # Arriba
-                y = y
+                y = orig_y
         
+            y = y + extra_size
+            
             if self.design_mode:
                 self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
                 if xml.tag == "CalculatedField":
@@ -534,7 +554,9 @@ class kut2fpdf(object):
             result_section_size += start_section_size
         
         result_section_size = result_section_size - start_section_size
-        self.setTopSection(self.topSection() + result_section_size)  #Actualizo tamaño ...
+        
+        if self.increase_section_size < extra_size: #Si algun incremento extra hay superior se respeta
+            self.increase_section_size = extra_size
 
     
     def split_text(self, texto, limit_w):
