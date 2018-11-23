@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
 import pineboolib
+from pineboolib.utils import filedir
 from PyQt5 import QtCore
 
 
@@ -14,9 +15,11 @@ class FormInternalObj(FormDBWidget):
         self.w_ = mng.createUI(u"ebcomportamiento.ui", None, self.w_)
         w = self.w_
         botonAceptar = w.child(u"pbnAceptar")
+        boton_aceptar_kugar = w.child(u"pbn_kut")
         botonCancelar = w.child(u"pbnCancelar")
         botonCambiarColor = w.child(u"pbnCO")
         connect(botonAceptar, u"clicked()", self, u"guardar_clicked")
+        connect(boton_aceptar_kugar, u"clicked()", self, u"cambiar_kugar_clicked")
         connect(botonCancelar, u"clicked()", self, u"cerrar_clicked")
         connect(botonCambiarColor, u"clicked()", self, u"seleccionarColor_clicked")
         self.cargarConfiguracion()
@@ -46,7 +49,8 @@ class FormInternalObj(FormDBWidget):
         w.child(u"cbSpacerLegacy").checked = self.leerValorLocal("spacerLegacy")
         w.child(u"cbParseModulesOnLoad").checked = self.leerValorLocal("parseModulesOnLoad")
         w.child(u"cb_traducciones").checked = self.leerValorLocal("translations_from_qm")
-
+        w.child("le_kut_temporales").text = self.leerValorLocal("kugar_temp_dir")
+        w.child("cb_kut_debug").checked = self.leerValorLocal("kugar_debug_mode")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -86,11 +90,13 @@ class FormInternalObj(FormDBWidget):
         if valor_name == u"isDebuggerMode":
             valor = settings.readBoolEntry("application/%s" % valor_name)
         else:
-            if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio"):
+            if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio","kugar_temp_dir"):
                 valor = util.readSettingEntry("ebcomportamiento/%s" % valor_name, u"")
+                if valor_name is "kugar_temp_dir" and valor is "":
+                    valor = pineboolib.project.getTempDir()
+                
             else:
                 valor = settings.readBoolEntry("ebcomportamiento/%s" % valor_name, False)
-
         return valor
 
     def grabarValorLocal(self, valor_name=None, value=None):
@@ -143,6 +149,8 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("spacerLegacy", w.child(u"cbSpacerLegacy").checked)
         self.grabarValorLocal("parseModulesOnLoad", w.child(u"cbParseModulesOnLoad").checked)
         self.grabarValorLocal("translations_from_qm",  w.child(u"cb_traducciones").checked)
+        self.grabarValorLocal("kugar_temp_dir", w.child("le_kut_temporales").text)
+        self.grabarValorLocal("kugar_debug_mode", w.child("cb_kut_debug").checked)
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"
@@ -156,7 +164,14 @@ class FormInternalObj(FormDBWidget):
     def seleccionarColor_clicked(self):
         self.colorActual_ = AQS.ColorDialog_getColor(self.colorActual_, self.w_).name()
         self.w_.child(u"leCO").setStyleSheet('background-color:' + self.colorActual_)
-
+    
+    def cambiar_kugar_clicked(self):
+        old_dir = self.w_.child("le_kut_temporales").text
+        old_dir = self.fixPath(old_dir)
+        new_dir = FileDialog.getExistingDirectory(old_dir)
+        if new_dir and new_dir is not old_dir:
+            self.w_.child("le_kut_temporales").text = new_dir
+            
     def fixPath(self, ruta=None):
         rutaFixed = ""
         if sys.osName() == u"WIN32":

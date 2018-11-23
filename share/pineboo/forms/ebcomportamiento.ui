@@ -41,7 +41,7 @@
                         <rect>
                             <x>10</x>
                             <y>10</y>
-                            <width>522</width>
+                            <width>526</width>
                             <height>403</height>
                         </rect>
                     </property>
@@ -86,7 +86,7 @@
                                             <cstring>cbFLTableDC</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Desactivar edición con doble click</string>
+                                            <string>Desactivar edición con doble click.</string>
                                         </property>
                                     </widget>
                                     <widget class="QCheckBox">
@@ -94,7 +94,7 @@
                                             <cstring>cbFLTableSC</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Desactivar atajos de teclado</string>
+                                            <string>Desactivar atajos de teclado.</string>
                                         </property>
                                     </widget>
                                     <widget class="QCheckBox">
@@ -102,7 +102,7 @@
                                             <cstring>cbFLTableCalc</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Desactivar exportar a hoja de cálculo</string>
+                                            <string>Desactivar exportar a hoja de cálculo.</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -265,7 +265,7 @@
                                             <cstring>cbActionsMenuRed</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Mostrar menú de acciones reducido (sin acciones de la barra de herramientas)</string>
+                                            <string>Mostrar menú de acciones reducido (sin acciones de la barra de herramientas).</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -353,7 +353,7 @@
                                     <cstring>cbDebuggerMode</cstring>
                                 </property>
                                 <property name="text">
-                                    <string>Activar modo desarrollo</string>
+                                    <string>Activar modo desarrollo.</string>
                                 </property>
                             </widget>
                             <widget class="QGroupBox">
@@ -372,7 +372,7 @@
                                             <cstring>cbSLConsola</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Mostrar carga estática en consola</string>
+                                            <string>Mostrar carga estática en consola.</string>
                                         </property>
                                     </widget>
                                     <widget class="QCheckBox">
@@ -380,7 +380,7 @@
                                             <cstring>cbSLInterface</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Mostrar carga estática y parser en interface gráfico</string>
+                                            <string>Mostrar carga estática y parser en interface gráfico.</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -401,7 +401,7 @@
                                             <cstring>cbDeleteCache</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Eliminar cache al iniciar</string>
+                                            <string>Eliminar cache al iniciar.</string>
                                         </property>
                                     </widget>
                                     <widget class="QCheckBox">
@@ -409,7 +409,7 @@
                                             <cstring>cbParseProject</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Parsear todo el QSA al iniciar</string>
+                                            <string>Parsear todo el QSA al iniciar.</string>
                                         </property>
                                     </widget>
                                     <widget class="QCheckBox">
@@ -417,7 +417,7 @@
                                             <cstring>cbParseModulesOnLoad</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Convertir a Python los script QSA al cargar un módulo en la BD</string>
+                                            <string>Convertir a Python los script QSA al cargar un módulo en la BD.</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -468,7 +468,7 @@
                                             <cstring>cbSpacerLegacy</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>No usar el spacer en modo legacy (Abanq/Eneboo)</string>
+                                            <string>No usar el spacer en modo legacy (Abanq/Eneboo).</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -478,7 +478,7 @@
                                     <cstring>cbMobile</cstring>
                                 </property>
                                 <property name="text">
-                                    <string>Forzar modo Mobile</string>
+                                    <string>Forzar modo Mobile.</string>
                                 </property>
                             </widget>
                             <spacer>
@@ -551,6 +551,51 @@
                                     </spacer>
                                 </hbox>
                             </widget>
+                            <widget class="QLayoutWidget">
+                                <property name="name">
+                                    <cstring>layout8</cstring>
+                                </property>
+                                <hbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel1_6</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Carpeta temporales:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit">
+                                        <property name="name">
+                                            <cstring>le_kut_temporales</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                    </widget>
+                                    <widget class="QPushButton">
+                                        <property name="name">
+                                            <cstring>pbn_kut</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Cam&amp;biar</string>
+                                        </property>
+                                        <property name="accel">
+                                            <string>Alt+B</string>
+                                        </property>
+                                    </widget>
+                                </hbox>
+                            </widget>
+                            <widget class="QCheckBox">
+                                <property name="name">
+                                    <cstring>cb_kut_debug</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>Habilitar modo debug.</string>
+                                </property>
+                            </widget>
                             <spacer>
                                 <property name="name">
                                     <cstring>spacer13</cstring>
@@ -564,7 +609,7 @@
                                 <property name="sizeHint">
                                     <size>
                                         <width>20</width>
-                                        <height>271</height>
+                                        <height>250</height>
                                     </size>
                                 </property>
                             </spacer>
@@ -597,7 +642,7 @@
                                             <cstring>cb_traducciones</cstring>
                                         </property>
                                         <property name="text">
-                                            <string>Usar traducciones QM</string>
+                                            <string>Usar traducciones QM.</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -685,7 +730,7 @@
                                                 <cstring>cbPosInfo</cstring>
                                             </property>
                                             <property name="text">
-                                                <string>Mostrar información de conexión en la barra de tareas</string>
+                                                <string>Mostrar información de conexión en la barra de tareas.</string>
                                             </property>
                                         </widget>
                                         <spacer>
@@ -742,7 +787,7 @@
                                         <cstring>cbFLLarge</cstring>
                                     </property>
                                     <property name="text">
-                                        <string>Usar múltiples tablas FLLarge (modo AbanQ)</string>
+                                        <string>Usar múltiples tablas FLLarge (modo AbanQ).</string>
                                     </property>
                                 </widget>
                                 <spacer>
