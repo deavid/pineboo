@@ -300,7 +300,7 @@ class kut2fpdf(object):
         g = 0 if not color else int(color.split(",")[1])
         b = 0 if not color else int(color.split(",")[2])
 
-        #style = int(xml.get("Style"))
+        style = int(xml.get("Style"))
         width = int(xml.get("Width"))
         X1 = self.calculateLeftStart(xml.get("X1"))
         X1 = self.calculateRightEnd(X1)
@@ -312,9 +312,24 @@ class kut2fpdf(object):
         if fix_height:
             Y1 = self._parser_tools.heightCorrection(Y1)
             Y2 = self._parser_tools.heightCorrection(Y2)
+        
+          
+            
+        
         self._document.set_line_width(width)
         self._document.set_draw_color(r, g, b)
-        self._document.line(X1, Y1, X2, Y2)
+        dash_length = 1
+        space_length = 1
+        if style == 2:
+            dash_length = 20
+            space_length = 20
+        elif style == 3:
+            dash_length = 10
+            space_length = 10
+        
+        self._document.dashed_line(X1, Y1, X2, Y2, dash_length, space_length)  
+        #else:
+        #    self._document.line(X1, Y1, X2, Y2)
 
     """
     Comprueba si excedemos el margen izquierdo de la página actual
