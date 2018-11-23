@@ -638,9 +638,8 @@ class kut2fpdf(object):
             if xml.get("BorderStyle") == "1":
                 
                 border_color = self.get_color(xml.get("BorderColor"))
-                if not (border_color[0] is 0 and border_color[1] is 0 and border_color[2] is 0):
-                    self._document.set_draw_color(border_color[0], border_color[1], border_color[2])
-                    style_ += "D"
+                self._document.set_draw_color(border_color[0], border_color[1], border_color[2])
+                style_ += "D"
                     
             
             bg_color = self.get_color(xml.get("BackgroundColor"))
