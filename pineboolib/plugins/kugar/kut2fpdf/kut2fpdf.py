@@ -411,7 +411,6 @@ class kut2fpdf(object):
             
         if data_type is not None:
             text = self._parser_tools.calculated(text, int(data_type), int(xml.get("Precision")), data_row)
-
         if data_type == "5":
             isImage = True
         
@@ -423,7 +422,7 @@ class kut2fpdf(object):
             
             
 
-        if text and text.startswith(filedir("../tempdata")):
+        if text is not None and text.startswith(filedir("../tempdata")):
             isImage = True
 
         negValueColor = xml.get("NegValueColor")
@@ -646,7 +645,12 @@ class kut2fpdf(object):
         orig_w = W
         x = self.calculateLeftStart(orig_x)
         dif_orig_x = x - orig_x
+        
+        
+        
         W = self.calculateRightEnd((x + orig_w) - dif_orig_x) - x
+        
+        dif_orig_w = orig_w -W
         #W = W - dif_orig_x
         
         if xml is not None and not self.design_mode:
@@ -670,6 +674,12 @@ class kut2fpdf(object):
             
         if style_ is not "":
             self._document.set_line_width(border_width)
+            if dif_orig_x is not 0: # Corrige el relleno cuando 
+                x += 2
+            
+            if dif_orig_w is not 0:
+                W -= 2
+
             self._document.rect(x, y, W, H, style_)
             self._document.set_line_width(line_width)
             

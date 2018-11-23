@@ -112,7 +112,7 @@ class parsertools(object):
             pass
         elif data_type == 0:
             pass
-        
+                
         elif data:
             ret_ = data.get(value)
 
