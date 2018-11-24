@@ -683,7 +683,6 @@ class FLSqlCursorPrivate(QtCore.QObject):
                 return
 
         elif self.cursor_.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
-            print("Procesando", self.acTable_, self.acTable_.name(), self.id_)
             if not self.acTable_.name() == self.id_:
                 self.acTable_.clear()
                 self.acTable_.setName(self.id_)
@@ -1964,7 +1963,6 @@ class FLSqlCursor(QtCore.QObject):
                         ret_ = True
                         break
         
-        print("ret_", ret_)
         return ret_
 
     """
@@ -2401,7 +2399,6 @@ class FLSqlCursor(QtCore.QObject):
             if not self.seek(pos, False, True):
                 self.d.buffer_ = None
                 self.newBuffer.emit()
-        self.afterSeek()
 
     """
     Actualiza el conjunto de registros con un retraso.
@@ -2609,25 +2606,19 @@ class FLSqlCursor(QtCore.QObject):
     @QtCore.pyqtSlot()
     def seek(self, i, relative=None, emite=None):
 
-        # if self.d.modeAccess_ == self.Del:
-        #    return False
-
-        b = False
+        ret_ = False
 
         if self.buffer():
-            b = True
+            if emite:
+                self.currentChanged.emit(self.at())
 
-        if b and emite:
-            self.currentChanged.emit(self.at())
-
-        if b:
-            return self.refreshBuffer()
-
-        # else:
-            # logger.trace("FLSqlCursor.seek(): buffer principal =", self.buffer().md5Sum())
-
-        return False
-
+            ret_ = self.refreshBuffer()
+        
+        if ret_:
+            print("AfterSeek", self.curName())
+            self.afterSeek()
+        
+        return ret_
     """
     Redefinicion del método next() de QSqlCursor.
 
