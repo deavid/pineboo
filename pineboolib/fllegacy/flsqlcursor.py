@@ -94,8 +94,7 @@ class PNBuffer(object):
         for field in self.fieldsList():
 
             if field.type_ in ("unlock", "bool"):
-                field.value = (self.cursor().model().value(
-                    row, field.name) in ("True", True, 1, "1"))
+                field.value = (self.cursor().model().value( row, field.name) in ("True", True, 1, "1"))
                 #    field.value = True
                 # else:
                 #    field.value = False
@@ -144,7 +143,6 @@ class PNBuffer(object):
     """
 
     def setNull(self, name):
-        # field = self.field(name)
         return self.setValue(name, None)
 
     """
@@ -215,6 +213,8 @@ class PNBuffer(object):
         v = field.value
         if field.value is None:
             v = None
+        
+        
         else:
             if field.type_ in ("str", "pixmap", "time", "date"):
                 try:
@@ -250,7 +250,6 @@ class PNBuffer(object):
     """
 
     def setValue(self, name, value, mark_=True):
-        
         if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date)):
             raise ValueError(
                 "No se admite el tipo %r , en setValue %r" % (type(value), value))
@@ -321,7 +320,6 @@ class PNBuffer(object):
                 try:
                     return not (float(actual) == float(value))
                 except Exception:
-                    print("****************************************Error al comparar buffer", actual, value)
                     return True
             else:
                 return True
@@ -579,7 +577,6 @@ class FLSqlCursorPrivate(QtCore.QObject):
     acosCondVal_ = None
     lastAt_ = None
     aclDone_ = False
-    fieldsNamesUnlock_ = None
     idAc_ = 0
     idAcos_ = 0
     idCond_ = 0
@@ -853,7 +850,7 @@ class FLSqlCursor(QtCore.QObject):
         if not self.metadata():
             return
 
-        self.fieldsNamesUnlock_ = self.metadata().fieldsNamesUnlock()
+        
 
         self.d.isQuery_ = self.metadata().isQuery()
         if (name[len(name) - 3:]) == "sys" or self.db().manager().isSystemTable(name):
@@ -1954,11 +1951,11 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def isLocked(self):
-        if not self.d.modeAccess_ == self.Insert and self.fieldsNamesUnlock_ and self.buffer() and self.buffer().value(self.metadata().primaryKey()):
-            for field in self.fieldsNamesUnlock_:
+        if self.d.modeAccess_ is not self.Insert:
+            for field in self.metadata().fieldsNamesUnlock():
                 if self.buffer().value(field) is False:
                     return True
-
+        
         return False
 
     """
@@ -2539,14 +2536,16 @@ class FLSqlCursor(QtCore.QObject):
         elif self.d.modeAccess_ == self.Edit:
             if not self.commitBufferCursorRelation():
                 return False
-
+            
+            self.primeUpdate()
+            
             if self.isLocked() and not self.d.acosCondName_:
                 self.d.modeAccess_ = self.Browse
 
             # if not self.buffer():
                 # self.d.buffer_ = PNBuffer(self.d)
 
-            self.primeUpdate()
+            
 
             self.setNotGenerateds()
             self.updateBufferCopy()
