@@ -44,32 +44,39 @@ class FLTranslator(QTranslator):
 
     def loadTsContent(self, key):
         if self.idM_ == "sys":
-            tsFile = filedir("../share/pineboo/translations/%s.%s" %
+            ts_file = filedir("../share/pineboo/translations/%s.%s" %
                              (self.idM_, self.lang_))
         else:
             from pineboolib.pncontrolsfactory import aqApp
-            tsFile = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %
+            ts_file = filedir("../tempdata/cache/%s/%s/file.ts/%s.%s/%s" %
                              (aqApp.db().database(), self.idM_, self.idM_, self.lang_, key))
         # qmFile = self.AQ_DISKCACHE_DIRPATH + "/" + key + ".qm"
-        qmFile = "%s.qm" % tsFile
-        if os.path.exists(qmFile):
-            if tsFile in (None, ""):
-                return False
-
-        else:
-
-            trans = FLTranslations()
-            trans.lrelease("%s.ts" % tsFile, qmFile, not self.mulTiLang_)
+        
         
         ret_ = None
         if not self.translation_from_qm:
-            ret_ = self.load_ts("%s.ts" % tsFile)
+            ret_ = self.load_ts("%s.ts" % ts_file)
             if not ret_:
-                self.logger.warn("For some reason, i cannot load '%s.ts'", tsFile)
+                self.logger.warn("For some reason, i cannot load '%s.ts'", ts_file)
         else:
-            ret_ = self.load(qmFile)
+            
+            qm_file = "%s.qm" % ts_file
+            if os.path.exists(qm_file):
+                if ts_file in (None, ""):
+                    return False
+
+            else:
+
+                trans = FLTranslations()
+                trans.lrelease("%s.ts" % ts_file, qm_file, not self.mulTiLang_)
+            
+            
+            
+            
+            
+            ret_ = self.load(qm_file)
             if not ret_:
-                self.logger.warn("For some reason, i cannot load '%s'", qmFile)
+                self.logger.warn("For some reason, i cannot load '%s'", qm_file)
         
         return ret_
 
