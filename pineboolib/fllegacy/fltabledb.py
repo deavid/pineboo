@@ -976,7 +976,7 @@ class FLTableDB(QtWidgets.QWidget):
         if isinstance(self.topWidget, FLFormSearchDB) and self.topWidget.inExec_:
             self.topWidget.accept()
         else:
-            self.cursor_.chooseRecord()
+            self.editRecord()
 
     @QtCore.pyqtSlot()
     def currentChangedSlot(self):

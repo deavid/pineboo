@@ -769,9 +769,8 @@ class FLDataTable(QtWidgets.QTableView):
     def mouseDoubleClickEvent(self, e):
         if e.button() != QtCore.Qt.LeftButton:
             return
-
+        
         self.recordChoosed.emit()
-
 
 
     def visual_index_to_column_index(self, c):
