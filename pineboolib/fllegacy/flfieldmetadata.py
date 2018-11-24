@@ -70,7 +70,7 @@ class FLFieldMetaData(object):
     """
 
     def name(self):
-        return str(self.d.fieldName_)
+        return self.d.fieldName_
 
     """
     Establece el nombre para el campo
@@ -88,7 +88,7 @@ class FLFieldMetaData(object):
     """
 
     def alias(self):
-        return aqtt(self.d.alias_)
+        return self.d.alias_
 
     """
     Obtiene si permite nulos.
@@ -881,7 +881,7 @@ class FLFieldMetaDataPrivate(object):
 
     def inicialize(self, n, a, aN, iPK, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
         self.fieldName_ = n.lower()
-        self.alias_ = a
+        self.alias_ = aqtt(a)
         if c:
             self.allowNull_ = True
         else:

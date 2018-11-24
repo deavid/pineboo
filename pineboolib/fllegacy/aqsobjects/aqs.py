@@ -77,16 +77,15 @@ class AQS(object):
 
         _meta = obj_.metaObject()
 
-        num = _meta.propertyCount()
         i = 0
-        _p_properties = []
-        while i < num:
+        #_p_properties = []
+        for i in range(_meta.propertyCount()):
             mp = _meta.property(i)
-            if mp.name() in _p_properties:
-                i += 1
-                continue
+            #if mp.name() in _p_properties:
+            #    i += 1
+            #    continue
 
-            _p_properties.append(mp.name())
+            #_p_properties.append(mp.name())
 
             val = getattr(obj_, mp.name(), None)
             try:

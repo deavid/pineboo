@@ -567,9 +567,8 @@ class FLTableMetaData(QtCore.QObject):
         if not fN:
             return
 
-        for f in self.fieldList():
-            # print("comprobando ", f.name())
-            if f.name() == str(fN).lower():
+        for f in self.d.fieldList_:
+            if f.name() == fN.lower():
                 return f
 
         return None
@@ -579,8 +578,6 @@ class FLTableMetaData(QtCore.QObject):
 
     @return Objeto con la lista de deficiones de campos de la tabla
     """
-    # def fieldList(self):
-    #    return self.d.fieldList_
 
     """
     Para obtener una cadena con los nombres de los campos separados por comas.
