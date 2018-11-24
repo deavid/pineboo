@@ -682,15 +682,17 @@ class FLSqlCursorPrivate(QtCore.QObject):
 
                 return
 
-            elif self.cursor_.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
-                if not self.acTable_.name() == self.id_:
-                    self.acTable_.clear()
-                    self.acTable_.setName(self.id_)
-                    self.acTable_.setPerm("r-")
-                    self.acTable_.processObject(self.metadata_)
-                    self.aclDone_ = True
+        elif self.cursor_.isLocked() or (self.cursorRelation_ and self.cursorRelation_.isLocked()):
+            print("Procesando", self.acTable_, self.acTable_.name(), self.id_)
+            if not self.acTable_.name() == self.id_:
+                self.acTable_.clear()
+                self.acTable_.setName(self.id_)
+                self.acTable_.setPerm("r-")
+                
+                self.acTable_.processObject(self.metadata_)
+                self.aclDone_ = True
 
-                return
+            return
 
         self.undoAcl()
 
@@ -1544,6 +1546,7 @@ class FLSqlCursor(QtCore.QObject):
             if m != self.Insert:
                 self.updateBufferCopy()
             
+            
             pineboolib.project.actions[self._action.name()].openDefaultFormRecord(self)
 
             # if m != self.Insert and self.refreshBuffer():
@@ -1952,11 +1955,17 @@ class FLSqlCursor(QtCore.QObject):
 
     def isLocked(self):
         if self.d.modeAccess_ is not self.Insert:
+            ret_ = False
+            row = self.currentRegister()
+            
             for field in self.metadata().fieldsNamesUnlock():
-                if self.buffer().value(field) is False:
-                    return True
+                if row > -1:
+                    if self.model().value( row, field) not in ("True", True, 1, "1"):
+                        ret_ = True
+                        break
         
-        return False
+        print("ret_", ret_)
+        return ret_
 
     """
     Devuelve el contenido del buffer
@@ -2389,9 +2398,9 @@ class FLSqlCursor(QtCore.QObject):
             if pos > self.size():
                 pos = self.size() - 1
 
-            # if not self.seek(pos, False, True):
-            #    self.d.buffer_ = None
-            #    self.newBuffer.emit()
+            if not self.seek(pos, False, True):
+                self.d.buffer_ = None
+                self.newBuffer.emit()
         self.afterSeek()
 
     """
@@ -2538,12 +2547,9 @@ class FLSqlCursor(QtCore.QObject):
                 return False
             
             self.primeUpdate()
-            
-            if self.isLocked() and not self.d.acosCondName_:
-                self.d.modeAccess_ = self.Browse
 
-            # if not self.buffer():
-                # self.d.buffer_ = PNBuffer(self.d)
+            if self.isLocked() and self.d.acosCondName_ is None:
+                self.d.modeAccess_ = self.Browse
 
             
 
