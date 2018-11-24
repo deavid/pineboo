@@ -610,7 +610,7 @@ def convert2FLAction(action):
 
 def load2xml(form_path_or_str):
     from xml.etree import ElementTree as ET
-
+    """
     class xml_parser(ET.TreeBuilder):
 
 
@@ -625,9 +625,9 @@ def load2xml(form_path_or_str):
 
         def close(self):
             return super(xml_parser, self).close()
-
+    """
     try:
-        parser = ET.XMLParser(html=0, target=xml_parser())
+        parser = ET.XMLParser(html=0)
         if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:           
             form_path_or_str = parse_for_duplicates(form_path_or_str)         
             ret = ET.fromstring(form_path_or_str, parser)
@@ -635,7 +635,7 @@ def load2xml(form_path_or_str):
             ret = ET.parse(form_path_or_str, parser)
     except Exception:
         try:
-            parser = ET.XMLParser(html=0, encoding="ISO-8859-15", target=xml_parser())
+            parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
             if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
