@@ -1953,8 +1953,8 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def isLocked(self):
+        ret_ = False
         if self.d.modeAccess_ is not self.Insert:
-            ret_ = False
             row = self.currentRegister()
             
             for field in self.metadata().fieldsNamesUnlock():
