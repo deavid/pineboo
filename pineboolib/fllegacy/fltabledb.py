@@ -1854,18 +1854,12 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot(bool)
     def editRecord(self, unknown=None):
         w = self.sender()
-
-        # if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation()
-        #       and self.cursor_.cursorRelation().isLocked())):
-        relationLock = False
-
-        if isinstance(self.cursor().cursorRelation(), FLSqlCursor):
-            relationLock = self.cursor_.cursorRelation().isLocked()
-
-        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqInsertOnly_ or self.reqOnlyTable_ or relationLock):
+        if isinstance(w, FLDataTable):
+            w = None
+        if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)
             return
-
+        
         if self.cursor_:
             self.cursor_.editRecord()
     """
@@ -1875,6 +1869,8 @@ class FLTableDB(QtWidgets.QWidget):
     def browseRecord(self, unknown):
 
         w = self.sender()
+        if isinstance(w, FLDataTable):
+            w = None
         if w and (not self.cursor_ or self.reqOnlyTable_):
             w.setDisabled(True)
             return
@@ -1888,6 +1884,8 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot(bool)
     def deleteRecord(self, unknown):
         w = self.sender()
+        if isinstance(w, FLDataTable):
+            w = None
         if w and (not self.cursor_ or self.reqReadOnly_ or self.reqInsertOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or
                   (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)
@@ -1902,6 +1900,8 @@ class FLTableDB(QtWidgets.QWidget):
     @QtCore.pyqtSlot()
     def copyRecord(self):
         w = self.sender()
+        if isinstance(w, FLDataTable):
+            w = None
         if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (
                 self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)
