@@ -263,9 +263,10 @@ class FLAccessControl(object):
         self.acosPerms_ = {}
 
         nameAcos = None
-        for it in acos.values():
-            nameAcos = it
-            self.acosPerms_.replace(nameAcos, str(it))
+
+        for it in acos:
+            print("it", it)
+            self.acosPerms_[it] = it
 
     """
     Obtiene una lista de cadenas de texto correspondiente a la lista de ACOs establecida
