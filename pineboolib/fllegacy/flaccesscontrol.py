@@ -265,7 +265,6 @@ class FLAccessControl(object):
         nameAcos = None
 
         for it in acos:
-            print("it", it)
             self.acosPerms_[it] = it
 
     """

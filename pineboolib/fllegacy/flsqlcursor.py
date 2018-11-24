@@ -2615,7 +2615,6 @@ class FLSqlCursor(QtCore.QObject):
             ret_ = self.refreshBuffer()
         
         if ret_:
-            print("AfterSeek", self.curName())
             self.afterSeek()
         
         return ret_
