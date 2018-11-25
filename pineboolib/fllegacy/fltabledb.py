@@ -388,6 +388,7 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def setReadOnly(self, mode):
+
         if self.tableRecords_:
             self.readonly = mode
             self.tableRecords_.setFLReadOnly(mode)
@@ -976,7 +977,7 @@ class FLTableDB(QtWidgets.QWidget):
         if isinstance(self.topWidget, FLFormSearchDB) and self.topWidget.inExec_:
             self.topWidget.accept()
         else:
-            self.editRecord()
+            self.cursor().chooseRecord()
 
     @QtCore.pyqtSlot()
     def currentChangedSlot(self):
