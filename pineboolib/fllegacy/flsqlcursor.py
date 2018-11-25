@@ -15,6 +15,8 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 from pineboolib.fllegacy.flaction import FLAction
 
+
+
 import weakref
 import copy
 import datetime
@@ -461,7 +463,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
     nada. Por defecto esta bandera está a TRUE
     """
     browse_ = True
-    browseStates_ = []
+    browse_states_ = []
 
     """
     Filtro principal para el cursor.
@@ -595,7 +597,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
     _model = None
 
     _currentregister = None
-    editionStates_ = None
+    edition_states_ = None
 
     filter_ = None
 
@@ -611,7 +613,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
         self._currentregister = -1
         self.acosCondName_ = None
         self.buffer_ = None
-        self.editionStates_ = None
+        self.edition_states_ = None
         self.activatedCheckIntegrity_ = True
         self.askForCancelChanges_ = True
         self.transactionsOpened_ = []
@@ -636,12 +638,12 @@ class FLSqlCursorPrivate(QtCore.QObject):
         if self.acTable_:
             del self.acTable_
 
-        if self.editionStates_:
-            del self.editionStates_
+        if self.edition_states_:
+            del self.edition_states_
             # logger.trace("AQBoolFlagState count %s", self.count_)
 
-        if self.browseStates_:
-            del self.browseStates_
+        if self.browse_states_:
+            del self.browse_states_
             # logger.trace("AQBoolFlagState count %s", self.count_)
         if self.transactionsOpened_:
             del self.transactionsOpened_
@@ -1281,47 +1283,51 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def setEdition(self, b, m=None):
-
         if m is None:
             self.d.edition_ = b
             return
 
-        stateChanges = (not b == self.d.edition_)
+        state_changes = (b is not self.d.edition_)
+        
+        
+        
+        if state_changes is not None and not self.d.edition_states_:
+            from pineboolib.pncontrolsfactory import AQBoolFlagStateList
+            self.d.edition_states_ = AQBoolFlagStateList()
+                
 
-        if stateChanges and not self.d.editionStates_:
-            self.d.editionStates_ = AQBoolFlagStateList()
-
-        if not self.d.editionStates_:
+        if self.d.edition_states_ is None:
             return
 
-        i = self.d.editionStates_.find(m)
-        if not i and stateChanges:
+        i = self.d.edition_states_.find(m)
+        if not i and state_changes is not None:
+            from pineboolib.pncontrolsfactory import AQBoolFlagState
             i = AQBoolFlagState()
             i. modifier_ = m
             i.prevValue_ = self.d.edition_
-            self.d.editionStates_.append(i)
+            self.d.edition_states_.append(i)
         elif i:
-            if stateChanges:
-                self.d.editionStates_.pushOnTop(i)
+            if state_changes is not None:
+                self.d.edition_states_.pushOnTop(i)
                 i.prevValue_ = self.d.edition_
             else:
-                self.d.editionStates_.erase(i)
+                self.d.edition_states_.erase(i)
 
-        if stateChanges:
+        if state_changes is not None:
             self.d.edition_ = b
 
     def restoreEditionFlag(self, m):
 
-        if not getattr(self.d, "editionStates_", None):
+        if not self.d.edition_states_:
             return
 
-        i = self.d.editionStates_.find(m)
+        i = self.d.edition_states_.find(m)
 
-        if i and i == self.d.editionStates_.cur_:
+        if i and i == self.d.edition_states_.current():
             self.d.edition_ = i.prevValue_
 
         if i:
-            self.d.editionStates_.erase(i)
+            self.d.edition_states_.erase(i)
 
     """
     Establece el valor de FLSqlCursor::browse.
@@ -1334,41 +1340,43 @@ class FLSqlCursor(QtCore.QObject):
             self.d.browse_ = b
             return
 
-        stateChanges = (not b == self.d.browse_)
+        state_changes = (not b == self.d.browse_)
 
-        if stateChanges and not self.d.browseStates_:
-            self.d.browseStates_ = AQBoolFlagStateList()
+        if state_changes is not None and not self.d.browse_states_:
+            from pineboolib.pncontrolsfactory import AQBoolFlagStateList
+            self.d.browse_states_ = AQBoolFlagStateList()
 
-        if not self.d.browseStates_:
+        if not self.d.browse_states_:
             return
 
-        i = self.d.browseStates_.find(m)
-        if not i and stateChanges:
+        i = self.d.browse_states_.find(m)
+        if not i and state_changes is not None:
+            from pineboolib.pncontrolsfactory import AQBoolFlagState
             i = AQBoolFlagState()
             i. modifier_ = m
             i.prevValue_ = self.d.browse_
-            self.d.browseStates_.append(i)
+            self.d.browse_states_.append(i)
         elif i:
-            if stateChanges:
-                self.d.browseStates_.pushOnTop(i)
+            if state_changes is not None:
+                self.d.browse_states_.pushOnTop(i)
                 i.prevValue_ = self.d.browse_
             else:
-                self.d.browseStates_.erase(i)
+                self.d.browse_states_.erase(i)
 
-        if stateChanges:
+        if state_changes is not None:
             self.d.browse_ = b
 
     def restoreBrowseFlag(self, m):
-        if not getattr(self.d, "browseStates_", None):
+        if not self.d.browse_states_:
             return
 
-        i = self.d.browseStates_.find(m)
+        i = self.d.browse_states_.find(m)
 
-        if i and i == self.d.browseStates_.cur_:
+        if i and i == self.d.browse_states_.current():
             self.d.browse_ = i.prevValue_
 
         if i:
-            self.d.browseStates_.erase(i)
+            self.d.browse_states_.erase(i)
 
     """
     Establece el contexto de ejecución de scripts, este puede ser del master o del form_record
