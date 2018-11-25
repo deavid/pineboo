@@ -545,7 +545,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def refresh(self):
-        if self._disable_refresh:
+        if self._disable_refresh and self.rows > 0:
             return
 
         if not self.metadata():
