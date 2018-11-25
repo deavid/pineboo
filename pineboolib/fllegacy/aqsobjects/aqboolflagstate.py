@@ -30,7 +30,7 @@ class AQBoolFlagStateList(object):
     def erase(self, data):
         
         for d in self.data_list_:
-            if d.modifier_ == data:
+            if d == data:
                 del d
                 break
     
