@@ -9,6 +9,7 @@ from pineboolib.fllegacy.aqsobjects.aqsql import AQSql
 from pineboolib.fllegacy.aqsobjects.aqsmtpclient import AQSmtpClient
 from pineboolib.fllegacy.aqsobjects.aqs import AQS as AQS_class
 from pineboolib.fllegacy.aqsobjects.aqods import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle
+from pineboolib.fllegacy.aqsobjects.aqboolflagstate import AQBoolFlagState, AQBoolFlagStateList
 
 import pineboolib
 
