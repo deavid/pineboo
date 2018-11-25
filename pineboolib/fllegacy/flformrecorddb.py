@@ -173,30 +173,13 @@ class FLFormRecordDB(FLFormDB):
             caption = None
             if self._action:
                 self.cursor().setAction(self._action)
-                caption = self._action.caption()
                 if self._action.description():
                     self.setWhatsThis(self._action.description())
                 self.idMDI_ = self._action.name()
 
             # self.bindIface()
             # self.setCursor(self.cursor_)
-            if not caption:
-                caption = self.cursor().metadata().alias()
             
-            if not self.cursor().isValid():
-                self.cursor().model().refresh()
-
-            if self.cursor().modeAccess() in (self.cursor().Insert, self.cursor().Edit, self.cursor().Browse):
-                self.cursor().transaction()
-                self.initTransLevel = self.cursor().transactionLevel()
-                self.setCaptionWidget(caption)
-                self.cursor().setContext(self.iface)
-            if self.cursor().modeAccess() == FLSqlCursor.Insert:
-                self.showAcceptContinue_ = True
-            else:
-                self.showAcceptContinue_ = False
-
-            self.loadControls()
 
         else:
             self.setCaptionWidget("No hay metadatos")
@@ -790,7 +773,26 @@ class FLFormRecordDB(FLFormDB):
             QtWidgets.QMessageBox.information(QtWidgets.QApplication.activeWindow(), "Aviso", "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
                                               QtWidgets.QMessageBox.Yes)
             return
+        else:
+            caption = self._action.caption()
+            if not caption:
+                caption = self.cursor().metadata().alias()
+            
+            if not self.cursor().isValid():
+                self.cursor().model().refresh()
 
+            if self.cursor().modeAccess() in (self.cursor().Insert, self.cursor().Edit, self.cursor().Browse):
+                self.cursor().transaction()
+                self.initTransLevel = self.cursor().transactionLevel()
+                self.setCaptionWidget(caption)
+                self.cursor().setContext(self.iface)
+            if self.cursor().modeAccess() == FLSqlCursor.Insert:
+                self.showAcceptContinue_ = True
+            else:
+                self.showAcceptContinue_ = False
+
+            self.loadControls()
+            
         super(FLFormRecordDB, self).show()
 
     def inicializeControls(self):
