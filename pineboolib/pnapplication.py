@@ -833,7 +833,7 @@ class XMLAction(XMLStruct):
             self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
             if self.formrecord_widget:
-                self.logger.warn("End of record action load %s (iface:%s ; widget:%s)", self.name, getattr(
+                self.logger.debug("End of record action load %s (iface:%s ; widget:%s)", self.name, getattr(
                     self.formrecord_widget, "iface", None), getattr(self.formrecord_widget, "widget", None))
         
         if cursor and self.formrecord_widget.cursor() is None:
