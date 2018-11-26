@@ -118,8 +118,8 @@ class FLTableDB(QtWidgets.QWidget):
         if name:
             self.setObjectName(name)
         self.checkColumnVisible_ = False
-        self.tdbFilterLastWhere_ = ""
-        self.filter_ = ""
+        self.tdbFilterLastWhere_ = None
+        self.filter_ = None
         self.iconSize = pineboolib.project._DGI.iconSize()
         self.tabControlLayout = QtWidgets.QHBoxLayout()
         self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
@@ -1761,7 +1761,6 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords_.header().show()
 
         if refreshData or self.sender():
-
             finalFilter = self.filter_
             if self.tdbFilterLastWhere_:
                 if not finalFilter:
@@ -1769,7 +1768,7 @@ class FLTableDB(QtWidgets.QWidget):
                 else:
                     finalFilter = "%s AND %s" % (
                         finalFilter, self.tdbFilterLastWhere_)
-
+            
             self.tableRecords_.setPersistentFilter(finalFilter)
 
             self.tableRecords_.setShowAllPixmaps(self.showAllPixmaps_)
@@ -2320,19 +2319,19 @@ class FLTableDB(QtWidgets.QWidget):
 
         if functionQSA:
             msec_refresh = 200
-            ret = ""
+            ret = None
             try:
                 from pineboolib.pncontrolsfactory import aqApp
                 ret = aqApp.call(functionQSA, vargs, None)
                 logger.debug("functionQSA:%s:", functionQSA)
             except Exception:
                 pass
-
-            if ret is not isinstance(ret, bool):
-                bFilter = ret
             else:
-                if p == "":
-                    bFilter = ""
+                if ret is not isinstance(ret, bool):
+                    bFilter = ret
+                else:
+                    if p == "":
+                        bFilter = None
 
         self.refreshDelayed(msec_refresh, refreshData)
         self.filter_ = bFilter

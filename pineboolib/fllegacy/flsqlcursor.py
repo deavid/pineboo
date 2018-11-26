@@ -2804,7 +2804,6 @@ class FLSqlCursor(QtCore.QObject):
 
         bFilter = self.baseFilter()
         finalFilter = bFilter
-
         if _filter:
             if bFilter:
                 if _filter not in bFilter:
@@ -2860,14 +2859,12 @@ class FLSqlCursor(QtCore.QObject):
                 self.relation().foreignField())
             field = self.metadata().field(self.relation().field())
 
-            if fgValue is None:
-                fgValue = ""
 
             if field and fgValue is not None:
+                
                 relationFilter = self.db().manager().formatAssignValue(field, fgValue, True)
                 filterAc = self.cursorRelation().filterAssoc(
                     self.relation().foreignField(), self.metadata())
-
                 if filterAc:
                     if not relationFilter:
                         relationFilter = filterAc
@@ -2920,7 +2917,8 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def setFilter(self, _filter):
-
+        
+            
         self.d.filter_ = None
 
         finalFilter = _filter
@@ -2935,7 +2933,7 @@ class FLSqlCursor(QtCore.QObject):
 
         if finalFilter and self.d.persistentFilter_ and self.d.persistentFilter_ not in finalFilter:
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
-
+        
         self.d._model.where_filters["filter"] = finalFilter
 
     """
