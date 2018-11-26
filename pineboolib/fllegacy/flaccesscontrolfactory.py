@@ -4,21 +4,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
-from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib import decorators
+
 import pineboolib
-
-
-try:
-    QString = unicode
-except NameError:
-    # Python 3
-    QString = str
 
 
 class FLAccessControlFactory(object):
 
-    @decorators.BetaImplementation
     def create(self, type_):
         if type_ is None:
             return False
@@ -32,26 +23,23 @@ class FLAccessControlFactory(object):
 
         return False
 
-    @decorators.BetaImplementation
     def type(self, obj):
-        if not obj:
+        if obj is None:
             print("NO OBJ")
-
-        from pineboolib.fllegacy.FLFormDB import FLFormDB
+        
+        ret_ = ""
+        from pineboolib.fllegacy.flformdb import FLFormDB
         if isinstance(obj, QtWidgets.QMainWindow):
-            return "mainwindow"
-        if isinstance(obj, FLTableMetaData):
-            return "table"
-        if isinstance(obj, FLFormDB):
-            return "form"
+            ret_ = "mainwindow"
+        elif isinstance(obj, FLTableMetaData):
+            ret_ = "table"
+        elif isinstance(obj, FLFormDB):
+            ret_ = "form"
 
-        return QString("")
+        return ret_
 
 
 class FLAccessControlMainWindow(FLAccessControl):
-
-    acosPerms_ = None
-    perm_ = None
 
     def __init__(self):
         super(FLAccessControlMainWindow, self).__init__()
@@ -64,17 +52,17 @@ class FLAccessControlMainWindow(FLAccessControl):
   @return Devuelve el nombre del tipo asociado al objeto de alto nivel dado, si existe controlador de acceso para él,
   en caso contrario devuelve una cadena vacía.
     """
-    @decorators.BetaImplementation
+
     def type(self):
         return "mainwindow"
 
-    @decorators.BetaImplementation
+
     def processObject(self, obj):
         mw = QtGui.QMainWindow(obj)
         if not mw or not self.acosPerms_:
             return
 
-        if not self.perm_.isEmpty():
+        if not self.perm_:
             l = QtCore.QObjectList(mw.queryList("QAction"))
             ito = QtCore.QObjectListIt(l)
             a = QtCore.QAction
@@ -97,33 +85,24 @@ class FLAccessControlMainWindow(FLAccessControl):
                 if perm in ("-w", "--"):
                     a.setVisible(False)
 
-    @decorators.BetaImplementation
+    
     def setFromObject(self, object):
+        from pineboolib.fllegacy.flutil import FLUtil
         print("FLAccessControlMainWindow::setFromObject %s" %
               FLUtil.translate(self, "app", "No implementado todavía."))
 
 
 class FLAccessControlForm(FLAccessControl):
 
-    pal = None
-    acosPerms_ = None
-    perm_ = None
-
-    @decorators.BetaImplementation
     def __init__(self):
         super(FLAccessControlForm, self).__init__()
         if pineboolib.project._DGI.localDesktop():
             self.pal = QtGui.QPalette()
-            # cg = QtGui.QPalette()
+
             from PyQt5.Qt import qApp
             bg = QtGui.QColor(qApp.palette().color(
                 QtGui.QPalette.Active, QtGui.QPalette.Background))
-            # cg.setColor(QtGui.QPalette.Foreground, bg)
-            # cg.setColor(QtGui.QPalette.Text, bg)
-            # cg.setColor(QtGui.QPalette.ButtonText, bg)
-            # cg.setColor(QtGui.QPalette.Base, bg)
-            # cg.setColor(QtGui.QPalette.Background, bg)
-            # self.pal.setColor(QtGui.QPalette.Disabled, cg)
+
             self.pal.setColor(QtGui.QPalette.Foreground, bg)
             self.pal.setColor(QtGui.QPalette.Text, bg)
             self.pal.setColor(QtGui.QPalette.ButtonText, bg)
@@ -132,7 +111,7 @@ class FLAccessControlForm(FLAccessControl):
     """
   @return El tipo del que se encarga; "form".
     """
-    @decorators.BetaImplementation
+
     def type(self):
         return "form"
 
@@ -191,7 +170,6 @@ class FLAccessControlForm(FLAccessControl):
                 print(
                     "WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
 
-    @decorators.BetaImplementation
     def setFromObject(self, object):
         print("FLAccessControlform::setFromObject %s" %
               FLUtil.translate(self, "app", "No implementado todavía."))
@@ -211,49 +189,49 @@ class FLAccessControlTable(FLAccessControl):
 
         tm = obj
 
-        maskPerm = 0
-        hasAcos = True if self.acosPerms_ else False
+        mask_perm = 0
+        has_acos = True if self.acosPerms_ else False
 
         if self.perm_:
             if self.perm_[0] == "r":
-                maskPerm = maskPerm + 2
+                mask_perm = mask_perm + 2
             if self.perm_[1] == "w":
-                maskPerm = maskPerm + 1
-        elif hasAcos:
-            maskPerm = 8
+                mask_perm = mask_perm + 1
+        elif has_acos:
+            mask_perm = 3
         else:
             return
 
-        fieldPerm = ""
-        maskFieldPerm = 0
+        field_perm = ""
+        mask_field_perm = 0
 
         fL = tm.fieldList()
         if not fL:
             return
-
-        field = None
+        
         for it in fL:
             field = it
-            maskFieldPerm = maskPerm
-            if hasAcos and (field.name() in self.acosPerms_.keys()):
-                fieldPerm = self.acosPerms_[field.name()]
-                maskFieldPerm = 0
-                if fieldPerm[0] == "r":
-                    maskFieldPerm = maskFieldPerm + 2
+            mask_field_perm = mask_perm
+            if has_acos and (field.name() in self.acosPerms_.keys()):
+                field_perm = self.acosPerms_[field.name()]
+                mask_field_perm = 0
+                if field_perm[0] == "r":
+                    mask_field_perm = mask_field_perm + 2
 
-                if fieldPerm[1] == "w":
-                    maskFieldPerm = maskFieldPerm + 1
-
-            if maskFieldPerm == 0:
+                if field_perm[1] == "w":
+                    mask_field_perm = mask_field_perm + 1
+                
+            
+            if mask_field_perm == 0:
                 field.setVisible(False)
                 field.setEditable(False)
-            elif maskFieldPerm == 1:
+            elif mask_field_perm == 1:
                 field.setVisible(False)
                 field.setEditable(True)
-            elif maskFieldPerm == 2:
+            elif mask_field_perm == 2:
                 field.setVisible(True)
                 field.setEditable(False)
-            elif maskFieldPerm == 3:
+            elif mask_field_perm == 3:
                 field.setVisible(True)
                 field.setEditable(True)
 
@@ -273,8 +251,8 @@ class FLAccessControlTable(FLAccessControl):
         if not fL:
             return
 
-        permW = None
-        permR = None
+        permW = ""
+        permR = ""
         for it in fL:
             permR = '-'
             permW = '-'

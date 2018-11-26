@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
 """
 Clase base para Controles de Acceso, también denominados Reglas de Control de Acceso.
 
@@ -79,15 +78,22 @@ class FLAccessControl(object):
     correspondencia entre el nombre del ACO (utilizado como clave de búsqueda)
     y el permiso a aplicar.
     """
-    acosPerms_ = []
+    acosPerms_ = None
 
+    def __init__(self):
+        self.name_ = ""
+        self.user_ = ""
+        self.perm_ = ""
+        self.acosPerms_ = {}
 
     """
     Destructor
     """
 
     def __del__(self):
-        pass
+        if self.acosPerms_:
+            self.acosPerms_.clear()
+            del self.acosPerms_
 
     """
     Obtiene el nombre del objeto de alto nivel.
@@ -148,13 +154,13 @@ class FLAccessControl(object):
     """
 
     def clear(self):
-        self.name_ = None
-        self.user_ = None
-        self.perm_ = None
+        self.name_ = ""
+        self.user_ = ""
+        self.perm_ = ""
         if self.acosPerms_:
             self.acosPerms_.clear()
             del self.acosPerms_
-            self.acosPerms_ = []
+            self.acosPerms_ = {}
 
     """
     Devuelve una constante de texto que identifica el tipo.
@@ -167,7 +173,7 @@ class FLAccessControl(object):
     """
 
     def type(self):
-        return None
+        return ""
 
     """
     Define la regla de control de acceso a partir de la información de un nodo DOM de un documento DOM/XML dado.
@@ -217,7 +223,7 @@ class FLAccessControl(object):
     """
 
     def get(self, d):
-        if not self.type() or not d:
+        if not self.type() or d is None:
             return
 
         root = d.fisrtChild().toElement()
@@ -244,7 +250,7 @@ class FLAccessControl(object):
                 aco.appendChild(t)
 
     """
-    Establece la lista de ACOs a partir de una lista de cadenas de texto.
+    Establece la lista de Acos a partir de una lista de cadenas de texto.
 
     Esta lista de textos deberá tener en sus componentes de orden par los nombres de los objetos,y en los
     componentes de orden impar el permiso a aplicar a ese objeto, p.e.: "pbAbrir", "r-", "lblTexto", "--", "tbBorrar", "rw",...
@@ -253,7 +259,7 @@ class FLAccessControl(object):
     """
 
     def setAcos(self, acos):
-        if not acos:
+        if acos is None:
             return
 
         if self.acosPerms_:
@@ -263,10 +269,10 @@ class FLAccessControl(object):
         self.acosPerms_ = {}
 
         nameAcos = None
-
-        for it in acos:
-            self.acosPerms_[it] = it
-
+        i = 0
+        while i < len(acos):
+            self.acosPerms_[acos[i]] = acos[i +1]
+            i += 2
     """
     Obtiene una lista de cadenas de texto correspondiente a la lista de ACOs establecida
 
