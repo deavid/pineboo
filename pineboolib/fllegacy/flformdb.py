@@ -150,6 +150,8 @@ class FLFormDB(QtWidgets.QDialog):
     _uiName = None
     _scriptForm = None
     ui_ = {}
+    
+    init_thread_script = None
 
     def __init__(self, parent, action, load=False):
 
@@ -207,7 +209,7 @@ class FLFormDB(QtWidgets.QDialog):
         pineboolib.project.actions[self._action.name()].load_script(script_name, self)
 
         self.iconSize = pineboolib.project._DGI.iconSize()
-
+        self.init_thread_script = None
         if load:
             self.load()
             self.initForm()
@@ -234,12 +236,14 @@ class FLFormDB(QtWidgets.QDialog):
     """
     @QtCore.pyqtSlot()
     def initScript(self):
+        from threading import Thread
         if self._loaded:
             if not getattr(self.widget, "iface", None):
                 self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
 
-            if hasattr(self.iface, "init"):
-                self.iface.init()
+            if hasattr(self.iface, "init"): #Meterlo en un hilo
+                self.init_thread_script = Thread(target = self.iface.init)
+                QtCore.QTimer(self).singleShot(0,self.init_thread_script.run)
                 return True
 
         return False
@@ -748,6 +752,11 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def showEvent(self, e):
+        #--> Para mostrar form sin negro previo
+        from pineboolib.pncontrolsfactory import SysType
+        sys = SysType()
+        sys.processEvents()
+        #<--
         if not self.loaded():
             return
 
@@ -756,6 +765,7 @@ class FLFormDB(QtWidgets.QDialog):
             v = None
 
             self.initMainWidget()
+            
             self.callInitScript()
 
             self.bindIface()
@@ -806,7 +816,6 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def show(self):
-               
         if self.initFocusWidget_ is None:          
             self.initFocusWidget_ = self.focusWidget()
               
