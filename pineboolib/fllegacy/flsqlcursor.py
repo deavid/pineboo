@@ -3273,9 +3273,9 @@ class FLSqlCursor(QtCore.QObject):
             self.setFilter(None)
             self.clearMapCalcFields()
 
-        if updated and emite:
-            self.cursorUpdated.emit()
-
+            if emite:
+                self.cursorUpdated.emit()
+        
         self.bufferCommited.emit()
         return True
 
