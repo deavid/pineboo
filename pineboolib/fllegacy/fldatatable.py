@@ -187,8 +187,11 @@ class FLDataTable(QtWidgets.QTableView):
     de hacer un refresh
     """
 
-    def marcaRow(self):
-        self.selectRow(self.cursor_.at())
+    def marcaRow(self,id_pk):
+        if id_pk is not None:
+            pos = self.model().findPKRow((id_pk, ))
+            if pos is not None:
+                self.cursor().move(pos)
 
     def setPersistentFilter(self, pFilter):
         self.persistentFilter_ = pFilter
@@ -634,13 +637,18 @@ class FLDataTable(QtWidgets.QTableView):
                         filter = "%s AND %s" % (filter, self.filter_)
                     else:
                         filter = self.filter_
-
+            
             self.cursor().setFilter(filter)
             if self.sort_:
                 self.cursor().setSort(self.sort_)
+                
+            last_pk = None
+            if self.cursor().buffer():
+                last_pk = self.cursor().buffer().value(self.cursor().buffer().pK())
 
             self.cursor().refresh()
-            self.marcaRow()
+
+            self.marcaRow(last_pk)
             self.show()
             self.refreshing_ = False
 
