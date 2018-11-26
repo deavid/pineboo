@@ -92,11 +92,11 @@ class PNBuffer(object):
 
         if row < 0 or row is None:
             row = self.cursor().currentRegister()
-
         for field in self.fieldsList():
 
             if field.type_ in ("unlock", "bool"):
                 field.value = (self.cursor().model().value( row, field.name) in ("True", True, 1, "1"))
+                
                 #    field.value = True
                 # else:
                 #    field.value = False
@@ -110,6 +110,7 @@ class PNBuffer(object):
             # if val == "None":
             #    val = None
             # self.setValue(field.name, val)
+            
             field.originalValue = copy.copy(field.value)
             # self.cursor().bufferChanged.emit(field.name)
 
@@ -674,7 +675,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
                 condTrue_ = aqApp.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
 
             if condTrue_:
-                if not self.acTable_.name() == self.id_:
+                if self.acTable_.name() != self.id_:
                     self.acTable_.clear()
                     self.acTable_.setName(self.id_)
                     self.acTable_.setPerm(self.acPermTable_)
@@ -689,7 +690,6 @@ class FLSqlCursorPrivate(QtCore.QObject):
                 self.acTable_.clear()
                 self.acTable_.setName(self.id_)
                 self.acTable_.setPerm("r-")
-                
                 self.acTable_.processObject(self.metadata_)
                 self.aclDone_ = True
 
