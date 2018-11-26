@@ -553,7 +553,7 @@ def check_gc_referrers(typename, w_obj, name):
 
     def checkfn():
         import gc
-        #time.sleep(2)
+        time.sleep(2)
         gc.collect()
         obj = w_obj()
         if not obj:
