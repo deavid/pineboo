@@ -145,10 +145,12 @@ class FLFormRecordDB(FLFormDB):
     @author Silix
     """
 
-    def setCaptionWidget(self, text):
-        if not text or not self.cursor():
+    def setCaptionWidget(self, text = None):
+        if not self.cursor():
             return
         
+        if not text:
+            text = self.cursor_.metadata().alias()
         
         if self.cursor().modeAccess() == self.cursor().Insert:
             self.setWindowTitle("Insertar %s" % text)
@@ -687,6 +689,7 @@ class FLFormRecordDB(FLFormDB):
                     self.accepted_ = False
                     self.cursor_.transaction()
                     self.cursor_.first()
+                    self.setCaptionWidget()
                     self.initScript()
 
     """
@@ -712,6 +715,7 @@ class FLFormRecordDB(FLFormDB):
                     self.accepted_ = False
                     self.cursor_.transaction()
                     self.cursor_.prev()
+                    self.setCaptionWidget()
                     self.initScript()
 
     """
@@ -737,6 +741,7 @@ class FLFormRecordDB(FLFormDB):
                     self.accepted_ = False
                     self.cursor_.transaction()
                     self.cursor_.next()
+                    self.setCaptionWidget()
                     self.initScript()
 
     """
@@ -758,6 +763,7 @@ class FLFormRecordDB(FLFormDB):
                     self.accepted_ = False
                     self.cursor_.transaction()
                     self.cursor_.last()
+                    self.setCaptionWidget()
                     self.initScript()
 
     """
