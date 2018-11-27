@@ -88,7 +88,7 @@ class FLFieldMetaData(object):
     """
 
     def alias(self):
-        return self.d.alias_
+        return aqtt(self.d.alias_)
 
     """
     Obtiene si permite nulos.
@@ -881,7 +881,7 @@ class FLFieldMetaDataPrivate(object):
 
     def inicialize(self, n, a, aN, iPK, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
         self.fieldName_ = n.lower()
-        self.alias_ = aqtt(a)
+        self.alias_ = a
         if c:
             self.allowNull_ = True
         else:
