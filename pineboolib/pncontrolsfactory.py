@@ -458,19 +458,13 @@ class FormDBWidget(QWidget):
         pass
 
     def closeEvent(self, event):
-        can_exit = True
         if not self._action:
             self._action = getattr(self.parent(), "_action")
         self.logger.debug("closeEvent para accion %r", self._action.name)
-        check_gc_referrers("FormDBWidget:" + self.__class__.__name__,
-                           weakref.ref(self), self._action.name)
-        if can_exit:
-            self.closed.emit()
-            event.accept()  # let the window close
-            self.doCleanUp()
-        else:
-            event.ignore()
-            return
+        #check_gc_referrers("FormDBWidget:" + self.__class__.__name__, weakref.ref(self), self._action.name)
+        self.closed.emit()
+        event.accept()  # let the window close
+        self.doCleanUp()
 
     def doCleanUp(self):
         # Limpiar todas las conexiones hechas en el script
@@ -483,8 +477,7 @@ class FormDBWidget(QWidget):
         self._formconnections.clear()
 
         if getattr(self, 'iface', None) is not None:
-            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__,
-                               weakref.ref(self.iface), self._action.name)
+            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
