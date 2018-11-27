@@ -289,10 +289,21 @@ class FLFormDB(QtWidgets.QDialog):
         if not cursor:
             return
 
+        if self.cursor_ and self.cursor_ is not cursor:
+            if type(self).__name__ == "FLFormRecodDB":
+                self.cursor_.restoreEditionFlag(self)
+                self.cursor_.restoreBrowseFlag(self)
+            
+
         if self.cursor_:
             self.cursor_.destroyed.disconnect(self.cursorDestroyed)
 
         self.cursor_ = cursor
+        
+        if type(self).__name__ == "FLFormRecodDB":
+            self.cursor_.setEdition(False, self)
+            self.cursor_.setBrowse(False, self)
+        
         self.cursor_.destroyed.connect(self.cursorDestroyed)
         if self.iface and self.cursor_:
             self.oldCursorCtxt = self.cursor().context()

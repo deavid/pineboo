@@ -836,7 +836,7 @@ class XMLAction(XMLStruct):
                 self.logger.debug("End of record action load %s (iface:%s ; widget:%s)", self.name, getattr(
                     self.formrecord_widget, "iface", None), getattr(self.formrecord_widget, "widget", None))
         
-        if cursor and self.formrecord_widget.cursor() is None:
+        if cursor and self.formrecord_widget:
             self.formrecord_widget.setCursor(cursor)
         
 
