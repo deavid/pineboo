@@ -160,8 +160,9 @@ class FLDataTable(QtWidgets.QTableView):
             if self.cursor_ and not self.cursor_ == c:
                 self.cursor_.restoreEditionFlag(self)
                 self.cursor_.restoreBrowseFlag(self)
-                self.cursor_.bufferCommited.disconnect(self.ensureRowSelectedVisible)
+                self.cursor_.d._current_changed.disconnect(self.ensureRowSelectedVisible)
                 self.cursor_.cursorUpdated.disconnect(self.refresh)
+                
 
                 cur_chg = True
 
@@ -172,7 +173,7 @@ class FLDataTable(QtWidgets.QTableView):
                 self.setInsertOnly(self.insertonly_)
                 self.setOnlyTable(self.onlyTable_)
 
-                self.cursor_.bufferCommited.connect(self.ensureRowSelectedVisible)
+                self.cursor_.d._current_changed.connect(self.ensureRowSelectedVisible)
                 self.cursor_.cursorUpdated.connect(self.refresh)
 
                 self.setModel(self.cursor_.model())
@@ -189,9 +190,10 @@ class FLDataTable(QtWidgets.QTableView):
 
     def marcaRow(self,id_pk):
         if id_pk is not None:
-            pos = self.model().findPKRow((id_pk, ))
+            pos = self.model().findPKRow((id_pk, ))          
             if pos is not None:
                 self.cursor().move(pos)
+                #self.ensureRowSelectedVisible()
 
     def setPersistentFilter(self, pFilter):
         self.persistentFilter_ = pFilter
@@ -656,12 +658,19 @@ class FLDataTable(QtWidgets.QTableView):
     Hace que la fila seleccionada esté visible
     """
     @QtCore.pyqtSlot()
-    def ensureRowSelectedVisible(self):
-        if self.cursor():
-            if not self.selectedIndexes():
-                self.selectRow(self.cursor().at())
-            self.scrollTo(self.cursor().model().index(self.cursor().at(), 0))
-        # FIXME: Asegurarme de que esté pintada la columna seleccionada
+    @QtCore.pyqtSlot(int)
+    def ensureRowSelectedVisible(self, position = None):
+        if position is None:
+            if self.cursor():
+                position =  self.cursor().at()
+            else:
+                return
+        
+        index = self.cursor().model().index(position, 0)   
+        if index is not None:
+            self.scrollTo(index, self.PositionAtBottom)
+
+
 
     """
     Foco rápido sin refrescos para optimizar
