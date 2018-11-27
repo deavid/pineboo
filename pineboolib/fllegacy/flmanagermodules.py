@@ -337,10 +337,10 @@ class FLManagerModules(object):
             wid = root_.find("widget")
             parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
 
-        if not getattr(parent, "widget", None):
-            w_ = parent
-        else:
+        if hasattr(parent, "widget"):
             w_ = parent.widget
+        else:
+            w_ = parent
 
         logger.info("Procesando %s (v%s)", n, UIVersion)
         if not pineboolib.project or pineboolib.project._DGI.localDesktop():
