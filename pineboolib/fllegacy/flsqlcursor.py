@@ -650,7 +650,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
             del self.transactionsOpened_
 
     def doAcl(self):
-        #print("check acl de", self.curName_)
+        print("check acl de", self.curName_ , self.buffer_.value(self.buffer_.pK()) if self.buffer_ else None)
         from pineboolib.pncontrolsfactory import aqApp
         if not self.acTable_:
             self.acTable_ = FLAccessControlFactory().create("table")
@@ -1506,6 +1506,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def openFormInMode(self, m, cont=True):
+        print("***", m)
         if not self.metadata():
             return
         # util = FLUtil()
@@ -2323,11 +2324,13 @@ class FLSqlCursor(QtCore.QObject):
     @QtCore.pyqtSlot(int)
     def selection_currentRowChanged(self, current, previous=None):
         if self.d._currentregister == current.row():
+            self.d.doAcl()
             return False
         self.d._currentregister = current.row()
         self.d._current_changed.emit(self.at())
         # agregado para que FLTableDB actualice el buffer al pulsar.
         self.refreshBuffer()
+        self.d.doAcl()
         logger.debug("cursor:%s , row:%s:: %s", self._action.table(), self.d._currentregister, self)
 
     def selection_pk(self, value):
@@ -2619,8 +2622,6 @@ class FLSqlCursor(QtCore.QObject):
 
             ret_ = self.refreshBuffer()
         
-        if ret_:
-            self.d.doAcl()
         
         return ret_
     """
@@ -3033,6 +3034,7 @@ class FLSqlCursor(QtCore.QObject):
     @QtCore.pyqtSlot()
     def chooseRecord(self):
         settings = FLSettings()
+        print("***", self.d.edition_, self.d.browse_)
         if not settings.readBoolEntry("ebcomportamiento/FLTableDoubleClick", False):
             if self.d.edition_:
                 self.editRecord()
