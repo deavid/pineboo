@@ -650,6 +650,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
             del self.transactionsOpened_
 
     def doAcl(self):
+        #print("check acl de", self.curName_)
         from pineboolib.pncontrolsfactory import aqApp
         if not self.acTable_:
             self.acTable_ = FLAccessControlFactory().create("table")
@@ -1001,6 +1002,7 @@ class FLSqlCursor(QtCore.QObject):
         
         self.d.metadata_ = self.db().manager().metadata(self._action.table())
 
+        self.d.doAcl()
         self.d._model = PNCursorTableModel(self._action, self.conn(), self)
         if not self.model():
             return None
@@ -1970,6 +1972,9 @@ class FLSqlCursor(QtCore.QObject):
                     if self.model().value( row, field) not in ("True", True, 1, "1"):
                         ret_ = True
                         break
+            
+        if not ret_ and self.cursorRelation() is not None:
+            ret_ = self.cursorRelation().isLocked()
         
         return ret_
 
@@ -2307,14 +2312,6 @@ class FLSqlCursor(QtCore.QObject):
     def calculateField(self, name):
         return True
 
-    """
-    Redefinicion del método afterSeek() de QSqlCursor.
-    """
-
-    def afterSeek(self):
-        self.d.doAcl()
-        return True
-
     def model(self):
         return self.d._model
 
@@ -2623,7 +2620,7 @@ class FLSqlCursor(QtCore.QObject):
             ret_ = self.refreshBuffer()
         
         if ret_:
-            self.afterSeek()
+            self.d.doAcl()
         
         return ret_
     """
