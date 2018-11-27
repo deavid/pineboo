@@ -650,7 +650,6 @@ class FLSqlCursorPrivate(QtCore.QObject):
             del self.transactionsOpened_
 
     def doAcl(self):
-        print("check acl de", self.curName_ , self.buffer_.value(self.buffer_.pK()) if self.buffer_ else None)
         from pineboolib.pncontrolsfactory import aqApp
         if not self.acTable_:
             self.acTable_ = FLAccessControlFactory().create("table")
@@ -2639,10 +2638,10 @@ class FLSqlCursor(QtCore.QObject):
         #    return False
 
         b = self.moveby(1)
-        if b and emite:
-            self.d._current_changed.emit(self.at())
-
         if b:
+            if emite:
+                self.d._current_changed.emit(self.at())
+                
             return self.refreshBuffer()
 
         return b
@@ -2669,10 +2668,10 @@ class FLSqlCursor(QtCore.QObject):
 
         b = self.moveby(-1)
 
-        if b and emite:
-            self.d._current_changed.emit(self.at())
-
         if b:
+            if emite:
+                self.d._current_changed.emit(self.at())
+
             return self.refreshBuffer()
 
         return b
@@ -2725,10 +2724,10 @@ class FLSqlCursor(QtCore.QObject):
         else:
             b = True
 
-        if b and emite:
-            self.d._current_changed.emit(self.at())
-
         if b:
+            if emite:
+                self.d._current_changed.emit(self.at())
+
             return self.refreshBuffer()
 
         return b
@@ -2749,10 +2748,10 @@ class FLSqlCursor(QtCore.QObject):
 
         b = self.move(self.d._model.rows - 1)
 
-        if b and emite:
-            self.d._current_changed.emit(self.at())
+        if b: 
+            if emite:
+                self.d._current_changed.emit(self.at())
 
-        if b:
             return self.refreshBuffer()
 
         return b
