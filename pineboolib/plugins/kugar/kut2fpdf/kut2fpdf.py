@@ -567,7 +567,7 @@ class kut2fpdf(object):
         #Miramos si el texto sobrepasa el ancho
         str_width = self._document.get_string_width(txt)
         array_text = []
-        if str_width > W:
+        if str_width > W and xml.tag !="Label":
             height_resized = True
             array_text = self.split_text(txt, W)
         else:
