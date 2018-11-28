@@ -36,6 +36,8 @@ class kut2fpdf(object):
     _actual_section_size = None
     increase_section_size = None
     last_detail = False
+    actual_data_level = None
+    last_data_processed = None
 
     def __init__(self):
 
@@ -49,6 +51,7 @@ class kut2fpdf(object):
         self._actual_data_line = None
         self._no_print_footer = False
         self.increase_section_size = 0
+        self.actual_data_level = 0
 
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
@@ -166,6 +169,7 @@ class kut2fpdf(object):
             self.processData("Detail", data, level)
             
             prevLevel = level
+            self.last_data_processed = data
 
         if level:
             if not self._no_print_footer:
@@ -185,6 +189,7 @@ class kut2fpdf(object):
     """
 
     def processData(self, section_name, data, data_level):
+        self.actual_data_level = data_level
         listDF = self._xml.findall(section_name)
         data_size = len(listDF)
         for dF in listDF:
@@ -411,7 +416,10 @@ class kut2fpdf(object):
                     self.logger.exception(
                         "KUT2FPDF:: Error llamando a function %s", function_name)
                     return
-            elif calculation_type in ("1", "5"):
+            elif calculation_type == "1":
+                text = self._parser_tools.calculate_sum(field_name, self.last_data_processed, self._xml_data, self.actual_data_level)
+            
+            elif calculation_type in ("5"):
                 if data_row is None:
                     data_row = self._xml_data[0]
                 
