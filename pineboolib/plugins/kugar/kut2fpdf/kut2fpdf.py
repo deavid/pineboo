@@ -194,10 +194,16 @@ class kut2fpdf(object):
     def processData(self, section_name, data, data_level):
         self.actual_data_level = data_level
         listDF = self._xml.findall(section_name)
-        data_size = len(listDF)
+        data_size = len(listDF)      
+        
         for dF in listDF:
-            if dF.get("Level") == str(data_level):
-                if section_name == "Detail" and (not dF.get("DrawIf") or data.get(dF.get("DrawIf"))):
+            draw_if = dF.get("DrawIf")
+            show = True
+            if draw_if:
+                show = data.get(draw_if)
+                
+            if dF.get("Level") == str(data_level) and show not in ("None", "False"):
+                if section_name == "Detail":
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
                     for dFooter in self._xml.findall("DetailFooter"):
                         if dFooter.get("Level") == str(data_level):
