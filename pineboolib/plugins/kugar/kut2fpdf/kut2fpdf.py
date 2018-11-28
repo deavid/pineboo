@@ -415,7 +415,11 @@ class kut2fpdf(object):
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
                     from pineboolib.pncontrolsfactory import aqApp
-                    text = str(aqApp.call(function_name, [nodo, field_name]))
+                    ret_ = aqApp.call(function_name, [nodo, field_name])
+                    if ret_ is False:
+                        return
+                    else:
+                        text = str(ret_)
                 except Exception:
                     self.logger.exception(
                         "KUT2FPDF:: Error llamando a function %s", function_name)
