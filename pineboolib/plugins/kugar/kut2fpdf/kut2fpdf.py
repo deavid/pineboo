@@ -148,28 +148,31 @@ class kut2fpdf(object):
 
     def processDetails(self):
         # Procesamos la cabecera si procede ..
-        prevLevel = 0
-        level = None
+        prev_level = 0
+        level = 0
         
         rows_array = self._xml_data.findall("Row")
-        
+        actual_top_level = 0
         for data in self._xml_data.findall("Row"):
             self._actual_data_line = data
             level = int(data.get("level"))
-            if prevLevel > level:
+            if prev_level > level:
                 if not self._no_print_footer:
-                    self.processData("DetailFooter", data, prevLevel)
-            elif prevLevel < level:
+                    self.processData("DetailFooter", data, prev_level)
+            elif actual_top_level < level:
                 self.processData("DetailHeader",  data, level)
+                actual_top_level = level
             
             if rows_array[len(rows_array) - 1] is data:
                 self.last_detail = True
             
-            
+
             self.processData("Detail", data, level)
-            
-            prevLevel = level
+
+            prev_level = level
             self.last_data_processed = data
+            
+            
 
         if level:
             if not self._no_print_footer:
@@ -411,7 +414,8 @@ class kut2fpdf(object):
                 function_name = xml.get("FunctionName")
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
-                    text = str(pineboolib.project.call(function_name, [nodo, field_name]))
+                    from pineboolib.pncontrolsfactory import aqApp
+                    text = str(aqApp.call(function_name, [nodo, field_name]))
                 except Exception:
                     self.logger.exception(
                         "KUT2FPDF:: Error llamando a function %s", function_name)
