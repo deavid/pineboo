@@ -629,7 +629,7 @@ def load2xml(form_path_or_str):
     try:
         parser = ET.XMLParser(html=0)
         if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1:           
-            form_path_or_str = parse_for_duplicates(form_path_or_str)         
+            form_path_or_str = parse_for_duplicates(form_path_or_str)                  
             ret = ET.fromstring(form_path_or_str, parser)
         else:
             ret = ET.parse(form_path_or_str, parser)
@@ -651,10 +651,43 @@ def parse_for_duplicates(text):
     ret_ = ""
     text = text.replace("+","__PLUS__")
     
-    for section in text.split(">"):
+    for section_orig in text.split(">"):
         #print("section", section)
         duplicate_ = False
         attr_list = []
+        
+        #print("--->", section_orig)
+        ret2_ = ""
+        section = ""
+        for a in section_orig.split(" "):
+            
+            
+            c = a.count("=") 
+            if c > 1:
+                part_ = ""
+                text_to_process = a
+                for m in range(c):
+                    pos_ini = text_to_process.find("\"")
+                    pos_fin = text_to_process[pos_ini + 1:].find("\"")
+                    #print("Duplicado", m, pos_ini, pos_fin, text_to_process, "***" , text_to_process[0:pos_ini + 2 + pos_fin])
+                    ret2_ += " %s " % text_to_process[0:pos_ini + 2 + pos_fin]
+                    text_to_process = text_to_process[pos_ini + 2 + pos_fin:]
+                    
+                 
+            else:
+                ret2_ += "%s " % a    
+    
+        section += ret2_ 
+        if section.endswith(" "):
+            section = section[0:len(section) -1 ]
+        
+        if section_orig.endswith("/") and not section.endswith("/"):
+            section += "/"
+            
+        
+        
+        
+        
         for attribute_ in section.split(" "):
             
             #print("attribute", attribute_)
