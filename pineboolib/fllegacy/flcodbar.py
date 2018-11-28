@@ -37,7 +37,7 @@ class FLCodBar(object):
     pError = None
 
     @decorators.BetaImplementation
-    def __init__(self, value=None, type_=None, margin=None, scale=None, cut=None, rotation=None, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72):
+    def __init__(self, value=None, type_=BARCODE_128, margin=10, scale=1.0, cut=1.0, rotation=0, text_flag=False, fg=QtCore.Qt.black, bg=QtCore.Qt.white, res=72):
         dict_ = {"barcode": "python-barcode", "PIL": "Pillow"}
         from pineboolib.utils import checkDependencies
         checkDependencies(dict_)
@@ -58,7 +58,7 @@ class FLCodBar(object):
                 self.writingStdout = False
                 self.barcode["value"] = value
                 self.barcode["type"] = type_
-                self.barcode["margin"] = margin
+                self.barcode["margin"] = margin 
                 self.barcode["scale"] = scale
                 self.barcode["cut"] = cut
                 self.barcode["rotation"] = rotation

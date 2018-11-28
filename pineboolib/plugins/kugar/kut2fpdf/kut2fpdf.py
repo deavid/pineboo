@@ -382,7 +382,8 @@ class kut2fpdf(object):
     """
 
     def processText(self, xml, data_row=None, fix_height=True):
-        isImage = False
+        is_image = False
+        is_barcode = False
         text = xml.get("Text")
         borderColor = xml.get("BorderColor")
         field_name = xml.get("Field")
@@ -436,7 +437,11 @@ class kut2fpdf(object):
         if data_type is not None:
             text = self._parser_tools.calculated(text, int(data_type), int(xml.get("Precision")), data_row)
         if data_type == "5":
-            isImage = True
+            is_image = True
+        
+        if data_type == "6":
+            is_barcode = True
+            
         
         if xml.get("BlankZero") == "1" and text is not None:
             res_ = re.findall(r'\d+', text)
@@ -447,7 +452,7 @@ class kut2fpdf(object):
             
 
         if text is not None and text.startswith(filedir("../tempdata")):
-            isImage = True
+            is_image = True
 
         negValueColor = xml.get("NegValueColor")
         Currency = xml.get("Currency")
@@ -455,11 +460,13 @@ class kut2fpdf(object):
         commaSeparator = xml.get("CommaSeparator")
         dateFormat = xml.get("DateFormat")
 
-        if not isImage:
-
-            self.drawText(x, y, W, H, xml, text)
+        if is_image:
+            self.draw_image(x, y, W, H, xml, text)
+        elif is_barcode:
+            self.draw_barcode(x, y, W, H, xml, text)
         else:
-            self.drawImage(x, y, W, H, xml, text)
+            self.drawText(x, y, W, H, xml, text)
+
 
     """
     Dibuja un campo texto en la página.
@@ -761,13 +768,28 @@ class kut2fpdf(object):
     @param file_name. Nombr del fichero de tempdata a usar
     """
 
-    def drawImage(self, x, y, W, H, xml, file_name):
+    def draw_image(self, x, y, W, H, xml, file_name):
         import os
         if os.path.exists(file_name):            
             limit_right = self.calculateRightEnd(x + W)
             W = W - ((x + W) - limit_right )
             
             self._document.image(file_name, x, y, W, H, "PNG")
+    
+    def draw_barcode(self, x, y, W, H, xml, text):
+        from pineboolib.fllegacy.flcodbar import FLCodBar
+        bar_code = FLCodBar(text) #Code128
+        pix = bar_code.pixmap()
+        if not pix.isNull():
+            file_name = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
+            file_name += "/%s_%s.png" % (text, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+            pix.save(file_name, "PNG")
+            self.draw_image(x, y, W, H, xml, file_name)
+            
+            
+            
+ 
+        
     """
     Define los parámetros de la página
     @param xml: Elemento xml con los datos del fichero .kut a procesar
