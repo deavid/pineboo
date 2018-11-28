@@ -2,6 +2,7 @@
 from PyQt5.QtGui import QPixmap
 from pineboolib.utils import filedir, cacheXPM, load2xml
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsettings import FLSettings
 import pineboolib
 import os
 import sys
@@ -133,23 +134,30 @@ class parsertools(object):
         if ref_key is not None:
             value = None
             from pineboolib.pncontrolsfactory import aqApp
-            imgFile = filedir("../tempdata/cache/%s/%s.png" % (aqApp.db().DBName(), ref_key))
+            
+            tmp_dir = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
+            img_file = filedir("%s/%s.png" % (tmp_dir, ref_key))
+            
+            if not os.path.exists(img_file):
+                if not pineboolib.project.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                    table_name += "_%s" % ref_key.split("@")[1]
 
-            if not pineboolib.project.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
-                table_name += "_%s" % ref_key.split("@")[1]
+                q = FLSqlQuery()
+                # q.setForwardOnly(True)
+                q.exec_("SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key))
+                if q.next():
+                    value = cacheXPM(q.value(0))
 
-            q = FLSqlQuery()
-            # q.setForwardOnly(True)
-            q.exec_("SELECT contenido FROM %s WHERE refkey='%s'" % (table_name, ref_key))
-            if q.next():
-                value = cacheXPM(q.value(0))
+                if value:
+                    pix = QPixmap(value)
+                    if not pix.save(img_file):
+                        self.logger.warn("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                        ret = None
+                    else:
+                        ret = img_file
+            else:
 
-            if not os.path.exists(imgFile) and value:
-                pix = QPixmap(value)
-                if not pix.save(imgFile):
-                    self.logger.warn("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, imgFile))
-
-            ret = imgFile
+                ret = img_file
 
         return ret
 
