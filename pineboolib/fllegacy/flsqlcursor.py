@@ -1505,7 +1505,6 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def openFormInMode(self, m, cont=True):
-        print("***", m)
         if not self.metadata():
             return
         # util = FLUtil()
@@ -3033,7 +3032,6 @@ class FLSqlCursor(QtCore.QObject):
     @QtCore.pyqtSlot()
     def chooseRecord(self):
         settings = FLSettings()
-        print("***", self.d.edition_, self.d.browse_)
         if not settings.readBoolEntry("ebcomportamiento/FLTableDoubleClick", False):
             if self.d.edition_:
                 self.editRecord()
