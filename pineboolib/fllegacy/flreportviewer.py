@@ -856,11 +856,13 @@ class internalReportViewer(QObject):
     rptEngine_ = None
     dpi_ = 0
     report_ = []
+    num_copies = 1
 
     def __init__(self, parent):
         super(internalReportViewer, self).__init__(parent)
         self.dpi_ = 300
         self.report_ = []
+        self.num_copies = 1
 
     def setReportEngine(self, rptEngine):
         self.rptEngine_ = rptEngine
@@ -873,3 +875,7 @@ class internalReportViewer(QObject):
 
     def renderReport(self, initRow, initCol, flags):
         return self.rptEngine_.renderReport()
+    
+    def setNumCopies(self, num_copies):
+        self.num_copies = num_copies
+    
