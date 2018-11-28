@@ -426,7 +426,8 @@ class kut2fpdf(object):
                     if ret_ is False:
                         return
                     else:
-                        text = str(ret_)
+                        text = str(ret_)                       
+                        
                 except Exception:
                     self.logger.exception(
                         "KUT2FPDF:: Error llamando a function %s", function_name)
@@ -442,10 +443,11 @@ class kut2fpdf(object):
             
         if data_type is not None:
             text = self._parser_tools.calculated(text, int(data_type), int(xml.get("Precision")), data_row)
+            
         if data_type == "5":
             is_image = True
         
-        if data_type == "6":
+        elif data_type == "6":
             is_barcode = True
             
         
@@ -776,6 +778,9 @@ class kut2fpdf(object):
 
     def draw_image(self, x, y, W, H, xml, file_name):
         import os
+        if file_name[0:3] == "RK@":
+                file_name = self._parser_tools.parseKey(file_name)
+        
         if os.path.exists(file_name):            
             limit_right = self.calculateRightEnd(x + W)
             W = W - ((x + W) - limit_right )
