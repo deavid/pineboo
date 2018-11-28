@@ -49,10 +49,10 @@ class FLReportEngine(object):
                         row.setAttribute(it, strVal)
                         continue
 
-                    from pineboolib.plugins.kugar.parsertools import parsertools
-                    parser = parsertools()
+                    #from pineboolib.plugins.kugar.parsertools import parsertools
+                    #parser = parsertools()
                     key = self.qry_.value(i, False)
-                    imgFile = parser.parseKey(key)
+                    #imgFile = parser.parseKey(key)
                     #from pineboolib.pncontrolsfactory import aqApp
                     #imgFile = filedir("../tempdata/cache/%s/cacheXPM" % aqApp.db().DBName())
                     #imgFile += "/%s.png" % strVal
@@ -62,7 +62,7 @@ class FLReportEngine(object):
                     #    pix = QtGui.QPixmap(self.qry_.value(i, True))
                     #    if not pix.save(imgFile):
                     #        print("FLReportEngine::No se ha podido guardar", imgFile)
-                    row.setAttribute(it, imgFile)
+                    row.setAttribute(it, key)
                 else:
                     row.setAttribute(it, strVal)
                 i += 1
