@@ -519,9 +519,10 @@ class kut2fpdf(object):
         if fontU == "1":
             font_style += "U"
 
-        while font_name not in self._avalible_fonts:
-            font_found = self._parser_tools.find_font("%s%s" % (font_name, font_style))
-            font_full_name = "%s%s" % (font_name, font_style)
+        font_full_name = "%s%s" % (font_name, font_style)
+
+        if font_full_name not in self._avalible_fonts:
+            font_found = self._parser_tools.find_font(font_full_name)            
             if font_found:
                 self.logger.warn("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_full_name, font_found)
                 self._document.add_font(font_full_name, "", font_found, True)
@@ -529,11 +530,11 @@ class kut2fpdf(object):
 
             else:
                 if font_full_name not in self._unavalible_fonts:
-                    self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s%s. Sustituido por helvetica.", font_name, font_style)
+                    self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica.", font_full_name)
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
                     
-                
+        
         self._document.set_font(font_name, font_style, font_size)
         self._document.set_stretching(font_w)
         # Corregir alineación
