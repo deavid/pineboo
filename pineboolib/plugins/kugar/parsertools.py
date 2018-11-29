@@ -3,6 +3,7 @@ from PyQt5.QtGui import QPixmap
 from pineboolib.utils import filedir, cacheXPM, load2xml
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 import os
 import sys
@@ -104,16 +105,19 @@ class parsertools(object):
     """
 
     def calculated(self, value, data_type, p, data):
+        print("****", value, data_type)
         from pineboolib.pncontrolsfactory import aqApp
         ret_ = value
         if data_type == 2: # Double
             ret_ = aqApp.localeSystem().toString(float(value),'f', p)
-        
-        elif data_type == 5:  # Imagen
-            pass
         elif data_type == 0:
             pass
-        
+        elif data_type == 3:
+            ret_ = FLUtil().dateAMDtoDMA(value)
+            
+        elif data_type == 5:  # Imagen
+            pass
+                
         elif data_type == 6: # Barcode
             pass
         elif data:
