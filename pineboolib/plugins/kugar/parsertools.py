@@ -141,7 +141,7 @@ class parsertools(object):
             tmp_dir = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
             img_file = filedir("%s/%s.png" % (tmp_dir, ref_key))
             
-            if not os.path.exists(img_file):
+            if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
                 if not pineboolib.project.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
 
@@ -152,12 +152,22 @@ class parsertools(object):
                     value = cacheXPM(q.value(0))
 
                 if value:
+                    ret = img_file
                     pix = QPixmap(value)
                     if not pix.save(img_file):
                         self.logger.warn("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
                         ret = None
                     else:
-                        ret = img_file
+                       ret = img_file
+            elif ref_key.endswith(".xpm"):
+                pix = QPixmap(ref_key)
+                img_file = ref_key.replace(".xpm",".png")
+                if not pix.save(img_file):
+                    self.logger.warn("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                    ret = None
+                else:
+                    ret = img_file
+                
             else:
 
                 ret = img_file
