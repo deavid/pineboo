@@ -140,7 +140,9 @@ class kut2fpdf(object):
         self.processSection("PageHeader")
         
         if data_level is not None:
-            self.processSection("AddOnHeader", str(data_level))
+            for l in range(data_level):
+                self.processSection("AddOnHeader", str(l))
+
         
     """
     Procesa las secciones details con sus correspondientes detailHeader y detailFooter.
