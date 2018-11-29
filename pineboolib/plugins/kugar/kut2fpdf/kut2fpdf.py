@@ -559,7 +559,7 @@ class kut2fpdf(object):
 
             else:
                 if font_full_name not in self._unavalible_fonts:
-                    self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica.", font_full_name)
+                    self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." %(font_full_name, font_style))
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
                     
@@ -608,7 +608,8 @@ class kut2fpdf(object):
                 #x = x + W - str_width if not height_resized else W
             else:
                 # Izquierda
-                x = x + 2 # +2 de margen 
+                x = orig_x + dif_orig_x + 2
+
                 
             if VAlignment == "1":  # sobre Y
                 # Centrado
