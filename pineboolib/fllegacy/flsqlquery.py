@@ -430,7 +430,7 @@ class FLSqlQuery(object):
              en vez de contenido al que apunta esa referencia
     """
 
-    def value(self, n, raw=False):
+    def value(self, n, raw=None):
         pos = None
         name = None
 
@@ -440,8 +440,33 @@ class FLSqlQuery(object):
         else:
             pos = n
             name = self.posToFieldName(pos)
+        
+        if raw is None and name:
+            #Intentamos saber si en un valor para fllarge
+            table_name = None
+            table_field = None
+            if name.find(".") > -1 and name[0:name.find(".")] is self.tablesList():
+                table_name = name[0:name.find(".")]
+                field_name = name[name.find(".") + 1:]
+            else:
+                for t in self.tablesList():
+                    mtd = self.d.db_.manager().metadata(t)
+                    f = mtd.field(name)
+                    
+                    if f:
+                        table_name = t
+                        field_name = name
+                        break
+            
+            if table_name and field_name:
+                field = self.d.db_.manager().metadata(table_name).field(field_name)
+                raw  = (field.type() is "pixmap") and not self.d.db_.manager().isSystemTable(table_name)
+                        
+            
+            
 
-        if raw:
+            
+        if raw is True:
             return self.d.db_.manager().fetchLargeValue(self._row[pos])
         else:
 
