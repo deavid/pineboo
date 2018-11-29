@@ -105,7 +105,6 @@ class parsertools(object):
     """
 
     def calculated(self, value, data_type, p, data):
-        print("****", value, data_type)
         from pineboolib.pncontrolsfactory import aqApp
         ret_ = value
         if data_type == 2: # Double
