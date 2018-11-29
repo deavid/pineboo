@@ -131,7 +131,6 @@ class parsertools(object):
     """
 
     def parseKey(self, ref_key=None):
-        print(ref_key)
         ret = None
         table_name = "fllarge"
         if ref_key is not None:
