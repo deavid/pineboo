@@ -801,7 +801,7 @@ class kut2fpdf(object):
             file_name = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
             file_name += "/%s_%s.png" % (text, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
             pix.save(file_name, "PNG")
-            self.draw_image(x , y, W - 20, H, xml, file_name)
+            self.draw_image(x , y, W, H, xml, file_name)
             
             
             
