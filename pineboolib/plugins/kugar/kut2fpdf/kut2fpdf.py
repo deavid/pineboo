@@ -161,7 +161,7 @@ class kut2fpdf(object):
             if prev_level > level:
                 if not self._no_print_footer:
                     self.processData("DetailFooter", data, prev_level)
-            elif actual_top_level < level:
+            elif actual_top_level <= level:
                 self.processData("DetailHeader",  data, level)
                 actual_top_level = level
             
