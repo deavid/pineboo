@@ -79,7 +79,7 @@ class Project(object):
         self.files = {}
         self.cur = None
         self.apppath = filedir("..")
-        self.tmpdir = filedir("../tempdata")
+        self.tmpdir = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
             os.mkdir(self.tmpdir)
         self.kugarPlugin = PNKugarPlugins()
@@ -160,7 +160,7 @@ class Project(object):
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
 
-        if self.deleteCache and not not os.path.exists(_dir("cache/%s" % self.conn.DBName())):
+        if self.deleteCache and os.path.exists(_dir("cache/%s" % self.conn.DBName())):
             if self._splash:
                 self._splash.showMessage("Borrando caché ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             self.logger.debug("DEVELOP: DeleteCache Activado\nBorrando %s", _dir(
@@ -177,6 +177,15 @@ class Project(object):
         if not os.path.exists(_dir("cache/%s" % self.conn.DBName())):
             os.makedirs(_dir("cache/%s" % self.conn.DBName()))
 
+        if not self.deleteCache:
+            keep_images = FLSettings().readBoolEntry("ebcomportamiento/keep_general_cache", False)
+            if keep_images is False:
+                for f in os.listdir(self.tmpdir):
+                    if f.find(".") > -1:
+                        pt_ = os.path.join(self.tmpdir, f)
+                        os.remove(pt_)
+                    
+                
         # Conectar:
 
         # Se verifica que existen estas tablas

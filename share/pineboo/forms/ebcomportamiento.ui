@@ -398,14 +398,6 @@
                                     </property>
                                     <widget class="QCheckBox">
                                         <property name="name">
-                                            <cstring>cbDeleteCache</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Eliminar cache al iniciar.</string>
-                                        </property>
-                                    </widget>
-                                    <widget class="QCheckBox">
-                                        <property name="name">
                                             <cstring>cbParseProject</cstring>
                                         </property>
                                         <property name="text">
@@ -418,6 +410,27 @@
                                         </property>
                                         <property name="text">
                                             <string>Convertir a Python los script QSA al cargar un módulo en la BD.</string>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                            <widget class="QGroupBox">
+                                <property name="name">
+                                    <cstring>groupBox9</cstring>
+                                </property>
+                                <property name="title">
+                                    <string>Otros</string>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QCheckBox">
+                                        <property name="name">
+                                            <cstring>cbDeleteCache</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Eliminar carpeta caché al iniciar.</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -435,7 +448,7 @@
                                 <property name="sizeHint">
                                     <size>
                                         <width>21</width>
-                                        <height>110</height>
+                                        <height>100</height>
                                     </size>
                                 </property>
                             </spacer>
@@ -551,43 +564,6 @@
                                     </spacer>
                                 </hbox>
                             </widget>
-                            <widget class="QLayoutWidget">
-                                <property name="name">
-                                    <cstring>layout8</cstring>
-                                </property>
-                                <hbox>
-                                    <property name="name">
-                                        <cstring>unnamed</cstring>
-                                    </property>
-                                    <widget class="QLabel">
-                                        <property name="name">
-                                            <cstring>textLabel1_6</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Carpeta temporales:</string>
-                                        </property>
-                                    </widget>
-                                    <widget class="QLineEdit">
-                                        <property name="name">
-                                            <cstring>le_kut_temporales</cstring>
-                                        </property>
-                                        <property name="enabled">
-                                            <bool>false</bool>
-                                        </property>
-                                    </widget>
-                                    <widget class="QPushButton">
-                                        <property name="name">
-                                            <cstring>pbn_kut</cstring>
-                                        </property>
-                                        <property name="text">
-                                            <string>Cam&amp;biar</string>
-                                        </property>
-                                        <property name="accel">
-                                            <string>Alt+B</string>
-                                        </property>
-                                    </widget>
-                                </hbox>
-                            </widget>
                             <widget class="QCheckBox">
                                 <property name="name">
                                     <cstring>cb_kut_debug</cstring>
@@ -609,7 +585,7 @@
                                 <property name="sizeHint">
                                     <size>
                                         <width>20</width>
-                                        <height>250</height>
+                                        <height>280</height>
                                     </size>
                                 </property>
                             </spacer>
@@ -661,6 +637,81 @@
                                     <size>
                                         <width>31</width>
                                         <height>181</height>
+                                    </size>
+                                </property>
+                            </spacer>
+                        </vbox>
+                    </widget>
+                    <widget class="QWidget">
+                        <property name="name">
+                            <cstring>tab_cache</cstring>
+                        </property>
+                        <attribute name="title">
+                            <string>Caché</string>
+                        </attribute>
+                        <vbox>
+                            <property name="name">
+                                <cstring>unnamed</cstring>
+                            </property>
+                            <widget class="QLayoutWidget">
+                                <property name="name">
+                                    <cstring>layout8_2</cstring>
+                                </property>
+                                <hbox>
+                                    <property name="name">
+                                        <cstring>unnamed_2</cstring>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel1_6</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Carpeta temporales:</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QLineEdit">
+                                        <property name="name">
+                                            <cstring>le_kut_temporales</cstring>
+                                        </property>
+                                        <property name="enabled">
+                                            <bool>false</bool>
+                                        </property>
+                                    </widget>
+                                    <widget class="QPushButton">
+                                        <property name="name">
+                                            <cstring>pbn_kut</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Cam&amp;biar</string>
+                                        </property>
+                                        <property name="accel">
+                                            <string>Alt+B</string>
+                                        </property>
+                                    </widget>
+                                </hbox>
+                            </widget>
+                            <widget class="QCheckBox">
+                                <property name="name">
+                                    <cstring>cb_no_borrar_cache</cstring>
+                                </property>
+                                <property name="text">
+                                    <string>No borrar cache común al iniciar</string>
+                                </property>
+                            </widget>
+                            <spacer>
+                                <property name="name">
+                                    <cstring>spacer14_2</cstring>
+                                </property>
+                                <property name="orientation">
+                                    <enum>Vertical</enum>
+                                </property>
+                                <property name="sizeType">
+                                    <enum>Expanding</enum>
+                                </property>
+                                <property name="sizeHint">
+                                    <size>
+                                        <width>51</width>
+                                        <height>250</height>
                                     </size>
                                 </property>
                             </spacer>
