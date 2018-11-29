@@ -778,9 +778,9 @@ class kut2fpdf(object):
 
     def draw_image(self, x, y, W, H, xml, file_name):
         import os
-        if file_name[0:3] == "RK@":
-                file_name = self._parser_tools.parseKey(file_name)
-        
+        if not file_name.lower().endswith(".png"):
+            file_name = self._parser_tools.parseKey(file_name)
+            
         if os.path.exists(file_name):            
             limit_right = self.calculateRightEnd(x + W)
             orig_x = x
