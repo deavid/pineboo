@@ -38,6 +38,7 @@ class kut2fpdf(object):
     last_detail = False
     actual_data_level = None
     last_data_processed = None
+    drawif_values = None
 
     def __init__(self):
 
@@ -52,6 +53,7 @@ class kut2fpdf(object):
         self._no_print_footer = False
         self.increase_section_size = 0
         self.actual_data_level = 0
+        self.drawif_values = {}
 
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
@@ -205,6 +207,21 @@ class kut2fpdf(object):
                 show = data.get(draw_if)
                 
             if dF.get("Level") == str(data_level) and show not in ("None", "False"):
+                #Si el valor previo de draw_if de esta section y este level es el mismo no se pinta
+                if show is not True:
+                    if section_name not in self.drawif_values.keys():
+                        self.drawif_values[section_name] = {}
+                    
+                    if str(data_level) not in self.drawif_values[section_name].keys():
+                        self.drawif_values[section_name][str(data_level)] = None
+                        
+                
+                
+                    if self.drawif_values[section_name][str(data_level)] == show:
+                        return
+                    else:
+                        self.drawif_values[section_name][str(data_level)] = show
+                
                 if section_name == "DetailHeader":
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
                     for detail in self._xml.findall("Detail"):
@@ -236,10 +253,8 @@ class kut2fpdf(object):
                             #self.processSection("PageFooter")  # Pie de página
                             self.newPage(data_level)
 
-                if not dF.get("DrawIf") or data.get(dF.get("DrawIf")):
                     
-                    self.processXML(dF, data)
-                    #self.logger.debug("%s_BOTTON = %s" % (name.upper(), self.actualVSize[str(self.pagina)]))
+                self.processXML(dF, data)
 
     """
     Procesa las secciones fuera de detail
