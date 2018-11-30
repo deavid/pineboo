@@ -92,7 +92,6 @@ class kut2fpdf(object):
             self.logger.debug("KUT2FPDF :: Adding font %s", f)
             self._avalible_fonts.append(f)
 
-        self.newPage(0)
         self.processDetails()
 
         pdfname = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
@@ -127,7 +126,7 @@ class kut2fpdf(object):
     Añade una nueva página al documento.
     """
 
-    def newPage(self, data_level = None):
+    def newPage(self, data_level):
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
         self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
@@ -135,15 +134,13 @@ class kut2fpdf(object):
         self._no_print_footer = False
         if self.design_mode:
             self.draw_margins()
-        # Corta con el borde inferior ...
-        # self._document.set_auto_page_break(
-        #    True, self._document.h - self._bottom_margin)
+            
         self._actual_section_size = 0
-        self.processSection("PageHeader")
         
-        if data_level is not None:
-            for l in range(data_level):
-                self.processSection("AddOnHeader", str(l))
+        for l in range(data_level):
+            self.processSection("AddOnHeader", str(l))
+        
+        #Por ahora se omite detail header
 
         
     """
@@ -152,41 +149,35 @@ class kut2fpdf(object):
 
     def processDetails(self):
         # Procesamos la cabecera si procede ..
-        prev_level = 0
+        top_level = 0
         level = 0
+        first_page_created = False
+        prev_level = 0
         
         rows_array = self._xml_data.findall("Row")
-        actual_top_level = 0
-        for data in self._xml_data.findall("Row"):
+        for data in rows_array:
             self._actual_data_line = data
             level = int(data.get("level"))
-            if prev_level > level:
-                if not self._no_print_footer:
-                    self.processData("DetailFooter", data, prev_level)
-            elif actual_top_level <= level:
-                self.processData("DetailHeader",  data, level)
-                actual_top_level = level
+            if level > top_level:
+                top_level = level
+                
+            if not first_page_created:
+                self.newPage(level)
+                first_page_created = True
             
             if rows_array[len(rows_array) - 1] is data:
                 self.last_detail = True
             
-
+            if level > prev_level:
+                self.processData("DetailHeader",  data, level)   
+                        
             self.processData("Detail", data, level)
-
-            prev_level = level
+            
             self.last_data_processed = data
-            
-            
-
-        if level:
-            if not self._no_print_footer:
-                for l in reversed(range(level + 1)):
-                    self.processData("DetailFooter", data, l)
-
-        if self._xml.find("PageFooter"):
-            self.processSection("PageFooter")
-        #elif self._xml.find("AddOnFooter"):
-        #    self.processSection("AddOnFooter")
+            prev_level = level
+        if not self._no_print_footer:
+            for l in reversed(range(top_level + 1)):
+                self.processData("DetailFooter", data, l)
 
     """
     Paso intermedio que calcula si detailHeader + detail + detailFooter entran en el resto de la ṕagina. Si no es así crea nueva página.
@@ -224,7 +215,8 @@ class kut2fpdf(object):
                 
                 if section_name == "DetailHeader":
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
-                    for detail in self._xml.findall("Detail"):
+                    
+                    for detail in self._xml.findall("DetailFooter"):
                         if detail.get("Level") == str(data_level):
                             heightCalculated += self._parser_tools.getHeight(detail)
                             
@@ -242,7 +234,6 @@ class kut2fpdf(object):
                             heightCalculated += self._parser_tools.getHeight(pageFooter)
 
                     heightCalculated += self._bottom_margin
-
                     if heightCalculated > self._document.h:  # Si nos pasamos
                         self._no_print_footer = True
                         #Vemos el tope por abajo 
@@ -261,22 +252,17 @@ class kut2fpdf(object):
     @param name. Nombre de la sección a procesar.
     """
 
-    def processSection(self, name, level = None):
-        sec_ = self._xml.find(name)
+    def processSection(self, name, level):
+        sec_list = self._xml.findall(name)
+        sec_ = None
+        for s in sec_list:
+            if s.get("Level") == str(level):
+                sec_ = s
+                break
             
-        if sec_:
-            if level is not None and sec_.get("Level") != level:
-                return
-            
-            if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1 or name is "AddOnFooter" or (self._document.page_no() > 1 and name is "AddOnHeader"):
-                if name is "PageFooter":
-                    self.setTopSection(self._document.h - int(sec_.get("Height")))
-                    
-                data = None
-                if name in ("AddOnFooter", "AddOnHeader"):
-                    data = self._actual_data_line
-                    
-                self.processXML(sec_, data)
+        if sec_ is not None:
+            if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1 or name in ("AddOnHeader","AddOnFooter"):   
+                self.processXML(sec_)
 
     """
     Procesa un elemento de xml.
@@ -286,9 +272,10 @@ class kut2fpdf(object):
 
     def processXML(self, xml, data=None):
         fix_height = True
+        if data is None:
+            data = self._actual_data_line
         
         size_updated = False
-        
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
                 self.setTopSection(self._document.h - self._parser_tools.getHeight(xml))
@@ -633,7 +620,7 @@ class kut2fpdf(object):
                 y = orig_y + orig_H - font_size
             else:
                 # Arriba
-                y = orig_y
+                y = orig_y + font_size
         
             y = y + extra_size
             
@@ -712,9 +699,7 @@ class kut2fpdf(object):
         orig_y = y
         orig_w = W
         x = self.calculateLeftStart(orig_x)
-        dif_orig_x = x - orig_x
-        
-        
+        dif_orig_x = x - orig_x      
         
         W = self.calculateRightEnd((x + orig_w) - dif_orig_x) - x
         
