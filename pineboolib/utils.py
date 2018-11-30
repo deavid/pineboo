@@ -629,7 +629,7 @@ def load2xml(form_path_or_str):
     try:
         parser = ET.XMLParser(html=0)
         if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:           
-            form_path_or_str = parse_for_duplicates(form_path_or_str)                  
+            form_path_or_str = parse_for_duplicates(form_path_or_str)    
             ret = ET.fromstring(form_path_or_str, parser)
         else:
             ret = ET.parse(form_path_or_str, parser)
@@ -637,6 +637,7 @@ def load2xml(form_path_or_str):
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
             if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE QUERY_DATA") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:
+                form_path_or_str = parse_for_duplicates(form_path_or_str)
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
                 ret = ET.parse(form_path_or_str, parser)
