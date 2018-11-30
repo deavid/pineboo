@@ -71,7 +71,6 @@ class FLReportEngine(object):
             self.qImgFields_ = imgFieldsBack
 
         def groupBy(self, levelMax, vA):
-            print(levelMax, vA)
             if not self.qry_.isValid():
                 return
 
