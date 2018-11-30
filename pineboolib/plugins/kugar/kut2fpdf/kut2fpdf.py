@@ -196,12 +196,13 @@ class kut2fpdf(object):
                 show = data.get(draw_if)
                 
             if dF.get("Level") == str(data_level) and show not in ("None", "False"):
-                if section_name == "DetailHeader":
+                if section_name in ("DetailHeader","Detail"):
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
                     
-                    for detail in self._xml.findall("DetailFooter"):
-                        if detail.get("Level") == str(data_level):
-                            heightCalculated += self._parser_tools.getHeight(detail)
+                    if section_name is "DetailHeader":
+                        for detail in self._xml.findall("Detail"):
+                            if detail.get("Level") == str(data_level):
+                                heightCalculated += self._parser_tools.getHeight(detail)
                             
                     for dFooter in self._xml.findall("DetailFooter"):
                         if dFooter.get("Level") == str(data_level):
