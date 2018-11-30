@@ -286,17 +286,20 @@ class kut2fpdf(object):
 
     def processXML(self, xml, data=None):
         fix_height = True
+        
+        size_updated = False
+        
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
                 self.setTopSection(self._document.h - self._parser_tools.getHeight(xml))
+                size_updated = True
         
                
         if xml.tag == "PageFooter":
             fix_height = False
 
-        self.fix_extra_size()
+        self.fix_extra_size() #Sirve para actualizar la altura con lineas que se han partido porque son muy largas
         
-        #labels, fields, clculatedFields, Lineas
         
             
         for label in xml.iter("Label"):
@@ -311,15 +314,10 @@ class kut2fpdf(object):
         for calculated in xml.iter("CalculatedField"):
             self.processText(calculated, data, fix_height)
         
-        #for child in xml.iter():
-        #    if child.tag in ("Label", "Field", "Special", "CalculatedField"):
-        #        self.processText(child, data, fix_height)
-        #    elif child.tag == "Line":
-        #        self.processLine(child, fix_height)
         for line in xml.iter("Line"):
             self.processLine(line, fix_height)
 
-        if xml.get("PlaceAtBottom") != "true":
+        if not size_updated:
             self.setTopSection(self.topSection() + self._parser_tools.getHeight(xml))
         
         
