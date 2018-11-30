@@ -71,13 +71,14 @@ class FLReportEngine(object):
             self.qImgFields_ = imgFieldsBack
 
         def groupBy(self, levelMax, vA):
+            print(levelMax, vA)
             if not self.qry_.isValid():
                 return
 
             g = self.qGroupDict_
             lev = 0
-            val = str(self.qry_.value(g[lev]))
-            while lev < levelMax and vA[lev] == val:
+            
+            while lev < levelMax and str(self.qry_.value(g[lev])) == str(vA[lev]):
                 lev += 1
 
             for i in range(lev, levelMax):
