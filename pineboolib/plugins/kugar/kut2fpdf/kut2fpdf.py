@@ -39,6 +39,8 @@ class kut2fpdf(object):
     actual_data_level = None
     last_data_processed = None
     prev_level = None
+    _top_detail_header = None
+    _detail_header_page = None
 
     def __init__(self):
 
@@ -54,6 +56,8 @@ class kut2fpdf(object):
         self.increase_section_size = 0
         self.actual_data_level = 0
         self.prev_level = -1
+        self._top_detail_header = {}
+        self._detail_header_page = {}
 
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
@@ -126,7 +130,7 @@ class kut2fpdf(object):
     Añade una nueva página al documento.
     """
 
-    def newPage(self, data_level):
+    def newPage(self, data_level, add_on_header = True):
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
         self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
@@ -147,8 +151,9 @@ class kut2fpdf(object):
         #    for l in range(l_ini , l_end):
         #        print(l)
         #        self.processSection("AddOnHeader", str(l))
-        for l in range(data_level + 1):
-            self.processSection("AddOnHeader", str(l))
+        if add_on_header:
+            for l in range(data_level + 1):
+                self.processSection("AddOnHeader", str(l))
             
         
         #Por ahora se omite detail header
@@ -216,10 +221,13 @@ class kut2fpdf(object):
                 show = data.get(draw_if)
                 
             if dF.get("Level") == str(data_level) and show not in ("None", "False"):
+                    
                 if section_name in ("DetailHeader","Detail"):
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
                     
                     if section_name is "DetailHeader":
+                        self._top_detail_header[str(data_level)] = self.topSection()
+                        self._detail_header_page = self._document.page
                         for detail in self._xml.findall("Detail"):
                             if detail.get("Level") == str(data_level):
                                 heightCalculated += self._parser_tools.getHeight(detail)
@@ -250,8 +258,13 @@ class kut2fpdf(object):
 
                     
                 self.processXML(dF, data)
+                if section_name == "DetailFooter":
+                    self._top_detail_header[str(data_level)] = None
+                    
                 if dF.get("NewPage") == "true" and not self.last_detail:
-                    self.newPage(data_level)
+                    self.newPage(data_level, False)
+                
+                
 
     """
     Procesa las secciones fuera de detail
@@ -408,12 +421,33 @@ class kut2fpdf(object):
         
         # x,y,W,H se calcula y corrigen aquí para luego estar correctos en los diferentes destinos posibles
         W = int(xml.get("Width"))
+        
         H = self._parser_tools.getHeight(xml)
-
+        
         x = int(xml.get("X"))
-        y = int(xml.get("Y")) + self.topSection()  # Añade la altura que hay ocupada por otras secciones
+        
+        
+        
+        top = self.topSection()
+        level = data_row.get("level")
+        #print("***", xml.get("DrawAtHeader"), level, xml.tag)
+        if xml.get("DrawAtHeader") == "true" and level:
+            
+            #print("Cambiando", top," a  cabecera", self._top_detail_header[level])
+            top = self._top_detail_header[level]
+            #print(self._detail_header_page)
+            #print("No se imprime DrawAtheader")
+            return 
+        
+        y = int(xml.get("Y")) + top  # Añade la altura que hay ocupada por otras secciones
         if fix_height:
             y = self._parser_tools.heightCorrection(y)  # Corrige la posición con respecto al kut original
+        
+        
+        
+        
+
+
 
         data_type = xml.get("DataType")
         
