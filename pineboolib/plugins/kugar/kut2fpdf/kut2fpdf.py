@@ -138,6 +138,8 @@ class kut2fpdf(object):
         for l in range(data_level + 1):
             self.processSection("AddOnHeader", str(l))
         
+            
+        
         #Por ahora se omite detail header
 
         
@@ -150,7 +152,7 @@ class kut2fpdf(object):
         top_level = 0
         level = 0
         first_page_created = False
-        prev_level = 0
+        prev_level = -1
         
         rows_array = self._xml_data.findall("Row")
         for data in rows_array:
@@ -243,7 +245,7 @@ class kut2fpdf(object):
             if s.get("Level") == str(level):
                 sec_ = s
                 break
-            
+        
         if sec_ is not None:
             if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1 or name in ("AddOnHeader","AddOnFooter"):   
                 self.processXML(sec_)
@@ -559,9 +561,9 @@ class kut2fpdf(object):
         #Miramos si el texto sobrepasa el ancho
         str_width = self._document.get_string_width(txt)
         array_text = []
-        if str_width > W and xml.tag !="Label":
+        if str_width > orig_W and xml.tag !="Label":
             height_resized = True
-            array_text = self.split_text(txt, W)
+            array_text = self.split_text(txt, orig_W)
         else:
             
             array_text.append(txt)
