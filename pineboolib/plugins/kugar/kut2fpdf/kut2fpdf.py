@@ -601,7 +601,7 @@ class kut2fpdf(object):
             
         for tl in text_lines:
             str_width = self._document.get_string_width(tl)
-            if str_width > orig_W and xml.tag !="Label": #Una linea es mas larga que el ancho del campo
+            if str_width > orig_W + 2 and xml.tag !="Label": #Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
                 height_resized = True
                 array_text = self.split_text(tl, orig_W)
             else:
