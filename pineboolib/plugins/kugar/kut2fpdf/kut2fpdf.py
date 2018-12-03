@@ -128,7 +128,7 @@ class kut2fpdf(object):
         self._document.add_page(self._page_orientation)
         self._page_top[str(self._document.page_no())] = self._top_margin
         self._document.set_margins(self._left_margin, self._top_margin, self._right_margin)  # Lo dejo pero no se nota nada
-        self.last_detail = False
+        #self.last_detail = False
         self._no_print_footer = False
         if self.design_mode:
             self.draw_margins()
@@ -168,16 +168,23 @@ class kut2fpdf(object):
             if rows_array[len(rows_array) - 1] is data:
                 self.last_detail = True
             
+            if level < prev_level:
+                for l in range(level + 1, prev_level):
+                    self.processData("DetailFooter", self.last_data_processed, l)    
+            
+            
             if level > prev_level:
-                self.processData("DetailHeader",  data, level)   
+                self.processData("DetailHeader",  data, level)              
                         
             self.processData("Detail", data, level)
             
             self.last_data_processed = data
+            
+                
             prev_level = level
         if not self._no_print_footer:
-            for l in reversed(range(top_level + 1)):
-                self.processData("DetailFooter", data, l)
+           for l in reversed(range(top_level + 1)):
+               self.processData("DetailFooter", data, l)
 
     """
     Paso intermedio que calcula si detailHeader + detail + detailFooter entran en el resto de la ṕagina. Si no es así crea nueva página.
@@ -232,6 +239,9 @@ class kut2fpdf(object):
 
                     
                 self.processXML(dF, data)
+                if dF.get("NewPage") == "true" and not self.last_detail:
+                    print("Fuerza nueva página")
+                    self.newPage(data_level)
 
     """
     Procesa las secciones fuera de detail
@@ -559,14 +569,27 @@ class kut2fpdf(object):
         start_section_size = self._actual_section_size
         result_section_size = 0
         #Miramos si el texto sobrepasa el ancho
-        str_width = self._document.get_string_width(txt)
+        
         array_text = []
-        if str_width > orig_W and xml.tag !="Label":
-            height_resized = True
-            array_text = self.split_text(txt, orig_W)
-        else:
+        array_n = []
+        text_lines = []
+        if txt.find("\n") > -1 :
+            for t in txt.split("\n"):
+                array_n.append(t)
+        if array_n: #Hay saltos de lineas ...
+            for n in array_n:
+                text_lines.append(n)
+        else: #No hay saltos de lineas
+            text_lines.append(txt)
             
-            array_text.append(txt)
+        for tl in text_lines:
+            str_width = self._document.get_string_width(tl)
+            if str_width > orig_W and xml.tag !="Label": #Una linea es mas larga que el ancho del campo
+                height_resized = True
+                array_text = self.split_text(tl, orig_W)
+            else:
+            
+                array_text.append(tl)
         
         calculated_h = orig_H * len(array_text)
         self.drawRect(orig_x, orig_y, orig_W, calculated_h, xml)
@@ -585,7 +608,7 @@ class kut2fpdf(object):
             processed_lines += 1
             
             if processed_lines > 1:
-                extra_size += orig_H - (orig_H - font_size) / 2
+                extra_size += font_size + 2
             
             if HAlignment == "1":  # sobre X
                 # Centrado
