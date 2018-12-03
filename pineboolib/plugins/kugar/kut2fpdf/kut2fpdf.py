@@ -507,7 +507,7 @@ class kut2fpdf(object):
         #font_name, font_size, font_style
         font_style = ""
         font_size = int(xml.get("FontSize"))
-        font_name = xml.get("FontFamily").lower()
+        font_name = xml.get("FontFamily").lower() if xml.get("FontFamily") is not None else "helvetica"
 
         font_w = xml.get("FontWeight")
         
@@ -572,6 +572,9 @@ class kut2fpdf(object):
         processed_lines = 0
         extra_size = 0
         for actual_text in array_text:
+            
+            if actual_text is None:
+                continue
             
             if dif_orig_x > 0:
                 x += 2
