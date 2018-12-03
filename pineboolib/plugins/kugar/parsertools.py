@@ -245,8 +245,8 @@ class parsertools(object):
                 "porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
             r = [595, 842]
 
-        if orientation != 0:
-            r = [r[1], r[0]]
+        #if orientation != 0:
+        #    r = [r[1], r[0]]
 
         return r
 
