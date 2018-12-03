@@ -3,6 +3,7 @@
 import os
 import re
 import traceback
+import math
 
 from PyQt5 import QtCore
 import logging
@@ -109,7 +110,15 @@ class Array(object):
 
     def __getitem__(self, key):
         if isinstance(key, int):
-            return self.dict_[self.names_[key]]
+            if key in self.names_:            
+                return self.dict_[self.names_[key]]
+            else:
+                m = 0
+                for m_k in self.dict_.keys():
+                    if m == key:
+                        return self.dict_[m_k]
+                    m += 1
+                    
         else:
             # print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
             return self.dict_[key]
@@ -141,7 +150,7 @@ def Boolean(x=False):
 
 
 class Math(object):
-
+    
     def abs(x):
         return math.fabs(x)
 
