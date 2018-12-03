@@ -3,7 +3,7 @@ from PyQt5.Qt import QApplication
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
-
+import pineboolib
 import logging
 logger = logging.getLogger(__name__)
 
