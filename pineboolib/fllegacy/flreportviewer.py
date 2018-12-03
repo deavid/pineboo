@@ -849,6 +849,9 @@ class FLReportViewer(QObject):
     @decorators.BetaImplementation
     def name(self):
         return self.name_
+    
+    def __getattr__(self, name):
+        return getattr(self.rptEngine_, name, None)
 
 
 class internalReportViewer(QObject):
