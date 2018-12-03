@@ -137,7 +137,7 @@ class FLReportEngine(object):
 
     def setReportData(self, q):
         if isinstance(q, FLDomNodeInterface):
-            return self.setFLReportData(q.obj())
+            return self.setFLReportData(q)
         if not q:
             return
 
@@ -176,7 +176,9 @@ class FLReportEngine(object):
 
     def setFLReportData(self, n):
         self.d_.setQuery(0)
-        return super(FLReportEngine, self).setReportData(n)
+        self.rd = n
+        return True
+        #return super(FLReportEngine, self).setReportData(n)
 
     def setFLReportTemplate(self, t):
         # buscamos el .kut o el .rlab
@@ -213,15 +215,11 @@ class FLReportEngine(object):
 
     @decorators.NotImplementedWarn
     def reportData(self):
-        return FLDomNodeInterface.nodeInterface(
-            self.rd if self.rd else QtXml.QDomDocument()
-        )
+        return self.rd if self.rd else QtXml.QDomDocument()
 
     @decorators.NotImplementedWarn
     def reportTemplate(self):
-        return FLDomNodeInterface.nodeInterface(
-            self.rt if self.rt else QtXml.QDomDocument()
-        )
+        return self.rt if self.rt else QtXml.QDomDocument()
 
     @decorators.NotImplementedWarn
     def exportToOds(self, pages):
