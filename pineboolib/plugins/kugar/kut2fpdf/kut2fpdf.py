@@ -533,26 +533,33 @@ class kut2fpdf(object):
 
         font_w = xml.get("FontWeight")
         
-        if font_w is None:
+        if font_w in (None, "50"): #Normal
+            font_w = 100
+        elif int(font_w) >= 65:
+            font_style += "B"
             font_w = 100
         else:
-            font_w = int(font_w) #Ajuste de streching en pyfpdf
+            font_w = int(font_w) 
             factor = (100 -font_w) / 13
             font_w = 100 - (5 * factor)
+        
         
         
         fontI = xml.get("FontItalic")
         fontU = xml.get("FontUnderlined")  # FIXME: hay que ver si es así
 
         background_color = self.get_color(xml.get("BackgroundColor"))
-        if background_color != [255,255,255]: #Los textos que llevan fondo no blanco van en negrita
-            font_style += "B"
+        #if background_color != [255,255,255]: #Los textos que llevan fondo no blanco van en negrita
+        #    font_style += "B"
 
         if fontI == "1":
             font_style += "I"
 
         if fontU == "1":
             font_style += "U"
+        
+        
+        
 
         font_full_name = "%s%s" % (font_name, font_style)
 
