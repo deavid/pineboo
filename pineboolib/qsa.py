@@ -70,6 +70,8 @@ def Object(x=None):
     from pineboolib.utils import StructMyDict
     return StructMyDict(x)
 
+def String(campo):
+    return str(campo)
 
 class Array(object):
 
