@@ -135,7 +135,7 @@ class kut2fpdf(object):
             
         self._actual_section_size = 0
         
-        for l in range(data_level):
+        for l in range(data_level + 1):
             self.processSection("AddOnHeader", str(l))
         
         #Por ahora se omite detail header
