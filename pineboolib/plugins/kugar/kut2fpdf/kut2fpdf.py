@@ -39,6 +39,8 @@ class kut2fpdf(object):
     actual_data_level = None
     last_data_processed = None
     prev_level = None
+    draws_at_header = None
+    detailn = None
 
     def __init__(self):
 
@@ -54,6 +56,8 @@ class kut2fpdf(object):
         self.increase_section_size = 0
         self.actual_data_level = 0
         self.prev_level = -1
+        self.draws_at_header = {}
+        self.detailn = {}
 
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
@@ -93,6 +97,19 @@ class kut2fpdf(object):
             self._avalible_fonts.append(f)
 
         self.processDetails()
+        
+        #FIXME:Alguno valores no se encuentran
+        for p in self._document.pages.keys():
+            page_content = self._document.pages[p]["content"]
+            for h in self.draws_at_header.keys():
+                page_content = page_content.replace(h, str(self.draws_at_header[h]))
+            
+            
+            self._document.pages[p]["content"] = page_content
+                    
+        #print(self.draws_at_header.keys())   
+                
+        
 
         pdfname = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
         pdfname += "/%s_%s.pdf" % (name, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
@@ -184,8 +201,17 @@ class kut2fpdf(object):
                     self.processData("DetailFooter", self.last_data_processed, l)    
             
             
-            if level > self.prev_level:
-                self.processData("DetailHeader",  data, level)              
+            
+            
+               
+            if not str(level) in self.detailn.keys():
+                self.detailn[str(level)] = 0
+            else:    
+                self.detailn[str(level)] += 1
+            
+            if level > self.prev_level:           
+                self.processData("DetailHeader",  data, level)    
+                      
                         
             self.processData("Detail", data, level)
             
@@ -281,9 +307,12 @@ class kut2fpdf(object):
     """
 
     def processXML(self, xml, data=None):
+        
         fix_height = True
         if data is None:
             data = self._actual_data_line
+        
+        print("Procesando", xml.tag, data.get("level"))
         
         size_updated = False
         if xml.tag == "DetailFooter":
@@ -306,10 +335,24 @@ class kut2fpdf(object):
             self.processText(field, data, fix_height)
         
         for special in xml.iter("Special"):
-            self.processText(special, data, fix_height)
+            self.processText(special, data, fix_height, xml.tag)
         
         for calculated in xml.iter("CalculatedField"):
-            self.processText(calculated, data, fix_height)
+            self.processText(calculated, data, fix_height, xml.tag)
+        
+        
+        #Busco draw_at_header en DetailFooter y los meto también
+        if xml.tag == "DetailHeader":
+            detail_level = xml.get("Level")
+            for df in self._xml.iter("DetailFooter"):
+                if df.get("Level") == detail_level:
+                    for cf in df.iter("CalculatedField"):
+                        if cf.get("DrawAtHeader") == "true":
+                            header_name = "%s_header_%s_%s" % (self.detailn[detail_level], detail_level, cf.get("Field"))
+                            self.draws_at_header[header_name] = 0
+                            self.processText(cf, data, fix_height, xml.tag)
+            
+        
         
         for line in xml.iter("Line"):
             self.processLine(line, fix_height)
@@ -403,7 +446,7 @@ class kut2fpdf(object):
     @param fix_height. Ajusta la altura a los .kut originales, excepto el pageFooter.
     """
 
-    def processText(self, xml, data_row=None, fix_height=True):
+    def processText(self, xml, data_row=None, fix_height=True, section_name = None):
         is_image = False
         is_barcode = False
         text = xml.get("Text")
@@ -418,14 +461,7 @@ class kut2fpdf(object):
         x = int(xml.get("X"))
         
         
-        
-        top = self.topSection()
-        level = data_row.get("level")
-        
-        if xml.get("DrawAtHeader") == "true" and level:
-            return 
-        
-        y = int(xml.get("Y")) + top  # Añade la altura que hay ocupada por otras secciones
+        y = int(xml.get("Y")) + self.topSection() # Añade la altura que hay ocupada por otras secciones
         if fix_height:
             y = self._parser_tools.heightCorrection(y)  # Corrige la posición con respecto al kut original
         
@@ -505,7 +541,18 @@ class kut2fpdf(object):
         elif is_barcode:
             self.draw_barcode(x, y, W, H, xml, text)
         else:
-            self.drawText(x, y, W, H, xml, text)
+            level = data_row.get("level")
+            if xml.get("DrawAtHeader") == "true" and level:
+                val = "%s_header_%s_%s" % ( self.detailn[str(level)], level,field_name)
+                if section_name == "DetailHeader":
+                    self.drawText(x, y, W, H, xml, val)
+                else:
+                    if section_name == "DetailFooter":
+                        self.draws_at_header[val] = text
+                        print("Añadiendo a", val, text)
+            
+            else:
+                self.drawText(x, y, W, H, xml, text)
 
 
     """
