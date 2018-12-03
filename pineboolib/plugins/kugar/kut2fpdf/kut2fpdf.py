@@ -38,6 +38,7 @@ class kut2fpdf(object):
     last_detail = False
     actual_data_level = None
     last_data_processed = None
+    prev_level = None
 
     def __init__(self):
 
@@ -52,6 +53,7 @@ class kut2fpdf(object):
         self._no_print_footer = False
         self.increase_section_size = 0
         self.actual_data_level = 0
+        self.prev_level = -1
 
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
@@ -135,8 +137,12 @@ class kut2fpdf(object):
             
         self._actual_section_size = 0
         
-        for l in range(data_level + 1):
-            self.processSection("AddOnHeader", str(l))
+        l_ini = data_level + 1
+        l_end = self.prev_level
+        
+        if l_ini < l_end:
+            for l in range(l_ini , self.prev_level):
+                self.processSection("AddOnHeader", str(l))
         
             
         
@@ -152,7 +158,7 @@ class kut2fpdf(object):
         top_level = 0
         level = 0
         first_page_created = False
-        prev_level = -1
+        
         
         rows_array = self._xml_data.findall("Row")
         for data in rows_array:
@@ -168,12 +174,12 @@ class kut2fpdf(object):
             if rows_array[len(rows_array) - 1] is data:
                 self.last_detail = True
             
-            if level < prev_level:
-                for l in range(level + 1, prev_level):
+            if level < self.prev_level:
+                for l in range(level + 1, self.prev_level):
                     self.processData("DetailFooter", self.last_data_processed, l)    
             
             
-            if level > prev_level:
+            if level > self.prev_level:
                 self.processData("DetailHeader",  data, level)              
                         
             self.processData("Detail", data, level)
@@ -181,7 +187,7 @@ class kut2fpdf(object):
             self.last_data_processed = data
             
                 
-            prev_level = level
+            self.prev_level = level
         if not self._no_print_footer:
            for l in reversed(range(top_level + 1)):
                self.processData("DetailFooter", data, l)
