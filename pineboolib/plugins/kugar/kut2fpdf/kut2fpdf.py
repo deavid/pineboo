@@ -137,13 +137,18 @@ class kut2fpdf(object):
             
         self._actual_section_size = 0
         
-        l_ini = data_level + 1
-        l_end = self.prev_level
+        #l_ini = data_level
+        #l_end = self.prev_level
         
-        if l_ini < l_end:
-            for l in range(l_ini , self.prev_level):
-                self.processSection("AddOnHeader", str(l))
+        #if l_ini == l_end:
+        #    l_end = l_end + 1
         
+        #if l_ini <= l_end:
+        #    for l in range(l_ini , l_end):
+        #        print(l)
+        #        self.processSection("AddOnHeader", str(l))
+        for l in range(data_level + 1):
+            self.processSection("AddOnHeader", str(l))
             
         
         #Por ahora se omite detail header
@@ -175,7 +180,7 @@ class kut2fpdf(object):
                 self.last_detail = True
             
             if level < self.prev_level:
-                for l in range(level + 1, self.prev_level):
+                for l in range(level + 1, self.prev_level + 1):
                     self.processData("DetailFooter", self.last_data_processed, l)    
             
             
@@ -246,7 +251,6 @@ class kut2fpdf(object):
                     
                 self.processXML(dF, data)
                 if dF.get("NewPage") == "true" and not self.last_detail:
-                    print("Fuerza nueva página")
                     self.newPage(data_level)
 
     """
