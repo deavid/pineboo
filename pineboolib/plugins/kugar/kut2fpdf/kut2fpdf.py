@@ -6,6 +6,7 @@ from xml import etree
 import logging
 import datetime
 import re
+import os
 from concurrent.futures import process
 
 """
@@ -68,7 +69,7 @@ class kut2fpdf(object):
     @return Ruta a fichero pdf.
     """
 
-    def parse(self, name, kut, data, report = None):
+    def parse(self, name, kut, data, report = None, flags = []):
 
         try:
             self._xml = self._parser_tools.loadKut(kut)
@@ -91,15 +92,22 @@ class kut2fpdf(object):
             from fpdf import FPDF
             print("nuevo report")
             self._document = FPDF(self._page_orientation, "pt", self._page_size)
+            for f in self._document.core_fonts:
+                self.logger.debug("KUT2FPDF :: Adding font %s", f)
+                self._avalible_fonts.append(f)
         else:
             print("completando")
             self._document = report
         # Seteamos rutas a carpetas con tipos de letra ...
 
         # Cargamos las fuentes disponibles
-        for f in self._document.core_fonts:
-            self.logger.debug("KUT2FPDF :: Adding font %s", f)
-            self._avalible_fonts.append(f)
+        page_break = (flags[2] == 1) if len(flags) == 3 else False
+        page_append = (flags[0] == 1) if len(flags) > 0 else False
+        page_display = (flags[1] == 1) if len(flags) > 1 else False
+        
+        print("Append", page_append)
+        print("Display", page_display)
+        print("Page break", page_break)
 
         self.processDetails()
         
@@ -900,18 +908,19 @@ class kut2fpdf(object):
             x = x + (x -orig_x)
             W = W - ((x + W) - limit_right )
             
-            
             self._document.image(file_name, x, y, W, H, "PNG")
     
     def draw_barcode(self, x, y, W, H, xml, text):
-        from pineboolib.fllegacy.flcodbar import FLCodBar
-        bar_code = FLCodBar(text) #Code128
-        pix = bar_code.pixmap()
-        if not pix.isNull():
-            file_name = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
-            file_name += "/%s_%s.png" % (text, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
-            pix.save(file_name, "PNG")
-            self.draw_image(x , y, W, H, xml, file_name)
+        file_name = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
+        file_name += "/%s.png" % (text)
+        if not os.path.exists(file_name):   
+            from pineboolib.fllegacy.flcodbar import FLCodBar
+            bar_code = FLCodBar(text) #Code128
+            pix = bar_code.pixmap()
+            if not pix.isNull():
+                pix.save(file_name, "PNG")
+            
+        self.draw_image(x , y, W, H, xml, file_name)
             
             
             
