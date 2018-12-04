@@ -1726,10 +1726,12 @@ class FLTableDB(QtWidgets.QWidget):
                 self.tableRecords_.setSort(s)
 
             if model:
-                self.comboBoxFieldToSearch.currentIndexChanged.disconnect(
-                    self.putFirstCol)
-                self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(
-                    self.putSecondCol)
+                try:
+                    self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
+                    self.comboBoxFieldToSearch2.currentIndexChanged.disconnect(self.putSecondCol)
+                except Exception:
+                    logger.error("Se ha producido un problema al desconectar")
+                    return
 
                 self.comboBoxFieldToSearch.clear()
                 self.comboBoxFieldToSearch2.clear()
@@ -1930,7 +1932,7 @@ class FLTableDB(QtWidgets.QWidget):
         _index = self.tableRecords_.column_name_to_column_index(col) if isinstance(col, str) else self.tableRecords_.visual_index_to_column_index(col)
 
             
-        if _index < 0:
+        if _index is None or _index < 0:
             return False
         self.moveCol(_index, self.sortColumn_)
         self.tableRecords_.sortByColumn(
@@ -1948,7 +1950,7 @@ class FLTableDB(QtWidgets.QWidget):
     def putSecondCol(self, col):
         _index = self.tableRecords_.column_name_to_column_index(col) if isinstance(col, str) else self.tableRecords_.visual_index_to_column_index(col)
 
-        if _index < 0:
+        if _index is None or _index < 0:
             return False
 
         self.moveCol(_index, self.sortColumn2_)
@@ -1978,8 +1980,11 @@ class FLTableDB(QtWidgets.QWidget):
         field = self.cursor_.metadata().indexFieldObject(to)
 
         if to == 0:  # Si ha cambiado la primera columna
-
-            self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
+            try:
+                self.comboBoxFieldToSearch.currentIndexChanged.disconnect(self.putFirstCol)
+            except Exception:
+                logger.error("Se ha producido un problema al desconectar")
+                return
 
             self.comboBoxFieldToSearch.setCurrentIndex(from_)
             self.comboBoxFieldToSearch.currentIndexChanged.connect(
