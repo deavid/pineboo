@@ -104,7 +104,10 @@ class parsertools(object):
     @return Valor calculado.
     """
 
-    def calculated(self, value, data_type, p, data):
+    def calculated(self, value, data_type, p = None, data = None):
+        
+        p = 0 if p is None else int(p)
+        
         from pineboolib.pncontrolsfactory import aqApp
         ret_ = value
         if data_type == 2: # Double

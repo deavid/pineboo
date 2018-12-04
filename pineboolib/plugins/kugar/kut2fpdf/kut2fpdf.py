@@ -510,7 +510,7 @@ class kut2fpdf(object):
                 text = data_row.get(field_name)
             
         if data_type is not None:
-            text = self._parser_tools.calculated(text, int(data_type), int(xml.get("Precision")), data_row)
+            text = self._parser_tools.calculated(text, int(data_type), xml.get("Precision"), data_row)
             
         if data_type == "5":
             is_image = True
