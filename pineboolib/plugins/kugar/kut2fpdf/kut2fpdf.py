@@ -410,8 +410,8 @@ class kut2fpdf(object):
         Y1 = int(xml.get("Y1")) + self.topSection()
         Y2 = int(xml.get("Y2")) + self.topSection()
         if fix_height:
-            Y1 = self._parser_tools.heightCorrection(Y1)
-            Y2 = self._parser_tools.heightCorrection(Y2)
+            Y1 = self._parser_tools.ratio_correction(Y1)
+            Y2 = self._parser_tools.ratio_correction(Y2)
         
           
             
@@ -482,7 +482,7 @@ class kut2fpdf(object):
         
         y = int(xml.get("Y")) + self.topSection() # Añade la altura que hay ocupada por otras secciones
         if fix_height:
-            y = self._parser_tools.heightCorrection(y)  # Corrige la posición con respecto al kut original
+            y = self._parser_tools.ratio_correction(y)  # Corrige la posición con respecto al kut original
         
         
         

@@ -24,7 +24,7 @@ class parsertools(object):
     def __init__(self):
         self.logger = logging.getLogger("ParseTools")
         self.pagina = 0
-        self._fix_altura = 0.947  # Corrector de altura 0.927
+        self._fix_ratio = 0.947  # Corrector de altura 0.927
 
     """
     Retorna un objecto xml desde una cadena de texto.
@@ -41,8 +41,8 @@ class parsertools(object):
     @return Número corregido.
     """
 
-    def heightCorrection(self, value):
-        return value * self._fix_altura
+    def ratio_correction(self, value):
+        return value * self._fix_ratio
 
     """
     Cuando es un calculatedField , se envia un dato al qsa de tipo node.
