@@ -233,7 +233,7 @@ class NumberEdit(QtWidgets.QWidget):
         
 
     def getValue(self):
-        return float(self.line_edit.text)
+        return self.line_edit.text
 
     def setValue(self, value):
         self.line_edit.setText(value)
