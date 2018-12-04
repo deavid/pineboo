@@ -17,6 +17,9 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flstylepainter import FLStylePainter
 from pineboolib.fllegacy.flsmtpclient import FLSmtpClient
 from pineboolib.fllegacy.flreportengine import FLReportEngine
+import logging
+
+
 
 AQ_USRHOME = "."  # FIXME
 
@@ -35,7 +38,7 @@ class FLReportViewer(QObject):
         #pParam = pParam | Qt.WindowSystemMenuHint
 
         super(FLReportViewer, self).__init__(parent)
-
+        self.logger = logging.getLogger("FLReportViewer")
         self.loop_ = False
         self.eventloop = QtCore.QEventLoop()
         self.reportPrinted_ = False
@@ -217,18 +220,21 @@ class FLReportViewer(QObject):
                 flags[1] = display_report
         elif isinstance(append_or_flags, list):
             if len(append_or_flags) > 0:
-                flags[0] = append_or_flags[0] # append
+                flags[0] = append_or_flags[0] # display
             if len(append_or_flags) > 1:
-                flags[1] = append_or_flags[1] #display
+                flags[1] = append_or_flags[1] #append
             if len(append_or_flags) > 2:
                 flags.append(append_or_flags[2]) #page_break
                 
         ret = self.rptViewer_.renderReport(init_row, init_col, flags)
         self.report_ = self.rptViewer_.reportPages()
-        print(flags[1], type(flags[1]))
-        if ret and flags[1] == 1:
-            print("Mostrando report!!")
-            self.pdfFile = self.rptViewer_.rptEngine_.parser_.get_file_name()
+        if ret and flags[0] == 1:
+            try:
+                self.pdfFile = self.rptViewer_.rptEngine_.parser_.get_file_name()
+            except Exception:
+                self.logger.warn("No se ha devuelto report")
+                return False
+            
             return True
         else:
             return False
