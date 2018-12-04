@@ -20,6 +20,7 @@ import os
 class FLReportEngine(object):
 
     parser_ = None
+    report_ = None
 
     class FLReportEnginePrivate(object):
 
@@ -32,6 +33,7 @@ class FLReportEngine(object):
 
             self.qDoubleFieldList_ = []
             self.qImgFields_ = []
+            self.report_ = None
 
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
@@ -232,9 +234,9 @@ class FLReportEngine(object):
     def renderReport(self, initRow=0, initCol=0, fRec=False, pages=None):
         if self.rt and self.rt.find("KugarTemplate") > -1:
             data = self.rd.toString(1)
-            self.pdfFile = self.parser_.parse(self.d_.template_, self.rt, data)
-
-            return True if self.pdfFile else False
+            self.report_ = self.parser_.parse(self.d_.template_, self.rt, data, self.report_)
+            
+            return True if self.report_ else False
 
         return False
 

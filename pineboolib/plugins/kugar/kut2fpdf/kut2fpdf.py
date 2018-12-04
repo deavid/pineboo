@@ -41,6 +41,7 @@ class kut2fpdf(object):
     prev_level = None
     draws_at_header = None
     detailn = None
+    name_ = None
 
     def __init__(self):
 
@@ -58,7 +59,7 @@ class kut2fpdf(object):
         self.prev_level = -1
         self.draws_at_header = {}
         self.detailn = {}
-
+        self.name_ = None
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
     @param name. Nombre de ".kut".
@@ -67,7 +68,7 @@ class kut2fpdf(object):
     @return Ruta a fichero pdf.
     """
 
-    def parse(self, name, kut, data):
+    def parse(self, name, kut, data, report = None):
 
         try:
             self._xml = self._parser_tools.loadKut(kut)
@@ -82,13 +83,17 @@ class kut2fpdf(object):
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False
 
+        self.name_ = name
         self.setPageFormat(self._xml)
         # self._page_orientation =
         # self._page_size =
-
-        from fpdf import FPDF
-        self._document = FPDF(self._page_orientation, "pt", self._page_size)
-        
+        if report is None:
+            from fpdf import FPDF
+            print("nuevo report")
+            self._document = FPDF(self._page_orientation, "pt", self._page_size)
+        else:
+            print("completando")
+            self._document = report
         # Seteamos rutas a carpetas con tipos de letra ...
 
         # Cargamos las fuentes disponibles
@@ -108,19 +113,25 @@ class kut2fpdf(object):
             self._document.pages[p]["content"] = page_content
                     
         #print(self.draws_at_header.keys())   
-                
+        self._document.set_title(self.name_)
+        self._document.set_author("Pineboo - kut2fpdf plugin")
+        
+        
+        return self._document    
         
 
-        pdfname = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
-        pdfname += "/%s_%s.pdf" % (name, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
-
-        # Datos del creador del documento
-        self._document.set_title(name)
-        self._document.set_author("Pineboo - kut2fpdf plugin")
-
-        self._document.output(pdfname, 'F')
-
-        return pdfname
+        
+    
+    def get_file_name(self):
+        import os
+        pdf_name = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
+        pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
+        if os.path.exists(pdf_name):
+            os.remove(pdf_name)
+            
+        self._document.output(pdf_name, 'F')        
+        return pdf_name
+    
 
     """
     Indica el techo para calcular la posición de los objetos de esa sección.
