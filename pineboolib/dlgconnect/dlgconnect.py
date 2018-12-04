@@ -253,7 +253,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.lePort.setText(self.pNSqlDrivers.port(self.ui.cbDBType.currentText()))
 
     @QtCore.pyqtSlot(int)
-    def enablePassword(self):
+    def enablePassword(self, n = None):
         """
         Comprueba si el perfil requiere password para login o no
         """
