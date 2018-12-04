@@ -696,8 +696,8 @@ class kut2fpdf(object):
             
                 array_text.append(tl)
         
-        calculated_h = orig_H * len(array_text)
-        self.drawRect(orig_x, orig_y, orig_W, calculated_h, xml)
+        #calculated_h = orig_H * len(array_text)
+        self.drawRect(orig_x, orig_y, orig_W, orig_H, xml)
         
         processed_lines = 0
         extra_size = 0
