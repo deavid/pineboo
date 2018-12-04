@@ -99,6 +99,9 @@ class Array(object):
                 self.__setitem__(f, f)
         else:
             self.dict_ = args
+    
+    def __iter__(self):
+        return self.dict_.__iter__() if self.dict_ else self.list_.__iter__()
 
     def __setitem__(self, key, value):
         # if isinstance(key, int):
@@ -120,6 +123,7 @@ class Array(object):
                         if m == key:
                             return self.dict_[m_k]
                         m += 1
+                        
                 else:
                     return self.list_[key]
                     
