@@ -113,11 +113,15 @@ class Array(object):
             if key in self.names_:            
                 return self.dict_[self.names_[key]]
             else:
-                m = 0
-                for m_k in self.dict_.keys():
-                    if m == key:
-                        return self.dict_[m_k]
-                    m += 1
+                
+                if self.dict_:
+                    m = 0
+                    for m_k in self.dict_.keys():
+                        if m == key:
+                            return self.dict_[m_k]
+                        m += 1
+                else:
+                    return self.list_[key]
                     
         else:
             # print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
@@ -125,7 +129,7 @@ class Array(object):
 
     def __getattr__(self, k):
         if k == 'length':
-            return len(self.dict_)
+            return len(self.dict_) if self.dict_ else len(list_)
         elif k == 'append':
             return self.list_.append
 
@@ -135,9 +139,11 @@ class Array(object):
     def __len__(self):
         len_ = 0
 
-        for l in self.dict_:
-            len_ = len_ + 1
-
+        if self.dict_:
+            len_ = len(self.dict_)
+        elif self.list_:
+            len_ = len(self.list_)
+        
         return len_
 
     def __str__(self):
