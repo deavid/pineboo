@@ -135,10 +135,10 @@ class FLReportEngine(object):
     def relDpi(self):
         return self.relDpi_
 
-    def setReportData(self, q):
+    def setReportData(self, q = None):
         if isinstance(q, FLDomNodeInterface):
             return self.setFLReportData(q)
-        if not q:
+        if q is None:
             return
 
         if not self.rd:
@@ -176,7 +176,9 @@ class FLReportEngine(object):
 
     def setFLReportData(self, n):
         self.d_.setQuery(0)
-        self.rd = n
+        tmp_doc = QtXml.QDomDocument("QUERY_DATA")
+        tmp_doc.appendChild(n)
+        self.rd = tmp_doc
         return True
         #return super(FLReportEngine, self).setReportData(n)
 
@@ -213,11 +215,10 @@ class FLReportEngine(object):
 
         return self.setFLReportData(t)
 
-    @decorators.NotImplementedWarn
     def reportData(self):
         return self.rd if self.rd else QtXml.QDomDocument()
 
-    @decorators.NotImplementedWarn
+
     def reportTemplate(self):
         return self.rt if self.rt else QtXml.QDomDocument()
 
