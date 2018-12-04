@@ -313,4 +313,4 @@ class Node(object):
         self.list_[name] = value
 
     def attributeValue(self, name):
-        return self.list_[name]
+        return self.list_[name] if name in self.list_.keys() else None
