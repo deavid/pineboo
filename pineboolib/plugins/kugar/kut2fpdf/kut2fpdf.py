@@ -625,8 +625,9 @@ class kut2fpdf(object):
         #font_name, font_size, font_style
         font_style = ""
         font_size = int(xml.get("FontSize"))
-        font_name = xml.get("FontFamily").lower() if xml.get("FontFamily") is not None else "helvetica"
-
+        font_name_orig = xml.get("FontFamily").lower() if xml.get("FontFamily") is not None else "helvetica"
+        font_name = font_name_orig
+        
         font_w = xml.get("FontWeight")
         
         if font_w in (None, "50"): #Normal
@@ -634,10 +635,7 @@ class kut2fpdf(object):
         elif int(font_w) >= 65:
             font_style += "B"
             font_w = 100
-        else:
-            font_w = int(font_w) 
-            factor = (100 -font_w) / 13
-            font_w = 100 - (5 * factor)
+
         
         
         
@@ -671,6 +669,9 @@ class kut2fpdf(object):
                     self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." %(font_full_name, font_style))
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
+        
+        if font_name is not font_name_orig and font_name_orig.lower().find("narrow") > -1:
+            font_w = 85
                     
         
         self._document.set_font(font_name, font_style, font_size)
