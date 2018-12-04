@@ -182,7 +182,7 @@ class kut2fpdf(object):
         #    for l in range(l_ini , l_end):
         #        print(l)
         #        self.processSection("AddOnHeader", str(l))
-        if add_on_header:
+        if add_on_header and not self._document.page_no() == 1:
             for l in range(data_level + 1):
                 self.processSection("AddOnHeader", str(l))
             
