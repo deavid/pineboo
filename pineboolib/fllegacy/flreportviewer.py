@@ -24,6 +24,9 @@ AQ_USRHOME = "."  # FIXME
 class FLReportViewer(QObject):
 
     pdfFile = None
+    Append = None
+    Display = None
+    PageBreak = None
 
     def __init__(self, parent=None, name=0, embedInParent=False, rptEngine=None):
         #pParam = 0 if parent and embedInParent else 0
@@ -200,27 +203,24 @@ class FLReportViewer(QObject):
                 if inter.width() * inter.height() > (geodim / 20):
                     self.move(geo.topLeft())
 
-    def renderReport(self, initRow=0, initCol=0, append_or_flags=None, dRpt=None):
-        """
-        flags = None
-        ap = MReportViewer.RenderReportFlags.Append.value
-        dp = MReportViewer.RenderReportFlags.Display.value
-
-        if dRpt is None:
-            if append_or_flags is None:
-                flags = dp
-            else:
-                flags = append_or_flags
-        else:
-            flags = ap if append_or_flags else 0 | int(dp) if dRpt else 0
-
+    def renderReport(self, initRow=0, initCol=0, fl= []):
+        
         if not self.rptEngine_:
             return False
-        """
-        ret = self.rptViewer_.renderReport(initRow, initCol, append_or_flags)
-        #self.report_ = self.rptViewer_.reportPages()
+        
+        flags = [self.Append, self.Display]
+        if len(fl) > 0:
+            flags[0] = fl[0] # append
+        if len(fl) > 1:
+            flags[1] = fl[1] #display
+        if len(fl) > 2:
+            flags.append(fl[2]) #page_break
+                
+        ret = self.rptViewer_.renderReport(initRow, initCol, flags)
+        self.report_ = self.rptViewer_.reportPages()
         if ret:
-            self.pdfFile = self.rptEngine_.pdfFile
+            print(flags)
+            self.pdfFile = self.rptViewer_.rptEngine_.parser_.get_file_name()
             return True
         else:
             return False
@@ -851,7 +851,7 @@ class FLReportViewer(QObject):
         return self.name_
     
     def __getattr__(self, name):
-        return getattr(self.rptEngine_, name, None)
+        return getattr(self.rptViewer_, name, None)
 
 
 class internalReportViewer(QObject):
@@ -881,4 +881,7 @@ class internalReportViewer(QObject):
     
     def setNumCopies(self, num_copies):
         self.num_copies = num_copies
+    
+    def __getattr__(self, name):
+        return getattr(self.rptEngine_, name, None)
     
