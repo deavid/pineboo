@@ -589,7 +589,15 @@ class kut2fpdf(object):
         if txt in ("None", None):
             return
         
+        
         txt = self._parser_tools.restore_text(txt)
+        
+        resizeable = False
+        
+        if xml.get("ChangeHeight") == "1":
+            resizeable = True
+        
+        
         
         height_resized = False
         orig_x = x
@@ -678,7 +686,7 @@ class kut2fpdf(object):
         array_text = []
         array_n = []
         text_lines = []
-        if txt.find("\n") > -1 :
+        if txt.find("\n") > -1:
             for t in txt.split("\n"):
                 array_n.append(t)
         if array_n: #Hay saltos de lineas ...
@@ -689,7 +697,7 @@ class kut2fpdf(object):
             
         for tl in text_lines:
             str_width = self._document.get_string_width(tl)
-            if str_width > orig_W + 2 and xml.tag !="Label": #Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
+            if str_width > orig_W + 2 and xml.tag !="Label" and resizeable: #Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
                 height_resized = True
                 array_text = self.split_text(tl, orig_W)
             else:
