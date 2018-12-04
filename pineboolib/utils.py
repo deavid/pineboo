@@ -651,8 +651,8 @@ def load2xml(form_path_or_str):
 def parse_for_duplicates(text):
     ret_ = ""
     text = text.replace("+","__PLUS__")
-    text = text.replace("(", "__LPARENT__")
-    text = text.replace(")", "__RPARENT__")
+    text = text.replace("(", "__LPAREN__")
+    text = text.replace(")", "__RPAREN__")
     text = text.replace("*", "__ASTERISK__")
     
     for section_orig in text.split(">"):

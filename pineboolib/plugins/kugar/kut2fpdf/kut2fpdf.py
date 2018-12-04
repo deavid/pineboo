@@ -589,6 +589,8 @@ class kut2fpdf(object):
         if txt in ("None", None):
             return
         
+        txt = self._parser_tools.restore_text(txt)
+        
         height_resized = False
         orig_x = x
         orig_y = y
@@ -970,3 +972,4 @@ class kut2fpdf(object):
         self._document.set_line_width(1)
         self._document.set_draw_color(r, g, b)
         self._document.dashed_line(X1, Y1, X2, Y2, dash_length, space_length)
+    

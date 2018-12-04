@@ -296,7 +296,15 @@ class parsertools(object):
                 break
         
         return val
-
+    
+    def restore_text(self, t):
+        ret_ = t
+        ret_ = ret_.replace("__RPAREN__", ")")
+        ret_ = ret_.replace("__LPAREN__", "(")
+        ret_ = ret_.replace("__ASTERISK__", "*")
+        ret_ = ret_.replace("__PLUS__", "+")
+        
+        return ret_
 
 """
 Clase del tipo node para los calculatedField.
