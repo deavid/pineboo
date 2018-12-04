@@ -203,23 +203,31 @@ class FLReportViewer(QObject):
                 if inter.width() * inter.height() > (geodim / 20):
                     self.move(geo.topLeft())
 
-    def renderReport(self, initRow=0, initCol=0, fl= []):
+    def renderReport(self, init_row=0, init_col=0, append_or_flags = None, display_report = None):
         
         if not self.rptEngine_:
             return False
         
         flags = [self.Append, self.Display]
-        if len(fl) > 0:
-            flags[0] = fl[0] # append
-        if len(fl) > 1:
-            flags[1] = fl[1] #display
-        if len(fl) > 2:
-            flags.append(fl[2]) #page_break
+        
+        if isinstance(append_or_flags, bool):
+            flags[0] = append_or_flags
+        
+            if display_report is not None:
+                flags[1] = display_report
+        elif isinstance(append_or_flags, list):
+            if len(append_or_flags) > 0:
+                flags[0] = append_or_flags[0] # append
+            if len(append_or_flags) > 1:
+                flags[1] = append_or_flags[1] #display
+            if len(append_or_flags) > 2:
+                flags.append(append_or_flags[2]) #page_break
                 
-        ret = self.rptViewer_.renderReport(initRow, initCol, flags)
+        ret = self.rptViewer_.renderReport(init_row, init_col, flags)
         self.report_ = self.rptViewer_.reportPages()
-        if ret:
-            print(flags)
+        print(flags[1], type(flags[1]))
+        if ret and flags[1] == 1:
+            print("Mostrando report!!")
             self.pdfFile = self.rptViewer_.rptEngine_.parser_.get_file_name()
             return True
         else:
@@ -876,8 +884,8 @@ class internalReportViewer(QObject):
     def reportPages(self):
         return self.report_
 
-    def renderReport(self, initRow, initCol, flags):
-        return self.rptEngine_.renderReport()
+    def renderReport(self, init_row, init_col, flags):
+        return self.rptEngine_.renderReport(init_row, init_col, flags)
     
     def setNumCopies(self, num_copies):
         self.num_copies = num_copies
