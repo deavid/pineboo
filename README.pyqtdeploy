@@ -55,6 +55,9 @@ Compilación cruzada windows-64
 
 sudo apt-get install autoconf
 
+./configure -xplatform win32-g++ -prefix /opt/qt5win32 -device-option CROSS_COMPILE=x86_64-w64-mingw32- -nomake examples -nomake tools -continue -opensource -confirm-license -static
+
+
 
 Compilar qt cruzado para qmake:
 * Descomprimir qt-everywhere-opensource-src-5.9.3.tar.xz
