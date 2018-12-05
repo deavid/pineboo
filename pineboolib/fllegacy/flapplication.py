@@ -810,12 +810,11 @@ class FLApplication(QtCore.QObject):
         for module in self.modules().keys():
             self.loadTranslationFromModule(module, lang)
 
-        if translatorsCopy:
-            for it in translatorsCopy:
-                if it.sysTrans_:
-                    self.installTranslator(it)
-                else:
-                    it.deletelater()
+        for it in translatorsCopy:
+            if it.sysTrans_:
+                self.installTranslator(it)
+            else:
+                del it
 
     """
     Busca la traducción de un texto a un Idioma dado
@@ -862,6 +861,21 @@ class FLApplication(QtCore.QObject):
         else:
             QtWidgets.qApp.installTranslator(tor)
             self.translator_.append(tor)
+
+    """
+    Elimina una traducción para la aplicación
+    @param tor, Objeto con la traducción a cargar
+    """
+    def removeTranslator(self, tor):
+        if tor is None:
+            return
+        else:
+            QtWidgets.qApp.removeTranslator(tor)
+            for t in self.translator_:
+                if t == tor:
+                    del t
+                    break
+            
 
     """
     Crea una traducción para sys
