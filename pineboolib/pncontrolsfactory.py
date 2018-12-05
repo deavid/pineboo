@@ -10,6 +10,7 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.packager.aqunpacker import AQUnpacker
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 
+import inspect
 import pineboolib
 import logging
 import weakref
@@ -270,6 +271,15 @@ class ProxySlot:
     def getProxyFn(self):
         return self.proxy_function
 
+def get_expected_args_num(inspected_function):
+    expected_args = inspect.getargspec(inspected_function)[0]
+    args_num = len(expected_args)
+
+    if args_num and expected_args[0] == "self":
+        args_num -= 1
+
+    return args_num
+
 
 def proxy_fn(wf, wr, slot):
     def fn(*args, **kwargs):
@@ -280,9 +290,7 @@ def proxy_fn(wf, wr, slot):
         if not r:
             return None
 
-        # Apaño para conectar los clicked()
-        if args == (False,):
-            return f()
+        args_num = get_expected_args_num(f)
 
         try:
             return f(*args, **kwargs)
@@ -290,6 +298,19 @@ def proxy_fn(wf, wr, slot):
             return f(*args[:-1])
 
     return fn
+
+def slot_done(fn, signal):
+    def new_fn(*args, **kwargs):
+        args_num = get_expected_args_num(fn)
+
+        res = None
+        try:
+            res = fn(*args[:args_num], **kwargs)
+        except Exception:
+            res = fn(*args[:args_num][:-1])
+        print("***************Emitir evento test", signal)
+        return res
+    return new_fn
 
 
 def connect(sender, signal, receiver, slot, caller=None):
@@ -302,16 +323,19 @@ def connect(sender, signal, receiver, slot, caller=None):
         return False
     # http://pyqt.sourceforge.net/Docs/PyQt4/qt.html#ConnectionType-enum
     conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
-    signal, slot = signal_slot
+    new_signal, new_slot = signal_slot
 
     try:
-        signal.connect(slot, type=conntype)
+        slot_done_fn = slot_done(new_slot, new_signal)
+        new_signal.connect(slot_done_fn, type=conntype)
+        # new_signal.connect(new_slot, type=conntype)
+
     except Exception:
-        #logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
+        # logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return False
 
+    signal_slot = new_signal, slot_done_fn
     return signal_slot
-
 
 def disconnect(sender, signal, receiver, slot, caller=None):
     signal_slot = solve_connection(sender, signal, receiver, slot)
@@ -348,6 +372,7 @@ def solve_connection(sender, signal, receiver, slot):
     oSignal = getattr(sender, sg_name, None)
     if not oSignal and sender.__class__.__name__ == "FormInternalObj":
         oSignal = getattr(sender.parent(), sg_name, None)
+        
     if not oSignal:
         logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
         return
