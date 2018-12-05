@@ -40,7 +40,7 @@
         ],
         "android#modules":              [
                 "QtCore", "QtGui", "QtXml", "QtNetwork", "QtPrintSupport", "QtWidgets",
-                "QtAndroidExtras","QtSvg"
+                "QtAndroidExtras"
         ],
 
         "ios#disabled_features":        [
@@ -52,7 +52,7 @@
         ],
         "ios|macos#modules":            [
                 "QtCore", "QtGui", "QtXml","QtNetwork", "QtPrintSupport", "QtWidgets",
-                "QtMacExtras","QtSvg"
+                "QtMacExtras"
         ],
 
         "linux#modules":                [
@@ -63,7 +63,7 @@
         "win#disabled_features":        ["PyQt_Desktop_OpenGL"],
         "win#modules":                  [
                 "QtCore", "QtGui", "QtXml","QtNetwork", "QtPrintSupport", "QtWidgets",
-                "QtWinExtras","QtSvg"
+                "QtWinExtras"
         ],
 
         "source":                   "PyQt5_*-5.*.tar.gz"
