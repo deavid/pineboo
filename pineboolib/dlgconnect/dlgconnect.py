@@ -162,7 +162,9 @@ class DlgConnect(QtWidgets.QWidget):
             self.hostname = db.find("host").text
             self.portnumber = db.find("port").text
             self.driveralias = db.find("type").text
-
+            if self.driveralias not in self.pNSqlDrivers.aliasList():
+                QMessageBox.information(self.ui, "Pineboo", "Esta versión de pineboo no soporta este tipo de BD")
+                return
         for credentials in root.findall("database-credentials"):
             self.username = credentials.find("username").text
             ps = credentials.find("password").text
@@ -183,6 +185,12 @@ class DlgConnect(QtWidgets.QWidget):
         """
         profile = ET.Element("Profile")
         description = self.ui.leDescription.text()
+        
+        if description is "":
+            QMessageBox.information(self.ui, "Pineboo", "La descripción no se puede dejar en blanco")
+            self.ui.leDescription.setFocus()
+            return
+            
         
         if not os.path.exists(self.profile_dir):
             os.mkdir(filedir(self.profile_dir))
