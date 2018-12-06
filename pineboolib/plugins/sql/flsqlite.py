@@ -86,14 +86,14 @@ class FLSQLITE(object):
         return self.cursor_
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
-
+        import pineboolib
         checkDependencies({"sqlite3": "sqlite3"})
         self.db_filename = db_name
-        db_is_new = not os.path.exists(filedir("../%s" % self.db_filename))
+        db_is_new = not os.path.exists("%s/%s" % (pineboolib.project.get_temp_dir(), self.db_filename))
 
         import sqlite3
 
-        import pineboolib
+        
         if self.db_filename == getattr(pineboolib.project.conn, "db_name", None):
             self.conn_ = pineboolib.project.conn.conn
         else:
