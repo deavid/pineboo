@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore, uic
-from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox
+from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox, QFileDialog
 from PyQt5.QtCore import QFileInfo, QSize
 from PyQt5.Qt import QWidget
 
@@ -25,7 +25,7 @@ class DlgConnect(QtWidgets.QWidget):
     optionsShowed = True
     minSize = None
     maxSize = None
-    profileDir = None
+    profile_dir = None
     pNSqlDrivers = None
 
     def __init__(self, _DGI):
@@ -38,7 +38,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.optionsShowed = True
         self.minSize = QSize(350, 140)
         self.maxSize = QSize(350, 495)
-        self.profileDir = filedir("../profiles")
+        self.profile_dir = FLSettings().readEntry("ebcomportamiento/profiles_folder", filedir("../profiles"))
         import pineboolib
         self.pNSqlDrivers = pineboolib.project.sql_drivers_manager
 
@@ -59,7 +59,8 @@ class DlgConnect(QtWidgets.QWidget):
         centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
-
+        
+        
         self.ui.pbLogin.clicked.connect(self.open)
         self.ui.tbOptions.clicked.connect(self.showOptions)
         self.ui.pbSaveConnection.clicked.connect(self.saveProfile)
@@ -68,6 +69,8 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.cbDBType.currentIndexChanged.connect(self.updatePort)
         self.ui.cbProfiles.currentIndexChanged.connect(self.enablePassword)
         self.ui.cbAutoLogin.stateChanged.connect(self.enableProfilePassword)
+        self.ui.le_profiles.setText(self.profile_dir)
+        self.ui.tb_profiles.clicked.connect(self.change_profile_dir)
         self.showOptions()
         self.loadProfiles()
         self.ui.leDescription.textChanged.connect(self.updateDBName)
@@ -94,10 +97,11 @@ class DlgConnect(QtWidgets.QWidget):
         Actualiza el ComboBox de los perfiles
         """
         self.ui.cbProfiles.clear()
-        if not os.path.exists(self.profileDir):
-            os.mkdir(filedir(self.profileDir))
-
-        files = [f for f in os.listdir(self.profileDir) if os.path.isfile(os.path.join(self.profileDir, f))]
+        if not os.path.exists(self.profile_dir):
+            #os.mkdir(filedir(self.profile_dir))
+            return
+        
+        files = [f for f in os.listdir(self.profile_dir) if os.path.isfile(os.path.join(self.profile_dir, f))]
         for file in files:
             fileName = file.split(".")[0]
             self.ui.cbProfiles.addItem(fileName)
@@ -136,7 +140,7 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Abre la conexión seleccionada
         """
-        fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
+        fileName = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
         tree = ET.parse(fileName)
         root = tree.getroot()
         last_profile = self.ui.cbProfiles.currentText()
@@ -179,8 +183,11 @@ class DlgConnect(QtWidgets.QWidget):
         """
         profile = ET.Element("Profile")
         description = self.ui.leDescription.text()
+        
+        if not os.path.exists(self.profile_dir):
+            os.mkdir(filedir(self.profile_dir))
 
-        if os.path.exists(os.path.join(self.profileDir, "%s.xml" % description)):
+        if os.path.exists(os.path.join(self.profile_dir, "%s.xml" % description)):
             QMessageBox.information(self.ui, "Pineboo", "El perfil ya existe")
             return
 
@@ -225,7 +232,7 @@ class DlgConnect(QtWidgets.QWidget):
 
         tree = ET.ElementTree(profile)
 
-        tree.write(os.path.join(self.profileDir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
+        tree.write(os.path.join(self.profile_dir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
         # self.cleanProfileForm()
         self.loadProfiles()
 
@@ -242,7 +249,7 @@ class DlgConnect(QtWidgets.QWidget):
                 return
 
             fileName = "%s.xml" % self.ui.cbProfiles.currentText()
-            os.remove(os.path.join(self.profileDir, fileName))
+            os.remove(os.path.join(self.profile_dir, fileName))
             self.loadProfiles()
 
     @QtCore.pyqtSlot(int)
@@ -260,9 +267,13 @@ class DlgConnect(QtWidgets.QWidget):
         if self.ui.cbProfiles.count() == 0:
             return
         password = None
-        fileName = os.path.join(self.profileDir, "%s.xml" % self.ui.cbProfiles.currentText())
-        tree = ET.parse(fileName)
-        root = tree.getroot()
+        fileName = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
+        try:
+            tree = ET.parse(fileName)
+            root = tree.getroot()
+        except Exception:
+            QMessageBox.warning(self.ui,"Pineboo", "El perfil %s no parece válido" % self.ui.cbProfiles.currentText() ,QtWidgets.QMessageBox.Ok)
+            return
 
         for profile in root.findall("profile-data"):
             password = profile.find("password")
@@ -288,3 +299,14 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.leProfilePassword.setEnabled(False)
         else:
             self.ui.leProfilePassword.setEnabled(True)
+    
+    def change_profile_dir(self):
+        
+        new_dir = QtWidgets.QFileDialog.getExistingDirectory(self.ui, self.tr("Carpeta profiles"), self.profile_dir, QtWidgets.QFileDialog.ShowDirsOnly)
+        
+        if new_dir and new_dir is not self.profile_dir:
+            FLSettings().writeEntry("ebcomportamiento/profiles_folder", new_dir)
+            self.profile_dir = new_dir
+            self.loadProfiles()
+        
+    
