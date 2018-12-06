@@ -530,35 +530,35 @@ def checkDependencies(dict_, exit=True):
     dependences = []
     error = []
     for key in dict_.keys():
-        if not key in DEPENDECIE_CHECKED:
-            try:
-                mod_ = import_module(key)
-                mod_ver = None
-                if key == "ply":
-                    version_check(key, mod_.__version__, '3.9')
-                elif key == "Pillow":
-                    version_check(key, mod_.__version__, '5.1.0')
-                elif key == "fpdf":
-                    version_check(key, mod_.__version__, "1.7.3")
-                elif key == "PyQt5.QtCore":
-                    version_check("PyQt5", mod_.QT_VERSION_STR, '5.11')
-                    mod_ver = mod_.QT_VERSION_STR
+        try:
+            mod_ = import_module(key)
+            mod_ver = None
+            if key == "ply":
+                version_check(key, mod_.__version__, '3.9')
+            elif key == "Pillow":
+                version_check(key, mod_.__version__, '5.1.0')
+            elif key == "fpdf":
+                version_check(key, mod_.__version__, "1.7.3")
+            elif key == "PyQt5.QtCore":
+                version_check("PyQt5", mod_.QT_VERSION_STR, '5.11')
+                mod_ver = mod_.QT_VERSION_STR
 
-                if not mod_ver:
-                    mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
+            if not mod_ver:
+                mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
 
-                settings = FLSettings()
-                if settings.readBoolEntry("application/isDebuggerMode", False):
+            settings = FLSettings()
+            if settings.readBoolEntry("application/isDebuggerMode", False):
+                if not key in DEPENDECIE_CHECKED:
                     logger.warn("Versión de %s: %s", key, mod_ver)
-            except ImportError:
-                dependences.append(dict_[key])
-                print(traceback.format_exc())
-                error.append(traceback.format_exc())
+        except ImportError:
+            dependences.append(dict_[key])
+            print(traceback.format_exc())
+            error.append(traceback.format_exc())
 
-            DEPENDECIE_CHECKED.append(key)
+        
 
     msg = ""
-    if len(dependences) > 0:
+    if len(dependences) > 0 and not key in DEPENDECIE_CHECKED:
         logger.warn("HINT: Dependencias incumplidas:")
         for dep in dependences:
             logger.warn("HINT: Instale el paquete %s" % dep)
@@ -576,6 +576,9 @@ def checkDependencies(dict_, exit=True):
 
             if not getattr(sys, 'frozen', False):
                 sys.exit(32)
+    
+    if not key in DEPENDECIE_CHECKED:
+        DEPENDECIE_CHECKED.append(key)
 
     return len(dependences) == 0
 
