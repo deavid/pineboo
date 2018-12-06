@@ -1,5 +1,5 @@
 {
-    "Description": "The sysroot for the demo application.",
+    "Description": "Pineboo",
 
     "android|macos|win#openssl": {
         "android#source":   "openssl-1.0.*.tar.gz",
