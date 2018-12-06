@@ -485,7 +485,7 @@ class Project(object):
     @return ruta a la carpeta temporal
     """
 
-    def getTempDir(self):
+    def get_temp_dir(self):
         return self.tmpdir
 
 

@@ -94,7 +94,8 @@ class FormInternalObj(FormDBWidget):
             if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio","kugar_temp_dir"):
                 valor = util.readSettingEntry("ebcomportamiento/%s" % valor_name, u"")
                 if valor_name is "kugar_temp_dir" and valor is "":
-                    valor = pineboolib.project.getTempDir()
+                    from pineboolib.pncontrolsfactory import aqApp
+                    valor = aqApp.temp_dir()
                 
             else:
                 valor = settings.readBoolEntry("ebcomportamiento/%s" % valor_name, False)
@@ -173,6 +174,7 @@ class FormInternalObj(FormDBWidget):
         new_dir = FileDialog.getExistingDirectory(old_dir)
         if new_dir and new_dir is not old_dir:
             self.w_.child("le_kut_temporales").text = new_dir
+            pineboolib.project.tmpdir = new_dir
             
     def fixPath(self, ruta=None):
         rutaFixed = ""

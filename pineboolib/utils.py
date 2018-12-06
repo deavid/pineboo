@@ -365,8 +365,8 @@ def cacheXPM(value):
         xpm_name = value[:value.find("[]")]
         xpm_name = xpm_name[xpm_name.rfind(" ") + 1:]
         from pineboolib.pncontrolsfactory import aqApp
-
-        cache_dir = filedir("../tempdata/cache/%s/cacheXPM" % aqApp.db().DBName())
+        
+        cache_dir = filedir("%s/cache/%s/cacheXPM" % (aqApp.tmp_dir(), aqApp.db().DBName()))
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
 
@@ -552,6 +552,7 @@ def checkDependencies(dict_, exit=True):
                     logger.warn("Versión de %s: %s", key, mod_ver)
             except ImportError:
                 dependences.append(dict_[key])
+                print(traceback.format_exc())
                 error.append(traceback.format_exc())
 
             DEPENDECIE_CHECKED.append(key)

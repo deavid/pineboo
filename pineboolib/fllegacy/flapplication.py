@@ -912,6 +912,9 @@ class FLApplication(QtCore.QObject):
 
     def commaSeparator(self):
         return self.comma_separator
+    
+    def tmp_dir(self):
+        return pineboolib.project.get_temp_dir()
 
 
 class FLWorkSpace(QtWidgets.QWidget):

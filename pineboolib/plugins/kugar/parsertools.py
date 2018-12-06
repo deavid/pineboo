@@ -140,8 +140,8 @@ class parsertools(object):
             value = None
             from pineboolib.pncontrolsfactory import aqApp
             
-            tmp_dir = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
-            img_file = filedir("%s/%s.png" % (tmp_dir, ref_key))
+            tmp_dir = aqApp.tmp_dir()
+            img_file = "%s/%s.png" % (tmp_dir, ref_key)
             
             if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
                 if not pineboolib.project.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge

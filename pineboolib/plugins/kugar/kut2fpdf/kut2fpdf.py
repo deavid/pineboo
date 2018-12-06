@@ -8,6 +8,7 @@ import datetime
 import re
 import os
 from concurrent.futures import process
+from pineboolib.pncontrolsfactory import aqApp
 
 """
 Conversor de kuts a pyFPDF
@@ -132,7 +133,8 @@ class kut2fpdf(object):
     
     def get_file_name(self):
         import os
-        pdf_name = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
+        
+        pdf_name = aqApp.tmp_dir()
         pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
         if os.path.exists(pdf_name):
             os.remove(pdf_name)
@@ -922,7 +924,7 @@ class kut2fpdf(object):
             self._document.image(file_name, x, y, W, H, "PNG")
     
     def draw_barcode(self, x, y, W, H, xml, text):
-        file_name = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir",pineboolib.project.getTempDir())
+        file_name = aqApp.tmp_dir()
         file_name += "/%s.png" % (text)
         if not os.path.exists(file_name):   
             from pineboolib.fllegacy.flcodbar import FLCodBar

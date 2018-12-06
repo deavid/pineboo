@@ -9,6 +9,7 @@ from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
+from pineboolib.pncontrolsfactory import aqApp
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import QWidget
@@ -91,7 +92,7 @@ class FLManagerModules(object):
     """
     Base de datos a utilizar por el manejador
     """
-    db_ = None
+    conn_ = None
 
     """
     Uso interno.
@@ -114,9 +115,9 @@ class FLManagerModules(object):
     def __init__(self, db=None):
         super(FLManagerModules, self).__init__()
         if db:
-            self.db_ = db
+            self.conn_ = db
 
-            self.staticBdInfo_ = AQStaticBdInfo(self.db_)
+            self.staticBdInfo_ = AQStaticBdInfo(self.conn_)
 
         self.filesCached_ = {}
 
@@ -172,7 +173,7 @@ class FLManagerModules(object):
 
     def content(self, n):
         query = "SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n
-        cursor = self.db_.cursor()
+        cursor = self.conn_.cursor()
         try:
             cursor.execute(query)
         except Exception:
@@ -228,7 +229,7 @@ class FLManagerModules(object):
 
     def contentCached(self, n, shaKey=None):
 
-        not_sys_table = (self.db_.dbAux() and n[0:3] is not "sys" and not self.db_.manager().isSystemTable(n))
+        not_sys_table = (self.conn_.dbAux() and n[0:3] is not "sys" and not self.conn_.manager().isSystemTable(n))
         if not_sys_table and self.staticBdInfo_ and self.staticBdInfo_.enabled_:
             str_ret = self.contentStatic(n)
             if str_ret:
@@ -257,12 +258,12 @@ class FLManagerModules(object):
         elif ext_ == "xml":
             type_ = ""
 
-        if not shaKey and not pineboolib.project.conn.manager().isSystemTable(name_):
+        if not shaKey and not aqApp.db().manager().isSystemTable(name_):
             query = "SELECT sha FROM flfiles WHERE nombre='%s'" % n
             try:
-                cursor = self.db_.cursor()
+                cursor = self.conn_.cursor()
             except Exception:
-                cursor = pineboolib.project.conn.cursor()
+                cursor = aqApp.db().cursor()
             try:
                 cursor.execute(query)
             except Exception:
@@ -275,16 +276,16 @@ class FLManagerModules(object):
             for contenido in cursor:
                 shaKey = contenido[0]
 
-        if pineboolib.project.conn.manager().isSystemTable(name_):
+        if aqApp.db().manager().isSystemTable(name_):
             modId = "sys"
         else:
-            modId = pineboolib.project.conn.managerModules().idModuleOfFile(n)
-        if os.path.exists(filedir("../tempdata/cache/%s/%s/file.%s/%s" % (pineboolib.project.conn.DBName(), modId, ext_, name_))):
+            modId = aqApp.db().managerModules().idModuleOfFile(n)
+        if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_)):
             utf8_ = False
             if ext_ == "kut":
                 utf8_ = True
-            data = self.contentFS(filedir("../tempdata/cache/%s/%s/file.%s/%s/%s.%s" %
-                                          (pineboolib.project.conn.DBName(), modId, ext_, name_, shaKey, ext_)), utf8_)
+            data = self.contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" %
+                                          (aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_, shaKey, ext_), utf8_)
         elif os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):
             data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))
         else:
@@ -670,7 +671,7 @@ class FLManagerModules(object):
             n = n.toString()
 
         query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
-        cursor = self.db_.cursor()
+        cursor = self.conn_.cursor()
         try:
             cursor.execute(query)
         except Exception:
@@ -723,7 +724,7 @@ class FLManagerModules(object):
                     from PyQt5.QtXml import QDomDocument
                     doc = QDomDocument(n)
                     if util.domDocumentSetContent(doc, str_ret):
-                        mng = self.db_.manager()
+                        mng = self.conn_.manager()
                         docElem = doc.documentElement()
                         mtd = mng.metadata(docElem, True)
 
@@ -732,8 +733,8 @@ class FLManagerModules(object):
 
                         if not mng.existTable(mtd.name()):
                             mng.createTable(mng)
-                        elif (self.db_.canRegenTables()):
-                            self.db_.regenTable(mtd.name(), mtd)
+                        elif (self.conn_.canRegenTables()):
+                            self.conn_.regenTable(mtd.name(), mtd)
 
         return str_ret
 
