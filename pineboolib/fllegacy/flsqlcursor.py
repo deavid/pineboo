@@ -2397,7 +2397,7 @@ class FLSqlCursor(QtCore.QObject):
                 self.refreshDelayed()
                 return
         else:
-            self.select()
+            #self.select()
             pos = self.atFrom()
             if pos > self.size():
                 pos = self.size() - 1
@@ -3154,14 +3154,7 @@ class FLSqlCursor(QtCore.QObject):
                     self.cursorRelation().setAskForCancelChanges(True)
 
             self.model().Insert(self)
-            #/////////////////////////////////////////////////////////////////////////////////////////////////
-            # MEJORABLE: Esto es un parche para evitar doble commitBuffer cuando usamos cursores relacionados.
-
-            # El segundo peta diciendo que ya existe el registro
-            if not self.selection_pk(self.buffer().value(self.buffer().pK())):
-                self.model().refresh()  # <- Solo seria necesaria esta parte
-                self.selection_pk(self.buffer().value(self.buffer().pK()))
-            #//////////////////////////////////////////////////////////////////////////////////////////////////
+            self.model().refresh()
             self.move(self.model().findPKRow((self.buffer().value(self.buffer().pK()), )))
 
             updated = True
