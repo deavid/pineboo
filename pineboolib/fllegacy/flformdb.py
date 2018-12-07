@@ -752,14 +752,21 @@ class FLFormDB(QtWidgets.QDialog):
         from pineboolib.pncontrolsfactory import SysType
         SysType().processEvents()
         try:
-            self.script.form = None
+            if hasattr(self.script, "form"):
+                self.script.form = None
             self.iface = None
-            self.widget.close()
-            del self.known_instances[(self.__class__, self._action.name())]
-            del self.widget
-            del self.script
+            if hasattr(self, "widget"):
+                self.widget.close()
+                del self.widget
+            instance_name = (self.__class__, self._action.name())
+            if instance_name in self.known_instances.keys():
+                del self.known_instances[instance_name]
+            
+            if hasattr(self, "script"):
+                self.script = None
         except Exception:
-           self.logger.warn("El FLFormDB %s no se cerró correctamente", self.formName())
+            
+           self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
 
     """
     Captura evento mostrar
