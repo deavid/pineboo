@@ -439,11 +439,7 @@ class FormDBWidget(QWidget):
         self.parent_ = parent or parent.parentWidget()
 
         self._formconnections = set([])
-        try:
-            self._class_init()
-
-        except Exception as e:
-            self.logger.exception("Error al inicializar la clase iface de QS:")
+        self._class_init()
 
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
@@ -459,14 +455,11 @@ class FormDBWidget(QWidget):
         signal_slot = disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
-        try:
+        
+        if signal_slot in self._formconnections:
             self._formconnections.remove(signal_slot)
-        except KeyError:
-            self.logger.exception("Error al eliminar una señal que no se encuentra")
-
-    # def __del__(self):
-    #    self.doCleanUp()
-    #    print("FormDBWidget: Borrando form para accion %r %s %s" % (self._action.name, self.iface, self))
+        else:
+            self.logger.warn("Error al eliminar una señal que no se encuentra")
 
     def obj(self):
         return self
@@ -486,7 +479,6 @@ class FormDBWidget(QWidget):
         if not self._action:
             self._action = getattr(self.parent(), "_action")
         self.logger.debug("closeEvent para accion %r", self._action.name)
-        #check_gc_referrers("FormDBWidget:" + self.__class__.__name__, weakref.ref(self), self._action.name)
         self.closed.emit()
         event.accept()  # let the window close
         self.doCleanUp()
@@ -498,7 +490,6 @@ class FormDBWidget(QWidget):
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
-            del self
     
     def clear_connections(self):
         # Limpiar todas las conexiones hechas en el script
