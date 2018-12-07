@@ -2139,6 +2139,7 @@ class FLTableDB(QtWidgets.QWidget):
         if not self.cursor_:
             return
 
+        from pineboolib.pncontrolsfactory import aqApp
         settings = FLSettings()
         if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
             QtWidgets.QMessageBox.information(self.topWidget, self.tr("Opción deshabilitada"), self.tr(
@@ -2165,7 +2166,7 @@ class FLTableDB(QtWidgets.QWidget):
         sheet = AQOdsSheet(spread_sheet, mtd.alias())
         tdb_num_rows = tdb.numRows()
         tdb_num_cols = tdb.numCols()
-
+        
         util = FLUtil()
 
         pd = util.createProgressDialog("Procesando", tdb_num_rows)
@@ -2238,7 +2239,7 @@ class FLTableDB(QtWidgets.QWidget):
                                 if not pix.isNull():
                                     
                                     pix_name = "pix%s_" % pix.serialNumber()
-                                    pix_file_name = "%s/%s.png" % (pineboolib.project.getTempDir(), pix_name,
+                                    pix_file_name = "%s/%s.png" % (aqApp.tmp_dir(), pix_name,
                                                                QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
                                     pix.save(pix_file_name, "PNG")
                                     print("Metiendo imagen")
@@ -2258,13 +2259,13 @@ class FLTableDB(QtWidgets.QWidget):
         cur.seek(cur_row)
         sheet.close()
         spread_sheet.close()
-
+        
         util.setProgress(tdb_num_rows)
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-        file_name = "%s/%s%s.ods" % (pineboolib.project.getTempDir(), mtd.name(),
+        file_name = "%s/%s%s.ods" % (aqApp.tmp_dir(), mtd.name(),
                                      QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
         ods_gen.generateOds(file_name)
-        from pineboolib.pncontrolsfactory import aqApp
+        
         aqApp.call("sys.openUrl", [file_name], None)
 
         QtWidgets.QApplication.restoreOverrideCursor()
