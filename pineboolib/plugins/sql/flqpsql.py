@@ -37,11 +37,17 @@ class FLQPSQL(object):
         self.name_ = "FLQPSQL"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "PostgreSQL"
+        self.alias_ = "PostgreSQL (PSYCOPG2)"
         self._dbname = None
         self.mobile_ = False
         self.pure_python_ = False
         self.defaultPort_ = 5432
+    
+    def useThreads(self):
+        return True
+
+    def useTimer(self):
+        return False
 
     def version(self):
         return self.version_
@@ -352,12 +358,6 @@ class FLQPSQL(object):
             cursor.execute(sql)
         except Exception:
             qWarning("PSQLDriver.refreshFetch\n %s" % traceback.format_exc())
-
-    def useThreads(self):
-        return True
-
-    def useTimer(self):
-        return False
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         ret_ = []
