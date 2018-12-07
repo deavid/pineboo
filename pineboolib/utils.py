@@ -552,7 +552,7 @@ def checkDependencies(dict_, exit=True):
                     logger.warn("Versión de %s: %s", key, mod_ver)
         except ImportError:
             dependences.append(dict_[key])
-            print(traceback.format_exc())
+            #print(traceback.format_exc())
             error.append(traceback.format_exc())
 
         
