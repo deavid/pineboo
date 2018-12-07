@@ -193,7 +193,7 @@ class PNConnection(QtCore.QObject):
         settings = FLSettings()
         if self.transaction_ == 0:
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warn("Iniciando Transacción... %s", self.transaction_)
+                logger.info("Iniciando Transacción... %s", self.transaction_)
             if self.transaction():
                 self.savePoint(self.transaction_)
                 self.lastActiveCursor_ = cursor
@@ -208,7 +208,7 @@ class PNConnection(QtCore.QObject):
                 return False
         else:
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warn("Creando punto de salvaguarda %s", self.transaction_)
+                logger.info("Creando punto de salvaguarda %s", self.transaction_)
             self.savePoint(self.transaction_)
 
             self.transaction_ = self.transaction_ + 1
@@ -300,7 +300,7 @@ class PNConnection(QtCore.QObject):
         if self.transaction_ == 0:
             settings = FLSettings()
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warn("Terminando transacción... %s", self.transaction_)
+                logger.info("Terminando transacción... %s", self.transaction_)
             try:
                 # self.conn.commit()
                 self.releaseSavePoint(self.transaction_)
