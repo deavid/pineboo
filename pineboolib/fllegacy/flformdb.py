@@ -240,6 +240,9 @@ class FLFormDB(QtWidgets.QDialog):
         if self._loaded:
             if not getattr(self.widget, "iface", None):
                 self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
+            
+            if self.widget:
+                self.widget.clear_connections()
 
             if hasattr(self.iface, "init"): #Meterlo en un hilo
                 self.init_thread_script = Thread(target = self.iface.init)
