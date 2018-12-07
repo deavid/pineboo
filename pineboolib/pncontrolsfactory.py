@@ -492,6 +492,15 @@ class FormDBWidget(QWidget):
         self.doCleanUp()
 
     def doCleanUp(self):
+        self.clear_connections()
+        if getattr(self, 'iface', None) is not None:
+            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
+            del self.iface.ctx
+            del self.iface
+            self._action.formrecord_widget = None
+            del self
+    
+    def clear_connections(self):
         # Limpiar todas las conexiones hechas en el script
         for signal, slot in self._formconnections:
             try:
@@ -500,13 +509,7 @@ class FormDBWidget(QWidget):
             except Exception:
                 self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
         self._formconnections.clear()
-
-        if getattr(self, 'iface', None) is not None:
-            check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
-            del self.iface.ctx
-            del self.iface
-            self._action.formrecord_widget = None
-            del self
+        
 
     def child(self, child_name):
         try:
