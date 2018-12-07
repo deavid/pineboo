@@ -118,8 +118,12 @@ class FLLineEdit(QtWidgets.QLineEdit):
             self.partDecimal = 0
             self.autoSelect = True
             self.partInteger = parent.cursor_.metadata().field(self._fieldName).partInteger()
-            self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
+            
             self._parent = parent
+            
+            if self._tipo is "string":
+                self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
+                self.setMaxLength(self._longitudMax)
 
             if self._tipo in ("int", "uint", "double"):
                 self.setAlignment(QtCore.Qt.AlignRight)
