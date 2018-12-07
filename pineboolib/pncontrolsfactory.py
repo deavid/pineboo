@@ -363,23 +363,23 @@ def solve_connection(sender, signal, receiver, slot):
         if "valueChanged" in signal:
             signal = signal.replace("valueChanged", "dateChanged")
 
-    if receiver.__class__.__name__ == "FormInternalObj" and slot == "accept":
-        receiver = receiver.parent()
+    #if receiver.__class__.__name__ == "FormInternalObj" and slot == "accept":
+    #    receiver = receiver.parent()
 
     remote_fn = getattr(receiver, slot, None)
 
     sg_name = re.sub(' *\(.*\)', '', signal)
     oSignal = getattr(sender, sg_name, None)
-    if not oSignal and sender.__class__.__name__ == "FormInternalObj":
-        oSignal = getattr(sender.parent(), sg_name, None)
+    #if not oSignal and sender.__class__.__name__ == "FormInternalObj":
+    #    oSignal = getattr(sender.parent(), sg_name, None)
         
     if not oSignal:
         logger.error("ERROR: No existe la señal %s para la clase %s", signal, sender.__class__.__name__)
         return
 
     if remote_fn:
-        if receiver.__class__.__name__ in ("FLFormSearchDB", "QDialog") and slot in ("accept", "reject"):
-            return oSignal, remote_fn
+        #if receiver.__class__.__name__ in ("FLFormSearchDB", "QDialog") and slot in ("accept", "reject"):
+        #    return oSignal, remote_fn
 
         pS = ProxySlot(remote_fn, receiver, slot)
         proxyfn = pS.getProxyFn()
