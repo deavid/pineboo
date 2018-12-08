@@ -89,7 +89,7 @@ class FLSQLITE(object):
         import pineboolib
         checkDependencies({"sqlite3": "sqlite3"})
         self.db_filename = db_name
-        db_is_new = not os.path.exists("%s/%s" % (pineboolib.project.get_temp_dir(), self.db_filename))
+        db_is_new = not os.path.exists("%s" % self.db_filename)
 
         import sqlite3
 
@@ -97,7 +97,7 @@ class FLSQLITE(object):
         if self.db_filename == getattr(pineboolib.project.conn, "db_name", None):
             self.conn_ = pineboolib.project.conn.conn
         else:
-            self.conn_ = sqlite3.connect(self.db_filename)
+            self.conn_ = sqlite3.connect("%s" % self.db_filename)
             self.conn_.isolation_level = None
 
             if db_is_new:
