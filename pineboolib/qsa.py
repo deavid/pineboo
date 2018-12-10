@@ -178,10 +178,12 @@ class Math(object):
 
 
 def parseFloat(x):
-    if x is None:
-        return 0
-    return float(x)
-
+    try:
+        if x is None:
+            return 0
+        return float(x)
+    except Exception:
+        return x
 
 def parseString(obj):
     try:
