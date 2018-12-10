@@ -647,7 +647,8 @@ class FLDataTable(QtWidgets.QTableView):
             last_pk = None
             if self.cursor().buffer():
                 last_pk = self.cursor().buffer().value(self.cursor().buffer().pK())
-
+            
+            self.model().refresh()
             self.cursor().refresh()
 
             self.marcaRow(last_pk)
