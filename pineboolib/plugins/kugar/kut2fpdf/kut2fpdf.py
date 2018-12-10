@@ -921,6 +921,8 @@ class kut2fpdf(object):
             self._document.image(file_name, x, y, W, H, "PNG")
     
     def draw_barcode(self, x, y, W, H, xml, text):
+        if text == "None":
+            return
         file_name = aqApp.tmp_dir()
         file_name += "/%s.png" % (text)
         if not os.path.exists(file_name):   
