@@ -184,6 +184,12 @@ class kut2fpdf(object):
         #    for l in range(l_ini , l_end):
         #        print(l)
         #        self.processSection("AddOnHeader", str(l))
+        page_header = self._xml.find("PageHeader")
+        if page_header is not None:
+            if self._document.page_no() == 1 or page_header.get("PrintFrequency") == "1":
+                self.processSection("PageHeader")
+        
+        
         if add_on_header and not self._document.page_no() == 1:
             for l in range(data_level + 1):
                 self.processSection("AddOnHeader", str(l))
@@ -309,11 +315,11 @@ class kut2fpdf(object):
     @param name. Nombre de la sección a procesar.
     """
 
-    def processSection(self, name, level):
+    def processSection(self, name, level=0):
         sec_list = self._xml.findall(name)
         sec_ = None
         for s in sec_list:
-            if s.get("Level") == str(level):
+            if s.get("Level") == str(level) or s.get("Level") is None:
                 sec_ = s
                 break
         
