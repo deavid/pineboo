@@ -108,9 +108,13 @@ class parsertools(object):
         
         p = 0 if p is None else int(p)
         
+        
+        
         from pineboolib.pncontrolsfactory import aqApp
         ret_ = value
         if data_type == 2: # Double
+            if value in (None, "None"):
+                return
             ret_ = aqApp.localeSystem().toString(float(value),'f', p)
         elif data_type == 0:
             pass
