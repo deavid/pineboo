@@ -217,7 +217,7 @@ class FLReportViewer(QObject):
             flags[0] = append_or_flags
         
             if display_report is not None:
-                flags[1] = display_report
+                flags[0] = display_report
         elif isinstance(append_or_flags, list):
             if len(append_or_flags) > 0:
                 flags[0] = append_or_flags[0] # display
