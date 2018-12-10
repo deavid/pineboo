@@ -418,7 +418,9 @@ class kut2fpdf(object):
         style = int(xml.get("Style"))
         width = int(xml.get("Width"))
         X1 = self.calculateLeftStart(xml.get("X1"))
+        X1 = self.calculateWidth(X1, 0, False)
         X2 = self.calculateLeftStart(xml.get("X2"))
+        X2 = self.calculateWidth(X2, 0, False)
         # Ajustar altura a secciones ya creadas
         Y1 = int(xml.get("Y1")) + self.topSection()
         Y2 = int(xml.get("Y2")) + self.topSection()
@@ -458,15 +460,17 @@ class kut2fpdf(object):
     @param x. Posición a comprobar.
     @return Valor corregido, si procede.
     """
-    """
-    def calculateRightEnd(self, x):
-        x = int(x)
-        ret_ = x
-        if x > (self._document.w - self._right_margin):
-            ret_ = self._document.w - self._right_margin
 
+    def calculateWidth(self, width, pos_x, fix_ratio = True):
+        width = int(width)
+        if fix_ratio:
+            width = self._parser_tools.ratio_correction(int(width))
+        ret_ = width
+        limit = self._document.w - self._right_margin
+        if pos_x + width > limit:
+            ret_ = limit - pos_x
         return ret_
-    """
+
     """
     Procesa una etiqueta. Esta peude ser un campo calculado, una etiqueta, un campo especial o una imagen.
     @param xml. Sección de xml a procesar.
@@ -614,6 +618,7 @@ class kut2fpdf(object):
         orig_H = H
         # Corregimos margenes:
         x = self.calculateLeftStart(x)
+        W = self.calculateWidth(W, x)
         
         #bg_color = xml.get("BackgroundColor").split(",")
         fg_color = self.get_color(xml.get("ForegroundColor"))
@@ -702,9 +707,9 @@ class kut2fpdf(object):
             
         for tl in text_lines:
             str_width = self._document.get_string_width(tl)
-            if str_width > orig_W + 2 and xml.tag !="Label" and resizeable: #Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
+            if str_width > W + 2 and xml.tag !="Label" and resizeable: #Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
                 height_resized = True
-                array_text = self.split_text(tl, orig_W)
+                array_text = self.split_text(tl, W)
             else:
             
                 array_text.append(tl)
@@ -824,8 +829,10 @@ class kut2fpdf(object):
         orig_x = x
         orig_y = y
         orig_w = W
-        x = self.calculateLeftStart(orig_x)
-        dif_orig_x = x - orig_x      
+        
+        x = self.calculateLeftStart(orig_x) 
+        W = self.calculateWidth(W, x)
+          
         
         if xml is not None and not self.design_mode:
             if xml.get("BorderStyle") == "1":
@@ -903,9 +910,8 @@ class kut2fpdf(object):
             file_name = self._parser_tools.parseKey(file_name)
             
         if os.path.exists(file_name):            
-            orig_x = x
-            x = self.calculateLeftStart(orig_x)
-            x = x + (x -orig_x)
+            x = self.calculateLeftStart(x)
+            W = self.calculateWidth(W, x)
             
             self._document.image(file_name, x, y, W, H, "PNG")
     
