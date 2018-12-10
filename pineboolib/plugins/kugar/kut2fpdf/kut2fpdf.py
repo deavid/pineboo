@@ -451,7 +451,7 @@ class kut2fpdf(object):
     """
 
     def calculateLeftStart(self, x):
-        return int(x) + self._left_margin
+        return self._parser_tools.ratio_correction(int(x)) + self._left_margin
 
     """
     Comprueba si excedemos el margen derecho de la página actual
