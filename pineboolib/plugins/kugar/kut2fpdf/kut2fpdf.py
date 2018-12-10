@@ -44,6 +44,7 @@ class kut2fpdf(object):
     draws_at_header = None
     detailn = None
     name_ = None
+    _actual_append_page_no = None
 
     def __init__(self):
 
@@ -62,6 +63,7 @@ class kut2fpdf(object):
         self.draws_at_header = {}
         self.detailn = {}
         self.name_ = None
+        self._actual_append_page_no = 0
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
     @param name. Nombre de ".kut".
@@ -107,6 +109,10 @@ class kut2fpdf(object):
         page_display = (flags[1] == 1) if len(flags) > 1 else False
         
         print("Append", page_append)
+        
+        if page_append:
+            self._actual_append_page_no = 0
+        
         print("Display", page_display)
         print("Page break", page_break)
 
@@ -173,6 +179,7 @@ class kut2fpdf(object):
             self.draw_margins()
             
         self._actual_section_size = 0
+        self._actual_append_page_no += 1
         
         #l_ini = data_level
         #l_end = self.prev_level
@@ -507,7 +514,7 @@ class kut2fpdf(object):
             if text == "":
                 if xml.get("Type") == "1":
                     text = "PageNo"
-            text = self._parser_tools.getSpecial( text, self._document.page_no())
+            text = self._parser_tools.getSpecial( text, self._actual_append_page_no)
 
         elif xml.tag == "CalculatedField":
             calculation_type = xml.get("CalculationType")
