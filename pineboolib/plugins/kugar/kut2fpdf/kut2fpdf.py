@@ -451,12 +451,7 @@ class kut2fpdf(object):
     """
 
     def calculateLeftStart(self, x):
-        x = int(x)
-        ret_ = x
-        if x < self._left_margin:
-            ret_ = self._left_margin
-
-        return ret_
+        return int(x) + self._left_margin
 
     """
     Comprueba si excedemos el margen derecho de la página actual
@@ -739,7 +734,7 @@ class kut2fpdf(object):
                 #x = x + W - str_width if not height_resized else W
             else:
                 # Izquierda
-                x = orig_x + 2
+                x = x + 2
 
                 
             if VAlignment == "1":  # sobre Y
