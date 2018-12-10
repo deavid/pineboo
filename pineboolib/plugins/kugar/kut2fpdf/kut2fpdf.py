@@ -418,9 +418,7 @@ class kut2fpdf(object):
         style = int(xml.get("Style"))
         width = int(xml.get("Width"))
         X1 = self.calculateLeftStart(xml.get("X1"))
-        X1 = self.calculateRightEnd(X1)
         X2 = self.calculateLeftStart(xml.get("X2"))
-        X2 = self.calculateRightEnd(X2)
         # Ajustar altura a secciones ya creadas
         Y1 = int(xml.get("Y1")) + self.topSection()
         Y2 = int(xml.get("Y2")) + self.topSection()
@@ -465,7 +463,7 @@ class kut2fpdf(object):
     @param x. Posición a comprobar.
     @return Valor corregido, si procede.
     """
-
+    """
     def calculateRightEnd(self, x):
         x = int(x)
         ret_ = x
@@ -473,7 +471,7 @@ class kut2fpdf(object):
             ret_ = self._document.w - self._right_margin
 
         return ret_
-
+    """
     """
     Procesa una etiqueta. Esta peude ser un campo calculado, una etiqueta, un campo especial o una imagen.
     @param xml. Sección de xml a procesar.
@@ -621,10 +619,6 @@ class kut2fpdf(object):
         orig_H = H
         # Corregimos margenes:
         x = self.calculateLeftStart(x)
-        dif_orig_x = x - orig_x
-        W = self.calculateRightEnd((x + orig_W) - dif_orig_x) - x
-        
-        dif_orig_w = W - orig_W
         
         #bg_color = xml.get("BackgroundColor").split(",")
         fg_color = self.get_color(xml.get("ForegroundColor"))
@@ -730,10 +724,6 @@ class kut2fpdf(object):
             if actual_text is None:
                 continue
             
-            if dif_orig_x > 0:
-                x += 2
-
-            
             processed_lines += 1
             
             if processed_lines > 1:
@@ -749,7 +739,7 @@ class kut2fpdf(object):
                 #x = x + W - str_width if not height_resized else W
             else:
                 # Izquierda
-                x = orig_x + dif_orig_x + 2
+                x = orig_x + 2
 
                 
             if VAlignment == "1":  # sobre Y
@@ -842,11 +832,6 @@ class kut2fpdf(object):
         x = self.calculateLeftStart(orig_x)
         dif_orig_x = x - orig_x      
         
-        W = self.calculateRightEnd((x + orig_w) - dif_orig_x) - x
-        
-        dif_orig_w = orig_w -W
-        #W = W - dif_orig_x
-        
         if xml is not None and not self.design_mode:
             if xml.get("BorderStyle") == "1":
                 
@@ -867,11 +852,6 @@ class kut2fpdf(object):
             
         if style_ is not "":
             self._document.set_line_width(border_width)
-            if dif_orig_x is not 0: # Corrige el relleno cuando 
-                x += 2
-            
-            if dif_orig_w is not 0:
-                W -= 2
 
             self._document.rect(x, y, W, H, style_)
             self._document.set_line_width(line_width)
@@ -928,11 +908,9 @@ class kut2fpdf(object):
             file_name = self._parser_tools.parseKey(file_name)
             
         if os.path.exists(file_name):            
-            limit_right = self.calculateRightEnd(x + W)
             orig_x = x
             x = self.calculateLeftStart(orig_x)
             x = x + (x -orig_x)
-            W = W - ((x + W) - limit_right )
             
             self._document.image(file_name, x, y, W, H, "PNG")
     
