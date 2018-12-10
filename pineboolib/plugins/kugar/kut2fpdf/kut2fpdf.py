@@ -113,6 +113,7 @@ class kut2fpdf(object):
         if page_append:
             self._actual_append_page_no = 0
             self.prev_level = -1
+            self.last_detail = False
         
         
         print("Display", page_display)
@@ -247,7 +248,8 @@ class kut2fpdf(object):
             else:    
                 self.detailn[str(level)] += 1
             
-            if level > self.prev_level:           
+            if level > self.prev_level:
+                print("Imprimo detailHeader")           
                 self.processData("DetailHeader",  data, level)    
                       
                         
@@ -308,9 +310,12 @@ class kut2fpdf(object):
                         #Vemos el tope por abajo 
                         limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter"))
                         actual_size = self._parser_tools.getHeight(dF) + self.topSection()
+                        
+                        
+                        
+                        
                         if (actual_size > limit_bottom) or self.last_detail:
                             self.processSection("AddOnFooter", str(data_level))
-                            #self.processSection("PageFooter")  # Pie de página
                             self.newPage(data_level)
 
                     
@@ -332,7 +337,6 @@ class kut2fpdf(object):
         for s in sec_list:
             if s.get("Level") == str(level) or s.get("Level") is None:
                 sec_ = s
-                break
         
         if sec_ is not None:
             if sec_.get("PrintFrequency") == "1" or self._document.page_no() == 1 or name in ("AddOnHeader","AddOnFooter"):   
