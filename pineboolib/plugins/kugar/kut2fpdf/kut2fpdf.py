@@ -104,19 +104,23 @@ class kut2fpdf(object):
         # Seteamos rutas a carpetas con tipos de letra ...
 
         # Cargamos las fuentes disponibles
-        page_break = (flags[2] == 1) if len(flags) == 3 else False
-        page_append = (flags[0] == 1) if len(flags) > 0 else False
-        page_display = (flags[1] == 1) if len(flags) > 1 else False
+        page_break = (flags[2] == 1) if len(flags) == 3 else True
+        page_append = (flags[1] == 1) if len(flags) > 1 else False
+        page_display = (flags[0] == 1) if len(flags) > 0 else False
         
         print("Append", page_append)
         
         if page_append:
             self._actual_append_page_no = 0
+            self.prev_level = -1
+        
         
         print("Display", page_display)
         print("Page break", page_break)
+        
+            
 
-        self.processDetails()
+        self.processDetails(not page_break)
         
         #FIXME:Alguno valores no se encuentran
         for p in self._document.pages.keys():
@@ -193,7 +197,7 @@ class kut2fpdf(object):
         #        self.processSection("AddOnHeader", str(l))
         page_header = self._xml.find("PageHeader")
         if page_header is not None:
-            if self._document.page_no() == 1 or page_header.get("PrintFrequency") == "1":
+            if self._actual_append_page_no == 1 or page_header.get("PrintFrequency") == "1":
                 self.processSection("PageHeader")
         
         
@@ -209,12 +213,11 @@ class kut2fpdf(object):
     Procesa las secciones details con sus correspondientes detailHeader y detailFooter.
     """
 
-    def processDetails(self):
+    def processDetails(self, keep_page = None):
         # Procesamos la cabecera si procede ..
         top_level = 0
         level = 0
-        first_page_created = False
-        
+        first_page_created = keep_page if keep_page is not None and self._document.page_no() > 0 else False
         
         rows_array = self._xml_data.findall("Row")
         for data in rows_array:
@@ -224,6 +227,7 @@ class kut2fpdf(object):
                 top_level = level
                 
             if not first_page_created:
+                print("New page!!")
                 self.newPage(level)
                 first_page_created = True
             
@@ -346,7 +350,8 @@ class kut2fpdf(object):
         if data is None:
             data = self._actual_data_line
         
-        print("Procesando", xml.tag, data.get("level"))
+        if self.design_mode:
+            print("Procesando", xml.tag, data.get("level"))
         
         size_updated = False
         if xml.tag == "DetailFooter":
