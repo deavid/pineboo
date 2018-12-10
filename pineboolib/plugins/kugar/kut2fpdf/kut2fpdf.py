@@ -248,8 +248,7 @@ class kut2fpdf(object):
             else:    
                 self.detailn[str(level)] += 1
             
-            if level > self.prev_level:
-                print("Imprimo detailHeader")           
+            if level > self.prev_level:         
                 self.processData("DetailHeader",  data, level)    
                       
                         
@@ -325,6 +324,7 @@ class kut2fpdf(object):
                     self.newPage(data_level, False)
                 
                 
+                break #Se ejecuta una sola instancia
 
     """
     Procesa las secciones fuera de detail
