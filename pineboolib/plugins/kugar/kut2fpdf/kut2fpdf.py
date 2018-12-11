@@ -700,6 +700,8 @@ class kut2fpdf(object):
         VAlignment = xml.get("VAlignment")  # 0 izquierda, 1 centrado,2 derecha
         HAlignment = xml.get("HAlignment")
         
+        layout_direction = xml.get("layoutDirection")
+        
         start_section_size = self._actual_section_size
         result_section_size = 0
         #Miramos si el texto sobrepasa el ancho
