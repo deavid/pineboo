@@ -157,8 +157,9 @@ class FLReportViewer(QObject):
         # if self.loop_:
         #    print("FLReportViewer::exec(): Se ha detectado una llamada recursiva")
         #    return
-
-        pineboolib.project.call("sys.openUrl", [self.pdfFile], None, True)
+        if hasattr(self.rptViewer_.rptEngine_,"parser_"):
+            pdf_file = self.rptViewer_.rptEngine_.parser_.get_file_name()
+            pineboolib.project.call("sys.openUrl", [pdf_file], None, True)
         # self.eventloop.exec_()
 
         # if self.embedInParent_:
@@ -228,16 +229,7 @@ class FLReportViewer(QObject):
                 
         ret = self.rptViewer_.renderReport(init_row, init_col, flags)
         self.report_ = self.rptViewer_.reportPages()
-        if ret and flags[0] == 1:
-            try:
-                self.pdfFile = self.rptViewer_.rptEngine_.parser_.get_file_name()
-            except Exception:
-                self.logger.warn("No se ha devuelto report")
-                return False
-            
-            return True
-        else:
-            return False
+        return True
 
     @decorators.BetaImplementation
     def slotFirstPage(self):
