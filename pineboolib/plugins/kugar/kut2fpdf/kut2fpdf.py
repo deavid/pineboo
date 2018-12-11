@@ -196,10 +196,13 @@ class kut2fpdf(object):
         #    for l in range(l_ini , l_end):
         #        print(l)
         #        self.processSection("AddOnHeader", str(l))
-        page_header = self._xml.find("PageHeader")
-        if page_header is not None:
-            if self._actual_append_page_no == 1 or page_header.get("PrintFrequency") == "1":
-                self.processSection("PageHeader")
+        pg_headers = self._xml.findall("PageHeader")
+        
+        for ph in pg_headers:
+            if self._actual_append_page_no == 1 or ph.get("PrintFrequency") == "1":
+                ph_level = ph.get("Level") if ph.get("Level") is not None else None
+                self.processSection("PageHeader", ph_level)
+                break
         
         
         if add_on_header and not self._document.page_no() == 1:
@@ -228,7 +231,6 @@ class kut2fpdf(object):
                 top_level = level
                 
             if not first_page_created:
-                print("New page!!")
                 self.newPage(level)
                 first_page_created = True
             
