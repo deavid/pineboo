@@ -63,7 +63,7 @@ class kut2fpdf(object):
         self.draws_at_header = {}
         self.detailn = {}
         self.name_ = None
-        self._actual_append_page_no = 0
+        self._actual_append_page_no = -1
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
     @param name. Nombre de ".kut".
@@ -82,6 +82,7 @@ class kut2fpdf(object):
             return False
 
         try:
+            print(data)
             self._xml_data = load2xml(data)
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
@@ -94,6 +95,7 @@ class kut2fpdf(object):
         if report is None:
             from fpdf import FPDF
             print("nuevo report")
+            self._actual_append_page_no = 0
             self._document = FPDF(self._page_orientation, "pt", self._page_size)
             for f in self._document.core_fonts:
                 self.logger.debug("KUT2FPDF :: Adding font %s", f)
@@ -526,7 +528,7 @@ class kut2fpdf(object):
 
         calculation_type = xml.get("CalculationType")
         
-        if calculation_type is not None:
+        if calculation_type is not None and xml.tag != "Field":
             if calculation_type == "6":
                 function_name = xml.get("FunctionName")
                 try:
