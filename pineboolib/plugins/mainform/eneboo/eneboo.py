@@ -241,7 +241,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
-            aqApp.call("%s.iface.init" % module, [])
+            aqApp.call("%s.iface.init" % module, [], None, False)
 
         mng = aqApp.db().managerModules()
         mng.setActiveIdModule(module)
