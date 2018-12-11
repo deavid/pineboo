@@ -82,7 +82,6 @@ class kut2fpdf(object):
             return False
 
         try:
-            print(data)
             self._xml_data = load2xml(data)
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
@@ -95,7 +94,7 @@ class kut2fpdf(object):
         if report is None:
             from fpdf import FPDF
             print("nuevo report")
-            self._actual_append_page_no = 0
+            self._actual_append_page_no = -1
             self._document = FPDF(self._page_orientation, "pt", self._page_size)
             for f in self._document.core_fonts:
                 self.logger.debug("KUT2FPDF :: Adding font %s", f)
@@ -113,13 +112,14 @@ class kut2fpdf(object):
         print("Append", page_append)
         
         if page_append:
-            self._actual_append_page_no = 0
             self.prev_level = -1
             self.last_detail = False
         
         
         print("Display", page_display)
         print("Page break", page_break)
+        if page_break:
+            self._actual_append_page_no = -1
         
             
 
@@ -201,13 +201,13 @@ class kut2fpdf(object):
         pg_headers = self._xml.findall("PageHeader")
         
         for ph in pg_headers:
-            if self._actual_append_page_no == 1 or ph.get("PrintFrequency") == "1":
+            if self.number_pages() == 0 or ph.get("PrintFrequency") == "1":
                 ph_level = ph.get("Level") if ph.get("Level") is not None else None
                 self.processSection("PageHeader", ph_level)
                 break
         
         
-        if add_on_header and not self._document.page_no() == 1:
+        if add_on_header and not self.number_pages() == 0:
             for l in range(data_level + 1):
                 self.processSection("AddOnHeader", str(l))
             
@@ -992,4 +992,7 @@ class kut2fpdf(object):
         self._document.set_line_width(1)
         self._document.set_draw_color(r, g, b)
         self._document.dashed_line(X1, Y1, X2, Y2, dash_length, space_length)
+    
+    def number_pages(self):
+        return self._actual_append_page_no
     
