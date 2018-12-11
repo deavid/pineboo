@@ -777,16 +777,15 @@ class FLReportViewer(QObject):
             return self.report_.pageOrientation()
         return -1
 
-    @decorators.BetaImplementation
     def pageDimensions(self):
-        if self.report_:
-            return self.report_.pageDimensions()
-        return QtCore.QSize()
+        if hasattr(self.rptViewer_.rptEngine_, "parser_"):
+            return self.rptViewer_.rptEngine_.parser_._page_size
+        return -1
 
-    @decorators.BetaImplementation
+
     def pageCount(self):
-        if self.report_:
-            return self.report_.pageCount()
+        if hasattr(self.rptViewer_.rptEngine_, "parser_"):
+            return self.rptViewer_.rptEngine_.parser_._actual_append_page_no
         return -1
 
     @decorators.BetaImplementation
