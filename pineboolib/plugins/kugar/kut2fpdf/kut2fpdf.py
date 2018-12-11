@@ -524,9 +524,9 @@ class kut2fpdf(object):
                     text = "PageNo"
             text = self._parser_tools.getSpecial( text, self._actual_append_page_no)
 
-        elif xml.tag == "CalculatedField":
-            calculation_type = xml.get("CalculationType")
-            
+        calculation_type = xml.get("CalculationType")
+        
+        if calculation_type is not None:
             if calculation_type == "6":
                 function_name = xml.get("FunctionName")
                 try:
