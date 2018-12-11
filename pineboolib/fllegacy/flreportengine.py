@@ -294,3 +294,7 @@ class FLReportEngine(object):
                     self.preferedTemplate.emit(tempname)
                     break
             n = n.nextSibling()
+    
+    def number_pages(self):
+        return self.parser_.number_pages() if self.parser_ else 0
+            
