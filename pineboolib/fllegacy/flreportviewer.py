@@ -776,8 +776,8 @@ class FLReportViewer(QObject):
 
 
     def pageCount(self):
-        if hasattr(self.rptViewer_.rptEngine_, "parser_"):
-            return self.rptViewer_.rptEngine_.parser_._actual_append_page_no
+        if hasattr(self.rptViewer_, "rptEngine_"):
+            return self.rptViewer_.rptEngine_.number_pages()
         return -1
 
     @decorators.BetaImplementation
