@@ -315,8 +315,9 @@ def slot_done(fn, signal, sender, caller):
         
         
         if caller is not None:
-            signal_name = signal.signal[1:] #Quitamos el caracter "2" inicial
-            if not signal_name.startswith("signal_test"):
+            
+            if signal.signal != caller.signal_test.signal:
+                signal_name = signal.signal[1:signal.signal.find("(")] #Quitamos el caracter "2" inicial y parámetros
                 logger.debug("Emitir evento test: %s", signal_name)
                 caller.signal_test.emit(signal_name, sender)
             
