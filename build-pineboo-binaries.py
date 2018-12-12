@@ -127,8 +127,16 @@ if build_sysroot:
             os.symlink("%s/../../src/sqlite3-android/build/sqlite3.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3.h" % sysroot_dir)
             os.symlink("%s/../../src/sqlite3-android/obj/local/armeabi/libsqlite3.so" %
                        os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libsqlite3.so" % sysroot_dir)
-        except:
-            pass
+        except Exception:
+            print(traceback.format_exc())
+    
+    if target == "linux-64":
+        try:
+            os.symlink("%s/../../src/sqlite3-linux-64/sqlite-autoconf-3260000/sqlite3ext.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3ext.h" % sysroot_dir)
+            os.symlink("%s/../../src/sqlite3-linux-64/sqlite-autoconf-3260000/sqlite3.h" % os.path.abspath(os.path.join(sysroot_dir)), "%s/include/sqlite3.h" % sysroot_dir)
+            os.symlink("%s/../../src/sqlite3-linux-64/sqlite-autoconf-3260000/.libs/libsqlite3.so" % os.path.abspath(os.path.join(sysroot_dir)), "%s/lib/libsqlite3.so" % sysroot_dir)
+        except Exception:
+            print(traceback.format_exc())
 else:
     print("INFO::sysroot-%s ya existe, omitiendo ..." % target)
 # Build the demo.

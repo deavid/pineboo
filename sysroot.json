@@ -3,21 +3,20 @@
 
     "android|macos|win#openssl": {
         "android#source":   "openssl-1.0.*.tar.gz",
-	"macos|win#source": "openssl-1.1.*.tar.gz"
+	"macos|win|linux#source": "openssl-1.1.*.tar.gz"
     },
 
     "qt5": {
         "android#qt_dir":           "/opt/Qt5.*/*/android_armv7",
-	"linux#qt_dir":           "/opt/Qt5.*/*/gcc_64",
         "ios#qt_dir":               "Qt/*/ios",
-	"win#qt_dir":		    "win64-mxe/usr/x86_64-w64-mingw32.static/qt5",
+	"win#qt_dir":		    "/opt/Qt5.11.3-WIN-64",
 
-        "macos#source":   "qt-everywhere-*-src-5.*.tar.xz",
+        "macos|linux#source":   "qt-everywhere-src-5.*.tar.xz",
 
         "android|linux#ssl":        "openssl-runtime",
         "ios#ssl":                  "securetransport",
         "macos|win#ssl":            "openssl-linked",
-
+	"edition":		"opensource",
         "static_msvc_runtime":      true
     },
 
@@ -25,7 +24,7 @@
         "build_host_from_source":   true,
         "build_target_from_source": true,
 	"dynamic_loading": 	    true,
-        "source":                   "Python-3.7.*.tar.xz"
+        "source":                   "Python-3.*.*.tar.xz"
     },
 
     "sip": {
@@ -40,7 +39,7 @@
         ],
         "android#modules":              [
                 "QtCore", "QtGui", "QtXml", "QtNetwork", "QtPrintSupport", "QtWidgets",
-                "QtAndroidExtras"
+                "QtAndroidExtras","QtSvg"
         ],
 
         "ios#disabled_features":        [
