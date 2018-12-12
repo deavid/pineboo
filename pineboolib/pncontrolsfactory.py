@@ -299,7 +299,11 @@ def proxy_fn(wf, wr, slot):
 
     return fn
 
-def slot_done(fn, signal):
+
+
+
+def slot_done(fn, signal, sender, caller): 
+    
     def new_fn(*args, **kwargs):
         args_num = get_expected_args_num(fn)
 
@@ -308,7 +312,14 @@ def slot_done(fn, signal):
             res = fn(*args[:args_num], **kwargs)
         except Exception:
             res = fn(*args[:args_num][:-1])
-        print("***************Emitir evento test", signal)
+        
+        
+        if caller is not None:
+            signal_name = signal.signal[1:] #Quitamos el caracter "2" inicial
+            if not signal_name.startswith("signal_test"):
+                logger.debug("Emitir evento test: %s", signal_name)
+                caller.signal_test.emit(signal_name, sender)
+            
         return res
     return new_fn
 
@@ -326,7 +337,7 @@ def connect(sender, signal, receiver, slot, caller=None):
     new_signal, new_slot = signal_slot
 
     try:
-        slot_done_fn = slot_done(new_slot, new_signal)
+        slot_done_fn = slot_done(new_slot, new_signal, sender, caller)
         new_signal.connect(slot_done_fn, type=conntype)
         # new_signal.connect(new_slot, type=conntype)
 
@@ -417,6 +428,7 @@ class FormDBWidget(QWidget):
     cursor_ = None
     parent_ = None
     iface = None
+    signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
 
     logger = logging.getLogger("pnControlsFactory.FormDBWidget")
 
