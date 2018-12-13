@@ -311,12 +311,12 @@ class kut2fpdf(object):
                     if heightCalculated > self._document.h:  # Si nos pasamos
                         self._no_print_footer = True
                         #Vemos el tope por abajo 
-                        limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter"))
+                        limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter")) + 3
                         actual_size = self._parser_tools.getHeight(dF) + self.topSection()
                         
                         
                         
-                        
+                        print("***", actual_size, limit_bottom)
                         if (actual_size > limit_bottom) or self.last_detail:
                             self.processSection("AddOnFooter", str(data_level))
                             self.newPage(data_level)
