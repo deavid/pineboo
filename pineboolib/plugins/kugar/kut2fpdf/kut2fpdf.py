@@ -80,7 +80,7 @@ class kut2fpdf(object):
             self.logger.exception(
                 "KUT2FPDF: Problema al procesar %s.kut", name)
             return False
-
+        
         try:
             self._xml_data = load2xml(data)
         except Exception:
@@ -311,13 +311,13 @@ class kut2fpdf(object):
                     if heightCalculated > self._document.h:  # Si nos pasamos
                         self._no_print_footer = True
                         #Vemos el tope por abajo 
-                        limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter")) + 3
+                        limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter"))
                         actual_size = self._parser_tools.getHeight(dF) + self.topSection()
                         
                         
                         
-                        print("***", actual_size, limit_bottom)
-                        if (actual_size > limit_bottom) or self.last_detail:
+
+                        if (actual_size > limit_bottom + 2) or self.last_detail: # +2 se usa de margen extra
                             self.processSection("AddOnFooter", str(data_level))
                             self.newPage(data_level)
 
