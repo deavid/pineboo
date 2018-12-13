@@ -927,7 +927,8 @@ class Member(ASTPython):
             "charAt",
             "charCodeAt",
             "arg",
-            "substring"
+            "substring", 
+            "attributeValue"
         ]
         for member in replace_members:
             for idx, arg in enumerate(arguments):
@@ -1014,6 +1015,10 @@ class Member(ASTPython):
                         value = arg[5:]
                         value = value[:len(value) - 1]
                         arguments = ["%s.append(%s)" % (".".join(part1), value)] + part2
+                    elif member == "attributeValue":
+                        value = arg[15:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
                     else:
                         if ".".join(part1):
                             arguments = ["%s.%s" %
