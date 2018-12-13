@@ -144,9 +144,9 @@ class FLReportEngine(object):
             return
 
         if not self.rd:
-            self.rd = QtXml.QDomDocument("QUERY_DATA")
+            self.rd = QtXml.QDomDocument("KugarData")
 
-        tmpDoc = QtXml.QDomDocument("QUERY_DATA")
+        tmpDoc = QtXml.QDomDocument("KugarData")
 
         self.d_.rows_ = tmpDoc.createDocumentFragment()
         self.d_.setQuery(q)
@@ -167,7 +167,7 @@ class FLReportEngine(object):
                     if not q.next():
                         break
 
-        data = QtXml.QDomElement(tmpDoc.createElement("queryData"))
+        data = QtXml.QDomElement(tmpDoc.createElement("KugarData"))
         data.appendChild(self.d_.rows_)
         tmpDoc.appendChild(data)
         self.rd = tmpDoc
@@ -178,7 +178,7 @@ class FLReportEngine(object):
 
     def setFLReportData(self, n):
         self.d_.setQuery(0)
-        tmp_doc = QtXml.QDomDocument("QUERY_DATA")
+        tmp_doc = QtXml.QDomDocument("KugarData")
         tmp_doc.appendChild(n)
         self.rd = tmp_doc
         return True
