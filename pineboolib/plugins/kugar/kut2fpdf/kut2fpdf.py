@@ -1014,8 +1014,8 @@ class kut2fpdf(object):
         self._document.dashed_line(X1, Y1, X2, Y2, dash_length, space_length)
     
     def number_pages(self):
-        return self._actual_append_page_no
+        return self._actual_append_page_no if self._actual_append_page_no > 0 else 0
     
     def reset_page_no(self):
-        self._actual_append_page_no = 0
+        self._actual_append_page_no = -1
     
