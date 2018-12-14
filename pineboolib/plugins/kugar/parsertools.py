@@ -52,11 +52,17 @@ class parsertools(object):
 
     def convertToNode(self, data):
 
-        node = Node()
+        #node = Node()
+        from pineboolib.pncontrolsfactory import FLDomElement, FLDomNode, FLDomDocument
+        
+        doc = FLDomDocument()
+        ele = doc.createElement("element")
         for k in data.keys():
-            node.setAttribute(k, data.get(k))
+            attr_node = doc.createAttribute(k)
+            attr_node.setValue(data.get(k))
+            ele.setAttributeNode(attr_node)
 
-        return node
+        return ele
 
     """
     Coge la altura especificada en un elemento xml.
@@ -309,20 +315,3 @@ class parsertools(object):
         ret_ = ret_.replace("__PLUS__", "+")
         
         return ret_
-
-"""
-Clase del tipo node para los calculatedField.
-"""
-
-
-class Node(object):
-    list_ = None
-
-    def __init__(self):
-        self.list_ = {}
-
-    def setAttribute(self, name, value):
-        self.list_[name] = value
-
-    def attributeValue(self, name):
-        return self.list_[name] if name in self.list_.keys() else None
