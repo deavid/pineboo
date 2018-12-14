@@ -45,6 +45,7 @@ class kut2fpdf(object):
     detailn = None
     name_ = None
     _actual_append_page_no = None
+    next_break = None
 
     def __init__(self):
 
@@ -63,7 +64,8 @@ class kut2fpdf(object):
         self.draws_at_header = {}
         self.detailn = {}
         self.name_ = None
-        self._actual_append_page_no = -1
+        self._actual_append_page_no = 0
+        self.next_break = False
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
     @param name. Nombre de ".kut".
@@ -80,7 +82,6 @@ class kut2fpdf(object):
             self.logger.exception(
                 "KUT2FPDF: Problema al procesar %s.kut", name)
             return False
-        
         try:
             self._xml_data = load2xml(data)
         except Exception:
@@ -116,10 +117,16 @@ class kut2fpdf(object):
             self.last_detail = False
         
         
+        if self.next_break:
+            self._actual_append_page_no = -1
+            self.next_break = False
+        
         print("Display", page_display)
         print("Page break", page_break)
         if page_break:
-            self._actual_append_page_no = -1
+            self.next_break = True
+            
+            
         
             
 
@@ -610,6 +617,7 @@ class kut2fpdf(object):
     """
 
     def drawText(self, x, y, W, H, xml, txt):
+
 
         if txt in ("None", None):
             return
