@@ -45,7 +45,7 @@ class kut2fpdf(object):
     detailn = None
     name_ = None
     _actual_append_page_no = None
-    next_break = None
+    reset_page_count = None
 
     def __init__(self):
 
@@ -65,7 +65,8 @@ class kut2fpdf(object):
         self.detailn = {}
         self.name_ = None
         self._actual_append_page_no = 0
-        self.next_break = False
+        self.reset_page_count = False
+        self.new_page = False
     """
     Convierte una cadena de texto que contiene el ".kut" en un pdf y retorna la ruta a este último.
     @param name. Nombre de ".kut".
@@ -104,9 +105,9 @@ class kut2fpdf(object):
             print("completando")
             self._document = report
         # Seteamos rutas a carpetas con tipos de letra ...
-
+        
         # Cargamos las fuentes disponibles
-        page_break = (flags[2] == 1) if len(flags) == 3 else True
+        next_page_break = (flags[2] == 1) if len(flags) == 3 else True
         page_append = (flags[1] == 1) if len(flags) > 1 else False
         page_display = (flags[0] == 1) if len(flags) > 0 else False
         
@@ -116,15 +117,24 @@ class kut2fpdf(object):
             self.prev_level = -1
             self.last_detail = False
         
+        page_break = False
+        if self.new_page:
+            page_break = True
+            self.new_page = False
+                   
         
-        if self.next_break:
-            self._actual_append_page_no = -1
-            self.next_break = False
+        if self.reset_page_count:
+            self.reset_page_no()
+            self.reset_page_count = False
         
         print("Display", page_display)
-        print("Page break", page_break)
-        if page_break:
-            self.next_break = True
+        print("Page break", next_page_break)
+        
+        if next_page_break:
+            self.reset_page_count = True
+        
+        if page_display:
+            self.new_page = True
             
             
         
@@ -194,6 +204,8 @@ class kut2fpdf(object):
             
         self._actual_section_size = 0
         self._actual_append_page_no += 1
+        
+        print("Nueva página", self.number_pages())
         
         #l_ini = data_level
         #l_end = self.prev_level
@@ -1003,4 +1015,7 @@ class kut2fpdf(object):
     
     def number_pages(self):
         return self._actual_append_page_no
+    
+    def reset_page_no(self):
+        self._actual_append_page_no = 0
     
