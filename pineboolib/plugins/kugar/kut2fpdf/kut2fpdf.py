@@ -95,14 +95,12 @@ class kut2fpdf(object):
         # self._page_size =
         if report is None:
             from fpdf import FPDF
-            print("nuevo report")
             self._actual_append_page_no = -1
             self._document = FPDF(self._page_orientation, "pt", self._page_size)
             for f in self._document.core_fonts:
                 self.logger.debug("KUT2FPDF :: Adding font %s", f)
                 self._avalible_fonts.append(f)
         else:
-            print("completando")
             self._document = report
         # Seteamos rutas a carpetas con tipos de letra ...
         
@@ -111,7 +109,7 @@ class kut2fpdf(object):
         page_append = (flags[1] == 1) if len(flags) > 1 else False
         page_display = (flags[0] == 1) if len(flags) > 0 else False
         
-        print("Append", page_append)
+
         
         if page_append:
             self.prev_level = -1
@@ -127,8 +125,10 @@ class kut2fpdf(object):
             self.reset_page_no()
             self.reset_page_count = False
         
-        print("Display", page_display)
-        print("Page break", next_page_break)
+        if self.design_mode:
+            print("Append", page_append)
+            print("Display", page_display)
+            print("Page break", next_page_break)
         
         if next_page_break:
             self.reset_page_count = True
@@ -204,8 +204,8 @@ class kut2fpdf(object):
             
         self._actual_section_size = 0
         self._actual_append_page_no += 1
-        
-        print("Nueva página", self.number_pages())
+        if self.design_mode:
+            print("Nueva página", self.number_pages())
         
         #l_ini = data_level
         #l_end = self.prev_level
@@ -953,11 +953,18 @@ class kut2fpdf(object):
     def draw_barcode(self, x, y, W, H, xml, text):
         if text == "None":
             return
+        from pineboolib.fllegacy.flcodbar import FLCodBar
         file_name = aqApp.tmp_dir()
         file_name += "/%s.png" % (text)
+        type = xml.get("CodBarType")
+        
         if not os.path.exists(file_name):   
-            from pineboolib.fllegacy.flcodbar import FLCodBar
+            
             bar_code = FLCodBar(text) #Code128
+            if type is not None:
+                type = bar_code.nameToType(type.lower())
+                bar_code.setType(type)
+                
             pix = bar_code.pixmap()
             if not pix.isNull():
                 pix.save(file_name, "PNG")

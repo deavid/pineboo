@@ -277,18 +277,25 @@ class FLCodBar(object):
             fg_ = QColor(self.barcode["fg"]).name()
 
         margin_ = self.barcode["margin"] / 10
-        bar_ = None
-        render_options = {
-            'module_width': 0.6,
-            'module_height': 10,  # 15
-            'text_distance': 35,  # 5.0
-            'background': bg_.lower(),
-            'foreground': fg_.lower(),
-            'write_text': self.barcode["text"],
-            'font_size': 8,
-            'text': value_,
-            'quiet_zone': margin_,  # 6.5
-        }
+        
+        render_options = {}
+        render_options['module_width'] = 0.6
+        render_options['module_height'] = 10
+        render_options['background'] = bg_.lower()
+        render_options['foreground'] = fg_.lower()
+        render_options['font_size'] = 8
+        render_options['write_text'] = self.barcode["text"]
+        render_options['text_distance'] = 35
+        render_options['quiet_zone'] = margin_ 
+        if self.barcode["text"]:
+            render_options['text'] = value_  
+        else:
+            render_options['text'] = " "
+            
+        
+        
+        
+        
         
         import barcode
         from barcode.writer import ImageWriter
