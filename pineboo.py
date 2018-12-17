@@ -167,7 +167,7 @@ def parse_options():
 def load_dgi(name):
     """Load a DGI module dynamically."""
     modname = "dgi_%s" % name
-    modpath = "pineboolib.plugins.dgi.%s" % modname
+    modpath = "pineboolib.plugins.dgi.%s.%s" % (modname, modname)
     try:
         dgi_pymodule = importlib.import_module(modpath)
     except ImportError:
