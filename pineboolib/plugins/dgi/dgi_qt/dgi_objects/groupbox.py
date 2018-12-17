@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from PyQt5 import QtWidgets
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 
 class GroupBox(QGroupBox):

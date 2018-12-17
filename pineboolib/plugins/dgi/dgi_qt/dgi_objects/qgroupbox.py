@@ -30,3 +30,6 @@ class QGroupBox(QtWidgets.QGroupBox):
             self.setTitle(str(value))
         else:
             super(QGroupBox, self).__setattr__(name, value)
+    
+        
+        

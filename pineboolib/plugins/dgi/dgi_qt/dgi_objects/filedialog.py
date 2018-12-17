@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 
 class FileDialog(QFileDialog):
@@ -27,11 +27,9 @@ class FileDialog(QFileDialog):
             basedir = filedir("..")
 
         import pineboolib
-        if pineboolib.project._DGI.localDesktop():
-            parent = pineboolib.project.main_window.ui_
-            ret = QtWidgets.QFileDialog.getExistingDirectory(
-                parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
-            if ret:
-                ret = ret + "/"
+        parent = pineboolib.project.main_window.ui_
+        ret = QtWidgets.QFileDialog.getExistingDirectory(parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
+        if ret:
+            ret = ret + "/"
 
-            return ret
+        return ret
