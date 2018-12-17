@@ -97,9 +97,8 @@ class Project(object):
     """
 
     def setDebugLevel(self, q):
-        from pineboolib import pnqt3ui
         Project.debugLevel = q
-        pnqt3ui.Options.DEBUG_LEVEL = q
+        self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
 
     """
     Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)
