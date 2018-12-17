@@ -168,9 +168,11 @@ class kut2fpdf(object):
         pdf_name += "/%s_%s.pdf" % (self.name_, datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
         if os.path.exists(pdf_name):
             os.remove(pdf_name)
-            
-        self._document.output(pdf_name, 'F')        
-        return pdf_name
+        if self._document is not None:
+            self._document.output(pdf_name, 'F')        
+            return pdf_name
+        else:
+            return None
     
 
     """
