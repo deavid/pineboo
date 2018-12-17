@@ -563,7 +563,7 @@ class MainForm(QtWidgets.QMainWindow):
         tL = self.w_.findChild(QtWidgets.QLabel, "tLabel")
         tL2 = self.w_.findChild(QtWidgets.QLabel, "tLabel2")
         texto = AQUtil.sqlSelect("flsettings", "valor", "flkey='verticalName'")
-        if texto:
+        if texto and texto != "False":
             tL.setText(texto)
 
         if AQUtil.sqlSelect("flsettings", "valor", "flkey='PosInfo'") == 'True':
