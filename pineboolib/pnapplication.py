@@ -417,7 +417,7 @@ class Project(object):
 
                 msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
                 if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
-                    self.logger.info(msg)
+                    self.logger.warn(msg)
 
                 if self._splash:
                     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
@@ -429,7 +429,7 @@ class Project(object):
 
             from pineboolib.flparser import postparse
             try:
-                postparse.pythonify(scriptname)
+                postparse.pythonify(scriptname, True)
             except Exception as e:
                 self.logger.warn("El fichero %s no se ha podido convertir: %s", scriptname, e)
 
