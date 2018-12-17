@@ -5,7 +5,6 @@ from PyQt5.QtCore import Qt, QObject
 from PyQt5.Qt import QFileDialog, QMessageBox, QWidget
 
 from pineboolib import decorators
-from pineboolib import pnqt3ui
 from pineboolib.utils import filedir
 import pineboolib
 
