@@ -313,9 +313,9 @@ class FLApplication(QtCore.QObject):
         QtWidgets.QMessageBox.aboutQt(self.mainWidget())
 
     def aboutPineboo(self):
-        msg = "Texto Acerca de Pineboo"
-        QtWidgets.QMessageBox.information(self.mainWidget(), "Pineboo", msg)
-
+        from pineboolib.dlgabout.about_pineboo import about_pineboo
+        about_dlg = about_pineboo()
+        
     @decorators.NotImplementedWarn
     def statusHelpMsg(self, text):
         pass
