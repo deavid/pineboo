@@ -7,13 +7,11 @@ from PyQt5.Qt import QWidget
 from pineboolib.utils import filedir, indent
 from pineboolib.fllegacy.flsettings import FLSettings
 
-from builtins import str
 import os
 import sys
 import traceback
 import logging
 import base64
-import xml
 from xml.etree import ElementTree as ET
 
 
