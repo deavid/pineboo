@@ -754,9 +754,8 @@ def execute(options, args):
                 destname = os.path.join(options.storepath, bname + ".xml")
             else:
                 destname = filename + ".xml"
-            f1 = open(destname, "wb")
-            f1.write(etree.ElementTree.tostring(ast))
-            f1.close()
+            etree.ElementTree.ElementTree(ast).write(destname, encoding="UTF-8",xml_declaration=True)
+            
 
 
 if __name__ == "__main__":
