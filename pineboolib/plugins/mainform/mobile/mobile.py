@@ -191,7 +191,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.w_.statusBar().hide()
         self.main_widgets_ = []
         self.initialized_mods_ = []
-        self.act_sig_map_ = QSignalMapper(self.w_, "pinebooActSignalMap")
+        self.act_sig_map_ = QSignalMapper(self.w_)
+        self.act_sig_map_.setObjectName("pinebooActSignalMap")
         self.act_sig_map_.mapped[str].connect(self.triggerAction)
         self.initTabWidget()
         self.initHelpMenu()
@@ -204,7 +205,8 @@ class MainForm(QtWidgets.QMainWindow):
         self.w_ = w
         self.main_widgets_ = []
         self.initialized_mods_ = []
-        self.act_sig_map_ = QSignalMapper(self.w_, "pinebooActSignalMap")
+        self.act_sig_map_ = QSignalMapper(self.w_)
+        self.act_sig_map_.setObjectName("pinebooActSignalMap")
         self.tw_ = w.findChild(QtWidgets.QTabWidget, "tabWidget")
         self.agMenu_ = w.child("pinebooActionGroup", "QActionGroup")
         self.dck_mod_ = DockListView()
