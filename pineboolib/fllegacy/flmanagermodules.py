@@ -4,7 +4,7 @@ import traceback
 import logging
 
 import pineboolib
-from pineboolib import decorators, pnqt3ui
+from pineboolib import decorators
 from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
@@ -317,48 +317,7 @@ class FLManagerModules(object):
     """
 
     def createUI(self, n, connector=None, parent=None, name=None):
-        if ".ui" not in n:
-            n += ".ui"
-
-        form_path = n if os.path.exists(n) else _path(n)
-
-        if form_path is None:
-            raise AttributeError("File %r not found in project" % n)
-            return
-
-        tree = pineboolib.utils.load2xml(form_path)
-
-        if not tree:
-            return parent
-
-        root_ = tree.getroot()
-
-        UIVersion = root_.get("version")
-        if parent is None:
-            wid = root_.find("widget")
-            parent = getattr(pineboolib.pncontrolsfactory, wid.get("class"))()
-
-        if hasattr(parent, "widget"):
-            w_ = parent.widget
-        else:
-            w_ = parent
-
-        logger.info("Procesando %s (v%s)", n, UIVersion)
-        if not pineboolib.project or pineboolib.project._DGI.localDesktop():
-            if UIVersion < "4.0":
-                pnqt3ui.loadUi(form_path, w_)
-            else:
-                from PyQt5 import uic
-                qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
-                if not qtWidgetPlugings in uic.widgetPluginPath:
-                    logger.info(
-                        "Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
-                    uic.widgetPluginPath.append(qtWidgetPlugings)
-                uic.loadUi(form_path, w_)
-        else:
-            pineboolib.project._DGI.loadUI(form_path, w_)
-
-        return w_
+        return pineboolib.project._DGI.createUI(n, connector, parent, name)
 
     """
     Crea el formulario maestro de una acción a partir de su fichero de descripción.
