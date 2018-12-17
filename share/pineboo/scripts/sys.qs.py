@@ -1839,7 +1839,7 @@ def setObjText( container=None, component=None, value=None):
     c = testObj(container, component)
     if not c:
         return False
-    clase = (u"FLFieldDB" if (u"editor" in c) else c.className())
+    clase = (u"FLFieldDB" if hasattr(c,"editor_") else c.__class__.__name__)
     s03_when = clase
     s03_do_work, s03_work_done = False, False
     if s03_when == u"QPushButton":
@@ -1853,12 +1853,12 @@ def setObjText( container=None, component=None, value=None):
     if s03_when == u"QLabel":
         s03_do_work, s03_work_done = True, True
     if s03_do_work:
-        self.runObjMethod(container, component, u"text", ustr(u"\"", value, u"\""))
+        runObjMethod(container, component, u"text", ustr(u"\"", value, u"\""))
         s03_do_work = False  # BREAK
     if s03_when == u"FLFieldDB":
         s03_do_work, s03_work_done = True, True
     if s03_do_work:
-        self.runObjMethod(container, component, u"setValue", value)
+        runObjMethod(container, component, u"setValue", value)
         s03_do_work = False  # BREAK
     if not s03_work_done:
         s03_do_work, s03_work_done = True, True
