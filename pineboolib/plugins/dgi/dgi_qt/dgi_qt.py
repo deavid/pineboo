@@ -28,11 +28,10 @@ class dgi_qt(dgi_schema):
 
     def __getattr__(self, name):
         cls = None
-        if os.path.exists(filedir("./plugins/dgi/dgi_%s/dgi_objects/%s.py" % (self._name, name.lower()))):
+        try:
             mod_ = import_module("pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (self._name, name.lower()))
             cls = getattr(mod_, name, None) 
-        
-        if cls is None:
+        except Exception:
             mod_ = import_module(__name__)
             cls = getattr(mod_, name, None)
     
