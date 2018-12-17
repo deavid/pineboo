@@ -105,6 +105,7 @@ MessageBox = resolveObject("MessageBox")
 RadioButton = resolveObject("RadioButton")
 Color = QColor
 Dialog = resolveObject("Dialog")
+Label = resolveObject("QLabel")
 GroupBox = resolveObject("GroupBox")
 Process = resolveObject("Process")
 
