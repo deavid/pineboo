@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
 from pineboolib import decorators
+from PyQt5.QtWidgets import QFrame
+from PyQt5 import Qt
 
 class QGroupBox(QtWidgets.QGroupBox):
 
     def __init__(self, *args, **kwargs):
         super(QGroupBox, self).__init__(*args, **kwargs)
         self.setStyleSheet("QGroupBox { font-weight: bold; } ")
-        self.setContentsMargins(0, 0, 0, 0)
         from pineboolib.fllegacy.flsettings import FLSettings
         settings = FLSettings()
         if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
-            self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+            self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
 
     @decorators.NotImplementedWarn
     def setLineWidth(self, width):
@@ -25,7 +26,6 @@ class QGroupBox(QtWidgets.QGroupBox):
         return self.isEnabled()
     
     def set_enabled(self, b):
-        print("Desactivando", not b)
         self.setDisabled(not b)
 
     @decorators.NotImplementedWarn
@@ -37,6 +37,8 @@ class QGroupBox(QtWidgets.QGroupBox):
             self.setTitle(str(value))
         else:
             super(QGroupBox, self).__setattr__(name, value)
+    
+    
     
     enabled = property(get_enabled, set_enabled)
     
