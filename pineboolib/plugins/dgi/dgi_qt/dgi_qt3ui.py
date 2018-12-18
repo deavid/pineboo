@@ -478,6 +478,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
 
         if c.tag in ("vbox", "hbox", "grid"):
+            from pineboolib.fllegacy.flsettings import FLSettings
+            settings = FLSettings()
             if c.tag.find("box") > -1:
                 layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
             else:
@@ -486,20 +488,33 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             widget.layout = getattr(QtWidgets, layout_type)()
 
             lay_name = None
-            lay_margin = 2
+            lay_margin_v = 0
+            lay_margin_h = 0
             lay_spacing = 2
             for p in c.findall("property"):
                 p_name = p.get("name")
+                                
                 if p_name == "name":
-                    lay_name = p.find("cstring").text
+                    lay_name = p.find("cstring").text      
                 elif p_name == "margin":
                     lay_margin = int(p.find("number").text)
+                    
+                    if c.tag == "hbox":
+                        lay_margin_h = lay_margin
+                    elif c.tag == "vbox":
+                        lay_margin_v = lay_margin
+                    else:
+                        lay_margin_h = lay_margin_v = lay_margin
+                        
+                    
                 elif p_name == "spacing":
                     lay_spacing = int(p.find("number").text)
+                elif p_name == "sizePolicy":
+                    widget.setSizePolicy(loadVariant(p, widget))
 
             widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
             widget.layout.setObjectName(lay_name)
-            widget.layout.setContentsMargins(lay_margin, lay_margin, lay_margin, lay_margin)
+            widget.layout.setContentsMargins(lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v)
             widget.layout.setSpacing(lay_spacing)
 
             lay_type = "grid" if c.tag == "grid" else "box"
@@ -685,6 +700,7 @@ def _loadVariant(variant, widget=None):
         return QtCore.QRect(k['x'], k['y'], k['width'], k['height'])
 
     if variant.tag == "sizepolicy":
+        
         p = QtWidgets.QSizePolicy()
         for c in variant:
             value = int(c.text.strip())
