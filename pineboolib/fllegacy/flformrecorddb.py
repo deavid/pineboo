@@ -803,8 +803,11 @@ class FLFormRecordDB(FLFormDB):
 
     def inicializeControls(self):
         from pineboolib.fllegacy.flfielddb import FLFieldDB
+        from pineboolib.fllegacy.fltabledb import FLTableDB
         for child_ in self.findChildren(QtWidgets.QWidget):
             if isinstance(child_, FLFieldDB):
                 loaded = getattr(child_, "_loaded", None)
                 if loaded is False:
                     QtCore.QTimer().singleShot(0,child_.load)
+            elif isinstance(child_, FLTableDB):
+                QtCore.QTimer().singleShot(0,child_.initCursor)
