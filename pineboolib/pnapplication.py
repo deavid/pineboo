@@ -409,6 +409,7 @@ class Project(object):
             scriptname + ".xml.py").replace(".qs.xml.py", ".qs.py")
         if not os.path.isfile(python_script_path) or pineboolib.no_python_cache:
             settings = FLSettings()
+            debug_postparse = False
             if settings.readBoolEntry("application/isDebuggerMode", False):
                 util = FLUtil()
                 file_name = scriptname.split("\\") if util.getOS() == "WIN32" else scriptname.split("/")
@@ -417,6 +418,7 @@ class Project(object):
 
                 msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
                 if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
+                    debug_postparse = True
                     self.logger.warn(msg)
 
                 if self._splash:
@@ -426,10 +428,11 @@ class Project(object):
                     if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
                         from pineboolib.pncontrolsfactory import aqApp
                         aqApp.popupWarn(msg)
+                        
 
             from pineboolib.flparser import postparse
             try:
-                postparse.pythonify(scriptname, True)
+                postparse.pythonify(scriptname, debug_postparse)
             except Exception as e:
                 self.logger.warn("El fichero %s no se ha podido convertir: %s", scriptname, e)
 
