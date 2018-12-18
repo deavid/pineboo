@@ -79,6 +79,7 @@ class Array(object):
     dict_ = None
     key_ = None
     names_ = None
+    pos_iter = None
 
     def __init__(self, *args):
         self.names_ = []
@@ -101,7 +102,35 @@ class Array(object):
             self.dict_ = args
     
     def __iter__(self):
-        return self.dict_.__iter__() if self.dict_ else self.list_.__iter__()
+        self.pos_iter = 0
+        return self
+    
+    def __next__(self):
+        ret_ = None
+        i = 0
+        if self.dict_:
+            for k in self.dict_.keys():
+                if i == self.pos_iter:
+                   ret_ = self.dict_[k]
+                   break
+                
+                i += 1
+                  
+        elif self.list_:
+            for v in self.list_:
+                if i == self.pos_iter:
+                    ret_ = v
+                    break
+                
+                i += 1
+            
+        if ret_ is None:
+                raise StopIteration
+        else:     
+            self.pos_iter += 1
+            
+        return ret_
+    
 
     def __setitem__(self, key, value):
         # if isinstance(key, int):
