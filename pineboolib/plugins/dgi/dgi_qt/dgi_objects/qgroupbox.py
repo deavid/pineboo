@@ -20,6 +20,13 @@ class QGroupBox(QtWidgets.QGroupBox):
     @property
     def selectedId(self):
         return 0
+    
+    def get_enabled(self):
+        return self.isEnabled()
+    
+    def set_enabled(self, b):
+        print("Desactivando", not b)
+        self.setDisabled(not b)
 
     @decorators.NotImplementedWarn
     def setShown(self, b):
@@ -30,6 +37,8 @@ class QGroupBox(QtWidgets.QGroupBox):
             self.setTitle(str(value))
         else:
             super(QGroupBox, self).__setattr__(name, value)
+    
+    enabled = property(get_enabled, set_enabled)
     
         
         
