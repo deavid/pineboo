@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from pineboolib import decorators
 
 class QTextEdit(QtWidgets.QTextEdit):
