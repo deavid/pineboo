@@ -25,6 +25,7 @@ class DlgConnect(QtWidgets.QWidget):
     maxSize = None
     profile_dir = None
     pNSqlDrivers = None
+    edit_mode = None
 
     def __init__(self, _DGI):
         """
@@ -39,6 +40,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.profile_dir = FLSettings().readEntry("ebcomportamiento/profiles_folder", filedir("../profiles"))
         import pineboolib
         self.pNSqlDrivers = pineboolib.project.sql_drivers_manager
+        self.edit_mode = False
 
     def load(self):
         """
@@ -63,6 +65,7 @@ class DlgConnect(QtWidgets.QWidget):
         self.ui.tbOptions.clicked.connect(self.showOptions)
         self.ui.pbSaveConnection.clicked.connect(self.saveProfile)
         self.ui.tbDeleteProfile.clicked.connect(self.deleteProfile)
+        self.ui.tbEditProfile.clicked.connect(self.editProfile)
         self.cleanProfileForm()
         self.ui.cbDBType.currentIndexChanged.connect(self.updatePort)
         self.ui.cbProfiles.currentIndexChanged.connect(self.enablePassword)
@@ -121,12 +124,14 @@ class DlgConnect(QtWidgets.QWidget):
         if self.optionsShowed:
             self.ui.frmOptions.hide()
             self.ui.tbDeleteProfile.hide()
+            self.ui.tbEditProfile.hide()
             self.ui.setMinimumSize(self.minSize)
             self.ui.setMaximumSize(self.minSize)
             self.ui.resize(self.minSize)
         else:
             self.ui.frmOptions.show()
             self.ui.tbDeleteProfile.show()
+            self.ui.tbEditProfile.show()
             self.ui.setMinimumSize(self.maxSize)
             self.ui.setMaximumSize(self.maxSize)
             self.ui.resize(self.maxSize)
@@ -194,9 +199,11 @@ class DlgConnect(QtWidgets.QWidget):
         if not os.path.exists(self.profile_dir):
             os.mkdir(filedir(self.profile_dir))
 
-        if os.path.exists(os.path.join(self.profile_dir, "%s.xml" % description)):
+        if os.path.exists(os.path.join(self.profile_dir, "%s.xml" % description)) and not self.edit_mode:
             QMessageBox.information(self.ui, "Pineboo", "El perfil ya existe")
             return
+        
+            
 
         dbt = self.ui.cbDBType.currentText()
         url = self.ui.leURL.text()
@@ -238,6 +245,10 @@ class DlgConnect(QtWidgets.QWidget):
         indent(profile)
 
         tree = ET.ElementTree(profile)
+        
+        if self.edit_mode:
+            os.remove(os.path.join(self.profile_dir, "%s.xml" % description))
+            self.edit_mode = False
 
         tree.write(os.path.join(self.profile_dir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
         # self.cleanProfileForm()
@@ -258,6 +269,44 @@ class DlgConnect(QtWidgets.QWidget):
             fileName = "%s.xml" % self.ui.cbProfiles.currentText()
             os.remove(os.path.join(self.profile_dir, fileName))
             self.loadProfiles()
+    
+    @QtCore.pyqtSlot()
+    def editProfile(self):
+        """
+        Edita la conexión seleccionada
+        """
+        #Cogemos el perfil y lo abrimos
+        file_name = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
+        tree = ET.parse(file_name)
+        root = tree.getroot()
+        
+        self.ui.cbAutoLogin.setChecked(True)
+        for profile in root.findall("profile-data"):
+            if getattr(profile.find("password"), "text", None):
+                psP = profile.find("password").text
+                psP = base64.b64decode(psP).decode()
+                if psP is not None:
+                    self.ui.leProfilePassword.setText(psP)
+                    self.ui.cbAutoLogin.setChecked(False)
+                    
+        
+        self.ui.leDescription.setText(self.ui.cbProfiles.currentText())
+        self.ui.leDBName.setText(root.find("database-name").text)
+        root.find("database-name").text
+        for db in root.findall("database-server"):
+            self.ui.leURL.setText(db.find("host").text)
+            self.ui.lePort.setText(db.find("port").text)
+            self.ui.cbDBType.setCurrentText(db.find("type").text)
+        for credentials in root.findall("database-credentials"):
+
+            self.ui.leDBUser.setText(credentials.find("username").text)
+            self.ui.leDBPassword.setText(base64.b64decode(credentials.find("password").text).decode())
+            self.ui.leDBPassword2.setText(base64.b64decode(credentials.find("password").text).decode())    
+        
+        self.edit_mode = True
+        
+        
+    
 
     @QtCore.pyqtSlot(int)
     def updatePort(self):

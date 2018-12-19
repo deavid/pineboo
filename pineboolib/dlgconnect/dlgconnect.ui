@@ -78,6 +78,23 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QToolButton" name="tbEditProfile">
+       <property name="toolTip">
+        <string>Borra el perfil seleccionado</string>
+       </property>
+       <property name="statusTip">
+        <string/>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../share/icons/gtk-properties.png</normaloff>../../share/icons/gtk-properties.png</iconset>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
