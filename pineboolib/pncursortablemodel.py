@@ -523,7 +523,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 found = False
                 for table in qry.tablesList():
                     # print("Comprobando %s en %s" % (field.name(), pineboolib.project.conn.manager().metadata(table).fieldList()))
-                    if self.db().manager().metadata(table).field(field.name()):
+                    if self.db().manager().metadata(table, True).field(field.name()):
                         self.sql_fields.append("%s.%s" % (table, field.name()))
                         found = True
                         break
