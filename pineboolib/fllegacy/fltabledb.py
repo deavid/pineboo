@@ -23,6 +23,8 @@ import logging
 from PyQt5.QtGui import QPixmap
 logger = logging.getLogger(__name__)
 
+import time
+
 DEBUG = False
 
 
@@ -143,6 +145,7 @@ class FLTableDB(QtWidgets.QWidget):
         # print("FLTableDB(%s): setting columns in interactive mode" % self._tableName))
         if self.loaded():
             return
+        
 
         if not self.topWidget.cursor():
             print("FLTableDB : Uno de los padres o antecesores de FLTableDB deber ser de la clase FLFormDB o heredar de ella")
@@ -163,9 +166,12 @@ class FLTableDB(QtWidgets.QWidget):
         # ...... esta doble carga provoca el error y deja en el formulario el cursor original.
 
         self.mapCondType = []
-
+        
+        
         self._loaded = True
         self.showWidget()
+        
+        
 
         if DEBUG:
             print("**FLTableDB::name: %r cursor: %r" %
@@ -747,7 +753,7 @@ class FLTableDB(QtWidgets.QWidget):
             self.initFakeEditor()
             self.showed = True
             return
-
+        
         if not self.cursor_:
             return
 
@@ -772,6 +778,7 @@ class FLTableDB(QtWidgets.QWidget):
             else:
                 self.refresh(True)
                 if self.tableRecords_.numRows() <= 0:
+                    
                     self.refresh(False, True)
                 else:
                     self.refreshDelayed()
@@ -793,9 +800,12 @@ class FLTableDB(QtWidgets.QWidget):
                     self.refresh(False, True)
                 else:
                     self.refreshDelayed()
+            
+
         elif isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess() == FLSqlCursor.Browse and tmd and not tmd.isQuery():
             self.cursor_.setEdition(False)
             self.setReadOnly(True)
+        
 
         # if own_tmd and tmd and not tmd.inCache():
         #    del tmd
@@ -936,7 +946,6 @@ class FLTableDB(QtWidgets.QWidget):
 
         t_cursor = self.tableRecords_.cursor()
         if self.cursor_ and self.cursor_ is not t_cursor and self.cursor_.metadata() and (not t_cursor or (t_cursor and t_cursor.metadata() and t_cursor.metadata().name() != self.cursor_.metadata().name())):
-
             self.setTableRecordsCursor()
 
         return self.tableRecords_
@@ -964,11 +973,10 @@ class FLTableDB(QtWidgets.QWidget):
         t_cursor = self.tableRecords_.cursor()
         if t_cursor is not self.cursor_:
             self.tableRecords_.setFLSqlCursor(self.cursor_)
-
             if t_cursor:
                 self.tableRecords_.recordChoosed.disconnect(self.recordChoosedSlot)
                 t_cursor.newBuffer.disconnect(self.currentChangedSlot)
-
+            
             self.tableRecords_.recordChoosed.connect(self.recordChoosedSlot)
             self.cursor_.newBuffer.connect(self.currentChangedSlot)
 
@@ -1761,7 +1769,7 @@ class FLTableDB(QtWidgets.QWidget):
                 self.comboBoxFieldToSearch2.addItem("*")
 
             self.tableRecords_.header().show()
-
+        
         if refreshData or self.sender():
             finalFilter = self.filter_
             if self.tdbFilterLastWhere_:
@@ -1772,7 +1780,6 @@ class FLTableDB(QtWidgets.QWidget):
                         finalFilter, self.tdbFilterLastWhere_)
             
             self.tableRecords_.setPersistentFilter(finalFilter)
-
             self.tableRecords_.setShowAllPixmaps(self.showAllPixmaps_)
             self.tableRecords_.refresh()
 
@@ -1801,7 +1808,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         if self.tableRecords_ and self.tableRecords_.isHidden():
             self.tableRecords_.show()
-
+        
         QtCore.QTimer.singleShot(50, self.setSortOrder)
 
     """
