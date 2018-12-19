@@ -81,7 +81,7 @@
      <item>
       <widget class="QToolButton" name="tbEditProfile">
        <property name="toolTip">
-        <string>Borra el perfil seleccionado</string>
+        <string>Edita el perfil seleccionado</string>
        </property>
        <property name="statusTip">
         <string/>
