@@ -498,7 +498,10 @@ class FLQPSQL(object):
                             found = True
                             if self.notEqualsFields(field, fieldMtd):
                                 mismatch = True
+                            
+                            recBd.remove(field)
                             break
+                            
 
                     if not found:
                         mismatch = True
