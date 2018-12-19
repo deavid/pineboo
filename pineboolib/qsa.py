@@ -22,6 +22,7 @@ from pineboolib.fllegacy.flvar import FLVar
 from pineboolib.utils import ustr, ustr1, filedir
 
 from pineboolib.pncontrolsfactory import *
+from functools import total_ordering
 
 logger = logging.getLogger(__name__)
 
@@ -368,6 +369,7 @@ class qsaRegExp(object):
         return self.strRE_
 
 
+@total_ordering
 class Date(object):
 
     date_ = None
@@ -455,7 +457,9 @@ class Date(object):
     
     def __str__(self):
         return self.toString()
-
+    
+    def __le__(self, other):
+        return self.toString() < other.toString()
 
 
 
