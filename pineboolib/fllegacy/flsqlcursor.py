@@ -1220,8 +1220,7 @@ class FLSqlCursor(QtCore.QObject):
         
         if type_ in ("date") and v:
             from pineboolib.qsa import Date
-            v = Date(v).toString()
-            print(v)
+            v = Date(v)
         # Por compatibilidad con Eneboo no devolvemos None nunca
         if type_ in ("string", "stringlist", "date") and v is None:
             v = ""
