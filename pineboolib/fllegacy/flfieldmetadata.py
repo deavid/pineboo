@@ -661,7 +661,7 @@ class FLFieldMetaData(object):
 
         return "%s = %s" % (fName, formatV)
     
-    def __len__(self):
+    def __len__(self):        
         return self.d.length_
 
 
