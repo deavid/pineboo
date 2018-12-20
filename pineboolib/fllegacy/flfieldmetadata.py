@@ -660,6 +660,9 @@ class FLFieldMetaData(object):
             fName = fieldName
 
         return "%s = %s" % (fName, formatV)
+    
+    def __len__(self):
+        return self.d.length_
 
 
 class FLFieldMetaDataPrivate(object):
