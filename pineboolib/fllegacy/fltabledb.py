@@ -254,7 +254,7 @@ class FLTableDB(QtWidgets.QWidget):
                 if testM1.cardinality() == FLRelationMetaData.RELATION_M1:
                     checkIntegrity = True
             fMD = self.cursor_.metadata().field(self.foreignField_)
-            if fMD:
+            if fMD is not None:
                 tmdAux = self.cursor_.db().manager().metadata(self.tableName_)
                 if not tmdAux or tmdAux.isQuery():
                     checkIntegrity = False
@@ -277,7 +277,7 @@ class FLTableDB(QtWidgets.QWidget):
         rMD = testM1
         if not rMD:
             fMD = tMD.field(self.fieldRelation_)
-            if fMD:
+            if fMD is not None:
                 rMD = FLRelationMetaData(
                     curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
@@ -1066,7 +1066,7 @@ class FLTableDB(QtWidgets.QWidget):
                                                           QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole)
                 field = tMD.field(tMD.fieldAliasToName(_label))
 
-                if not field:
+                if field is None:
                     i = i + 1
                     continue
 
@@ -1225,7 +1225,7 @@ class FLTableDB(QtWidgets.QWidget):
         while i < rCount:
             fieldName = tMD.fieldAliasToName(self.tdbFilter.text(i, 0))
             field = tMD.field(fieldName)
-            if not field:
+            if field is None:
                 i = i + 1
                 continue
 

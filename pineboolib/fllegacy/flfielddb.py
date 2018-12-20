@@ -661,7 +661,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         field = tMD.field(self.fieldName_)
-        if not field:
+        if field is None:
             self.logger.warn("FLFieldDB::setValue(%s) : No existe el campo ", self.fieldName_)
             return
 
@@ -808,7 +808,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return None
 
         field = tMD.field(self.fieldName_)
-        if not field:
+        if field is None:
             self.logger.warn(FLUtil.tr("FLFieldDB::value() : No existe el campo %s"), self.fieldName_)
             return None
 
@@ -866,7 +866,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         field = self.cursor_.metadata().field(self.fieldName_)
-        if not field:
+        if field is None:
             return
         type_ = field.type()
 
@@ -1047,7 +1047,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 #        del tmd
                 #    return
 
-                if not field:
+                if field is None:
                     if tmd and not tmd.inCache():
                         del tmd
 
@@ -1094,7 +1094,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         field = tMD.field(str(self.fieldName_))
-        if not field:
+        if field is None:
             return
         type_ = field.type()
 
@@ -1354,7 +1354,7 @@ class FLFieldDB(QtWidgets.QWidget):
         tMD = self.cursor_.metadata()
         field = tMD.field(self.fieldName_)
 
-        if not field:
+        if field is None:
             return
 
         if field.outTransaction():
@@ -1687,7 +1687,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         field = tMD.field(self.fieldName_)
-        if not field:
+        if field is None:
             return
 
         type_ = field.type()
@@ -2410,7 +2410,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         field = tMD.field(self.fieldName_)
-        if not field:
+        if field is None:
             return
 
         if not field.relationM1():
@@ -2469,7 +2469,7 @@ class FLFieldDB(QtWidgets.QWidget):
             return
 
         field = tMD.field(self.fieldName_)
-        if not field:
+        if field is None:
             return
 
         if not field.relationM1():
@@ -2592,7 +2592,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         field = tMD.field(self.fieldName_)
 
-        if not field:
+        if field is None:
             return
         util = FLUtil()
         if field.type() == "pixmap":
@@ -2809,7 +2809,7 @@ class FLFieldDB(QtWidgets.QWidget):
             field = tMD.field(self.fieldName_)
             fieldSender = tMD.field(fSN)
 
-            if not field or not fieldSender:
+            if field is None or not fieldSender:
                 return
 
             if field.relationM1():

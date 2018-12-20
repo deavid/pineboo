@@ -726,7 +726,7 @@ class FLManager(QtCore.QObject):
         @param upper Si TRUE convierte a mayúsculas el valor (si es de tipo cadena)
         """
         if not isinstance(args[0], str):
-            if not args[0]:
+            if args[0] is None:
                 return ""
 
             self.formatValueLike(args[0].type(), args[1], args[2])
@@ -749,7 +749,7 @@ class FLManager(QtCore.QObject):
         """
         if isinstance(args[0], FLFieldMetaData):
             # Tipo 1
-            if not args[0]:
+            if args[0] is None:
                 return "1 = 1"
 
             mtd = args[0].metadata()
@@ -782,7 +782,7 @@ class FLManager(QtCore.QObject):
 
         elif isinstance(args[1], FLFieldMetaData):
             # tipo 2
-            if args[1] == None:
+            if args[1] is None:
                 return "1 = 1"
 
             return self.formatAssignValueLike(args[0], args[1].type(), args[2], args[3])
@@ -808,7 +808,7 @@ class FLManager(QtCore.QObject):
 
     def formatValue(self, fMD_or_type, v, upper=False):
 
-        if not fMD_or_type:
+        if fMD_or_type is None:
             return None
 
         if not isinstance(fMD_or_type, str):
@@ -817,7 +817,7 @@ class FLManager(QtCore.QObject):
         return self.db_.formatValue(fMD_or_type, v, upper)
 
     def formatAssignValue(self, *args, **kwargs):
-        if not args[0]:
+        if args[0] is None:
             # print("FLManager.formatAssignValue(). Primer argumento vacio %s" % args[0])
             return "1 = 1"
 
@@ -910,7 +910,7 @@ class FLManager(QtCore.QObject):
         @param ed Valor utilizado por defecto para la propiedad editable
         @return Objeto FLFieldMetaData que contiene la descripción del campo
         """
-        if not field:
+        if field is None:
             return None
 
         util = FLUtil()
@@ -1154,7 +1154,7 @@ class FLManager(QtCore.QObject):
         @param relation Elemento XML con la descripción de la relación
         @return Objeto FLRelationMetaData que contiene la descripción de la relación
         """
-        if not relation:
+        if relation is None:
             return False
 
         fT = ""

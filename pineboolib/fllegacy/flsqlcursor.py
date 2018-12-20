@@ -1070,7 +1070,7 @@ class FLSqlCursor(QtCore.QObject):
 
         field = self.metadata().field(fN)
 
-        if not field:
+        if field is None:
             logger.message("setAtomicValueBuffer(): No existe el campo %s:%s", self.metadata().name(), fN)
             return
 
@@ -1120,7 +1120,7 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         field = self.metadata().field(fN)
-        if not field:
+        if field is None:
             logger.warn("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
             return
 
@@ -1130,13 +1130,13 @@ class FLSqlCursor(QtCore.QObject):
         # if not self.buffer():  # Si no lo pongo malo....
         #    self.primeUpdate()
 
-        if not fN or not self.metadata():
-            return
+        #if not fN or not self.metadata():
+        #    return
 
-        field = self.metadata().field(fN)
-        if not field:
-            logger.warn("FLSqlCursor::setValueBuffer() : No existe el campo %s:%s", self.metadata().name(), fN)
-            return
+        #field = self.metadata().field(fN)
+        #if field is None:
+        #    logger.warn("FLSqlCursor::setValueBuffer() : No existe el campo %s:%s", self.metadata().name(), fN)
+        #    return
 
         type_ = field.type()
         # fltype = field.flDecodeType(type_)
@@ -1192,7 +1192,7 @@ class FLSqlCursor(QtCore.QObject):
                 return None
 
         field = self.metadata().field(fN)
-        if not field:
+        if field is None:
             logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s",
                         self.curName(), fN, self.metadata().name())
             return None

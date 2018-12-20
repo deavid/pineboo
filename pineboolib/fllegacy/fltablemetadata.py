@@ -713,7 +713,7 @@ class FLTableMetaData(QtCore.QObject):
 
             i += 1
 
-        if not ret and show_exception:
+        if ret is None and show_exception:
             self.logger.warn("FLTableMetadata(%s).indexField() Posicion %s no encontrado", self.name(), position)
         return ret
 
