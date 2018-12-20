@@ -27,6 +27,8 @@ class dgi_schema(object):
     _localDesktop = True
     _mobile = False
     _deployed = False
+    _clean_no_python = True
+    _clean_no_python_changeable = True
 
     def __init__(self):
         self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
@@ -46,6 +48,8 @@ class dgi_schema(object):
 
         from pineboolib.utils import imFrozen
         self._deployed = imFrozen()
+        self.set_clean_no_python(True)
+        self.set_clean_no_python_changeable(False)
 
     def name(self):
         return self._name
@@ -107,6 +111,19 @@ class dgi_schema(object):
             size = QtCore.QSize(60, 60)
 
         return size
+    
+    def clean_no_python(self):
+        return self._clean_no_python
+    
+    def set_clean_no_python(self, b):
+        if self._clean_no_python_changeable:
+            self._clean_no_python = b
+    
+    def clean_no_python_changeable(self):
+        return self._clean_no_python_changeable
+    
+    def set_clean_no_python_changeable(self, b):
+        self._clean_no_python_changeable = b
 
     def __getattr__(self, name):
         return resolveObject(name)

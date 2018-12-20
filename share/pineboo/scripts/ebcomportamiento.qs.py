@@ -52,6 +52,7 @@ class FormInternalObj(FormDBWidget):
         w.child("le_kut_temporales").text = self.leerValorLocal("kugar_temp_dir")
         w.child("cb_kut_debug").checked = self.leerValorLocal("kugar_debug_mode")
         w.child("cb_no_borrar_cache").checked = self.leerValorLocal("keep_general_cache")
+        w.child("cb_clean_no_python").checked = self.leerValorLocal("clean_no_python")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -154,6 +155,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("kugar_temp_dir", w.child("le_kut_temporales").text)
         self.grabarValorLocal("kugar_debug_mode", w.child("cb_kut_debug").checked)
         self.grabarValorLocal("keep_general_cache", w.child("cb_no_borrar_cache").checked)
+        self.grabarValorLocal("clean_no_python", w.child("cb_clean_no_python").checked)
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"

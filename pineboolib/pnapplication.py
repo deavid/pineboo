@@ -428,11 +428,12 @@ class Project(object):
                     if settings.readBoolEntry("ebcomportamiento/SLInterface", False):
                         from pineboolib.pncontrolsfactory import aqApp
                         aqApp.popupWarn(msg)
-                        
-
+            
+            clean_no_python = self._DGI.clean_no_python()
+            
             from pineboolib.flparser import postparse
             try:
-                postparse.pythonify(scriptname, debug_postparse)
+                postparse.pythonify(scriptname, debug_postparse, clean_no_python)
             except Exception as e:
                 self.logger.warn("El fichero %s no se ha podido convertir: %s", scriptname, e)
 

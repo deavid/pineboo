@@ -6,6 +6,7 @@ from importlib import import_module
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import filedir, load2xml, _path
 from pineboolib.fllegacy.fldatatable import FLDataTable
+from pineboolib.fllegacy.flsettings import FLSettings
 import pineboolib
 import logging, os
 
@@ -21,6 +22,9 @@ class dgi_qt(dgi_schema):
         super(dgi_qt, self).__init__()  # desktopEnabled y mlDefault a True
         self._name = "qt"
         self._alias = "Qt5"
+        self.set_clean_no_python_changeable(True)
+        self.set_clean_no_python(FLSettings().readBoolEntry("ebcomportamiento/clean_no_python", False))
+        
         
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
         self.pnqt3ui = dgi_qt3ui
@@ -84,4 +88,3 @@ class dgi_qt(dgi_schema):
             uic.loadUi(form_path, w_)
 
         return w_
-
