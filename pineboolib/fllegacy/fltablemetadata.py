@@ -160,7 +160,7 @@ class FLTableMetaData(QtCore.QObject):
     """
 
     def addFieldMD(self, f):
-        if not f:
+        if f is None:
             return
         if not f.metadata():
             f.setMetadata(self)
@@ -179,7 +179,7 @@ class FLTableMetaData(QtCore.QObject):
     """
 
     def removeFieldMD(self, fN):
-        if fN.isEmpty():
+        if fN is None:
             return
 
         self.d.fieldList_[fN.lower()].clear()
