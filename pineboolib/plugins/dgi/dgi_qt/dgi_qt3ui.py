@@ -488,8 +488,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             widget.layout = getattr(QtWidgets, layout_type)()
 
             lay_name = None
-            lay_margin_v = 0
-            lay_margin_h = 0
+            lay_margin_v = 2
+            lay_margin_h = 2
             lay_spacing = 2
             for p in c.findall("property"):
                 p_name = p.get("name")
