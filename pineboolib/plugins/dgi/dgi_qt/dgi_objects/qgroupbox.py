@@ -38,6 +38,17 @@ class QGroupBox(QtWidgets.QGroupBox):
         else:
             super(QGroupBox, self).__setattr__(name, value)
     
+    @decorators.NotImplementedWarn
+    def setFrameShadow(self, fs):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def setLineWidth(self, lw):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def setFrameShape(self, fs):
+        pass
     
     
     enabled = property(get_enabled, set_enabled)
