@@ -596,9 +596,10 @@ def main():
     execute(options, args)
 
 
-def pythonify(filelist, verbose=False):
+def pythonify(filelist, verbose=False, clean_no_python = True):
     options, args = parseArgs([])
     options.full = True
+    options.clean_no_python = clean_no_python
     if not verbose:
         options.verbose = False
     if isinstance(filelist, str):
@@ -714,7 +715,8 @@ def execute(options, args):
                 sys.stdout.flush()
             try:
                 filecontent = open(filename, "r", encoding="latin-1").read()
-                filecontent = flscriptparse.cleanNoPython(filecontent)
+                if options.clean_no_python:
+                    filecontent = flscriptparse.cleanNoPython(filecontent)
             except Exception as e:
                 print("Error: No se pudo abrir fichero %-35s          \n" %
                       (repr(filename)), e)
