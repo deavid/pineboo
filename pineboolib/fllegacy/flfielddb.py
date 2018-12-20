@@ -2524,7 +2524,10 @@ class FLFieldDB(QtWidgets.QWidget):
 
         f.setMainWidget()
         list_objs = f.findChildren(pineboolib.fllegacy.fltabledb.FLTableDB)
-        obj_tdb = list_objs[0]
+        obj_tdb = None
+        
+        if list_objs:
+            obj_tdb = list_objs[0]
         if fMD and obj_tdb:
             #obj_tdb.setTableName(field.relationM1().foreignTable())
             #obj_tdb.setFieldRelation(field.associatedFieldFilterTo())
