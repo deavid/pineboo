@@ -223,6 +223,8 @@ class FunctionAnon(Function):
     pass
 
 
+
+
 class FunctionCall(ASTPython):
     def generate(self, **kwargs):
         name = id_translate(self.elem.get("name"))
@@ -286,7 +288,10 @@ class FunctionCall(ASTPython):
                 arguments.append(" ".join(expr))
 
         yield "expr", "%s(%s)" % (name, ", ".join(arguments))
+        
 
+class FunctionAnonExec(FunctionCall):
+    pass
 
 class If(ASTPython):
     def generate(self, break_mode=False, **kwargs):
@@ -914,12 +919,12 @@ class Member(ASTPython):
                     classname, ".".join(arguments[0:1]))]
 
         replace_members = [
+            "toString()",
             "length",
             "text",
             "join",
             "push",
             "date",
-            "toString()",
             "isEmpty()",
             "left",
             "right",
