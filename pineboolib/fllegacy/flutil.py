@@ -1265,18 +1265,196 @@ class FLUtil(QtCore.QObject):
         """
         pass
     
-    def fieldType(self, field_name, table_name):
+    def fieldType(self, fn, tn, conn_name = 'default'):
         """
-        Retorna el tipo numérico de un field
+        Retorna el tipo numérico de un campo
         @param field_name. Nombre del campo
         @param table_name. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
         @return id del tipo de campo
         """
-        ret_ = None
         from pineboolib.pncontrolsfactory import aqApp
-        table_metadata = aqApp.db().manager().metadata(table_name)
-        if table_metadata:
-            ret_ = table_metadata.fieldType(field_name)
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
         
-        return ret_
+        return None if mtd is None else mtd.fieldType(fn)
+    
+    def fieldLength(self, fn, tn, conn_name = 'default'):
+        """
+        Retorna la longitud de un campo
+        @param fn. Nombre del campo
+        @param tn. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
+        @return longitud del campo solicitado
+        """
+        if tn is None:
+            return 0
         
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+        
+        return 0 if mtd is None else mtd.fieldLength(fn)
+        
+        
+    
+    def fieldNameToAlias(self, fn, tn, conn_name = 'default'):
+        """
+        Retorna el alias de un campo a partir de su nombre
+        @param fn. Nombre del campo
+        @param tn. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
+        @return Alias del campo especificado
+        """
+        if tn is None:
+            return fn
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+        
+        return fn if mtd is None else mtd.fieldNameToAlias(fn)
+
+    
+    def tableNameToAlias(self, tn, conn_name= 'default'):
+        """
+        Retorna el nombre de una tabla a partir de su alias
+        @param tn. Nombre de la tabla
+        @param conn_name. Nombre de la conexión a usar
+        @return Alias de la tabla especificada
+        """
+        
+        if tn is None:
+            return None
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+
+        return None if mtd is None else mtd.alias()
+    
+    def fieldAliasToName(self, an, tn, conn_name= 'default'):
+        
+        """
+        Retorna el nombre de un campo a partir de su alias
+        @param fn. Nombre del campo
+        @param tn. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
+        @return Alias del campo especificado
+        """
+        
+        if tn is None:
+            return an
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+    
+        return an if mtd is None else mtd.fieldAliasToName(an)
+        
+        
+    def fieldAllowNull(self, fn , tn, conn_name = 'default'):
+        """
+        Retorna si el campo permite dejarse en blanco
+        @param fn. Nombre del campo
+        @param tn. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
+        @return Boolean. Si acepta o no dejar en blanco el valor del campo
+        """
+        
+        if tn is None:
+            return False
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+        
+        return False if mtd is None else mtd.fieldAllowNull(fn)
+    
+    def fieldIsPrimaryKey(self, fn, tn, conn_name='default'):
+        """
+        Retorna si el campo es clave primaria de la tabla
+        @param fn. Nombre del campo
+        @param tn. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
+        @return Boolean. Si es clave primaria o no
+        """
+        if tn is None:
+            return False
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+        
+        return False if mtd is None else mtd.fieldIsPrimaryKey(fn)
+    
+    def fieldIsCompoundKey(self, fn, tn, conn_name='default'):
+        """
+        Retorna si el campo es clave compuesta de la tabla
+        @param fn. Nombre del campo
+        @param tn. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
+        @return Boolean. Si es clave compuesta o no
+        """
+        if tn is None:
+            return False
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+        
+        if mtd is None:
+            return False
+        
+        return False if field is None else field.isCompoundKey()
+    
+    
+    def fieldDefaultValue(self, fn, tn, conn_name = 'default'):
+        """
+        Retorna el valor por defecto de un campo
+        @param fn. Nombre del campo
+        @param tn. Nombre de la tabla que contiene el campo
+        @param conn_name. Nombre de la conexión a usar
+        @return Valor por defecto del campo
+        """
+        if tn is None:
+            return None #return QVariant
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)
+        mtd = conn.manager().metadata(tn)
+        
+        if mtd is None:
+            return None #return QVariant
+        
+        field = mtd.field(fn)
+        if field is None:
+            return None #return QVariant
+        
+        return field.defaultValue()
+    
+    
+    def formatValue(self, t, v, upper, conn_name = 'default'):
+        """
+        Retorna valor formateado
+        @param t. Tipo de campo
+        @param v. Valor del campo
+        @param conn_name. Nombre de la conexión a usar
+        @return Valor formateado
+        """
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        conn = aqApp.db().useConn(conn_name)    
+        return conn.manager().formatValue(t, v, upper)
+    
+            
+        
+                
+        
+        
+        
+        
+        
+            
+        
+    
