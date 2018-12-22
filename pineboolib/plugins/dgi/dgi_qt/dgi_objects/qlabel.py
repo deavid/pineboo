@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 class QLabel(QtWidgets.QLabel):
 
@@ -21,7 +21,7 @@ class QLabel(QtWidgets.QLabel):
 
     def setPixmap(self, pix):
 
-        if isinstance(pix, QIcon):
+        if isinstance(pix, QtGui.QIcon):
             pix = pix.pixmap(32, 32)
         super(QLabel, self).setPixmap(pix)
 
