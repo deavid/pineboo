@@ -306,20 +306,14 @@ def proxy_fn(wf, wr, slot):
 def slot_done(fn, signal, sender, caller): 
     
     def new_fn(*args, **kwargs):
-        args_num = get_expected_args_num(fn)
-
-        res = None
-        try:
-            res = fn(*args[:args_num], **kwargs)
-        except Exception:
-            res = fn(*args[:args_num][:-1])
-        
+             
+        res = fn(*args, **kwargs)
         
         if caller is not None:
             
             if signal.signal != caller.signal_test.signal:
                 signal_name = signal.signal[1:signal.signal.find("(")] #Quitamos el caracter "2" inicial y parámetros
-                logger.debug("Emitir evento test: %s", signal_name)
+                logger.debug("Emitir evento test: %s, args:%s kwargs:%s", signal_name, args if args else "", kwargs if kwargs else "")
                 caller.signal_test.emit(signal_name, sender)
             
         return res
