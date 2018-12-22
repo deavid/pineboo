@@ -519,22 +519,25 @@ class File(QtCore.QFile):
     WriteOnly = QIODevice.WriteOnly
     ReadWrite = QIODevice.ReadWrite
     encode_ = None
+    last_seek = None
 
     def __init__(self, rutaFichero, encode=None):
         self.encode_ = "iso-8859-15"
         if isinstance(rutaFichero, tuple):
             rutaFichero = rutaFichero[0]
         self.fichero = str(rutaFichero)
-        super(File, self).__init__(rutaFichero)
+        super().__init__(rutaFichero)
         self.path = os.path.dirname(self.fichero)
         
         if encode is not None:
             self.encode_ = encode
+        
+    
 
     # def open(self, mode):
     #    super(File, self).open(self.fichero, mode)
 
-    def read(self):
+    def read(self, byte = False):
 
         if isinstance(self, str):
             file_ = self
@@ -543,7 +546,7 @@ class File(QtCore.QFile):
             file_ = self.fichero
             encode = self.encode_
         import codecs
-        f = codecs.open(file_,"r", encoding=encode)
+        f = codecs.open(file_,"r" if not byte else "rb", encoding=encode)
         ret = ""
         for l in f:
             ret = ret + l
@@ -570,7 +573,7 @@ class File(QtCore.QFile):
         text = args[1]
             
         import codecs
-        f = codecs.open(fichero, encoding=encode, mode="w+")
+        f = codecs.open(self.fichero, encoding=encode, mode="w+")
         f.write(text)
         f.seek(0)
         f.close()
@@ -582,7 +585,49 @@ class File(QtCore.QFile):
         return os.path.isdir(dir_name)
     
     def getName(self):
-        return super(File, self).fileName()
+        return super().fileName()
+    
+    def writeLine(self, data):
+        import codecs
+        f = codecs.open(fichero, encoding=encode, mode="a")
+        f.write(data)
+        f.close()
+    
+    @decorators.NotImplementedWarn
+    def readLine(self):
+        pass
+    
+    def readLines(self):
+        ret = None
+        import codecs
+        f = codecs.open(fichero, encoding=encode, mode="a")
+        ret = f.readlines()
+        f.close()
+        return ret
+    
+    def readByte(self):
+        return self.read(True)
+    
+    def writeByte(*args):
+        if not isinstance(args[0], str):
+            fichero = self.fichero
+            encode = self.encode_
+        else:
+            fichero = args[0]
+            encode = "iso-8859-15"
+        
+        text = args[1]
+            
+        import codecs
+        f = codecs.open(self.fichero, encoding=encode, mode="wb+")
+        f.write(text)
+        f.seek(0)
+        f.close()
+    
+    def remove(self):
+        super().remove()
+        
+    
     
     name = property(getName)
 
