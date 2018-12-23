@@ -573,7 +573,7 @@ class File(QtCore.QFile):
         text = args[1]
             
         import codecs
-        f = codecs.open(self.fichero, encoding=encode, mode="w+")
+        f = codecs.open(fichero, encoding=encode, mode="w+")
         f.write(text)
         f.seek(0)
         f.close()
