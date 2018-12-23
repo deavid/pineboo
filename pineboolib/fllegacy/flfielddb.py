@@ -1247,6 +1247,11 @@ class FLFieldDB(QtWidgets.QWidget):
                 # if cs.isEmpty():
                 #    self.editorImg_.clear()
                 #    return
+                if isinstance(v, str):
+                    if v.find("static char") > -1:
+                        from pineboolib.utils import cacheXPM
+                        v = cacheXPM(v)
+                
                 pix = QtGui.QPixmap(v)
                 # if not QtGui.QPixmapCache.find(cs.left(100), pix):
                 # pix.loadFromData()
@@ -1456,7 +1461,12 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not v:
                     self.editorImg_.clear()
                     return
-
+            
+            if isinstance(v, str):
+                if v.find("static char") > -1:
+                    from pineboolib.utils import cacheXPM
+                    v = cacheXPM(v)
+            
             pix = QtGui.QPixmap(v)
             # pix.loadFromData(v)
 
