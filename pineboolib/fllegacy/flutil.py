@@ -660,23 +660,24 @@ class FLUtil(QtCore.QObject):
         while head.startswith(" "):
             head = head[1:]
         
+        ret = False
         
         if head.find("<!DOCTYPE UI>") == 0:
-            return True
-        if head.find("<!DOCTYPE QRY>") == 0:
-            return True
-        if head.find("<!DOCTYPE KugarTemplate") == 0:
-            return True
-        if head.find("<!DOCTYPE TMD>") == 0:
-            return True
-        if head.find("<!DOCTYPE TS>") == 0:
-            return True
-        if head.find("<ACTIONS>") == 0:
-            return True
-        if head.find("<jasperReport") == 0:
-            return True
+            ret = True
+        elif head.find("<!DOCTYPE QRY>") == 0:
+            ret = True
+        elif head.find("<!DOCTYPE KugarTemplate") == 0:
+            ret = True
+        elif head.find("<!DOCTYPE TMD>") == 0:
+            ret = True
+        elif head.find("<!DOCTYPE TS>") == 0:
+            ret = True
+        elif head.find("<ACTIONS>") == 0:
+            ret = True
+        elif head.find("<jasperReport") == 0:
+            ret = True
 
-        return False
+        return ret
 
     def addDays(self, fecha, offset):
         """
