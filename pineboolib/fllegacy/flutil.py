@@ -657,19 +657,20 @@ class FLUtil(QtCore.QObject):
             con las tres o cuatro primeras linea del fichero no vacías
         @return TRUE si es un fichero soportado, FALSE en caso contrario
         """
-        if head.find("<!DOCTYPE UI>") == 0:
+        
+        if head.find("<!DOCTYPE UI>") in [0,1]:
             return True
-        if head.find("<!DOCTYPE QRY>") == 0:
+        if head.find("<!DOCTYPE QRY>") in [0, 1]:
             return True
-        if head.find("<!DOCTYPE KugarTemplate") == 0:
+        if head.find("<!DOCTYPE KugarTemplate") in [0, 1]:
             return True
-        if head.find("<!DOCTYPE TMD>") == 0:
+        if head.find("<!DOCTYPE TMD>") in [0, 1]:
             return True
-        if head.find("<!DOCTYPE TS>") == 0:
+        if head.find("<!DOCTYPE TS>") in [0, 1]:
             return True
-        if head.find("<ACTIONS>") == 0:
+        if head.find("<ACTIONS>") in [0, 1]:
             return True
-        if head.find("<jasperReport") == 0:
+        if head.find("<jasperReport") in [0, 1]:
             return True
 
         return False
