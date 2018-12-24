@@ -66,17 +66,27 @@ function anon(%s) {
 
 
 def Object(x=None):
+    """
+    Objeto tipo object
+    """
     if x is None:
         x = {}
 
     from pineboolib.utils import StructMyDict
     return StructMyDict(x)
 
-def String(campo):
-    return str(campo)
+def String(value):
+    """
+    Devuelve una cadena de texto
+    @param value. Valor a convertir
+    @return cadena de texto.
+    """
+    return str(value)
 
 class Array(object):
-
+    """
+    Objeto tipo Array
+    """
     dict_ = None
     key_ = None
     names_ = None
@@ -103,10 +113,16 @@ class Array(object):
             self.dict_ = args
     
     def __iter__(self):
+        """
+        iterable
+        """
         self.pos_iter = 0
         return self
     
     def __next__(self):
+        """
+        iterable
+        """
         ret_ = None
         i = 0
         if self.dict_:
@@ -134,6 +150,11 @@ class Array(object):
     
 
     def __setitem__(self, key, value):
+        """
+        Especificamos una nueva entrada
+        @param key. Nombre del registro
+        @param value. Valor del registro
+        """
         # if isinstance(key, int):
         #   key = str(key)
         if key not in self.names_:
@@ -142,6 +163,12 @@ class Array(object):
         self.dict_[key] = value
 
     def __getitem__(self, key):
+        """
+        Recogemos el valor de un registro
+        @param key. Valor que idenfica el registro a recoger
+        @return Valor del registro especificado
+        """
+        
         if isinstance(key, int):
             if key in self.names_:            
                 return self.dict_[self.names_[key]]
@@ -171,6 +198,9 @@ class Array(object):
             return self.dict_[k]
 
     def __len__(self):
+        """
+        len()
+        """
         len_ = 0
 
         if self.dict_:
@@ -186,7 +216,14 @@ class Array(object):
 
 
 def Boolean(x=False):
-    return bool(x)
+    """
+    Retorna Booelan de una cadena de texto
+    """ 
+    ret = False
+    if x in ["true","True",True,1] or isinstance(x, int) > 0 or isinstance(x, float) > 0:
+        ret = True
+    
+    return ret
 
 
 class Math(object):
@@ -208,6 +245,11 @@ class Math(object):
 
 
 def parseFloat(x):
+    """
+    Convierte a float un valor dado
+    @param x. valor a convertir
+    @return Valor tipo float, o parametro x , si no es convertible
+    """
     try:
         if x is None:
             return 0
@@ -216,19 +258,30 @@ def parseFloat(x):
         return x
 
 def parseString(obj):
-    try:
-        return obj.toString()
-    except Exception:
-        return str(obj)
+    """
+    Convierte a str un objeto dado
+    @param obj. valor a convertir
+    @return str del objeto dado
+    """
+    return obj.toString() if hasattr(obj, "toString") else str(obj)
 
 
 def parseInt(x):
-    if x is None:
-        return 0
-    return int(x)
+    """
+    Convierte en int un valor dado
+    @param x. Valor a convertir
+    @return Valor convertido
+    """
+    return int(x) if x is not None else 0
 
 
 def isNaN(x):
+    """
+    Comprueba si un valor dado en numerico
+    @param x. Valor numérico
+    @return True o False
+    """
+    
     if not x:
         return True
 
@@ -240,8 +293,18 @@ def isNaN(x):
 
 
 class Input(object):
+    """
+    Dialogo de entrada de datos
+    """
     @classmethod
     def getText(cls, question, prevtxt="", title="Pineboo"):
+        """
+        Recoge texto
+        @param question. Label del diálogo.
+        @param prevtxt. Valor inicial a especificar en el campo
+        @param title. Título del diálogo
+        @return cadena de texto recogida
+        """
         text, ok = QtWidgets.QInputDialog.getText(None, title,
                                                   question, QtWidgets.QLineEdit.Normal, prevtxt)
         if not ok:
@@ -250,6 +313,14 @@ class Input(object):
 
     @classmethod
     def getItem(cls, question, items_list=[], title="Pineboo", editable=True):
+        """
+        Recoge Item
+        @param question. Label del diálogo.
+        @param item_list. Lista de items.
+        @param title. Título del diálogo.
+        @return item, Item seleccionado.
+        """
+        
         text, ok = QtWidgets.QInputDialog.getItem(None, title, question, items_list, 0, editable)
         if not ok:
             return None
@@ -257,6 +328,9 @@ class Input(object):
 
 
 class NumberEdit(QtWidgets.QWidget):
+    """
+    Diálogo para recoger un número
+    """
 
     def __init__(self):
         super(NumberEdit, self).__init__()
@@ -275,36 +349,75 @@ class NumberEdit(QtWidgets.QWidget):
         
 
     def getValue(self):
+        """
+        Recoge el valor
+        @return valor actual
+        """
         return self.line_edit.text
 
     def setValue(self, value):
+        """
+        Setea el valor dado como valor actual
+        @param value. Nuevo valor actual
+        """
         self.line_edit.setText(value)
 
     def getDecimals(self):
+        """
+        Recoge decimales
+        @return decimales del valor actual
+        """
         return self.line_edit.validator().decimals()
 
     def setDecimals(self, decimals):
+        """
+        Setea decimales al valor actual
+        @param decimals. Decimales a setear
+        """
         self.line_edit.validator().setDecimals(int(decimals))
 
 
     def setMinimum(self, min):
+        """
+        Setea valor mínimo
+        @param min. Valor mínimo especificable
+        """
         self.line_edit.validator().setBottom(float(min))
 
     def getMinimum(self):
+        """
+        Recoge el valor mínimo seteable
+        @return valor mínimo seteable
+        """
         return self.line_edit.validator().bottom()
 
 
     def getMaximum(self):
+        """
+        Recoge el valor máximo seteable
+        @return Valor máximo posible
+        """
         return self.line_edit.validator().top()
 
     def setMaximum(self, max):
+        """
+        Setea valor máximo
+        @param max. Valor maximo especificable
+        """
         return self.line_edit.validator().setTop(float(max))
 
     def getLabel(self):
+        """
+        Recoge la etiqueta del diálogo
+        @return texto de la etiqueta del diálogo
+        """
         self.label_line_edit.text()
 
     def setLabel(self, label):
-        
+        """
+        Setea la nueva etiqueta del diálogo
+        @param label. Etiqueta del diálogo
+        """
         self.label_line_edit.setText(label)
 
     label = property(getLabel, setLabel)
@@ -315,13 +428,20 @@ class NumberEdit(QtWidgets.QWidget):
 
 
 def qsa_length(obj):
-    lfn = getattr(obj, "length", None)
-    if lfn:
-        return lfn()
-    return len(lfn)
+    """
+    Parser para recoger el length de un campo
+    @param obj, objeto a obtener longitud
+    @return longitud del objeto
+    """
+    return obj.length() if hasattr(obj, "length") else len(obj)
 
 
 def qsa_text(obj):
+    """
+    Parser para recoger valor text de un objeto dado
+    @param obj. Objeto a procesar
+    @return Valor de text o text()
+    """
     try:
         return obj.text()
     except Exception:
@@ -329,6 +449,11 @@ def qsa_text(obj):
 
 
 def RegExp(strRE):
+    """
+    Regexp
+    @param strRE. Cadena de texto
+    @return valor procesado
+    """
     if strRE[-2:] == "/g":
         strRE = strRE[:-2]
 
@@ -371,7 +496,9 @@ class qsaRegExp(object):
 
 @total_ordering
 class Date(object):
-
+    """
+    Case que gestiona un objeto tipo Date
+    """
     date_ = None
     time_ = None
 
@@ -404,37 +531,74 @@ class Date(object):
             self.date_ = QtCore.QDate(args[0], args[1], args[2])
             self.time_ = QtCore.QTime(0, 0)
 
-    def toString(self, *args, **kwargs):
+    def toString(self):
+        """
+        Retorna una cadena de texto con los datos de fecha y hora.
+        @return cadena de texto con los datos de fecha y hora
+        """
+        
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"), self.date_.toString("MM"), self.date_.toString(
             "dd"), self.time_.toString("hh"), self.time_.toString("mm"), self.time_.toString("ss"))
         return texto
 
     def getYear(self):
+        """
+        Retorna el año
+        @return año
+        """
         return self.date_.year()
 
     def getMonth(self):
+        """
+        Retorna el mes
+        @return mes
+        """
         return self.date_.month()
 
     def getDay(self):
+        """
+        Retorna el día
+        @return día
+        """
         return self.date_.day()
 
     def getHours(self):
+        """
+        Retorna horas
+        @return horas
+        """
         return self.time_.hour()
 
     def getMinutes(self):
+        """
+        Retorna minutos
+        @return minutos
+        """
         return self.time_.minute()
 
     def getSeconds(self):
+        """
+        Retorna segundos
+        @return segundos
+        """
         return self.time_.second()
 
     def getMilliseconds(self):
+        """
+        Retorna milisegundos
+        @return milisegundos
+        """
         return self.time_.msec()
     
-    def setDate(self, *args):
+    def setDate(self, date):
+        """
+        Se especifica fecha
+        @param date. Fecha a setear
+        """
         if len(args) == 1:
             year_ = self.date_.toString("yyyy")
             month_ = self.date_.toString("MM")
-            day_ = str(args[0])
+            day_ = str(date)
             if len(day_) == 1:
                 day_ = "0" + day_
             str_ = "%s-%s-%s" % (year_, month_, day_)
@@ -443,12 +607,27 @@ class Date(object):
             logger.warn("DATE.setDate: Se han especificado %s", len(args))
     
     def addDays(self, d):
+        """
+        Se añaden dias a una fecha dada
+        @param d. Dias a sumar (o restar) a la fecha dada
+        @return nueva fecha calculada
+        """
         return Date(self.date_.addDays(d).toString("yyyy-MM-dd"))
     
     def addMonths(self, m):
+        """
+        Se añaden meses a una fecha dada
+        @param m. Meses a sumar (o restar) a la fecha dada
+        @return nueva fecha calculada
+        """
         return Date(self.date_.addMonths(m).toString("yyyy-MM-dd"))
     
     def addYears(self, y):
+        """
+        Se añaden años a una fecha dada
+        @param y. Años a sumar (o restar) a la fecha dada
+        @return nueva fecha calculada
+        """
         return Date(self.date_.addYears(y).toString("yyyy-MM-dd"))      
 
     @classmethod
@@ -459,12 +638,19 @@ class Date(object):
         return self.toString()
     
     def __le__(self, other):
+        """
+        Esta función junto con total_ordering, sirve para poder comparar este tipo con otro similar
+        return Boolean. True si este objeto es menor que el comparado
+        """
         return self.toString() < other.toString()
 
 
 
 
 class Dir(object):
+    """
+    Gestiona un directorio
+    """
     path_ = None
     Files = "*.*"
 
@@ -475,6 +661,11 @@ class Dir(object):
         self.path_ = path
 
     def entryList(self, patron, type_=None):
+        """
+        Lista de ficheros que coinciden con un patron dado
+        @param patron. Patron a usa para identificar los ficheros
+        @return lista con los ficheros que coinciden con el patrón
+        """
         # p = os.walk(self.path_)
         retorno = []
         try:
@@ -487,20 +678,41 @@ class Dir(object):
 
         return retorno
 
-    def fileExists(self, name):
-        return os.path.exists(name)
+    def fileExists(self, file_name):
+        """
+        Retorna si existe el fichero dado o no
+        @param file_name. Nombre del fichero
+        @return Boolean. Si existe el ficehro o no.
+        """
+        return os.path.exists(file_name)
 
     def cleanDirPath(name):
+        """
+        Devuelve la ruta del ficehro limpia
+        @param name. Rtua del ficehro a limpiar
+        @return ruta limpia
+        """
         return str(name)
 
+    @decorators.Deprecated
     def convertSeparators(filename):
-        # Retorno el mismo path del fichero ...
+        """
+        Retona el mismo valor
+        """
         return filename
 
     def setCurrent(self, val=None):
+        """
+        Especifica la ruta como path actual
+        @param val. Ruta especificada
+        """ 
         os.chdir(val or filedir("."))
 
     def mkdir(self, name=None):
+        """
+        Crea un directorio
+        @param name. Nombre de la ruta a crear
+        """
         if name is None:
             name = self.path_
         try:
@@ -510,6 +722,9 @@ class Dir(object):
 
 
 class File(QtCore.QFile):
+    """
+    Para gestionar un fichero
+    """
     fichero = None
     mode = None
     path = None
@@ -531,14 +746,13 @@ class File(QtCore.QFile):
         
         if encode is not None:
             self.encode_ = encode
-        
-    
-
-    # def open(self, mode):
-    #    super(File, self).open(self.fichero, mode)
 
     def read(self, byte = False):
-
+        """
+        Lee el fichero al completo
+        @param byte. Especifica si se lee en modo texto o en bytes
+        @retunr contenido del fichero
+        """
         if isinstance(self, str):
             file_ = self
             encode = "iso-8859-15"
@@ -553,87 +767,123 @@ class File(QtCore.QFile):
 
         f.close()
         return ret
-        # if isinstance(self, str):
-        #    f = File(self)
-        #    f.open(File.ReadOnly)
-        #    return f.read()
 
-        #in_ = QTextStream(self)
-        # return in_.readAll()
-
-    def write(*args):
-        
-        if not isinstance(args[0], str):
-            fichero = self.fichero
-            encode = self.encode_
-        else:
-            fichero = args[0]
-            encode = "iso-8859-15"
-        
-        text = args[1]
+    def write(self, data, length = -1):
+        """
+        Escribe datos en el fichero
+        @param data. Valores a guardar en el fichero
+        @param length. Tamaño de data. (No se usa)
+        """
             
         import codecs
-        f = codecs.open(fichero, encoding=encode, mode="w+")
-        f.write(text)
-        f.seek(0)
+        f = codecs.open(self.fichero_, encoding=self.encode, mode="w+")
+        f.write(data)
         f.close()
 
     def exists(name):
-        return os.path.exists(name)
+        """
+        Comprueba si un fichero exite
+        @param name. Nombre del fichero.
+        @return boolean informando si existe o no el fichero.
+        """
+        return super().exists(name)
 
     def isDir(dir_name):
+        """
+        Indica si la ruta data es un directorio
+        @param. Nombre del directorio
+        @return. boolean informando si la ruta dada es un direcotiro o no.
+        """
         return os.path.isdir(dir_name)
     
     def getName(self):
-        return super().fileName()
+        """
+        Retorna el nombre del fichero
+        @return Nombre del fichero
+        """
+        path_, file_name = os.path.split(self.fichero)
+        return file_name
+
     
     def writeLine(self, data):
+        """
+        Escribe un nueva linea en un fichero
+        @param data. Datos a añadir en el fichero
+        """
         import codecs
-        f = codecs.open(fichero, encoding=encode, mode="a")
+        f = codecs.open(self.fichero, encoding=self.encode_, mode="a")
         f.write(data)
         f.close()
     
-    @decorators.NotImplementedWarn
     def readLine(self):
-        pass
+        """
+        Lee una linea de un fichero dado
+        @return cadena de texto con los datos de la linea actual
+        """
+        if self.last_seek is None:
+            self.last_seek = 0
+        
+        f = codecs.open(self.fichero,"r", encoding=self.encode_)
+        ret = f.readline(self.last_seek)
+        self.last_seek += 1
+        f.close()
+        return ret
+        
     
     def readLines(self):
+        """
+        Lee todas las lineas de un fichero y devuelve un array
+        @return array con las lineas del fichero.
+        """
         ret = None
         import codecs
-        f = codecs.open(fichero, encoding=encode, mode="a")
+        f = codecs.open(self.fichero, encoding=self.encode_, mode="a")
+        if self.last_seek is not None:
+            f.seek(self.last_seek)
         ret = f.readlines()
         f.close()
         return ret
     
     def readByte(self):
+        """
+        Lee una linea (bytes) de un fichero dado
+        @return Bytes con los datos de la linea actual
+        """
         return self.read(True)
     
-    def writeByte(*args):
-        if not isinstance(args[0], str):
-            fichero = self.fichero
-            encode = self.encode_
-        else:
-            fichero = args[0]
-            encode = "iso-8859-15"
-        
-        text = args[1]
+    def writeByte(self, data_b):
+        """
+        Escribe un nueva linea en un fichero
+        @param data_b. Datos a añadir en el fichero
+        """
             
         import codecs
-        f = codecs.open(self.fichero, encoding=encode, mode="wb+")
-        f.write(text)
-        f.seek(0)
+        f = codecs.open(self.fichero, encoding=self.encode_, mode="wb+")
+        f.write(data_b)
         f.close()
     
     def remove(self):
-        super().remove()
+        """
+        Borra el fichero dado
+        @return Boolean . True si se ha borrado el fichero, si no False.
+        """
+        return super().remove()
         
-    
     
     name = property(getName)
 
 
 class QString(str):
+    """
+    Clase QString para simular la original que no existe en PyQt5
+    """
     def mid(self, start, length=None):
+        """
+        Recoje una sub cadena a partir de una cadena
+        @param start. Posición inicial
+        @param length. Longitud de la cadena. Si no se especifica , es hasta el final
+        @return sub cadena de texto.
+        """ 
         if length is None:
             return self[start:]
         else:
@@ -641,4 +891,8 @@ class QString(str):
 
 
 def debug(txt):
+    """
+    Mensajes debug en qsa
+    @param txt. Mensaje.
+    """
     logger.warn("---> " + ustr(txt))
