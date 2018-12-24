@@ -112,10 +112,7 @@ def loadUi(form_path, widget, parent=None):
                         #    getattr(ifx, fn_name))
                         pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
                     except Exception as e:
-                        logger.exception("Error connecting:",
-                                         sender, signal_name,
-                                         receiver, slot_name,
-                                         getattr(ifx, fn_name))
+                        logger.exception("Error connecting: %s %s %s %s %s", sender, signal_name, receiver, slot_name, getattr(ifx, fn_name))
                     continue
 
             if receiver is None:
