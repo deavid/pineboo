@@ -786,7 +786,7 @@ class File(QtCore.QFile):
         @param name. Nombre del fichero.
         @return boolean informando si existe o no el fichero.
         """
-        return super().exists(name)
+        return QtCore.QFile.exists(name)
 
     def isDir(dir_name):
         """
