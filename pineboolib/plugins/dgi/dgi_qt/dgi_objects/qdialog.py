@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 
 class QDialog(QtWidgets.QDialog):
     
@@ -15,6 +15,14 @@ class QDialog(QtWidgets.QDialog):
     
     def setEnable_(self, enable_):
         self.setEnabled(enable_)
+    
+    @QtCore.pyqtSlot()
+    def accept(self):
+        super().accept()
+    
+    @QtCore.pyqtSlot()
+    def reject(self):
+        super().reject()
 
     caption = property(getTitle, setTitle)
     enable = property(getEnabled, setEnable_)
