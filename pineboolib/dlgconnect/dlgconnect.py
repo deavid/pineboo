@@ -253,6 +253,7 @@ class DlgConnect(QtWidgets.QWidget):
         tree.write(os.path.join(self.profile_dir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
         # self.cleanProfileForm()
         self.loadProfiles()
+        self.ui.cbProfiles.setCurrentText(description)
 
     @QtCore.pyqtSlot()
     def deleteProfile(self):
