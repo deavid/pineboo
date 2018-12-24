@@ -983,7 +983,7 @@ class Member(ASTPython):
                     elif member == "length":
                         value = arg[7:]
                         value = value[:len(value) - 1]
-                        arguments = ["len(%s)" % (".".join(part1))] + part2
+                        arguments = ["qsa_length(%s)" % (".".join(part1))] + part2
                     elif member == "charAt":
                         value = arg[7:]
                         value = value[:len(value) - 1]
