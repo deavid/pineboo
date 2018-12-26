@@ -431,10 +431,12 @@ class FLSqlQuery(object):
     """
 
     def value(self, n, raw=None):
+        
         pos = None
         name = None
 
         if isinstance(n, str):
+            n = n.replace(" ", "")
             pos = self.fieldNameToPos(n)
             name = n
         else:
