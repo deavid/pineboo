@@ -234,6 +234,8 @@ class PNBuffer(object):
             elif field.type_ == "double":
                 try:
                     v = float(field.value)
+                    if v == int(field.value):
+                        v = int(field.value)
                 except Exception:
                     v = 0.0
                 
@@ -1239,6 +1241,7 @@ class FLSqlCursor(QtCore.QObject):
 
             if v_large:
                 v = v_large
+        
 
         return v
 
