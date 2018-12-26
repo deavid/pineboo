@@ -433,7 +433,14 @@ def qsa_length(obj):
     @param obj, objeto a obtener longitud
     @return longitud del objeto
     """
-    return obj.length() if hasattr(obj, "length") else len(obj)
+    if hasattr(obj, "length"):
+        if isinstance(obj.length, int):
+            return obj.length
+        else:
+            return obj.length()
+    
+    else:
+        return len(obj)
 
 
 def qsa_text(obj):
