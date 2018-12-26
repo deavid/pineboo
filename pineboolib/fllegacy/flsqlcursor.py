@@ -1849,7 +1849,7 @@ class FLSqlCursor(QtCore.QObject):
                         if not mtd:
                             continue
                         f = mtd.field(r.foreignField())
-                        if f:
+                        if f is not None:
                             if f.relationM1():
                                 if f.relationM1().deleteCascade():
                                     if not mtd.inCache():
