@@ -190,7 +190,7 @@ class Array(object):
 
     def __getattr__(self, k):
         if k == 'length':
-            return len(self.dict_) if self.dict_ else len(list_)
+            return len(self.dict_) if self.dict_ else len(self.list_)
         elif k == 'append':
             return self.list_.append
 
