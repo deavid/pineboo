@@ -220,12 +220,13 @@ class Project(object):
 
         # Descargar proyecto . . .
 
-        self.cur.execute(
-            """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
-        size_ = len(self.cur.fetchall())
+        self.cur.execute(""" SELECT COUNT(idmodulo) FROM flfiles WHERE NOT sha = ''""")
+        for count in self.cur:
+            size_ = count[0]
 
         self.cur.execute(
             """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
+        
         f1 = open(_dir("project.txt"), "w")
         self.files = {}
         if self._DGI.useDesktop() and self._DGI.localDesktop():
