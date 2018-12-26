@@ -103,8 +103,12 @@ class Array(object):
             return
         elif isinstance(args[0], list):
             for field in args[0]:
-                self.names_.append(field)
-                self.dict_[field] = field
+                if field in self.names_:
+                    field_key = "%s_bis" % field
+                else:
+                    field_key = field
+                self.names_.append(field_key)
+                self.dict_[field_key] = field
 
         elif isinstance(args[0], str):
             for f in args:
