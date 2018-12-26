@@ -520,7 +520,7 @@ class StructMyDict(dict):
         self[name] = value
 
 
-DEPENDECIE_CHECKED = []
+DEPENDENCIES_CHECKED = {}
 
 
 def checkDependencies(dict_, exit=True):
@@ -548,7 +548,7 @@ def checkDependencies(dict_, exit=True):
 
             settings = FLSettings()
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                if not key in DEPENDECIE_CHECKED:
+                if not key in DEPENDENCIES_CHECKED.keys():
                     logger.warn("Versión de %s: %s", key, mod_ver)
         except ImportError:
             dependences.append(dict_[key])
@@ -558,7 +558,7 @@ def checkDependencies(dict_, exit=True):
         
 
     msg = ""
-    if len(dependences) > 0 and not key in DEPENDECIE_CHECKED:
+    if len(dependences) > 0 and not key in DEPENDENCIES_CHECKED.keys():
         logger.warn("HINT: Dependencias incumplidas:")
         for dep in dependences:
             logger.warn("HINT: Instale el paquete %s" % dep)
@@ -577,8 +577,8 @@ def checkDependencies(dict_, exit=True):
             if not getattr(sys, 'frozen', False):
                 sys.exit(32)
     
-    if not key in DEPENDECIE_CHECKED:
-        DEPENDECIE_CHECKED.append(key)
+    if not key in DEPENDENCIES_CHECKED.keys():
+        DEPENDENCIES_CHECKED[key] = mod_ver
 
     return len(dependences) == 0
 
