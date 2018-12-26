@@ -1612,7 +1612,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     checkIntegrity = True
             fMD = tMD.field(self.fieldRelation_)
 
-            if fMD:
+            if fMD is not None:
                 rMD = FLRelationMetaData(
                     curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
 
