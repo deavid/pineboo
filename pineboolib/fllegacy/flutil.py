@@ -863,7 +863,7 @@ class FLUtil(QtCore.QObject):
         cursor.close()
         return True
 
-    def roundFieldValue(self, n, table, field):
+    def roundFieldValue(self, value, table_name, field_name):
         """
         Redondea un valor en función de la precisión especificada para un campo tipo double de la base de datos
 
@@ -874,20 +874,12 @@ class FLUtil(QtCore.QObject):
         @return Número redondeado
         """
         from pineboolib.pncontrolsfactory import aqApp
-        tmd = aqApp.db().manager().metadata(table)
-        if not tmd:
+        tmd = aqApp.db().manager().metadata(table_name)
+        if tmd is None:
             return 0
-        fmd = tmd.field(field)
-        if not fmd:
-            if tmd and not tmd.inCache():
-                del tmd
-            return 0
-
-        ret = self.buildNumber(n, 'float', fmd.partDecimal())
-        if tmd and not tmd.inCache():
-            del tmd
-        return ret
-
+        fmd = tmd.field(field_name)
+        return self.buildNumber(value, 'float', fmd.partDecimal()) if fmd is not None else 0
+    
     def sqlSelect(self, f, s, w, tL=None, size=0, connName="default"):
         """
         Ejecuta una query de tipo select, devolviendo los resultados del primer registro encontrado
