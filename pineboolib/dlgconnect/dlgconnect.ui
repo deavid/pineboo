@@ -611,22 +611,24 @@
           <item>
            <widget class="QPlainTextEdit" name="plainTextEdit">
             <property name="plainText">
-             <string>This software is distributed under the MIT License. As a whole, other conditions
-may apply too since there are many other libraries required that have other
-terms like PyQt5. Even if such conditions apply, the files distributed here may
-be used, distributed and modified as documentation under the MIT license.
+             <string>Copyright © 2012 David Martínez Martí
 
-If anyone later modifies the software to remove certain libraries, the terms
-of those libraries will no longer apply to any part of this software. 
+Permission is hereby granted, free of charge, to any person obtaining a copy of 
+this software and associated documentation files (the “Software”), to deal in 
+the Software without restriction, including without limitation the rights to 
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
+of the Software, and to permit persons to whom the Software is furnished to do 
+so, subject to the following conditions:
 
-At the time of this writting this software is using PyQt5, which is distributed 
-with a GPL License. So, if you convey this work you should meet the license 
-terms of GPL as well. 
+The above copyright notice and this permission notice shall be included in all 
+copies or substantial portions of the Software.
 
-The LICENSE.mit should be included with this software and holds the MIT license.
-
-Copyright and license notices are not required to appear in any part of the 
-graphical interface of the software. Those are completely optional. </string>
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS 
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR 
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
             </property>
            </widget>
           </item>
