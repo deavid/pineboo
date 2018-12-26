@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget
+from pineboolib.utils import DEPENDENCIES_CHECKED
 
 class about_pineboo(QWidget):
     
@@ -16,12 +17,28 @@ class about_pineboo(QWidget):
         import pineboolib
         from pineboolib.fllegacy.flmanagermodules import FLManagerModules
         from pineboolib.utils import filedir
-        mM = FLManagerModules()
+        mng_mod = FLManagerModules()
     
         dlg_ = filedir('dlgabout/about_pineboo.ui')
         version_ = pineboolib.project.version
-        self.ui = mM.createUI(dlg_, None, self)
+        self.ui = mng_mod.createUI(dlg_, None, self)
         self.ui.lbl_version.setText("Pineboo v%s" % version_)
         self.ui.btn_close.clicked.connect(self.ui.close)
         self.ui.show()
+        
+        self.ui.lbl_librerias.setText(self.load_components())
     
+    def load_components(self):
+        components = "Versiones de componentes:\n\n"
+        
+        for k in DEPENDENCIES_CHECKED.keys():
+            components += "%s = %s\n" % (k, DEPENDENCIES_CHECKED[k])
+            
+        
+        
+        
+        
+        
+        return components
+        
+        
