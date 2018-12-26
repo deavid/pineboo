@@ -819,7 +819,7 @@ class File(QtCore.QFile):
         """
         import codecs
         f = codecs.open(self.fichero, encoding=self.encode_, mode="a")
-        f.write(data)
+        f.write("%s\n" % data)
         f.close()
     
     def readLine(self):
