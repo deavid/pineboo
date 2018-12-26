@@ -292,7 +292,7 @@ def proxy_fn(wf, wr, slot):
             return None
 
         args_num = get_expected_args_num(f)
-
+        
         try:
             return f(*args, **kwargs)
         except:
@@ -306,8 +306,11 @@ def proxy_fn(wf, wr, slot):
 def slot_done(fn, signal, sender, caller): 
     
     def new_fn(*args, **kwargs):
-             
-        res = fn(*args, **kwargs)
+        
+        try:
+            res = fn(*args, **kwargs)
+        except:
+            res = fn(*args[:-1])
         
         if caller is not None:
             
