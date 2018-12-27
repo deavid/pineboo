@@ -41,6 +41,8 @@ endoffile = None
 def cleanNoPython(data):
     return re.sub(r'\/\/___NOPYTHON\[\[.*?\/\/\]\]___NOPYTHON\s*', '', data, flags=re.DOTALL)
 
+def cleanNoPythonNever(data):
+    return re.sub(r'\/\/___NOPYTHON_NEVER\[\[.*?\/\/\]\]___NOPYTHON_NEVER\s*', '', data, flags=re.DOTALL)
 
 def cnvrt(val):
     val = str(val)
@@ -875,6 +877,7 @@ def main():
             sys.stderr.write("Loading %s ..." % fs[-1])
             sys.stderr.flush()
             data = open(filename).read()
+            data = cleanNoPythonNever(data)
             data = cleanNoPython(data)
             sys.stderr.write(" parsing ...")
             sys.stderr.flush()

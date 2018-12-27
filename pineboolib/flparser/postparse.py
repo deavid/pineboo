@@ -715,6 +715,7 @@ def execute(options, args):
                 sys.stdout.flush()
             try:
                 filecontent = open(filename, "r", encoding="latin-1").read()
+                filecontent = flscriptparse.cleanNoPythonNever(filecontent)
                 if options.clean_no_python:
                     filecontent = flscriptparse.cleanNoPython(filecontent)
             except Exception as e:
