@@ -174,20 +174,12 @@ class Array(object):
         @return Valor del registro especificado
         """
         
-        if isinstance(key, int):
-            if key in self.names_:            
+        if isinstance(key, int):                
+            if self.dict_:
                 return self.dict_[self.names_[key]]
-            else:
-                
-                if self.dict_:
-                    m = 0
-                    for m_k in self.dict_.keys():
-                        if m == key:
-                            return self.dict_[m_k]
-                        m += 1
                         
-                else:
-                    return self.list_[key]
+            else:
+                return self.list_[key]
                     
         else:
             # print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
