@@ -273,7 +273,7 @@ class Project(object):
                 
                 if not os.path.exists(_dir("cache", fileobj.filekey)):
                     
-                    folder = _dir("cache", "/".join(fileobj.filekey.split("/")[:4]))
+                    folder = _dir("cache", "/".join(fileobj.filekey.split("/")[:len(fileobj.filekey.split("/")) -1]))
                     if os.path.exists(folder):
                         for root, dirs, files in os.walk(folder):
                             for f in files:
