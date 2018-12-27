@@ -784,8 +784,6 @@ class FLUtil(QtCore.QObject):
         if v.endswith("5"):
            v += "1" 
         
-        partDecimal = 1
-        
         ret = round(float(v)) if partDecimal == 0 else round(float(v), partDecimal)
         """    
         d = float(v) * 10**partDecimal
@@ -799,9 +797,7 @@ class FLUtil(QtCore.QObject):
         if tipo == "float":
             ret = float(ret)
         return ret
-        """
-        print("*****", ret, type(ret))
-        
+        """        
         return ret
         
     def readSettingEntry(self, key, def_=u""):
