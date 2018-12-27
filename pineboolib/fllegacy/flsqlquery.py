@@ -486,6 +486,11 @@ class FLSqlQuery(object):
                       (name, type(retorno), retorno))
                 retorno = float(retorno)
 
+            if isinstance(retorno, float):
+                if retorno == int(retorno):
+                    retorno = int(retorno)
+                
+
             return retorno
 
     """

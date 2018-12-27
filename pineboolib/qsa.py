@@ -256,9 +256,11 @@ def parseFloat(x):
     @return Valor tipo float, o parametro x , si no es convertible
     """
     try:
-        if x is None:
-            return 0
-        return float(x)
+        ret = 0 if x is None else float(x) 
+        if ret == int(ret):
+            ret = int(ret)
+        
+        return ret
     except Exception:
         return x
 
