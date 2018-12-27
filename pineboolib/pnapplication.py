@@ -263,7 +263,22 @@ class Project(object):
                     encode_ = "utf-8"
 
                 settings = FLSettings()
+                
+                
+                    
+                
+                
+                
+                
+                
                 if not os.path.exists(_dir("cache", fileobj.filekey)):
+                    
+                    folder = _dir("cache", "/".join(fileobj.filekey.split("/")[:4]))
+                    if os.path.exists(folder):
+                        for root, dirs, files in os.walk(folder):
+                            for f in files:
+                                os.remove(os.path.join(root, f))
+                    
 
                     if settings.readBoolEntry("application/isDebuggerMode", False):
                         if self._splash:
