@@ -529,10 +529,11 @@ def checkDependencies(dict_, exit=True):
 
     dependences = []
     error = []
+    mod_ver = None
     for key in dict_.keys():
+        
         try:
             mod_ = import_module(key)
-            mod_ver = None
             if key == "ply":
                 version_check(key, mod_.__version__, '3.9')
             elif key == "Pillow":
@@ -543,7 +544,7 @@ def checkDependencies(dict_, exit=True):
                 version_check("PyQt5", mod_.QT_VERSION_STR, '5.11')
                 mod_ver = mod_.QT_VERSION_STR
 
-            if not mod_ver:
+            if mod_ver is None:
                 mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
 
             settings = FLSettings()
