@@ -553,6 +553,14 @@ class Date(object):
         @return año
         """
         return self.date_.year()
+    
+    def setYear(self, yyyy):
+        """
+        Setea un año dado
+        @param yyyy. Año a setear
+        """
+        if yyyy is not None:
+            self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (yyyy, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd")
 
     def getMonth(self):
         """
@@ -560,6 +568,18 @@ class Date(object):
         @return mes
         """
         return self.date_.month()
+    
+    def setMonth(self, mm):
+        """
+        Setea un mes dado
+        @param mm. Mes a setear
+        """
+        
+        if mm is not None:
+            if len(str(mm)) == 1:
+                mm = "0%s" % mm
+            self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), mm, self.date_.toString("dd")), "yyyy-MM-dd")
+    
 
     def getDay(self):
         """
@@ -567,6 +587,18 @@ class Date(object):
         @return día
         """
         return self.date_.day()
+    
+    def setDay(self, dd):
+        """
+        Setea un dia dado
+        @param dd. Dia a setear
+        """
+        if dd is not None:
+            if len(str(dd)) == 1:
+                dd = "0%s" % dd
+                
+            self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd")
+    
 
     def getHours(self):
         """
@@ -601,16 +633,14 @@ class Date(object):
         Se especifica fecha
         @param date. Fecha a setear
         """
-        if len(args) == 1:
-            year_ = self.date_.toString("yyyy")
-            month_ = self.date_.toString("MM")
-            day_ = str(date)
-            if len(day_) == 1:
-                day_ = "0" + day_
-            str_ = "%s-%s-%s" % (year_, month_, day_)
-            self.date_ = QtCore.QDate.fromString(str_, "yyyy-MM-dd")
-        else:
-            logger.warn("DATE.setDate: Se han especificado %s", len(args))
+        year_ = self.date_.toString("yyyy")
+        month_ = self.date_.toString("MM")
+        day_ = str(date)
+        if len(day_) == 1:
+            day_ = "0" + day_
+         
+        str_ = "%s-%s-%s" % (year_, month_, day_)
+        self.date_ = QtCore.QDate.fromString(str_, "yyyy-MM-dd") 
     
     def addDays(self, d):
         """
