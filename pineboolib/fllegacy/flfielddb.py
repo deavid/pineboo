@@ -2431,7 +2431,7 @@ class FLFieldDB(QtWidgets.QWidget):
         a = None
 
         v = self.cursor_.valueBuffer(field.name())
-        if v is None or (fMD and self.cursor_.bufferIsNull(fMD.name())):
+        if v in  [None, ""] or (fMD is not None and self.cursor_.bufferIsNull(fMD.name())):
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(
             ), "Aviso", "Debe indicar un valor para %s" % field.alias(), QtWidgets.QMessageBox.Ok)
             return
