@@ -311,7 +311,11 @@ def slot_done(fn, signal, sender, caller):
         
         res = False
         try:
-            res = fn(*args, **kwargs)
+            try:
+                res = fn(*args, **kwargs)
+            except:
+                res = fn(*args[:-1], **kwargs)
+                
         except Exception:
             script_name = caller.__module__ if caller is not None else "????"
             aqApp.msgBoxWarning("Se ha producido un error al ejecutar el script %s:\n%s" % (script_name ,traceback.format_exc()),pineboolib.project._DGI)
