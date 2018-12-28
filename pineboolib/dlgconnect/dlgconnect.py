@@ -102,7 +102,7 @@ class DlgConnect(QtWidgets.QWidget):
             #os.mkdir(filedir(self.profile_dir))
             return
         
-        files = [f for f in os.listdir(self.profile_dir) if os.path.isfile(os.path.join(self.profile_dir, f))]
+        files = [f for f in sorted(os.listdir(self.profile_dir)) if os.path.isfile(os.path.join(self.profile_dir, f))]
         for file in files:
             fileName = file.split(".")[0]
             self.ui.cbProfiles.addItem(fileName)
