@@ -919,8 +919,8 @@ class FLUtil(QtCore.QObject):
 
         if q.next():
             valor = q.value(0)
-            if isinstance(valor, datetime.date):
-                valor = str(valor)
+            #if isinstance(valor, datetime.date):
+            #    valor = str(valor)
             return valor
 
         return False
