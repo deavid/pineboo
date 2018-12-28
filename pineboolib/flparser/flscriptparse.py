@@ -648,10 +648,15 @@ def calctree(obj, depth=0, num=[], otype="source", alias_mode=1):
 
         if type(value) is dict:
             # print "*"
-            try:
-                tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
-            except Exception:
-                print("ERROR: trying to calculate member %d on:" % n, repr(obj))
+            if depth < 950:
+                try:
+                    tree_obj = calctree(value, depth + 1, num + [str(n)], ctype, alias_mode=alias_mode)
+                except Exception:
+                    print("ERROR: trying to calculate member %d on:" % n, repr(obj))
+            else:
+                tree_obj = None
+                
+                
             if type(tree_obj) is dict:
                 if (tree_obj['has_data'] or alias_mode == 0) and ctype != otype:
                     contentlist.append([ctype, tree_obj])
