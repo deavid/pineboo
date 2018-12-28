@@ -208,7 +208,7 @@ class FLSqlQuery(object):
         self.d.select_ = s
 
         if isinstance(s, str) and sep in s:
-            s = s.replace(" ", "")
+            #s = s.replace(" ", "")
             s = s.split(sep)
 
         # self.d.select_ = s.strip_whitespace()
@@ -436,7 +436,7 @@ class FLSqlQuery(object):
         name = None
 
         if isinstance(n, str):
-            n = n.replace(" ", "")
+            #n = n.replace(" ", "")
             pos = self.fieldNameToPos(n)
             name = n
         else:
