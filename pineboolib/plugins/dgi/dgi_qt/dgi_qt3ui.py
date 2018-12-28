@@ -509,7 +509,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 elif p_name == "sizePolicy":
                     widget.setSizePolicy(loadVariant(p, widget))
 
-            widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+            #widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
             widget.layout.setObjectName(lay_name)
             widget.layout.setContentsMargins(lay_margin_h, lay_margin_v, lay_margin_h, lay_margin_v)
             widget.layout.setSpacing(lay_spacing)
