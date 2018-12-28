@@ -9,6 +9,8 @@ from pineboolib.fllegacy.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsettings import FLSettings
 import pineboolib
 import logging, os
+from PyQt5.Qt import QMessageBox
+from PyQt5.QtWidgets import qApp
 
 
 logger = logging.getLogger(__name__)
@@ -47,6 +49,9 @@ class dgi_qt(dgi_schema):
             getattr(QtCore, name, None)                   
              
         return cls
+    
+    def  msgBoxWarning(self, t):
+        QMessageBox.warning(qApp.focusWidget(), "Pineboo", t)
     
     def createUI(self, n, connector=None, parent=None, name=None):
         

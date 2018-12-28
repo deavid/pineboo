@@ -16,6 +16,7 @@ import logging
 import weakref
 import re
 import os
+import traceback
 
 logger = logging.getLogger("PNControlsFactory")
 
@@ -293,10 +294,10 @@ def proxy_fn(wf, wr, slot):
 
         args_num = get_expected_args_num(f)
         
-        try:
-            return f(*args, **kwargs)
-        except:
-            return f(*args[:-1])
+        if args_num:     
+            return f(*args[0:args_num], **kwargs)
+        else:
+            return f()
 
     return fn
 
@@ -307,10 +308,13 @@ def slot_done(fn, signal, sender, caller):
     
     def new_fn(*args, **kwargs):
         
+        
+        res = False
         try:
             res = fn(*args, **kwargs)
-        except:
-            res = fn(*args[:-1])
+        except Exception:
+            script_name = caller.__module__ if caller is not None else "????"
+            aqApp.msgBoxWarning("Se ha producido un error al ejecutar el script %s:\n%s" % (script_name ,traceback.format_exc()),pineboolib.project._DGI)
         
         if caller is not None:
             

@@ -586,9 +586,9 @@ class FLApplication(QtCore.QObject):
     def singleFLLarge(self):
         pass
 
-    @decorators.NotImplementedWarn
+
     def msgBoxWarning(self, t, _gui):
-        pass
+        _gui.msgBoxWarning(t)
 
     @decorators.NotImplementedWarn
     def checkAndFixTransactionLevel(self, ctx):
