@@ -1139,8 +1139,11 @@ class FLQPSQL(object):
         util = FLUtil()
         self.db_.dbAux().transaction()
 
-        qry = FLSqlQuery(None, self.db_.dbAux())
-        qry2 = FLSqlQuery(None, self.db_.dbAux())
+        qry = FLSqlQuery(None, "dbAux")
+        qry2 = FLSqlQuery(None, "dbAux")
+        qry3 = FLSqlQuery(None, "dbAux")
+        qry4 = FLSqlQuery(None, "dbAux")
+        qry5 = FLSqlQuery(None, "dbAux")
         steps = 0
 
         rx = QRegExp("^.*\\d{6,9}$")
@@ -1158,8 +1161,8 @@ class FLQPSQL(object):
 
         while qry.next():
             item = qry.value(0)
-            util.setLabelText(util.tr("Borrando registro %1").arg(item))
-            qry2.exec_("DELETE FROM flfiles WERE nombre ='%s'" % item)
+            util.setLabelText(util.tr("Borrando registro %s") % item)
+            qry2.exec_("DELETE FROM flfiles WHERE nombre ='%s'" % item)
             if item.find("alteredtable") > -1:
                 if self.existsTable(item.replace(".mtd", "")):
                     util.setLabelText(util.tr("Borrando tabla %1").arg(item))
@@ -1187,13 +1190,12 @@ class FLQPSQL(object):
         util.destroyProgressDialog()
 
         steps = 0
-        qry.exec_("select tablename from pg_tables where schemaname='public'")
+        qry3.exec_("select tablename from pg_tables where schemaname='public'")
         util.createProgressDialog(
-            util.tr("Comprobando base de datos"), qry.size())
-        while qry.next():
-            item = qry.value(0)
+            util.tr("Comprobando base de datos"), qry3.size())
+        while qry3.next():
+            item = qry3.value(0)
             util.setLabelText(util.tr("Comprobando tabla %s" % item))
-
             mustAlter = self.mismatchedTable(item, item)
             if mustAlter:
                 conte = self.db_.managerModules().content("%s.mtd" % item)
@@ -1210,7 +1212,7 @@ class FLQPSQL(object):
 
         self.db_.dbAux().driver().transaction()
         steps = 0
-        sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
+        #sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
         sqlQuery = FLSqlQuery(None, self.db_.dbAux())
         if sqlQuery.exec_("select relname from pg_class where ( relkind = 'r' ) "
                           "and ( relname !~ '^Inv' ) " "and ( relname !~ '^pg_' ) and ( relname !~ '^sql_' )"):
@@ -1241,18 +1243,18 @@ class FLQPSQL(object):
                             buf.setValue(it.name(), v)
                             cur.update(False)
 
-                sqlCursor.setName(item, True)
+                #sqlCursor.setName(item, True)
 
         # self.db_.dbAux().driver().commit()
 
         steps = 0
-        qry.exec_("select tablename from pg_tables where schemaname='public'")
+        qry4.exec_("select tablename from pg_tables where schemaname='public'")
         util.createProgressDialog(
-            util.tr("Analizando base de datos"), qry.size())
-        while qry.next():
-            item = qry.value(0)
+            util.tr("Analizando base de datos"), qry4.size())
+        while qry4.next():
+            item = qry4.value(0)
             util.setLabelText(util.tr("Analizando tabla %s" % item))
-            qry2.exec_("vacuum analyze %s" % item)
+            qry5.exec_("vacuum analyze %s" % item)
             steps = steps + 1
             util.setProgress(steps)
 
