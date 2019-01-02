@@ -245,9 +245,14 @@ class FLFormDB(QtWidgets.QDialog):
                 self.widget.clear_connections()
 
             if hasattr(self.iface, "init"): #Meterlo en un hilo
-                self.init_thread_script = Thread(target = self.iface.init)
-                QtCore.QTimer(self).singleShot(0,self.init_thread_script.run)
-                return True
+                try:
+                    self.iface.init()
+                except Exception:
+                    script_name = self.iface.__module__
+                    from pineboolib.pncontrolsfactory import aqApp
+                    aqApp.msgBoxWarning("Se ha producido un error al ejecutar el script %s:\n%s" % (script_name ,traceback.format_exc()),pineboolib.project._DGI)    
+            
+            return True
 
         return False
 

@@ -401,14 +401,21 @@ class Project(object):
                     "No existe la función %s en %s", function_name, aFunction[0])
             return True  # FIXME: Esto devuelve true? debería ser false, pero igual se usa por el motor para detectar propiedades
 
+        
         try:
-            if aList:
-                return fn(*aList)
-            else:
-                return fn()
+            return fn(*aList)
         except Exception:
-            if showException:
-                self.logger.exception("js.call: error al llamar %s de %s", function, object_context)
+            from pineboolib.pncontrolsfactory import aqApp
+            aqApp.msgBoxWarning("Se ha producido un error al ejecutar el script %s:\n%s" % (function ,traceback.format_exc()),pineboolib.project._DGI)
+
+        #try:
+        #    if aList:
+        #        return fn(*aList)
+        #    else:
+        #        return fn()
+        #except Exception:
+        #    if showException:
+        #        self.logger.exception("js.call: error al llamar %s de %s", function, object_context)
 
         return None
     """

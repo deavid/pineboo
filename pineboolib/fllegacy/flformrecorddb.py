@@ -517,7 +517,13 @@ class FLFormRecordDB(FLFormDB):
             ret_ = True
             fun_ = getattr(self.iface, "validateForm", None)
             if fun_ is not None and fun_ != self.validateForm:
-                ret_ = fun_()
+                try:
+                    ret_ = fun_()
+                except Exception:
+                    script_name = self.iface.__module__
+                    from pineboolib.pncontrolsfactory import aqApp
+                    aqApp.msgBoxWarning("Se ha producido un error al ejecutar el script %s:\n%s" % (script_name ,traceback.format_exc()),pineboolib.project._DGI)  
+                
 
             return ret_ if isinstance(ret_, bool) else False
         return True

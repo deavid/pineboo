@@ -310,11 +310,14 @@ def slot_done(fn, signal, sender, caller):
         
         
         res = False
+        
+        #Este parche es para evitar que las conexiones de un clicked de error de cantidad de argumentos. En Eneboo se esperaba que signal no contenga argumentos
+        if signal.signal == "2clicked(bool)":
+            args = []
+        
+        
         try:
-            try:
-                res = fn(*args, **kwargs)
-            except:
-                res = fn(*args[:-1], **kwargs)
+            res = fn(*args, **kwargs)
                 
         except Exception:
             script_name = caller.__module__ if caller is not None else "????"
