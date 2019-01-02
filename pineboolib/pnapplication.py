@@ -6,6 +6,7 @@ import os
 import logging
 import zlib
 import sys
+import traceback
 
 import pineboolib
 from pineboolib.utils import filedir, one, Struct, XMLStruct, cacheXPM, parseTable, _path, coalesce_path, _dir
