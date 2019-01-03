@@ -8,6 +8,7 @@ from pineboolib import decorators
 from pineboolib.utils import filedir, _path
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
+from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
 from pineboolib.pncontrolsfactory import aqApp
 
@@ -645,16 +646,30 @@ class FLManagerModules(object):
     """
     Guarda el estado del sistema de módulos
     """
-    @decorators.NotImplementedWarn
     def writeState(self):
-        pass
+        idDB = "noDB"
+        if self.conn_.dbAux() is not None:
+            idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
+        
+        FLSettings().writeEntry("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
+        FLSettings().writeEntry("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)    
+        FLSettings().writeEntry("Modules/shaLocal/%s" % idDB, self.shaLocal_)      
 
     """
     Lee el estado del sistema de módulos
     """
 
     def readState(self):
-        pass
+        idDB = "noDB"
+        if self.conn_.dbAux() is not None:
+            idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
+        
+        self.activeIdModule_ = FLSettings().readEntry("Modules/activeIdModule/%s" % idDB, None)
+        self.activeIdArea_ = FLSettings().readEntry("Modules/activeIdArea/%s" % idDB, None)
+        self.shaLocal_ = FLSettings().readEntry("Modules/shaLocal/%s" % idDB, None)
+        
+        if self.activeIdModule_ is None or self.activeIdModule_ not in self.listAllIdModules():
+            self.setActiveIdModule(None)
 
     """
     Uso interno.

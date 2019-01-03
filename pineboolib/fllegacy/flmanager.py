@@ -630,10 +630,11 @@ class FLManager(QtCore.QObject):
                     realiza una consulta a la base para obtener las tablas existentes
         @return TRUE si existe la tabla, FALSE en caso contrario
         """
+        from pineboolib.pncontrolsfactory import aqApp
 
         sql_query = "SELECT * FROM %s WHERE 1 = 1 LIMIT 1" % n
         # Al usar dbAux no bloquea sql si falla
-        cursor = pineboolib.project.conn.useConn("dbAux").cursor()
+        cursor = aqApp.db().useConn("dbAux").cursor()
         try:
             cursor.execute(sql_query)
         except Exception:
