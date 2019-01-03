@@ -7,6 +7,9 @@ from pineboolib.fllegacy.fltranslator import FLTranslator
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 import pineboolib
+from PyQt5.QtCore import QTimer
+from PyQt5.Qt import QApplication
+
 
 logger = logging.getLogger("FLApplication")
 
@@ -44,6 +47,7 @@ class FLApplication(QtCore.QObject):
     show_debug_ = None
     time_user_ = None
     script_entry_function_ = None
+    event_loop = None
 
     def __init__(self):
         super(FLApplication, self).__init__()
@@ -88,6 +92,7 @@ class FLApplication(QtCore.QObject):
         v = 1.1
         self.comma_separator = self.locale_system_.toString(v, 'f', 1)[1]
         self.setObjectName("aqApp")
+        self.event_loop = QtCore.QEventLoop()
 
     def __del__(self):
         self.destroying_ = True
@@ -570,17 +575,26 @@ class FLApplication(QtCore.QObject):
     def evalueateProject(self):
         pass
 
-    @decorators.NotImplementedWarn
     def aqAppIdle(self):
-        pass
+        if self.wb_ or not self.project_ or QApplication.activeModalWidget() or QApplication.activePopupWidget():
+            return
 
-    @decorators.NotImplementedWarn
+        self.checkAndFixTransactionLevel("Application::aqAppIdle()")
+            
+
+
     def startTimerIdle(self):
-        pass
+        if not self.timer_idle_:
+            self.timer_idle_ = QTimer()
+            self.timer_idle_.timeout.connect(self.aqAppIdle)
+        else:
+            self.timer_idle_.stop()
+        
+        self.timer_idle_.start(1000)
 
-    @decorators.NotImplementedWarn
     def stopTimerIdle(self):
-        pass
+        if self.timer_idle_ and self.timer_idle_.isActive():
+            self.timer_idle_.stop()
 
     @decorators.NotImplementedWarn
     def singleFLLarge(self):
@@ -590,9 +604,40 @@ class FLApplication(QtCore.QObject):
     def msgBoxWarning(self, t, _gui):
         _gui.msgBoxWarning(t)
 
-    @decorators.NotImplementedWarn
-    def checkAndFixTransactionLevel(self, ctx):
-        pass
+    def checkAndFixTransactionLevel(self, ctx=None):
+        dict_db = self.db().dictDatabases()
+        if not dict_db:
+            return
+        
+        roll_back_done = False
+        for it in dict_db:
+            if it.transactionLevel() <= 0:
+                continue
+            roll_back_done = True
+            if it.lastActiveCursor():
+                it.lastActiveCursor().rollbackOpened(-1)
+            if it.transactionLevel <= 0:
+                continue
+            
+        
+        if not roll_back_done:
+            return
+        
+        msg =   QApplication.tr("Se han detectado transacciones abiertas en estado inconsistente.\n"
+                                "Esto puede suceder por un error en la conexión o en la ejecución\n"
+                                "de algún proceso de la aplicación.\n"
+                                "Para mantener la consistencia de los datos se han deshecho las\n"
+                                "últimas operaciones sobre la base de datos.\n"
+                                "Los últimos datos introducidos no han sido guardados, por favor\n"
+                                "revise sus últimas acciones y repita las operaciones que no\n"
+                                "se han guardado.\n")
+        
+        if ctx is not None:
+            msg += QApplication.tr("Contexto: %1\n").arg(ctx)
+        
+        self.msgBoxWarning(msg)
+        logger.warn("%s\n", msg)
+        
 
     @decorators.NotImplementedWarn
     def showDebug(self):
