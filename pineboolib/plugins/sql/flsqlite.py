@@ -236,6 +236,9 @@ class FLSQLITE(object):
         return True
 
     def rollbackSavePoint(self, n):
+        if n == 0:
+            return True
+        
         if not self.isOpen():
             self.logger.warn("%s::rollbackSavePoint: Database not open", __name__)
             return False
@@ -282,7 +285,8 @@ class FLSQLITE(object):
         try:
             cursor.execute(q)
         except Exception:
-            self.setLastError("%s::No se pudo ejecutar la query.\n%s", __name__, q)
+            self.logger.error("SQL3Driver:: No se pudo ejecutar la query %s", q)
+            self.setLastError("%s::No se pudo ejecutar la query.\n%s" % ( __name__, q), q)
 
     def rollbackTransaction(self):
         if not self.isOpen():
@@ -332,6 +336,7 @@ class FLSQLITE(object):
         return " %s(%s)" % (type_.upper(), leng) if leng else " %s" % type_.upper()
 
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
+        where = self.process_booleans(where)
         self.sql = "SELECT %s FROM %s WHERE %s" % (fields, table, where)
 
     def refreshFetch(self, number, curname, table, cursor, fields, where):
@@ -342,6 +347,9 @@ class FLSQLITE(object):
         except Exception:
             self.logger.error("SQL3Driver:: refreshFetch")
 
+    def process_booleans(self, where):
+        where = where.replace("'true'", str(1))
+        return where.replace("'false'", str(0))
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         if curname not in self.rowsFetched.keys():
