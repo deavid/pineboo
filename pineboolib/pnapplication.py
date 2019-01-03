@@ -865,7 +865,7 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor):
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
-            self.logger.warn("Loading record action %s . . . ", self.name)
+            self.logger.debug("Loading record action %s . . . ", self.name)
             self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
             if self.formrecord_widget:
