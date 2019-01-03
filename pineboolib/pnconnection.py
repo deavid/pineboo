@@ -95,8 +95,6 @@ class PNConnection(QtCore.QObject):
             for k in self.connAux.keys():
                 if k == name:
                     return self.connAux[name]
-        else:
-            logger.warn("PNConnection::database : No existe la conexión '%s', se devuelve la conexión por defecto 'default'", name)
 
         logger.info("PNConnection::Creando nueva conexión %s", name)
 
@@ -337,6 +335,14 @@ class PNConnection(QtCore.QObject):
             return False
 
         return self.driver().canDetectLocks()
+    
+    
+    def commit(self):
+        if not self.db():
+            return False
+        
+        return self.driver().commitTransaction()
+    
 
     def managerModules(self):
         if not self._managerModules:
