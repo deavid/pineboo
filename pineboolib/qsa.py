@@ -173,7 +173,6 @@ class Array(object):
         @param key. Valor que idenfica el registro a recoger
         @return Valor del registro especificado
         """
-        
         if isinstance(key, int):                
             if self.dict_:
                 return self.dict_[self.names_[key]]
@@ -182,8 +181,7 @@ class Array(object):
                 return self.list_[key]
                     
         else:
-            # print("QSATYPE.DEBUG: Array.getItem() " ,key,  self.dict_[key])
-            return self.dict_[key]
+            return self.names_[key]
 
     def __getattr__(self, k):
         if k == 'length':
@@ -810,9 +808,15 @@ class File(QtCore.QFile):
         @param data. Valores a guardar en el fichero
         @param length. Tamaño de data. (No se usa)
         """
-            
+        if isinstance(self, str):
+            file_ = self
+            encode = "iso-8859-15"
+        else:
+            file_ = self.fichero
+            encode = self.encode_
+
         import codecs
-        f = codecs.open(self.fichero_, encoding=self.encode, mode="w+")
+        f = codecs.open(file_, encoding=encode, mode="w+")
         f.write(data)
         f.close()
 
