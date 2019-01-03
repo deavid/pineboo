@@ -3116,12 +3116,7 @@ class FLSqlCursor(QtCore.QObject):
                     continue
 
                 if self.context() and field.calculated():
-                    v = None
-                    try:
-                        v = self.context().calculateField(field.name())
-                    except Exception:
-                        logger.exception(
-                            "commitBuffer(): Campo calculado %s, pero no se ha calculado nada", field.name())
+                    v = None if not hasattr(self.context(), "calculateField") else self.context().calculateField(field.name())
 
                     if v:
                         self.setValueBuffer(field.name(), v)
