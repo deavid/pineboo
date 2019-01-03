@@ -77,7 +77,6 @@ class FLSqlQuery(object):
             self._posicion = None
         except Exception:
             logger.warn("Error en consulta %s", sql, stack_info=True)
-            # conn.rollback()
             return False
         # conn.commit()
 
@@ -230,6 +229,8 @@ class FLSqlQuery(object):
 
         for f in s:
             try:
+                if f.startswith(" "):
+                    f = f[1:]
                 table = f[:f.index(".")]
                 field = f[f.index(".") + 1:]
             except Exception:
