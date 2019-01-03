@@ -1,4 +1,5 @@
-from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate, QRegExp
+from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate, QRegExp,\
+    QApplication
 from PyQt5.QtCore import QTime, QTimer
 
 from pineboolib.utils import auto_qt_translate_text, checkDependencies, filedir
@@ -12,13 +13,6 @@ import traceback
 import os
 import sys
 import logging
-
-
-class QApplication:
-    @staticmethod
-    def tr(text, *args):
-        return text
-
 
 class FLSQLITE(object):
 
@@ -84,6 +78,22 @@ class FLSQLITE(object):
             #self.cursor_.execute("PRAGMA journal_mode = WAL")
             #self.cursor_.execute("PRAGMA synchronous = NORMAL")
         return self.cursor_
+    
+
+    def useThreads(self):
+        return False
+
+    def useTimer(self):
+        return True
+
+    def cascadeSupport(self):
+        return False
+
+    def canDetectLocks(self):
+        return True
+
+    def desktopFile(self):
+        return True
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         import pineboolib
@@ -181,7 +191,6 @@ class FLSQLITE(object):
                 v = v.upper()
                 # v = v.encode("UTF-8")
             s = "'%s'" % v
-        # print ("PNSqlDriver(%s).formatValue(%s, %s) = %s" % (self.name_, type_, v, s))
         return s
 
     def DBName(self):
@@ -213,7 +222,7 @@ class FLSQLITE(object):
 
         cursor = self.cursor()
         try:
-            print("Creando savepoint sv_%s" % n)
+            self.logger.debug("Creando savepoint sv_%s" % n)
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError(
@@ -277,29 +286,27 @@ class FLSQLITE(object):
 
     def rollbackTransaction(self):
         if not self.isOpen():
-            print("SQL3Driver::rollbackTransaction: Database not open")
+            self.logger.warn("SQL3Driver::rollbackTransaction: Database not open")
 
         cursor = self.cursor()
         try:
             cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-            print("SQL3Driver:: No se pudo deshacer la transacción ROLLBACK",
-                  traceback.format_exc())
+            self.logger.error("SQL3Driver:: No se pudo deshacer la transacción ROLLBACK")
             return False
 
         return True
 
     def transaction(self):
         if not self.isOpen():
-            print("SQL3Driver::transaction: Database not open")
+            self.logger.warn("SQL3Driver::transaction: Database not open")
         cursor = self.cursor()
         try:
             cursor.execute("BEGIN TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN")
-            print("SQL3Driver:: No se pudo crear la transacción BEGIN",
-                  traceback.format_exc())
+            self.logger.error("SQL3Driver:: No se pudo crear la transacción BEGIN")
             return False
 
         return True
@@ -308,27 +315,21 @@ class FLSQLITE(object):
         if n == 0:
             return True
         if not self.isOpen():
-            print("SQL3Driver::releaseSavePoint: Database not open")
+            self.logger.debug("SQL3Driver::releaseSavePoint: Database not open")
             return False
 
         cursor = self.cursor()
         try:
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            print("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s" %
-                  n, traceback.format_exc())
-
+            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
+            self.logger.error("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s",n)
             return False
 
         return True
 
     def setType(self, type_, leng=None):
-        if leng:
-            return " %s(%s)" % (type_.upper(), leng)
-        else:
-            return " %s" % type_.upper()
+        return " %s(%s)" % (type_.upper(), leng) if leng else " %s" % type_.upper()
 
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
         self.sql = "SELECT %s FROM %s WHERE %s" % (fields, table, where)
@@ -339,13 +340,8 @@ class FLSQLITE(object):
             rows = cursor.fetchmany(number)
             return rows
         except Exception:
-            print("SQL3Driver:: refreshFetch", traceback.format_exc())
+            self.logger.error("SQL3Driver:: refreshFetch")
 
-    def useThreads(self):
-        return False
-
-    def useTimer(self):
-        return True
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         if curname not in self.rowsFetched.keys():
@@ -364,7 +360,7 @@ class FLSQLITE(object):
                 self.rowsFetched[curname] = i
             return rowsF
         except Exception:
-            print("SQL3Driver:: fetchAll", traceback.format_exc())
+            self.logger.error("SQL3Driver:: fetchAll", traceback.format_exc())
             return []
 
     def existsTable(self, name):
@@ -373,7 +369,7 @@ class FLSQLITE(object):
 
         t = FLSqlQuery()
         t.setForwardOnly(True)
-        ok = t.exec_("SELECT * FROM %s WHERE 1 = 1 LIMIT 1" % name)
+        ok = t.exec_("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name)
         if ok:
             ok = t.next()
 
@@ -395,9 +391,8 @@ class FLSQLITE(object):
                 unlocks = unlocks + 1
 
         if unlocks > 1:
-            print(u"FLManager : No se ha podido crear la tabla " + tmd.name())
-            print(
-                u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
+            self.logger.debug(u"FLManager : No se ha podido crear la tabla " + tmd.name())
+            self.loger.debug(u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
             return None
 
         i = 1
@@ -436,10 +431,8 @@ class FLSQLITE(object):
                 if primaryKey is None:
                     sql = sql + " PRIMARY KEY"
                 else:
-                    print(QApplication.tr("FLManager : Tabla-> ") + tmd.name() +
-                          QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
-                          field.name() + QApplication.tr(" , pero el campo ") + primaryKey +
-                          QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
+                    self.logger.debug(QApplication.tr("FLManager : Tabla-> ") + tmd.name() + QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
+                          field.name() + QApplication.tr(" , pero el campo ") + primaryKey + QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
                                           "use FLCompoundKey para crear claves compuestas."))
                     return None
             else:
@@ -466,17 +459,21 @@ class FLSQLITE(object):
 
         return sql
 
-    def mismatchedTable(self, table1, tmd_or_table2, db_):
+    def mismatchedTable(self, table1, tmd_or_table2, db_=None):
+
+        if db_ is None:
+            db_ = self.db_
+
         if isinstance(tmd_or_table2, str):
             mtd = db_.manager().metadata(tmd_or_table2, True)
             if not mtd:
                 return False
 
-            recMtd = self.recordInfo(tmd_or_table2)
-            recBd = self.recordInfo2(table1)
-            # fieldBd = None
             mismatch = False
             try:
+                recMtd = self.recordInfo(tmd_or_table2)
+                recBd = self.recordInfo2(table1)
+                # fieldBd = None
                 for fieldMtd in recMtd:
                     # fieldBd = None
                     found = False
@@ -485,14 +482,17 @@ class FLSQLITE(object):
                             found = True
                             if self.notEqualsFields(field, fieldMtd):
                                 mismatch = True
+                            
+                            recBd.remove(field)
                             break
+                            
 
                     if not found:
                         mismatch = True
                         break
 
             except Exception:
-                print(traceback.format_exc())
+                self.logger.error("mismatchedTable %s %s %s", table1, tmd_or_table2, db_)
 
             return mismatch
 
@@ -520,11 +520,9 @@ class FLSQLITE(object):
                 ret = True
             elif field1[1] == "double" and not field2[1] == "double":
                 ret = True
-
-            if ret:
-                print(field1, field2)
+                
         except Exception:
-            print(traceback.format_exc())
+            self.logger.error("notEqualsFields %s %s", field1, field2 )
         return ret
 
     def recordInfo2(self, tablename):
@@ -550,8 +548,7 @@ class FLSQLITE(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                print(
-                    "FLManager : " + qApp.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
+                self.logger.warn("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
 
                 return self.recordInfo2(tablename)
 
@@ -610,8 +607,7 @@ class FLSQLITE(object):
         docElem = None
 
         if not util.docDocumentSetContect(doc, mtd1):
-            print("FLManager::alterTable : " +
-                  qApp.tr("Error al cargar los metadatos."))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Error al cargar los metadatos."))
         else:
             docElem = doc.documentElement()
             oldMTD = self.db_.manager().metadata(docElem, True)
@@ -620,8 +616,7 @@ class FLSQLITE(object):
             return True
 
         if not util.docDocumentSetContect(doc, mtd2):
-            print("FLManager::alterTable : " +
-                  qApp.tr("Error al cargar los metadatos."))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Error al cargar los metadatos."))
             return False
         else:
             docElem = doc.documentElement()
@@ -631,8 +626,7 @@ class FLSQLITE(object):
             oldMTD = newMTD
 
         if not oldMTD.name() == newMTD.name():
-            print("FLManager::alterTable : " +
-                  qApp.tr("Los nombres de las tablas nueva y vieja difieren."))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los nombres de las tablas nueva y vieja difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -644,8 +638,7 @@ class FLSQLITE(object):
         newPK = newMTD.primaryKey()
 
         if not oldPK == newPK:
-            print("FLManager::alterTable : " +
-                  qApp.tr("Los nombres de las claves primarias difieren."))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los nombres de las claves primarias difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -662,8 +655,7 @@ class FLSQLITE(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            print("FLManager::alterTable : " + qApp.tr(
-                "La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -675,8 +667,7 @@ class FLSQLITE(object):
         oldField = None
 
         if not fieldList:
-            print("FLManager::alterTable : " +
-                  qApp.tr("Los antiguos metadatos no tienen campos."))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los antiguos metadatos no tienen campos."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -684,8 +675,7 @@ class FLSQLITE(object):
 
             return False
 
-        renameOld = "%salteredtable%s" % (
-            oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+        renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
 
         if not self.db_.dbAux():
             if oldMTD and not oldMTD == newMTD:
@@ -711,8 +701,7 @@ class FLSQLITE(object):
 
         q = FLSqlQuery("", self.db_.dbAux())
         if not q.exec_("CREATE TABLE %s AS SELECT * FROM %s;" % (renameOld, oldMTD.name())) or not q.exec_("DROP TABLE %s;" % oldMTD.name()):
-            print("FLManager::alterTable : " +
-                  qApp.tr("No se ha podido renombrar la tabla antigua."))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("No se ha podido renombrar la tabla antigua."))
 
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
@@ -738,8 +727,7 @@ class FLSQLITE(object):
 
         oldCursor.select()
         totalSteps = oldCursor.size()
-        progress = QProgressDialog(qApp.tr("Reestructurando registros para %1...").arg(
-            newMTD.alias()), qApp.tr("Cancelar"), 0, totalSteps)
+        progress = QProgressDialog(qApp.tr("Reestructurando registros para %1...").arg(newMTD.alias()), QApplication.tr("Cancelar"), 0, totalSteps)
         progress.setLabelText(qApp.tr("Tabla modificada"))
 
         step = 0
@@ -749,8 +737,7 @@ class FLSQLITE(object):
         newField = None
 
         if not fieldList:
-            print("FLManager::alterTable : " +
-                  qApp.tr("Los nuevos metadatos no tienen campos."))
+            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los nuevos metadatos no tienen campos."))
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -781,7 +768,7 @@ class FLSQLITE(object):
                             v = defVal
 
                     if not newBuffer.field(newField.name()).type() == newField.type():
-                        print("FLManager::alterTable : " + qApp.tr("Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.")
+                        self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.")
                               .arg(newField.name()))
 
                 if not oldField.allowNull() or not newField.allowNull() and v is not None:
@@ -827,8 +814,7 @@ class FLSQLITE(object):
         t.setForwardOnly(True)
 
         if typeName == "Tables" and typeName == "Views":
-            t.exec_(
-                "SELECT name FROM sqlite_master WHERE type='table' OR type='view'")
+            t.exec_("SELECT name FROM sqlite_master WHERE type='table' OR type='view'")
         elif not typeName or typeName == "Tables":
             t.exec_("SELECT name FROM sqlite_master WHERE type='table'")
         elif not typeName or typeName == "Views":
@@ -855,35 +841,44 @@ class FLSQLITE(object):
         self.db_.dbAux().transaction()
         rx = QRegExp("^.*[\\d][\\d][\\d][\\d].[\\d][\\d].*[\\d][\\d]$")
         rx2 = QRegExp("^.*alteredtable[\\d][\\d][\\d][\\d].*$")
-        qry = FLSqlQuery(None, self.db_.dbAux())
-        qry2 = FLSqlQuery(None, self.db_.dbAux())
+        qry = FLSqlQuery(None, "dbAux")
+        qry2 = FLSqlQuery(None, "dbAux")
+        qry3 = FLSqlQuery(None, "dbAux")
         steps = 0
         item = ""
 
         rx3 = QRegExp("^.*\\d{6,9}$")
-        listOldBks = rx3 in self.tables("")
+        #listOldBks = self.tables("").grep(rx3)
+        listOldBks_prev = self.tables("")
+        
+        listOldBks = []
+        
+        for l in listOldBks_prev:            
+            if rx3.indexIn(l) > -1:
+                listOldBks.append(l)
+        
 
         qry.exec_("select nombre from flfiles")
         util.createProgressDialog(
             util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5)
         while qry.next():
             item = qry.value(0)
-            if item.find(rx) > -1 or item.find(rx2) > -1:
-                util.setLabelText(util.tr("Borrando regisro %1").arg(item))
+            if rx.indexIn(item) > -1 or rx2.indexIn(item) > -1:
+                util.setLabelText(util.tr("Borrando regisro %s" % item))
                 qry2.exec_("delete from flfiles where nombre = '%s'" % item)
                 if item.find("alteredtable") > -1:
                     if item.replace(".mtd", "") in self.tables(""):
-                        util.setLabelText(
-                            util.tr("Borrando tabla %1").arg(item))
-                        qry2.exec_("drop table %s" %
-                                   (item.replace(".mtd", "")))
+                        util.setLabelText(util.tr("Borrando tabla %s" % item))
+                        qry2.exec_("drop table %s" % item.replace(".mtd", ""))
 
             steps = steps + 1
             util.setProgress(steps)
 
         for item in listOldBks:
             if item in self.tables(""):
-                util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                print("Borrando", item)
+                util.tr("Borrando tabla %s" % item)
+                util.setLabelText(util.tr("Borrando tabla %s" % item))
                 qry2.exec_("drop table %s" % item)
 
             steps = steps + 1
@@ -901,16 +896,7 @@ class FLSQLITE(object):
         util.setLabelText(util.tr("Vacunando base de datos"))
         steps = steps + 1
         util.setProgress(steps)
-        qry2.exec_("vacuum")
+        qry3.exec_("vacuum")
         steps = steps + 1
         util.setProgress(steps)
-        util.destryProgressDialog()
-
-    def cascadeSupport(self):
-        return False
-
-    def canDetectLocks(self):
-        return True
-
-    def desktopFile(self):
-        return True
+        util.destroyProgressDialog()
