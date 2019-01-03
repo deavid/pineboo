@@ -9,7 +9,7 @@ class QTextEdit(QtWidgets.QTextEdit):
         super(QTextEdit, self).__init__(parent)
         self.LogText = 0
 
-    def setText(self, text):
+    def setText(self, text):       
         super(QTextEdit, self).setText(text)
         #if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), text)
@@ -26,17 +26,17 @@ class QTextEdit(QtWidgets.QTextEdit):
         if value == 0:  # LogText
             self.setReadOnly(True)
 
-    @decorators.NotImplementedWarn
     def setShown(self, value):
-        pass
+        if value:
+            super().show()
+        else:
+            super().hide()
     
     def getPlainText(self):
         return super(QTextEdit, self).toPlainText()
 
     def setAutoFormatting(self, value):
-        if value == 0:
-            value = QtWidgets.QTextEdit.AutoAll
-            self.setTextColor(QtCore.Qt.white)
+        value = QtWidgets.QTextEdit.AutoAll
         super(QTextEdit, self).setAutoFormatting(value)
 
     text = property(getText, setText)
