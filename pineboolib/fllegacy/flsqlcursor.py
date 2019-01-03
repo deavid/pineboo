@@ -3115,10 +3115,10 @@ class FLSqlCursor(QtCore.QObject):
                 if not self.buffer().isGenerated(field.name()):
                     continue
 
-                if self.context() and field.calculated():
-                    v = None if not hasattr(self.context(), "calculateField") else self.context().calculateField(field.name())
+                if self.context() and hasattr(self.context(), "calculateField") and field.calculated():
+                    v = aqApp.call("calculateField", [field.name()], self.context(), False)
 
-                    if v:
+                    if v not in (True, False, None):
                         self.setValueBuffer(field.name(), v)
 
         functionBefore = None
