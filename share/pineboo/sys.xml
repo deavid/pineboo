@@ -105,6 +105,10 @@
 		<table>fllarge</table>
 	</action>
 	<action>
+		<name>flserial</name>
+		<table>flserial</table>
+	</action>
+	<action>
 		<name>ebcomportamiento</name>
 		<scriptform>ebcomportamiento</scriptform>
 
