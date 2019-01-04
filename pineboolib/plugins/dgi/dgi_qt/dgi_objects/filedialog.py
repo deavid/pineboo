@@ -20,6 +20,12 @@ class FileDialog(QFileDialog):
             return None
 
         return obj[0]
+    
+    def getSaveFileName(filter=None):
+        ret = QtWidgets.QFileDialog.getSaveFileName(None,"","",filter)
+        
+        return ret[0] if ret else None
+
 
     def getExistingDirectory(basedir=None, caption=None):
         if not basedir:
