@@ -13,7 +13,7 @@ class FLMYSQL_INNODB(FLMYSQL_MYISAM):
     def __init__(self):
         super(FLMYSQL_INNODB, self).__init__()
         self.name_ = "FLMYSQL_INNODB"
-        self.alias_ = "MySQL_INNODB (EN OBRAS)"
+        self.alias_ = "MySQL_INNODB"
         self.noInnoDB = False
 
     # Aquí , en principio la única diferencia es a la hora de crear las
