@@ -488,7 +488,8 @@ def ustr(*t1):
     return "".join([ustr1(t) for t in t1])
 
 
-def ustr1(t):
+def ustr1(t):   
+    
     if isinstance(t, str):
         return t
 
@@ -502,6 +503,9 @@ def ustr1(t):
     if isinstance(t, str):
         return str(t, "UTF-8")
     try:
+        if t is None:
+            t = ""
+        
         return "%s" % t
     except Exception as e:
         logger.exception("ERROR Coercing to string: %s", repr(t))
