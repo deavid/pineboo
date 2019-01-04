@@ -1259,7 +1259,7 @@ class FLSqlCursor(QtCore.QObject):
             return None
 
         field = self.metadata().field(fN)
-        if not field:
+        if field is None:
             FLUtil.tr("FLSqlCursor::valueBufferCopy() : No existe el campo ") + \
                 self.metadata().name() + ":" + fN
             return None
@@ -2106,7 +2106,7 @@ class FLSqlCursor(QtCore.QObject):
             # else:
             #    sql = "%s WHERE 1=1" % sql
 
-            if field:
+            if field is not None:
                 sqlPriKeyValue = self.db().manager().formatAssignValue(field, pKValue, True)
                 if cFilter:
                     sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
@@ -2264,7 +2264,7 @@ class FLSqlCursor(QtCore.QObject):
             return None
 
         field = mtd.field(fieldName)
-        if not field:
+        if field is None:
             return None
 
         # ownTMD = False
@@ -2277,7 +2277,7 @@ class FLSqlCursor(QtCore.QObject):
             return None
 
         fieldAc = field.associatedField()
-        if not fieldAc:
+        if fieldAc is None:
             # if ownTMD and not tableMD.inCache():
                 # del tableMD
             return None
@@ -2859,7 +2859,7 @@ class FLSqlCursor(QtCore.QObject):
             field = self.metadata().field(self.relation().field())
 
 
-            if field and fgValue is not None:
+            if field is not None and fgValue is not None:
                 
                 relationFilter = self.db().manager().formatAssignValue(field, fgValue, True)
                 filterAc = self.cursorRelation().filterAssoc(

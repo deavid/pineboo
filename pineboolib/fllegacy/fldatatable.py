@@ -351,7 +351,7 @@ class FLDataTable(QtWidgets.QTableView):
             return None
 
         field = self.cursor_.field(self.indexOf(col))
-        if not field:
+        if field is None:
             return None
 
         return field.name()
@@ -469,7 +469,7 @@ class FLDataTable(QtWidgets.QTableView):
         pri_key = mtd.primaryKey()
 
         field = mtd.field(pri_key)
-        if not field:
+        if field is None:
             return
 
         rel_list = field.relationList()
@@ -493,7 +493,7 @@ class FLDataTable(QtWidgets.QTableView):
             if cur.metadata():
                 mtd = cur.metadata()
                 field = mtd.field(rel.foreignField())
-                if not field:
+                if field is None:
                     continue
 
                 sub_popup = pineboolib.pncontrolsfactory.QMenu(self)

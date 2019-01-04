@@ -192,7 +192,7 @@ class FLTableDB(QtWidgets.QWidget):
             return
 
         tMD = self.cursor_.metadata()
-        if not self.sortField_:
+        if self.sortField_ is None:
             if tMD:
                 self.sortField_ = tMD.field(tMD.primaryKey())
 
@@ -462,7 +462,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         for f in fields:
             fmd = tMD.field(f)
-            if fmd:
+            if fmd is not None:
                 if fmd.visibleGrid():
                     fieldsList.append(f)
 
@@ -1653,7 +1653,7 @@ class FLTableDB(QtWidgets.QWidget):
         if self.checkColumnEnabled_:
             if not self.checkColumnVisible_:
                 fieldCheck = tMD.field(self.fieldNameCheckColumn_)
-                if not fieldCheck:
+                if fieldCheck is None:
                     self.fieldNameCheckColumn_ = "%s_check_column" % tMD.name()
 
                     if self.fieldNameCheckColumn_ not in tMD.fieldsNames():
@@ -1701,11 +1701,11 @@ class FLTableDB(QtWidgets.QWidget):
                 field_2 = self.tableRecords_.visual_index_to_field(self.sortColumn2_)
                 field_3 = self.tableRecords_.visual_index_to_field(self.sortColumn3_)
                 
-                if field_1:
+                if field_1 is not None:
                     s.append(field_1.name() + " ASC" if self.orderAsc_ else " DESC")
-                if field_2:
+                if field_2 is not None:
                     s.append(field_2.name() + " ASC" if self.orderAsc2_ else " DESC")
-                if field_3:
+                if field_3 is not None:
                     s.append(field_3.name() + " ASC" if self.orderAsc3_ else " DESC")
 
                 id_mod = self.cursor_.db().managerModules().idModuleOfFile("%s.mtd" % self.cursor_.metadata().name())
@@ -1782,6 +1782,8 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords_.setPersistentFilter(finalFilter)
             self.tableRecords_.setShowAllPixmaps(self.showAllPixmaps_)
             self.tableRecords_.refresh()
+            
+            
 
         if self.initSearch_:
             try:
