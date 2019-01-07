@@ -13,9 +13,5 @@ class FLMYSQL_INNODB(FLMYSQL_MYISAM):
     def __init__(self):
         super(FLMYSQL_INNODB, self).__init__()
         self.name_ = "FLMYSQL_INNODB"
-        self.alias_ = "MySQL_INNODB"
+        self.alias_ = "MySQL INNODB (MYSQLDB)"
         self.noInnoDB = False
-
-    # Aquí , en principio la única diferencia es a la hora de crear las
-    # tablas. cuando el driver este más avanzado sobreescribiremos la función
-    # de crear tablas.

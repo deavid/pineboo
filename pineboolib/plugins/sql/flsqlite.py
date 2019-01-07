@@ -42,7 +42,7 @@ class FLSQLITE(object):
         self.name_ = "FLsqlite"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "SQLite3"
+        self.alias_ = "SQLite3 (SQLITE3)"
         self.declare = []
         self.db_filename = None
         self.sql = None
@@ -382,8 +382,7 @@ class FLSQLITE(object):
         ok = t.exec_("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name)
         if ok:
             ok = t.next()
-
-        del t
+            
         return ok
 
     def sqlCreateTable(self, tmd):
