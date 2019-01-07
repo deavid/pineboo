@@ -9,6 +9,8 @@ from pineboolib.utils import filedir
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 import pineboolib
 
+import traceback
+
 DEBUG = False
 
 """
