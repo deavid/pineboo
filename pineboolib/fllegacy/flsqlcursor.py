@@ -1965,6 +1965,10 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def isLocked(self):
+        
+        if not self.metadata():
+            return False
+        
         ret_ = False
         if self.d.modeAccess_ is not self.Insert:
             row = self.currentRegister()
