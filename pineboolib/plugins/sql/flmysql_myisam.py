@@ -41,6 +41,7 @@ class FLMYSQL_MYISAM(object):
         self.mobile_ = False
         self.pure_python_ = False
         self.defaultPort_ = 3306
+        self.rowsFetched = {}
 
     def version(self):
         return self.version_
@@ -423,8 +424,7 @@ class FLMYSQL_MYISAM(object):
         try:
             self.cursorsArray_[curname].fetchmany(number)
         except Exception:
-            qWarning("%s.refreshFetch\n %s" %
-                     (self.name_, traceback.format_exc()))
+            qWarning("%s.refreshFetch\n %s" %(self.name_, traceback.format_exc()))
 
     def useThreads(self):
         return False
@@ -433,7 +433,25 @@ class FLMYSQL_MYISAM(object):
         return True
 
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
-        return list(self.cursorsArray_[curname])
+        if curname not in self.rowsFetched.keys():
+            self.rowsFetched[curname] = 0
+        
+        rowsF = []
+        try:
+            rows = list(self.cursorsArray_[curname])
+            if self.rowsFetched[curname] < len(rows):
+                i = 0
+                for row in rows:
+                    i += 1
+                    if i > self.rowsFetched[curname]:
+                        rowsF.append(row)
+
+                self.rowsFetched[curname] = i
+        except Exception:
+            self.logger.error("%s:: fetchAll",self.name_, traceback.format_exc())
+        
+        return rowsF
+
 
     def existsTable(self, name):
         if not self.isOpen():

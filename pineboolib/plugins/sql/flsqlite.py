@@ -354,22 +354,24 @@ class FLSQLITE(object):
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
+        
+        rowsF = []
         try:
             cursor.execute(self.sql)
             rows = cursor.fetchall()
-            rowsF = []
             if self.rowsFetched[curname] < len(rows):
                 i = 0
                 for row in rows:
-                    i = i + 1
+                    i += 1
                     if i > self.rowsFetched[curname]:
                         rowsF.append(row)
 
                 self.rowsFetched[curname] = i
-            return rowsF
+            
         except Exception:
             self.logger.error("SQL3Driver:: fetchAll", traceback.format_exc())
-            return []
+        
+        return rowsF
 
     def existsTable(self, name):
         if not self.isOpen():
