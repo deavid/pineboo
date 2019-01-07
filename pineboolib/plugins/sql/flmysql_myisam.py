@@ -231,55 +231,51 @@ class FLMYSQL_MYISAM(object):
         res = None
         row = None
         max = 0
-        curMax = 0
+        cur_max = 0
         updateQry = False
+        ret = None
+        
+        q = FLSqlQuery()
+        q.setSelect("max(%s)" % field)
+        q.setFrom(table)
+        q.setWhere("1 = 1")
+        if not q.exec_():
+            self.logger.warn("not exec sequence")
+            return None
+        if q.first() and q.value(0) is not None:
+            max = q.value(0)
 
-        strQry = "SELECT MAX(%s) FROM %s" % (field, table)
         cursor = self.conn_.cursor()
 
+
+
+        #print(1,"max de %s.%s = %s" % (table, field, max))
+
+
+        strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (table, field)
         try:
-            result = cursor.execute(strQry)
+            cur_max = cursor.execute(strQry)
         except Exception:
-            qWarning("%s:: No se pudo crear la transacción BEGIN\n %s" %
-                     (self.name_, traceback.format_exc()))
-            self.rollbackTransaction()
-            return
-
-        res = result
-
-        if res is None:
-            row = cursor._fetch_row(res)
-            if row:
-                max = int(row[0])
-
-        strQry = "SELECT seq FROM flseqs WHERE tabla = '%s' AND campo ='%s'" % (
-            table, field)
-        try:
-            result = cursor.execute(strQry)
-        except Exception:
-            qWarning("%s:: La consulta a la base de datos ha fallado" %
-                     (self.name_, traceback.format_exc()))
+            qWarning("%s:: La consulta a la base de datos ha fallado" % (self.name_, traceback.format_exc()))
             self.rollbackTransaction()
             return
         
-        res = result
-
-        if res is None:
-            updateQry = res > 0
-            if updateQry:
-                row = cursor._fetch_row(res)
-                if row:
-                    curMax = int(row[0])
+        
+        #print(2,"cur_max de %s.%s = %s" % (table, field , cur_max))
+        
+        updateQry = cur_max > 0
 
         strQry = None
+        ret = max + 1
         if updateQry:
-            if max > curMax:
-                strQry = "UPDATE flseqs SET seq=%s WHERE tabla = '%s' AND campo = '%s'" % (max + 1, table, field)
+            if ret > cur_max:
+                strQry = "UPDATE flseqs SET seq=%s WHERE tabla = '%s' AND campo = '%s'" % (ret, table, field)
         else:
-            strQry = "INSERT INTO flseqs (tabla,campo,seq) VALUES('%s','%s',%s)" % (table, field, max + 1)
-
-        if strQry:
-            print("*****", strQry, max, curMax)
+            strQry = "INSERT INTO flseqs (tabla,campo,seq) VALUES('%s','%s',%s)" % (table, field, ret)
+        
+        result = None
+        
+        if strQry is not None:
             try:
                 result = cursor.execute(strQry)
             except Exception:
@@ -289,33 +285,6 @@ class FLMYSQL_MYISAM(object):
 
                 return
 
-        strQry = "UPDATE flseqs SET seq= LAST_INSERT_ID(seq+1) WHERE tabla = '%s' and campo = '%s'" % (table, field)
-        try:
-            result = cursor.execute(strQry)
-        except Exception:
-            qWarning("%s:: La consulta a la base de datos ha fallado\n %s" % (self.name_, traceback.format_exc()))
-            if not self.noInnoDB:
-                self.rollbackTransaction()
-
-            return
-
-        strQry = "SELECT LAST_INSERT_ID()"
-        try:
-            result = cursor.execute(strQry)
-        except Exception:
-            qWarning("%s:: La consulta a la base de datos ha fallado\n %s" % (self.name_, traceback.format_exc()))
-            if not self.noInnoDB:
-                self.rollbackTransaction()
-
-            return
-
-        res = result
-        ret = None
-        
-        if res is None:
-            row = cursor._fetch_row(res)
-            if row:
-                ret = int(row[0])
 
         if not self.noInnoDB and self.commitTransaction():
             qWarning("%s:: No se puede aceptar la transacción" % self.name_)
