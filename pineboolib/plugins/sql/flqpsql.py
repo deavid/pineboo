@@ -32,7 +32,7 @@ class FLQPSQL(object):
     defaultPort_ = None
 
     def __init__(self):
-        self.version_ = "0.5"
+        self.version_ = "0.6"
         self.conn_ = None
         self.name_ = "FLQPSQL"
         self.open_ = False
@@ -1166,7 +1166,7 @@ class FLQPSQL(object):
             qry2.exec_("DELETE FROM flfiles WHERE nombre ='%s'" % item)
             if item.find("alteredtable") > -1:
                 if self.existsTable(item.replace(".mtd", "")):
-                    util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                    util.setLabelText(util.tr("Borrando tabla %s" % item))
                     qry2.exec_("DROP TABLE %s CASCADE" %
                                item.replace(".mtd", ""))
 
@@ -1225,8 +1225,10 @@ class FLQPSQL(object):
                 util.setProgress(steps)
                 util.setLabelText(util.tr("Creando índices para %s" % item))
                 mtd = self.db_.manager().metadata(item)
+                if not mtd:
+                    continue
                 fL = mtd.fieldList()
-                if not mtd or not fL:
+                if not fL:
                     continue
                 for it in fL:
                     if not it or not it.type() == "pixmap":
