@@ -1140,7 +1140,7 @@ class FLMYSQL_MYISAM(object):
         
         ret = t
         
-        if t == "char":
+        if t in ["char","varchar"]:
             ret = "string"
         elif t == "int":
             ret = "uint"
@@ -1219,11 +1219,17 @@ class FLMYSQL_MYISAM(object):
         
         
     def normalizeValue(self, text):
-        if text and text.find("\\n") > -1:
-            text = text.replace("\\n", "\\\\n")
-        if text and text.find('\\"') > -1:
-            text = text.replace('\\"', '\\\\"')
-        return None if text is None else text.replace("'", "''")
+        if not text:
+            return None
+        
+        text = text.replace("'", "''")
+        text = text.replace('\\"', '\\\\"')
+        text = text.replace("\\n", "\\\\n")
+        text = text.replace("\\r", "\\\\r")
+        
+        
+       
+        return text
 
     def cascadeSupport(self):
         return True
