@@ -1,10 +1,12 @@
 from PyQt5.Qt import qWarning, QApplication, QRegExp, QDomDocument
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
 from pineboolib.utils import auto_qt_translate_text, checkDependencies
 from pineboolib import decorators
 from pineboolib.utils import text2bool
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
@@ -13,7 +15,7 @@ import sys
 import traceback
 
 import logging
-from PyQt5.QtCore import QTime, QDate
+from PyQt5.QtCore import QTime, QDate, QDateTime
 
 logger = logging.getLogger(__name__)
 
@@ -674,8 +676,10 @@ class FLMYSQL_MYISAM(object):
                 util.setProgress(steps)
                 util.setLabelText(util.tr("Creando índices para %s" % item))
                 mtd = self.db_.manager().metadata(item)
+                if not mtd:
+                    continue
                 fL = mtd.fieldList()
-                if not mtd or not fL:
+                if not fL:
                     continue
                 for it in fL:
                     if not it or not it.type() == "pixmap":
@@ -718,9 +722,20 @@ class FLMYSQL_MYISAM(object):
     
     def alterTable(self, mtd1, mtd2, key):
         return self.alterTable2(mtd1, mtd2, key)
+    
+    def hasCheckColumn(self, mtd):
+        field_list = mtd.fieldList()
+        if not field_list:
+            return False
+        
+        for field in field_list:
+            if field.isCheck() or field.name().endswith("_check_column"):
+                return True
+        
+        return False
 
     def alterTable2(self, mtd1, mtd2, key, force=False):
-        from pineboolib.fllegacy.flfieldmetadata import FLFieldMetadata
+        
         util = FLUtil()
 
         oldMTD = None
@@ -728,8 +743,8 @@ class FLMYSQL_MYISAM(object):
         doc = QDomDocument("doc")
         docElem = None
 
-        if not util.docDocumentSetContect(doc, mtd1):
-            print("FLManager::alterTable : " + qApp.tr("Error al cargar los metadatos."))
+        if not util.domDocumentSetContent(doc, mtd1):
+            print("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
         else:
             docElem = doc.documentElement()
             oldMTD = self.db_.manager().metadata(docElem, True)
@@ -740,8 +755,8 @@ class FLMYSQL_MYISAM(object):
         if oldMTD and self.hasCheckColumn(oldMTD):
             return False
 
-        if not util.docDocumentSetContect(doc, mtd2):
-            print("FLManager::alterTable : " + qApp.tr("Error al cargar los metadatos."))
+        if not util.domDocumentSetContent(doc, mtd2):
+            print("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
             return False
         else:
             docElem = doc.documentElement()
@@ -751,7 +766,7 @@ class FLMYSQL_MYISAM(object):
             oldMTD = newMTD
 
         if not oldMTD.name() == newMTD.name():
-            print("FLManager::alterTable : " + qApp.tr("Los nombres de las tablas nueva y vieja difieren."))
+            print("FLManager::alterTable : " + util.tr("Los nombres de las tablas nueva y vieja difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -763,7 +778,7 @@ class FLMYSQL_MYISAM(object):
         newPK = newMTD.primaryKey()
 
         if not oldPK == newPK:
-            print("FLManager::alterTable : " + qApp.tr("Los nombres de las claves primarias difieren."))
+            print("FLManager::alterTable : " + util.tr("Los nombres de las claves primarias difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -780,7 +795,7 @@ class FLMYSQL_MYISAM(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            print("FLManager::alterTable : " + qApp.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            print("FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -792,7 +807,7 @@ class FLMYSQL_MYISAM(object):
         oldField = None
 
         if not fieldList:
-            print("FLManager::alterTable : " + qApp.tr("Los antiguos metadatos no tienen campos."))
+            print("FLManager::alterTable : " + util.tr("Los antiguos metadatos no tienen campos."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -822,7 +837,7 @@ class FLMYSQL_MYISAM(object):
         fieldList = newMTD.fieldList()
         
         if not fieldList:
-            qWarning("FLManager::alterTable : " + QApplication.tr("Los nuevos metadatos no tienen campos"))
+            qWarning("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos"))
             
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -833,7 +848,7 @@ class FLMYSQL_MYISAM(object):
         
         q = FLSqlQuery(None, "dbAux")
         if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
-            qWarning("FLManager::alterTable : " + QApplication.tr("No se ha podido renombrar la tabla antigua."))
+            qWarning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
             
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -897,8 +912,8 @@ class FLMYSQL_MYISAM(object):
             oldCursor.setForwardOnly(True)
             oldCursor.select()
             totalSteps = oldCursor.size()
-            progress = QProgressDialog(qApp.tr("Reestructurando registros para %1...").arg(newMTD.alias()), qApp.tr("Cancelar"), 0, totalSteps)
-            progress.setLabelText(qApp.tr("Tabla modificada"))
+            util.createProgressDialog(util.tr("Reestructurando registros para %s..." % newMTD.alias()), totalSteps)
+            util.setLabelText(util.tr("Tabla modificada"))
 
             step = 0
             newBuffer = None
@@ -915,7 +930,7 @@ class FLMYSQL_MYISAM(object):
                 if oldField is None or oldCursor.field(oldField.name()) is None:
                     if oldField is None:
                         oldField = it2
-                    if it2.type() != FLFieldMetadata.Serial:
+                    if it2.type() != FLFieldMetaData.Serial:
                         v = it2.defaultValue()
                         step += 1
                         defValues[str(step)] = v
@@ -944,7 +959,7 @@ class FLMYSQL_MYISAM(object):
                         i += 1
                         oldField = vector_fields[str(i)]
                         v = oldCursor.value(newField.name())
-                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type != FLFieldMetadata.Serial:
+                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type != FLFieldMetaData.Serial:
                             defVal = newField.defaultValue()
                             if defVal is not None:
                                 v = defVal
@@ -975,10 +990,11 @@ class FLMYSQL_MYISAM(object):
                         ok = False
                     listRecords.clear()
                 
-            progress.setProgress(totalSteps)
+            util.setProgress(totalSteps)
                 
                 
-                
+        
+        util.destroyProgressDialog()      
         if ok:
             self.db_.dbAux().commit()
             

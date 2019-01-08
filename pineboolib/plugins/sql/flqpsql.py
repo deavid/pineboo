@@ -842,7 +842,7 @@ class FLQPSQL(object):
         doc = QDomDocument("doc")
         docElem = None
 
-        if not util.docDocumentSetContect(doc, mtd1):
+        if not util.domDocumentSetContent(doc, mtd1):
             print("FLManager::alterTable : " +
                   qApp.tr("Error al cargar los metadatos."))
         else:
@@ -852,7 +852,7 @@ class FLQPSQL(object):
         if oldMTD and oldMTD.isQuery():
             return True
 
-        if not util.docDocumentSetContect(doc, mtd2):
+        if not util.domDocumentSetContent(doc, mtd2):
             print("FLManager::alterTable : " +
                   qApp.tr("Error al cargar los metadatos."))
             return False
