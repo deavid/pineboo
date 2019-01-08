@@ -8,7 +8,6 @@ from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flutil import FLUtil
 
-
 import traceback
 import os
 import sys
@@ -615,8 +614,8 @@ class FLSQLITE(object):
         doc = QDomDocument("doc")
         docElem = None
 
-        if not util.docDocumentSetContect(doc, mtd1):
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Error al cargar los metadatos."))
+        if not util.domDocumentSetContent(doc, mtd1):
+            self.logger.warn("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
         else:
             docElem = doc.documentElement()
             oldMTD = self.db_.manager().metadata(docElem, True)
@@ -624,8 +623,8 @@ class FLSQLITE(object):
         if oldMTD and oldMTD.isQuery():
             return True
 
-        if not util.docDocumentSetContect(doc, mtd2):
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Error al cargar los metadatos."))
+        if not util.domDocumentSetContent(doc, mtd2):
+            self.logger.warn("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
             return False
         else:
             docElem = doc.documentElement()
@@ -635,7 +634,7 @@ class FLSQLITE(object):
             oldMTD = newMTD
 
         if not oldMTD.name() == newMTD.name():
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los nombres de las tablas nueva y vieja difieren."))
+            self.logger.warn("FLManager::alterTable : " + util.tr("Los nombres de las tablas nueva y vieja difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -647,7 +646,7 @@ class FLSQLITE(object):
         newPK = newMTD.primaryKey()
 
         if not oldPK == newPK:
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los nombres de las claves primarias difieren."))
+            self.logger.warn("FLManager::alterTable : " + util.tr("Los nombres de las claves primarias difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -664,7 +663,7 @@ class FLSQLITE(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            self.logger.warn("FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -676,7 +675,7 @@ class FLSQLITE(object):
         oldField = None
 
         if not fieldList:
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los antiguos metadatos no tienen campos."))
+            self.logger.warn("FLManager::alterTable : " + util.tr("Los antiguos metadatos no tienen campos."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -710,7 +709,7 @@ class FLSQLITE(object):
 
         q = FLSqlQuery("", self.db_.dbAux())
         if not q.exec_("CREATE TABLE %s AS SELECT * FROM %s;" % (renameOld, oldMTD.name())) or not q.exec_("DROP TABLE %s;" % oldMTD.name()):
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("No se ha podido renombrar la tabla antigua."))
+            self.logger.warn("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
 
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
@@ -736,8 +735,8 @@ class FLSQLITE(object):
 
         oldCursor.select()
         totalSteps = oldCursor.size()
-        progress = QProgressDialog(qApp.tr("Reestructurando registros para %1...").arg(newMTD.alias()), QApplication.tr("Cancelar"), 0, totalSteps)
-        progress.setLabelText(qApp.tr("Tabla modificada"))
+        progress = QProgressDialog(util.tr("Reestructurando registros para %s..." % newMTD.alias()), util.tr("Cancelar"), 0, totalSteps)
+        progress.setLabelText(util.tr("Tabla modificada"))
 
         step = 0
         newBuffer = None
@@ -746,7 +745,7 @@ class FLSQLITE(object):
         newField = None
 
         if not fieldList:
-            self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los nuevos metadatos no tienen campos."))
+            self.logger.warn("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos."))
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -777,8 +776,7 @@ class FLSQLITE(object):
                             v = defVal
 
                     if not newBuffer.field(newField.name()).type() == newField.type():
-                        self.logger.warn("FLManager::alterTable : " + QApplication.tr("Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.")
-                              .arg(newField.name()))
+                        self.logger.warn("FLManager::alterTable : " + util.tr("Los tipos del campo %s no son compatibles. Se introducirá un valor nulo." % newField.name()))
 
                 if not oldField.allowNull() or not newField.allowNull() and v is not None:
                     if oldField.type() in ("int", "serial", "uint", "bool", "unlock"):
@@ -846,6 +844,7 @@ class FLSQLITE(object):
         return sql
 
     def Mr_Proper(self):
+        self.logger.warn("FLSQLITE: FIXME: Mr_Proper no regenera tablas")
         util = FLUtil()
         self.db_.dbAux().transaction()
         rx = QRegExp("^.*[\\d][\\d][\\d][\\d].[\\d][\\d].*[\\d][\\d]$")
@@ -868,8 +867,7 @@ class FLSQLITE(object):
         
 
         qry.exec_("select nombre from flfiles")
-        util.createProgressDialog(
-            util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5)
+        util.createProgressDialog(util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5)
         while qry.next():
             item = qry.value(0)
             if rx.indexIn(item) > -1 or rx2.indexIn(item) > -1:
@@ -885,7 +883,6 @@ class FLSQLITE(object):
 
         for item in listOldBks:
             if item in self.tables(""):
-                print("Borrando", item)
                 util.tr("Borrando tabla %s" % item)
                 util.setLabelText(util.tr("Borrando tabla %s" % item))
                 qry2.exec_("drop table %s" % item)
