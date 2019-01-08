@@ -33,6 +33,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.ui_ = None
 
         aqApp.main_widget_ = self  
+    
         
     def eventFilter(self, o, e):
         if isinstance(e, AQS.ContextMenu):
@@ -845,6 +846,8 @@ class MainForm(QtWidgets.QMainWindow):
     def setDebugLevel(self, q):
         MainForm.debugLevel = q
 
+    def child(self, name):
+        return self.w_.findChild(QtWidgets.QWidget, name)
 
 class DockListView(QtCore.QObject):
 

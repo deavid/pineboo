@@ -843,6 +843,9 @@ class MainForm(QtWidgets.QMainWindow):
     @classmethod
     def setDebugLevel(self, q):
         MainForm.debugLevel = q
+    
+    def child(self, name):
+        return self.w_.findChild(QtWidgets.QWidget, name)
 
 
 class DockListView(QtCore.QObject):
