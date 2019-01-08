@@ -93,9 +93,7 @@ class Array(object):
     pos_iter = None
 
     def __init__(self, *args):
-        self.names_ = []
         self.dict_ = {}
-        self.list_ = []
 
         if not len(args):
             return
@@ -105,10 +103,9 @@ class Array(object):
             for field in args[0]:
                 
                 field_key = field
-                while field_key in self.names_:
+                while field_key in self.dict_.keys():
                     field_key = "%s_bis" % field_key
                     
-                self.names_.append(field_key)
                 self.dict_[field_key] = field
 
         elif isinstance(args[0], str):
@@ -137,14 +134,6 @@ class Array(object):
                    break
                 
                 i += 1
-                  
-        elif self.list_:
-            for v in self.list_:
-                if i == self.pos_iter:
-                    ret_ = v
-                    break
-                
-                i += 1
             
         if ret_ is None:
                 raise StopIteration
@@ -160,10 +149,6 @@ class Array(object):
         @param key. Nombre del registro
         @param value. Valor del registro
         """
-        # if isinstance(key, int):
-        #   key = str(key)
-        if key not in self.names_:
-            self.names_.append(key)
 
         self.dict_[key] = value
 
@@ -174,40 +159,31 @@ class Array(object):
         @return Valor del registro especificado
         """
         if isinstance(key, int):                
-            if self.dict_:
-                return self.dict_[self.names_[key]]
-                        
-            else:
-                return self.list_[key]
-                    
+            i = 0
+            for k in self.dict_.keys():
+                if key == i:
+                    return self.dict_[k]
+                i +=1
+            
+            
+        elif isinstance(key, slice):
+            logger.warn("FIXME: Array __getitem__%s con slice" % key)
         else:
-            return self.names_[key]
+            return self.dict_[key] if key in self.dict_.keys() else None
+        
+        return None
 
     def __getattr__(self, k):
         if k == 'length':
-            return len(self.dict_) if self.dict_ else len(self.list_)
-        elif k == 'append':
-            return self.list_.append
-
+            return len(self.dict_)
         else:
             return self.dict_[k]
 
     def __len__(self):
-        """
-        len()
-        """
-        len_ = 0
-
-        if self.dict_:
-            len_ = len(self.dict_)
-        elif self.list_:
-            len_ = len(self.list_)
-        
-        return len_
+        return len(self.dict_)
 
     def __str__(self):
-        ret = " ".join(self.list_) if len(self.list_) > 0 else " ".join(self.dict_.keys())
-        return ret
+        return " ".join(self.dict_.keys())
 
 
 def Boolean(x=False):
