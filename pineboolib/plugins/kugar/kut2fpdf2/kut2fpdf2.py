@@ -49,7 +49,7 @@ class kut2fpdf2(object):
 
     def __init__(self):
 
-        self.logger = logging.getLogger("kut2rml")
+        self.logger = logging.getLogger("kut2fpdf2")
         checkDependencies({"fpdf": "fpdf2"})
         from pineboolib.plugins.kugar.parsertools import parsertools
         self._parser_tools = parsertools()
