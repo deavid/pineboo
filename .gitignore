@@ -11,6 +11,8 @@ share/pineboo/scripts/*.py.src
 .pydevproject
 .settings/
 src/*
+builds/*
+sysroots/*
 __pycache__
 test.qs.py
 test.qs.py.debug
