@@ -11,6 +11,10 @@ import pineboolib
 import sys
 import traceback
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 class FLMYSQL_MYISAM(object):
@@ -424,12 +428,19 @@ class FLMYSQL_MYISAM(object):
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
         if curname not in self.cursorsArray_.keys():
             self.cursorsArray_[curname] = cursor
+        
 
         sql = "SELECT %s FROM %s WHERE %s " % (fields, table, where)
+        sql = self.fix_query(sql)
         try:
             self.cursorsArray_[curname].execute(sql)
         except Exception:
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
+    
+    def fix_query(self, val):
+        ret_ = val.replace("'true'","1")
+        ret_ = ret_.replace("'false'", "0")
+        return ret_
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
         try:
@@ -904,6 +915,7 @@ class FLMYSQL_MYISAM(object):
             return False
         cursor = self.cursor()
         try:
+            q = self.fix_query(q)
             cursor.execute(q)
         except Exception:
             
