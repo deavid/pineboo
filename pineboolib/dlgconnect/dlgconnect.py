@@ -300,10 +300,11 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.lePort.setText(db.find("port").text)
             self.ui.cbDBType.setCurrentText(db.find("type").text)
         for credentials in root.findall("database-credentials"):
-
-            self.ui.leDBUser.setText(credentials.find("username").text)
-            self.ui.leDBPassword.setText(base64.b64decode(credentials.find("password").text).decode())
-            self.ui.leDBPassword2.setText(base64.b64decode(credentials.find("password").text).decode())    
+            if credentials.find("username").text is not None:
+                self.ui.leDBUser.setText(credentials.find("username").text)
+            if credentials.find("password").text is not None:
+                self.ui.leDBPassword.setText(base64.b64decode(credentials.find("password").text).decode())
+                self.ui.leDBPassword2.setText(base64.b64decode(credentials.find("password").text).decode())    
         
         self.edit_mode = True
         
