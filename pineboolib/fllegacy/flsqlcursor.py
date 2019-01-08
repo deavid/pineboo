@@ -3589,6 +3589,9 @@ class FLSqlCursor(QtCore.QObject):
 
     def filter(self):
         return self.d.filter_
+    
+    def field(self, name):
+        return self.buffer().field(name) if self.buffer() else None
 
     """
     Actualiza tableModel con el buffer
