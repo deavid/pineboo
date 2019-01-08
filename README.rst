@@ -28,7 +28,7 @@ Aproximaciones existentes
 Solo existe una única aproximación a la ejecución de proyectos de Eneboo:
 
  - Python3.x + PyQt5
- - Permite ejecutarlo en PostgreSQL y en MySQL.
+ - Permite ejecutarlo en PostgreSQL , SQLite y en MySQL.
  - Motor realizado integramente en Python
  - Conversión al vuelo de QSA a PY con parseador FLScriptParser2 
  - Conversión al vuelo de formularios Qt3 a Qt5 creando un UiLoader manualmente
@@ -40,8 +40,6 @@ Dependencias
  - PyQt5
  - PsycoPG2
  - Python PLY (flscriptparser)
- - Python LXML
- - FLScriptParser
  
 
 Alcance actual de Pineboo
@@ -62,7 +60,7 @@ lanza el init() automáticamente.
 Las referencias entre módulos (flfacturac.iface.XYZ) funcionan con carga de módulo
 retrasada.
 
-La API de QSA y Eneboo estÃ¡ en desarrollo. En la API aÃºn existente son
+La API de QSA y Eneboo está en desarrollo. En la API aún existente son
 funciones y clases "fake", que desde el script, parece que funcionen pero no 
 realizan ningÃºn trabajo. Esto permite ejecutar los scripts, pero no opera correctamente.
 
@@ -85,49 +83,31 @@ Lo mejor es usarlo en bases de datos de desarrollo para evitar problemas.
 Cómo poner en marcha Pineboo
 ------------------------------
 
-    - PASO 1 - DESCARGAMOS PINEBOO Y FLSCRIPTPARSER :
-    - PASO 2 - INSTALAMOS PYTHON 3.x :
-    - PASO 3 - CREAR EL PATH PARA PYTHON 3.X :
-    - PASO 4 - INSTALAR "Python-lxml" PARA WINDOWS :
-    - PASO 5 - INSTALAR PYTHON3-PLY :
-    - PASO 6 - INSTALAR PYTHON3-PYQT5 :
-    - PASO 7 - INSTALAR PYTHON3-FUTURE :
-    - PASO 8 - INSTALAR PYTHON3-PSYCOPG2 :
-    - PASO 9 - INSTALAR PYTHON3-XMLJSON :
-    - PASO 9B-Instalar PYTHON3-BARCODE :
-    - PASO 9C-Instalar PYTHON3-PILLOW :
-    - PASO 9D-Instalar PYTHON3-Z3C.RML :
-    - PASO 10 - INSTALAR SERVIDOR PostgreSQL o MySQL
-    - PASO 11 - DAR DE ALTA NUEVO USUARIO Y BASE DE DATOS EN SERVIDOR PostgreSQL o MySQL
-    - PASO 12 - ARRANCAR PINEBOO :
-    - PASO 13 - AÑADIR DATOS CONEXIÓN AL FORMULARIO DE ENTRADA :
+1) Instalar desde apt-get.
 
-Al llamar al programa Pineboo éste crea una base de datos sqlite llamada "conectores" en el subdirectorio "/projects". Es accesible desde una tabla-formulario.
+sudo apt-get install python3-pip git libmysqlclient-dev
 
-Desde ese formulario se configura el acceso a la empresa elegida. Existe un botón en la tercera pestaña desde el cuál cargar una "Empresa de Prueba".
+2) Actualizar pip.
+
+sudo -H pip3 install --upgrade pip
+
+3) Instalar dependencias python3.
+
+sudo -H pip3 install python-barcode==0.9.0 odfpy==1.4.0 fpdf2==2.0.3 ply==3.11  six==1.10.0 pyqt5==5.11.3 pg8000==1.12.3 psycopg2-binary==2.7.6.1 PyQt5_sip==4.19.13 mysqlclient==1.3.14
+
+4) Descargamos pineboo
+
+git clone https://github.com/Aulla/pineboo.git
+
+Al llamar al programa Pineboo éste crea el subdirectorio "/projects".
+
+Desde ese formulario se configura el acceso a la empresa elegida
+
+
 
 Con esto, pineboo debería iniciarse así::
 
     ./pineboo -l proyecto1
-    
-Veréis una lista de módulos y al pulsar salen las acciones.
-
-Para que las acciones funcionen vais a necesitar la conversión de QS a PY, pero
-esa tarea está en otro programa llamado flscriptparser::
-
-    git clone git://github.com/deavid/flscriptparser.git
-
-El proyecto está en github: https://github.com/deavid/flscriptparser
-
-Pineboo lanza el comando flscriptparser2, que debe existir en el PATH. Si habéis
-seguido las instrucciones de instalación, ya lo tenéis. Si no, pues podéis 
-enlazarlo::
-
-    sudo ln -s /path/to/flscriptparser/flscriptparser2 /usr/local/bin/flscriptparser2
-    
-Con esto debería de funcionar ya.
-
-Algunos ejemplos interesantes son las acciones de articulos, tarifas, pedidoscli.
 
 Pineboo en Windows
 ----------------------
