@@ -4,7 +4,7 @@ from PyQt5.Qt import qWarning, QApplication, qApp, QDomDocument, QRegExp
 from PyQt5.QtWidgets import QMessageBox, QProgressDialog 
 
 from pineboolib.utils import text2bool, auto_qt_translate_text, checkDependencies
-
+from pineboolib import decorators
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -1115,6 +1115,7 @@ class FLQPSQL(object):
 
         return True
 
+    @decorators.NotImplementedWarn
     def insertMulti(self, tableName, records):
         k = len(records)
 

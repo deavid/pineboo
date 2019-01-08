@@ -1,7 +1,7 @@
 from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate, QRegExp,\
     QApplication
 from PyQt5.QtCore import QTime, QTimer
-
+from pineboolib import decorators
 from pineboolib.utils import auto_qt_translate_text, checkDependencies, filedir
 
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
