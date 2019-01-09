@@ -461,7 +461,8 @@ def afterCommit_flfiles(curFiles=None):
                 util = FLUtil()
                 v = util.sha1(qry.value(0))
                 while qry.next():
-                    v = util.sha1(v + qry.value(0))
+                    if qry.value(0) is not None:
+                        v = util.sha1(v + qry.value(0))
                 curSerial = FLSqlCursor(u"flserial")
                 curSerial.select()
                 if not curSerial.first():
@@ -2097,6 +2098,11 @@ def launchCommand(comando):
         e = traceback.format_exc()
         return False
 
+def search_git_updates(url = None):
+    command = "git pull %s" % url
+    res = launchCommand(command)
+    if res:
+        aqApp.mes
     
 def isUserBuild():
     return sys.version().upper().find("USER") > - 1
