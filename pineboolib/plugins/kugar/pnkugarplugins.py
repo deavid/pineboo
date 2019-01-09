@@ -29,7 +29,7 @@ class PNKugarPlugins(object):
             if not f[0:2] == "__" and not os.path.isfile(filedir("plugins/kugar", f)):
                 self.avalibleParsers_.append(f)
 
-        self.defaultParser_ = "kut2fpdf2"
+        self.defaultParser_ = "kut2fpdf"
 
     """
     Retorna una lista con los nombres de los conversores disponibles
