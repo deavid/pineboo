@@ -2104,6 +2104,10 @@ def launchCommand(comando):
 
 def search_git_updates(url = None):
     
+    if not os.path.exists(filedir("../.git")):
+        return
+    
+    
     settings = AQSettings()
     only_message = True
     if not url:
