@@ -2099,6 +2099,8 @@ def launchCommand(comando):
         return False
 
 def search_git_updates(url = None):
+    if not url:
+        url = 'https://github.com/Aulla/pineboo.git'
     command = "git pull %s" % url
     res = launchCommand(command)
     if res:
