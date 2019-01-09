@@ -76,7 +76,7 @@ class FormInternalObj(FormDBWidget):
             w.child("cb_git_informa").checked = self.leerValorLocal("git_updates_only_search")
             ruta = self.leerValorLocal("git_updates_repo")
             if ruta is False:
-                ruta = ""
+                ruta = 'https://github.com/Aulla/pineboo.git'
             w.child("le_git_ruta").text = ruta
             connect(w.child("pb_git_test"), u"clicked()", self, "search_git_updates")
         else:
