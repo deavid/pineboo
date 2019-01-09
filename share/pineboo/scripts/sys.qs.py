@@ -2105,10 +2105,10 @@ def launchCommand(comando):
 def search_git_updates(url = None):
     
     settings = AQSettings()
+    only_message = True
     if not url:
         url = settings.readEntry("ebcomportamiento/git_updates_repo", 'https://github.com/Aulla/pineboo.git')
-    
-    only_message = settings.readBoolEntry("ebcomportamiento/git_updates_only_search", False)
+        only_message = settings.readBoolEntry("ebcomportamiento/git_updates_only_search", False)
     
     if only_message:
         command = "git status %s" % url
@@ -2123,7 +2123,7 @@ def search_git_updates(url = None):
             aqApp.popupWarn("Pineboo ha sido actualizado. Reinicie para aplicar los cambios")
             return
     else:
-        if pro.stdout.find("Tu rama está actualizada") > -1:
+        if pro.stdout.find("Tu rama está actualizada") == -1:
             aqApp.popupWarn("Hay actualizaciones pendientes en %s" % url)
             return
     
