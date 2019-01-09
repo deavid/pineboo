@@ -502,7 +502,7 @@ class FLApplication(QtCore.QObject):
                 return
 
         if not mw.isHidden():
-            wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width(), 0)), msg_warn, mw)
+            wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width() *2 , 0)), msg_warn, mw)
             QtCore.QTimer().singleShot(4000, wi.hideText)
             QtWidgets.qApp.processEvents()
 
@@ -1019,7 +1019,7 @@ class FLPopuWarn(QtWidgets.QWhatsThis):
     def clicked(self, href):
         if href:
 
-            from pineboolib.pncontrols import aqApp
+            from pineboolib.pncontrolsfactory import aqApp
 
             if href.find(":") > -1:
                 h = href.split(":")[1]

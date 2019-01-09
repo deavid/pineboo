@@ -2128,7 +2128,7 @@ def search_git_updates(url = None):
             return
     else:
         if pro.stdout.find("Tu rama está actualizada") == -1:
-            aqApp.popupWarn("Hay actualizaciones pendientes en %s" % url)
+            aqApp.popupWarn("No estas actualizado con %s" % url)
             return
     
     aqApp.popupWarn("Pineboo está actualizado")

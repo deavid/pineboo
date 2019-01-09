@@ -762,8 +762,6 @@ def execute(options, args):
             xml_str = minidom.parseString(etree.ElementTree.tostring(ast)).toprettyxml(indent="   ")
             with open(destname, "w", encoding="UTF-8") as f:
                 f.write(xml_str)
-                
-            #etree.ElementTree.ElementTree(ast).write(destname, encoding="UTF-8",xml_declaration=True)
             
 
 
