@@ -425,7 +425,6 @@ def init_project(DGI, splash, options, project, mainForm, app):
         splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
     logger.info("Abriendo interfaz ...")
     main_window.show()
-    project.call("sys.iface.init()", [], None, True)
     if DGI.localDesktop():
         splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         # main_window.w_.activateWindow()
