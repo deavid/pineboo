@@ -420,6 +420,7 @@ class FormInternalObj(FormDBWidget):
         self.iface = self
 
     def init(self):
+        settings = AQSettings()
         if sys.isLoadedModule(u"flfactppal"):
             util = FLUtil()
             codEjercicio = flfactppal.iface.pub_ejercicioActual()
@@ -436,7 +437,7 @@ class FormInternalObj(FormDBWidget):
                 if nombreEjercicio:
                     aqApp.setCaptionMainWidget(nombreEjercicio)
 
-            settings = AQSettings()
+            
             oldApi = settings.readBoolEntry(u"application/oldApi")
             if not oldApi:
                 valor = util.readSettingEntry(u"ebcomportamiento/ebCallFunction")
@@ -447,6 +448,9 @@ class FormInternalObj(FormDBWidget):
                     except Exception as e:
                         e = traceback.format_exc()
                         debug(e)
+        
+        if settings.readBoolEntry("ebcomportamiento/git_updates_enabled", False):
+            sys.AQTimer.singleShot(2000, sys.search_git_updates)
 
     
 def afterCommit_flfiles(curFiles=None):
@@ -2099,12 +2103,31 @@ def launchCommand(comando):
         return False
 
 def search_git_updates(url = None):
+    
+    settings = AQSettings()
     if not url:
-        url = 'https://github.com/Aulla/pineboo.git'
-    command = "git pull %s" % url
-    res = launchCommand(command)
-    if res:
-        aqApp.mes
+        url = settings.readEntry("ebcomportamiento/git_updates_repo", 'https://github.com/Aulla/pineboo.git')
+    
+    only_message = settings.readBoolEntry("ebcomportamiento/git_updates_only_search", False)
+    
+    if only_message:
+        command = "git status %s" % url
+    else:
+        command = "git pull %s" % url
+
+    pro = Process
+    pro.execute(command)
+    
+    if not only_message:
+        if pro.stdout.count("\n") > 1:
+            aqApp.popupWarn("Pineboo ha sido actualizado. Reinicie para aplicar los cambios")
+            return
+    else:
+        if pro.stdout.find("Tu rama está actualizada") > -1:
+            aqApp.popupWarn("Hay actualizaciones pendientes en %s" % url)
+            return
+    
+    aqApp.popupWarn("Pineboo está actualizado")
     
 def isUserBuild():
     return sys.version().upper().find("USER") > - 1
