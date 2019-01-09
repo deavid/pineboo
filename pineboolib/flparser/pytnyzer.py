@@ -1030,6 +1030,9 @@ class Member(ASTPython):
                                          (".".join(part1), arg)] + part2
                         else:
                             arguments = ["%s" % arg] + part2
+        
+        
+
         yield "expr", ".".join(arguments)
 
 
@@ -1040,10 +1043,15 @@ class ArrayMember(ASTPython):
             arg.set("parent_", self.elem)
             expr = []
             for dtype, data in parse_ast(arg).generate(isolate=False):
+                if data.find(".") > -1:
+                    l = data.split(".")
+                    data = "%s['%s']" % (l[0], l[1])
+                    
                 if dtype == "expr":
                     expr.append(data)
                 else:
                     yield dtype, data
+            
             if len(expr) == 0:
                 arguments.append("unknownarg")
                 yield "debug", "Argument %d not understood" % n
@@ -1147,12 +1155,19 @@ class OpTernary(ASTPython):
 class DictObject(ASTPython):
     def generate(self, isolate=False, **kwargs):
         yield "expr", "{"
+        key = True
         for child in self.elem:
             child.set("parent_", self.elem)
             for dtype, data in parse_ast(child).generate():
-                yield dtype, data
+                if key:
+                    yield dtype, "'%s'" % data
+                    key = False
+                else:   
+                    yield dtype, data
             # Como en Python la coma final la ignora, pues la ponemos.
             yield "expr", ","
+            key = True
+            
         yield "expr", "}"
 
 
