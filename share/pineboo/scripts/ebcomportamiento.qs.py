@@ -117,7 +117,7 @@ class FormInternalObj(FormDBWidget):
                 valor = util.readSettingEntry("ebcomportamiento/%s" % valor_name, u"")
                 if valor_name is "kugar_temp_dir" and valor is "":
                     from pineboolib.pncontrolsfactory import aqApp
-                    valor = aqApp.temp_dir()
+                    valor = aqApp.tmp_dir()
                 
             else:
                 valor = settings.readBoolEntry("ebcomportamiento/%s" % valor_name, False)
