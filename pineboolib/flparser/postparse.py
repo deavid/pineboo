@@ -8,6 +8,7 @@ import sys
 import imp
 import traceback
 from xml import etree
+from xml.dom import minidom
 
 
 try:
@@ -757,7 +758,12 @@ def execute(options, args):
                 destname = os.path.join(options.storepath, bname + ".xml")
             else:
                 destname = filename + ".xml"
-            etree.ElementTree.ElementTree(ast).write(destname, encoding="UTF-8",xml_declaration=True)
+            
+            xml_str = minidom.parseString(etree.ElementTree.tostring(ast)).toprettyxml(indent="   ")
+            with open(destname, "w", encoding="UTF-8") as f:
+                f.write(xml_str)
+                
+            #etree.ElementTree.ElementTree(ast).write(destname, encoding="UTF-8",xml_declaration=True)
             
 
 
