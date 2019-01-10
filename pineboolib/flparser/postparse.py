@@ -614,6 +614,10 @@ def execute(options, args):
     if options.optdebug:
         if options.verbose:
             print(options, args)
+    
+    if not hasattr(options, "clean_no_python"):
+        options.clean_no_python = True
+        
     if options.full:
         execpython = options.exec_python
         options.exec_python = False
