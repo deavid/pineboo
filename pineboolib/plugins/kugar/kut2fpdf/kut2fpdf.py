@@ -304,7 +304,8 @@ class kut2fpdf(object):
             show = True
             if draw_if:
                 show = data.get(draw_if)
-                
+            
+            
             if dF.get("Level") == str(data_level) and show not in ("None", "False"):
                     
                 if section_name in ("DetailHeader","Detail"):
@@ -506,7 +507,7 @@ class kut2fpdf(object):
         return ret_
 
     """
-    Procesa una etiqueta. Esta peude ser un campo calculado, una etiqueta, un campo especial o una imagen.
+    Procesa una etiqueta. Esta puede ser un campo calculado, una etiqueta, un campo especial o una imagen.
     @param xml. Sección de xml a procesar.
     @param fix_height. Ajusta la altura a los .kut originales, excepto el pageFooter.
     """
@@ -607,16 +608,21 @@ class kut2fpdf(object):
             self.draw_barcode(x, y, W, H, xml, text)
         else:
             level = data_row.get("level")
-            if xml.get("DrawAtHeader") == "true" and level:
+            if level:
                 val = "%s_header_%s_%s" % ( self.detailn[str(level)], level,field_name)
+            
+            if xml.get("DrawAtHeader") == "true" and level:
                 if section_name == "DetailHeader":
                     self.drawText(x, y, W, H, xml, val)
-                else:
-                    if section_name == "DetailFooter":
-                        self.draws_at_header[val] = text
-                        print("Añadiendo a", val, text)
+            
+            print(level, section_name, val, text)
+            
+            if section_name == "DetailFooter":
+                self.draws_at_header[val] = text
+                print("Añadiendo a", val, text, level)
             
             else:
+                
                 self.drawText(x, y, W, H, xml, text)
 
 
