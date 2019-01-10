@@ -615,9 +615,9 @@ class kut2fpdf(object):
                 if section_name == "DetailHeader":
                     self.drawText(x, y, W, H, xml, val)
             
-            print(level, section_name, val, text)
+                print(level, section_name, val, text)
             
-            if section_name == "DetailFooter":
+            if section_name == "DetailFooter" and xml.get("DrawAtHeader") == "true":
                 self.draws_at_header[val] = text
                 print("Añadiendo a", val, text, level)
             
