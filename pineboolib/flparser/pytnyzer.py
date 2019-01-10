@@ -1019,7 +1019,7 @@ class Member(ASTPython):
                         arguments = ["%s.join(%s)" % (value, ".".join(part1))] + part2
                     elif member == "match":
                         value = arg[6:]
-                        value = value = value[:len(value) - 1]
+                        value = value[:len(value) - 1]
                         arguments = ["re.match(%s, %s)" % (value, ".".join(part1))] + part2
                     elif member == "push":
                         value = arg[5:]
