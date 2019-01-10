@@ -544,6 +544,9 @@ def checkDependencies(dict_, exit=True):
                 version_check(key, mod_.__version__, '5.1.0')
             elif key == "fpdf":
                 version_check(key, mod_.__version__, "1.7.3")
+            elif key == "odf":
+                from odf import namespaces
+                mod_ver = namespaces.__version__
             elif key == "PyQt5.QtCore":
                 version_check("PyQt5", mod_.QT_VERSION_STR, '5.11')
                 mod_ver = mod_.QT_VERSION_STR
