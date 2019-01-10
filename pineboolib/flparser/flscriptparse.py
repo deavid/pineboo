@@ -463,6 +463,9 @@ p_parse.__doc__ = '''
               | OR
               | SCONST
               | SEMI
+              | MOD
+              | AT
+              | COLON
               | error
 
     regexflags : ID
