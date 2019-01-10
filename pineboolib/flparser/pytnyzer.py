@@ -1233,14 +1233,21 @@ class Constant(ASTPython):
         self.debug("ctype: %r -> %r" % (ctype, value))
         if ctype is None or value is None:
             for child in self.elem:
-                child.set("parent_", self.elem)
                 if child.tag == "list_constant":
                     # TODO/FIXME:: list_constant debe ser ELIMINADO o CONVERTIDO por postparse.py
                     # .... este generador convertirá todos los arrays en vacíos, sin importar
                     # .... si realmente tienen algo.
                     yield "expr", "[]"
+                
+                elif child.tag == "regex":
+                    val = ""
+                    for dtype, data in parse_ast(child).generate(isolate=False):
+                        if data:
+                            val += data
+                    yield "expr", "re.compile(\"/%s/i\")" % val
+                
 
-                if child.tag == "CallArguments":
+                elif child.tag == "CallArguments":
                     arguments = []
                     for n, arg in enumerate(child):
                         expr = []
@@ -1277,6 +1284,64 @@ class Identifier(ASTPython):
     def generate(self, **kwargs):
         name = id_translate(self.elem.get("name"))
         yield "expr", name
+
+class regex(ASTPython):
+    def generate(self, **kwargs):
+        child = self.elem.find("regexbody")
+        args_ = self.elem.items()
+        
+        for arg in child:
+            for dtype, data in parse_ast(arg).generate(isolate=False):
+                yield "expr", data
+                
+
+class regexchar(ASTPython):
+    def generate(self, **kwargs):
+        val = self.elem.get("arg00")
+        ret = None
+        if val == "XOR":
+            ret = "^"
+        elif val == "LBRACKET":
+            ret = "["
+        elif val == "RBRACKET":
+            ret = "]"
+        elif val == "MINUS":
+            ret = "-"
+        elif val == "PLUS":
+            ret = "+"
+        elif val == "BACKSLASH":
+            ret = "\\"
+        elif val == "COMMA":
+            ret = ","
+        elif val == "PERIOD":
+            ret = "."
+        elif val == "MOD":
+            ret = "%"
+        elif val == "RBRACE":
+            ret = "}"
+        elif val == "LBRACE":
+            ret = "{"
+        elif val == "DOLLAR":
+            ret = "$"
+        elif val == "COLON":
+            ret = ":"
+        elif val == "CONDITIONAL1":
+            ret = "?"
+        elif val == "AT":
+            ret = "@"
+        elif val == "RPAREN":
+            ret = ")"
+        elif val == "LPAREN":
+            ret = "("
+        else:
+            if val.find(":") > -1:
+                ret = val.split(":")[1]
+                ret = ret.replace("'","")
+            else:
+                print("regexchar:: item desconocido %s" % val)
+        
+
+        yield "exp", ret
 
 
 class OpUpdate(ASTPython):
