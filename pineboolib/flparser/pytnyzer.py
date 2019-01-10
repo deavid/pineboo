@@ -933,7 +933,8 @@ class Member(ASTPython):
             "charCodeAt",
             "arg",
             "substring", 
-            "attributeValue"
+            "attributeValue",
+            "match"
         ]
         for member in replace_members:
             for idx, arg in enumerate(arguments):
@@ -1016,6 +1017,10 @@ class Member(ASTPython):
                         value = arg[5:]
                         value = value[:len(value) - 1]
                         arguments = ["%s.join(%s)" % (value, ".".join(part1))] + part2
+                    elif member == "match":
+                        value = arg[6:]
+                        value = value = value[:len(value) - 1]
+                        arguments = ["re.match(%s, %s)" % (value, ".".join(part1))] + part2
                     elif member == "push":
                         value = arg[5:]
                         value = value[:len(value) - 1]
