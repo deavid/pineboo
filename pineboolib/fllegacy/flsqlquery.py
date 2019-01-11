@@ -484,8 +484,6 @@ class FLSqlQuery(object):
                 from pineboolib.qsa import Date
                 retorno = Date(str(retorno))
             elif retorno is not None and not isinstance(retorno, (str, int, bool, float)):
-                print("WARN:::FLSqlQuery.value(%s)Observar------------------>type %s,value %s" %
-                      (name, type(retorno), retorno))
                 retorno = float(retorno)
 
             if isinstance(retorno, float):
