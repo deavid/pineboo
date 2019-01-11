@@ -608,7 +608,7 @@ class kut2fpdf(object):
             self.draw_barcode(x, y, W, H, xml, text)
         else:
             level = data_row.get("level")
-            if level:
+            if level and str(level) in self.detailn.keys():
                 val = "%s_header_%s_%s" % ( self.detailn[str(level)], level,field_name)
             
             if xml.get("DrawAtHeader") == "true" and level:
