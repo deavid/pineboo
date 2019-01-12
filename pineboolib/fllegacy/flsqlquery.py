@@ -76,7 +76,7 @@ class FLSqlQuery(object):
             self._cursor = micursor
             self._posicion = None
         except Exception:
-            logger.warn("Error en consulta %s", sql, stack_info=True)
+            logger.warn("Error en consulta:\n %s", sql, stack_info=True)
             return False
         # conn.commit()
 
