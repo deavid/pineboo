@@ -936,7 +936,7 @@ class FLQPSQL(object):
                 buffer.setValue("sha", key)
                 c.insert()
 
-        q = FLSqlQuery("", self.db_.dbAux())
+        q = FLSqlQuery(None, self.db_.dbAux())
         constraintName = "%s_pkey" % oldMTD.name()
 
         if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
@@ -966,7 +966,7 @@ class FLQPSQL(object):
                         del newMTD
 
                     return False
-
+                
         if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
             logger.warn("FLManager::alterTable : " +
                   qApp.tr("No se ha podido renombrar la tabla antigua."))
