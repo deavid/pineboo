@@ -49,7 +49,7 @@ class QTable(QtWidgets.QTableWidget):
         if b:
             self.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         else:
-            self.setEditTriggers(QtWidgets.QAbstractItemView.EditTriggers)
+            self.setEditTriggers(QtWidgets.QAbstractItemView.AllEditTriggers)
 
     def selectionMode(self):
         return super(QTable, self).selectionMode()
