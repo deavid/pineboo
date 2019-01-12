@@ -81,6 +81,7 @@ QTreeWidgetItemIterator = resolveObject("QTreeWidgetItemIterator")
 QDataView = resolveObject("QWidget")
 QProcess = resolveObject("Process")
 QByteArray = resolveObject("QByteArray")
+QRadioButton = resolveObject("QRadioButton")
 """
 QIconSet = resolveObject("QIconSet")
 """
