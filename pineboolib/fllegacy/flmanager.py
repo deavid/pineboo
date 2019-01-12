@@ -645,18 +645,68 @@ class FLManager(QtCore.QObject):
 
     def checkMetaData(self, mtd1, mtd2):
         """
-        Esta función es esencialmente igual a la anterior, se proporciona por conveniencia.
-
         Compara los metadatos de dos tablas,  la definición en XML de esas dos tablas se
         pasan como dos cadenas de caracteres.
 
         @param mtd1 Cadena de caracteres con XML que describe la primera tabla
-        @param mtd2 Cadena de caracteres con XML que describe la primera tabla
+        @param mtd2 Cadena de caracteres con XML que describe la segunda tabla
         @return TRUE si las dos descripciones son iguales, y FALSE en caso contrario
         """
-        if mtd1 == mtd2:
+        if isinstance(mtd1, str):
+            if mtd1 == mtd2:
+                return True
+            return False
+        else:
+            if not mtd1 or not mtd2:
+                return mtd1 == mtd2
+            
+            field_list = mtd1.fieldList()
+            
+            for field1 in field_list:
+                if field1.isCheck():
+                    continue
+                
+                field2 = mtd2.field(field1.name())
+                if field2 is None:
+                    return False
+                
+                if field2.isCheck():
+                    continue
+                
+                if field1.type() != field2.type() or field1.allowNull() != field2.allowNull():
+                    return False
+                
+                if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
+                    return False
+                
+                if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
+                    return False
+                
+                
+            
+            field_list = mtd2.fieldList()
+            for field1 in field_list:
+                if field1.isCheck():
+                    continue
+                
+                field2 = mtd1.field(field1.name())
+                if field2 is None:
+                    return False
+                
+                if field2.isCheck():
+                    continue
+                
+                if field1.type() != field2.type() or field1.allowNull() != field2.allowNull():
+                    return False
+                
+                if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
+                    return False
+                
+                if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
+                    return False
+            
             return True
-        return False
+                
 
     def alterTable(self, mtd1=None, mtd2=None, key=None):
         """
