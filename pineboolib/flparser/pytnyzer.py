@@ -891,11 +891,15 @@ class Member(ASTPython):
             if funs:
                 #fun = funs[-1]
                 fun = funs
-                name_parts = fun.get("name").split("_")
-                classname = name_parts[0]
+                full_fun_name = fun.get("name")
+                fun_name = arguments[2][2:]
+                if fun_name.find("(") > -1:
+                    fun_name = fun_name[:fun_name.find("(")]
+                
+                classname = full_fun_name.replace("_%s" % fun_name, "")
                 arguments[2] = arguments[2][2:]
-                arguments[0:2] = ["super(%s, %s)" % (
-                    classname, ".".join(arguments[0:2]))]
+                arguments[0:2] = ["super(%s, %s)" % (classname, ".".join(arguments[0:2]))]
+                
 
         # Lectura del self.iface.__init() al nuevo estilo yeboyebo
         if len(arguments) >= 2 and arguments[0:1] == ["_i"] and arguments[1].startswith("__"):
@@ -912,11 +916,15 @@ class Member(ASTPython):
             if funs:
                 #fun = funs[-1]
                 fun = funs
-                name_parts = fun.get("name").split("_")
-                classname = name_parts[0]
+                #name_parts = fun.get("name").split("_")
+                full_fun_name = fun.get("name")
+                fun_name = arguments[1][2:]
+                if fun_name.find("(") > -1:
+                    fun_name = fun_name[:fun_name.find("(")]
+                
+                classname = full_fun_name.replace("_%s" % fun_name, "")
                 arguments[1] = arguments[1][2:]
-                arguments[0:1] = ["super(%s, %s)" % (
-                    classname, ".".join(arguments[0:1]))]
+                arguments[0:1] = ["super(%s, %s)" % (classname, ".".join(arguments[0:1]))]
 
         replace_members = [
             "toString()",
@@ -1294,6 +1302,8 @@ class regex(ASTPython):
     def generate(self, **kwargs):
         child = self.elem.find("regexbody")
         args_ = self.elem.items()
+        if not child:
+            return
         
         for arg in child:
             for dtype, data in parse_ast(arg).generate(isolate=False):
