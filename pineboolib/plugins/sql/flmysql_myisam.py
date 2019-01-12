@@ -675,7 +675,7 @@ class FLMYSQL_MYISAM(object):
                 steps = steps + 1
                 util.setProgress(steps)
                 util.setLabelText(util.tr("Creando índices para %s" % item))
-                mtd = self.db_.manager().metadata(item)
+                mtd = self.db_.manager().metadata(item, True)
                 if not mtd:
                     continue
                 fL = mtd.fieldList()

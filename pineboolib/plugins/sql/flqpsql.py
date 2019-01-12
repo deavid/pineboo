@@ -479,7 +479,7 @@ class FLQPSQL(object):
 
         if db_ is None:
             db_ = self.db_
-
+        
         if isinstance(tmd_or_table2, str):
             mtd = db_.manager().metadata(tmd_or_table2, True)
             if not mtd:
@@ -834,17 +834,17 @@ class FLQPSQL(object):
         return True
 
     def alterTable2(self, mtd1, mtd2, key, force=False):
-
+        logger.warn("alterTable2 FIXME::Me quedo colgado al hacer createTable --> existTable")
         util = FLUtil()
 
         oldMTD = None
         newMTD = None
         doc = QDomDocument("doc")
         docElem = None
+        
 
         if not util.domDocumentSetContent(doc, mtd1):
-            print("FLManager::alterTable : " +
-                  qApp.tr("Error al cargar los metadatos."))
+            logger.warn("FLManager::alterTable : " + qApp.tr("Error al cargar los metadatos."))
         else:
             docElem = doc.documentElement()
             oldMTD = self.db_.manager().metadata(docElem, True)
@@ -853,8 +853,7 @@ class FLQPSQL(object):
             return True
 
         if not util.domDocumentSetContent(doc, mtd2):
-            print("FLManager::alterTable : " +
-                  qApp.tr("Error al cargar los metadatos."))
+            logger.warn("FLManager::alterTable : " + App.tr("Error al cargar los metadatos."))
             return False
         else:
             docElem = doc.documentElement()
@@ -864,8 +863,7 @@ class FLQPSQL(object):
             oldMTD = newMTD
 
         if not oldMTD.name() == newMTD.name():
-            print("FLManager::alterTable : " +
-                  qApp.tr("Los nombres de las tablas nueva y vieja difieren."))
+            logger.warn("FLManager::alterTable : " + qApp.tr("Los nombres de las tablas nueva y vieja difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -877,8 +875,7 @@ class FLQPSQL(object):
         newPK = newMTD.primaryKey()
 
         if not oldPK == newPK:
-            print("FLManager::alterTable : " +
-                  qApp.tr("Los nombres de las claves primarias difieren."))
+            logger.warn("FLManager::alterTable : " + qApp.tr("Los nombres de las claves primarias difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -895,8 +892,7 @@ class FLQPSQL(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            print("FLManager::alterTable : " + qApp.tr(
-                "La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            logger.warn("FLManager::alterTable : " + qApp.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -908,8 +904,7 @@ class FLQPSQL(object):
         oldField = None
 
         if not fieldList:
-            print("FLManager::alterTable : " +
-                  qApp.tr("Los antiguos metadatos no tienen campos."))
+            logger.warn("FLManager::alterTable : " + qApp.tr("Los antiguos metadatos no tienen campos."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -917,8 +912,7 @@ class FLQPSQL(object):
 
             return False
 
-        renameOld = "%salteredtable%s" % (
-            oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+        renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
 
         if not self.db_.dbAux():
             if oldMTD and not oldMTD == newMTD:
@@ -946,7 +940,7 @@ class FLQPSQL(object):
         constraintName = "%s_pkey" % oldMTD.name()
 
         if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
-            print("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(oldMTD.name()))
+            logger.warn("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(oldMTD.name()))
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -963,7 +957,7 @@ class FLQPSQL(object):
             if it.isUnique():
                 constraintName = "%s_%s_key" % (oldMTD.name(), it.name())
                 if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
-                    print("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.")
+                    logger.warn("FLManager : " + qApp.tr("En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.")
                           .arg(oldMTD.name(), oldField.name()))
                     self.db_.dbAux().rollback()
                     if oldMTD and not oldMTD == newMTD:
@@ -974,7 +968,7 @@ class FLQPSQL(object):
                     return False
 
         if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
-            print("FLManager::alterTable : " +
+            logger.warn("FLManager::alterTable : " +
                   qApp.tr("No se ha podido renombrar la tabla antigua."))
 
             self.db_.dbAux().rollback()
@@ -1059,8 +1053,7 @@ class FLQPSQL(object):
                             v = defVal
 
                     if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
-                        print("FLManager::alterTable : " + qApp.tr(
-                            "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
+                        logger.warn("FLManager::alterTable : " + qApp.tr("Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
 
                 if v is not None and newField.type() == "string" and newField.length() > 0:
                     v = str(v)[0:newField.length()]
@@ -1205,7 +1198,7 @@ class FLQPSQL(object):
                                   "estructura interna en la base de datos no coinciden. "
                                   "Intentando regenerarla." % item)
 
-                    print(msg)
+                    logger.warn(msg)
                     self.alterTable2(conte, conte, None, True)
 
             steps = steps + 1
@@ -1224,7 +1217,7 @@ class FLQPSQL(object):
                 steps = steps + 1
                 util.setProgress(steps)
                 util.setLabelText(util.tr("Creando índices para %s" % item))
-                mtd = self.db_.manager().metadata(item)
+                mtd = self.db_.manager().metadata(item, True)
                 if not mtd:
                     continue
                 fL = mtd.fieldList()
