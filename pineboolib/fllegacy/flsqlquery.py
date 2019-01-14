@@ -435,6 +435,8 @@ class FLSqlQuery(object):
         
         pos = None
         name = None
+        table_name = None
+        field_name = None
 
         if isinstance(n, str):
             #n = n.replace(" ", "")
@@ -444,10 +446,8 @@ class FLSqlQuery(object):
             pos = n
             name = self.posToFieldName(pos)
         
-        if raw is None and name:
-            #Intentamos saber si en un valor para fllarge
-            table_name = None
-            table_field = None
+        
+        if name:
             if name.find(".") > -1 and name[0:name.find(".")] is self.tablesList():
                 table_name = name[0:name.find(".")]
                 field_name = name[name.find(".") + 1:]
@@ -456,11 +456,14 @@ class FLSqlQuery(object):
                     mtd = self.d.db_.manager().metadata(t)
                     f = mtd.field(name)
                     
-                    if f:
+                    if f is not None:
                         table_name = t
                         field_name = name
                         break
-            
+        
+        
+        if raw is None:
+            #Intentamos saber si en un valor para fllarge
             if table_name and field_name:
                 field = self.d.db_.manager().metadata(table_name).field(field_name)
                 raw  = (field.type() is "pixmap") and not self.d.db_.manager().isSystemTable(table_name)
@@ -472,18 +475,25 @@ class FLSqlQuery(object):
         if raw is True:
             return self.d.db_.manager().fetchLargeValue(self._row[pos])
         else:
-
+            from pineboolib.qsa import Date
+            
+            
             try:
                 retorno = self._row[pos]
             except Exception:
                 retorno = None
-
+            
+            if table_name is not None and field_name is not None:
+                field = self.d.db_.manager().metadata(table_name).field(field_name)
+                if field.type() == "date" and isinstance(retorno, str):
+                    retorno = Date(retorno)
+            
             if isinstance(retorno, datetime.time):
                 retorno = str(retorno)[:8]
             elif isinstance(retorno, datetime.date):
-                from pineboolib.qsa import Date
+                
                 retorno = Date(str(retorno))
-            elif retorno is not None and not isinstance(retorno, (str, int, bool, float)):
+            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, Date)):
                 retorno = float(retorno)
 
             if isinstance(retorno, float):
