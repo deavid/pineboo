@@ -166,7 +166,7 @@ class DlgConnect(QtWidgets.QWidget):
             self.portnumber = db.find("port").text
             self.driveralias = db.find("type").text
             if self.driveralias not in self.pNSqlDrivers.aliasList():
-                QMessageBox.information(self.ui, "Pineboo", "Esta versión de pineboo no soporta este tipo de BD")
+                QMessageBox.information(self.ui, "Pineboo", "Esta versión de pineboo no soporta el driver '%s'" % self.driveralias)
                 self.database = None
                 return
         for credentials in root.findall("database-credentials"):
