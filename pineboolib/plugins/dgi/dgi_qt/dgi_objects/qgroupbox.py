@@ -5,18 +5,30 @@ from PyQt5.QtWidgets import QFrame
 from PyQt5 import Qt
 
 class QGroupBox(QtWidgets.QGroupBox):
-
+    
+    style_str = None
+    _line_width = None
+    
     def __init__(self, *args, **kwargs):
         super(QGroupBox, self).__init__(*args, **kwargs)
-        self.setStyleSheet("QGroupBox { font-weight: bold; } ")
+        self._do_style()
         from pineboolib.fllegacy.flsettings import FLSettings
         settings = FLSettings()
         if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
             self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
-    @decorators.NotImplementedWarn
     def setLineWidth(self, width):
-        pass
+        self._line_width = width
+        self._do_style()
+    
+    
+    def _do_style(self):
+        self.style_str = "QGroupBox { font-weight: bold; background-color: transparent;"
+        if self._line_width is not None:
+            self.style_str += " border: %spx transparent;" % self._line_width
+        self.style_str += " }"
+        self.setStyleSheet(self.style_str)
+        
 
     @property
     def selectedId(self):
@@ -40,10 +52,6 @@ class QGroupBox(QtWidgets.QGroupBox):
     
     @decorators.NotImplementedWarn
     def setFrameShadow(self, fs):
-        pass
-    
-    @decorators.NotImplementedWarn
-    def setLineWidth(self, lw):
         pass
     
     @decorators.NotImplementedWarn
