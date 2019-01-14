@@ -348,7 +348,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         elif pname in ["windowIcon", "icon"]:
             value = loadVariant(xmlprop, widget)
             if isinstance(value, str):
-                logger.warn("Icono %s no encontrado.", value)
+                logger.warn("Icono %s.%s no encontrado." %  (widget.objectName(), value))
                 return
 
         else:
