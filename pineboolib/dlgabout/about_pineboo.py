@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QApplication
 from pineboolib.utils import DEPENDENCIES_CHECKED
 
 class about_pineboo(QWidget):
@@ -22,8 +22,9 @@ class about_pineboo(QWidget):
         dlg_ = filedir('dlgabout/about_pineboo.ui')
         version_ = pineboolib.project.version
         self.ui = mng_mod.createUI(dlg_, None, self)
-        self.ui.lbl_version.setText("Pineboo v%s" % version_)
+        self.ui.lbl_version.setText("Pineboo v%s" % str(version_))
         self.ui.btn_close.clicked.connect(self.ui.close)
+        self.ui.btn_clipboard.clicked.connect(self.to_clipboard)
         self.ui.show()
         
         self.ui.lbl_librerias.setText(self.load_components())
@@ -31,8 +32,18 @@ class about_pineboo(QWidget):
     def load_components(self):
         components = "Versiones de componentes:\n\n"
         
+        import sys
+        import platform
+        
+        components += "S.O.: %s %s %s\n" % (platform.system(), platform.release(), platform.version())
+        py_ver = sys.version
+        if py_ver.find("(") > -1:
+            py_ver = py_ver[:py_ver.find("(")]
+            
+        components += "Python: %s\n" % py_ver
+        
         for k in DEPENDENCIES_CHECKED.keys():
-            components += "%s = %s\n" % (k, DEPENDENCIES_CHECKED[k])
+            components += "%s: %s\n" % (k, DEPENDENCIES_CHECKED[k])
             
         
         
@@ -40,5 +51,12 @@ class about_pineboo(QWidget):
         
         
         return components
+    
+    def to_clipboard(self):
+        
+        clip_board = QApplication.clipboard()
+        clip_board.clear()
+        clip_board.setText(self.load_components())
+        
         
         
