@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets import QWidget, QApplication
 from pineboolib.utils import DEPENDENCIES_CHECKED
+from PyQt5 import QtCore
 
 class about_pineboo(QWidget):
     
@@ -41,6 +42,7 @@ class about_pineboo(QWidget):
             py_ver = py_ver[:py_ver.find("(")]
             
         components += "Python: %s\n" % py_ver
+        components += "PyQt: %s\n" % QtCore.QT_VERSION_STR
         
         for k in DEPENDENCIES_CHECKED.keys():
             components += "%s: %s\n" % (k, DEPENDENCIES_CHECKED[k])
