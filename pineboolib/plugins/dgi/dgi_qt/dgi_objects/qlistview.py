@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, QtGui
-from pineboolib import decorators
 
 class QListView(QtWidgets.QListView):
 
@@ -24,9 +23,12 @@ class QListView(QtWidgets.QListView):
     def setItemMargin(self, m):
         self.setContentsMargins(m, m, m, m)
     
-    @decorators.NotImplementedWarn
     def setHeaderLabel(self, l):
-        pass  
+        if isinstance(l, str):
+            l = [l]
+            
+        if self._model and isinstance(l, list):
+            self._model.setHorizontalHeaderLabels(l)
 
     def setClickable(self, c):
         self._clickable = True if c else False
