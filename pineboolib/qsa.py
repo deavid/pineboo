@@ -493,6 +493,11 @@ class Date(object):
             self.time_ = None
             if isinstance(date_, str):
                 if len(date_) == 10:
+                    tmp = date_.split("-")
+                    if len(tmp[2]) == 4:
+                        from pineboolib.fllegacy.flutil import FLUtil
+                        date_ = FLUtil().dateDMAtoAMD(date_)
+                    
                     self.date_ = QtCore.QDate.fromString(date_, format_)
                 else:
                     self.date_ = QtCore.QDate.fromString(date_[0:10], format_)
