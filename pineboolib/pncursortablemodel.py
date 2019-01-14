@@ -715,9 +715,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def updateValuesDB(self, pKValue, dict_update):
         row = self.findPKRow([pKValue])
+        #if row is None:
+        #    raise AssertionError(
+        #        "Los indices del CursorTableModel no devolvieron un registro (%r)" % (pKValue))
         if row is None:
-            raise AssertionError(
-                "Los indices del CursorTableModel no devolvieron un registro (%r)" % (pKValue))
+            return
 
         if self.value(row, self.pK()) != pKValue:
             raise AssertionError("Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (
