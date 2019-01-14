@@ -717,11 +717,11 @@ class ModuleActions(object):
     def __init__(self, module, path, modulename):
         self.mod = module
         self.path = path
-        self.moduleName = modulename
+        self.module_name = modulename
         self.logger = logging.getLogger("main.ModuleActions")
         if not self.path:
             self.logger.error(
-                "El módulo no tiene un path válido %s", self.moduleName)
+                "El módulo no tiene un path válido %s", self.module_name)
 
     """
     Carga las actions del módulo en el projecto
@@ -744,24 +744,23 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         pineboolib.project.actions[action.name] = action
         if hasattr(qsa_dict_modules, action.name):
-            self.logger.warn(
-                "No se sobreescribe variable de entorno %s", action.name)
+            if action.name is not "sys":
+                self.logger.warn("No se sobreescribe variable de entorno %s", action.name)
         else:  # Se crea la action del módulo
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
 
         for xmlaction in self.root:
-            action = XMLAction(xmlaction)
-            action.mod = self
-            name = action.name
-            pineboolib.project.actions[name] = action
+            action_xml = XMLAction(xmlaction)
+            action_xml.mod = self
+            name = action_xml.name
             if name != "unnamed":
-                if hasattr(qsa_dict_modules, "form" + name):
-                    self.logger.warn(
-                        "No se sobreescribe variable de entorno %s", "form" + name)
+                if hasattr(qsa_dict_modules, "form%s" % name):
+                    self.logger.warn("No se sobreescribe variable de entorno %s. Hay una definición previa en %s", "%s.form%s" %(self.module_name, name), pineboolib.project.actions[name].mod.module_name)
                 else:  # Se crea la action del form
+                    pineboolib.project.actions[name] = action_xml
                     delayed_action = DelayedObjectProxyLoader(
-                        action.load,
+                        action_xml.load,
                         name="QSA.Module.%s.Action.form%s" % (self.mod.name, name))
                     setattr(qsa_dict_modules, "form" + name, delayed_action)
 
@@ -770,7 +769,7 @@ class ModuleActions(object):
                         "No se sobreescribe variable de entorno %s", "formRecord" + name)
                 else:  # Se crea la action del formRecord
                     delayed_action = DelayedObjectProxyLoader(
-                        action.formRecordWidget,
+                        action_xml.formRecordWidget,
                         name="QSA.Module.%s.Action.formRecord%s" % (self.mod.name, name))
 
                     setattr(qsa_dict_modules, "formRecord" + name, delayed_action)
