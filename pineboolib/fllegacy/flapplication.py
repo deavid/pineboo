@@ -602,6 +602,9 @@ class FLApplication(QtCore.QObject):
 
 
     def msgBoxWarning(self, t, _gui):
+        if pineboolib.project._splash is not None:
+            pineboolib.project._splash.hide()
+            
         _gui.msgBoxWarning(t)
 
     def checkAndFixTransactionLevel(self, ctx=None):
