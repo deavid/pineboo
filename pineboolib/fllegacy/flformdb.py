@@ -12,6 +12,7 @@ import pineboolib
 import traceback
 
 
+
 """
 Representa un formulario que enlaza con una tabla.
 
@@ -854,6 +855,14 @@ class FLFormDB(QtWidgets.QDialog):
         super(FLFormDB, self).show()
         #tiempo_fin = time.time()
         settings = FLSettings()
+        
+        
+        from PyQt5.QtWidgets import QDesktopWidget #Centrado
+        
+        qt_rectangle = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        qt_rectangle.moveCenter(center_point)
+        self.move(qt_rectangle.topLeft())
         #if settings.readBoolEntry("application/isDebuggerMode", False):
         #    self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s (iface %s)" %
         #                     (self.actionName_, tiempo_fin - self.tiempo_ini, self, self.iface))
