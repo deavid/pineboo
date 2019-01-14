@@ -59,11 +59,15 @@ class QTable(QtWidgets.QTableWidget):
 
     def setColumnLabels(self, separador, lista):
         array_ = lista.split(separador)
-        labels_ = []
+        self.cols_list = []
         for i in range(self.columnCount()):
             if len(array_) > i:
-                labels_.append(array_[i])
-        self.setHorizontalHeaderLabels(labels_)
+                self.cols_list.append(array_[i])
+        self.setHorizontalHeaderLabels(self.cols_list)
+    
+    def clear(self):
+        super().clear()
+        self.setHorizontalHeaderLabels(self.cols_list)
 
     def setColumnStrechable(self, col, b):
         if b:
