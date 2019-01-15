@@ -4,6 +4,11 @@ from PyQt5 import QtWidgets, QtCore
 
 class QDialog(QtWidgets.QDialog):
     
+    def __init__(self):
+        super().__init__()
+        self.setModal(True)
+        
+    
     def getTitle(self):
         return self.windowTitle()
     
