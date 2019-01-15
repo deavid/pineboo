@@ -1056,9 +1056,9 @@ class ArrayMember(ASTPython):
             arg.set("parent_", self.elem)
             expr = []
             for dtype, data in parse_ast(arg).generate(isolate=False):
-                if data.find(".") > -1:
-                    l = data.split(".")
-                    data = "%s['%s']" % (l[0], l[1])
+                #if data.find(".") > -1:
+                #    l = data.split(".")
+                #    data = "%s['%s']" % (l[0], l[1])
                     
                 if dtype == "expr":
                     expr.append(data)
