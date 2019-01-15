@@ -95,7 +95,8 @@ class Array(object):
     pos_iter = None
 
     def __init__(self, *args):
-        self.dict_ = {}
+        import collections
+        self.dict_ = collections.OrderedDict()
 
         if not len(args):
             return
