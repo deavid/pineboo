@@ -36,7 +36,7 @@ def resolveObject(name):
     if obj_:
         return obj_
 
-    logger.warn("%s.resolveSDIObject no puede encontra el objeto %s en %s",
+    logger.warn("%s.resolveDGIObject no puede encontra el objeto %s en %s",
                 __name__, name, pineboolib._DGI.alias())
 
 
@@ -94,7 +94,7 @@ FLDomDocument = resolveObject("QDomDocument")
 FLDomElement = resolveObject("QDomElement")
 FLDomNode = resolveObject("QDomNode")
 FLListViewItem = resolveObject("QListView")
-FLTable = resolveObject("FLTable")
+FLTable = resolveObject("QTable")
 FLDataTable = resolveObject("FLDataTable")
 FLCheckBox = resolveObject("FLCheckBox")
 FLTextEditOutput = resolveObject("FLTextEditOutput")
