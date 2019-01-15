@@ -68,7 +68,7 @@ class Process(QtCore.QProcess):
         pro.start()
         encoding = sys.getfilesystemencoding()
         stdin_as_bytes = stdin_buffer.encode(encoding)
-        self.writeData(stdin_as_bytes)
+        pro.writeData(stdin_as_bytes)
         pro.waitForFinished(30000)
         Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
         Process.stderr = pro.readAllStandardError().data().decode(encoding)
