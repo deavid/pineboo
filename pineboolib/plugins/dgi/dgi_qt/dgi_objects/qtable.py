@@ -67,7 +67,10 @@ class QTable(QtWidgets.QTableWidget):
     
     def clear(self):
         super().clear()
+        for i in range(self.rowCount()):
+            self.removeRow(i)
         self.setHorizontalHeaderLabels(self.cols_list)
+        
 
     def setColumnStrechable(self, col, b):
         if b:
