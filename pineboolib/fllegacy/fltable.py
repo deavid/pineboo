@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtable import QTable
+from pineboolib.pncontrolsfactory import QTable
 from pineboolib import decorators
 
 class FLTable(QTable):

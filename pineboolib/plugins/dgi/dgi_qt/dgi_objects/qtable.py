@@ -86,6 +86,8 @@ class QTable(QtWidgets.QTableWidget):
         self.insertRow(numero)
 
     def text(self, row, col):
+        if not row:
+            row = self.SelectRows
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
