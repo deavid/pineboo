@@ -14,8 +14,8 @@ class QGroupBox(QtWidgets.QGroupBox):
         self._do_style()
         from pineboolib.fllegacy.flsettings import FLSettings
         settings = FLSettings()
-        if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
-            self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        #if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
+        #    self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
     def setLineWidth(self, width):
         self._line_width = width
