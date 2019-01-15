@@ -825,7 +825,7 @@ class File(QtCore.QFile):
         @param. Nombre del fichero
         @return. boolean informando si la ruta dada es un fichero o no.
         """
-        return op.path.isfile(file_name)
+        return os.path.isfile(file_name)
         
     
     def getName(self):
