@@ -815,9 +815,18 @@ class File(QtCore.QFile):
         """
         Indica si la ruta data es un directorio
         @param. Nombre del directorio
-        @return. boolean informando si la ruta dada es un direcotiro o no.
+        @return. boolean informando si la ruta dada es un directorio o no.
         """
         return os.path.isdir(dir_name)
+    
+    def isFile(file_name):
+        """
+        Indica si la ruta data es un fichero
+        @param. Nombre del fichero
+        @return. boolean informando si la ruta dada es un fichero o no.
+        """
+        return op.path.isfile(file_name)
+        
     
     def getName(self):
         """
