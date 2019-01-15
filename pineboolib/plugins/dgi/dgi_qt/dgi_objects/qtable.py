@@ -138,6 +138,11 @@ class QTable(QtWidgets.QTableWidget):
     def setLeftMargin(self, n):
         pass
 
+    
+    def setCellBackgroundColor(self, row, col, color):
+        item = self.cellWidget(row, col)
+        if item is not None and color:
+            item.setStyleSheet("background-color:%s;" % color.name())
         # setItemDelegateForColumn(c, new NotEditableDelegate(view))
 
     # def __getattr__(self, name):
