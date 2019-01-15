@@ -418,7 +418,7 @@ class kut2fpdf(object):
                     for cf in df.iter("CalculatedField"):
                         if cf.get("DrawAtHeader") == "true":
                             header_name = "%s_header_%s_%s" % (self.detailn[detail_level], detail_level, cf.get("Field"))
-                            self.draws_at_header[header_name] = 0
+                            self.draws_at_header[header_name] = ""
                             self.processText(cf, data, fix_height, xml.tag)
             
         
@@ -613,16 +613,16 @@ class kut2fpdf(object):
             
             if xml.get("DrawAtHeader") == "true" and level:
                 if section_name == "DetailHeader":
+                    val = ""
                     self.drawText(x, y, W, H, xml, val)
             
-                print(level, section_name, val, text)
+                    print(level, section_name, val, text)
             
             if section_name == "DetailFooter" and xml.get("DrawAtHeader") == "true":
                 self.draws_at_header[val] = text
                 print("Añadiendo a", val, text, level)
             
             else:
-                
                 self.drawText(x, y, W, H, xml, text)
 
 
