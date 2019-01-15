@@ -4,6 +4,7 @@ from pineboolib import decorators
 
 class QTextEdit(QtWidgets.QTextEdit):
     LogText = 0
+    RichText = 1
 
     def __init__(self, parent = None):
         super(QTextEdit, self).__init__(parent)
@@ -25,6 +26,10 @@ class QTextEdit(QtWidgets.QTextEdit):
     def setTextFormat(self, value):
         if value == 0:  # LogText
             self.setReadOnly(True)
+            self.setAcceptRichText(False)
+        elif value == 1:
+            self.setReadOnly(False)
+            self.setAcceptRichText(True)
 
     def setShown(self, value):
         if value:

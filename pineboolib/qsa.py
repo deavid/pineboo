@@ -30,6 +30,8 @@ util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 sys = SysType()
 
 undefined = None
+LogText = 0
+RichText = 1
 
 
 def Function(args, source):
