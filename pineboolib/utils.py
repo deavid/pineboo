@@ -537,9 +537,12 @@ def checkDependencies(dict_, exit=True):
     for key in dict_.keys():
         
         try:
-            mod_ = import_module(key)
+            if key is not "Python3":
+                mod_ = import_module(key)
             if key == "ply":
                 version_check(key, mod_.__version__, '3.9')
+            if key == "Python3":
+                version_check(key, "%s.%s.%s" % (sys.version_info[0], sys.version_info[1], sys.version_info[2]), '3.6')
             elif key == "Pillow":
                 version_check(key, mod_.__version__, '5.1.0')
             elif key == "fpdf":
