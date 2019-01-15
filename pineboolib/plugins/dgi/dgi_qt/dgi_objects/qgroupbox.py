@@ -7,25 +7,25 @@ from PyQt5 import Qt
 class QGroupBox(QtWidgets.QGroupBox):
     
     style_str = None
-    _line_width = None
+    _line_width = 0
     
     def __init__(self, *args, **kwargs):
         super(QGroupBox, self).__init__(*args, **kwargs)
         self._do_style()
         from pineboolib.fllegacy.flsettings import FLSettings
         settings = FLSettings()
+        self._line_width = 0
+        
         #if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
         #    self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 
     def setLineWidth(self, width):
         self._line_width = width
-        self._do_style()
-    
+        self._do_style()    
     
     def _do_style(self):
         self.style_str = "QGroupBox { font-weight: bold; background-color: transparent;"
-        if self._line_width is not None:
-            self.style_str += " border: %spx transparent;" % self._line_width
+        self.style_str += " border: %spx transparent;" % self._line_width
         self.style_str += " }"
         self.setStyleSheet(self.style_str)
         
