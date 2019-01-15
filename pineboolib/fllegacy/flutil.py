@@ -1120,6 +1120,8 @@ class FLUtil(QtCore.QObject):
         return True
 
     def sha1(self, str_):
+        if str_ is None:
+            str_ = ""
         """
         Obtiene la clave SHA1 de una cadena de texto.
 
