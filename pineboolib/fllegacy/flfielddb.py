@@ -20,6 +20,7 @@ from pineboolib.fllegacy.flformdb import FLFormDB
 import datetime
 import pineboolib
 import logging
+from PyQt5.QtGui import QColor
 
 
 class FLFieldDB(QtWidgets.QWidget):
@@ -83,6 +84,7 @@ class FLFieldDB(QtWidgets.QWidget):
     keyF2Pressed = QtCore.pyqtSignal()
 
     firstRefresh = None
+    default_style = None
 
     """
     Tamaño de icono por defecto
@@ -1788,8 +1790,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                     if not field.allowNull() and field.editable() and not (type_ == "time" or type_ == "date"):
                         # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
-                        self.editor_.setStyleSheet(
-                            'background-color:%s;' % self.notNullColor())
+                        self.editor_.setStyleSheet('background-color:%s; color:%s' % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
                     self.editor_.installEventFilter(self)
 
                 if type_ == "double":
@@ -2904,6 +2905,7 @@ class FLFieldDB(QtWidgets.QWidget):
         # print("FLFieldDB: %r setEnabled: %r" % (self.fieldName_, enable))
         if self.editor_:
             if not self.cursor():
+                self.default_style = self.editor_.styleSheet()
                 self.editor_.setDisabled(True)
                 self.editor_.setStyleSheet('background-color: #f0f0f0')
             else:
@@ -2916,12 +2918,10 @@ class FLFieldDB(QtWidgets.QWidget):
                     if not enable or not field.editable():
                         self.editor_.setStyleSheet('background-color: #f0f0f0')
                     else:
-                        # TODO: al re-habilitar un control, restaurar el color que
-                        # le toca
                         if not field.allowNull() and not (field.type() == "time" or field.type() == "date"):
-                            self.editor_.setStyleSheet('background-color:' + self.notNullColor())
+                            self.editor_.setStyleSheet('background-color:%s; color:%s' % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
                         else:
-                            self.editor_.setStyleSheet('background-color: #fff')
+                            self.editor_.setStyleSheet(self.default_style)
 
                 else:
                     self.editor_.setEnabled(enable)
