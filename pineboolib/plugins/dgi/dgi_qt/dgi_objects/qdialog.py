@@ -4,10 +4,14 @@ from PyQt5 import QtWidgets, QtCore
 
 class QDialog(QtWidgets.QDialog):
     
-    def __init__(self):
-        super().__init__()
-        self.setModal(True)
+    def __init__(self, parent=None, name=None, b=None):
+        if isinstance(parent, int):
+            parent = None
         
+        super().__init__(parent)
+        if name:
+            self.setTitle(name)
+        self.setModal(True)     
     
     def getTitle(self):
         return self.windowTitle()
@@ -28,6 +32,11 @@ class QDialog(QtWidgets.QDialog):
     @QtCore.pyqtSlot()
     def reject(self):
         super().reject()
+    
+    @QtCore.pyqtSlot()
+    def close(self):
+        super().close()
+    
 
     caption = property(getTitle, setTitle)
     enable = property(getEnabled, setEnable_)
