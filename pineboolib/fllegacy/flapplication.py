@@ -145,6 +145,11 @@ class FLApplication(QtCore.QObject):
     @decorators.NotImplementedWarn
     def eventFilter(self, obj, ev):
         pass
+    
+    def eventLoop(self):
+        from pineboolib.pncontrolsfactory import QEventLoop
+        return QEventLoop()
+        
 
     @decorators.NotImplementedWarn
     def checkForUpdate(self):

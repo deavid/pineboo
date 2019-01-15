@@ -617,3 +617,13 @@ def check_gc_referrers(typename, w_obj, name):
 def print_stack(maxsize=1):
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
+        
+
+class QEventLoop(QtCore.QEventLoop):
+    
+    def exitLoop(self):
+        super().exit()
+
+    def enterLoop(self):
+        super().exec_()
+
