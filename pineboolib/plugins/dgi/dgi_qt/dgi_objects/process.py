@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore
+import sys
 
 class Process(QtCore.QProcess):
 
@@ -27,7 +28,6 @@ class Process(QtCore.QProcess):
         super(Process, self).stop()
 
     def writeToStdin(self, stdin_):
-        import sys
         encoding = sys.getfilesystemencoding()
         stdin_as_bytes = stdin_.encode(encoding)
         self.writeData(stdin_as_bytes)
@@ -53,6 +53,29 @@ class Process(QtCore.QProcess):
     
     def exitcode(self):
         return self.exitCode()
+    
+    def executeNoSplit(comando, stdin_buffer):
+        
+        list_ = []
+        for c in comando:
+            list_.append(c)
+            
+        pro = QtCore.QProcess()
+        programa = list_[0]
+        arguments = list_[1:]
+        pro.setProgram(programa)
+        pro.setArguments(arguments)
+        pro.start()
+        encoding = sys.getfilesystemencoding()
+        stdin_as_bytes = stdin_buffer.encode(encoding)
+        self.writeData(stdin_as_bytes)
+        pro.waitForFinished(30000)
+        Process.stdout = pro.readAllStandardOutput().data().decode(encoding)
+        Process.stderr = pro.readAllStandardError().data().decode(encoding)
+        
+        
+        
+        
 
     def execute(comando):
         import sys
