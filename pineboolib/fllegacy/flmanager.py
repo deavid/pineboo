@@ -584,18 +584,13 @@ class FLManager(QtCore.QObject):
                                 continue
                             if e2.tagName() == "caption":
                                 txt_ = e2.text()
-                                if txt_.find("QT_TRANSLATE_NOOP") > -1:
-                                    txt_ = txt_[30: len(txt_) - 32]
-                                    txt_ = util.translate("Metadata", txt_)
-
+                                txt_ = auto_qt_translate_text(txt_)
                                 a.setCaption(txt_)
                                 no2 = no2.nextSibling()
                                 continue
                             if e2.tagName() == "description":
                                 txt_ = e2.text()
-                                if txt_.find("QT_TRANSLATE_NOOP") > -1:
-                                    txt_ = txt_[30: len(txt_) - 32]
-                                    txt_ = util.translate("Metadata", txt_)
+                                txt_ = auto_qt_translate_text(txt_)
 
                                 if a.caption() == "":
                                     a.setDescription(txt_)
@@ -603,9 +598,7 @@ class FLManager(QtCore.QObject):
                                 continue
                             if e2.tagName() == "alias":
                                 txt_ = e2.text()
-                                if txt_.find("QT_TRANSLATE_NOOP") > -1:
-                                    txt_ = txt_[30: len(txt_) - 32]
-                                    txt_ = util.translate("Metadata", txt_)
+                                txt_ = auto_qt_translate_text(txt_)
 
                                 a.setCaption(txt_)
                                 no2 = no2.nextSibling()
