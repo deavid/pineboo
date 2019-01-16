@@ -1665,7 +1665,7 @@ class FLTableDB(QtWidgets.QWidget):
 
                 self.tableRecords().cursor().model().updateColumnsCount()
                 self.tableRecords().header().reset()
-                self.tableRecords().header().swapSections(self.tableRecords().realColumnIndex(fieldCheck.name()), self.sortColumn_)
+                self.tableRecords().header().swapSections(self.tableRecords().column_name_to_column_index(fieldCheck.name()), self.sortColumn_)
                 self.checkColumnVisible_ = True
                 self.setTableRecordsCursor()
                 self.sortColumn_ = 1
