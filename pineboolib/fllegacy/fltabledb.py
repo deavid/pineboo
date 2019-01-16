@@ -217,7 +217,7 @@ class FLTableDB(QtWidgets.QWidget):
                     if ownTMD and tMD and not tMD.inCache():
                         del tMD
                     return
-
+                
                 if not self.cursor_.metadata().name() == self.tableName_:
                     ctxt = self.cursor_.context()
                     self.cursor_ = FLSqlCursor(
@@ -234,7 +234,7 @@ class FLTableDB(QtWidgets.QWidget):
 
             else:
                 cursorTopWidget = self.topWidget.cursor()
-                if cursorTopWidget and not cursorTopWidget.metadata().name() == self.tableName_:
+                if cursorTopWidget and cursorTopWidget.metadata().name() != self.tableName_:
                     self.cursor_ = cursorTopWidget
 
         if not self.tableName_ or not self.foreignField_ or not self.fieldRelation_ or self.cursorAux:
