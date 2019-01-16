@@ -988,8 +988,11 @@ class FLSqlCursor(QtCore.QObject):
         else:
             action = a
 
-        if a is self._action:
+        if self._action: #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
             return
+        
+        
+        
 
         if not self._action:
             self._action = action
