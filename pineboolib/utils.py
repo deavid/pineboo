@@ -534,6 +534,7 @@ def checkDependencies(dict_, exit=True):
     dependences = []
     error = []
     mod_ver = None
+    mod_ = None
     for key in dict_.keys():
         
         try:
