@@ -86,13 +86,20 @@ class QTable(QtWidgets.QTableWidget):
         self.insertRow(numero)
 
     def text(self, row, col):
-        if not row:
-            row = self.SelectRows
+        if row is None:
+            return
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
-        # self.setItem(self.numRows() - 1, col, QtWidgets.QTableWidgetItem(str(value)))
+        prev_item = self.item(row, col)
+        if prev_item:
+            bg_color = prev_item.background()
+            
         self.setItem(row, col, QtWidgets.QTableWidgetItem(str(value)))
+        
+        if prev_item:
+            self.setCellBackgroundColor(row, col, bg_color)
+            
         if row in self.read_only_rows:
             self.setRowReadOnly(row, True)
 
@@ -142,10 +149,7 @@ class QTable(QtWidgets.QTableWidget):
 
     
     def setCellBackgroundColor(self, row, col, color):
-        item = self.cellWidget(row, col)
+        item = self.item(row, col)
+        
         if item is not None and color:
-            item.setStyleSheet("background-color:%s;" % color.name())
-        # setItemDelegateForColumn(c, new NotEditableDelegate(view))
-
-    # def __getattr__(self, name):
-        # return DefFun(self, name)
+            item.setBackground(color)
