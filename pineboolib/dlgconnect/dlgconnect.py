@@ -347,7 +347,7 @@ class DlgConnect(QtWidgets.QWidget):
         """
         Actualiza el nombre de la BD con el nombre de la descripción
         """
-        self.ui.leDBName.setText(self.ui.leDescription.text())
+        self.ui.leDBName.setText(self.ui.leDescription.text().replace(" ", "_"))
 
     @QtCore.pyqtSlot(int)
     def enableProfilePassword(self):
