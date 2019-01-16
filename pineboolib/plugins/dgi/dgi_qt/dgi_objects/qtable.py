@@ -70,6 +70,7 @@ class QTable(QtWidgets.QTableWidget):
         for i in range(self.rowCount()):
             self.removeRow(i)
         self.setHorizontalHeaderLabels(self.cols_list)
+        self.setRowCount(0)
         
 
     def setColumnStrechable(self, col, b):
@@ -88,6 +89,7 @@ class QTable(QtWidgets.QTableWidget):
     def text(self, row, col):
         if row is None:
             return
+        
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
