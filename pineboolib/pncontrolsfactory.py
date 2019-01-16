@@ -99,6 +99,7 @@ FLTable = resolveObject("QTable")
 FLDataTable = resolveObject("FLDataTable")
 FLCheckBox = resolveObject("FLCheckBox")
 FLTextEditOutput = resolveObject("FLTextEditOutput")
+FLSpinBox = resolveObject("FLSpinBox")
 # Clases QSA
 CheckBox = resolveObject("CheckBox")
 TextEdit = QTextEdit
@@ -111,6 +112,7 @@ Dialog = resolveObject("Dialog")
 Label = resolveObject("QLabel")
 GroupBox = resolveObject("GroupBox")
 Process = resolveObject("Process")
+SpinBox = resolveObject("FLSpinBox")
 
 
 class SysType(object):
