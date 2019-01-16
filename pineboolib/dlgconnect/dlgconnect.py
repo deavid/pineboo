@@ -248,8 +248,9 @@ class DlgConnect(QtWidgets.QWidget):
         tree = ET.ElementTree(profile)
         
         if self.edit_mode:
-            os.remove(os.path.join(self.profile_dir, "%s.xml" % description))
-            self.edit_mode = False
+            if os.path.exists(os.path.join(self.profile_dir, "%s.xml" % description)):
+                os.remove(os.path.join(self.profile_dir, "%s.xml" % description))
+                self.edit_mode = False
 
         tree.write(os.path.join(self.profile_dir, "%s.xml" % description), xml_declaration=True, encoding='utf-8')
         # self.cleanProfileForm()
