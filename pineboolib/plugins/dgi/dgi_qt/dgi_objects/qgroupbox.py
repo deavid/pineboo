@@ -17,7 +17,7 @@ class QGroupBox(QtWidgets.QGroupBox):
         self._do_style()
         
         if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
-            self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+            self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
     def setLineWidth(self, width):
         self._line_width = width
