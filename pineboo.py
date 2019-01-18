@@ -26,7 +26,7 @@ def startup_check_dependencies():
     """Do a preemptive import of the libraries needed and handle errors in a user friendly way."""
     from pineboolib.utils import checkDependencies
 
-    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5","Python3":"Python3"}
+    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5","Python":"Python"}
     checkDependencies(dict_)
 
     if sys.version_info[0] < 3:

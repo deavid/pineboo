@@ -37,11 +37,11 @@ class about_pineboo(QWidget):
         import platform
         
         components += "S.O.: %s %s %s\n" % (platform.system(), platform.release(), platform.version())
-        py_ver = sys.version
-        if py_ver.find("(") > -1:
-            py_ver = py_ver[:py_ver.find("(")]
+        #py_ver = sys.version
+        #if py_ver.find("(") > -1:
+        #    py_ver = py_ver[:py_ver.find("(")]
             
-        components += "Python: %s\n" % py_ver
+        #components += "Python: %s\n" % py_ver
         
         if not "PyQt5.QtCore" in DEPENDENCIES_CHECKED.keys():
             components += "PyQt5.QtCore: %s\n" % QtCore.QT_VERSION_STR
