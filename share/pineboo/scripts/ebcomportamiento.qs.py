@@ -73,7 +73,6 @@ class FormInternalObj(FormDBWidget):
         
         if os.path.exists(filedir("../.git")):
             w.child("cb_git_activar").checked = self.leerValorLocal("git_updates_enabled")
-            w.child("cb_git_informa").checked = self.leerValorLocal("git_updates_only_search")
             ruta = self.leerValorLocal("git_updates_repo")
             if ruta is False:
                 ruta = 'https://github.com/Aulla/pineboo.git'
@@ -178,7 +177,6 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("keep_general_cache", w.child("cb_no_borrar_cache").checked)
         self.grabarValorLocal("clean_no_python", w.child("cb_clean_no_python").checked)
         self.grabarValorLocal("git_updates_enabled", w.child("cb_git_activar").checked)
-        self.grabarValorLocal("git_updates_only_search", w.child("cb_git_informa").checked) 
         self.grabarValorLocal("git_updates_repo", w.child("le_git_ruta").text)
         
         autoComp = w.child(u"cbAutoComp").currentText()

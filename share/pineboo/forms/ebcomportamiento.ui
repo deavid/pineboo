@@ -704,14 +704,6 @@
                                                 <string>Activar actualizaciones.</string>
                                             </property>
                                         </widget>
-                                        <widget class="QCheckBox">
-                                            <property name="name">
-                                                <cstring>cb_git_informa</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Solo informar.</string>
-                                            </property>
-                                        </widget>
                                         <widget class="QLayoutWidget">
                                             <property name="name">
                                                 <cstring>layout9</cstring>

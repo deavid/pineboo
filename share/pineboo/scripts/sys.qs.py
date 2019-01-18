@@ -2109,29 +2109,16 @@ def search_git_updates(url = None):
     
     
     settings = AQSettings()
-    only_message = True
     if not url:
         url = settings.readEntry("ebcomportamiento/git_updates_repo", 'https://github.com/Aulla/pineboo.git')
-        only_message = settings.readBoolEntry("ebcomportamiento/git_updates_only_search", False)
     
-    if only_message:
-        command = "git status %s" % url
-    else:
-        command = "git pull %s" % url
+    command = "git status %s" % url
 
     pro = Process
     pro.execute(command)
     
-    if not only_message:
-        if pro.stdout.count("\n") > 1:
-            aqApp.popupWarn("Pineboo ha sido actualizado. Reinicie para aplicar los cambios")
-            return
-    else:
-        if pro.stdout.find("Tu rama está actualizada") == -1:
-            aqApp.popupWarn("No estas actualizado con %s" % url)
-            return
-    
-    aqApp.popupWarn("Pineboo está actualizado")
+    aqApp.popupWarn(pro.stdout)  
+    print("***", pro.stdout)  
     
 def isUserBuild():
     return sys.version().upper().find("USER") > - 1
