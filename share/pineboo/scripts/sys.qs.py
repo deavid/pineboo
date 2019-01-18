@@ -2117,8 +2117,17 @@ def search_git_updates(url = None):
     pro = Process
     pro.execute(command)
     
-    aqApp.popupWarn(pro.stdout)  
-    print("***", pro.stdout)  
+    #print("***", pro.stdout)  
+    
+    if pro.stdout.find("git pull") > -1:
+        if MessageBox.Yes != MessageBox.warning("Hay nuevas actualizaciones disponibles para Pineboo. ¿Desea actualizar?", MessageBox.No, MessageBox.Yes):
+            return
+        
+        pro.execute("git pull %s" % url)
+        
+        MessageBox.information("Pineboo se va a reiniciar ahora", MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
+        os.execl(sys.executable, os.path.abspath(__file__), *sys.argv) 
+    
     
 def isUserBuild():
     return sys.version().upper().find("USER") > - 1
