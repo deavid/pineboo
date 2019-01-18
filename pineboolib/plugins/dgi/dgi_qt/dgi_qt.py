@@ -62,7 +62,8 @@ class dgi_qt(dgi_schema):
         form_path = n if os.path.exists(n) else _path(n)
 
         if form_path is None:
-            raise AttributeError("File %r not found in project" % n)
+            #raise AttributeError("File %r not found in project" % n)
+            logger.warn("%s.createUI : No se encuentra el fichero %s", self.__name__, n)
             return
 
         tree = load2xml(form_path)
