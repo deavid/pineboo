@@ -460,7 +460,6 @@ class qsaRegExp(object):
         self.result_ = re.search(self.strRE_, text)
     
     def replace(self, target , new_value):
-        import re
         return re.sub(r"%s" % self.strRE_, new_value, target)
 
     def cap(self, i):
