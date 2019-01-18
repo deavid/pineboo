@@ -1,5 +1,5 @@
 
-from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 
 class FLSqlCursor_test():

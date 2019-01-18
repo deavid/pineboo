@@ -474,7 +474,7 @@ class Project(object):
         for f in dirlist:
             if not f[0:2] == "__":
                 f = f[:f.find(".py")]
-                mod_ = importlib.import_module(
+                mod_ = import_module(
                     "pineboolib.plugins.test.%s" % f)
                 test_ = getattr(mod_, f)
                 testDict[f] = test_

@@ -317,6 +317,10 @@ def main():
         return _DGI.alternativeMain(options)
 
     project = pineboolib.pnapplication.Project(_DGI)
+    
+    if options.test:
+        project.test()
+        return
 
     if _DGI.useDesktop():
         app = create_app(_DGI)
@@ -417,10 +421,6 @@ def init_project(DGI, splash, options, project, mainForm, app):
 
     if options.preload:
         preload_actions(project, options.forceload)
-
-    if options.test:
-        print(project.test())
-        return
 
     if DGI.localDesktop():
         splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
