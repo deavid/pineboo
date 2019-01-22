@@ -190,8 +190,11 @@ class Array(object):
     
     def append(self, val):
         k = val
-        while k in self.dict_.keys():
-            k = "%s_" % k
+        while True:
+            if k in self.dict_.keys():
+                k = "%s_" % k
+            else:
+                break
         
         self.dict_[k] = val
             
