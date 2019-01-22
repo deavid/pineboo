@@ -395,12 +395,20 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     new_widget.show()
                 if mode == "box":
                     if pineboolib.project._DGI.localDesktop():
-                        widget.layout.addWidget(new_widget)
+                        try:
+                            widget.layout.addWidget(new_widget)
+                        except Exception:
+                            logger.warn("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                            
                 elif mode == "grid":
                     if pineboolib.project._DGI.localDesktop():
                         rowSpan = c.get("rowspan") or 1
                         colSpan = c.get("colspan") or 1
-                        widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
+                        try:
+                            widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
+                        except Exception:
+                            logger.warn("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                            
             elif c.tag == "spacer":
                 sH = None
                 sV = None
