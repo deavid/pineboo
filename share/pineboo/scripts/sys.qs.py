@@ -1971,14 +1971,14 @@ def testAndRun(container=None, component=None, method=None, param=None):
 
     
 def runObjMethod(container=None, component=None, method=None, param=None):
+    import pineboolib
     c = container.child(component)
-    if method in c:
-        s = ustr(container.name, u".child(\"", component, u"\").", method)
-        m = ast.literal_eval(s)
-        if m == u"function":
-            m(param)
-        else:
-            ast.literal_eval("%s = %s" % (s, param))
+    
+    m = getattr(c, method, None)
+    if m is not None:
+        q = pineboolib.project.actions[container.name]
+        o = q.load()
+        setattr(o.findChild(QtWidgets.QWidget,component), method, param)
 
     else:
         debug(ustr(method, u" no existe"))
