@@ -36,7 +36,7 @@ def resolveObject(name):
     if obj_:
         return obj_
 
-    logger.warn("%s.resolveDGIObject no puede encontra el objeto %s en %s",
+    logger.warn("%s.resolveDGIObject no puede encontrar el objeto %s en %s",
                 __name__, name, pineboolib._DGI.alias())
 
 
@@ -113,6 +113,7 @@ Label = resolveObject("QLabel")
 GroupBox = resolveObject("GroupBox")
 Process = resolveObject("Process")
 SpinBox = resolveObject("FLSpinBox")
+Line = resolveObject("QLine")
 
 
 class SysType(object):
