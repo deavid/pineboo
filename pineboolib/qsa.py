@@ -187,6 +187,14 @@ class Array(object):
 
     def __str__(self):
         return " ".join(self.dict_.keys())
+    
+    def append(self, val):
+        k = val
+        while k in self.dict_.keys():
+            k = "%s_" % k
+        
+        self.dict_[k] = val
+            
 
 
 def Boolean(x=False):
