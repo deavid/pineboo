@@ -6,7 +6,7 @@ class QLabel(QtWidgets.QLabel):
 
     @QtCore.pyqtProperty(str)
     def text(self):
-        return self.text()
+        return super().text()
 
     @text.setter
     def text(self, v):
