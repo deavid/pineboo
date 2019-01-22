@@ -1281,9 +1281,9 @@ class Constant(ASTPython):
         if ctype == "String":
             delim = self.elem.get("delim")
             if delim == "'":
-                yield "expr", "u'%s'" % value
+                yield "expr", "'%s'" % value
             else:
-                yield "expr", "u\"%s\"" % value
+                yield "expr", "\"%s\"" % value
         elif ctype == "Number":
             value = value.lstrip("0")
             if value == "":
