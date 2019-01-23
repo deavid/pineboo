@@ -11,7 +11,11 @@ class QDialog(QtWidgets.QDialog):
         super().__init__(parent)
         if name:
             self.setTitle(name)
-        self.setModal(True)     
+        self.setModal(True)
+    
+    def child(self, name):
+        return self.findChild(QtWidgets.QWidget, name)   
+           
     
     def getTitle(self):
         return self.windowTitle()
