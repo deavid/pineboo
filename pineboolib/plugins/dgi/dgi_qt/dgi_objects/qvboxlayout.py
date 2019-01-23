@@ -11,7 +11,7 @@ class QVBoxLayout(QtWidgets.QVBoxLayout):
         else:
             print("V2", parent)
             super().__init__()
-            self.setParent(parent)
+            parent.addLayout(self)
             
         
         self.setContentsMargins(1, 1, 1, 1)

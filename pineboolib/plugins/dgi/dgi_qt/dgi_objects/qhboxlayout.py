@@ -11,7 +11,7 @@ class QHBoxLayout(QtWidgets.QHBoxLayout):
         else:
             print("H2", parent)
             super().__init__()
-            self.setParent(parent)
+            parent.addLayout(self)
         
         self.setContentsMargins(1, 1, 1, 1)
         self.setSpacing(1)
