@@ -189,9 +189,9 @@ class Array(object):
         return " ".join(self.dict_.keys())
     
     def append(self, val):
-        k = val
+        k = repr(val)
         while True:
-            if k in self.dict_.keys():
+            if hasattr(self.dict_, k):
                 k = "%s_" % k
             else:
                 break
