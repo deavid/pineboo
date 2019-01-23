@@ -24,7 +24,8 @@ except ImportError:
 
 try:
     import pineboolib
-    tempDir = pineboolib.project.getTempDir()
+    
+    tempDir = pineboolib.project.get_temp_dir()
 except (ImportError, AttributeError):
     tempDir = "/tmp"
 
