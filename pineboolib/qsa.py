@@ -46,16 +46,15 @@ function anon(%s) {
     print("Compilando QS en línea: ", qs_source)
     from pineboolib.flparser import flscriptparse
     from pineboolib.flparser import postparse
-    from pineboolib.flparser.pytnyzer import write_python_file, string_template
+    from pineboolib.flparser.pytnyzer import write_python_file
     import io
     prog = flscriptparse.parse(qs_source)
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = postparse.post_parse(tree_data)
-    tpl = string_template
 
     f1 = io.StringIO()
 
-    write_python_file(f1, ast, tpl)
+    write_python_file(f1, ast)
     pyprog = f1.getvalue()
     print("Resultado: ", pyprog)
     glob = {}
