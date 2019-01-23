@@ -8,6 +8,7 @@ class QTable(QtWidgets.QTableWidget):
     lineaActual = None
     currentChanged = QtCore.pyqtSignal(int, int)
     doubleClicked = QtCore.pyqtSignal(int, int)
+    valueChanged = QtCore.pyqtSignal(int , int)
     read_only_cols = None
     read_only_rows = None
     cols_list = None
@@ -21,6 +22,7 @@ class QTable(QtWidgets.QTableWidget):
         self.lineaActual = -1
         self.currentCellChanged.connect(self.currentChanged_)
         self.cellDoubleClicked.connect(self.doubleClicked_)
+        self.itemChanged.connect(self.valueChanged_)
         self.read_only_cols = []
         self.read_only_rows = []
 
@@ -31,6 +33,10 @@ class QTable(QtWidgets.QTableWidget):
 
     def doubleClicked_(self, f, c):
         self.doubleClicked.emit(f, c)
+    
+    def valueChanged_(self, item = None):
+        if item:
+            self.valueChanged.emit(item.row(), item.col())
 
     def numRows(self):
         return self.rowCount()
@@ -83,8 +89,9 @@ class QTable(QtWidgets.QTableWidget):
         self.cols_list.append(l)
         self.setColumnLabels(",", ",".join(self.cols_list))
 
-    def insertRows(self, numero):
-        self.insertRow(numero)
+    def insertRows(self, numero, n = 1):
+        for r in range(n):
+            self.insertRow(numero)
 
     def text(self, row, col):
         if row is None:
