@@ -6,11 +6,12 @@ class QLineEdit(QtWidgets.QLineEdit):
 
     _parent = None
 
-    def __init__(self, parent=None, text = None):
-        super(QLineEdit, self).__init__(parent=None)
+    def __init__(self, parent=None, name = None):
+        super(QLineEdit, self).__init__(parent)
         self._parent = parent
-        if text:
-            self.setText(text)
+        if name:
+            #self.setText(text)
+            self.setObjectName(name)
         #if not pineboolib.project._DGI.localDesktop():
         #    pineboolib.project._DGI._par.addQueque("%s_CreateWidget" % self._parent.objectName(), "QLineEdit")
 
