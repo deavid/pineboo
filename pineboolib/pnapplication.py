@@ -340,12 +340,15 @@ class Project(object):
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s",
                           function, aList, object_context, stack_info=True)
-
+        
+        if function is not None:
         # Tipicamente flfactalma.iface.beforeCommit_articulos()
-        if function[-2:] == "()":
-            function = function[:-2]
+            if function[-2:] == "()":
+                function = function[:-2]
 
-        aFunction = function.split(".")
+            aFunction = function.split(".")
+        else:
+            aFunction = []
 
         if not object_context:
             if not aFunction[0] in self.actions:
@@ -386,15 +389,20 @@ class Project(object):
                         "No existe el script para la acción %s en el módulo %s", aFunction[0], aFunction[0])
                 return False
 
+        fn = None
         if len(aFunction) == 1:  # Si no hay puntos en la llamada a functión
             function_name = aFunction[0]
 
         elif len(aFunction) > 2:  # si existe self.iface por ejemplo
             function_name = aFunction[2]
-        else:
+        elif len(aFunction) == 2:
             function_name = aFunction[1]  # si no exite self.iiface
+        else:
+            if len(aFunction) == 0:
+                fn = object_context
 
-        fn = getattr(object_context, function_name, None)
+        if not fn:
+            fn = getattr(object_context, function_name, None)
 
         if fn is None:
             if showException:
@@ -419,6 +427,7 @@ class Project(object):
         #        self.logger.exception("js.call: error al llamar %s de %s", function, object_context)
 
         return None
+    
     """
     Convierte un script .qs a .py lo deja al lado
     @param scriptname, Nombre del script a convertir
