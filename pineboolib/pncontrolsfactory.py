@@ -7,6 +7,7 @@ from pineboolib import decorators
 
 from pineboolib.fllegacy.flapplication import FLApplication
 from pineboolib.fllegacy.flutil import FLUtil
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.packager.aqunpacker import AQUnpacker
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 
@@ -212,16 +213,14 @@ class SysType(object):
         return pineboolib.project.conn.removeConn(connName)
 
     def runTransaction(self, f, oParam):
-
         curT = FLSqlCursor("flfiles")
         curT.transaction(False)
         # gui = self.interactiveGUI()
         # if gui:
         #   AQS.Application_setOverrideCursor(AQS.WaitCursor);
-
         errorMsg = None
         try:
-            valor = f(oParam)
+            valor = aqApp.call(None, oParam, f)
             errorMsg = getattr(oParam, "errorMsg", None)
             if valor:
                 curT.commit()
