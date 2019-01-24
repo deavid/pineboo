@@ -2002,10 +2002,10 @@ def runTransaction(f=None, oParam=None):
     if gui:
         try:
             AQS.Application_setOverrideCursor(AQS.WaitCursor)
-        except Exception as e:
+        except Exception:
             e = traceback.format_exc()
 
-    try:
+    try:       
         valor = f(oParam)
         errorMsg = (oParam.errorMsg if (u"errorMsg" in oParam) else False)
         if valor:
@@ -2035,19 +2035,19 @@ def runTransaction(f=None, oParam=None):
                 e = traceback.format_exc()
 
         if errorMsg:
-            self.warnMsgBox(ustr(errorMsg, u": ", parseString(e)))
+            warnMsgBox(ustr(errorMsg, u": ", parseString(e)))
         else:
-            self.warnMsgBox(ustr(translate(u"Error ejecutando la función"), u":\n", e))
+            warnMsgBox(ustr(sys.translate(u"Error ejecutando la función"), u":\n", e))
 
         return False
 
-        if gui:
-            try:
-                AQS.Application_restoreOverrideCursor()
-            except Exception as e:
-                e = traceback.format_exc()
+    if gui:
+        try:
+            AQS.Application_restoreOverrideCursor()
+        except Exception as e:
+            e = traceback.format_exc()
 
-        return valor
+    return valor
 
     
 def openUrl(url=None):
