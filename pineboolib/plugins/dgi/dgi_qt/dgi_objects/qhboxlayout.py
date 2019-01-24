@@ -4,12 +4,9 @@ from PyQt5 import QtWidgets
 class QHBoxLayout(QtWidgets.QHBoxLayout):
     
     def __init__(self, parent):
-        print("Creando QHBox y se pasa", parent)
         if isinstance(parent, QtWidgets.QWidget):
-            print("H1", parent)
             super().__init__(parent)
         else:
-            print("H2", parent)
             super().__init__()
             parent.addLayout(self)
         
