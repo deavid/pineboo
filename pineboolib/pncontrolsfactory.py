@@ -212,43 +212,6 @@ class SysType(object):
     def removeDatabase(self, connName="default"):
         return pineboolib.project.conn.removeConn(connName)
 
-    def runTransaction(self, f, oParam):
-        curT = FLSqlCursor("flfiles")
-        curT.transaction(False)
-        # gui = self.interactiveGUI()
-        # if gui:
-        #   AQS.Application_setOverrideCursor(AQS.WaitCursor);
-        errorMsg = None
-        try:
-            valor = aqApp.call(None, oParam, f)
-            errorMsg = getattr(oParam, "errorMsg", None)
-            if valor:
-                curT.commit()
-            else:
-                curT.rollback()
-                # if gui:
-                #   AQS.Application_restoreOverrideCursor();
-                if errorMsg is None:
-                    self.warnMsgBox(self.translate(u"Error al ejecutar la función"))
-                else:
-                    self.warnMsgBox(errorMsg)
-                return False
-
-        except Exception:
-            curT.rollback()
-            # if gui:
-            #   AQS.Application_restoreOverrideCursor();
-            if errorMsg is None:
-                self.warnMsgBox(self.translate(u"Error al ejecutar la función"))
-            else:
-                self.warnMsgBox(errorMsg)
-            return False
-
-        # if gui:
-        #   AQS.Application_restoreOverrideCursor();
-        return valor
-
-
 class System_class(object):
 
     def setenv(name, val):
