@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QColor, QPixmap
-from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy
+from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 
@@ -128,7 +128,14 @@ class AQS(object):
         from pineboolib.pncontrolsfacory import QByteArray
         ba = QByteArray(byte_array)
         return ba.sha1()
+    
+    def Application_setOverrideCursor(self, shape, replace = False):
+        QApplication.setOverrideCursor(shape, replace)
+    
+    def Application_restoreOverrideCursor(self):
+        QApplication.restoreOverrideCursor()
         
+    
 
     def __getattr__(self, name):
 
@@ -147,3 +154,4 @@ class AQS(object):
                 return ret_
 
         logger.warn("AQS: No se encuentra el atributo %s", name)
+        
