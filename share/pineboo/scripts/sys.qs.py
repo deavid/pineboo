@@ -1992,7 +1992,7 @@ def connectSS(ssSender=None, ssSignal=None, ssReceiver=None, ssSlot=None):
     connect(ssSender, ssSignal, ssReceiver, ssSlot)
     return True
 
-    
+@decorators.WorkingOnThis
 def runTransaction(f=None, oParam=None):
     curT = FLSqlCursor(u"flfiles")
     curT.transaction(False)
