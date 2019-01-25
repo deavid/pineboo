@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5.QtWidgets import QMessageBox, QApplication
+import pineboolib
 class MessageBox(QMessageBox):
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
+        
+        if pineboolib.project._splash:
+            pineboolib.project._splash.hide()
+        
+          
         if form:
             logger.warn("MessageBox: Se intentó usar form, y no está implementado.")
         icon = QMessageBox.NoIcon
@@ -48,7 +54,6 @@ class MessageBox(QMessageBox):
         clip_board = QApplication.clipboard()
         clip_board.clear()
         clip_board.setText(args[0])
-        
         
         return cls.msgbox("warning", *args)
 
