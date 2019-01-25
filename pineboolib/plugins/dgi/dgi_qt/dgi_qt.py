@@ -52,7 +52,7 @@ class dgi_qt(dgi_schema):
     
     def  msgBoxWarning(self, t):
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
-        QMessageBox.warning(parent, "Pineboo", t)
+        MessageBox.warning(parent, "Pineboo", t)
     
     def createUI(self, n, connector=None, parent=None, name=None):
         
