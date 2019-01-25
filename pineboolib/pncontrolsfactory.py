@@ -533,7 +533,8 @@ class FormDBWidget(QWidget):
         cursor = None
         parent = self
 
-        while not cursor and parent:
+        
+        while cursor is None and parent:
             parent = parent.parentWidget()
             cursor = getattr(parent, "cursor_", None)
         if cursor:
