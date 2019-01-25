@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QApplication
 class MessageBox(QMessageBox):
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
@@ -45,6 +45,11 @@ class MessageBox(QMessageBox):
 
     @classmethod
     def warning(cls, *args):
+        clip_board = QApplication.clipboard()
+        clip_board.clear()
+        clip_board.setText(args[0])
+        
+        
         return cls.msgbox("warning", *args)
 
     @classmethod
