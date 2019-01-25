@@ -426,6 +426,9 @@ class FormDBWidget(QWidget):
         self._action = action
         self.cursor_ = None
         self.parent_ = parent or parent.parentWidget()
+        
+        if isinstance(self.parent(), pineboolib.fllegacy.flformdb.FLFormDB):
+            self.form = self.parent()
 
         self._formconnections = set([])
         self._class_init()
