@@ -758,22 +758,27 @@ class FLFormDB(QtWidgets.QDialog):
         from pineboolib.pncontrolsfactory import SysType
         SysType().processEvents()
         try:
-            if hasattr(self.script, "form"):
-                self.script.form = None
+            #if hasattr(self.script, "form"):
+            #    print("Borrando self.script.form", self.script.form)
+            #    self.script.form = None
+            
+            #print("Borrando self.iface", self.iface)
             self.iface = None
-            if hasattr(self, "widget"):
-                self.widget.close()
-                del self.widget
+            #if hasattr(self, "widget"):
+            #    print("Borrando self.widget", self.widget)
+            #    self.widget.close()
+            #    del self.widget
             instance_name = (self.__class__, self._action.name())
             if instance_name in self.known_instances.keys():
                 del self.known_instances[instance_name]
             
-            if hasattr(self, "script"):
-                self.script = None
+            #if hasattr(self, "script"):
+            #    print("Borrando self.script", self.script)
+            self.script = None
         except Exception:
             
            self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
-
+        
     """
     Captura evento mostrar
     """
@@ -801,8 +806,10 @@ class FLFormDB(QtWidgets.QDialog):
         if size:
             self.resize(size)
 
-    @QtCore.pyqtSlot(FLSqlCursor)
-    def cursorDestroyed(self, obj_):
+    def cursorDestroyed(self, obj_ = None):
+        if not obj_:
+            obj_ = self.sender()
+        
         if not obj_ or obj_ is self.cursor_:
             return
 
