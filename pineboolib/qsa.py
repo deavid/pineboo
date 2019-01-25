@@ -66,7 +66,7 @@ function anon(%s) {
     f1.close()
     
     mod = importlib.import_module("tempdata.anon")
-    return getattr(mod.FormInternalObj, "anon")
+    return mod.FormInternalObj().anon
 
 
 def Object(x=None):
