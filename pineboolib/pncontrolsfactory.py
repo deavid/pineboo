@@ -17,6 +17,7 @@ import logging
 import weakref
 import re
 import os
+import sys
 import traceback
 
 logger = logging.getLogger("PNControlsFactory")
@@ -409,28 +410,32 @@ class FormDBWidget(QWidget):
 
     logger = logging.getLogger("pnControlsFactory.FormDBWidget")
 
-    def __init__(self, action, project, parent=None):
-        import pineboolib
-        if not pineboolib.project._DGI.useDesktop():
-            self._class_init()
-            return
-
-        if pineboolib.project._DGI.localDesktop():
-            self.remote_widgets = {}
-
-        super(FormDBWidget, self).__init__(parent)
-        import sys
-        self._module = sys.modules[self.__module__]
-        self._module.connect = self._connect
-        self._module.disconnect = self._disconnect
-        self._action = action
-        self.cursor_ = None
-        self.parent_ = parent or parent.parentWidget()
+    def __init__(self, action=None, project=None, parent=None):
+        if project is not None:
+            
         
-        if isinstance(self.parent(), pineboolib.fllegacy.flformdb.FLFormDB):
-            self.form = self.parent()
+        
+            import pineboolib
+            if not pineboolib.project._DGI.useDesktop():
+                self._class_init()
+                return
 
-        self._formconnections = set([])
+            if pineboolib.project._DGI.localDesktop():
+                self.remote_widgets = {}
+
+            super(FormDBWidget, self).__init__(parent)
+            
+            self._module = sys.modules[self.__module__]
+            self._module.connect = self._connect
+            self._module.disconnect = self._disconnect
+            self._action = action
+            self.cursor_ = None
+            self.parent_ = parent or parent.parentWidget()
+        
+            if isinstance(self.parent(), pineboolib.fllegacy.flformdb.FLFormDB):
+                self.form = self.parent()
+
+            self._formconnections = set([])
         self._class_init()
 
     def _connect(self, sender, signal, receiver, slot):
