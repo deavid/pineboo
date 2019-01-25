@@ -10,7 +10,6 @@ import traceback
 
 import pineboolib
 from pineboolib.utils import filedir, one, Struct, XMLStruct, cacheXPM, parseTable, _path, coalesce_path, _dir
-
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
 
@@ -873,6 +872,12 @@ class XMLAction(XMLStruct):
     def loadRecord(self, cursor):
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
+            if getattr(self.formrecord_widget, "widget", None):
+                print("Borrando", self.formrecord_widget.widget)
+                self.formrecord_widget.widget.doCleanUp()
+                #self.formrecord_widget.widget = None
+                
+                
             self.logger.debug("Loading record action %s . . . ", self.name)
             self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
