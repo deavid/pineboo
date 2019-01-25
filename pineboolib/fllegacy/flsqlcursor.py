@@ -2796,6 +2796,8 @@ class FLSqlCursor(QtCore.QObject):
                 self.rollbackOpened(-1, msg)
         else:
             logger.warn("Se está eliminando un cursor Huerfano (%s)", self)
+        
+        self.destroyed.emit()
 
         # self.d.countRefCursor = self.d.countRefCursor - 1     FIXME
 
@@ -2828,6 +2830,7 @@ class FLSqlCursor(QtCore.QObject):
 
         if sort:
             self.model().setSortOrder(sort)
+            
         self.model().refresh()
         self.d._currentregister = -1
 
@@ -3731,5 +3734,7 @@ class FLSqlCursor(QtCore.QObject):
 
     """ Uso interno """
     clearPersistentFilter = QtCore.pyqtSignal()
+    
+    destroyed = QtCore.pyqtSignal()
     # def clearPersistentFilter(self):
     #     self.d.persistentFilter_ = None
