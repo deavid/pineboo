@@ -35,15 +35,18 @@ RichText = 1
 
 
 def Function(args, source):
+    
+    import importlib
     # Leer código QS embebido en Source
     # asumir que es una funcion anónima, tal que:
     #  -> function($args) { source }
     # compilar la funcion y devolver el puntero
     qs_source = """
-function anon(%s) {
+    
+function anon(%s) {   
     %s
 } """ % (args, source)
-    print("Compilando QS en línea: ", qs_source)
+    #print("Compilando QS en línea: ", qs_source)
     from pineboolib.flparser import flscriptparse
     from pineboolib.flparser import postparse
     from pineboolib.flparser.pytnyzer import write_python_file
@@ -51,19 +54,19 @@ function anon(%s) {
     prog = flscriptparse.parse(qs_source)
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
     ast = postparse.post_parse(tree_data)
+    dest_filename = "%s/anon.py" % aqApp.tmp_dir()
+    #f1 = io.StringIO()
+    if os.path.exists(dest_filename):
+        os.remove(dest_filename)
+    
+    f1 = open(dest_filename, "w", encoding="UTF-8")
 
-    f1 = io.StringIO()
 
     write_python_file(f1, ast)
-    pyprog = f1.getvalue()
-    print("Resultado: ", pyprog)
-    glob = {}
-    loc = {}
-    exec(pyprog, glob, loc)
-    # ... y lo peor es que funciona. W-T-F.
-
-    # return loc["anon"]
-    return getattr(loc["FormInternalObj"], "anon")
+    f1.close()
+    
+    mod = importlib.import_module("tempdata.anon")
+    return getattr(mod.FormInternalObj, "anon")
 
 
 def Object(x=None):
