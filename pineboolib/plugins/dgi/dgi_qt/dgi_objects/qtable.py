@@ -12,6 +12,7 @@ class QTable(QtWidgets.QTableWidget):
     read_only_cols = None
     read_only_rows = None
     cols_list = None
+    
 
     def __init__(self, parent=None):
         super(QTable, self).__init__(parent)
@@ -34,15 +35,21 @@ class QTable(QtWidgets.QTableWidget):
     def doubleClicked_(self, f, c):
         self.doubleClicked.emit(f, c)
     
+    def __getattr__(self, name):
+        return getattr(QtCore.Qt, name) if hasattr(QtCore.Qt, name) else None
+    
     def valueChanged_(self, item = None):
         if item:
-            self.valueChanged.emit(item.row(), item.col())
+            self.valueChanged.emit(item.row(), item.column())
 
     def numRows(self):
         return self.rowCount()
 
     def numCols(self):
         return self.columnCount()
+    
+    def setCellAlignment(self, row, col, alig_):
+        self.item(row, col).setTextAlignment(alig_)
 
     def setNumCols(self, n):
         self.setColumnCount(n)
@@ -70,6 +77,10 @@ class QTable(QtWidgets.QTableWidget):
             if len(array_) > i:
                 self.cols_list.append(array_[i])
         self.setHorizontalHeaderLabels(self.cols_list)
+    
+    def setRowLabels(self, separator, lista):
+        array_ = lista.split(separator)
+        self.setVerticalHeaderLabels(array_)
     
     def clear(self):
         super().clear()
