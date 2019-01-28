@@ -883,7 +883,6 @@ class XMLAction(XMLStruct):
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if getattr(self.formrecord_widget, "widget", None):
-                print("Borrando", self.formrecord_widget.widget)
                 self.formrecord_widget.widget.doCleanUp()
                 #self.formrecord_widget.widget = None
                 
