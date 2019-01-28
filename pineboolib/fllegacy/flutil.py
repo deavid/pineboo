@@ -547,9 +547,13 @@ class FLUtil(QtCore.QObject):
                 if not q.next():
                     numero = 1
                     break
-
-                numero = int(q.value(0))
-                numero = numero + 1
+                
+                try:
+                    numero = int(q.value(0))
+                    numero = numero + 1
+                except Exception:
+                    pass
+                
 
             if type_ == "string":
                 cadena = str(numero)
