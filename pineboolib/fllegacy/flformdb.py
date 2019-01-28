@@ -775,6 +775,8 @@ class FLFormDB(QtWidgets.QDialog):
         self._loaded = False
         from pineboolib.pncontrolsfactory import SysType
         SysType().processEvents()
+        
+        self.hide()
         try:
             #if hasattr(self.script, "form"):
             #    print("Borrando self.script.form", self.script.form)
@@ -796,6 +798,8 @@ class FLFormDB(QtWidgets.QDialog):
         except Exception:
             
            self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
+        
+        
         
     """
     Captura evento mostrar
