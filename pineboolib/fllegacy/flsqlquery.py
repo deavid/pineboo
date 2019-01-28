@@ -432,7 +432,6 @@ class FLSqlQuery(object):
     """
 
     def value(self, n, raw=None):
-        
         pos = None
         name = None
         table_name = None
@@ -453,7 +452,7 @@ class FLSqlQuery(object):
                 field_name = name[name.find(".") + 1:]
             else:
                 for t in self.tablesList():
-                    mtd = self.d.db_.manager().metadata(t)
+                    mtd = self.d.db_.manager().metadata(t, True)
                     f = mtd.field(name)
                     
                     if f is not None:
@@ -465,7 +464,7 @@ class FLSqlQuery(object):
         if raw is None:
             #Intentamos saber si en un valor para fllarge
             if table_name and field_name:
-                field = self.d.db_.manager().metadata(table_name).field(field_name)
+                field = self.d.db_.manager().metadata(table_name, True).field(field_name)
                 raw  = (field.type() is "pixmap") and not self.d.db_.manager().isSystemTable(table_name)
                         
             
@@ -483,8 +482,8 @@ class FLSqlQuery(object):
             except Exception:
                 retorno = None
             
-            if table_name is not None and field_name is not None:
-                field = self.d.db_.manager().metadata(table_name).field(field_name)
+            if table_name and field_name:
+                #field = self.d.db_.manager().metadata(table_name, True).field(field_name)
                 if field.type() == "date" and isinstance(retorno, str):
                     retorno = Date(retorno)
             
