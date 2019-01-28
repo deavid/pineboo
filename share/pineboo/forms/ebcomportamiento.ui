@@ -9,7 +9,7 @@
             <x>0</x>
             <y>0</y>
             <width>574</width>
-            <height>488</height>
+            <height>543</height>
         </rect>
     </property>
     <property name="caption">
@@ -464,6 +464,27 @@
                                             </property>
                                             <property name="text">
                                                 <string>Forzar modo Mobile.</string>
+                                            </property>
+                                        </widget>
+                                    </vbox>
+                                </widget>
+                                <widget class="QGroupBox">
+                                    <property name="name">
+                                        <cstring>groupBox11</cstring>
+                                    </property>
+                                    <property name="title">
+                                        <string>Snapshot</string>
+                                    </property>
+                                    <vbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_snapshot</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>Mostrar botón para capturar pantalla en formularios.</string>
                                             </property>
                                         </widget>
                                     </vbox>

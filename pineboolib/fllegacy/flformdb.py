@@ -424,9 +424,9 @@ class FLFormDB(QtWidgets.QDialog):
     Obtiene la imagen o captura de pantalla del formulario.
     """
 
-    def snapShot(self):
-        pix = QtGui.QPixmap.grabWidget(self)
-        return pix.convertToImage()
+    def snapShot(self):        
+        pix = self.grab()
+        return pix.toImage()
 
     """
     Salva en un fichero con formato PNG la imagen o captura de pantalla del formulario.
@@ -434,11 +434,14 @@ class FLFormDB(QtWidgets.QDialog):
     @param pathFile Ruta y nombre del fichero donde guardar la imagen
     """
 
-    def saveSnapShot(self, pathFile):
+    def saveSnapShot(self, path_file = None):
+        if not path_file:
+            from pineboolib.pncontrolsfactory import aqApp
+            path_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(),QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
 
-        fi = QtCore.QFile(pathFile)
+        fi = QtCore.QFile(path_file)
         if not fi.OpenMode(QtCore.QIODevice.WriteOnly):
-            print("FLFormDB : Error I/O al intentar escribir el fichero", pathFile)
+            print("FLFormDB : Error I/O al intentar escribir el fichero", path_file)
             return
 
         self.snapShot().save(fi, "PNG")
@@ -677,6 +680,21 @@ class FLFormDB(QtWidgets.QDialog):
             pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
             self.bottomToolbar.layout.addWidget(pushButtonExport)
             pushButtonExport.clicked.connect(self.exportToXml)
+            
+            if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
+                push_button_snapshot = QtWidgets.QToolButton()
+                push_button_snapshot.setObjectName("pushButtonSnapshot")
+                push_button_snapshot.setSizePolicy(sizePolicy)
+                push_button_snapshot.setMinimumSize(pbSize)
+                push_button_snapshot.setMaximumSize(pbSize)
+                push_button_snapshot.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
+                push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
+                push_button_snapshot.setToolTip("Capturar pantalla(F8)")
+                push_button_snapshot.setFocusPolicy(QtCore.Qt.NoFocus)
+                self.bottomToolbar.layout.addWidget(push_button_snapshot)
+                push_button_snapshot.clicked.connect(self.saveSnapShot)
+            
             spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
             self.bottomToolbar.layout.addItem(spacer)
 

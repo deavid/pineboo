@@ -2,9 +2,11 @@
 import logging
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.Qt import QKeySequence
 
 from pineboolib.fllegacy.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.utils import filedir
 import pineboolib
 
@@ -111,6 +113,40 @@ class FLFormSearchDB(FLFormDB):
         sizePolicy.setHeightForWidth(True)
 
         pbSize = self.iconSize
+        settings = FLSettings()
+        if settings.readBoolEntry("application/isDebuggerMode", False):
+            
+            pushButtonExport = QtWidgets.QToolButton()
+            pushButtonExport.setObjectName("pushButtonExport")
+            pushButtonExport.setSizePolicy(sizePolicy)
+            pushButtonExport.setMinimumSize(pbSize)
+            pushButtonExport.setMaximumSize(pbSize)
+            pushButtonExport.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-properties.png")))
+            pushButtonExport.setShortcut(QKeySequence(self.tr("F3")))
+            pushButtonExport.setWhatsThis("Exportar a XML(F3)")
+            pushButtonExport.setToolTip("Exportar a XML(F3)")
+            pushButtonExport.setFocusPolicy(QtCore.Qt.NoFocus)
+            self.bottomToolbar.layout.addWidget(pushButtonExport)
+            pushButtonExport.clicked.connect(self.exportToXml)
+            
+            if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
+                push_button_snapshot = QtWidgets.QToolButton()
+                push_button_snapshot.setObjectName("pushButtonSnapshot")
+                push_button_snapshot.setSizePolicy(sizePolicy)
+                push_button_snapshot.setMinimumSize(pbSize)
+                push_button_snapshot.setMaximumSize(pbSize)
+                push_button_snapshot.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-paste.png")))
+                push_button_snapshot.setShortcut(QKeySequence(self.tr("F8")))
+                push_button_snapshot.setWhatsThis("Capturar pantalla(F8)")
+                push_button_snapshot.setToolTip("Capturar pantalla(F8)")
+                push_button_snapshot.setFocusPolicy(QtCore.Qt.NoFocus)
+                self.bottomToolbar.layout.addWidget(push_button_snapshot)
+                push_button_snapshot.clicked.connect(self.saveSnapShot)
+            
+            spacer = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+            self.bottomToolbar.layout.addItem(spacer)
+        
+        
 
         if not self.pushButtonAccept:
             self.pushButtonAccept = QtWidgets.QToolButton()
