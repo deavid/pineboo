@@ -84,6 +84,7 @@ QDataView = resolveObject("QWidget")
 QProcess = resolveObject("Process")
 QByteArray = resolveObject("QByteArray")
 QRadioButton = resolveObject("QRadioButton")
+QSpinBox = resolveObject("FLSpinBox")
 """
 QIconSet = resolveObject("QIconSet")
 """
