@@ -28,9 +28,10 @@ class QTable(QtWidgets.QTableWidget):
         self.read_only_rows = []
 
     @decorators.needRevision
-    def currentChanged_(self, currentRow, currentColumn, previousRow, previousColumn):
+    def currentChanged_(self, current_row, current_column, previous_row, previous_column):
         # FIXME: esto produce un TypeError: native Qt signal is not callable
-        self.currentChanged.emit(currentRow, currentColumn)
+        if (current_row > -1 and current_column > -1):
+            self.currentChanged.emit(current_row, current_column)
 
     def doubleClicked_(self, f, c):
         self.doubleClicked.emit(f, c)
@@ -108,6 +109,7 @@ class QTable(QtWidgets.QTableWidget):
         if row is None:
             return
         
+        print(row, col)
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
