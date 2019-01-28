@@ -496,7 +496,8 @@ class FormDBWidget(QWidget):
                 signal.disconnect(slot)
                 self.logger.debug("Señal desconectada al limpiar: %s %s" % (signal, slot))
             except Exception:
-                self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
+                #self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
+                pass
         self._formconnections.clear()
         
 
