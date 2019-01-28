@@ -2,7 +2,12 @@
 
 from PyQt5.QtWidgets import QMessageBox, QApplication
 import pineboolib
+import logging
+
+logger = logging.getLogger("messageBox")
+
 class MessageBox(QMessageBox):
+    
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
         
