@@ -52,6 +52,7 @@ class Project(object):
     kugarPluging = None
     _splash = None
     sql_drivers_manager = None
+    timer_ = None
     """
     Constructor
     """
@@ -86,6 +87,8 @@ class Project(object):
 
         if not self._DGI.localDesktop():
             self._DGI.extraProjectInit()
+        
+        self.init_time()
 
     """
     Destructor
@@ -99,6 +102,13 @@ class Project(object):
     def setDebugLevel(self, q):
         Project.debugLevel = q
         self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
+    
+    def init_time(self):
+        self.time_ = time.time()
+        
+    def show_time(self):
+        now_ = time.time()
+        return round(now_ - self.time_, 3)
 
     """
     Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)
