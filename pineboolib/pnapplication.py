@@ -101,7 +101,7 @@ class Project(object):
 
     def setDebugLevel(self, q):
         Project.debugLevel = q
-        self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
+        #self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
     
     def init_time(self):
         self.time_ = time.time()
@@ -151,6 +151,37 @@ class Project(object):
 
         self.actions = {}
         self.tables = {}
+    
+    def load(self, file_name):
+        from xml.etree import ElementTree as ET
+        tree = ET.parse(file_name)
+        root = tree.getroot()
+        
+        
+
+        for profile in root.findall("profile-data"):
+            if getattr(profile.find("password"), "text", None) is not None:
+                self.logger.warn("No se puede cargar un profile con contraseña por consola")
+
+        self.dbname = root.find("database-name").text
+        for db in root.findall("database-server"):
+            self.dbserver = DBServer()
+            self.dbserver.host = db.find("host").text
+            self.dbserver.port = db.find("port").text
+            self.dbserver.type = db.find("type").text
+            if self.dbserver.type not in self.sql_drivers_manager.aliasList():
+                self.logger.warn("Esta versión de pineboo no soporta el driver '%s'" % self.dbserver.type)
+                self.database = None
+                return
+        for credentials in root.findall("database-credentials"):
+            self.dbauth = DBAuth()
+            self.dbauth.username = credentials.find("username").text
+            ps = credentials.find("password").text
+            if ps:
+                import base64
+                self.dbauth.password = base64.b64decode(ps).decode()
+            else:
+                self.dbauth.password = ""
 
     """
     Arranca el projecto. Conecta a la BD y carga los datos
