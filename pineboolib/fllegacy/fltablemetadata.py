@@ -5,7 +5,6 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flcompoundkey import FLCompoundKey
 import logging
 import copy
-from PyQt5 import QtCore
 
 
 """
@@ -22,7 +21,7 @@ los metadatos de una consulta, ver FLTableMetaData::query().
 """
 
 
-class FLTableMetaData(QtCore.QObject):
+class FLTableMetaData(object):
     logger = logging.getLogger("CursorTableModel")
     d = None
 
