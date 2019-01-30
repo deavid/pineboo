@@ -38,8 +38,7 @@ def resolveObject(name):
     if obj_:
         return obj_
 
-    logger.warn("%s.resolveDGIObject no puede encontrar el objeto %s en %s",
-                __name__, name, pineboolib._DGI.alias())
+    logger.warn("el objeto %s no se encuentra en el dgi %s", name, pineboolib._DGI.alias().lower())
 
 
 # Clases Qt
@@ -85,6 +84,8 @@ QProcess = resolveObject("Process")
 QByteArray = resolveObject("QByteArray")
 QRadioButton = resolveObject("QRadioButton")
 QSpinBox = resolveObject("FLSpinBox")
+QInputDialog = resolveObject("QInputDialog")
+QLineEdit = resolveObject("QLineEdit")
 """
 QIconSet = resolveObject("QIconSet")
 """
@@ -127,6 +128,7 @@ GroupBox = resolveObject("GroupBox")
 Process = resolveObject("Process")
 SpinBox = resolveObject("FLSpinBox")
 Line = resolveObject("QLine")
+NumberEdit = resolveObject("NumberEdit")
 
 
 class SysType(object):
