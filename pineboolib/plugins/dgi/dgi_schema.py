@@ -1,6 +1,4 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
-
 
 from importlib import import_module
 
@@ -10,12 +8,6 @@ import re
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-def resolveObject(name):
-    mod_ = import_module(__name__)
-    ret_ = getattr(mod_, name, None)
-    return ret_
 
 
 class dgi_schema(object):
@@ -106,6 +98,7 @@ class dgi_schema(object):
         return self._deployed
 
     def iconSize(self):
+        from PyQt5 import QtCore
         size = QtCore.QSize(22, 22)
         if self.mobilePlatform():
             size = QtCore.QSize(60, 60)
@@ -126,4 +119,13 @@ class dgi_schema(object):
         self._clean_no_python_changeable = b
 
     def __getattr__(self, name):
-        return resolveObject(name)
+        return self.resolveObject(self._name, name)
+
+    def resolveObject(self, module_name, name):
+        cls = None
+        try:
+            mod_ = import_module("pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (module_name, name.lower()))
+            cls = getattr(mod_, name, None)
+        except Exception:
+            pass
+        return cls

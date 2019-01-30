@@ -8,7 +8,10 @@ from pineboolib.utils import filedir, load2xml, _path
 from pineboolib.fllegacy.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsettings import FLSettings
 import pineboolib
-import logging, os, weakref, sys
+import logging
+import os
+import weakref
+import sys
 import traceback
 from PyQt5.Qt import QMessageBox
 from PyQt5.QtWidgets import qApp
@@ -31,14 +34,17 @@ class dgi_qt(dgi_schema):
         
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
         self.pnqt3ui = dgi_qt3ui
+    
+    def create_app(self):
+        app = QtWidgets.QApplication(sys.argv)
+        app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+        return app
         
 
     def __getattr__(self, name):
-        cls = None
-        try:
-            mod_ = import_module("pineboolib.plugins.dgi.dgi_%s.dgi_objects.%s" % (self._name, name.lower()))
-            cls = getattr(mod_, name, None) 
-        except Exception:
+        cls = super().resolveObject(self._name, name)
+        
+        if cls is None:
             mod_ = import_module(__name__)
             cls = getattr(mod_, name, None)
     

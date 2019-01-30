@@ -2,12 +2,10 @@
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
-from pineboolib.fllegacy.FLFieldDB import FLFieldDB
-from pineboolib.fllegacy.FLTableDB import FLTableDB
 from pineboolib import decorators
 import pineboolib
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 
 from xmljson import yahoo as xml2json
 from xml.etree.ElementTree import fromstring
@@ -18,13 +16,15 @@ from xml import etree
 from importlib import import_module
 
 
+
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
 import traceback
-
+import logging
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -154,11 +154,7 @@ class parser(object):
         return "notFound"
 
 
-def resolveObject(name):
 
-    mod_ = import_module(__name__)
-    ret_ = getattr(mod_, name, None)
-    return ret_
 
 
 class dgi_jsonrpc(dgi_schema):
@@ -168,7 +164,7 @@ class dgi_jsonrpc(dgi_schema):
 
     def __init__(self):
         # desktopEnabled y mlDefault a True
-        super(dgi_jsonrpc, self).__init__()
+        super().__init__()
         self._name = "jsonrpc"
         self._alias = "JSON-RPC"
         self.setUseDesktop(True)
@@ -180,6 +176,10 @@ class dgi_jsonrpc(dgi_schema):
 
     def extraProjectInit(self):
         pass
+    
+    def create_app(self):
+        app = QtCore.QCoreApplication(sys.argv)
+        return app
 
     def setParameter(self, param):
         self._listenSocket = param
@@ -208,7 +208,7 @@ class dgi_jsonrpc(dgi_schema):
             "%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
     def __getattr__(self, name):
-        return resolveObject(name)
+        return super().resolveObject(self._name, name)
 
 
 """
@@ -304,12 +304,11 @@ FIXME: Estas clases de abajo ,deberian de ser tipo object para poder levantar la
 """
 
 
-class mainForm(QtWidgets.QMainWindow):
+class mainForm(object):
     mainWindow = None
     MainForm = None
 
     def __init__(self):
-        super(mainForm, self).__init__()
         self.mainWindow = json_mainWindow()
         self.MainForm = json_MainForm()
 
@@ -332,23 +331,27 @@ class mainForm(QtWidgets.QMainWindow):
             return False
 
 
-class json_mainWindow(QtWidgets.QMainWindow):
+class json_mainWindow(object):
     areas_ = {}
     modules_ = {}
     _actionsConnects = {}
     _actions = {}
     _toolBarActions = []
     _images = {}
+    initialized_mods_ = []
+    w_ = None
 
     def __init__(self):
-        super(json_mainWindow, self).__init__()
         self.areas_ = {}
         self.modules_ = {}
         self._actionsConnects = {}
         self._actions = {}
         self._toolBarActions = []
         self._images = {}
+        self.initialized_mods_ = []
+        self.w_ = "hola"
 
+    """
     def load(self):
         pass
         # Aquí se genera el json con las acciones disponibles
@@ -384,7 +387,7 @@ class json_mainWindow(QtWidgets.QMainWindow):
         for key in module.mainform.toolbar:
             action = module.mainform.actions[key]
             self._actionsConnects[action.name] = action
-
+    """
     def show(self):
         pass
 
@@ -452,6 +455,19 @@ class json_mainWindow(QtWidgets.QMainWindow):
             if name[1] == self._actions[_ac].iconSet:
                 return str(self._actions[_ac].icon)
         return False
+    
+    def initScript(self):
+        self.initModule("sys")
+    
+    def initModule(self, module):
+        if module not in self.initialized_mods_:
+            self.initialized_mods_.append(module)
+            from pineboolib.pncontrolsfactory import aqApp
+            aqApp.call("%s.iface.init" % module, [], None, False)
+
+        mng = aqApp.db().managerModules()
+        mng.setActiveIdModule(module)
+        
 
 
 class json_MainForm(object):
