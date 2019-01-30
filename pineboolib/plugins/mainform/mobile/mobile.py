@@ -54,7 +54,7 @@ class MainForm(QtWidgets.QMainWindow):
 
                 return True
 
-            if isinstance(o, pineboolib.fllegacy.flformdb.FLFormDB):
+            if isinstance(o, pineboolib.pncontrolsfactory.FLFormDB):
                 self.formClosed()
 
         elif isinstance(e, AQS.WindowStateChange):
