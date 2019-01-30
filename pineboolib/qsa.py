@@ -228,7 +228,7 @@ class Math(object):
         return math.pow(x, y)
 
     def round(x):
-        return round(x, 2)
+        return round(float(x), 2)
 
 
 def parseFloat(x):
@@ -487,7 +487,6 @@ class qsaRegExp(object):
     def __str__(self):
         print("devolviendo", self.strRE_)
         return self.strRE_
-
 
 @total_ordering
 class Date(object):
