@@ -86,6 +86,7 @@ QRadioButton = resolveObject("QRadioButton")
 QSpinBox = resolveObject("FLSpinBox")
 QInputDialog = resolveObject("QInputDialog")
 QLineEdit = resolveObject("QLineEdit")
+QApplication = resolveObject("QApplication")
 """
 QIconSet = resolveObject("QIconSet")
 """
