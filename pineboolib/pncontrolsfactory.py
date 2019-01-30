@@ -420,9 +420,8 @@ class FormDBWidget(QWidget):
             if not pineboolib.project._DGI.useDesktop():
                 self._class_init()
                 return
-
-            if pineboolib.project._DGI.localDesktop():
-                self.remote_widgets = {}
+            
+            
 
             super(FormDBWidget, self).__init__(parent)
             
@@ -438,6 +437,8 @@ class FormDBWidget(QWidget):
 
             self._formconnections = set([])
         self._class_init()
+        
+        
 
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
@@ -554,10 +555,23 @@ class FormDBWidget(QWidget):
         return self.cursor_
 
     def __getattr__(self, name):
+        
         ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None) or getattr(self.parent().script, name, None)
         if ret_:
             return ret_
 
+    def __iter__(self):
+        self._iter_current = None
+        return self
+
+    def __next__(self):
+        self._iter_current = 0 if self._iter_current is None else self._iter_current + 1
+
+        list_ = [attr for attr in dir(self) if not attr[0] == "_"]
+        if self._iter_current >= len(list_):
+            raise StopIteration
+
+        return list_[self._iter_current]
 
 def check_gc_referrers(typename, w_obj, name):
     import threading
