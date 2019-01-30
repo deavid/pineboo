@@ -196,8 +196,7 @@ def create_app(DGI):
     from PyQt5 import QtGui, QtWidgets, QtCore
     from pineboolib.utils import filedir
     import pineboolib
-    app = QtWidgets.QApplication(sys.argv)
-    app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    app = DGI.create_app()
     pineboolib.base_dir = filedir(".")  # Almacena base_dir para luego usarlo sobre filedir
     pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
 
@@ -336,7 +335,7 @@ def main():
     if options.project:  # FIXME: --project debería ser capaz de sobreescribir algunas opciones
         if not options.project.endswith(".xml"):
             options.project += ".xml"
-        prjpath = filedir("../projects", options.project)
+        prjpath = filedir("../profiles", options.project)
         if not os.path.isfile(prjpath):
             logger.warn("el proyecto %s no existe." % options.project)
         else:
