@@ -1,5 +1,4 @@
 from pineboolib import decorators
-from PyQt5 import QtWidgets
 import pineboolib
 import traceback
 import datetime
@@ -334,8 +333,8 @@ class FLSqlQuery(object):
                 v = self.d.parameterDict_[pD]
 
                 if not v:
-                    v = QtWidgets.QInputDialog.getText(
-                        QtWidgets.QApplication, "Entrada de parámetros de la consulta", pD, None, None)
+                    from pineboolib.pncontrolsfactory import QInputDialog, QApplication
+                    v = QInputDialog.getText(QApplication, "Entrada de parámetros de la consulta", pD, None, None)
 
                 res = res.replace("[%s]" % pD, "\'%s\'" % v)
 
@@ -793,7 +792,7 @@ class FLSqlQuery(object):
         pass
 
 
-class FLSqlQueryPrivate():
+class FLSqlQueryPrivate(object):
     name_ = None
     select_ = None
     from_ = None
