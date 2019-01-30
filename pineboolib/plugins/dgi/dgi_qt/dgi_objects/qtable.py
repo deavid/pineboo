@@ -109,7 +109,6 @@ class QTable(QtWidgets.QTableWidget):
         if row is None:
             return
         
-        print(row, col)
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
