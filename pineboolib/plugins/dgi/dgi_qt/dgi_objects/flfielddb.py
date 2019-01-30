@@ -13,9 +13,11 @@ from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flmanager import FLManager
-from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB
-from pineboolib.fllegacy.flformdb import FLFormDB
-
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flintvalidator import FLIntValidator
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
 
 import datetime
 import pineboolib
@@ -2534,7 +2536,7 @@ class FLFieldDB(QtWidgets.QWidget):
             f = FLFormSearchDB(c, self.topWidget_)
 
         f.setMainWidget()
-        list_objs = f.findChildren(pineboolib.fllegacy.fltabledb.FLTableDB)
+        list_objs = f.findChildren(pineboolib.pncontrolsfactory.FLTableDB)
         obj_tdb = None
         
         if list_objs:
@@ -3167,109 +3169,3 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.notNullColor_ is None:
             self.notNullColor_ = QtGui.QColor(255, 233, 173).name()
         return self.notNullColor_
-
-
-class FLDoubleValidator(QtGui.QDoubleValidator):
-    logger = logging.getLogger(__name__)
-    _formatting = None
-    def __init__(self, *args):
-        if len(args) == 4:
-            super(FLDoubleValidator, self).__init__(args[0], args[1], args[2], args[3])
-            # 1 inferior
-            # 2 superior
-            # 3 partDecimal
-            # 4 editor
-        self.setNotation(self.StandardNotation)
-        self._formatting = False
-
-    def validate(self, input_, pos_cursor):
-        value_in = input_
-        
-        if value_in is None or self._formatting == True:
-            return (self.Acceptable, value_in, pos_cursor)
-        
-        from pineboolib.pncontrolsfactory import aqApp
-        
-            
-        #pos_cursor= len(value_in)
-        state = super(FLDoubleValidator, self).validate(value_in, pos_cursor)
-        # 0 Invalid
-        # 1 Intermediate
-        # 2 Acceptable
-        ret_0 = None
-        ret_2 = state[2]
-
-        if state[0] in (self.Invalid, self.Intermediate) and len(value_in) > 0:
-            s = value_in[1:]
-            if value_in[0] == "-" and super(FLDoubleValidator, self).validate(s, pos_cursor)[0] == self.Acceptable or s == "":
-                ret_0 = self.Acceptable
-            else:
-                ret_0 = self.Invalid
-        else:
-            ret_0 = self.Acceptable
-        
-        ret_1 = state[1]
-        
-        if aqApp.commaSeparator() == "," and ret_1.endswith("."):
-            ret_1 = ret_1[0:len(ret_1) - 1] + ","
-        
-        if len(ret_1) == 1 and ret_1 not in ("0","1","2","3","4","5","6", "7","8","9",",","."):
-            ret_0 = 0
-            ret_1 = ""
-            ret_2 = 0
-            
-        return (ret_0, ret_1, ret_2)
-
-
-class FLIntValidator(QtGui.QIntValidator):
-    _formatting = None
-    def __init__(self, *args, **kwargs):
-        super(FLIntValidator, self).__init__(args[0], args[1], args[2])
-        self._formatting = False
-        
-    def validate(self, input_, pos_cursor):
-
-        if not input_ or self._formatting == True:
-            return (self.Acceptable, input_, pos_cursor)
-
-        state = super(FLIntValidator, self).validate(input_, pos_cursor)
-
-        ret_0 = None
-        ret_1 = state[1]
-        ret_2 = state[2]
-
-        if state[0] in (self.Invalid, self.Intermediate) and len(input_) > 0:
-            s = input_[1:]
-            if input_[0] == "-" and super(FLIntValidator, self).validate(s, pos_cursor)[0] == self.Acceptable or s == "":
-                ret_0 = self.Acceptable
-            else:
-                ret_0 = self.Invalid
-        else:
-            ret_0 = self.Acceptable
-
-        #FIXME:Salir formateado
-        return (ret_0, ret_1, ret_2)
-
-
-class FLUIntValidator(QtGui.QIntValidator):
-    _formatting = None
-    def __init__(self, *args, **kwargs):
-        if len(args) == 3:
-            super(FLUIntValidator, self).__init__(args[0], args[1], args[2])
-        
-        self._formatting = False
-
-    def validate(self, input_, pos_cursor):
-
-        if not input_ or self._formatting == True:
-            return (self.Acceptable, input_, pos_cursor)
-
-        i_v = QtGui.QIntValidator(0, 1000000000, self)
-        state = i_v.validate(input_, pos_cursor)
-
-        ret_0 = self.Invalid if state[0] is self.Intermediate else state[0]
-        ret_1 = state[1]
-        ret_2 = state[2]
-
-        #FIXME: Salir formateado
-        return (ret_0, ret_1, ret_2)

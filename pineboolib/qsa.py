@@ -10,10 +10,8 @@ import logging
 
 # FLObjects
 from pineboolib.fllegacy.flposprinter import FLPosPrinter
-from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.fltabledb import FLTableDB
 from pineboolib.fllegacy.flcodbar import FLCodBar
 from pineboolib.fllegacy.flnetwork import FLNetwork
 from pineboolib.fllegacy.flreportviewer import FLReportViewer

@@ -330,7 +330,7 @@ class FLManagerModules(object):
     """
 
     def createForm(self, a, connector=None, parent=None, name=None):
-        from pineboolib.fllegacy.flformdb import FLFormDB
+        from pineboolib.pncontrolsfactory import FLFormDB
         if not isinstance(a, FLAction):
             a = pineboolib.utils.convert2FLAction(a)
 
@@ -348,7 +348,7 @@ class FLManagerModules(object):
     """
 
     def createFormRecord(self, a, connector=None, parent_or_cursor=None, name=None):
-        from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB
+        from pineboolib.pncontrolsfactory import FLFormRecordDB
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
             a = pineboolib.utils.convert2FLAction(a)

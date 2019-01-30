@@ -4,7 +4,7 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QKeySequence
 
-from pineboolib.fllegacy.flformdb import FLFormDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.utils import filedir

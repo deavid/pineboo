@@ -9,6 +9,7 @@ from pineboolib.fllegacy.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsettings import FLSettings
 import pineboolib
 import logging, os
+import traceback
 from PyQt5.Qt import QMessageBox
 from PyQt5.QtWidgets import qApp
 

@@ -10,13 +10,15 @@ from pineboolib.utils import DefFun, filedir
 from pineboolib.fllegacy.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-from pineboolib.fllegacy.flformsearchdb import FLFormSearchDB
-from pineboolib.fllegacy.flformrecorddb import FLFormRecordDB
-from pineboolib.fllegacy.flformdb import FLFormDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb  import FLFormDB
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.fllegacy.flfielddb import FLDoubleValidator, FLUIntValidator, FLIntValidator
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDoubleValidator
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flintvalidator import  FLIntValidator
 
 import pineboolib
 import logging

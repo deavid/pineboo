@@ -28,7 +28,7 @@ class FLAccessControlFactory(object):
             print("NO OBJ")
         
         ret_ = ""
-        from pineboolib.fllegacy.flformdb import FLFormDB
+        from pineboolib.pncontrolsfactory import FLFormDB
         if isinstance(obj, QtWidgets.QMainWindow):
             ret_ = "mainwindow"
         elif isinstance(obj, FLTableMetaData):

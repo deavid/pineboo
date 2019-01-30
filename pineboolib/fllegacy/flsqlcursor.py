@@ -2540,8 +2540,7 @@ class FLSqlCursor(QtCore.QObject):
                             siguiente = aqApp.call(functionCounter, None, None, True)
                         except Exception:
                             util = FLUtil()
-                            siguiente = util.nextCounter(
-                                field.name(), self)
+                            siguiente = util.nextCounter(field.name(), self)
 
                         if siguiente:
                             self.buffer().setValue(

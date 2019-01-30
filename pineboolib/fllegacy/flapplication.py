@@ -97,7 +97,7 @@ class FLApplication(QtCore.QObject):
     def __del__(self):
         self.destroying_ = True
         self.stopTimerIdle()
-        self.checkAndFixTransactionLAvel("%s:%s" % (__name__, __class__))
+        #self.checkAndFixTransactionLAvel("%s:%s" % (__name__, __class__))
         app_db = self.db()
         if app_db:
             app_db.setInteractiveGUI(False)

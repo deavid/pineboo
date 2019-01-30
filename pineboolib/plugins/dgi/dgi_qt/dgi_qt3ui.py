@@ -2,8 +2,6 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from pineboolib.fllegacy import fltabledb as FLTableDB
-from pineboolib.fllegacy import flfielddb as FLFieldDB
 
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
@@ -252,9 +250,7 @@ def createWidget(classname, parent=None):
     from pineboolib import pncontrolsfactory
     
     cls = getattr(pncontrolsfactory, classname, None) or \
-        getattr(QtWidgets, classname, None) or \
-        getattr(FLTableDB, classname, None) or \
-        getattr(FLFieldDB, classname, None)
+        getattr(QtWidgets, classname, None)
 
     if cls is None:
         logger.warn("WARN: Class name not found in QtWidgets:", classname)
