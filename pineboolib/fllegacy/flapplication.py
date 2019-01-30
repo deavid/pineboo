@@ -109,13 +109,13 @@ class FLApplication(QtCore.QObject):
             del self.dict_main_widgets_
             self.dict_main_widgets_ = {}
 
-        self.clearPorject()
-        del self.project_
-        del self.ted_output_
+        self.clearProject()
+        self.project_ = None
+        self.ted_output_ = None
 
         if app_db:
             app_db.finish()
-
+        """
         if self.showDebug():
             from pineboolib.fllegacy.FLFieldMetaData import FLFieldMetaData
             from pineboolib.fllegacy.FLTableMetadata import FLTableMetaData
@@ -139,7 +139,7 @@ class FLApplication(QtCore.QObject):
             logger.warn("FLTableMetaData::count_ %d", FLTableMetaData.count_)
             logger.warn("FLFieldMetaData::count_ %d", FLFieldMetaData.count_)
             logger.warn("FLRelationMetaData::count_ %d", FLRelationMetaData.count_)
-
+        """
         self.aqApp = None
 
     @decorators.NotImplementedWarn
