@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 
 
 import pineboolib
@@ -14,6 +14,8 @@ from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 from pineboolib.fllegacy.flaction import FLAction
+
+
 
 
 
@@ -717,10 +719,10 @@ class FLSqlCursorPrivate(QtCore.QObject):
         return need
 
     def msgBoxWarning(self, msg, throwException=False):
+        from pineboolib.pncontrolsfactory import QMessageBox, QApplication
         logger.message(msg)
         if not throwException:
-            QtWidgets.QMessageBox.warning(
-                QtWidgets.QApplication.activeWindow(), "Pineboo", msg)
+            QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)
 
 
 # ###############################################################################
@@ -1514,17 +1516,17 @@ class FLSqlCursor(QtCore.QObject):
         if not self.metadata():
             return
         # util = FLUtil()
+        from pineboolib.pncontrolsfactory import QMessageBox, QApplication
         if (not self.isValid() or self.size() <= 0) and not m == self.Insert:
             if not self.size():
-                QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), self.tr(
+                QMessageBox.warning(QApplication.focusWidget(), self.tr(
                     "Aviso"), self.tr("No hay ningún registro seleccionado"))
                 return
             self.first()
 
         if m == self.Del:
-            res = QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), self.tr("Aviso"), self.tr(
-                "El registro activo será borrado. ¿ Está seguro ?"), QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No)
-            if res == QtWidgets.QMessageBox.No:
+            res = QMessageBox.warning(QApplication.focusWidget(), self.tr("Aviso"), self.tr("El registro activo será borrado. ¿ Está seguro ?"), QMessageBox.Ok, QMessageBox.No)
+            if res == QMessageBox.No:
                 return
 
             self.transaction()
@@ -1552,7 +1554,7 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         if not self._action.formRecord():
-            QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(), self.tr("Aviso"), self.tr(
+            QMessageBox.warning(QApplication.focusWidget(), self.tr("Aviso"), self.tr(
                 "No hay definido ningún formulario para manejar\nregistros de esta tabla : %s" % self.curName()))
             return
 
@@ -3003,10 +3005,11 @@ class FLSqlCursor(QtCore.QObject):
     def copyRecord(self):
         if not self.d.metadata_ or not self.d.buffer_:
             return
-
+        
+        from pineboolib.pncontrolsfactory import QMessageBox, QApplication
         if not self.isValid() or self.size() <= 0:
-            QtWidgets.QMessageBox.warning(
-                QtWidget.QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QtWidgets.QMessageBox.Ok)
+            QMessageBox.warning(
+                QApplication.focusWidget(), self.tr("Aviso"), self.tr("No hay ningún registro seleccionado"), QMessageBox.Ok)
             return
 
         field_list = self.d.metadata_.fieldList()
@@ -3089,20 +3092,20 @@ class FLSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def commitBuffer(self, emite=True, checkLocks=False):
-        from pineboolib.pncontrolsfactory import aqApp
         if not self.buffer() or not self.metadata():
             return False
 
+        from pineboolib.pncontrolsfactory import QMessageBox, QApplication, aqApp
         if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.metadata().detectLocks()):
             self.checkRisksLocks()
             if self.d.inRisksLocks_:
-                ret = QtWidgets.QMessageBox.warning(
+                ret = QMessageBox.warning(
                     None, "Bloqueo inminente",
                     "Los registros que va a modificar están bloqueados actualmente.\n"
                     "Si continua hay riesgo de que su conexión quede congelada hasta finalizar el bloqueo.\n"
                     "\n¿ Desa continuar aunque exista riesgo de bloqueo ?",
-                    QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Default | QtWidgets.QMessageBox.Escape)
-                if ret == QtWidgets.QMessageBox.No:
+                    QMessageBox.Ok, QMessageBox.No | QMessageBox.Default | QMessageBox.Escape)
+                if ret == QMessageBox.No:
                     return False
 
         if not self.checkIntegrity():
@@ -3284,11 +3287,12 @@ class FLSqlCursor(QtCore.QObject):
     @QtCore.pyqtSlot()
     def commitBufferCursorRelation(self):
         ok = True
-        activeWid = QtWidgets.QApplication.activeModalWidget()
+        from pineboolib.pncontrolsfactory import QApplication
+        activeWid = QApplication.activeModalWidget()
         if not activeWid:
-            activeWid = QtWidgets.QApplication.activePopupWidget()
+            activeWid = QApplication.activePopupWidget()
         if not activeWid:
-            activeWid = QtWidgets.QApplication.activeWindow()
+            activeWid = QApplication.activeWindow()
 
         activeWidEnabled = False
         if activeWid:
