@@ -12,7 +12,6 @@ import logging
 from pineboolib.fllegacy.flposprinter import FLPosPrinter
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flcodbar import FLCodBar
 from pineboolib.fllegacy.flnetwork import FLNetwork
 from pineboolib.fllegacy.flreportviewer import FLReportViewer
 from pineboolib.fllegacy.flvar import FLVar
