@@ -1,5 +1,4 @@
 from PyQt5.QtXml import QDomDocument
-from PyQt5.Qt import QApplication
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
@@ -77,7 +76,7 @@ class FLAccessControlLists(object):
             self.accessControlList_ = []
 
         if aclXml and not util.domDocumentSetContent(doc, aclXml):
-            qWarning("FLAccessControlList : " + QApplication.tr("Lista de control de acceso errónea"))
+            qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))
             return
 
         self.accessControlList_ = {}
