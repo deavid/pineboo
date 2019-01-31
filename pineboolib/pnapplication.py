@@ -111,18 +111,6 @@ class Project(object):
         return round(now_ - self.time_, 3)
 
     """
-    Para especificar si usa fllarge unificado o multiple (Eneboo/Abanq)
-    @return True (Tabla única), False (Múltiples tablas)
-    """
-
-    def singleFLLarge(self):
-        ret = FLUtil().sqlSelect("flsettings", "valor", "flkey='FLLargeMode'")
-        if ret == "True":
-            return False
-
-        return True
-
-    """
     Retorna si hay o no acls cargados
     @return Objeto acl_
     """
