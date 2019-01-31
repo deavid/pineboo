@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flaccesscontrol import FLAccessControl
@@ -28,8 +28,8 @@ class FLAccessControlFactory(object):
             print("NO OBJ")
         
         ret_ = ""
-        from pineboolib.pncontrolsfactory import FLFormDB
-        if isinstance(obj, QtWidgets.QMainWindow):
+        from pineboolib.pncontrolsfactory import FLFormDB, QMainWindow
+        if isinstance(obj, QMainWindow):
             ret_ = "mainwindow"
         elif isinstance(obj, FLTableMetaData):
             ret_ = "table"
@@ -58,7 +58,8 @@ class FLAccessControlMainWindow(FLAccessControl):
 
 
     def processObject(self, obj):
-        mw = QtGui.QMainWindow(obj)
+        from pineboolib.pncontrolsfactory import QMainWindow
+        mw = QMainWindow(obj)
         if not mw or not self.acosPerms_:
             return
 
@@ -97,11 +98,11 @@ class FLAccessControlForm(FLAccessControl):
     def __init__(self):
         super(FLAccessControlForm, self).__init__()
         if pineboolib.project._DGI.localDesktop():
-            self.pal = QtGui.QPalette()
-
             from PyQt5.Qt import qApp
-            bg = QtGui.QColor(qApp.palette().color(
-                QtGui.QPalette.Active, QtGui.QPalette.Background))
+            from PyQt5 import QtGui
+            
+            self.pal = QtGui.QPalette()
+            bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))
 
             self.pal.setColor(QtGui.QPalette.Foreground, bg)
             self.pal.setColor(QtGui.QPalette.Text, bg)
@@ -153,7 +154,8 @@ class FLAccessControlForm(FLAccessControl):
                     w.setDisabled(True)
 
         for it in self.acosPerms_.keys():
-            w = fm.findChild(QtWidgets.QWidget, it)
+            from pineboolib.pncontrolsfactory import QWidget
+            w = fm.findChild(QWidget, it)
             if w:
                 perm = self.acosPerms_[it]
                 if perm in ("-w", "--"):
