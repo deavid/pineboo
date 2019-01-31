@@ -3,7 +3,7 @@
 # Completa Si
 
 
-class FLFieldMetaDataList():
+class FLFieldMetaDataList(object):
     """
     Lista de campos
     """
