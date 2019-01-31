@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
-from PyQt5.Qt import qWarning, QApplication
 from PyQt5.QtXml import QDomDocument
 
 
@@ -168,17 +167,6 @@ class FLManager(QtCore.QObject):
             stream = None
 
             isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
-            # if not isSysTable:
-            #    stream = self.db_.managerModules().contentCached("%s.mtd" % key)
-
-            #    if not stream:
-            #        qWarning(
-            #            "FLManager : Error al cargar los metadatos para la tabla %s" % n)
-
-            #       return None
-
-            #    if not key:
-            #        key = n
             cacheFound_ = False
             if isSysTable:
                 if key in self.cacheMetaDataSys_.keys():
@@ -195,8 +183,7 @@ class FLManager(QtCore.QObject):
 
                 if not stream:
                     if not n in self.metadataCachedFails:
-                        qWarning(
-                            "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        logger.warn("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                         self.metadataCachedFails.append(n)
                     return None
 
@@ -204,8 +191,7 @@ class FLManager(QtCore.QObject):
                 
                 if not util.domDocumentSetContent(doc, stream):
                     if not n in self.metadataCachedFails:
-                        qWarning(
-                            "FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        logger.warn("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                         self.metadataCachedFails.append(n)
                     return None
 
@@ -508,7 +494,7 @@ class FLManager(QtCore.QObject):
 
         if not n in list_modules:
             if not util.domDocumentSetContent(doc, content_actions):
-                logger.warn("FLManager : " + QApplication.translate("application", "Error al cargar la accion ") + n)
+                logger.warn("FLManager : " + FLUtil().translate("application", "Error al cargar la accion ") + n)
 
         doc_elem = doc.documentElement()
         no = doc_elem.firstChild()
@@ -736,7 +722,7 @@ class FLManager(QtCore.QObject):
                 return tmd
             else:
                 if not tmd.isQuery():
-                    qWarning("FLMAnager :: No existe tabla %s" % n_or_tmd)
+                    logger.warn("FLMAnager :: No existe tabla %s", n_or_tmd)
 
             return self.createTable(tmd)
         else:
@@ -744,8 +730,7 @@ class FLManager(QtCore.QObject):
                 return n_or_tmd
 
             if not self.db_.createTable(n_or_tmd):
-                logger.warn("FLManager : %s", util.tr(
-                    "No se ha podido crear la tabla ") + n_or_tmd.name())
+                logger.warn("FLManager : %s", util.tr("No se ha podido crear la tabla ") + n_or_tmd.name())
                 return False
 
             return n_or_tmd
@@ -1369,7 +1354,7 @@ class FLManager(QtCore.QObject):
             if not self.existsTable(table):
                 self.createTable(table)
             if not tmd:
-                logger.warn("FLManager::cleanupMetaData %s", QApplication.tr(self, "No se ha podido crear los metadatatos para la tabla %s") % table)
+                logger.warn("FLManager::cleanupMetaData %s", FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table)
 
             c.select("tabla='%s'" % table)
             if c.next():
@@ -1446,7 +1431,7 @@ class FLManager(QtCore.QObject):
 
         util = FLUtil()
         sha = str(util.sha1(largeValue))
-        print("-->", tableName, sha)
+        #print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
         q = FLSqlQuery()
         q.setSelect("refkey")
@@ -1479,11 +1464,10 @@ class FLManager(QtCore.QObject):
             return None
         if not refKey[0:3] == "RK@":
             return None
+        
+        from pineboolib.pncontrolsfactory import aqApp
 
-        if pineboolib.project.singleFLLarge():
-            tableName = "fllarge"
-        else:
-            tableName = "fllarge_" + refKey.split("@")[1]
+        tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]
 
         if not self.existsTable(tableName):
             return None
