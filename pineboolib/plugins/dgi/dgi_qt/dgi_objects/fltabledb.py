@@ -7,7 +7,7 @@ from pineboolib import decorators
 from pineboolib.utils import DefFun, filedir
 
 
-from pineboolib.fllegacy.fldatatable import FLDataTable
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB

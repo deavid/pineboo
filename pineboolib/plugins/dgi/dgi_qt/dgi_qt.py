@@ -5,7 +5,6 @@ from importlib import import_module
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import filedir, load2xml, _path
-from pineboolib.fllegacy.fldatatable import FLDataTable
 from pineboolib.fllegacy.flsettings import FLSettings
 import pineboolib
 import logging
