@@ -14,6 +14,18 @@ class MessageBox(QMessageBox):
         if pineboolib.project._splash:
             pineboolib.project._splash.hide()
         
+        
+
+        if not isinstance(text, str):
+            temp = text
+            text = button1
+            button1 = title
+            title = button0
+            button0 = button2
+            button2 = None
+              
+        
+        
           
         if form:
             logger.warn("MessageBox: Se intentó usar form, y no está implementado.")

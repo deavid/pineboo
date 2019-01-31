@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtWidgets, QtGui
+from pineboolib import decorators
 
 class QListView(QtWidgets.QListView):
 
@@ -9,7 +10,7 @@ class QListView(QtWidgets.QListView):
     _clickable = True
     
     def __init__(self, *args, **kwargs):
-        super(QListView, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self._model = QtGui.QStandardItemModel(self)
         self._resizeable = True
@@ -29,6 +30,35 @@ class QListView(QtWidgets.QListView):
             
         if self._model and isinstance(l, list):
             self._model.setHorizontalHeaderLabels(l)
+    
+    @decorators.NotImplementedWarn
+    def setColumnText(self, col, text):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def addColumn(self, text):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def setExpandable(self, e):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def setText(self, *args):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def text(self, pos):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def setOpen(self, b):
+        pass
+    
+    
+    @decorators.NotImplementedWarn
+    def setPixmap(self, *args):
+        pass
 
     def setClickable(self, c):
         self._clickable = True if c else False

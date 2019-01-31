@@ -10,22 +10,7 @@ class QTabWidget(QtWidgets.QTabWidget):
         if idx is None:
             return
 
-        #if pineboolib.project._DGI.localDesktop():
         return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
-        #else:
-        #    pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [idx, enabled])
-
-            # try:
-            #     for idx in range(self.count()):
-            #         if self.widget(idx).objectName() == tab.lower():
-            #             if not pineboolib.project._DGI.localDesktop():
-            #                 pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [idx, enabled])
-            #             return QtWidgets.QTabWidget.setTabEnabled(self, idx, enabled)
-
-            # except ValueError:
-            #     print("ERROR: Tab not found:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
-            #     return False
-        # print("ERROR: Unknown type for 1st arg:: QTabWidget::setTabEnabled %r : %r" % (tab, enabled))
 
     def showPage(self, tab):
 
@@ -33,11 +18,8 @@ class QTabWidget(QtWidgets.QTabWidget):
         if idx is None:
             return
 
-        if pineboolib.project._DGI.localDesktop():
-            return QtWidgets.QTabWidget.setCurrentIndex(self, idx)
-        else:
-            pass
-            # pineboolib.project._DGI._par.addQueque("%s_setTabEnabled" % self.objectName(), [idx, enabled])
+
+        return QtWidgets.QTabWidget.setCurrentIndex(self, idx)
 
     def indexByName(self, tab):
 
