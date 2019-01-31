@@ -41,8 +41,8 @@ class dgi_qt(dgi_schema):
         
 
     def __getattr__(self, name):
-        cls = super().resolveObject(self._name, name)
         
+        cls = super().resolveObject(self._name, name)
         if cls is None:
             mod_ = import_module(__name__)
             cls = getattr(mod_, name, None)
@@ -69,7 +69,7 @@ class dgi_qt(dgi_schema):
 
         if form_path is None:
             #raise AttributeError("File %r not found in project" % n)
-            logger.warn("%s.createUI : No se encuentra el fichero %s", self.__name__, n)
+            #logger.warn("%s.createUI : No se encuentra el fichero %s", self.__name__, n)
             return
 
         tree = load2xml(form_path)
