@@ -16,6 +16,12 @@ import signal
 import importlib
 import logging
 
+try:
+    import pineboolib
+except Exception:
+    print("Soy invitado")
+    from pineboo import pineboolib
+
 
 
 logger = logging.getLogger("pineboo.__main__")
@@ -167,6 +173,7 @@ def parse_options():
 
 def load_dgi(name):
     """Load a DGI module dynamically."""
+    
     modname = "dgi_%s" % name
     modpath = "pineboolib.plugins.dgi.%s.%s" % (modname, modname)
     try:
