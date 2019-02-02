@@ -15,7 +15,7 @@ from optparse import OptionParser
 import signal
 import importlib
 import logging
-from pineboolib.fllegacy.flsettings import FLSettings
+
 
 
 logger = logging.getLogger("pineboo.__main__")
@@ -211,6 +211,7 @@ def create_app(DGI):
             QtGui.QFontDatabase.addApplicationFont(
                 filedir("../share/fonts/Noto_Sans", fontfile))
 
+        from pineboolib.fllegacy.flsettings import FLSettings
         sett_ = FLSettings()
 
         styleA = sett_.readEntry("application/style", None)
@@ -249,6 +250,7 @@ def show_connection_dialog(project, app):
         # elif connection_window.database:
         if getattr(connection_window, "database", None):
             logger.info("Cargando credenciales")
+            from pineboolib.fllegacy.flsettings import FLSettings
             project.deleteCache = FLSettings().readBoolEntry("ebcomportamiento/deleteCache", False)
             project.parseProject = FLSettings().readBoolEntry("ebcomportamiento/parseProject", False)
             project.load_db(connection_window.database, connection_window.hostname, connection_window.portnumber,
