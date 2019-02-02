@@ -23,8 +23,8 @@ class dgi_aqnext(dgi_schema):
     def __init__(self):
         # desktopEnabled y mlDefault a True
         super().__init__()
-        self._name = "jsonrpc"
-        self._alias = "JSON-RPC"
+        self._name = "aqnext"
+        self._alias = "AQNEXT"
         self.setUseDesktop(True)
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
