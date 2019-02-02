@@ -1,4 +1,6 @@
 # # -*- coding: utf-8 -*-
+from pineboo import pineboolib
+
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import Struct
