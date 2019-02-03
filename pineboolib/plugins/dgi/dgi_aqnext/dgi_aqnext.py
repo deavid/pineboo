@@ -7,7 +7,7 @@ import pineboo.pineboolib
 
 
 from importlib import import_module
-
+from PyQt5 import QtCore
 
 import traceback
 import logging
@@ -29,6 +29,7 @@ class dgi_aqnext(dgi_schema):
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
         self._mainForm = None
+        self.showInitBanner()
 
     def extraProjectInit(self):
         pass
@@ -44,13 +45,6 @@ class dgi_aqnext(dgi_schema):
         if not self._mainForm:
             self._mainForm = mainForm()
         return self._mainForm
-
-
-
-
-    def showWidget(self, widget):
-        self._par.addQueque(
-            "%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
     def __getattr__(self, name):
         return super().resolveObject(self._name, name)
