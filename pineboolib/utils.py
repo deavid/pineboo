@@ -222,7 +222,7 @@ def trace_function(f):
     return wrapper
 
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QByteArray,\
     QDir
 from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply,\
@@ -530,6 +530,7 @@ DEPENDENCIES_CHECKED = {}
 def checkDependencies(dict_, exit=True):
 
     from importlib import import_module
+    from pineboolib.pncontrolsfactory import QMessageBox
 
     dependences = []
     error = []
@@ -583,7 +584,7 @@ def checkDependencies(dict_, exit=True):
             if getattr(pineboolib.project, "_DGI", None):
                 if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
                     try:
-                        ret = QtWidgets.QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QtWidgets.QMessageBox.Ok)
+                        ret = QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
                     except Exception:
                         logger.error("No se puede mostrar el diálogo de dependecias incumplidas")
 
