@@ -28,6 +28,7 @@ class dgi_aqnext(dgi_schema):
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
         self._mainForm = None
+        self._use_authentication = False # True La autenticación la realiza pineboolib
         self.showInitBanner()
         self.qApp = QtCore.QCoreApplication
 
@@ -50,8 +51,13 @@ class dgi_aqnext(dgi_schema):
         return super().resolveObject(self._name, name)
     
     def exec_(self):
-        logger.warn("%s se ha inicializado correctamente" % self._alias)
+        logger.warn("DGI_%s se ha inicializado correctamente" % self._alias)
     
     def authenticate(self, **kwargs):
         user = kwargs["username"]
         password = kwargs["password"]
+    
+    
+    def use_authentication(self):
+        return self._use_authentication
+        
