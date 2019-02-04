@@ -530,7 +530,7 @@ DEPENDENCIES_CHECKED = {}
 def checkDependencies(dict_, exit=True):
 
     from importlib import import_module
-    from pineboolib.pncontrolsfactory import QMessageBox
+    
 
     dependences = []
     error = []
@@ -583,6 +583,7 @@ def checkDependencies(dict_, exit=True):
         if exit:
             if getattr(pineboolib.project, "_DGI", None):
                 if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
+                    from pineboolib.pncontrolsfactory import QMessageBox
                     try:
                         ret = QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
                     except Exception:

@@ -34,11 +34,11 @@ Devuelve un objecto a partir de su nombre
 
 
 def resolveObject(name):
-    obj_ = getattr(pineboolib._DGI, name, None)
+    obj_ = getattr(pineboolib.project._DGI, name, None)
     if obj_:
         return obj_
 
-    logger.warn("el objeto %s no se encuentra en el dgi %s", name, pineboolib._DGI.alias().lower())
+    logger.warn("el objeto %s no se encuentra en el dgi %s", name, pineboolib.project._DGI.alias().lower())
 
 
 # Clases Qt
