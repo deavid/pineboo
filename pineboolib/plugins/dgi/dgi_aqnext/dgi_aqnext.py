@@ -29,6 +29,7 @@ class dgi_aqnext(dgi_schema):
         self.setLocalDesktop(False)
         self._mainForm = None
         self.showInitBanner()
+        self.qApp = QtCore.QCoreApplication
 
     def extraProjectInit(self):
         pass
@@ -47,3 +48,6 @@ class dgi_aqnext(dgi_schema):
 
     def __getattr__(self, name):
         return super().resolveObject(self._name, name)
+    
+    def exec_(self):
+        logger.warn("%s se ha inicializado correctamente" % self._alias)
