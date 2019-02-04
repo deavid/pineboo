@@ -134,6 +134,9 @@ SpinBox = resolveObject("FLSpinBox")
 Line = resolveObject("QLine")
 NumberEdit = resolveObject("NumberEdit")
 
+# Clases AQNext
+auth = resolveObject("auth")
+
 
 class SysType(object):
     def __init__(self):

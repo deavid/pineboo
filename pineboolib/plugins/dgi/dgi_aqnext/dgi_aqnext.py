@@ -24,7 +24,7 @@ class dgi_aqnext(dgi_schema):
         super().__init__()
         self._name = "aqnext"
         self._alias = "AQNEXT"
-        self.setUseDesktop(True)
+        self.setUseDesktop(False)
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
         self._mainForm = None
@@ -51,3 +51,7 @@ class dgi_aqnext(dgi_schema):
     
     def exec_(self):
         logger.warn("%s se ha inicializado correctamente" % self._alias)
+    
+    def authenticate(self, **kwargs):
+        user = kwargs["username"]
+        password = kwargs["password"]
