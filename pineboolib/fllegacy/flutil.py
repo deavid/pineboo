@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pineboolib import decorators
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
 import pineboolib
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsettings import FLSettings
@@ -8,7 +8,6 @@ import platform
 import hashlib
 import datetime
 import logging
-from PyQt5.QtWidgets import qApp
 logger = logging.getLogger(__name__)
 
 
@@ -1052,6 +1051,8 @@ class FLUtil(QtCore.QObject):
         @param l Label del diálogo
         @param tS Número total de pasos a realizar
         """
+        from PyQt5 import QtWidgets
+        
         pd_widget = QtWidgets.QProgressDialog(str(title), str(
             self.translate("scripts", "Cancelar")), 0, steps)
         self.__class__.progress_dialog_stack.append(pd_widget)

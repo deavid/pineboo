@@ -1,9 +1,8 @@
 # # -*- coding: utf-8 -*-
 
-from pineboo.pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboo.pineboolib.utils import Struct
-from pineboo.pineboolib import decorators
-import pineboo.pineboolib
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib import decorators
+import pineboolib
 
 
 from importlib import import_module
