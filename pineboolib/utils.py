@@ -651,7 +651,7 @@ def load2xml(form_path_or_str):
             form_path_or_str = parse_for_duplicates(form_path_or_str)    
             ret = ET.fromstring(form_path_or_str, parser)
         else:
-            ret = ET.parse(form_path_or_str, parser)
+            ret = ET.parse(form_path_or_str, parser) if os.path.exists(form_path_or_str) else None
     except Exception:
         try:
             parser = ET.XMLParser(html=0, encoding="ISO-8859-15")
@@ -659,10 +659,10 @@ def load2xml(form_path_or_str):
                 form_path_or_str = parse_for_duplicates(form_path_or_str)
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
-                ret = ET.parse(form_path_or_str, parser)
+                ret = ET.parse(form_path_or_str, parser) if os.path.exists(form_path_or_str) else None
             #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
         except Exception:
-            logger.exception("Error cargando UI después de intentar con UTF8 y ISO \n%s", form_path_or_str)
+            logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
             ret = None
 
     return ret
