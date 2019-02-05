@@ -34,6 +34,18 @@ class FLUtil(QtCore.QObject):
     vecCentenas = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos',
                    'setecientos', 'ochocientos', 'novecientos']
 
+    def deleteCascade(self, collector, field, sub_objs, using):
+        for o in sub_objs:
+            try:
+                from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+                cursor = FLSqlCursor(field.model._meta.db_table)
+                cursor.select(field.model._meta.pk.name + "=" + str(o.pk))
+                if cursor.next():
+                    cursor.setModeAccess(cursor.Del)
+                    if not cursor.commitBuffer():
+                        raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
+            except Exception:
+                raise Exception("No pudo eliminar " + str(field.model._meta.db_table) + " : " + str(o.pk))
 
     def partInteger(self, n):
         """
@@ -1459,10 +1471,6 @@ class FLUtil(QtCore.QObject):
         from pineboolib.pncontrolsfactory import aqApp
         conn = aqApp.db().useConn(conn_name)    
         return conn.manager().formatValue(t, v, upper)
-    
-            
-        
-                
         
         
         
