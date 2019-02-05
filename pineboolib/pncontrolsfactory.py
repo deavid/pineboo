@@ -37,8 +37,9 @@ def resolveObject(name):
     obj_ = getattr(pineboolib.project._DGI, name, None)
     if obj_:
         return obj_
-
-    logger.warn("el objeto %s no se encuentra en el dgi %s", name, pineboolib.project._DGI.alias().lower())
+    
+    if pineboolib.project._DGI.show_object_not_found_warnings():
+        logger.warn("el objeto %s no se encuentra en el dgi %s", name, pineboolib.project._DGI.alias().lower())
 
 
 # Clases Qt
