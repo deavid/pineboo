@@ -168,6 +168,10 @@ class PNConnection(QtCore.QObject):
     @decorators.NotImplementedWarn
     def md5TuplesStateTable(self, curname):
         return True
+    
+    @decorators.NotImplementedWarn
+    def setInteractiveGUI(self, b):
+        pass
 
     def db(self):
         return self.conn
