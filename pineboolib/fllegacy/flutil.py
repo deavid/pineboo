@@ -1473,9 +1473,31 @@ class FLUtil(QtCore.QObject):
         return conn.manager().formatValue(t, v, upper)
         
         
+    
+    
         
         
-        
-            
+    def nameUser(self):
+        from pineboolib.pncontrolsfactory import SysType
+        return SysType().nameUser()
+
+    def userGroups(self):
+        from pineboolib.pncontrolsfactory import SysType
+        return SysType().userGroups()
+
+
+    def isInProd(self):
+        from pineboolib.pncontrolsfactory import SysType
+        return SysType().isInProd()
+
+
+    def request(self):
+        from pineboolib.pncontrolsfactory import SysType
+        return SysType().request()
+
+
+    def nameBD(self):
+        from pineboolib.pncontrolsfactory import SysType
+        return SysType().nameBD()        
         
     
