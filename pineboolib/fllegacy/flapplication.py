@@ -873,7 +873,6 @@ class FLApplication(QtCore.QObject):
         """
     Instala las traducciones cargadas
     """
-    @decorators.BetaImplementation
     def loadTranslations(self):
         translatorsCopy = []
         if self.translator_:
@@ -921,7 +920,6 @@ class FLApplication(QtCore.QObject):
     @param idM, Identificador del módulo donde buscar
     @param lang, Lenguaje a buscar
     """
-    @decorators.BetaImplementation
     def loadTranslationFromModule(self, idM, lang):
         self.installTranslator(self.createModTranslator(idM, lang, True))
         # self.installTranslator(self.createModTranslator(idM, "mutliLang"))
@@ -930,7 +928,6 @@ class FLApplication(QtCore.QObject):
     Instala una traducción para la aplicación
     @param tor, Objeto con la traducción a cargar
     """
-    @decorators.BetaImplementation
     def installTranslator(self, tor):
         
         if tor is None:
@@ -973,7 +970,6 @@ class FLApplication(QtCore.QObject):
     @param loadDefault, Boolean para cargar los datos por defecto
     @return objeto traducción
     """
-    @decorators.BetaImplementation
     def createModTranslator(self, idM, lang, loadDefault=False):
         fileTs = "%s.%s.ts" % (idM, lang)
         key = self.db().managerModules().shaOfFile(fileTs)
