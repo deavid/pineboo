@@ -137,4 +137,4 @@ Devuelve la traducción si existe
 
 
 def FLTranslate(group, context, translate=True):
-    return Qt.qApp.translate(group, context) if translate else context
+    return Qt.qApp.translate(group.encode(), context.encode()) if translate else context.encode()
