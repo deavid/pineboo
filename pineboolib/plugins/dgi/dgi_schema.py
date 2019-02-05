@@ -28,6 +28,7 @@ class dgi_schema(object):
         self.setLocalDesktop(True)
         self._name = "dgi_shema"
         self._alias = "Default Schema"
+        self._show_object_not_found_warnings = True
         self.loadReferences()
         try:
             import PyQt5.QtAndroidExtras
@@ -80,13 +81,16 @@ class dgi_schema(object):
     def showInitBanner(self):
         print("")
         print("=============================================")
-        print("                 %s MODE               " % self._alias)
+        print("                GDI_%s MODE               " % self._alias)
         print("=============================================")
         print("")
         print("")
 
     def mainForm(self):
         pass
+    
+    def show_object_not_found_warnings(self):
+        return self._show_object_not_found_warnings
 
     def loadReferences(self):
         return

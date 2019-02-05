@@ -30,6 +30,7 @@ class dgi_aqnext(dgi_schema):
         self._mainForm = None
         self._use_authentication = False # True La autenticación la realiza pineboolib
         self.showInitBanner()
+        self._show_object_not_found_warnings = False
         self.qApp = QtCore.QCoreApplication
 
     def extraProjectInit(self):
