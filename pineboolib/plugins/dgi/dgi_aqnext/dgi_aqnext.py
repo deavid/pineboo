@@ -32,6 +32,7 @@ class dgi_aqnext(dgi_schema):
         self.showInitBanner()
         self._show_object_not_found_warnings = False
         self.qApp = QtCore.QCoreApplication
+        
 
     def extraProjectInit(self):
         pass
@@ -52,8 +53,14 @@ class dgi_aqnext(dgi_schema):
         return super().resolveObject(self._name, name)
     
     def exec_(self):
+        from pineboolib.pncontrolsfactory import SysType, aqApp
+        sys = SysType()
         logger.warn("DGI_%s se ha inicializado correctamente" % self._alias)
+        logger.warn("Driver  DB: %s", aqApp.db().driverAlias())
+        logger.warn("Usuario DB: %s", sys.nameUser())
+        logger.warn("Nombre  DB: %s", sys.nameBD())
     
+
     def authenticate(self, **kwargs):
         user = kwargs["username"]
         password = kwargs["password"]
@@ -61,4 +68,4 @@ class dgi_aqnext(dgi_schema):
     
     def use_authentication(self):
         return self._use_authentication
-        
+    
