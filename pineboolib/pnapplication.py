@@ -78,7 +78,6 @@ class Project(object):
         self.actions = {}
         self.tables = {}
         self.files = {}
-        self.cur = None
         self.apppath = filedir("..")
         self.tmpdir = FLSettings().readEntry("ebcomportamiento/kugar_temp_dir", filedir("../tempdata"))
         if not os.path.exists(self.tmpdir):
@@ -222,23 +221,22 @@ class Project(object):
 
         util = FLUtil()
         util.writeSettingEntry(u"DBA/lastDB", self.conn.DBName())
-        self.cur = self.conn.cursor()
+        cursor_ = self.conn.cursor()
         self.areas = {}
-        self.cur.execute(
+        cursor_.execute(
             """ SELECT idarea, descripcion FROM flareas WHERE 1 = 1""")
-        for idarea, descripcion in self.cur:
+        for idarea, descripcion in cursor_:
             self.areas[idarea] = Struct(idarea=idarea, descripcion=descripcion)
 
         self.areas["sys"] = Struct(idarea="sys", descripcion="Area de Sistema")
 
         # Obtener módulos activos
-        self.cur.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ %
+        cursor_.execute(""" SELECT idarea, idmodulo, descripcion, icono FROM flmodules WHERE bloqueo = %s """ %
                          self.conn.driver().formatValue("bool", "True", False))
         self.modules = {}
-        for idarea, idmodulo, descripcion, icono in self.cur:
+        for idarea, idmodulo, descripcion, icono in cursor_:
             icono = cacheXPM(icono)
-            self.modules[idmodulo] = Module(
-                idarea, idmodulo, descripcion, icono)
+            self.modules[idmodulo] = Module(idarea, idmodulo, descripcion, icono)
 
         file_object = open(filedir("..", "share", "pineboo", "sys.xpm"), "r")
         icono = file_object.read()
@@ -249,11 +247,11 @@ class Project(object):
 
         # Descargar proyecto . . .
 
-        self.cur.execute(""" SELECT COUNT(idmodulo) FROM flfiles WHERE NOT sha = ''""")
-        for count in self.cur:
+        cursor_.execute(""" SELECT COUNT(idmodulo) FROM flfiles WHERE NOT sha = ''""")
+        for count in cursor_:
             size_ = count[0]
-
-        self.cur.execute(
+        
+        cursor_.execute(
             """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
         
         f1 = open(_dir("project.txt"), "w")
@@ -264,7 +262,7 @@ class Project(object):
             raise AssertionError
         p = 0
         pos_qs = 1
-        for idmodulo, nombre, sha in self.cur:
+        for idmodulo, nombre, sha in cursor_:
             p = p + 1
             if idmodulo not in self.modules:
                 continue  # I
