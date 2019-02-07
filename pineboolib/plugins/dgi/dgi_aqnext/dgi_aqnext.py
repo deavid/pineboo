@@ -11,6 +11,7 @@ from PyQt5 import QtCore
 import traceback
 import logging
 import sys
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class dgi_aqnext(dgi_schema):
         self.showInitBanner()
         self._show_object_not_found_warnings = False
         self.qApp = QtCore.QCoreApplication
+        self._alternative_content_cached = True
         
 
     def extraProjectInit(self):
@@ -60,6 +62,7 @@ class dgi_aqnext(dgi_schema):
         logger.warn("Usuario DB: %s", sys.nameUser())
         logger.warn("Nombre  DB: %s", sys.nameBD())
     
+    
 
     def authenticate(self, **kwargs):
         user = kwargs["username"]
@@ -68,4 +71,21 @@ class dgi_aqnext(dgi_schema):
     
     def use_authentication(self):
         return self._use_authentication
-    
+
+    def content_cached(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
+        data = None
+        utf8_ = False
+        if ext_ == "qs":
+            from django.conf import settings
+            folder_ = settings.PROJECT_ROOT
+            legacy_path = "%s/legacy/%s/%s.py" % (folder_, module_id, name_)
+            print("**** Buscando en path", legacy_path)
+            if os.path.exists(legacy_path):
+                data = pineboolib.project.conn.managerModules().contentFS(legacy_path, True)
+        else:
+            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (tmp_dir, db_name, module_id, ext_, name_)):
+                if ext_ == "kut":
+                    utf8_ = True
+                data = pineboolib.project.conn.managerModules().contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_)
+        
+        return data

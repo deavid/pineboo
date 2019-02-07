@@ -21,6 +21,7 @@ class dgi_schema(object):
     _deployed = False
     _clean_no_python = True
     _clean_no_python_changeable = True
+    _alternative_content_cached = False
 
     def __init__(self):
         self._desktopEnabled = True  # Indica si se usa en formato escritorio con interface Qt
@@ -121,6 +122,9 @@ class dgi_schema(object):
     
     def set_clean_no_python_changeable(self, b):
         self._clean_no_python_changeable = b
+    
+    def alternative_content_cached(self):
+        return self._alternative_content_cached
 
     def __getattr__(self, name):
         return self.resolveObject(self._name, name)
