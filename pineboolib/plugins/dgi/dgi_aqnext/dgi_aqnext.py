@@ -89,3 +89,17 @@ class dgi_aqnext(dgi_schema):
                 data = pineboolib.project.conn.managerModules().contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_)
         
         return data
+    
+    def alternative_path(self, script_name):
+        
+        module_name = pineboolib.project.conn.db().managerModules().idModuleOfFile(n)
+        script_name = script_name.replace(".qs", ".py")
+        
+        from django.conf import settings
+        folder_ = settings.PROJECT_ROOT
+        ret_ = None
+        if os.path.exists("%s/legacy/%s/%s" % (folder_, module_name, script_name)):
+            ret_ = "%s/legacy/%s/%s" % (folder_, module_name, script_name)
+        
+        return ret_
+        

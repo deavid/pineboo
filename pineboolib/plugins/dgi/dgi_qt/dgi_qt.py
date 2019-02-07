@@ -101,6 +101,11 @@ class dgi_qt(dgi_schema):
             uic.loadUi(form_path, w_)
 
         return w_
+    
+
+def print_stack(maxsize=1):
+        for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
+            print(tb.rstrip())
 
 class FormDBWidget(QtWidgets.QWidget):
     closed = QtCore.pyqtSignal()
@@ -227,6 +232,7 @@ class FormDBWidget(QtWidgets.QWidget):
             if ret is None:
                 self.logger.warn("WARN: No se encontro el control %s", child_name)
         return ret
+
 
     def cursor(self):
         # if self.cursor_:
