@@ -1031,9 +1031,12 @@ class XMLAction(XMLStruct):
             parent.widget = parent.script.form
             parent.iface = parent.widget.iface
             return
-
-        script_path_qs = _path("%s.qs" % scriptname, False)
-        script_path_py = coalesce_path("%s.py" % scriptname, "%s.qs.py" % scriptname, None)
+        
+        script_path_py = pineboolib.project._DGI.alternative_path(scriptname)
+        
+        if script_path_py is None:
+            script_path_qs = _path("%s.qs" % scriptname, False)        
+            script_path_py = coalesce_path("%s.py" % scriptname, "%s.qs.py" % scriptname, None)
         
         mng_modules = pineboolib.project.conn.managerModules()
         if mng_modules.staticBdInfo_ and mng_modules.staticBdInfo_.enabled_:
