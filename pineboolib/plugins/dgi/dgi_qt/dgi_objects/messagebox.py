@@ -51,7 +51,8 @@ class MessageBox(QMessageBox):
         # title = unicode(title,"UTF-8")
         # text = unicode(text,"UTF-8")
         msg = QMessageBox(icon, title, text)
-        msg.addButton(button0)
+        if button0:
+            msg.addButton(button0)
         if button1:
             msg.addButton(button1)
         if button2:
