@@ -10,7 +10,7 @@ class QDateEdit(QtWidgets.QDateEdit):
     _date = None
     separator_ = None
 
-    def __init__(self, parent, name=None):
+    def __init__(self, parent = None, name=None):
         super(QDateEdit, self).__init__(parent)
         super(QDateEdit, self).setDisplayFormat("dd-MM-yyyy")
         if name:
@@ -31,6 +31,7 @@ class QDateEdit(QtWidgets.QDateEdit):
     def setDate(self, v):
         if not isinstance(v, str):
             if hasattr(v, "toString"):
+                print("v", v, type(v))
                 v = v.toString("yyyy%sMM%sdd" % (self.separator(), self.separator()))
             else:
                 v = str(v)
