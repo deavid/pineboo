@@ -454,11 +454,6 @@ def check_gc_referrers(typename, w_obj, name):
                 # print(" - obj:", repr(ref), [x for x in dir(ref) if getattr(ref, x) is obj])
 
     threading.Thread(target=checkfn).start()
-
-
-def print_stack(maxsize=1):
-    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
-        print(tb.rstrip())
         
 
 class QEventLoop(QtCore.QEventLoop):
