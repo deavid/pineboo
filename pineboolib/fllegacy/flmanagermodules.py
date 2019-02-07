@@ -281,16 +281,22 @@ class FLManagerModules(object):
             modId = "sys"
         else:
             modId = aqApp.db().managerModules().idModuleOfFile(n)
-        if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_)):
-            utf8_ = False
-            if ext_ == "kut":
-                utf8_ = True
-            data = self.contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" %
-                                          (aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_, shaKey, ext_), utf8_)
-        elif os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):
-            data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))
+        
+        if pineboolib.project._DGI.alternative_content_cached():
+            data = pineboolib.project._DGI.content_cached(aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_, shaKey)
         else:
-            data = self.content(n)
+            """Ruta por defecto"""
+            if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_)):
+                utf8_ = False
+                if ext_ == "kut":
+                    utf8_ = True
+                data = self.contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_, shaKey, ext_), utf8_)
+        
+        if data is None:
+            if os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):
+                data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))
+            else:
+                data = self.content(n)
 
         if data:
             self.filesCached_[n] = data
