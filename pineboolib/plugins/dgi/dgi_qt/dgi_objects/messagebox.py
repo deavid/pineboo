@@ -71,10 +71,15 @@ class MessageBox(QMessageBox):
     def warning(cls, *args):
         clip_board = QApplication.clipboard()
         clip_board.clear()
-        clip_board.setText(args[0])
+        text_ = args[0] if isinstance(args[0], str) else args[2]
+        clip_board.setText(text_)
         
         return cls.msgbox("warning", *args)
 
     @classmethod
     def critical(cls, *args):
+        clip_board = QApplication.clipboard()
+        clip_board.clear()
+        text_ = args[0] if isinstance(args[0], str) else args[2]
+        clip_board.setText(text_)
         return cls.msgbox("critical", *args)
