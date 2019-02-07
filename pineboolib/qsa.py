@@ -427,11 +427,13 @@ class Date(object):
             self.date_ = QtCore.QDate(args[0], args[1], args[2])
             self.time_ = QtCore.QTime(0, 0)
 
-    def toString(self):
+    def toString(self, pattern=None):
         """
         Retorna una cadena de texto con los datos de fecha y hora.
         @return cadena de texto con los datos de fecha y hora
         """
+        if pattern:
+            texto = self.date_.toString(pattern)
         
         texto = "%s-%s-%sT%s:%s:%s" % (self.date_.toString("yyyy"), self.date_.toString("MM"), self.date_.toString(
             "dd"), self.time_.toString("hh"), self.time_.toString("mm"), self.time_.toString("ss"))
@@ -568,7 +570,7 @@ class Date(object):
         Esta función junto con total_ordering, sirve para poder comparar este tipo con otro similar
         return Boolean. True si este objeto es menor que el comparado
         """
-        return self.toString() < other.toString()
+        return self.toString() < other.toString() if not isinstance(other, str) else other
 
 
 
