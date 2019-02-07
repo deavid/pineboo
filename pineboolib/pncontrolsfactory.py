@@ -55,6 +55,7 @@ QPushButton = resolveObject("QPushButton")
 QTextEdit = resolveObject("QTextEdit")
 QLineEdit = resolveObject("QLineEdit")
 QDateEdit = resolveObject("QDateEdit")
+QTimeEdit = resolveObject("QTimeEdit")
 QCheckBox = resolveObject("QCheckBox")
 QWidget = resolveObject("QWidget")
 QtWidgets = resolveObject("QtWidgets")
@@ -90,6 +91,7 @@ QLineEdit = resolveObject("QLineEdit")
 QApplication = resolveObject("QApplication")
 qApp = resolveObject("qApp")
 QStyleFactory = resolveObject("QStyleFactory")
+
 """
 QIconSet = resolveObject("QIconSet")
 """
@@ -134,6 +136,8 @@ Process = resolveObject("Process")
 SpinBox = resolveObject("FLSpinBox")
 Line = resolveObject("QLine")
 NumberEdit = resolveObject("NumberEdit")
+DateEdit = resolveObject("QDateEdit")
+TimeEdit = resolveObject("QTimeEdit")
 
 # Clases AQNext
 auth = resolveObject("auth")
