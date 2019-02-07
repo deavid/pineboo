@@ -91,15 +91,16 @@ class dgi_aqnext(dgi_schema):
         return data
     
     def alternative_script_path(self, script_name):
-        
-        module_name = pineboolib.project.conn.db().managerModules().idModuleOfFile(script_name)
-        script_name = script_name.replace(".qs", ".py")
-        
         from django.conf import settings
+        import glob
+        
+        script_name = script_name.replace(".qs", ".py")
         folder_ = settings.PROJECT_ROOT
         ret_ = None
-        if os.path.exists("%s/legacy/%s/%s" % (folder_, module_name, script_name)):
-            ret_ = "%s/legacy/%s/%s" % (folder_, module_name, script_name)
+        
+        for file_name in glob.iglob("%s/legacy/**/%s" % (folder_, script_name), recursive=True):
+            ret_ = file_name
+            break
         
         return ret_
         
