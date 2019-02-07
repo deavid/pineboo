@@ -230,8 +230,7 @@ class PNConnection(QtCore.QObject):
         if self.interactiveGUI() and cur.d.modeAccess_ in (FLSqlCursor.Insert, FLSqlCursor.Edit) and cur.isModifiedBuffer() and cur.d.askForCancelChanges_:
             import pineboolib
             if pineboolib.project._DGI.localDesktop():
-                res = QtWidgets.QMessageBox.information(
-                    QtWidgets.QApplication.activeWindow(),
+                res = QtWidgets.QMessageBox.information( QtWidgets.QApplication.activeWindow(),
                     "Cancelar Cambios",
                     "Todos los cambios se cancelarán.¿Está seguro?",
                     QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
