@@ -503,6 +503,9 @@ class FLFormDB(QtWidgets.QDialog):
     def close(self):
         if self.isClosing_:
             return True
+        
+        
+        
         self.isClosing_ = True
         super(FLFormDB, self).close()
         if not pineboolib.project._DGI.localDesktop():
@@ -763,6 +766,7 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def closeEvent(self, e):
+                
         self.frameGeometry()
 
         self.saveGeometry()
@@ -776,7 +780,7 @@ class FLFormDB(QtWidgets.QDialog):
         from pineboolib.pncontrolsfactory import SysType
         SysType().processEvents()
         
-        self.hide()
+        #self.hide()
         try:
             #if hasattr(self.script, "form"):
             #    print("Borrando self.script.form", self.script.form)
@@ -816,17 +820,22 @@ class FLFormDB(QtWidgets.QDialog):
 
         if not self.showed:
             self.showed = True
-            v = None
 
-            self.initMainWidget()
+            #self.initMainWidget()
             
             self.callInitScript()
-
+        
+            if not self._loaded:
+                return
+        
+        
+            
             self.bindIface()
 
         size = loadGeometryForm(self.geoName())
         if size:
             self.resize(size)
+            
 
     def cursorDestroyed(self, obj_ = None):
         if not obj_:
