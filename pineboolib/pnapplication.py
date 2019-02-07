@@ -1032,7 +1032,7 @@ class XMLAction(XMLStruct):
             parent.iface = parent.widget.iface
             return
         
-        script_path_py = pineboolib.project._DGI.alternative_path(scriptname)
+        script_path_py = pineboolib.project._DGI.alternative_script_path(scriptname)
         
         if script_path_py is None:
             script_path_qs = _path("%s.qs" % scriptname, False)        

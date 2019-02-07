@@ -90,9 +90,9 @@ class dgi_aqnext(dgi_schema):
         
         return data
     
-    def alternative_path(self, script_name):
+    def alternative_script_path(self, script_name):
         
-        module_name = pineboolib.project.conn.db().managerModules().idModuleOfFile(n)
+        module_name = pineboolib.project.conn.db().managerModules().idModuleOfFile(script_name)
         script_name = script_name.replace(".qs", ".py")
         
         from django.conf import settings

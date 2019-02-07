@@ -126,7 +126,7 @@ class dgi_schema(object):
     def alternative_content_cached(self):
         return self._alternative_content_cached
     
-    def alternative_path(self, script_name):
+    def alternative_script_path(self, script_name):
         return None
 
     def __getattr__(self, name):
