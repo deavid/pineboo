@@ -174,3 +174,14 @@ class QTable(QtWidgets.QTableWidget):
         
         if item is not None and color:
             item.setBackground(color)
+    
+    @decorators.NotImplementedWarn
+    def getSort(self):
+        pass
+    
+    def setSort(self, col):
+        super().setSortingEnabled()
+        super().sortByColumn(col)
+        
+    
+    sorting = property(getSort, setSort)
