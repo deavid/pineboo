@@ -130,7 +130,7 @@ class AQS(object):
         return ba.sha1()
     
     def Application_setOverrideCursor(self, shape, replace = False):
-        QApplication.setOverrideCursor(shape, replace)
+        QApplication.setOverrideCursor(shape)
     
     def Application_restoreOverrideCursor(self):
         QApplication.restoreOverrideCursor()
