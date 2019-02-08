@@ -34,6 +34,7 @@ RichText = 1
 def Function(args, source):
     
     import importlib
+    import sys as python_sys
     # Leer código QS embebido en Source
     # asumir que es una funcion anónima, tal que:
     #  -> function($args) { source }
@@ -61,8 +62,13 @@ function anon(%s) {
 
     write_python_file(f1, ast)
     f1.close()
+    mod = None
+    module_path = "tempdata.anon"
     
-    mod = importlib.import_module("tempdata.anon")
+    if module_path in python_sys.modules:
+        mod = importlib.reload(python_sys.modules[module_path])
+    else:
+        mod = importlib.import_module(module_path)
     return mod.FormInternalObj().anon
 
 
