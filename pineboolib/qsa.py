@@ -241,6 +241,9 @@ def parseFloat(x):
     @return Valor tipo float, o parametro x , si no es convertible
     """
     try:
+        if isinstance(x, str) and x.find(":"):
+            x = x.replace(":", "")
+        
         ret = 0 if x is None else float(x) 
         if ret == int(ret):
             ret = int(ret)
