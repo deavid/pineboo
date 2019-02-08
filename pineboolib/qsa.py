@@ -271,6 +271,8 @@ def isNaN(x):
     if not x:
         return True
 
+    if isinstance(x, str) and x.find(":"):
+        x = x.replace(":", "")
     try:
         float(x)
         return False
@@ -295,6 +297,13 @@ class Input(object):
         if not ok:
             return None
         return text
+    
+    @classmethod
+    def getNumber(cls, question, value, part_decimal, title="Pineboo"):
+        text, ok = QInputDialog.getText(None, title,  question, QLineEdit.Normal, str(round(float(value), part_decimal)))
+        if not ok:
+            return None
+        return float(text)
 
     @classmethod
     def getItem(cls, question, items_list=[], title="Pineboo", editable=True):
