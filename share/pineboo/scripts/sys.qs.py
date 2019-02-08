@@ -2004,8 +2004,9 @@ def runTransaction(f=None, oParam=None):
             AQS.Application_setOverrideCursor(AQS.WaitCursor)
         except Exception:
             e = traceback.format_exc()
-
-    try:       
+            
+            
+    try:
         valor = f(oParam)
         errorMsg = (oParam.errorMsg if (u"errorMsg" in oParam) else False)
         if valor:
@@ -2019,9 +2020,9 @@ def runTransaction(f=None, oParam=None):
                     e = traceback.format_exc()
 
             if errorMsg:
-                self.warnMsgBox(errorMsg)
+                warnMsgBox(errorMsg)
             else:
-                self.warnMsgBox(translate(u"Error al ejecutar la función"))
+                warnMsgBox(sys.translate(u"Error al ejecutar la función"))
 
             return False
 
