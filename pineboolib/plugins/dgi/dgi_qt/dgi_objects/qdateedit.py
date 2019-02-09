@@ -31,7 +31,6 @@ class QDateEdit(QtWidgets.QDateEdit):
     def setDate(self, v):
         if not isinstance(v, str):
             if hasattr(v, "toString"):
-                print("v", v, type(v))
                 v = v.toString("yyyy%sMM%sdd" % (self.separator(), self.separator()))
             else:
                 v = str(v)
