@@ -1858,7 +1858,7 @@ def setObjText( container=None, component=None, value=None):
     if s03_when == u"QLabel":
         s03_do_work, s03_work_done = True, True
     if s03_do_work:
-        runObjMethod(container, component, u"text", ustr(u"\"", value, u"\""))
+        runObjMethod(container, component, u"text", value)
         s03_do_work = False  # BREAK
     if s03_when == u"FLFieldDB":
         s03_do_work, s03_work_done = True, True
@@ -1955,7 +1955,7 @@ def testObj(container=None, component=None):
     if not container or container == None:
         return False
     c = container.child(component)
-    if not c or c == None:
+    if not c:
         debug(ustr(component, u" no existe"))
         return False
     return c
@@ -1973,13 +1973,9 @@ def testAndRun(container=None, component=None, method=None, param=None):
 def runObjMethod(container=None, component=None, method=None, param=None):
     import pineboolib
     c = container.child(component)
-    
     m = getattr(c, method, None)
     if m is not None:
-        q = pineboolib.project.actions[container.name]
-        o = q.load()
-        setattr(o.findChild(QtWidgets.QWidget,component), method, param)
-
+        setattr(c, method, param)
     else:
         debug(ustr(method, u" no existe"))
 
