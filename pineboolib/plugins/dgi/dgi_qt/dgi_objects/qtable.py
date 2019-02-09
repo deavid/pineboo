@@ -40,6 +40,7 @@ class QTable(QtWidgets.QTableWidget):
         return getattr(QtCore.Qt, name) if hasattr(QtCore.Qt, name) else None
     
     def valueChanged_(self, item = None):
+        
         if item:
             self.valueChanged.emit(item.row(), item.column())
 
@@ -130,39 +131,39 @@ class QTable(QtWidgets.QTableWidget):
     def adjustColumn(self, k):
         self.horizontalHeader().setSectionResizeMode(k, QtWidgets.QHeaderView.ResizeToContents)
 
-    def setRowReadOnly(self, row, b):
+    def setRowReadOnly(self, row, b):      
         if b:
+            if row in self.read_only_rows:
+                return #Ya esta en True la row
+            
             self.read_only_rows.append(row)
         else:
-            for r in self.read_only_rows:
-                if r == row:
-                    del r
-                    break
+            if row in self.read_only_rows:
+                self.read_only_rows.remove(row)
+            else:
+                return #Ya esta en False la row
 
         for col in range(self.columnCount()):
             item = self.item(row, col)
             if item:
-                if b:
-                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-                else:
-                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+                item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled) if b else item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
     def setColumnReadOnly(self, col, b):
         if b:
+            if col in self.read_only_cols:
+                return
+            
             self.read_only_cols.append(col)
         else:
-            for c in self.read_only_cols:
-                if c == col:
-                    del c
-                    break
+            if col in self.read_only_cols:
+                self.read_only_cols.remove(col)
+            else:
+                return
 
         for row in range(self.rowCount()):
             item = self.item(row, col)
             if item:
-                if b:
-                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-                else:
-                    item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+                item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled) if b else item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
     @decorators.NotImplementedWarn
     def setLeftMargin(self, n):
