@@ -8,7 +8,8 @@ class QHBoxLayout(QtWidgets.QHBoxLayout):
             super().__init__(parent)
         else:
             super().__init__()
-            parent.addLayout(self)
+            if parent:
+                parent.addLayout(self)
         
         self.setContentsMargins(1, 1, 1, 1)
         self.setSpacing(1)

@@ -3,12 +3,13 @@ from PyQt5 import QtWidgets
 
 class QVBoxLayout(QtWidgets.QVBoxLayout):
     
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         if isinstance(parent, QtWidgets.QWidget):
             super().__init__(parent)
         else:
             super().__init__()
-            parent.addLayout(self)
+            if parent:
+                parent.addLayout(self)
             
         
         self.setContentsMargins(1, 1, 1, 1)
