@@ -882,6 +882,10 @@ class FLApplication(QtCore.QObject):
                 self.removeTranslator(it)
 
         lang = QtCore.QLocale().name()[:2]
+        
+        if lang == "C":
+            lang = "es"
+        
         for module in self.modules().keys():
             self.loadTranslationFromModule(module, lang)
 
