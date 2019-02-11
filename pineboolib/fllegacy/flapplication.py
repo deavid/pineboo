@@ -589,11 +589,12 @@ class FLApplication(QtCore.QObject):
         pass
 
     def aqAppIdle(self):
-        from pineboolib.pncontrolsfactory import QApplication
-        if self.wb_ or not self.project_ or QApplication.activeModalWidget() or QApplication.activePopupWidget():
-            return
+        if pineboolib.project._DGI.localDesktop():
+            from pineboolib.pncontrolsfactory import QApplication
+            if self.wb_ or not self.project_ or QApplication.activeModalWidget() or QApplication.activePopupWidget():
+                return
 
-        self.checkAndFixTransactionLevel("Application::aqAppIdle()")
+            self.checkAndFixTransactionLevel("Application::aqAppIdle()")
             
 
 
