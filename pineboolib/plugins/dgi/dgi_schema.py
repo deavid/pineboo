@@ -105,8 +105,8 @@ class dgi_schema(object):
     def iconSize(self):
         from PyQt5 import QtCore
         size = QtCore.QSize(22, 22)
-        if self.mobilePlatform():
-            size = QtCore.QSize(60, 60)
+        #if self.mobilePlatform():
+        #    size = QtCore.QSize(60, 60)
 
         return size
     
