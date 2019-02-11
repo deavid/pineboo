@@ -5,6 +5,7 @@ class QPushButton(QtWidgets.QPushButton):
 
     def __init__(self, *args, **kwargs):
         super(QPushButton, self).__init__(*args, **kwargs)
+        
 
     @property
     def pixmap(self):
@@ -42,6 +43,17 @@ class QPushButton(QtWidgets.QPushButton):
     
     def setText(self, val):
         super(QPushButton, self).setText(val)
+    
+    def setMaximumSize(self, w, h=None):
+        if not isinstance(w, int):
+            if w.height() == 32767:
+                w.setHeight(22)
+            
+            super().setMaximumSize(w)
+        else:
+            if h == 32767:
+                h = w
+            super().setMaximumSize(w, h) 
 
     toggleButton = property(getToggleButton, setToggleButton)
     on = property(getOn, setOn)
