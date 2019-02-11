@@ -3692,6 +3692,9 @@ class FLSqlCursor(QtCore.QObject):
         """Busca en el DGI, si procede"""
         if self.ext_cursor:
             _attr = getattr(self.ext_cursor, name)
+        
+        return _attr or None
+        
     """
     signals:
     """
