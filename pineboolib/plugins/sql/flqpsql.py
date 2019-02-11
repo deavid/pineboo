@@ -82,7 +82,12 @@ class FLQPSQL(object):
         try:
             self.conn_ = psycopg2.connect(conninfostr)
         except psycopg2.OperationalError as e:
-            pineboolib.project._splash.hide()
+            if pineboolib.project._splash:
+                pineboolib.project._splash.hide()
+            
+            if not pineboolib.project._DGI.localDesktop():
+                return False
+            
             if "does not exist" in str(e) or "no existe" in str(e):
                 ret = QMessageBox.warning(None, "Pineboo",
                                           "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
