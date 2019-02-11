@@ -216,9 +216,9 @@ class PNBuffer(object):
     def value(self, n):
         field = self.field(n)
         v = field.value
+        
         if field.value is None:
             v = None
-        
         
         else:
             if field.type_ in ("str", "pixmap", "time", "date"):
@@ -241,8 +241,8 @@ class PNBuffer(object):
                 except Exception:
                     v = 0.0
                 
-            elif field.type_ in ("bool", "unlock"):
-                v = field.value in (True, "true")
+        if field.type_ in ("bool", "unlock"):
+            v = field.value in (True, "true")
         
         
         # ret = self.convertToType(field.value, field.type_)
