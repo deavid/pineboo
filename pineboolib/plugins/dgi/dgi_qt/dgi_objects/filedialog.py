@@ -22,13 +22,13 @@ class FileDialog(QFileDialog):
 
         return obj[0]
     
-    @decorators.NotImplementedWarn
+    
     def getSaveFileName(filter=None):
         import pineboolib
         parent = pineboolib.project.main_window.ui_
         from pineboolib.utils import filedir
         basedir = filedir("..")
-        ret = QFileDialog.getSaveFileName(parent,"Eoo",basedir,filter)
+        ret = QFileDialog.getSaveFileName(parent,"caption",basedir,filter)
         
         return ret[0] if ret else None
 
