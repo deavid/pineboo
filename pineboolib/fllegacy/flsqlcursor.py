@@ -791,7 +791,7 @@ class FLSqlCursor(QtCore.QObject):
 
         name_action = None
         
-        self.ext_cursor = pineboolib.project._DGI.FLSqlCursor()
+        self.ext_cursor = pineboolib.project._DGI.FLSqlCursor(self, name)
 
         # FIXME: XMLAction Tiene que ser eliminado de fuera de pnapplication
         from pineboolib.utils import XMLStruct

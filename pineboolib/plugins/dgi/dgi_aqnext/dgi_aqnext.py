@@ -33,7 +33,7 @@ class dgi_aqnext(dgi_schema):
         self.showInitBanner()
         self._show_object_not_found_warnings = False
         self.qApp = QtCore.QCoreApplication
-        self._alternative_content_cached = True
+        self._alternative_content_cached = False
         
 
     def extraProjectInit(self):
@@ -71,7 +71,8 @@ class dgi_aqnext(dgi_schema):
     
     def use_authentication(self):
         return self._use_authentication
-
+    
+    """
     def content_cached(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
         data = None
         utf8_ = False
@@ -89,7 +90,7 @@ class dgi_aqnext(dgi_schema):
                 data = pineboolib.project.conn.managerModules().contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_)
         
         return data
-    
+    """
     def alternative_script_path(self, script_name):
         from django.conf import settings
         import glob
