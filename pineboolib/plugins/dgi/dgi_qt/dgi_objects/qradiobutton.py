@@ -4,9 +4,12 @@ from PyQt5 import QtWidgets
 
 class QRadioButton(QtWidgets.QRadioButton):
 
-    def __ini__(self):
+    def __init__(self):
         super(QRadioButton, self).__init__()
         self.setChecked(False)
+        
+        
+        
 
     def __setattr__(self, name, value):
         if name == "text":
