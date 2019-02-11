@@ -940,7 +940,6 @@ class FLUtil(QtCore.QObject):
 
         return False
 
-    @decorators.BetaImplementation
     def quickSqlSelect(self, f, s, w, connName="default"):
         """
         Versión rápida de sqlSelect. Ejecuta directamente la consulta sin realizar comprobaciones.
