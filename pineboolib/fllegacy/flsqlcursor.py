@@ -779,6 +779,8 @@ class FLSqlCursor(QtCore.QObject):
 
     _refreshDelayedTimer = None
     _action = None
+    
+    ext_cursor = None
     #actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
@@ -788,6 +790,8 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         name_action = None
+        
+        self.ext_cursor = pineboolib.project._DGI.FLSqlCursor()
 
         # FIXME: XMLAction Tiene que ser eliminado de fuera de pnapplication
         from pineboolib.utils import XMLStruct
@@ -3287,16 +3291,19 @@ class FLSqlCursor(QtCore.QObject):
     @QtCore.pyqtSlot()
     def commitBufferCursorRelation(self):
         ok = True
-        from pineboolib.pncontrolsfactory import QApplication
-        activeWid = QApplication.activeModalWidget()
-        if not activeWid:
-            activeWid = QApplication.activePopupWidget()
-        if not activeWid:
-            activeWid = QApplication.activeWindow()
-
         activeWidEnabled = False
-        if activeWid:
-            activeWidEnabled = activeWid.isEnabled()
+        activeWid = None
+        if pineboolib.project._DGI.localDesktop():
+            from pineboolib.pncontrolsfactory import QApplication
+            activeWid = QApplication.activeModalWidget()
+            if not activeWid:
+                activeWid = QApplication.activePopupWidget()
+            if not activeWid:
+                activeWid = QApplication.activeWindow()
+
+        
+            if activeWid:
+                activeWidEnabled = activeWid.isEnabled()
 
         if self.d.modeAccess_ == self.Insert:
             if self.cursorRelation() and self.relation():
@@ -3680,7 +3687,11 @@ class FLSqlCursor(QtCore.QObject):
         if field_name:
             ret_ =  self.metadata().fieldType(field_name)        
         return ret_
-
+    
+    def __getattr__(self, name):
+        """Busca en el DGI, si procede"""
+        if self.ext_cursor:
+            _attr = getattr(self.ext_cursor, name)
     """
     signals:
     """
