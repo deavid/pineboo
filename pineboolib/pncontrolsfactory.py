@@ -199,7 +199,10 @@ class SysType(object):
         return str(pineboolib.project.version)
 
     def processEvents(self):
-        QtWidgets.qApp.processEvents()
+        if pineboolib.project._DGI.localDesktop():
+            QtWidgets.qApp.processEvents()
+        else:
+            QtCore.QCoreApplication.processEvents()
 
     def write(self, encode_, dir_, contenido):
         import codecs
