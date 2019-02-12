@@ -448,7 +448,7 @@ class FLUtil(QtCore.QObject):
 
         return ret
 
-    def translate(self, group, string):
+    def translate(self, group, text_):
         """
         Traducción de una cadena al idioma local
 
@@ -461,9 +461,16 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.fllegacy.fltranslations import FLTranslate
         
-        string = string.replace(" % ", " %% ")
+        if text_ == "MetaData":
+            a = group
+            group = text_
+            text_ = a
+            
         
-        return str(FLTranslate(group, string))
+        
+        text_ = text_.replace(" % ", " %% ")
+        
+        return str(FLTranslate(group, text_))
 
     @decorators.NotImplementedWarn
     def numCreditCard(self, num):
