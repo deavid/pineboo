@@ -719,11 +719,13 @@ class FLSqlCursorPrivate(QtCore.QObject):
         return need
 
     def msgBoxWarning(self, msg, throwException=False):
-        from pineboolib.pncontrolsfactory import QMessageBox, QApplication
-        logger.message(msg)
-        if not throwException:
-            QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)
-
+        if pineboolib.project._DGI.localDesktop():
+            from pineboolib.pncontrolsfactory import QMessageBox, QApplication
+            logger.message(msg)
+            if not throwException:
+                QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)
+        else:
+            logger.message(msg)
 
 # ###############################################################################
 # ###############################################################################
