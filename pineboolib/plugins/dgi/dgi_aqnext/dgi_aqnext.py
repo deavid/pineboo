@@ -94,14 +94,14 @@ class dgi_aqnext(dgi_schema):
     def alternative_script_path(self, script_name):
         from django.conf import settings
         import glob
-        
-        script_name = script_name.replace(".qs", ".py")
+
         folder_ = settings.PROJECT_ROOT
         ret_ = None
-        
-        for file_name in glob.iglob("%s/legacy/**/%s" % (folder_, script_name), recursive=True):
-            ret_ = file_name
-            break
+
+        for file_name in glob.iglob("%s/legacy/**/*.py" % (folder_), recursive=True):
+            if file_name.endswith(script_name):
+                ret_ = file_name
+                break
         
         return ret_
         
