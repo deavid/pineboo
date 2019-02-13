@@ -804,9 +804,11 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         name_action = None
-        
-        self.ext_cursor = pineboolib.project._DGI.FLSqlCursor(self, name)
-
+        ext_cursor = getattr(pineboolib.project._DGI, "FLSqlCursor", None)
+        if ext_cursor is not None:
+            self.ext_cursor = ext_cursor(self, name)
+        else:
+            self.ext_cursor = None
         # FIXME: XMLAction Tiene que ser eliminado de fuera de pnapplication
         from pineboolib.utils import XMLStruct
         if isinstance(name, XMLStruct):
@@ -3704,10 +3706,11 @@ class FLSqlCursor(QtCore.QObject):
     
     def __getattr__(self, name):
         """Busca en el DGI, si procede"""
+        _attr = None
         if self.ext_cursor:
             _attr = getattr(self.ext_cursor, name)
         
-        return _attr or None
+        return _attr
         
     """
     signals:
