@@ -720,6 +720,7 @@ class DelayedObjectProxyLoader(object):
         self.logger.debug(
             "DelayedObjectProxyLoader: loading %s %s( *%s **%s)",
             self._name, self._obj, self._args, self._kwargs)
+        
         self.loaded_obj = self._obj(*self._args, **self._kwargs)
         return self.loaded_obj
 
@@ -961,7 +962,7 @@ class XMLAction(XMLStruct):
     """
 
     def formRecordWidget(self):
-        if not self.formrecord_widget:
+        if not self.formrecord_widget or getattr(self.formrecord_widget, "_loaded", None) is False:
             self.loadRecord(None)
 
         return self.formrecord_widget
