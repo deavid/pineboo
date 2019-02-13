@@ -471,3 +471,8 @@ class QEventLoop(QtCore.QEventLoop):
     def enterLoop(self):
         super().exec_()
 
+
+def print_stack(maxsize=1):
+    for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
+        print(tb.rstrip())
+
