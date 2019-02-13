@@ -930,6 +930,7 @@ class XMLAction(XMLStruct):
                 self.mainform_widget = self.script.form
                 self.mainform_widget.widget = self.mainform_widget
                 self.mainform_widget.iface = self.mainform_widget.widget.iface
+                self.mainform_widget._loaded = True
                
                 """
                 from pineboolib.utils import Struct

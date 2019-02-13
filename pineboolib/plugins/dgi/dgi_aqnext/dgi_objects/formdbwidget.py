@@ -9,6 +9,7 @@ class FormDBWidget(QtCore.QObject):
     parent_ = None
     iface = None
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
+    _loaded = None
     
     def __init__(self, action=None, project=None, parent=None):
         if project is not None:          
@@ -21,7 +22,7 @@ class FormDBWidget(QtCore.QObject):
             self._module.disconnect = self._disconnect
             self._action = action
             self.cursor_ = None
-            
+            self._loaded = None
             if parent is None:
                 parent = QtCore.QObject()
             
