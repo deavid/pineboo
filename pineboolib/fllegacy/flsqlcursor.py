@@ -268,16 +268,21 @@ class PNBuffer(object):
         if field is None:
             return False
         
-        if field.type_ == "double" and value not in ("", "-",None):
+        elif field.type_ is "double" and value not in ("", "-",None):
             value = float(value)
 
 
-        if field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
+        elif field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
         
-        if field.type_ is "time" and value is not None:
+        elif field.type_ is "time" and value is not None:
             if value.find("T") > -1:
                 value = value[value.find("T") + 1:]
+        
+        elif field.type_ is "date":
+            if isinstance(value, str):
+                list_ = value.split("-")
+                value = datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
 
         if self.hasChanged(field.name, value):
             
@@ -300,25 +305,29 @@ class PNBuffer(object):
     def hasChanged(self, name, value):
 
         field = self.field(name)
+        
+
+        
         if value is None and field.value is None:
             return False
 
         elif value in (None, "None"):
             return True
 
+
         if field.name == name:
-            type = field.type_
+            type_ = field.type_
             actual = field.value
             if actual in (None, "None"):
                 return True
 
             if (actual == "" and value != "") or (actual != "" and value == ""):
                 return True
-            elif type in ("string", "stringlist"):
+            elif type_ in ("string", "stringlist"):
                 return not (actual == value)
-            elif type in ("int", "uint", "serial"):
+            elif type_ in ("int", "uint", "serial"):
                 return not (str(actual) == str(value))
-            elif type == "double":
+            elif type_ == "double":
                 if value == "-":
                     return False
 
@@ -328,6 +337,9 @@ class PNBuffer(object):
                     return not (float(actual) == float(value))
                 except Exception:
                     return True
+            elif type_ == "date":
+                return not str(field.value) == str(value)
+                    
             else:
                 return True
 
