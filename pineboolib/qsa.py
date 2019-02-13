@@ -277,7 +277,7 @@ def isNaN(x):
     @return True o False
     """
     
-    if not x:
+    if x is None:
         return True
 
     if isinstance(x, str) and x.find(":"):
