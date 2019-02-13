@@ -38,6 +38,9 @@ class FLQPSQL2(FLQPSQL):
         try:
             self.conn_ = pg8000.connect(user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5)
         except Exception:
+            if not pineboolib.project._DGI.localDesktop():
+                return False
+            
             pineboolib.project._splash.hide()
             if repr(traceback.format_exc()).find("does not exist") > -1:
                 ret = QMessageBox.warning(None, "Pineboo",
