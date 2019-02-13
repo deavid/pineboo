@@ -925,12 +925,19 @@ class XMLAction(XMLStruct):
                 self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
                     self, None, pineboolib.project.main_window.w_, None)
             else:
+                self.scriptform = getattr(self, "scriptform", None)
+                self.load_script(self.scriptform,None)
+                self.mainform_widget = self.script.form
+                self.mainform_widget.widget = self.mainform_widget
+                self.mainform_widget.iface = self.mainform_widget.widget.iface
+               
+                """
                 from pineboolib.utils import Struct
                 self.mainform_widget = Struct()
                 self.mainform_widget._action = self
                 self.load_script(getattr(self, "scriptform", None), self.mainform_widget)
                 self.mainform_widget._loaded = True
-
+                """
             self.logger.debug("End of action load %s (iface:%s ; widget:%s)", self.name, getattr(
                 self.mainform_widget, "iface", None), getattr(self.mainform_widget, "widget", None))
 
@@ -1078,12 +1085,8 @@ class XMLAction(XMLStruct):
             except Exception as e:
                 self.logger.exception(
                     "ERROR al cargar script QS para la accion %s:", action_.name)
-        try:
-            print(type(parent.script.FormInternalObj))
-            parent.script.form = parent.script.FormInternalObj(
-                action_, pineboolib.project, parent_)
-        except:
-            print(traceback.format_exc())
+        
+        parent.script.form = parent.script.FormInternalObj(action_, pineboolib.project, parent_)
         if parent_:
             parent.widget = parent.script.form
             if getattr(parent.widget, "iface", None):
