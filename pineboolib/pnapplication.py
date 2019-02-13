@@ -932,14 +932,7 @@ class XMLAction(XMLStruct):
                 self.mainform_widget.widget = self.mainform_widget
                 self.mainform_widget.iface = self.mainform_widget.widget.iface
                 self.mainform_widget._loaded = True
-               
-                """
-                from pineboolib.utils import Struct
-                self.mainform_widget = Struct()
-                self.mainform_widget._action = self
-                self.load_script(getattr(self, "scriptform", None), self.mainform_widget)
-                self.mainform_widget._loaded = True
-                """
+
             self.logger.debug("End of action load %s (iface:%s ; widget:%s)", self.name, getattr(
                 self.mainform_widget, "iface", None), getattr(self.mainform_widget, "widget", None))
 
@@ -962,7 +955,7 @@ class XMLAction(XMLStruct):
     """
 
     def formRecordWidget(self):
-        if not self.formrecord_widget or getattr(self.formrecord_widget, "_loaded", None) is False:
+        if not getattr(self.formrecord_widget, "_loaded", None):
             self.loadRecord(None)
 
         return self.formrecord_widget
