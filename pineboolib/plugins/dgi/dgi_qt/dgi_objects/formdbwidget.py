@@ -1,5 +1,7 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
+import logging
+import weakref
 import sys
 
 class FormDBWidget(QtWidgets.QWidget):

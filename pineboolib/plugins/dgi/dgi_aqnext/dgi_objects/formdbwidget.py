@@ -1,6 +1,7 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
 import sys
+import weakref
 
 class FormDBWidget(QtCore.QObject):
     """description of class"""
