@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QFileDialog
-from pineboolib import decorators
 
 class FileDialog(QFileDialog):
 
@@ -24,8 +23,7 @@ class FileDialog(QFileDialog):
     
     
     def getSaveFileName(filter=None):
-        import pineboolib
-        parent = pineboolib.project.main_window.ui_
+        parent = QtWidgets.QApplication.activeModalWidget()
         from pineboolib.utils import filedir
         basedir = filedir("..")
         ret = QFileDialog.getSaveFileName(parent,"caption",basedir,filter)
@@ -38,8 +36,7 @@ class FileDialog(QFileDialog):
             from pineboolib.utils import filedir
             basedir = filedir("..")
 
-        import pineboolib
-        parent = pineboolib.project.main_window.ui_
+        parent = QtWidgets.QApplication.activeModalWidget()
         ret = QFileDialog.getExistingDirectory(parent, caption, basedir, QtWidgets.QFileDialog.ShowDirsOnly)
         if ret:
             ret = ret + "/"
