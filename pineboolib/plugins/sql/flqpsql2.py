@@ -38,7 +38,10 @@ class FLQPSQL2(FLQPSQL):
         try:
             self.conn_ = pg8000.connect(user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5)
         except Exception:
-            if not pineboolib.project._DGI.localDesktop():
+            try:
+                if not pineboolib.project._DGI.localDesktop():
+                    return False
+            except:
                 return False
             
             pineboolib.project._splash.hide()
