@@ -440,9 +440,13 @@ class Project(object):
         try:
             return fn(*aList)
         except Exception:
-            from pineboolib.pncontrolsfactory import aqApp
-            aqApp.msgBoxWarning("Se ha producido un error al ejecutar el script %s:\n%s" % (function ,traceback.format_exc()),pineboolib.project._DGI)
-
+            msg_w = "Se ha producido un error al ejecutar el script %s:\n%s" % (function ,traceback.format_exc())
+            if pineboolib.project._DGI.localDesktop():
+                from pineboolib.pncontrolsfactory import aqApp
+                aqApp.msgBoxWarning(msg_w ,pineboolib.project._DGI)
+            else:
+                self.logger.warn(msg_w)
+                
         #try:
         #    if aList:
         #        return fn(*aList)
