@@ -17,27 +17,20 @@ class FLSqlCursor(QtCore.QObject):
     def __init__(self, cursor, stabla):
         super().__init__()
         self.parent_cursor = cursor
-        
+        self.parent_cursor.setActivatedBufferChanged(False)
+        self.parent_cursor.setActivatedBufferCommited(False)
         
         
         if stabla:
             (self._model, self._buffer_changed, self._before_commit, self._after_commit, self._buffer_commited, self._inicia_valores_cursor, self._buffer_changed_label, self._validate_cursor, self._validate_transaction, self._cursor_accepted) = self.obtener_modelo(stabla)
             self._stabla = self._model._meta.db_table
     
-    def setActivatedCommitActions(self, activated_commitactions):
-        self._activatedCommitActions = activated_commitactions
-
-    def setActivatedBufferChanged(self, activated_bufferchanged):
-        self._activatedBufferChanged = activated_bufferchanged
-
-    def setActivatedBufferCommited(self, activated_buffercommited):
-        self._activatedBufferCommited = activated_buffercommited
     
     def buffer_changed_signal(self, scampo):
         if self._buffer_changed is None:
             return True
 
-        return self._buffer_changed(scampo, self)
+        return self._buffer_changed(scampo, self.parent_cursor)
 
     def buffer_commited_signal(self):
         if not self._activatedBufferCommited:
@@ -47,7 +40,7 @@ class FLSqlCursor(QtCore.QObject):
             return True
 
         try:
-            return self._buffer_commited(self)
+            return self._buffer_commited(self.parent_cursor)
         except Exception as exc:
             print("Error inesperado", exc)
 
@@ -58,7 +51,7 @@ class FLSqlCursor(QtCore.QObject):
         if self._before_commit is None:
             return True
 
-        return self._before_commit(self)
+        return self._before_commit(self.parent_cursor)
 
     def after_commit_signal(self):
         if not self._activatedCommitActions:
@@ -67,13 +60,13 @@ class FLSqlCursor(QtCore.QObject):
         if self._after_commit is None:
             return True
 
-        return self._after_commit(self)
+        return self._after_commit(self.parent_cursor)
 
     def inicia_valores_cursor_signal(self):
         if self._inicia_valores_cursor is None:
             return True
 
-        return self._inicia_valores_cursor(self)
+        return self._inicia_valores_cursor(self.parent_cursor)
 
     def buffer_changed_label_signal(self, scampo):
         if self._buffer_changed_label is None:
@@ -82,27 +75,27 @@ class FLSqlCursor(QtCore.QObject):
         import inspect
         expected_args = inspect.getargspec(self._buffer_changed_label)[0]
         if len(expected_args) == 3:
-            return self._buffer_changed_label(self._model, scampo, self)
+            return self._buffer_changed_label(self._model, scampo, self.parent_cursor)
         else:
-            return self._buffer_changed_label(scampo, self)
+            return self._buffer_changed_label(scampo, self.parent_cursor)
 
     def validate_cursor_signal(self):
         if self._validate_cursor is None:
             return True
 
-        return self._validate_cursor(self)
+        return self._validate_cursor(self.parent_cursor)
 
     def validate_transaction_signal(self):
         if self._validate_transaction is None:
             return True
 
-        return self._validate_transaction(self)
+        return self._validate_transaction(self.parent_cursor)
 
     def cursor_accepted_signal(self):
         if self._cursor_accepted is None:
             return True
 
-        return self._cursor_accepted(self)
+        return self._cursor_accepted(self.parent_cursor)
     
     def obtener_modelo(self, stabla):
         from YBLEGACY.FLAux import FLAux
