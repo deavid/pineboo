@@ -797,6 +797,8 @@ class FLSqlCursor(QtCore.QObject):
     _action = None
     
     ext_cursor = None
+    _activatedBufferChanged = None
+    _activatedBufferCommited = None
     #actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
@@ -806,6 +808,8 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         name_action = None
+        self.setActivatedBufferChanged(True)
+        self.setActivatedBufferCommited(True)
         ext_cursor = getattr(pineboolib.project._DGI, "FLSqlCursor", None)
         if ext_cursor is not None:
             self.ext_cursor = ext_cursor(self, name)
@@ -1135,7 +1139,8 @@ class FLSqlCursor(QtCore.QObject):
             logger.warn("No se puede actualizar el campo de forma atómica, porque no existe clave primaria")
 
         self.buffer().setValue(fN, v)
-        self.bufferChanged.emit()
+        if self.activatedBufferChanged():
+            self.bufferChanged.emit()
 
     """
     Establece el valor de un campo del buffer con un valor.
@@ -1195,7 +1200,8 @@ class FLSqlCursor(QtCore.QObject):
             self.buffer().setValue(fN, vv)
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
-        self.bufferChanged.emit(fN)
+        if self.activatedBufferChanged():
+            self.bufferChanged.emit(fN)
         from pineboolib.pncontrolsfactory import SysType
         SysType.processEvents(self)
 
@@ -1659,6 +1665,20 @@ class FLSqlCursor(QtCore.QObject):
 
     def activatedCommitActions(self):
         return self.d.activatedCommitActions_
+    
+    
+    def setActivatedBufferChanged(self, activated_bufferchanged):
+        self._activatedBufferChanged = activated_bufferchanged
+    
+    def activatedBufferChanged(self):
+        return self._activatedBufferChanged
+
+    def setActivatedBufferCommited(self, activated_buffercommited):
+        self._activatedBufferCommited = activated_buffercommited
+        
+    def activatedBufferCommited(self):
+        return self._activatedBufferCommited
+    
 
     """
     Se comprueba la integridad referencial al intentar borrar, tambien se comprueba la no duplicidad de
@@ -3114,8 +3134,12 @@ class FLSqlCursor(QtCore.QObject):
 
     @QtCore.pyqtSlot()
     def commitBuffer(self, emite=True, checkLocks=False):
+        
         if not self.buffer() or not self.metadata():
             return False
+        
+        if not self.activatedBufferCommited():
+            return True
 
         from pineboolib.pncontrolsfactory import QMessageBox, QApplication, aqApp
         if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.metadata().detectLocks()):
@@ -3169,7 +3193,9 @@ class FLSqlCursor(QtCore.QObject):
             else:
                 functionBefore = "sys.iface.beforeCommit_%s" % self.metadata().name()
                 functionAfter = "sys.iface.afterCommit_%s" % self.metadata().name()
-
+            
+            
+            
             if functionBefore:
                 v = aqApp.call(functionBefore, [self], None, False)
                 if v and not isinstance(v, bool):
