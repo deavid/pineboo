@@ -921,6 +921,8 @@ class XMLAction(XMLStruct):
     def load(self):
         self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
+            if getattr(self.mainform_widget, "widget", None):
+                self.mainform_widget.widget.doCleanUp()
             self.logger.debug("Loading action %s . . . ", self.name)
             if pineboolib.project._DGI.useDesktop():
                 self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
