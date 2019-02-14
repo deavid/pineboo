@@ -185,11 +185,12 @@ class FLQPSQL(object):
             s = text2bool(v)
 
         elif type_ == "date":
-            val = util.dateDMAtoAMD(v)
-            if val is None:
-                s = "Null"
+            if len(str(v).split("-")[0]) < 3:
+                val = util.dateDMAtoAMD(v)
             else:
-                s = "'%s'" % val
+                val = v
+            
+            s = "'%s'" % val
 
         elif type_ == "time":
             s = "'%s'" % v
