@@ -91,17 +91,75 @@ class dgi_aqnext(dgi_schema):
         
         return data
     """
-    def alternative_script_path(self, script_name):
+    def alternative_script_path(self, script_name, app = None):
         from django.conf import settings
         import glob
-
-        folder_ = settings.PROJECT_ROOT
+        
         ret_ = None
-
-        for file_name in glob.iglob("%s/legacy/**/*.py" % (folder_), recursive=True):
+        
+        folder_ = settings.PROJECT_ROOT
+        if app is None:
+            app = "**"
+        
+        
+        
+        for file_name in glob.iglob("%s/legacy/%s/%s" % (folder_, app, script_name), recursive=True):
             if file_name.endswith(script_name):
                 ret_ = file_name
                 break
         
         return ret_
+    
+    def register_script(self, app, module_name, script_name, prefix):
+        #print("*****", app, module_name, script_name, prefix)
+        ret_ = self.alternative_script_path("%s.py" % script_name, app)
+        if ret_ is None:
+            raise ImportError
+
+        from pineboolib import qsa as qsa_dict_modules
+        from pineboolib.pnapplication import DelayedObjectProxyLoader, XMLAction
+            
+        action = XMLAction()
+        action.name = module_name
+        action.alias = module_name
+        action.form = None
+        action.table = None
+        action.scriptform = module_name
+        
+        #Carganmos módulo
+        if module_name == script_name:
+            setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))
+            pineboolib.project.actions[action.name] = action
+            return
+        
+        
+        action_xml = XMLAction()
+        if module_name in pineboolib.project.actions.keys():
+            action_xml = pineboolib.project.actions[module_name]
+        
+        #print("*", prefix, module_name)
+        
+        if prefix == "form":
+            #if hasattr(qsa_dict_modules, "form" + module_name):
+            #    logger.warn("No se sobreescribe variable de entorno %s", "form" + module_name)
+            #else:
+            action_xml.table = module_name
+            action_xml.mainscript = module_name 
+            pineboolib.project.actions[module_name] = action_xml
+            delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, module_name))
+            #print("Creando", "form" + module_name)
+            setattr(qsa_dict_modules, "form" + module_name, delayed_action)
+
+        if prefix == "formRecord":
+            #if hasattr(qsa_dict_modules, "formRecord" + module_name):
+            #    logger.warn("No se sobreescribe variable de entorno %s", "formRecord" + module_name)
+            #else:  # Se crea la action del formRecord
+            action_xml.table = module_name
+            action_xml.script = module_name 
+            pineboolib.project.actions[module_name] = action_xml
+            delayed_action = DelayedObjectProxyLoader(action_xml.formRecordWidget ,name="QSA.Module.%s.Action.formRecord%s" % (app, module_name))
+            print("Creando", "formRecord" + module_name)
+            setattr(qsa_dict_modules, "formRecord" + module_name, delayed_action)
+            #print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
+        
         
