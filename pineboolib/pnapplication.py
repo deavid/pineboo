@@ -910,7 +910,15 @@ class XMLAction(XMLStruct):
                 
                 
             self.logger.debug("Loading record action %s . . . ", self.name)
-            self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
+            if pineboolib.project._DGI.useDesktop():
+                self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
+            else:
+                self.script = getattr(self, "script", None)
+                self.load_script(self.script, self)
+                self.formrecord_widget = self.script.form
+                self.formrecord_widget.widget = self.formrecord_widget
+                self.formrecord_widget.iface = self.formrecord_widget.widget.iface
+                self.formrecord_widget._loaded = True
             # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
             if self.formrecord_widget:
                 self.logger.debug("End of record action load %s (iface:%s ; widget:%s)", self.name, getattr(
@@ -933,7 +941,7 @@ class XMLAction(XMLStruct):
                     self, None, pineboolib.project.main_window.w_, None)
             else:
                 self.scriptform = getattr(self, "scriptform", None)
-                self.load_script(self.scriptform,None)
+                self.load_script(self.scriptform, self)
                 self.mainform_widget = self.script.form
                 self.mainform_widget.widget = self.mainform_widget
                 self.mainform_widget.iface = self.mainform_widget.widget.iface
@@ -1012,15 +1020,15 @@ class XMLAction(XMLStruct):
         from importlib import machinery
         if scriptname:
             scriptname = scriptname.replace(".qs", "")
-        if scriptname:
-            self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
+        #if scriptname:
+        #    self.logger.info("Cargando script %s de %s accion %s", scriptname, parent, self.name)
 
         parent_ = parent
         if parent is None:
             parent = self
             action_ = self
         else:
-            action_ = parent._action
+            action_ = parent._action if hasattr(parent, "_action") else self
 
             # import aqui para evitar dependencia ciclica
         from pineboolib.utils import convertFLAction
@@ -1033,8 +1041,7 @@ class XMLAction(XMLStruct):
         parent.script = emptyscript
 
         if scriptname is None:
-            parent.script.form = parent.script.FormInternalObj(
-                action=action_, project=pineboolib.project, parent=parent)
+            parent.script.form = parent.script.FormInternalObj(action=action_, project=pineboolib.project, parent=parent)
             parent.widget = parent.script.form
             parent.iface = parent.widget.iface
             return
