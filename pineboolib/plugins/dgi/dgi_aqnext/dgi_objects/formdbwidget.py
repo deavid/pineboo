@@ -16,6 +16,8 @@ class FormDBWidget(QtCore.QObject):
         if project is not None:          
             
 
+            parent = QtCore.QObject()
+            
             super().__init__(parent)
             
             self._module = sys.modules[self.__module__]
@@ -24,8 +26,6 @@ class FormDBWidget(QtCore.QObject):
             self._action = action
             self.cursor_ = None
             self._loaded = None
-            if parent is None:
-                parent = QtCore.QObject()
             
             self.parent_ = parent
         
