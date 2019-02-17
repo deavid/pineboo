@@ -107,11 +107,12 @@ class dgi_aqnext(dgi_schema):
             if file_name.endswith(script_name):
                 ret_ = file_name
                 break
-        
+            
         return ret_
     
     def register_script(self, app, module_name, script_name, prefix):
-        #print("*****", app, module_name, script_name, prefix)
+
+        
         ret_ = self.alternative_script_path("%s.py" % script_name, app)
         if ret_ is None:
             raise ImportError
@@ -128,12 +129,16 @@ class dgi_aqnext(dgi_schema):
         
         #Carganmos módulo
         if module_name == script_name:
+            #Borrar el action viejo asignado??
+            
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))
             pineboolib.project.actions[action.name] = action
-            return
+            if prefix == "":
+                return
         
         
         action_xml = XMLAction()
+        """Sobrecargamos el arbol qsa si procede"""
         if module_name in pineboolib.project.actions.keys():
             action_xml = pineboolib.project.actions[module_name]
         
@@ -144,7 +149,7 @@ class dgi_aqnext(dgi_schema):
             #    logger.warn("No se sobreescribe variable de entorno %s", "form" + module_name)
             #else:
             action_xml.table = module_name
-            action_xml.mainscript = module_name 
+            action_xml.scriptform = script_name 
             pineboolib.project.actions[module_name] = action_xml
             delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, module_name))
             #print("Creando", "form" + module_name)
@@ -155,10 +160,9 @@ class dgi_aqnext(dgi_schema):
             #    logger.warn("No se sobreescribe variable de entorno %s", "formRecord" + module_name)
             #else:  # Se crea la action del formRecord
             action_xml.table = module_name
-            action_xml.script = module_name 
+            action_xml.script = script_name 
             pineboolib.project.actions[module_name] = action_xml
             delayed_action = DelayedObjectProxyLoader(action_xml.formRecordWidget ,name="QSA.Module.%s.Action.formRecord%s" % (app, module_name))
-            print("Creando", "formRecord" + module_name)
             setattr(qsa_dict_modules, "formRecord" + module_name, delayed_action)
             #print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
         
