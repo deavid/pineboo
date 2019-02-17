@@ -915,7 +915,7 @@ class XMLAction(XMLStruct):
             else:
                 self.script = getattr(self, "script", None)
                 if isinstance(self.script, str):
-                    self.load_script(self.script, self)
+                    self.load_script(self.script, None)
                     self.formrecord_widget = self.script.form
                     self.formrecord_widget.widget = self.formrecord_widget
                     self.formrecord_widget.iface = self.formrecord_widget.widget.iface
@@ -942,7 +942,7 @@ class XMLAction(XMLStruct):
                     self, None, pineboolib.project.main_window.w_, None)
             else:
                 self.scriptform = getattr(self, "scriptform", None)
-                self.load_script(self.scriptform, self)
+                self.load_script(self.scriptform, None)
                 self.mainform_widget = self.script.form
                 self.mainform_widget.widget = self.mainform_widget
                 self.mainform_widget.iface = self.mainform_widget.widget.iface
