@@ -138,6 +138,7 @@ class dgi_aqnext(dgi_schema):
         
         
         action_xml = XMLAction()
+        action_xml.name = module_name
         """Sobrecargamos el arbol qsa si procede"""
         if module_name in pineboolib.project.actions.keys():
             action_xml = pineboolib.project.actions[module_name]
