@@ -914,11 +914,12 @@ class XMLAction(XMLStruct):
                 self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             else:
                 self.script = getattr(self, "script", None)
-                self.load_script(self.script, self)
-                self.formrecord_widget = self.script.form
-                self.formrecord_widget.widget = self.formrecord_widget
-                self.formrecord_widget.iface = self.formrecord_widget.widget.iface
-                self.formrecord_widget._loaded = True
+                if isinstance(self.script, str):
+                    self.load_script(self.script, self)
+                    self.formrecord_widget = self.script.form
+                    self.formrecord_widget.widget = self.formrecord_widget
+                    self.formrecord_widget.iface = self.formrecord_widget.widget.iface
+                    self.formrecord_widget._loaded = True
             # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
             if self.formrecord_widget:
                 self.logger.debug("End of record action load %s (iface:%s ; widget:%s)", self.name, getattr(
@@ -1062,8 +1063,8 @@ class XMLAction(XMLStruct):
                 ret_qs = FLStaticLoader.content("%s.qs" % scriptname, mng_modules.staticBdInfo_, True)  # Con True solo devuelve el path
                 if ret_qs:
                     script_path_qs = ret_qs
-
-        if script_path_py:
+        
+        if script_path_py is not None:
             script_path = script_path_py
             self.logger.info("Loading script PY %s . . . ", scriptname)
             if not os.path.isfile(script_path):
