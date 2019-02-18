@@ -41,6 +41,9 @@ class Process(QtCore.QProcess):
 
     def readStderr(self):
         return self.stderr
+    
+    def readStdout(self):
+        return self.stdout
 
     def getWorkingDirectory(self):
         return super(Process, self).workingDirectory()
