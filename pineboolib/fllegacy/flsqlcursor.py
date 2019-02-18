@@ -269,7 +269,15 @@ class PNBuffer(object):
             return False
         
         elif field.type_ is "double" and value not in ("", "-",None):
-            value = float(value)
+            if isinstance(value, str) and value.find(":") > -1:
+                #Convertimos a horas
+                list_ = value.split(":")
+                value = float(list_[0]) #Horas
+                value += float(list_[1]) / 60 #Minutos a hora
+                value += float(list_[2]) / 3600 #Segundos a hora
+                
+            else:
+                value = float(value)
 
 
         elif field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:

@@ -242,7 +242,11 @@ def parseFloat(x):
     """
     try:
         if isinstance(x, str) and x.find(":"):
-            x = x.replace(":", "")
+            #Convertimos a horas
+            list_ = x.split(":")
+            x = float(list_[0]) #Horas
+            x += float(list_[1]) / 60 #Minutos a hora
+            x += float(list_[2]) / 3600 #Segundos a hora
         
         ret = 0 if x is None else float(x) 
         if ret == int(ret):
