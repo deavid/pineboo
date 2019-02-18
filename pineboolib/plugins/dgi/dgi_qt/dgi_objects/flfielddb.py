@@ -2177,8 +2177,9 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.editor_:
             self.editor_.setFocusPolicy(Qt.StrongFocus)
             self.setFocusProxy(self.editor_)
-            self.setTabOrder(self.pushButtonDB, self.editor_)
+            
             if hasPushButtonDB:
+                self.setTabOrder(self.pushButtonDB, self.editor_)
                 self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
                 self.editor_.setToolTip(
                     "Para buscar un valor en la tabla relacionada pulsar F2")
@@ -3122,7 +3123,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.FLWidgetFieldDBLayout.addWidget(self.editor_)
             self.editor_.setFocusPolicy(Qt.StrongFocus)
             self.setFocusProxy(self.editor_)
-            self.setTabOrder(self.pushButtonDB, self.editor_)
+            
             self.editor_.show()
 
         self.textLabelDB.setText(self.fieldAlias_)
@@ -3132,6 +3133,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.textLabelDB.hide()
 
         if hasPushButtonDB:
+            self.setTabOrder(self.pushButtonDB, self.editor_)
             self.pushButtonDB.setFocusPolicy(Qt.NoFocus)
             self.pushButtonDB.show()
         else:
