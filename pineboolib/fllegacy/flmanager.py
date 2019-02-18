@@ -150,14 +150,13 @@ class FLManager(QtCore.QObject):
         @param quick Si TRUE no realiza chequeos, usar con cuidado
         @return Un objeto FLTableMetaData con los metadatos de la tabla solicitada
         """
-
+        
         util = FLUtil()
 
         if not n:
             return None
 
         if isinstance(n, str):
-
             if not n or not self.db_.dbAux():
                 return None
 
@@ -165,9 +164,9 @@ class FLManager(QtCore.QObject):
             acl = False
             key = n.strip()
             stream = None
-
             isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
             cacheFound_ = False
+            
             if isSysTable:
                 if key in self.cacheMetaDataSys_.keys():
                     ret = self.cacheMetaDataSys_[key]
@@ -176,9 +175,9 @@ class FLManager(QtCore.QObject):
                 if key in self.cacheMetaData_.keys():
                     ret = self.cacheMetaData_[key]
                     cacheFound_ = True
-
+            
+            
             if not cacheFound_:
-
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
 
                 if not stream:
@@ -200,31 +199,36 @@ class FLManager(QtCore.QObject):
                 if ret is None:
                     return None
 
-                if not isSysTable:
-                    self.cacheMetaData_[key] = ret
-                    if not ret.isQuery() and not self.existsTable(n):
-                        self.createTable(ret)
+                if not ret.isQuery() and not self.existsTable(n):
+                    self.createTable(ret)
 
-                elif isSysTable:
-                    self.cacheMetaDataSys_[key] = ret
+                
 
-            else:
                 acl = pineboolib.project.acl()
 
             # if ret.fieldsNamesUnlock():
             #    ret = FLTableMetaData(ret)
 
-            if acl:
-                acl.process(ret)
+                if acl:
+                    acl.process(ret)
+                
+                if quick: #Si al cachear es quick , no temina de cachear y devuelve ret.Esto obliga a cachear correctamente cuando quick sea False
+                    return ret
+                
+                if not isSysTable:
+                    self.cacheMetaData_[key] = ret
+                else:
+                    self.cacheMetaDataSys_[key] = ret
+            
 
-            if not quick and not isSysTable and not ret.isQuery() and self.db_.mismatchedTable(n, ret) and self.existsTable(n):
-                msg = util.translate(
-                    "application",
-                    "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
-                    "Debe regenerar la base de datos.").replace("%1", n)
-                logger.warn(msg)
+                if not isSysTable and not ret.isQuery() and self.db_.mismatchedTable(n, ret) and self.existsTable(n):
+                    msg = util.translate(
+                        "application",
+                        "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
+                        "Debe regenerar la base de datos.").replace("%1", n)
+                    logger.warn(msg)
                 # throwMsgWarning(self.db_, msg)
-
+                
             return ret
 
         else:
