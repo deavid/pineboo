@@ -2323,9 +2323,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         bFilter = self.cursor_.db().manager().formatAssignValue(field, p, True)
 
-        idMod = self.cursor_.db().managerModules().idModuleOfFile(
-            self.cursor_.metadata().name() + ".mtd")
-
+        idMod = self.cursor_.db().managerModules().idModuleOfFile(self.cursor_.metadata().name() + ".mtd")
         functionQSA = idMod + ".tableDB_filterRecords_" + self.cursor_.metadata().name()
 
         vargs = []
