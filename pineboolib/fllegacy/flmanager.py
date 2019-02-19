@@ -246,43 +246,43 @@ class FLManager(QtCore.QObject):
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "name":
+                    elif e.tagName() == "name":
                         name = e.text()
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "query":
+                    elif e.tagName() == "query":
                         q = e.text()
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "alias":
+                    elif e.tagName() == "alias":
                         a = auto_qt_translate_text(e.text())
                         a = util.translate("Metadata", a)
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "visible":
+                    elif e.tagName() == "visible":
                         v = (e.text() == "true")
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "editable":
+                    elif e.tagName() == "editable":
                         ed = (e.text() == "true")
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "concurWarn":
+                    elif e.tagName() == "concurWarn":
                         cw = (e.text() == "true")
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "detectLocks":
+                    elif e.tagName() == "detectLocks":
                         dl = (e.text() == "true")
                         no = no.nextSibling()
                         continue
 
-                    if e.tagName() == "FTSFunction":
+                    elif e.tagName() == "FTSFunction":
                         ftsfun = (e.text() == "true")
                         no = no.nextSibling()
                         continue
@@ -327,11 +327,11 @@ class FLManager(QtCore.QObject):
                 if not aWith:
                     aWith = it
                     continue
-                if not aBy:
+                elif not aBy:
                     aBy = it
                     continue
 
-                if not tmd.field(it):
+                elif not tmd.field(it):
                     continue
 
                 tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
@@ -455,8 +455,7 @@ class FLManager(QtCore.QObject):
             gr = groupXml_[i]
             if float(gr.find("level").text.strip(' \t\n\r')) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                q.addGroup(FLGroupByQuery(i, gr.find(
-                    "field").text.strip(' \t\n\r')))
+                q.addGroup(FLGroupByQuery(i, gr.find("field").text.strip(' \t\n\r')))
                 i = i + 1
 
         return q
@@ -549,33 +548,33 @@ class FLManager(QtCore.QObject):
                                 a.setName(e2.text())
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "scriptformrecord":
+                            elif e2.tagName() == "scriptformrecord":
                                 a.setScriptFormRecord(e2.text())
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "scriptform":
+                            elif e2.tagName() == "scriptform":
                                 a.setScriptForm(e2.text())
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "table":
+                            elif e2.tagName() == "table":
                                 a.setTable(e2.text())
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "form":
+                            elif e2.tagName() == "form":
                                 a.setForm(e2.text())
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "formrecord":
+                            elif e2.tagName() == "formrecord":
                                 a.setFormRecord(e2.text())
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "caption":
+                            elif e2.tagName() == "caption":
                                 txt_ = e2.text()
                                 txt_ = auto_qt_translate_text(txt_)
                                 a.setCaption(txt_)
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "description":
+                            elif e2.tagName() == "description":
                                 txt_ = e2.text()
                                 txt_ = auto_qt_translate_text(txt_)
 
@@ -583,7 +582,7 @@ class FLManager(QtCore.QObject):
                                     a.setDescription(txt_)
                                 no2 = no2.nextSibling()
                                 continue
-                            if e2.tagName() == "alias":
+                            elif e2.tagName() == "alias":
                                 txt_ = e2.text()
                                 txt_ = auto_qt_translate_text(txt_)
 
@@ -613,8 +612,8 @@ class FLManager(QtCore.QObject):
         if not self.db_ or not self.db_.dbAux() or n is None:
             return False
         
-        if cache and self.listTables_:
-            return True if n in self.listTables_ else self.db_.existsTable(n)
+        if cache and n in self.listTables_:
+            return True
         else:
             return self.db_.existsTable(n)
 
@@ -976,27 +975,27 @@ class FLManager(QtCore.QObject):
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "name":
+                elif e.tagName() == "name":
                     n = e.text()
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "alias":
+                elif e.tagName() == "alias":
                     a = auto_qt_translate_text(e.text())
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "null":
+                elif e.tagName() == "null":
                     aN = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "pk":
+                elif e.tagName() == "pk":
                     iPK = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "type":
+                elif e.tagName() == "type":
                     if e.text() == "int":
                         t = "int"
                     elif e.text() == "uint":
@@ -1024,17 +1023,17 @@ class FLManager(QtCore.QObject):
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "length":
+                elif e.tagName() == "length":
                     length = int(e.text())
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "regexp":
+                elif e.tagName() == "regexp":
                     rX = e.text()
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "default":
+                elif e.tagName() == "default":
                     if e.text().find("QT_TRANSLATE_NOOP") > -1:
                         dV = auto_qt_translate_text(e.text())
                     else:
@@ -1043,77 +1042,77 @@ class FLManager(QtCore.QObject):
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "outtransaction":
+                elif e.tagName() == "outtransaction":
                     oT = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "counter":
+                elif e.tagName() == "counter":
                     coun = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "calculated":
+                elif e.tagName() == "calculated":
                     c = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "fullycalculated":
+                elif e.tagName() == "fullycalculated":
                     fullCalc = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "trimmed":
+                elif e.tagName() == "trimmed":
                     trimm = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "visible":
+                elif e.tagName() == "visible":
                     v = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "visiblegrid":
+                elif e.tagName() == "visiblegrid":
                     vG = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "editable":
+                elif e.tagName() == "editable":
                     ed = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "partI":
+                elif e.tagName() == "partI":
                     pI = int(e.text())
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "partD":
+                elif e.tagName() == "partD":
                     pD = int(e.text())
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "index":
+                elif e.tagName() == "index":
                     iNX = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "unique":
+                elif e.tagName() == "unique":
                     uNI = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "ck":
+                elif e.tagName() == "ck":
                     ck = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "optionslist":
+                elif e.tagName() == "optionslist":
                     ol = e.text()
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "searchoptions":
+                elif e.tagName() == "searchoptions":
                     so = e.text()
                     no = no.nextSibling()
                     continue
@@ -1140,7 +1139,7 @@ class FLManager(QtCore.QObject):
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "associated":
+                elif e.tagName() == "associated":
                     noas = e.firstChild()
                     while not noas.isNull():
                         eas = noas.toElement()
@@ -1150,7 +1149,7 @@ class FLManager(QtCore.QObject):
                                 noas = noas.nextSibling()
                                 continue
 
-                            if eas.tagName() == "by":
+                            elif eas.tagName() == "by":
                                 assocBy = eas.text()
                                 noas = noas.nextSibling()
                                 continue
@@ -1200,29 +1199,29 @@ class FLManager(QtCore.QObject):
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "field":
+                elif e.tagName() == "field":
                     fF = e.text()
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "card":
+                elif e.tagName() == "card":
                     if e.text() == "1M":
                         rC = FLRelationMetaData.RELATION_1M
 
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "delC":
+                elif e.tagName() == "delC":
                     dC = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "updC":
+                elif e.tagName() == "updC":
                     uC = (e.text() == "true")
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "checkIn":
+                elif e.tagName() == "checkIn":
                     cI = (e.text() == "true")
                     no = no.nextSibling()
                     continue
