@@ -635,20 +635,24 @@ class FLManagerModules(object):
     def idModuleOfFile(self, n):
         if not isinstance(n, str):
             n = n.toString()
+        
+        if n == "flfiles.mtd":
+            return "sys"
+        
+        else:
+            query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
+            cursor = self.conn_.cursor()
+            try:
+                cursor.execute(query)
+            except Exception:
+                print("ERROR: FLManagerModules.idModuleOfFile",
+                      traceback.format_exc())
+                # cursor.execute("ROLLBACK")
+                cursor.close()
+                return None
 
-        query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
-        cursor = self.conn_.cursor()
-        try:
-            cursor.execute(query)
-        except Exception:
-            print("ERROR: FLManagerModules.idModuleOfFile",
-                  traceback.format_exc())
-            # cursor.execute("ROLLBACK")
-            cursor.close()
-            return None
-
-        for idmodulo in cursor:
-            return idmodulo[0]
+            for idmodulo in cursor:
+                return idmodulo[0]
     """
     Guarda el estado del sistema de módulos
     """
