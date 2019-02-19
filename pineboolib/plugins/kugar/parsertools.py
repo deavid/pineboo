@@ -154,7 +154,7 @@ class parsertools(object):
             img_file = "%s/%s.png" % (tmp_dir, ref_key)
             
             if not os.path.exists(img_file) and ref_key[0:3] == "RK@":
-                if not pineboolib.project.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
+                if not aqApp.singleFLLarge():  # Si no es FLLarge modo único añadimos sufijo "_nombre" a fllarge
                     table_name += "_%s" % ref_key.split("@")[1]
 
                 q = FLSqlQuery()

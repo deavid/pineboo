@@ -951,8 +951,9 @@ class kut2fpdf(object):
         import os
         if not file_name.lower().endswith(".png"):
             file_name = self._parser_tools.parseKey(file_name)
-            
-        if os.path.exists(file_name):            
+        
+        
+        if file_name is not None and os.path.exists(file_name):            
             x = self.calculateLeftStart(x)
             W = self.calculateWidth(W, x)
             
