@@ -988,10 +988,13 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def mainFilter(self):
+        ret_ = None
         if hasattr(self.model(), "where_filters"):
             ret_ = self.model().where_filters["main-filter"]
-        else:
+        
+        if ret_ is None:
             ret_ = ""
+            
 
         return ret_
 
