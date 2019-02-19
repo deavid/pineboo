@@ -203,12 +203,12 @@ class FLAccessControl(object):
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "user":
+                elif e.tagName() == "user":
                     self.user_ = e.text()
                     no = no.nextSibling()
                     continue
 
-                if e.tagName() == "aco":
+                elif e.tagName() == "aco":
                     self.acosPerms_[e.text()] = e.attribute("perm")
                     no = no.nextSibling()
                     continue
