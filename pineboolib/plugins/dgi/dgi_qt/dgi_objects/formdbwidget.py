@@ -120,11 +120,11 @@ class FormDBWidget(QtWidgets.QWidget):
             print_stack(8)
             import gc
             gc.collect()
-            print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
-                  (self, self._action.name, gc.get_referrers(self)))
-            if hasattr(self, 'iface'):
-                print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (
-                    self.iface, gc.get_referrers(self.iface)))
+            #print("HINT: Objetos referenciando FormDBWidget::%r (%r) : %r" %
+            #      (self, self._action.name, gc.get_referrers(self)))
+            #if hasattr(self, 'iface'):
+            #    print("HINT: Objetos referenciando FormDBWidget.iface::%r : %r" % (
+            #        self.iface, gc.get_referrers(self.iface)))
             ret = None
         else:
             if ret is None:
