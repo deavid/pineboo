@@ -67,7 +67,7 @@ class QListView(QtWidgets.QListView):
         self._resizeable = True if r else False
     
     def resizeEvent(self, e):
-        return super().resizeEvent(self, e) if self._resizeable else False
+        return super().resizeEvent(e) if self._resizeable else False
             
     def clear(self):
         self._model = None
