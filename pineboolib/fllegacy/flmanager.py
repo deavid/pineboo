@@ -165,19 +165,16 @@ class FLManager(QtCore.QObject):
             key = n.strip()
             stream = None
             isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
-            cacheFound_ = False
             
             if isSysTable:
                 if key in self.cacheMetaDataSys_.keys():
                     ret = self.cacheMetaDataSys_[key]
-                    cacheFound_ = True
             else:
                 if key in self.cacheMetaData_.keys():
                     ret = self.cacheMetaData_[key]
-                    cacheFound_ = True
             
             
-            if not cacheFound_:
+            if not ret:
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
 
                 if not stream:
