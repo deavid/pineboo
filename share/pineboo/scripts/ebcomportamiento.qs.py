@@ -4,6 +4,7 @@ import pineboolib
 from pineboolib.utils import filedir
 from PyQt5 import QtCore
 
+settings = AQSettings()
 
 class FormInternalObj(FormDBWidget):
     def _class_init(self):
@@ -109,7 +110,6 @@ class FormInternalObj(FormDBWidget):
 
     def leerValorLocal(self, valor_name):
         util = FLUtil()
-        settings = AQSettings()
         if valor_name == u"isDebuggerMode":
             valor = settings.readBoolEntry("application/%s" % valor_name)
         else:
@@ -124,13 +124,12 @@ class FormInternalObj(FormDBWidget):
         return valor
 
     def grabarValorLocal(self, valor_name=None, value=None):
-        settings = AQSettings()
-        if valor_name == "maxPixImages" and value is None:
-            value = 600
-
+        
         if valor_name == "isDebuggerMode":
             settings.writeEntry("application/%s" % valor_name, value)
         else:
+            if valor_name == "maxPixImages" and value is None:
+                value = 600
             settings.writeEntry("ebcomportamiento/%s" % valor_name, value)
 
     def initEventFilter(self):
@@ -140,19 +139,14 @@ class FormInternalObj(FormDBWidget):
         w.installEventFilter(w)
 
     def eventFilter(self, o=None, e=None):
-        s03_when = e.type
-        s03_do_work, s03_work_done = False, False
-        if s03_when == AQS.Close:
-            s03_do_work, s03_work_done = True, True
-        if s03_do_work:
+        if e.type == AQS.Close:
             self.cerrar_clicked()
-            s03_do_work = False  # BREAK
 
     def cerrar_clicked(self):
         self.w_.close()
 
     def guardar_clicked(self):
-        w = self.w_            
+        w = self.w_       
         self.grabarValorGlobal("verticalName", w.child(u"leNombreVertical").text)
         self.grabarValorLocal("FLTableDoubleClick", w.child(u"cbFLTableDC").checked)
         self.grabarValorLocal("FLTableShortCut", w.child(u"cbFLTableSC").checked)
@@ -180,6 +174,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("git_updates_enabled", w.child("cb_git_activar").checked)
         self.grabarValorLocal("git_updates_repo", w.child("le_git_ruta").text)
         self.grabarValorLocal("show_snaptshop_button",w.child("cb_snapshot").checked)
+        
         
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
