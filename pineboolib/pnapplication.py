@@ -107,7 +107,7 @@ class Project(object):
         
     def show_time(self):
         now_ = time.time()
-        return round(now_ - self.time_, 3)
+        self.logger.warn("Tiempo : %s", round(now_ - self.time_, 3), stack_info = True)
 
     """
     Retorna si hay o no acls cargados
