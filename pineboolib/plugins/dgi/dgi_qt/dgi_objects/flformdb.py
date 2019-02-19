@@ -787,6 +787,8 @@ class FLFormDB(QtWidgets.QDialog):
             #    self.script.form = None
             
             #print("Borrando self.iface", self.iface)
+            if self.widget:
+                self.widget.clear_connections()
             self.iface = None
             #if hasattr(self, "widget"):
             #    print("Borrando self.widget", self.widget)
