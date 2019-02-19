@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+from PyQt5.QtCore import QSettings
 
 class FLSettings(object):
     s = None
     def __init__(self):
-        from PyQt5.QtCore import QSettings
         self.s = QSettings(QSettings.NativeFormat,QSettings.UserScope, "Eneboo", "Pineboo")
 
     def readListEntry(self, key):
@@ -56,6 +56,7 @@ class FLSettings(object):
         self.s.setValue(key, value)
 
     def writeEntryList(self, key, value):
+        
         if len(value) == 1:
             val = value[0]
         else:
