@@ -152,7 +152,7 @@ class SysType(object):
         return pineboolib.project.conn.user()
 
     def interactiveGUI(self):
-        return "Pineboo"
+        return pineboolib.project._DGI.interactiveGUI()
 
     def isLoadedModule(self, modulename):
         return modulename in pineboolib.project.conn.managerModules().listAllIdModules()

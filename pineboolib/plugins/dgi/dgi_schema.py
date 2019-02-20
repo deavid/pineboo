@@ -90,6 +90,9 @@ class dgi_schema(object):
     def mainForm(self):
         pass
     
+    def interactiveGUI(self):
+        return "Pineboo"
+    
     def show_object_not_found_warnings(self):
         return self._show_object_not_found_warnings
 
