@@ -896,7 +896,11 @@ class Member(ASTPython):
                 if fun_name.find("(") > -1:
                     fun_name = fun_name[:fun_name.find("(")]
                 
-                classname = full_fun_name.replace("_%s" % fun_name, "")
+                if full_fun_name.find("_%s" % fun_name):
+                    classname = full_fun_name.replace("_%s" % fun_name, "")
+                else:
+                    classname = full_fun_name.split("_")[0]
+                    
                 arguments[2] = arguments[2][2:]
                 arguments[0:2] = ["super(%s, %s)" % (classname, ".".join(arguments[0:2]))]
                 
@@ -922,7 +926,10 @@ class Member(ASTPython):
                 if fun_name.find("(") > -1:
                     fun_name = fun_name[:fun_name.find("(")]
                 
-                classname = full_fun_name.replace("_%s" % fun_name, "")
+                if full_fun_name.find("_%s" % fun_name):
+                    classname = full_fun_name.replace("_%s" % fun_name, "")
+                else:
+                    classname = full_fun_name.split("_")[0]
                 arguments[1] = arguments[1][2:]
                 arguments[0:1] = ["super(%s, %s)" % (classname, ".".join(arguments[0:1]))]
 
