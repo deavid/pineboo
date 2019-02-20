@@ -261,10 +261,8 @@ class PNBuffer(object):
             raise ValueError(
                 "No se admite el tipo %r , en setValue %r" % (type(value), value))
 
-        if isinstance(value, pineboolib.qsa.Date):
-            value = value.toString()
-
         field = self.field(name)
+        
         if field is None:
             return False
         
@@ -288,6 +286,9 @@ class PNBuffer(object):
                 value = value[value.find("T") + 1:]
         
         elif field.type_ is "date":
+            if isinstance(value, pineboolib.qsa.Date):
+                value = value.toString()
+            
             if isinstance(value, str):
                 if value.find("T") > -1:
                     value = value[:value.find("T")]
