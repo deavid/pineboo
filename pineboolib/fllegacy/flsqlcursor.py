@@ -263,8 +263,11 @@ class PNBuffer(object):
 
         field = self.field(name)
         
+        
         if field is None:
             return False
+        
+        
         
         elif field.type_ is "double" and value not in ("", "-",None):
             if isinstance(value, str) and value.find(":") > -1:
@@ -281,8 +284,11 @@ class PNBuffer(object):
         elif field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
         
-        elif field.type_ is "time" and value is not None:
-            if value.find("T") > -1:
+        elif field.type_ is "time":
+            if value is not None:
+                if isinstance(value, pineboolib.qsa.Date):
+                    value = value.toString()
+            if isinstance(value, str) and value.find("T") > -1:
                 value = value[value.find("T") + 1:]
         
         elif field.type_ is "date":
@@ -295,6 +301,7 @@ class PNBuffer(object):
                 list_ = value.split("-")
                 value = datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
 
+        #print("*", field.type_, name, value, type(value))
         if self.hasChanged(field.name, value):
             
             field.value = value
@@ -2592,8 +2599,8 @@ class FLSqlCursor(QtCore.QObject):
 
                             # Este lo hago sin context() porque no se ha especificado todavía en el
                             # cursor y continue el de master
-                            functionCounter = "%s.widget.calculateCounter" % self._action.scriptFormRecord()[:-3]
-                            siguiente = aqApp.call(functionCounter, None, None, True)
+                            function_counter = "%s.iface.calculateCounter" % self._action.scriptFormRecord()[:-3]
+                            siguiente = aqApp.call(function_counter, [], None, True)
                         except Exception:
                             util = FLUtil()
                             siguiente = util.nextCounter(field.name(), self)
