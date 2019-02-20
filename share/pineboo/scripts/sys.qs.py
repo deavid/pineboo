@@ -1876,27 +1876,14 @@ def disableObj(container=None, component=None):
     c = testObj(container, component)
     if not c:
         return False
-    clase = (u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className())))
-    s04_when = clase
-    s04_do_work, s04_work_done = False, False
-    if s04_when == u"QPushButton":
-        s04_do_work, s04_work_done = True, True
-    if s04_do_work:
-        pass
-    if s04_when == u"QToolButton":
-        s04_do_work, s04_work_done = True, True
-    if s04_do_work:
-        self.runObjMethod(container, component, u"setEnabled", False)
-        s04_do_work = False  # BREAK
-    if s04_when == u"FLFieldDB":
-        s04_do_work, s04_work_done = True, True
-    if s04_do_work:
-        self.runObjMethod(container, component, u"setDisabled", True)
-        s04_do_work = False  # BREAK
-    if not s04_work_done:
-        s04_do_work, s04_work_done = True, True
-    if s04_do_work:
+    clase = "FLFieldDB" if isinstance(c, pineboolib.project._DGI.FLFieldDB) else "FLTableDB" if isinstance(c, pineboolib.project._DGI.FLTableDB) else c.className()
+    if clase in ["QToolButton", "QPushButton"]:
+        runObjMethod(container, component, u"setEnabled", False)
+    elif clase == u"FLFieldDB":
+        runObjMethod(container, component, u"setDisabled", True)
+    else:
         return False
+    
     return True
 
     
