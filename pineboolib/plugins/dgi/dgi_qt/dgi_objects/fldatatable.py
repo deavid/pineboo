@@ -652,7 +652,7 @@ class FLDataTable(QtWidgets.QTableView):
             if filter:
                 self.cursor().select(filter)  
             else:      
-                self.cursor().refresh()
+                self.cursor().select()
 
             self.marcaRow(last_pk)
             self.show()
