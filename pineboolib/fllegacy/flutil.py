@@ -541,7 +541,7 @@ class FLUtil(QtCore.QObject):
 
             type_ = field.type()
 
-            if not type_ == "string" and not not type_ == "double":
+            if type_ not in ["string", "double"]:
                 return None
 
             _len = int(field.length())
@@ -605,7 +605,7 @@ class FLUtil(QtCore.QObject):
                 return None
 
             type_ = field.type()
-            if not type_ == "string" and not type_ == "double":
+            if type_ not in ["string", "double"]:
                 return None
 
             _len = field.length() - len(serie)
@@ -634,15 +634,15 @@ class FLUtil(QtCore.QObject):
                     numero = 1
                     break
 
-                numero = float(q.value(0))
+                numero = int(q.value(0))
                 numero = numero + 1
 
-            if type_ == "string" or type_ == "double":
+            if type_ in ["string", "double"]:
                 cadena = numero
                 if len(cadena) < _len:
                     relleno = cadena.rjust(_len - len(cadena), '0')
                     cadena = relleno + cadena
-
+                
                 # res = serie + cadena
                 return cadena
 
