@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtWidgets  import QWidget
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qlineedit import QLineEdit
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qlabel import QLabel
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qhboxlayout import QHBoxLayout
+from PyQt5.Qt import QDoubleValidator
 
 class NumberEdit(QWidget):
     """
@@ -9,11 +13,11 @@ class NumberEdit(QWidget):
     def __init__(self):
         super(NumberEdit, self).__init__()
         
-        from PyQt5.Qt import QDoubleValidator
+        
         self.line_edit = QLineEdit(self)
         self.label_line_edit = QLabel(self)
         self.label_line_edit.setMinimumWidth(150)
-        lay = QHBoxLayout()
+        lay = QHBoxLayout(self)
         lay.addWidget(self.label_line_edit)
         lay.addWidget(self.line_edit)
         lay.setContentsMargins(0,0,0,0)
@@ -34,6 +38,9 @@ class NumberEdit(QWidget):
         Setea el valor dado como valor actual
         @param value. Nuevo valor actual
         """
+        if value in ["",None]:
+            return
+        
         self.line_edit.setText(value)
 
     def getDecimals(self):
@@ -56,6 +63,10 @@ class NumberEdit(QWidget):
         Setea valor mínimo
         @param min. Valor mínimo especificable
         """
+        if min in ["",None]:
+            return
+        
+        
         self.line_edit.validator().setBottom(float(min))
 
     def getMinimum(self):
@@ -78,6 +89,9 @@ class NumberEdit(QWidget):
         Setea valor máximo
         @param max. Valor maximo especificable
         """
+        if max in ["",None]:
+            return
+        
         return self.line_edit.validator().setTop(float(max))
 
     def getLabel(self):
