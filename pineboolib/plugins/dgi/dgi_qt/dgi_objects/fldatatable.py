@@ -647,12 +647,8 @@ class FLDataTable(QtWidgets.QTableView):
             last_pk = None
             if self.cursor().buffer():
                 last_pk = self.cursor().buffer().value(self.cursor().buffer().pK())
-            
-            #self.cursor().model().refresh() #Si elimino esto ,no filtra los registros a buscar      
-            if filter:
-                self.cursor().select(filter)  
-            else:      
-                self.cursor().select()
+ 
+            self.cursor().refresh()
 
             self.marcaRow(last_pk)
             self.show()

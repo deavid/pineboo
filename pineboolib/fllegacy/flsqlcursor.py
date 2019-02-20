@@ -2470,6 +2470,7 @@ class FLSqlCursor(QtCore.QObject):
                 self.refreshDelayed()
                 return
         else:
+            self.model().refresh() #Hay que hacer refresh previo pq si no no recoge valores de un commitBuffer paralelo
             #self.select()
             pos = self.atFrom()
             if pos > self.size():
@@ -2892,7 +2893,7 @@ class FLSqlCursor(QtCore.QObject):
 
         if sort:
             self.model().setSortOrder(sort)
-            
+          
         self.model().refresh()
         self.d._currentregister = -1
 
