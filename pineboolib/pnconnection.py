@@ -104,7 +104,12 @@ class PNConnection(QtCore.QObject):
         return self.connAux[name]
 
     def removeConn(self, name="default"):
-        return self.useConn(name).conn.close()
+        try:
+            self.useConn(name).conn.close()
+        except Exception:
+            pass
+        
+        return True
 
     def isOpen(self):
         return self.driver().isOpen()
