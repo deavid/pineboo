@@ -72,8 +72,8 @@ class dgi_aqnext(dgi_schema):
     def use_authentication(self):
         return self._use_authentication
     
-    def interactiveGUI(self):       
-        return "Django"
+    #def interactiveGUI(self):       
+        #return "Django"
     
     """
     def content_cached(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
