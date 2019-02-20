@@ -2596,19 +2596,14 @@ class FLSqlCursor(QtCore.QObject):
                     if field.isCounter():
                         siguiente = None
                         try:
-                            # siguiente = self.context().calculateCounter()
-
-                            # Este lo hago sin context() porque no se ha especificado todavía en el
-                            # cursor y continue el de master
-                            function_counter = "%s.iface.calculateCounter" % self._action.scriptFormRecord()[:-3]
+                            function_counter = "%s.widget.calculateCounter" % self._action.scriptFormRecord()[:-3]
                             siguiente = aqApp.call(function_counter, [], None, True)
                         except Exception:
                             util = FLUtil()
                             siguiente = util.nextCounter(field.name(), self)
 
                         if siguiente:
-                            self.buffer().setValue(
-                                field.name(), siguiente)
+                            self.buffer().setValue(field.name(), siguiente)
 
             if self.cursorRelation() and self.relation() and self.cursorRelation().metadata():
                 self.setValueBuffer(self.relation().field(
