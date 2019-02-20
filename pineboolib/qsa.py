@@ -240,6 +240,8 @@ def parseFloat(x):
     @param x. valor a convertir
     @return Valor tipo float, o parametro x , si no es convertible
     """
+    
+    
     try:
         if isinstance(x, str) and x.find(":") > -1:
             #Convertimos a horas
@@ -248,9 +250,10 @@ def parseFloat(x):
             x += float(list_[1]) / 60 #Minutos a hora
             x += float(list_[2]) / 3600 #Segundos a hora
         
-        ret = 0 if x is None else float(x) 
+        ret = 0 if x in [None, ""] else float(x) 
         if ret == int(ret):
             ret = int(ret)
+        
         return ret
     except Exception:
         return x
