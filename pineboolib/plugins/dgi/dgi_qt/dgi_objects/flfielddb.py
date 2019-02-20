@@ -1128,8 +1128,8 @@ class FLFieldDB(QtWidgets.QWidget):
                 (modeAcces == FLSqlCursor.Edit and (field.isPrimaryKey() or tMD.fieldListOfCompoundKey(self.fieldName_))) or
                 not field.editable() or modeAcces == FLSqlCursor.Browse):
             fDis = True
-
-        self.setDisabled(fDis)
+        
+        self.setEnabled(not fDis)
 
         if type_ == "double":
             try:
@@ -1349,7 +1349,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.hide()
             elif self.editorImg_:
                 self.editorImg_.hide()
-            self.setDisabled(True)
+            self.setEnabled(False)
 
     """
     Refresco rápido
@@ -2896,8 +2896,6 @@ class FLFieldDB(QtWidgets.QWidget):
             self.activatedAccel.emit()
 
     def setDisabled(self, disable):
-        if not pineboolib.project._DGI.localDesktop():
-            pineboolib.project._DGI._par.addQueque("%s_setDisabled" % self.objectName(), disable)
         self.setEnabled(not disable)
 
     """
