@@ -970,6 +970,10 @@ class FLTableDB(QtWidgets.QWidget):
             self.tableRecords_.installEventFilter(self)
 
         if self.checkColumnEnabled_:
+            try:
+                self.tableRecords_.clicked.disconnect(self.tableRecords_.setChecked)
+            except:
+                pass
             self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
 
         t_cursor = self.tableRecords_.cursor()
