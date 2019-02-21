@@ -41,7 +41,7 @@ class QTable(QtWidgets.QTableWidget):
     
     def valueChanged_(self, item = None):
         
-        if item:
+        if item and self.text(item.row(), item.column()) != "":
             self.valueChanged.emit(item.row(), item.column())
 
     def numRows(self):
