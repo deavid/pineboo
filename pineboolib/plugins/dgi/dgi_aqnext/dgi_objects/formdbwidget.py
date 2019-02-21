@@ -178,6 +178,9 @@ class FormDBWidget(QtCore.QObject):
         return list_[self._iter_current]
     
     
+    def legacy(self):
+        return getattr(pineboolib.qsa, "%s_legacy" % self.name, self)
+    
     """
     def debug(*args):
         try:
