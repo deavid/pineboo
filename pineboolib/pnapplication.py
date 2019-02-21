@@ -342,11 +342,14 @@ class Project(object):
                     self.modules[idmodulo].add_project_file(fileobj)
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
-
+        
+        from pineboolib.pncontrolsfactory import aqApp
+        
         if self._splash:
             self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+            self._DGI.processEvents()
 
-        from pineboolib.pncontrolsfactory import aqApp
+        
         aqApp.loadTranslations()
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
         self.acl_ = FLAccessControlLists()
