@@ -629,7 +629,7 @@ class FLTableMetaData(object):
         return None
 
     """
-    Obtiene una cadena de texto que contiene los nombres de los campos separados por comas.
+    Obtiene una lista de textos que contiene los nombres de los campos separados por comas.
 
     El orden de los campos de izquierda a derecha es el correspondiente al orden en que
     se han añadido con el método addFieldMD() o addFieldName()

@@ -62,6 +62,9 @@ class dgi_aqnext(dgi_schema):
         logger.warn("Usuario DB: %s", sys.nameUser())
         logger.warn("Nombre  DB: %s", sys.nameBD())
     
+    def processEvents(self):
+        return QtCore.QCoreApplication.processEvents()
+    
     
 
     def authenticate(self, **kwargs):

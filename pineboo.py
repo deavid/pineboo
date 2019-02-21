@@ -271,6 +271,7 @@ def show_splashscreen(project):
     """Show a splashscreen to inform keep the user busy while Pineboo is warming up."""
     from PyQt5 import QtGui, QtCore, QtWidgets
     from pineboolib.utils import filedir
+    
     splash_path = filedir("../share/splashscreen/splash_%s.png" % project.dbname)
     if not os.path.exists(splash_path):
         splash_path = filedir("../share/splashscreen/splash.png")
@@ -278,14 +279,14 @@ def show_splashscreen(project):
     splash_pix = QtGui.QPixmap(splash_path)
     splash = QtWidgets.QSplashScreen(splash_pix, QtCore.Qt.WindowStaysOnTopHint)
     splash.setMask(splash_pix.mask())
-    splash.show()
 
     frameGm = splash.frameGeometry()
-    screen = QtWidgets.QApplication.desktop().screenNumber(
-        QtWidgets.QApplication.desktop().cursor().pos())
+    screen = QtWidgets.QApplication.desktop().screenNumber(QtWidgets.QApplication.desktop().cursor().pos())
     centerPoint = QtWidgets.QApplication.desktop().screenGeometry(screen).center()
     frameGm.moveCenter(centerPoint)
     splash.move(frameGm.topLeft())
+    splash.show()
+    
     return splash
 
 
@@ -336,6 +337,7 @@ def main():
         project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
             project.main_form_name, project.main_form_name)) if _DGI.localDesktop() else _DGI.mainForm()
         project.main_window = project.main_form.mainWindow
+    
 
     project.sql_drivers_manager = PNSqlDrivers()
     project.setDebugLevel(options.debug_level)
@@ -354,17 +356,21 @@ def main():
         user, passwd, driver_alias, host, port, dbname = translate_connstring(
             options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
-    elif _DGI.useDesktop() and _DGI.localDesktop() and not _DGI.mobilePlatform():
-        show_connection_dialog(project, app)
-    elif _DGI.useDesktop() and _DGI.localDesktop() and _DGI.mobilePlatform():
-        project.load_db("pineboo.sqlite3", None, None, None, None, "SQLite3 (SQLITE3)")
+    elif _DGI.useDesktop() and _DGI.localDesktop():
+        if not _DGI.mobilePlatform():
+            show_connection_dialog(project, app)
+        else:
+            project.load_db("pineboo.sqlite3", None, None, None, None, "SQLite3 (SQLITE3)")
+
 
     # Cargando spashscreen
     # Create and display the splash screen
-    if _DGI.useDesktop() and _DGI.localDesktop():
+    if _DGI.localDesktop():
         splash = show_splashscreen(project)
+        _DGI.processEvents()
     else:
         splash = None
+
 
     project._splash = splash
     project.run()
@@ -401,6 +407,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
     from PyQt5 import QtCore
     if DGI.useDesktop() and DGI.localDesktop():
         splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        DGI.processEvents()
     logger.info("Iniciando proyecto ...")
 
     # Necesario para que funcione isLoadedModule ¿es este el mejor sitio?
@@ -422,6 +429,7 @@ def init_project(DGI, splash, options, project, mainForm, app):
 
     if DGI.localDesktop():
         splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        DGI.processEvents()
 
     logger.info("Creando interfaz ...")
     main_window = mainForm.mainWindow
@@ -433,10 +441,12 @@ def init_project(DGI, splash, options, project, mainForm, app):
 
     if DGI.localDesktop():
         splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        DGI.processEvents()
     logger.info("Abriendo interfaz ...")
     main_window.show()
     if DGI.localDesktop():
         splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+        DGI.processEvents()
         # main_window.w_.activateWindow()
         QtCore.QTimer.singleShot(1000, splash.hide)
 

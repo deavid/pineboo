@@ -634,7 +634,7 @@ class FLSqlCursorPrivate(QtCore.QObject):
     _currentregister = None
     edition_states_ = None
 
-    filter_ = None
+    #filter_ = None
 
     _current_changed = QtCore.pyqtSignal(int)
 
@@ -2595,12 +2595,13 @@ class FLSqlCursor(QtCore.QObject):
 
                     if field.isCounter():
                         siguiente = None
-                        try:
-                            function_counter = "%s.widget.calculateCounter" % self._action.scriptFormRecord()[:-3]
-                            siguiente = aqApp.call(function_counter, [], None, True)
-                        except Exception:
+                        context_ = getattr(pineboolib.qsa,"formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
+                        function_counter = getattr(context_, "calculateCounter", None)
+                        if function_counter is None:
                             util = FLUtil()
                             siguiente = util.nextCounter(field.name(), self)
+                        else:
+                            siguiente = function_counter()
 
                         if siguiente:
                             self.buffer().setValue(field.name(), siguiente)
@@ -2922,16 +2923,14 @@ class FLSqlCursor(QtCore.QObject):
 
         if self.cursorRelation() and self.relation() and self.metadata() and self.cursorRelation().metadata():
 
-            fgValue = self.cursorRelation().valueBuffer(
-                self.relation().foreignField())
+            fgValue = self.cursorRelation().valueBuffer(self.relation().foreignField())
             field = self.metadata().field(self.relation().field())
 
 
             if field is not None and fgValue is not None:
                 
                 relationFilter = self.db().manager().formatAssignValue(field, fgValue, True)
-                filterAc = self.cursorRelation().filterAssoc(
-                    self.relation().foreignField(), self.metadata())
+                filterAc = self.cursorRelation().filterAssoc(self.relation().foreignField(), self.metadata())
                 if filterAc:
                     if not relationFilter:
                         relationFilter = filterAc
@@ -2949,11 +2948,11 @@ class FLSqlCursor(QtCore.QObject):
                 if relationFilter not in finalFilter:
                     finalFilter = "%s AND %s" % (finalFilter, relationFilter)
 
-        if self.filter():
-            if finalFilter and self.filter() not in finalFilter:
-                finalFilter = "%s AND %s" % (finalFilter, self.filter())
-            else:
-                finalFilter = self.filter()
+        #if self.filter():
+        #    if finalFilter and self.filter() not in finalFilter:
+        #        finalFilter = "%s AND %s" % (finalFilter, self.filter())
+        #    else:
+        #        finalFilter = self.filter()
 
         return finalFilter
 
@@ -2986,9 +2985,10 @@ class FLSqlCursor(QtCore.QObject):
     def setFilter(self, _filter):
         
             
-        self.d.filter_ = None
+        #self.d.filter_ = None
 
         finalFilter = _filter
+        
         bFilter = self.baseFilter()
         if bFilter:
             if not finalFilter:
@@ -3000,6 +3000,7 @@ class FLSqlCursor(QtCore.QObject):
 
         if finalFilter and self.d.persistentFilter_ and self.d.persistentFilter_ not in finalFilter:
             finalFilter = finalFilter + " OR " + self.d.persistentFilter_
+        
         
         self.d._model.where_filters["filter"] = finalFilter
 
@@ -3663,7 +3664,7 @@ class FLSqlCursor(QtCore.QObject):
         return None
 
     def filter(self):
-        return self.d.filter_
+        return self.model().where_filters["filter"] if "filter" in self.model().where_filters else "";
     
     def field(self, name):
         return self.buffer().field(name) if self.buffer() else None
