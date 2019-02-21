@@ -2595,12 +2595,13 @@ class FLSqlCursor(QtCore.QObject):
 
                     if field.isCounter():
                         siguiente = None
-                        try:
-                            function_counter = "%s.widget.calculateCounter" % self._action.scriptFormRecord()[:-3]
-                            siguiente = aqApp.call(function_counter, [], None, True)
-                        except Exception:
+                        context_ = getattr(pineboolib.qsa,"formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
+                        function_counter = getattr(context_, "calculateCounter", None)
+                        if function_counter is None:
                             util = FLUtil()
                             siguiente = util.nextCounter(field.name(), self)
+                        else:
+                            siguiente = function_counter()
 
                         if siguiente:
                             self.buffer().setValue(field.name(), siguiente)
