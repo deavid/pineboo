@@ -2149,20 +2149,23 @@ class FLTableDB(QtWidgets.QWidget):
     def exportToOds(self):
         if not self.cursor_:
             return
+        
+        cursor = FLSqlCursor(self.cursor_.curName())
+        cursor.select(self.cursor_.filter())
 
-        from pineboolib.pncontrolsfactory import aqApp
+        from pineboolib.pncontrolsfactory import aqApp, QMessageBox
         settings = FLSettings()
         if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
-            QtWidgets.QMessageBox.information(self.topWidget, self.tr("Opción deshabilitada"), self.tr(
+            QMessageBox.information(self.topWidget, self.tr("Opción deshabilitada"), self.tr(
                 "Esta opción ha sido deshabilitada por el administrador"), QtWidgets.QMessageBox.Ok)
             return
 
-        mtd = self.cursor_.metadata()
+        mtd = cursor.metadata()
         if not mtd:
             return
 
         tdb = self.tableRecords()
-        if not tdb or not tdb.cursor():
+        if not hasattr(tdb, "cursor"):
             return
 
         from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle
@@ -2175,8 +2178,8 @@ class FLTableDB(QtWidgets.QWidget):
         ods_gen = AQOdsGenerator
         spread_sheet = AQOdsSpreadSheet(ods_gen)
         sheet = AQOdsSheet(spread_sheet, mtd.alias())
-        tdb_num_rows = tdb.numRows()
-        tdb_num_cols = tdb.numCols()
+        tdb_num_rows = cursor.size()
+        tdb_num_cols = len(mtd.fieldsNames())
         
         util = FLUtil()
 
@@ -2186,7 +2189,7 @@ class FLTableDB(QtWidgets.QWidget):
         row.addBgColor(AQOdsColor(0xe7e7e7))
         for i in range(tdb_num_cols):
             field = mtd.indexFieldObject(tdb.visual_index_to_logical_index(i))
-            if field and field.visibleGrid():
+            if field is not None and field.visibleGrid():
                 row.opIn(title_style)
                 row.opIn(border_bot)
                 row.opIn(border_left)
@@ -2195,10 +2198,10 @@ class FLTableDB(QtWidgets.QWidget):
 
         row.close()
 
-        cur = tdb.cursor()
-        cur_row = tdb.currentRow()
+        #cur = tdb.cursor()
+        #cur_row = tdb.currentRow()
 
-        cur.first()
+        cursor.first()
 
         for r in range(tdb_num_rows):
             if pd.wasCanceled():
@@ -2211,8 +2214,8 @@ class FLTableDB(QtWidgets.QWidget):
                 #    continue
                 
                 field = mtd.indexFieldObject(tdb.visual_index_to_logical_index(c))
-                if field and field.visibleGrid():
-                    val = cur.valueBuffer(field.name())
+                if field is not None and field.visibleGrid():
+                    val = cursor.valueBuffer(field.name())
                     if field.type() == "double":
                         row.setFixedPrecision(mtd.fieldPartDecimal(field.name()))
                         row.opIn(float(val))
@@ -2230,7 +2233,7 @@ class FLTableDB(QtWidgets.QWidget):
                         
                             
 
-                    elif field.type() in ("bool", "unlock"):
+                    elif field.type() in ["bool", "unlock"]:
                         str_ = self.tr("Sí") if val == True else self.tr("No")
                         row.opIn(italic)
                         row.opIn(str_)
@@ -2242,9 +2245,9 @@ class FLTableDB(QtWidgets.QWidget):
                             if isinstance(str_, list):
                                 cs = ",".join(str_)
                             elif str(str_).startswith("RK@"):
-                                cs = self.cursor_.db().manager().fetchLargeValue(str_)
+                                cs = cursor.fetchLargeValue(str_)
 
-                            if cs:
+                            if cs is not None:
                                 pix = QPixmap(cs)
 
                                 if not pix.isNull():
@@ -2253,7 +2256,7 @@ class FLTableDB(QtWidgets.QWidget):
                                     pix_file_name = "%s/%s.png" % (aqApp.tmp_dir(), pix_name,
                                                                QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
                                     pix.save(pix_file_name, "PNG")
-                                    print("Metiendo imagen")
+                                    #print("Metiendo imagen")
                                     row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
                                                         double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
                                 else:
@@ -2265,16 +2268,15 @@ class FLTableDB(QtWidgets.QWidget):
             row.close()
             if not r % 4:
                 util.setProgress(r)
-            cur.next()
+            cursor.next()
 
-        cur.seek(cur_row)
+        #cur.seek(cur_row)
         sheet.close()
         spread_sheet.close()
         
         util.setProgress(tdb_num_rows)
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
-        file_name = "%s/%s%s.ods" % (aqApp.tmp_dir(), mtd.name(),
-                                     QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+        file_name = "%s/%s%s.ods" % (aqApp.tmp_dir(), mtd.name(), QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
         ods_gen.generateOds(file_name)
         
         aqApp.call("sys.openUrl", [file_name], None)
