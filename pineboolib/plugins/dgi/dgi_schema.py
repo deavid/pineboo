@@ -93,6 +93,10 @@ class dgi_schema(object):
     def interactiveGUI(self):
         return "Pineboo"
     
+    def processEvents(self):
+        from PyQt5 import QtWidgets
+        QtWidgets.qApp.processEvents()
+    
     def show_object_not_found_warnings(self):
         return self._show_object_not_found_warnings
 
