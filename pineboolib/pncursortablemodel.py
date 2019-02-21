@@ -148,8 +148,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         ord = "ASC"
         if order == 1:
             ord = "DESC"
-
-        col_name = self.metadata().indexFieldObject(col).name()
+        
+        field_mtd = self.metadata().indexFieldObject(col)
+        if field_mtd.type() == "check":
+            return
+        
+        col_name = field_mtd.name()
+        
+        
         order_list = []
         found_ = False
         if self._sortOrder:
@@ -358,15 +364,15 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     d = QtGui.QBrush(QtCore.Qt.red)
 
             elif _type == "check":
-                d = self._checkColumn[pK]
-                if d.isChecked():
+                obj_ = self._checkColumn[pK]
+                if obj_.isChecked():
                     d = QtGui.QBrush(QtCore.Qt.green)
                 else:
                     d = QtGui.QBrush(QtCore.Qt.white)
 
             else:
                 d = None
-
+                
             return d
 
         elif role == QtCore.Qt.ForegroundRole:
