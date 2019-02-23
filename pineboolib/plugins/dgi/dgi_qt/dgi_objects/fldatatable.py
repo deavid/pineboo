@@ -100,7 +100,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Nombre de la función de script a invocar para obtener el color de las filas y celdas
     """
-    functionGetColor_ = None
+    function_get_color = None
 
     """
     Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
@@ -309,15 +309,15 @@ class FLDataTable(QtWidgets.QTableView):
         return self.showAllPixmaps_
 
     """
-    Ver FLDataTable::functionGetColor_
+    Ver FLDataTable::function_get_color
     """
 
     def setFunctionGetColor(self, f):
 
-        self.functionGetColor_ = f
+        self.function_get_color = f
 
     def functionGetColor(self):
-        return self.functionGetColor_
+        return self.function_get_color
 
     """
     Ver FLDataTable::onlyTable_
@@ -627,9 +627,9 @@ class FLDataTable(QtWidgets.QTableView):
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
         if not self.refreshing_ and self.cursor():
 
-            if self.functionGetColor_ and self.cursor().model():
-                if self.cursor().model().color_function_ != self.functionGetColor_:
-                    self.cursor().model().setColorFunction(self.functionGetColor_)
+            #if self.function_get_color and self.cursor().model():
+            #    if self.cursor().model().color_function_ != self.function_get_color:
+            #        self.cursor().model().setColorFunction(self.function_get_color)
 
             self.refreshing_ = True
             self.hide()

@@ -196,11 +196,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         else:
             self._sortOrder = sort_order
 
-    def setColorFunction(self, f):
-        self.color_function_ = f
+    #def setColorFunction(self, f):
+    #    self.color_function_ = f
 
-    def dict_color_function(self):
-        return self.color_function_
+    #def dict_color_function(self):
+    #    return self.color_function_
     """
     Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
     @param index. Posición del registro
@@ -213,6 +213,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         col = index.column()
         field = self.metadata().indexFieldObject(col)
         _type = field.type()
+        res_color_function = []
 
         if _type is not "check":
             r = [x for x in self._data[row]]
@@ -224,18 +225,18 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 d = QtWidgets.QCheckBox()
                 self._checkColumn[pK] = d
 
-        if self.dict_color_function():
-            if not index in self.color_dict_.keys():
-                from pineboolib.pncontrolsfactory import aqApp
-                field_name = field.name()
-                field_value = d
-                cursor = self._parent
-                selected = False
-
-                self.color_dict_["%d_%d" % (row, col)] = aqApp.call(
-                    self.dict_color_function(), [field_name, field_value, cursor, selected, _type], None)
-
-                self.logger.warn("******** functionGetColor!!! %s", self.dict_color_function())
+        if self.parent_view and role in [QtCore.Qt.BackgroundRole, QtCore.Qt.ForegroundRole]:
+            fun_get_color = self.parent_view.functionGetColor() 
+            if fun_get_color is not None: 
+                list_ = fun_get_color.split(".") 
+                context_ = getattr(pineboolib.qsa, list_[0], None).iface
+                function_color = getattr(context_, "%s" % (list_[1]))
+                if function_color is not None:
+                    field_name = field.name()
+                    field_value = d
+                    cursor = self._parent
+                    selected = False
+                    res_color_function = function_color(field_name, field_value, cursor, selected, _type)
         # print("Data ", index, role)
         # print("Registros", self.rowCount())
         # roles
@@ -371,7 +372,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     d = QtGui.QBrush(QtCore.Qt.white)
 
             else:
-                d = None
+                if res_color_function and len(res_color_function) and res_color_function[0] != "":
+                    color_ = QtGui.QColor(res_color_function[0])
+                    style_ = getattr(QtCore.Qt, res_color_function[2], None)
+                    d = QtGui.QBrush(color_)
+                    d.setStyle(style_)
+                else:
+                    d = None
                 
             return d
 
@@ -382,7 +389,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 else:
                     d = QtGui.QBrush(QtCore.Qt.white)
             else:
-                d = None
+                if res_color_function and len(res_color_function) and res_color_function[1] != "":
+                    color_ = QtGui.QColor(res_color_function[1])
+                    style_ = getattr(QtCore.Qt, res_color_function[2], None)
+                    d = QtGui.QBrush(color_)
+                    d.setStyle(style_)
+                else:
+                    d = None
 
             return d
 

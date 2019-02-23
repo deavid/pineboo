@@ -652,14 +652,11 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def setFunctionGetColor(self, f):
-        if f.find('.') > -1:
-            self.functionGetColor_ = f
-        else:
-            self.functionGetColor_ = "%s.%s" % (self.topWidget.name(), f)
+        self.functionGetColor_ = f
 
-        if self.tableRecords_:
-            self.tableRecords().setFunctionGetColor("%s.%s" % (self.topWidget.name(), f))
-
+        
+        #if self.tableRecords_ is not None:
+        #    self.tableRecords().setFunctionGetColor("%s.%s" % (self.topWidget.name(), f))
     """
     Asigna el nombre de función a llamar cuando cambia el filtro.
     """
@@ -1687,6 +1684,8 @@ class FLTableDB(QtWidgets.QWidget):
             self.sortColumn2_ = 1
             self.sortColumn3_ = 2
             self.checkColumnVisible_ = False
+        
+        self.tableRecords_.setFunctionGetColor(self.functionGetColor())
 
         if refreshHead:
             if not self.tableRecords().header().isHidden():
