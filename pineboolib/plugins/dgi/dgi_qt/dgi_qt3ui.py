@@ -287,6 +287,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if pname in translate_properties:
             pname = translate_properties[pname]
         setpname = "set" + pname[0].upper() + pname[1:]
+        
         if pname == "layoutSpacing":
             set_fn = widget.layout.setSpacing
         elif pname == "margin":
@@ -312,6 +313,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn = widget.setSingleStep
         elif pname == "newLine":
             set_fn = origWidget.addToolBarBreak
+        elif pname == "functionGetColor":
+            set_fn = widget.setFunctionGetColor
 
         else:
             set_fn = getattr(widget, setpname, None)
@@ -349,6 +352,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
         else:
             value = loadVariant(xmlprop, widget)
+        
 
         try:
             set_fn(value)
