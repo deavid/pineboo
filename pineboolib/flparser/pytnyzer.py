@@ -1511,7 +1511,19 @@ def file_template(ast):
             if child.tag != "Class":  # Limpiamos las class, se cuelan desde el cambio de xml
                 csource.append(child)
         else:
-            mainsource.append(child)
+            mainclass_sc = None
+            for sc in sourceclasses:
+                class_name = child.get("name").split("_")[0]
+                if sc.get("name") == class_name:
+                    mainclass_sc = sc
+                    break
+            
+            if mainclass_sc:
+                mainsource_sc = etree.ElementTree.SubElement(mainclass_sc, "Source")
+                mainsource_sc.append(child)
+            else:
+                mainsource.append(child)
+                
 
     for dtype, data in parse_ast(sourceclasses).generate():
         yield dtype, data
