@@ -177,10 +177,11 @@ class FormDBWidget(QtCore.QObject):
 
         return list_[self._iter_current]
     
-    
     def legacy(self):
-        return getattr(pineboolib.qsa, "%s_legacy" % self.name, self)
-    
+        from pineboolib import qsa as qsa_dict_modules
+        ret_ = getattr(qsa_dict_modules, "%s_legacy" % self._action.name, None)
+        if ret_ is None:
+            return
     """
     def debug(*args):
         try:
