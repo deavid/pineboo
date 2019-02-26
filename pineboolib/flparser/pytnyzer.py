@@ -263,8 +263,7 @@ class FunctionCall(ASTPython):
             if class_:
                 extends = class_.get("extends")
                 if extends == name:
-                    #name = "super(%s, self).__init__" % class_.get("name")
-                    name = "super().__init__"
+                    name = "super(%s, self).__init__" % class_.get("name")
             functions = parent.findall("Function[@name=\"%s\"]" % name)
             for f in functions:
                 # yield "debug", "Function to:" + etree.ElementTree.tostring(f)
@@ -903,8 +902,7 @@ class Member(ASTPython):
                     classname = full_fun_name.split("_")[0]
                     
                 arguments[2] = arguments[2][2:]
-                #arguments[0:2] = ["super(%s, %s)" % (classname, ".".join(arguments[0:2]))]
-                arguments[0:2] = ["super()"]
+                arguments[0:2] = ["super(%s, %s)" % (classname, ".".join(arguments[0:2]))]
                 
 
         # Lectura del self.iface.__init() al nuevo estilo yeboyebo
@@ -933,8 +931,7 @@ class Member(ASTPython):
                 else:
                     classname = full_fun_name.split("_")[0]
                 arguments[1] = arguments[1][2:]
-                #arguments[0:1] = ["super(%s, %s)" % (classname, ".".join(arguments[0:1]))]
-                arguments[0:1] = ["super()"]
+                arguments[0:1] = ["super(%s, %s)" % (classname, ".".join(arguments[0:1]))]
 
         replace_members = [
             "toString()",
