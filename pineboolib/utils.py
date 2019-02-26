@@ -885,3 +885,49 @@ def convert_to_qdate(date):
         date = QtCore.QDate.fromString(date, "dd-MM-yyyy")
 
     return date
+
+
+def cursor2json( cursor ):
+    if not cursor.isValid():
+        logger.warn("Cursor inválido en %s", cursor.curName())
+        return
+    
+    import json, collections
+    
+    dict_ = collections.OrderedDict()
+    pk = cursor.primaryKey()
+    fields_list = cursor.metadata().fieldsNames()
+    for f in fields_list:
+        value = cursor.valueBuffer(f)
+        if cursor.metadata().field(f).type() in ["date"]:
+            value = value.toString()
+            value = value[:10]
+            
+        if f == pk:
+            dict_["pk"] = value
+        dict_[f] = value
+    
+    return dict_
+        
+
+def load_meta_model(opt , action_name):
+    import importlib
+    from pineboolib.pncontrolsfactory import aqApp
+    
+    module_name = aqApp.db().managerModules().idModuleOfFile("%s.qs" % action_name)
+    if module_name is None:
+        module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
+    
+    
+    if module_name:
+        action = aqApp.db().manager().action(action_name)
+        field_name = action.scriptFormRecord() if opt == "formRecord" else action.scriptForm()
+        field_name = field_name.replace(".qs", "")
+        #field_name = action_name 
+        ret_ = importlib.import_module("models.%s.%s" % (module_name, field_name))
+        ret_ = getattr(ret_, action_name, None)
+    else:
+        ret_ = None
+        
+    return ret_
+    
