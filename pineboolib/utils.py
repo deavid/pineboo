@@ -906,11 +906,13 @@ def cursor2json( cursor ):
         if f == pk:
             dict_["pk"] = value
         dict_[f] = value
+        
+        
     
     return dict_
         
 
-def load_meta_model(opt , action_name):
+def load_meta_model(action_name, opt = None):
     import importlib
     from pineboolib.pncontrolsfactory import aqApp
     
@@ -920,14 +922,103 @@ def load_meta_model(opt , action_name):
     
     
     if module_name:
-        action = aqApp.db().manager().action(action_name)
-        field_name = action.scriptFormRecord() if opt == "formRecord" else action.scriptForm()
-        field_name = field_name.replace(".qs", "")
-        #field_name = action_name 
-        ret_ = importlib.import_module("models.%s.%s" % (module_name, field_name))
+        if opt is not None:
+            action = aqApp.db().manager().action(action_name)
+            field_name = action.scriptFormRecord() if opt == "formRecord" else action.scriptForm()
+            field_name = field_name.replace(".qs", "")
+            #field_name = action_name 
+            ret_ = importlib.import_module("models.%s.%s" % (module_name, field_name))
+        else:
+            ret_ = importlib.import_module("models.%s.%s" % (module_name, module_name))
+            
         ret_ = getattr(ret_, action_name, None)
     else:
         ret_ = None
         
     return ret_
+
+def resolve_query(table_name, params):
+    from collections import OrderedDict
+    or_where = ""
+    and_where = ""
+    where = ""
+    order_by = ""
+    params = OrderedDict(sorted(params.items(), key= lambda x: x[0]))
+    for p in params:
+        if p.startswith("q_"):
+            or_where += " OR " if len(or_where) else ""
+            or_where += resolve_where_params(p, params[p], table_name)
+        elif p.startswith("s_"):
+            and_where += " AND " if len(and_where) else ""
+            and_where += resolve_where_params(p, params[p], table_name)
+        elif p.startswith("o_"):
+            order_by += resolve_order_params(p, params[p])
     
+    if and_where != "":
+        where += str(and_where)
+    if or_where != "":
+        where += " OR (" + str(or_where) + ")" if len(where) else str(or_where)
+    if order_by:
+        order_by = order_by.strip()[:-1]    
+    
+    
+    
+    return where, order_by
+
+
+def resolve_order_params(key, valor):
+    if valor.startswith("-"):
+        valor = valor[1:] + " DESC, "
+    else:
+        valor +=  ", "
+    
+    return valor
+
+
+def resolve_where_params(key, valor, table_name):
+    list_params = key.split("__")
+    campo = "_".join(list_params[0].split("_")[1:])
+    tipo = list_params[1]
+    where = ""
+    if campo == "pk":
+        return "1=1"
+    
+    from pineboolib.pncontrolsfactory import aqApp
+    field_type = aqApp.db().manager().metadata(table_name).field(campo).type()
+    valor = aqApp.db().manager().formatValue(field_type , valor, False)
+    
+    if field_type in ["bool", "unlock"]:
+        valor = "True" if valor else "False"
+    
+    if tipo == "contains":
+        where = campo + " LIKE '%" + valor + "%'"
+    elif tipo == "icontains":
+        where = "UPPER(CAST(" + campo + " AS TEXT)) LIKE UPPER('%" + valor + "%')"
+    elif tipo == "exact":
+        where = campo + " = '" + valor + "'"
+    elif tipo == "iexact":
+        where = "UPPER(CAST(" + campo + " AS TEXT)) = UPPER('" + valor + "')"
+    elif tipo == "startswith":
+        where = campo + " LIKE '" + valor + "%'"
+    elif tipo == "istartswith":
+        where = campo + " ILIKE '" + valor + "%'"
+    elif tipo == "endswith":
+        where = campo + " LIKE '%" + valor + "'"
+    elif tipo == "iendswith":
+        where = campo + " ILIKE '%" + valor + "'"
+    elif tipo == "lt":
+        where = campo + " < '" + valor + "'"
+    elif tipo == "lte":
+        where = campo + " <= '" + valor + "'"
+    elif tipo == "gt":
+        where = campo + " > '" + valor + "'"
+    elif tipo == "gte":
+        where = campo + " >= '" + valor + "'"
+    elif tipo == "ne":
+        where = campo + " <> '" + valor + "'"
+    elif tipo == "in":
+        where = campo + " IN ('" + "', '".join(valor) + "')"
+    
+    return where
+        
+
