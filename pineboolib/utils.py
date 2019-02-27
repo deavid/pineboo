@@ -887,7 +887,7 @@ def convert_to_qdate(date):
     return date
 
 
-def cursor2json( cursor ):
+def cursor2json( cursor , meta_model = None):
     
     if not cursor.isValid():
         logger.warn("Cursor inválido/vacío en %s", cursor.curName())
@@ -897,10 +897,11 @@ def cursor2json( cursor ):
     
     ret_ = None
     
+    cursor.first()
     size_ = cursor.size()
     i = 0
     while i < size_:
-        dict_ = {}
+        dict_ = collections.OrderedDict()
         pk = cursor.primaryKey()
         fields_list = cursor.metadata().fieldsNames()
         for f in fields_list:
@@ -913,6 +914,20 @@ def cursor2json( cursor ):
                 dict_["pk"] = value
             dict_[f] = value
         
+        if meta_model:
+            calculateFields = meta_model.getForeignFields(meta_model, cursor.curName())
+            for field in calculateFields:
+                if hasattr(meta_model, field["func"]):
+                    """ FIXME """ 
+                    #dict_[field["verbose_name"]] = getattr(meta_model, field["func"])
+                    dict_[field["verbose_name"]] = ""
+            
+            #dict_["desc"] = meta_model
+            
+        #for field in calculateFields:
+        #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
+        
+        
         if size_ == 1:
             ret_ = dict_
             break
@@ -920,58 +935,22 @@ def cursor2json( cursor ):
             if ret_ is None:
                 ret_ = []
             ret_.append(dict_)
-            
+        
+        cursor.next()
         i += 1
         
         
-    
     return ret_
         
 
 def load_meta_model(action_name, opt = None):
-    print("***", action_name, opt)
     import importlib
     from pineboolib.pncontrolsfactory import aqApp
-    
-    module_name = aqApp.db().managerModules().idModuleOfFile("%s.qs" % action_name)
-    if module_name is None:
-        module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
-    
     ret_ = None
-    
-    if module_name:
-        if opt is not None:
-            #action = aqApp.db().manager().action(action_name)
-            #field_name = action.scriptFormRecord() if opt == "formRecord" else action.scriptForm()
-            field_name = action_name if opt == "formRecord" else "master%s" % action_name
-            if field_name is not None:
-                
-                field_name = field_name.replace(".qs", "")
-                #field_name = action_name 
-                try:
-                    ret_ = importlib.import_module("models.%s.%s" % (module_name, field_name))
-                except:
-                    print("**** FIXME ****. load_meta_model2")
-                    ret_ = None
-            else:
-                print("**** FIXME ****. load_meta_model")
-                
-                try:
-                    ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))
-                except:
-                    print("**** FIXME ****. load_meta_model3")
-                    ret_ = None
-        else:
-            try:
-                ret_ = importlib.import_module("models.%s.%s" % (module_name, module_name))
-            except:
-                print("**** FIXME ****. load_meta_model3")
-                ret_ = None
-                
+    module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
+    if module_name is not None:
+        ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))                
         ret_ = getattr(ret_, action_name, None)
-    else:
-        ret_ = None
-        
     return ret_
 
 def resolve_query(table_name, params):
