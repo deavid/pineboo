@@ -815,6 +815,7 @@ class FLSqlCursor(QtCore.QObject):
     ext_cursor = None
     _activatedBufferChanged = None
     _activatedBufferCommited = None
+    _meta_model = None
     #actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
@@ -823,6 +824,7 @@ class FLSqlCursor(QtCore.QObject):
             logger.warn("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
             return
 
+        self._meta_model = None
         name_action = None
         self.setActivatedBufferChanged(True)
         self.setActivatedBufferCommited(True)
@@ -1433,6 +1435,16 @@ class FLSqlCursor(QtCore.QObject):
 
         if i:
             self.d.browse_states_.erase(i)
+    
+    def meta_model(self):
+        if pineboolib.project._DGI.use_model():
+            if self._meta_model is None:
+                self._meta_model = pineboolib.utils.load_meta_model(self.curName())
+            return self._meta_model
+        
+        return None
+                
+            
 
     """
     Establece el contexto de ejecución de scripts, este puede ser del master o del form_record
