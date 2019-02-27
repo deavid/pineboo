@@ -944,18 +944,22 @@ def cursor2json(cursor):
         
         
     return ret_
-        
+
+meta_models = {}      
 
 def load_meta_model(action_name, opt = None):
-    import importlib
-    from pineboolib.pncontrolsfactory import aqApp
-    ret_ = None
-    module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
-    if module_name is not None:
-        ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))                
-        ret_ = getattr(ret_, action_name, None)
-    
-    return ret_
+    if action_name not in meta_models.keys():
+        import importlib
+        from pineboolib.pncontrolsfactory import aqApp
+        module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
+        ret_ = None
+        if module_name is not None:
+            ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))                
+            meta_models[action_name] = getattr(ret_, action_name, None)
+        else:
+            meta_models[action_name] = ret_
+         
+    return meta_models[action_name]
 
 def resolve_query(table_name, params):
     from collections import OrderedDict
