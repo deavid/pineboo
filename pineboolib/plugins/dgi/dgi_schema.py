@@ -135,6 +135,9 @@ class dgi_schema(object):
     
     def alternative_script_path(self, script_name):
         return None
+    
+    def use_model(self):
+        return False
 
     def __getattr__(self, name):
         return self.resolveObject(self._name, name)

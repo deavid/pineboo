@@ -75,6 +75,9 @@ class dgi_aqnext(dgi_schema):
     def use_authentication(self):
         return self._use_authentication
     
+    def use_model(self):
+        return True
+    
     #def interactiveGUI(self):       
         #return "Django"
     
