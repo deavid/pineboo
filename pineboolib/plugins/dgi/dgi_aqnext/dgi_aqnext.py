@@ -109,7 +109,7 @@ class dgi_aqnext(dgi_schema):
         
         
         
-        for file_name in glob.iglob("%s/models/%s/%s" % (folder_, app, script_name), recursive=True):
+        for file_name in glob.iglob("%s/legacy/%s/%s" % (folder_, app, script_name), recursive=True):
             if file_name.endswith(script_name):
                 ret_ = file_name
                 break

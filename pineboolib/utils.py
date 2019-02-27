@@ -888,31 +888,48 @@ def convert_to_qdate(date):
 
 
 def cursor2json( cursor ):
+    
     if not cursor.isValid():
-        logger.warn("Cursor inválido en %s", cursor.curName())
-        return
+        logger.warn("Cursor inválido/vacío en %s", cursor.curName())
+        return {}
     
     import json, collections
     
-    dict_ = collections.OrderedDict()
-    pk = cursor.primaryKey()
-    fields_list = cursor.metadata().fieldsNames()
-    for f in fields_list:
-        value = cursor.valueBuffer(f)
-        if cursor.metadata().field(f).type() in ["date"]:
-            value = value.toString()
-            value = value[:10]
+    ret_ = None
+    
+    size_ = cursor.size()
+    i = 0
+    while i < size_:
+        dict_ = {}
+        pk = cursor.primaryKey()
+        fields_list = cursor.metadata().fieldsNames()
+        for f in fields_list:
+            value = cursor.valueBuffer(f)
+            if cursor.metadata().field(f).type() in ["date"]:
+               value = value.toString()
+               value = value[:10]
             
-        if f == pk:
-            dict_["pk"] = value
-        dict_[f] = value
+            if f == pk:
+                dict_["pk"] = value
+            dict_[f] = value
+        
+        if size_ == 1:
+            ret_ = dict_
+            break
+        else:
+            if ret_ is None:
+                ret_ = []
+            ret_.append(dict_)
+            
+        i += 1
         
         
     
-    return dict_
+    return ret_
         
 
 def load_meta_model(action_name, opt = None):
+    print("***", action_name, opt)
     import importlib
     from pineboolib.pncontrolsfactory import aqApp
     
@@ -920,17 +937,37 @@ def load_meta_model(action_name, opt = None):
     if module_name is None:
         module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
     
+    ret_ = None
     
     if module_name:
         if opt is not None:
-            action = aqApp.db().manager().action(action_name)
-            field_name = action.scriptFormRecord() if opt == "formRecord" else action.scriptForm()
-            field_name = field_name.replace(".qs", "")
-            #field_name = action_name 
-            ret_ = importlib.import_module("models.%s.%s" % (module_name, field_name))
+            #action = aqApp.db().manager().action(action_name)
+            #field_name = action.scriptFormRecord() if opt == "formRecord" else action.scriptForm()
+            field_name = action_name if opt == "formRecord" else "master%s" % action_name
+            if field_name is not None:
+                
+                field_name = field_name.replace(".qs", "")
+                #field_name = action_name 
+                try:
+                    ret_ = importlib.import_module("models.%s.%s" % (module_name, field_name))
+                except:
+                    print("**** FIXME ****. load_meta_model2")
+                    ret_ = None
+            else:
+                print("**** FIXME ****. load_meta_model")
+                
+                try:
+                    ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))
+                except:
+                    print("**** FIXME ****. load_meta_model3")
+                    ret_ = None
         else:
-            ret_ = importlib.import_module("models.%s.%s" % (module_name, module_name))
-            
+            try:
+                ret_ = importlib.import_module("models.%s.%s" % (module_name, module_name))
+            except:
+                print("**** FIXME ****. load_meta_model3")
+                ret_ = None
+                
         ret_ = getattr(ret_, action_name, None)
     else:
         ret_ = None
@@ -1020,5 +1057,26 @@ def resolve_where_params(key, valor, table_name):
         where = campo + " IN ('" + "', '".join(valor) + "')"
     
     return where
+
+def get_tipo_aqnext(tipo):
+    tipo_ = 3
+    subtipo_ = None
+    
+    if tipo in ["int","uint","serial"]:
+        tipo_ = 16
+    elif tipo in ["string", "stringlist","pixmap","counter"]:
+        tipo_ = 3
+    elif tipo in ["double"]: 
+        tipo_ = 19
+    elif tipo in ["bool","unlock"]:
+        tipo_ = 18
+    elif tipo in ["date"]:
+        tipo_ = 26
+    elif tipo in ["time"]:
+        tipo_ = 27
+    
+    return tipo_
+    
+    
         
 
