@@ -1234,6 +1234,13 @@ class FLSqlCursor(QtCore.QObject):
 
     def valueBuffer(self, fN):
         fN = str(fN)
+        
+        if pineboolib.project._DGI.use_model():
+            if fN == "pk":
+                logger.warn("¡¡¡¡ OJO Cambiado fieldname PK!!", stack_info = True)
+                fN = self.primaryKey()
+        
+        
         if self.d.rawValues_:
             return self.valueBufferRaw(fN)
 
