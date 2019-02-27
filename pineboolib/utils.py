@@ -887,11 +887,13 @@ def convert_to_qdate(date):
     return date
 
 
-def cursor2json( cursor , meta_model = None):
+def cursor2json(cursor):
     
     if not cursor.isValid():
         logger.warn("Cursor inválido/vacío en %s", cursor.curName())
         return {}
+    
+    meta_model = cursor.meta_model()
     
     import json, collections
     
@@ -905,8 +907,9 @@ def cursor2json( cursor , meta_model = None):
         pk = cursor.primaryKey()
         fields_list = cursor.metadata().fieldsNames()
         for f in fields_list:
-            value = cursor.valueBuffer(f)
-            if cursor.metadata().field(f).type() in ["date"]:
+            field_name = f if f != "pk" else pk
+            value = cursor.valueBuffer(field_name)
+            if cursor.metadata().field(field_name).type() in ["date"]:
                value = value.toString()
                value = value[:10]
             
@@ -951,6 +954,7 @@ def load_meta_model(action_name, opt = None):
     if module_name is not None:
         ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))                
         ret_ = getattr(ret_, action_name, None)
+    
     return ret_
 
 def resolve_query(table_name, params):
