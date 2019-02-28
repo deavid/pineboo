@@ -192,4 +192,103 @@ class dgi_aqnext(dgi_schema):
             setattr(qsa_dict_modules, "formRecord" + action_xml.name, delayed_action)
             #print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
         
+    def load_meta_model(self, action_name, opt = None):
+        
+        import importlib
+        from pineboolib.pncontrolsfactory import aqApp
+        module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
+        ret_ = None
+        if module_name is not None:
+            ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))                
+            ret_ = getattr(ret_, action_name, None)
+         
+        return ret_
+    
+    def get_master_cursor(self, prefix, template):
+        from pineboolib import qsa as qsa_tree
+        import traceback
+        
+        module_name = prefix
+        
+        #if template == "master":        
+        #    module_name = "form%s" % prefix
+        #elif template == "formRecord":
+        #    module_name = "formRecord%s" % prefix
+        if template in ["master", "formRecord"]:
+            module_name = "form%s" % prefix
+            
+        script_form_cursor = None
+        module = getattr(qsa_tree, module_name, None)
+        if module is not None:
+            script_form_cursor = module.widget.cursor()
+        else:
+            logger.warn("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
+            from pineboolib.pncontrolsfactory import FLSqlCursor
+            script_form_cursor = FLSqlCursor(prefix)
+            
+        if script_form_cursor is None:
+            logger.warn("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
+            
+        
+        return script_form_cursor
+    
+    def cursor2json(self, cursor):
+    
+        if not cursor.isValid():
+            logger.warn("Cursor inválido/vacío en %s", cursor.curName())
+            return {}
+    
+        meta_model = cursor.meta_model()
+    
+        import json, collections
+    
+        ret_ = None
+    
+        cursor.first()
+        size_ = cursor.size()
+        i = 0
+        while i < size_:
+            dict_ = collections.OrderedDict()
+            pk = cursor.primaryKey()
+            fields_list = cursor.metadata().fieldsNames()
+            for f in fields_list:
+                field_name = f if f != "pk" else pk
+                value = cursor.valueBuffer(field_name)
+                if cursor.metadata().field(field_name).type() in ["date"]:
+                    value = value.toString()
+                    value = value[:10]
+            
+                if f == pk:
+                    dict_["pk"] = value
+                dict_[f] = value
+        
+            if meta_model:
+                calculateFields = meta_model.getForeignFields(meta_model, cursor.curName())
+                for field in calculateFields:
+                    if hasattr(meta_model, field["func"]):
+                        """ FIXME """ 
+                        dict_[field["verbose_name"]] = getattr(meta_model, field["func"])(meta_model)
+                        #dict_[field["verbose_name"]] = ""
+            
+                #dict_["desc"] = meta_model
+            
+            #for field in calculateFields:
+            #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
+        
+        
+            if size_ == 1:
+                ret_ = dict_
+                break
+            else:
+                if ret_ is None:
+                    ret_ = []
+                ret_.append(dict_)
+        
+            cursor.next()
+            i += 1
+        
+        return ret_
+        
+        
+        
         
