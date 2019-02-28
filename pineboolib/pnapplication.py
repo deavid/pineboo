@@ -917,7 +917,7 @@ class XMLAction(XMLStruct):
                 self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             else:
                 self.script = getattr(self, "script", None)
-                if isinstance(self.script, str):
+                if isinstance(self.script, str) or self.script is None:
                     self.load_script(self.script, None)
                     self.formrecord_widget = self.script.form
                     self.formrecord_widget.widget = self.formrecord_widget
