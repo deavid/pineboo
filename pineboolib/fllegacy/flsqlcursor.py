@@ -1446,7 +1446,7 @@ class FLSqlCursor(QtCore.QObject):
     def meta_model(self):
         if pineboolib.project._DGI.use_model():
             if self._meta_model is None:
-                self._meta_model = pineboolib.utils.load_meta_model(self.curName())
+                self._meta_model = pineboolib.project._DGI.load_meta_model(self.curName())
             return self._meta_model
         
         return None
@@ -2578,10 +2578,10 @@ class FLSqlCursor(QtCore.QObject):
 
         if not self.metadata():
             return False
-
+        
         if not self.isValid() and not self.d.modeAccess_ == self.Insert:
             return False
-
+        
         if self.d.modeAccess_ == self.Insert:
 
             if not self.commitBufferCursorRelation():
@@ -2594,7 +2594,7 @@ class FLSqlCursor(QtCore.QObject):
             fieldList = self.metadata().fieldList()
             if fieldList:
                 for field in fieldList:
-                    fiName = field.name()
+                    field_name = field.name()
                     self.buffer().setNull(fiName)
                     if not self.buffer().isGenerated(fiName):
                         continue
@@ -2604,13 +2604,13 @@ class FLSqlCursor(QtCore.QObject):
                     defVal = field.defaultValue()
                     if defVal is not None:
                         # defVal.cast(fltype)
-                        self.buffer().setValue(fiName, defVal)
+                        self.buffer().setValue(field_name, defVal)
 
                     if type_ == "serial":
-                        val = self.db().nextSerialVal(self.metadata().name(), fiName)
+                        val = self.db().nextSerialVal(self.metadata().name(), field_name)
                         if val is None:
                             val = 0
-                        self.buffer().setValue(fiName, "%u" % val)
+                        self.buffer().setValue(field_name, "%u" % val)
 
                     if field.isCounter():
                         siguiente = None
@@ -2618,12 +2618,14 @@ class FLSqlCursor(QtCore.QObject):
                         function_counter = getattr(context_, "calculateCounter", None)
                         if function_counter is None:
                             util = FLUtil()
-                            siguiente = util.nextCounter(field.name(), self)
+                            siguiente = util.nextCounter(field_name, self)
                         else:
                             siguiente = function_counter()
 
                         if siguiente:
-                            self.buffer().setValue(field.name(), siguiente)
+                            self.buffer().setValue(field_name, siguiente)
+                    
+                    
 
             if self.cursorRelation() and self.relation() and self.cursorRelation().metadata():
                 self.setValueBuffer(self.relation().field(
@@ -2669,6 +2671,14 @@ class FLSqlCursor(QtCore.QObject):
 
         else:
             logger.error("refreshBuffer(). No hay definido modeAccess()")
+        
+        if pineboolib.project._DGI.use_model():
+            fieldList = self.metadata().fieldList()
+            if fieldList:
+                for field in fieldList:
+                    field_name = field.name()
+                    #print("Reploblando", self.meta_model(), field_name, self.buffer().value(field_name))
+                    setattr(self.meta_model(), field_name, self.buffer().value(field_name))
 
         return True
 
