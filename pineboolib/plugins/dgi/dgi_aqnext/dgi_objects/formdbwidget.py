@@ -141,22 +141,29 @@ class FormDBWidget(QtCore.QObject):
     def cursor(self):
         # if self.cursor_:
         #    return self.cursor_
-
         cursor = None
         parent = self
 
-        
         while cursor is None and parent:
-            parent = parent.parentWidget()
-            cursor = getattr(parent, "cursor_", None)
+            if hasattr(parent, "parentWidget"):
+                parent = parent.parentWidget()
+                cursor = getattr(parent, "cursor_", None)
+            else:
+                parent = None
+         
         if cursor:
             self.cursor_ = cursor
         else:
             if not self.cursor_:
                 from pineboolib.pncontrolsfactory import FLSqlCursor
-                self.cursor_ = FLSqlCursor(self._action)
+                self.cursor_ = FLSqlCursor(self._action.table)
+            
+        
 
         return self.cursor_
+    
+    def parentWidget(self):
+        return self.parent_
 
     def __getattr__(self, name):
         from pineboolib.pncontrolsfactory import aqApp
