@@ -2883,7 +2883,8 @@ class FLSqlCursor(QtCore.QObject):
                        "se han guardado.\nSqlCursor::~SqlCursor: %s\n" % t)
                 self.rollbackOpened(-1, msg)
         else:
-            logger.warn("Se está eliminando un cursor Huerfano (%s)", self)
+            if not pineboolib.project._DGI.use_model():
+                logger.warn("Se está eliminando un cursor Huerfano (%s)", self)
         
         self.destroyed.emit()
 
