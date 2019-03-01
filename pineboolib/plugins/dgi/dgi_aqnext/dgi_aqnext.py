@@ -194,13 +194,22 @@ class dgi_aqnext(dgi_schema):
         
     def load_meta_model(self, action_name, opt = None):
         
-        import importlib
+        import importlib, os
+        import sys as python_sys
         from pineboolib.pncontrolsfactory import aqApp
         module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
+        
         ret_ = None
+        model_file = "models.%s.%s" % (module_name, action_name)
+        #print("load_meta_model", model_file)
         if module_name is not None:
-            ret_ = importlib.import_module("models.%s.%s" % (module_name, action_name))                
-            ret_ = getattr(ret_, action_name, None)
+            if module_name in python_sys.modules:
+                module = importlib.reload(python_sys.modules[module_name])
+            else:
+                module = importlib.import_module(model_file)     
+            
+            if module:           
+                ret_ = getattr(module, action_name, None)
          
         return ret_
     
@@ -209,6 +218,8 @@ class dgi_aqnext(dgi_schema):
         import traceback
         
         module_name = prefix
+        
+        print("Cargando el prefix_master", prefix)
         
         #if template == "master":        
         #    module_name = "form%s" % prefix
@@ -228,8 +239,7 @@ class dgi_aqnext(dgi_schema):
             
         if script_form_cursor is None:
             logger.warn("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
-            
-        
+
         return script_form_cursor
     
     def cursor2json(self, cursor):
