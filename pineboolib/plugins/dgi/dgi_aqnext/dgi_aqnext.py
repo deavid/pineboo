@@ -299,6 +299,52 @@ class dgi_aqnext(dgi_schema):
         
         return ret_
         
+    def pagination(self, cursor, query): 
+        limit_ = int(query["p_l"])
+        page_ =  0 if isinstance(query["p_c"], bool) else int(query["p_c"])
+        return pagination_class(cursor, limit_, page_)
+
+class pagination_class(object):
+    
+    count = None
+    _limit = None
+    _page = None
+    
+    def __init__(self, cursor, limit, page):
+        self.count = cursor.size()
+        self._limit = limit
+        self._page = page
+    
+    
+    def get_next_offset(self):
+        ret_ = None
+        actual = 0
+        i = 0         
+        while i < self._page:
+            actual += self._limit
+
+        if actual > 0:
+            ret_ = actual
+        
+        return ret_
+        
+    
+    def get_previous_offset(self):
+        ret_ = None
+        i = 0
+        while i < self._page: 
+            if ret_ is None:
+                ret_ = 0
+            else:
+                ret_ += self._limit
+            i += 1
+        
+        return ret_
+        
+        
+        
+    
+        
         
         
         
