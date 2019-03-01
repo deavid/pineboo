@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore
+import logging
+import os
+
+logger = logging.getLogger(__name__)
+
+
 
 class FLSqlCursor(QtCore.QObject):
     
@@ -13,17 +19,26 @@ class FLSqlCursor(QtCore.QObject):
     _validate_cursor = None
     _validate_transaction = None
     _cursor_accepted = None
+    cursor_tree_dict = {}
+    show_debug = None
     
     def __init__(self, cursor, stabla):
         super().__init__()
         self.parent_cursor = cursor
         self.parent_cursor.setActivatedBufferChanged(False)
-        self.parent_cursor.setActivatedBufferCommited(False)
+        self.parent_cursor.setActivatedBufferCommited(False) 
+        self.cursor_tree_dict = {}    
+        self.show_debug = False
         
         
-        if stabla:
-            (self._model, self._buffer_changed, self._before_commit, self._after_commit, self._buffer_commited, self._inicia_valores_cursor, self._buffer_changed_label, self._validate_cursor, self._validate_transaction, self._cursor_accepted) = self.obtener_modelo(stabla)
-            self._stabla = self._model._meta.db_table
+        
+        if stabla is not None:
+            from pineboolib.pncontrolsfactory import aqApp       
+            module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % stabla)
+            model_file = "models.%s.%s" % (module_name, stabla)
+            if os.path.exists(model_file):
+                (self._model, self._buffer_changed, self._before_commit, self._after_commit, self._buffer_commited, self._inicia_valores_cursor, self._buffer_changed_label, self._validate_cursor, self._validate_transaction, self._cursor_accepted) = self.obtener_modelo(stabla)
+                #self._stabla = self._model._meta.db_table
     
     
     def buffer_changed_signal(self, scampo):
@@ -98,5 +113,68 @@ class FLSqlCursor(QtCore.QObject):
         return self._cursor_accepted(self.parent_cursor)
     
     def obtener_modelo(self, stabla):
+        #logger.warn("****** obtener_modelo %s", stabla, stack_info = True)
         from YBLEGACY.FLAux import FLAux
-        return FLAux.obtener_modelo(stabla)   
+        return FLAux.obtener_modelo(stabla)
+    
+    def build_cursor_tree_dict(self):
+        recursive = True 
+        lev = 2
+        l = 0
+        cur_rel = None
+        while True:
+            if cur_rel is None:    
+                cur_rel = self.parent_cursor.cursorRelation()
+            else:
+                cur_rel = cur_rel.cursorRelation()
+            
+            if cur_rel is not None and cur_rel.cursorRelation():
+                if l == lev:
+                    if self.show_debug:
+                        print("Corte cíclica nivel", lev, self.parent_cursor.curName())
+                    recursive = False
+                    break
+            
+                l += 1
+            else:
+                break
+        
+        
+        
+        from pineboolib.pncontrolsfactory import FLSqlCursor as FLSqlCursor_legacy, FLRelationMetaData
+        mtd = self.parent_cursor.metadata()
+        fields_list = mtd.fieldList()
+        if fields_list:
+            for field in fields_list:
+                field_relation = field.relationM1()
+                if isinstance(field_relation, FLRelationMetaData) and recursive:
+                    relation_table_name = field_relation.foreignTable()
+                    relation_field_name = field_relation.field()
+                    if relation_table_name and relation_field_name:
+                        key_ = "%s_%s" % ( relation_table_name, relation_field_name)
+                        self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.d.db_, self.parent_cursor, field_relation)
+    
+    def populate_meta_model(self):
+        fields_list = self.parent_cursor.metadata().fieldList()
+        meta_model = self.parent_cursor.meta_model()
+        if meta_model is not None:
+            #meta_model._meta = {}
+            #setattr(meta_model._meta, "db_table" ,self.parent_cursor.curName())
+            
+            if fields_list:
+                for field in fields_list:
+                    field_name = field.name()
+                    field_relation = field.relationM1()
+                    value = self.parent_cursor.buffer().value(field_name)
+                    if field_relation is not None:
+                        key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.field())
+                        if key_ in self.cursor_tree_dict.keys():
+                            value = self.cursor_tree_dict[key_].meta_model()                            
+                    
+                    if self.show_debug:
+                        print("Populate", self.parent_cursor.curName(),":", field_name, "--->", value)
+                    setattr(meta_model, field_name, value)
+            
+            
+            
+            
