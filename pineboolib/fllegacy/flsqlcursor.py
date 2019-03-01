@@ -23,6 +23,7 @@ import weakref
 import copy
 import datetime
 import logging
+import traceback
 logger = logging.getLogger(__name__)
 
 
@@ -900,7 +901,9 @@ class FLSqlCursor(QtCore.QObject):
 
         if not self.metadata():
             return
-
+        
+        if pineboolib.project._DGI.use_model():
+            self.build_cursor_tree_dict()
         
 
         self.d.isQuery_ = self.metadata().isQuery()
@@ -2628,8 +2631,7 @@ class FLSqlCursor(QtCore.QObject):
                     
 
             if self.cursorRelation() and self.relation() and self.cursorRelation().metadata():
-                self.setValueBuffer(self.relation().field(
-                ), self.cursorRelation().valueBuffer(self.relation().foreignField()))
+                self.setValueBuffer(self.relation().field(), self.cursorRelation().valueBuffer(self.relation().foreignField()))
 
             self.d.undoAcl()
             self.updateBufferCopy()
@@ -2673,12 +2675,8 @@ class FLSqlCursor(QtCore.QObject):
             logger.error("refreshBuffer(). No hay definido modeAccess()")
         
         if pineboolib.project._DGI.use_model():
-            fieldList = self.metadata().fieldList()
-            if fieldList:
-                for field in fieldList:
-                    field_name = field.name()
-                    #print("Reploblando", self.meta_model(), field_name, self.buffer().value(field_name))
-                    setattr(self.meta_model(), field_name, self.buffer().value(field_name))
+            self.populate_meta_model()
+            
 
         return True
 
@@ -2866,7 +2864,7 @@ class FLSqlCursor(QtCore.QObject):
         # if self.metadata():
         #     if not self.metadata().inCache():
         #         delMtd = True
-        if hasattr(self, "d"):
+        if self.d is not None:
             msg = None
             mtd = self.metadata()
 
