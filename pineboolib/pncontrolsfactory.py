@@ -8,6 +8,7 @@ from pineboolib import decorators
 from pineboolib.fllegacy.flapplication import FLApplication
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.packager.aqunpacker import AQUnpacker
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 
