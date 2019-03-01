@@ -912,6 +912,7 @@ def resolve_query(table_name, params):
         order_by = order_by.strip()[:-1]    
     
     
+    where = "1=1" if not len(where) else where
     
     return where, order_by
 
@@ -935,7 +936,7 @@ def resolve_where_params(key, valor, table_name):
     
     from pineboolib.pncontrolsfactory import aqApp
     field_type = aqApp.db().manager().metadata(table_name).field(campo).type()
-    valor = aqApp.db().manager().formatValue(field_type , valor, False)
+    #valor = aqApp.db().manager().formatValue(field_type , valor, False)
     
     if field_type in ["bool", "unlock"]:
         valor = "True" if valor else "False"
