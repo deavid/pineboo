@@ -217,7 +217,7 @@ class dgi_aqnext(dgi_schema):
          
         return ret_
     
-    def get_master_cursor(self, prefix, template):
+    def get_master_cursor(self, prefix, template = "master"):
         from pineboolib import qsa as qsa_tree
         import traceback
         
@@ -278,7 +278,8 @@ class dgi_aqnext(dgi_schema):
                 field_name = f if f != "pk" else pk
                 value = cursor.valueBuffer(field_name)
                 if cursor.metadata().field(field_name).type() in ["date"]:
-                    value = value.toString()
+                    if hasattr(value, "toString"):
+                        value = value.toString()
                     value = value[:10]
             
                 if f == pk:
