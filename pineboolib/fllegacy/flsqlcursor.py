@@ -902,8 +902,8 @@ class FLSqlCursor(QtCore.QObject):
         if not self.metadata():
             return
         
-        if pineboolib.project._DGI.use_model():
-            self.build_cursor_tree_dict()
+        #if pineboolib.project._DGI.use_model():
+        #    self.build_cursor_tree_dict()
         
 
         self.d.isQuery_ = self.metadata().isQuery()
@@ -937,6 +937,11 @@ class FLSqlCursor(QtCore.QObject):
             except Exception:
                 pass
             cR.newBuffer.connect(self.clearPersistentFilter)
+            
+            if pineboolib.project._DGI.use_model() and cR.meta_model(): #Si el cursor_relation tiene un model asociado , este cursor carga el propio también
+                self.assoc_model()
+                self.build_cursor_tree_dict(False)
+            
         else:
             self.seek(None)
 
@@ -1447,12 +1452,7 @@ class FLSqlCursor(QtCore.QObject):
             self.d.browse_states_.erase(i)
     
     def meta_model(self):
-        if pineboolib.project._DGI.use_model():
-            if self._meta_model is None:
-                self._meta_model = pineboolib.project._DGI.load_meta_model(self.curName())
-            return self._meta_model
-        
-        return None
+        return self._meta_model if pineboolib.project._DGI.use_model() else None
                 
             
 
@@ -2674,7 +2674,7 @@ class FLSqlCursor(QtCore.QObject):
         else:
             logger.error("refreshBuffer(). No hay definido modeAccess()")
         
-        if pineboolib.project._DGI.use_model():
+        if pineboolib.project._DGI.use_model() and self.meta_model():
             self.populate_meta_model()
             
 

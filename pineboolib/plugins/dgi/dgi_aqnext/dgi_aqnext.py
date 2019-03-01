@@ -193,7 +193,6 @@ class dgi_aqnext(dgi_schema):
             #print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
         
     def load_meta_model(self, action_name, opt = None):
-        
         import importlib, os
         import sys as python_sys
         from pineboolib.pncontrolsfactory import aqApp
@@ -206,8 +205,13 @@ class dgi_aqnext(dgi_schema):
             if module_name in python_sys.modules:
                 module = importlib.reload(python_sys.modules[module_name])
             else:
-                module = importlib.import_module(model_file)     
-            
+                try:
+                    module = importlib.import_module(model_file)     
+                except:
+                    logger.warn("DGI: load_meta_model. No se encuentra el model de %s", action_name)
+                    module = None
+                    ret_ = None
+                    
             if module:           
                 ret_ = getattr(module, action_name, None)
          
@@ -219,7 +223,7 @@ class dgi_aqnext(dgi_schema):
         
         module_name = prefix
         
-        print("Cargando el prefix_master", prefix)
+        logger.warn("Cargando el prefix_master de %s", prefix)
         
         #if template == "master":        
         #    module_name = "form%s" % prefix
@@ -239,8 +243,17 @@ class dgi_aqnext(dgi_schema):
             
         if script_form_cursor is None:
             logger.warn("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
-
+        
+        if not script_form_cursor.meta_model():
+            #print("**************************", prefix)
+            script_form_cursor.assoc_model() #Asocia el modelo
+            script_form_cursor.build_cursor_tree_dict(True)
+            #print("************  ************", prefix)
         return script_form_cursor
+    
+    
+    
+    
     
     def cursor2json(self, cursor):
     
@@ -298,6 +311,90 @@ class dgi_aqnext(dgi_schema):
             i += 1
         
         return ret_
+    
+    def getYBschema(self, cursor):
+        """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
+        import pineboolib, collections
+        from pineboolib.pncontrolsfactory import FLSqlCursor
+        mtd = cursor.metadata()
+
+        meta_model = cursor.meta_model()
+    
+        dict = collections.OrderedDict()
+        meta = collections.OrderedDict()
+        meta["verbose_name"] = mtd.alias()
+    
+        dict["desc"] = collections.OrderedDict()
+        dict["desc"]["verbose_name"] = "Desc"
+        dict["desc"]["help_text"] = None
+        dict["desc"]["locked"] = True
+        dict["desc"]["field"] = False
+        dict["desc"]["visible"] = True
+        dict["desc"]["tipo"] = 3
+        dict["desc"]["visiblegrid"] = False
+        fields_list = mtd.fieldsNames()
+    
+        fields_list.append("pk")
+    
+        for key in fields_list:
+            field = mtd.field(key if key != "pk" else mtd.primaryKey())
+            dict[key] = collections.OrderedDict()
+            dict[key]['verbose_name'] = field.alias()
+            """ FIXME: help_text """
+            dict[key]['help_text'] = None
+            dict[key]['locked'] = False #FIXME: hay que ver el criterio de locked
+            dict[key]['field'] = False
+            visible = False if cursor.primaryKey() == key or key == 'desc' else True 
+                
+            dict[key]['visible'] = visible
+            dict[key]['tipo'] = pineboolib.utils.get_tipo_aqnext(field.type())
+            
+            dict[key]['visiblegrid'] = field.visibleGrid()
+            dict[key]['required'] = not field.allowNull()
+            if field.type() == "double":
+                dict[key]['max_digits'] = field.partInteger()
+                dict[key]['decimal_places'] = field.partDecimal()
+            if field.hasOptionsList():
+                dict[key]['optionslist'] = field.optionsList()
+                dict[key]['tipo'] = 5
+                
+        #dict[key]['desc'] = cursor.primaryKey()
+            relation = field.relationM1()     
+            if relation is not None:
+                table_name = relation.foreignTable() #Tabla relacionada
+                dict[key]['rel'] = table_name
+                dict[key]['to_field'] = relation.field() #Campo relacionado
+            
+                desc = None
+                #print("Cursor relacionado", table_name)
+                cursor_rel = FLSqlCursor(table_name)
+            
+                rel_meta_model = cursor_rel.meta_model()
+                desc_function = getattr(rel_meta_model, "getDesc", None)
+                if desc_function:
+                    expected_args = inspect.getargspec(desc_function)[0]
+                    new_args = [rel_meta_model]
+                    desc = desc_function(*new_args[:len(expected_args)])
+            
+                if not desc or desc is None:
+                        desc = cursor.db().manager().metadata(table_name).primaryKey()
+
+                dict[key]['desc'] = desc
+    
+        if meta_model:
+            calculateFields = meta_model.getForeignFields(meta_model, cursor.curName())
+            for field in calculateFields:
+                dict[field["verbose_name"]] = collections.OrderedDict()
+                dict[field["verbose_name"]]["verbose_name"] = field["verbose_name"]
+                dict[field["verbose_name"]]["help_text"] = None
+                dict[field["verbose_name"]]["locked"] = True
+                dict[field["verbose_name"]]["field"] = False
+                dict[field["verbose_name"]]["visible"] = True
+                dict[field["verbose_name"]]["tipo"] = 3
+            
+
+
+        return dict, meta
         
     def pagination(self, cursor, query): 
         limit_ = int(query["p_l"])
@@ -322,9 +419,9 @@ class pagination_class(object):
         i = 0         
         while i < self._page:
             actual += self._limit
-
-        if actual > 0:
             ret_ = actual
+            i += 1
+            
         
         return ret_
         
