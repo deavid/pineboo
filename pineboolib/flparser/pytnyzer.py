@@ -1584,7 +1584,7 @@ def pythonize(filename, destfilename, debugname=None):
     ASTPython.debug_file = open(debugname, "w") if debugname else None
     parser = etree.ElementTree.XMLParser(encoding="UTF-8")
     try:
-        ast_tree = etree.ElementTree.parse(open(filename), parser)
+        ast_tree = etree.ElementTree.parse(open(filename, "r", encoding="UTF-8"), parser)
     except Exception:
         print("filename:", filename)
         raise
