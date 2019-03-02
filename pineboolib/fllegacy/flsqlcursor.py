@@ -1264,8 +1264,7 @@ class FLSqlCursor(QtCore.QObject):
 
         field = self.metadata().field(fN)
         if field is None:
-            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s",
-                        self.curName(), fN, self.metadata().name())
+            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s",self.curName(), fN, self.metadata().name())
             return None
 
         type_ = field.type()
@@ -2537,12 +2536,10 @@ class FLSqlCursor(QtCore.QObject):
             self.newBuffer.emit()
         else:
             if self.cursorRelation() and self.relation() and self.cursorRelation().metadata():
-                v = self.valueBuffer(self.relation().field())
-                foreignFieldValueBuffer = self.cursorRelation().valueBuffer(
-                    self.relation().foreignField())
+                v = self.cursorRelation().valueBuffer(self.relation().field())
+                foreignFieldValueBuffer = self.valueBuffer(self.relation().foreignField())
                 if (foreignFieldValueBuffer != v and foreignFieldValueBuffer is not None):
-                    self.cursorRelation().setValueBuffer(
-                        self.relation().foreignField(), v)
+                    self.cursorRelation().setValueBuffer(self.relation().foreignField(), v)
 
     def primeInsert(self):
         if not self.buffer():
@@ -2950,10 +2947,8 @@ class FLSqlCursor(QtCore.QObject):
         finalFilter = ""
 
         if self.cursorRelation() and self.relation() and self.metadata() and self.cursorRelation().metadata():
-
-            fgValue = self.cursorRelation().valueBuffer(self.relation().foreignField())
-            field = self.metadata().field(self.relation().field())
-
+            fgValue = self.cursorRelation().valueBuffer(self.relation().field())
+            field = self.metadata().field(self.relation().foreignField())
 
             if field is not None and fgValue is not None:
                 
