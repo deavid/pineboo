@@ -9,6 +9,8 @@ from importlib import import_module
 from PyQt5 import QtCore
 
 import traceback
+import collections
+import inspect
 import logging
 import sys
 import os
@@ -277,7 +279,8 @@ class dgi_aqnext(dgi_schema):
         size_ = cursor.size()
         i = 0
         while i < size_:
-            dict_ = collections.OrderedDict()
+            #dict_ = collections.OrderedDict()
+            dict_ = {}
             pk = cursor.primaryKey()
             fields_list = cursor.metadata().fieldsNames()
             for f in fields_list:
@@ -300,8 +303,14 @@ class dgi_aqnext(dgi_schema):
                         dict_[field["verbose_name"]] = getattr(meta_model, field["func"])(meta_model)
                         #dict_[field["verbose_name"]] = ""
             
-                #dict_["desc"] = meta_model
+                desc_function = getattr(meta_model, "getDesc", None)
+                desc = None
+                if desc_function:
+                    expected_args = inspect.getargspec(desc_function)[0]
+                    new_args = [meta_model]
+                    desc = desc_function(*new_args[:len(expected_args)])
             
+                dict_["desc"] = desc
             #for field in calculateFields:
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
         
@@ -321,8 +330,7 @@ class dgi_aqnext(dgi_schema):
     
     def getYBschema(self, cursor):
         """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
-        import pineboolib, collections
-        from pineboolib.pncontrolsfactory import FLSqlCursor
+        import pineboolib
         mtd = cursor.metadata()
 
         meta_model = cursor.meta_model()
@@ -346,37 +354,38 @@ class dgi_aqnext(dgi_schema):
         for key in fields_list:
             field = mtd.field(key if key != "pk" else mtd.primaryKey())
             dict[key] = collections.OrderedDict()
-            dict[key]['verbose_name'] = field.alias()
+            dict[key]['verbose_name'] = field.alias() if key != "pk" else "Pk"
             """ FIXME: help_text """
             dict[key]['help_text'] = None
-            dict[key]['locked'] = False #FIXME: hay que ver el criterio de locked
+            dict[key]['locked'] = True if field.name() == mtd.primaryKey() else False #FIXME: hay que ver el criterio de locked
             dict[key]['field'] = False
-            visible = False if cursor.primaryKey() == key or key == 'desc' else True 
-                
-            dict[key]['visible'] = visible
+                            
+            dict[key]['visible'] = False if key in ['pk','desc'] else True 
             dict[key]['tipo'] = pineboolib.utils.get_tipo_aqnext(field.type())
+            if field.type() == "stringlist":
+                dict[key]['subtipo'] = 6
             
             dict[key]['visiblegrid'] = field.visibleGrid()
-            dict[key]['required'] = not field.allowNull()
+            if not field.allowNull():
+                dict[key]['required'] = True
             if field.type() == "double":
                 dict[key]['max_digits'] = field.partInteger()
                 dict[key]['decimal_places'] = field.partDecimal()
             if field.hasOptionsList():
                 dict[key]['optionslist'] = field.optionsList()
                 dict[key]['tipo'] = 5
-                
+            
         #dict[key]['desc'] = cursor.primaryKey()
             relation = field.relationM1()     
             if relation is not None:
                 table_name = relation.foreignTable() #Tabla relacionada
                 dict[key]['rel'] = table_name
                 dict[key]['to_field'] = relation.field() #Campo relacionado
-            
                 desc = None
                 #print("Cursor relacionado", table_name)
-                cursor_rel = FLSqlCursor(table_name)
-            
-                rel_meta_model = cursor_rel.meta_model()
+                #cursor_rel = FLSqlCursor(table_name)
+                
+                rel_meta_model = getattr(meta_model,relation.foreignField())
                 desc_function = getattr(rel_meta_model, "getDesc", None)
                 if desc_function:
                     expected_args = inspect.getargspec(desc_function)[0]
@@ -385,7 +394,7 @@ class dgi_aqnext(dgi_schema):
             
                 if not desc or desc is None:
                         desc = cursor.db().manager().metadata(table_name).primaryKey()
-
+                
                 dict[key]['desc'] = desc
     
         if meta_model:
@@ -399,7 +408,6 @@ class dgi_aqnext(dgi_schema):
                 dict[field["verbose_name"]]["visible"] = True
                 dict[field["verbose_name"]]["tipo"] = 3
             
-
 
         return dict, meta
         
