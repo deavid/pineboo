@@ -171,9 +171,6 @@ class FLSqlCursor(QtCore.QObject):
         fields_list = self.parent_cursor.metadata().fieldList()
         meta_model = self.parent_cursor.meta_model()
         if meta_model is not None:
-            #meta_model._meta = {}
-            #setattr(meta_model._meta, "db_table" ,self.parent_cursor.curName())
-            
             if fields_list:
                 for field in fields_list:
                     field_name = field.name()
@@ -190,6 +187,4 @@ class FLSqlCursor(QtCore.QObject):
           
            
     
-    
-           
-            
+        
