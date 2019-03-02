@@ -2596,8 +2596,8 @@ class FLSqlCursor(QtCore.QObject):
             if fieldList:
                 for field in fieldList:
                     field_name = field.name()
-                    self.buffer().setNull(fiName)
-                    if not self.buffer().isGenerated(fiName):
+                    self.buffer().setNull(field_name)
+                    if not self.buffer().isGenerated(field_name):
                         continue
                     type_ = field.type()
                     # fltype = FLFieldMetaData.flDecodeType(type_)
