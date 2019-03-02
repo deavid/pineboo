@@ -161,9 +161,10 @@ class FLSqlCursor(QtCore.QObject):
                 field_relation = field.relationM1()
                 if isinstance(field_relation, FLRelationMetaData) and recursive:
                     relation_table_name = field_relation.foreignTable()
-                    relation_field_name = field_relation.field()
+                    relation_field_name = field_relation.foreignField()
                     if relation_table_name and relation_field_name:
                         key_ = "%s_%s" % ( relation_table_name, relation_field_name)
+                        print("Creando", relation_table_name, relation_field_name,"desde", self.parent_cursor.curName(), field_relation.field())
                         self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.d.db_, self.parent_cursor, field_relation)
     
     def populate_meta_model(self):
@@ -179,7 +180,7 @@ class FLSqlCursor(QtCore.QObject):
                     field_relation = field.relationM1()
                     value = self.parent_cursor.buffer().value(field_name)
                     if field_relation is not None:
-                        key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.field())
+                        key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.foreignField())
                         if key_ in self.cursor_tree_dict.keys():
                             value = self.cursor_tree_dict[key_].meta_model()                            
                     
