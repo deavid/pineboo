@@ -203,7 +203,10 @@ class dgi_aqnext(dgi_schema):
         #print("load_meta_model", model_file)
         if module_name is not None:
             if module_name in python_sys.modules:
-                module = importlib.reload(python_sys.modules[module_name])
+                try:
+                    module = importlib.reload(python_sys.modules[module_name])
+                except:
+                    logger.warn("DGI: load_meta_model. No se ha podido recargar el model de %s", action_name)
             else:
                 try:
                     module = importlib.import_module(model_file)     
@@ -244,10 +247,13 @@ class dgi_aqnext(dgi_schema):
         if script_form_cursor is None:
             logger.warn("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
         
-        if not script_form_cursor.meta_model():
+        if script_form_cursor and not script_form_cursor.meta_model():
             #print("**************************", prefix)
-            script_form_cursor.assoc_model() #Asocia el modelo
-            script_form_cursor.build_cursor_tree_dict(True)
+            try:
+                script_form_cursor.assoc_model() #Asocia el modelo
+                script_form_cursor.build_cursor_tree_dict(True)
+            except:
+                import traceback
             #print("************  ************", prefix)
         return script_form_cursor
     
