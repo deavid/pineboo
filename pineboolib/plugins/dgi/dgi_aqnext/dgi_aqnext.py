@@ -267,7 +267,7 @@ class dgi_aqnext(dgi_schema):
     
         if not cursor.isValid():
             logger.warn("Cursor inválido/vacío en %s", cursor.curName())
-            return {}
+            return []
     
         meta_model = cursor.meta_model()
     
@@ -326,6 +326,7 @@ class dgi_aqnext(dgi_schema):
             cursor.next()
             i += 1
         
+                   
         return ret_
     
     def getYBschema(self, cursor):
@@ -344,7 +345,7 @@ class dgi_aqnext(dgi_schema):
         dict["desc"]["help_text"] = None
         dict["desc"]["locked"] = True
         dict["desc"]["field"] = False
-        dict["desc"]["visible"] = True
+        dict["desc"]["visible"] = False
         dict["desc"]["tipo"] = 3
         dict["desc"]["visiblegrid"] = False
         fields_list = mtd.fieldsNames()
@@ -366,7 +367,7 @@ class dgi_aqnext(dgi_schema):
                 dict[key]['subtipo'] = 6
             
             dict[key]['visiblegrid'] = field.visibleGrid()
-            if not field.allowNull():
+            if not field.allowNull() or key == "pk":
                 dict[key]['required'] = True
             if field.type() == "double":
                 dict[key]['max_digits'] = field.partInteger()
@@ -391,9 +392,8 @@ class dgi_aqnext(dgi_schema):
                     expected_args = inspect.getargspec(desc_function)[0]
                     new_args = [rel_meta_model]
                     desc = desc_function(*new_args[:len(expected_args)])
-            
-                if not desc or desc is None:
-                        desc = cursor.db().manager().metadata(table_name).primaryKey()
+                if not desc:
+                    desc = cursor.db().manager().metadata(table_name).primaryKey()
                 
                 dict[key]['desc'] = desc
     
