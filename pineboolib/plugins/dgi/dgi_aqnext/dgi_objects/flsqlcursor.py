@@ -164,7 +164,8 @@ class FLSqlCursor(QtCore.QObject):
                     relation_field_name = field_relation.foreignField()
                     if relation_table_name and relation_field_name:
                         key_ = "%s_%s" % ( relation_table_name, relation_field_name)
-                        print("Creando", relation_table_name, relation_field_name,"desde", self.parent_cursor.curName(), field_relation.field())
+                        if self.show_debug:
+                            print("Creando", relation_table_name, relation_field_name,"desde", self.parent_cursor.curName(), field_relation.field())
                         self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.d.db_, self.parent_cursor, field_relation)
     
     def populate_meta_model(self):
