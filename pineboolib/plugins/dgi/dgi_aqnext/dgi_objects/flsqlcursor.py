@@ -182,7 +182,7 @@ class FLSqlCursor(QtCore.QObject):
                         key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.foreignField())
                         if key_ in self.cursor_tree_dict.keys():
                             if self.cursor_tree_dict[key_].refresh():
-                                print("*******************Refrescado", self.cursor_tree_dict[key_].curName())
+                                pass
                             value = self.cursor_tree_dict[key_].meta_model()                            
                     
                     if self.show_debug:
