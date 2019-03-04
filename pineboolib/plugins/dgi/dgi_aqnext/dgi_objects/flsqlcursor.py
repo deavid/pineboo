@@ -169,6 +169,7 @@ class FLSqlCursor(QtCore.QObject):
                         self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.d.db_, self.parent_cursor, field_relation)
     
     def populate_meta_model(self):
+        #print("**** populando", self.parent_cursor.curName())
         fields_list = self.parent_cursor.metadata().fieldList()
         meta_model = self.parent_cursor.meta_model()
         if meta_model is not None:
@@ -180,6 +181,8 @@ class FLSqlCursor(QtCore.QObject):
                     if field_relation is not None:
                         key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.foreignField())
                         if key_ in self.cursor_tree_dict.keys():
+                            if self.cursor_tree_dict[key_].refresh():
+                                print("*******************Refrescado", self.cursor_tree_dict[key_].curName())
                             value = self.cursor_tree_dict[key_].meta_model()                            
                     
                     if self.show_debug:
