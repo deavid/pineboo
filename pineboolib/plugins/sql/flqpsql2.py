@@ -38,10 +38,12 @@ class FLQPSQL2(FLQPSQL):
         try:
             self.conn_ = pg8000.connect(user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5)
         except Exception:
-            try:
-                if not pineboolib.project._DGI.localDesktop():
-                    return False
-            except:
+            import pineboolib
+            if not pineboolib.project._DGI.localDesktop():
+                import traceback
+                if repr(traceback.format_exc()).find("the database system is starting up") > -1:
+                    raise
+                    
                 return False
             
             pineboolib.project._splash.hide()
