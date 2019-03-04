@@ -1245,7 +1245,7 @@ class FLSqlCursor(QtCore.QObject):
         
         if pineboolib.project._DGI.use_model():
             if fN == "pk":
-                logger.warn("¡¡¡¡ OJO Cambiado fieldname PK!!", stack_info = True)
+                #logger.warn("¡¡¡¡ OJO Cambiado fieldname PK!!", stack_info = True)
                 fN = self.primaryKey()
         
         
