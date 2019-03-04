@@ -268,7 +268,9 @@ class dgi_aqnext(dgi_schema):
     
         ret_ = None
     
-        cursor.first()
+        if cursor.first():
+            pass
+        
         size_ = cursor.size()
         i = 0
         while i < size_:
@@ -314,7 +316,8 @@ class dgi_aqnext(dgi_schema):
                     ret_ = []
                 ret_.append(dict_)
         
-            cursor.next()
+            if cursor.next():
+                pass
             i += 1
         
         return ret_
