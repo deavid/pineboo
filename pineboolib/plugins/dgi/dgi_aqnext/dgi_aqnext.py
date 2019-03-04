@@ -199,27 +199,20 @@ class dgi_aqnext(dgi_schema):
         import sys as python_sys
         from pineboolib.pncontrolsfactory import aqApp
         module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
-        
+        module = None
         ret_ = None
         model_file = "models.%s.%s" % (module_name, action_name)
-        #print("load_meta_model", model_file)
         if module_name is not None:
-            if module_name in python_sys.modules:
-                try:
-                    module = importlib.reload(python_sys.modules[module_name])
-                except:
-                    logger.warn("DGI: load_meta_model. No se ha podido recargar el model de %s", action_name)
-            else:
-                try:
-                    module = importlib.import_module(model_file)     
-                except:
-                    logger.warn("DGI: load_meta_model. No se encuentra el model de %s", action_name)
-                    module = None
-                    ret_ = None
+            try:
+                module = importlib.import_module(model_file)     
+            except:
+                logger.warn("DGI: load_meta_model. No se encuentra el model de %s", action_name)
+                module = None
+                ret_ = None
                     
-            if module:           
-                ret_ = getattr(module, action_name, None)
-         
+        if module is not None:           
+            ret_ = getattr(module, action_name, None)
+        
         return ret_
     
     def get_master_cursor(self, prefix, template = "master"):
@@ -256,7 +249,7 @@ class dgi_aqnext(dgi_schema):
                 script_form_cursor.build_cursor_tree_dict(True)
             except:
                 import traceback
-            #print("************  ************", prefix)
+        
         return script_form_cursor
     
     
@@ -351,6 +344,8 @@ class dgi_aqnext(dgi_schema):
     
         for key in fields_list:
             field = mtd.field(key if key != "pk" else mtd.primaryKey())
+            if field is None:
+                continue
             dict[key] = collections.OrderedDict()
             dict[key]['verbose_name'] = field.alias() if key != "pk" else "Pk"
             """ FIXME: help_text """
@@ -406,7 +401,6 @@ class dgi_aqnext(dgi_schema):
                 dict[field["verbose_name"]]["visible"] = True
                 dict[field["verbose_name"]]["tipo"] = 3
             
-
         return dict, meta
         
     def pagination(self, cursor, query): 
