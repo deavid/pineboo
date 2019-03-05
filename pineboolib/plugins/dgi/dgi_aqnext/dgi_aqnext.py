@@ -227,30 +227,36 @@ class dgi_aqnext(dgi_schema):
         #    module_name = "form%s" % prefix
         #elif template == "formRecord":
         #    module_name = "formRecord%s" % prefix
-        if template in ["master", "formRecord"]:
+        if template in ["master", "formRecord", "newRecord"]:
             module_name = "form%s" % prefix
             
-        script_form_cursor = None
+        cursor = None
         module = getattr(qsa_tree, module_name, None)
         if module is not None:
-            script_form_cursor = module.widget.cursor()
+            cursor = module.widget.cursor()
         else:
             logger.warn("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
             from pineboolib.pncontrolsfactory import FLSqlCursor
-            script_form_cursor = FLSqlCursor(prefix)
+            cursor = FLSqlCursor(prefix)
             
-        if script_form_cursor is None:
+        if cursor is None:
             logger.warn("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
         
-        if script_form_cursor and not script_form_cursor.meta_model():
+        if cursor and not cursor.meta_model():
             #print("**************************", prefix)
             try:
-                script_form_cursor.assoc_model() #Asocia el modelo
-                script_form_cursor.build_cursor_tree_dict(True)
+                cursor.assoc_model() #Asocia el modelo
+                cursor.build_cursor_tree_dict(True)
             except:
                 import traceback
+                logger.warn("DGI. get_master_cursor: %s", traceback.format_exc())
         
-        return script_form_cursor
+        #if template == "newRecord":
+        #    cursor.setModeAccess(cursor.Insert)
+        #    cursor.refreshBuffer()
+            
+        
+        return cursor
     
     
     
@@ -331,6 +337,10 @@ class dgi_aqnext(dgi_schema):
     
         dict = collections.OrderedDict()
         meta = collections.OrderedDict()
+        
+        if mtd is None:
+            return dict, meta
+        
         meta["verbose_name"] = mtd.alias()
     
         dict["desc"] = collections.OrderedDict()
@@ -407,8 +417,8 @@ class dgi_aqnext(dgi_schema):
         return dict, meta
         
     def pagination(self, cursor, query): 
-        limit_ = int(query["p_l"])
-        page_ =  0 if isinstance(query["p_c"], bool) else int(query["p_c"])
+        limit_ = int(query["p_l"]) if "p_l" in query.keys() else 50
+        page_ =  0 if not "p_c" in query.keys() or isinstance(query["p_c"], bool)  else int(query["p_c"])
         return pagination_class(cursor, limit_, page_)
 
 class pagination_class(object):
