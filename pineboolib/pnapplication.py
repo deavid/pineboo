@@ -774,8 +774,7 @@ class ModuleActions(object):
 
     def load(self):
         # Ojo: Almacena un arbol con los módulos cargados
-        #from pineboolib import qsa as qsa_dict_modules
-        qsa_dict_modules =  pineboolib.project._DGI.get_qsa_dict()
+        from pineboolib import qsa as qsa_dict_modules
         
         self.tree = pineboolib.utils.load2xml(self.path)
         self.root = self.tree.getroot()
