@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class dgi_aqnext(dgi_schema):
+    
 
 
     def __init__(self):
@@ -420,6 +421,17 @@ class dgi_aqnext(dgi_schema):
         limit_ = int(query["p_l"]) if "p_l" in query.keys() else 50
         page_ =  0 if not "p_c" in query.keys() or isinstance(query["p_c"], bool)  else int(query["p_c"])
         return pagination_class(cursor, limit_, page_)
+    
+    def get_qsa_dict(self):
+        
+        from pineboolib.plugins.dgi.dgi_aqnext.dgi_objects import qsa_tree
+        #print("Poblando arbol qsa maestro de AQNext", qsa_tree)
+        return qsa_tree
+
+
+    
+    
+
 
 class pagination_class(object):
     

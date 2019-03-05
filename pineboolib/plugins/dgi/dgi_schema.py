@@ -150,3 +150,9 @@ class dgi_schema(object):
         except Exception:
             pass
         return cls
+    
+    
+    def get_qsa_dict(self):
+        print("Poblando arbol qsa por defecto")
+        from pineboolib import pnqsa
+        return pnqsa
