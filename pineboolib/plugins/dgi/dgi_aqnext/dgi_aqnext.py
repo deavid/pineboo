@@ -264,16 +264,17 @@ class dgi_aqnext(dgi_schema):
     
     
     def cursor2json(self, cursor):
-    
+        ret_ = []
+        
         if not cursor.isValid():
             logger.warn("Cursor inválido/vacío en %s", cursor.curName())
-            return []
+            return ret_
     
         meta_model = cursor.meta_model()
     
         import json, collections
     
-        ret_ = None
+        
     
         if cursor.first():
             pass
@@ -315,13 +316,7 @@ class dgi_aqnext(dgi_schema):
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
         
         
-            if size_ == 1:
-                ret_ = dict_
-                break
-            else:
-                if ret_ is None:
-                    ret_ = []
-                ret_.append(dict_)
+            ret_.append(dict_)
         
             if cursor.next():
                 pass
