@@ -354,6 +354,8 @@ class Project(object):
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
+        
+        return True
 
     """
     LLama a una función del projecto.
@@ -772,8 +774,9 @@ class ModuleActions(object):
 
     def load(self):
         # Ojo: Almacena un arbol con los módulos cargados
-        from pineboolib import qsa as qsa_dict_modules
-
+        #from pineboolib import qsa as qsa_dict_modules
+        qsa_dict_modules =  pineboolib.project._DGI.get_qsa_dict()
+        
         self.tree = pineboolib.utils.load2xml(self.path)
         self.root = self.tree.getroot()
 
