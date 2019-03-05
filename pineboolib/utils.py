@@ -939,7 +939,7 @@ def resolve_where_params(key, valor, table_name):
     #valor = aqApp.db().manager().formatValue(field_type , valor, False)
     
     if field_type in ["bool", "unlock"]:
-        valor = "True" if valor else "False"
+        valor = "True" if valor == "true" else "False"
     
     if tipo == "contains":
         where = campo + " LIKE '%" + valor + "%'"
