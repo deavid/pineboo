@@ -315,8 +315,10 @@ class dgi_aqnext(dgi_schema):
             #for field in calculateFields:
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
         
-        
-            ret_.append(dict_)
+            if size_ == 1:
+                ret_ = dict_
+            else:
+                ret_.append(dict_)
         
             if cursor.next():
                 pass
@@ -412,14 +414,65 @@ class dgi_aqnext(dgi_schema):
             
         return dict, meta
         
-    def pagination(self, cursor, query): 
-        limit_ = int(query["p_l"]) if "p_l" in query.keys() else 50
-        page_ =  0 if not "p_c" in query.keys() or isinstance(query["p_c"], bool)  else int(query["p_c"])
-        return pagination_class(cursor, limit_, page_)
+    def pagination(self, data_, query): 
+        return pagination_class(data_, query)
 
 
+    def get_queryset(self, prefix, params):
+        from pineboolib.utils import resolve_query
+        #retorna una lista con objetos del modelo
+        cursor_master = self.get_master_cursor(prefix)
+        list_objects = []
+        where, order_by = pineboolib.utils.resolve_query(prefix, params)
+        where_filter = "%s ORDER BY %s" % ( where, order_by) if len(order_by) else where 
+        cursor_master.select(where_filter)
+        if cursor_master.first():
+            while True:
+                list_objects.append(cursor_master.meta_model()())
+            
+            
+                if not cursor_master.next():
+                    break
+                
+        return list_objects
     
+    @decorators.NotImplementedWarn
+    def paginate_queryset(self, query_set):
+        
+        return query_set
     
+    def get_paginated_response(self, data, params):
+        
+        response = paginated_object()
+        response.data = {}
+        data_list = self._convert_to_ordered_dict(data)
+        response.data["data"] = data_list
+        
+        pagination = pagination_class(data_list, params)
+        response.data["PAG"] = {"NO": pagination.get_next_offset(), "PO": pagination.get_previous_offset(), "COUNT": pagination.count}
+        
+        return response
+    
+    def _convert_to_ordered_dict(self, data):
+        ret_ = []
+        
+        if isinstance(data, list):
+            for t in data:
+                o = collections.OrderedDict()
+                for key in t.keys():     
+                    o[key] = t[key] 
+                ret_.append(o)
+        else:
+            o = collections.OrderedDict()
+            for key in data.keys(): 
+                    o[key] = data[key]
+            ret_.append(o)
+        
+        
+        return ret_
+
+class paginated_object(object):
+    pass   
 
 
 class pagination_class(object):
@@ -428,10 +481,10 @@ class pagination_class(object):
     _limit = None
     _page = None
     
-    def __init__(self, cursor, limit, page):
-        self.count = cursor.size()
-        self._limit = limit
-        self._page = page
+    def __init__(self, data_, query = {}):
+        self.count = len(data_)
+        self._limit = 50 if not "p_l" in query.keys() or query["p_l"] == 'true' else int(query["p_l"])
+        self._page =  0 if not "p_c" in query.keys() or query["p_c"] == 'true'  else int(query["p_c"])
     
     
     def get_next_offset(self):
