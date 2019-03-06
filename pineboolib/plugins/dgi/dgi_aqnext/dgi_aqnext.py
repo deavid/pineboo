@@ -222,7 +222,7 @@ class dgi_aqnext(dgi_schema):
         
         module_name = prefix
         
-        logger.warn("Cargando el prefix_master de %s", prefix)
+        #logger.warn("Cargando el prefix_master de %s", prefix)
         
         #if template == "master":        
         #    module_name = "form%s" % prefix
@@ -263,7 +263,7 @@ class dgi_aqnext(dgi_schema):
     
     
     
-    def cursor2json(self, cursor):
+    def cursor2json(self, cursor, template = None):
         ret_ = []
         
         if not cursor.isValid():
@@ -299,7 +299,7 @@ class dgi_aqnext(dgi_schema):
                 dict_[f] = value
         
             if meta_model:
-                calculateFields = meta_model.getForeignFields(meta_model, cursor.curName())
+                calculateFields = self.get_foreign_fields(meta_model, template)
                 for field in calculateFields:
                     if hasattr(meta_model, field["func"]):
                         dict_[field["verbose_name"]] = getattr(meta_model, field["func"])(meta_model)
@@ -326,7 +326,7 @@ class dgi_aqnext(dgi_schema):
         
         return ret_
     
-    def getYBschema(self, cursor):
+    def getYBschema(self, cursor, template = None):
         """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
         import pineboolib
         mtd = cursor.metadata()
@@ -402,7 +402,7 @@ class dgi_aqnext(dgi_schema):
                 dict[key]['desc'] = desc
     
         if meta_model:
-            calculateFields = meta_model.getForeignFields(meta_model, cursor.curName())
+            calculateFields = self.get_foreign_fields(meta_model, template)
             for field in calculateFields:
                 dict[field["verbose_name"]] = collections.OrderedDict()
                 dict[field["verbose_name"]]["verbose_name"] = field["verbose_name"]
@@ -413,6 +413,9 @@ class dgi_aqnext(dgi_schema):
                 dict[field["verbose_name"]]["tipo"] = 3
             
         return dict, meta
+    
+    def get_foreign_fields(self, meta_model, template = None):
+        return meta_model.getForeignFields(meta_model, template)
         
     def pagination(self, data_, query): 
         return pagination_class(data_, query)
