@@ -20,10 +20,10 @@ class FLSqlQuery(object):
     countRefQuery = 0
     invalidTables = False
 
-    def __init__(self, name=None, connection_name=None):
+    def __init__(self, cx=None, connection_name=None):
         # super(FLSqlQuery, self).__init__()
 
-        self.d = FLSqlQueryPrivate(name)
+        self.d = FLSqlQueryPrivate(cx)
         self.d.db_ = pineboolib.project.conn.useConn(connection_name)
 
         self.countRefQuery = self.countRefQuery + 1
@@ -37,8 +37,8 @@ class FLSqlQuery(object):
         #self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
-        if name:
-            retornoQry = pineboolib.project.conn.manager().query(name, self)
+        if cx:
+            retornoQry = pineboolib.project.conn.manager().query(cx, self)
 
         if retornoQry:
             self.d = retornoQry.d
@@ -571,6 +571,7 @@ class FLSqlQuery(object):
 
     def setTablesList(self, tl):
         self.d.tablesList_ = []
+        tl = tl.replace(" ", "")
         for tabla in tl.split(","):
             if not pineboolib.project.conn.manager().existsTable(tabla):
                 self.invalidTablesList = True
