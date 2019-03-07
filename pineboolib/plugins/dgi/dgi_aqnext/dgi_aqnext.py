@@ -456,6 +456,10 @@ class dgi_aqnext(dgi_schema):
         
         return response
     
+    @decorators.NotImplementedWarn
+    def carga_datos_custom_filter(self, table, schema, usuario):
+        return {}
+    
     def _convert_to_ordered_dict(self, data):
         ret_ = []
         
