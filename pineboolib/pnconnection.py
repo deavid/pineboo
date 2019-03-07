@@ -180,6 +180,10 @@ class PNConnection(QtCore.QObject):
     @decorators.NotImplementedWarn
     def setInteractiveGUI(self, b):
         pass
+    
+    @decorators.NotImplementedWarn
+    def setQsaExceptions(self, b):
+        pass
 
     def db(self):
         return self.conn
