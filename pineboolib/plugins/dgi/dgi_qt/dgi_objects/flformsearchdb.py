@@ -205,24 +205,23 @@ class FLFormSearchDB(FLFormDB):
 
     def exec_(self, valor=None):
         if not self.cursor_:
-            return None
+            return False
 
-        # if not self.cursor_.isLocked():
-        #    self.cursor_.setModeAccess(FLSqlCursor.Edit)
+        if not self.cursor_.isLocked():
+            self.cursor_.setModeAccess(FLSqlCursor.Edit)
 
         if self.loop or self.inExec_:
             print("FLFormSearchDB::exec(): Se ha detectado una llamada recursiva")
-            super(FLFormDB, self).show()
             if self.initFocusWidget_:
                 self.initFocusWidget_.setFocus()
+            return False
 
-            return None
-
-        # self.load()  # Extra
 
         self.inExec_ = True
         self.acceptingRejecting_ = False
-
+        self.accepted_ = False
+        
+        
         super(FLFormSearchDB, self).show()
         if self.initFocusWidget_:
             self.initFocusWidget_.setFocus()
@@ -238,27 +237,21 @@ class FLFormSearchDB(FLFormDB):
             timer2 = QtCore.QTimer(self)
             timer2.singleShot(0, self.emitFormReady)
 
-        self.accepted_ = False
+        
+        
         self.loop = True
         self.eventloop.exec_()
-
-        # if not self.isClosing_ and not self.acceptingRejecting_:
-        # QtCore.QEventLoop().enterLoop() FIXME
-
         self.loop = False
 
-        # self.clearWFlags(WShowModal) FIXME
-
-        v = None
         if self.accepted_ and valor:
-            v = self.cursor_.valueBuffer(valor)
+            self.inExec_ = False
+            return self.cursor_.valueBuffer(valor)
         else:
-            v = None
             self.close()
             return False
 
-        self.inExec_ = False
-        return v
+        
+        
 
     """
     Aplica un filtro al cursor
