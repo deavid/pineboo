@@ -735,7 +735,7 @@ class File(QtCore.QFile):
             encode = self.encode_
 
         import codecs
-        data = data.decode("utf8").encode(encode)
+        data = data.encode(encode)
         f = codecs.open(file_, encoding=encode, mode="w+")
         f.write(data)
         f.close()
