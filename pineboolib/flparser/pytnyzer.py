@@ -949,7 +949,8 @@ class Member(ASTPython):
             "arg",
             "substring", 
             "attributeValue",
-            "match"
+            "match",
+            "replace",
         ]
         for member in replace_members:
             for idx, arg in enumerate(arguments):
@@ -1044,6 +1045,19 @@ class Member(ASTPython):
                         value = arg[15:]
                         value = value[:len(value) - 1]
                         arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
+                    elif member == "replace":
+                        value = arg[8:-1]
+                        part_list = value.split(",")
+                        if part_list[0].find("re.compile") > -1:
+                            print("***", arg, part1, part2, value)
+                            arguments = ["%s.sub(%s,%s)" % (part_list[0], part_list[1], ".".join(part1))] + part2
+                            
+                            #Es un regexpr
+                        #else:
+                        #    if ".".join(part1):
+                        #        arguments = ["%s.%s" % (".".join(part1), arg)] + part2
+                        
+                        
                     else:
                         if ".".join(part1):
                             arguments = ["%s.%s" %
