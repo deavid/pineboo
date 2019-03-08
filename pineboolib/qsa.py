@@ -735,9 +735,15 @@ class File(QtCore.QFile):
             encode = self.encode_
 
         import codecs
-        data = data.encode(encode)
+        try:
+            data_ = data.encode(encode)      
+        except Exception:
+            encode = "utf-8" if enconde == "iso-8859-15" else "iso-8859-15"
+            data_ = data
+        
         f = codecs.open(file_, encoding=encode, mode="w+")
-        f.write(data)
+        f.write(data_)
+            
         f.close()
 
     def exists(name):
