@@ -738,7 +738,7 @@ class File(QtCore.QFile):
         try:
             data_ = data.encode(encode)      
         except Exception:
-            encode = "utf-8" if enconde == "iso-8859-15" else "iso-8859-15"
+            encode = "utf-8" if encode == "iso-8859-15" else "iso-8859-15"
             data_ = data
         
         f = codecs.open(file_, encoding=encode, mode="w+")
