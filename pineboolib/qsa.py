@@ -391,10 +391,11 @@ class qsaRegExp(object):
 
     def search(self, text):
         print("Buscando " + self.strRE_ + " en " + text)
-        self.result_ = re.search(self.strRE_, text)
+        return re.search(self.strRE_, text)
     
     def replace(self, target , new_value):
-        return re.sub(r"%s" % self.strRE_, new_value, target)
+        pattern = re.compile('r"' + self.strRE_ +'"')
+        return pattern.sub(new_value, target)
 
     def cap(self, i):
         if self.result_ is None:
