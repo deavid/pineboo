@@ -3,6 +3,8 @@ from PyQt5 import QtCore
 import sys
 import weakref
 
+import YBUTILS
+
 class FormDBWidget(QtCore.QObject):
     """description of class"""
     closed = QtCore.pyqtSignal()
@@ -11,6 +13,8 @@ class FormDBWidget(QtCore.QObject):
     iface = None
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
     _loaded = None
+    
+    _cursors = {}
     
     def __init__(self, action=None, project=None, parent=None):
         if project is not None:          
@@ -28,6 +32,7 @@ class FormDBWidget(QtCore.QObject):
             self._loaded = None
             
             self.parent_ = parent
+            self._cursors = {}
         
             #import pineboolib
             #if isinstance(self.parent(), pineboolib.pncontrolsfactory.FLFormDB):
@@ -139,28 +144,32 @@ class FormDBWidget(QtCore.QObject):
         """
 
     def cursor(self):
+        
         # if self.cursor_:
         #    return self.cursor_
         cursor = None
-        parent = self
+        #parent = self
 
-        while cursor is None and parent:
-            if hasattr(parent, "parentWidget"):
-                parent = parent.parentWidget()
-                cursor = getattr(parent, "cursor_", None)
-            else:
-                parent = None
+        #while cursor is None and parent:
+        #    if hasattr(parent, "parentWidget"):
+        #        parent = parent.parentWidget()
+        #        cursor = getattr(parent, "cursor_", None)
+        #    else:
+        #        parent = None
          
-        if cursor:
-            self.cursor_ = cursor
-        else:
-            if not self.cursor_:
-                from pineboolib.pncontrolsfactory import FLSqlCursor
-                self.cursor_ = FLSqlCursor(self._action.table)
-            
-        
+        #if cursor:
+        #    self.cursor_ = cursor
+        #else:
+        remote_user = YBUTILS.viewREST.cacheController.getUser()
 
-        return self.cursor_
+        if remote_user in self._cursors.keys():
+            cursor = self._cursors[remote_user]
+        else:
+            from pineboolib.pncontrolsfactory import FLSqlCursor
+            cursor = FLSqlCursor(self._action.table)           
+            self._cursors[remote_user] = cursor
+
+        return cursor
     
     def parentWidget(self):
         return self.parent_
