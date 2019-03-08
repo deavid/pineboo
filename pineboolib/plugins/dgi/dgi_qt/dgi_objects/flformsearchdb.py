@@ -212,6 +212,8 @@ class FLFormSearchDB(FLFormDB):
 
         if self.loop or self.inExec_:
             print("FLFormSearchDB::exec(): Se ha detectado una llamada recursiva")
+            if self.isHidden():
+                super(FLFormSearchDB, self).show()
             if self.initFocusWidget_:
                 self.initFocusWidget_.setFocus()
             return False
@@ -242,9 +244,9 @@ class FLFormSearchDB(FLFormDB):
         self.loop = True
         self.eventloop.exec_()
         self.loop = False
-
+        self.inExec_ = False
+        
         if self.accepted_ and valor:
-            self.inExec_ = False
             return self.cursor_.valueBuffer(valor)
         else:
             self.close()
