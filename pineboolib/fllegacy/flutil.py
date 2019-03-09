@@ -853,15 +853,21 @@ class FLUtil(QtCore.QObject):
 
         @return Valor del setting
         """
+        ret = None
         q = FLSqlQuery()
         q.setSelect("valor")
         q.setFrom("flsettings")
         q.setWhere("flkey = '%s'" % key)
         q.setTablesList("flsettings")
         if q.exec_() and q.first():
-            return q.value(0)
+            ret = q.value(0)
+            if ret in ["false","False"]:
+                ret = False
+            elif ret in ["true","True"]:
+                ret = True
+                 
 
-        return None
+        return ret
 
     def writeDBSettingEntry(self, key, value):
         """

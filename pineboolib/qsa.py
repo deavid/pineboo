@@ -392,10 +392,11 @@ class qsaRegExp(object):
 
     def search(self, text):
         print("Buscando " + self.strRE_ + " en " + text)
-        self.result_ = re.search(self.strRE_, text)
+        return re.search(self.strRE_, text)
     
     def replace(self, target , new_value):
-        return re.sub(r"%s" % self.strRE_, new_value, target)
+        pattern = re.compile('r"' + self.strRE_ +'"')
+        return pattern.sub(new_value, target)
 
     def cap(self, i):
         if self.result_ is None:
@@ -735,14 +736,19 @@ class File(QtCore.QFile):
             encode = self.encode_
 
         import codecs
-        data = data.decode("utf8").encode(encode)
         
-        string_type = False
-        if isinstance(data, str):
-            string_type = True
+        try:
+            data_ = data.encode(encode)      
+        except Exception:
+            encode = "utf-8" if encode == "iso-8859-15" else "iso-8859-15"
+            data_ = data
             
+        string_type = False
+        if isinstance(data_, str):
+            string_type = True
+        
         f = codecs.open(file_, mode="w+" if string_type else "wb+", encoding=encode)
-        f.write(data)
+        f.write(data_)
         f.close()
 
     def exists(name):
