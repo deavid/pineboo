@@ -734,22 +734,13 @@ class File(QtCore.QFile):
         else:
             file_ = self.fichero
             encode = self.encode_
+                    
+        byte_ = data.encode(encode)
+        
+        with open(file_, 'wb') as file:
+            file.write(byte_)
 
-        import codecs
-        
-        try:
-            data_ = data.encode(encode)      
-        except Exception:
-            encode = "utf-8" if encode == "iso-8859-15" else "iso-8859-15"
-            data_ = data
-            
-        string_type = False
-        if isinstance(data_, str):
-            string_type = True
-        
-        f = codecs.open(file_, mode="w+" if string_type else "wb+", encoding=encode)
-        f.write(data_)
-        f.close()
+        file.close()
 
     def exists(name):
         """
