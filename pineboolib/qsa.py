@@ -20,6 +20,7 @@ from pineboolib.utils import ustr, ustr1, filedir
 
 from pineboolib.pncontrolsfactory import *
 from functools import total_ordering
+from lazr.restfulclient._browser import str_types
 
 logger = logging.getLogger(__name__)
 
@@ -735,7 +736,12 @@ class File(QtCore.QFile):
 
         import codecs
         data = data.decode("utf8").encode(encode)
-        f = codecs.open(file_, encoding=encode, mode="w+")
+        
+        string_type = False
+        if isinstance(data, str):
+            string_type = True
+            
+        f = codecs.open(file_, mode="w+" if string_type else "wb+", encoding=encode)
         f.write(data)
         f.close()
 
