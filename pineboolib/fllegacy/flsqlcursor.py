@@ -279,7 +279,11 @@ class PNBuffer(object):
                 value += float(list_[2]) / 3600 #Segundos a hora
                 
             else:
+                if isinstance(value, str) and value.find(",") > -1:
+                        value = value.replace(",",".") 
+                
                 value = float(value)
+
 
         elif field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
