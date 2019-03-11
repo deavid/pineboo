@@ -20,7 +20,6 @@ from pineboolib.utils import ustr, ustr1, filedir
 
 from pineboolib.pncontrolsfactory import *
 from functools import total_ordering
-from lazr.restfulclient._browser import str_types
 
 logger = logging.getLogger(__name__)
 
