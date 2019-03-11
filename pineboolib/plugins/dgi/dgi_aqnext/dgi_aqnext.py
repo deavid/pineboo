@@ -394,12 +394,12 @@ class dgi_aqnext(dgi_schema):
             if relation is not None:
                 table_name = relation.foreignTable() #Tabla relacionada
                 dict[key]['rel'] = table_name
-                dict[key]['to_field'] = relation.foreignField() #Campo relacionado
+                dict[key]['to_field'] = relation.field() #Campo relacionado
                 desc = None
                 #print("Cursor relacionado", table_name)
                 #cursor_rel = FLSqlCursor(table_name)
                 
-                rel_meta_model = getattr(meta_model,relation.field())
+                rel_meta_model = getattr(meta_model,relation.foreignField())
                 desc_function = getattr(rel_meta_model, "getDesc", None)
                 if desc_function:
                     expected_args = inspect.getargspec(desc_function)[0]
