@@ -143,7 +143,7 @@ class FLRelationMetaDataPrivate():
     """
     Nombre del campo a relacionar
     """
-    Field_ = None
+    field_ = None
 
     """
     Nombre de la tabla foránea a relacionar
