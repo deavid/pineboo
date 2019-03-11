@@ -284,7 +284,10 @@ class FLManagerModules(object):
         
         if pineboolib.project._DGI.alternative_content_cached():
             data = pineboolib.project._DGI.content_cached(aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_, shaKey)
-        else:
+            if data is not None:
+                return data
+            
+        if data is None:
             """Ruta por defecto"""
             if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), aqApp.db().DBName(), modId, ext_, name_)):
                 utf8_ = False

@@ -81,6 +81,16 @@ class dgi_aqnext(dgi_schema):
     def use_model(self):
         return True
     
+    def alternative_content_cached(self):
+        return False
+    
+    
+    def content_cached( tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
+        data_ = None
+        model_folder = None
+        
+        return data_ #Retorna un esquema adecuado al del fichero/extensión solicitado si procede.
+    
     #def interactiveGUI(self):       
         #return "Django"
     
