@@ -153,20 +153,29 @@ class FLSqlCursor(QtCore.QObject):
                 break
         
         
-        from pineboolib.pncontrolsfactory import FLSqlCursor as FLSqlCursor_legacy, FLRelationMetaData
+        from pineboolib.pncontrolsfactory import FLSqlCursor as FLSqlCursor_legacy, FLRelationMetaData, aqApp
         mtd = self.parent_cursor.metadata()
         fields_list = mtd.fieldList()
         if fields_list:
             for field in fields_list:
                 field_relation = field.relationM1()
                 if isinstance(field_relation, FLRelationMetaData) and recursive:
+                    
                     relation_table_name = field_relation.foreignTable()
                     relation_field_name = field_relation.foreignField()
+                    
+                    cur_name = self.parent_cursor.curName()
+                    rel_mtd = aqApp.db().manager().metadata(relation_table_name)                 
+                    
+                    relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
+                    relation_mtd.setField(relation_field_name)
+                    
+                    #print("***",mtd.name(),field_relation.field(), "-->",  relation_table_name , relation_field_name)
                     if relation_table_name and relation_field_name:
                         key_ = "%s_%s" % ( relation_table_name, relation_field_name)
                         if self.show_debug:
                             print("Creando", relation_table_name, relation_field_name,"desde", self.parent_cursor.curName(), field_relation.field())
-                        self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.d.db_, self.parent_cursor, field_relation)
+                        self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.conn(), self.parent_cursor, relation_mtd)
     
     def populate_meta_model(self):
         #print("**** populando", self.parent_cursor.curName())
