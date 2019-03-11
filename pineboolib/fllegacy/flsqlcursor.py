@@ -281,7 +281,6 @@ class PNBuffer(object):
             else:
                 value = float(value)
 
-
         elif field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
         
@@ -2164,7 +2163,7 @@ class FLSqlCursor(QtCore.QObject):
             sql = self.curFilter()
             sqlIn = self.curFilter()
             cFilter = self.curFilter()
-            field = self.metadata().field(pKN)
+            field = None
 
             sqlPriKey = None
             sqlFrom = None
@@ -2175,11 +2174,19 @@ class FLSqlCursor(QtCore.QObject):
             if not self.d.isQuery_ or "." in pKN:
                 sqlPriKey = pKN
                 sqlFrom = self.metadata().name()
+                field = self.metadata().field(pKN)
                 sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
             else:
                 qry = self.db().manager().query(self.metadata().query(), self)
                 if qry:
-                    sqlPriKey = "%s.%s" % (self.metadata().name(), pKN)
+                    #Buscamos la tabla que contiene el campo:
+                    for t in qry.tablesList():
+                        mtd = self.db().manager().metadata(t)
+                        field = mtd.field(pKN)
+                        if field is not None:
+                            break
+                        
+                    sqlPriKey = "%s.%s" % (field.metadata().name(), pKN)
                     sqlFrom = qry.from_()
                     sql = "SELECT %s FROM %s" % (sqlPriKey, sqlFrom)
                     del qry
