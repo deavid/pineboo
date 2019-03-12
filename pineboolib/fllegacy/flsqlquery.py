@@ -60,7 +60,8 @@ class FLSqlQuery(object):
 
     def exec_(self, sql=None):
         if self.invalidTablesList:
-            return False
+            return False        
+        
         if not sql:
             sql = self.sql()
         if not sql:
@@ -435,6 +436,7 @@ class FLSqlQuery(object):
         name = None
         table_name = None
         field_name = None
+        field = None
 
         if isinstance(n, str):
             #n = n.replace(" ", "")
@@ -450,11 +452,18 @@ class FLSqlQuery(object):
                 table_name = name[0:name.find(".")]
                 field_name = name[name.find(".") + 1:]
             else:
-                for t in self.tablesList():
-                    mtd = self.d.db_.manager().metadata(t, True)
-                    f = mtd.field(name)
+                tables_list = self.tablesList()
+                if not tables_list and self.from_():
+                    tl = self.from_().replace(" ", "")
+                    tables_list = tl.split(",")
                     
-                    if f is not None:
+                
+                table_list = tables_list
+                for t in table_list:
+                    mtd = self.d.db_.manager().metadata(t, True)
+                    field = mtd.field(name)
+                    
+                    if field is not None:
                         table_name = t
                         field_name = name
                         break
@@ -499,12 +508,19 @@ class FLSqlQuery(object):
                 
             elif retorno is not None and not isinstance(retorno, (str, int, bool, float, Date)):
                 retorno = float(retorno)
+            
 
             if isinstance(retorno, float):
                 if retorno == int(retorno):
                     retorno = int(retorno)
-                
-
+            
+            if field_name and table_name and retorno is None:
+                if field.type() == "string":
+                    retorno = ""
+                elif field.type() == "date":
+                    retorno = "0000-00-00"
+            
+            
             return retorno
 
     """

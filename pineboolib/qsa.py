@@ -729,7 +729,7 @@ class File(QtCore.QFile):
         """
         if isinstance(self, str):
             file_ = self
-            encode = "iso-8859-15"
+            encode = "utf-8"
         else:
             file_ = self.fichero
             encode = self.encode_
