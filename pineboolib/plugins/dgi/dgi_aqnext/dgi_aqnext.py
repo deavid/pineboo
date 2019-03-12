@@ -82,14 +82,22 @@ class dgi_aqnext(dgi_schema):
         return True
     
     def alternative_content_cached(self):
-        return False
+        return True
     
     
-    def content_cached( tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
+    def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
+        from pineboolib.utils import filedir
+        from pineboolib.pncontrolsfactory import aqApp
         data_ = None
-        model_folder = None
+        if module_id == "sys" and file_name in self.sys_mtds():
+            path_ = filedir("./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s" % (file_ext, file_name, file_ext))
+            if os.path.exists(path_):
+                data_ = aqApp.db().managerModules().contentFS(path_, False)
         
-        return data_ #Retorna un esquema adecuado al del fichero/extensión solicitado si procede.
+        return data_ 
+    
+    def sys_mtds(self):
+        return ['sis_acl','sis_user_notifications','sis_gridfilter']
     
     #def interactiveGUI(self):       
         #return "Django"
@@ -466,9 +474,18 @@ class dgi_aqnext(dgi_schema):
         
         return response
     
-    @decorators.NotImplementedWarn
-    def carga_datos_custom_filter(self, table, schema, usuario):
-        return {}
+    
+    def carga_datos_custom_filter(self, table, usuario):
+        from pineboolib.pncontrolsfactory import FLSqlCursor
+        ret = {}
+        cursor = FLSqlCursor("sis_gridfilter")
+        cursor.select(" prefix ='%s' AND usuario ='%s'" %  (table, usuario))
+        if cursor.first():
+            ret[cursor.valueBuffer("descripcion")] = {}
+            ret[cursor.valueBuffer("descripcion")]["pk"] = cursor.valueBuffer("id")
+            ret[cursor.valueBuffer("descripcion")]["filtro"] = cursor.valueBuffer("filtro")
+            ret[cursor.valueBuffer("descripcion")]["default"] = cursor.valueBuffer("inicial")
+        return ret
     
     def _convert_to_ordered_dict(self, data):
         ret_ = []

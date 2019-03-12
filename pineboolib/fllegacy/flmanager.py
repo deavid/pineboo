@@ -1370,6 +1370,9 @@ class FLManager(QtCore.QObject):
         @param n Nombre de la tabla.
         @return TRUE si es una tabla de sistema
         """
+        
+        if n in pineboolib.project._DGI.sys_mtds():
+            return True
 
         if n[0:2] != "fl":
             return False

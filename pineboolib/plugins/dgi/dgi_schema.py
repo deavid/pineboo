@@ -150,3 +150,6 @@ class dgi_schema(object):
         except Exception:
             pass
         return cls
+    
+    def sys_mtds(self):
+        return []
