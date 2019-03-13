@@ -96,6 +96,13 @@ class dgi_aqnext(dgi_schema):
         
         return data_ 
     
+    def use_alternative_credentials(self):
+        return True
+    
+    def get_nameuser(self):
+        from YBUTILS.viewREST.cacheController import getUser
+        return repr(getUser())
+    
     def sys_mtds(self):
         return ['sis_acl','sis_user_notifications','sis_gridfilter']
     

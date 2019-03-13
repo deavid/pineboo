@@ -153,3 +153,7 @@ class dgi_schema(object):
     
     def sys_mtds(self):
         return []
+
+    def use_alternative_credentials(self):
+        return False
+    
