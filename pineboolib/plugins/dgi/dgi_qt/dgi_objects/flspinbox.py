@@ -18,3 +18,4 @@ class FLSpinBox(QtWidgets.QSpinBox):
         super().setValue(val)
     
     value = property(getValue, setValue)
+    text = value
