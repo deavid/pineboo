@@ -907,7 +907,7 @@ def resolve_query(table_name, params):
     if and_where != "":
         where += str(and_where)
     if or_where != "":
-        where += " OR (" + str(or_where) + ")" if len(where) else str(or_where)
+        where += " AND (" + str(or_where) + ")" if len(where) else str(or_where)
     if order_by:
         order_by = order_by.strip()[:-1]    
     
