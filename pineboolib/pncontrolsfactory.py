@@ -150,7 +150,13 @@ class SysType(object):
         self.sys_widget = None
 
     def nameUser(self):
-        return pineboolib.project.conn.user()
+        ret_ = None
+        if pineboolib.project._DGI.use_alternative_credentials():
+            ret_ = pineboolib.project._DGI.get_nameuser()
+        else:
+            ret_ = pineboolib.project.conn.user()
+        
+        return ret_
 
     def interactiveGUI(self):
         return pineboolib.project._DGI.interactiveGUI()
