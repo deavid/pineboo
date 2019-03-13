@@ -134,9 +134,9 @@ class QTable(QtWidgets.QTableWidget):
     def setRowReadOnly(self, row, b):      
         if b:
             if row in self.read_only_rows:
-                return #Ya esta en True la row
-            
-            self.read_only_rows.append(row)
+                pass
+            else:            
+                self.read_only_rows.append(row)
         else:
             if row in self.read_only_rows:
                 self.read_only_rows.remove(row)
@@ -151,15 +151,16 @@ class QTable(QtWidgets.QTableWidget):
     def setColumnReadOnly(self, col, b):
         if b:
             if col in self.read_only_cols:
-                return
-            
-            self.read_only_cols.append(col)
+                pass
+            else:
+                self.read_only_cols.append(col)
         else:
             if col in self.read_only_cols:
                 self.read_only_cols.remove(col)
             else:
                 return
-
+        
+        
         for row in range(self.rowCount()):
             item = self.item(row, col)
             if item:
