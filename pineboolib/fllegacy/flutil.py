@@ -981,8 +981,8 @@ class FLUtil(QtCore.QObject):
         """
         from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-        fL = fL.split(",")
-        vL = vL.split(",")
+        fL = fL.split(",") if isinstance(fL, str) else fL
+        vL = vL.split(",") if isinstance(vL, str) else vL
 
         if not len(fL) == len(vL):
             return False
