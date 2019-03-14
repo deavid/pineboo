@@ -280,7 +280,7 @@ class PNBuffer(object):
                 
             else:
                 if isinstance(value, str) and value.find(",") > -1:
-                        value = value.replace(",",".") 
+                        value = value.replace(",","") 
                 
                 value = float(value)
 
