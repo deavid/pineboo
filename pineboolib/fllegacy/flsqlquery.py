@@ -518,9 +518,9 @@ class FLSqlQuery(object):
                     retorno = int(retorno)
             
             if mtd_field is not None and retorno is None:
-                if field.type() == "string":
+                if mtd_field.type() == "string":
                     retorno = ""
-                elif field.type() == "date":
+                elif mtd_field.type() == "date":
                     retorno = "0000-00-00"
             
             
