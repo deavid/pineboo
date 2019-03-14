@@ -19,6 +19,7 @@ class FLSqlQuery(object):
 
     countRefQuery = 0
     invalidTables = False
+    fields_cache = None
 
     def __init__(self, cx=None, connection_name=None):
         # super(FLSqlQuery, self).__init__()
@@ -34,6 +35,7 @@ class FLSqlQuery(object):
         self.invalidTablesList = False
         self.d.select_ = None
         self.d.fieldList_ = []
+        self.fields_cache = {}
         #self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
@@ -437,6 +439,9 @@ class FLSqlQuery(object):
         table_name = None
         field_name = None
         field = None
+        mtd_field = None
+        
+        
 
         if isinstance(n, str):
             #n = n.replace(" ", "")
@@ -446,42 +451,40 @@ class FLSqlQuery(object):
             pos = n
             name = self.posToFieldName(pos)
         
+        if name not in self.fields_cache.keys():
         
-        if name:
-            if name.find(".") > -1 and name[0:name.find(".")] is self.tablesList():
-                table_name = name[0:name.find(".")]
-                field_name = name[name.find(".") + 1:]
-            else:
-                tables_list = self.tablesList()
-                if not tables_list and self.from_():
-                    tl = self.from_().replace(" ", "")
-                    tables_list = tl.split(",")
+            if name:
+                if name.find(".") > -1 and name[0:name.find(".")] is self.tablesList():
+                    table_name = name[0:name.find(".")]
+                    field_name = name[name.find(".") + 1:]
+                else:
+                    tables_list = self.tablesList()
+                    if not tables_list and self.from_():
+                        tl = self.from_().replace(" ", "")
+                        tables_list = tl.split(",")
                     
                 
-                table_list = tables_list
-                for t in table_list:
-                    mtd = self.d.db_.manager().metadata(t, True)
-                    field = mtd.field(name)
-                    
-                    if field is not None:
-                        table_name = t
-                        field_name = name
-                        break
+                    table_list = tables_list
+                    for t in table_list:
+                        mtd = self.d.db_.manager().metadata(t, True)
+                        if mtd is not None and name in mtd.fieldsNames():
+                            table_name = t
+                            field_name = name
+                            break
+                
+                if field_name is not None:
+                    self.fields_cache[name] = self.d.db_.manager().metadata(table_name, False).field(field_name)
         
+        if name in self.fields_cache.keys():
+            mtd_field = self.fields_cache[name]
         
-        if raw is None:
-            #Intentamos saber si en un valor para fllarge
-            if table_name and field_name:
-                field = self.d.db_.manager().metadata(table_name, True).field(field_name)
-                raw  = (field.type() is "pixmap") and not self.d.db_.manager().isSystemTable(table_name)
+        if raw is None and mtd_field:
+            raw  = (mtd_field.type() is "pixmap") and not self.d.db_.manager().isSystemTable(mtd_field.metadata().name())
                         
-            
-            
-
-            
-        if raw is True:
+        if raw:
             return self.d.db_.manager().fetchLargeValue(self._row[pos])
         else:
+            
             from pineboolib.qsa import Date
             
             
@@ -490,9 +493,9 @@ class FLSqlQuery(object):
             except Exception:
                 retorno = None
             
-            if table_name and field_name:
+            if mtd_field is not None:
                 #field = self.d.db_.manager().metadata(table_name, True).field(field_name)
-                if field.type() == "date" and isinstance(retorno, str):
+                if mtd_field.type() == "date" and isinstance(retorno, str):
                     retorno = Date(retorno)
             
             """ TIME """
@@ -514,7 +517,7 @@ class FLSqlQuery(object):
                 if retorno == int(retorno):
                     retorno = int(retorno)
             
-            if field_name and table_name and retorno is None:
+            if mtd_field is not None and retorno is None:
                 if field.type() == "string":
                     retorno = ""
                 elif field.type() == "date":
