@@ -121,12 +121,14 @@ class QTable(QtWidgets.QTableWidget):
         
         if prev_item:
             self.setCellBackgroundColor(row, col, bg_color)
-            
-        if row in self.read_only_rows:
-            self.setRowReadOnly(row, True)
+        
+        new_item = self.item(row, col)
+        if new_item:
+            if row in self.read_only_rows or col in self.read_only_cols:
+                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+            else:
+                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
-        if col in self.read_only_cols:
-            self.setColumnReadOnly(col, True)
 
     def adjustColumn(self, k):
         self.horizontalHeader().setSectionResizeMode(k, QtWidgets.QHeaderView.ResizeToContents)
