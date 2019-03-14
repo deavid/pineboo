@@ -292,6 +292,8 @@ class PNBuffer(object):
             if value is not None:
                 if isinstance(value, pineboolib.qsa.Date):
                     value = value.toString()
+                elif isinstance(value , datetime.timedelta):
+                    value = str(value)
             if isinstance(value, str) and value.find("T") > -1:
                 value = value[value.find("T") + 1:]
         
@@ -703,12 +705,10 @@ class FLSqlCursorPrivate(QtCore.QObject):
             condTrue_ = False
 
             if self.acosCond_ == FLSqlCursor.Value:
-                condTrue_ = (self.cursor_.value(
-                    self.acosCondName_) == self.acosCondVal_)
+                condTrue_ = (self.cursor_.value(self.acosCondName_) == self.acosCondVal_)
             elif self.acosCond_ == FLSqlCursor.RegExp:
                 from PyQt5.Qt import QRegExp
-                condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(
-                    str(self.cursor_.value(self.acosCondName_))))
+                condTrue_ = str(QRegExp(str(self.acosCondVal_)).exactMatch(str(self.cursor_.value(self.acosCondName_))))
             elif self.acosCond_ == FLSqlCursor.Function:
                 condTrue_ = aqApp.call(self.acosCondName_, [self.cursor_]) == self.acosCondVal_
 

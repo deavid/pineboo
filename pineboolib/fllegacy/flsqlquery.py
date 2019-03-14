@@ -501,6 +501,8 @@ class FLSqlQuery(object):
             """ TIME """
             if isinstance(retorno, datetime.time):
                 retorno = str(retorno)[:8]
+            elif isinstance(retorno , datetime.timedelta):
+                retorno = str(retorno)
             
             elif isinstance(retorno, str) and retorno is not None and retorno.find(":") < retorno.find(".") and retorno.find(":") > -1:
                 retorno = retorno[:retorno.find(".")]
@@ -509,7 +511,7 @@ class FLSqlQuery(object):
             elif isinstance(retorno, datetime.date):
                 retorno = Date(str(retorno))
                 
-            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, Date)):
+            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, Date, datetime.time, datetime.timedelta)):
                 retorno = float(retorno)
             
 
