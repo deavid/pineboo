@@ -187,15 +187,17 @@ class FLSqlCursor(QtCore.QObject):
                     field_name = field.name()
                     field_relation = field.relationM1()
                     value = self.parent_cursor.buffer().value(field_name)
-                    if field_relation is not None:
-                        key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.foreignField())
-                        if key_ in self.cursor_tree_dict.keys():
-                            if self.cursor_tree_dict[key_].refresh():
-                                pass
-                            value = self.cursor_tree_dict[key_].meta_model()                            
+                    if value is not None:
+                        if field_relation is not None:
+                            key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.foreignField())
+                            if key_ in self.cursor_tree_dict.keys():
+                                if self.cursor_tree_dict[key_].refresh():
+                                    pass
+                                value = self.cursor_tree_dict[key_].meta_model()                            
                     
-                    if self.show_debug:
-                        print("Populate", self.parent_cursor.curName(),":", field_name, "--->", value)
+                        if self.show_debug:
+                            print("Populate", self.parent_cursor.curName(),":", field_name, "--->", value)
+                    
                     setattr(meta_model, field_name, value)
           
            
