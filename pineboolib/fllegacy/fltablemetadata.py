@@ -263,7 +263,7 @@ class FLTableMetaData(object):
         
         ret_ = None
         if type_ is not None:
-            if type_ in ("string","counter"):
+            if type_ in ("string","counter","stringlist"):
                 ret_ = 3
             elif type_ == "uint":
                 ret_ = 17
@@ -283,7 +283,7 @@ class FLTableMetaData(object):
                 ret_ = 300
             else:
                 #FIXME: Falta stringlist e int
-                logger.warn("FIXME:: No hay definido un valor numérico para el tipo %s", self.d.type_)
+                self.logger.warn("FIXME:: No hay definido un valor numérico para el tipo %s", type_)
         
         return ret_
 
@@ -315,8 +315,8 @@ class FLTableMetaData(object):
 
         i = 0
 
-        for f in self.d.fieldList_:
-            if f.name() == str(fN).lower():
+        for field_name in self.fieldsNames():
+            if field_name == str(fN).lower():
                 return i
 
             i = i + 1
