@@ -302,7 +302,11 @@ class FLCodBar(object):
         from PyQt5.QtSvg import QSvgRenderer
 
         barC = barcode.get_barcode_class(type_.lower())
-        bar_ = barC(u'%s' % value_)
+        try:
+            bar_ = barC(u'%s' % value_)
+        except Exception:
+            bar_ = barC('000000000000')
+            
         svg = bar_.render(render_options)
         xml_svg = load2xml(svg.decode("utf-8"))
         svg_w = (3.779 * float(xml_svg.get("width")[0:6])) 
