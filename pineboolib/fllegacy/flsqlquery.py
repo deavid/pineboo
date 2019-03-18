@@ -497,6 +497,7 @@ class FLSqlQuery(object):
                 #field = self.d.db_.manager().metadata(table_name, True).field(field_name)
                 if mtd_field.type() == "date" and isinstance(retorno, str):
                     retorno = Date(retorno)
+                
             
             """ TIME """
             if isinstance(retorno, datetime.time):
@@ -511,7 +512,7 @@ class FLSqlQuery(object):
             elif isinstance(retorno, datetime.date):
                 retorno = Date(str(retorno))
                 
-            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, Date, datetime.time, datetime.timedelta)):
+            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, Date)):
                 retorno = float(retorno)
             
 

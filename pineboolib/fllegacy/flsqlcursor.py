@@ -218,10 +218,7 @@ class PNBuffer(object):
         field = self.field(n)
         v = field.value
         
-        if field.value is None:
-            v = None
-        
-        else:
+        if field.value is not None:
             if field.type_ in ("str", "pixmap", "time", "date"):
                 try:
                     v = str(field.value)
