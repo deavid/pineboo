@@ -186,7 +186,10 @@ class FLSqlCursor(QtCore.QObject):
                 for field in fields_list:
                     field_name = field.name()
                     field_relation = field.relationM1()
-                    value = self.parent_cursor.buffer().value(field_name)                        
+                    value = self.parent_cursor.buffer().value(field_name)
+                    if value is not None and field.type() in ["date"]:
+                        value = value[:10]
+                                        
                     if value is not None:
                         if field_relation is not None:
                             key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.foreignField())
