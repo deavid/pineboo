@@ -210,7 +210,20 @@ class FLSqlQuery(object):
 
         if isinstance(s, str) and sep in s:
             #s = s.replace(" ", "")
-            s = s.split(sep)
+            list_fields = []
+            prev = ""
+            for f in s.split(sep):
+                
+                field = prev + f
+                if field.count("(") == field.count(")"):
+                    list_fields.append(field)
+                    prev = ""
+                else:
+                    prev = "%s," % field
+            
+            s = list_fields
+                
+            #s = s.split(sep)
 
         # self.d.select_ = s.strip_whitespace()
         # self.d.select_ = self.d.select_.simplifyWhiteSpace()
@@ -441,7 +454,6 @@ class FLSqlQuery(object):
         field = None
         mtd_field = None
         
-        
 
         if isinstance(n, str):
             #n = n.replace(" ", "")
@@ -450,6 +462,7 @@ class FLSqlQuery(object):
         else:
             pos = n
             name = self.posToFieldName(pos)
+        
         
         if name not in self.fields_cache.keys():
         
