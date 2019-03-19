@@ -25,8 +25,8 @@ class FLSqlCursor(QtCore.QObject):
     def __init__(self, cursor, stabla):
         super().__init__()
         self.parent_cursor = cursor
-        self.parent_cursor.setActivatedBufferChanged(False)
-        self.parent_cursor.setActivatedBufferCommited(False) 
+        #self.parent_cursor.setActivatedBufferChanged(False)
+        #self.parent_cursor.setActivatedBufferCommited(False) 
         self.cursor_tree_dict = {}    
         self.show_debug = False
         
