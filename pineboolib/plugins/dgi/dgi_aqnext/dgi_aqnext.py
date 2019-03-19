@@ -422,7 +422,7 @@ class dgi_aqnext(dgi_schema):
                     desc = desc_function(*new_args[:len(expected_args)])
             
                 if not desc or desc is None:
-                        desc = cursor.db().manager().metadata(table_name).primaryKey()
+                    desc = cursor.db().manager().metadata(table_name).primaryKey()
                 
                 dict[key]['desc'] = desc
     
@@ -490,7 +490,7 @@ class dgi_aqnext(dgi_schema):
         if cursor.first():
             ret[cursor.valueBuffer("descripcion")] = {}
             ret[cursor.valueBuffer("descripcion")]["pk"] = cursor.valueBuffer("id")
-            ret[cursor.valueBuffer("descripcion")]["filtro"] = cursor.valueBuffer("filtro")
+            ret[cursor.valueBuffer("descripcion")]["filtro"] = cursor.valueBuffer("filtro").replace('\"', "\'")
             ret[cursor.valueBuffer("descripcion")]["default"] = cursor.valueBuffer("inicial")
         return ret
     
