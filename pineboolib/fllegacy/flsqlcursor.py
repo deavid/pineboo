@@ -3233,7 +3233,7 @@ class FLSqlCursor(QtCore.QObject):
         functionAfter = None
         model_module = None
         
-        idMod = self.db().managerModules().idModuleOfFile("%s.%s" % (self.metadata().name(), "mtd"))
+        idMod = self.db().managerModules().idModuleOfFile("%s.mtd" % self.metadata().name())
         
         
         if pineboolib.project._DGI.use_model():
