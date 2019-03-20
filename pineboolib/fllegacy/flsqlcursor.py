@@ -1171,7 +1171,13 @@ class FLSqlCursor(QtCore.QObject):
 
         self.buffer().setValue(fN, v)
         if self.activatedBufferChanged():
-            self.bufferChanged.emit()
+            if pineboolib.project._DGI.use_model() and self.meta_model():
+                if hasattr(self.meta_model(), "bChCursor"):
+                    if self.meta_model().bChCursor(fN, self) is False:
+                        return
+            self.bufferChanged.emit(fN)
+            from pineboolib.pncontrolsfactory import SysType
+            SysType.processEvents(self)
 
     """
     Establece el valor de un campo del buffer con un valor.
@@ -1232,6 +1238,11 @@ class FLSqlCursor(QtCore.QObject):
 
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         if self.activatedBufferChanged():
+            if pineboolib.project._DGI.use_model() and self.meta_model():
+                if hasattr(self.meta_model(), "bChCursor"):
+                    if self.meta_model().bChCursor(fN, self) is False:
+                        return
+            
             self.bufferChanged.emit(fN)
         from pineboolib.pncontrolsfactory import SysType
         SysType.processEvents(self)
