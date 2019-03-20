@@ -642,6 +642,10 @@ class FLManagerModules(object):
         if n == "flfiles.mtd":
             return "sys"
         
+        if n.endswith(".mtd"):
+            if n[:n.find(".mtd")] in pineboolib.project._DGI.sys_mtds():
+                return "sys"
+        
         else:
             query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
             cursor = self.conn_.cursor()
