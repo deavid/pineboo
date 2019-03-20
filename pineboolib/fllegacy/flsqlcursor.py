@@ -24,6 +24,8 @@ import copy
 import datetime
 import logging
 import traceback
+import importlib
+import os
 logger = logging.getLogger(__name__)
 
 
@@ -406,7 +408,7 @@ class PNBuffer(object):
             if f.metadata.isPrimaryKey():
                 return f.name
 
-        logger.message("PNBuffer.pk(): No se ha encontrado clave Primaria")
+        logger.warn("PNBuffer.pk(): No se ha encontrado clave Primaria")
 
     """
     Indica la posicion del buffer de un campo determinado
@@ -752,11 +754,11 @@ class FLSqlCursorPrivate(QtCore.QObject):
     def msgBoxWarning(self, msg, throwException=False):
         if pineboolib.project._DGI.localDesktop():
             from pineboolib.pncontrolsfactory import QMessageBox, QApplication
-            logger.message(msg)
+            logger.warn(msg)
             if not throwException:
                 QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)
         else:
-            logger.message(msg)
+            logger.warn(msg)
 
 # ###############################################################################
 # ###############################################################################
@@ -1133,7 +1135,7 @@ class FLSqlCursor(QtCore.QObject):
         field = self.metadata().field(fN)
 
         if field is None:
-            logger.message("setAtomicValueBuffer(): No existe el campo %s:%s", self.metadata().name(), fN)
+            logger.warn("setAtomicValueBuffer(): No existe el campo %s:%s", self.metadata().name(), fN)
             return
 
         if not self.db().dbAux():
@@ -2619,7 +2621,7 @@ class FLSqlCursor(QtCore.QObject):
                         val = self.db().nextSerialVal(self.metadata().name(), field_name)
                         if val is None:
                             val = 0
-                        self.buffer().setValue(field_name, "%u" % val)
+                        self.buffer().setValue(field_name, val)
 
                     if field.isCounter():
                         siguiente = None
@@ -3229,9 +3231,22 @@ class FLSqlCursor(QtCore.QObject):
 
         functionBefore = None
         functionAfter = None
+        model_module = None
+        
+        idMod = self.db().managerModules().idModuleOfFile("%s.%s" % (self.metadata().name(), "mtd"))
+        
+        
+        if pineboolib.project._DGI.use_model():
+            model_name = "models.%s.%s_def" %( idMod, idMod)
+            try:
+                model_module = importlib.import_module(model_name)
+            except:
+                pass
+        
+        
+        
         if not self.modeAccess() == FLSqlCursor.Browse and self.activatedCommitActions():
-            idMod = self.db().managerModules().idModuleOfFile(
-                "%s.%s" % (self.metadata().name(), "mtd"))
+            
 
             if idMod:
                 functionBefore = "%s.iface.beforeCommit_%s" % (
@@ -3241,6 +3256,15 @@ class FLSqlCursor(QtCore.QObject):
             else:
                 functionBefore = "sys.iface.beforeCommit_%s" % self.metadata().name()
                 functionAfter = "sys.iface.afterCommit_%s" % self.metadata().name()
+            
+            
+            if model_module is not None:
+                function_model_before = getattr(model_module.iface, "beforeCommit_%s" % self.metadata().name(), None)
+                if function_model_before:
+                    ret = function_model_before(self)
+                    if not ret:
+                        return ret
+                        
             
             
             
@@ -3339,6 +3363,7 @@ class FLSqlCursor(QtCore.QObject):
                                     return False
 
             self.model().Delete(self)
+            
 
             recordDelAfter = "recordDelAfter%s" % self.metadata().name()
             v = aqApp.call(recordDelAfter, [self], self.context(), False)
@@ -3348,10 +3373,19 @@ class FLSqlCursor(QtCore.QObject):
         if updated and self.lastError():
             return False
 
-        if not self.modeAccess() == self.Browse and functionAfter and self.activatedCommitActions():
-            v = aqApp.call(functionAfter, [self], None, False)
-            if v and not isinstance(v, bool):
-                return False
+        if not self.modeAccess() == self.Browse and self.activatedCommitActions():
+            
+            if model_module is not None:
+                function_model_after = getattr(model_module.iface, "afterCommit_%s" % self.metadata().name(), None)
+                if function_model_after:
+                    ret = function_model_after(self)
+                    if not ret:
+                        return ret
+            
+            if functionAfter:
+                v = aqApp.call(functionAfter, [self], None, False)
+                if v and not isinstance(v, bool):
+                    return False
 
         if self.modeAccess() in (self.Del, self.Edit):
             self.setModeAccess(self.Browse)
@@ -3514,13 +3548,13 @@ class FLSqlCursor(QtCore.QObject):
         if ct and msg:
             m = "%sSqlCursor::commitOpened: %s %s" % (msg, str(count), t)
             self.d.msgBoxWarning(m, False)
-            logger.message(m)
+            logger.warn(m)
         elif ct > 0:
-            logger.message("SqlCursor::commitOpened: %d %s" % (count, self.name()))
+            logger.warn("SqlCursor::commitOpened: %d %s" % (count, self.name()))
 
         i = 0
         while i < ct:
-            logger.message("Terminando transacción abierta %s", self.transactionLevel())
+            logger.warn("Terminando transacción abierta %s", self.transactionLevel())
             self.commit()
             i = i + 1
 
