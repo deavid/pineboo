@@ -639,27 +639,22 @@ class FLManagerModules(object):
         if not isinstance(n, str):
             n = n.toString()
         
-        if n == "flfiles.mtd":
-            return "sys"
-        
         if n.endswith(".mtd"):
-            if n[:n.find(".mtd")] in pineboolib.project._DGI.sys_mtds():
-                return "sys"
-        
-        else:
-            query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
-            cursor = self.conn_.cursor()
-            try:
-                cursor.execute(query)
-            except Exception:
-                print("ERROR: FLManagerModules.idModuleOfFile",
-                      traceback.format_exc())
-                # cursor.execute("ROLLBACK")
-                cursor.close()
-                return None
+            if n[:n.find(".mtd")] in pineboolib.project._DGI.sys_mtds() or n == "flfiles.mtd":
+                return "sys"    
 
-            for idmodulo in cursor:
-                return idmodulo[0]
+        query = "SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n
+        cursor = self.conn_.cursor()
+        try:
+            cursor.execute(query)
+        except Exception:
+            print("ERROR: FLManagerModules.idModuleOfFile", traceback.format_exc())
+            # cursor.execute("ROLLBACK")
+            cursor.close()
+            return None
+
+        for idmodulo in cursor:
+            return idmodulo[0]
     """
     Guarda el estado del sistema de módulos
     """
