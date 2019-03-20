@@ -414,7 +414,7 @@ class dgi_aqnext(dgi_schema):
                 #print("Cursor relacionado", table_name)
                 #cursor_rel = FLSqlCursor(table_name)
                 
-                rel_meta_model = getattr(meta_model,relation.foreignField())
+                rel_meta_model = getattr(meta_model,relation.field())
                 desc_function = getattr(rel_meta_model, "getDesc", None)
                 if desc_function:
                     expected_args = inspect.getargspec(desc_function)[0]
