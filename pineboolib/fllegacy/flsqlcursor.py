@@ -941,7 +941,7 @@ class FLSqlCursor(QtCore.QObject):
             cR.newBuffer.connect(self.clearPersistentFilter)
             
             if pineboolib.project._DGI.use_model() and cR.meta_model(): #Si el cursor_relation tiene un model asociado , este cursor carga el propio también
-                self.assoc_model()
+                self.assoc_model(False)
                 self.build_cursor_tree_dict(False)
             
         else:

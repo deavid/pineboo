@@ -272,7 +272,7 @@ class dgi_aqnext(dgi_schema):
             #print("**************************", prefix)
             try:
                 cursor.assoc_model() #Asocia el modelo
-                cursor.build_cursor_tree_dict(True)
+                
             except:
                 import traceback
                 logger.warn("DGI. get_master_cursor: %s", traceback.format_exc())
