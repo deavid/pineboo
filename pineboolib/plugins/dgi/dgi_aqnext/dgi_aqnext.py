@@ -7,7 +7,8 @@ import pineboolib
 
 from importlib import import_module
 from PyQt5 import QtCore
-
+import json
+import collections
 import traceback
 import collections
 import inspect
@@ -297,7 +298,7 @@ class dgi_aqnext(dgi_schema):
     
         meta_model = cursor.meta_model()
     
-        import json, collections
+        
     
         
     
