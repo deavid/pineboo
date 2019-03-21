@@ -887,22 +887,23 @@ def convert_to_qdate(date):
     return date
 
 def resolve_pagination(query):
-    page = 0
+    init = 0
     limit = 0
     for k in query.keys():
         if k.startswith("p_"):
             if k.endswith("l"):
                 limit = query[k]
-            elif k.endswith("c"):
-                if isinstance(query[k], bool):
-                    page = 0
-                else:
-                    page = query[k]
+            elif k.endswith("o"):
+                init = query[k]
+                
+                #if query[k] == "true":
+                #    page = 0
+                #else:
+                #    page = int(query[k])
     
     ret = (None, None)                
     if limit is not 0:
-        init = page * limit
-        print("init", page, limit)
+        #init = page * limit
         ret = (init, limit)
     
     return ret
