@@ -124,6 +124,7 @@ class FLSqlCursor(QtCore.QObject):
         cursor._meta_model = pineboolib.project._DGI.load_meta_model(cursor.curName())
         if cursor.meta_model():
             cursor.build_cursor_tree_dict(recursive_populate)
+            setattr(cursor.meta_model(), "_cursor", cursor)
         
     
     def build_cursor_tree_dict(self, recursive = False): 
