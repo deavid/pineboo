@@ -307,7 +307,9 @@ class dgi_aqnext(dgi_schema):
         
         size_ = cursor.size()
         i = 0
+        #logger.warn("***** %s", size_, stack_info = True)
         while i < size_:
+            
             #dict_ = collections.OrderedDict()
             dict_ = {}
             pk = cursor.primaryKey()
@@ -323,24 +325,22 @@ class dgi_aqnext(dgi_schema):
                 if f == pk:
                     dict_["pk"] = value
                 dict_[f] = value
-        
             if meta_model:
                 calculateFields = self.get_foreign_fields(meta_model, template)
                 for field in calculateFields:
                     if hasattr(meta_model, field["func"]):
                         dict_[field["verbose_name"]] = getattr(meta_model, field["func"])(meta_model)
-            
+                
                 desc_function = getattr(meta_model, "getDesc", None)
                 desc = None
                 if desc_function:
                     expected_args = inspect.getargspec(desc_function)[0]
                     new_args = [meta_model]
                     desc = desc_function(*new_args[:len(expected_args)])
-            
+                    
                 dict_["desc"] = desc
             #for field in calculateFields:
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
-        
             if size_ == 1:
                 ret_ = dict_
             else:
@@ -349,7 +349,7 @@ class dgi_aqnext(dgi_schema):
             if cursor.next():
                 pass
             i += 1
-        
+
         return ret_
     
     def getYBschema(self, cursor, template = None):
@@ -458,9 +458,9 @@ class dgi_aqnext(dgi_schema):
         first_reg, limit_reg =  pineboolib.utils.resolve_pagination(params)
         if first_reg:
             where_filter += " OFFSET %s" % first_reg 
-            
-        where_filter += " LIMIT %s" % limit_reg
         
+        if limit_reg:
+            where_filter += " LIMIT %s" % limit_reg
         
         cursor_master.select(where_filter)
         if cursor_master.first():
@@ -470,7 +470,7 @@ class dgi_aqnext(dgi_schema):
             
                 if not cursor_master.next():
                     break
-                
+        
         return list_objects
     
     """
@@ -488,7 +488,7 @@ class dgi_aqnext(dgi_schema):
         
         #pagination = pagination_class(data_list, params)
         first_reg , limit_reg = pineboolib.utils.resolve_pagination(params)
-        response.data["PAG"] = {"NO": "%s" % (int(limit_reg) + int(first_reg)), "PO": first_reg, "COUNT": len(data) if size is None else size}
+        response.data["PAG"] = {"NO": "%s" % (int(limit_reg) + int(first_reg)), "PO": "%s" % (int(first_reg) - int(limit_reg)) if first_reg else 0 , "COUNT": len(data) if size is None else size}
         
         return response
     
