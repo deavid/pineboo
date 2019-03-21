@@ -454,6 +454,14 @@ class dgi_aqnext(dgi_schema):
         list_objects = []
         where, order_by = pineboolib.utils.resolve_query(prefix, params)
         where_filter = "%s ORDER BY %s" % ( where, order_by) if len(order_by) else where 
+        
+        first_reg, limit_reg =  pineboolib.utils.resolve_pagination(params)
+        if first_reg:
+            where_filter += " OFFSET %s" % first_reg 
+            
+        where_filter += " LIMIT %s" % limit_reg
+        
+        
         cursor_master.select(where_filter)
         if cursor_master.first():
             while True:
@@ -465,20 +473,22 @@ class dgi_aqnext(dgi_schema):
                 
         return list_objects
     
+    """
     @decorators.NotImplementedWarn
     def paginate_queryset(self, query_set):
         
         return query_set
-    
-    def get_paginated_response(self, data, params):
+    """
+    def get_paginated_response(self, data, params, size = None):
         
         response = paginated_object()
         response.data = {}
         data_list = self._convert_to_ordered_dict(data)
         response.data["data"] = data_list
         
-        pagination = pagination_class(data_list, params)
-        response.data["PAG"] = {"NO": pagination.get_next_offset(), "PO": pagination.get_previous_offset(), "COUNT": pagination.count}
+        #pagination = pagination_class(data_list, params)
+        first_reg , limit_reg = pineboolib.utils.resolve_pagination(params)
+        response.data["PAG"] = {"NO": "%s" % (int(limit_reg) + int(first_reg)), "PO": first_reg, "COUNT": len(data) if size is None else size}
         
         return response
     
@@ -516,7 +526,7 @@ class dgi_aqnext(dgi_schema):
 class paginated_object(object):
     pass   
 
-
+"""
 class pagination_class(object):
     
     count = None
@@ -553,7 +563,7 @@ class pagination_class(object):
             i += 1
         
         return ret_
-        
+"""     
         
         
     
