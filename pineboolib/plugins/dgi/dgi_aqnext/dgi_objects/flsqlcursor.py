@@ -118,14 +118,12 @@ class FLSqlCursor(QtCore.QObject):
         return FLAux.obtener_modelo(stabla)
     
     
-    def assoc_model(self, populate = True):
+    def assoc_model(self, recursive_populate = True):
         import pineboolib
         cursor = self.parent_cursor
-        cur_name = cursor.curName()
-        #logger.warn("Asociando modelo %s a cursor %s", cur_name, self.parent_cursor )
-        cursor._meta_model = pineboolib.project._DGI.load_meta_model(cur_name)
-        if populate and cursor._meta_model:
-            self.build_cursor_tree_dict(True)
+        cursor._meta_model = pineboolib.project._DGI.load_meta_model(cursor.curName())
+        if cursor.meta_model():
+            cursor.build_cursor_tree_dict(recursive_populate)
         
     
     def build_cursor_tree_dict(self, recursive = False): 
