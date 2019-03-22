@@ -3,6 +3,7 @@
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib import decorators
 import pineboolib
+from pineboolib.utils import resolve_query
 
 
 from importlib import import_module
@@ -441,14 +442,17 @@ class dgi_aqnext(dgi_schema):
         return dict, meta
     
     def get_foreign_fields(self, meta_model, template = None):
-        return meta_model.getForeignFields(meta_model, template)
+        foreign_field_function = getattr(meta_model,"getForeignFields")
+        expected_args = inspect.getargspec(foreign_field_function)[0]
+        new_args = [meta_model, template]
+        return foreign_field_function(*new_args[:len(expected_args)])
         
     def pagination(self, data_, query): 
         return pagination_class(data_, query)
 
 
     def get_queryset(self, prefix, params):
-        from pineboolib.utils import resolve_query
+        
         #retorna una lista con objetos del modelo
         cursor_master = self.get_master_cursor(prefix)
         list_objects = []
@@ -488,7 +492,8 @@ class dgi_aqnext(dgi_schema):
         
         #pagination = pagination_class(data_list, params)
         first_reg , limit_reg = pineboolib.utils.resolve_pagination(params)
-        response.data["PAG"] = {"NO": "%s" % (int(limit_reg) + int(first_reg)), "PO": "%s" % (int(first_reg) - int(limit_reg)) if first_reg else 0 , "COUNT": len(data) if size is None else size}
+        
+        response.data["PAG"] = {"NO": "%s" % (int(limit_reg) + int(first_reg)) if first_reg else 0 , "PO": "%s" % (int(first_reg) - int(limit_reg)) if first_reg else 0 , "COUNT": len(data) if size is None else size}
         
         return response
     
