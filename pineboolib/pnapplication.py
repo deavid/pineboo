@@ -105,9 +105,9 @@ class Project(object):
     def init_time(self):
         self.time_ = time.time()
         
-    def show_time(self):
+    def show_time(self, text = "", stack = False):
         now_ = time.time()
-        self.logger.warn("Tiempo : %s", round(now_ - self.time_, 3), stack_info = True)
+        self.logger.warn("%s Tiempo : %s", text, round(now_ - self.time_, 5), stack_info = stack)
 
     """
     Retorna si hay o no acls cargados
