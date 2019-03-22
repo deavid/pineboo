@@ -292,40 +292,37 @@ class dgi_aqnext(dgi_schema):
     
     def cursor2json(self, cursor, template = None):
         ret_ = []
-        
         if not cursor.isValid():
             logger.warn("Cursor inválido/vacío en %s", cursor.curName())
             return ret_
     
         meta_model = cursor.meta_model()
-    
-        
-    
-        
-    
+
         if cursor.first():
             pass
-        
+        #pineboolib.project.init_time()
         size_ = cursor.size()
+        pk = cursor.primaryKey()
+        fields_list = cursor.metadata().fieldList()
         i = 0
+        date_fields = []
         #logger.warn("***** %s", size_, stack_info = True)
         while i < size_:
-            
             #dict_ = collections.OrderedDict()
             dict_ = {}
-            pk = cursor.primaryKey()
-            fields_list = cursor.metadata().fieldsNames()
+            
             for f in fields_list:
-                field_name = f if f != "pk" else pk
+                field_name = f.name() if f.name() != "pk" else pk
                 value = cursor.valueBuffer(field_name)
-                if cursor.metadata().field(field_name).type() in ["date"]:
+                if f.type() in ["date"]:
                     if hasattr(value, "toString"):
                         value = value.toString()
                     value = value[:10]
             
-                if f == pk:
+                if f.isPrimaryKey():
                     dict_["pk"] = value
-                dict_[f] = value
+                dict_[f.name()] = value
+                
             if meta_model:
                 calculateFields = self.get_foreign_fields(meta_model, template)
                 for field in calculateFields:
@@ -338,19 +335,20 @@ class dgi_aqnext(dgi_schema):
                     expected_args = inspect.getargspec(desc_function)[0]
                     new_args = [meta_model]
                     desc = desc_function(*new_args[:len(expected_args)])
-                    
                 dict_["desc"] = desc
             #for field in calculateFields:
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
             if size_ == 1:
                 ret_ = dict_
+                break
             else:
                 ret_.append(dict_)
-        
+            
+            
             if cursor.next():
                 pass
             i += 1
-
+        #pineboolib.project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
         return ret_
     
     def getYBschema(self, cursor, template = None):
