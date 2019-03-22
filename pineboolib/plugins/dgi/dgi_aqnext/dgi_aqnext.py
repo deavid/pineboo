@@ -339,7 +339,7 @@ class dgi_aqnext(dgi_schema):
             #for field in calculateFields:
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
             if size_ == 1:
-                ret_ = dict_
+                ret_ = [dict_]
                 break
             else:
                 ret_.append(dict_)
