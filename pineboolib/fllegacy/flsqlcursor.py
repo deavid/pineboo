@@ -2595,12 +2595,11 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
-        from pineboolib.pncontrolsfactory import aqApp
-
+        
         if not self.metadata():
             return False
         
-        if not self.isValid() and not self.d.modeAccess_ == self.Insert:
+        if not self.isValid() and self.d.modeAccess_ != self.Insert:
             return False
         
         if self.d.modeAccess_ == self.Insert:
