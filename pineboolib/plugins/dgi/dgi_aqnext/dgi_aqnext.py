@@ -327,7 +327,7 @@ class dgi_aqnext(dgi_schema):
                 calculateFields = self.get_foreign_fields(meta_model, template)
                 for field in calculateFields:
                     if hasattr(meta_model, field["func"]):
-                        dict_[field["verbose_name"]] = getattr(meta_model, field["func"])(meta_model)
+                        dict_[field["verbose_name"]] = str(getattr(meta_model, field["func"])(meta_model))
                 
                 desc_function = getattr(meta_model, "getDesc", None)
                 desc = None
@@ -339,7 +339,7 @@ class dgi_aqnext(dgi_schema):
             #for field in calculateFields:
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
             if size_ == 1:
-                ret_ = [dict_]
+                ret_ = dict_
                 break
             else:
                 ret_.append(dict_)
@@ -409,7 +409,7 @@ class dgi_aqnext(dgi_schema):
             if relation is not None:
                 table_name = relation.foreignTable() #Tabla relacionada
                 dict[key]['rel'] = table_name
-                dict[key]['to_field'] = relation.field() #Campo relacionado
+                dict[key]['to_field'] = relation.foreignField() #Campo relacionado
                 desc = None
                 #print("Cursor relacionado", table_name)
                 #cursor_rel = FLSqlCursor(table_name)
