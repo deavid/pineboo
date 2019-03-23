@@ -15,5 +15,5 @@ class FileDialog(object):
         
 
     def getExistingDirectory(basedir=None, caption=None):
-        ret = QtWidgets.QFileDialog.getExistingDirectory(None, caption, os.getenv('HOME'), QtWidgets.QFileDialog.ShowDirsOnly)
+        ret = QtWidgets.QFileDialog.getExistingDirectory(None, caption, os.getenv('HOME') if basedir is None else basedir, QtWidgets.QFileDialog.ShowDirsOnly)
         return "%s/" % ret if ret else ret
