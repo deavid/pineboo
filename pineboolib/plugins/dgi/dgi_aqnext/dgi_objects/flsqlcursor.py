@@ -24,7 +24,7 @@ class DelayedObjectProxyLoader(object):
         self._args = args
         self._kwargs = kwargs
         self.loaded_obj = None
-        self.logger = logging.getLogger("main.DelayedObjectProxyLoader")
+        self.logger = logging.getLogger("FLSQLCURSOR AQNEXT.DelayedObjectProxyLoader")
         self.cursor_tree_dict = {}
         self.last_value_buffer = None
         
@@ -34,6 +34,7 @@ class DelayedObjectProxyLoader(object):
     """
 
     def __load(self):
+        #print("**Carga", self._field.name())
         field_relation = self._field.relationM1()
         
         value = self._obj.valueBuffer(self._field.name())
@@ -108,6 +109,12 @@ class DelayedObjectProxyLoader(object):
     def __ge__(self, other):
         obj_ = self.__load()
         return obj_ >= other
+
+    
+    def __str__(self):
+        obj_ = self.__load()
+        return "%s" % obj_
+
 
 
 class FLSqlCursor(QtCore.QObject):
