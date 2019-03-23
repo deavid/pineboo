@@ -45,6 +45,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     parent_view = None
     need_update = False
     _driver_sql = None
+    _last_filter = None
     """
     Constructor
     @param action. action relacionada al cursor
@@ -100,6 +101,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._showPixmap = True
         self.color_function_ = None
         self.color_dict_ = {}
+        self._last_filter = ""
 
         self.where_filters = {}
         self.where_filters["main-filter"] = ""
@@ -572,26 +574,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if not self.metadata():
             self.logger.warn("ERROR: CursorTableModel :: No hay tabla %s", self.metadata().name())
             return
-
-        parent = QtCore.QModelIndex()
-        oldrows = self.rowsLoaded
-        self.beginRemoveRows(parent, 0, oldrows)
-        if self.USE_THREADS:
-            self.threadFetcherStop.set()
-            if self.threadFetcher.is_alive():
-                self.threadFetcher.join()
-
-        self.rows = 0
-        self.rowsLoaded = 0
-        self.fetchedRows = 0
-        self.sql_fields = []
-        self.sql_fields_without_check = []
-        self.pkpos = []
-        self.ckpos = []
-        self._data = []
-        self.endRemoveRows()
-        if oldrows > 0:
-            self.rowsRemoved.emit(parent, 0, oldrows - 1)
+        
+        """ FILTRO WHERE """
         where_filter = None
         for k, wfilter in sorted(self.where_filters.items()):
             if wfilter is None:
@@ -614,7 +598,36 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             else:
                 self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
 
+        
+        if self.where_filter == self._last_filter:
+            return
+        self._last_filter = self.where_filter
+        """ FIN """
+        
+        
+        
+        
 
+        parent = QtCore.QModelIndex()
+        oldrows = self.rowsLoaded
+        self.beginRemoveRows(parent, 0, oldrows)
+        if self.USE_THREADS:
+            self.threadFetcherStop.set()
+            if self.threadFetcher.is_alive():
+                self.threadFetcher.join()
+
+        self.rows = 0
+        self.rowsLoaded = 0
+        self.fetchedRows = 0
+        self.sql_fields = []
+        self.sql_fields_without_check = []
+        self.pkpos = []
+        self.ckpos = []
+        self._data = []
+        self.endRemoveRows()
+        if oldrows > 0:
+            self.rowsRemoved.emit(parent, 0, oldrows - 1)
+        
         if self.metadata().isQuery():
             qry = self.db().manager().query(self.metadata().query())
             from_ = qry.from_()
