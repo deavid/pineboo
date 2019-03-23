@@ -52,7 +52,7 @@ class FormInternalObj(FormDBWidget):
 
     def interna_main(self):
         util = FLUtil()
-        setting = ustr(u"scripts/sys/modLastModule_", sys.nameBD())
+        setting = "scripts/sys/modLastModule_%s" % sys.nameBD()
         fichMod = util.readSettingEntry(setting)
         if not fichMod:
             fichMod = FileDialog.getOpenFileName(util.translate(u"scripts", u"Módulo a cargar (*.mod)"), util.translate(u"scripts", u"Módulo a cargar"))
@@ -140,12 +140,12 @@ class FormInternalObj(FormDBWidget):
         # arg00="ICONST:'0'"/><regexchar arg00="MINUS"/><regexchar
         # arg00="ICONST:'9'"/><regexchar arg00="RBRACKET"/><regexchar
         # arg00="PLUS"/></regexbody></Constant></Value>
-        versionSys = sys.version().match(unknownarg)
-        if self.iface.compararVersiones(versionSys, versionMinimaFL) == 2:
-            contVersion = MessageBox.warning(util.translate(u"scripts", u"Este módulo necesita la versión ") + versionMinimaFL + util.translate(u"scripts", u" o superior de la aplicación base,\nactualmente la versión instalada es la ") +
-                                             sys.version() + util.translate(u"scripts", u".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
-            if contVersion == MessageBox.No:
-                return
+        #versionSys = sys.version().match(unknownarg)
+        #if self.iface.compararVersiones(versionSys, versionMinimaFL) == 2:
+        #    contVersion = MessageBox.warning(util.translate(u"scripts", u"Este módulo necesita la versión ") + versionMinimaFL + util.translate(u"scripts", u" o superior de la aplicación base,\nactualmente la versión instalada es la ") +
+        #                                     sys.version() + util.translate(u"scripts", u".\nFacturaLUX puede fallar por esta causa.\n¿Desea continuar la carga?"), MessageBox.Yes, MessageBox.No)
+        #    if contVersion == MessageBox.No:
+        #        return
         if not util.sqlSelect(u"flareas", u"idarea", ustr(u"idarea = '", area, u"'")):
             if not util.sqlInsert(u"flareas", u"idarea,descripcion", ustr(area, u",", desArea)):
                 MessageBox.warning(util.translate(u"scripts", u"Error al crear el área:\n") + area, MessageBox.Ok, MessageBox.NoButton)

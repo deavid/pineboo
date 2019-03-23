@@ -61,8 +61,9 @@ class FormInternalObj(FormDBWidget):
 
     def interna_main(self):
         util = FLUtil()
-        setting = ustr(u"scripts/sys/modLastDirModules_", sys.nameBD())
-        dirAnt = util.readSettingEntry(setting, False)
+        setting = "scripts/sys/modLastDirModules_%s" % sys.nameBD()
+        dirAnt = util.readSettingEntry(setting)
+        print("**", dirAnt)
         dirMods = FileDialog.getExistingDirectory(dirAnt, util.translate(u"scripts", u"Directorio de Módulos"))
 
         if not dirMods:
@@ -235,6 +236,9 @@ class FormInternalObj(FormDBWidget):
         curModulo.editRecord()
         formRecordflmodules.cargarDeDisco(u"%s/" % fichero.path, False)
         formRecordflmodules.accept()
+        setting = "scripts/sys/modLastModule_%s" % sys.nameBD()
+        nombreFichero = "%s" % os.path.abspath(nombreFichero)
+        util.writeSettingEntry(setting, nombreFichero)
         sys.processEvents()
         return True
 
