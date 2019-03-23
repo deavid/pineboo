@@ -885,7 +885,31 @@ def convert_to_qdate(date):
         date = QtCore.QDate.fromString(date, "dd-MM-yyyy")
 
     return date
- 
+
+def resolve_pagination(query):
+    init = 0
+    limit = 0
+    for k in query.keys():
+        if k.startswith("p_"):
+            if k.endswith("l"):
+                limit = query[k]
+            elif k.endswith("o"):
+                init = query[k]
+                
+                #if query[k] == "true":
+                #    page = 0
+                #else:
+                #    page = int(query[k])
+    
+    ret = (None, None)                
+    if limit is not 0:
+        #init = page * limit
+        ret = (init, limit)
+    
+    return ret
+    
+    
+
 
 def resolve_query(table_name, params):
     from collections import OrderedDict
@@ -893,14 +917,16 @@ def resolve_query(table_name, params):
     and_where = ""
     where = ""
     order_by = ""
+    from pineboolib.pncontrolsfactory import aqApp
+    mtd = aqApp.db().manager().metadata(table_name)
     params = OrderedDict(sorted(params.items(), key= lambda x: x[0]))
     for p in params:
         if p.startswith("q_"):
             or_where += " OR " if len(or_where) else ""
-            or_where += resolve_where_params(p, params[p], table_name)
+            or_where += resolve_where_params(p, params[p], mtd)
         elif p.startswith("s_"):
             and_where += " AND " if len(and_where) else ""
-            and_where += resolve_where_params(p, params[p], table_name)
+            and_where += resolve_where_params(p, params[p], mtd)
         elif p.startswith("o_"):
             order_by += resolve_order_params(p, params[p])
     
@@ -926,7 +952,7 @@ def resolve_order_params(key, valor):
     return valor
 
 
-def resolve_where_params(key, valor, table_name):
+def resolve_where_params(key, valor, mtd_table):
     list_params = key.split("__")
     campo = "_".join(list_params[0].split("_")[1:])
     tipo = list_params[1]
@@ -934,8 +960,12 @@ def resolve_where_params(key, valor, table_name):
     if campo == "pk":
         return "1=1"
     
-    from pineboolib.pncontrolsfactory import aqApp
-    field_type = aqApp.db().manager().metadata(table_name).field(campo).type()
+    field =  mtd_table.field(campo)
+    if field is not None:
+        field_type = field.type()
+    else:
+        logger.warn("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
+        return ""
     #valor = aqApp.db().manager().formatValue(field_type , valor, False)
     
     if field_type in ["bool", "unlock"]:

@@ -4,6 +4,116 @@ import logging
 import os
 
 logger = logging.getLogger(__name__)
+from pineboolib.pncontrolsfactory import FLRelationMetaData, aqApp, FLSqlCursor as FLSqlCursor_legacy
+
+
+class DelayedObjectProxyLoader(object):
+
+    """
+    Constructor
+    """
+    cursor_tree_dict = {}
+    last_value_buffer = None
+    
+    
+    def __init__(self, obj, *args, **kwargs):
+        if "field_object" in kwargs:
+            self._field = kwargs["field_object"]
+            del kwargs["field_object"]
+        self._obj = obj
+        self._args = args
+        self._kwargs = kwargs
+        self.loaded_obj = None
+        self.logger = logging.getLogger("FLSQLCURSOR AQNEXT.DelayedObjectProxyLoader")
+        self.cursor_tree_dict = {}
+        self.last_value_buffer = None
+        
+    """
+    Carga un objeto nuevo
+    @return objeto nuevo o si ya existe , cacheado
+    """
+
+    def __load(self):
+        #print("**Carga", self._field.name())
+        field_relation = self._field.relationM1()
+        
+        value = self._obj.valueBuffer(self._field.name())
+        
+        if value == self.last_value_buffer:
+            return self.loaded_obj
+        
+        
+        self.last_value_buffer = value
+        if value in (None, ""):
+            self.loaded_obj = None
+            return self.loaded_obj
+        
+        if isinstance(field_relation, FLRelationMetaData):
+            relation_table_name = field_relation.foreignTable()
+            relation_field_name = field_relation.foreignField()
+            
+            key_ = "%s_%s" % ( relation_table_name, relation_field_name)
+            
+            if key_ not  in self.cursor_tree_dict.keys():
+                rel_mtd = aqApp.db().manager().metadata(relation_table_name)
+            
+                relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
+                relation_mtd.setField(relation_field_name)
+            
+                if relation_table_name and relation_field_name:
+                    self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self._obj.conn(), self._obj, relation_mtd)
+            
+            
+            rel_cursor = self.cursor_tree_dict[key_]
+            
+            rel_cursor.select()
+            loaded_obj = rel_cursor.meta_model()
+            
+        else:
+            loaded_obj = self._obj.valueBuffer(self._field.name())
+        
+        self.loaded_obj = loaded_obj
+        return loaded_obj
+
+    """
+    Retorna una función buscada
+    @param name. Nombre del la función buscada
+    @return el objecto del XMLAction afectado
+    """
+
+    def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
+        obj_ = self.__load()
+        ret = getattr(obj_, name)
+        return ret
+    
+    def __le__(self, other):
+        obj_ = self.__load()
+        return obj_ <= other
+    
+    def __lt__(self, other):
+        obj_ = self.__load()
+        return obj_ < other
+    
+    def __ne__(self, other):
+        obj_ = self.__load()
+        return obj_ != other
+    
+    def __eq__(self, other):
+        obj_ = self.__load()
+        return obj_ == other
+    
+    def __gt__(self, other):
+        obj_ = self.__load()
+        return obj_ > other
+    
+    def __ge__(self, other):
+        obj_ = self.__load()
+        return obj_ >= other
+
+    
+    def __str__(self):
+        obj_ = self.__load()
+        return "%s" % obj_
 
 
 
@@ -19,7 +129,7 @@ class FLSqlCursor(QtCore.QObject):
     _validate_cursor = None
     _validate_transaction = None
     _cursor_accepted = None
-    cursor_tree_dict = {}
+    
     show_debug = None
     
     def __init__(self, cursor, stabla):
@@ -27,7 +137,7 @@ class FLSqlCursor(QtCore.QObject):
         self.parent_cursor = cursor
         #self.parent_cursor.setActivatedBufferChanged(False)
         #self.parent_cursor.setActivatedBufferCommited(False) 
-        self.cursor_tree_dict = {}    
+          
         self.show_debug = False
         
         
@@ -118,16 +228,27 @@ class FLSqlCursor(QtCore.QObject):
         return FLAux.obtener_modelo(stabla)
     
     
-    def assoc_model(self, recursive_populate = True):
+    def assoc_model(self, module_name = None):
         import pineboolib
         cursor = self.parent_cursor
-        cursor._meta_model = pineboolib.project._DGI.load_meta_model(cursor.curName())
-        if cursor.meta_model():
-            cursor.build_cursor_tree_dict(recursive_populate)
+        mtd = cursor.metadata()
+        if module_name is None:
+            module_name = cursor.curName()
+        model = pineboolib.project._DGI.load_meta_model(module_name)
+        if model:
+            cursor._meta_model = model
             setattr(cursor.meta_model(), "_cursor", cursor)
-        
-    
+            
+            #Creamos las propiedades , una por carda campo
+            fields_list = mtd.fieldList()
+            
+            for field in fields_list:
+                #print("Seteando", field.name())
+                setattr(model, field.name(), DelayedObjectProxyLoader(cursor, field_object=field))
+            
+    """
     def build_cursor_tree_dict(self, recursive = False): 
+        print("Building", self.parent_cursor.metadata().name())
         lev = 2
         l = 0
         cur_rel = None
@@ -179,7 +300,9 @@ class FLSqlCursor(QtCore.QObject):
                             print("Creando", relation_table_name, relation_field_name,"desde", self.parent_cursor.curName(), field_relation.field())
                         self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.conn(), self.parent_cursor, relation_mtd)
     
+
     def populate_meta_model(self):
+        print("** **", self.parent_cursor.metadata().name())
         #print("**** populando", self.parent_cursor.curName())
         fields_list = self.parent_cursor.metadata().fieldList()
         meta_model = self.parent_cursor.meta_model()
@@ -207,5 +330,5 @@ class FLSqlCursor(QtCore.QObject):
                     setattr(meta_model, field_name, value)
           
            
-    
+    """
         

@@ -3,11 +3,13 @@
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib import decorators
 import pineboolib
+from pineboolib.utils import resolve_query
 
 
 from importlib import import_module
 from PyQt5 import QtCore
-
+import json
+import collections
 import traceback
 import collections
 import inspect
@@ -290,65 +292,63 @@ class dgi_aqnext(dgi_schema):
     
     def cursor2json(self, cursor, template = None):
         ret_ = []
-        
         if not cursor.isValid():
             logger.warn("Cursor inválido/vacío en %s", cursor.curName())
             return ret_
     
         meta_model = cursor.meta_model()
-    
-        import json, collections
-    
-        
-    
+
         if cursor.first():
             pass
-        
+        #pineboolib.project.init_time()
         size_ = cursor.size()
+        pk = cursor.primaryKey()
+        fields_list = cursor.metadata().fieldList()
         i = 0
+        date_fields = []
+        #logger.warn("***** %s", size_, stack_info = True)
         while i < size_:
             #dict_ = collections.OrderedDict()
             dict_ = {}
-            pk = cursor.primaryKey()
-            fields_list = cursor.metadata().fieldsNames()
+            
             for f in fields_list:
-                field_name = f if f != "pk" else pk
+                field_name = f.name() if f.name() != "pk" else pk
                 value = cursor.valueBuffer(field_name)
-                if cursor.metadata().field(field_name).type() in ["date"]:
+                if f.type() in ["date"]:
                     if hasattr(value, "toString"):
                         value = value.toString()
                     value = value[:10]
             
-                if f == pk:
+                if f.isPrimaryKey():
                     dict_["pk"] = value
-                dict_[f] = value
-        
+                dict_[f.name()] = value
+                
             if meta_model:
                 calculateFields = self.get_foreign_fields(meta_model, template)
                 for field in calculateFields:
                     if hasattr(meta_model, field["func"]):
-                        dict_[field["verbose_name"]] = getattr(meta_model, field["func"])(meta_model)
-            
+                        dict_[field["verbose_name"]] = str(getattr(meta_model, field["func"])(meta_model))
+                
                 desc_function = getattr(meta_model, "getDesc", None)
                 desc = None
                 if desc_function:
                     expected_args = inspect.getargspec(desc_function)[0]
                     new_args = [meta_model]
                     desc = desc_function(*new_args[:len(expected_args)])
-            
                 dict_["desc"] = desc
             #for field in calculateFields:
             #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
-        
             if size_ == 1:
                 ret_ = dict_
+                break
             else:
                 ret_.append(dict_)
-        
+            
+            
             if cursor.next():
                 pass
             i += 1
-        
+        #pineboolib.project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
         return ret_
     
     def getYBschema(self, cursor, template = None):
@@ -409,7 +409,7 @@ class dgi_aqnext(dgi_schema):
             if relation is not None:
                 table_name = relation.foreignTable() #Tabla relacionada
                 dict[key]['rel'] = table_name
-                dict[key]['to_field'] = relation.field() #Campo relacionado
+                dict[key]['to_field'] = relation.foreignField() #Campo relacionado
                 desc = None
                 #print("Cursor relacionado", table_name)
                 #cursor_rel = FLSqlCursor(table_name)
@@ -440,19 +440,30 @@ class dgi_aqnext(dgi_schema):
         return dict, meta
     
     def get_foreign_fields(self, meta_model, template = None):
-        return meta_model.getForeignFields(meta_model, template)
+        foreign_field_function = getattr(meta_model,"getForeignFields")
+        expected_args = inspect.getargspec(foreign_field_function)[0]
+        new_args = [meta_model, template]
+        return foreign_field_function(*new_args[:len(expected_args)])
         
     def pagination(self, data_, query): 
         return pagination_class(data_, query)
 
 
     def get_queryset(self, prefix, params):
-        from pineboolib.utils import resolve_query
+        
         #retorna una lista con objetos del modelo
         cursor_master = self.get_master_cursor(prefix)
         list_objects = []
         where, order_by = pineboolib.utils.resolve_query(prefix, params)
         where_filter = "%s ORDER BY %s" % ( where, order_by) if len(order_by) else where 
+        
+        first_reg, limit_reg =  pineboolib.utils.resolve_pagination(params)
+        if first_reg:
+            where_filter += " OFFSET %s" % first_reg 
+        
+        if limit_reg:
+            where_filter += " LIMIT %s" % limit_reg
+        
         cursor_master.select(where_filter)
         if cursor_master.first():
             while True:
@@ -461,23 +472,26 @@ class dgi_aqnext(dgi_schema):
             
                 if not cursor_master.next():
                     break
-                
+        
         return list_objects
     
+    """
     @decorators.NotImplementedWarn
     def paginate_queryset(self, query_set):
         
         return query_set
-    
-    def get_paginated_response(self, data, params):
+    """
+    def get_paginated_response(self, data, params, size = None):
         
         response = paginated_object()
         response.data = {}
         data_list = self._convert_to_ordered_dict(data)
         response.data["data"] = data_list
         
-        pagination = pagination_class(data_list, params)
-        response.data["PAG"] = {"NO": pagination.get_next_offset(), "PO": pagination.get_previous_offset(), "COUNT": pagination.count}
+        #pagination = pagination_class(data_list, params)
+        first_reg , limit_reg = pineboolib.utils.resolve_pagination(params)
+        
+        response.data["PAG"] = {"NO": "%s" % (int(limit_reg) + int(first_reg)) if first_reg else 0 , "PO": "%s" % (int(first_reg) - int(limit_reg)) if first_reg else 0 , "COUNT": len(data) if size is None else size}
         
         return response
     
@@ -515,7 +529,7 @@ class dgi_aqnext(dgi_schema):
 class paginated_object(object):
     pass   
 
-
+"""
 class pagination_class(object):
     
     count = None
@@ -552,7 +566,7 @@ class pagination_class(object):
             i += 1
         
         return ret_
-        
+"""     
         
         
     

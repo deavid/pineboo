@@ -941,7 +941,7 @@ class FLSqlCursor(QtCore.QObject):
             cR.newBuffer.connect(self.clearPersistentFilter)
             
             if pineboolib.project._DGI.use_model() and cR.meta_model(): #Si el cursor_relation tiene un model asociado , este cursor carga el propio también
-                self.assoc_model(False)
+                self.assoc_model()
             
         else:
             self.seek(None)
@@ -2595,12 +2595,11 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
-        from pineboolib.pncontrolsfactory import aqApp
-
+        
         if not self.metadata():
             return False
         
-        if not self.isValid() and not self.d.modeAccess_ == self.Insert:
+        if not self.isValid() and self.d.modeAccess_ != self.Insert:
             return False
         
         if self.d.modeAccess_ == self.Insert:
@@ -2692,8 +2691,8 @@ class FLSqlCursor(QtCore.QObject):
         else:
             logger.error("refreshBuffer(). No hay definido modeAccess()")
         
-        if pineboolib.project._DGI.use_model() and self.meta_model():
-            self.populate_meta_model()
+        #if pineboolib.project._DGI.use_model() and self.meta_model():
+        #    self.populate_meta_model()
             
 
         return True
