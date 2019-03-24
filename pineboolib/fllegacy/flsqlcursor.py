@@ -948,6 +948,9 @@ class FLSqlCursor(QtCore.QObject):
 
         if self.d.timer_:
             del self.d.timer_
+        
+        self.d.timer_ = QtCore.QTimer(self)
+        self.d.timer_.timeout.connect(self.refreshDelayed)
 
         self.refreshDelayed()
         # self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
@@ -2533,7 +2536,14 @@ class FLSqlCursor(QtCore.QObject):
     def refreshDelayed(self, msec=50):
         if self.buffer():
             return
-
+        
+        obj = self.sender()
+        
+        if not obj or not obj.inherits("QTimer"):
+                self.d.timer_.start(msec)
+                return
+        
+        """
         if not self._refreshDelayedTimer:
             time = QtCore.QTimer()
             time.singleShot(msec, self.refreshDelayed)
@@ -2541,9 +2551,11 @@ class FLSqlCursor(QtCore.QObject):
             return
 
         self._refreshDelayedTimer = False
-
-        # if not self.d.timer_:
-        #    return
+        """
+        
+        if not self.d.timer_:
+            return
+        
         # self.d.timer_.start(msec)
         # cFilter = self.filter()
         # self.setFilter(None)
