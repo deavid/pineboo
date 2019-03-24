@@ -14,10 +14,13 @@ class QTable(QtWidgets.QTableWidget):
     cols_list = None
     
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, name = None):
         super(QTable, self).__init__(parent)
         if not parent:
             self.setParent(self.parentWidget())
+        
+        if name:
+            self.setObjectName(name)
 
         self.cols_list = []
         self.lineaActual = -1
@@ -36,7 +39,12 @@ class QTable(QtWidgets.QTableWidget):
     def doubleClicked_(self, f, c):
         self.doubleClicked.emit(f, c)
     
+    
     def __getattr__(self, name):
+        if name == "Multi":
+            return self.MultiSelection
+        elif name == "SpreadSheet":
+            return 999
         return getattr(QtCore.Qt, name) if hasattr(QtCore.Qt, name) else None
     
     def valueChanged_(self, item = None):
@@ -70,6 +78,8 @@ class QTable(QtWidgets.QTableWidget):
         return super(QTable, self).selectionMode()
 
     def setFocusStyle(self, m):
+        if isinstance(m, int):
+            return
         self.setStyleSheet(m)
 
     def setColumnLabels(self, separador, lista):
@@ -90,6 +100,12 @@ class QTable(QtWidgets.QTableWidget):
             self.removeRow(i)
         self.setHorizontalHeaderLabels(self.cols_list)
         self.setRowCount(0)
+    
+    def setSelectionMode(self, mode):
+        if mode == 999:
+            self.setAlternatingRowColors(True)
+        else:
+            super().setSelectionMode(mode)
         
 
     def setColumnStrechable(self, col, b):
