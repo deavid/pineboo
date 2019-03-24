@@ -620,8 +620,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Redefinida por conveniencia
     """
-    @decorators.Incomplete
-    def refresh(self):
+    def refresh(self, refresh_option = None):
         if self.popup_:
             self.cursor_.refresh()
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
