@@ -929,11 +929,11 @@ class FLSqlCursor(QtCore.QObject):
         if cR and r:
             try:
                 cR.bufferChanged.disconnect(self.refresh)
-                cR.d._current_changed.disconnect(self.refresh)
+                #cR.d._current_changed.disconnect(self.refresh)
             except Exception:
                 pass
             cR.bufferChanged.connect(self.refresh)
-            cR.d._current_changed.connect(self.refresh)
+            #cR.d._current_changed.connect(self.refresh)
             try:
                 cR.newBuffer.disconnect(self.clearPersistentFilter)
             except Exception:
