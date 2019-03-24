@@ -695,7 +695,7 @@ class File(QtCore.QFile):
             rutaFichero = rutaFichero[0]
         self.fichero = str(rutaFichero)
         super().__init__(rutaFichero)
-        self.path = os.path.dirname(self.fichero)
+        self.path = os.path.dirname(os.path.abspath(self.fichero))
         
         if encode is not None:
             self.encode_ = encode

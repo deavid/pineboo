@@ -148,7 +148,8 @@ class FormInternalObj(FormDBWidget):
             curModulo.editRecord()
             formRecordflmodules.cargarDeDisco(ustr(fichero.path, u"/"), False)
             formRecordflmodules.accept()
-            setting = ustr(u"scripts/sys/modLastModule_", sys.nameBD())
+            setting = "scripts/sys/modLastModule_%s" % sys.nameBD()
+            nombreFichero = "%s" % os.path.abspath(nombreFichero)
             util.writeSettingEntry(setting, nombreFichero)
             aqApp.reinit()
 
