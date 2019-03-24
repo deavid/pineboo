@@ -457,7 +457,6 @@ class FLApplication(QtCore.QObject):
     def showDocPage(self, url):
         pass
 
-    @decorators.NotImplementedWarn
     def timeUser(self):
         return self.time_user_
 
