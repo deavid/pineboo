@@ -31,7 +31,7 @@ LogText = 0
 RichText = 1
 
 
-def Function(args, source):
+def Function(*args):
     
     import importlib
     import sys as python_sys
@@ -39,11 +39,14 @@ def Function(args, source):
     # asumir que es una funcion anónima, tal que:
     #  -> function($args) { source }
     # compilar la funcion y devolver el puntero
+    arguments = args[:len(args)-1]
+    source = args[len(args) -1]
     qs_source = """
     
 function anon(%s) {   
     %s
-} """ % (args, source)
+} """ % (", ".join(arguments), source)
+
     #print("Compilando QS en línea: ", qs_source)
     from pineboolib.flparser import flscriptparse
     from pineboolib.flparser import postparse
