@@ -124,6 +124,7 @@ FLCodBar = resolveObject("FLCodBar")
 FormDBWidget = resolveObject("FormDBWidget")
 # Clases QSA
 CheckBox = resolveObject("CheckBox")
+ComboBox = resolveObject("QComboBox")
 TextEdit = QTextEdit
 LineEdit = resolveObject("LineEdit")
 FileDialog = resolveObject("FileDialog")
@@ -244,6 +245,9 @@ class SysType(object):
 
     def removeDatabase(self, connName="default"):
         return pineboolib.project.conn.removeConn(connName)
+    
+    def idSession(self):
+        return aqApp.timeUser().toString(QtCore.Qt.ISODate)
 
 class System_class(object):
 
