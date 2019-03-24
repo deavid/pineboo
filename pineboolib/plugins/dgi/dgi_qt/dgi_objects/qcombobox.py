@@ -9,21 +9,14 @@ class QComboBox(QtWidgets.QComboBox):
         self._parent = parent
         super(QComboBox, self).__init__(parent)
 
-    # def __getattr__(self, name):
-    #    return DefFun(self, name)
-
-    @QtCore.pyqtProperty(str)
+    @property
     def currentItem(self):
-        return self.currentIndex
+        return self.currentIndex()
 
     @currentItem.setter
     def currentItem(self, i):
-        if i:
-            #if not pineboolib.project._DGI.localDesktop():
-            #    pineboolib.project._DGI._par.addQueque("%s_setCurrentIndex" % self.objectName(), n)
+        if i is not None:
             self.setCurrentIndex(i)
 
     def insertStringList(self, strl):
-        #if not pineboolib.project._DGI.localDesktop():
-        #    pineboolib.project._DGI._par.addQueque("%s_insertStringList" % self.objectName(), strl)
         self.insertItems(len(strl), strl)
