@@ -45,7 +45,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     parent_view = None
     need_update = False
     _driver_sql = None
-    _last_filter = None
     """
     Constructor
     @param action. action relacionada al cursor
@@ -101,7 +100,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._showPixmap = True
         self.color_function_ = None
         self.color_dict_ = {}
-        self._last_filter = ""
 
         self.where_filters = {}
         self.where_filters["main-filter"] = ""
@@ -597,11 +595,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 self.where_filter = self.where_filter.replace(";", " ORDER BY %s;" % self.getSortOrder())
             else:
                 self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
-
-        
-        if self.where_filter == self._last_filter:
-            return
-        self._last_filter = self.where_filter
         """ FIN """
         
         
