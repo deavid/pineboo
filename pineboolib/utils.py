@@ -901,7 +901,7 @@ def resolve_pagination(query):
                 #else:
                 #    page = int(query[k])
     
-    ret = (None, None)                
+    ret = (None, "50")                
     if limit is not 0:
         #init = page * limit
         ret = (init, limit)
