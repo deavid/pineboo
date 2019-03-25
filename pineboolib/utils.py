@@ -369,10 +369,11 @@ def cacheXPM(value):
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
         
-        if cache_dir in xpm_name:
-            file_name = xpm_name
+        if value.find("cacheXPM") > -1:
+            file_name = value
         else:
             file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
+            
         if not os.path.exists(file_name):
             f = open(file_name, "w")
             f.write(value)
