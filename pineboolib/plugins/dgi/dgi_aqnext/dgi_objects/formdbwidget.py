@@ -179,6 +179,8 @@ class FormDBWidget(QtCore.QObject):
         ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None) or getattr(self._action.script, name, None)
         if ret_:
             return ret_
+        #else:
+        #    return getattr(self.iface, name, None)
 
     def __iter__(self):
         self._iter_current = None
