@@ -368,8 +368,11 @@ def cacheXPM(value):
         cache_dir = "%s/cache/%s/cacheXPM" % (aqApp.tmp_dir(), aqApp.db().DBName())
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
-
-        file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
+        
+        if cache_dir in xpm_name:
+            file_name = xpm_name
+        else:
+            file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
         if not os.path.exists(file_name):
             f = open(file_name, "w")
             f.write(value)
