@@ -1351,6 +1351,8 @@ class FLSqlCursor(QtCore.QObject):
         if self.bufferCopy().isNull(fN):
             if type_ == "double" or type_ == "int" or type_ == "uint":
                 return 0
+            elif type_ == "string":
+                return ""
 
         v = self.bufferCopy().value(fN)
 
