@@ -919,7 +919,11 @@ def resolve_query(table_name, params):
     order_by = ""
     from pineboolib.pncontrolsfactory import aqApp
     mtd = aqApp.db().manager().metadata(table_name)
-    params = OrderedDict(sorted(params.items(), key= lambda x: x[0]))
+    
+    if hasattr(params, "_iterlists"):
+        q = params
+        params = {k: q.getlist(k) if len(q.getlist(k))>1 else v for k, v in q.items()}
+
     for p in params:
         if p.startswith("q_"):
             or_where += " OR " if len(or_where) else ""
@@ -959,6 +963,9 @@ def resolve_where_params(key, valor, mtd_table):
     where = ""
     if campo == "pk":
         return "1=1"
+    
+    if tipo.endswith("[]"):
+        tipo = tipo[:-2]
     
     field =  mtd_table.field(campo)
     if field is not None:
