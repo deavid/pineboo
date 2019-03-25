@@ -1988,10 +1988,11 @@ def runTransaction(f=None, oParam=None):
         except Exception:
             e = traceback.format_exc()
             
-            
     try:
         valor = f(oParam)
-        errorMsg = (oParam.errorMsg if (u"errorMsg" in oParam) else False)
+        if "errorMsg" in oParam:
+            errorMsg = oParam["errorMsg"]
+
         if valor:
             curT.commit()
         else:
