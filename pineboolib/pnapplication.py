@@ -918,13 +918,13 @@ class XMLAction(XMLStruct):
             if pineboolib.project._DGI.useDesktop():
                 self.formrecord_widget = pineboolib.project.conn.managerModules().createFormRecord(self, None, cursor, None)
             else:
-                self.script = getattr(self, "script", None)
-                if isinstance(self.script, str) or self.script is None:
-                    self.load_script(self.script, None)
-                    self.formrecord_widget = self.script.form
-                    self.formrecord_widget.widget = self.formrecord_widget
-                    self.formrecord_widget.iface = self.formrecord_widget.widget.iface
-                    self.formrecord_widget._loaded = True
+                #self.script = getattr(self, "script", None)
+                #if isinstance(self.script, str) or self.script is None:
+                self.load_script(self.scriptformrecord, None)
+                self.formrecord_widget = self.script.form
+                self.formrecord_widget.widget = self.formrecord_widget
+                self.formrecord_widget.iface = self.formrecord_widget.widget.iface
+                self.formrecord_widget._loaded = True
             # self.formrecord_widget.setWindowModality(Qt.ApplicationModal)
             if self.formrecord_widget:
                 self.logger.debug("End of record action load %s (iface:%s ; widget:%s)", self.name, getattr(
