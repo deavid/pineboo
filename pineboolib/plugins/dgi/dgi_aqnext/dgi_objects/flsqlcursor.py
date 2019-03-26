@@ -298,8 +298,8 @@ class meta_model(object):
         if ret is None:
             ret = getattr(self._model, name, None)
             
-        if ret is None:
-            print("No se encuentra %s en el model del cursor %s" % (name, self._cursor.curName()))
+        #if ret is None:
+        #    logger.warn("No se encuentra %s en el model del cursor %s" , name, self._cursor.curName())
         
         #print("-->", ret, type(ret))
         return ret
