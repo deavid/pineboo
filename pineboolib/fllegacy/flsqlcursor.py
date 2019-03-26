@@ -1174,9 +1174,9 @@ class FLSqlCursor(QtCore.QObject):
         self.buffer().setValue(fN, v)
         if self.activatedBufferChanged():
             if pineboolib.project._DGI.use_model() and self.meta_model():
-                if hasattr(self.meta_model(), "bChCursor"):
-                    if self.meta_model().bChCursor(fN, self) is False:
-                        return
+                bch_model = getattr(self.meta_model(), "bChCursor", None)
+                if bch_model and mch_model(fN, self) is False:
+                    return
                     
                 script = getattr(pineboolib.qsa, "formRecord%s" % self.action(), None)
                 if script is not None:
@@ -1249,9 +1249,9 @@ class FLSqlCursor(QtCore.QObject):
         # logger.trace("(%s)bufferChanged.emit(%s)" % (self.curName(),fN))
         if self.activatedBufferChanged():
             if pineboolib.project._DGI.use_model() and self.meta_model():
-                if hasattr(self.meta_model(), "bChCursor"):
-                    if self.meta_model().bChCursor(fN, self) is False:
-                        return
+                bch_model = getattr(self.meta_model(), "bChCursor", None)
+                if bch_model and mch_model(fN, self) is False:
+                    return
                 
                 script = getattr(pineboolib.qsa, "formRecord%s" % self.action(), None)
                 if script is not None:
