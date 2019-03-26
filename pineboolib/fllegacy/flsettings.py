@@ -59,6 +59,8 @@ class FLSettings(object):
         
         if len(value) == 1:
             val = value[0]
+        elif len(value) == 0:
+            val = ""
         else:
             val = value
 
