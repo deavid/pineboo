@@ -72,6 +72,8 @@ class DelayedObjectProxyLoader(object):
         else:
             loaded_obj = self._obj.valueBuffer(self._field.name())
         
+        #if loaded_obj is None:
+        #    self = None
         self.loaded_obj = loaded_obj
         return loaded_obj
 
@@ -83,7 +85,7 @@ class DelayedObjectProxyLoader(object):
 
     def __getattr__(self, name):  # Solo se lanza si no existe la propiedad.
         obj_ = self.__load()
-        ret = getattr(obj_, name)
+        ret = getattr(obj_, name, obj_) if obj_ is not None else None
         return ret
     
     def __le__(self, other):
@@ -114,6 +116,9 @@ class DelayedObjectProxyLoader(object):
     def __str__(self):
         obj_ = self.__load()
         return "%s" % obj_
+    
+    def resolve_expression(self, *args, **kwargs):
+        return getattr(self, self._field.name())
 
 
 
