@@ -239,101 +239,69 @@ class FLSqlCursor(QtCore.QObject):
         mtd = cursor.metadata()
         if module_name is None:
             module_name = cursor.curName()
-        model = pineboolib.project._DGI.load_meta_model(module_name)
+        model = meta_model(pineboolib.project._DGI.load_meta_model(module_name), cursor)
         if model:
             cursor._meta_model = model
-            setattr(cursor.meta_model(), "_cursor", cursor)
+            #setattr(cursor.meta_model(), "_cursor", cursor)
             
             #Creamos las propiedades , una por carda campo
-            fields_list = mtd.fieldList()
+            #fields_list = mtd.fieldList()
             
-            for field in fields_list:
+            #for field in fields_list:
                 #print("Seteando", field.name())
-                setattr(model, field.name(), DelayedObjectProxyLoader(cursor, field_object=field))
+            #    setattr(model, field.name(), DelayedObjectProxyLoader(cursor, field_object=field))
             
-    """
-    def build_cursor_tree_dict(self, recursive = False): 
-        print("Building", self.parent_cursor.metadata().name())
-        lev = 2
-        l = 0
-        cur_rel = None
-        while True:
-            if cur_rel is None:    
-                cur_rel = self.parent_cursor.cursorRelation()
-            else:
-                cur_rel = cur_rel.cursorRelation()
+
+class meta_model(object):
+    
+    _model = None
+    _cursor = None
+    cursor_tree_dict = {}
+    
+    def __init__(self, model, cursor):
+        self._model = model
+        self._cursor = cursor
+        self.cursor_tree_dict = {}
+    
+    def __getattr__(self, name):
+        #print("Buscando", name)
+        ret = None
+        field = self._cursor.metadata().field(name)
+        if field is not None:
+            field_relation = field.relationM1()
+            value = self._cursor.valueBuffer(field.name())
+                       
+            if isinstance(field_relation, FLRelationMetaData):
+                relation_table_name = field_relation.foreignTable()
+                relation_field_name = field_relation.foreignField()
             
+                key_ = "%s_%s" % ( relation_table_name, relation_field_name)
             
+                if key_ not  in self.cursor_tree_dict.keys():
+                    rel_mtd = aqApp.db().manager().metadata(relation_table_name)
             
-            
-            if cur_rel:
-                if cur_rel.meta_model() and cur_rel.cursorRelation():
-                    if l == lev:
-                        if self.show_debug:
-                            print("Corte cíclica nivel", lev, self.parent_cursor.curName())
-                        recursive = False
-                        break
-            
-                    l += 1
-                else:
-                    break
-            else:
-                break
-        
-        
-        from pineboolib.pncontrolsfactory import FLSqlCursor as FLSqlCursor_legacy, FLRelationMetaData, aqApp
-        mtd = self.parent_cursor.metadata()
-        fields_list = mtd.fieldList()
-        if fields_list:
-            for field in fields_list:
-                field_relation = field.relationM1()
-                if isinstance(field_relation, FLRelationMetaData) and recursive:
-                    
-                    relation_table_name = field_relation.foreignTable()
-                    relation_field_name = field_relation.foreignField()
-                    
-                    cur_name = self.parent_cursor.curName()
-                    rel_mtd = aqApp.db().manager().metadata(relation_table_name)                 
-                    
                     relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
                     relation_mtd.setField(relation_field_name)
-                    
-                    #print("***",mtd.name(),field_relation.field(), "-->",  relation_table_name , relation_field_name)
+            
                     if relation_table_name and relation_field_name:
-                        key_ = "%s_%s" % ( relation_table_name, relation_field_name)
-                        if self.show_debug:
-                            print("Creando", relation_table_name, relation_field_name,"desde", self.parent_cursor.curName(), field_relation.field())
-                        self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self.parent_cursor.conn(), self.parent_cursor, relation_mtd)
-    
-
-    def populate_meta_model(self):
-        print("** **", self.parent_cursor.metadata().name())
-        #print("**** populando", self.parent_cursor.curName())
-        fields_list = self.parent_cursor.metadata().fieldList()
-        meta_model = self.parent_cursor.meta_model()
-        if meta_model is not None:
-            if fields_list:
-                for field in fields_list:
-                    field_name = field.name()
-                    field_relation = field.relationM1()
-                    value = self.parent_cursor.buffer().value(field_name)
-                    if value is not None and field.type() in ["date"]:
-                        value = value[:10]
-                                        
-                    if value is not None:
-                        if field_relation is not None:
-                            key_ = "%s_%s" % ( field_relation.foreignTable(), field_relation.foreignField())
-                            if key_ in self.cursor_tree_dict.keys():
-                                if self.cursor_tree_dict[key_].select():
-                                    pass
-                                
-                                value = self.cursor_tree_dict[key_].meta_model()
-                                                     
-                        if self.show_debug:
-                            print("Populate", self.parent_cursor.curName(),":", field_name, "--->", value)
-                    
-                    setattr(meta_model, field_name, value)
-          
-           
-    """
+                        self.cursor_tree_dict[key_] =  FLSqlCursor_legacy(relation_table_name, True, self._cursor.conn(), self._cursor, relation_mtd)
+            
+            
+                rel_cursor = self.cursor_tree_dict[key_]
+                rel_cursor.select()
+            
+                ret = rel_cursor.meta_model()
+            
+            else:
+                ret = self._cursor.valueBuffer(field.name())
         
+        if ret is None:
+            ret = getattr(self._model, name, None)
+            
+        if ret is None:
+            print("No se encuentra %s en el model del cursor %s" % (name, self._cursor.curName()))
+        
+        #print("-->", ret, type(ret))
+        return ret
+            
+    
