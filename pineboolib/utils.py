@@ -971,6 +971,9 @@ def resolve_where_params(key, valor, mtd_table):
     if tipo.endswith("[]"):
         tipo = tipo[:-2]
     
+    if valor is None:
+        return "%s = ''" % campo
+    
     field =  mtd_table.field(campo)
     if field is not None:
         field_type = field.type()
