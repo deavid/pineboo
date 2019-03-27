@@ -92,6 +92,7 @@ QLineEdit = resolveObject("QLineEdit")
 QApplication = resolveObject("QApplication")
 qApp = resolveObject("qApp")
 QStyleFactory = resolveObject("QStyleFactory")
+QFontDialog = resolveObject("QFontDialog")
 
 """
 QIconSet = resolveObject("QIconSet")
