@@ -422,9 +422,11 @@ class MainForm(QtWidgets.QMainWindow):
         self.dck_mod_.update(self.ag_menu_)
         self.dck_rec_.update(self.ag_rec_)
         self.dck_mar_.update(self.ag_mar_)
-
-        self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
-        self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
+        try:
+            self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
+            self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
+        except:
+            pass
         self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(aqApp.chooseFont)
         #self.w_.findChild(QtWidgets.QAction, "style").triggered.connect(aqApp.showStyles)
         self.w_.findChild(QtWidgets.QAction, "helpIndexAction").triggered.connect(aqApp.helpIndex)
