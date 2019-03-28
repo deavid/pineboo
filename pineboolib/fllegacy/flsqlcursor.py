@@ -3441,6 +3441,16 @@ class FLSqlCursor(QtCore.QObject):
             if emite:
                 self.cursorUpdated.emit()
         
+        
+        if model_module is not None:
+            function_model_buffer_commited = getattr(model_module.iface, "bufferCommited_%s" % self.metadata().name(), None)
+            if function_model_buffer_commited:
+                ret = function_model_buffer_commited(self)
+                if not ret:
+                    return ret
+        
+        
+        
         self.bufferCommited.emit()
         return True
 
