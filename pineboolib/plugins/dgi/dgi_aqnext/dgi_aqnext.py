@@ -70,6 +70,8 @@ class dgi_aqnext(dgi_schema):
     def processEvents(self):
         return QtCore.QCoreApplication.processEvents()
     
+    def interactiveGUI(self):
+        return "Django"
     
 
     def authenticate(self, **kwargs):
