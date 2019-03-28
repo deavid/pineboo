@@ -306,7 +306,6 @@ class PNBuffer(object):
                 list_ = value.split("-")
                 value = datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
 
-        #print("*", field.type_, name, value, type(value))
         if self.hasChanged(field.name, value):
             
             field.value = value
