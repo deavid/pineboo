@@ -78,7 +78,7 @@ class FLFormSearchDB(FLFormDB):
         self.eventloop = QtCore.QEventLoop()
 
     def setAction(self, a):
-        self._action = a
+        self.cursor_.setAction(a)
 
     """
     destructor
