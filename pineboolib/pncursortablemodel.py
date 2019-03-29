@@ -47,17 +47,17 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     _driver_sql = None
     """
     Constructor
-    @param action. action relacionada al cursor
     @param conn. Objeto PNConnection
+    @param parent. FLSqlCursor relacionado
     """
 
-    def __init__(self, action, conn, parent):
+    def __init__(self, conn, parent):
         super(PNCursorTableModel, self).__init__()
 
         self._cursorConn = conn
         self._parent = parent
         
-        self._metadata = self._parent.metadata()
+        #self._metadata = self._parent.metadata()
         if not self.metadata():
             return
 
@@ -1058,7 +1058,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def metadata(self):
-        return self._metadata
+        return self._parent.metadata()
 
     
     def driver_sql(self):
