@@ -95,7 +95,7 @@ class PNBuffer(object):
 
     def primeUpdate(self, row=None):
 
-        if row < 0 or row is None:
+        if row is None  or row < 0:
             row = self.cursor().currentRegister()
         for field in self.fieldsList():
 
@@ -1049,28 +1049,36 @@ class FLSqlCursor(QtCore.QObject):
         else:
             action = a
 
-        if self._action: #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
-            return
-        
-        
         
 
         if not self._action:
             self._action = action
         else:
-            if self.action() == action.name():
-                return True
+            if self.action() == action.name(): #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
+                logger.warn("Se hace setAction sobre un cursor con el mismo action ya aplicado")
+                return
+        
+            if self.action() is not None:
+                self._action = None
+                self.d.buffer_ = None
+                self.d.metadata_ = None
+                
+
+                self._action = action
 
         if not self._action.table():
             return None
 
-        
-        self.d.metadata_ = self.db().manager().metadata(self._action.table())
+        if not self.d.metadata_:
+            self.d.metadata_ = self.db().manager().metadata(self._action.table())
 
         self.d.doAcl()
-        self.d._model = PNCursorTableModel(self._action, self.conn(), self)
+        self.d._model = PNCursorTableModel(self.conn(), self)
         if not self.model():
             return None
+        
+        if not self.d.buffer_:
+            self.primeInsert()
 
         self._selection = QtCore.QItemSelectionModel(self.model())
         self.selection().currentRowChanged.connect(self.selection_currentRowChanged)
