@@ -13,5 +13,5 @@ class AQUtil(object):
         self.logger = logging.getLogger(__name__)
 
     def __getattr__(self, name):
-        self.logger.info("Usando function FAKE %s de FLUtil()", name)
+        #self.logger.info("Usando function FAKE %s de FLUtil()", name)
         return getattr(self.util, name)

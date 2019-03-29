@@ -266,6 +266,10 @@ class meta_model(object):
     def __getattr__(self, name):
         #print("Buscando", name)
         ret = None
+        if name == "pk":
+            name = self._cursor.primaryKey()
+        
+        
         field = self._cursor.metadata().field(name)
         if field is not None:
             field_relation = field.relationM1()
@@ -295,11 +299,12 @@ class meta_model(object):
             else:
                 ret = self._cursor.valueBuffer(field.name())
         
-        if ret is None:
-            ret = getattr(self._model, name, None)
+        else:
+            if self._model is not None:
+                ret = getattr(self._model, name, None)
             
-        #if ret is None:
-        #    logger.warn("No se encuentra %s en el model del cursor %s" , name, self._cursor.curName())
+                #if ret is None:
+                #    logger.warn("No se encuentra %s en el model (%s) del cursor %s" , name, self._model, self._cursor.curName())
         
         #print("-->", ret, type(ret))
         return ret

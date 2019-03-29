@@ -306,7 +306,6 @@ class PNBuffer(object):
                 list_ = value.split("-")
                 value = datetime.date(int(list_[0]), int(list_[1]), int(list_[2]))
 
-        #print("*", field.type_, name, value, type(value))
         if self.hasChanged(field.name, value):
             
             field.value = value
@@ -3449,6 +3448,16 @@ class FLSqlCursor(QtCore.QObject):
 
             if emite:
                 self.cursorUpdated.emit()
+        
+        
+        if model_module is not None:
+            function_model_buffer_commited = getattr(model_module.iface, "bufferCommited_%s" % self.metadata().name(), None)
+            if function_model_buffer_commited:
+                ret = function_model_buffer_commited(self)
+                if not ret:
+                    return ret
+        
+        
         
         self.bufferCommited.emit()
         return True

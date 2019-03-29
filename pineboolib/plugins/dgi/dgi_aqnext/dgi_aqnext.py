@@ -70,6 +70,8 @@ class dgi_aqnext(dgi_schema):
     def processEvents(self):
         return QtCore.QCoreApplication.processEvents()
     
+    def interactiveGUI(self):
+        return "Django"
     
 
     def authenticate(self, **kwargs):
@@ -233,7 +235,7 @@ class dgi_aqnext(dgi_schema):
         if module_name is not None:
             try:
                 module = importlib.import_module(model_file)     
-            except:
+            except ImportError:
                 logger.warn("DGI: load_meta_model. No se encuentra el model de %s", action_name)
                 module = None
                 ret_ = None
