@@ -1300,7 +1300,7 @@ class FLSqlCursor(QtCore.QObject):
 
         field = self.metadata().field(fN)
         if field is None:
-            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s",self.curName(), fN, self.metadata().name(), stack_info = True)
+            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s",self.curName(), fN, self.metadata().name())
             return None
 
         type_ = field.type()
