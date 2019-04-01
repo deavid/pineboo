@@ -3,6 +3,14 @@
 from PyQt5 import QtWidgets
 
 class QTabWidget(QtWidgets.QTabWidget):
+    
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        
+        self.Top = self.North
+        self.Bottom = self.South
+        self.Left = self.West
+        self.Right = self.East
 
     def setTabEnabled(self, tab, enabled):
 
