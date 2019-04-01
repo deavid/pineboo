@@ -1254,25 +1254,9 @@ class FLUtil(QtCore.QObject):
         pass
 
     @decorators.NotImplementedWarn
-    def findFiles(self, paths, filter_="*", breakOnFirstMatch=False):
+    def findFiles(self, paths, filter_="*", break_on_first_match=False):
         """
         Busca ficheros recursivamente en las rutas indicadas y según el patrón indicado
-
-        Ejemplo:
-
-        C++:
-        QStringList filesFound = FLUtil::findFiles(QStringList() << "/home/user/Documents", "*.odt *.gif");
-        for (QStringList::Iterator it = filesFound.begin(); it != filesFound.end(); ++it)
-            qWarning(*it);
-
-        QSA:
-        var util = new FLUtil;
-        var filesFound = util.findFiles( [ "/home/user/Documents" ], "*.odt *.gif");
-
-        for(var i = 0; i < filesFound.length; ++i)
-            debug(filesFound[i]);
-
-
         @param  paths   Rutas de búsqueda
         @param  filter  Patrón de filtrado para los ficheros. Admite varios separados por espacios "*.gif *.png".
                       Por defecto todos, "*"
@@ -1280,7 +1264,17 @@ class FLUtil(QtCore.QObject):
                                 la búsqueda y devuelve el nombre de ese fichero
         @return Lista de los nombres de los ficheros encontrados
         """
-        pass
+        
+        import glob
+        files_found = []
+        for p in paths:
+            for file_name in glob.iglob('%s/**/%s' % (p, filter_), recursive=True):
+                files_found.append(file_name)
+                if break_on_first_match:
+                    break
+        
+        return files_found
+
 
     def execSql(self, sql, connName="default"):
         """
