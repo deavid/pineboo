@@ -796,6 +796,7 @@ class File(QtCore.QFile):
         if self.last_seek is None:
             self.last_seek = 0
         
+        import codecs
         f = codecs.open(self.fichero,"r", encoding=self.encode_)
         ret = f.readline(self.last_seek)
         self.last_seek += 1
@@ -844,6 +845,13 @@ class File(QtCore.QFile):
         
     
     name = property(getName)
+
+
+def startTimer(time, fun):
+    timer = QtCore.QTimer()
+    timer.timeout.connect(fun)
+    timer.start(time)
+    return timer
 
 
 class QString(str):
