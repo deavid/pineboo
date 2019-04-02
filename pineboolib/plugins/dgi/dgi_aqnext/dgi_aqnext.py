@@ -280,7 +280,7 @@ class dgi_aqnext(dgi_schema):
             except:
                 import traceback
                 logger.warn("DGI. get_master_cursor: %s", traceback.format_exc())
-        
+                
         #if template == "newRecord":
         #    cursor.setModeAccess(cursor.Insert)
         #    cursor.refreshBuffer()
@@ -288,26 +288,50 @@ class dgi_aqnext(dgi_schema):
         
         return cursor
     
-    
-    
-    
+    def init_cursor(self, cursor, prefix, template):
+        from pineboolib import qsa as qsa_tree
+        
+        if template in ["formRecord", "newRecord"]:
+            module_name = "form%s" % prefix
+            
+        module = getattr(qsa_tree, module_name, None)
+        
+        if template == "newRecord":
+            if cursor.meta_model():
+                fun_mod = getattr(cursor.meta_model(), "iniciaValoresCursor", None)
+                if fun_mod is not None:
+                    #print("Inicializando cursor model", prefix)
+                    fun_mod(cursor)
+            
+            fun_qsa = getattr(module.widget, "iniciaValoresCursor", None)
+            if fun_qsa is not None:
+                #print("Inicializando cursor qsa", prefix)
+                fun_qsa(cursor)
+        
     
     def cursor2json(self, cursor, template = None):
         ret_ = []
-        if not cursor.isValid():
-            logger.warn("Cursor inválido/vacío en %s", cursor.curName())
-            return ret_
+        if not cursor.modeAccess() == cursor.Insert:
+            if not cursor.isValid():
+                logger.warn("Cursor inválido/vacío en %s", cursor.curName())
+                return ret_
+            
+            if cursor.first():
+                pass
     
         meta_model = cursor.meta_model()
 
-        if cursor.first():
-            pass
+        
+            
         #pineboolib.project.init_time()
         size_ = cursor.size()
         pk = cursor.primaryKey()
         fields_list = cursor.metadata().fieldList()
         i = 0
         date_fields = []
+        
+        if cursor.modeAccess() == cursor.Insert:
+            size_ = 1 
         #logger.warn("***** %s", size_, stack_info = True)
         while i < size_:
             #dict_ = collections.OrderedDict()
