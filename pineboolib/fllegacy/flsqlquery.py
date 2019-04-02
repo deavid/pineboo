@@ -607,7 +607,7 @@ class FLSqlQuery(object):
         self.d.tablesList_ = []
         tl = tl.replace(" ", "")
         for tabla in tl.split(","):
-            if not pineboolib.project.conn.manager().existsTable(tabla):
+            if not pineboolib.project.conn.manager().existsTable(tabla) and len(tl.split(",")) > 1:
                 self.invalidTablesList = True
 
             self.d.tablesList_.append(tabla)
