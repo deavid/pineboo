@@ -345,22 +345,22 @@ class FLFormRecordDB(FLFormDB):
                 # self.pushButtonLast.show()
 
         if not self.cursor().modeAccess() == self.cursor().Browse:
-            if self.showAcceptContinue_:
-                self.pushButtonAcceptContinue = QtWidgets.QToolButton()
-                self.pushButtonAcceptContinue.setObjectName("pushButtonAcceptContinue")
-                self.pushButtonAcceptContinue.clicked.connect(self.acceptContinue)
-                self.pushButtonAcceptContinue.setSizePolicy(sizePolicy)
-                self.pushButtonAcceptContinue.setMaximumSize(pbSize)
-                self.pushButtonAcceptContinue.setMinimumSize(pbSize)
-                self.pushButtonAcceptContinue.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
-                self.pushButtonAcceptContinue.setShortcut(QKeySequence(self.tr("F9")))
-                self.pushButtonAcceptContinue.setWhatsThis(
-                    "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
-                self.pushButtonAcceptContinue.setToolTip(
-                    "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
-                self.pushButtonAcceptContinue.setFocusPolicy(QtCore.Qt.NoFocus)
-                self.bottomToolbar.layout.addWidget(
-                    self.pushButtonAcceptContinue)
+            self.pushButtonAcceptContinue = QtWidgets.QToolButton()
+            self.pushButtonAcceptContinue.setObjectName("pushButtonAcceptContinue")
+            self.pushButtonAcceptContinue.clicked.connect(self.acceptContinue)
+            self.pushButtonAcceptContinue.setSizePolicy(sizePolicy)
+            self.pushButtonAcceptContinue.setMaximumSize(pbSize)
+            self.pushButtonAcceptContinue.setMinimumSize(pbSize)
+            self.pushButtonAcceptContinue.setIcon(QtGui.QIcon(filedir("../share/icons", "gtk-refresh.png")))
+            self.pushButtonAcceptContinue.setShortcut(QKeySequence(self.tr("F9")))
+            self.pushButtonAcceptContinue.setWhatsThis(
+                "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
+            self.pushButtonAcceptContinue.setToolTip(
+                "Aceptar los cambios y continuar con la edición de un nuevo registro (F9)")
+            self.pushButtonAcceptContinue.setFocusPolicy(QtCore.Qt.NoFocus)
+            self.bottomToolbar.layout.addWidget(self.pushButtonAcceptContinue)
+            if not self.showAcceptContinue_:
+                self.pushButtonAcceptContinue.close()
                 # self.pushButtonAcceptContinue.show()
 
             if not self.pushButtonAccept:
