@@ -288,11 +288,15 @@ class dgi_aqnext(dgi_schema):
         
         return cursor
     
-    def init_cursor(self, cursor, prefix, template):
+    def init_cursor(self, cursor, params, template):
         from pineboolib import qsa as qsa_tree
+        
+        prefix = cursor.curName()
         
         if template in ["formRecord", "newRecord"]:
             module_name = "form%s" % prefix
+        
+        self.populate_with_params(cursor, params)
             
         module = getattr(qsa_tree, module_name, None)
         
@@ -307,7 +311,14 @@ class dgi_aqnext(dgi_schema):
             if fun_qsa is not None:
                 #print("Inicializando cursor qsa", prefix)
                 fun_qsa(cursor)
-        
+    
+    def populate_with_params(self, cursor, params):
+        for k in params.keys():
+            if k.startswith("p_"):
+                cursor.setValueBuffer(k[2:], params[k])
+            else:
+                print("FIXME:: populate_with_params", k, params[k])
+           
     
     def cursor2json(self, cursor, template = None):
         ret_ = []
