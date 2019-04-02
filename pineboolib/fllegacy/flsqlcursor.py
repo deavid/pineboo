@@ -258,8 +258,7 @@ class PNBuffer(object):
 
     def setValue(self, name, value, mark_=True):
         if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date)):
-            raise ValueError(
-                "No se admite el tipo %r , en setValue %r" % (type(value), value))
+            raise ValueError("No se admite el tipo %r , en setValue(%s,%r)" % (type(value), name, value))
 
         field = self.field(name)
         
