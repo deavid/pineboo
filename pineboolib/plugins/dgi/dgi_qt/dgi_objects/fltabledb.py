@@ -1828,15 +1828,9 @@ class FLTableDB(QtWidgets.QWidget):
     """
 
     def refreshDelayed(self, msec=50, refreshData=True):
-        if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
-            return
-
-        if refreshData:
-            self._refreshData = True
-        else:
-            self._refreshData = False
-            QtCore.QTimer.singleShot(msec, self.refreshDelayed2)
-
+        
+        self._refreshData = True if refreshData else False
+        QtCore.QTimer.singleShot(msec, self.refreshDelayed2)
         self.seekCursor()
 
     def refreshDelayed2(self):
@@ -2342,7 +2336,7 @@ class FLTableDB(QtWidgets.QWidget):
             ret = None
             try:
                 from pineboolib.pncontrolsfactory import aqApp
-                ret = aqApp.call(functionQSA, vargs, None)
+                ret = aqApp.call(functionQSA, vargs, None, False)
                 logger.debug("functionQSA:%s:", functionQSA)
             except Exception:
                 pass
