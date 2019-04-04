@@ -985,21 +985,10 @@ class Member(ASTPython):
                     elif member == "mid":
                         value = arg[4:]
                         value = value[: len(value) -1]
-                        value = value.replace(",", ":")
+                        i, l = value.split(",")
+                        value = "%s:%s + %s" % (i, i, l)
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
-                        #arguments[idx - 1] = "QString(%s)" % arguments[idx - 1]
-                        """ print("###### ARG:", arguments, value, expr)
-                        if value.find(",") > -1 and value.find(")") > value.find(","):
-                            value = value[0:len(value) - 1]
-                            v0 = value[0:value.find(",")]
-                            v1 = value[value.find(",") + 1:]
-                            arguments = ["%s[%s:%s + %s]" %
-                                         (".".join(part1), v0, v0, v1)] + part2
-                        else:
-                            value = value[:len(value) - 1]
-                            arguments = ["%s[(%s):]" %
-                                         (".".join(part1), value)] + part2
-                        """
+    
                     elif member == "length":
                         value = arg[7:]
                         value = value[:len(value) - 1]
