@@ -777,6 +777,7 @@ class FLManager(QtCore.QObject):
                 return "1 = 1"
 
             mtd = args[0].metadata()
+            prefixTable = mtd.name()
             if not mtd:
                 return self.formatAssignValueLike(args[0].name(), args[0].type(), args[1], args[2])
 
@@ -785,7 +786,6 @@ class FLManager(QtCore.QObject):
 
             fieldName = args[0].name()
             if mtd.isQuery() and fieldName.find(".") == -1:
-                prefixTable = mtd.name()
                 qry = FLSqlQuery(mtd.query())
 
                 if qry:
@@ -801,7 +801,7 @@ class FLManager(QtCore.QObject):
                         break
 
                 qry.deleteLater()
-
+            
             return self.formatAssignValueLike("%s.%s" % (prefixTable, fieldName), args[0].type(), args[1], args[2])
 
         elif isinstance(args[1], FLFieldMetaData):
@@ -821,14 +821,19 @@ class FLManager(QtCore.QObject):
             if args[0] is None or not args[1]:
                 return "1 = 1"
 
-            isText = args[1] in ("string", "stringlist")
-            formatV = self.formatValueLike(args[1], args[2], args[3])
+            is_text = args[1] in ["string", "stringlist"]
+            format_value = self.formatValueLike(args[1], args[2], args[3])
 
-            if not formatV:
+            if not format_value:
                 return "1 = 1"
-
-            fName = "upper(%s)" % args[0] if args[3] else args[0]
-            return "%s %s" % (fName, formatV)
+            
+            
+            field_name = args[0]
+            if is_text:
+                if args[3]:
+                    field_name = "upper(%s)" % args[0]
+            
+            return "%s%s" % (field_name, format_value)
 
     def formatValue(self, fMD_or_type, v, upper=False):
 
