@@ -984,7 +984,10 @@ class Member(ASTPython):
                         arguments = ["%s[ %s]" % (".".join(part1), value)] + part2
                     elif member == "mid":
                         value = arg[4:]
-                        arguments[idx - 1] = "QString(%s)" % arguments[idx - 1]
+                        value = value[: len(value) -1]
+                        value = value.replace(",", ":")
+                        arguments = ["%s[%s]" % (".".join(part1), value)] + part2
+                        #arguments[idx - 1] = "QString(%s)" % arguments[idx - 1]
                         """ print("###### ARG:", arguments, value, expr)
                         if value.find(",") > -1 and value.find(")") > value.find(","):
                             value = value[0:len(value) - 1]
