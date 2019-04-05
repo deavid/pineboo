@@ -323,17 +323,20 @@ def main():
     if options.dgi_parameter:
         _DGI.setParameter(options.dgi_parameter)
 
-    if not _DGI.useMLDefault():
-        return _DGI.alternativeMain(options)
-
     project = pineboolib.pnapplication.Project(_DGI)
     
     if options.test:
         project.test()
         return
 
-    if _DGI.useDesktop():
+    if not _DGI.useMLDefault():
+        app = _DGI.alternativeMain(options)
+    else:
         app = create_app(_DGI)
+ 
+    
+
+    if _DGI.useDesktop():
         project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
             project.main_form_name, project.main_form_name)) if _DGI.localDesktop() else _DGI.mainForm()
         project.main_window = project.main_form.mainWindow
@@ -379,7 +382,7 @@ def main():
     else:
         # return main()
 
-        init_project(_DGI, splash, options, project, project.main_form, app)
+        init_project(_DGI, splash, options, project, project.main_form if _DGI.useDesktop() else None, app)
 
 
 def preload_actions(project, forceload=None):
@@ -431,23 +434,27 @@ def init_project(DGI, splash, options, project, mainForm, app):
         splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         DGI.processEvents()
 
-    logger.info("Creando interfaz ...")
-    main_window = mainForm.mainWindow
-    main_window.initScript()
-    ret = 0
+    if mainForm is not None:
+        logger.info("Creando interfaz ...")
+        main_window = mainForm.mainWindow
+        main_window.initScript()
+        ret = 0
 
     if options.preload:
         preload_actions(project, options.forceload)
 
-    if DGI.localDesktop():
-        splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        DGI.processEvents()
-    logger.info("Abriendo interfaz ...")
-    main_window.show()
-    if DGI.localDesktop():
-        splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
-        DGI.processEvents()
-        # main_window.w_.activateWindow()
+    
+    if mainForm is not None:
+        if DGI.localDesktop():
+            splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+            DGI.processEvents()
+    
+        logger.info("Abriendo interfaz ...")
+        main_window.show()
+        if DGI.localDesktop():
+            splash.showMessage("Listo ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+            DGI.processEvents()
+            # main_window.w_.activateWindow()
         QtCore.QTimer.singleShot(1000, splash.hide)
 
     if objaction:
@@ -458,8 +465,9 @@ def init_project(DGI, splash, options, project, mainForm, app):
     else:
         ret = DGI.exec_()
 
-    mainForm.mainWindow = None
-    del main_window
+    if mainForm is not None:
+        mainForm.mainWindow = None
+        del main_window
     del project
     return ret
 
