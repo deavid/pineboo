@@ -24,6 +24,7 @@ import traceback
 import logging
 import sys
 import inspect
+import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,20 @@ class parser_options(object):
 
 parser_server = parser_options()
 
+def normalize_data(data):   
+    if isinstance(data, (list, tuple)):
+        new_data = []
+        for line in data:
+            if isinstance(line, (datetime.date, datetime.time)):
+                #print("premio!!", type(line), line, type(data))
+                new_data.append(line.__str__())
+            else:
+                #print(type(line), line)
+                new_data.append(normalize_data(line))      
+        
+        data = new_data
+                
+    return data
 
 class parser(object):
 
@@ -57,8 +72,9 @@ class parser(object):
             response = JSONRPCResponseManager.handle(request.data, dispatcher)
         except Exception:
             response = "Not Found"
-            
+
         return Response(response.json, mimetype='application/json')
+    
     
 
     @dispatcher.add_method
@@ -86,10 +102,9 @@ class parser(object):
             
             try:
                 ret = cursor_dict[dict_["arguments"]["cursor_id"]].fetchone()
-                #print("2", dict_["arguments"]["cursor_id"], ret)
             except:
                 print("Error %s" % dict_["function"], traceback.format_exc())
-            return ret
+            return normalize_data(ret)
         
         if dict_["function"] == "refreshQuery":
             try:
@@ -119,11 +134,18 @@ class parser(object):
                 if not dict_["arguments"]["cursor_id"] in cursor_dict.keys():
                      cursor_dict[dict_["arguments"]["cursor_id"]] = aqApp.db().driver().conn_.cursor()
                      
-                return fun(cursor_dict[dict_["arguments"]["cursor_id"]], dict_["arguments"]["tablename"], dict_["arguments"]["where_filter"], dict_["arguments"]["fields"], dict_["arguments"]["curname"])
+                ret = fun(cursor_dict[dict_["arguments"]["cursor_id"]], dict_["arguments"]["tablename"], dict_["arguments"]["where_filter"], dict_["arguments"]["fields"], dict_["arguments"]["curname"])
+                return normalize_data(ret)
             except:
                 print("Error fetchAll", traceback.format_exc())
             return
         
+        if dict_["function"] == "fetchall":
+            try:
+                ret_ =  cursor_dict[dict_["arguments"]["cursor_id"]].fetchall()
+                return normalize_data(ret_)
+            except:
+                print("Error fetchall", traceback.format_exc())
         
         
         if dict_["function"] == "close":
@@ -144,7 +166,7 @@ class parser(object):
             expected_args = inspect.getargspec(fun)[0]
             args_num = len(expected_args)
             #print("-->", fun, dict_["arguments"][:args_num])
-            return fun(*dict_["arguments"][:args_num])
+            return normalize_data(fun(*dict_["arguments"][:args_num]))
         
         
         return "Desconocido"
