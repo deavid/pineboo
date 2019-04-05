@@ -4,6 +4,9 @@ requiere:
 
 json-rpc 1.10.8
 werkzeug 0.14.1
+xmljson
+pyOpenSSL
+
 
 
 
@@ -21,7 +24,7 @@ python3 ./cliente_json-rpc.py -m mainWindow -p modules:F
 
 
 
-
+C
 
 
 
