@@ -54,6 +54,9 @@ class dgi_schema(object):
     # Establece un lanzador alternativo al de la aplicación
     def alternativeMain(self, options):
         pass
+    
+    def accept_file(self, name):
+        return True
 
     def useDesktop(self):
         return self._desktopEnabled
