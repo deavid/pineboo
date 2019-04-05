@@ -354,7 +354,7 @@ class FLQPSQL(object):
         try:
             cursor.execute(sql)
         except Exception:
-            logger.warn("Error en consulta %s", sql, stack_info=True)
+            logger.warn("Error en consulta %s\n%s", sql, traceback.format_exc(), stack_info=True)
             return
             qWarning("CursorTableModel.Refresh\n %s" % traceback.format_exc())
 
