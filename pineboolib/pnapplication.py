@@ -263,13 +263,15 @@ class Project(object):
         p = 0
         pos_qs = 1
         for idmodulo, nombre, sha in cursor_:
+            if not self._DGI.accept_file(nombre):
+                continue
+            
             p = p + 1
             if idmodulo not in self.modules:
                 continue  # I
             fileobj = File(idmodulo, nombre, sha)
             if nombre in self.files:
-                self.logger.warn(
-                    "run: file %s already loaded, overwritting..." % nombre)
+                self.logger.warn("run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
