@@ -31,6 +31,7 @@ class cursor_class(object):
         self.id_ = n
         self.current_ = None
         self.last_sql = None
+        self.description = None
     
     def __getattr__(self, name):
         logger.warn("cursor(%s).%s!!", self.id_,name, stack_info = True)
@@ -47,6 +48,12 @@ class cursor_class(object):
         ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchone", {"cursor_id": self.id_}))
         #print(self.id_, "**", self.last_sql, ret_)
         return ret_
+    
+    def fetchall(self):
+        ret_ = self.driver_.send_to_server(self.driver_.create_dict("fetchall", {"cursor_id": self.id_}))
+        #print(self.id_, "**", self.last_sql, ret_)
+        return ret_
+        
         
     def __iter__(self):
         return self
@@ -78,6 +85,7 @@ class conn_class(object):
         cur = cursor_class(self.driver_, len(self.list_cursor))
         self.list_cursor.append(cur)
         return cur
+    
         
         
 
@@ -155,7 +163,7 @@ class FLREMOTECLIENT(object):
         return res_
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
-  
+        self._dbname = db_name
         self.url = "http://%s:%s/jsonrpc" % (db_host, db_port)
         dict_ = self.create_dict("hello")
         ret = self.send_to_server(dict_)
