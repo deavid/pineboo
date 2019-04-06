@@ -279,6 +279,14 @@ class Project(object):
             fileobjdir = os.path.dirname(_dir("cache", fileobj.filekey))
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
+            
+            if os.path.exists(_dir("cache", fileobj.filekey)):
+                if fileobj.filekey.endswith(".qs"):
+                    if os.path.exists(_dir("cache", "%s.py" % fileobj.filekey)):
+                        continue
+                else:
+                    if os.path.exists(_dir("cache", fileobj.filekey)):
+                        continue
 
             cur2 = self.conn.cursor()
             sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue(
@@ -299,28 +307,26 @@ class Project(object):
                 
                 
                 
-                
-                if not os.path.exists(_dir("cache", fileobj.filekey)):
                     
-                    folder = _dir("cache", "/".join(fileobj.filekey.split("/")[:len(fileobj.filekey.split("/")) -1]))
-                    if os.path.exists(folder):
-                        for root, dirs, files in os.walk(folder):
-                            for f in files:
-                                os.remove(os.path.join(root, f))
+                folder = _dir("cache", "/".join(fileobj.filekey.split("/")[:len(fileobj.filekey.split("/")) -1]))
+                if os.path.exists(folder):
+                    for root, dirs, files in os.walk(folder):
+                        for f in files:
+                            os.remove(os.path.join(root, f))
                     
 
-                    if settings.readBoolEntry("application/isDebuggerMode", False):
-                        if self._splash:
-                            self._splash.showMessage("Volcando a caché %s..." %
+                if settings.readBoolEntry("application/isDebuggerMode", False):
+                    if self._splash:
+                        self._splash.showMessage("Volcando a caché %s..." %
                                                      nombre, QtCore.Qt.AlignLeft, QtCore.Qt.white)
 
                     
                     
-                    if contenido:
-                        f2 = open(_dir("cache", fileobj.filekey), "wb")
-                        txt = contenido.encode(encode_, "replace")
-                        f2.write(txt)
-                        f2.close()
+                if contenido:
+                    f2 = open(_dir("cache", fileobj.filekey), "wb")
+                    txt = contenido.encode(encode_, "replace")
+                    f2.write(txt)
+                    f2.close()
 
             if self.parseProject and nombre.endswith(".qs") and settings.readBoolEntry("application/isDebuggerMode", False):
                 # if self._splash:
