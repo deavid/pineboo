@@ -109,7 +109,7 @@ class FLREMOTECLIENT(object):
         self.name_ = "REMOTECLIENT"
         self.open_ = False
         self.errorList = []
-        self.alias_ = "Remote client"
+        self.alias_ = "Pineboo Server"
         self._dbname = None
         self.mobile_ = False
         self.pure_python_ = False
