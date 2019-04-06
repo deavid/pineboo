@@ -146,6 +146,8 @@ TimeEdit = resolveObject("QTimeEdit")
 # Clases AQNext
 auth = resolveObject("auth")
 
+    
+
 
 class SysType(object):
     def __init__(self):
@@ -438,7 +440,13 @@ def solve_connection(sender, signal, receiver, slot):
 
 aqApp = FLApplication()
 
-
+def GET(function_name, arguments = [], conn = None):
+    if conn is None:
+        conn = aqApp.db()
+    if hasattr(conn.driver(), "send_to_server"):
+        return conn.driver().send_to_server(pineboolib.utils.create_dict("call_function", function_name, conn.driver().id_, arguments))
+    else:
+        return "Funcionalidad no soportada"
 
 
 def check_gc_referrers(typename, w_obj, name):
