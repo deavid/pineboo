@@ -285,8 +285,7 @@ class Project(object):
                     if os.path.exists(_dir("cache", "%s.py" % fileobj.filekey)):
                         continue
                 else:
-                    if os.path.exists(_dir("cache", fileobj.filekey)):
-                        continue
+                    continue
 
             cur2 = self.conn.cursor()
             sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue(
