@@ -92,11 +92,9 @@ class PNConnection(QtCore.QObject):
         
         
         if name in self.connAux.keys():
-            for k in self.connAux.keys():
-                if k == name:
-                    return self.connAux[name]
+            return self.connAux[name]
 
-        logger.info("PNConnection::Creando nueva conexión %s", name)
+        logger.warn("PNConnection::Creando nueva conexión %s", name)
 
         self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
                                           self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
@@ -106,6 +104,8 @@ class PNConnection(QtCore.QObject):
     def removeConn(self, name="default"):
         try:
             self.useConn(name).conn.close()
+            self.connAux[name] = None
+            del self.connAux[name]
         except Exception:
             pass
         
