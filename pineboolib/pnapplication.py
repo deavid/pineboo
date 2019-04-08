@@ -607,13 +607,13 @@ class Module(object):
 
     def load(self):
         pathxml = _path("%s.xml" % self.name)
-        pathui = _path("%s.ui" % self.name)
+        #pathui = _path("%s.ui" % self.name)
         if pathxml is None:
             self.logger.error("módulo %s: fichero XML no existe", self.name)
             return False
-        if pathui is None:
-            self.logger.error("módulo %s: fichero UI no existe", self.name)
-            return False
+        #if pathui is None:
+        #    self.logger.error("módulo %s: fichero UI no existe", self.name)
+        #    return False
         if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
             tiempo_1 = time.time()
         try:
