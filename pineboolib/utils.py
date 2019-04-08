@@ -1037,7 +1037,7 @@ def get_tipo_aqnext(tipo):
     
 
 def create_dict(method, fun, id, arguments = []):
-    data = [{"function" : fun, "arguments" : arguments}]
+    data = [{"function" : fun, "arguments" : arguments, "id" : id}]
     return {"method": method, "params": data, "jsonrpc":"2.0", "id": id} 
         
 
