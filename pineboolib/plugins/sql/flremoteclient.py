@@ -152,7 +152,7 @@ class FLREMOTECLIENT(object):
         return pineboolib.utils.create_dict("dbdata", fun, self.id_, data)
     
     def send_to_server(self, js):
-        import requests
+        import request
         headers = {'content-type': 'application/json'}
         
         req = requests.post(self.url, data=json.dumps(js), headers=headers).json()
