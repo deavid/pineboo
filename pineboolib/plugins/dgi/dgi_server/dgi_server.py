@@ -174,6 +174,8 @@ class parser(object):
         elif fun_name == "close":
             try:
                 cursor.close()
+                del cursor
+                del cursor_dict["%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])]
                 #print("3 close", dict_["arguments"]["cursor_id"])
             except:
                 print("Error %s" % fun_name, traceback.format_exc())
@@ -230,12 +232,10 @@ class dgi_server(dgi_schema):
 
     def launchServer(self):
         #run_simple('localhost', self._listenSocket, self._par.receive, ssl_context="adhoc")
-        run_simple('localhost', self._listenSocket, self._par.receive)
+        run_simple('0.0.0.0', self._listenSocket, self._par.receive)
 
     def __getattr__(self, name):
         return super().resolveObject(self._name, name)
     
     def accept_file(self, name):
-        #if name.endswith((".ui")):
-        #    return False
-        return True
+        return False if name.endswith((".ui")) else True
