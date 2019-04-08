@@ -3,7 +3,7 @@
 #from PyQt5.Qt import qWarning, QDomDocument, QRegExp
 #from PyQt5.QtWidgets import QMessageBox, QProgressDialog 
 
-#from pineboolib.utils import text2bool, auto_qt_translate_text, checkDependencies
+from pineboolib.utils import checkDependencies
 from pineboolib import decorators
 #from pineboolib.fllegacy.flutil import FLUtil
 #from pineboolib.fllegacy.flsqlquery import FLSqlQuery
@@ -13,7 +13,6 @@ import traceback
 import pineboolib
 import sys
 import logging
-import requests
 import json
 
 
@@ -116,6 +115,7 @@ class FLREMOTECLIENT(object):
         self.defaultPort_ = 4000
         self.id_ = 0
         self.url = None
+        checkDependencies({"request": "request"})
     
     def useThreads(self):
         return False
@@ -152,6 +152,7 @@ class FLREMOTECLIENT(object):
         return pineboolib.utils.create_dict("dbdata", fun, self.id_, data)
     
     def send_to_server(self, js):
+        import requests
         headers = {'content-type': 'application/json'}
         
         req = requests.post(self.url, data=json.dumps(js), headers=headers).json()
