@@ -115,7 +115,7 @@ class FLREMOTECLIENT(object):
         self.defaultPort_ = 4000
         self.id_ = 0
         self.url = None
-        checkDependencies({"request": "request"})
+        checkDependencies({"request": "request"}, False)
     
     def useThreads(self):
         return False
