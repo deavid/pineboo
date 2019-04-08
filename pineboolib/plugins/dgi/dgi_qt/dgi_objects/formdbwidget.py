@@ -53,7 +53,7 @@ class FormDBWidget(QtWidgets.QWidget):
         if signal_slot in self._formconnections:
             self._formconnections.remove(signal_slot)
         else:
-            self.logger.warn("Error al eliminar una señal que no se encuentra")
+            self.logger.warning("Error al eliminar una señal que no se encuentra")
 
     def obj(self):
         return self
@@ -128,7 +128,7 @@ class FormDBWidget(QtWidgets.QWidget):
             ret = None
         else:
             if ret is None:
-                self.logger.warn("WARN: No se encontro el control %s", child_name)
+                self.logger.warning("WARN: No se encontro el control %s", child_name)
         return ret
 
 

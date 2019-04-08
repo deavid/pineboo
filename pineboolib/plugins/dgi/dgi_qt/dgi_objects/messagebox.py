@@ -28,7 +28,7 @@ class MessageBox(QMessageBox):
         
           
         if form:
-            logger.warn("MessageBox: Se intentó usar form, y no está implementado.")
+            logger.warning("MessageBox: Se intentó usar form, y no está implementado.")
         icon = QMessageBox.NoIcon
         if not title:
             title = "Pineboo"

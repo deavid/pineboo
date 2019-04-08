@@ -352,7 +352,7 @@ def main():
             options.project += ".xml"
         prjpath = filedir("../profiles", options.project)
         if not os.path.isfile(prjpath):
-            logger.warn("el proyecto %s no existe." % options.project)
+            logger.warning("el proyecto %s no existe." % options.project)
         else:
             project.load(prjpath)
     elif options.connection:
@@ -378,7 +378,7 @@ def main():
     project._splash = splash
     project.run()
     if project.conn.conn is False:
-        logger.warn("No connection was provided. Aborting Pineboo load.")
+        logger.warning("No connection was provided. Aborting Pineboo load.")
     else:
         # return main()
 
@@ -478,9 +478,9 @@ def monkey_patch_connect():
     This is not stable and should be used with care
     """
     from PyQt5 import QtCore
-    logger.warn(
+    logger.warning(
         "--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
-    logger.warn(
+    logger.warning(
         "... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
 
     class BoundSignal():

@@ -57,7 +57,7 @@ class FLTranslator(QTranslator):
         if not self.translation_from_qm:
             ret_ = self.load_ts("%s.ts" % ts_file)
             if not ret_:
-                self.logger.warn("For some reason, i cannot load '%s.ts'", ts_file)
+                self.logger.warning("For some reason, i cannot load '%s.ts'", ts_file)
         else:
             
             qm_file = "%s.qm" % ts_file
@@ -76,7 +76,7 @@ class FLTranslator(QTranslator):
             
             ret_ = self.load(qm_file)
             if not ret_:
-                self.logger.warn("For some reason, i cannot load '%s'", qm_file)
+                self.logger.warning("For some reason, i cannot load '%s'", qm_file)
         
         return ret_
 

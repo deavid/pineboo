@@ -904,7 +904,7 @@ class FLFormDB(QtWidgets.QDialog):
             qt_rectangle.moveCenter(center_point)
             self.move(qt_rectangle.topLeft())
         #if settings.readBoolEntry("application/isDebuggerMode", False):
-        #    self.logger.warn("INFO:: Tiempo de carga de %s: %.3fs %s (iface %s)" %
+        #    self.logger.warning("INFO:: Tiempo de carga de %s: %.3fs %s (iface %s)" %
         #                     (self.actionName_, tiempo_fin - self.tiempo_ini, self, self.iface))
         #self.tiempo_ini = None
 

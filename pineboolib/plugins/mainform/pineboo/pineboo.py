@@ -186,7 +186,7 @@ class MainForm(QMainWindow):
             icon = action.mod.mod.mainform.actions[action.name].icon
             self.formTab.addTab(widget, icon, widget.windowTitle())
         except Exception as e:
-            logger.warn("addFormTab: No pude localizar icono para %s: %s", action.name, e)
+            logger.warning("addFormTab: No pude localizar icono para %s: %s", action.name, e)
             self.formTab.addTab(widget, widget.windowTitle())
 
         self.formTab.setCurrentWidget(widget)
@@ -241,7 +241,7 @@ class MainForm(QMainWindow):
         if not module.loaded:
             module.load()
         if not module.loaded:
-            logger.warn("moduleLoad: Ignorando modulo %s por fallo al cargar", module.name)
+            logger.warning("moduleLoad: Ignorando modulo %s por fallo al cargar", module.name)
             return False
         logger.trace("moduleLoad: Running module %s . . . ", module.name)
         iconsize = QtCore.QSize(22, 22)

@@ -191,7 +191,7 @@ class FLFieldDB(QtWidgets.QWidget):
                     f.value for f in self.cursor_.d.buffer_.fieldList_]
                 self.logger.info("*** cursor Buffer: %r", cur_values)
             else:
-                self.logger.warn("*** FLFieldDB::loaded: SIN cursor ??")
+                self.logger.warning("*** FLFieldDB::loaded: SIN cursor ??")
 
         if not self.name:
             self.setName("FLFieldDB")
@@ -666,7 +666,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         field = tMD.field(self.fieldName_)
         if field is None:
-            self.logger.warn("FLFieldDB::setValue(%s) : No existe el campo ", self.fieldName_)
+            self.logger.warning("FLFieldDB::setValue(%s) : No existe el campo ", self.fieldName_)
             return
 
         type_ = field.type()
@@ -813,7 +813,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         field = tMD.field(self.fieldName_)
         if field is None:
-            self.logger.warn(FLUtil.tr("FLFieldDB::value() : No existe el campo %s"), self.fieldName_)
+            self.logger.warning(FLUtil.tr("FLFieldDB::value() : No existe el campo %s"), self.fieldName_)
             return None
 
         v = None

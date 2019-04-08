@@ -431,11 +431,11 @@ def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
     query = root.find("query")
     if query is not None:
         if query.text != nombre:
-            logger.warn("WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (
+            logger.warning("WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (
                 obj_name.text, nombre))
             query.text = nombre
     elif obj_name.text != nombre:
-        logger.warn("WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (
+        logger.warning("WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (
             obj_name.text, nombre))
         obj_name.text = nombre
     return getTableObj(tree, root)
@@ -566,7 +566,7 @@ def checkDependencies(dict_, exit=True):
             settings = FLSettings()
             #if settings.readBoolEntry("application/isDebuggerMode", False):
                 #if not key in DEPENDENCIES_CHECKED.keys():
-                #    logger.warn("Versión de %s: %s", key, mod_ver)
+                #    logger.warning("Versión de %s: %s", key, mod_ver)
         except ImportError:
             dependences.append(dict_[key])
             #print(traceback.format_exc())
@@ -576,9 +576,9 @@ def checkDependencies(dict_, exit=True):
 
     msg = ""
     if len(dependences) > 0 and not key in DEPENDENCIES_CHECKED.keys():
-        logger.warn("HINT: Dependencias incumplidas:")
+        logger.warning("HINT: Dependencias incumplidas:")
         for dep in dependences:
-            logger.warn("HINT: Instale el paquete %s" % dep)
+            logger.warning("HINT: Instale el paquete %s" % dep)
             msg += "Instale el paquete %s.\n%s" % (dep, error)
             if dep == "pyfpdf":
                 msg +="\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
@@ -604,7 +604,7 @@ def checkDependencies(dict_, exit=True):
 def version_check(mod_name, mod_ver, min_ver):
     """Compare two version numbers and raise a warning if "minver" is not met."""
     if version_normalize(mod_ver) < version_normalize(min_ver):
-        logger.warn("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
+        logger.warning("La version de <%s> es %s. La mínima recomendada es %s.", mod_name, mod_ver, min_ver)
 
 
 def version_normalize(v):
@@ -978,7 +978,7 @@ def resolve_where_params(key, valor, mtd_table):
     if field is not None:
         field_type = field.type()
     else:
-        logger.warn("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
+        logger.warning("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
         return ""
     #valor = aqApp.db().manager().formatValue(field_type , valor, False)
     

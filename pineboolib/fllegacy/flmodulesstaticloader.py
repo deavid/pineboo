@@ -249,7 +249,7 @@ class FLStaticLoader(QtCore.QObject):
                     warn_.warns_.append(msg)
                     warn_.paths_.append("%s:%s" % (n, info.path_))
                     if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
-                        logger.warn("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
+                        logger.warning("CARGA ESTATICA ACTIVADA:%s -> %s", n, info.path_)
 
                 if only_path:
                     return content_path

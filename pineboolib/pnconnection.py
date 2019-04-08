@@ -94,7 +94,7 @@ class PNConnection(QtCore.QObject):
         if name in self.connAux.keys():
             return self.connAux[name]
 
-        logger.warn("PNConnection::Creando nueva conexión %s", name)
+        logger.warning("PNConnection::Creando nueva conexión %s", name)
 
         self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
                                           self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
@@ -217,7 +217,7 @@ class PNConnection(QtCore.QObject):
                 return True
             else:
 
-                logger.warn(
+                logger.warning(
                     "doTransaction: Fallo al intentar iniciar la transacción")
                 return False
         else:
@@ -299,10 +299,10 @@ class PNConnection(QtCore.QObject):
             if cur.d.transactionsOpened_:
                 trans = cur.d.transactionsOpened_.pop()
                 if not trans == self.transaction_:
-                    logger.warn(
+                    logger.warning(
                         "El cursor va a terminar la transacción %s pero la última que inició es la %s", self.transaction_, trans)
             else:
-                logger.warn(
+                logger.warning(
                     "El cursor va a terminar la transacción %s pero no ha iniciado ninguna", self.transaction_)
 
             self.transaction_ = self.transaction_ - 1
@@ -461,7 +461,7 @@ class PNConnection(QtCore.QObject):
         if getattr(self.driver(), "normalizeValue", None):
             return self.driver().normalizeValue(text)
 
-        logger.warn("PNConnection: El driver %s no dispone de normalizeValue(text)", self.driverName())
+        logger.warning("PNConnection: El driver %s no dispone de normalizeValue(text)", self.driverName())
         return text
 
     def queryUpdate(self, name, update, filter):

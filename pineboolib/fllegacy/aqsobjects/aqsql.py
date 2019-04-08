@@ -160,7 +160,7 @@ class AQSql(object):
             if not cur.metadata():
                 from pineboolib.fllegacy.flutil import FLUtil
                 util = FLUtil()
-                logger.warn(util.translate("No hay metadatos para '%s%s'"), cur.curName(), cur.db())
+                logger.warning(util.translate("No hay metadatos para '%s%s'"), cur.curName(), cur.db())
                 return False
         
             if not cur.select(where):
@@ -179,7 +179,7 @@ class AQSql(object):
                 msg_check = cur.msgCheckIntegrity()
                 if msg_check is None:
                     ok = False
-                    logger.warn(msg_check, cur.db())
+                    logger.warning(msg_check, cur.db())
                     break
             
                 cur.setActivatedCheckIntegrity(False)

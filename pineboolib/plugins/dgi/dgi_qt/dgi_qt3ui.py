@@ -94,7 +94,7 @@ def loadUi(form_path, widget, parent=None):
 
             receiver = None
             if sender is None:
-                logger.warn("Connection sender not found:%s", sender_name)
+                logger.warning("Connection sender not found:%s", sender_name)
             if receiv_name == formname:
                 receiver = widget
                 fn_name = slot_name.rstrip("()")
@@ -121,7 +121,7 @@ def loadUi(form_path, widget, parent=None):
                 if receiver is None and wui:
                     receiver = widget.ui_[receiv_name]
             if receiver is None:
-                logger.warn("Connection receiver not found:%s", receiv_name)
+                logger.warning("Connection receiver not found:%s", receiv_name)
             if sender is None or receiver is None:
                 continue
             try:
@@ -253,7 +253,7 @@ def createWidget(classname, parent=None):
         getattr(QtWidgets, classname, None)
 
     if cls is None:
-        logger.warn("WARN: Class name not found in QtWidgets:", classname)
+        logger.warning("WARN: Class name not found in QtWidgets:", classname)
         widgt = QtWidgets.QWidget(parent)
         widgt.setStyleSheet("* { background-color: #fa3; } ")
         return widgt
@@ -320,7 +320,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             set_fn = getattr(widget, setpname, None)
 
         if set_fn is None:
-            logger.warn("qt3ui: Missing property %s for %r", pname, widget.__class__)
+            logger.warning("qt3ui: Missing property %s for %r", pname, widget.__class__)
             return
         if pname == "contentsMargins" or pname == "layoutSpacing":
             try:
@@ -347,7 +347,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         elif pname in ["windowIcon", "icon"]:
             value = loadVariant(xmlprop, widget)
             if isinstance(value, str):
-                logger.warn("Icono %s.%s no encontrado." %  (widget.objectName(), value))
+                logger.warning("Icono %s.%s no encontrado." %  (widget.objectName(), value))
                 return
 
         else:
@@ -398,7 +398,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         try:
                             widget.layout.addWidget(new_widget)
                         except Exception:
-                            logger.warn("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                            logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
                             
                 elif mode == "grid":
                     if pineboolib.project._DGI.localDesktop():
@@ -407,7 +407,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         try:
                             widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
                         except Exception:
-                            logger.warn("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                            logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
                             
             elif c.tag == "spacer":
                 sH = None
@@ -449,7 +449,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 widget.layout.addItem(new_spacer)
                 #print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
             else:
-                logger.warn("qt3ui: Unknown layout xml tag", repr(c.tag))
+                logger.warning("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
         #widget.layout.setContentsMargins(1, 1, 1, 1)
@@ -472,7 +472,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
     for c in xml:
         if c.tag == "layout":
-            #logger.warn("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
+            #logger.warning("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
             lay_ = getattr(QtWidgets, c.get("class"))()
             lay_.setObjectName(c.get("name"))
             widget.setLayout(lay_)
@@ -545,7 +545,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if attrs is not None:
                 attrs[k] = v
             else:
-                logger.warn("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
+                logger.warning("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
                             (k, v), widget.__class__, repr(c.tag))
             continue
         if c.tag == "widget":
@@ -583,7 +583,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     lay.addWidget(new_widget)
             else:
                 if Options.DEBUG_LEVEL > 50:
-                    logger.warn("qt3ui: Unknown container widget xml tag",
+                    logger.warning("qt3ui: Unknown container widget xml tag",
                                 widget.__class__, repr(c.tag))
             unbold_fonts.append(new_widget)
             continue
@@ -615,7 +615,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
 
         if Options.DEBUG_LEVEL > 50:
-            logger.warn("%s: Unknown widget xml tag %s %s", __name__, widget.__class__, repr(c.tag))
+            logger.warning("%s: Unknown widget xml tag %s %s", __name__, widget.__class__, repr(c.tag))
 
     for c in properties:
         process_property(c)
@@ -678,7 +678,7 @@ def b(x):
         return True
     if x == "off":
         return False
-    logger.warn("Bool?:", repr(x))
+    logger.warning("Bool?:", repr(x))
     return None
 
 
@@ -744,7 +744,7 @@ def _loadVariant(variant, widget=None):
                 elif c.tag == "pointsize":
                     p.setPointSize(int(value))
                 else:
-                    logger.warn("unknown font style type", repr(c.tag))
+                    logger.warning("unknown font style type", repr(c.tag))
             except Exception as e:
                 if Options.DEBUG_LEVEL > 50:
                     logger.error(e)
@@ -808,4 +808,4 @@ def _loadVariant(variant, widget=None):
         return c
 
     if Options.DEBUG_LEVEL > 50:
-        logger.warn("qt3ui: Unknown variant: %s --> %s ", repr(widget),  ET.tostring(variant))
+        logger.warning("qt3ui: Unknown variant: %s --> %s ", repr(widget),  ET.tostring(variant))

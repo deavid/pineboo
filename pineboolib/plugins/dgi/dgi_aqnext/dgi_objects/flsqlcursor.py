@@ -228,7 +228,7 @@ class FLSqlCursor(QtCore.QObject):
         return self._cursor_accepted(self.parent_cursor)
     
     def obtener_modelo(self, stabla):
-        #logger.warn("****** obtener_modelo %s", stabla, stack_info = True)
+        #logger.warning("****** obtener_modelo %s", stabla, stack_info = True)
         from YBLEGACY.FLAux import FLAux
         return FLAux.obtener_modelo(stabla)
     
@@ -304,7 +304,7 @@ class meta_model(object):
                 ret = getattr(self._model, name, None)
             
                 #if ret is None:
-                #    logger.warn("No se encuentra %s en el model (%s) del cursor %s" , name, self._model, self._cursor.curName())
+                #    logger.warning("No se encuentra %s en el model (%s) del cursor %s" , name, self._model, self._cursor.curName())
         
         #print("-->", ret, type(ret))
         return ret

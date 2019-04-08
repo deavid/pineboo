@@ -54,7 +54,7 @@ class PNKugarPlugins(object):
 
     def loadParser(self, name):
         if not name in self.avalibleParsers_:
-            logger.warn("No se encuentra el plugin %s", name)
+            logger.warning("No se encuentra el plugin %s", name)
             return None
         else:
             logger.info("PNKUGARPLUGINS:: Cargando kutparser %s", name)

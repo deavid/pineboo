@@ -244,7 +244,7 @@ class kut2rml(object):
                 font = "%sItalic" % fontIt
 
         if font not in self.registeredFonts:
-            self.logger.warn("porcessXML: Registering %s font" % font)
+            self.logger.warning("porcessXML: Registering %s font" % font)
             self.registeredFonts.append(fontName)
 
             rF = SubElement(self.docInitSubElemet_, "registerTTFont")
@@ -418,7 +418,7 @@ class kut2rml(object):
             #self.actualVSize[str(self.pagina)] = self.maxVSize[str(self.pagina)] + (self.getHeight(xml) - self.pageSize_["BM"]) * self.correcionAltura_
             self.actualVSize[str(self.pagina)] = self.maxVSize[str(
                 self.pagina)] + self._parser_tools.heightCorrection(self._parser_tools.getHeight(xml))
-            #self.logger.warn("PAGE_FOOTER BOTTON %s" % self.actualVSize[str(self.pagina)])
+            #self.logger.warning("PAGE_FOOTER BOTTON %s" % self.actualVSize[str(self.pagina)])
             self.processXML(xml, parent)
 
     def getOption(self, xml, name):
@@ -512,7 +512,7 @@ class kut2rml(object):
                 self.processText(child, parent, data)
             else:
                 if child.tag not in ("PageFooter", "PageHeader", "DetailFooter", "Detail", "AddOnHeader", "AddOnFooter", "DetailHeader"):
-                    self.logger.warn("porcessXML: Unknown tag %s." % child.tag)
+                    self.logger.warning("porcessXML: Unknown tag %s." % child.tag)
 
         self.actualVSize[str(self.pagina)] += self._parser_tools.getHeight(xml)
 

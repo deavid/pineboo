@@ -110,7 +110,7 @@ class FLSQLITE(object):
             self.conn_.isolation_level = None
 
             if db_is_new:
-                self.logger.warn("La base de datos %s no existe", self.db_filename)
+                self.logger.warning("La base de datos %s no existe", self.db_filename)
 
         if self.conn_:
             self.open_ = True
@@ -204,7 +204,7 @@ class FLSQLITE(object):
         q.setFrom(table)
         q.setWhere("1 = 1")
         if not q.exec_():  # FIXME: exec es palabra reservada
-            self.logger.warn("not exec sequence")
+            self.logger.warning("not exec sequence")
             return None
         if q.first() and q.value(0) is not None:
             return int(q.value(0)) + 1
@@ -216,7 +216,7 @@ class FLSQLITE(object):
             return True
 
         if not self.isOpen():
-            self.logger.warn("%s::savePoint: Database not open", __name__)
+            self.logger.warning("%s::savePoint: Database not open", __name__)
             return False
 
         cursor = self.cursor()
@@ -239,7 +239,7 @@ class FLSQLITE(object):
             return True
         
         if not self.isOpen():
-            self.logger.warn("%s::rollbackSavePoint: Database not open", __name__)
+            self.logger.warning("%s::rollbackSavePoint: Database not open", __name__)
             return False
 
         cursor = self.cursor()
@@ -261,7 +261,7 @@ class FLSQLITE(object):
 
     def commitTransaction(self):
         if not self.isOpen():
-            self.logger.warn("%s::commitTransaction: Database not open", __name__)
+            self.logger.warning("%s::commitTransaction: Database not open", __name__)
 
         cursor = self.cursor()
         try:
@@ -278,7 +278,7 @@ class FLSQLITE(object):
 
     def execute_query(self, q):
         if not self.isOpen():
-            self.logger.warn("%s::execute_query: Database not open", __name__)
+            self.logger.warning("%s::execute_query: Database not open", __name__)
 
         cursor = self.cursor()
         try:
@@ -289,7 +289,7 @@ class FLSQLITE(object):
 
     def rollbackTransaction(self):
         if not self.isOpen():
-            self.logger.warn("SQL3Driver::rollbackTransaction: Database not open")
+            self.logger.warning("SQL3Driver::rollbackTransaction: Database not open")
 
         cursor = self.cursor()
         try:
@@ -303,7 +303,7 @@ class FLSQLITE(object):
 
     def transaction(self):
         if not self.isOpen():
-            self.logger.warn("SQL3Driver::transaction: Database not open")
+            self.logger.warning("SQL3Driver::transaction: Database not open")
         cursor = self.cursor()
         try:
             cursor.execute("BEGIN TRANSACTION")
@@ -556,7 +556,7 @@ class FLSQLITE(object):
             stream = self.db_.managerModules().contentCached("%s.mtd" % tablename)
             util = FLUtil()
             if not util.domDocumentSetContent(doc, stream):
-                self.logger.warn("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
+                self.logger.warning("FLManager : " + QApplication.tr("Error al cargar los metadatos para la tabla %1").arg(tablename))
 
                 return self.recordInfo2(tablename)
 
@@ -615,7 +615,7 @@ class FLSQLITE(object):
         docElem = None
 
         if not util.domDocumentSetContent(doc, mtd1):
-            self.logger.warn("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
+            self.logger.warning("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
         else:
             docElem = doc.documentElement()
             oldMTD = self.db_.manager().metadata(docElem, True)
@@ -624,7 +624,7 @@ class FLSQLITE(object):
             return True
 
         if not util.domDocumentSetContent(doc, mtd2):
-            self.logger.warn("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
+            self.logger.warning("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
             return False
         else:
             docElem = doc.documentElement()
@@ -634,7 +634,7 @@ class FLSQLITE(object):
             oldMTD = newMTD
 
         if not oldMTD.name() == newMTD.name():
-            self.logger.warn("FLManager::alterTable : " + util.tr("Los nombres de las tablas nueva y vieja difieren."))
+            self.logger.warning("FLManager::alterTable : " + util.tr("Los nombres de las tablas nueva y vieja difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -646,7 +646,7 @@ class FLSQLITE(object):
         newPK = newMTD.primaryKey()
 
         if not oldPK == newPK:
-            self.logger.warn("FLManager::alterTable : " + util.tr("Los nombres de las claves primarias difieren."))
+            self.logger.warning("FLManager::alterTable : " + util.tr("Los nombres de las claves primarias difieren."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -663,7 +663,7 @@ class FLSQLITE(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            self.logger.warn("FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            self.logger.warning("FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -675,7 +675,7 @@ class FLSQLITE(object):
         oldField = None
 
         if not fieldList:
-            self.logger.warn("FLManager::alterTable : " + util.tr("Los antiguos metadatos no tienen campos."))
+            self.logger.warning("FLManager::alterTable : " + util.tr("Los antiguos metadatos no tienen campos."))
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -709,7 +709,7 @@ class FLSQLITE(object):
 
         q = FLSqlQuery("", self.db_.dbAux())
         if not q.exec_("CREATE TABLE %s AS SELECT * FROM %s;" % (renameOld, oldMTD.name())) or not q.exec_("DROP TABLE %s;" % oldMTD.name()):
-            self.logger.warn("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
+            self.logger.warning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
 
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
@@ -745,7 +745,7 @@ class FLSQLITE(object):
         newField = None
 
         if not fieldList:
-            self.logger.warn("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos."))
+            self.logger.warning("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos."))
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -776,7 +776,7 @@ class FLSQLITE(object):
                             v = defVal
 
                     if not newBuffer.field(newField.name()).type() == newField.type():
-                        self.logger.warn("FLManager::alterTable : " + util.tr("Los tipos del campo %s no son compatibles. Se introducirá un valor nulo." % newField.name()))
+                        self.logger.warning("FLManager::alterTable : " + util.tr("Los tipos del campo %s no son compatibles. Se introducirá un valor nulo." % newField.name()))
 
                 if not oldField.allowNull() or not newField.allowNull() and v is not None:
                     if oldField.type() in ("int", "serial", "uint", "bool", "unlock"):
@@ -844,7 +844,7 @@ class FLSQLITE(object):
         return sql
 
     def Mr_Proper(self):
-        self.logger.warn("FLSQLITE: FIXME: Mr_Proper no regenera tablas")
+        self.logger.warning("FLSQLITE: FIXME: Mr_Proper no regenera tablas")
         util = FLUtil()
         self.db_.dbAux().transaction()
         rx = QRegExp("^.*[\\d][\\d][\\d][\\d].[\\d][\\d].*[\\d][\\d]$")

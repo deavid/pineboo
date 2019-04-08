@@ -33,7 +33,7 @@ class cursor_class(object):
         self.description = None
     
     def __getattr__(self, name):
-        logger.warn("cursor(%s).%s !!", self.id_,name, stack_info = True)
+        logger.warning("cursor(%s).%s !!", self.id_,name, stack_info = True)
     
     def execute(self, sql):
         self.last_sql = sql

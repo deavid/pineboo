@@ -69,7 +69,7 @@ class metaTranslator(object):
 
         saved = tor.save_qm(file_name, mode)
         if saved and verbose:
-            self.logger.warn("%d finished, %d unfinished and %d untranslated messages" %
+            self.logger.warning("%d finished, %d unfinished and %d untranslated messages" %
                              finished, unfinished, untranslated)
 
         return saved

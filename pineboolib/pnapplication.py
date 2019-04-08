@@ -107,7 +107,7 @@ class Project(object):
         
     def show_time(self, text = "", stack = False):
         now_ = time.time()
-        self.logger.warn("%s Tiempo : %s", text, round(now_ - self.time_, 5), stack_info = stack)
+        self.logger.warning("%s Tiempo : %s", text, round(now_ - self.time_, 5), stack_info = stack)
 
     """
     Retorna si hay o no acls cargados
@@ -148,7 +148,7 @@ class Project(object):
 
         for profile in root.findall("profile-data"):
             if getattr(profile.find("password"), "text", None) is not None:
-                self.logger.warn("No se puede cargar un profile con contraseña por consola")
+                self.logger.warning("No se puede cargar un profile con contraseña por consola")
 
         self.dbname = root.find("database-name").text
         for db in root.findall("database-server"):
@@ -157,7 +157,7 @@ class Project(object):
             self.dbserver.port = db.find("port").text
             self.dbserver.type = db.find("type").text
             if self.dbserver.type not in self.sql_drivers_manager.aliasList():
-                self.logger.warn("Esta versión de pineboo no soporta el driver '%s'" % self.dbserver.type)
+                self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.dbserver.type)
                 self.database = None
                 return
         for credentials in root.findall("database-credentials"):
@@ -271,7 +271,7 @@ class Project(object):
                 continue  # I
             fileobj = File(idmodulo, nombre, sha)
             if nombre in self.files:
-                self.logger.warn("run: file %s already loaded, overwritting..." % nombre)
+                self.logger.warning("run: file %s already loaded, overwritting..." % nombre)
             self.files[nombre] = fileobj
             self.modules[idmodulo].add_project_file(fileobj)
             f1.write(fileobj.filekey + "\n")
@@ -457,7 +457,7 @@ class Project(object):
                 from pineboolib.pncontrolsfactory import aqApp
                 aqApp.msgBoxWarning(msg_w ,pineboolib.project._DGI)
             else:
-                self.logger.warn(msg_w)
+                self.logger.warning(msg_w)
                 
         #try:
         #    if aList:
@@ -494,7 +494,7 @@ class Project(object):
                 msg = "Convirtiendo a Python . . . %s.qs %s" % (file_name, txt_)
                 if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
                     debug_postparse = True
-                    self.logger.warn(msg)
+                    self.logger.warning(msg)
 
                 if self._splash:
                     self._splash.showMessage(msg, QtCore.Qt.AlignLeft, QtCore.Qt.white)
@@ -510,7 +510,7 @@ class Project(object):
             try:
                 postparse.pythonify(scriptname, debug_postparse, clean_no_python)
             except Exception as e:
-                self.logger.warn("El fichero %s no se ha podido convertir: %s", scriptname, e)
+                self.logger.warning("El fichero %s no se ha podido convertir: %s", scriptname, e)
 
     """
     Lanza los test
@@ -642,7 +642,7 @@ class Module(object):
                 continue
             tableObj = parseTable(name, contenido)
             if tableObj is None:
-                self.logger.warn(
+                self.logger.warning(
                     "No se pudo procesar. Se ignora tabla %s/%s ", self.name, name)
                 continue
             self.tables[name] = tableObj
@@ -797,7 +797,7 @@ class ModuleActions(object):
         pineboolib.project.actions[action.name] = action
         if hasattr(qsa_dict_modules, action.name):
             if action.name is not "sys":
-                self.logger.warn("No se sobreescribe variable de entorno %s", action.name)
+                self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
         else:  # Se crea la action del módulo
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
@@ -808,7 +808,7 @@ class ModuleActions(object):
             name = action_xml.name
             if name != "unnamed":
                 if hasattr(qsa_dict_modules, "form%s" % name):
-                    self.logger.warn("No se sobreescribe variable de entorno %s. Hay una definición previa en %s", "%s.form%s" %(self.module_name, name), pineboolib.project.actions[name].mod.module_name)
+                    self.logger.warning("No se sobreescribe variable de entorno %s. Hay una definición previa en %s", "%s.form%s" %(self.module_name, name), pineboolib.project.actions[name].mod.module_name)
                 else:  # Se crea la action del form
                     pineboolib.project.actions[name] = action_xml
                     delayed_action = DelayedObjectProxyLoader(
@@ -972,7 +972,7 @@ class XMLAction(XMLStruct):
     def execMainScript(self, name):
         a = pineboolib.project.conn.manager().action(name)
         if not a:
-            self.logger.warn("No existe la acción %s", name)
+            self.logger.warning("No existe la acción %s", name)
             return True
         pineboolib.project.call("%s.main" % a.name(), [], None, False)
 

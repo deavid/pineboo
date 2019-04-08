@@ -710,7 +710,7 @@ class kut2fpdf(object):
         if font_full_name not in self._avalible_fonts:
             font_found = self._parser_tools.find_font(font_full_name)            
             if font_found:
-                self.logger.warn("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_full_name, font_found)
+                self.logger.warning("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_full_name, font_found)
                 self._document.add_font(font_full_name, "", font_found, True)
                 self._avalible_fonts.append(font_full_name)
 

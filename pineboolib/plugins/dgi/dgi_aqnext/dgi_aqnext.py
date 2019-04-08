@@ -62,10 +62,10 @@ class dgi_aqnext(dgi_schema):
     def exec_(self):
         from pineboolib.pncontrolsfactory import SysType, aqApp
         sys = SysType()
-        logger.warn("DGI_%s se ha inicializado correctamente" % self._alias)
-        logger.warn("Driver  DB: %s", aqApp.db().driverAlias())
-        logger.warn("Usuario DB: %s", sys.nameUser())
-        logger.warn("Nombre  DB: %s", sys.nameBD())
+        logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
+        logger.warning("Driver  DB: %s", aqApp.db().driverAlias())
+        logger.warning("Usuario DB: %s", sys.nameUser())
+        logger.warning("Nombre  DB: %s", sys.nameBD())
     
     def processEvents(self):
         return QtCore.QCoreApplication.processEvents()
@@ -236,7 +236,7 @@ class dgi_aqnext(dgi_schema):
             try:
                 module = importlib.import_module(model_file)     
             except ImportError:
-                logger.warn("DGI: load_meta_model. No se encuentra el model de %s", action_name)
+                logger.warning("DGI: load_meta_model. No se encuentra el model de %s", action_name)
                 module = None
                 ret_ = None
                     
@@ -251,7 +251,7 @@ class dgi_aqnext(dgi_schema):
         
         module_name = prefix
         
-        #logger.warn("Cargando el prefix_master de %s", prefix)
+        #logger.warning("Cargando el prefix_master de %s", prefix)
         
         #if template == "master":        
         #    module_name = "form%s" % prefix
@@ -265,12 +265,12 @@ class dgi_aqnext(dgi_schema):
         if module is not None:
             cursor = module.widget.cursor()
         else:
-            logger.warn("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
+            logger.warning("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
             from pineboolib.pncontrolsfactory import FLSqlCursor
             cursor = FLSqlCursor(prefix)
             
         if cursor is None:
-            logger.warn("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
+            logger.warning("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
         
         if cursor and not cursor.meta_model():
             #print("**************************", prefix)
@@ -279,7 +279,7 @@ class dgi_aqnext(dgi_schema):
                 
             except:
                 import traceback
-                logger.warn("DGI. get_master_cursor: %s", traceback.format_exc())
+                logger.warning("DGI. get_master_cursor: %s", traceback.format_exc())
                 
         #if template == "newRecord":
         #    cursor.setModeAccess(cursor.Insert)
@@ -324,7 +324,7 @@ class dgi_aqnext(dgi_schema):
         ret_ = []
         if not cursor.modeAccess() == cursor.Insert:
             if not cursor.isValid():
-                logger.warn("Cursor inválido/vacío en %s", cursor.curName())
+                logger.warning("Cursor inválido/vacío en %s", cursor.curName())
                 return ret_
             
             if cursor.first():
@@ -343,7 +343,7 @@ class dgi_aqnext(dgi_schema):
         
         if cursor.modeAccess() == cursor.Insert:
             size_ = 1 
-        #logger.warn("***** %s", size_, stack_info = True)
+        #logger.warning("***** %s", size_, stack_info = True)
         while i < size_:
             #dict_ = collections.OrderedDict()
             dict_ = {}

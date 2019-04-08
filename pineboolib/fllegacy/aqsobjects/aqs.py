@@ -153,5 +153,5 @@ class AQS(object):
             if ret_ is not None:
                 return ret_
 
-        logger.warn("AQS: No se encuentra el atributo %s", name)
+        logger.warning("AQS: No se encuentra el atributo %s", name)
         

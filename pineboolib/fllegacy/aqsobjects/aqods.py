@@ -158,7 +158,7 @@ class AQOdsRow(object):
                     self.sheet_.spread_sheet_parent_.automaticstyles.addElement(opt)
                     self.style_cell_text_ = opt
                 else:
-                    logger.warn("%s:Parámetro desconocido %s", __name__, opt.tagName)
+                    logger.warning("%s:Parámetro desconocido %s", __name__, opt.tagName)
 
             elif isinstance(opt, list):  # Si es lista , Insertamos todos los parámetros uno a uno
                 for l in opt:

@@ -38,7 +38,7 @@ class FLTranslations(object):
             ok = tor.load(ts_file_name)
 
         if not ok:
-            self.logger.warn("For some reason, I cannot load '%s'", ts_file_name)
+            self.logger.warning("For some reason, I cannot load '%s'", ts_file_name)
         return ok
 
     """
@@ -58,7 +58,7 @@ class FLTranslations(object):
         if settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
             print("*** FAKE :: ", qm_file_name)
             if not tor.release(qm_file_name, verbose, "Stripped" if stripped else "Everything"):
-                self.logger.warn("For some reason, i cannot save '%s'", qm_file_name)
+                self.logger.warning("For some reason, i cannot save '%s'", qm_file_name)
 
     """
     Libera el fichero .ts
@@ -90,7 +90,7 @@ class FLTranslations(object):
 
         f = Qt.QFile(ts_input_file)
         if not f.open(QtCore.QIODevice.ReadOnly):
-            self.logger.warn("Cannot open file '%s'", ts_input_file)
+            self.logger.warning("Cannot open file '%s'", ts_input_file)
             return
 
         t = Qt.QTextStream(f)
@@ -120,7 +120,7 @@ class FLTranslations(object):
                         self.releaseTsFile(t, verbose, stripped)
 
             if not metTranslations:
-                self.logger.warn("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
+                self.logger.warning("Met no 'TRANSLATIONS' entry in project file '%s'", ts_input_file)
 
         if qm_output_file:
             self.releaseMetaTranslator(tor, qm_output_file, verbose, stripped)

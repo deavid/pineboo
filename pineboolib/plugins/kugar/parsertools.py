@@ -167,7 +167,7 @@ class parsertools(object):
                     ret = img_file
                     pix = QPixmap(value)
                     if not pix.save(img_file):
-                        self.logger.warn("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                        self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
                         ret = None
                     else:
                        ret = img_file
@@ -175,7 +175,7 @@ class parsertools(object):
                 pix = QPixmap(ref_key)
                 img_file = ref_key.replace(".xpm",".png")
                 if not pix.save(img_file):
-                    self.logger.warn("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
+                    self.logger.warning("%s:refkey2cache No se ha podido guardar la imagen %s" % (__name__, img_file))
                     ret = None
                 else:
                     ret = img_file
@@ -254,7 +254,7 @@ class parsertools(object):
         elif size in (30, 31):
             r = Custom  # "CUSTOM"
         if r is None:
-            self.logger.warn(
+            self.logger.warning(
                 "porcessXML:No se encuentra pagesize para %s. Usando A4" % size)
             r = [595, 842]
 
@@ -284,7 +284,7 @@ class parsertools(object):
         elif sys.platform.find("darwin") > -1:
             fonts_folders = ["/Library/Fonts", "/System/Library/Fonts", "~/Library/Fonts"]
         else:
-            self.logger.warn("KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform)
+            self.logger.warning("KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform)
             return False
 
         for folder in fonts_folders:

@@ -161,7 +161,7 @@ class FLSmtpClient(QtCore.QObject):
                     self.map_attach_cid_[attach] = cid
         else:
             err_msg_ = self.tr("El fichero %s no existe o no se puede leer\n\n" % attach)
-            logger.warn(err_msg_)
+            logger.warning(err_msg_)
             self.changeStatus(err_msg_, State.AttachError)
                 
                 
@@ -277,7 +277,7 @@ class FLSmtpClient(QtCore.QObject):
                     part["Content-Disposition"] = 'attachment; filename="%s"' % basename(att)
                     outer.attach(part)
             except IOError:
-                logger.warn("Error al adjuntar el fichero %s." % att)
+                logger.warning("Error al adjuntar el fichero %s." % att)
                 return False
         
         #Envio mail

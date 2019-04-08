@@ -179,7 +179,7 @@ class FLManager(QtCore.QObject):
 
                 if not stream:
                     if not n in self.metadataCachedFails:
-                        logger.warn("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                         self.metadataCachedFails.append(n)
                     return None
 
@@ -187,7 +187,7 @@ class FLManager(QtCore.QObject):
                 
                 if not util.domDocumentSetContent(doc, stream):
                     if not n in self.metadataCachedFails:
-                        logger.warn("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                        logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                         self.metadataCachedFails.append(n)
                     return None
 
@@ -223,7 +223,7 @@ class FLManager(QtCore.QObject):
                         "application",
                         "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
                         "Debe regenerar la base de datos.").replace("%1", n)
-                    logger.warn(msg)
+                    logger.warning(msg)
                 # throwMsgWarning(self.db_, msg)
                 
             return ret
@@ -494,7 +494,7 @@ class FLManager(QtCore.QObject):
 
         if not n in list_modules:
             if not util.domDocumentSetContent(doc, content_actions):
-                logger.warn("FLManager : " + FLUtil().translate("application", "Error al cargar la accion ") + n)
+                logger.warning("FLManager : " + FLUtil().translate("application", "Error al cargar la accion ") + n)
 
         doc_elem = doc.documentElement()
         no = doc_elem.firstChild()
@@ -508,7 +508,7 @@ class FLManager(QtCore.QObject):
                 if e.tagName() == "action":
                     nl = e.elementsByTagName("name")
                     if nl.count() == 0:
-                        self.logger.warn("Debe indicar la etiqueta <name> en acción '%s'" % n)
+                        self.logger.warning("Debe indicar la etiqueta <name> en acción '%s'" % n)
                         no = no.nextSibling()
                         continue
                     else:
@@ -722,7 +722,7 @@ class FLManager(QtCore.QObject):
                 return tmd
             else:
                 if not tmd.isQuery():
-                    logger.warn("FLMAnager :: No existe tabla %s", n_or_tmd)
+                    logger.warning("FLMAnager :: No existe tabla %s", n_or_tmd)
 
             return self.createTable(tmd)
         else:
@@ -730,7 +730,7 @@ class FLManager(QtCore.QObject):
                 return n_or_tmd
 
             if not self.db_.createTable(n_or_tmd):
-                logger.warn("FLManager : %s", util.tr("No se ha podido crear la tabla ") + n_or_tmd.name())
+                logger.warning("FLManager : %s", util.tr("No se ha podido crear la tabla ") + n_or_tmd.name())
                 return False
 
             return n_or_tmd
@@ -1291,7 +1291,7 @@ class FLManager(QtCore.QObject):
                 _in = QtCore.QTextStream(_file)
                 _data = _in.readAll()
                 if not util.domDocumentSetContent(doc, _data):
-                    logger.warn("FLManager::createSystemTable: %s", util.tr(
+                    logger.warning("FLManager::createSystemTable: %s", util.tr(
                         "Error al cargar los metadatos para la tabla %1").arg(n))
                     return False
                 else:
@@ -1359,7 +1359,7 @@ class FLManager(QtCore.QObject):
             if not self.existsTable(table):
                 self.createTable(table)
             if not tmd:
-                logger.warn("FLManager::cleanupMetaData %s", FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table)
+                logger.warning("FLManager::cleanupMetaData %s", FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table)
 
             c.select("tabla='%s'" % table)
             if c.next():
@@ -1450,13 +1450,13 @@ class FLManager(QtCore.QObject):
                 sql = "UPDATE %s SET contenido = '%s' WHERE refkey ='%s'" % (
                     tableLarge, largeValue, refKey)
                 if not util.execSql(sql, "Aux"):
-                    logger.warn("FLManager::ERROR:StoreLargeValue.Update %s.%s", tableLarge, refKey)
+                    logger.warning("FLManager::ERROR:StoreLargeValue.Update %s.%s", tableLarge, refKey)
                     return None
         else:
             sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (
                 tableLarge, largeValue, refKey)
             if not util.execSql(sql, "Aux"):
-                logger.warn("FLManager::ERROR:StoreLargeValue.Insert %s.%s", tableLarge, refKey)
+                logger.warning("FLManager::ERROR:StoreLargeValue.Insert %s.%s", tableLarge, refKey)
                 return None
 
         return refKey

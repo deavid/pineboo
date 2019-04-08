@@ -306,7 +306,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                         d = d.strftime(date_format)
                     except AttributeError:
                         import platform
-                        self.logger.warn("locale specific date format is not yet implemented for %s", platform.system())
+                        self.logger.warning("locale specific date format is not yet implemented for %s", platform.system())
 
             elif _type is "check":
                 return
@@ -570,7 +570,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return
 
         if not self.metadata():
-            self.logger.warn("ERROR: CursorTableModel :: No hay tabla %s", self.metadata().name())
+            self.logger.warning("ERROR: CursorTableModel :: No hay tabla %s", self.metadata().name())
             return
         
         """ FILTRO WHERE """
@@ -825,7 +825,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 except ValueError:
                     colsnotfound.append(fieldname)
             if colsnotfound:
-                self.logger.warn("CursorTableModel.setValuesDict:: columns not found: %r", colsnotfound)
+                self.logger.warning("CursorTableModel.setValuesDict:: columns not found: %r", colsnotfound)
             self.indexUpdateRow(row)
 
         except Exception as e:
@@ -956,7 +956,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.indexes_valid = True
         cklist = tuple(cklist)
         if cklist not in self.ckidx:
-            self.logger.warn(
+            self.logger.warning(
                 "CursorTableModel.%s.findCKRow:: CK not found: %r ", self.metadata().name(), cklist)
             return None
         return self.ckidx[cklist]

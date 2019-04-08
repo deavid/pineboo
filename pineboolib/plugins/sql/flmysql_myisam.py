@@ -252,7 +252,7 @@ class FLMYSQL_MYISAM(object):
         q.setFrom(table)
         q.setWhere("1 = 1")
         if not q.exec_():
-            self.logger.warn("not exec sequence")
+            self.logger.warning("not exec sequence")
             return None
         if q.first() and q.value(0) is not None:
             max = q.value(0)

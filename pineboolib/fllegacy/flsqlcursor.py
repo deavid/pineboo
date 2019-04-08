@@ -406,7 +406,7 @@ class PNBuffer(object):
             if f.metadata.isPrimaryKey():
                 return f.name
 
-        logger.warn("PNBuffer.pk(): No se ha encontrado clave Primaria")
+        logger.warning("PNBuffer.pk(): No se ha encontrado clave Primaria")
 
     """
     Indica la posicion del buffer de un campo determinado
@@ -752,11 +752,11 @@ class FLSqlCursorPrivate(QtCore.QObject):
     def msgBoxWarning(self, msg, throwException=False):
         if pineboolib.project._DGI.localDesktop():
             from pineboolib.pncontrolsfactory import QMessageBox, QApplication
-            logger.warn(msg)
+            logger.warning(msg)
             if not throwException:
                 QMessageBox.warning(QApplication.activeWindow(), "Pineboo", msg)
         else:
-            logger.warn(msg)
+            logger.warning(msg)
 
 # ###############################################################################
 # ###############################################################################
@@ -822,7 +822,7 @@ class FLSqlCursor(QtCore.QObject):
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
         super(FLSqlCursor, self).__init__()
         if name is None:
-            logger.warn("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
+            logger.warning("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
             return
 
         self._meta_model = None
@@ -875,7 +875,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def init(self, name, autopopulate, cR, r):
-        #logger.warn("FLSqlCursor(%s): Init() %s (%s, %s)" , name, self, cR, r, stack_info=True)
+        #logger.warning("FLSqlCursor(%s): Init() %s (%s, %s)" , name, self, cR, r, stack_info=True)
 
         # if self.metadata() and not self.metadata().aqWasDeleted() and not
         # self.metadata().inCache():
@@ -1053,7 +1053,7 @@ class FLSqlCursor(QtCore.QObject):
             self._action = action
         else:
             if self.action() == action.name(): #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
-                logger.warn("Se hace setAction sobre un cursor con el mismo action ya aplicado")
+                logger.warning("Se hace setAction sobre un cursor con el mismo action ya aplicado")
                 return
         
             if self.action() is not None:
@@ -1143,7 +1143,7 @@ class FLSqlCursor(QtCore.QObject):
         field = self.metadata().field(fN)
 
         if field is None:
-            logger.warn("setAtomicValueBuffer(): No existe el campo %s:%s", self.metadata().name(), fN)
+            logger.warning("setAtomicValueBuffer(): No existe el campo %s:%s", self.metadata().name(), fN)
             return
 
         if not self.db().dbAux():
@@ -1175,7 +1175,7 @@ class FLSqlCursor(QtCore.QObject):
             else:
                 self.db().dbAux().rollback()
         else:
-            logger.warn("No se puede actualizar el campo de forma atómica, porque no existe clave primaria")
+            logger.warning("No se puede actualizar el campo de forma atómica, porque no existe clave primaria")
 
         self.buffer().setValue(fN, v)
         if self.activatedBufferChanged():
@@ -1208,7 +1208,7 @@ class FLSqlCursor(QtCore.QObject):
 
         field = self.metadata().field(fN)
         if field is None:
-            logger.warn("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
+            logger.warning("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
             return
 
         if not self.buffer().hasChanged(fN, v):
@@ -1222,7 +1222,7 @@ class FLSqlCursor(QtCore.QObject):
 
         #field = self.metadata().field(fN)
         #if field is None:
-        #    logger.warn("FLSqlCursor::setValueBuffer() : No existe el campo %s:%s", self.metadata().name(), fN)
+        #    logger.warning("FLSqlCursor::setValueBuffer() : No existe el campo %s:%s", self.metadata().name(), fN)
         #    return
 
         type_ = field.type()
@@ -1280,7 +1280,7 @@ class FLSqlCursor(QtCore.QObject):
         
         if pineboolib.project._DGI.use_model():
             if fN == "pk":
-                #logger.warn("¡¡¡¡ OJO Cambiado fieldname PK!!", stack_info = True)
+                #logger.warning("¡¡¡¡ OJO Cambiado fieldname PK!!", stack_info = True)
                 fN = self.primaryKey()
         
         
@@ -1299,7 +1299,7 @@ class FLSqlCursor(QtCore.QObject):
 
         field = self.metadata().field(fN)
         if field is None:
-            logger.warn("valueBuffer(): No existe el campo %s:%s en la tabla %s",self.curName(), fN, self.metadata().name())
+            logger.warning("valueBuffer(): No existe el campo %s:%s en la tabla %s",self.curName(), fN, self.metadata().name())
             return None
 
         type_ = field.type()
@@ -1318,7 +1318,7 @@ class FLSqlCursor(QtCore.QObject):
                 if q.next():
                     v = q.value(0)
             else:
-                logger.warn("No se puede obtener el campo fuera de transacción porque no existe clave primaria")
+                logger.warning("No se puede obtener el campo fuera de transacción porque no existe clave primaria")
 
         else:
             v = self.buffer().value(fN)
@@ -1569,7 +1569,7 @@ class FLSqlCursor(QtCore.QObject):
 
     def transaction(self, lock=False):
         if not self.db() and not self.db().db():
-            logger.warn("transaction(): No hay conexión con la base de datos")
+            logger.warning("transaction(): No hay conexión con la base de datos")
             return False
 
         return self.db().doTransaction(self)
@@ -1582,7 +1582,7 @@ class FLSqlCursor(QtCore.QObject):
 
     def rollback(self):
         if not self.db() and not self.db().db():
-            logger.warn("rollback(): No hay conexión con la base de datos")
+            logger.warning("rollback(): No hay conexión con la base de datos")
             return False
 
         return self.db().doRollback(self)
@@ -1597,7 +1597,7 @@ class FLSqlCursor(QtCore.QObject):
 
     def commit(self, notify=True):
         if not self.db() and not self.db().db():
-            logger.warn("commit(): No hay conexión con la base de datos")
+            logger.warning("commit(): No hay conexión con la base de datos")
             return False
 
         r = self.db().doCommit(self, notify)
@@ -1654,7 +1654,7 @@ class FLSqlCursor(QtCore.QObject):
             # self.d.action_ = self.db().manager().action(self.metadata().name())
 
         if not self._action:
-            logger.warn("Para poder abrir un registro de edición se necesita una acción asociada al cursor, "
+            logger.warning("Para poder abrir un registro de edición se necesita una acción asociada al cursor, "
                         "o una acción definida con el mismo nombre que la tabla de la que procede el cursor.")
             return
 
@@ -2074,7 +2074,7 @@ class FLSqlCursor(QtCore.QObject):
         if not self.metadata() or not self.modeAccess() == self.Browse:
             return
         if not self.metadata().field(fN).type() == FLFieldMetaData.Unlock:
-            logger.warn("setUnLock sólo permite modificar campos del tipo Unlock")
+            logger.warning("setUnLock sólo permite modificar campos del tipo Unlock")
             return
         self.d.buffer_ = self.primeUpdate()
         self.setModeAccess(self.Edit)
@@ -2933,7 +2933,7 @@ class FLSqlCursor(QtCore.QObject):
                 self.rollbackOpened(-1, msg)
         else:
             if not pineboolib.project._DGI.use_model():
-                logger.warn("Se está eliminando un cursor Huerfano (%s)", self)
+                logger.warning("Se está eliminando un cursor Huerfano (%s)", self)
         
         self.destroyed.emit()
 
@@ -3601,13 +3601,13 @@ class FLSqlCursor(QtCore.QObject):
         if ct and msg:
             m = "%sSqlCursor::commitOpened: %s %s" % (msg, str(count), t)
             self.d.msgBoxWarning(m, False)
-            logger.warn(m)
+            logger.warning(m)
         elif ct > 0:
-            logger.warn("SqlCursor::commitOpened: %d %s" % (count, self.name()))
+            logger.warning("SqlCursor::commitOpened: %d %s" % (count, self.name()))
 
         i = 0
         while i < ct:
-            logger.warn("Terminando transacción abierta %s", self.transactionLevel())
+            logger.warning("Terminando transacción abierta %s", self.transactionLevel())
             self.commit()
             i = i + 1
 
@@ -3821,7 +3821,7 @@ class FLSqlCursor(QtCore.QObject):
 
                 else:
                     # Método clásico
-                    logger.warn("update :: WARN :: Los indices del CursorTableModel no funcionan o el PKey no existe.")
+                    logger.warning("update :: WARN :: Los indices del CursorTableModel no funcionan o el PKey no existe.")
                     row = 0
                     while row < self.model().rowCount():
                         if self.model().value(row, self.model().pK()) == pKValue:

@@ -283,7 +283,7 @@ class FLTableMetaData(object):
                 ret_ = 300
             else:
                 #FIXME: Falta stringlist e int
-                self.logger.warn("FIXME:: No hay definido un valor numérico para el tipo %s", type_)
+                self.logger.warning("FIXME:: No hay definido un valor numérico para el tipo %s", type_)
         
         return ret_
 
@@ -609,7 +609,7 @@ class FLTableMetaData(object):
                 return i
             i = i + 1
 
-        self.logger.warn("FLTableMetaData.indexPos(%s) No encontrado", field_name)
+        self.logger.warning("FLTableMetaData.indexPos(%s) No encontrado", field_name)
         return None
 
     """
@@ -713,7 +713,7 @@ class FLTableMetaData(object):
             i += 1
 
         if ret is None and show_exception:
-            self.logger.warn("FLTableMetadata(%s).indexField() Posicion %s no encontrado", self.name(), position)
+            self.logger.warning("FLTableMetadata(%s).indexField() Posicion %s no encontrado", self.name(), position)
         return ret
 
 

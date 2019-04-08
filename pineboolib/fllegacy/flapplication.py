@@ -122,22 +122,22 @@ class FLApplication(QtCore.QObject):
             from pineboolib.fllegacy.FLSqlCursor import FLSqlCursor
             from pineboolib.fllegacy.FLSqlQuery import FLSqlQuery
 
-            logger.warn("*************************************************")
-            logger.warn("FLSqlQuery::count_ref_query")
-            logger.warn("*************************************************")
-            logger.warn("%d", FLSqlQuery.count_ref_query)
-            logger.warn("*************************************************")
-            logger.warn("FLSqlQuery::count_ref_query")
-            logger.warn("*************************************************")
-            logger.warn("FLSqlCursor::count_ref_cursor")
-            logger.warn("*************************************************")
-            logger.warn("%d", FLSqlCursor.count_ref_cursor)
-            logger.warn("*************************************************")
-            logger.warn("FLSqlCursor::count_ref_cursor")
-            logger.warn("*************************************************")
-            logger.warn("FLTableMetaData::count_ %d", FLTableMetaData.count_)
-            logger.warn("FLFieldMetaData::count_ %d", FLFieldMetaData.count_)
-            logger.warn("FLRelationMetaData::count_ %d", FLRelationMetaData.count_)
+            logger.warning("*************************************************")
+            logger.warning("FLSqlQuery::count_ref_query")
+            logger.warning("*************************************************")
+            logger.warning("%d", FLSqlQuery.count_ref_query)
+            logger.warning("*************************************************")
+            logger.warning("FLSqlQuery::count_ref_query")
+            logger.warning("*************************************************")
+            logger.warning("FLSqlCursor::count_ref_cursor")
+            logger.warning("*************************************************")
+            logger.warning("%d", FLSqlCursor.count_ref_cursor)
+            logger.warning("*************************************************")
+            logger.warning("FLSqlCursor::count_ref_cursor")
+            logger.warning("*************************************************")
+            logger.warning("FLTableMetaData::count_ %d", FLTableMetaData.count_)
+            logger.warning("FLFieldMetaData::count_ %d", FLFieldMetaData.count_)
+            logger.warning("FLRelationMetaData::count_ %d", FLRelationMetaData.count_)
         """
         self.aqApp = None
 
@@ -661,7 +661,7 @@ class FLApplication(QtCore.QObject):
             msg += self.tr("Contexto: %1\n").arg(ctx)
         
         self.msgBoxWarning(msg)
-        logger.warn("%s\n", msg)
+        logger.warning("%s\n", msg)
         
 
     @decorators.NotImplementedWarn

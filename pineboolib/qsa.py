@@ -178,7 +178,7 @@ class Array(object):
             
             
         elif isinstance(key, slice):
-            logger.warn("FIXME: Array __getitem__%s con slice" % key)
+            logger.warning("FIXME: Array __getitem__%s con slice" % key)
         else:
             return self.dict_[key] if key in self.dict_.keys() else None
         
@@ -876,4 +876,4 @@ def debug(txt):
     Mensajes debug en qsa
     @param txt. Mensaje.
     """
-    logger.warn("---> " + ustr(txt))
+    logger.warning("---> " + ustr(txt))
