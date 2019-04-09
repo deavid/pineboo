@@ -129,21 +129,33 @@ class QTable(QtWidgets.QTableWidget):
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
+        from pineboolib.utils import format_double
         prev_item = self.item(row, col)
         if prev_item:
             bg_color = prev_item.background()
+        
+        right = True if isinstance(value, (int, float)) else False
+        
+        if right:
+            value = value if isinstance(value, int) else format_double(value, len("%s" % value), 2)
+        
+        item =  QtWidgets.QTableWidgetItem(str(value))
+        
+        if right:
+            item.setTextAlignment(QtCore.Qt.AlignVCenter + QtCore.Qt.AlignRight)
             
-        self.setItem(row, col, QtWidgets.QTableWidgetItem(str(value)))
+        self.setItem(row, col, item)
         
         if prev_item:
             self.setCellBackgroundColor(row, col, bg_color)
         
         new_item = self.item(row, col)
-        if new_item:
-            if row in self.read_only_rows or col in self.read_only_cols:
-                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-            else:
-                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+        
+        #if new_item:
+        if row in self.read_only_rows or col in self.read_only_cols:
+            new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+        else:
+            new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
 
     def adjustColumn(self, k):
