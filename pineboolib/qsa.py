@@ -253,6 +253,10 @@ def parseFloat(x):
             x += float(list_[1]) / 60 #Minutos a hora
             x += float(list_[2]) / 3600 #Segundos a hora
         
+        if isinstance(x, str):
+            x = x.replace(".", "")
+            x = x.replace(",", ".")
+        
         ret = 0 if x in [None, ""] else float(x) 
         if ret == int(ret):
             ret = int(ret)
