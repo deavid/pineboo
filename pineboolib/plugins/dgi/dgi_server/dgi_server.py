@@ -82,7 +82,9 @@ class parser(object):
         func_name = dict_["function"]
         arguments = dict_["arguments"]
         from pineboolib.pncontrolsfactory import aqApp
-        return aqApp.call(func_name, arguments)
+        result = aqApp.call(func_name, arguments)
+        print("Llamada remota: %s(%s) --> %s" % (func_name, ", ".join(arguments), result))
+        return result
         
         
     
