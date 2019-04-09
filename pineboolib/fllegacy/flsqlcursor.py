@@ -2667,14 +2667,17 @@ class FLSqlCursor(QtCore.QObject):
                         self.buffer().setValue(field_name, val)
 
                     if field.isCounter():
+                        util = FLUtil()
                         siguiente = None
-                        context_ = getattr(pineboolib.qsa,"formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
-                        function_counter = getattr(context_, "calculateCounter", None)
-                        if function_counter is None:
-                            util = FLUtil()
-                            siguiente = util.nextCounter(field_name, self)
+                        if self._action.scriptFormRecord():
+                            context_ = getattr(pineboolib.qsa,"formRecord%s" % self._action.scriptFormRecord()[:-3]).iface
+                            function_counter = getattr(context_, "calculateCounter", None)
+                            if function_counter is None:
+                                siguiente = util.nextCounter(field_name, self)
+                            else:
+                                siguiente = function_counter()
                         else:
-                            siguiente = function_counter()
+                            siguiente = util.nextCounter(field_name, self)
 
                         if siguiente:
                             self.buffer().setValue(field_name, siguiente)
@@ -3313,7 +3316,7 @@ class FLSqlCursor(QtCore.QObject):
             
             if functionBefore:
                 v = aqApp.call(functionBefore, [self], None, False)
-                if v and not isinstance(v, bool):
+                if v and not isinstance(v, bool) or v is False:
                     return False
 
         pKN = self.metadata().primaryKey()
@@ -3427,7 +3430,7 @@ class FLSqlCursor(QtCore.QObject):
             
             if functionAfter:
                 v = aqApp.call(functionAfter, [self], None, False)
-                if v and not isinstance(v, bool):
+                if v and not isinstance(v, bool) or v is False:
                     return False
 
         if self.modeAccess() in (self.Del, self.Edit):
