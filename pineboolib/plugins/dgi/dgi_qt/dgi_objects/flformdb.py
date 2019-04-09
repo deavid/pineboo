@@ -598,6 +598,8 @@ class FLFormDB(QtWidgets.QDialog):
             from pineboolib.pncontrolsfactory import aqApp
             aqApp.call("fltesttest.iface.recibeEvento", ("formClosed", self.actionName_), None)
         self.formClosed.emit()
+        if self.widget:
+            self.widget.closed.emit()
         
     
     def action(self):
