@@ -281,11 +281,7 @@ class Project(object):
                 os.makedirs(fileobjdir)
             
             if os.path.exists(_dir("cache", fileobj.filekey)):
-                if fileobj.filekey.endswith(".qs"):
-                    if os.path.exists(_dir("cache", "%s.py" % fileobj.filekey)):
-                        continue
-                else:
-                    continue
+                continue
 
             cur2 = self.conn.cursor()
             sql = "SELECT contenido FROM flfiles WHERE idmodulo = %s AND nombre = %s AND sha = %s" % (self.conn.driver().formatValue(
