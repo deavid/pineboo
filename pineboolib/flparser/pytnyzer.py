@@ -12,7 +12,7 @@ def id_translate(name):
     python_keywords = ['and', 'del', 'for', 'is', 'raise', 'assert', 'elif',
                        'from', 'lambda', 'return', 'break', 'else', 'global', 'not', 'try',
                        'class', 'except', 'if', 'or', 'while', 'continue', 'from',
-                       'exec', 'import', 'pass', 'yield', 'def', 'finally', 'in', 'print']
+                       'exec', 'import', 'pass', 'yield', 'def', 'finally', 'in', 'print','str']
     if name in python_keywords:
         return name + "_"
     if name == "false":
@@ -1038,10 +1038,18 @@ class Member(ASTPython):
                         value = value[:len(value) - 1]
                         arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
                     elif member == "replace":
+                        print("***", part2, "*")
                         value = arg[8:-1]
                         part_list = value.split(",")
                         if part_list[0].find("re.compile") > -1:
                             arguments = ["%s.sub(%s,%s)" % (part_list[0], part_list[1], ".".join(part1))] + part2
+                        else:
+                            if not part2:
+                                if ".".join(part1):
+                                    arguments = ["%s.%s if isinstance(%s, str) else %s.replace(%s, %s)" % (".".join(part1), arg, ".".join(part1), part_list[0], ".".join(part1), part_list[1])] + part2
+                                
+                            
+                            
                             
                             #Es un regexpr
                         #else:
@@ -1051,8 +1059,7 @@ class Member(ASTPython):
                         
                     else:
                         if ".".join(part1):
-                            arguments = ["%s.%s" %
-                                         (".".join(part1), arg)] + part2
+                            arguments = ["%s.%s" % (".".join(part1), arg)] + part2
                         else:
                             arguments = ["%s" % arg] + part2
         
