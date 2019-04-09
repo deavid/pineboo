@@ -1038,7 +1038,6 @@ class Member(ASTPython):
                         value = value[:len(value) - 1]
                         arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
                     elif member == "replace":
-                        print("***", part2, "*")
                         value = arg[8:-1]
                         part_list = value.split(",")
                         if part_list[0].find("re.compile") > -1:
