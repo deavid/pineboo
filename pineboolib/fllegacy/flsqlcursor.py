@@ -2633,11 +2633,13 @@ class FLSqlCursor(QtCore.QObject):
         if not self.metadata():
             return False
         
+        if self.sender() and self.d.modeAccess_ != self.Browse:
+            return False
+        
         if not self.isValid() and self.d.modeAccess_ != self.Insert:
             return False
         
         if self.d.modeAccess_ == self.Insert:
-
             if not self.commitBufferCursorRelation():
                 return False
 
