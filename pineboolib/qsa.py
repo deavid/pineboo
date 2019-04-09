@@ -387,18 +387,19 @@ class qsaRegExp(object):
 
     strRE_ = None
     result_ = None
+    is_global = None
 
     def __init__(self, strRE):
-        print("Nuevo Objeto RegExp de " + repr(strRE))
         self.strRE_ = repr(strRE)
+        self.is_global = False
 
     def search(self, text):
-        print("Buscando " + self.strRE_ + " en " + text)
         return re.search(self.strRE_, text)
     
     def replace(self, target , new_value):
         pattern = re.compile('r"' + self.strRE_ +'"')
-        return pattern.sub(new_value, target)
+        count = 1 if not self.is_global else 0
+        return pattern.sub(new_value, target, count)
 
     def cap(self, i):
         if self.result_ is None:
@@ -409,9 +410,13 @@ class qsaRegExp(object):
         except Exception:
             return None
     
-    def __str__(self):
-        print("devolviendo", self.strRE_)
-        return self.strRE_
+    def get_global(self):
+        return self.is_global
+    
+    def set_global(self, b):
+        self.is_global = b
+    
+    global_ = property(get_global, set_global)
 
 @total_ordering
 class Date(object):
