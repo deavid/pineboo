@@ -862,6 +862,9 @@ def startTimer(time, fun):
     timer.start(time)
     return timer
 
+def killTimer( t ):
+    t.stop()
+    t = None
 
 class QString(str):
     """
