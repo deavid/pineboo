@@ -1,11 +1,24 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
+from pineboolib import decorators
 
 class QPushButton(QtWidgets.QPushButton):
 
     def __init__(self, *args, **kwargs):
         super(QPushButton, self).__init__(*args, **kwargs)
-        
+        self.setTextLabel = self.setText
+
+    @decorators.NotImplementedWarn
+    def setTextPosition(self, pos):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def setUsesBigPixmap(self, b):
+        pass
+
+    @decorators.NotImplementedWarn
+    def setUsesTextLabel(self, b):
+        pass
 
     @property
     def pixmap(self):
@@ -58,3 +71,8 @@ class QPushButton(QtWidgets.QPushButton):
     toggleButton = property(getToggleButton, setToggleButton)
     on = property(getOn, setOn)
     text = property(getText, setText)
+    
+    @decorators.NotImplementedWarn
+    def __getattr__(self, name):
+        pass
+    
