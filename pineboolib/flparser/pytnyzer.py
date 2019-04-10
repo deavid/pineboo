@@ -1045,7 +1045,7 @@ class Member(ASTPython):
                         else:
                             if not part2:
                                 if ".".join(part1):
-                                    arguments = ["%s.%s if isinstance(%s, str) else %s.replace(%s, %s)" % (".".join(part1), arg, ".".join(part1), part_list[0], ".".join(part1), part_list[1])] + part2
+                                    arguments = ["%s.%s if isinstance(%s, str) else %s.replace(%s, %s)" % (".".join(part1), arg, part_list[0], part_list[0], ".".join(part1), part_list[1])] + part2
                                 
                             
                             
