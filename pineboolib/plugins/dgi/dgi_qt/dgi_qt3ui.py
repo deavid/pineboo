@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 
 
 from xml.etree import ElementTree as ET
@@ -8,6 +8,7 @@ from binascii import unhexlify
 import pineboolib
 import logging
 import zlib
+
 
 
 ICONS = {}
@@ -353,10 +354,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         else:
             value = loadVariant(xmlprop, widget)
         
-
         try:
             set_fn(value)
-
         except Exception as e:
             logger.exception(ET.tostring(xmlprop))
             # if Options.DEBUG_LEVEL > 50:
@@ -806,6 +805,55 @@ def _loadVariant(variant, widget=None):
 
         c.setRgb(red_, green_, blue_)
         return c
+    
+    if variant.tag == "palette":
+        p = QtGui.QPalette()
+        for state in variant:
+            print("FIXME: Procesando palette", state.tag)
+            for color in state:
+                r_ = 0
+                g_ = 0 
+                b_ = 0
+                for c in color:
+                    if c.tag == "red":
+                        r_ = int(c.text)
+                    elif c.tag == "green":
+                        g_ = int(c.text)
+                    elif c.tag == "blue":
+                        b_ = int(c.text)
+              
+                if state.tag == "active":
+                    #p.setColor(p.Active, Qt.QColor(r_, g_, b_))
+                    pass
+                elif state.tag == "disabled":
+                    #p.setColor(p.Disabled, Qt.QColor(r_, g_, b_))
+                    pass
+                elif state.tag == "inactive":
+                    #p.setColor(p.Inactive, Qt.QColor(r_, g_, b_))
+                    pass
+                elif state.tag == "normal":
+                    #p.setColor(p.Normal, Qt.QColor(r_, g_, b_))
+                    pass
+                else:
+                    logger.warning("Unknown palette state %s", state.tag)
+        
+        return p
+    
+    if variant.tag == "date":
+        
+        y_ = None
+        m_ = None
+        d_ = None
+        for v in variant:
+            if v.tag == "year":
+                y_ = int(v.text)
+            elif v.tag == "month":
+                m_ = int(v.text)
+            elif v.tag == "day":
+                d_ = int(v.text)
+        
+        d = QtCore.QDate(y_, m_, d_)
+        return d
 
     if Options.DEBUG_LEVEL > 50:
         logger.warning("qt3ui: Unknown variant: %s --> %s ", repr(widget),  ET.tostring(variant))
