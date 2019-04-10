@@ -8,6 +8,7 @@ from binascii import unhexlify
 import pineboolib
 import logging
 import zlib
+from PyQt5.QtWidgets import QButtonGroup
 
 
 
@@ -385,7 +386,11 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if c.tag == "property":  # Ya se han procesado previamente ...
                 continue
             elif c.tag == "widget":
-                new_widget = createWidget(c.get("class"), parent=widget)
+                if isinstance(widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup.QButtonGroup):
+                    new_widget = createWidget(c.get("class"), parent=widget)
+                    widget.addButton(new_widget)
+                else:
+                    new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c, new_widget, parent, origWidget)
                 path = c.find("./property[@name='name']/cstring").text
                 if not pineboolib.project._DGI.localDesktop():
