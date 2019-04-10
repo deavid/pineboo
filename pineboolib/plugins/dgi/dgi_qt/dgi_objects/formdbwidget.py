@@ -106,10 +106,10 @@ class FormDBWidget(QtWidgets.QWidget):
                 ret = parent.findChild(QtWidgets.QWidget, child_name)
                 if not ret:
                     parent = parent.parentWidget()
-
-            loaded = getattr(ret, "_loaded", None)
-            if loaded is False:
-                ret.load()
+            
+            if hasattr(ret, "_loaded"):
+                if ret._loaded is False:
+                    ret.load()
 
         except RuntimeError as rte:
             # FIXME: A veces intentan buscar un control que ya está siendo eliminado.
