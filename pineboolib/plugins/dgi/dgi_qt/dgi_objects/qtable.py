@@ -12,6 +12,13 @@ class QTable(QtWidgets.QTableWidget):
     read_only_cols = None
     read_only_rows = None
     cols_list = None
+    resize_policy = None
+    
+    Default = 0
+    Manual = 1
+    AutoOne = 2
+    AutoOneFit = 3
+
     
 
     def __init__(self, parent=None, name = None):
@@ -29,6 +36,7 @@ class QTable(QtWidgets.QTableWidget):
         self.itemChanged.connect(self.valueChanged_)
         self.read_only_cols = []
         self.read_only_rows = []
+        self.resize_policy = 0 #Default
     
     def currentChanged_(self, current_row, current_column, previous_row, previous_column):
         # FIXME: esto produce un TypeError: native Qt signal is not callable, porque existe una función virtual llamada currentChanged
@@ -40,12 +48,19 @@ class QTable(QtWidgets.QTableWidget):
         self.doubleClicked.emit(f, c)
     
     
+    @decorators.NotImplementedWarn
+    def setResizePolicy(self, pol):
+        self.resize_policy = pol
+    
+    
     def __getattr__(self, name):
         if name == "Multi":
             return self.MultiSelection
         elif name == "SpreadSheet":
             return 999
-        return getattr(QtCore.Qt, name) if hasattr(QtCore.Qt, name) else None
+        
+        print("FIXME:QTable:", name)
+        return getattr(QtCore.Qt, name, None)
     
     def valueChanged_(self, item = None):
         
