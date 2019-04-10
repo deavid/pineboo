@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
-
+from pineboolib import decorators
 
 class QLineEdit(QtWidgets.QLineEdit):
 
     _parent = None
+    WindowOrigin = 0
 
     def __init__(self, parent=None, name = None):
         super(QLineEdit, self).__init__(parent)
@@ -26,3 +27,13 @@ class QLineEdit(QtWidgets.QLineEdit):
         #    pineboolib.project._DGI._par.addQueque("%s_setText" % self._parent.objectName(), v)
 
     text = property(getText, setText)
+    
+    @decorators.NotImplementedWarn
+    def setBackgroundOrigin(self, bgo):
+        pass
+    
+    @decorators.NotImplementedWarn
+    def setLineWidth(self, w):
+        pass
+    
+    
