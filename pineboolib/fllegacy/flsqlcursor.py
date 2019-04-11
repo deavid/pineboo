@@ -1040,7 +1040,7 @@ class FLSqlCursor(QtCore.QObject):
         action = None
 
         if isinstance(a, str):
-            action = self.db().manager().action(a)
+            action = self.db().manager().action(a.lower())
 
             if action.table() is None:
                 action.setTable(a)
@@ -1053,7 +1053,7 @@ class FLSqlCursor(QtCore.QObject):
             self._action = action
         else:
             if self.action() == action.name(): #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
-                logger.warning("Se hace setAction sobre un cursor con el mismo action ya aplicado")
+                #logger.warning("Se hace setAction sobre un cursor con el mismo action ya aplicado")
                 return
         
             if self.action() is not None:
