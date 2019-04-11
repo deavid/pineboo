@@ -2911,11 +2911,12 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.setStyleSheet('background-color: #f0f0f0')
             else:
 
-                if hasattr(self.editor_, "setReadOnly"):
+                read_only = getattr(self.editor_, "setReadOnly", None)
+                if read_only:
                     tMD = self.cursor_.metadata()
                     field = tMD.field(self.fieldName_)
 
-                    self.editor_.setReadOnly(not enable)
+                    read_only(not enable)
                     if not enable or not field.editable():
                         self.editor_.setStyleSheet('background-color: #f0f0f0')
                     else:
