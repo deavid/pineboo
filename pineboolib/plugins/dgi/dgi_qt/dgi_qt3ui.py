@@ -748,7 +748,7 @@ def _loadVariant(variant, widget=None):
                 elif c.tag == "pointsize":
                     p.setPointSize(int(value))
                 else:
-                    logger.warning("unknown font style type", repr(c.tag))
+                    logger.warning("unknown font style type %s", repr(c.tag))
             except Exception as e:
                 if Options.DEBUG_LEVEL > 50:
                     logger.error(e)
