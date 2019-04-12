@@ -17,7 +17,7 @@ def process_error(error_str):
     
     if "AttributeError: 'dict' object has no attribute" in error_str:
         error = "AttributeError: 'dict' object has no attribute"
-        var = error_str[error_str.find(error) + len(error):]
+        var = error_str[error_str.find(error) + len(error) + 1:]
         var = var.replace("\n","")
         ret += sys.translate("scripts", "La forma correcta de acceder a .%s es [%s]") % (var, var)
         
