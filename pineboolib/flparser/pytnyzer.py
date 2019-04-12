@@ -985,7 +985,11 @@ class Member(ASTPython):
                     elif member == "mid":
                         value = arg[4:]
                         value = value[: len(value) -1]
-                        i, l = value.split(",")
+                        if len(value.split(",")) == 2:
+                            i, l = value.split(",")
+                        else:
+                            i = 0
+                            l = value
                         value = "%s:%s + %s" % (i, i, l)
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
     
