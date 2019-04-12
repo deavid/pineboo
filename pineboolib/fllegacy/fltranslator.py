@@ -25,8 +25,8 @@ class FLTranslator(QTranslator):
         super(FLTranslator, self).__init__()
         self.logger = logging.getLogger("FLTranslator")
         self._prj = parent
-        self.idM_ = name[:name.find("_")]
-        self.lang_ = name[name.find("_") + 1:]
+        self.idM_ = name[:name.rfind("_")]
+        self.lang_ = name[name.rfind("_") + 1:]
         self.mulTiLang_ = multiLang
         self.sysTrans_ = sysTrans
         settings = FLSettings()
