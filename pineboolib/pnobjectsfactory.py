@@ -4,8 +4,8 @@ from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.utils import _dir
 
 import pineboolib
-
 import importlib
+
 import os
 import sys
 
@@ -33,6 +33,15 @@ class default_schema(object):
                 return
 
         self.__dict__[name] = value
+        
+    
+    def __del__(self):
+        for d in list(self.__dict__.keys()):
+            del self.__dict__[d]
+        if getattr(self._orm, "table_cursor", None):
+            del self._orm.table_cursor
+        if getattr(self, "_orm", None):
+            del self._orm
         
 
 def load_object(obj_name, *args, **kwargs):
@@ -69,7 +78,7 @@ class orm(object):
         if self.table_cursor is not None:
             del self.table_cursor
         
-        
+        cursor = None
         if "field_relation" in kwargs:
             name = kwargs["field_relation"]
             cursor = kwargs["cursor"]
@@ -92,6 +101,14 @@ class orm(object):
             
         self.object_tree_dict = {}
         self.table_cursor = FLSqlCursor(*new_args)
+        #self.table_cursor.setModeAccess(self.table_cursor.Edit)
+        #self.table_cursor.refreshBuffer()
+        if cursor:
+            cursor.newBuffer.connect(self.table_cursor.select)
+            self.table_cursor.select()
+            
+        
+        return True
     
     def select(self, value= None):
         
@@ -123,7 +140,7 @@ class orm(object):
                         return self.table_cursor.cursorRelation()
                 
                 field_relation = field.relationM1()
-                value = self.table_cursor.valueBuffer(field.name())   
+                value = self.table_cursor.valueBuffer(field.name())
                 if field_relation is not None:
                     relation_table_name = field_relation.foreignTable()
                     relation_field_name = field_relation.foreignField()
@@ -146,9 +163,8 @@ class orm(object):
                         self.object_tree_dict[key_] = obj
             
                     rel_object = self.object_tree_dict[key_] #retorna el objeto
-                    
                     if rel_object is not None:
-                        rel_object.select()
+                        rel_object.refresh()
             
                     ret = rel_object
             
