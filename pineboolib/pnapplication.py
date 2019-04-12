@@ -452,7 +452,8 @@ class Project(object):
         try:
             return fn(*aList)
         except Exception:
-            msg_w = "Se ha producido un error al ejecutar el script %s:\n%s" % (function ,traceback.format_exc())
+            from pineboolib.pncontrolsfactory import wiki_error
+            msg_w = wiki_error(traceback.format_exc(8))
             if pineboolib.project._DGI.localDesktop():
                 from pineboolib.pncontrolsfactory import aqApp
                 aqApp.msgBoxWarning(msg_w ,pineboolib.project._DGI)

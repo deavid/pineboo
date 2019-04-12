@@ -251,7 +251,7 @@ class FLFormDB(QtWidgets.QDialog):
                 except Exception:
                     script_name = self.iface.__module__
                     from pineboolib.pncontrolsfactory import aqApp
-                    aqApp.msgBoxWarning("Se ha producido un error al ejecutar el script %s:\n%s" % (script_name ,traceback.format_exc()),pineboolib.project._DGI)    
+                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc(8)),pineboolib.project._DGI)   
             
             return True
 
