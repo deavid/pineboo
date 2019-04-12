@@ -453,7 +453,7 @@ class Project(object):
             return fn(*aList)
         except Exception:
             from pineboolib.pncontrolsfactory import wiki_error
-            msg_w = wiki_error(traceback.format_exc(8))
+            msg_w = wiki_error(traceback.format_exc())
             if pineboolib.project._DGI.localDesktop():
                 from pineboolib.pncontrolsfactory import aqApp
                 aqApp.msgBoxWarning(msg_w ,pineboolib.project._DGI)

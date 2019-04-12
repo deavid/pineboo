@@ -561,7 +561,7 @@ class FLFormRecordDB(FLFormDB):
                 except Exception:
                     script_name = self.iface.__module__
                     from pineboolib.pncontrolsfactory import aqApp, wiki_error
-                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc(8)),pineboolib.project._DGI)  
+                    aqApp.msgBoxWarning(wiki_error(traceback.format_exc()),pineboolib.project._DGI)  
                 
 
             return ret_ if isinstance(ret_, bool) else False
