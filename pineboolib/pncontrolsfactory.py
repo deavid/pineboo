@@ -12,6 +12,7 @@ from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.packager.aqunpacker import AQUnpacker
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
 from pineboolib.pnobjectsfactory import load_object
+from pineboolib.wiki_error import wiki_error
 
 import inspect
 import pineboolib

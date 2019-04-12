@@ -2017,12 +2017,12 @@ def runTransaction(f=None, oParam=None):
             try:
                 AQS.Application_restoreOverrideCursor()
             except Exception:
-                e = traceback.format_exc()
+                e = traceback.format_exc(8)
 
         if errorMsg:
             warnMsgBox(ustr(errorMsg, u": ", parseString(e)))
         else:
-            warnMsgBox(ustr(sys.translate(u"Error ejecutando la función"), u":\n", e))
+            warnMsgBox(wiki_error(e))
 
         return False
 
@@ -2030,7 +2030,7 @@ def runTransaction(f=None, oParam=None):
         try:
             AQS.Application_restoreOverrideCursor()
         except Exception as e:
-            e = traceback.format_exc()
+            e = traceback.format_exc(8)
 
     return valor
 
