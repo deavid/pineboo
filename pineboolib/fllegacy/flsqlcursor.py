@@ -2556,14 +2556,19 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def refreshDelayed(self, msec=50):
-        if self.buffer():
+        #if self.buffer():
+        #    return
+        if not self.d.timer_:
             return
+        
         
         obj = self.sender()
         
         if not obj or not obj.inherits("QTimer"):
                 self.d.timer_.start(msec)
                 return
+        else:
+            self.d.timer_.stop()
         
         """
         if not self._refreshDelayedTimer:
@@ -2575,8 +2580,7 @@ class FLSqlCursor(QtCore.QObject):
         self._refreshDelayedTimer = False
         """
         
-        if not self.d.timer_:
-            return
+        
         
         # self.d.timer_.start(msec)
         # cFilter = self.filter()
@@ -2629,10 +2633,9 @@ class FLSqlCursor(QtCore.QObject):
     """
     @QtCore.pyqtSlot()
     def refreshBuffer(self):
-        
         if not self.metadata():
             return False
-        
+
         if isinstance(self.sender(), QtCore.QTimer) and self.d.modeAccess_ != self.Browse:
             return False
         
@@ -2703,7 +2706,6 @@ class FLSqlCursor(QtCore.QObject):
                 self.d.modeAccess_ = self.Browse
 
             
-
             self.setNotGenerateds()
             self.updateBufferCopy()
             self.newBuffer.emit()
