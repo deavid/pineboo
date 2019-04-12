@@ -1043,7 +1043,14 @@ class Member(ASTPython):
                         arguments = ["%s.attributes().namedItem(%s).nodeValue()" % (".".join(part1), value)] + part2
                     elif member == "replace":
                         value = arg[8:-1]
-                        part_list = value.split(",")
+                        part_list = []
+                        if value.startswith("\",\""):
+                            part_list.append("\",\"")
+                            part_list.append(value[4:]) 
+                        else:
+                            part_list = value.split(",")
+                            
+                            
                         if part_list[0].find("re.compile") > -1:
                             arguments = ["%s.sub(%s,%s)" % (part_list[0], part_list[1], ".".join(part1))] + part2
                         else:
