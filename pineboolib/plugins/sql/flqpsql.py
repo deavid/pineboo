@@ -9,6 +9,8 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
+from sqlalchemy import create_engine
+
 import traceback
 import pineboolib
 import sys
@@ -30,6 +32,7 @@ class FLQPSQL(object):
     mobile_ = False
     pure_python_ = False
     defaultPort_ = None
+    engine_ = None
 
     def __init__(self):
         self.version_ = "0.6"
@@ -42,6 +45,7 @@ class FLQPSQL(object):
         self.mobile_ = False
         self.pure_python_ = False
         self.defaultPort_ = 5432
+        self.engine_ = None
     
     def useThreads(self):
         return True
@@ -81,6 +85,7 @@ class FLQPSQL(object):
 
         try:
             self.conn_ = psycopg2.connect(conninfostr)
+            self.engine_ = create_engine('postgresql+psycopg2://%s:%s@%s:%s/%s' % (db_userName, db_password, db_host, db_port, db_name))
         except psycopg2.OperationalError as e:
             if pineboolib.project._splash:
                 pineboolib.project._splash.hide()
@@ -100,6 +105,7 @@ class FLQPSQL(object):
                         db_userName, db_password)
                     try:
                         tmpConn = psycopg2.connect(conninfostr2)
+                        
                         tmpConn.set_isolation_level(
                             psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
@@ -140,6 +146,9 @@ class FLQPSQL(object):
             qWarning(traceback.format_exc())
 
         return self.conn_
+    
+    def engine(self):
+        return self.engine_
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"

@@ -37,6 +37,7 @@ class FLQPSQL2(FLQPSQL):
 
         try:
             self.conn_ = pg8000.connect(user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5)
+            self.engine_ = create_engine('postgresql+pg8000://%s:%s@%s:%s/%s' % (db_userName, db_password, db_host, db_port, db_name))
         except Exception:
             import pineboolib
             if not pineboolib.project._DGI.localDesktop():

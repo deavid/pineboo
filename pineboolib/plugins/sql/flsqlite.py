@@ -8,6 +8,8 @@ from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flutil import FLUtil
 
+from sqlalchemy import create_engine
+
 import traceback
 import os
 import sys
@@ -33,6 +35,7 @@ class FLSQLITE(object):
     # Latin1
     parseFromLatin = None
     defaultPort_ = None
+    engine_ = None
 
     def __init__(self):
         self.logger = logging.getLogger("FLSqLite")
@@ -52,6 +55,7 @@ class FLSQLITE(object):
         self.pure_python_ = False
         self.defaultPort_ = 0
         self.cursor_ = None
+        self.engine_ = None
 
     def pure_python(self):
         return self.pure_python_
@@ -107,6 +111,7 @@ class FLSQLITE(object):
             self.conn_ = pineboolib.project.conn.conn
         else:
             self.conn_ = sqlite3.connect("%s" % self.db_filename)
+            self.engine_ = create_engine('sqlite:///%s' % self.db_filename)
             self.conn_.isolation_level = None
 
             if db_is_new:
@@ -119,6 +124,9 @@ class FLSQLITE(object):
             self.conn_.text_factory = lambda x: str(x, 'latin1')
 
         return self.conn_
+    
+    def engine(self):
+        return self.engine_
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"

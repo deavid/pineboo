@@ -11,6 +11,8 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 
+from sqlalchemy import create_engine
+
 import sys
 import traceback
 
@@ -36,6 +38,7 @@ class FLMYSQL_MYISAM(object):
     defaultPort_ = None
     cursor_ = None
     db_ = None
+    engine_ = None
 
     def __init__(self):
         self.version_ = "0.6"
@@ -53,6 +56,7 @@ class FLMYSQL_MYISAM(object):
         self.rowsFetched = {}
         self.active_create_index = True
         self.db_ = None
+        self.engine_
 
     def version(self):
         return self.version_
@@ -82,6 +86,7 @@ class FLMYSQL_MYISAM(object):
 
         try:
             self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
+            self.engine_ = create_engine('mysql+mysqldb://%s:%s@%s:%s/%s' % (db_userName, db_password, db_host, db_port, db_name))
         except MySQLdb.OperationalError as e:
             pineboolib.project._splash.hide()
             if "Unknown database" in str(e):
@@ -131,6 +136,9 @@ class FLMYSQL_MYISAM(object):
             #self.cursor_.execute('SET CHARACTER SET utf8;')
             #self.cursor_.execute('SET character_set_connection=utf8;')
         return self.cursor_
+    
+    def engine(self):
+        return self.engine_
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
