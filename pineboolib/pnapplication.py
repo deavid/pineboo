@@ -12,6 +12,7 @@ import pineboolib
 from pineboolib.utils import filedir, one, Struct, XMLStruct, cacheXPM, parseTable, _path, coalesce_path, _dir
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.mtdparser.pnmtdparser import mtd_parse
 
 """
 Almacena los datos del serividor de la BD principal
@@ -326,6 +327,11 @@ class Project(object):
                     txt = contenido.encode(encode_, "replace")
                     f2.write(txt)
                     f2.close()
+            
+            if nombre.endswith(".mtd"):
+                self.parse_mtd(fileobj)
+            
+            
 
             if self.parseProject and nombre.endswith(".qs") and settings.readBoolEntry("application/isDebuggerMode", False):
                 # if self._splash:
@@ -470,6 +476,14 @@ class Project(object):
         #        self.logger.exception("js.call: error al llamar %s de %s", function, object_context)
 
         return None
+    
+        """
+    Convierte un .mtd a un model sqlAlchemy y lo deja al lado
+    @param mtd_name. Nombre del mtd al convertir
+    """
+    def parse_mtd(self, fileobj):
+        mtd_parse(fileobj)
+    
     
     """
     Convierte un script .qs a .py lo deja al lado
