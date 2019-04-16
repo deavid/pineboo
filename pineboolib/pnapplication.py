@@ -329,7 +329,7 @@ class Project(object):
                     f2.close()
             
             if nombre.endswith(".mtd"):
-                self.parse_mtd(fileobj)
+                mtd_parse(fileobj)
             
             
 
@@ -356,12 +356,23 @@ class Project(object):
                     if self.parseProject and nombre.endswith(".qs"):
                         self.parseScript(_dir(root, nombre))
         
-        from pineboolib.pncontrolsfactory import aqApp
+        
+        
+        
+        if self._splash:
+            self._splash.showMessage("Cargando objetos ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
+            self._DGI.processEvents()
+        
+        from pineboolib.pncontrolsfactory import load_models
+        load_models()
+        
         
         if self._splash:
             self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             self._DGI.processEvents()
 
+       
+        from pineboolib.pncontrolsfactory import aqApp
         
         aqApp.loadTranslations()
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
@@ -477,12 +488,7 @@ class Project(object):
 
         return None
     
-        """
-    Convierte un .mtd a un model sqlAlchemy y lo deja al lado
-    @param mtd_name. Nombre del mtd al convertir
-    """
-    def parse_mtd(self, fileobj):
-        mtd_parse(fileobj)
+        
     
     
     """
