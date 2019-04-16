@@ -22,11 +22,19 @@ def generate_model( dest_file, mtd_table):
     data = []
     data.append("# -*- coding: utf-8 -*-")
     data.append("from sqlalchemy.ext.declarative import declarative_base")
-    data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime")
-    data.append("from pineboolib.pnobjectsfactory import Calculated")
+    data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey")
+    data.append("from sqlalchemy.orm import relationship")
+    data.append("from pineboolib.pnobjectsfactory import Calculated, load_model")
+    data.append("from pineboolib.pncontrolsfactory import aqApp")
     data.append("")
     data.append("Base = declarative_base()")
+    data.append("engine = aqApp.db().driver().engine()")
     data.append("")
+    for field in mtd_table.fieldList():
+        if field.relationM1():
+            rel = field.relationM1()
+            data.append("load_model('%s')" % rel.foreignTable()) 
+    
     data.append("")
     data.append("class %s%s(Base):" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
     data.append("    __tablename__ = '%s'" % mtd_table.name())
@@ -52,6 +60,9 @@ def generate_model( dest_file, mtd_table):
                     rel_data.append("    %s = relationship('%s', backref='parent')\n" % (r.foreignTable(), r.foreignTable()))
                 
             data.append("".join(rel_data))
+    
+    data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
+    data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
             
     return data  
  
@@ -74,12 +85,20 @@ def field_type(field):
             
     elif field.type() in ("bool", "unlock"):
         ret = "Boolean"
+        ret += ", unique=False"
     
     elif field.type() in ("time, date"):
         ret = "DateTime"
+        
     
     else:
         ret = "Desconocido %s" % field.type()
+        
+    
+    if field.relationM1() is not None:
+        rel = field.relationM1()
+        ret += ", ForeignKey('%s.%s'%s)" % (rel.foreignTable(), rel.foreignField(), ", cascade='all,delete', backref='%s'" % (rel.foreignTable()) if rel.deleteCascade() else "")   
+    
     
     if field.isPrimaryKey() or field.isCompoundKey():
         ret += ", primary_key=True"
@@ -91,7 +110,7 @@ def field_type(field):
         ret += ", unique=True"
     
     
-    if not field.allowNull():
+    if not field.allowNull() and field.type() not in ("bool", "unlock"):
         ret += ", nullable=False"
     
     if field.defaultValue() is not None:
@@ -100,8 +119,6 @@ def field_type(field):
             value = "'%s'" % value
         ret += ", default=%s" % value
         
-    if field.relationM1() is not None:
-        rel = field.relationM1()
-        ret += ", ForeignKey('%s.%s' %s )" % (rel.foreignTable(), rel.foreignField(), ", cascade='all,delete', backref='%s'" % (rel.foreignTable()) if rel.deleteCascade() else "")
+    
     
     return ret    
