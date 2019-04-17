@@ -11,7 +11,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.packager.aqunpacker import AQUnpacker
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
-from pineboolib.pnobjectsfactory import load_model, load_models, Calculated
+from pineboolib.pnobjectsfactory import load_model, load_models, Calculated, orm
 from pineboolib.wiki_error import wiki_error
 
 import inspect
@@ -495,4 +495,3 @@ class QEventLoop(QtCore.QEventLoop):
 def print_stack(maxsize=1):
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
-

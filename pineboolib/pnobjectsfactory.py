@@ -3,7 +3,7 @@ import pineboolib
 from pineboolib.utils import _path, _dir, filedir
 from importlib import machinery
 
-from sqlalchemy import String
+from sqlalchemy import String, orm
 
 import importlib
 import traceback
