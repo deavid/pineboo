@@ -30,10 +30,10 @@ def generate_model( dest_file, mtd_table):
     data.append("Base = declarative_base()")
     data.append("engine = aqApp.db().driver().engine()")
     data.append("")
-    for field in mtd_table.fieldList():
-        if field.relationM1():
-            rel = field.relationM1()
-            data.append("load_model('%s')" % rel.foreignTable()) 
+    #for field in mtd_table.fieldList():
+    #    if field.relationM1():
+    #        rel = field.relationM1()
+    #        data.append("load_model('%s')" % rel.foreignTable()) 
     
     data.append("")
     data.append("class %s%s(Base):" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
@@ -57,12 +57,12 @@ def generate_model( dest_file, mtd_table):
             rel_data = []
             for r in field.relationList():
                 if r.cardinality() == r.RELATION_1M:
-                    rel_data.append("    %s = relationship('%s', backref='parent')\n" % (r.foreignTable(), r.foreignTable()))
+                    rel_data.append("    %s = relationship('%s', backref='parent'%s)\n" % (r.foreignTable(), r.foreignTable(), ", cascade ='all, delete'" if r.deleteCascade() else ""))
                 
             data.append("".join(rel_data))
     
-    data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
-    data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
+    #data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
+    #data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
             
     return data  
  
@@ -97,7 +97,7 @@ def field_type(field):
     
     if field.relationM1() is not None:
         rel = field.relationM1()
-        ret += ", ForeignKey('%s.%s'%s)" % (rel.foreignTable(), rel.foreignField(), ", cascade='all,delete', backref='%s'" % (rel.foreignTable()) if rel.deleteCascade() else "")   
+        ret += ", ForeignKey('%s.%s')" % (rel.foreignTable(), rel.foreignField())
     
     
     if field.isPrimaryKey() or field.isCompoundKey():
