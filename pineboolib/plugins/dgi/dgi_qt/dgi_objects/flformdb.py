@@ -250,7 +250,7 @@ class FLFormDB(QtWidgets.QDialog):
                     self.iface.init()
                 except Exception:
                     script_name = self.iface.__module__
-                    from pineboolib.pncontrolsfactory import aqApp
+                    from pineboolib.pncontrolsfactory import aqApp, wiki_error
                     aqApp.msgBoxWarning(wiki_error(traceback.format_exc()),pineboolib.project._DGI)   
             
             return True
