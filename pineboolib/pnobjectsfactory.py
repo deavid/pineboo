@@ -3,7 +3,7 @@ import pineboolib
 from pineboolib.utils import _path, _dir, filedir
 from importlib import machinery
 
-from sqlalchemy import String, orm
+from sqlalchemy import String, orm, event
 
 import importlib
 import traceback
@@ -22,7 +22,11 @@ def base_model( name ):
     if path:
         path = "%s_model.py" % path[:-4]
         if os.path.exists(path):
-            return machinery.SourceFileLoader( name , path).load_module() if path else None
+            try:
+                return machinery.SourceFileLoader( name , path).load_module() if path else None
+            except Exception as exc:
+                logger.warning("Error recargando model base:\n%s\n%s", exc, traceback.format_exc())
+                pass 
     
     return None
 
@@ -64,14 +68,14 @@ def load_model( nombre ):
             try:
                 mod = importlib.reload(sys.modules[module_path])
             except Exception as exc:
-                logger.warning("Error recargando módulo:\n%s", exc)
+                logger.warning("Error recargando módulo:\n%s\n%s", exc, traceback.format_exc())
                 pass 
         else:
             #print("Cargando", module_path)
             try:
                 mod = importlib.import_module(module_path)
             except Exception as exc:
-                logger.warning("Error cargando módulo:\n%s", exc)
+                logger.warning("Error cargando módulo:\n%s\n%s", exc, traceback.format_exc())
                 pass 
             #models_[nombre] = mod
     
@@ -132,7 +136,26 @@ def load_models():
     setattr(qsa_dict_modules, "engine", aqApp.db().engine())
     
             
-Calculated = String       
-    
+Calculated = String    
+
+def before_commit(s):
+    for o in s.new:
+        o.beforeCommit()
+    for o in s.dirty:
+        o.beforeCommit()
+    for o in s.deleted:
+        o.beforeCommit()   
+        
+
+def after_commit(s):
+    for o in s.new:
+        o.afterCommit()
+    for o in s.dirty:
+        o.afterCommit()
+    for o in s.deleted:
+        o.afterCommit()   
+
+def after_flush(*args):
+    print("****", args)
     
     

@@ -11,7 +11,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.packager.aqunpacker import AQUnpacker
 from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
-from pineboolib.pnobjectsfactory import load_model, load_models, Calculated, orm
+from pineboolib.pnobjectsfactory import load_model, load_models, Calculated, orm, event
 from pineboolib.wiki_error import wiki_error
 
 import inspect

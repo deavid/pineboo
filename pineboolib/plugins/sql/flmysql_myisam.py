@@ -145,11 +145,12 @@ class FLMYSQL_MYISAM(object):
     def session(self):
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
+            from sqlalchemy import event
+            from pineboolib.pnobjectsfactory import before_commit, after_commit
             Session = sessionmaker(bind=self.engine())
             self.session_ = Session()
-        
-        return self.session_ 
-
+            event.listen(Session, 'before_commit', before_commit, self.session_)
+            event.listen(Session, 'after_commit', after_commit, self.session_)
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
