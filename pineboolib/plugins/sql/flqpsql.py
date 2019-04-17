@@ -33,6 +33,7 @@ class FLQPSQL(object):
     pure_python_ = False
     defaultPort_ = None
     engine_ = None
+    session_ = None
 
     def __init__(self):
         self.version_ = "0.6"
@@ -46,6 +47,7 @@ class FLQPSQL(object):
         self.pure_python_ = False
         self.defaultPort_ = 5432
         self.engine_ = None
+        self.session_ = None
     
     def useThreads(self):
         return True
@@ -149,6 +151,14 @@ class FLQPSQL(object):
     
     def engine(self):
         return self.engine_
+    
+    def session(self):
+        if self.session_ is None:
+            from sqlalchemy.orm import sessionmaker
+            Session = sessionmaker(bind=self.engine())
+            self.session_ = Session()
+        
+        return self.session_ 
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"

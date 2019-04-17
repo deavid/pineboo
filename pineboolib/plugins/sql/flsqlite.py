@@ -36,6 +36,7 @@ class FLSQLITE(object):
     parseFromLatin = None
     defaultPort_ = None
     engine_ = None
+    session_ = None
 
     def __init__(self):
         self.logger = logging.getLogger("FLSqLite")
@@ -56,6 +57,7 @@ class FLSQLITE(object):
         self.defaultPort_ = 0
         self.cursor_ = None
         self.engine_ = None
+        self.session_ = None
 
     def pure_python(self):
         return self.pure_python_
@@ -127,6 +129,15 @@ class FLSQLITE(object):
     
     def engine(self):
         return self.engine_
+    
+    def session(self):
+        if self.session_ is None:
+            from sqlalchemy.orm import sessionmaker
+            Session = sessionmaker(bind=self.engine())
+            self.session_ = Session()
+        
+        return self.session_ 
+
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"

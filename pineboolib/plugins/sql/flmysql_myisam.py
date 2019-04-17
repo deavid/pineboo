@@ -39,6 +39,7 @@ class FLMYSQL_MYISAM(object):
     cursor_ = None
     db_ = None
     engine_ = None
+    session_ = None
 
     def __init__(self):
         self.version_ = "0.6"
@@ -56,7 +57,8 @@ class FLMYSQL_MYISAM(object):
         self.rowsFetched = {}
         self.active_create_index = True
         self.db_ = None
-        self.engine_
+        self.engine_ = None
+        self.session_ = None
 
     def version(self):
         return self.version_
@@ -139,6 +141,15 @@ class FLMYSQL_MYISAM(object):
     
     def engine(self):
         return self.engine_
+    
+    def session(self):
+        if self.session_ is None:
+            from sqlalchemy.orm import sessionmaker
+            Session = sessionmaker(bind=self.engine())
+            self.session_ = Session()
+        
+        return self.session_ 
+
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"

@@ -132,6 +132,12 @@ class PNConnection(QtCore.QObject):
 
     def driver(self):
         return self.driverSql.driver()
+    
+    def session(self):
+        return self.driver().session()
+    
+    def engine(self):
+        return self.driver().engine()
 
     def cursor(self):
         return self.conn.cursor()
