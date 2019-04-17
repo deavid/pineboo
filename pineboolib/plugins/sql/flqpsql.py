@@ -155,13 +155,13 @@ class FLQPSQL(object):
     def session(self):
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
-            from sqlalchemy import event
-            from pineboolib.pnobjectsfactory import before_commit, after_commit, after_flush
+            #from sqlalchemy import event
+            #from pineboolib.pnobjectsfactory import before_commit, after_commit, after_flush
             Session = sessionmaker(bind=self.engine())
             self.session_ = Session()
-            event.listen(Session, 'before_commit', before_commit, self.session_)
-            event.listen(Session, 'after_commit', after_commit, self.session_)
-            event.listen(Session, 'after_flush', after_flush)
+            #event.listen(Session, 'before_commit', before_commit, self.session_)
+            #event.listen(Session, 'after_commit', after_commit, self.session_)
+            #event.listen(Session, 'after_flush', after_flush)
         
         return self.session_ 
 

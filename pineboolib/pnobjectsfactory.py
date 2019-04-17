@@ -138,6 +138,7 @@ def load_models():
             
 Calculated = String    
 
+"""
 def before_commit(s):
     for o in s.new:
         o.beforeCommit()
@@ -158,4 +159,4 @@ def after_commit(s):
 def after_flush(*args):
     print("****", args)
     
-    
+"""
