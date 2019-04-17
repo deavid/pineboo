@@ -23,7 +23,7 @@ def generate_model( dest_file, mtd_table):
     data.append("# -*- coding: utf-8 -*-")
     data.append("from sqlalchemy.ext.declarative import declarative_base")
     data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey")
-    data.append("from sqlalchemy.orm import relationship")
+    data.append("from sqlalchemy.orm import relationship, validates")
     data.append("from pineboolib.pnobjectsfactory import Calculated, load_model")
     data.append("from pineboolib.pncontrolsfactory import aqApp")
     data.append("")
@@ -40,6 +40,8 @@ def generate_model( dest_file, mtd_table):
     data.append("    __tablename__ = '%s'" % mtd_table.name())
     data.append("")
     
+    validator_list = []
+    
     for field in mtd_table.fieldList(): #Crea los campos y relaciones 1:M
         field_data = []
         field_data.append("    ")
@@ -47,15 +49,38 @@ def generate_model( dest_file, mtd_table):
         field_data.append(" = Column(")
         field_data.append(field_type(field))
         field_data.append(")")
+        validator_list.append(field.name())
         
         data.append("".join(field_data))
+        
+    data.append("")
+    data.append("")
+    data.append("    @validates('%s')" % "','".join(validator_list))
+    data.append("    def validate(self, key, value):")
+    data.append("        self.bufferChanged(key)")
+    data.append("")
+    data.append("    def bufferChanged(self, fn):")
+    data.append("        pass")
+    
     
     data.append("")
     data.append("    def beforeCommit(self):")
-    data.append("        pass")
+    data.append("        return True")
     data.append("")
     data.append("    def afterCommit(self):")
-    data.append("        pass")
+    data.append("        return True")
+    data.append("")
+    data.append("    def commitBuffer(self):")
+    data.append("        if not self.beforeCommit():")
+    data.append("            return False")
+    data.append("")
+    data.append("        aqApp.db().session().commit()")
+    data.append("")
+    data.append("        if not self.afterCommit():")
+    data.append("            return False")
+    
+    
+    
     
     
     #for field in mtd_table.fieldList(): #Relaciones M:1
