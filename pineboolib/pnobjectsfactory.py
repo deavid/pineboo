@@ -9,6 +9,9 @@ import importlib
 import traceback
 import sys
 import os
+import logging
+
+logger = logging.getLogger("PNControlsFactory")
 
 processed_ = []
 
@@ -55,21 +58,20 @@ def load_model( nombre ):
     file_path = filedir("..", "tempdata", "cache", db_name, "models", "%s_model.py" % nombre)
     
     if os.path.exists(file_path):
-        print("Buscando", file_path)
         module_path = "tempdata.cache.%s.models.%s_model" % (db_name, nombre)
         if module_path in sys.modules:
             #print("Recargando", module_path)
             try:
                 mod = importlib.reload(sys.modules[module_path])
             except Exception as exc:
-                print("** ***", exc)
+                logger.warning("Error recargando módulo:\n%s", exc)
                 pass 
         else:
             #print("Cargando", module_path)
             try:
                 mod = importlib.import_module(module_path)
             except Exception as exc:
-                print("** *** **", traceback.format_exc())
+                logger.warning("Error cargando módulo:\n%s", exc)
                 pass 
             #models_[nombre] = mod
     
@@ -105,7 +107,7 @@ def load_models():
             model_name = "%s%s" % (t[0].upper(), t[1:])
             class_ = getattr(mod, model_name, None)
             if class_ is not None:
-                print("Registrando", model_name)
+                #print("Registrando", model_name)
                 setattr(qsa_dict_modules, model_name, class_)
     
     
@@ -122,7 +124,7 @@ def load_models():
                 model_name = "%s%s" % (nombre[0].upper(), nombre[1:])
                 class_ = getattr(mod, model_name, None)
                 if class_ is not None:
-                    print("Registro 2", model_name)
+                    #print("Registro 2", model_name)
                     setattr(qsa_dict_modules, model_name, class_)
     
     
