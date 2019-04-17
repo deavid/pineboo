@@ -37,6 +37,7 @@ def load_model( nombre ):
     
     from pineboolib import qsa as qsa_dict_modules
     
+    
     nombre_qsa = nombre.replace("_model", "")
     model_name = nombre_qsa[0].upper() + nombre_qsa[1:]
     
@@ -90,7 +91,9 @@ def load_models():
     db_name = pineboolib.project.conn.DBName()
     tables = pineboolib.project.conn.tables()
     #models_ = {}
+    from pineboolib.pncontrolsfactory import aqApp
     from pineboolib import qsa as qsa_dict_modules
+    
     for t in tables:
         #print(t, "*")
         mod = base_model(t)
@@ -99,6 +102,7 @@ def load_models():
             model_name = "%s%s" % (t[0].upper(), t[1:])
             class_ = getattr(mod, model_name, None)
             if class_ is not None:
+                print("Registrando", model_name)
                 setattr(qsa_dict_modules, model_name, class_)
     
     
@@ -115,9 +119,13 @@ def load_models():
                 model_name = "%s%s" % (nombre[0].upper(), nombre[1:])
                 class_ = getattr(mod, model_name, None)
                 if class_ is not None:
+                    print("Registro 2", model_name)
                     setattr(qsa_dict_modules, model_name, class_)
-            
-               
+    
+    
+    setattr(qsa_dict_modules, "session", aqApp.db().session())
+    setattr(qsa_dict_modules, "engine", aqApp.db().engine())
+    
             
 Calculated = String       
     
