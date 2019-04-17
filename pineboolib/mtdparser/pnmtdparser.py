@@ -51,6 +51,12 @@ def generate_model( dest_file, mtd_table):
         data.append("".join(field_data))
     
     data.append("")
+    data.append("    def beforeCommit(self):")
+    data.append("        pass")
+    data.append("")
+    data.append("    def afterCommit(self):")
+    data.append("        pass")
+    
     
     #for field in mtd_table.fieldList(): #Relaciones M:1
     #    if field.relationList():
