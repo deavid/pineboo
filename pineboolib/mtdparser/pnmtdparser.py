@@ -28,7 +28,7 @@ def generate_model( dest_file, mtd_table):
     data.append("from pineboolib.pncontrolsfactory import aqApp")
     data.append("")
     data.append("Base = declarative_base()")
-    data.append("engine = aqApp.db().driver().engine()")
+    data.append("engine = aqApp.db().engine()")
     data.append("")
     #for field in mtd_table.fieldList():
     #    if field.relationM1():
@@ -52,14 +52,15 @@ def generate_model( dest_file, mtd_table):
     
     data.append("")
     
-    for field in mtd_table.fieldList(): #Relaciones M:1
-        if field.relationList():
-            rel_data = []
-            for r in field.relationList():
-                if r.cardinality() == r.RELATION_1M:
-                    rel_data.append("    %s = relationship('%s', backref='parent'%s)\n" % (r.foreignTable(), r.foreignTable(), ", cascade ='all, delete'" if r.deleteCascade() else ""))
+    #for field in mtd_table.fieldList(): #Relaciones M:1
+    #    if field.relationList():
+    #        rel_data = []
+    #        for r in field.relationList():
+    #            if r.cardinality() == r.RELATION_1M:
+    #                obj_name = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
+    #                rel_data.append("    %s = relationship('%s', backref='parent'%s)\n" % (r.foreignTable(), obj_name, ", cascade ='all, delete'" if r.deleteCascade() else ""))
                 
-            data.append("".join(rel_data))
+    #        data.append("".join(rel_data))
     
     #data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
     #data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
