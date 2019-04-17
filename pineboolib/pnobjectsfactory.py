@@ -96,7 +96,10 @@ def load_models():
     
     for t in tables:
         #print(t, "*")
-        mod = base_model(t)
+        try:
+            mod = base_model(t)
+        except Exception:
+            mod = None
         #print(t, mod)
         if mod is not None:
             model_name = "%s%s" % (t[0].upper(), t[1:])
