@@ -34,6 +34,7 @@ class FLQPSQL(object):
     defaultPort_ = None
     engine_ = None
     session_ = None
+    declarative_base_ = None
 
     def __init__(self):
         self.version_ = "0.6"
@@ -48,6 +49,7 @@ class FLQPSQL(object):
         self.defaultPort_ = 5432
         self.engine_ = None
         self.session_ = None
+        self.declarative_base_ = None
     
     def useThreads(self):
         return True
@@ -164,6 +166,13 @@ class FLQPSQL(object):
             #event.listen(Session, 'after_flush', after_flush)
         
         return self.session_ 
+    
+    def declarative_base(self):
+        if self.declarative_base_ is None:
+            from sqlalchemy.ext.declarative import declarative_base
+            self.declarative_base_ = declarative_base()
+        
+        return self.declarative_base_
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"

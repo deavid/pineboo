@@ -37,6 +37,7 @@ class FLSQLITE(object):
     defaultPort_ = None
     engine_ = None
     session_ = None
+    declarative_base_ = None
 
     def __init__(self):
         self.logger = logging.getLogger("FLSqLite")
@@ -58,6 +59,7 @@ class FLSQLITE(object):
         self.cursor_ = None
         self.engine_ = None
         self.session_ = None
+        self.declarative_base_ = None
 
     def pure_python(self):
         return self.pure_python_
@@ -139,6 +141,13 @@ class FLSQLITE(object):
             self.session_ = Session()
             #event.listen(Session, 'before_commit', before_commit, self.session_)
             #event.listen(Session, 'after_commit', after_commit, self.session_)
+    
+    def declarative_base(self):
+        if self.declarative_base_ is None:
+            from sqlalchemy.ext.declarative import declarative_base
+            self.declarative_base_ = declarative_base()
+        
+        return self.declarative_base_
 
 
     def formatValueLike(self, type_, v, upper):
