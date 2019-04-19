@@ -67,7 +67,7 @@ def generate_model( dest_file, mtd_table):
     data.append("")
     
     data.append("")
-    data.append("# --- Relations ---> ")
+    data.append("# --- Relations 1:M ---> ")
     data.append("")
     
     
@@ -87,9 +87,33 @@ def generate_model( dest_file, mtd_table):
                     data.append(relation_)
     
     data.append("")
-    data.append("# <--- Relations --- ")
+    data.append("# <--- Relations 1:M --- ")
     data.append("")
     
+    """
+    data.append("")
+    data.append("# --- Relations M:1 ---> ")
+    data.append("")
+    
+    
+    for field in mtd_table.fieldList(): #Creamos relaciones M1
+        rel = field.relationM1()
+        if rel:
+            foreign_table_mtd = aqApp.db().manager().metadata(rel.foreignTable())
+            if foreign_table_mtd:
+                foreign_object = "%s%s" % (rel.foreignTable()[0].upper(), rel.foreignTable()[1:])
+                relation_ = "    %s_%s = relationship('%s'" % (rel.foreignTable(), rel.foreignField(), foreign_object)
+                relation_ += ", foreign_keys='%s.%s'" % (foreign_object, rel.foreignField())
+                relation_ += ")"
+            
+                data.append(relation_) 
+    
+    
+    
+    data.append("")
+    data.append("# <--- Relations M:1 --- ")
+    data.append("")
+    """
     data.append("")
     data.append("")
     data.append("    @validates('%s')" % "','".join(validator_list))
