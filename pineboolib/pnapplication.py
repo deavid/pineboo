@@ -285,6 +285,10 @@ class Project(object):
                 if _dir("cache", fileobj.filekey).endswith(".qs"):
                     if os.path.exists("%s.py" % _dir("cache", fileobj.filekey)):
                         continue
+                    
+                elif _dir("cache", fileobj.filekey).endswith(".mtd"):
+                    if os.path.exists("%s_model.py" % _dir("cache", fileobj.filekey[:-4])):
+                        continue
                 else:
                     continue
 
