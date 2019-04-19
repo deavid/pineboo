@@ -758,7 +758,7 @@ class FLFieldMetaDataPrivate(object):
     """
     Lista de relaciones para este campo
     """
-    relationList_ = None
+    relationList_ = []
 
     """
     Mantiene, si procede, la relación M1 (muchos a uno)
@@ -877,7 +877,7 @@ class FLFieldMetaDataPrivate(object):
             self.inicialize(*args, **kwargs)
 
     def inicializeEmpty(self):
-        self.relationList_ = None
+        self.relationList_ = []
         self.relationM1_ = None
         self.associatedField_ = None
         self.mtd_ = None
@@ -900,7 +900,7 @@ class FLFieldMetaDataPrivate(object):
         self.isIndex_ = iNX
         self.isUnique_ = uNI
         self.contador_ = coun
-        self.relationList_ = None
+        self.relationList_ = []
         self.relationM1_ = None
         self.associatedField_ = None
         self.defaultValue_ = defValue
