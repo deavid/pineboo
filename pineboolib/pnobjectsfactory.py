@@ -4,6 +4,7 @@ from pineboolib.utils import _path, _dir, filedir
 from importlib import machinery
 
 from sqlalchemy import String, orm, event
+from sqlalchemy.orm import relationship
 
 import importlib
 import traceback
@@ -94,11 +95,17 @@ def load_model( nombre ):
 
 def load_models():
     #print(1, "load_models!!")
+    
     db_name = pineboolib.project.conn.DBName()
     tables = pineboolib.project.conn.tables()
     #models_ = {}
     from pineboolib.pncontrolsfactory import aqApp
     from pineboolib import qsa as qsa_dict_modules
+    Base = aqApp.db().declarative_base()
+    
+    setattr(qsa_dict_modules, "Base", aqApp.db().declarative_base())
+    setattr(qsa_dict_modules, "session", aqApp.db().session())
+    setattr(qsa_dict_modules, "engine", aqApp.db().engine())
     
     for t in tables:
         #print(t, "*")
@@ -126,18 +133,17 @@ def load_models():
             mod = load_model(nombre)
             if mod is not None:
                 model_name = "%s%s" % (nombre[0].upper(), nombre[1:])
+                
                 class_ = getattr(mod, model_name, None)
                 if class_ is not None:
                     #print("Registro 2", model_name)
                     setattr(qsa_dict_modules, model_name, class_)
     
     
-    setattr(qsa_dict_modules, "session", aqApp.db().session())
-    setattr(qsa_dict_modules, "engine", aqApp.db().engine())
+    
     
             
 Calculated = String    
-
 """
 def before_commit(s):
     for o in s.new:
