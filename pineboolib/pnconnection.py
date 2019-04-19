@@ -138,6 +138,9 @@ class PNConnection(QtCore.QObject):
     
     def engine(self):
         return self.driver().engine()
+    
+    def declarative_base(self):
+        return self.driver().declarative_base()
 
     def cursor(self):
         return self.conn.cursor()
