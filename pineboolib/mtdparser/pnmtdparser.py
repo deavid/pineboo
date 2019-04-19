@@ -19,15 +19,17 @@ def mtd_parse(fileobj):
 
 
 def generate_model( dest_file, mtd_table):
+    from pineboolib.pncontrolsfactory import aqApp
     data = []
     data.append("# -*- coding: utf-8 -*-")
-    data.append("from sqlalchemy.ext.declarative import declarative_base")
+    #data.append("from sqlalchemy.ext.declarative import declarative_base")
     data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey")
     data.append("from sqlalchemy.orm import relationship, validates")
     data.append("from pineboolib.pnobjectsfactory import Calculated, load_model")
     data.append("from pineboolib.pncontrolsfactory import aqApp")
     data.append("")
-    data.append("Base = declarative_base()")
+    #data.append("Base = declarative_base()")
+    data.append("Base = aqApp.db().declarative_base()")
     data.append("engine = aqApp.db().engine()")
     data.append("")
     #for field in mtd_table.fieldList():
@@ -42,7 +44,11 @@ def generate_model( dest_file, mtd_table):
     
     validator_list = []
     
-    for field in mtd_table.fieldList(): #Crea los campos y relaciones 1:M
+    data.append("")
+    data.append("# --- Fields ---> ")
+    data.append("")
+    
+    for field in mtd_table.fieldList(): #Crea los campos 
         field_data = []
         field_data.append("    ")
         field_data.append(field.name())
@@ -51,8 +57,39 @@ def generate_model( dest_file, mtd_table):
         field_data.append(")")
         validator_list.append(field.name())
         
-        data.append("".join(field_data))
+            
+            
         
+        data.append("".join(field_data))
+    
+    data.append("")
+    data.append("# <--- Fields --- ")
+    data.append("")
+    
+    data.append("")
+    data.append("# --- Relations ---> ")
+    data.append("")
+    
+    
+    for field in mtd_table.fieldList(): #Creamos relaciones 1M
+        for r in field.relationList():
+            foreign_table_mtd = aqApp.db().manager().metadata(r.foreignTable())
+            #if aqApp.db().manager().existsTable(r.foreignTable()):
+            if foreign_table_mtd:
+                #comprobamos si existe el campo...
+                if foreign_table_mtd.field(r.foreignField()):
+                    
+                    foreign_object = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
+                    relation_ = "    %s_%s = relationship('%s'" % (r.foreignTable(), r.foreignField(), foreign_object)
+                    relation_ += ", foreign_keys='%s.%s'" % (foreign_object, r.foreignField())
+                    relation_ += ")"
+            
+                    data.append(relation_)
+    
+    data.append("")
+    data.append("# <--- Relations --- ")
+    data.append("")
+    
     data.append("")
     data.append("")
     data.append("    @validates('%s')" % "','".join(validator_list))
@@ -130,8 +167,15 @@ def field_type(field):
         
     
     if field.relationM1() is not None:
+        from pineboolib.pncontrolsfactory import aqApp
         rel = field.relationM1()
-        ret += ", ForeignKey('%s.%s')" % (rel.foreignTable(), rel.foreignField())
+        if aqApp.db().manager().existsTable(rel.foreignTable()):
+            ret += ", ForeignKey('%s.%s'" % (rel.foreignTable(), rel.foreignField())
+            if rel.deleteCascade():
+                ret += ", ondelete='CASCADE'"
+            
+            ret += ")"
+                
     
     
     if field.isPrimaryKey() or field.isCompoundKey():
