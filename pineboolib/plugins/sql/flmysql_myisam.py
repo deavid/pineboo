@@ -1170,7 +1170,7 @@ class FLMYSQL_MYISAM(object):
         
         ret = t
         
-        if t in ["char","varchar"]:
+        if t in ["char","varchar","text"]:
             ret = "string"
         elif t == "int":
             ret = "uint"
@@ -1180,7 +1180,7 @@ class FLMYSQL_MYISAM(object):
             ret = "stringlist"
         elif t == "tinyint":
             ret = "bool"
-        elif t == "decimal":
+        elif t in ["decimal","double"]:
             ret = "double"
         elif t == "time":
             ret = "time"
