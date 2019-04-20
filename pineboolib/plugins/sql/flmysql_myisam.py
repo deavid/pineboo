@@ -474,6 +474,8 @@ class FLMYSQL_MYISAM(object):
     def fix_query(self, val):
         ret_ = val.replace("'true'","1")
         ret_ = ret_.replace("'false'", "0")
+        ret_ = ret_.replace("\'0\'", "0")
+        ret_ = ret_.replace("\'1\'", "1")
         return ret_
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
@@ -1279,7 +1281,9 @@ class FLMYSQL_MYISAM(object):
         try:
             q = self.fix_query(q)
             cursor.execute(q)
-        except Exception:
+        except Exception as exc:
+            print("*****", q, exc)
+            sys.exit(32)
             
             self.setLastError(
                 "No se puedo ejecutar la siguiente query %s" % q, q)
