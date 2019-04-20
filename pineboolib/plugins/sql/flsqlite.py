@@ -74,7 +74,7 @@ class FLSQLITE(object):
         return self.name_
 
     def safe_load(self):
-        return checkDependencies({"sqlite3": "sqlite3"}, False)
+        return checkDependencies({"sqlite3": "sqlite3", "sqlalchemy":"sqlAlchemy"}, False)
 
     def isOpen(self):
         return self.open_
@@ -104,7 +104,7 @@ class FLSQLITE(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         import pineboolib
-        checkDependencies({"sqlite3": "sqlite3"})
+        checkDependencies({"sqlite3": "sqlite3", "sqlalchemy":"sqlAlchemy"})
         self.db_filename = db_name
         db_is_new = not os.path.exists("%s" % self.db_filename)
 

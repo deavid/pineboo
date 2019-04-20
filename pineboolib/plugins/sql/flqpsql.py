@@ -70,7 +70,7 @@ class FLQPSQL(object):
         return self.pure_python_
 
     def safe_load(self):
-        return checkDependencies({"psycopg2": "python3-psycopg2"}, False)
+        return checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy":"sqlAlchemy"}, False)
 
     def mobile(self):
         return self.mobile_
@@ -80,7 +80,7 @@ class FLQPSQL(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"psycopg2": "python3-psycopg2"})
+        checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy":"sqlAlchemy"})
         import psycopg2
 
         conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (

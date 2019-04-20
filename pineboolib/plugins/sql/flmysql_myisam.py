@@ -72,7 +72,7 @@ class FLMYSQL_MYISAM(object):
         return self.pure_python_
 
     def safe_load(self):
-        return checkDependencies({"MySQLdb": "mysqlclient"}, False)
+        return checkDependencies({"MySQLdb": "mysqlclient", "sqlalchemy":"sqlAlchemy"}, False)
 
     def mobile(self):
         return self.mobile_
@@ -85,7 +85,7 @@ class FLMYSQL_MYISAM(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"MySQLdb": "mysqlclient"})
+        checkDependencies({"MySQLdb": "mysqlclient", "sqlalchemy":"sqlAlchemy"})
         import MySQLdb
 
         try:
