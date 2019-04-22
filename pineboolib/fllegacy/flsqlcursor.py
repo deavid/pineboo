@@ -2598,7 +2598,7 @@ class FLSqlCursor(QtCore.QObject):
                 foreignFieldValueBuffer = self.cursorRelation().valueBuffer(self.relation().foreignField())
                 
                 if (foreignFieldValueBuffer != v and foreignFieldValueBuffer is not None):
-                    self.cursorRelation().setValueBuffer(self.relation().foreignField(), foreignFieldValueBuffer)
+                    self.cursorRelation().setValueBuffer(self.relation().foreignField(), v)
 
     def primeInsert(self):
         if not self.buffer():
