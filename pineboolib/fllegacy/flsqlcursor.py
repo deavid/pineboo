@@ -817,6 +817,8 @@ class FLSqlCursor(QtCore.QObject):
     _activatedBufferChanged = None
     _activatedBufferCommited = None
     _meta_model = None
+    
+    _listen_timer = None
     #actionName_ = None
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
@@ -870,9 +872,9 @@ class FLSqlCursor(QtCore.QObject):
         #            break
         self.init(act_.name(), autopopulate, cR, r)
         
-        #from threading import Timer
-        #t = Timer(0, self.init_listen)
-        #t.start()
+        from threading import Timer
+        self._listen_timer = Timer(0, self.init_listen)
+        self._listen_timer.start()
 
     """
     Código de inicialización común para los constructores
@@ -2926,6 +2928,9 @@ class FLSqlCursor(QtCore.QObject):
         # if self.metadata():
         #     if not self.metadata().inCache():
         #         delMtd = True
+        if self._listen_timer:
+            self._listen_timer.stop()
+        
         if self.d is not None:
             msg = None
             mtd = self.metadata()
@@ -2947,6 +2952,7 @@ class FLSqlCursor(QtCore.QObject):
                 logger.warning("Se está eliminando un cursor Huerfano (%s)", self)
         
         self.destroyed.emit()
+        
 
         # self.d.countRefCursor = self.d.countRefCursor - 1     FIXME
 
@@ -3897,13 +3903,13 @@ class FLSqlCursor(QtCore.QObject):
         conn = self.db().useConn(conn_name).driver().conn_
         print(self.db().useConn(conn_name).driver())
         cursor = conn.cursor()
-        cursor.execute("LISTEN test;")
+        cursor.execute("LISTEN clientes;")
         #print("****", conn, conn_name)
         seconds_passed = 0
         print("Waiting for notifications on channel '%s'" % self.curName())
         while 1:
             conn.commit()
-            print("*", select.select([conn],[],[],1), conn.notifies)
+            print("*", conn.notifies, conn.poll())
             if select.select([conn],[],[],1) == ([],[],[]):
                 seconds_passed += 1
                 #print("{} seconds passed without a notification ...".format(seconds_passed))
