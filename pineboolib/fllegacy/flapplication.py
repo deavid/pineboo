@@ -388,6 +388,8 @@ class FLApplication(QtCore.QObject):
         self.writeStateModule()
         time = QtCore.QTimer()
         time.singleShot(0, self.reinitP)
+        from pineboolib.pnobjectsfactory import empty_base
+        empty_base()
 
     def clearProject(self):
         pineboolib.project.actions = {}

@@ -90,8 +90,12 @@ def load_model( nombre ):
     #if mod is not None:
     #    setattr(qsa_dict_modules,  model_name, mod)
     
-    
-    
+
+
+def empty_base():
+    from pineboolib.pncontrolsfactory import aqApp
+    del aqApp.db().driver().declarative_base_
+    aqApp.db().driver().declarative_base_ = None
 
 def load_models():
     #print(1, "load_models!!")
