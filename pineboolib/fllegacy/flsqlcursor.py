@@ -869,6 +869,10 @@ class FLSqlCursor(QtCore.QObject):
         #            self.d.action_ = action
         #            break
         self.init(act_.name(), autopopulate, cR, r)
+        
+        #from threading import Timer
+        #t = Timer(0, self.init_listen)
+        #t.start()
 
     """
     Código de inicialización común para los constructores
@@ -3881,6 +3885,37 @@ class FLSqlCursor(QtCore.QObject):
             _attr = getattr(self.ext_cursor, name)
         
         return _attr
+    
+    """
+    Crea una conexión y la escuha para recoger eventos de la tabla
+    """
+    def init_listen(self):
+        print("Init_listen")
+        import select
+        import datetime
+        conn_name = "listen_%s" % self.curName()
+        conn = self.db().useConn(conn_name).driver().conn_
+        print(self.db().useConn(conn_name).driver())
+        cursor = conn.cursor()
+        cursor.execute("LISTEN test;")
+        #print("****", conn, conn_name)
+        seconds_passed = 0
+        print("Waiting for notifications on channel '%s'" % self.curName())
+        while 1:
+            conn.commit()
+            print("*", select.select([conn],[],[],1), conn.notifies)
+            if select.select([conn],[],[],1) == ([],[],[]):
+                seconds_passed += 1
+                #print("{} seconds passed without a notification ...".format(seconds_passed))
+            else:
+                seconds_passed = 0
+                conn.poll()
+                conn.commit()
+                while conn.notifies:
+                    notify = conn.notifies.pop()
+                    print("Got NOTIFY:", datetime.datetime.now(), notify.pid, notify.channel, notify.payload)
+            
+            
         
     """
     signals:
