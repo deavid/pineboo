@@ -335,14 +335,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     else:
                         pixmap = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
 
-                elif _type == "pixmap" and self.parent_view:
+                if _type == "pixmap" and self.parent_view:
                     d = self.db().manager().fetchLargeValue(d)
                     if d:
                         pixmap = QtGui.QPixmap(d)
                 
                 elif _type == "unlock" or self.parent_view.showAllPixmap() or row == self.parent_view.cursor().at():
-
                     if pixmap and not pixmap.isNull()and self.parent_view:
+                        
                         #print("Dibuja", self.headerData(col, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
                         row_height = self.parent_view.rowHeight(row)  # Altura row
                         row_width = self.parent_view.columnWidth(col)
