@@ -93,7 +93,7 @@ sudo -H pip3 install --upgrade pip
 
 3) Instalar dependencias python3.
 
-sudo -H pip3 install python-barcode==0.9.0 odfpy==1.4.0  ply==3.11  six==1.10.0 pyqt5==5.12 pg8000==1.12.3 psycopg2-binary==2.7.6.1 PyQt5_sip==4.19.14 mysqlclient==1.3.14
+sudo -H pip3 install python-barcode==0.9.0 odfpy==1.4.0  ply==3.11  six==1.10.0 pyqt5==5.12.1 pg8000==1.12.3 psycopg2-binary==2.7.6.1 PyQt5_sip==4.19.14 mysqlclient==1.3.14 SQLAlchemy
 
 sudo -H pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3
 
