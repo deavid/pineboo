@@ -368,7 +368,7 @@ def main():
 
     # Cargando spashscreen
     # Create and display the splash screen
-    if _DGI.localDesktop():
+    if _DGI.localDesktop() and not options.action:
         splash = show_splashscreen(project)
         _DGI.processEvents()
     else:
@@ -407,8 +407,9 @@ def preload_actions(project, forceload=None):
 
 def init_project(DGI, splash, options, project, mainForm, app):
     """Initialize the project and start it."""
-    from PyQt5 import QtCore
-    if DGI.useDesktop() and DGI.localDesktop():
+    from PyQt5 import QtCore   
+    
+    if DGI.useDesktop() and DGI.localDesktop() and splash:
         splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         DGI.processEvents()
     logger.info("Iniciando proyecto ...")
@@ -423,14 +424,18 @@ def init_project(DGI, splash, options, project, mainForm, app):
         project.modules[module_name].load()
 
     if options.action:
-        objaction = project.conn.manager(options.action)
-        # if options.action in module.actions:
-        #    objaction = module.actions[options.action]
+        list = options.action.split(":")
+        action_name = list[0].split(".")[0]
+        #objaction = project.conn.manager(options.action)
+        if action_name in project.actions.keys():
+            
+            ret = project.call(list[0], list[1:] if len(list) > 1 else [])
+            print(ret)
+            return ret
+        else:
+            raise ValueError("Action name %s not found" % options.action)
 
-    if options.action and not objaction:
-        raise ValueError("Action name %s not found" % options.action)
-
-    if DGI.localDesktop():
+    if DGI.localDesktop() and splash:
         splash.showMessage("Creando interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         DGI.processEvents()
 
