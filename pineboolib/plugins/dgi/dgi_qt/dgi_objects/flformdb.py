@@ -437,14 +437,18 @@ class FLFormDB(QtWidgets.QDialog):
     def saveSnapShot(self, path_file = None):
         if not path_file:
             from pineboolib.pncontrolsfactory import aqApp
-            path_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(),QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
+            tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(),QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
 
-        fi = QtCore.QFile(path_file)
-        if not fi.OpenMode(QtCore.QIODevice.WriteOnly):
-            print("FLFormDB : Error I/O al intentar escribir el fichero", path_file)
-            return
+            ret = QtWidgets.QFileDialog.getSaveFileName(None, 'Pineboo', tmp_file, 'PNG(*.png)')
+            path_file = ret[0] if ret else None
+        
+        if path_file:   
+            fi = QtCore.QFile(path_file)
+            if not fi.OpenMode(QtCore.QIODevice.WriteOnly):
+                print("FLFormDB : Error I/O al intentar escribir el fichero", path_file)
+                return
 
-        self.snapShot().save(fi, "PNG")
+            self.snapShot().save(fi, "PNG")
 
     def saveGeometry(self):
         #pW = self.parentWidget()
