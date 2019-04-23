@@ -430,7 +430,6 @@ def init_project(DGI, splash, options, project, mainForm, app):
         if action_name in project.actions.keys():
             
             ret = project.call(list[0], list[1:] if len(list) > 1 else [])
-            print(ret)
             return ret
         else:
             raise ValueError("Action name %s not found" % options.action)
