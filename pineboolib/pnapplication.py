@@ -974,7 +974,7 @@ class XMLAction(XMLStruct):
             if getattr(self.mainform_widget, "widget", None):
                 self.mainform_widget.widget.doCleanUp()
             self.logger.debug("Loading action %s . . . ", self.name)
-            if pineboolib.project._DGI.useDesktop():
+            if pineboolib.project._DGI.useDesktop() and hasattr(pineboolib.project.main_window, "w_"):
                 self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
                     self, None, pineboolib.project.main_window.w_, None)
             else:
