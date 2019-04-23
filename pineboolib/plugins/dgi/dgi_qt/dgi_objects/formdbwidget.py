@@ -24,7 +24,7 @@ class FormDBWidget(QtWidgets.QWidget):
             self._module.disconnect = self._disconnect
             self._action = action
             self.cursor_ = None
-            self.parent_ = parent or parent.parentWidget()
+            self.parent_ = parent or parent.parentWidget() if parent and hasattr(parent,"parentWidget") else parent
         
             import pineboolib
             if isinstance(self.parent(), pineboolib.pncontrolsfactory.FLFormDB):
