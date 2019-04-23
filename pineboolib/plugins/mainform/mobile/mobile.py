@@ -67,6 +67,10 @@ class MainForm(QtWidgets.QMainWindow):
                 if not self.w_.fullScreen():
                     self.w_.showFullScreen()
                     return True
+        
+        elif isinstance(e, AQS.Show):
+            if isinstance(o, pineboolib.pncontrolsfactory.FLFormDB):
+                return True
 
         return False
 

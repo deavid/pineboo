@@ -71,6 +71,11 @@ class MainForm(QtWidgets.QMainWindow):
                 if not self.w_.fullScreen():
                     self.w_.showFullScreen()
                     return True
+        
+        elif isinstance(e, AQS.Show):
+            if isinstance(o, pineboolib.pncontrolsfactory.FLFormDB):
+                return True
+        
 
         return False
 
@@ -287,7 +292,6 @@ class MainForm(QtWidgets.QMainWindow):
         tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.windowTitle())
         fm.setIdMDI(action_name)
         fm.show()
-
         #idx = tw.indexOf(fm)
         # self.tw_.setCurrentPage(idx)
         self.tw_.setCurrentWidget(fm)
