@@ -603,7 +603,15 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Redefinida por conveniencia
     """
+    
+    def focusInEvent(self, e):
+        self.refresh()  
+        super().focusInEvent(e)
+    
+    
+    
 
+    """
     def setFocus(self):
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
@@ -616,7 +624,7 @@ class FLDataTable(QtWidgets.QTableView):
             self.syncNumRows()
 
         super(FLDataTable, self).setFocus()
-
+    """
     """
     Redefinida por conveniencia
     """
