@@ -2238,15 +2238,15 @@ class FLSqlCursor(QtCore.QObject):
                         pos = 0
                     return pos
 
-            if cFilter:
-                sql = "%s WHERE %s" % (sql, cFilter)
+            #if cFilter:
+            #    sql = "%s WHERE %s" % (sql, cFilter)
             # else:
             #    sql = "%s WHERE 1=1" % sql
 
             if field is not None:
                 sqlPriKeyValue = self.db().manager().formatAssignValue(field, pKValue, True)
                 if cFilter:
-                    sqlIn = "%s AND %s" % (sql, sqlPriKeyValue)
+                    sqlIn = "%s WHERE %s AND %s" % (sql, sqlPriKeyValue, cFilter)
                 else:
                     sqlIn = "%s WHERE %s" % (sql, sqlPriKeyValue)
                 # q.exec_(self.db(), sqlIn)
