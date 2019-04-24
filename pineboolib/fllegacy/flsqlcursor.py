@@ -2258,7 +2258,13 @@ class FLSqlCursor(QtCore.QObject):
                     else:
                         pos = 0
                     return pos
-
+            else:
+                if cFilter:
+                    sql = "%s WHERE %s" % (sql, cFilter)
+                else:
+                    sql = "%s WHERE 1=1" % sql
+            
+            
             if self.d.isQuery_ and self.d.queryOrderBy_:
                 sqlOrderBy = self.d.queryOrderBy_
                 sql = "%s ORDER BY %s" % (sql, sqlOrderBy)
