@@ -479,7 +479,7 @@ class FLSqlQuery(object):
                 
                     table_list = tables_list
                     for t in table_list:
-                        mtd = self.d.db_.manager().metadata(t, True)
+                        mtd = self.d.db_.manager().metadata(t, True) if t.find("=") == -1 else None
                         if mtd is not None and name in mtd.fieldsNames():
                             table_name = t
                             field_name = name
