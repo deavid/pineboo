@@ -166,7 +166,10 @@ class FLManager(QtCore.QObject):
             stream = None
             isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
             
-            if isSysTable:
+            if n in self.metadataCachedFails:
+                return None
+            
+            elif isSysTable:
                 if key in self.cacheMetaDataSys_.keys():
                     ret = self.cacheMetaDataSys_[key]
             else:
@@ -178,17 +181,15 @@ class FLManager(QtCore.QObject):
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
 
                 if not stream:
-                    if not n in self.metadataCachedFails:
-                        logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
-                        self.metadataCachedFails.append(n)
+                    logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                    self.metadataCachedFails.append(n)
                     return None
 
                 doc = QDomDocument(n)
                 
                 if not util.domDocumentSetContent(doc, stream):
-                    if not n in self.metadataCachedFails:
-                        logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
-                        self.metadataCachedFails.append(n)
+                    logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                    self.metadataCachedFails.append(n)
                     return None
 
                 docElem = doc.documentElement()
