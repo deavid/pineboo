@@ -1,29 +1,35 @@
 # -*- coding: utf-8 -*-
 from pineboolib.utils import _dir
+import logging
+
+logger = logging.getLogger(__name__)
+
+reserved_words = ["pass"]
+
 
 def mtd_parse(fileobj):
     mtd_file = _dir("cache", fileobj.filekey)
     metadata_name = fileobj.filename[:-4]
     dest_file = "%s_model.py" % mtd_file[:-4]
     from pineboolib.pncontrolsfactory import aqApp
-    
     mtd = aqApp.db().manager().metadata(metadata_name)
     
     lines = generate_model(dest_file, mtd)
     
-    f = open(dest_file, "w")
-    for line in lines:
-        f.write("%s\n" % line)
-    f.close()
-    
+    if lines:
+        f = open(dest_file, "w")
+        for line in lines:
+            f.write("%s\n" % line)
+        f.close()
 
 
 def generate_model( dest_file, mtd_table):
     from pineboolib.pncontrolsfactory import aqApp
     data = []
+    pk_found = False
     data.append("# -*- coding: utf-8 -*-")
     #data.append("from sqlalchemy.ext.declarative import declarative_base")
-    data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey")
+    data.append("from sqlalchemy import Column, Integer, Numeric, String, BigInteger, Boolean, DateTime, ForeignKey, LargeBinary")
     data.append("from sqlalchemy.orm import relationship, validates")
     data.append("from pineboolib.pnobjectsfactory import Calculated, load_model")
     data.append("from pineboolib.pncontrolsfactory import aqApp")
@@ -51,11 +57,13 @@ def generate_model( dest_file, mtd_table):
     for field in mtd_table.fieldList(): #Crea los campos 
         field_data = []
         field_data.append("    ")
-        field_data.append(field.name())
-        field_data.append(" = Column(")
+        field_data.append("%s" % field.name() + "_" if field.name() in reserved_words else field.name())
+        field_data.append(" = Column('%s', " % field.name())
         field_data.append(field_type(field))
         field_data.append(")")
         validator_list.append(field.name())
+        if field.isPrimaryKey():
+            pk_found = True
         
             
             
@@ -158,8 +166,17 @@ def generate_model( dest_file, mtd_table):
     
     #data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
     #data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
-            
-    return data  
+    if mtd_table.isQuery():
+        data = []
+    
+    
+    elif not pk_found:
+        logger.warning("La tabla %s no tiene definida una clave primaria. No se generará el model %s\n" % (mtd_table.name(), mtd_table.primaryKey()))
+        data = []
+    
+
+          
+    return data
  
 def field_type(field):
     ret = "String"
@@ -184,7 +201,9 @@ def field_type(field):
     
     elif field.type() in ("time, date"):
         ret = "DateTime"
-        
+    
+    elif field.type() in ("bytearray"):
+        ret = "LargeBinary"  
     
     else:
         ret = "Desconocido %s" % field.type()
