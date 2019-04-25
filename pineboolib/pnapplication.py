@@ -821,7 +821,7 @@ class ModuleActions(object):
         action.scriptform = self.mod.name
         pineboolib.project.actions[action.name] = action
         if hasattr(qsa_dict_modules, action.name):
-            if action.name is not "sys":
+            if action.name != "sys":
                 self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
         else:  # Se crea la action del módulo
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(
