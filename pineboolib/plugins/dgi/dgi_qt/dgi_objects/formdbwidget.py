@@ -1,5 +1,6 @@
 # # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
+from pineboolib.pncontrolsfactory import FLFieldDB, FLTableDB
 import logging
 import weakref
 import sys
@@ -107,7 +108,7 @@ class FormDBWidget(QtWidgets.QWidget):
                 if not ret:
                     parent = parent.parentWidget()
             
-            if hasattr(ret, "_loaded"):
+            if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
                 if ret._loaded is False:
                     ret.load()
 
