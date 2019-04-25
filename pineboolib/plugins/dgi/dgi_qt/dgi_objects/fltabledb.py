@@ -822,14 +822,27 @@ class FLTableDB(QtWidgets.QWidget):
             QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
         self.dataLayout = QtWidgets.QHBoxLayout()  # Contiene tabData y tabFilters
+        #self.dataLayout.setContentsMargins(0, 0, 0, 0)
+        #self.dataLayout.setSizeConstraint(0)
         self.tabData = QtWidgets.QGroupBox()  # contiene data
         self.tabData.setSizePolicy(sizePolicyGB)
+        
+
 
         self.tabFilter.setSizePolicy(sizePolicyGB)
+        
 
         self.tabDataLayout = QtWidgets.QVBoxLayout()
+        
         filterL = QtWidgets.QVBoxLayout()
         self.tabData.setLayout(self.tabDataLayout)
+        
+        #Fix para acercar el lineEdit con el fltable
+        self.tabData.setContentsMargins(0, 0, 0, 0)
+        self.tabFilter.setContentsMargins(0, 0, 0, 0)
+        self.tabDataLayout.setContentsMargins(0, 0, 0, 0)
+        filterL.setContentsMargins(0, 0, 0, 0)
+        
         self.tabFilter.setLayout(filterL)
 
         # Contiene botones lateral (datos, filtros, odf)
@@ -902,6 +915,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         label1.setText("Buscar")
         label2.setText("en")
+        
 
         self.tabControlLayout.addWidget(label1)
         self.tabControlLayout.addWidget(self.lineEditSearch)
