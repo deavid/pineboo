@@ -886,7 +886,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 
                 self.need_update = True
             except Exception as e:
-                self.logger.exception("CursorTableModel.%s.Insert() :: ERROR:", self.metadata().name())
+                self.logger.exception("CursorTableModel.%s.Insert() :: SQL: %s", self.metadata().name(), sql)
                 # self._cursor.execute("ROLLBACK")
                 return False
 
