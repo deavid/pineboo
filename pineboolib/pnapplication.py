@@ -70,7 +70,7 @@ class Project(object):
         self.apppath = None
         self.tmpdir = None
         self.parser = None
-        self.version = 0.7
+        self.version = 0.8
         self.main_form_name = "eneboo" if not self._DGI.mobilePlatform() else "mobile"
         pineboolib.project = self
         self.deleteCache = False
