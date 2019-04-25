@@ -36,4 +36,10 @@ class QLineEdit(QtWidgets.QLineEdit):
     def setLineWidth(self, w):
         pass
     
+    @decorators.NotImplementedWarn
+    def setFrameShape(self, f):
+        pass
     
+    @decorators.NotImplementedWarn
+    def setFrameShadow(self, f):
+        pass
