@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore
+from PyQt5 import QtWidgets
 from pineboolib import decorators
 
-class QLine(QtCore.QLine):
+class QLine(QtWidgets.QFrame):
     object_name = None
+    orientation_ = 0
     
     def __init__(self, parent):
         super().__init__()
-    
-    def __getattr__(self, name):
-        print("Buscando", name)
-    
-    @decorators.NotImplementedWarn
-    def setPalette(self, *args):
-        pass
     
     
     def getObjectName(self):
@@ -22,25 +16,13 @@ class QLine(QtCore.QLine):
     
     def setObjectName(self, name):
         self.object_name = name
-    
-    @decorators.NotImplementedWarn
-    def show(self):
-        pass
-    
-    @decorators.NotImplementedWarn
-    def setFrameShadow(self, frame_shadow):
-        pass
-    
-    @decorators.NotImplementedWarn
-    def setFrameShape(self, frame_shape):
-        pass
-    
-    @decorators.NotImplementedWarn
-    def setOrientation(self, ori_):
-        pass
+
+    def setOrientation(self, ori_ = 0):
+        self.orientation_ = ori_
+        self.setFrameShape(self.HLine if ori_ == 1 else self.VLine)
     
     def getOrientation(self):
-        return super().orientation()
+        return self.orientation_
     
     orientation = property(getOrientation, setOrientation)
     objectName = property(getObjectName, setObjectName)
