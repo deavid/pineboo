@@ -1,6 +1,7 @@
 from pineboolib.utils import  checkDependencies
 import logging
 
+from sqlalchemy import create_engine
 
 logger = logging.getLogger(__name__)
 from pineboolib.plugins.sql.flqpsql import FLQPSQL
@@ -22,11 +23,11 @@ class FLQPSQL2(FLQPSQL):
         return True
 
     def safe_load(self):
-        return checkDependencies({"pg8000": "pg8000"}, False)
+        return checkDependencies({"pg8000": "pg8000", "sqlalchemy":"sqlAlchemy"}, False)
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"pg8000": "pg8000"})
+        checkDependencies({"pg8000": "pg8000", "sqlalchemy":"sqlAlchemy"})
         import pg8000
         
         
