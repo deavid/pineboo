@@ -18,7 +18,7 @@ class QTable(QtWidgets.QTableWidget):
     Manual = 1
     AutoOne = 2
     AutoOneFit = 3
-
+    sort_column_ = None
     
 
     def __init__(self, parent=None, name = None):
@@ -37,6 +37,7 @@ class QTable(QtWidgets.QTableWidget):
         self.read_only_cols = []
         self.read_only_rows = []
         self.resize_policy = 0 #Default
+        self.sort_column_ = None
     
     def currentChanged_(self, current_row, current_column, previous_row, previous_column):
         # FIXME: esto produce un TypeError: native Qt signal is not callable, porque existe una función virtual llamada currentChanged
@@ -222,16 +223,17 @@ class QTable(QtWidgets.QTableWidget):
         if item is not None and color:
             item.setBackground(color)
     
-    @decorators.NotImplementedWarn
-    def getSort(self):
-        pass
+    def getSorting(self):
+        return self.sort_column_
     
-    def setSort(self, col):
-        super().setSortingEnabled()
-        super().sortByColumn(col)
+    def setSorting(self, col):
+        if not super().isSortingEnabled():
+            super().setSortingEnabled(True)
+        super().sortByColumn(col, QtCore.Qt.AscendingOrder)
+        self.sort_column_ = col
         
     
-    sorting = property(getSort, setSort)
+    sorting = property(getSorting, setSorting)
     
     def editCell(self, row, col):
         self.editItem(self.item(row,col))
