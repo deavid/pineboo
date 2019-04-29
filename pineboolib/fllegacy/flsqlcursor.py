@@ -928,17 +928,19 @@ class FLSqlCursor(QtCore.QObject):
         if cR and r:
             try:
                 cR.bufferChanged.disconnect(self.refresh)
+                cR.newBuffer.disconnect(self.refresh)
                 #cR.d._current_changed.disconnect(self.refresh)
             except Exception:
                 pass
             cR.bufferChanged.connect(self.refresh)
+            cR.newBuffer.connect(self.refresh)
             #cR.d._current_changed.connect(self.refresh)
             try:
                 cR.newBuffer.disconnect(self.clearPersistentFilter)
+                
             except Exception:
                 pass
             cR.newBuffer.connect(self.clearPersistentFilter)
-            
             if pineboolib.project._DGI.use_model() and cR.meta_model(): #Si el cursor_relation tiene un model asociado , este cursor carga el propio también
                 self.assoc_model()
             
