@@ -13,7 +13,8 @@ class QComboBox(QtWidgets.QComboBox):
     def insertStringList(self, strl):
         self.insertItems(len(strl), strl)
     
-    @decorators.NotImplementedWarn
-    def __getattr__(self, name):
-        pass
+    
+    def setReadOnly(self, b):
+        super().setEditable(not b) 
+    
             
