@@ -341,7 +341,8 @@ class Project(object):
                 # if self._splash:
                 #    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
                 #                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
-                self.parseScript(_dir("cache", fileobj.filekey), "(%d de %d)" % (p, size_))
+                if os.path.exists(_dir("cache", fileobj.filekey)):
+                    self.parseScript(_dir("cache", fileobj.filekey), "(%d de %d)" % (p, size_))
 
                 pos_qs += 1
 
