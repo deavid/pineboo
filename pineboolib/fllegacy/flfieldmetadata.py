@@ -357,11 +357,7 @@ class FLFieldMetaData(object):
     #    self.d.associatedFieldFilterTo_ = f
 
     def setAssociatedField(self, r_or_name, f):
-        if isinstance(r_or_name, FLFieldMetaData):
-            self.d.associatedField_ = r_or_name
-        else:
-            self.d.associatedFieldName_ = r_or_name
-
+        self.d.associatedFieldName_ = r_or_name
         self.d.associatedFieldFilterTo_ = f
 
     """
@@ -374,7 +370,7 @@ class FLFieldMetaData(object):
     """
 
     def associatedField(self):
-        return self.d.associatedField_
+        return self.metadata().field(self.d.associatedFieldName_)
 
     """
     Devuelve el nombre del campo que hay que filtrar según el campo asociado.
@@ -613,7 +609,6 @@ class FLFieldMetaData(object):
         self.d.isIndex_ = od.isIndex_
         self.d.isUnique_ = od.isUnique_
         self.d.contador_ = od.contador_
-        self.d.associatedField_ = od.associatedField_
         self.d.associatedFieldName_ = od.associatedFieldName_
         self.d.associatedFieldFilterTo_ = od.associatedFieldFilterTo_
         self.d.defaultValue_ = od.defaultValue_
@@ -786,7 +781,6 @@ class FLFieldMetaDataPrivate(object):
     (ver FLFieldMetaData::associatedFieldFilterTo_) sea igual al valor de la empresa origen
     elegida (codemporig)
     """
-    associatedField_ = None
     associatedFieldName_ = None
 
     """
@@ -879,7 +873,8 @@ class FLFieldMetaDataPrivate(object):
     def inicializeEmpty(self):
         self.relationList_ = []
         self.relationM1_ = None
-        self.associatedField_ = None
+        self.associatedFieldFilterTo_ = None
+        self.associatedFieldName_ = None
         self.mtd_ = None
 
     def inicialize(self, n, a, aN, iPK, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
@@ -902,7 +897,8 @@ class FLFieldMetaDataPrivate(object):
         self.contador_ = coun
         self.relationList_ = []
         self.relationM1_ = None
-        self.associatedField_ = None
+        self.associatedFieldFilterTo_ = None
+        self.associatedFieldName_ = None
         self.defaultValue_ = defValue
         self.outTransaction_ = oT
         self.regExpValidator_ = rX
