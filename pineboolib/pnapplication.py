@@ -278,15 +278,16 @@ class Project(object):
             f1.write(fileobj.filekey + "\n")
 
             fileobjdir = os.path.dirname(_dir("cache", fileobj.filekey))
+            file_name = _dir("cache", fileobj.filekey)
             if not os.path.exists(fileobjdir):
                 os.makedirs(fileobjdir)
             
-            if os.path.exists(_dir("cache", fileobj.filekey)):
-                if _dir("cache", fileobj.filekey).endswith(".qs"):
-                    if os.path.exists("%s.py" % _dir("cache", fileobj.filekey)):
+            if os.path.exists(file_name):
+                if file_name.endswith(".qs"):
+                    if os.path.exists("%s.py" % file_name):
                         continue
                     
-                elif _dir("cache", fileobj.filekey).endswith(".mtd"):
+                elif file_name.endswith(".mtd"):
                     if os.path.exists("%s_model.py" % _dir("cache", fileobj.filekey[:-4])):
                         continue
                 else:
@@ -305,15 +306,9 @@ class Project(object):
 
                 settings = FLSettings()
                 
-                
-                    
-                
-                
-                
-                
-                    
+  
                 folder = _dir("cache", "/".join(fileobj.filekey.split("/")[:len(fileobj.filekey.split("/")) -1]))
-                if os.path.exists(folder):
+                if os.path.exists(folder) and not file_name: #Borra la carpeta si no existe el fichero destino
                     for root, dirs, files in os.walk(folder):
                         for f in files:
                             os.remove(os.path.join(root, f))
@@ -326,8 +321,8 @@ class Project(object):
 
                     
                     
-                if contenido:
-                    f2 = open(_dir("cache", fileobj.filekey), "wb")
+                if contenido and not file_name:
+                    f2 = open(file_name, "wb")
                     txt = contenido.encode(encode_, "replace")
                     f2.write(txt)
                     f2.close()
@@ -341,8 +336,9 @@ class Project(object):
                 # if self._splash:
                 #    self._splash.showMessage("Convirtiendo %s ( %d/ ??) ..." %
                 #                             (nombre, pos_qs), QtCore.Qt.AlignLeft, QtCore.Qt.white)
-                if os.path.exists(_dir("cache", fileobj.filekey)):
-                    self.parseScript(_dir("cache", fileobj.filekey), "(%d de %d)" % (p, size_))
+                if os.path.exists(file_name):
+                    
+                    self.parseScript(file_name, "(%d de %d)" % (p, size_))
 
                 pos_qs += 1
 
