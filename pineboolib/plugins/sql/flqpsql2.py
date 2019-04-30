@@ -1,9 +1,12 @@
 from pineboolib.utils import  checkDependencies
 import logging
-
 from sqlalchemy import create_engine
 
+from PyQt5.Qt import qWarning
+from PyQt5.QtWidgets import QMessageBox
+
 logger = logging.getLogger(__name__)
+
 from pineboolib.plugins.sql.flqpsql import FLQPSQL
 
 
@@ -29,6 +32,7 @@ class FLQPSQL2(FLQPSQL):
         self._dbname = db_name
         checkDependencies({"pg8000": "pg8000", "sqlalchemy":"sqlAlchemy"})
         import pg8000
+        import traceback
         
         
 
@@ -42,7 +46,6 @@ class FLQPSQL2(FLQPSQL):
         except Exception:
             import pineboolib
             if not pineboolib.project._DGI.localDesktop():
-                import traceback
                 if repr(traceback.format_exc()).find("the database system is starting up") > -1:
                     raise
                     
