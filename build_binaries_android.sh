@@ -3,11 +3,12 @@ TARGET="android-32"
 SYSROOT=""
 LOCALDIR="$(pwd)"
 export ANDROID_SDK_ROOT=~/Android/Sdk
-export ANDROID_NDK_ROOT=$LOCALDIR/src/android-ndk-r15b
+export ANDROID_NDK_ROOT=$LOCALDIR/src/android-ndk-r19c
+
 export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
 export PATH=$PATH:$ANDROID_SDK_ROOT/tools
 export PATH=$PATH:$ANDROID_NDK:$ANDROID_NDK_ROOT/build
-export ANDROID_NDK_PLATFORM=android-24
+export ANDROID_NDK_PLATFORM=android-26
 export ANDROID_NDK_TOOLCHAIN_VERSION=4.9
 export TOOLCHAIN_PREFIX=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/arm-linux-androideabi/bin
 
