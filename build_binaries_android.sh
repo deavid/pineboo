@@ -24,6 +24,22 @@ make
 cd ..
 fi
 
+#if [ ! -e "zlib-android" ] ; then
+#git clone https://github.com/madler/zlib.git -b v1.2.11 --depth=1 zlib-android
+
+#BINS=$ANDROID_NDK_ROOT/toolchains/x86_64-4.9/prebuilt/linux-x86_64/bin
+
+#export PATH=$BINS:$PATH
+#export CROSS_COMPILE=arm-linux-androideabi-
+#export CC=arm-linux-androideabi-gcc
+#export AR=arm-linux-androideabi-ar cqs
+#export RANLIB=arm-linux-androideabi-ranlib
+#cd zlib-android
+#./configure --static
+#make
+#cd ..
+#fi
+
 if [ ! -e "bzip2-android" ] ; then
 git clone https://github.com/dmcrystax/cosp-android-bzip2 bzip2-android
 cd bzip2-android

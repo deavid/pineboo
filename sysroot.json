@@ -6,6 +6,7 @@
 	"macos|win|linux#source": "openssl-1.1.*.tar.gz"
     },
 
+
     "qt5": {
         "android#qt_dir":           "/opt/Qt5.12.3/5.12.3/android_armv7",
 	"linux#qt_dir":             "/opt/Qt5.12.3/5.12.3/gcc_64",

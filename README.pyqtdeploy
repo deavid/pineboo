@@ -8,7 +8,7 @@ Copiamos los siguientes paquetes en la carpeta src.
 
 Compilación básica (Linux64 - Linux64)
 ============================================
-https://www.python.org/ftp/python/3.7.2/Python-3.7.2.tar.xz
+https://www.python.org/ftp/python/3.6.7/Python-3.6.7.tar.xz
 https://www.openssl.org/source/openssl-1.1.1b.tar.gz
 https://www.riverbankcomputing.com/static/Downloads/sip/4.19.16/sip-4.19.16.tar.gz
 https://www.riverbankcomputing.com/static/Downloads/PyQt5/5.12.1/PyQt5_gpl-5.12.1.tar.gz
@@ -38,6 +38,7 @@ configure -> sdk manager -> Appearance & Behavior -> System Settings -> Android 
     Google Repository
 
 
+sudo apt-get install gcc-arm-linux-gnueabi
 
 
 Ejecutar:
