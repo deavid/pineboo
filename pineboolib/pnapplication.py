@@ -321,7 +321,7 @@ class Project(object):
 
                     
                     
-                if contenido and not file_name:
+                if contenido and not os.path.exists(file_name):
                     f2 = open(file_name, "wb")
                     txt = contenido.encode(encode_, "replace")
                     f2.write(txt)
