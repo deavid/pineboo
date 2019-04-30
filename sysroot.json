@@ -7,11 +7,12 @@
     },
 
     "qt5": {
-        "android#qt_dir":           "/opt/Qt5.*/*/android_armv7",
+        "android#qt_dir":           "/opt/Qt5.12.3/5.12.3/android_armv7",
+	"linux#qt_dir":             "/opt/Qt5.12.3/5.12.3/gcc_64",
         "ios#qt_dir":               "Qt/*/ios",
 	"win#qt_dir":		    "/opt/Qt5.11.3-WIN-64",
 
-        "macos|linux#source":   "qt-everywhere-src-5.*.tar.xz",
+        "macos#source":   "qt-everywhere-src-5.*.tar.xz",
 
         "android|linux#ssl":        "openssl-runtime",
         "ios#ssl":                  "securetransport",
