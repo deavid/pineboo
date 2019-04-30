@@ -27,9 +27,16 @@ def process_error(error_str):
         var = var.replace("\n","")
         var = var.replace("'", "")
         ret += sys.translate("scripts", "La forma correcta de acceder a .%s es ().%s") % (var, var)
+        
+    elif "AttributeError: 'ifaceCtx' object has no attribute" in error_str:
+        error = "AttributeError: 'ifaceCtx' object has no attribute"
+        var = error_str[error_str.find(error) + len(error) + 1:] 
+        var = var.replace("\n","")
+        var = var.replace("'", "")
+        ret += sys.translate("scripts", "No se ha traducido el script o el script está vacio")
     
     else:
-        "Información no disponible."
+        ret += sys.translate("scripts", "Información no disponible.")
     
     return ret   
     
