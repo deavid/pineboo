@@ -186,10 +186,11 @@ def traceit(frame, event, arg):
 
     This function is intended to be the callback of sys.settrace.
     """
-    import linecache
+    
     # if event != "line":
     #    return traceit
     try:
+        import linecache
         lineno = frame.f_lineno
         filename = frame.f_globals["__file__"]
         # if "pineboo" not in filename:
