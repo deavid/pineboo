@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtWidgets import QMessageBox, QApplication
+from PyQt5.QtWidgets import QMessageBox, QApplication, QDesktopWidget
+from PyQt5.QtCore import QPoint
 import pineboolib
 import logging
 
 logger = logging.getLogger("messageBox")
 
 class MessageBox(QMessageBox):
-    
+
+        
     @classmethod
     def msgbox(cls, typename, text, button0, button1=None, button2=None, title=None, form=None):
         
         if pineboolib.project._splash:
             pineboolib.project._splash.hide()
         
-        
+        parent = pineboolib.project.main_window
 
         if not isinstance(text, str):
             temp = text
@@ -51,12 +53,24 @@ class MessageBox(QMessageBox):
         # title = unicode(title,"UTF-8")
         # text = unicode(text,"UTF-8")
         msg = QMessageBox(icon, title, text)
+        msg.setParent(parent)
+        msg.setWindowModality(1)
+        msg.setEnabled(True)
         if button0:
             msg.addButton(button0)
         if button1:
             msg.addButton(button1)
         if button2:
             msg.addButton(button2)
+        
+        #size = msg.sizeHint()
+        #screen_rect = QDesktopWidget().screenGeometry(parent)
+        #screen_num = QDesktopWidget().screenNumber(parent)
+        #geo = QDesktopWidget().availableGeometry(screen_num)
+        #print("*", geo, geo.x(), geo.y())
+        #msg.move(QPoint(geo.x() + ( geo.width() / 2 ) + 100, geo.y() + ( geo.height() / 2 )))
+           
+        
         return msg.exec_()
 
     @classmethod
