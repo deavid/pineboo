@@ -137,21 +137,21 @@ class AQS(object):
         
     
 
-    def __getattr__(self, name):
-
-        ret_ = getattr(QtGui, "Q%sEvent" % name, None)
-        if ret_:
-            return ret_
-
+    def __getattr__(self, name):        
         if name in self.translate:
             if name == "DockLeft":
                 name = "LeftDockWidgetArea"
-
-        for lib in [QFrame, QLabel, QSizePolicy, QtCore.Qt]:
-            ret_ = getattr(lib, name, None)
-
-            if ret_ is not None:
-                return ret_
+        
+        ret_ = getattr(QtGui, "Q%sEvent" % name, None)
+        
+        if ret_ is None:
+            for lib in [QFrame, QLabel, QSizePolicy, QtCore.Qt]:
+                ret_ = getattr(lib, name, None)
+                if ret_ is not None:
+                    break
+                
+        if ret_ is not None:
+            return ret_
 
         logger.warning("AQS: No se encuentra el atributo %s", name)
         
