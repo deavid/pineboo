@@ -552,7 +552,7 @@ class FLApplication(QtCore.QObject):
             mw.addDockWidget(QtCore.Qt.BottomDockWidgetArea, dw)
 
     def consoleShown(self):
-        return (self.ted_output_ and self.ted_output_.isVisible())
+        return self.ted_output_ and not self.ted_output_.isHidden()
 
     @decorators.NotImplementedWarn
     def modMainWidget(self, id_modulo):
@@ -689,7 +689,7 @@ class FLApplication(QtCore.QObject):
             do_exit = self.queryExit()
         if do_exit:
             self.destroying_ = True
-            if self.ted_output_:
+            if self.consoleShown():
                 self.ted_output_.close()
 
             if not self.form_alone_:
