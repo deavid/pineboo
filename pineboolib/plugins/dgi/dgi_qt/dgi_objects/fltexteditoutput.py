@@ -17,3 +17,8 @@ class FLTextEditOutput(QtWidgets.QPlainTextEdit):
     def write(self, txt):
         self.oldStdout.write(txt)
         self.appendPlainText(str(txt))
+    
+    def close(self):
+        sys.stdout = self.oldStdout
+        sys.stderr = self.oldStderr
+        super().close()
