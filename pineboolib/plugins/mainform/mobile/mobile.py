@@ -3,6 +3,10 @@ from pineboolib.qsa import *
 from pineboolib import decorators
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QTreeWidgetItem
+import logging
+
+
+logging.getLogger("mainForm_%s" % __name__)
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -27,7 +31,7 @@ class MainForm(QtWidgets.QMainWindow):
         super(MainForm, self).__init__()
 
         self.ui_ = None
-        self.w_ = QMainWindow()
+        #self.w_ = QMainWindow()
 
         aqApp.main_widget_ = self
 
@@ -158,6 +162,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         self.loadTabs()
         aqApp.showConsole()
+        
 
     def loadTabs(self):
         if self.ag_menu_:
@@ -245,7 +250,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
-            aqApp.call("%s.iface.init" % module, [])
+            aqApp.call("%s.iface.init" % module, [], None, False)
 
         mng = aqApp.db().managerModules()
         mng.setActiveIdModule(module)
@@ -427,10 +432,12 @@ class MainForm(QtWidgets.QMainWindow):
         self.dck_rec_.update(self.ag_rec_)
         self.dck_mar_.update(self.ag_mar_)
         try:
-            self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
-            self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
+            self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.disconnect(aqApp.aboutQt)
+            self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.disconnect(aqApp.aboutPineboo)
         except:
             pass
+        self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
+        self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
         self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(aqApp.chooseFont)
         #self.w_.findChild(QtWidgets.QAction, "style").triggered.connect(aqApp.showStyles)
         self.w_.findChild(QtWidgets.QAction, "helpIndexAction").triggered.connect(aqApp.helpIndex)
@@ -643,7 +650,7 @@ class MainForm(QtWidgets.QMainWindow):
         doc = QDomDocument()
         cc = mng.contentCached(ui_file)
         if not cc or not doc.setContent(cc):
-            print("WARN::%s::widgetActions::No se ha podido cargar %s" % (__name__, ui_file))
+            logger.warning("No se ha podido cargar %s" % (ui_file))
             return None
 
         w = mng.createUI(ui_file)
@@ -747,7 +754,7 @@ class MainForm(QtWidgets.QMainWindow):
 
     def show(self):
         super(MainForm, self).show()
-        self.w_.activateWindow()
+        self.activateWindow()
 
 
     def initScript(self):
