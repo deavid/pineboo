@@ -44,6 +44,16 @@ sudo apt-get install gcc-arm-linux-gnueabi
 Ejecutar:
 build_binaries_android.sh
 
+
+Compilación windows-64 (nativa)
+============================================
+
+* Visual Studio Build Tools 2019 Community (Instalar VC2017)
+* qt-unified-windows-x86-3.1.0-online.exe
+
+
+
+
 Compilación cruzada windows-64
 ============================================
 
