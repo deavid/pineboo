@@ -126,7 +126,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.filter_ = None
         self.iconSize = pineboolib.project._DGI.iconSize()
         self.tabControlLayout = QtWidgets.QHBoxLayout()
-        self.tabFilter = QtWidgets.QGroupBox()  # contiene filtros
+        self.tabFilter = QtWidgets.QFrame()  # contiene filtros
         self.functionGetColor_ = None
 
         while not isinstance(self.topWidget, FLFormDB):
@@ -824,7 +824,7 @@ class FLTableDB(QtWidgets.QWidget):
         self.dataLayout = QtWidgets.QHBoxLayout()  # Contiene tabData y tabFilters
         #self.dataLayout.setContentsMargins(0, 0, 0, 0)
         #self.dataLayout.setSizeConstraint(0)
-        self.tabData = QtWidgets.QGroupBox()  # contiene data
+        self.tabData = QtWidgets.QFrame()  # contiene data
         self.tabData.setSizePolicy(sizePolicyGB)
         
 
@@ -838,10 +838,10 @@ class FLTableDB(QtWidgets.QWidget):
         self.tabData.setLayout(self.tabDataLayout)
         
         #Fix para acercar el lineEdit con el fltable
-        self.tabData.setContentsMargins(0, 0, 0, 0)
-        self.tabFilter.setContentsMargins(0, 0, 0, 0)
-        self.tabDataLayout.setContentsMargins(0, 0, 0, 0)
-        filterL.setContentsMargins(0, 0, 0, 0)
+        #self.tabData.setContentsMargins(0, 0, 0, 0)
+        #self.tabFilter.setContentsMargins(0, 0, 0, 0)
+        #self.tabDataLayout.setContentsMargins(0, 0, 0, 0)
+        #filterL.setContentsMargins(0, 0, 0, 0)
         
         self.tabFilter.setLayout(filterL)
 
@@ -2113,9 +2113,14 @@ class FLTableDB(QtWidgets.QWidget):
     @param  field Nombre del campo de la base de datos correspondiente a la columna
     @param  w     Ancho de la columna
     """
-    @decorators.NotImplementedWarn
     def setColumnWidth(self, field, w):
-        pass
+        if self.tableRecords_:
+            col = self.tableRecords_.column_name_to_column_index(field) if isinstance(field, str) else field
+            
+            self.tableRecords_.setColumnWidth(col, w)
+                
+            
+
 
     """
     Selecciona la fila indicada
