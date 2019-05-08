@@ -56,5 +56,5 @@ fi
 
 
 
-python3 ./build-pineboo-binaries.py --target $TARGET $SYSROOT --verbose
+python3 ./build-pineboo-binaries.py --target $TARGET $SYSROOT
 #python3 ./build-demo.py --target $TARGET $SYSROOT --verbose
