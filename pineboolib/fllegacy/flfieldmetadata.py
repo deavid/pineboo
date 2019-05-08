@@ -357,9 +357,8 @@ class FLFieldMetaData(object):
     #    self.d.associatedFieldFilterTo_ = f
 
     def setAssociatedField(self, r_or_name, f):
-        name = r_or_name
-        if not isinstance(r_or_name, str):
-            name = r_or_name.name()
+        name = r_or_name.name() if not isinstance(r_or_name, str) else r_or_name
+        
         self.d.associatedFieldName_ = name
         self.d.associatedFieldFilterTo_ = f
 
