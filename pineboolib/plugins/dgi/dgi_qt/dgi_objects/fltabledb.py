@@ -60,7 +60,6 @@ class FLTableDB(QtWidgets.QWidget):
     Null = 9
     NotNull = 10
 
-    tdbFilter = None
     mapCondType = None
 
     _parent = None
