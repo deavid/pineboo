@@ -397,7 +397,7 @@ class FLTableDB(QtWidgets.QWidget):
     def setReadOnly(self, mode):
 
         if self.tableRecords_:
-            self.readonly = mode
+            self.readonly_ = mode
             self.tableRecords_.setFLReadOnly(mode)
             self.readOnlyChanged.emit(mode)
 
@@ -784,8 +784,9 @@ class FLTableDB(QtWidgets.QWidget):
             if not isinstance(self.topWidget, FLFormRecordDB):
                 self.lineEditSearch.setFocus()
 
+        
         if self.cursorAux:
-            if isinstance(self.topWidget, FLFormRecordDB) and self.cursor_.modeAccess == FLSqlCursor.Browse:
+            if isinstance(self.topWidget, FLFormRecordDB) and self.cursorAux.modeAccess() == FLSqlCursor.Browse:
                 self.cursor_.setEdition(False)
                 self.setReadOnly(True)
 
@@ -1465,20 +1466,20 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Almacena si el componente está en modo sólo lectura
     """
-    readonly_ = None
-    reqReadOnly_ = None
+    readonly_ = False
+    reqReadOnly_ = False
 
     """
     Almacena si el componente está en modo sólo edición
     """
-    editonly_ = None
-    reqEditOnly_ = None
+    editonly_ = False
+    reqEditOnly_ = False
 
     """
     Indica si el componente está en modo sólo permitir añadir registros
     """
-    insertonly_ = None
-    reqInsertOnly_ = None
+    insertonly_ = False
+    reqInsertOnly_ = False
 
     """
     Almacena los metadatos del campo por el que está actualmente ordenada la tabla
@@ -1640,8 +1641,8 @@ class FLTableDB(QtWidgets.QWidget):
     """
     Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
     """
-    onlyTable_ = None
-    reqOnlyTable_ = None
+    onlyTable_ = False
+    reqOnlyTable_ = False
 
     """
     Editor falso
@@ -1879,6 +1880,8 @@ class FLTableDB(QtWidgets.QWidget):
         w = self.sender()
         if isinstance(w, FLDataTable):
             w = None
+           
+        
         if w and (not self.cursor_ or self.reqReadOnly_ or self.reqEditOnly_ or self.reqOnlyTable_ or (self.cursor_.cursorRelation() and self.cursor_.cursorRelation().isLocked())):
             w.setDisabled(True)
             return

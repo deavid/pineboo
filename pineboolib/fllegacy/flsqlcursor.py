@@ -2106,7 +2106,7 @@ class FLSqlCursor(QtCore.QObject):
                         ret_ = True
                         break
             
-        if not ret_ and self.cursorRelation() is not None:
+        if not ret_ and self.cursorRelation():
             ret_ = self.cursorRelation().isLocked()
         
         return ret_

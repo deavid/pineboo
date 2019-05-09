@@ -105,7 +105,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Indica que no se realicen operaciones con la base de datos (abrir formularios). Modo "sólo tabla".
     """
-    onlyTable_ = None
+    onlyTable_ = False
 
     def __init__(self, parent=None, name=None, popup=False):
         super(FLDataTable, self).__init__(parent)
@@ -115,6 +115,10 @@ class FLDataTable(QtWidgets.QTableView):
 
         if not name:
             self.setName("FLDataTable")
+        
+        self.readonly_ = False
+        self.editonly_ = False
+        self.insertonly_ = False
 
         self.pixOk_ = filedir("../share/icons", "unlock.png")
         self.pixNo_ = filedir("../share/icons", "lock.png")
@@ -167,7 +171,7 @@ class FLDataTable(QtWidgets.QTableView):
                 cur_chg = True
 
             if not self.cursor_ or cur_chg:
-                self.cursor_ = c
+                self.cursor_ = c                      
                 self.setFLReadOnly(self.readonly_)
                 self.setEditOnly(self.editonly_)
                 self.setInsertOnly(self.insertonly_)
@@ -227,6 +231,7 @@ class FLDataTable(QtWidgets.QTableView):
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return
+
 
         self.cursor_.setEdition(not mode, self)
         self.readonly_ = mode
