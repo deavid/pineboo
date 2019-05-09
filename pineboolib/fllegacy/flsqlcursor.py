@@ -837,7 +837,7 @@ class FLSqlCursor(QtCore.QObject):
         # FIXME: XMLAction Tiene que ser eliminado de fuera de pnapplication
         from pineboolib.utils import XMLStruct
         if isinstance(name, XMLStruct):
-            print("FIXME::__init__ XMLSTRUCT", __name__)
+            logger.warning("FIXME::__init__ XMLSTRUCT %s", name.name, stack_info = True)
             name_action = name.name
         else:
             name_action = name
