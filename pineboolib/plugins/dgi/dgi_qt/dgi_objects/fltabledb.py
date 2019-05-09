@@ -2049,7 +2049,7 @@ class FLTableDB(QtWidgets.QWidget):
         if not textSearch:
             textSearch = self.cursor_.valueBuffer(field.name())
 
-        self.refresh(True)
+        #self.refresh(True)
 
         if textSearch:
             self.refresh(False, True)
