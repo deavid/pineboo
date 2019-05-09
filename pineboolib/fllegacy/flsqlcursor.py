@@ -1610,7 +1610,7 @@ class FLSqlCursor(QtCore.QObject):
         return r
 
     def size(self):
-        return self.d._model.rowCount()
+        return self.model().size()
 
     """
     Abre el formulario asociado a la tabla origen en el modo indicado.

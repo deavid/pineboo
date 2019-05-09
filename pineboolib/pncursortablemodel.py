@@ -45,6 +45,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     parent_view = None
     need_update = False
     _driver_sql = None
+    _size = None
     """
     Constructor
     @param conn. Objeto PNConnection
@@ -100,6 +101,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self._showPixmap = True
         self.color_function_ = None
         self.color_dict_ = {}
+        self._size = None
 
         self.where_filters = {}
         self.where_filters["main-filter"] = ""
@@ -405,7 +407,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         return None
 
     """
-    Cuando el driver SQL soporta Threa, recoge info de la tabla
+    Cuando el driver SQL soporta Thread, recoge info de la tabla
     """
 
     def threadFetch(self):
@@ -598,7 +600,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         """ FIN """
         
         
-        
+        self._size = None
         
 
         parent = QtCore.QModelIndex()
@@ -1017,6 +1019,25 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def rowCount(self, parent=None):
         return self.rowsLoaded
+
+
+    """
+    Devuelve el tamaño de registros seleccionados con el cursor
+    @return lineas seleccionadas
+    """
+    def size(self):
+        if self._size is None: #Cada vez que hacemos refresh se limpia
+            util = FLUtil()
+            from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()  
+            where_ = self.where_filter[:self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
+            #where_ = self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" %  self.metadata().primaryKey()) if self.where_filter.find("ORDER BY") > -1 else " %s GROUP BY %s" %  (self.where_filter, self.metadata().primaryKey())
+            self._size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
+            
+            if isinstance(self._size, bool):
+                self._size = 0
+        
+        return self._size
+            
 
     """
     Devuelve datos de la cebecera
