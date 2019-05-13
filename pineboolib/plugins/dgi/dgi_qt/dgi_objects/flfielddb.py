@@ -1754,7 +1754,10 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if type_ == "uint" or type_ == "int" or type_ == "double" or type_ == "string":
             if ol:
-                self.editor_ = pineboolib.pncontrolsfactory.QComboBox(self)
+                self.editor_ = pineboolib.pncontrolsfactory.QComboBox()
+                style_ = self.editor_.styleSheet()
+                self.editor_.setParent(self)
+                
                 self.editor_.name = "editor"
                 self.editor_.setEditable(False)
                 # self.editor_.setAutoCompletion(True)
@@ -1766,6 +1769,10 @@ class FLFieldDB(QtWidgets.QWidget):
                 # if not field.allowNull():
                 # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
                 # self.editor_.setStyleSheet('background-color:' + self.notNullColor().name())
+                if not field.allowNull() and field.editable():
+                    self.editor_.setStyleSheet('background-color:%s; color:%s' % (self.notNullColor(), QtGui.QColor(Qt.black).name()))
+                else:
+                    self.editor_.setStyleSheet(style_)
 
                 olTranslated = []
                 olNoTranslated = field.optionsList()
