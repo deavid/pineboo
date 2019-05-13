@@ -477,12 +477,17 @@ class FLSqlQuery(object):
                         tables_list = tl.split(",")
                     
                 
-                    table_list = tables_list
-                    for t in table_list:
+                    for t in tables_list:
                         mtd = self.d.db_.manager().metadata(t, True) if t.find("=") == -1 else None
-                        if mtd is not None and name in mtd.fieldsNames():
+                        name_fixed = name
+                        if name_fixed.upper().startswith("SUM(") or name_fixed.upper().startswith("COUNT("):
+                            name_fixed = name_fixed.replace(")", "")
+                            name_fixed = name_fixed.replace("SUM(", "")
+                            name_fixed = name_fixed.replace("COUNT(", "")
+                        
+                        if mtd is not None and name_fixed in mtd.fieldsNames():
                             table_name = t
-                            field_name = name
+                            field_name = name_fixed
                             break
                 
                 if field_name is not None:
@@ -497,7 +502,6 @@ class FLSqlQuery(object):
         if raw:
             return self.d.db_.manager().fetchLargeValue(self._row[pos])
         else:
-            
             from pineboolib.qsa import Date
             
             
@@ -506,7 +510,7 @@ class FLSqlQuery(object):
             except Exception:
                 retorno = None
             
-            if retorno is None and (name.upper().startswith("SUM(") or name.upper().startswith("COUNT(")):
+            if retorno is None and mtd_field is not None and mtd_field.type() in ("double", "uint", "int"):
                 retorno = 0
                 
             
