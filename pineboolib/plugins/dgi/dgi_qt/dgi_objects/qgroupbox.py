@@ -8,6 +8,7 @@ class QGroupBox(QtWidgets.QGroupBox):
     
     style_str = None
     _line_width = 0
+    presset = Qt.pyqtSignal(int)
     
     def __init__(self, *args, **kwargs):
         super(QGroupBox, self).__init__(*args, **kwargs)
