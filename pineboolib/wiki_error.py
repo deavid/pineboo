@@ -34,6 +34,11 @@ def process_error(error_str):
         var = var.replace("\n","")
         var = var.replace("'", "")
         ret += sys.translate("scripts", "No se ha traducido el script o el script está vacio")
+    elif "object is not callable" in error_str:
+        error = "object is not callable"
+        var = error_str[error_str.find("TypeError") + 10:error_str.find(error)] 
+        ret += sys.translate("scripts", "Estas llamando a un objeto %s .Los parentesis finales hay que quitarlos." % var)
+        
     
     else:
         ret += sys.translate("scripts", "Información no disponible.")
