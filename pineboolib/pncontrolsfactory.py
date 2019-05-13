@@ -247,7 +247,7 @@ class SysType(object):
         return pineboolib.project.conn.database(connName).driverName()
 
     def addDatabase(self, connName="default"):
-        return pineboolib.project.conn.useConn(connName)()
+        return pineboolib.project.conn.useConn(connName)
 
     def removeDatabase(self, connName="default"):
         return pineboolib.project.conn.removeConn(connName)
