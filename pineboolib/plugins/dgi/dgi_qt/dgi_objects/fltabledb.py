@@ -200,8 +200,8 @@ class FLTableDB(QtWidgets.QWidget):
         ownTMD = None
         if self.tableName_:
             if DEBUG:
-                print("**FLTableDB::name: %r tableName: %r" %
-                      (self.objectName(), self.tableName_))
+                logger.warning("**FLTableDB::name: %r tableName: %r" ,
+                      self.objectName(), self.tableName_)
 
             if not self.cursor_.db().manager().existsTable(self.tableName_):
                 ownTMD = True
@@ -265,14 +265,14 @@ class FLTableDB(QtWidgets.QWidget):
                 rMD = FLRelationMetaData(self.tableName_, self.fieldRelation_,
                                          FLRelationMetaData.RELATION_1M, False, False, checkIntegrity)
                 fMD.addRelationMD(rMD)
-                print("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, "
-                      "pero sin embargo se han indicado los campos de relación( %s, %s )"
-                      % (curName, self.tableName_, self.fieldRelation_, self.foreignField_))
-                print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" %
-                      (curName, self.foreignField_, self.tableName_, self.fieldRelation_))
+                logger.warning("FLTableDB : La relación entre la tabla del formulario %s y esta tabla %s de este campo no existe, "
+                      "pero sin embargo se han indicado los campos de relación( %s, %s )" ,
+                      curName, self.tableName_, self.fieldRelation_, self.foreignField_)
+                logger.warning("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" ,
+                      curName, self.foreignField_, self.tableName_, self.fieldRelation_)
             else:
-                print("FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )" % (
-                    self.foreignField_, curName))
+                logger.warning("FLTableDB : El campo ( %s ) indicado en la propiedad foreignField no se encuentra en la tabla ( %s )" ,
+                    self.foreignField_, curName)
                 pass
 
         rMD = testM1
@@ -283,13 +283,13 @@ class FLTableDB(QtWidgets.QWidget):
                     curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
                 if DEBUG:
-                    print("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" %
-                          (self.tableName_, self.fieldRelation_, curName, self.foreignField_))
+                    loger.warning("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s" ,
+                          self.tableName_, self.fieldRelation_, curName, self.foreignField_)
 
             else:
                 if DEBUG:
-                    print("FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" % (
-                        self.fieldRelation_, self.tableName_))
+                    loger.warning("FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" , 
+                        self.fieldRelation_, self.tableName_)
 
         self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor_.db(
         ).connectionName(), self.cursorAux, rMD, self)
