@@ -506,6 +506,11 @@ class FLSqlQuery(object):
             except Exception:
                 retorno = None
             
+            if retorno is None and (name.upper().startswith("SUM(") or name.upper().startswith("COUNT(")):
+                retorno = 0
+                
+            
+            
             if mtd_field is not None:
                 #field = self.d.db_.manager().metadata(table_name, True).field(field_name)
                 if mtd_field.type() == "date" and isinstance(retorno, str):
