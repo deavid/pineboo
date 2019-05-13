@@ -1100,7 +1100,7 @@ class FLTableDB(QtWidgets.QWidget):
                 rX = field.regExpValidator()
                 ol = field.hasOptionsList()
                 from pineboolib.pncontrolsfactory import QComboBox
-                cond = QComboBox()
+                cond = QComboBox(self)
                 if not type == "pixmap":
                     condList = [util.tr("Todos"), util.tr("Igual a Valor"), util.tr(
                         "Distinto de Valor"), util.tr("Vacío"), util.tr("No Vacío")]
@@ -1118,7 +1118,7 @@ class FLTableDB(QtWidgets.QWidget):
                     editor_ = None
                     if type in ("uint, int", "double", "string", "stringList"):
                         if ol:
-                            editor_ = QComboBox()
+                            editor_ = QComboBox(self)
                             olTranslated = []
                             olNoTranslated = field.optionsList()
                             # print(field.optionsList())
@@ -1164,6 +1164,7 @@ class FLTableDB(QtWidgets.QWidget):
                         editor_ = pineboolib.pncontrolsfactory.FLDateEdit(self, _label)
                         # editor_.setOrder(FLDateEdit.DMY) # FIXME
                         editor_.setAutoAdvance(True)
+                        #editor_.setCalendarPopup(True)
                         editor_.setSeparator("-")
                         da = QtCore.QDate()
                         editor_.setDate(da.currentDate())
