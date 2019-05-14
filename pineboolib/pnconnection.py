@@ -212,7 +212,7 @@ class PNConnection(QtCore.QObject):
     def doTransaction(self, cursor):
         if not cursor or not self.db():
             return False
-
+        
         settings = FLSettings()
         if self.transaction_ == 0:
             if settings.readBoolEntry("application/isDebuggerMode", False):
@@ -236,6 +236,7 @@ class PNConnection(QtCore.QObject):
 
             self.transaction_ = self.transaction_ + 1
             cursor.d.transactionsOpened_.append(self.transaction_)  # push
+            return True
 
     def transactionLevel(self):
         return self.transaction_
