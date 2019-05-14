@@ -5,9 +5,10 @@ from PyQt5 import QtCore
 
 from pineboolib.fllegacy.fltranslator import FLTranslator
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSignal
 
 
 logger = logging.getLogger("FLApplication")
@@ -566,18 +567,18 @@ class FLApplication(QtCore.QObject):
             self.call(self.script_entry_function_, [], self)
             self.script_entry_function_ = None
 
-    @decorators.NotImplementedWarn
+
     def emitTransactionBegin(self, o):
         if self.notify_begin_transaction_:
             o.transactionBegin.emit()
 
-    @decorators.NotImplementedWarn
-    def emitTansactionEnd(self, o):
+
+    def emitTransactionEnd(self, o):
         if self.notify_end_transaction_:
             o.transactionEnd.emit()
 
-    @decorators.NotImplementedWarn
-    def emitTransactionRollBack(self, o):
+
+    def emitTransactionRollback(self, o):
         if self.notify_roll_back_transaction_:
             o.transsactionRollBack.emit()
 
