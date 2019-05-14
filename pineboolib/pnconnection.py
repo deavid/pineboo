@@ -6,7 +6,9 @@ from PyQt5 import QtCore, QtWidgets
 
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib import decorators
+from pineboolib.pncontrolsfactory import aqApp
 
 
 
@@ -207,35 +209,65 @@ class PNConnection(QtCore.QObject):
         return self.driverSql.formatValueLike(t, v, upper)
 
     def canSavePoint(self):
-        return True
+        return self.driverSql.canSavePoint()
+    
+    def canTransaction(self):
+        return self.driverSql.canTransaction()
 
     def doTransaction(self, cursor):
         if not cursor or not self.db():
             return False
         
         settings = FLSettings()
-        if self.transaction_ == 0:
+        if self.transaction_ == 0 and self.canTransaction():
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.info("Iniciando Transacción... %s", self.transaction_)
+                aqApp.statusHelpMsg("Iniciando Transacción... %s" % self.transaction_)
             if self.transaction():
-                self.savePoint(self.transaction_)
                 self.lastActiveCursor_ = cursor
+                aqApp.emitTransactionBegin(cursor)
+                
+                if not self.canSavePoint():
+                    if self.currentSavePoint_:
+                        del self.currentSavePoint_
+                        self.currentSavePoint_ = None
+                    
+                    self.stackSavePoints_.clear()
+                    self.queueSavePoints_.clear()
+                
                 self.transaction_ = self.transaction_ + 1
-                # cursor.d.transactionsOpened_.push(self.transaction_)
-                cursor.d.transactionsOpened_.append(self.transaction_)
+                cursor.d.transactionsOpened_.insert(0, self.transaction_)
                 return True
             else:
-
-                logger.warning(
-                    "doTransaction: Fallo al intentar iniciar la transacción")
+                logger.warning("doTransaction: Fallo al intentar iniciar la transacción")
                 return False
+            
         else:
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.info("Creando punto de salvaguarda %s", self.transaction_)
-            self.savePoint(self.transaction_)
+                aqApp.statusHelpMsg("Creando punto de salvaguarda %s" % self.transaction_)
+                if not self.canSavePoint():
+                    if self.transaction_ == 0:
+                        if self.currentSavePoint_:
+                            del self.currentSavePoint_
+                            self.currentSavePoint_ = None
+                        
+                        self.stackSavePoints_.clear()
+                        self.queueSavePoints_.clear()
+                    
+                    if self.currentSavePoint_:
+                        if self.stackSavePoints_:
+                            self.stackSavePoints_.insert(0, self.currentSavePoint_)
+                        else:
+                            self.stackSavePoints_.append(self.currentSavePoint_)
+                    
+                    self.currentSavePoint_ = FLSqlSavePoint(self.transaction_)
+                else:
+                    self.savePoint(self.transaction_)
 
             self.transaction_ = self.transaction_ + 1
-            cursor.d.transactionsOpened_.append(self.transaction_)  # push
+            if cursor.d.transactionsOpened_:
+                cursor.d.transactionsOpened_.index(0, self.transaction_)  # push
+            else:
+                cursor.d.transactionsOpened_.append(self.transaction_)
             return True
 
     def transactionLevel(self):
@@ -272,28 +304,66 @@ class PNConnection(QtCore.QObject):
         else:
             return True
 
-        if self.transaction_ == 0:
-            logger.info("Deshaciendo Transacción...")
-            try:
-                self.rollbackSavePoint(self.transaction_)
-                self.rollbackTransaction()
+        if self.transaction_ == 0 and self.canTransaction():
+            aqApp.statusHelpMsg("Deshaciendo Transacción...")
+            if self.rollbackTransaction():
                 self.lastActiveCursor_ = None
+                
+                if not self.canSavePoint():
+                    if self.currentSavePoint_:
+                        del self.currentSavePoint_
+                        self.currentSavePoint_ = None
+                    
+                    self.stackSavePoints_.clear()
+                    self.queueSavePoints_.clear()
+                
                 cur.d.modeAccess_ = FLSqlCursor.Browse
                 if cancel:
                     cur.select()
-
+                
+                aqApp.emitTransactionRollback(cur)        
                 return True
-            except Exception:
-                logger.exception(
-                    "doRollback: Fallo al intentar deshacer transacción")
+            else:
+                logger.warning("doRollback: Fallo al intentar deshacer transacción")
                 return False
 
         else:
-            logger.info("Restaurando punto de salvaguarda %s...",
-                        self.transaction_)
-            self.rollbackSavePoint(self.transaction_)
+            aqApp.statusHelpMsg("Restaurando punto de salvaguarda %s..." % self.transaction_)
+            if not self.canSavePoint():
+                tam_queue = len(self.queueSavePoints_)
+                for i in range(tam_queue):
+                    temp_save_point = self.queueSavePoints_.dequeue()
+                    temp_id = temp_save_point.id()
+                    
+                    if temp_id > self.transaction_ or self.transaction_ == 0:
+                        temp_save_point.undo()
+                        del temp_save_point
+                    else: 
+                        self.queueSavePoints_.append(temp_save_point)
+                
+                if self.currentSavePoint_:
+                    self.currentSavePoint_.undo()
+                    del self.currentSavePoint_
+                    self.currentSavePoint_ = None
+                    if self.stackSavePoints_:
+                        self.currentSavePoint_ = self.stackSavePoints_.pop()
+                
+                if self.transaction_ == 0:
+                    if self.currentSavePoint_:
+                        del self.currentSavePoint_
+                        self.currentSavePoint_ = None
+                    
+                    self.stackSavePoints_.clear()
+                    self.queueSavePoints_.clear()
+                
+            else:
+                self.rollbackSavePoint(self.transaction_)
+
             cur.d.modeAccess_ = FLSqlCursor.Browse
             return True
+    
+    
+    
 
     def interactiveGUI(self):
         return self.interactiveGUI_
@@ -320,40 +390,73 @@ class PNConnection(QtCore.QObject):
 
             return True
 
-        if self.transaction_ == 0:
+        if self.transaction_ == 0 and self.canTransaction():
             settings = FLSettings()
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.info("Terminando transacción... %s", self.transaction_)
+                aqApp.statusHelpMsg("Terminando transacción... %s" % self.transaction_)
             try:
-                # self.conn.commit()
-                self.releaseSavePoint(self.transaction_)
-                self.commitTransaction()
-                self.lastActiveCursor_ = None
-
-                if notify:
-                    cur.d.modeAccess_ = FLSqlCursor.Browse
-
-                # aqApp.emitTransactionEnd(cur)
-                return True
+                if self.driver().commitTransaction():
+                    self.lastActiveCursor_ = None
+                
+                    if not self.canSavePoint():
+                        if self.currentSavePoint_:
+                            del self.currentSavePoint_
+                            self.currentSavePoint_ = None
+                    
+                        self.stackSavePoints_.clear()
+                        self.queueSavePoints_.clear()
+                    
+                    if notify:
+                        cur.d.modeAccess_ = FLSqlCursor.Browse
+                        
+                    aqApp.emitTransactionEnd(cur)
+                    return True
+                
+                else:
+                    logger.error("doCommit: Fallo al intentar terminar transacción: %s" % self.transaction_)
+                    return False
+                    
             except Exception as e:
                 logger.error(
                     "doCommit: Fallo al intentar terminar transacción: %s", e)
                 return False
         else:
-            logger.info("Liberando punto de salvaguarda %s...",
-                        self.transaction_)
-            if self.transaction_ == 1:
-                self.releaseSavePoint(self.transaction_)
+            aqApp.statusHelpMsg("Liberando punto de salvaguarda %s..." % self.transaction_)
+            if (self.transaction_ == 1 and self.canTransaction()) or (self.transaction_ == 0 and not self.canTransaction()):
+                if not self.canSavePoint():
+                    if self.currentSavePoint_:
+                        del self.currentSavePoint_
+                        self.currentSavePoint_ = None
+                    
+                    self.stackSavePoints_.clear()
+                    self.queueSavePoints_.clear()
+                else:
+                    self.releaseSavePoint(self.transaction_)
                 if notify:
                     cur.d.modeAccess_ = FLSqlCursor.Browse
 
                 return True
-            self.releaseSavePoint(self.transaction_)
-
+            if not self.canSavePoint():
+                tam_queue = len(self.queueSavePoints_)
+                for i in range(tam_queue):
+                    temp_save_point = self.queueSavePoints_.dequeue()
+                    temp_save_point.setId(self.transaction_ - 1)
+                    self.queueSavePoints_.append(temp_save_point)
+                
+                if self.currentSavePoint_:
+                    self.queueSavePoints_.append(self.currentSavePoint_)
+                    self.currentSavePoint_ = None
+                    if self.stackSavePoints_:
+                        self.currentSavePoint_ = self.stackSavePoints_.pop()
+            else:
+                self.releaseSavePoint(self.transaction_)
+                
             if notify:
                 cur.d.modeAccess_ = FLSqlCursor.Browse
-
+                
             return True
+                    
+
 
     def canDetectLocks(self):
         if not self.db():
