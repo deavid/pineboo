@@ -263,6 +263,9 @@ class FLSQLITE(object):
 
     def canSavePoint(self):
         return True
+    
+    def canTransaction(self):
+        return True
 
     def rollbackSavePoint(self, n):
         if n == 0:

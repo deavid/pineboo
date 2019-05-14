@@ -357,7 +357,10 @@ class FLMYSQL_MYISAM(object):
         return True
 
     def canSavePoint(self):
-        return True
+        return False
+    
+    def canTransaction(self):
+        return False
 
     def rollbackSavePoint(self, n):
         if n == 0:

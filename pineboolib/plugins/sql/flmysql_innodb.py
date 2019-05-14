@@ -15,3 +15,9 @@ class FLMYSQL_INNODB(FLMYSQL_MYISAM):
         self.name_ = "FLMYSQL_INNODB"
         self.alias_ = "MySQL INNODB (MYSQLDB)"
         self.noInnoDB = False
+
+    def canSavePoint(self):
+        return True
+    
+    def canTransaction(self):
+        return True

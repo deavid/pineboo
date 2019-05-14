@@ -349,7 +349,10 @@ class FLMYSQL_MYISAM2(object):
         return True
 
     def canSavePoint(self):
-        return True
+        return False
+    
+    def canTransaction(self):
+        return False
 
     def rollbackSavePoint(self, n):
         if n == 0:
@@ -398,13 +401,16 @@ class FLMYSQL_MYISAM2(object):
             qWarning("%s::rollbackTransaction: Database not open" % self.name_)
 
         cursor = self.cursor()
-        try:
-            cursor.execute("ROLLBACK")
-        except Exception:
-            self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-            qWarning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s" % (
-                self.name_, traceback.format_exc()))
-            return False
+        if self.canSavePoint():
+            try:
+                cursor.execute("ROLLBACK")
+            except Exception:
+                self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
+                qWarning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s" % (
+                    self.name_, traceback.format_exc()))
+                return False
+        else:
+            qWarning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s" % (self.name_, traceback.format_exc()))
 
         return True
 
