@@ -11,8 +11,6 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
 
-from sqlalchemy import create_engine
-
 import sys
 import traceback
 
@@ -86,7 +84,9 @@ class FLMYSQL_MYISAM(object):
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
         checkDependencies({"MySQLdb": "mysqlclient", "sqlalchemy":"sqlAlchemy"})
+        from sqlalchemy import create_engine
         import MySQLdb
+        
 
         try:
             self.conn_ = MySQLdb.connect(db_host, db_userName, db_password, db_name)
