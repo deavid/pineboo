@@ -263,10 +263,7 @@ class FLMYSQL_MYISAM2(object):
             qWarning("%s::beginTransaction: Database not open" % self.name_)
             return None
 
-        if not self.noInnoDB and self.transaction():
-            self.setLastError(
-                "No se puede iniciar la transacción", "BEGIN WORK")
-            return None
+        self.transaction()
 
         res = None
         row = None
@@ -320,16 +317,11 @@ class FLMYSQL_MYISAM2(object):
                 result = cursor.execute(strQry)
             except Exception:
                 qWarning("%s:: La consulta a la base de datos ha fallado\n %s" % (self.name_, traceback.format_exc()))
-                if not self.noInnoDB:
-                    self.rollbackTransaction()
-
+                self.rollbackTransaction()
                 return
 
 
-        if not self.noInnoDB and self.commitTransaction():
-            qWarning("%s:: No se puede aceptar la transacción" % self.name_)
-            return
-
+        self.commitTransaction()
         return ret
     
     def queryUpdate(self, name, update, filter):
@@ -386,6 +378,7 @@ class FLMYSQL_MYISAM2(object):
         return self.lastError_
 
     def commitTransaction(self):
+        
         if not self.isOpen():
             qWarning("%s::commitTransaction: Database not open" % self.name_)
 
@@ -416,6 +409,7 @@ class FLMYSQL_MYISAM2(object):
         return True
 
     def transaction(self):
+        
         if not self.isOpen():
             qWarning("%s::transaction: Database not open" % self.name_)
 
@@ -598,7 +592,7 @@ class FLMYSQL_MYISAM2(object):
                 sql += ","
                 i = i + 1
 
-        engine = ") ENGINE=INNODB" if self.alias_ is "FLMYSQL_INNODB" else ") ENGINE=MyISAM"
+        engine = ") ENGINE=INNODB" if not self.noInnoDB else ") ENGINE=MyISAM"
         sql += engine
         
         sql += " DEFAULT CHARACTER SET = utf8 COLLATE = utf8_bin"
