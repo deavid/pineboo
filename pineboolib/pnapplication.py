@@ -71,7 +71,13 @@ class Project(object):
         self.tmpdir = None
         self.parser = None
         self.version = 0.8
-        self.main_form_name = "eneboo" if not self._DGI.mobilePlatform() else "mobile"
+        self.main_form_name = "eneboo" 
+        if self._DGI.mobilePlatform():
+            self.main_form_name =  "mobile"
+        else:
+            if FLSettings().readBoolEntry("ebcomportamiento/sdi_mode"):
+                self.main_form_name = "eneboo_sdi"
+                
         pineboolib.project = self
         self.deleteCache = False
         self.parseProject = False
