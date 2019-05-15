@@ -9,6 +9,9 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
 from PyQt5.QtCore import QTimer, pyqtSignal
+from PyQt5.QtWidgets import QMainWindow, QAction, QWidget, QBoxLayout,\
+    QPushButton, QToolTip, QWhatsThis, QToolBox
+from PyQt5.QtGui import QPixmap, QKeySequence
 
 
 logger = logging.getLogger("FLApplication")
@@ -159,9 +162,79 @@ class FLApplication(QtCore.QObject):
     def checkForUpdateFinish(self, op):
         pass
 
-    @decorators.NotImplementedWarn
+
     def init(self):
-        pass
+        self.initializing_ = True
+        self.dict_main_widgets_ = []
+        self.container_ = QMainWindow(None)
+        self.container_.setName("container")
+        self.container_.setIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))
+        if self.db():
+            self.container_.setCaption(self.db().database())
+        else:
+            self.container_.setCaption("Eneboo %s" % pineboolib.project.version)
+        
+        #FLDiskCache.init(self)
+        
+        self.window_menu = QPopupMenu(self.container_, "windowMenu")
+        self.window_cascade_action = QAction(self.translate("Cascada"), self.translate("Cascada"), QKeySequence(), self.container_)
+        self.window_cascade_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("cascada.png")))
+        self.window_cascade_action.addTo(self.window_menu)
+        
+        self.window_tile_action = QAction(self.translate("Mosaico"), self.translate("Mosaico"), QKeySequence(), self.container_)
+        self.window_tile_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("mosaico.png")))
+        self.window_tile_action.addTo(self.window_menu)
+        
+        self.window_close_action = QAction(self.translate("Cerrar"), self.translate("Cerrar"), QKeySequence(), self.container_)
+        self.window_close_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("cerrar.png")))
+        self.window_close_action.addTo(self.window_menu)
+        
+        self.modules_menu = QPopupMenu(self.container_, "modulesMenu")
+        self.modules_menu.setCheckable(False)
+        
+        w = QWidget(self.container_, "widgetContainer")
+        vl = QBoxLayout(w)
+        
+        self.exit_button = QPushButton(AQS.Pixmap_fromMineSource("exit.png"), self.translate("Salir"), w, "pbSalir")
+        self.exit_button.setAccel(QKeySequence(self.translate("Ctrl+Q")))
+        self.exit_button.setFocusPolicy(QWidget.NoFocus)
+        QToolTip.add(self.exit_button, self.translate("Salir de la aplicación (Ctrl+Q)"))
+        QWhatsThis.add(self.exit_button, self.translate("Salir de la aplicación (Ctrl+Q)"))
+        self.exit_button.clicked.connect(self.generalExit)
+        
+        self.tool_box_ = QToolBox(w, "toolBox")
+        vl.addWidget(self.exit_button)
+        vl.addWidget(self.tool_box_)
+        self.container_.setCentralWidget(w)
+    
+        
+        self.db().manager().init()
+        self.mng_loader_.init()
+        
+        self.initStyles()
+        self.initMenuBar()
+        
+        self.db().manager().loadTables()
+        self.mng_loader_.loadKeyFiles()
+        self.mng_loader_.loadAllIdModules()
+        self.mng_loader_.loadIdAreas()
+        
+        self.acl_ = FLAccessControlLists()
+        self.acl_.init()
+        
+        self.loadScripts()
+        self.mng_loader_.setShaLocalFromGlobal()
+        self.loadTranslations()
+        
+        self.call("init", [], "sys")
+        self.initToolBox()
+        self.readState()
+        self.container_.installEventFilter(self)
+        
+        self.initializing_ = False
+        self.startTimerIdle()
+        
+        
 
     @decorators.NotImplementedWarn
     def initfcgi(self):
@@ -186,13 +259,77 @@ class FLApplication(QtCore.QObject):
     def openQSWorkbench(self):
         pass
 
-    @decorators.NotImplementedWarn
     def initMainWidget(self):
-        pass
+        if not self.main_widget_ or not self.container_:
+            return
+        
+        if self.main_widget_:
+            self.main_widget_.menuBar().insertItem(self.tr("&Ventana"), self.window_menu)
+            self.main_widget_.setCentralWidget(None)
+        
+        self.initView()
+        self.initActions()
+        self.initToolBar()
+        self.initStatusBar()
+        
+        self.readStateModule()
+        
 
-    @decorators.NotImplementedWarn
+
     def showMainWidget(self, w):
-        pass
+        if not self.container_:
+            if w:
+                w.show()
+            return
+        
+        focus_w = self.focusWidget()
+        
+        if w == self.container_ or not w:
+            if self.container_.isMinimized():
+                self.container_.showNormal()
+            elif not self.container_.isvisible():
+                self.container_.setFont(self.font())
+                self.container_.show()
+            
+            if focus_w and isinstance(focus_w, QMainWindow) and focus_w != self.container_:
+                self.container_.setFocus()
+            
+            if not self.container_.isActiveWindow():
+                self.container_.raise_()
+                self.container_.setActiveWindow()
+            
+            if self.db():
+                self.container_.setCaption(self.db().database())
+            else:
+                self.container_.setCaption("Eneboo %s" % pineboolib.project.version)
+            
+            return
+        
+        if w.isMinimized():
+            w.showNormal()
+        elif not w.isVisible():
+            w.show()
+            w.setFont(self.font())
+        
+        if focus_w and isinstance(focus_w, QMainWindow) and focus_w != w:
+            w.setFocus()
+        if not w.isActiveWindow():
+            w.raise_()
+            w.setActiveWindow()
+        
+        mw = QMainWindow(w)
+        if mw:
+            view_back = mw.centralWidget()
+            if view_back:
+                self.p_work_space_ = view_back.child(mw.name(), "QWorkspace")
+                view_back.show()
+        
+        self.setCaptionMainWidget("")
+        descript_area = self.mng_loader_.idAreaToDescription(self.mng_loader_.activeIdArea())
+        w.setIcon(self.mng_loader_.iconModule(w.name()))
+        self.tool_box_.setCurrentItem(self.tool_box_.child(descript_area, "QToolBar"))
+        
+            
 
     def setMainWidget(self, w):
 
@@ -334,9 +471,11 @@ class FLApplication(QtCore.QObject):
             from pineboolib.dlgabout.about_pineboo import about_pineboo
             about_dlg = about_pineboo()
         
-    @decorators.NotImplementedWarn
     def statusHelpMsg(self, text):
-        pass
+        if not self.main_widget_:
+            return
+        
+        self.main_widget_.statusBar().showMessage(text, 2000)
 
     @decorators.NotImplementedWarn
     def windowMenuAboutToShow(self):
