@@ -226,7 +226,7 @@ class SysType(object):
         pineboolib.project.conn.database(connName).manager().cleanupMetaData()
 
     def updateAreas(self):
-        pineboolib.project.initToolBox()
+        aqApp.initToolBox()
 
     def isDebuggerMode(self):
         from pineboolib.fllegacy.flsettings import FLSettings
