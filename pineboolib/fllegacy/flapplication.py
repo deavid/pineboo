@@ -9,9 +9,6 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
 from PyQt5.QtCore import QTimer, pyqtSignal
-from PyQt5.QtWidgets import QMainWindow, QAction, QWidget, QBoxLayout,\
-    QPushButton, QToolTip, QWhatsThis, QToolBox
-from PyQt5.QtGui import QPixmap, QKeySequence
 
 
 logger = logging.getLogger("FLApplication")
@@ -162,78 +159,10 @@ class FLApplication(QtCore.QObject):
     def checkForUpdateFinish(self, op):
         pass
 
-
+    @decorators.NotImplementedWarn
     def init(self):
-        self.initializing_ = True
-        self.dict_main_widgets_ = []
-        self.container_ = QMainWindow(None)
-        self.container_.setName("container")
-        self.container_.setIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))
-        if self.db():
-            self.container_.setCaption(self.db().database())
-        else:
-            self.container_.setCaption("Eneboo %s" % pineboolib.project.version)
-        
-        #FLDiskCache.init(self)
-        
-        self.window_menu = QPopupMenu(self.container_, "windowMenu")
-        self.window_cascade_action = QAction(self.translate("Cascada"), self.translate("Cascada"), QKeySequence(), self.container_)
-        self.window_cascade_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("cascada.png")))
-        self.window_cascade_action.addTo(self.window_menu)
-        
-        self.window_tile_action = QAction(self.translate("Mosaico"), self.translate("Mosaico"), QKeySequence(), self.container_)
-        self.window_tile_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("mosaico.png")))
-        self.window_tile_action.addTo(self.window_menu)
-        
-        self.window_close_action = QAction(self.translate("Cerrar"), self.translate("Cerrar"), QKeySequence(), self.container_)
-        self.window_close_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("cerrar.png")))
-        self.window_close_action.addTo(self.window_menu)
-        
-        self.modules_menu = QPopupMenu(self.container_, "modulesMenu")
-        self.modules_menu.setCheckable(False)
-        
-        w = QWidget(self.container_, "widgetContainer")
-        vl = QBoxLayout(w)
-        
-        self.exit_button = QPushButton(AQS.Pixmap_fromMineSource("exit.png"), self.translate("Salir"), w, "pbSalir")
-        self.exit_button.setAccel(QKeySequence(self.translate("Ctrl+Q")))
-        self.exit_button.setFocusPolicy(QWidget.NoFocus)
-        QToolTip.add(self.exit_button, self.translate("Salir de la aplicación (Ctrl+Q)"))
-        QWhatsThis.add(self.exit_button, self.translate("Salir de la aplicación (Ctrl+Q)"))
-        self.exit_button.clicked.connect(self.generalExit)
-        
-        self.tool_box_ = QToolBox(w, "toolBox")
-        vl.addWidget(self.exit_button)
-        vl.addWidget(self.tool_box_)
-        self.container_.setCentralWidget(w)
-    
-        
-        self.db().manager().init()
-        self.mng_loader_.init()
-        
-        self.initStyles()
-        self.initMenuBar()
-        
-        self.db().manager().loadTables()
-        self.mng_loader_.loadKeyFiles()
-        self.mng_loader_.loadAllIdModules()
-        self.mng_loader_.loadIdAreas()
-        
-        self.acl_ = FLAccessControlLists()
-        self.acl_.init()
-        
-        self.loadScripts()
-        self.mng_loader_.setShaLocalFromGlobal()
-        self.loadTranslations()
-        
-        self.call("init", [], "sys")
-        self.initToolBox()
-        self.readState()
-        self.container_.installEventFilter(self)
-        
-        self.initializing_ = False
-        self.startTimerIdle()
-        
+        pass
+
         
 
     @decorators.NotImplementedWarn
@@ -390,9 +319,67 @@ class FLApplication(QtCore.QObject):
     def showToggleBars(self):
         pass
 
-    @decorators.NotImplementedWarn
     def initToolBox(self):
-        pass
+        if self.tool_box_ is None or self.modules_menu is None:
+            return
+        
+        self.modules_menu.clear()
+        for item in range(self.tool_box_.count()):
+            if isinstance(item, QToolBar):
+                item.clear()
+            
+            self.tool_box_.removeItem(item)
+            del item
+        
+        print(2)
+        for it in self.db().managerModules().listIdAreas():
+            print(3, it)
+            descript_area = self.db().managerModules().idAreaToDescription(it)
+            #new_area_bar = QToolBar(self.tr(descript_area), self.container_, self.tool_box_, False, descript_area)
+            new_area_bar = QToolBar(self.tr(descript_area), self.container_)
+            #new_area_bar.setFrameStyle(QFrame.NoFrame)
+            new_area_bar.setOrientation(QtCore.Qt.Vertical)
+            new_area_bar.layout().setSpacing(3)
+            self.tool_box_.addItem(new_area_bar, self.tr(descript_area))
+            
+            ag = QActionGroup(new_area_bar)
+            ag.setObjectName(descript_area)
+            ac = QAction(ag)
+            ac.setText(descript_area)
+            #ac.setUsesDropDown(True)
+            
+            list_modules = self.db().managerModules().listIdModules(it)
+            list_modules.sort()
+            
+            for mod in list_modules:
+                if mod == "Q":
+                    continue
+                
+                if mod == "sys":
+                    pass
+                
+                descript_module = "?? : %s" % self.db().managerModules().idModuleToDescription(mod)
+                new_module_action = QAction(new_area_bar)
+                new_module_action.setText(self.tr(descript_module))
+                #Falta QKeySequence
+                new_module_action.setIcon(QIcon(self.db().managerModules().iconModule(mod)))
+                new_module_action.setObjectName(mod)
+                new_area_bar.addAction(new_module_action)
+                ag.addAction(new_module_action)
+                new_module_action.triggered.connect(self.activateModule)
+                
+            
+            self.modules_menu.addAction(ac)
+            
+            #Falta Opciones
+            
+        if self.acl_:
+            self.acl_.process(self.container_)
+        
+        print(4)          
+            
+            
+        
 
     @decorators.NotImplementedWarn
     def initActions(self):
@@ -584,6 +571,7 @@ class FLApplication(QtCore.QObject):
         self.readState()
 
         if self.container_:
+            
             self.container_.installEventFilter(self)
             self.container_.setDisable(False)
 
@@ -821,7 +809,10 @@ class FLApplication(QtCore.QObject):
     #    return getattr(pineboolib.project, name, None)
 
     def mainWidget(self):
-        return self.main_widget_
+        ret_ = self.main_widget_
+        if ret_ is None:
+            ret_ = self.container_
+        return ret_
 
     def generalExit(self, ask_exit=True):
         do_exit = True
@@ -927,7 +918,7 @@ class FLApplication(QtCore.QObject):
         from pineboolib.pncontrolsfactory import QApplication, QWidget, QMainWindow
 
         if self.container_:
-            r = QtCore.Qrect(self.container_.pos(), self.container_.size())
+            r = QtCore.QRect(self.container_.pos(), self.container_.size())
             self.multi_lang_enabled_ = settings.readBoolEntry("MultiLang/Enabled", False)
             self.multi_lang_id_ = settings.readEntry("MultiLang/LangId", QtCore.QLocale().name()[:2].upper())
 
@@ -938,7 +929,7 @@ class FLApplication(QtCore.QObject):
                 r.setHeight(settings.readNumEntry("Geometry/MainWindowHeight", r.height()))
 
                 desk = QApplication.desktop().availableGeometry(self.container_)
-                inter = desk.intersect(r)
+                inter = desk.intersected(r)
                 self.container_.resize(r.size())
                 if inter.width() * inter.height() > (r.width() * r.height() / 20):
                     self.container_.move(r.topLeft())
