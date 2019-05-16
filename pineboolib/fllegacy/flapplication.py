@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 
 from pineboolib.fllegacy.fltranslator import FLTranslator
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
-from PyQt5.QtCore import QTimer, pyqtSignal
+from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent
 from PyQt5.QtWidgets import QToolBox, QMenu, QToolBar, QActionGroup, QAction,\
-    QSizePolicy
-from PyQt5.Qt import QIcon
+    QSizePolicy, QApplication, QMainWindow
+from PyQt5.Qt import QIcon, QPainter, QCursor
+from PyQt5.QtGui import QColor
 
 
 logger = logging.getLogger("FLApplication")
@@ -51,6 +52,7 @@ class FLApplication(QtCore.QObject):
     time_user_ = None
     script_entry_function_ = None
     event_loop = None
+    window_menu = None
 
     def __init__(self):
         super(FLApplication, self).__init__()
@@ -78,6 +80,7 @@ class FLApplication(QtCore.QObject):
         self.notify_end_transaction_ = False
         self.notify_roll_back_transaction_ = False
         self.popup_warn_ = None
+        self.window_menu = None
 
         self.ted_output_ = None
         self.style = None
@@ -145,9 +148,89 @@ class FLApplication(QtCore.QObject):
         """
         self.aqApp = None
 
-    @decorators.NotImplementedWarn
+
     def eventFilter(self, obj, ev):
-        pass
+        if self.initializing_ or self.destroying_:
+            return super().eventFilter(obj, ev)
+        
+        if QApplication.activeModalWidget() or QApplication.activePopupWidget():
+            return super().eventFilter(obj, ev)
+        
+        evt = ev.type()
+        
+        if obj != self.main_widget_ and not isinstance(obj, QMainWindow):
+            return super().eventFilter(obj, ev)
+        
+        aw = None
+        if self.p_work_space_ is not None:
+            aw = self.p_work_space_.activeWindow()
+    
+        if aw is not None and aw != obj and evt not in (QEvent.Resize, QEvent.Close):
+            obj.removeEventFilter(self)
+            if evt == QEvent.WindowActivate:
+                if obj == self.container_:
+                    self.activateModule(None)
+                else:
+                    self.activateModule(obj.objectName())
+            
+            
+            if self.p_work_space_ and self.notify(self.p_work_space_, ev):
+                obj.installEventFilter(self)
+                return True
+            
+            obj.installEventFilter(self)
+        
+        if evt == QEvent.KeyPress:
+            if obj == self.container_:
+                ke = ev
+            
+            elif obj == self.main_widget_:
+                ke = ev
+                if ke.key() == QtCore.Qt.Key_Shift and (ke.state() == QtCore.Qt.Key_Control):
+                    self.activateModule(None)
+                    return True
+                if ke.key() == QtCore.Qt.Key_Q and (ke.state() == QtCore.Qt.Key_Control):
+                    self.generalExit()
+                    return True
+                if ke.key() == QtCore.Qt.Key_W and (ke.state() in  (QtCore.Qt.Key_Control, QtCore.Qt.Key_Alt)):
+                    print("????")
+                    return True
+                if ke.key() == QtCore.Qt.Key_Escape:
+                    obj.hide()
+                    return True
+        
+        elif evt == QEvent.Close:
+            if obj == self.container_:
+                self.generalExit()
+                return True
+            else:
+                obj.hide()
+                return True
+        elif evt == QEvent.WindowActivate:
+            if obj == self.container_:
+                self.activateModule(None)
+                return True
+            else:
+                self.activateModule(obj.objectName())
+                return True
+        
+        elif evt == QEvent.MouseButtonPress:
+            if self.modules_menu:
+                me = ev
+                if me.button() == QtCore.Qt.RightButton:
+                    self.modules_menu.popup(QCursor.pos())
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        
+        
+        return super().eventFilter(obj, ev)
+        
+            
+            
+            
     
     def eventLoop(self):
         from pineboolib.pncontrolsfactory import QEventLoop
@@ -162,9 +245,89 @@ class FLApplication(QtCore.QObject):
     def checkForUpdateFinish(self, op):
         pass
 
-    @decorators.NotImplementedWarn
+
     def init(self):
-        pass
+        from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence
+        from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
+        self.dict_main_widgets_ = []
+        self.container_.setObjectName("container")
+        self.container_.setWindowIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))
+        if self.db() is not None:
+            self.container_.setWindowTitle(self.db().database())
+        else:
+            self.container_.setWindowTitle("Eneboo %s" % pineboolib.project.version)
+        
+        #FLDiskCache.init(self)
+        
+        self.window_menu = QMenu(self.container_)
+        self.window_menu.setObjectName("windowMenu")
+        
+    
+        
+        self.window_cascade_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cascada.png")), self.tr("Cascada"), self.container_)
+        self.window_menu.addAction(self.window_cascade_action)
+        
+        
+        self.window_tile_action = QAction(QIcon(AQS.Pixmap_fromMineSource("mosaico.png")), self.tr("Mosaico"), self.container_)
+        self.window_menu.addAction(self.window_tile_action)
+        
+        self.window_close_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cerrar.png")), self.tr("Cerrar"), self.container_)
+        self.window_menu.addAction(self.window_close_action)
+        
+        self.modules_menu = QMenu(self.container_)
+        self.modules_menu.setObjectName("modulesMenu")
+        #self.modules_menu.setCheckable(False)
+
+        w = QWidget(self.container_)
+        w.setObjectName("widgetContainer")
+        vl = QVBoxLayout(w)
+        
+        self.exit_button = QPushButton(QIcon(AQS.Pixmap_fromMineSource("exit.png")), self.tr("Salir"), w)
+        self.exit_button.setObjectName("pbSalir")
+        self.exit_button.setShortcut(QKeySequence(self.tr("Ctrl+Q")))
+        self.exit_button.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.exit_button.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.exit_button.setToolTip(self.tr("Salir de la aplicación (Ctrl+Q)"))
+        self.exit_button.setWhatsThis(self.tr("Salir de la aplicación (Ctrl+Q)"))
+        self.exit_button.clicked.connect(self.container_.close)
+        
+        self.tool_box_ = QToolBox(w)
+        self.tool_box_.setObjectName("toolBox")
+        
+        vl.addWidget(self.exit_button)
+        vl.addWidget(self.tool_box_)
+        self.container_.setCentralWidget(w)
+    
+        
+        self.db().manager().init()
+        #self.mng_loader_.init()
+        
+        self.initStyles()
+        self.initMenuBar()
+        
+
+        self.db().manager().loadTables()
+        #self.mng_loader_.loadKeyFiles()
+        #self.mng_loader_.loadAllIdModules()
+        #self.mng_loader_.loadIdAreas()
+        self.db().managerModules().loadKeyFiles()
+        self.db().managerModules().loadAllIdModules()
+        self.db().managerModules().loadIdAreas()
+        
+        self.acl_ = FLAccessControlLists()
+        #self.acl_.init()
+        
+        #self.loadScripts()
+        #self.mng_loader_.setShaLocalFromGlobal()
+        self.db().managerModules().setShaLocalFromGlobal()
+        self.loadTranslations()
+        
+        self.call("sys.init", [])
+        self.initToolBox()
+        self.readState()
+        
+        self.container_.installEventFilter(self)
+        self.startTimerIdle()
 
         
 
@@ -196,7 +359,8 @@ class FLApplication(QtCore.QObject):
             return
         
         if self.main_widget_:
-            self.main_widget_.menuBar().insertItem(self.tr("&Ventana"), self.window_menu)
+            ac = self.main_widget_.menuBar().addMenu(self.window_menu)
+            ac.setText(self.tr("&Ventana"))
             self.main_widget_.setCentralWidget(None)
         
         self.initView()
@@ -214,12 +378,12 @@ class FLApplication(QtCore.QObject):
                 w.show()
             return
         
-        focus_w = self.focusWidget()
+        focus_w = QApplication.focusWidget()
         
         if w == self.container_ or not w:
             if self.container_.isMinimized():
                 self.container_.showNormal()
-            elif not self.container_.isvisible():
+            elif not self.container_.isVisible():
                 self.container_.setFont(self.font())
                 self.container_.show()
             
@@ -228,12 +392,12 @@ class FLApplication(QtCore.QObject):
             
             if not self.container_.isActiveWindow():
                 self.container_.raise_()
-                self.container_.setActiveWindow()
+                QApplication.setActiveWindow(self.container_)
             
             if self.db():
-                self.container_.setCaption(self.db().database())
+                self.container_.setWindowTitle(self.db().database())
             else:
-                self.container_.setCaption("Eneboo %s" % pineboolib.project.version)
+                self.container_.setWindowTitle("Eneboo %s" % pineboolib.project.version)
             
             return
         
@@ -241,7 +405,7 @@ class FLApplication(QtCore.QObject):
             w.showNormal()
         elif not w.isVisible():
             w.show()
-            w.setFont(self.font())
+            w.setFont(QApplication.font())
         
         if focus_w and isinstance(focus_w, QMainWindow) and focus_w != w:
             w.setFocus()
@@ -257,20 +421,18 @@ class FLApplication(QtCore.QObject):
                 view_back.show()
         
         self.setCaptionMainWidget("")
-        descript_area = self.mng_loader_.idAreaToDescription(self.mng_loader_.activeIdArea())
-        w.setIcon(self.mng_loader_.iconModule(w.name()))
-        self.tool_box_.setCurrentItem(self.tool_box_.child(descript_area, "QToolBar"))
+        descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
+        w.setWindowIcon(QIcon(self.db().managerModules().iconModule(w.objectName())))
+        #self.tool_box_.setCurrentItem(self.tool_box_.child(descript_area, "QToolBar"))
         
             
 
     def setMainWidget(self, w):
-
         if not self.container_:
             return
 
         from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QAction, QActionGroup, QToolBar
-
-        if w is self.container_ or not w:
+        if w == self.container_ or not w:
             QApplication.setActiveWindow(w)
             self.main_widget_ = None
             return
@@ -278,8 +440,7 @@ class FLApplication(QtCore.QObject):
         QApplication.setActiveWindow(w)
         self.main_widget_ = w
 
-        mw = self.main_widget_ if isinstance(QMainWindow, self.main_widget_) else None
-
+        mw = self.main_widget_ if isinstance(self.main_widget_, QMainWindow) else None
         if not mw:
             return
 
@@ -400,9 +561,28 @@ class FLApplication(QtCore.QObject):
     def initStatusBar(self):
         pass
 
-    @decorators.NotImplementedWarn
-    def initview(self):
-        pass
+
+    def initView(self):
+        mw = self.main_widget_
+        if mw is None:
+            return
+        
+        view_back = mw.centralWidget()
+        if view_back is None:
+            from pineboolib.pncontrolsfactory import QMdiArea
+            view_back = QMdiArea()
+            view_back.setObjectName("mdi_area")
+            
+            p_work_space = FLWorkSpace(view_back, self.db().managerModules().activeIdModule())
+            p_work_space.setAttribute(QtCore.Qt.WA_NoSystemBackground)
+            #p_work_space.setScrollBarsEnabled(True)
+            #FIXME: setScrollBarsEnabled
+            mw.setCentralWidget(view_back)
+            
+            
+            
+            mw.setCentralWidget(view_back)
+        
 
     def setStyle(self, style_):
         if style_:
@@ -503,7 +683,7 @@ class FLApplication(QtCore.QObject):
         if idm in pineboolib.project.modules.keys():
             pineboolib.project.modules[idm].load()
 
-    def activateModule(self, idm=None):  # dos funciones
+    def activateModule(self, idm=None):
         if not idm:
             if self.sender():
                 idm = self.sender().objectName()
@@ -905,7 +1085,7 @@ class FLApplication(QtCore.QObject):
 
         if self.container_:
             windows_opened = []
-            _list = self.topLevelWidgets()
+            _list = QApplication.topLevelWidgets()
 
             if self.initializing_:
                 for it in _list:
@@ -1031,6 +1211,10 @@ class FLApplication(QtCore.QObject):
                 self.container_.setFont(self.font())
 
             self.activateModule(active_id_module)
+    
+    @decorators.NotImplementedWarn
+    def readStateModule(self):
+        pass
 
     def loadScripts(self):
         from pineboolib.pncontrolsfactory import QApplication
@@ -1177,29 +1361,6 @@ class FLApplication(QtCore.QObject):
     def tmp_dir(self):
         return pineboolib.project.get_temp_dir()
 
-"""
-class FLWorkSpace(QWidget):
-
-    logo = None
-    f_color = None
-    p_color = None
-
-    @decorators.NotImplementedWarn
-    def __init__(self, parent, name):
-        super(FLWorkSpace, self).__init_(parent)
-        self.setObjectName(name)
-
-    @decorators.NotImplementedWarn
-    def init(self):
-        from pineboolib.fllegacy.aqsobject.AQS import AQS
-        self.logo = AQS.Pixmap_fromMineSource("pineboo.png")
-        self.f_color.setRgb(self.AQ_RGB_LOGO)
-        self.p_color.setRGB(164, 170, 180)
-
-    @decorators.NotImplementedWarn
-    def paintEvent(self, pe):
-        super(FLWorkSpace, self.paintEvent(pe))
-
 
 class FLWidget(QtWidgets.QWidget):
 
@@ -1207,22 +1368,42 @@ class FLWidget(QtWidgets.QWidget):
     f_color = None
     p_color = None
 
-    @decorators.NotImplementedWarn
+
     def __init__(self, parent, name):
-        super(FLWidget, self).__init_(parent)
+        super(FLWidget, self).__init__(parent)
         self.setObjectName(name)
 
-    @decorators.NotImplementedWarn
-    def init(self):
-        from pineboolib.fllegacy.aqsobject.AQS import AQS
-        self.logo = AQS.Pixmap_fromMineSource("pineboo.png")
-        self.f_color.setRgb(self.AQ_RGB_LOGO)
-        self.p_color.setRGB(164, 170, 180)
+        from pineboolib.pncontrolsfactory import AQS
+        self.logo = AQS.Pixmap_fromMineSource("pineboo-logo.png")
+        self.f_color = QColor(255, 255, 255)
+        self.p_color = QColor(164, 170, 180)
+        #self.f_color.setRgb(self.AQ_RGB_LOGO)
+        #self.p_color.setRGB()
 
-    @decorators.NotImplementedWarn
+
     def paintEvent(self, pe):
-        super(FLWidget, self.paintEvent(pe))
-"""
+        
+        #p = QPainter(self)
+        #p.fillRect(pe.rect() , self.f_color)
+
+        #dx = self.parent().width() -  self.logo.width()
+        #dy = self.parent().height() - self.logo.height()
+        #p.drawImage(QPoint(dx, dy), self.logo.toImage())
+        
+        #p.setPen(self.p_color)
+        #p.setBrush(self.p_color)
+        
+        #p.end()
+        
+        super().paintEvent(pe)
+        
+        
+
+class FLWorkSpace(FLWidget):
+    pass
+
+
+
 """
 class FLPopuWarn(QtWidgets.QWhatsThis):
 
