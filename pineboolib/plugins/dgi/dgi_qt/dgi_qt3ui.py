@@ -8,7 +8,7 @@ from binascii import unhexlify
 import pineboolib
 import logging
 import zlib
-from PyQt5.QtWidgets import QButtonGroup, QMdiArea
+from PyQt5.QtWidgets import QButtonGroup
 from PyQt5.QtCore import QObject
 
 
@@ -65,10 +65,6 @@ def loadUi(form_path, widget, parent=None):
     formname = widget.objectName()
     logger.info("form: %s", formname)
     
-    if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
-        mdi_area = QMdiArea()
-        mdi_area.setObjectName("mdi_area")
-        widget.setCentralWidget(mdi_area)
                 
     # Cargamos actions...
     for action in root.findall("actions//action"):
