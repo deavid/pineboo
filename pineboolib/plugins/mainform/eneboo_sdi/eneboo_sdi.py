@@ -6,19 +6,25 @@ from pineboolib.pncontrolsfactory import aqApp, AQS
 from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
 
 import logging
-from PyQt5.QtWidgets import QMenu, QAction, QWidget, QHBoxLayout, QPushButton,\
-    QToolBox
+from PyQt5.QtWidgets import QMenu, QAction, QWidget, QVBoxLayout, QPushButton,\
+    QToolBox, QSizePolicy
+from PyQt5.QtGui import QKeySequence
 
 
-logging.getLogger("mainForm_%s" % __name__)
+logger = logging.getLogger("mainForm_%s" % __name__)
 
 
 class MainForm(QtWidgets.QMainWindow):
+
+    is_closing_ = False
+    mdi_enable_ = True
 
     def __init__(self):
         super().__init__()
         
         aqApp.main_widget_ = self
+        self.is_closing_ = False
+        self.mdi_enable_ = True
         
     
     @classmethod
@@ -32,52 +38,53 @@ class MainForm(QtWidgets.QMainWindow):
         mw = mainWindow
         mw.createUi(filedir('plugins/mainform/eneboo_sdi/mainform.ui'))     
         aqApp.dict_main_widgets_ = []
-        mainWindow.setObjectName("container")
-        mainWindow.setWindowIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))
+        mw.setObjectName("container")
+        mw.setWindowIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))
         if aqApp.db():
-            mainWindow.setWindowTitle(aqApp.db().database())
+            mw.setWindowTitle(aqApp.db().database())
         else:
-            mainWindow.setWindowTitle("Eneboo %s" % pineboolib.project.version)
+            mw.setWindowTitle("Eneboo %s" % pineboolib.project.version)
         
         #FLDiskCache.init(self)
         
-        window_menu = QMenu(mainWindow)
+        window_menu = QMenu(mw)
         window_menu.setObjectName("windowMenu")
         
     
         
-        window_cascade_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cascada.png")), self.tr("Cascada"), mainWindow)
+        window_cascade_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cascada.png")), self.tr("Cascada"), mw)
         window_menu.addAction(window_cascade_action)
         
         
-        window_tile_action = QAction(QIcon(AQS.Pixmap_fromMineSource("mosaico.png")), self.tr("Mosaico"), mainWindow)
+        window_tile_action = QAction(QIcon(AQS.Pixmap_fromMineSource("mosaico.png")), self.tr("Mosaico"), mw)
         window_menu.addAction(window_tile_action)
         
-        window_close_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cerrar.png")), self.tr("Cerrar"), mainWindow)
+        window_close_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cerrar.png")), self.tr("Cerrar"), mw)
         window_menu.addAction(window_close_action)
         
-        self.modules_menu = QMenu(mainWindow)
-        self.modules_menu.setObjectName("modulesMenu")
+        modules_menu = QMenu(mw)
+        modules_menu.setObjectName("modulesMenu")
         #self.modules_menu.setCheckable(False)
 
-        w = QWidget(mainWindow)
+        w = QWidget(mw)
         w.setObjectName("widgetContainer")
-        vl = QHBoxLayout(w)
+        vl = QVBoxLayout(w)
         
         exit_button = QPushButton(QIcon(AQS.Pixmap_fromMineSource("exit.png")), self.tr("Salir"), w)
         exit_button.setObjectName("pbSalir")
-        #self.exit_button.setAccel(QKeySequence(self.tr("Ctrl+Q")))
+        exit_button.setShortcut(QKeySequence(self.tr("Ctrl+Q")))
+        exit_button.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed))
         exit_button.setFocusPolicy(QtCore.Qt.NoFocus)
         exit_button.setToolTip(self.tr("Salir de la aplicación (Ctrl+Q)"))
         exit_button.setWhatsThis(self.tr("Salir de la aplicación (Ctrl+Q)"))
-        exit_button.clicked.connect(aqApp.generalExit)
+        exit_button.clicked.connect(self.close)
         
         tool_box_ = QToolBox(w)
         tool_box_.setObjectName("toolBox")
         
         vl.addWidget(exit_button)
         vl.addWidget(tool_box_)
-        mainWindow.setCentralWidget(w)
+        mw.setCentralWidget(w)
     
         
         aqApp.db().manager().init()
@@ -107,7 +114,7 @@ class MainForm(QtWidgets.QMainWindow):
         aqApp.initToolBox()
         aqApp.readState()
         
-        mainWindow.installEventFilter(self)
+        mw.installEventFilter(self)
         aqApp.startTimerIdle()
         
     
@@ -115,7 +122,21 @@ class MainForm(QtWidgets.QMainWindow):
         mng = aqApp.db().managerModules()
         self.w_ = mng.createUI(ui_file, None, self)
         self.w_.setObjectName("container")
+    
+    def eventFilter(self, o, e):
+        if isinstance(e, AQS.Close):
+            if isinstance(o, MainForm):
+                if not self.is_closing_:
+                    self.w_.setDisabled(True)
+                    ret = aqApp.generalExit(True) 
+                    if ret == False:
+                        self.w_.setDisabled(False)
+                        e.ignore()
+                    else:
+                        self.is_closing_ = True
+                    
+                    return True
         
-        
+        return False
 
 mainWindow = MainForm()
