@@ -36,7 +36,7 @@ class MainForm(QtWidgets.QMainWindow):
         
         
         mw = mainWindow
-        mw.createUi(filedir('plugins/mainform/eneboo_sdi/mainform.ui'))     
+        mw.createUi(filedir('plugins/mainform/eneboo_mdi/mainform.ui'))     
         aqApp.dict_main_widgets_ = []
         mw.setObjectName("container")
         mw.setWindowIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))

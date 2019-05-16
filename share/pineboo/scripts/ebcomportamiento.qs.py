@@ -56,7 +56,7 @@ class FormInternalObj(FormDBWidget):
         w.child("cb_no_borrar_cache").checked = self.leerValorLocal("keep_general_cache")
         w.child("cb_clean_no_python").checked = self.leerValorLocal("clean_no_python")
         w.child("cb_snapshot").checked = self.leerValorLocal("show_snaptshop_button")
-        w.child("cb_sdi").checked = self.leerValorLocal("sdi_mode")
+        w.child("cb_mdi").checked = self.leerValorLocal("mdi_mode")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -176,7 +176,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("git_updates_enabled", w.child("cb_git_activar").checked)
         self.grabarValorLocal("git_updates_repo", w.child("le_git_ruta").text)
         self.grabarValorLocal("show_snaptshop_button",w.child("cb_snapshot").checked)
-        self.grabarValorLocal("sdi_mode",w.child("cb_sdi").checked)
+        self.grabarValorLocal("mdi_mode",w.child("cb_mdi").checked)
         
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":

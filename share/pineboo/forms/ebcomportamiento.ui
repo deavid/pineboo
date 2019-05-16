@@ -279,10 +279,10 @@
                                         </property>
                                         <widget class="QCheckBox">
                                             <property name="name">
-                                                <cstring>cb_sdi</cstring>
+                                                <cstring>cb_mdi</cstring>
                                             </property>
                                             <property name="text">
-                                                <string>Usar la pantalla tradicional (SDI) al iniciar.</string>
+                                                <string>Usar la pantalla tradicional (MDI) al iniciar.</string>
                                             </property>
                                         </widget>
                                     </vbox>

@@ -75,8 +75,8 @@ class Project(object):
         if self._DGI.mobilePlatform():
             self.main_form_name =  "mobile"
         else:
-            if FLSettings().readBoolEntry("ebcomportamiento/sdi_mode"):
-                self.main_form_name = "eneboo_sdi"
+            if FLSettings().readBoolEntry("ebcomportamiento/mdi_mode"):
+                self.main_form_name = "eneboo_mdi"
                 
         pineboolib.project = self
         self.deleteCache = False
