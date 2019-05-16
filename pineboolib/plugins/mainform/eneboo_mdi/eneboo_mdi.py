@@ -36,86 +36,9 @@ class MainForm(QtWidgets.QMainWindow):
         
         
         mw = mainWindow
-        mw.createUi(filedir('plugins/mainform/eneboo_mdi/mainform.ui'))     
-        aqApp.dict_main_widgets_ = []
-        mw.setObjectName("container")
-        mw.setWindowIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))
-        if aqApp.db():
-            mw.setWindowTitle(aqApp.db().database())
-        else:
-            mw.setWindowTitle("Eneboo %s" % pineboolib.project.version)
-        
-        #FLDiskCache.init(self)
-        
-        window_menu = QMenu(mw)
-        window_menu.setObjectName("windowMenu")
-        
-    
-        
-        window_cascade_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cascada.png")), self.tr("Cascada"), mw)
-        window_menu.addAction(window_cascade_action)
-        
-        
-        window_tile_action = QAction(QIcon(AQS.Pixmap_fromMineSource("mosaico.png")), self.tr("Mosaico"), mw)
-        window_menu.addAction(window_tile_action)
-        
-        window_close_action = QAction(QIcon(AQS.Pixmap_fromMineSource("cerrar.png")), self.tr("Cerrar"), mw)
-        window_menu.addAction(window_close_action)
-        
-        modules_menu = QMenu(mw)
-        modules_menu.setObjectName("modulesMenu")
-        #self.modules_menu.setCheckable(False)
-
-        w = QWidget(mw)
-        w.setObjectName("widgetContainer")
-        vl = QVBoxLayout(w)
-        
-        exit_button = QPushButton(QIcon(AQS.Pixmap_fromMineSource("exit.png")), self.tr("Salir"), w)
-        exit_button.setObjectName("pbSalir")
-        exit_button.setShortcut(QKeySequence(self.tr("Ctrl+Q")))
-        exit_button.setSizePolicy(QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed))
-        exit_button.setFocusPolicy(QtCore.Qt.NoFocus)
-        exit_button.setToolTip(self.tr("Salir de la aplicación (Ctrl+Q)"))
-        exit_button.setWhatsThis(self.tr("Salir de la aplicación (Ctrl+Q)"))
-        exit_button.clicked.connect(self.close)
-        
-        tool_box_ = QToolBox(w)
-        tool_box_.setObjectName("toolBox")
-        
-        vl.addWidget(exit_button)
-        vl.addWidget(tool_box_)
-        mw.setCentralWidget(w)
-    
-        
-        aqApp.db().manager().init()
-        #self.mng_loader_.init()
-        
-        aqApp.initStyles()
-        aqApp.initMenuBar()
-        
-
-        aqApp.db().manager().loadTables()
-        #self.mng_loader_.loadKeyFiles()
-        #self.mng_loader_.loadAllIdModules()
-        #self.mng_loader_.loadIdAreas()
-        aqApp.db().managerModules().loadKeyFiles()
-        aqApp.db().managerModules().loadAllIdModules()
-        aqApp.db().managerModules().loadIdAreas()
-        
-        aqApp.acl_ = FLAccessControlLists()
-        #self.acl_.init()
-        
-        #self.loadScripts()
-        #self.mng_loader_.setShaLocalFromGlobal()
-        aqApp.db().managerModules().setShaLocalFromGlobal()
-        aqApp.loadTranslations()
-        
-        aqApp.call("sys.init", [])
-        aqApp.initToolBox()
-        aqApp.readState()
-        
-        mw.installEventFilter(self)
-        aqApp.startTimerIdle()
+        mw.createUi(filedir('plugins/mainform/eneboo_mdi/mainform.ui'))
+        aqApp.container_ = mw
+        aqApp.init()
         
     
     def createUi(self, ui_file):
