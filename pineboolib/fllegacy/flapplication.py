@@ -9,6 +9,9 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
 from PyQt5.QtCore import QTimer, pyqtSignal
+from PyQt5.QtWidgets import QToolBox, QMenu, QToolBar, QActionGroup, QAction,\
+    QSizePolicy
+from PyQt5.Qt import QIcon
 
 
 logger = logging.getLogger("FLApplication")
@@ -320,6 +323,9 @@ class FLApplication(QtCore.QObject):
         pass
 
     def initToolBox(self):
+        self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
+        self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
+        
         if self.tool_box_ is None or self.modules_menu is None:
             return
         
@@ -331,9 +337,7 @@ class FLApplication(QtCore.QObject):
             self.tool_box_.removeItem(item)
             del item
         
-        print(2)
         for it in self.db().managerModules().listIdAreas():
-            print(3, it)
             descript_area = self.db().managerModules().idAreaToDescription(it)
             #new_area_bar = QToolBar(self.tr(descript_area), self.container_, self.tool_box_, False, descript_area)
             new_area_bar = QToolBar(self.tr(descript_area), self.container_)
@@ -360,6 +364,7 @@ class FLApplication(QtCore.QObject):
                 
                 descript_module = "?? : %s" % self.db().managerModules().idModuleToDescription(mod)
                 new_module_action = QAction(new_area_bar)
+                new_module_action.setObjectName(mod)
                 new_module_action.setText(self.tr(descript_module))
                 #Falta QKeySequence
                 new_module_action.setIcon(QIcon(self.db().managerModules().iconModule(mod)))
@@ -374,9 +379,7 @@ class FLApplication(QtCore.QObject):
             #Falta Opciones
             
         if self.acl_:
-            self.acl_.process(self.container_)
-        
-        print(4)          
+            self.acl_.process(self.container_)        
             
             
         
@@ -500,9 +503,49 @@ class FLApplication(QtCore.QObject):
         if idm in pineboolib.project.modules.keys():
             pineboolib.project.modules[idm].load()
 
-    @decorators.NotImplementedWarn
     def activateModule(self, idm=None):  # dos funciones
-        pass
+        if not idm:
+            if self.sender():
+                idm = self.sender().objectName()
+        
+        if idm is None:
+            return 
+        
+        self.writeStateModule()
+        
+        w = None
+        if idm in self.db().managerModules().listAllIdModules():
+            w = self.dict_main_widgets_.find(idm) if self.dict_main_widgets_ else None
+            if not w:
+                w = self.db().managerModules().createUI("%s.ui" % idm, self, None, idm)
+                
+                if not w:
+                    return
+                
+                self.dict_main_widgets_[idm] = w
+                w.setObjectName(idm)
+                
+                if self.acl_:
+                    self.acl_.process(w)
+                self.setMainWidget(w)
+                self.call("%s.init()" % idm, [])
+                w.removeEventFilter(self)
+                self.db().managerModules().setActiveIdModule(idm)
+                self.setMainWidget(w)
+                self.initMainWidget()
+                self.showMainWidget(w)
+                #w.installEventFilter(self)
+                return 
+        
+        if not w:
+            self.db().managerModules().setActiveIdModule("")
+        else:
+            self.db().managerModules().setActiveIdModule(idm)
+        
+        self.setMainWidget(w)
+        self.showMainWidget(w)
+        
+        print("Inicializando", idm, self.sender())
 
     def reinit(self):
         if self.initializing_ or self.destroying_:
@@ -831,15 +874,22 @@ class FLApplication(QtCore.QObject):
                 self.db().managerModules().finish()
                 self.db().manager().finish()
                 QtCore.QTimer().singleShot(0, self.quit)
+            
+            return True
+        else:
+            return False
 
     def quit(self):
-        pass
+        if self.main_widget_ is not None:
+            self.main_widget_.close()
 
     def queryExit(self):
         if self.not_exit_:
             return False
 
-        if not self.db().interactiveGui():
+        from pineboolib.pncontrolsfactory import SysType
+
+        if not SysType().interactiveGUI():
             return True
         
         from pineboolib.pncontrolsfactory import QMessageBox
