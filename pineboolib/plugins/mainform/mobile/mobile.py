@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QTreeWidgetItem
 import logging
 
 
-logging.getLogger("mainForm_%s" % __name__)
+logger = logging.getLogger("mainForm_%s" % __name__)
 
 
 class MainForm(QtWidgets.QMainWindow):
@@ -90,7 +90,7 @@ class MainForm(QtWidgets.QMainWindow):
         if doExit:
             self.writeState()
             self.w_.removeEventFilter(self.w_)
-            aqApp.generalExit(False)
+            #aqApp.generalExit(False)
             self.removeAllPages()
 
         return doExit

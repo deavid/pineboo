@@ -91,7 +91,7 @@ class MainForm(QtWidgets.QMainWindow):
         if doExit:
             self.writeState()
             self.w_.removeEventFilter(self.w_)
-            aqApp.generalExit(False)
+            #aqApp.generalExit(False)
             self.removeAllPages()
 
         return doExit
