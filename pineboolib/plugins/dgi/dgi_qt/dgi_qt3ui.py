@@ -8,7 +8,8 @@ from binascii import unhexlify
 import pineboolib
 import logging
 import zlib
-from PyQt5.QtWidgets import QButtonGroup
+from PyQt5.QtWidgets import QButtonGroup, QMdiArea
+from PyQt5.QtCore import QObject
 
 
 
@@ -63,73 +64,83 @@ def loadUi(form_path, widget, parent=None):
     # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     formname = widget.objectName()
     logger.info("form: %s", formname)
-
+    
+    if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
+        mdi_area = QMdiArea()
+        mdi_area.setObjectName("mdi_area")
+        widget.setCentralWidget(mdi_area)
+                
     # Cargamos actions...
     for action in root.findall("actions//action"):
         loadAction(action, widget)
 
-    if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
-        for xmlconnection in root.findall("connections//connection"):
-            sender_name = xmlconnection.find("sender").text
-            signal_name = xmlconnection.find("signal").text
-            receiv_name = xmlconnection.find("receiver").text
-            slot_name = xmlconnection.find("slot").text
+    for xmlconnection in root.findall("connections//connection"):
+        sender_name = xmlconnection.find("sender").text
+        signal_name = xmlconnection.find("signal").text
+        receiv_name = xmlconnection.find("receiver").text
+        slot_name = xmlconnection.find("slot").text
 
-            if sender_name == formname:
-                sender = widget
-            else:
-                sender = widget.findChild(QtWidgets.QWidget, sender_name)
+        receiver = None
+        if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
+            if signal_name == "activated()":
+                signal_name = "triggered()"            
+        
+        if sender_name == formname:
+            sender = widget
+        else:
+            sender = widget.findChild(QObject, sender_name)
+            
 
-            if not pineboolib.project._DGI.localDesktop():
-                wui = hasattr(widget, "ui_") and sender_name in widget.ui_
-                if sender is None and wui:
-                    sender = widget.ui_[sender_name]
+        #if not pineboolib.project._DGI.localDesktop():
+        #    wui = hasattr(widget, "ui_") and sender_name in widget.ui_
+        #    if sender is None and wui:
+        #        sender = widget.ui_[sender_name]
 
-            sg_name = signal_name
+        sg_name = signal_name
 
-            if signal_name.find("(") > -1:
-                sg_name = signal_name[:signal_name.find("(")]
+        if signal_name.find("(") > -1:
+            sg_name = signal_name[:signal_name.find("(")]
 
-            sl_name = slot_name
-            if slot_name.find("(") > -1:
-                sl_name = slot_name[:slot_name.find("(")]
+        sl_name = slot_name
+        if slot_name.find("(") > -1:
+            sl_name = slot_name[:slot_name.find("(")]
 
-            receiver = None
-            if sender is None:
-                logger.warning("Connection sender not found:%s", sender_name)
-            if receiv_name == formname:
-                receiver = widget
-                fn_name = slot_name.rstrip("()")
-                logger.debug("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
+        
+        if sender is None:
+            logger.warning("Connection sender not found:%s", sender_name)
+        if receiv_name == formname:
+            receiver = widget if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow) else pineboolib.project.actions[sender_name]
+            fn_name = slot_name.rstrip("()")
+            logger.debug("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
 
-                ifx = widget
-                # if hasattr(widget, "iface"):
-                #    ifx = widget.iface
-                if hasattr(ifx, fn_name):
-                    try:
-                        from pineboolib import pncontrolsfactory
-                        # getattr(sender, sg_name).connect(
-                        #    getattr(ifx, fn_name))
-                        pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
-                    except Exception as e:
-                        logger.exception("Error connecting: %s %s %s %s %s", sender, signal_name, receiver, slot_name, getattr(ifx, fn_name))
-                    continue
-
-            if receiver is None:
-                receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
-
-            if not pineboolib.project._DGI.localDesktop():
-                wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
-                if receiver is None and wui:
-                    receiver = widget.ui_[receiv_name]
-            if receiver is None:
-                logger.warning("Connection receiver not found:%s", receiv_name)
-            if sender is None or receiver is None:
+            ifx = widget
+            # if hasattr(widget, "iface"):
+            #    ifx = widget.iface
+            if hasattr(ifx, fn_name):
+                try:
+                    from pineboolib import pncontrolsfactory
+                    # getattr(sender, sg_name).connect(
+                    #    getattr(ifx, fn_name))
+                    pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
+                except Exception as e:
+                    logger.exception("Error connecting: %s %s %s %s %s", sender, signal_name, receiver, slot_name, getattr(ifx, fn_name))
                 continue
-            try:
-                getattr(sender, sg_name).connect(getattr(receiver, sl_name))
-            except Exception as e:
-                logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
+
+        if receiver is None:
+            receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
+
+        #if not pineboolib.project._DGI.localDesktop():
+        #    wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
+        #    if receiver is None and wui:
+        #        receiver = widget.ui_[receiv_name]
+        if receiver is None:
+            logger.warning("Connection receiver not found:%s", receiv_name)
+        if sender is None or receiver is None:
+            continue
+        try:
+            getattr(sender, sg_name).connect(getattr(receiver, sl_name))
+        except Exception as e:
+            logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
 
     # Cargamos menubar ...
     xmlmenubar = root.find("menubar")
@@ -169,8 +180,7 @@ def loadToolBar(xml, widget):
             # FIXME!!, meter el icono y resto de datos!!
         elif a.tag == "separator":
             # FIXME: Añadimos action en modo separator
-            ac_ = tb.addAction("separator")
-            ac_.setSeparator(True)
+            tb.addSeparator()
 
     widget.addToolBar(tb)
 
@@ -224,6 +234,8 @@ def load_action(action, widget):
         action.setToolTip(real_action.toolTip())
         action.setStatusTip(real_action.statusTip())
         action.setWhatsThis(real_action.whatsThis())
+        action.triggered.connect(real_action.trigger)
+        action.toggled.connect(real_action.toggle)
 
 
 def loadAction(action, widget):
