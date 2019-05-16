@@ -515,7 +515,7 @@ class FLApplication(QtCore.QObject):
         
         w = None
         if idm in self.db().managerModules().listAllIdModules():
-            w = self.dict_main_widgets_.find(idm) if self.dict_main_widgets_ else None
+            w = self.dict_main_widgets_[idm] if idm in self.dict_main_widgets_.keys() else None
             if not w:
                 w = self.db().managerModules().createUI("%s.ui" % idm, self, None, idm)
                 
