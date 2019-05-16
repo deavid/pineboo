@@ -545,7 +545,6 @@ class FLApplication(QtCore.QObject):
         self.setMainWidget(w)
         self.showMainWidget(w)
         
-        print("Inicializando", idm, self.sender())
 
     def reinit(self):
         if self.initializing_ or self.destroying_:
