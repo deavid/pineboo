@@ -111,6 +111,12 @@ class PNBuffer(object):
 
             else:
                 field.value = self.cursor().model().value(row, field.name)
+            
+            if field.type_ == "date":
+                if isinstance(field.value, str):
+                    date_ = field.value.split("-")
+                    if len(date_[2]) == 4:
+                        field.value = date_[2] + "-" + date_[1] + "-" + date_[0]
             # val = self.cursor().model().value(row , field.name)
             # if val == "None":
             #    val = None
@@ -1690,10 +1696,12 @@ class FLSqlCursor(QtCore.QObject):
         if not self.buffer():
             return None
 
+        if self.d.bufferCopy_:
+            del self.d.bufferCopy_
+
         self.d.bufferCopy_ = PNBuffer(self)
         for field in self.buffer().fieldsList():
-            self.bufferCopy().setValue(
-                field.name, self.buffer().value(field.name), False)
+            self.bufferCopy().setValue(field.name, self.buffer().value(field.name), False)
 
     """
     Indica si el contenido actual del buffer difiere de la copia guardada.
