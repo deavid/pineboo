@@ -10,6 +10,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 import pineboolib
 import traceback
+from pineboolib.pncontrolsfactory import QMdiArea, QMdiSubWindow
 
 
 
@@ -150,7 +151,6 @@ class FLFormDB(QtWidgets.QDialog):
 
     _uiName = None
     _scriptForm = None
-    ui_ = {}
     
     init_thread_script = None
 
@@ -169,8 +169,6 @@ class FLFormDB(QtWidgets.QDialog):
 
         self._loaded = False
         self.known_instances[(self.__class__, action.name())] = self
-
-        self.ui_ = {}
 
         self._action = action
         if type(self).__name__ == "FLFormRecordDB":
@@ -214,6 +212,8 @@ class FLFormDB(QtWidgets.QDialog):
         if load:
             self.load()
             self.initForm()
+        
+        
 
     def load(self):
         if self._loaded:
@@ -809,6 +809,10 @@ class FLFormDB(QtWidgets.QDialog):
             
            self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
         
+        if isinstance(self.parent(), QMdiSubWindow):
+            self.parent().close()
+                
+            
         
         
     """
@@ -887,6 +891,18 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def show(self):
+        
+        module_name = getattr(pineboolib.project.actions[self._action.name()].mod, "module_name", None)
+        if module_name:
+            from pineboolib.pncontrolsfactory import aqApp
+            if module_name in aqApp.dict_main_widgets_.keys():
+                module_window = aqApp.dict_main_widgets_[module_name]
+                mdi_area = module_window.centralWidget()
+                if isinstance(mdi_area, QMdiArea):
+                    mdi_area.addSubWindow(self)
+        
+        
+        
         if self.initFocusWidget_ is None:          
             self.initFocusWidget_ = self.focusWidget()
               

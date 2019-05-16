@@ -9,6 +9,7 @@ from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.utils import filedir
 import pineboolib
+from pineboolib.pncontrolsfactory import QMdiSubWindow
 
 
 class FLFormSearchDB(FLFormDB):
@@ -358,6 +359,9 @@ class FLFormSearchDB(FLFormDB):
         self.accepted_ = True
         self.saveGeometry()
         self.hide()
+        
+        if isinstance(self.parent(), QMdiSubWindow):
+            self.parent().hide()
 
     """
     Se activa al pulsar el botón cancelar
@@ -383,7 +387,7 @@ class FLFormSearchDB(FLFormDB):
         self.exec_()
 
     def child(self, childName):
-        return self.findChild(QtWidgets.QWidget, childName)
+        return self.findChild(QtWidgets.QWidget, childName, QtCore.Qt.FindChildrenRecursively)
 
     def accepted(self):
         return self.accepted_
