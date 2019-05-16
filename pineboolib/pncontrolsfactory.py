@@ -98,6 +98,7 @@ QFontDialog = resolveObject("QFontDialog")
 QDockWidget = resolveObject("QDockWidget")
 QMdiArea = resolveObject("QMdiArea")
 QMdiSubWindow = resolveObject("QMdiSubWindow")
+QKeySequence = resolveObject("QKeySequence")
 
 """
 QIconSet = resolveObject("QIconSet")
