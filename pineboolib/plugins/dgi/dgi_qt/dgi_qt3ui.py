@@ -105,7 +105,7 @@ def loadUi(form_path, widget, parent=None):
         if sender is None:
             logger.warning("Connection sender not found:%s", sender_name)
         if receiv_name == formname:
-            receiver = widget if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow) else pineboolib.project.actions[sender_name]
+            receiver = widget if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow) else pineboolib.project.actions[sender_name] if sender_name in pineboolib.project.actions.keys() else None
             fn_name = slot_name.rstrip("()")
             logger.debug("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
 
@@ -123,7 +123,7 @@ def loadUi(form_path, widget, parent=None):
                 continue
 
         if receiver is None:
-            receiver = widget.findChild(QtWidgets.QWidget, receiv_name)
+            receiver = widget.findChild(QtWidgets.QWidget, receiv_name, QtCore.Qt.FindChildrenRecursively)
 
         #if not pineboolib.project._DGI.localDesktop():
         #    wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
