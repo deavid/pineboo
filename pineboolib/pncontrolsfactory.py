@@ -328,9 +328,9 @@ def slot_done(fn, signal, sender, caller):
         if signal.signal == "2clicked(bool)":
             args = []
         
-        
+        args_num = get_expected_args_num(fn)
         try:
-            res = fn(*args, **kwargs)
+            res = fn(*args[0:args_num], **kwargs)
                 
         except Exception:
             script_name = caller.__module__ if caller is not None else "????"
