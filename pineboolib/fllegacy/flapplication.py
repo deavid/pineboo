@@ -433,14 +433,15 @@ class FLApplication(QtCore.QObject):
 
         from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QAction, QActionGroup, QToolBar
         if w == self.container_ or not w:
-            QApplication.setActiveWindow(w)
+            QApplication.setActiveWindow(self.container_)
             self.main_widget_ = None
             return
 
         QApplication.setActiveWindow(w)
         self.main_widget_ = w
 
-        mw = self.main_widget_ if isinstance(self.main_widget_, QMainWindow) else None
+        #mw = self.main_widget_ if isinstance(self.main_widget_, QMainWindow) else None
+        mw = self.main_widget_
         if not mw:
             return
 
@@ -708,6 +709,7 @@ class FLApplication(QtCore.QObject):
                 
                 if self.acl_:
                     self.acl_.process(w)
+                   
                 self.setMainWidget(w)
                 self.call("%s.init()" % idm, [])
                 w.removeEventFilter(self)
@@ -715,7 +717,7 @@ class FLApplication(QtCore.QObject):
                 self.setMainWidget(w)
                 self.initMainWidget()
                 self.showMainWidget(w)
-                #w.installEventFilter(self)
+                w.installEventFilter(self)
                 return 
         
         if not w:
