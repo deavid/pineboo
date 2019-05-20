@@ -396,7 +396,10 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             elif c.tag == "widget":
                 if isinstance(widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup.QButtonGroup):
                     new_widget = createWidget(c.get("class"), parent=widget)
-                    widget.addButton(new_widget)
+                    if isinstance(new_widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget.QWidget):
+                        widget.addWidget(new_widget)
+                    else:
+                        widget.addButton(new_widget)
                 else:
                     new_widget = createWidget(c.get("class"), parent=widget)
                 loadWidget(c, new_widget, parent, origWidget)
