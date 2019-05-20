@@ -561,7 +561,10 @@ class FLSqlQuery(object):
     """
 
     def isNull(self, n):
-        i = self.self.fieldNameToPos(n)
+        i = n
+        if isinstance(n, str):
+            i = self.self.fieldNameToPos(n)
+            
         return (self._row[i] is None)
 
     """
