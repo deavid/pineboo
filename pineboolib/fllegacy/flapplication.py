@@ -1185,8 +1185,9 @@ class FLApplication(QtCore.QObject):
                                 continue
 
                             w = self.db().managerModules().createUI("%s.ui" % it, self, None, it)
+                            print("*", it, w)
                             self.dict_main_widgets_[it] = w
-                            self.setName(it)
+                            w.setObjectName(it)
                             if self.acl_:
                                 self.acl_.process(w)
 
@@ -1196,12 +1197,12 @@ class FLApplication(QtCore.QObject):
                             self.setMainWidget(w)
                             self.initMainWidget()
 
-            itd = self.dict_main_widgets_
-            for w in itd:
-                if w.objectName() is not active_id_module:
+            for k in self.dict_main_widgets_.keys():
+                w = self.dict_main_widgets_[k]
+                if w.objectName() != active_id_module:
                     w.installEventFilter(self)
                     w.show()
-                    w.setFont(self.font())
+                    w.setFont(QApplication.font())
                     if not isinstance(w, QMainWindow):
                         continue
 
