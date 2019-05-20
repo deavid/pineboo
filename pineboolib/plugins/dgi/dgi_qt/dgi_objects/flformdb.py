@@ -898,7 +898,7 @@ class FLFormDB(QtWidgets.QDialog):
             if module_name in aqApp.dict_main_widgets_.keys():
                 module_window = aqApp.dict_main_widgets_[module_name]
                 mdi_area = module_window.centralWidget()
-                if isinstance(mdi_area, QMdiArea):
+                if isinstance(mdi_area, QMdiArea) and not self.formName().startswith("formRecord"):
                     mdi_area.addSubWindow(self)
         
         
