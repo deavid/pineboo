@@ -502,9 +502,10 @@ class FLApplication(QtCore.QObject):
             descript_area = self.db().managerModules().idAreaToDescription(it)
             #new_area_bar = QToolBar(self.tr(descript_area), self.container_, self.tool_box_, False, descript_area)
             new_area_bar = QToolBar(self.tr(descript_area), self.container_)
+            new_area_bar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
             #new_area_bar.setFrameStyle(QFrame.NoFrame)
             new_area_bar.setOrientation(QtCore.Qt.Vertical)
-            new_area_bar.layout().setSpacing(3)
+            #new_area_bar.layout().setSpacing(3)
             self.tool_box_.addItem(new_area_bar, self.tr(descript_area))
             
             ag = QActionGroup(new_area_bar)
