@@ -891,14 +891,13 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def show(self):
-        
         module_name = getattr(pineboolib.project.actions[self._action.name()].mod, "module_name", None)
         if module_name:
             from pineboolib.pncontrolsfactory import aqApp
             if module_name in aqApp.dict_main_widgets_.keys():
                 module_window = aqApp.dict_main_widgets_[module_name]
                 mdi_area = module_window.centralWidget()
-                if isinstance(mdi_area, QMdiArea) and not self.formName().startswith("formRecord"):
+                if isinstance(mdi_area, QMdiArea) and type(self).__name__ == "FLFormDB":
                     mdi_area.addSubWindow(self)
         
         
