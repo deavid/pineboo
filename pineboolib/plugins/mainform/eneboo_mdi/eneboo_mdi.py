@@ -46,20 +46,5 @@ class MainForm(QtWidgets.QMainWindow):
         self.w_ = mng.createUI(ui_file, None, self)
         self.w_.setObjectName("container")
     
-    def eventFilter(self, o, e):
-        if isinstance(e, AQS.Close):
-            if isinstance(o, MainForm):
-                if not self.is_closing_:
-                    self.w_.setDisabled(True)
-                    ret = aqApp.generalExit(True) 
-                    if ret == False:
-                        self.w_.setDisabled(False)
-                        e.ignore()
-                    else:
-                        self.is_closing_ = True
-                    
-                    return True
-        
-        return False
 
 mainWindow = MainForm()
