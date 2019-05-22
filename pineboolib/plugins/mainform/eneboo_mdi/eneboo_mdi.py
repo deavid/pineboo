@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 from pineboolib import decorators
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.Qt import QIcon
-from pineboolib.pncontrolsfactory import aqApp, AQS
+from pineboolib.pncontrolsfactory import aqApp, AQS, QMainWindow
 from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
 
+
 import logging
-from PyQt5.QtWidgets import QMenu, QAction, QWidget, QVBoxLayout, QPushButton,\
-    QToolBox, QSizePolicy
-from PyQt5.QtGui import QKeySequence
+
 
 
 logger = logging.getLogger("mainForm_%s" % __name__)
 
 
-class MainForm(QtWidgets.QMainWindow):
+class MainForm(QMainWindow):
 
     is_closing_ = False
     mdi_enable_ = True
