@@ -740,11 +740,11 @@ class FLApplication(QtCore.QObject):
             return
         
         self.window_menu.clear()
-        self.window_menu.addMenu(self.window_cascade_action)
-        self.window_menu.addMenu(self.window_tile_action)
-        self.window_menu.addMenu(self.window_close_action)
+        self.window_menu.addAction(self.window_cascade_action)
+        self.window_menu.addAction(self.window_tile_action)
+        self.window_menu.addAction(self.window_close_action)
         
-        if not self.window_menu.subWindowList():
+        if not self.p_work_space_.subWindowList():
             self.window_cascade_action.setEnabled(False)
             self.window_tile_action.setEnabled(False)
             self.window_close_action.setEnabled(False)
