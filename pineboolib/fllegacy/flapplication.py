@@ -8,7 +8,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
-from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent
+from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent, QRect
 from PyQt5.QtWidgets import QToolBox, QMenu, QToolBar, QActionGroup, QAction,\
     QSizePolicy, QApplication, QMainWindow, QWidget, QWhatsThis
 from PyQt5.Qt import QIcon, QPainter, QCursor, QKeySequence
@@ -381,6 +381,7 @@ class FLApplication(QtCore.QObject):
                 w.show()
             return
         
+        
         focus_w = QApplication.focusWidget()
         if w is self.container_ or not w:
             if self.container_.isMinimized():
@@ -409,17 +410,16 @@ class FLApplication(QtCore.QObject):
             w.show()
             w.setFont(QApplication.font())
         
-        if focus_w and isinstance(focus_w, QMainWindow) and focus_w != w:
+        if focus_w and isinstance(focus_w, pineboolib.pncontrolsfactory.QMainWindow) and focus_w != w:
             w.setFocus()
         if not w.isActiveWindow():
             w.raise_()
             QApplication.setActiveWindow(w)
         
-        mw = QMainWindow(w)
-        if mw:
-            view_back = mw.centralWidget()
+        if w:
+            view_back = w.centralWidget()
             if view_back:
-                self.p_work_space_ = view_back.child(mw.name(), "QWorkspace")
+                self.p_work_space_ = view_back.findChild(FLWorkSpace, w.objectName())
                 view_back.show()
         
         self.setCaptionMainWidget("")
@@ -611,9 +611,9 @@ class FLApplication(QtCore.QObject):
 
     def initView(self):
         mw = self.main_widget_
+        
         if mw is None:
             return
-        
         
         view_back = mw.centralWidget()
         if view_back is None:
@@ -702,9 +702,9 @@ class FLApplication(QtCore.QObject):
     def existFormInMDI(self, id):
         pass
 
-    @decorators.NotImplementedWarn
-    def openMasterForm(self, n, pix):
-        pass
+    def openMasterForm(self, action_name, pix):
+        pineboolib.project.actions[action_name].openDefaultForm()
+        
 
     @decorators.NotImplementedWarn
     def openDefaultForm(self):
@@ -1136,14 +1136,14 @@ class FLApplication(QtCore.QObject):
         settings.writeEntry("MultiLang/Enabled", self.multi_lang_enabled_)
         settings.writeEntry("MultiLang/LangId", self.multi_lang_id_)
 
-        if self.container_:
+        if self.container_ is not None:
             windows_opened = []
             _list = QApplication.topLevelWidgets()
 
             if self.initializing_:
                 for it in _list:
                     it.removeEventFilter(self)
-                    if it.onjectName() in self.dict_main_widgets_.keys():
+                    if it.objectName() in self.dict_main_widgets_.keys():
                         if it != self.container_:
                             if it.isVisible():
                                 windows_opened.append(it.objectName())
@@ -1173,11 +1173,14 @@ class FLApplication(QtCore.QObject):
     def writeStateModule(self):
         settings = FLSettings()
         idm = self.db().managerModules().activeIdModule()
-        if not self.main_widget_ or idm is None or self.main_widget_.objectName() == idm:
+        if not idm:
+            return
+        if self.main_widget_ is None or self.main_widget_.objectName() != idm:
             return
 
+
         windows_opened = []
-        if self.main_widget_ and self.p_work_space_:
+        if self.main_widget_ is not None and self.p_work_space_ is not None:
             for w in self.p_work_space_.subWindowList():
                 s = w.findChild(pineboolib.pncontrolsfactory.FLFormDB)
                 if s is not None:
@@ -1192,7 +1195,6 @@ class FLApplication(QtCore.QObject):
         settings.writeEntry("%s/Y" % k, self.main_widget_.y())
         settings.writeEntry("%s/Width" % k, self.main_widget_.width())
         settings.writeEntry("%s/Height" % k, self.main_widget_.height())
-        logger.warning("aqui", stack_info = True)
 
     def readState(self):
         settings = FLSettings()
@@ -1267,9 +1269,38 @@ class FLApplication(QtCore.QObject):
 
             self.activateModule(active_id_module)
     
-    @decorators.NotImplementedWarn
+
     def readStateModule(self):
-        pass
+        idm = self.db().managerModules().activeIdModule()
+        if not idm:
+            return 
+        
+        if self.main_widget_ is None or self.main_widget_.objectName() != idm:
+            return
+        
+        windows_opened = FLSettings().readListEntry("windowsOpened/%s" % idm)
+        if windows_opened:
+            for it in windows_opened:
+                act = self.main_widget_.findChild(QAction, it)
+                if act and act.isVisible():
+                    self.openMasterForm(it, act.icon())
+        
+        
+        r = QRect(self.main_widget_.pos(), self.main_widget_.size())
+        k = "Geometry/%s" % idm
+        
+        if not FLSettings().readBoolEntry("%s/Maximized" % k, False):
+            r.setX(FLSettings().readNumEntry("%s/X" % k, r.x()))
+            r.setY(FLSettings().readNumEntry("%s/Y" % k, r.y()))
+            r.setWidth(FLSettings().readNumEntry("%s/Width" % k, r.width()))
+            r.setWidth(FLSettings().readNumEntry("%s/Height" % k, r.height()))
+            desk = QApplication.desktop().availableGeometry(self.main_widget_)
+            inter = desk.intersected(r)
+            self.main_widget_.resize(r.size())
+            if (inter.width() * inter.height()) > (r.width() * r.height() / 20):
+                self.main_widget_.move(r.topLeft())
+            else:
+                self.main_widget_.resize(QApplication.desktop().availableGeometry(self.main_widget_).size()) 
 
     def loadScripts(self):
         from pineboolib.pncontrolsfactory import QApplication
