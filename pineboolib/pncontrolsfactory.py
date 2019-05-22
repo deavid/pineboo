@@ -99,7 +99,8 @@ QDockWidget = resolveObject("QDockWidget")
 QMdiArea = resolveObject("QMdiArea")
 QMdiSubWindow = resolveObject("QMdiSubWindow")
 QKeySequence = resolveObject("QKeySequence")
-
+QSizePolicy = resolveObject("QSizePolicy")
+QToolBox = resolveObject("QToolBox")
 """
 QIconSet = resolveObject("QIconSet")
 """
