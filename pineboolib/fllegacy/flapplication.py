@@ -109,6 +109,7 @@ class FLApplication(QtCore.QObject):
 
         if self.dict_main_widgets_:
             for mw in self.dict_main_widgets_:
+
                 del mw
             del self.dict_main_widgets_
             self.dict_main_widgets_ = {}
@@ -148,7 +149,6 @@ class FLApplication(QtCore.QObject):
 
 
     def eventFilter(self, obj, ev):
-        
         from pineboolib.pncontrolsfactory import QApplication, QMainWindow
         
         
@@ -159,14 +159,12 @@ class FLApplication(QtCore.QObject):
             return super().eventFilter(obj, ev)
         
         evt = ev.type()
-        
         if obj != self.main_widget_ and not isinstance(obj, QMainWindow):
             return super().eventFilter(obj, ev)
         
         aw = None
         #if self.p_work_space_ is not None:
         #    aw = QApplication.setActiveWindow(self.p_work_space_)
-    
         if aw is not None and aw != obj and evt not in (QEvent.Resize, QEvent.Close):
             obj.removeEventFilter(self)
             if evt == QEvent.WindowActivate:
@@ -254,7 +252,7 @@ class FLApplication(QtCore.QObject):
     def init(self):
         from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence, QMenu, QAction, QSizePolicy, QToolBox
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
-        self.dict_main_widgets_ = []
+        self.dict_main_widgets_ = {}
         self.container_.setObjectName("container")
         self.container_.setWindowIcon(QIcon(AQS.Pixmap_fromMineSource("pineboo.png")))
         if self.db() is not None:
@@ -568,9 +566,8 @@ class FLApplication(QtCore.QObject):
             self.window_tile_action.triggered.connect(self.p_work_space_.tileSubWindows)
             self.window_close_action.triggered.connect(self.p_work_space_.closeActiveSubWindow)
 
-    @decorators.NotImplementedWarn
     def initMenuBar(self):
-        pass
+        self.window_menu.aboutToShow.connect(self.windowMenuAboutToShow)
 
     def initToolBar(self):
         from pineboolib.pncontrolsfactory import QMenu, QAction
@@ -627,9 +624,19 @@ class FLApplication(QtCore.QObject):
         
         
 
-    @decorators.NotImplementedWarn
+
     def initStatusBar(self):
-        pass
+        if not self.main_widget_:
+            return
+        
+        from pineboolib.pncontrolsfactory import QLabel 
+        
+        self.statusHelpMsg(self.tr("Listo."))
+        self.main_widget_.statusBar().setSizeGripEnabled(False)
+        
+        conexion = QLabel(self.main_widget_.statusBar())
+        conexion.setText("%s@%s" % (self.db().user(), self.db().database()))
+        self.main_widget_.statusBar().addWidget(conexion)
 
 
     def initView(self):
@@ -727,17 +734,55 @@ class FLApplication(QtCore.QObject):
         
         self.main_widget_.statusBar().showMessage(text, 2000)
 
-    @decorators.NotImplementedWarn
+
     def windowMenuAboutToShow(self):
-        pass
+        if not self.p_work_space_:
+            return
+        
+        self.window_menu.clear()
+        self.window_menu.addMenu(self.window_cascade_action)
+        self.window_menu.addMenu(self.window_tile_action)
+        self.window_menu.addMenu(self.window_close_action)
+        
+        if not self.window_menu.subWindowList():
+            self.window_cascade_action.setEnabled(False)
+            self.window_tile_action.setEnabled(False)
+            self.window_close_action.setEnabled(False)
+        else:
+            self.window_cascade_action.setEnabled(True)
+            self.window_tile_action.setEnabled(True)
+            self.window_close_action.setEnabled(True)
+        
+        for window in self.p_work_space_.subWindowList():
+            id = self.window_menu.insertItem(window.caption(), self, self.windowMenuActivated)
+            self.window_menu.setItemParameter(id, window)
+            self.window_menu.setItemChecked(id, self.p_work_space_.activeWindow() == window)
+        
 
-    @decorators.NotImplementedWarn
+
     def windowMenuActivated(self, id):
-        pass
+        if not self.p_work_space_:
+            return
+        
+        w = self.p_work_space_.subWindowList().at(id)
+        if w:
+            w.setFocus()
 
-    @decorators.NotImplementedWarn
+
     def existFormInMDI(self, id):
-        pass
+        if id is None or not self.p_work_space_:
+            return False
+        
+
+        for window in self.subWindowList():
+           s = w.findChild(pineboolib.pncontrolsfactory.FLFormDB)
+           if s.idMDI() == id:
+               window.showNormal()
+               window.setFocus()
+               return True
+        
+        return False
+            
 
     def openMasterForm(self, action_name, pix):
         if action_name in pineboolib.project.actions.keys():
@@ -1137,13 +1182,14 @@ class FLApplication(QtCore.QObject):
                 self.writeState()
                 self.writeStateModule()
 
+
             if self.db().driverName():
                 self.db().managerModules().finish()
                 self.db().manager().finish()
                 QtCore.QTimer().singleShot(0, self.quit)
             
-            for k in self.dict_main_widgets_.keys():
-                self.dict_main_widgets_[k].close()
+            for mw in self.dict_main_widgets_.values():
+                mw.close()
             
             return True
         else:
@@ -1169,6 +1215,8 @@ class FLApplication(QtCore.QObject):
         return ret == QMessageBox.Yes
 
     def writeState(self):
+
+        from pineboolib.pncontrolsfactory import QApplication
 
         settings = FLSettings()
         settings.writeEntry("MultiLang/Enabled", self.multi_lang_enabled_)
