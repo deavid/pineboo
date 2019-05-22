@@ -7,8 +7,8 @@ class QAction(QtWidgets.QAction):
     _menuText = None
     _objectName = None
 
-    def __init__(self, parent=None):
-        super(QAction, self).__init__(parent)
+    def __init__(self, *args):
+        super().__init__(*args)
         self.triggered.connect(self.send_activated)
         self._name = None
         self._menuText = None
