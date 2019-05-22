@@ -8,9 +8,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
-from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent, QRect
-from PyQt5.QtWidgets import QToolBox, QMenu, QToolBar, QActionGroup, QAction,\
-    QSizePolicy, QApplication, QMainWindow, QWidget, QWhatsThis
+from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent, QRect, QObject
 from PyQt5.Qt import QIcon, QPainter, QCursor, QKeySequence
 from PyQt5.QtGui import QColor
 
@@ -150,6 +148,10 @@ class FLApplication(QtCore.QObject):
 
 
     def eventFilter(self, obj, ev):
+        
+        from pineboolib.pncontrolsfactory import QApplication, QMainWindow
+        
+        
         if self.initializing_ or self.destroying_:
             return super().eventFilter(obj, ev)
         
@@ -250,7 +252,7 @@ class FLApplication(QtCore.QObject):
 
 
     def init(self):
-        from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence
+        from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence, QMenu, QAction, QSizePolicy, QToolBox
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
         self.dict_main_widgets_ = []
         self.container_.setObjectName("container")
@@ -376,6 +378,9 @@ class FLApplication(QtCore.QObject):
 
 
     def showMainWidget(self, w):
+        
+        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QToolBar
+        
         if not self.container_:
             if w:
                 w.show()
@@ -410,7 +415,7 @@ class FLApplication(QtCore.QObject):
             w.show()
             w.setFont(QApplication.font())
         
-        if focus_w and isinstance(focus_w, pineboolib.pncontrolsfactory.QMainWindow) and focus_w != w:
+        if focus_w and isinstance(focus_w, QMainWindow) and focus_w != w:
             w.setFocus()
         if not w.isActiveWindow():
             w.raise_()
@@ -425,7 +430,7 @@ class FLApplication(QtCore.QObject):
         self.setCaptionMainWidget("")
         descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
         w.setWindowIcon(QIcon(self.db().managerModules().iconModule(w.objectName())))
-        self.tool_box_.setCurrentIndex(self.tool_box_.indexOf(self.tool_box_.findChild(QtWidgets.QToolBar, descript_area)))
+        self.tool_box_.setCurrentIndex(self.tool_box_.indexOf(self.tool_box_.findChild(QToolBar, descript_area)))
         
             
 
@@ -433,7 +438,7 @@ class FLApplication(QtCore.QObject):
         if not self.container_:
             return
 
-        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QAction, QActionGroup, QToolBar
+        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QAction, QActionGroup, QToolBar, QWidget
         if w == self.container_ or not w:
             QApplication.setActiveWindow(self.container_)
             self.main_widget_ = None
@@ -448,14 +453,17 @@ class FLApplication(QtCore.QObject):
             return
 
         if self.toogle_bars_:
-            tbg = self.container_.findChild(QActionGroup, "agToggleBars")
-            a = tgb.findChild(QAction, "Herramientas")
-            b = tgb.findChild(QAction, "Estado")
-            tb = mw.findChild(QToolBar, "toolBar")
-            if tb:
-                a.setOn(tb.isVisible())
+            tool_bar = self.main_widget_.findChild(QToolBar)
+            for ac in self.toogle_bars_.actions():
+                if ac.objectName() == "Herramientas":
+                    a = ac
+                elif ac.objectName() == "Estado":
+                    b = ac
 
-            b.setOn(mw.statusBar().isVisible())
+            if tool_bar:
+                a.setChecked(tool_bar.isVisible())
+
+            b.setChecked(mw.statusBar().isVisible())
 
     @decorators.NotImplementedWarn
     def makeStyle(self, style_):
@@ -487,6 +495,8 @@ class FLApplication(QtCore.QObject):
         pass
 
     def initToolBox(self):
+        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction
+        
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
         self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
         
@@ -563,44 +573,57 @@ class FLApplication(QtCore.QObject):
         pass
 
     def initToolBar(self):
+        from pineboolib.pncontrolsfactory import QMenu, QAction
+        
         mw = self.main_widget_
         if mw is None:
             return
         
-        tb = mw.findChild(QToolBar, "toolBar", QtCore.Qt.FindChildrenRecursively)
+        tb = mw.menuBar()
         if tb is None:
+            print("*** No se encuentra toolbar en", mw.objectName())
             return
         
-        tb.setMovingEnabled(False)
+        #tb.setMovingEnabled(False)
         
         tb.addSeparator()
-        what_this_button = QWhatsThis(tb)
+        #what_this_button = QWhatsThis(tb)
         
         if not self.toogle_bars_:
             self.toogle_bars_ = QMenu(self.container_)
             self.toogle_bars_.setObjectName("toggleBars")
-            self.toogle_bars_.setCheckable(True)
+            #self.toogle_bars_.setCheckable(True)
             
-            ag = QActionGroup(self.container_)
-            ag.setObjectName("agToggleBars")
             
-            a = QAction(self.tr("Barra de Herramientas"), QKeySequence(), ag, "Herramientas")
-            a.setToggleAction(True)
-            a.setOn(True)
+            #ag = QActionGroup(self.container_)
+            #ag.setObjectName("agToggleBars")
+            
+            a = QAction(self.tr("Barra de Herramientas"), self.container_)
+            a.setObjectName("Herramientas")
+            a.setCheckable(True)
+            a.setChecked(True)
             a.triggered.connect(self.toggleToolBar)
+            self.toogle_bars_.addAction(a)
             
-            b = QAction(self.tr("Barra de Estado"), QKeySequence(), ag, "Estado")
-            b.setToggleAction(True)
-            b.setOn(True)
-            b.triggered.connect(self.toggleToolBar) 
+            b = QAction(self.tr("Barra de Estado"), self.container_)
+            b.setObjectName("Estado")
+            b.setCheckable(True)
+            b.setChecked(True)
+            b.triggered.connect(self.toggleStatusBar) 
+            self.toogle_bars_.addAction(b)
             
-            ag.addTo(self.toogle_bars_)
+            mw.menuBar().addMenu(self.toogle_bars_)
         
         
             
+        
             
-        mw.menuBar().insertItem(self.tr("&Ver"), self.toogle_bars_)
-        mw.menuBar().insertItem(self.tr("&Módulos"), self.toogle_bars_)
+        ac = mw.menuBar().addMenu(self.toogle_bars_)
+        ac.setText(self.tr("&Ver"))
+        
+        
+        ac = mw.menuBar().addMenu(self.modules_menu)
+        ac.setText(self.tr("&Módulos"))
         
         
 
@@ -667,13 +690,27 @@ class FLApplication(QtCore.QObject):
     def getWidgetList(self, wn, c):
         pass
 
-    @decorators.NotImplementedWarn
-    def toggleToolBar(self, toggle):
-        pass
 
-    @decorators.NotImplementedWarn
+    def toggleToolBar(self, toggle):
+        if not self.main_widget_:
+            return
+        
+        from pineboolib.pncontrolsfactory import QToolBar
+        
+        tb = self.main_widget_.findChild(QToolBar)
+        if not tb:
+            return
+        
+        tb.show() if toggle else tb.hide()
+
+
     def toggleStatusBar(self, toggle):
-        pass
+        if not self.main_widget_:
+            return
+        
+        self.main_widget_.statusBar().show() if toggle else self.main_widget_.statusBar().hide()
+
+        
 
     def aboutQt(self):
         from pineboolib.pncontrolsfactory import QMessageBox
@@ -703,7 +740,8 @@ class FLApplication(QtCore.QObject):
         pass
 
     def openMasterForm(self, action_name, pix):
-        pineboolib.project.actions[action_name].openDefaultForm()
+        if action_name in pineboolib.project.actions.keys():
+            pineboolib.project.actions[action_name].openDefaultForm()
         
 
     @decorators.NotImplementedWarn
@@ -1271,6 +1309,9 @@ class FLApplication(QtCore.QObject):
     
 
     def readStateModule(self):
+        
+        from pineboolib.pncontrolsfactory import QAction, QApplication
+        
         idm = self.db().managerModules().activeIdModule()
         if not idm:
             return 
