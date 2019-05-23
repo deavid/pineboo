@@ -175,7 +175,6 @@ def loadToolBar(xml, widget):
 
             # FIXME!!, meter el icono y resto de datos!!
         elif a.tag == "separator":
-            # FIXME: Añadimos action en modo separator
             tb.addSeparator()
 
     widget.addToolBar(tb)
@@ -228,7 +227,10 @@ def load_action(action, widget):
         action.setText(real_action.text())
         action.setIcon(real_action.icon())
         action.setToolTip(real_action.toolTip())
-        action.setStatusTip(real_action.statusTip())
+        if real_action.statusTip():
+            action.setStatusTip(real_action.statusTip())
+        else:
+            action.setStatusTip(real_action.whatsThis())
         action.setWhatsThis(real_action.whatsThis())
         action.triggered.connect(real_action.trigger)
         action.toggled.connect(real_action.toggle)
