@@ -8,9 +8,8 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib import decorators
 import pineboolib
+
 from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent, QRect, QObject
-from PyQt5.Qt import QIcon, QPainter, QCursor, QKeySequence
-from PyQt5.QtGui import QColor
 
 
 logger = logging.getLogger("FLApplication")
@@ -252,7 +251,7 @@ class FLApplication(QtCore.QObject):
 
 
     def init(self):
-        from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence, QMenu, QAction, QSizePolicy, QToolBox
+        from pineboolib.pncontrolsfactory import AQS, QWidget, QVBoxLayout, QPushButton, QKeySequence, QMenu, QAction, QSizePolicy, QToolBox, QIcon
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
         self.dict_main_widgets_ = {}
         self.container_.setObjectName("container")
@@ -379,7 +378,7 @@ class FLApplication(QtCore.QObject):
 
     def showMainWidget(self, w):
         
-        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QToolBar
+        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QToolBar, QIcon
         
         if not self.container_:
             if w:
@@ -495,7 +494,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def initToolBox(self):
-        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction
+        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon
         
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
         self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
@@ -1578,7 +1577,7 @@ class FLWidget(QtWidgets.QWidget):
         super(FLWidget, self).__init__(parent)
         self.setObjectName(name)
 
-        from pineboolib.pncontrolsfactory import AQS
+        from pineboolib.pncontrolsfactory import AQS, QColor
         self.logo = AQS.Pixmap_fromMineSource("pineboo-logo.png")
         self.f_color = QColor(255, 255, 255)
         self.p_color = QColor(164, 170, 180)
