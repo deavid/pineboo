@@ -378,7 +378,7 @@ class FLApplication(QtCore.QObject):
 
     def showMainWidget(self, w):
         
-        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QToolBar, QIcon
+        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QToolBar, QIcon, FLWorkSpace
         
         if not self.container_:
             if w:
@@ -654,7 +654,7 @@ class FLApplication(QtCore.QObject):
         
         view_back = mw.centralWidget()
         if view_back is None:
-            from pineboolib.pncontrolsfactory import QMdiArea
+            from pineboolib.pncontrolsfactory import QMdiArea, FLWorkSpace
             view_back = QMdiArea()
             view_back.setObjectName("mdi_area")
             self.p_work_space_ = FLWorkSpace(view_back, self.db().managerModules().activeIdModule())
@@ -1566,47 +1566,10 @@ class FLApplication(QtCore.QObject):
         return pineboolib.project.get_temp_dir()
 
 
-class FLWidget(QtWidgets.QWidget):
-
-    logo = None
-    f_color = None
-    p_color = None
-
-
-    def __init__(self, parent, name):
-        super(FLWidget, self).__init__(parent)
-        self.setObjectName(name)
-
-        from pineboolib.pncontrolsfactory import AQS, QColor
-        self.logo = AQS.Pixmap_fromMineSource("pineboo-logo.png")
-        self.f_color = QColor(255, 255, 255)
-        self.p_color = QColor(164, 170, 180)
-        #self.f_color.setRgb(self.AQ_RGB_LOGO)
-        #self.p_color.setRGB()
-
-
-    def paintEvent(self, pe):
-        
-        #p = QPainter(self)
-        #p.fillRect(pe.rect() , self.f_color)
-
-        #dx = self.parent().width() -  self.logo.width()
-        #dy = self.parent().height() - self.logo.height()
-        #p.drawImage(QPoint(dx, dy), self.logo.toImage())
-        
-        #p.setPen(self.p_color)
-        #p.setBrush(self.p_color)
-        
-        #p.end()
-        
-        super().paintEvent(pe)
         
         
 
-class FLWorkSpace(FLWidget):
-    
-    def __getattr__(self, name):
-        return getattr(self.parent(), name)
+
 
 
 
