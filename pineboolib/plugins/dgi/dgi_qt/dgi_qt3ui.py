@@ -181,7 +181,11 @@ def loadToolBar(xml, widget):
 
 
 def loadMenuBar(xml, widget):
-    mB = QtWidgets.QMenuBar(widget)
+    if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
+        mB = widget.menuBar()
+    else:
+        mB = QtWidgets.QMenuBar(widget)
+        widget.layout().setMenuBar(mB)
     for x in xml:
         if x.tag == "property":
             name = x.get("name")
