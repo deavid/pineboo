@@ -754,11 +754,17 @@ class FLApplication(QtCore.QObject):
             self.window_cascade_action.setEnabled(True)
             self.window_tile_action.setEnabled(True)
             self.window_close_action.setEnabled(True)
+            self.window_menu.addSeparator()
         
         for window in self.p_work_space_.subWindowList():
-            id = self.window_menu.insertItem(window.caption(), self, self.windowMenuActivated)
-            self.window_menu.setItemParameter(id, window)
-            self.window_menu.setItemChecked(id, self.p_work_space_.activeWindow() == window)
+            ac = self.window_menu.addAction(window.windowTitle())
+            ac.setCheckable(True)
+            
+            if window == self.p_work_space_.activeSubWindow():
+                ac.setChecked(True)
+            
+            ac.triggered.connect(window.setFocus)
+            
         
 
 
