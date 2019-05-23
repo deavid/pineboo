@@ -445,6 +445,9 @@ class FLManagerModules(object):
     """
 
     def idAreaToDescription(self, idA):
+        if not idA:
+            return ""
+        
         for area in self.dictInfoMods.keys():
             if self.dictInfoMods[area].idArea.upper() == idA.upper():
                 return self.dictInfoMods[area].areaDescripcion
