@@ -523,8 +523,8 @@ class FLApplication(QtCore.QObject):
             
             ag = QActionGroup(new_area_bar)
             ag.setObjectName(descript_area)
-            ac = QAction(ag)
-            ac.setText(descript_area)
+            #ac = QAction(ag)
+            #ac.setText(descript_area)
             #ac.setUsesDropDown(True)
             
             list_modules = self.db().managerModules().listIdModules(it)
@@ -545,11 +545,14 @@ class FLApplication(QtCore.QObject):
                 new_module_action.setIcon(QIcon(self.db().managerModules().iconModule(mod)))
                 new_module_action.setObjectName(mod)
                 new_area_bar.addAction(new_module_action)
-                ag.addAction(new_module_action)
                 new_module_action.triggered.connect(self.activateModule)
+                ag.addAction(new_module_action)
+                
                 
             
-            self.modules_menu.addAction(ac)
+            a_menu = self.modules_menu.addMenu(descript_area)
+            for a in ag.actions():
+                a_menu.addAction(a)
             
             #Falta Opciones
             
