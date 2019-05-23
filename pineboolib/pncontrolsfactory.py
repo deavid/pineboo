@@ -101,6 +101,9 @@ QMdiSubWindow = resolveObject("QMdiSubWindow")
 QKeySequence = resolveObject("QKeySequence")
 QSizePolicy = resolveObject("QSizePolicy")
 QToolBox = resolveObject("QToolBox")
+QPainter = resolveObject("QPainter")
+QBrush = resolveObject("QBrush")
+
 """
 QIconSet = resolveObject("QIconSet")
 """
@@ -128,6 +131,8 @@ FLDoubleValidator = resolveObject("FLDoubleValidator")
 FLIntValidator = resolveObject("FLIntValidator")
 FLUIntValidator = resolveObject("FLUIntValidator")
 FLCodBar = resolveObject("FLCodBar")
+FLWidget = resolveObject("FLWidget")
+FLWorkSpace = resolveObject("FLWorkSpace")
 
 FormDBWidget = resolveObject("FormDBWidget")
 # Clases QSA
