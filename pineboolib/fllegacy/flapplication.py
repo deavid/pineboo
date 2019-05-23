@@ -544,7 +544,7 @@ class FLApplication(QtCore.QObject):
                 new_module_action = QAction(new_area_bar)
                 new_module_action.setObjectName(mod)
                 new_module_action.setText(self.tr(descript_module))
-                #Falta QKeySequence
+                new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
                 new_module_action.setIcon(QIcon(self.db().managerModules().iconModule(mod)))
                 new_module_action.setObjectName(mod)
                 new_area_bar.addAction(new_module_action)
