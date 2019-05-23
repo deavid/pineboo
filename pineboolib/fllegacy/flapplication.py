@@ -511,6 +511,8 @@ class FLApplication(QtCore.QObject):
             self.tool_box_.removeItem(item)
             del item
         
+        c = 65
+        
         for it in self.db().managerModules().listIdAreas():
             descript_area = self.db().managerModules().idAreaToDescription(it)
             #new_area_bar = QToolBar(self.tr(descript_area), self.container_, self.tool_box_, False, descript_area)
@@ -532,12 +534,13 @@ class FLApplication(QtCore.QObject):
             
             for mod in list_modules:
                 if mod == "Q":
+                    c += 1
                     continue
                 
                 if mod == "sys":
                     pass
                 
-                descript_module = "?? : %s" % self.db().managerModules().idModuleToDescription(mod)
+                descript_module = "%s: %s" % (str(chr(c)), self.db().managerModules().idModuleToDescription(mod))
                 new_module_action = QAction(new_area_bar)
                 new_module_action.setObjectName(mod)
                 new_module_action.setText(self.tr(descript_module))
@@ -547,7 +550,7 @@ class FLApplication(QtCore.QObject):
                 new_area_bar.addAction(new_module_action)
                 new_module_action.triggered.connect(self.activateModule)
                 ag.addAction(new_module_action)
-                
+                c += 1
                 
             
             a_menu = self.modules_menu.addMenu(descript_area)
