@@ -51,6 +51,7 @@ class FLApplication(QtCore.QObject):
     script_entry_function_ = None
     event_loop = None
     window_menu = None
+    last_text_caption_ = None
 
     def __init__(self):
         super(FLApplication, self).__init__()
@@ -86,6 +87,7 @@ class FLApplication(QtCore.QObject):
         self.init_single_fl_large = False
         self.show_debug_ = True  # FIXME
         self.script_entry_function_ = None
+        self.last_text_caption_ = None
 
         # self.fl_factory_ = FLObjectFactory() #FIXME para un futuro
         self.time_user_ = QtCore.QDateTime.currentDateTime()
@@ -425,7 +427,7 @@ class FLApplication(QtCore.QObject):
                 self.p_work_space_ = view_back.findChild(FLWorkSpace, w.objectName())
                 view_back.show()
         
-        self.setCaptionMainWidget("")
+        self.setCaptionMainWidget(None)
         descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
         w.setWindowIcon(QIcon(self.db().managerModules().iconModule(w.objectName())))
         self.tool_box_.setCurrentIndex(self.tool_box_.indexOf(self.tool_box_.findChild(QToolBar, descript_area)))
@@ -949,8 +951,23 @@ class FLApplication(QtCore.QObject):
         return pineboolib.project.call(function, argument_list, object_content, show_exceptions)
 
     def setCaptionMainWidget(self, value):
-        self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, value))
-        pass
+        
+        if value:
+            self.last_text_caption_ = value
+        
+        if not self.main_widget_:
+            mwi = self.mainWidget()
+            if mwi:
+                db = self.db().driverNameToDriverAlias(self.db().driverName())
+                self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, self.last_text_caption_))
+            
+            return
+        
+        descript_area = self.db().managerModules().idAreaToDescription(self.db().managerModules().activeIdArea())
+        descript_module = self.db().managerModules().idModuleToDescription(self.main_widget_.objectName())
+        
+        if descript_area:
+            self.main_widget_.setWindowTitle("%s - %s - %s" % (self.last_text_caption_, descript_area, descript_module))
 
     @decorators.NotImplementedWarn
     def setNotExit(self, b):
@@ -1329,7 +1346,8 @@ class FLApplication(QtCore.QObject):
                             w.setObjectName(it)
                             if self.acl_:
                                 self.acl_.process(w)
-
+                            
+                            self.setCaptionMainWidget(None)
                             self.setMainWidget(w)
                             self.call("%s.init()" % it, [])
                             self.db().managerModules().setActiveIdModule(it)
