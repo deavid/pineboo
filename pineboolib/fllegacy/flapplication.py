@@ -494,7 +494,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def initToolBox(self):
-        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon
+        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS
         
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
         self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
@@ -514,12 +514,11 @@ class FLApplication(QtCore.QObject):
         
         for it in self.db().managerModules().listIdAreas():
             descript_area = self.db().managerModules().idAreaToDescription(it)
-            #new_area_bar = QToolBar(self.tr(descript_area), self.container_, self.tool_box_, False, descript_area)
             new_area_bar = QToolBar(self.tr(descript_area), self.container_)
             new_area_bar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
             #new_area_bar.setFrameStyle(QFrame.NoFrame)
             new_area_bar.setOrientation(QtCore.Qt.Vertical)
-            #new_area_bar.layout().setSpacing(3)
+            new_area_bar.layout().setSpacing(3)
             self.tool_box_.addItem(new_area_bar, self.tr(descript_area))
             
             ag = QActionGroup(new_area_bar)
@@ -532,12 +531,45 @@ class FLApplication(QtCore.QObject):
             list_modules.sort()
             
             for mod in list_modules:
-                if mod == "Q":
+                if str(chr(c)) == "Q":
                     c += 1
                     continue
                 
                 if mod == "sys":
-                    pass
+                    if FLSettings().readBoolEntry("application/isDebuggerMode"):
+                        
+                        descript_module = "%s: %s" % (str(chr(c)), self.tr("Carga Estática desde Disco Duro"))
+                        new_module_action = QAction(new_area_bar)
+                        new_module_action.setObjectName("StaticLoadAction")
+                        new_module_action.setText(self.tr(descript_module))
+                        new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+                        new_module_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("folder_update.png")))
+                        new_area_bar.addAction(new_module_action)
+                        new_module_action.triggered.connect(self.staticLoaderSetup)
+                        ag.addAction(new_module_action)
+                        c += 1
+                        
+                        descript_module = "%s: %s" % (str(chr(c)), self.tr("Reiniciar Script"))
+                        new_module_action = QAction(new_area_bar)
+                        new_module_action.setObjectName("reinitScriptAction")
+                        new_module_action.setText(self.tr(descript_module))
+                        new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+                        new_module_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("reload.png")))
+                        new_area_bar.addAction(new_module_action)
+                        new_module_action.triggered.connect(self.reinit)
+                        ag.addAction(new_module_action)
+                        c += 1
+                    
+                        descript_module = "%s: %s" % (str(chr(c)), self.tr("Mostrar Consola de mensajes"))
+                        new_module_action = QAction(new_area_bar)
+                        new_module_action.setObjectName("shConsoleAction")
+                        new_module_action.setText(self.tr(descript_module))
+                        new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+                        new_module_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("consola.png")))
+                        new_area_bar.addAction(new_module_action)
+                        new_module_action.triggered.connect(self.showConsole)
+                        ag.addAction(new_module_action)
+                        c += 1
                 
                 descript_module = "%s: %s" % (str(chr(c)), self.db().managerModules().idModuleToDescription(mod))
                 new_module_action = QAction(new_area_bar)
@@ -545,7 +577,6 @@ class FLApplication(QtCore.QObject):
                 new_module_action.setText(self.tr(descript_module))
                 new_module_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
                 new_module_action.setIcon(QIcon(self.db().managerModules().iconModule(mod)))
-                new_module_action.setObjectName(mod)
                 new_area_bar.addAction(new_module_action)
                 new_module_action.triggered.connect(self.activateModule)
                 ag.addAction(new_module_action)
@@ -556,7 +587,79 @@ class FLApplication(QtCore.QObject):
             for a in ag.actions():
                 a_menu.addAction(a)
             
-            #Falta Opciones
+        descript_area = "Configuracion"
+        config_tool_bar = QToolBar(self.tr(descript_area), self.container_)
+        config_tool_bar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        #config_tool_bar.setFrameStyle(QFrame.NoFrame)
+        config_tool_bar.setOrientation(QtCore.Qt.Vertical)
+        config_tool_bar.layout().setSpacing(3)
+        self.tool_box_.addItem(config_tool_bar, self.tr(descript_area))
+        
+        descript_module = self.tr("Fuente")
+        font_action = QAction(new_area_bar)
+        font_action.setObjectName("fontAction")
+        font_action.setText(self.tr(descript_module))
+        #font_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+        font_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("font.png")))
+        config_tool_bar.addAction(font_action)
+        font_action.triggered.connect(self.chooseFont)
+        ag.addAction(font_action)
+        
+        
+        
+        descript_module = self.tr("Estilo")
+        style_action = QAction(new_area_bar)
+        style_action.setObjectName("styleAction")
+        style_action.setText(self.tr(descript_module))
+        #style_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+        style_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("estilo.png")))
+        config_tool_bar.addAction(style_action)
+        style_action.triggered.connect(self.showStyles)
+        ag.addAction(style_action)
+        
+        descript_module = self.tr("Indice")
+        help_action = QAction(new_area_bar)
+        help_action.setObjectName("helpAction")
+        help_action.setText(self.tr(descript_module))
+        #help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+        help_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("help_index.png")))
+        config_tool_bar.addAction(help_action)
+        help_action.triggered.connect(self.helpIndex)
+        ag.addAction(help_action)
+        
+        descript_module = self.tr("Acerca de Pineboo")
+        about_pineboo_action = QAction(new_area_bar)
+        about_pineboo_action.setObjectName("aboutPinebooAction")
+        about_pineboo_action.setText(self.tr(descript_module))
+        #help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+        about_pineboo_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("about.png")))
+        config_tool_bar.addAction(about_pineboo_action)
+        about_pineboo_action.triggered.connect(self.aboutPineboo)
+        ag.addAction(about_pineboo_action)
+        
+        descript_module = self.tr("Visita Eneboo.org")
+        visit_pineboo_action = QAction(new_area_bar)
+        visit_pineboo_action.setObjectName("visitPinebooAction")
+        visit_pineboo_action.setText(self.tr(descript_module))
+        #help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+        visit_pineboo_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("about.png")))
+        config_tool_bar.addAction(visit_pineboo_action)
+        visit_pineboo_action.triggered.connect(self.urlPineboo)
+        ag.addAction(visit_pineboo_action)
+        
+        descript_module = self.tr("Acerca de Qt")
+        about_qt_action = QAction(new_area_bar)
+        about_qt_action.setObjectName("aboutQtAction")
+        about_qt_action.setText(self.tr(descript_module))
+        #help_action.setShortcut(getattr(QtCore.Qt, "Key_%s" % str(chr(c))))
+        about_qt_action.setIcon(QIcon(AQS.Pixmap_fromMineSource("aboutqt.png")))
+        config_tool_bar.addAction(about_qt_action)
+        about_qt_action.triggered.connect(self.aboutQt)
+        ag.addAction(about_qt_action)
+        
+        
+        
+        
             
         if self.acl_:
             self.acl_.process(self.container_)        
@@ -930,7 +1033,7 @@ class FLApplication(QtCore.QObject):
         self.db().manager().cleanupMetaData()
 
         if self.acl_:
-            self.ac_.init()
+            self.acl_.init()
 
         self.loadScripts()
         # self.db().managerModules().setShaFromGlobal()
