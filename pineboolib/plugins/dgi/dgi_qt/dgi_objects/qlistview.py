@@ -1,35 +1,28 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets
 from pineboolib import decorators
 
-class QListView(QtWidgets.QListView):
+class QListView(QtWidgets.QWidget):
 
-    _model = None
     _resizeable = True
     _clickable = True
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self._model = QtGui.QStandardItemModel(self)
-        self._resizeable = True
-        self._clickable = True
-
+        pass
+    
+    @decorators.NotImplementedWarn
     def addItem(self, item):
-        it = QtGui.QStandardItem(item)
-        self._model.appendRow(it)
-        self.setModel(self._model)
+        pass
 
+    @decorators.NotImplementedWarn
     def setItemMargin(self, m):
         self.setContentsMargins(m, m, m, m)
     
+    @decorators.NotImplementedWarn
     def setHeaderLabel(self, l):
-        if isinstance(l, str):
-            l = [l]
-            
-        if self._model and isinstance(l, list):
-            self._model.setHorizontalHeaderLabels(l)
+        pass
     
     @decorators.NotImplementedWarn
     def setColumnText(self, col, text):
@@ -60,15 +53,18 @@ class QListView(QtWidgets.QListView):
     def setPixmap(self, *args):
         pass
 
+    @decorators.NotImplementedWarn
     def setClickable(self, c):
         self._clickable = True if c else False
 
+    @decorators.NotImplementedWarn
     def setResizable(self, r):
         self._resizeable = True if r else False
     
+    @decorators.NotImplementedWarn
     def resizeEvent(self, e):
         return super().resizeEvent(e) if self._resizeable else False
-            
+    
+    @decorators.NotImplementedWarn
     def clear(self):
-        self._model = None
-        self._model = QtGui.QStandardItemModel(self)
+        pass
