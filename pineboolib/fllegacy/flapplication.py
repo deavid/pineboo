@@ -494,7 +494,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def initToolBox(self):
-        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS
+        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS, QSize
         
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
         self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
@@ -587,12 +587,12 @@ class FLApplication(QtCore.QObject):
             for a in ag.actions():
                 a_menu.addAction(a)
             
-        descript_area = "Configuracion"
+        descript_area = "Configuración"
         config_tool_bar = QToolBar(self.tr(descript_area), self.container_)
         config_tool_bar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
         #config_tool_bar.setFrameStyle(QFrame.NoFrame)
         config_tool_bar.setOrientation(QtCore.Qt.Vertical)
-        config_tool_bar.layout().setSpacing(3)
+        #config_tool_bar.layout().setSpacing(3)
         self.tool_box_.addItem(config_tool_bar, self.tr(descript_area))
         
         descript_module = self.tr("Fuente")
