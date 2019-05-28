@@ -19,12 +19,12 @@ class FLListViewItem(Qt.QStandardItem):
         if parent:
             self._parent_model = parent.model()
             if parent.model().item(0,0) is not None:
-                parent.model().item(0,0).setChild(0, self)
+                parent.model().item(0,0).setChild(0,0, self)
             else:
                 parent.model().setItem(0,0,self)
             
     
-    @decorators.NotImplementedWarn
+
     def setText(self, *args):
         #logger.warning("Seteo texto %s" , args, stack_info = True )
         pos = 0
@@ -32,13 +32,22 @@ class FLListViewItem(Qt.QStandardItem):
             value = args[0]
         else:
             pos = args[0]
-            value = args[1]
+            value = str(args[1])
         
         if pos == 0:
             super().setText(value)
+        else:
+            item = self._parent_model.item(0,0).child(0,pos)
+            if item is None:
+                item = Qt.QStandardItem()
+                self._parent_model.item(0,0).setChild(0, pos, item)
+            
+            item.setText(value)
+        
+        
             
 
-    @decorators.NotImplementedWarn
+
     def text(self, col):
         ret = ""
         if col == 0:
