@@ -87,7 +87,6 @@ class FLListViewItem(Qt.QStandardItem):
     
     
     def setKey(self, k):
-        print("Seteando key", str(k), self)
         self._key = str(k)
     
     def key(self):
