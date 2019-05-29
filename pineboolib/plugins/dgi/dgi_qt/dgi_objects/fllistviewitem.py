@@ -2,6 +2,7 @@
 
 from PyQt5 import Qt
 from pineboolib import decorators
+import pineboolib
 import logging
 logger = logging.getLogger("FLListViewItem")
 
@@ -10,37 +11,59 @@ class FLListViewItem(Qt.QStandardItem):
     _expandable = None
     _key = None
     _open = None
-    _parent_model = None
+    _root = None
     
     def __init__(self, parent = None):
         super().__init__()
-        self._key = ""
-        self._open = False
-        if parent:
-            self._parent_model = parent.model()
-            if parent.model().item(0,0) is not None:
-                parent.model().item(0,0).setChild(0,0, self)
-            else:
-                parent.model().setItem(0,0,self)
+        self._root = False
+        self._parent = None
+        self.setKey("")
+        #Comprueba que tipo de parent es
+        if isinstance(parent, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qlistview.QListView):
+            #self._root = True
+            parent.model().setItem(0,0, self)
+        else:
+            if isinstance(parent, pineboolib.plugins.dgi.dgi_qt.dgi_objects.fllistviewitem.FLListViewItem):
+                #print("Añadiendo nueva linea a", parent.text(0))
+                parent.appendRow(self)
+        
+        
+        
+        
+        
+        
+        #if parent:
+        #    self._parent = parent
+        #    self._row = self._parent.model().rowCount()
+        #    if self._parent.model().item(0,0) is not None:
+        #        self._parent.model().item(0,0).setChild(self._row,0, self)
+        #        self._parent.model().item(0,0)._rowcount += 1
+        #    else:
+        #        self._parent.model().setItem(self._row,0,self)
+            
+        #    self._rows = self._parent.model().item(0,0)._rowcount - 1
             
     
 
     def setText(self, *args):
+        #print("Seteando", args, self.parent())
         #logger.warning("Seteo texto %s" , args, stack_info = True )
-        pos = 0
+        col = 0
         if len(args) == 1:
             value = args[0]
         else:
-            pos = args[0]
+            col = args[0]
             value = str(args[1])
         
-        if pos == 0:
+        if col == 0:
+            #if self._root:
+                #print("Inicializando con %s a %s" % ( value, self.parent()))
             super().setText(value)
         else:
-            item = self._parent_model.item(0,0).child(0,pos)
+            item = self.parent().child(self.row(), col)
             if item is None:
-                item = Qt.QStandardItem()
-                self._parent_model.item(0,0).setChild(0, pos, item)
+                item = FLListViewItem()
+                self.parent().setChild(self.row(), col, item)
             
             item.setText(value)
         
@@ -64,6 +87,7 @@ class FLListViewItem(Qt.QStandardItem):
     
     
     def setKey(self, k):
+        print("Seteando key", str(k), self)
         self._key = str(k)
     
     def key(self):

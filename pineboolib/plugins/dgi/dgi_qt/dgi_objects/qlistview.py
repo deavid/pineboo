@@ -3,6 +3,7 @@
 from PyQt5 import QtWidgets, QtGui
 from pineboolib import decorators
 import pineboolib
+from PyQt5.QtCore import pyqtSignal
 
 class QListView(QtWidgets.QWidget):
 
@@ -16,6 +17,9 @@ class QListView(QtWidgets.QWidget):
     _root_item = None
     _current_row = None
     
+    doubleClicked = pyqtSignal(object)
+    selectionChanged = pyqtSignal(object)
+    
     def __init__(self, parent = None):
         super().__init__(parent = None)
         lay = QtWidgets.QVBoxLayout(self)
@@ -27,16 +31,28 @@ class QListView(QtWidgets.QWidget):
         self._key = ""
         self._root_item = None
         self._current_row = -1
+        self._tree.doubleClicked.connect(self.doubleClickedEmit)
+        self._tree.clicked.connect(self.singleClickedEmit)
+        self._tree.activated.connect(self.singleClickedEmit)
+     
+    def singleClickedEmit(self, index):
+        if index.column() != 0:
+            index = index.sibling(index.row(), 0)  
+        item = index.model().itemFromIndex(index)  
+         
+        self.selectionChanged.emit(item)
+            
     
-    @decorators.NotImplementedWarn
+    def doubleClickedEmit(self, index):
+        item = index.model().itemFromIndex(index)
+        self.doubleClicked.emit(item)
+    
     def addItem(self, t):
-    #    from pineboolib.pncontrolsfactory import FLListViewItem
-    #    self._current_row = self._current_row + 1
-    #    item = FLListViewItem(self)
-    #    item.setText(t)
-    #    print("PADRE", item)
-    #    self._tree.model().setItem(self._current_row, 0, item)
-        pass
+        from pineboolib.pncontrolsfactory import FLListViewItem
+        self._current_row = self._current_row + 1
+        item = FLListViewItem()
+        item.setText(t)
+        self._tree.model().setItem(self._current_row, 0, item)
 
     @decorators.NotImplementedWarn
     def setItemMargin(self, m):
@@ -50,7 +66,6 @@ class QListView(QtWidgets.QWidget):
         self._cols_labels = labels
         
             
-    @decorators.NotImplementedWarn
     def setColumnText(self, col, new_value):
         i = 0
         new_list = []
