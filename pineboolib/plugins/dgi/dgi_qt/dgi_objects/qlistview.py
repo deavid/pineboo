@@ -51,7 +51,9 @@ class QListView(QtWidgets.QWidget):
         from pineboolib.pncontrolsfactory import FLListViewItem
         self._current_row = self._current_row + 1
         item = FLListViewItem()
+        item.setEditable(False)
         item.setText(t)
+        
         self._tree.model().setItem(self._current_row, 0, item)
 
     @decorators.NotImplementedWarn
@@ -94,7 +96,6 @@ class QListView(QtWidgets.QWidget):
     def resizeEvent(self, e):
         return super().resizeEvent(e) if self._resizeable else False
     
-    @decorators.NotImplementedWarn
     def clear(self):
         self._cols_labels = []
     
@@ -109,15 +110,5 @@ class QListView(QtWidgets.QWidget):
     
     def model(self):
         return self._tree.model()
-    
-    #def __getattr__(self, name):
-    #    att = getattr(self._tree, name, None)
-    #    return att
-    
-    #def key(self):
-    #    return self._key
-    
-    #def setKey(self, k):
-    #    self._key = str(k)
 
             

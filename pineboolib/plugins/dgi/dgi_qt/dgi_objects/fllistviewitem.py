@@ -12,12 +12,16 @@ class FLListViewItem(Qt.QStandardItem):
     _key = None
     _open = None
     _root = None
+    _index_child = None
     
     def __init__(self, parent = None):
         super().__init__()
         self._root = False
         self._parent = None
         self.setKey("")
+        self.setEditable(False)
+        self._index_child = 0
+        
         #Comprueba que tipo de parent es
         if isinstance(parent, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qlistview.QListView):
             #self._root = True
@@ -42,7 +46,19 @@ class FLListViewItem(Qt.QStandardItem):
         #        self._parent.model().setItem(self._row,0,self)
             
         #    self._rows = self._parent.model().item(0,0)._rowcount - 1
-            
+    
+    def firstChild(self):
+        self._index_child = 0
+        item = self.child(self._index_child)           
+        return item   
+    
+    def nextSibling(self):
+        self._index_child += 1
+        item = self.child(self._index_child)           
+        return item
+    
+    def isExpandable(self):
+        return True if self.child(0) is not None else False   
     
 
     def setText(self, *args):
