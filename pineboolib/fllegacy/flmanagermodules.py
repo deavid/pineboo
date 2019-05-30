@@ -499,25 +499,35 @@ class FLManagerModules(object):
 
     @return Clave sha de la versión de los módulos cargados localmente
     """
-    @decorators.NotImplementedWarn
     def shaLocal(self):
-        return None
+        return self.shaLocal_
 
     """
     Para obtener la clave sha global.
 
     @return Clave sha de la versión de los módulos cargados globalmente
     """
-    @decorators.NotImplementedWarn
     def shaGlobal(self):
-        return None
+        if not self.conn_.dbAux():
+            return ""
+        
+        q = FLSqlQuery(None, self.conn_.dbAux())
+        q.setForwardOnly(True)
+        q.exec_("SELECT sha FROM flserial")
+        if q.lastError is None:
+            return "error"
+        
+        if q.next():
+            return str(q.value(0))
+        else:
+            return ""
+            
 
     """
     Establece el valor de la clave sha local con el del global.
     """
-    @decorators.NotImplementedWarn
     def setShaLocalFromGlobal(self):
-        pass
+        self.shaLocal_ = self.shaGlobal()
 
     """
     Obtiene la clave sha asociada a un fichero almacenado.
