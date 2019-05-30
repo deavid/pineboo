@@ -1,4 +1,5 @@
-from PyQt5.Qt import qWarning, QApplication, QRegExp, QDomDocument
+from PyQt5.Qt import qWarning, QApplication, QRegExp
+from PyQt5.QtXml import QDomDocument
 from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
 from pineboolib.utils import auto_qt_translate_text, checkDependencies
@@ -260,10 +261,12 @@ class FLMYSQL_MYISAM2(object):
 
     def nextSerialVal(self, table, field):
         if not self.isOpen():
-            qWarning("%s::beginTransaction: Database not open" % self.name_)
+            logger.warning("%s::beginTransaction: Database not open", self.name_)
             return None
 
         self.transaction()
+        #    self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
+        #    return None
 
         res = None
         row = None
@@ -277,7 +280,7 @@ class FLMYSQL_MYISAM2(object):
         q.setFrom(table)
         q.setWhere("1 = 1")
         if not q.exec_():
-            self.logger.warning("not exec sequence")
+            logger.warning("not exec sequence")
             return None
         if q.first() and q.value(0) is not None:
             max = q.value(0)
@@ -293,7 +296,7 @@ class FLMYSQL_MYISAM2(object):
         try:
             cur_max = cursor.execute(strQry)
         except Exception:
-            qWarning("%s:: La consulta a la base de datos ha fallado" % (self.name_, traceback.format_exc()))
+            logger.warning("%s:: La consulta a la base de datos ha fallado" , self.name_, traceback.format_exc())
             self.rollbackTransaction()
             return
         
@@ -316,12 +319,16 @@ class FLMYSQL_MYISAM2(object):
             try:
                 result = cursor.execute(strQry)
             except Exception:
-                qWarning("%s:: La consulta a la base de datos ha fallado\n %s" % (self.name_, traceback.format_exc()))
+                logger.warning("%s:: La consulta a la base de datos ha fallado\n %s" ,self.name_, traceback.format_exc())
                 self.rollbackTransaction()
+
                 return
 
 
         self.commitTransaction()
+        #    qWarning("%s:: No se puede aceptar la transacción" % self.name_)
+        #    return
+
         return ret
     
     def queryUpdate(self, name, update, filter):
@@ -333,7 +340,7 @@ class FLMYSQL_MYISAM2(object):
             return True
         
         if not self.isOpen():
-            qWarning("%s::savePoint: Database not open" % self.name_)
+            logger.warning("%s::savePoint: Database not open", self.name_)
             return False
 
         cursor = self.cursor()
@@ -342,8 +349,7 @@ class FLMYSQL_MYISAM2(object):
         except Exception:
             self.setLastError(
                 "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            qWarning("MySQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s " % (
-                n, traceback.format_exc()))
+            logger.warning("MySQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s ", n, traceback.format_exc())
             return False
 
         return True
@@ -359,7 +365,7 @@ class FLMYSQL_MYISAM2(object):
             return True
         
         if not self.isOpen():
-            qWarning("%s::rollbackSavePoint: Database not open" % self.name_)
+            logger.warning("%s::rollbackSavePoint: Database not open", self.name_)
             return False
 
         cursor = self.cursor()
@@ -368,8 +374,7 @@ class FLMYSQL_MYISAM2(object):
         except Exception:
             self.setLastError(
                 "No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            qWarning("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s" % (
-                self.name_, n, traceback.format_exc()))
+            logger.warning("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s", self.name_, n, traceback.format_exc())
             return False
 
         return True
@@ -383,22 +388,21 @@ class FLMYSQL_MYISAM2(object):
     def commitTransaction(self):
         
         if not self.isOpen():
-            qWarning("%s::commitTransaction: Database not open" % self.name_)
+            logger.warning("%s::commitTransaction: Database not open", self.name_)
 
         cursor = self.cursor()
         try:
             cursor.execute("COMMIT")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            qWarning("%s:: No se pudo aceptar la transacción COMMIT\n %s" %
-                     (self.name_, traceback.format_exc()))
+            logger.warning("%s:: No se pudo aceptar la transacción COMMIT\n %s", self.name_, traceback.format_exc())
             return False
 
         return True
 
     def rollbackTransaction(self):
         if not self.isOpen():
-            qWarning("%s::rollbackTransaction: Database not open" % self.name_)
+            logger.warning("%s::rollbackTransaction: Database not open", self.name_)
 
         cursor = self.cursor()
         if self.canSavePoint():
@@ -417,15 +421,14 @@ class FLMYSQL_MYISAM2(object):
     def transaction(self):
         
         if not self.isOpen():
-            qWarning("%s::transaction: Database not open" % self.name_)
+            logger.warning("%s::transaction: Database not open", self.name_)
 
         cursor = self.cursor()
         try:
             cursor.execute("START TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN WORK")
-            qWarning("%s:: No se pudo crear la transacción BEGIN\n %s" %
-                     (self.name_, traceback.format_exc()))
+            logger.warning("%s:: No se pudo crear la transacción BEGIN\n %s", self.name_, traceback.format_exc())
             return False
 
         return True
@@ -505,7 +508,7 @@ class FLMYSQL_MYISAM2(object):
 
                 self.rowsFetched[curname] = i
         except Exception:
-            logger.error("%s:: fetchAll",self.name_, traceback.format_exc())
+            logger.error("%s:: fetchAll:%s",self.name_, traceback.format_exc())
         
         return rowsF
 
@@ -639,7 +642,7 @@ class FLMYSQL_MYISAM2(object):
             qry2.exec_("DELETE FROM flfiles WHERE nombre ='%s'" % item)
             if item.find("alteredtable") > -1:
                 if self.existsTable(item.replace(".mtd", "")):
-                    util.setLabelText(util.tr("Borrando tabla %1").arg(item))
+                    util.setLabelText(util.tr("Borrando tabla %s" % item))
                     qry2.exec_("DROP TABLE %s CASCADE" %
                                item.replace(".mtd", ""))
 
@@ -681,7 +684,7 @@ class FLMYSQL_MYISAM2(object):
                                   "estructura interna en la base de datos no coinciden. "
                                   "Intentando regenerarla." % item)
 
-                    print(msg)
+                    logger.warning("%s", msg)
                     self.alterTable2(conte, conte, None, True)
 
             steps = steps + 1
@@ -878,7 +881,9 @@ class FLMYSQL_MYISAM2(object):
             return False
         
         q = FLSqlQuery(None, "dbAux")
-        if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
+        in_sql = "ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)
+        logger.warning(in_sql)
+        if not q.exec_(in_sql):
             qWarning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
             
             if oldMTD and not oldMTD == newMTD:
@@ -890,7 +895,7 @@ class FLMYSQL_MYISAM2(object):
         
 
         if not self.db_.manager().createTable(newMTD):
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -902,28 +907,17 @@ class FLMYSQL_MYISAM2(object):
         
         self.db_.dbAux().transaction()
         
-        
-        if not force and key and len(key) == 40:
-            c = FLSqlCursor("flfiles", True, self.db_.dbAux())
-            c.setForwardOnly(True)
-            c.setFilter("nombre = '%s.mtd'" % renameOld)
-            c.select()
-            if not c.next():
-                buffer = c.primeInsert()
-                buffer.setValue("nombre", "%s.mtd" % renameOld)
-                buffer.setValue("contenido", mtd1)
-                buffer.setValue("sha", key)
-                c.insert()
-                
-                
+        #in_sql = "INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES ('%s.mtd','%s','%s','%s')" % (renameOld, mtd1, self.db_.managerModules().idModuleOfFile("%s.mtd" % oldMTD.name()), key)
+        #logger.warning(in_sql)
+        #q.exec_(in_sql)    
                 
                 
         
         ok = False
-        if not force and fieldsNamesOld:
+        if force and fieldsNamesOld:
             sel = fieldsNamesOld.join(",")
-            in_sql = "INSERT INTO %s(%s) SELECT %s FROM %s" % (newMTD.name(), sel, self, renameOld)
-            qWarning(in_sql)
+            in_sql = "INSERT INTO %s(%s) SELECT %s FROM %s" % (newMTD.name(), sel, sel, renameOld)
+            logger.warning(in_sql)
             ok = q.exec_(in_sql)
             if not ok:
                 self.db_.dbAux().rollback()
@@ -1015,8 +1009,7 @@ class FLMYSQL_MYISAM2(object):
                     newBuffer.setValue(newField.name(), v)
                 
                 listRecords.append(newBuffer)
-                
-                if len(listRecords) > 0:
+                if len(listRecords):
                     if not self.insertMulti(newMTD.name(), listRecords):
                         ok = False
                     listRecords.clear()
@@ -1183,10 +1176,13 @@ class FLMYSQL_MYISAM2(object):
             ret = "bool"
         elif t in ["decimal","double"]:
             ret = "double"
+        elif t == "longblob":
+            ret = "bytearray"
         elif t == "time":
             ret = "time"
+        
         else:
-            print("formato desconocido", ret)
+            logger.warning("formato desconocido %s", ret)
     
         return ret
     def recordInfo(self, tablename_or_query):
@@ -1250,7 +1246,7 @@ class FLMYSQL_MYISAM2(object):
         
         
     def normalizeValue(self, text):
-        if not text:
+        if text is None:
             return None
         
         text = text.replace("'", "''")
@@ -1274,16 +1270,12 @@ class FLMYSQL_MYISAM2(object):
     def execute_query(self, q):
 
         if not self.isOpen():
-            qWarning("MySQLDriver::execute_query. DB is closed")
+            logger.warning("MySQLDriver::execute_query. DB is closed")
             return False
         cursor = self.cursor()
         try:
             q = self.fix_query(q)
             cursor.execute(q)
-        except Exception as exc:
-            print("*****", q, exc)
-            sys.exit(32)
-            
-            self.setLastError(
-                "No se puedo ejecutar la siguiente query %s" % q, q)
-            qWarning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s" % (q, traceback.format_exc()))
+        except Exception as exc:           
+            self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
+            logger.warning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s", q, traceback.format_exc())
