@@ -2440,7 +2440,6 @@ class FLFieldDB(QtWidgets.QWidget):
 
         fMD = field.associatedField()
         a = None
-
         v = self.cursor_.valueBuffer(field.name())
         if v in  [None, ""] or (fMD is not None and self.cursor_.bufferIsNull(fMD.name())):
             QtWidgets.QMessageBox.warning(QtWidgets.QApplication.focusWidget(
@@ -2556,8 +2555,8 @@ class FLFieldDB(QtWidgets.QWidget):
             if fMD.relationM1().foreignTable() == tMD.name():
                 obj_tdb.setReadOnly(True)
         
-        
-        f.setFilter(self.filter_)
+        if self.filter_:
+            f.setFilter(self.filter_)
         if f.mainWidget():
             if obj_tdb:
                 cur_value = self.value()
