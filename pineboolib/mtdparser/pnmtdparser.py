@@ -55,15 +55,18 @@ def generate_model( dest_file, mtd_table):
     data.append("")
     
     for field in mtd_table.fieldList(): #Crea los campos 
-        field_data = []
-        field_data.append("    ")
-        field_data.append("%s" % field.name() + "_" if field.name() in reserved_words else field.name())
-        field_data.append(" = Column('%s', " % field.name())
-        field_data.append(field_type(field))
-        field_data.append(")")
-        validator_list.append(field.name())
-        if field.isPrimaryKey():
-            pk_found = True
+        if field.name() in validator_list:
+            logger.warning("Hay un campo %s duplicado en %s.mtd. Omitido", field.name(), mtd_table.name())
+        else:
+            field_data = []
+            field_data.append("    ")
+            field_data.append("%s" % field.name() + "_" if field.name() in reserved_words else field.name())
+            field_data.append(" = Column('%s', " % field.name())
+            field_data.append(field_type(field))
+            field_data.append(")")
+            validator_list.append(field.name())
+            if field.isPrimaryKey():
+                pk_found = True
         
             
             
