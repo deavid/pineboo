@@ -867,7 +867,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 if b.name == fl_cursor.metadata().primaryKey():
                     pKValue = value
                 if b.type_ in ("string", "stringlist") and isinstance(value, str):
-
                     value = self.db().normalizeValue(value)
                 value = self.db().manager().formatValue(b.type_, value, False)
                 if not campos:
@@ -1028,10 +1027,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def size(self):
         if self._size is None: #Cada vez que hacemos refresh se limpia
             util = FLUtil()
-            from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()  
-            where_ = self.where_filter[:self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
-            #where_ = self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" %  self.metadata().primaryKey()) if self.where_filter.find("ORDER BY") > -1 else " %s GROUP BY %s" %  (self.where_filter, self.metadata().primaryKey())
-            self._size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
+            if self.metadata():
+                from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()  
+                where_ = self.where_filter[:self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
+                #where_ = self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" %  self.metadata().primaryKey()) if self.where_filter.find("ORDER BY") > -1 else " %s GROUP BY %s" %  (self.where_filter, self.metadata().primaryKey())
+                self._size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
+            else:
+                self._size = util.sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
             
             if isinstance(self._size, bool):
                 self._size = 0
