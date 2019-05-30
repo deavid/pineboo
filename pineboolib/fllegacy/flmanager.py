@@ -332,9 +332,9 @@ class FLManager(QtCore.QObject):
                     aBy = it
                     continue
 
-                elif not tmd.field(it):
+                elif tmd.field(it) is None:
                     continue
-
+                
                 tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
                 aWith = None
                 aBy = None
@@ -494,7 +494,7 @@ class FLManager(QtCore.QObject):
                 break
 
         if not n in list_modules:
-            if not util.domDocumentSetContent(doc, content_actions):
+            if not util.domDocumentSetContent(doc, content_actions) and n.find("alteredtable") == -1:
                 logger.warning("FLManager : " + FLUtil().translate("application", "Error al cargar la accion ") + n)
 
         doc_elem = doc.documentElement()
