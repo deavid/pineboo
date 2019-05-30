@@ -658,7 +658,7 @@ class Module(object):
             tiempo_2 = time.time()
 
         for tablefile in self.files:
-            if not tablefile.endswith(".mtd"):
+            if not tablefile.endswith(".mtd") or tablefile.find("alteredtable") > -1:
                 continue
             name, ext = os.path.splitext(tablefile)
             try:
