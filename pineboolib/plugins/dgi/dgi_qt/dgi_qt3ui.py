@@ -292,11 +292,11 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         parent = widget
     if origWidget is None:
         origWidget = widget
-    if pineboolib.project._DGI.localDesktop():
-        if not hasattr(origWidget, "ui_"):
-            origWidget.ui_ = {}
-    else:
-        origWidget.ui_ = {}
+    #if pineboolib.project._DGI.localDesktop():
+    #    if not hasattr(origWidget, "ui_"):
+    #        origWidget.ui_ = {}
+    #else:
+    #    origWidget.ui_ = {}
 
     def process_property(xmlprop, widget=widget):
         pname = xmlprop.get("name")
@@ -396,24 +396,22 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 col = int(c.get("column"))
             except Exception:
                 row = col = None
+            
 
             if c.tag == "property":  # Ya se han procesado previamente ...
                 continue
             elif c.tag == "widget":
+                new_widget = createWidget(c.get("class"), parent=widget)
                 if isinstance(widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup.QButtonGroup):
-                    new_widget = createWidget(c.get("class"), parent=widget)
-                    if isinstance(new_widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qwidget.QWidget):
-                        widget.addWidget(new_widget)
-                    else:
+                    if isinstance(new_widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtoolbutton.QToolButton):
                         widget.addButton(new_widget)
-                else:
-                    new_widget = createWidget(c.get("class"), parent=widget)
+                
                 loadWidget(c, new_widget, parent, origWidget)
                 path = c.find("./property[@name='name']/cstring").text
-                if not pineboolib.project._DGI.localDesktop():
-                    origWidget.ui_[path] = new_widget
-                if pineboolib.project._DGI.localDesktop():
-                    new_widget.show()
+                #if not pineboolib.project._DGI.localDesktop():
+                #    origWidget.ui_[path] = new_widget
+                #if pineboolib.project._DGI.localDesktop():
+                #    new_widget.show()
                 if mode == "box":
                     if pineboolib.project._DGI.localDesktop():
                         try:
@@ -544,6 +542,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             widget.layout.setSpacing(lay_spacing)
 
             lay_type = "grid" if c.tag == "grid" else "box"
+            
             layouts_pending_process += [(c, lay_type)]
             continue
 
@@ -648,9 +647,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         f.setItalic(False)
         new_widget.setFont(f)
 
-    if not pineboolib.project._DGI.localDesktop():
-        if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
-            origWidget.ui_[origWidget.objectName()] = nwidget
+    #if not pineboolib.project._DGI.localDesktop():
+    #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
+    #        origWidget.ui_[origWidget.objectName()] = nwidget
 
 
 def loadIcon(xml):
