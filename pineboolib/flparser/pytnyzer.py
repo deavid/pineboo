@@ -985,11 +985,22 @@ class Member(ASTPython):
                     elif member == "mid":
                         value = arg[4:]
                         value = value[: len(value) -1]
-                        if len(value.split(",")) == 2:
-                            i, l = value.split(",")
+                        if value.find(",") > -1:
+                            if (value.find("(") < value.find(",")) and value.find(")") < value.find(","):
+                                 i, l = value.split(",")
+                        #if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
+                        #    i, l = value.split(",")
+                        #    if i.find("(") > -1 and i.find(")") == -1:
+                        #        i = "%s)" % i
+                        #        l = l.repalce(")", "")
+                            else:
+                                i = 0
+                                l = value
+                        
                         else:
                             i = 0
                             l = value
+                                
                         value = "%s:%s + %s" % (i, i, l)
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
     
