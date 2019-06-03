@@ -958,8 +958,9 @@ class FLSqlCursor(QtCore.QObject):
         
         self.d.timer_ = QtCore.QTimer(self)
         self.d.timer_.timeout.connect(self.refreshDelayed)
-
-        self.refreshDelayed()
+        
+        #if cR:
+        #    self.refreshDelayed()
         # self.d.md5Tuples_ = self.db().md5TuplesStateTable(self.d.curName_)
         # self.first()
 
@@ -2473,7 +2474,7 @@ class FLSqlCursor(QtCore.QObject):
     @QtCore.pyqtSlot(int, int)
     @QtCore.pyqtSlot(int)
     def selection_currentRowChanged(self, current, previous=None):
-        if self.d._currentregister == current.row():
+        if self.currentRegister() == current.row():
             self.d.doAcl()
             return False
         self.d._currentregister = current.row()
@@ -2481,7 +2482,7 @@ class FLSqlCursor(QtCore.QObject):
         # agregado para que FLTableDB actualice el buffer al pulsar.
         self.refreshBuffer()
         self.d.doAcl()
-        logger.debug("cursor:%s , row:%s:: %s", self._action.table(), self.d._currentregister, self)
+        logger.debug("cursor:%s , row:%s:: %s", self._action.table(), self.currentRegister(), self)
 
     def selection_pk(self, value):
 
@@ -2498,10 +2499,10 @@ class FLSqlCursor(QtCore.QObject):
         return False
 
     def at(self):
-        if not self.d._currentregister:
+        if not self.currentRegister():
             row = 0
         else:
-            row = self.d._currentregister
+            row = self.currentRegister()
 
         if row < 0:
             return -1
@@ -2600,7 +2601,6 @@ class FLSqlCursor(QtCore.QObject):
         # self.setFilter(None)
         # if cFilter == self.filter() and self.isValid():
         #    return
-
         self.select()
         pos = self.atFrom()
         if not self.seek(pos, False, True):
@@ -2813,9 +2813,9 @@ class FLSqlCursor(QtCore.QObject):
         return b
 
     def moveby(self, pos):
-        if self.d._currentregister:
-            pos += self.d._currentregister
-
+        if self.currentRegister():
+            pos += self.currentRegister()
+        
         return self.move(pos)
 
     """
@@ -2857,13 +2857,12 @@ class FLSqlCursor(QtCore.QObject):
             row = -1
         if row >= self.model().rows:
             row = self.model().rows
-        if self.d._currentregister == row:
+        if self.currentRegister() == row:
             return False
         topLeft = self.model().index(row, 0)
         bottomRight = self.model().index(row, self.model().cols - 1)
         new_selection = QtCore.QItemSelection(topLeft, bottomRight)
-        self._selection.select(
-            new_selection, QtCore.QItemSelectionModel.ClearAndSelect)
+        self._selection.select(new_selection, QtCore.QItemSelectionModel.ClearAndSelect)
         self.d._currentregister = row
         # self.d._current_changed.emit(self.at())
         if row < self.model().rows and row >= 0:
@@ -2885,7 +2884,7 @@ class FLSqlCursor(QtCore.QObject):
     def first(self, emite=True):
         # if self.d.modeAccess_ == self.Del:
         #    return False
-        if not self.d._currentregister == 0:
+        if not self.currentRegister() == 0:
             b = self.move(0)
         else:
             b = True
@@ -2993,6 +2992,7 @@ class FLSqlCursor(QtCore.QObject):
             self.model().setSortOrder(sort)
           
         self.model().refresh()
+
         self.d._currentregister = -1
 
         if self.cursorRelation() and self.modeAccess() == self.Browse:
