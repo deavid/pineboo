@@ -1975,10 +1975,6 @@ class FLSqlCursor(QtCore.QObject):
                     continue
 
                 relationList = field.relationList()
-
-                if not relationList:
-                    continue
-
                 if relationList:
                     for r in relationList:
                         if not r.checkIn():
@@ -3420,9 +3416,9 @@ class FLSqlCursor(QtCore.QObject):
                         if not c.metadata():
                             continue
                         f = c.metadata().field(r.foreignField())
-                        if not f:
+                        if f is None:
                             continue
-                        if f and f.relationM1() and f.relationM1().deleteCascade():
+                        if f.relationM1() and f.relationM1().deleteCascade():
                             c.setForwardOnly(True)
                             c.select(self.conn().manager().formatAssignValue(
                                 r.foreignField(), f, s, True))
