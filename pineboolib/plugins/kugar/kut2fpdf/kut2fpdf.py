@@ -962,7 +962,7 @@ class kut2fpdf(object):
     def draw_barcode(self, x, y, W, H, xml, text):
         if text == "None":
             return
-        from pineboolib.fllegacy.flcodbar import FLCodBar
+        from pineboolib.pncontrolsfactory import FLCodBar
         file_name = aqApp.tmp_dir()
         file_name += "/%s.png" % (text)
         type = xml.get("CodBarType")
