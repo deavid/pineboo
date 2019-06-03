@@ -265,7 +265,7 @@ class FLMYSQL_MYISAM(object):
             logger.warning("%s::beginTransaction: Database not open", self.name_)
             return None
 
-        self.transaction()
+        #self.transaction()
         #    self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
         #    return None
 
@@ -326,7 +326,7 @@ class FLMYSQL_MYISAM(object):
                 return
 
 
-        self.commitTransaction()
+        #self.commitTransaction()
         #    qWarning("%s:: No se puede aceptar la transacción" % self.name_)
         #    return
 
