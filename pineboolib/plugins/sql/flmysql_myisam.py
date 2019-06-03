@@ -1242,14 +1242,16 @@ class FLMYSQL_MYISAM(object):
         if text is None:
             return None
         
-        text = text.replace("'", "''")
-        text = text.replace('\\"', '\\\\"')
-        text = text.replace("\\n", "\\\\n")
-        text = text.replace("\\r", "\\\\r")
+        import MySQLdb
+        return MySQLdb.escape_string(text).decode("utf-8")
+        #text = text.replace("'", "''")
+        #text = text.replace('\\"', '\\\\"')
+        #text = text.replace("\\n", "\\\\n")
+        #text = text.replace("\\r", "\\\\r")
         
         
        
-        return text
+        #return text
 
     def cascadeSupport(self):
         return True
@@ -1261,14 +1263,18 @@ class FLMYSQL_MYISAM(object):
         return False
 
     def execute_query(self, q):
-
         if not self.isOpen():
             logger.warning("MySQLDriver::execute_query. DB is closed")
             return False
         cursor = self.cursor()
+        
         try:
             q = self.fix_query(q)
+            
+            
+            
             cursor.execute(q)
         except Exception as exc:           
             self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
             logger.warning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s", q, traceback.format_exc())
+            sys.exit(32)

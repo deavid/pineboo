@@ -1249,14 +1249,17 @@ class FLMYSQL_MYISAM2(object):
         if text is None:
             return None
         
-        text = text.replace("'", "''")
-        text = text.replace('\\"', '\\\\"')
-        text = text.replace("\\n", "\\\\n")
-        text = text.replace("\\r", "\\\\r")
+        import pymysql
+        
+        return pymysql.escape_string(text).decode("utf-8")
+        #text = text.replace("'", "''")
+        #text = text.replace('\\"', '\\\\"')
+        #text = text.replace("\\n", "\\\\n")
+        #text = text.replace("\\r", "\\\\r")
         
         
        
-        return text
+        #return text
 
     def cascadeSupport(self):
         return True
