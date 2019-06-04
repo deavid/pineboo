@@ -405,7 +405,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 if isinstance(widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qbuttongroup.QButtonGroup):
                     if isinstance(new_widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtoolbutton.QToolButton):
                         widget.addButton(new_widget)
-                
+                        continue
+                    
                 loadWidget(c, new_widget, parent, origWidget)
                 path = c.find("./property[@name='name']/cstring").text
                 #if not pineboolib.project._DGI.localDesktop():
