@@ -181,7 +181,8 @@ class FLManager(QtCore.QObject):
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
 
                 if not stream:
-                    logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
+                    if n.find("alteredtable") == -1:
+                        logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                     self.metadataCachedFails.append(n)
                     return None
 
