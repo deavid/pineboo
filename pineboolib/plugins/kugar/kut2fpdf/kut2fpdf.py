@@ -640,8 +640,8 @@ class kut2fpdf(object):
 
 
         if txt in ("None", None):
-            return
-        
+            #return
+            txt = ""
         
         txt = self._parser_tools.restore_text(txt)
         
