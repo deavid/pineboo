@@ -518,16 +518,16 @@ class FLQPSQL(object):
         return sql
 
     def mismatchedTable(self, table1, tmd_or_table2, db_=None):
-
         if db_ is None:
             db_ = self.db_
-        
+
         if isinstance(tmd_or_table2, str):
             mtd = db_.manager().metadata(tmd_or_table2, True)
             if not mtd:
                 return False
 
             mismatch = False
+            processed_fields = []
             try:
                 recMtd = self.recordInfo(tmd_or_table2)
                 recBd = self.recordInfo2(table1)
@@ -537,6 +537,7 @@ class FLQPSQL(object):
                     found = False
                     for field in recBd:
                         if field[0] == fieldMtd[0]:
+                            processed_fields.append(field[0])
                             found = True
                             if self.notEqualsFields(field, fieldMtd):
                                 mismatch = True
@@ -546,8 +547,9 @@ class FLQPSQL(object):
                             
 
                     if not found:
-                        mismatch = True
-                        break
+                        if fieldMtd[0] not in processed_fields:
+                            mismatch = True
+                            break
 
             except Exception:
                 print(traceback.format_exc())

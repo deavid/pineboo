@@ -1054,11 +1054,10 @@ class FLMYSQL_MYISAM2(object):
         vList = []
         for rec in records:
             for f in rec.fieldsList():
-                field = rec.field(f)
+                field = rec.field(f[0])
                 if rec.isGenerated(field):
-                    fList.append(field.name)
-                    vList.append(self.formatvalue(
-                        field.type_, field.value, False))
+                    fList.append(field.name())
+                    vList.append(self.formatValue(field.type(), f[5], False))
 
         sql = "INSERT INTO (%s) values (%s)" % (
             fList.split(","), vList.split(","))
@@ -1076,6 +1075,7 @@ class FLMYSQL_MYISAM2(object):
                 return False
 
             mismatch = False
+            processed_fields = []
             try:
                 recMtd = self.recordInfo(tmd_or_table2)
                 recBd = self.recordInfo2(table1)
@@ -1085,6 +1085,7 @@ class FLMYSQL_MYISAM2(object):
                     found = False
                     for field in recBd:
                         if field[0] == fieldMtd[0]:
+                            processed_fields.append(field[0])
                             found = True
                             if self.notEqualsFields(field, fieldMtd):
                                 mismatch = True
@@ -1094,8 +1095,9 @@ class FLMYSQL_MYISAM2(object):
                             
 
                     if not found:
-                        mismatch = True
-                        break
+                        if fieldMtd[0] not in processed_fields:
+                            mismatch = True
+                            break
 
             except Exception:
                 print(traceback.format_exc())
@@ -1144,6 +1146,9 @@ class FLMYSQL_MYISAM2(object):
                     len_ = len_[:len_.find(",")]
             
             len_ = int(len_)
+            
+            if len_ == 255 and tipo_ == "string":
+                len_ = 0
             
             
             default_value_ = field[4]
