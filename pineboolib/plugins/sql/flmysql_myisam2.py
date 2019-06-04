@@ -768,6 +768,7 @@ class FLMYSQL_MYISAM2(object):
         
         return False
 
+    @decorators.NotImplementedWarn
     def alterTable2(self, mtd1, mtd2, key, force=False):
         
         util = FLUtil()
@@ -776,7 +777,6 @@ class FLMYSQL_MYISAM2(object):
         newMTD = None
         doc = QDomDocument("doc")
         docElem = None
-
         if not util.domDocumentSetContent(doc, mtd1):
             print("FLManager::alterTable : " + util.tr("Error al cargar los metadatos."))
         else:
@@ -931,7 +931,7 @@ class FLMYSQL_MYISAM2(object):
             return self.alterTable2(mtd1, mtd2, key, True)
         
         if not ok:
-
+            #FIXME: la tabla vieja hay que recorerla de otra forma...
             oldCursor = FLSqlCursor(renameOld, True, "dbAux")
             oldCursor.setModeAccess(oldCursor.Browse)
             oldCursor.setForwardOnly(True)
@@ -946,7 +946,7 @@ class FLMYSQL_MYISAM2(object):
             listRecords = []
             newBufferInfo = self.recordInfo2(newMTD.name())
             vector_fields = {}
-            defValues = {}
+            default_values = {}
             v = None
             
             
@@ -958,7 +958,7 @@ class FLMYSQL_MYISAM2(object):
                     if it2.type() != FLFieldMetaData.Serial:
                         v = it2.defaultValue()
                         step += 1
-                        defValues[str(step)] = v
+                        default_values[str(step)] = v
                 
                 step += 1
                 vector_fields[str(step)] = it2
@@ -967,13 +967,16 @@ class FLMYSQL_MYISAM2(object):
             
             step2 = 0
             ok = True
-            while oldCursor.next():
+            x = 0
+            while oldCursor.next(): #FIXME: esto no funciona
+                x += 1
                 newBuffer = newBufferInfo
                 
                 i = 0
                 while i < len(vector_fields):
-                    if str(i) in defValues.keys():
-                        v = defValues[str(i)]
+                    if str(i + 1) in default_values.keys():
+                        i += 1
+                        v = default_values[str(i)]
                         i += 1
                         newField = vector_fields[str(i)]
                         i += 1
@@ -983,7 +986,7 @@ class FLMYSQL_MYISAM2(object):
                         newField = vector_fields[str(i)]
                         i += 1
                         oldField = vector_fields[str(i)]
-                        v = oldCursor.value(newField.name())
+                        v = oldCursor.valueBuffer(newField.name())
                         if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type != FLFieldMetaData.Serial:
                             defVal = newField.defaultValue()
                             if defVal is not None:
@@ -993,7 +996,7 @@ class FLMYSQL_MYISAM2(object):
                         v = v[:newField.length()]
                     
                     if (not oldField.allowNull() or not newField.allowNull()) and v is None:
-                        if oldField.type() == FLFieldMetadata.Serial:
+                        if oldField.type() == FLFieldMetaData.Serial:
                             v = int(self.nextSerialVal(newMTD.name(), newField.name()))
                         elif oldField.type() in ["int", "uint", "bool", "unlock"]:
                             v = 0
@@ -1006,13 +1009,19 @@ class FLMYSQL_MYISAM2(object):
                         else:
                             v = str("NULL")[:newField.length()]
                     
-                    newBuffer.setValue(newField.name(), v)
+                    for buffer in newBuffer:
+                        if buffer[0] == newField.name():
+                            buffer[2] == newField.allowNull()
+                            buffer[5] == v
+                            break
+                    
+                    #newBuffer.setValue(newField.name(), v)
                 
                 listRecords.append(newBuffer)
-                if len(listRecords):
+                if listRecords:
                     if not self.insertMulti(newMTD.name(), listRecords):
                         ok = False
-                    listRecords.clear()
+                    listRecords = []
                 
             util.setProgress(totalSteps)
                 
@@ -1043,24 +1052,23 @@ class FLMYSQL_MYISAM2(object):
                 
         return True
 
-    @decorators.NotImplementedWarn
-    def insertMulti(self, tableName, records):
+    def insertMulti(self, table_name, records):
         k = len(records)
 
         if k == 0:
             return None
-
+        mtd = self.db_.manager().metadata(table_name)
         fList = []
         vList = []
         for rec in records:
-            for f in rec.fieldsList():
-                field = rec.field(f[0])
-                if rec.isGenerated(field):
+            for f in rec:
+                field = mtd.field(f[0])
+                if field.generated():
                     fList.append(field.name())
                     vList.append(self.formatValue(field.type(), f[5], False))
 
         sql = "INSERT INTO (%s) values (%s)" % (
-            fList.split(","), vList.split(","))
+            ", ".join(fList), ", ".join(vList))
         return sql  # FIXME
 
 
