@@ -125,6 +125,8 @@ class parsertools(object):
         elif data_type == 0:
             pass
         elif data_type == 3:
+            if value.find("T") > -1:
+                value = value[:value.find("T")]
             ret_ = FLUtil().dateAMDtoDMA(value)
             
         elif data_type == 5:  # Imagen
