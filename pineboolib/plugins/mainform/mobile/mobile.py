@@ -338,16 +338,24 @@ class MainForm(QtWidgets.QMainWindow):
     def addMark(self, action):
         if not action:
             return
+        
         if not self.ag_mar_:
             self.ag_mar_ = QActionGroup(self.w_)
-            self.ag_mar_.setObjectName("pinebooAgMar")
+        
+        new_ag_mar = QActionGroup(self.w_)
+        new_ag_mar.setObjectName("pinebooAgMar")
 
-        if self.ag_mar_.findChild(QtWidgets.QAction, action.objectName()):
-            return
+        for ac in self.ag_mar_.actions():
+            if ac.objectName() == action.objectName():
+                continue
+            
+            self.cloneAction(ac, new_ag_mar) 
+        
+        self.cloneAction(action, new_ag_mar)
 
-        ac = self.cloneAction(action, self.ag_mar_)
+        self.ag_mar_ = new_ag_mar
 
-        self.dck_mar_.update(self.ag_mar_)
+        self.dck_mar_.update(self.ag_mar_, True)
 
     def addMarkFromItem(self, item, pos):
         if not item:
