@@ -392,8 +392,9 @@ class kut2fpdf(object):
                
         if xml.tag == "PageFooter":
             fix_height = False
-
-        self.fix_extra_size() #Sirve para actualizar la altura con lineas que se han partido porque son muy largas
+        
+        if not size_updated:
+            self.fix_extra_size() #Sirve para actualizar la altura con lineas que se han partido porque son muy largas
         
         
             
@@ -456,12 +457,13 @@ class kut2fpdf(object):
         X1 = self.calculateWidth(X1, 0, False)
         X2 = self.calculateLeftStart(xml.get("X2"))
         X2 = self.calculateWidth(X2, 0, False)
+
         # Ajustar altura a secciones ya creadas
         Y1 = int(xml.get("Y1")) + self.topSection()
         Y2 = int(xml.get("Y2")) + self.topSection()
         if fix_height:
-            Y1 = self._parser_tools.ratio_correction(Y1)
-            Y2 = self._parser_tools.ratio_correction(Y2)
+            Y1 = self._parser_tools.ratio_correction_h(Y1)
+            Y2 = self._parser_tools.ratio_correction_h(Y2)
         
           
             
@@ -488,7 +490,7 @@ class kut2fpdf(object):
     """
 
     def calculateLeftStart(self, x):
-        return self._parser_tools.ratio_correction(int(x)) + self._left_margin
+        return self._parser_tools.ratio_correction_w(int(x)) + self._left_margin
 
     """
     Comprueba si excedemos el margen derecho de la página actual
@@ -498,12 +500,16 @@ class kut2fpdf(object):
 
     def calculateWidth(self, width, pos_x, fix_ratio = True):
         width = int(width)
-        if fix_ratio:
-            width = self._parser_tools.ratio_correction(int(width))
         ret_ = width
         limit = self._document.w - self._right_margin
-        if pos_x + width > limit:
-            ret_ = limit - pos_x
+        
+        if fix_ratio:
+            width = self._parser_tools.ratio_correction_w(int(width))
+            pos_x = self._parser_tools.ratio_correction_w(int(pos_x))
+            ret_ = width
+            if pos_x + width > limit:
+                ret_ = limit - pos_x
+                
         return ret_
 
     """
@@ -529,7 +535,7 @@ class kut2fpdf(object):
         
         y = int(xml.get("Y")) + self.topSection() # Añade la altura que hay ocupada por otras secciones
         if fix_height:
-            y = self._parser_tools.ratio_correction(y)  # Corrige la posición con respecto al kut original
+            y = self._parser_tools.ratio_correction_h(y)  # Corrige la posición con respecto al kut original
         
         
         
@@ -789,13 +795,19 @@ class kut2fpdf(object):
                 # Centrado
                 #y = (y + ((H / 2) / processed_lines)) + (((self._document.font_size_pt / 2) / 2) * processed_lines) 
                 y = ( orig_y  + ( orig_H / 2))+ ((self._document.font_size_pt / 2) /2)
+                
+                if len(array_text) > 1:
+                    y = y - (font_size /2)
+                    
             elif VAlignment == "2":
                 # Abajo
                 y = orig_y + orig_H - font_size
             else:
                 # Arriba
                 y = orig_y + font_size
-        
+            
+                
+            
             y = y + extra_size
             
             if self.design_mode:
