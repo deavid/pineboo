@@ -635,9 +635,10 @@ class Dir(object):
         retorno = []
         try:
             import fnmatch
-            for file in os.listdir(self.path_):
-                if fnmatch.fnmatch(file, patron):
-                    retorno.append(file)
+            if os.path.exists(self.path_):
+                for file in os.listdir(self.path_):
+                    if fnmatch.fnmatch(file, patron):
+                        retorno.append(file)
         except Exception as e:
             print("Dir_Class.entryList:", e)
 
