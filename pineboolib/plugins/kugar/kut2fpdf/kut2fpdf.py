@@ -989,12 +989,14 @@ class kut2fpdf(object):
             if type is not None:
                 type = bar_code.nameToType(type.lower())
                 bar_code.setType(type)
+            
+            bar_code.setText(text)
                 
             pix = bar_code.pixmap()
             if not pix.isNull():
                 pix.save(file_name, "PNG")
             
-        self.draw_image(x , y, W, H, xml, file_name)
+        self.draw_image(x + 10, y, W - 20 , H, xml, file_name)
             
             
             
