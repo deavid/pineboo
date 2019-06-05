@@ -469,7 +469,7 @@ class kut2fpdf(object):
           
             
         
-        self._document.set_line_width(width)
+        self._document.set_line_width(self._parser_tools.ratio_correction_h(width))
         self._document.set_draw_color(r, g, b)
         dash_length = 1
         space_length = 1
