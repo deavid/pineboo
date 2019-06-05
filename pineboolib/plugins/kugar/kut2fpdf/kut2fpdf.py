@@ -386,7 +386,8 @@ class kut2fpdf(object):
         size_updated = False
         if xml.tag == "DetailFooter":
             if xml.get("PlaceAtBottom") == "true":
-                self.setTopSection(self._document.h - self._parser_tools.getHeight(xml))
+                height = self._parser_tools.getHeight(xml)
+                self.setTopSection(self._document.h - height - self.increase_section_size)
                 size_updated = True
         
                
