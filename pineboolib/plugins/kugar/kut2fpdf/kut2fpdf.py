@@ -623,11 +623,11 @@ class kut2fpdf(object):
                     val = ""
                     self.drawText(x, y, W, H, xml, val)
             
-                    print(level, section_name, val, text)
+                    #print(level, section_name, val, text)
             
             if section_name == "DetailFooter" and xml.get("DrawAtHeader") == "true":
                 self.draws_at_header[val] = text
-                print("Añadiendo a", val, text, level)
+                #print("Añadiendo a", val, text, level)
             
             else:
                 self.drawText(x, y, W, H, xml, text)
@@ -756,6 +756,9 @@ class kut2fpdf(object):
             text_lines.append(txt)
             
         for tl in text_lines:
+            if len(tl) > 1:
+                if tl[0] == " " and tl[1] != " ":
+                    tl = tl[1:] 
             str_width = self._document.get_string_width(tl)
             if str_width > W + 2 and xml.tag !="Label" and resizeable: #Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
                 height_resized = True
@@ -770,7 +773,6 @@ class kut2fpdf(object):
         processed_lines = 0
         extra_size = 0
         for actual_text in array_text:
-            
             if actual_text is None:
                 continue
             
@@ -784,12 +786,14 @@ class kut2fpdf(object):
                 x = x + (W / 2) - (self._document.get_string_width(actual_text) / 2)
                 #x = x + (W / 2) - (str_width if not height_resized else W / 2)
             elif HAlignment == "2":
+                
                 # Derecha
                 x = x + W - self._document.get_string_width(actual_text) - 2 # -2 de margen
                 #x = x + W - str_width if not height_resized else W
             else:
                 # Izquierda
-                x = x + 2
+                if processed_lines == 1:
+                    x = x + 2
 
                 
             if VAlignment == "1":  # sobre Y
@@ -815,7 +819,6 @@ class kut2fpdf(object):
                 self.write_debug(self.calculateLeftStart(orig_x), y, "Hal:%s, Val:%s, T:%s st:%s" % (HAlignment, VAlignment, txt, font_w), 6, "green")
                 if xml.tag == "CalculatedField":
                     self.write_debug(self.calculateLeftStart(orig_x), y, "CalculatedField:%s, Field:%s" % (xml.get("FunctionName"), xml.get("Field")), 3, "blue")
-            
             
             
             
