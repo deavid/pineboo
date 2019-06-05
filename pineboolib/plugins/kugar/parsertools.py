@@ -303,7 +303,7 @@ class parsertools(object):
         val = 0
         i = 0
         for l in xml_list:
-            if int(l.get("level")) != int(level):
+            if int(l.get("level")) <= int(level):
                 continue
             i += 1
             val += float(l.get(field_name))
