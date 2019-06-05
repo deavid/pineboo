@@ -709,21 +709,26 @@ class kut2fpdf(object):
         if fontU == "1":
             font_style += "U"
         
-        
+        font_name = font_name.replace(" narrow", "")
         
 
         font_full_name = "%s%s" % (font_name, font_style)
+        
 
         if font_full_name not in self._avalible_fonts:
-            font_found = self._parser_tools.find_font(font_full_name)            
+            font_foud = False
+            if font_full_name not in self._unavalible_fonts:
+                font_found = self._parser_tools.find_font(font_full_name, font_style)            
             if font_found:
-                self.logger.warning("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_full_name, font_found)
+                if self.design_mode:
+                    self.logger.warning("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_full_name, font_found)
                 self._document.add_font(font_full_name, "", font_found, True)
                 self._avalible_fonts.append(font_full_name)
 
             else:
                 if font_full_name not in self._unavalible_fonts:
-                    self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." %(font_full_name, font_style))
+                    if self.design_mode:
+                        self.logger.warning("KUT2FPDF:: No se encuentra el tipo de letra %s. Sustituido por helvetica%s." %(font_full_name, font_style))
                     self._unavalible_fonts.append(font_full_name)
                 font_name = "helvetica"
         

@@ -274,7 +274,7 @@ class parsertools(object):
     @return Path del fichero ".ttf" o None 
     """
 
-    def find_font(self, font_name):
+    def find_font(self, font_name, font_style):
         fonts_folders = []
         if sys.platform.find("win") > -1:
             windir = os.environ.get("WINDIR")
@@ -291,12 +291,55 @@ class parsertools(object):
         else:
             self.logger.warning("KUTPARSERTOOLS: Plataforma desconocida %s", sys.platform)
             return False
+        
+        font_name = font_name.replace(" ", "_")
+        
+        font_name = font_name
+        font_name2 = font_name
+        font_name3 = font_name
+        
+        if font_name.endswith("BI"):
+            font_name2 = font_name.replace("BI","_Bold_Italic")
+            font_name3 = font_name.replace("BI","bi")
+        
+        if font_name.endswith("B"):
+            font_name2 = font_name.replace("B","_Bold")
+            font_name3 = font_name.replace("B","b")
+        
+        if font_name.endswith("I"):
+            font_name2 = font_name.replace("I","_Italic")
+            font_name3 = font_name.replace("I","i")
+        
+        
 
         for folder in fonts_folders:
             for root, dirnames, filenames in os.walk(folder):
+
                 for filename in fnmatch.filter(filenames, '%s.ttf' % font_name):
                     ret_ = os.path.join(root, filename)
                     return ret_
+
+                for filename in fnmatch.filter(filenames, '%s%s.ttf' % (font_name[0].upper(), font_name[1:])):
+                    ret_ = os.path.join(root, filename)
+                    return ret_
+
+                for filename in fnmatch.filter(filenames, '%s.ttf' % font_name2):
+                    ret_ = os.path.join(root, filename)
+                    return ret_
+
+                for filename in fnmatch.filter(filenames, '%s%s.ttf' % (font_name2[0].upper(), font_name2[1:])):
+                    ret_ = os.path.join(root, filename)
+                    return ret_
+                
+
+                for filename in fnmatch.filter(filenames, '%s.ttf' % font_name3):
+                    ret_ = os.path.join(root, filename)
+                    return ret_
+
+                for filename in fnmatch.filter(filenames, '%s%s.ttf' % (font_name3[0].upper(), font_name3[1:])):
+                    ret_ = os.path.join(root, filename)
+                    return ret_
+                
         return None
     
     def calculate_sum(self, field_name, line, xml_list, level):
