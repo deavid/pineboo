@@ -42,7 +42,7 @@ class FLMYSQL_MYISAM(object):
     declarative_base_ = None
 
     def __init__(self):
-        self.version_ = "0.6"
+        self.version_ = "0.8"
         self.conn_ = None
         self.name_ = "FLMYSQL_MyISAM"
         self.open_ = False
@@ -762,7 +762,7 @@ class FLMYSQL_MYISAM(object):
         
         return False
 
-    @decorators.NotImplementedWarn
+
     def alterTable2(self, mtd1, mtd2, key, force=False):
         
         util = FLUtil()
@@ -807,7 +807,7 @@ class FLMYSQL_MYISAM(object):
 
         if not oldPK == newPK:
             print("FLManager::alterTable : " + util.tr("Los nombres de las claves primarias difieren."))
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -815,7 +815,7 @@ class FLMYSQL_MYISAM(object):
             return False
 
         if not force and self.db_.manager().checkMetaData(oldMTD, newMTD):
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -824,7 +824,7 @@ class FLMYSQL_MYISAM(object):
 
         if not self.db_.manager().existsTable(oldMTD.name()):
             print("FLManager::alterTable : " + util.tr("La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -832,11 +832,11 @@ class FLMYSQL_MYISAM(object):
             return False
 
         fieldList = oldMTD.fieldList()
-        oldField = None
+        #oldField = None
 
         if not fieldList:
             print("FLManager::alterTable : " + util.tr("Los antiguos metadatos no tienen campos."))
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -854,7 +854,7 @@ class FLMYSQL_MYISAM(object):
         renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
 
         if not self.db_.dbAux():
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -867,7 +867,7 @@ class FLMYSQL_MYISAM(object):
         if not fieldList:
             qWarning("FLManager::alterTable : " + util.tr("Los nuevos metadatos no tienen campos"))
             
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -880,7 +880,7 @@ class FLMYSQL_MYISAM(object):
         if not q.exec_(in_sql):
             qWarning("FLManager::alterTable : " + util.tr("No se ha podido renombrar la tabla antigua."))
             
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -890,7 +890,7 @@ class FLMYSQL_MYISAM(object):
 
         if not self.db_.manager().createTable(newMTD):
             self.db_.dbAux().rollbackTransaction()
-            if oldMTD and not oldMTD == newMTD:
+            if oldMTD and oldMTD != newMTD:
                 del oldMTD
             if newMTD:
                 del newMTD
@@ -901,36 +901,54 @@ class FLMYSQL_MYISAM(object):
         
         self.db_.dbAux().transaction()
         
-        #in_sql = "INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES ('%s.mtd','%s','%s','%s')" % (renameOld, mtd1, self.db_.managerModules().idModuleOfFile("%s.mtd" % oldMTD.name()), key)
-        #logger.warning(in_sql)
-        #q.exec_(in_sql)    
+        if not force and key and len(key) == 40:
+            c = FLSqlCursor("flfiles", True, sel.db_.dbAux())
+            #oldCursor.setModeAccess(oldCursor.Browse)
+            c.setForwardOnly(True)
+            c.setFilter("nombre='%s.mtd'" % renameOld)
+            c.select()
+            if not c.next():
+                #c.setModeAccess(c.Insert)
+                #c.refreshBuffer()
+                #c.setValueBuffer("nombre","%s.mtd" % renameOld)
+                #c.setValueBuffer("contenido", mtd1)
+                #c.setValueBuffer("sha", key)
+                #c.commitBuffer()
+        
+        
+                in_sql = "INSERT INTO flfiles(nombre,contenido,idmodulo,sha) VALUES ('%s.mtd','%s','%s','%s')" % (renameOld, mtd1, self.db_.managerModules().idModuleOfFile("%s.mtd" % oldMTD.name()), key)
+                logger.warning(in_sql)
+                q.exec_(in_sql)    
                 
                 
         
         ok = False
         if force and fieldsNamesOld:
-            sel = fieldsNamesOld.join(",")
-            in_sql = "INSERT INTO %s(%s) SELECT %s FROM %s" % (newMTD.name(), sel, sel, renameOld)
-            logger.warning(in_sql)
-            ok = q.exec_(in_sql)
+            #sel = fieldsNamesOld.join(",")
+            #in_sql = "INSERT INTO %s(%s) SELECT %s FROM %s" % (newMTD.name(), sel, sel, renameOld)
+            #logger.warning(in_sql)
+            #ok = q.exec_(in_sql)
             if not ok:
                 self.db_.dbAux().rollback()
-                if oldMTD and not oldMTD == newMTD:
+                if oldMTD and oldMTD != newMTD:
                     del oldMTD
                 if newMTD:
                     del newMTD
-
-                return False
             
             return self.alterTable2(mtd1, mtd2, key, True)
         
         if not ok:
-            #FIXME: la tabla vieja hay que recorerla de otra forma...
-            oldCursor = FLSqlCursor(renameOld, True, "dbAux")
-            oldCursor.setModeAccess(oldCursor.Browse)
-            oldCursor.setForwardOnly(True)
-            oldCursor.select()
-            totalSteps = oldCursor.size()
+            import MySQLdb
+            oldCursor = self.conn_.cursor(MySQLdb.cursors.DictCursor)
+            #print("Lanzando!!", "SELECT * FROM %s WHERE 1 = 1" % (renameOld))
+            oldCursor.execute("SELECT * FROM %s WHERE 1 = 1" % (renameOld))
+            result_set = oldCursor.fetchall()
+            totalSteps = len(result_set)
+            #oldCursor = FLSqlCursor(renameOld, True, "dbAux")
+            #oldCursor.setModeAccess(oldCursor.Browse)
+            #oldCursor.setForwardOnly(True)
+            #oldCursor.select()
+            #totalSteps = oldCursor.size()
             util.createProgressDialog(util.tr("Reestructurando registros para %s..." % newMTD.alias()), totalSteps)
             util.setLabelText(util.tr("Tabla modificada"))
 
@@ -942,11 +960,10 @@ class FLMYSQL_MYISAM(object):
             vector_fields = {}
             default_values = {}
             v = None
-            
-            
+                
             for it2 in fieldList:
                 oldField = oldMTD.field(it2.name())
-                if oldField is None or oldCursor.field(oldField.name()) is None:
+                if oldField is None or not result_set or oldField.name() not in result_set[0].keys():
                     if oldField is None:
                         oldField = it2
                     if it2.type() != FLFieldMetaData.Serial:
@@ -959,15 +976,19 @@ class FLMYSQL_MYISAM(object):
                 step += 1
                 vector_fields[str(step)] = oldField
             
+
+            
             step2 = 0
             ok = True
             x = 0
-            while oldCursor.next(): #FIXME: esto no funciona
+            for row in result_set: 
                 x += 1
                 newBuffer = newBufferInfo
                 
                 i = 0
-                while i < len(vector_fields):
+
+                while i < step:
+
                     if str(i + 1) in default_values.keys():
                         i += 1
                         v = default_values[str(i)]
@@ -975,17 +996,19 @@ class FLMYSQL_MYISAM(object):
                         newField = vector_fields[str(i)]
                         i += 1
                         oldField = vector_fields[str(i)]
+                        
                     else:
                         i += 1
                         newField = vector_fields[str(i)]
                         i += 1
                         oldField = vector_fields[str(i)]
-                        v = oldCursor.valueBuffer(newField.name())
-                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type != FLFieldMetaData.Serial:
+                        v = row[newField.name()]
+                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type() != FLFieldMetaData.Serial:
                             defVal = newField.defaultValue()
                             if defVal is not None:
                                 v = defVal
-                        
+                    
+                    
                     if v is not None and newField.type() == "string" and newField.length() > 0:
                         v = v[:newField.length()]
                     
@@ -1001,17 +1024,24 @@ class FLMYSQL_MYISAM(object):
                         elif oldField.type() == "date":
                             v = QDate.currentDate()
                         else:
-                            v = str("NULL")[:newField.length()]
+                            v = "NULL"[:newField.length()]
                     
+                    new_b = []
                     for buffer in newBuffer:
                         if buffer[0] == newField.name():
-                            buffer[2] == newField.allowNull()
-                            buffer[5] == v
+                            new_buffer = []
+                            new_buffer.append(buffer[0])
+                            new_buffer.append(buffer[1])
+                            new_buffer.append(newField.allowNull())
+                            new_buffer.append(buffer[3])
+                            new_buffer.append(buffer[4])
+                            new_buffer.append(v)
+                            new_buffer.append(buffer[6])
+                            listRecords.append(new_buffer)
                             break
-                    
                     #newBuffer.setValue(newField.name(), v)
                 
-                listRecords.append(newBuffer)
+                    
                 if listRecords:
                     if not self.insertMulti(newMTD.name(), listRecords):
                         ok = False
@@ -1028,7 +1058,7 @@ class FLMYSQL_MYISAM(object):
             if force:
                 q.exec_("DROP TABLE %s CASCADE" % renameOld)
         else:
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
                 
             q.exec_("DROP TABLE %s CASCADE" % oldMTD.name())
             q.exec_("ALTER TABLE %s RENAME TO %s" % (renameOld, oldMTD.name()))
@@ -1047,25 +1077,39 @@ class FLMYSQL_MYISAM(object):
         return True
 
     def insertMulti(self, table_name, records):
-        k = len(records)
 
-        if k == 0:
-            return None
+        if not records:
+            return False
+            
         mtd = self.db_.manager().metadata(table_name)
         fList = []
         vList = []
-        for rec in records:
-            for f in rec:
-                field = mtd.field(f[0])
-                if field.generated():
-                    fList.append(field.name())
-                    vList.append(self.formatValue(field.type(), f[5], False))
+        cursor_ = self.cursor()
+        for f in records:
+            field = mtd.field(f[0])
+            if field.generated():
+                fList.append(field.name())
+                value = f[5]
+                if field.type() in ("string", "stringlist"):
+                    value = self.db_.normalizeValue(value)
+                value = self.formatValue(field.type(), value, False)
+                vList.append(value)
+            
 
-        sql = "INSERT INTO (%s) values (%s)" % (
-            ", ".join(fList), ", ".join(vList))
-        return sql  # FIXME
+        sql = """INSERT INTO %s(%s) values (%s)""" % (table_name, ", ".join(fList), ", ".join(map(str, vList)))      
+                
+        if not fList:
+            return False
+        
+            
+        try:
+            cursor_.execute(sql)
+        except Exception as exc:
+            print(sql,"\n",exc)
+            return False
 
-
+        
+        return True
 
     def mismatchedTable(self, table1, tmd_or_table2, db_=None):
         if db_ is None:
