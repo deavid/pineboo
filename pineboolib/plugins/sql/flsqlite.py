@@ -533,6 +533,9 @@ class FLSQLITE(object):
                         if fieldMtd[0] not in processed_fields:
                             mismatch = True
                             break
+                        
+                if len(recBd) > 0:
+                    mismatch = True
 
             except Exception:
                 print(traceback.format_exc())

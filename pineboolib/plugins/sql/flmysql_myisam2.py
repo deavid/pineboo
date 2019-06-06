@@ -201,7 +201,7 @@ class FLMYSQL_MYISAM2(object):
         if v is None:
             s = "Null"
 
-        elif type_ == "bool" or type_ == "unlock":
+        if type_ == "bool" or type_ == "unlock":
             s = text2bool(v)
 
         elif type_ == "date":
@@ -216,7 +216,10 @@ class FLMYSQL_MYISAM2(object):
             s = "'%s'" % v
 
         elif type_ in ("uint", "int", "double", "serial"):
-            s = v
+            if s == "Null":
+                s = 0
+            else:
+                s = v
 
         elif type_ in ("string", "stringlist"):
             if v == "":
@@ -230,9 +233,11 @@ class FLMYSQL_MYISAM2(object):
                 s = "'%s'" % v
 
         elif type_ == "pixmap":
-            if v.find("'") > -1:
-                v = self.normalizeValue(v)
-            s = "'%s'" % v
+            if s is None:
+                s = v
+            if s.find("'") > -1:
+                s = self.normalizeValue(s)
+            s = "'%s'" % s
 
         else:
             s = v
@@ -993,7 +998,7 @@ class FLMYSQL_MYISAM2(object):
                 i = 0
 
                 while i < step:
-
+                    v = None
                     if str(i + 1) in default_values.keys():
                         i += 1
                         v = default_values[str(i)]
@@ -1151,6 +1156,9 @@ class FLMYSQL_MYISAM2(object):
                         if fieldMtd[0] not in processed_fields:
                             mismatch = True
                             break
+                        
+                if len(recBd) > 0:
+                    mismatch = True
 
             except Exception:
                 print(traceback.format_exc())

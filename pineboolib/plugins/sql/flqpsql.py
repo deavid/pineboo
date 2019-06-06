@@ -8,6 +8,7 @@ from pineboolib import decorators
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 from sqlalchemy import create_engine
 
@@ -37,7 +38,7 @@ class FLQPSQL(object):
     declarative_base_ = None
 
     def __init__(self):
-        self.version_ = "0.6"
+        self.version_ = "0.8"
         self.conn_ = None
         self.name_ = "FLQPSQL"
         self.open_ = False
@@ -214,22 +215,26 @@ class FLQPSQL(object):
         if v is None:
             s = "Null"
 
-        elif type_ == "bool" or type_ == "unlock":
+        if type_ == "bool" or type_ == "unlock":
             s = text2bool(v)
 
         elif type_ == "date":
-            if len(str(v).split("-")[0]) < 3:
-                val = util.dateDMAtoAMD(v)
-            else:
-                val = v
+            if s != "Null":
+                if len(str(v).split("-")[0]) < 3:
+                    val = util.dateDMAtoAMD(v)
+                else:
+                    val = v
             
-            s = "'%s'" % val
+                s = "'%s'" % val
 
         elif type_ == "time":
             s = "'%s'" % v
 
         elif type_ in ("uint", "int", "double", "serial"):
-            s = v
+            if s == "Null":
+                s = 0
+            else:
+                s = v
 
         elif type_ in ("string", "stringlist"):
             if v == "":
@@ -243,9 +248,12 @@ class FLQPSQL(object):
                 s = "'%s'" % v
 
         elif type_ == "pixmap":
-            if v.find("'") > -1:
-                v = self.normalizeValue(v)
-            s = "'%s'" % v
+            if s is None:
+                s = v
+                
+            if s.find("'") > -1:
+                s = self.normalizeValue(s)
+            s = "'%s'" % s
 
         else:
             s = v
@@ -550,6 +558,10 @@ class FLQPSQL(object):
                         if fieldMtd[0] not in processed_fields:
                             mismatch = True
                             break
+                
+                if len(recBd) > 0:
+                    mismatch = True
+                    
 
             except Exception:
                 print(traceback.format_exc())
@@ -593,8 +605,7 @@ class FLQPSQL(object):
             if defVal and defVal[0] == "'":
                 defVal = defVal[1:len(defVal) - 2]
 
-            info.append([name, self.decodeSqlType(type_),
-                         allowNull, len_, precision, defVal])
+            info.append([name, self.decodeSqlType(type_),allowNull, len_, precision, defVal, int(type_)])
 
         return info
 
@@ -646,8 +657,7 @@ class FLQPSQL(object):
 
             for f in mtd.fieldsNames():
                 field = mtd.field(f)
-                info.append([field.name(), field.type(), not field.allowNull(), field.length(
-                ), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()])
+                info.append([field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()])
 
             del mtd
 
@@ -878,7 +888,7 @@ class FLQPSQL(object):
         return True
 
     def alterTable2(self, mtd1, mtd2, key, force=False):
-        logger.warning("alterTable2 FIXME::Me quedo colgado al hacer createTable --> existTable")
+        #logger.warning("alterTable2 FIXME::Me quedo colgado al hacer createTable --> existTable")
         util = FLUtil()
 
         oldMTD = None
@@ -1043,135 +1053,182 @@ class FLQPSQL(object):
                 del newMTD
 
             return self.alterTable2(mtd1, mtd2, key, True)
+        
+        if not ok:
+            oldCursor = self.db_.dbAux().cursor()
+            oldCursor.execute("SELECT %s FROM %s WHERE 1 = 1" % (", ".join(fieldsNamesOld), renameOld))
+            result_set = oldCursor.fetchall()
+            totalSteps = len(result_set)
+            util.createProgressDialog(util.tr("application", "Reestructurando registros para %s..." % newMTD.alias()) , totalSteps)
+            util.setLabelText(util.tr("application", "Tabla modificada"))
 
-        oldCursor = FLSqlCursor(renameOld, True, self.db_.dbAux())
-        oldCursor.setModeAccess(oldCursor.Browse)
-        newCursor = FLSqlCursor(newMTD.name(), True, self.db_.dbAux())
-        newCursor.setMode(newCursor.Insert)
+            step = 0
+            newBuffer = None
+            newField = None
+            listRecords = []
+            newBufferInfo = self.recordInfo2(newMTD.name())
+            vector_fields = {}
+            default_values = {}
+            v = None
+                
+            for it2 in fieldList:
+                oldField = oldMTD.field(it2.name())
+                
+                if oldField is None or not result_set:
+                    if oldField is None:
+                        oldField = it2
+                    if it2.type() != FLFieldMetaData.Serial:
+                        v = it2.defaultValue()
+                        step += 1
+                        default_values[str(step)] = v
+                
+                step += 1
+                vector_fields[str(step)] = it2
+                step += 1
+                vector_fields[str(step)] = oldField
+            
 
-        oldCursor.select()
-        totalSteps = oldCursor.size()
-        progress = QProgressDialog(FLUtil().translate("application", "Reestructurando registros para %1...").arg(
-            newMTD.alias()), FLUtil().translate("application", "Cancelar"), 0, totalSteps)
-        progress.setLabelText(FLUtil().translate("application", "Tabla modificada"))
+            step2 = 0
+            ok = True
+            x = 0
+            for row in result_set: 
+                x += 1
+                newBuffer = newBufferInfo
+                
+                i = 0
 
-        step = 0
-        newBuffer = None
-        newField = None
-        listRecords = []
-        newBufferInfo = self.recordInfo2(newMTD.name())
-        oldFieldsList = {}
-        newFieldsList = {}
-        defValues = {}
-        v = None
-
-        for newField in fieldList:
-            oldField = oldMTD.field(newField.name())
-            defValues[str(step)] = None
-            if not oldField or not oldCursor.field(oldField.name()):
-                if not oldField:
-                    oldField = newField
-                if not newField.type() == "serial":
-                    v = newField.defaultValue()
-                    defValues[str(step)] = v
-
-            newFieldsList[str(step)] = newField
-            oldFieldsList[str(step)] = oldField
-            step = step + 1
-
-        step = 0
-        ok = True
-        while oldCursor.next():
-            newBuffer = newBufferInfo
-
-            for reg in defValues.keys():
-                newField = newFieldsList[reg]
-                oldField = oldFieldsList[reg]
-                if defValues[reg]:
-                    v = defValues[reg]
-                else:
-                    v = oldCursor.value(newField.name())
-                    if (not oldField.allowNull or not newField.allowNull()) and not v and not newField.type() == "serial":
-                        defVal = newField.defaultValue()
-                        if defVal is not None:
-                            v = defVal
-
-                    if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
-                        logger.warning("FLManager::alterTable : " + FLUtil().translate("application", "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
-
-                if v is not None and newField.type() == "string" and newField.length() > 0:
-                    v = str(v)[0:newField.length()]
-
-                if (not oldField.allowNull() or not newField.allowNull()) and v is None:
-                    if oldField.type() == "serial":
-                        v = int(self.nextSerialVal(
-                            newMTD.name(), newField.name()))
-                    elif oldField.type() in ("int", "uint", "bool", "unlock"):
-                        v = 0
-                    elif oldField.type() == "double":
-                        v = 0.0
-                    elif oldField.type() == "time":
-                        v = QTime().currentTime()
-                    elif oldField.type() == "date":
-                        v = QDate().currentDate()
+                while i < step:
+                    v = None
+                    if str(i + 1) in default_values.keys():
+                        i += 1
+                        v = default_values[str(i)]
+                        i += 1
+                        newField = vector_fields[str(i)]
+                        i += 1
+                        oldField = vector_fields[str(i)]
+                        
                     else:
-                        v = "NULL"[0:newField.length()]
-
-                newBuffer.setValue(newField.name(), v)
-
-            listRecords.append(newBuffer)
-
-            if not self.insertMulti(newMTD.name(), listRecords):
-                ok = False
-                listRecords.clear()
-                break
-
-            listRecords.clear()
-
-        if len(listRecords) > 0:
-            if not self.insertMulti(newMTD.name(), listRecords):
-                ok = False
-            listRecords.clear()
-
-        progress.setProgress(totalSteps)
-
-        if oldMTD and not oldMTD == newMTD:
-            del oldMTD
-
-        if newMTD:
-            del newMTD
-
+                        i += 1
+                        newField = vector_fields[str(i)]
+                        i += 1
+                        oldField = vector_fields[str(i)]
+                        pos = 0
+                        for field_name in fieldsNamesOld:
+                            if newField.name() == field_name:
+                                v = row[pos]
+                                break
+                            pos += 1
+                            
+                        if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type() != FLFieldMetaData.Serial:
+                            defVal = newField.defaultValue()
+                            if defVal is not None:
+                                v = defVal
+                    
+                    if v is not None and newField.type() == "string" and newField.length() > 0:
+                        v = v[:newField.length()]
+                    
+                    if (not oldField.allowNull() or not newField.allowNull()) and v in (None, "None"):
+                        if oldField.type() == FLFieldMetaData.Serial:
+                            v = int(self.nextSerialVal(newMTD.name(), newField.name()))
+                        elif oldField.type() in ["int", "uint"]:
+                            v = 0
+                        elif oldField.type() in ["bool", "unlock"]:
+                            v = False
+                        elif oldField.type() == "double":
+                            v = 0.0
+                        elif oldField.type() == "time":
+                            v = QTime.currentTime()
+                        elif oldField.type() == "date":
+                            v = QDate.currentDate()
+                        else:
+                            v = "NULL"[:newField.length()]
+                    
+                    new_b = []
+                    for buffer in newBuffer:
+                        if buffer[0] == newField.name():
+                            new_buffer = []
+                            new_buffer.append(buffer[0])
+                            new_buffer.append(buffer[1])
+                            new_buffer.append(newField.allowNull())
+                            new_buffer.append(buffer[3])
+                            new_buffer.append(buffer[4])
+                            new_buffer.append(v)
+                            new_buffer.append(buffer[6])
+                            listRecords.append(new_buffer)
+                            break
+                    #newBuffer.setValue(newField.name(), v)
+                
+                    
+                if listRecords:
+                    if not self.insertMulti(newMTD.name(), listRecords):
+                        ok = False
+                    listRecords = []
+                
+            util.setProgress(totalSteps)
+                
+                
+        
+        util.destroyProgressDialog()      
         if ok:
             self.db_.dbAux().commit()
+            
+            if force:
+                q.exec_("DROP TABLE %s CASCADE" % renameOld)
         else:
-            self.db_.dbAux().rollback()
+            self.db_.dbAux().rollbackTransaction()
+                
+            q.exec_("DROP TABLE %s CASCADE" % oldMTD.name())
+            q.exec_("ALTER TABLE %s RENAME TO %s" % (renameOld, oldMTD.name()))
+                
+            if oldMTD and oldMTD != newMTD:
+                del oldMTD 
+            if newMTD:
+                del newMTD 
             return False
-
-        if force and ok:
-            q.exec_("DROP TABLE %s CASCADE" % renameOld)
-
+        
+        if oldMTD and oldMTD != newMTD:
+            del oldMTD    
+        if newMTD:
+            del newMTD
+                
         return True
 
-    @decorators.NotImplementedWarn
-    def insertMulti(self, tableName, records):
-        k = len(records)
+    def insertMulti(self, table_name, records):
 
-        if k == 0:
-            return None
-
+        if not records:
+            return False
+            
+        mtd = self.db_.manager().metadata(table_name)
         fList = []
         vList = []
-        for rec in records:
-            for f in rec.fieldsList():
-                field = rec.field(f)
-                if rec.isGenerated(field):
-                    fList.append(field.name)
-                    vList.append(self.formatvalue(
-                        field.type_, field.value, False))
+        cursor_ = self.conn_.cursor()
+        for f in records:
+            field = mtd.field(f[0])
+            if field.generated():
+                fList.append(field.name())
+                value = f[5]
+                value = self.formatValue(field.type(), value, False)
+                if field.type() in ("string", "stringlist") and value == "Null":
+                    value = ""
+                #    value = self.db_.normalizeValue(value)
+                
+                vList.append(value)
+        
 
-        sql = "INSERT INTO (%s) values (%s)" % (
-            fList.split(","), vList.split(","))
-        return sql  # FIXME
+        sql = """INSERT INTO %s(%s) values (%s)""" % (table_name, ", ".join(fList), ", ".join(map(str, vList)))      
+                
+        if not fList:
+            return False
+        
+            
+        try:
+            cursor_.execute(sql)
+        except Exception as exc:
+            print(sql,"\n",exc)
+            return False
+
+        
+        return True
 
     def Mr_Proper(self):
         util = FLUtil()
