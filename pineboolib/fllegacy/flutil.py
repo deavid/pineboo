@@ -1060,13 +1060,13 @@ class FLUtil(QtCore.QObject):
 
         return True
 
-    @decorators.NotImplementedWarn
+
     def quickSqlDelete(self, t, w, connName="default"):
         """
         Versión rápida de sqlDelete. Ejecuta directamente la consulta sin realizar comprobaciones y sin disparar señales de commits.
         Usar con precaución.
         """
-        pass
+        self.execSql("DELETE FROM %s WHERE %s" % (t, w))
 
     def createProgressDialog(self, title, steps, id_="default"):
         """
@@ -1075,22 +1075,29 @@ class FLUtil(QtCore.QObject):
         @param l Label del diálogo
         @param tS Número total de pasos a realizar
         """
-        from PyQt5 import QtWidgets
+        from pineboolib.pncontrolsfactory import QProgressDialog, SysType
         
-        pd_widget = QtWidgets.QProgressDialog(str(title), str(
-            self.translate("scripts", "Cancelar")), 0, steps)
+        parent = None
+        if self.__class__.progress_dialog_stack:
+            parent = self.__class__.progress_dialog_stack[-1]
+        pd_widget = QProgressDialog(str(title), str(self.translate("scripts", "Cancelar")), 0, steps, parent)
         self.__class__.progress_dialog_stack.append(pd_widget)
-        QtWidgets.qApp.processEvents()
+        pd_widget.setMinimumDuration(300)
+        SysType().processEvents()
         return pd_widget
 
     def destroyProgressDialog(self, id_="default"):
         """
         Destruye el diálogo de progreso
         """
+        from pineboolib.pncontrolsfactory import SysType
+        
         pd_widget = self.__class__.progress_dialog_stack[-1]
-        del self.__class__.progress_dialog_stack[-1]
-        pd_widget.hide()
         pd_widget.close()
+        self.__class__.progress_dialog_stack.remove(pd_widget)
+        #pd_widget.hide()
+        SysType().processEvents()
+        
 
     def setProgress(self, step_number, id_="default"):
         """
@@ -1098,11 +1105,11 @@ class FLUtil(QtCore.QObject):
 
         @param p Grado de progreso
         """
-        from PyQt5 import QtWidgets
+        from pineboolib.pncontrolsfactory import SysType
         
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setValue(step_number)
-        QtWidgets.qApp.processEvents()
+        SysType().processEvents()
 
     def setLabelText(self, l, id_="default"):
         """
@@ -1110,11 +1117,11 @@ class FLUtil(QtCore.QObject):
 
         @param l Etiqueta
         """
-        from PyQt5 import QtWidgets
+        from pineboolib.pncontrolsfactory import SysType
         
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setLabelText(str(l))
-        QtWidgets.qApp.processEvents()
+        SysType().processEvents()
 
     def setTotalSteps(self, tS, id_="default"):
         """
@@ -1122,11 +1129,11 @@ class FLUtil(QtCore.QObject):
 
         @param ts Número total de pasos
         """
-        from PyQt5 import QtWidgets
+        from pineboolib.pncontrolsfactory import SysType
         
         pd_widget = self.__class__.progress_dialog_stack[-1]
         pd_widget.setRange(0, tS)
-        QtWidgets.qApp.processEvents()
+        SysType().processEvents()
 
     def domDocumentSetContent(self, doc, content):
         """

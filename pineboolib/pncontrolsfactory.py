@@ -104,6 +104,7 @@ QSizePolicy = resolveObject("QSizePolicy")
 QToolBox = resolveObject("QToolBox")
 QPainter = resolveObject("QPainter")
 QBrush = resolveObject("QBrush")
+QProgressDialog = resolveObject("QProgressDialog")
 
 """
 QIconSet = resolveObject("QIconSet")
