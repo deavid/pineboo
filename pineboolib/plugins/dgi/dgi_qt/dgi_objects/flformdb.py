@@ -436,10 +436,10 @@ class FLFormDB(QtWidgets.QDialog):
 
     def saveSnapShot(self, path_file = None):
         if not path_file:
-            from pineboolib.pncontrolsfactory import aqApp
+            from pineboolib.pncontrolsfactory import aqApp, QFileDialog
             tmp_file = "%s/snap_shot_%s.png" % (aqApp.tmp_dir(),QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
 
-            ret = QtWidgets.QFileDialog.getSaveFileName(None, 'Pineboo', tmp_file, 'PNG(*.png)')
+            ret = QFileDialog.getSaveFileName(None, 'Pineboo', tmp_file, 'PNG(*.png)')
             path_file = ret[0] if ret else None
         
         if path_file:   
