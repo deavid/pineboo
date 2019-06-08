@@ -759,8 +759,8 @@ class FLMYSQL_MYISAM2(object):
         self.active_create_index = False
         util.destroyProgressDialog()
     
-    def alterTable(self, mtd1, mtd2, key):
-        return self.alterTable2(mtd1, mtd2, key)
+    def alterTable(self, mtd1, mtd2, key, force = False):
+        return self.alterTable2(mtd1, mtd2, key, force)
     
     def hasCheckColumn(self, mtd):
         field_list = mtd.fieldList()
@@ -959,7 +959,8 @@ class FLMYSQL_MYISAM2(object):
             #oldCursor.setForwardOnly(True)
             #oldCursor.select()
             #totalSteps = oldCursor.size()
-            util.createProgressDialog(util.tr("Reestructurando registros para %s..." % newMTD.alias()), totalSteps)
+
+            util.createProgressDialog(util.tr("Reestructurando registros para %s...") % newMTD.alias(), totalSteps)
             util.setLabelText(util.tr("Tabla modificada"))
 
             step = 0
@@ -1297,7 +1298,10 @@ class FLMYSQL_MYISAM2(object):
                 ret = True
 
             elif field1[1] == "string" and (not field2[1] in ("string", "time", "date") or not field1[3] == field2[3]):
-                ret = True
+                if field1[3] == 0 and field2[3] == 255:
+                    pass
+                else:
+                    ret = True
             elif field1[1] == "uint" and not field2[1] in ("int", "uint", "serial"):
                 ret = True
             elif field1[1] == "bool" and not field2[1] in ("bool", "unlock"):

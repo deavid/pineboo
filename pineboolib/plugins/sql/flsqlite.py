@@ -644,7 +644,7 @@ class FLSQLITE(object):
 
         return ret
 
-    def alterTable(self, mtd1, mtd2, key):
+    def alterTable(self, mtd1, mtd2, key, force = False):
         util = FLUtil()
 
         oldMTD = None
