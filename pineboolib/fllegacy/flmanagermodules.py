@@ -490,9 +490,14 @@ class FLManagerModules(object):
     @param idM Identificador del módulo del que se quiere saber su versión
     @return Cadena con la versión
     """
-    @decorators.NotImplementedWarn
+
     def versionModule(self, idM):
-        return None
+        if not self.dictInfoMods:
+            return idM
+        
+        im = idM.upper()
+        
+        return im.version if im else idM
 
     """
     Para obtener la clave sha local.
