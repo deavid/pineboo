@@ -105,6 +105,7 @@ QToolBox = resolveObject("QToolBox")
 QPainter = resolveObject("QPainter")
 QBrush = resolveObject("QBrush")
 QProgressDialog = resolveObject("QProgressDialog")
+QFileDialog = resolveObject("QFileDialog")
 
 """
 QIconSet = resolveObject("QIconSet")
