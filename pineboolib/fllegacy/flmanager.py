@@ -177,9 +177,14 @@ class FLManager(QtCore.QObject):
                     ret = self.cacheMetaData_[key]
             
             
+            
+            
+            
+            
             if not ret:
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
-
+                
+                
                 if not stream:
                     if n.find("alteredtable") == -1:
                         logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
@@ -198,10 +203,9 @@ class FLManager(QtCore.QObject):
                 if ret is None:
                     return None
 
-                if not ret.isQuery() and not self.existsTable(n):
-                    self.createTable(ret)
 
-                
+                if not ret.isQuery() and not self.existsTable(n):
+                    self.createTable(ret)                
 
                 acl = pineboolib.project.acl()
 
@@ -224,8 +228,14 @@ class FLManager(QtCore.QObject):
                     msg = util.translate(
                         "application",
                         "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
-                        "Debe regenerar la base de datos.").replace("%1", n)
+                        "Regenerando la base de datos.").replace("%1", n)
                     logger.warning(msg)
+                    
+                    must_alter = self.db_.mismatchedTable(n, ret)
+                    if must_alter:
+                        if not self.alterTable(stream, stream, None, True):
+                            logger.warning("La regeneración de la tabla %s ha fallado", n)
+                        
                 # throwMsgWarning(self.db_, msg)
                 
             return ret
@@ -684,7 +694,7 @@ class FLManager(QtCore.QObject):
             return True
                 
 
-    def alterTable(self, mtd1=None, mtd2=None, key=None):
+    def alterTable(self, mtd1=None, mtd2=None, key=None, force= False):
         """
         Modifica la estructura o metadatos de una tabla, preservando los posibles datos
         que pueda contener.
@@ -699,7 +709,7 @@ class FLManager(QtCore.QObject):
         @param key Clave sha1 de la vieja estructura
         @return TRUE si la modificación tuvo éxito
         """
-        return self.db_.alterTable(mtd1, mtd2, key)
+        return self.db_.alterTable(mtd1, mtd2, key, force)
 
     def createTable(self, n_or_tmd):
         """
