@@ -354,7 +354,8 @@ def main():
         if not os.path.isfile(prjpath):
             logger.warning("el proyecto %s no existe." % options.project)
         else:
-            project.load(prjpath)
+            if not project.load(prjpath):
+                return
     elif options.connection:
         user, passwd, driver_alias, host, port, dbname = translate_connstring(
             options.connection)
