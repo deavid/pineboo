@@ -155,11 +155,13 @@ class Project(object):
         
         version = root.get("Version")
         if version is None:
-            version = "1.0"
-
+            version = 1.0
+        else:
+            version = float(version)
+            
         for profile in root.findall("profile-data"):
             invalid_password = False
-            if version == "1.0":
+            if version == 1.0:
                 if getattr(profile.find("password"), "text", None) is not None:
                     invalid_password = True
             else:

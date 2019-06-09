@@ -150,7 +150,9 @@ class DlgConnect(QtWidgets.QWidget):
         
         version = root.get("Version")
         if version is None:
-            version = "1.0"
+            version = 1.0
+        else:
+            version = float(version)
         
         last_profile = self.ui.cbProfiles.currentText()
         if last_profile not in (None, ""):
@@ -161,7 +163,7 @@ class DlgConnect(QtWidgets.QWidget):
             if getattr(profile.find("password"), "text", None):
                 psP = profile.find("password").text
                 invalid_password = False
-                if version == "1.0":
+                if version == 1.0:
                     psP = base64.b64decode(psP).decode()
                     if psP:
                         if self.ui.lePassword.text() != psP:
@@ -310,12 +312,13 @@ class DlgConnect(QtWidgets.QWidget):
         
         version = root.get("Version")
         if version is None:
-            version = "1.0"
-        
+            version = 1.0
+        else:
+            version = float(version)
         
         self.ui.leProfilePassword.setText("")
         
-        if version == "1.0":
+        if version == 1.0:
             self.ui.cbAutoLogin.setChecked(True)  
             for profile in root.findall("profile-data"):
                 if getattr(profile.find("password"), "text", None):
@@ -338,7 +341,7 @@ class DlgConnect(QtWidgets.QWidget):
         for credentials in root.findall("database-credentials"):
             if credentials.find("username").text is not None:
                 self.ui.leDBUser.setText(credentials.find("username").text)
-            if credentials.find("password").text is not None and version == "1.0":
+            if credentials.find("password").text is not None and version == 1.0:
                 self.ui.leDBPassword.setText(base64.b64decode(credentials.find("password").text).decode())
                 self.ui.leDBPassword2.setText(base64.b64decode(credentials.find("password").text).decode())    
         
