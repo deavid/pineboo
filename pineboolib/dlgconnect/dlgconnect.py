@@ -12,6 +12,7 @@ import sys
 import traceback
 import logging
 import base64
+import hashlib
 from xml.etree import ElementTree as ET
 
 
@@ -146,6 +147,11 @@ class DlgConnect(QtWidgets.QWidget):
         fileName = os.path.join(self.profile_dir, "%s.xml" % self.ui.cbProfiles.currentText())
         tree = ET.parse(fileName)
         root = tree.getroot()
+        
+        version = root.get("Version")
+        if version is None:
+            version = "1.0"
+        
         last_profile = self.ui.cbProfiles.currentText()
         if last_profile not in (None, ""):
             settings = FLSettings()
@@ -154,11 +160,25 @@ class DlgConnect(QtWidgets.QWidget):
         for profile in root.findall("profile-data"):
             if getattr(profile.find("password"), "text", None):
                 psP = profile.find("password").text
-                psP = base64.b64decode(psP).decode()
-                if psP:
-                    if self.ui.lePassword.text() != psP:
-                        QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
-                        return
+                invalid_password = False
+                if version == "1.0":
+                    psP = base64.b64decode(psP).decode()
+                    if psP:
+                        if self.ui.lePassword.text() != psP:
+                            invalid_password = True
+                            
+                else:
+                    user_pass = self.ui.lePassword.text()
+                    if not user_pass:
+                        user_pass = ""
+                    user_pass = hashlib.sha256(user_pass.encode()).hexdigest()
+                    if psP != user_pass:
+                        invalid_password = True
+                
+                if invalid_password:
+                    QMessageBox.information(self.ui, "Pineboo", "Contraseña Incorrecta")
+                    return
+                    
 
         self.database = root.find("database-name").text
         for db in root.findall("database-server"):
@@ -189,6 +209,7 @@ class DlgConnect(QtWidgets.QWidget):
         Guarda la conexión
         """
         profile = ET.Element("Profile")
+        profile.set('Version','1.1')
         description = self.ui.leDescription.text()
         
         if description is "":
@@ -216,10 +237,18 @@ class DlgConnect(QtWidgets.QWidget):
             self.ui.leDBPassword2.setText("")
             return
 
-        passwDB = self.ui.leDBPassword.text()  # Base 64?
+        passwDB = self.ui.leDBPassword.text() 
         nameDB = self.ui.leDBName.text()
-        passProfile = self.ui.leProfilePassword.text()  # base 64?
-        autoLogin = self.ui.cbAutoLogin.isChecked()
+        
+        auto_login = self.ui.cbAutoLogin.isChecked()
+        pass_profile = ""
+        if not auto_login:
+           pass_profile = self.ui.leProfilePassword.text()
+           
+        pass_profile = hashlib.sha256(pass_profile.encode())
+        profile_user = ET.SubElement(profile, "profile-data")
+        profile_password = ET.SubElement(profile_user, "password")
+        profile_password.text = pass_profile.hexdigest()
 
         name = ET.SubElement(profile, "name")
         name.text = description
@@ -238,10 +267,6 @@ class DlgConnect(QtWidgets.QWidget):
         dbcpasswd.text = base64.b64encode(passwDB.encode()).decode()
         dbname = ET.SubElement(profile, "database-name")
         dbname.text = nameDB
-        profile_user = ET.SubElement(profile, "profile-data")
-        if not autoLogin:
-            profile_password = ET.SubElement(profile_user, "password")
-            profile_password.text = base64.b64encode(passProfile.encode()).decode()
 
         indent(profile)
 
@@ -283,16 +308,26 @@ class DlgConnect(QtWidgets.QWidget):
         tree = ET.parse(file_name)
         root = tree.getroot()
         
-        self.ui.cbAutoLogin.setChecked(True)
-        for profile in root.findall("profile-data"):
-            if getattr(profile.find("password"), "text", None):
-                psP = profile.find("password").text
-                psP = base64.b64decode(psP).decode()
-                if psP is not None:
-                    self.ui.leProfilePassword.setText(psP)
-                    self.ui.cbAutoLogin.setChecked(False)
-                    
+        version = root.get("Version")
+        if version is None:
+            version = "1.0"
         
+        
+        self.ui.leProfilePassword.setText("")
+        
+        if version == "1.0":
+            self.ui.cbAutoLogin.setChecked(True)  
+            for profile in root.findall("profile-data"):
+                if getattr(profile.find("password"), "text", None):
+                    psP = profile.find("password").text
+                    psP = base64.b64decode(psP).decode()
+                    if psP is not None:
+                        self.ui.leProfilePassword.setText(psP)
+                        self.ui.cbAutoLogin.setChecked(False)
+        else:
+             QMessageBox.information(self.ui,"Pineboo", "Tiene que volver a escribir las contraseñas\ndel perfil antes de guardar.",QtWidgets.QMessageBox.Ok)           
+             self.ui.cbAutoLogin.setChecked(False)
+             
         self.ui.leDescription.setText(self.ui.cbProfiles.currentText())
         self.ui.leDBName.setText(root.find("database-name").text)
         root.find("database-name").text
@@ -303,7 +338,7 @@ class DlgConnect(QtWidgets.QWidget):
         for credentials in root.findall("database-credentials"):
             if credentials.find("username").text is not None:
                 self.ui.leDBUser.setText(credentials.find("username").text)
-            if credentials.find("password").text is not None:
+            if credentials.find("password").text is not None and version == "1.0":
                 self.ui.leDBPassword.setText(base64.b64decode(credentials.find("password").text).decode())
                 self.ui.leDBPassword2.setText(base64.b64decode(credentials.find("password").text).decode())    
         

@@ -148,14 +148,29 @@ class Project(object):
     
     def load(self, file_name):
         from xml.etree import ElementTree as ET
+        import hashlib
+        
         tree = ET.parse(file_name)
         root = tree.getroot()
         
-        
+        version = root.get("Version")
+        if version is None:
+            version = "1.0"
 
         for profile in root.findall("profile-data"):
-            if getattr(profile.find("password"), "text", None) is not None:
+            invalid_password = False
+            if version == "1.0":
+                if getattr(profile.find("password"), "text", None) is not None:
+                    invalid_password = True
+            else:
+                profile_pwd = getattr(profile.find("password"), "text", None)
+                user_pwd = hashlib.sha256("".encode()).hexdigest()
+                if profile_pwd != user_pwd:
+                    invalid_password = True
+            
+            if invalid_password:
                 self.logger.warning("No se puede cargar un profile con contraseña por consola")
+                return False
 
         self.dbname = root.find("database-name").text
         for db in root.findall("database-server"):
@@ -166,7 +181,8 @@ class Project(object):
             if self.dbserver.type not in self.sql_drivers_manager.aliasList():
                 self.logger.warning("Esta versión de pineboo no soporta el driver '%s'" % self.dbserver.type)
                 self.database = None
-                return
+                return False
+            
         for credentials in root.findall("database-credentials"):
             self.dbauth = DBAuth()
             self.dbauth.username = credentials.find("username").text
@@ -176,6 +192,8 @@ class Project(object):
                 self.dbauth.password = base64.b64decode(ps).decode()
             else:
                 self.dbauth.password = ""
+        
+        return True
 
     """
     Arranca el projecto. Conecta a la BD y carga los datos
