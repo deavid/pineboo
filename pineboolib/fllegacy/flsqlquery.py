@@ -72,7 +72,10 @@ class FLSqlQuery(object):
         sql = sql.replace(";", "")
         # micursor=self.__damecursor()
         conn = self.__dameConn()
+        sql = conn.driver().fix_query(sql)
         micursor = conn.cursor()
+        
+        
         try:
             micursor.execute(sql)
             self._cursor = micursor
@@ -104,12 +107,9 @@ class FLSqlQuery(object):
     def __dameConn(self):
         from pineboolib.pnconnection import PNConnection
         if getattr(self.d, "db_", None):
-            if isinstance(self.d.db_, PNConnection):
-                conn = self.d.db_.conn
-            else:
-                conn = self.d.db_
+            conn = self.d.db_
         else:
-            conn = pineboolib.project.conn.conn
+            conn = pineboolib.project.conn
         return conn
 
     def __cargarDatos(self):
