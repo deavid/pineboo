@@ -650,6 +650,9 @@ class kut2fpdf(object):
             #return
             txt = ""
         
+        if W == 0 and H == 0:
+            return
+        
         txt = self._parser_tools.restore_text(txt)
         
         resizeable = False
