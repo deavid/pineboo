@@ -308,6 +308,11 @@ class FLSQLITE(object):
 
     def inTransaction(self):
         return self.conn_.in_transaction
+    
+    
+    def fix_query(self, query):
+        return query
+    
 
     def execute_query(self, q):
         if not self.isOpen():
@@ -315,6 +320,7 @@ class FLSQLITE(object):
 
         cursor = self.cursor()
         try:
+            q = self.fix_query(q)
             cursor.execute(q)
         except Exception:
             self.logger.error("SQL3Driver:: No se pudo ejecutar la query %s", q)

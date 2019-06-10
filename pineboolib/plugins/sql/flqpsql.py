@@ -1364,6 +1364,9 @@ class FLQPSQL(object):
 
     def canDetectLocks(self):
         return True
+    
+    def fix_query(self, query):
+        return query
 
     def desktopFile(self):
         return False
@@ -1376,6 +1379,7 @@ class FLQPSQL(object):
 
         cursor = self.conn_.cursor()
         try:
+            q = self.fix_query(q)
             cursor.execute(q)
         except Exception:
             self.setLastError("No se puedo ejecutar la siguiente query", q)
