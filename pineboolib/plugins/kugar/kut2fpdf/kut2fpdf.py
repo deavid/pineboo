@@ -721,8 +721,8 @@ class kut2fpdf(object):
                 font_found = self._parser_tools.find_font(font_full_name, font_style)            
             if font_found:
                 if self.design_mode:
-                    self.logger.warning("KUT2FPDF::Añadiendo el tipo de letra %s (%s)", font_full_name, font_found)
-                self._document.add_font(font_full_name, "", font_found, True)
+                    self.logger.warning("KUT2FPDF::Añadiendo el tipo de letra %s %s (%s)", font_name, font_style, font_found)
+                self._document.add_font(font_name, font_style, font_found, True)
                 self._avalible_fonts.append(font_full_name)
 
             else:
@@ -735,7 +735,6 @@ class kut2fpdf(object):
         if font_name is not font_name_orig and font_name_orig.lower().find("narrow") > -1:
             font_w = 85
                     
-        
         self._document.set_font(font_name, font_style, font_size)
         self._document.set_stretching(font_w)
         # Corregir alineación
