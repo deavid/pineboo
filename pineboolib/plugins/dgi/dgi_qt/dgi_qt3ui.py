@@ -47,8 +47,8 @@ def loadUi(form_path, widget, parent=None):
     if parent is None:
         parent = widget
 
-    if pineboolib.project._DGI.localDesktop():
-        widget.hide()
+    #if pineboolib.project._DGI.localDesktop():
+    widget.hide()
 
     for xmlimage in root.findall("images//image"):
         loadIcon(xmlimage)
@@ -75,6 +75,8 @@ def loadUi(form_path, widget, parent=None):
         signal_name = xmlconnection.find("signal").text
         receiv_name = xmlconnection.find("receiver").text
         slot_name = xmlconnection.find("slot").text
+        
+        
 
         receiver = None
         if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
@@ -84,7 +86,7 @@ def loadUi(form_path, widget, parent=None):
         if sender_name == formname:
             sender = widget
         else:
-            sender = widget.findChild(QObject, sender_name)
+            sender = widget.findChild(QObject, sender_name, QtCore.Qt.FindChildrenRecursively)
             
 
         #if not pineboolib.project._DGI.localDesktop():
@@ -101,7 +103,8 @@ def loadUi(form_path, widget, parent=None):
         if slot_name.find("(") > -1:
             sl_name = slot_name[:slot_name.find("(")]
 
-        
+        from pineboolib import pncontrolsfactory
+                
         if sender is None:
             logger.warning("Connection sender not found:%s", sender_name)
         if receiv_name == formname:
@@ -114,7 +117,7 @@ def loadUi(form_path, widget, parent=None):
             #    ifx = widget.iface
             if hasattr(ifx, fn_name):
                 try:
-                    from pineboolib import pncontrolsfactory
+                    
                     # getattr(sender, sg_name).connect(
                     #    getattr(ifx, fn_name))
                     pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
@@ -123,12 +126,8 @@ def loadUi(form_path, widget, parent=None):
                 continue
 
         if receiver is None:
-            receiver = widget.findChild(QtWidgets.QWidget, receiv_name, QtCore.Qt.FindChildrenRecursively)
+            receiver = widget.findChild(QObject, receiv_name, QtCore.Qt.FindChildrenRecursively)
 
-        #if not pineboolib.project._DGI.localDesktop():
-        #    wui = hasattr(widget, "ui_") and receiv_name in widget.ui_
-        #    if receiver is None and wui:
-        #        receiver = widget.ui_[receiv_name]
         if receiver is None:
             logger.warning("Connection receiver not found:%s", receiv_name)
         if sender is None or receiver is None:
