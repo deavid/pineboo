@@ -587,7 +587,7 @@ class PNConnection(QtCore.QObject):
         if not self.db():
             return None
 
-        self.driver().execute_query(q)
+        return self.driver().execute_query(q)
     
     def alterTable(self, mtd_1, mtd_2, key, force = False):
         if not self.db():

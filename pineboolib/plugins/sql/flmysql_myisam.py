@@ -1340,11 +1340,9 @@ class FLMYSQL_MYISAM(object):
         
         try:
             q = self.fix_query(q)
-            
-            
-            
             cursor.execute(q)
         except Exception as exc:           
             self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
             logger.warning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s", q, traceback.format_exc())
-            sys.exit(32)
+        
+        return cursor

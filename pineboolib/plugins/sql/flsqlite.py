@@ -319,6 +319,8 @@ class FLSQLITE(object):
         except Exception:
             self.logger.error("SQL3Driver:: No se pudo ejecutar la query %s", q)
             self.setLastError("%s::No se pudo ejecutar la query.\n%s" % ( __name__, q), q)
+        
+        return cursor
 
     def rollbackTransaction(self):
         if not self.isOpen():
