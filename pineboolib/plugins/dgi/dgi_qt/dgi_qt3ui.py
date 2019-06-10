@@ -414,20 +414,18 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 #if pineboolib.project._DGI.localDesktop():
                 #    new_widget.show()
                 if mode == "box":
-                    if pineboolib.project._DGI.localDesktop():
-                        try:
-                            widget.layout.addWidget(new_widget)
-                        except Exception:
-                            logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                    try:
+                        widget.layout.addWidget(new_widget)
+                    except Exception:
+                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
                             
                 elif mode == "grid":
-                    if pineboolib.project._DGI.localDesktop():
-                        rowSpan = c.get("rowspan") or 1
-                        colSpan = c.get("colspan") or 1
-                        try:
-                            widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
-                        except Exception:
-                            logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
+                    rowSpan = c.get("rowspan") or 1
+                    colSpan = c.get("colspan") or 1
+                    try:
+                        widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
+                    except Exception:
+                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget, stack_info= True)
                             
             elif c.tag == "spacer":
                 sH = None
@@ -489,6 +487,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
     layouts_pending_process = []
     properties = []
     unbold_fonts = []
+    has_layout_defined = False
 
     for c in xml:
         if c.tag == "layout":
@@ -503,6 +502,10 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
 
         if c.tag in ("vbox", "hbox", "grid"):
+            if has_layout_defined: #nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
+                #El primer layout que se define es el que se respeta
+                continue
+            
             from pineboolib.fllegacy.flsettings import FLSettings
             settings = FLSettings()
             if c.tag.find("box") > -1:
@@ -545,6 +548,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             lay_type = "grid" if c.tag == "grid" else "box"
             
             layouts_pending_process += [(c, lay_type)]
+            has_layout_defined = True
             continue
 
         if c.tag == "item":
