@@ -344,11 +344,10 @@ class parsertools(object):
     
     def calculate_sum(self, field_name, line, xml_list, level):
         val = 0
-        i = 0
         for l in xml_list:
             if int(l.get("level")) <= int(level):
+                val = 0
                 continue
-            i += 1
             val += float(l.get(field_name))
             if l is line:
                 break
