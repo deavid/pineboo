@@ -477,7 +477,7 @@ class FLMYSQL_MYISAM(object):
         ret_ = ret_.replace("'false'", "0")
         ret_ = ret_.replace("\'0\'", "0")
         ret_ = ret_.replace("\'1\'", "1")
-        ret_ = ret_.replace(";", "")
+        #ret_ = ret_.replace(";", "")
         return ret_
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):

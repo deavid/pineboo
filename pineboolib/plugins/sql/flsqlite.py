@@ -311,8 +311,8 @@ class FLSQLITE(object):
     
     
     def fix_query(self, query):
-        ret_ = query.replace(";", "")
-        return ret_
+        #ret_ = query.replace(";", "")
+        return query
     
 
     def execute_query(self, q):
