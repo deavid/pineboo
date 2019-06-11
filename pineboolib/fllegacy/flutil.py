@@ -1293,8 +1293,8 @@ class FLUtil(QtCore.QObject):
             cur.execute(sql)
             conn_.conn.commit()
             return True
-        except Exception:
-            logger.exception("execSql: Error al ejecutar la SQL: %s", sql)
+        except Exception as exc:
+            logger.exception("execSql: Error al ejecutar la consulta SQL: %s %s", sql, exc)
             return False
 
     @decorators.NotImplementedWarn
