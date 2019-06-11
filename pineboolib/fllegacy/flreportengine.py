@@ -72,12 +72,10 @@ class FLReportEngine(object):
             
 
             for i in range(lev, levelMax):
-                print(i)
                 self.addRowToReportData(i)
                 vA[i] = str(self.qry_.value(self.qGroupDict_[i]))
 
             self.addRowToReportData(levelMax)
-            pineboolib.project.show_time("Fin groupBy")
 
         def setQuery(self, qry):
             self.qry_ = qry
@@ -156,7 +154,6 @@ class FLReportEngine(object):
                 
                 ok = True
                 while ok:
-                    pineboolib.project.init_time()
                     self.d_.groupBy(len(g), vA)
                     if not q.next():
                         ok = False
