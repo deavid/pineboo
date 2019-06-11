@@ -343,25 +343,24 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
-        dia_ = None
-        mes_ = None
-        ano_ = None
-
         if not f:
             return None
 
         f = str(f)
-
         if f.find("T") > -1:
             f = f[:f.find("T")]
-
-        array_ = f.split("-")
-        if len(array_) == 3:
-            dia_ = array_[0]
-            mes_ = array_[1]
-            ano_ = array_[2]
-        else:
+        
+        array_ = []
+        dia_ = None
+        mes_ = None
+        ano_ = None
+        
+        if f.find("-") > -1:
+            array_ = f.split("-")
+        elif f.find("/") > -1:
             array_ = f.split("/")
+            
+        if array_:
             if len(array_) == 3:
                 dia_ = array_[0]
                 mes_ = array_[1]
@@ -371,8 +370,7 @@ class FLUtil(QtCore.QObject):
                 mes_ = f[2:2]
                 ano_ = f[4:4]
 
-        retorno = "%s-%s-%s" % (ano_, mes_, dia_)
-        return retorno
+        return "%s-%s-%s" % (ano_, mes_, dia_)
 
     def dateAMDtoDMA(self, f):
         """
@@ -382,16 +380,23 @@ class FLUtil(QtCore.QObject):
         @param  f Cadena de texto con la fecha a transformar
         @return Cadena de texto con la fecha transformada
         """
+        if not f:
+            return None
+        
+        f = str(f)
+        if f.find("T") > -1:
+            f = f[:f.find("T")]
+        
+        array_ = []
         dia_ = None
         mes_ = None
         ano_ = None
-        array_ = str(f).split("-")
-        if len(array_) == 3:
-            ano_ = array_[0]
-            mes_ = array_[1]
-            dia_ = array_[2]
-        else:
+        if f.find("-") > -1:
+            array_ = f.split("-")
+        elif f.find("/") > -1:
             array_ = f.split("/")
+        
+        if array_:
             if len(array_) == 3:
                 ano_ = array_[0]
                 mes_ = array_[1]
@@ -401,8 +406,7 @@ class FLUtil(QtCore.QObject):
                 mes_ = f[4:2]
                 dia_ = f[6:2]
 
-        retorno = "%s-%s-%s" % (dia_, mes_, ano_)
-        return retorno
+        return "%s-%s-%s" % (dia_, mes_, ano_)
 
     @decorators.BetaImplementation
     def formatoMiles(self, s):
