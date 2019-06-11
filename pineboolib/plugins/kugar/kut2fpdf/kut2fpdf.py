@@ -95,7 +95,7 @@ class kut2fpdf(object):
         # self._page_size =
         if report is None:
             from fpdf import FPDF
-            self._actual_append_page_no = -1
+            self._actual_append_page_no = 0
             self._document = FPDF(self._page_orientation, "pt", self._page_size)
             for f in self._document.core_fonts:
                 self.logger.debug("KUT2FPDF :: Adding font %s", f)
@@ -563,7 +563,7 @@ class kut2fpdf(object):
                 try:
                     nodo = self._parser_tools.convertToNode(data_row)
                     from pineboolib.pncontrolsfactory import aqApp
-                    ret_ = aqApp.call(function_name, [nodo, field_name])
+                    ret_ = aqApp.call(function_name, [nodo, field_name],None, False)
                     if ret_ is False:
                         return
                     else:
