@@ -415,8 +415,7 @@ class FLMYSQL_MYISAM2(object):
                 cursor.execute("ROLLBACK")
             except Exception:
                 self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-                qWarning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s" % (
-                    self.name_, traceback.format_exc()))
+                logger.warning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s", self.name_, traceback.format_exc())
                 return False
         else:
             qWarning("%s:: No se pudo deshacer la transacción ROLLBACK\n %s" % (self.name_, traceback.format_exc()))
@@ -482,6 +481,7 @@ class FLMYSQL_MYISAM2(object):
         ret_ = ret_.replace("'false'", "0")
         ret_ = ret_.replace("\'0\'", "0")
         ret_ = ret_.replace("\'1\'", "1")
+        ret_ = ret_.replace(";", "")
         return ret_
 
     def refreshFetch(self, number, curname, table, cursor, fields, where_filter):
@@ -1349,8 +1349,9 @@ class FLMYSQL_MYISAM2(object):
         try:
             q = self.fix_query(q)
             cursor.execute(q)
-        except Exception as exc:           
+        except Exception as exc:         
             self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
             logger.warning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s", q, traceback.format_exc())
+            sys.exit(32)
         
         return cursor

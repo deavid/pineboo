@@ -1366,6 +1366,7 @@ class FLQPSQL(object):
         return True
     
     def fix_query(self, query):
+        ret_ = query.replace(";", "")
         return query
 
     def desktopFile(self):
