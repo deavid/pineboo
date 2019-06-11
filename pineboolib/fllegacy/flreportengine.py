@@ -38,55 +38,46 @@ class FLReportEngine(object):
         def addRowToReportData(self, l):
             if not self.qry_.isValid():
                 return
-            row = QtXml.QDomElement(self.q_.rptXmlData().createElement("Row"))
+            
+            row = self.q_.rptXmlData().createElement("Row")
             row.setAttribute("level", l)
-
-            imgFieldsBack = []
             i = 0
             for it in self.qFieldList_:
-                strVal = str(self.qry_.value(i, False))
-                if self.qImgFields_ and self.qImgFields_[len(self.qImgFields_) - 1] == i:
-                    imgFieldsBack.append(self.qImgFields_.pop())
-                    if strVal in ["", "None"]:
-                        row.setAttribute(it, strVal)
-                        continue
+                strVal = str(self.qry_.value(it, False))
+                if self.qImgFields_:
+                    if self.qImgFields_[-1] == i:
+                        self.qImgFields_.append(self.qImgFields_.pop())
+                        if strVal in ["", "None"]:
+                            row.setAttribute(it, strVal)
+                            continue
 
-                    #from pineboolib.plugins.kugar.parsertools import parsertools
-                    #parser = parsertools()
                     key = self.qry_.value(i, False)
-                    #imgFile = parser.parseKey(key)
-                    #from pineboolib.pncontrolsfactory import aqApp
-                    #imgFile = filedir("../tempdata/cache/%s/cacheXPM" % aqApp.db().DBName())
-                    #imgFile += "/%s.png" % strVal
-                    # if not os.path.exists(imgFile):
-                    #print("Creando", imgFile)
-                    #print(self.qry_.value(i, True))
-                    #    pix = QtGui.QPixmap(self.qry_.value(i, True))
-                    #    if not pix.save(imgFile):
-                    #        print("FLReportEngine::No se ha podido guardar", imgFile)
                     row.setAttribute(it, key)
+                    
                 else:
                     row.setAttribute(it, strVal)
                 i += 1
 
             self.rows_.appendChild(row)
-            self.qImgFields_ = imgFieldsBack
 
         def groupBy(self, levelMax, vA):
             if not self.qry_.isValid():
                 return
 
-            g = self.qGroupDict_
+            self.qGroupDict_
             lev = 0
             
-            while lev < levelMax and str(self.qry_.value(g[lev])) == str(vA[lev]):
+            while lev < levelMax and str(self.qry_.value(self.qGroupDict_[lev])) == str(vA[lev]):
                 lev += 1
+            
 
             for i in range(lev, levelMax):
+                print(i)
                 self.addRowToReportData(i)
-                vA[i] = str(self.qry_.value(g[i]))
+                vA[i] = str(self.qry_.value(self.qGroupDict_[i]))
 
             self.addRowToReportData(levelMax)
+            pineboolib.project.show_time("Fin groupBy")
 
         def setQuery(self, qry):
             self.qry_ = qry
@@ -162,10 +153,14 @@ class FLReportEngine(object):
                 vA = []
                 for i in range(10):
                     vA.append(None)
-                while True:
+                
+                ok = True
+                while ok:
+                    pineboolib.project.init_time()
                     self.d_.groupBy(len(g), vA)
                     if not q.next():
-                        break
+                        ok = False
+
 
         data = QtXml.QDomElement(tmpDoc.createElement("KugarData"))
         data.appendChild(self.d_.rows_)
@@ -198,8 +193,7 @@ class FLReportEngine(object):
         self.rt = mgr.contentCached("%s.kut" % t)
 
         if not self.rt:
-            self.logger.error(
-                "FLReportEngine::No se ha podido cargar %s.kut", t)
+            self.logger.error("FLReportEngine::No se ha podido cargar %s.kut", t)
             return False
 
         return True
