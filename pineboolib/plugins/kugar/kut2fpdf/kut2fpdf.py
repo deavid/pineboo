@@ -307,7 +307,8 @@ class kut2fpdf(object):
             
             
             if dF.get("Level") == str(data_level) and show not in ("None", "False"):
-                    
+                
+                 
                 if section_name in ("DetailHeader","Detail"):
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
                     
@@ -317,30 +318,34 @@ class kut2fpdf(object):
                                 heightCalculated += self._parser_tools.getHeight(detail)
                             
                     for dFooter in self._xml.findall("DetailFooter"):
-                        if dFooter.get("Level") == str(data_level):
+                        if dFooter.get("Level") == data_level:
                             heightCalculated += self._parser_tools.getHeight(dFooter)
                     
-                    #for addFooter in self._xml.findall("AddOnFooter"):
-                    #    if addFooter.get("Level") == str(data_level):
-                    #        heightCalculated += self._parser_tools.getHeight(addFooter)
+                    aof_size = 0
+                    for addFooter in self._xml.findall("AddOnFooter"):
+                        #if addFooter.get("Level") == str(data_level):
+                        aof_size += self._parser_tools.getHeight(addFooter)
+                        heightCalculated += self._parser_tools.getHeight(addFooter)
                     
                     pageFooter = self._xml.get("PageFooter")
                     if pageFooter:
                         if self._document.page_no() == 1 or pageFooter.get("PrintFrecuency") == "1":
                             heightCalculated += self._parser_tools.getHeight(pageFooter)
-
+                    
+                        
+                    
                     heightCalculated += self._bottom_margin
-                    if heightCalculated > self._document.h:  # Si nos pasamos
+                    if (heightCalculated + aof_size) > self._document.h:  # Si nos pasamos
                         self._no_print_footer = True
                         #Vemos el tope por abajo 
-                        limit_bottom = self._document.h - self._parser_tools.getHeight(self._xml.get("AddOnFooter"))
+                        limit_bottom = self._document.h - aof_size
                         actual_size = self._parser_tools.getHeight(dF) + self.topSection()
                         
                         
                         
-
-                        if (actual_size > limit_bottom + 2) or self.last_detail: # +2 se usa de margen extra
+                        if (actual_size >= limit_bottom -2) or self.last_detail: # +2 se usa de margen extra
                             self.processSection("AddOnFooter", str(data_level))
+                        
                             self.newPage(data_level)
 
                     
