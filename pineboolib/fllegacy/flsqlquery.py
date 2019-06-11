@@ -20,8 +20,9 @@ class FLSqlQuery(object):
     countRefQuery = 0
     invalidTables = False
     fields_cache = None
+    _is_active = False
 
-    def __init__(self, cx=None, connection_name=None):
+    def __init__(self, cx=None, connection_name="default"):
         # super(FLSqlQuery, self).__init__()
 
         self.d = FLSqlQueryPrivate(cx)
@@ -36,6 +37,7 @@ class FLSqlQuery(object):
         self.d.select_ = None
         self.d.fieldList_ = []
         self.fields_cache = {}
+        self._is_active = False
         #self.d.fieldMetaDataList_ = {}
 
         retornoQry = None
@@ -68,55 +70,24 @@ class FLSqlQuery(object):
             sql = self.sql()
         if not sql:
             return False
-
-        sql = sql.replace(";", "")
-        # micursor=self.__damecursor()
-        conn = self.__dameConn()
-        sql = conn.driver().fix_query(sql)
-        micursor = conn.cursor()
         
+        sql = self.db().driver().fix_query(sql)
+
         
         try:
-            micursor.execute(sql)
-            self._cursor = micursor
+
+            self._cursor = self.db().cursor()
+            self._cursor.execute(sql)
+
             self._posicion = None
-        except Exception:
-            logger.warning("Error en consulta:\n %s", sql, stack_info=True)
+            self._is_active = True
+        except Exception as exc:
+            logger.warning("Error en consulta:%s\n %s", exc, sql, stack_info=True)
             return False
         # conn.commit()
 
         return True
 
-    # exec = exec_  # FIXME: En python no se puede llamar una variable "exec".
-
-    """
-    def exec_(self, sql=None, conn=None):
-        if conn:
-            self.d.db_ = conn
-        return self.exec(sql)
-    """
-
-    @classmethod
-    def __damecursor(self):
-        if getattr(self.d, "db_", None):
-            cursor = self.d.db_.cursor()
-        else:
-            cursor = pineboolib.project.conn.cursor()
-        return cursor
-
-    def __dameConn(self):
-        from pineboolib.pnconnection import PNConnection
-        if getattr(self.d, "db_", None):
-            conn = self.d.db_
-        else:
-            conn = pineboolib.project.conn
-        return conn
-
-    def __cargarDatos(self):
-        if self._datos:
-            pass
-        else:
-            self._datos = self._cursor.fetchall()
 
     """
     Añade la descripción parámetro al diccionario de parámetros.
@@ -429,9 +400,51 @@ class FLSqlQuery(object):
 
     Está pensado sólo para tareas de depuración
     """
-    @decorators.NotImplementedWarn
     def showDebug(self):
-        pass
+        if not self.isActive():
+            logger.warning("DEBUG : La consulta no está activa : No se ha ejecutado exec() o la sentencia SQL no es válida")
+        
+        logger.warning("DEBUG : Nombre de la consulta : %s", self.d.name_)
+        logger.warning("DEBUG : Niveles de agrupamiento :")
+        if self.d.groupDict_:
+            for lev in self.d.groupDict_:
+                logger.warning("**Nivel : %s", lev.level())
+                logger.warning("**Campo : %s", lev.field())
+        else:
+            logger.warning("**No hay niveles de agrupamiento")
+        
+        logger.warning("DEBUG : Parámetros : ")
+        if self.d.parameterDict_:
+            if par in self.d.parameterDict_:
+                logger.warning("**Nombre : %s", par.name())
+                logger.warning("Alias : %s", par.alias())
+                logger.warning("Tipo : %s", par.type())
+                logger.warning("Valor : %s", par.value())
+        else:
+            logger.warning("**No hay parametros")
+        
+        logger.warning("DEBUG : Sentencia SQL")
+        logger.warning("%s", self.sql())
+        if not self.d.fieldList_:
+            logger.warning("DEBUG ERROR : No hay campos en la consulta")
+            return
+        
+        logger.warning("DEBUG: Campos de la consulta : ")
+        for f in self.d.fieldList_:
+            logger.warning("**%s", f)
+            
+        
+        logger.warning("DEBUG : Contenido de la consulta : ")
+        
+        linea = ""
+        
+        while next():
+            for it in self.d.fieldList_:
+                linea += "__%s" % self.value(it)
+        
+        logger.warning(linea)
+                
+        
 
     """
     Obtiene el valor de un campo de la consulta.
@@ -651,7 +664,8 @@ class FLSqlQuery(object):
     """
 
     def size(self):
-        self.__cargarDatos()
+        if not self._datos:
+            self._datos = self._cursor.fetchall()
         if self._datos:
             return len(self._datos)
         else:
@@ -703,9 +717,8 @@ class FLSqlQuery(object):
     def isValid(self):
         return True
 
-    @decorators.NotImplementedWarn
     def isActive(self):
-        pass
+        return self._is_active
 
     @decorators.NotImplementedWarn
     def at(self):
