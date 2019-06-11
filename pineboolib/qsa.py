@@ -490,6 +490,8 @@ class Date(object):
         """
         if yyyy is not None:
             self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (yyyy, self.date_.toString("MM"), self.date_.toString("dd")), "yyyy-MM-dd")
+        
+        return self
 
     def getMonth(self):
         """
@@ -508,6 +510,8 @@ class Date(object):
             if len(str(mm)) == 1:
                 mm = "0%s" % mm
             self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), mm, self.date_.toString("dd")), "yyyy-MM-dd")
+        
+        return self
     
 
     def getDay(self):
@@ -527,6 +531,8 @@ class Date(object):
                 dd = "0%s" % dd
                 
             self.date_ = QtCore.QDate.fromString("%s-%s-%s" % (self.date_.toString("yyyy"), self.date_.toString("mm"), dd), "yyyy-MM-dd")
+        
+        return self
     
 
     def getHours(self):
@@ -569,7 +575,9 @@ class Date(object):
             day_ = "0" + day_
          
         str_ = "%s-%s-%s" % (year_, month_, day_)
-        self.date_ = QtCore.QDate.fromString(str_, "yyyy-MM-dd") 
+        self.date_ = QtCore.QDate.fromString(str_, "yyyy-MM-dd")
+        
+        return self
     
     def addDays(self, d):
         """
