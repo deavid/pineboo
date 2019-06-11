@@ -4,6 +4,7 @@ import traceback
 import datetime
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -459,37 +460,32 @@ class FLSqlQuery(object):
              en vez de contenido al que apunta esa referencia
     """
 
-    def value(self, n, raw=None):
+    def value(self, n, raw=False):
+        
         pos = None
         name = None
         table_name = None
         field_name = None
         field = None
         mtd_field = None
+        retorno = None
         
 
-        if isinstance(n, str):
-            #n = n.replace(" ", "")
-            pos = self.fieldNameToPos(n)
-            name = n
-        else:
-            pos = n
-            name = self.posToFieldName(pos)
-        
+        pos = self.fieldNameToPos(n) if isinstance(n, str) else n
+        name = self.posToFieldName(pos)
         
         if name not in self.fields_cache.keys():
-        
+            
             if name:
-                if name.find(".") > -1 and name[0:name.find(".")] is self.tablesList():
+                tables_list = self.tablesList()
+                if name.find(".") > -1 and name[0:name.find(".")] in tables_list:
                     table_name = name[0:name.find(".")]
                     field_name = name[name.find(".") + 1:]
                 else:
-                    tables_list = self.tablesList()
                     if not tables_list and self.from_():
                         tl = self.from_().replace(" ", "")
                         tables_list = tl.split(",")
-                    
-                
+                        
                     for t in tables_list:
                         mtd = self.d.db_.manager().metadata(t, True) if t.find("=") == -1 else None
                         name_fixed = name
@@ -504,63 +500,58 @@ class FLSqlQuery(object):
                             break
                 
                 if field_name is not None:
-                    self.fields_cache[name] = self.d.db_.manager().metadata(table_name, False).field(field_name)
+                    mtd_field = self.d.db_.manager().metadata(table_name, False).field(field_name)
+                    self.fields_cache[name] = mtd_field
         
-        if name in self.fields_cache.keys():
+        else:
             mtd_field = self.fields_cache[name]
         
-        if raw is None and mtd_field:
-            raw  = (mtd_field.type() is "pixmap") and not self.d.db_.manager().isSystemTable(mtd_field.metadata().name())
-                        
-        if raw:
-            return self.d.db_.manager().fetchLargeValue(self._row[pos])
-        else:
-            from pineboolib.qsa import Date
+          
             
+        try:
+            retorno = self._row[pos]
+        except Exception:
+            pass
             
-            try:
-                retorno = self._row[pos]
-            except Exception:
-                retorno = None
-            
-            if retorno is None and mtd_field is not None and mtd_field.type() in ("double", "uint", "int"):
-                retorno = 0
-                
-            
-            
+        if retorno is None:
             if mtd_field is not None:
-                #field = self.d.db_.manager().metadata(table_name, True).field(field_name)
-                if mtd_field.type() == "date" and isinstance(retorno, str):
-                    retorno = Date(retorno)
-                
-            
-            """ TIME """
-            if isinstance(retorno, datetime.time):
-                retorno = str(retorno)[:8]
-            elif isinstance(retorno , datetime.timedelta):
-                retorno = str(retorno)
-            
-            elif isinstance(retorno, str) and retorno is not None and retorno.find(":") < retorno.find(".") and retorno.find(":") > -1:
-                retorno = retorno[:retorno.find(".")]
-                """ / TIME """
-                
-            elif isinstance(retorno, datetime.date):
-                retorno = Date(str(retorno))
-                
-            elif retorno is not None and not isinstance(retorno, (str, int, bool, float, Date)):
-                retorno = float(retorno)
-            
+                #retorno = self.db().formatValue(mtd_field.type(), None, False)
+                if mtd_field.type() in ("double", "uint", "int"):
+                    retorno = 0
+                elif mtd_field.type() == "string":
+                    retorno = ""
+        else:
 
-            if isinstance(retorno, float):
+            if isinstance(retorno, str):  #str
+                if mtd_field is not None:
+                    if mtd_field.type() == "date":
+                        retorno = pineboolib.qsa.Date(retorno)
+                    
+                    elif mtd_field.type() == "pixmap":
+                        if not raw:              
+                            if not self.d.db_.manager().isSystemTable(mtd_field.metadata().name()):
+                                raw = True
+                        if raw:
+                            retorno =  self.d.db_.manager().fetchLargeValue(retorno)
+                    
+                elif retorno.find(":") > -1:
+                    if retorno.find(":") < retorno.find("."):
+                        retorno = retorno[:retorno.find(".")]
+                            
+                
+            elif isinstance(retorno, datetime.date): #date
+                retorno = pineboolib.qsa.Date(str(retorno))
+                
+            elif isinstance(retorno, float): #float
                 if retorno == int(retorno):
                     retorno = int(retorno)
-            
-            if mtd_field is not None and retorno is None:
-                if mtd_field.type() == "string":
-                    retorno = ""
-            
-            
-            
+                
+            elif isinstance(retorno, (datetime.time, datetime.timedelta)): #time
+                retorno = str(retorno)[:8]
+                
+            elif not isinstance(retorno, (str, int, bool, float, pineboolib.qsa.Date)):
+                retorno = float(retorno)
+
             return retorno
 
     """
@@ -590,10 +581,15 @@ class FLSqlQuery(object):
     """
 
     def posToFieldName(self, p):
-        if p < 0 or p >= len(self.d.fieldList_):
-            return None
-
-        return self.d.fieldList_[p]
+        #if p < 0 or p >= len(self.d.fieldList_):
+        #    return None
+        ret_ = None
+        try:
+            ret_ = self.d.fieldList_[p]
+        except Exception:
+            pass
+        
+        return ret_
 
     """
     Devuelve la posición de una campo en la consulta, dado su nombre.
@@ -603,13 +599,15 @@ class FLSqlQuery(object):
     """
 
     def fieldNameToPos(self, n):
-        i = 0
-        for field in self.d.fieldList_:
-            if field.lower() == n.lower():
-                return i
-            i = i + 1
-
-        return False
+        #i = 0
+        #for field in self.d.fieldList_:
+        #    if field.lower() == n.lower():
+        #        return i
+        #    i = i + 1
+        if n in self.d.fieldList_:
+            return self.d.fieldList_.index(n)
+        else:
+            return False
 
     """
     Para obtener la lista de nombres de las tablas de la consulta.
@@ -713,9 +711,8 @@ class FLSqlQuery(object):
 
     _posicion = None
 
-    @decorators.NotImplementedWarn
     def isValid(self):
-        return True
+        return False if self.invalidTablesList else True
 
     def isActive(self):
         return self._is_active
