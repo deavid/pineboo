@@ -662,12 +662,7 @@ class FLSqlQuery(object):
     """
 
     def size(self):
-        if not self._datos:
-            self._datos = self._cursor.fetchall()
-        if self._datos:
-            return len(self._datos)
-        else:
-            return 0
+        return self._cursor.rowcount if self._cursor else 0
 
     """
     Para obtener la lista de definiciones de campos de la consulta
