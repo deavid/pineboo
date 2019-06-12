@@ -12,6 +12,7 @@ import pineboolib
 from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent, QRect, QObject
 
 
+
 logger = logging.getLogger("FLApplication")
 
 
@@ -495,6 +496,7 @@ class FLApplication(QtCore.QObject):
 
     def initToolBox(self):
         from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS, QSize
+        from PyQt5.QtWidgets import QToolButton
         
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
         self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
@@ -520,7 +522,6 @@ class FLApplication(QtCore.QObject):
             new_area_bar.setOrientation(QtCore.Qt.Vertical)
             new_area_bar.layout().setSpacing(3)
             self.tool_box_.addItem(new_area_bar, self.tr(descript_area))
-            
             ag = QActionGroup(new_area_bar)
             ag.setObjectName(descript_area)
             #ac = QAction(ag)
@@ -581,7 +582,17 @@ class FLApplication(QtCore.QObject):
                 new_module_action.triggered.connect(self.activateModule)
                 ag.addAction(new_module_action)
                 c += 1
-                
+            
+            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            
+            lay = new_area_bar.layout()
+            for child in new_area_bar.children():
+                if isinstance(child, QToolButton):
+                    child.setMinimumWidth(self.container_.width())
+                    lay.setAlignment(child, QtCore.Qt.AlignCenter)
+
+            
+            
             
             a_menu = self.modules_menu.addMenu(descript_area)
             for a in ag.actions():
@@ -657,7 +668,11 @@ class FLApplication(QtCore.QObject):
         about_qt_action.triggered.connect(self.aboutQt)
         ag.addAction(about_qt_action)
         
-        
+        lay = config_tool_bar.layout()
+        for child in config_tool_bar.children():
+            if isinstance(child, QToolButton):
+                    child.setMinimumWidth(self.container_.width())
+                    lay.setAlignment(child, QtCore.Qt.AlignCenter)
         
         
             
