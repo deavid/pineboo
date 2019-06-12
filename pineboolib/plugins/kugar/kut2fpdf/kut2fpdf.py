@@ -228,13 +228,13 @@ class kut2fpdf(object):
         pg_headers = self._xml.findall("PageHeader")
         
         for ph in pg_headers:
-            if self.number_pages() == 0 or ph.get("PrintFrequency") == "1":
+            if self.number_pages() == 1 or ph.get("PrintFrequency") == "1":
                 ph_level = ph.get("Level") if ph.get("Level") is not None else None
                 self.processSection("PageHeader", ph_level)
                 break
         
         
-        if add_on_header and not self.number_pages() == 0:
+        if add_on_header and not self.number_pages() == 1:
             for l in range(data_level + 1):
                 self.processSection("AddOnHeader", str(l))
             
@@ -739,7 +739,7 @@ class kut2fpdf(object):
         
 
         if font_full_name not in self._avalible_fonts:
-            font_foud = False
+            font_found = False
             if font_full_name not in self._unavalible_fonts:
                 font_found = self._parser_tools.find_font(font_full_name, font_style)            
             if font_found:
