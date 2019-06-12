@@ -139,7 +139,6 @@ class FLReportEngine(object):
         self.d_.setQuery(q)
         q.setForwardOnly(True)
         if q.exec_() and q.next():
-            size_ = q.size()
             g = self.d_.qGroupDict_
             if not g:
                 while True:
