@@ -167,11 +167,11 @@ class QTable(QtWidgets.QTableWidget):
         
         new_item = self.item(row, col)
         
-        #if new_item:
-        if row in self.read_only_rows or col in self.read_only_cols:
-            new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
-        else:
-            new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
+        if new_item is not None:
+            if row in self.read_only_rows or col in self.read_only_cols:
+                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+            else:
+                new_item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable)
 
 
     def adjustColumn(self, k):
