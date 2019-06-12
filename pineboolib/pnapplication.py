@@ -271,15 +271,11 @@ class Project(object):
         #icono = clearXPM(icono)
 
         self.modules["sys"] = Module("sys", "sys", "Administración", icono)
-
-        # Descargar proyecto . . .
-
-        cursor_.execute(""" SELECT COUNT(idmodulo) FROM flfiles WHERE NOT sha = ''""")
-        for count in cursor_:
-            size_ = count[0]
         
         cursor_.execute(
             """ SELECT idmodulo, nombre, sha FROM flfiles WHERE NOT sha = '' ORDER BY idmodulo, nombre """)
+        
+        size_ = cursor_.rowcount
         
         f1 = open(_dir("project.txt"), "w")
         self.files = {}
