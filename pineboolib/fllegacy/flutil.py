@@ -1085,8 +1085,10 @@ class FLUtil(QtCore.QObject):
         if self.__class__.progress_dialog_stack:
             parent = self.__class__.progress_dialog_stack[-1]
         pd_widget = QProgressDialog(str(title), str(self.translate("scripts", "Cancelar")), 0, steps, parent)
+        pd_widget.setObjectName(id_)
+        pd_widget.setWindowTitle(str(title))
         self.__class__.progress_dialog_stack.append(pd_widget)
-        pd_widget.setMinimumDuration(300)
+        pd_widget.setMinimumDuration(0)
         SysType().processEvents()
         return pd_widget
 
@@ -1097,6 +1099,14 @@ class FLUtil(QtCore.QObject):
         from pineboolib.pncontrolsfactory import SysType
         
         pd_widget = self.__class__.progress_dialog_stack[-1]
+        
+        if id_ != "default":
+            for w in self.__class__.progress_dialog_stack:
+                if w.objectName() == id_:
+                    pd_widget = w
+                    break
+        
+        
         pd_widget.close()
         self.__class__.progress_dialog_stack.remove(pd_widget)
         #pd_widget.hide()
@@ -1112,6 +1122,14 @@ class FLUtil(QtCore.QObject):
         from pineboolib.pncontrolsfactory import SysType
         
         pd_widget = self.__class__.progress_dialog_stack[-1]
+        
+        if id_ != "default":
+            for w in self.__class__.progress_dialog_stack:
+                if w.objectName() == id_:
+                    pd_widget = w
+                    break
+        
+        
         pd_widget.setValue(step_number)
         SysType().processEvents()
 
@@ -1124,6 +1142,13 @@ class FLUtil(QtCore.QObject):
         from pineboolib.pncontrolsfactory import SysType
         
         pd_widget = self.__class__.progress_dialog_stack[-1]
+        
+        if id_ != "default":
+            for w in self.__class__.progress_dialog_stack:
+                if w.objectName() == id_:
+                    pd_widget = w
+                    break
+        
         pd_widget.setLabelText(str(l))
         SysType().processEvents()
 
@@ -1136,6 +1161,14 @@ class FLUtil(QtCore.QObject):
         from pineboolib.pncontrolsfactory import SysType
         
         pd_widget = self.__class__.progress_dialog_stack[-1]
+        
+        if id_ != "default":
+            for w in self.__class__.progress_dialog_stack:
+                if w.objectName() == id_:
+                    pd_widget = w
+                    break
+        
+        
         pd_widget.setRange(0, tS)
         SysType().processEvents()
 
