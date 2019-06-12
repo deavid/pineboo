@@ -26,7 +26,7 @@ class QPushButton(QtWidgets.QPushButton):
 
     @property
     def enabled(self):
-        return self.getEnabled()
+        return not self.isDisabled()
 
     @enabled.setter
     def enabled(self, s):
