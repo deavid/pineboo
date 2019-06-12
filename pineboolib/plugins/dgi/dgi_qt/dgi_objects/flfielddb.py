@@ -1726,7 +1726,7 @@ class FLFieldDB(QtWidgets.QWidget):
         hasPushButtonDB = False
         self.fieldAlias_ = field.alias()
 
-        self.textLabelDB.setFont(QtWidgets.QApplication.font())
+        self.textLabelDB.setFont(self.font())
         if not type_ == "pixmap" and not type_ == "bool":
             if not field.allowNull() and field.editable():
                 self.textLabelDB.setText("%s*" % self.fieldAlias_)
@@ -1764,7 +1764,7 @@ class FLFieldDB(QtWidgets.QWidget):
                 self.editor_.setSizePolicy(
                     QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
                 self.editor_.setMinimumSize(self.iconSize)
-                self.editor_.setFont(QtWidgets.QApplication.font())
+                self.editor_.setFont(self.font())
                 # if not self.cursor_.modeAccess() == FLSqlCursor.Browse:
                 # if not field.allowNull():
                 # self.editor_.palette().setColor(self.editor_.backgroundRole(), self.notNullColor())
@@ -1791,7 +1791,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
             else:
                 self.editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self, "editor")
-                self.editor_.setFont(QtWidgets.QApplication.font())
+                self.editor_.setFont(self.font())
                 self.editor_.setMinimumSize(self.iconSize)
                 self.editor_.setMaximumHeight(self.iconSize.height())
                 self.editor_._tipo = type_
@@ -1886,7 +1886,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "serial":
             self.editor_ = pineboolib.pncontrolsfactory.FLLineEdit(self, "editor")
-            self.editor_.setFont(QtWidgets.QApplication.font())
+            self.editor_.setFont(self.font())
             self.editor_.setMaxValue(pow(10, field.partInteger()) - 1)
             sizePolicy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Policy(7), QtWidgets.QSizePolicy.Policy(0))
@@ -2035,7 +2035,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "date":
             self.editor_ = pineboolib.pncontrolsfactory.FLDateEdit(self, "editor")
-            self.editor_.setFont(QtWidgets.QApplication.font())
+            self.editor_.setFont(self.font())
             sizePolicy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
             sizePolicy.setHeightForWidth(True)
@@ -2088,7 +2088,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         elif type_ == "time":
             self.editor_ = pineboolib.pncontrolsfactory.FLTimeEdit(self)
-            self.editor_.setFont(QtWidgets.QApplication.font())
+            self.editor_.setFont(self.font())
             # self.editor_.setAutoAdvance(True)
             sizePolicy = QtWidgets.QSizePolicy(
                 QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
@@ -2115,7 +2115,7 @@ class FLFieldDB(QtWidgets.QWidget):
         elif type_ == "stringlist":
 
             self.editor_ = pineboolib.pncontrolsfactory.QTextEdit(self)
-            self.editor_.setFont(QtWidgets.QApplication.font())
+            self.editor_.setFont(self.font())
             self.editor_.setTabChangesFocus(True)
             self.editor_.setMinimumHeight(100)
             self.editor_.setMaximumHeight(120)
@@ -2163,7 +2163,7 @@ class FLFieldDB(QtWidgets.QWidget):
             self.editor_ = pineboolib.pncontrolsfactory.QCheckBox(self)
             # self.editor_.setName("editor")
             self.editor_.setText(tMD.fieldNameToAlias(self.fieldName_))
-            self.editor_.setFont(QtWidgets.QApplication.font())
+            self.editor_.setFont(self.font())
             self.editor_.installEventFilter(self)
 
             self.editor_.setMinimumWidth(self.fontMetrics().width(
@@ -3176,3 +3176,8 @@ class FLFieldDB(QtWidgets.QWidget):
         if self.notNullColor_ is None:
             self.notNullColor_ = QtGui.QColor(255, 233, 173).name()
         return self.notNullColor_
+    
+    
+        
+        
+        
