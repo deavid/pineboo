@@ -2,6 +2,7 @@
 from pineboolib.utils import checkDependencies, filedir, load2xml
 import pineboolib
 from pineboolib.fllegacy.flsettings import FLSettings
+from pineboolib.fllegacy.flutil import FLUtil
 from xml import etree
 import logging
 import datetime
@@ -64,7 +65,7 @@ class kut2fpdf(object):
         self.draws_at_header = {}
         self.detailn = {}
         self.name_ = None
-        self._actual_append_page_no = 0
+        self._actual_append_page_no = -1
         self.reset_page_count = False
         self.new_page = False
     """
@@ -88,6 +89,11 @@ class kut2fpdf(object):
         except Exception:
             self.logger.exception("KUT2FPDF: Problema al procesar xml_data")
             return False
+        
+        util = FLUtil()
+        if pineboolib.project._DGI.localDesktop():
+            util.createProgressDialog("Pineboo", len(self._xml_data))
+            util.setLabelText("Creando informe ...")
 
         self.name_ = name
         self.setPageFormat(self._xml)
@@ -247,6 +253,8 @@ class kut2fpdf(object):
         first_page_created = keep_page if keep_page is not None and self._document.page_no() > 0 else False
         
         rows_array = self._xml_data.findall("Row")
+        i = 0
+        util = FLUtil()
         for data in rows_array:
             self._actual_data_line = data
             level = int(data.get("level"))
@@ -283,10 +291,17 @@ class kut2fpdf(object):
             
                 
             self.prev_level = level
+            
+            if pineboolib.project._DGI.localDesktop():
+                util.setProgress(i)
+            i += 1
+            
         if not self._no_print_footer:
            for l in reversed(range(top_level + 1)):
                self.processData("DetailFooter", data, l)
-
+        
+        if pineboolib.project._DGI.localDesktop():
+            util.destroyProgressDialog()
     """
     Paso intermedio que calcula si detailHeader + detail + detailFooter entran en el resto de la ṕagina. Si no es así crea nueva página.
     @param section_name. Nombre de la sección a procesar.
