@@ -131,16 +131,20 @@ class FLReportEngine(object):
             return self.setFLReportData(q)
         if q is None:
             return
+        
+        util = FLUtil()
+        #if not self.rd:
+            #self.rd = QtXml.QDomDocument("KugarData")
+        
+        self.rd = QtXml.QDomDocument("KugarData")
 
-        if not self.rd:
-            self.rd = QtXml.QDomDocument("KugarData")
+        #tmpDoc = QtXml.QDomDocument("KugarData")
 
-        tmpDoc = QtXml.QDomDocument("KugarData")
-
-        self.d_.rows_ = tmpDoc.createDocumentFragment()
+        self.d_.rows_ = self.rd.createDocumentFragment()
         self.d_.setQuery(q)
         q.setForwardOnly(True)
         if q.exec_() and q.next():
+            size_ = q.size()
             g = self.d_.qGroupDict_
             if not g:
                 while True:
@@ -157,12 +161,16 @@ class FLReportEngine(object):
                     self.d_.groupBy(len(g), vA)
                     if not q.next():
                         ok = False
+                        
+            
+            
+            
 
-
-        data = QtXml.QDomElement(tmpDoc.createElement("KugarData"))
+        data = self.rd.createElement("KugarData")
         data.appendChild(self.d_.rows_)
-        tmpDoc.appendChild(data)
-        self.rd = tmpDoc
+        #tmpDoc.appendChild(data)
+        #self.rd = tmpDoc
+        self.rd.appendChild(data)
         self.d_.rows_.clear()
 
         self.initData()
