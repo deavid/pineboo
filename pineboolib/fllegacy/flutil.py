@@ -1329,7 +1329,7 @@ class FLUtil(QtCore.QObject):
         cur = conn_.cursor()
         try:
             logger.warning("execSql: Ejecutando la consulta : %s", sql)
-            sql = conn_.db().driver().fix_query(sql)
+            #sql = conn_.db().driver().fix_query(sql)
             cur.execute(sql)
             conn_.conn.commit()
             return True

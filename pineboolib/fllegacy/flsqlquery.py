@@ -97,7 +97,7 @@ class FLSqlQuery(object):
     """
 
     def addParameter(self, p=None):
-        if p is not None:
+        if p:
             self.d.parameterDict_[p.name()] = p
 
     """
@@ -106,11 +106,11 @@ class FLSqlQuery(object):
     @param g Objeto FLGroupByQuery con la descripción del grupo a añadir
     """
 
-    def addGroup(self, g):
-        if not self.d.groupDict_:
-            self.d.groupDict_ = {}
-
+    def addGroup(self, g=None):
         if g:
+            if not self.d.groupDict_:
+                self.d.groupDict_ = {}
+
             self.d.groupDict_[g.level()] = g.field()
 
     """

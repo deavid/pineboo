@@ -236,7 +236,7 @@ class FLManagerModules(object):
             if str_ret:
                 return str_ret
 
-        if n in self.filesCached_.items():
+        if n in self.filesCached_.keys():
             return self.filesCached_[n]
 
         data = None
@@ -542,10 +542,9 @@ class FLManagerModules(object):
     """
 
     def shaOfFile(self, n):
-        if pineboolib.project.conn.dbAux() and not n[:3] == "sys" and not pineboolib.project.conn.manager().isSystemTable(n):
-            formatVal = pineboolib.project.conn.manager(
-            ).formatAssignValue("nombre", "string", n, True)
-            q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
+        if self.conn_.dbAux() and not n[:3] == "sys" and not self.conn_.manager().isSystemTable(n):
+            formatVal = self.conn_.manager().formatAssignValue("nombre", "string", n, True)
+            q = FLSqlQuery(None, self.conn_.dbAux())
             # q.setForwardOnly(True)
             q.exec_("SELECT sha FROM flfiles WHERE %s" % formatVal)
             if q.next():
@@ -563,7 +562,7 @@ class FLManagerModules(object):
 
         self.dictKeyFiles = {}
         self.dictModFiles = {}
-        q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
+        q = FLSqlQuery(None, self.conn_.dbAux())
         # q.setForwardOnly(True)
         q.exec_("SELECT nombre, sha, idmodulo FROM flfiles")
         name = None
@@ -577,14 +576,14 @@ class FLManagerModules(object):
     """
 
     def loadAllIdModules(self):
-        if not pineboolib.project.conn.dbAux():
+        if not self.conn_.dbAux():
             return
 
         self.listAllIdModules_ = []
         self.listAllIdModules_.append("sys")
         self.dictInfoMods = {}
 
-        q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
+        q = FLSqlQuery(None, self.conn_.dbAux())
         q.setTablesList("flmodules,flareas")
         q.setSelect("idmodulo,flmodules.idarea,flmodules.descripcion,version,icono,flareas.descripcion")
         q.setFrom("flmodules left join flareas on flmodules.idarea = flareas.idarea")
@@ -626,11 +625,11 @@ class FLManagerModules(object):
     """
 
     def loadIdAreas(self):
-        if not pineboolib.project.conn.dbAux():
+        if not self.conn_.dbAux():
             return
 
         self.listIdAreas_ = []
-        q = FLSqlQuery(None, pineboolib.project.conn.dbAux())
+        q = FLSqlQuery(None, self.conn_.dbAux())
         # q.setForwardOnly(True)
         q.exec_("SELECT idarea from flareas WHERE idarea <> 'sys'")
         while q.next():

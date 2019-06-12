@@ -211,6 +211,8 @@ class Project(object):
         if self.conn.conn is False:
             return False
 
+        from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
+        from pineboolib.pncontrolsfactory import load_models, aqApp
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal
 
@@ -386,7 +388,7 @@ class Project(object):
             self._splash.showMessage("Cargando objetos ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             self._DGI.processEvents()
         
-        from pineboolib.pncontrolsfactory import load_models
+        
         load_models()
         
         
@@ -394,11 +396,9 @@ class Project(object):
             self._splash.showMessage("Cargando traducciones ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             self._DGI.processEvents()
 
-       
-        from pineboolib.pncontrolsfactory import aqApp
         
         aqApp.loadTranslations()
-        from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
+       
         self.acl_ = FLAccessControlLists()
         self.acl_.init_()
         

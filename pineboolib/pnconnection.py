@@ -265,7 +265,7 @@ class PNConnection(QtCore.QObject):
 
             self.transaction_ = self.transaction_ + 1
             if cursor.d.transactionsOpened_:
-                cursor.d.transactionsOpened_.index(0, self.transaction_)  # push
+                cursor.d.transactionsOpened_.insert(0, self.transaction_)  # push
             else:
                 cursor.d.transactionsOpened_.append(self.transaction_)
             return True
@@ -549,10 +549,10 @@ class PNConnection(QtCore.QObject):
         if self.transaction_ == 0:
             self.transaction()
             self.transaction_ += 1
-        q = self.cursor()
+        
         for singleSql in sql.split(";"):
             try:
-                q.execute(singleSql)
+                self.driver().execute_query(singleSql)
             except Exception as e:
                 logger.exception(
                     "createTable: Error happened executing sql: %s...", singleSql[:80])
