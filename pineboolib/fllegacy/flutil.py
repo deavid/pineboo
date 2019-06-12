@@ -1088,7 +1088,7 @@ class FLUtil(QtCore.QObject):
         pd_widget.setObjectName(id_)
         pd_widget.setWindowTitle(str(title))
         self.__class__.progress_dialog_stack.append(pd_widget)
-        pd_widget.setMinimumDuration(0)
+        pd_widget.setMinimumDuration(100)
         SysType().processEvents()
         return pd_widget
 
