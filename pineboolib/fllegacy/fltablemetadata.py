@@ -147,10 +147,8 @@ class FLTableMetaData(object):
     """
 
     def isQuery(self):
-        if self.d.query_:
-            return True
-        else:
-            return False
+        return True if self.d.query_ else False
+
 
     """
     Añade la descripción de un campo a lista de descripciones de campos.
@@ -309,18 +307,12 @@ class FLTableMetaData(object):
     @param fN Nombre del campo
     """
 
-    def fieldIsIndex(self, fN):
-        if not fN:
-            return None
-
-        i = 0
-
-        for field_name in self.fieldsNames():
-            if field_name == str(fN).lower():
-                return i
-
-            i = i + 1
-
+    def fieldIsIndex(self, field_name = None):
+        
+        if field_name in self.fieldsNames():
+            return self.fieldsNames().index(field_name)
+        
+        self.logger.warning("FLTableMetaData.fieldIsIndex(%s) No encontrado", field_name)
         return None
 
     """
@@ -602,15 +594,9 @@ class FLTableMetaData(object):
     #    #print("FiledList count", len(self.d.fieldList_))
     #    return self.d.fieldList_
 
-    def indexPos(self, field_name):
-        i = 0
-        for field in self.d.fieldList_:
-            if field.name() == field_name:
-                return i
-            i = i + 1
+    def indexPos(self, field_name = None):
+       return self.fieldIsIndex(field_name)
 
-        self.logger.warning("FLTableMetaData.indexPos(%s) No encontrado", field_name)
-        return None
 
     """
     Obtiene la lista de campos de una clave compuesta, a partir del nombre de
@@ -713,7 +699,7 @@ class FLTableMetaData(object):
             i += 1
 
         if ret is None and show_exception:
-            self.logger.warning("FLTableMetadata(%s).indexField() Posicion %s no encontrado", self.name(), position)
+            self.logger.warning("FLTableMetadata(%s).indexFieldObject() Posicion %s no encontrado", self.name(), position)
         return ret
 
 
