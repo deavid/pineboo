@@ -1226,7 +1226,10 @@ class FLApplication(QtCore.QObject):
 
             self.checkAndFixTransactionLevel("Application::aqAppIdle()")
             
-
+    
+    def DGI(self):
+        return pineboolib.project._DGI
+    
 
     def startTimerIdle(self):
         if not self.timer_idle_:
