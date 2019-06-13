@@ -1332,28 +1332,27 @@ class FLSqlCursor(QtCore.QObject):
 
         else:
             v = self.buffer().value(fN)
-        
-        if type_ in ("date") and v:
-            from pineboolib.qsa import Date
-            v = Date(v)
-        # Por compatibilidad con Eneboo no devolvemos None nunca
-        if type_ in ("string", "stringlist", "date") and v is None:
-            v = ""
-        elif type_ in ("double", "int", "uint") and v is None:
-            v = 0
-        
-        
             
+        if v:
+            if type_ in ("date"):
+                from pineboolib.qsa import Date
+                v = Date(v)
+            elif type_ == "pixmap":
+                v_large = None
+                if not self.db().manager().isSystemTable(self.table()):
+                    v_large = self.db().manager().fetchLargeValue(v)
+                else:
+                    v_large = v
 
-        if v and type_ == "pixmap":
-            v_large = None
-            if not self.db().manager().isSystemTable(self.table()):
-                v_large = self.db().manager().fetchLargeValue(v)
-            else:
-                v_large = self.db().normalizeValue(v)
-
-            if v_large:
-                v = v_large
+                if v_large:
+                    v = v_large
+        else:
+            if type_ in ("string", "stringlist", "date"):
+                v = ""
+            elif type_ in ("double", "int", "uint"):
+                v = 0
+            
+            
         
 
         return v
@@ -1378,20 +1377,19 @@ class FLSqlCursor(QtCore.QObject):
             return None
 
         type_ = field.type()
+        v = None
         if self.bufferCopy().isNull(fN):
-            if type_ == "double" or type_ == "int" or type_ == "uint":
-                return 0
+            if type_ in ("double","int","uint"):
+                v = 0
             elif type_ == "string":
-                return ""
+                v = ""
+        else:
+            v = self.bufferCopy().value(fN)
 
-        v = self.bufferCopy().value(fN)
-
-        # v.cast(fltype)
-
-        if v and type_ == "pixmap":
-            vl = self.db().manager().fetchLargeValue(v)
-            if vl.isValid():
-                return vl
+            if type_ == "pixmap":
+                vl = self.db().manager().fetchLargeValue(v)
+                if vl.isValid():
+                    return vl
 
         return v
 
@@ -1541,7 +1539,7 @@ class FLSqlCursor(QtCore.QObject):
     """
 
     def fieldDisabled(self, fN):
-        if self.modeAccess() == self.Insert or self.modeAccess() == self.Edit:
+        if self.modeAccess() in (self.Insert, self.Edit):
             if self.cursorRelation() and self.relation():
                 if not self.cursorRelation().metadata():
                     return False
