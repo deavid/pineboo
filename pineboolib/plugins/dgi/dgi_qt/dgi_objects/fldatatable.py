@@ -182,7 +182,7 @@ class FLDataTable(QtWidgets.QTableView):
 
                 self.setModel(self.cursor_.model())
                 self.setSelectionModel(self.cursor_.selection())
-                self.model().sort(self.header().logicalIndex(0), 0)
+                #self.model().sort(self.header().logicalIndex(0), 0)
                 self.installEventFilter(self)
                 self.model().set_parent_view(self)
             # if self.cursor_.at() >= 0:
