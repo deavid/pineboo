@@ -472,7 +472,7 @@ Guarda la geometría de una ventana
 
 def saveGeometryForm(name, geo):
     from pineboolib.pncontrolsfactory import aqApp
-    name = "%s/geo/%s" % (aqApp.db().DBName(), name)
+    name = "geo/%s/%s" % (aqApp.db().DBName(), name)
     FLSettings().writeEntry(name, geo)
 
 
@@ -485,7 +485,7 @@ Carga la geometría de una ventana
 
 def loadGeometryForm(name):
     from pineboolib.pncontrolsfactory import aqApp
-    name = "%s/geo/%s" % (aqApp.db().DBName(), name)
+    name = "geo/%s/%s" % (aqApp.db().DBName(), name)
     return FLSettings().readEntry(name, None)
 
 
