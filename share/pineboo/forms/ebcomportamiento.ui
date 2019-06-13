@@ -652,50 +652,84 @@
                                 <property name="name">
                                     <cstring>unnamed</cstring>
                                 </property>
-                                <widget class="QLayoutWidget">
+                                <widget class="QGroupBox">
                                     <property name="name">
-                                        <cstring>layout8_2</cstring>
+                                        <cstring>groupBox14</cstring>
                                     </property>
-                                    <hbox>
+                                    <property name="title">
+                                        <string>Ficheros</string>
+                                    </property>
+                                    <vbox>
                                         <property name="name">
-                                            <cstring>unnamed_2</cstring>
+                                            <cstring>unnamed</cstring>
                                         </property>
-                                        <widget class="QLabel">
+                                        <widget class="QLayoutWidget">
                                             <property name="name">
-                                                <cstring>textLabel1_6</cstring>
+                                                <cstring>layout8_2</cstring>
+                                            </property>
+                                            <hbox>
+                                                <property name="name">
+                                                    <cstring>unnamed_2</cstring>
+                                                </property>
+                                                <widget class="QLabel">
+                                                    <property name="name">
+                                                        <cstring>textLabel1_6</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Carpeta temporales:</string>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QLineEdit">
+                                                    <property name="name">
+                                                        <cstring>le_kut_temporales</cstring>
+                                                    </property>
+                                                    <property name="enabled">
+                                                        <bool>false</bool>
+                                                    </property>
+                                                </widget>
+                                                <widget class="QPushButton">
+                                                    <property name="name">
+                                                        <cstring>pbn_kut</cstring>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>Cam&amp;biar</string>
+                                                    </property>
+                                                    <property name="accel">
+                                                        <string>Alt+B</string>
+                                                    </property>
+                                                </widget>
+                                            </hbox>
+                                        </widget>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_no_borrar_cache</cstring>
                                             </property>
                                             <property name="text">
-                                                <string>Carpeta temporales:</string>
+                                                <string>No borrar cache común al iniciar</string>
                                             </property>
                                         </widget>
-                                        <widget class="QLineEdit">
-                                            <property name="name">
-                                                <cstring>le_kut_temporales</cstring>
-                                            </property>
-                                            <property name="enabled">
-                                                <bool>false</bool>
-                                            </property>
-                                        </widget>
-                                        <widget class="QPushButton">
-                                            <property name="name">
-                                                <cstring>pbn_kut</cstring>
-                                            </property>
-                                            <property name="text">
-                                                <string>Cam&amp;biar</string>
-                                            </property>
-                                            <property name="accel">
-                                                <string>Alt+B</string>
-                                            </property>
-                                        </widget>
-                                    </hbox>
+                                    </vbox>
                                 </widget>
-                                <widget class="QCheckBox">
+                                <widget class="QGroupBox">
                                     <property name="name">
-                                        <cstring>cb_no_borrar_cache</cstring>
+                                        <cstring>groupBox13</cstring>
                                     </property>
-                                    <property name="text">
-                                        <string>No borrar cache común al iniciar</string>
+                                    <property name="title">
+                                        <string>Imágenes</string>
                                     </property>
+                                    <vbox>
+                                        <property name="name">
+                                            <cstring>unnamed</cstring>
+                                        </property>
+                                        <widget class="QCheckBox">
+                                            <property name="name">
+                                                <cstring>cb_imagenes</cstring>
+                                            </property>
+                                            <property name="text">
+                                                <string>No cachear Imágenes</string>
+                                            </property>
+                                        </widget>
+                                    </vbox>
                                 </widget>
                                 <spacer>
                                     <property name="name">
@@ -710,7 +744,7 @@
                                     <property name="sizeHint">
                                         <size>
                                             <width>51</width>
-                                            <height>250</height>
+                                            <height>160</height>
                                         </size>
                                     </property>
                                 </spacer>

@@ -57,6 +57,7 @@ class FormInternalObj(FormDBWidget):
         w.child("cb_clean_no_python").checked = self.leerValorLocal("clean_no_python")
         w.child("cb_snapshot").checked = self.leerValorLocal("show_snaptshop_button")
         w.child("cb_mdi").checked = self.leerValorLocal("mdi_mode")
+        w.child("cb_imagenes").checked = self.leerValorLocal("no_img_cached")
         autoComp = self.leerValorLocal("autoComp")
         if not autoComp or autoComp == "OnDemandF4":
             autoComp = "Bajo Demanda (F4)"
@@ -177,6 +178,7 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("git_updates_repo", w.child("le_git_ruta").text)
         self.grabarValorLocal("show_snaptshop_button",w.child("cb_snapshot").checked)
         self.grabarValorLocal("mdi_mode",w.child("cb_mdi").checked)
+        self.grabarValorLocal("no_img_cached",w.child("cb_imagenes").checked)
         
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
