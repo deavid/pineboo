@@ -34,6 +34,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     USE_TIMER = False
     CURSOR_COUNT = itertools.count()
     rowsLoaded = 0
+    where_filter = None
     where_filters = {}
     _metadata = None
     _sortOrder = None
@@ -46,6 +47,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     need_update = False
     _driver_sql = None
     _size = None
+    sql_str = None
     """
     Constructor
     @param conn. Objeto PNConnection
@@ -103,10 +105,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.color_dict_ = {}
         self._size = None
 
+        self.where_filter = None
         self.where_filters = {}
         self.where_filters["main-filter"] = ""
         self.where_filters["filter"] = ""
-
+        self.sql_str = None
+        
         if self.USE_THREADS:
             self.fetchLock = threading.Lock()
             self.threadFetcher = threading.Thread(target=self.threadFetch)
@@ -451,6 +455,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def fetchMore(self, index, tablename=None, where_filter=None):
+        if not self.sql_str:
+            return
+        
         tiempo_inicial = time.time()
         # ROW_BATCH_COUNT = min(200 + self.rowsLoaded // 10, 1000)
         ROW_BATCH_COUNT = 1000
