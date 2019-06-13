@@ -2,6 +2,7 @@
 
 from PyQt5 import QtWidgets, QtCore, Qt
 from pineboolib import decorators
+from pineboolib.utils import format_double
 
 class QTable(QtWidgets.QTableWidget):
 
@@ -59,9 +60,9 @@ class QTable(QtWidgets.QTableWidget):
             return self.MultiSelection
         elif name == "SpreadSheet":
             return 999
-        
-        print("FIXME:QTable:", name)
-        return getattr(QtCore.Qt, name, None)
+        else:
+            print("FIXME:QTable:", name)
+            return getattr(QtCore.Qt, name, None)
     
     def valueChanged_(self, item = None):
         
@@ -96,7 +97,8 @@ class QTable(QtWidgets.QTableWidget):
     def setFocusStyle(self, m):
         if isinstance(m, int):
             return
-        self.setStyleSheet(m)
+        else:
+            self.setStyleSheet(m)
 
     def setColumnLabels(self, separador, lista):
         array_ = lista.split(separador)
@@ -145,7 +147,6 @@ class QTable(QtWidgets.QTableWidget):
         return self.item(row, col).text() if self.item(row, col) else None
 
     def setText(self, row, col, value):
-        from pineboolib.utils import format_double
         prev_item = self.item(row, col)
         if prev_item:
             bg_color = prev_item.background()
