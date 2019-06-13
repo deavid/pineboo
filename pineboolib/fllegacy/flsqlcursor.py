@@ -1220,6 +1220,8 @@ class FLSqlCursor(QtCore.QObject):
         if field is None:
             logger.warning("setValueBuffer(): No existe el campo %s:%s", self.curName(), fN)
             return
+        
+        type_ = field.type()
 
         if not self.buffer().hasChanged(fN, v):
             return
@@ -1235,7 +1237,7 @@ class FLSqlCursor(QtCore.QObject):
         #    logger.warning("FLSqlCursor::setValueBuffer() : No existe el campo %s:%s", self.metadata().name(), fN)
         #    return
 
-        type_ = field.type()
+        
         # fltype = field.flDecodeType(type_)
         vv = v
 
@@ -1340,10 +1342,13 @@ class FLSqlCursor(QtCore.QObject):
             elif type_ == "pixmap":
                 v_large = None
                 if not self.db().manager().isSystemTable(self.table()):
+                    
                     v_large = self.db().manager().fetchLargeValue(v)
+                    
                 else:
-                    v_large = v
-
+                    from pineboolib.utils import cacheXPM
+                    v_large = cacheXPM(v)
+                
                 if v_large:
                     v = v_large
         else:
