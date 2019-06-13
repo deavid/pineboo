@@ -2,7 +2,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QSpacerItem, QWidget, QVBoxLayout, QStyle, QFrame
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDateTime
 
 from pineboolib import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -588,7 +588,6 @@ class FLFieldDB(QtWidgets.QWidget):
         elif isinstance(self.editorImg_, pineboolib.pncontrolsfactory.FLPixmapView):
             if data == self.cursor_.valueBuffer(self.fieldName_):
                 return
-
             self.cursor_.setValueBuffer(self.fieldName_, data)
 
         """
@@ -2669,12 +2668,11 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if not buffer:
             return
-        s = None
 
         s = str(buffer.data(), "utf-8")
 
-        # if not QtGui.QPixmapCache.find(s.left(100)):
-        #    QtGui.QPixmapCache.insert(s.left(100), pix)
+        if s.find("*dummy") > -1:
+            s = s.replace("*dummy", "%s_%s_%s" % (self.cursor().metadata().name(), self.fieldName_, QDateTime().currentDateTime().toString("ddhhmmssz")))
         self.updateValue(s)
 
     """
