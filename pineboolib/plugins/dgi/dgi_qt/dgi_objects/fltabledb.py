@@ -2187,7 +2187,7 @@ class FLTableDB(QtWidgets.QWidget):
         if not hasattr(tdb, "cursor"):
             return
 
-        from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle
+        from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle, AQOdsImage
         hor_header = tdb.horizontalHeader()
         title_style = [AQOdsStyle.Align_center, AQOdsStyle.Text_bold]
         border_bot = AQOdsStyle.Border_bottom
@@ -2201,7 +2201,7 @@ class FLTableDB(QtWidgets.QWidget):
         tdb_num_cols = len(mtd.fieldsNames())
         
         util = FLUtil()
-
+        id_pix = 0
         pd = util.createProgressDialog("Procesando", tdb_num_rows)
         util.setProgress(1)
         row = AQOdsRow(sheet)
@@ -2256,32 +2256,34 @@ class FLTableDB(QtWidgets.QWidget):
                         str_ = self.tr("Sí") if val == True else self.tr("No")
                         row.opIn(italic)
                         row.opIn(str_)
-
-                    else:
-                        str_ = val
-                        if str_ is not None:
-                            cs = None
-                            if isinstance(str_, list):
-                                cs = ",".join(str_)
-                            elif str(str_).startswith("RK@"):
-                                cs = cursor.fetchLargeValue(str_)
-
-                            if cs is not None:
-                                pix = QPixmap(cs)
-
+                    
+                    elif field.type() == "pixmap":
+                        if val:
+                            if val.find("cacheXPM") > -1:
+                                pix = QPixmap(val)
                                 if not pix.isNull():
                                     
-                                    pix_name = "pix%s_" % pix.serialNumber()
-                                    pix_file_name = "%s/%s.png" % (aqApp.tmp_dir(), pix_name,
-                                                               QtCore.QDateTime.currentDateTime().toString("ddMMyyyyhhmmsszzz"))
-                                    pix.save(pix_file_name, "PNG")
-                                    #print("Metiendo imagen")
-                                    row.opIn(AQOdsImage(pix_name, double((pix.width() * 2.54) / 98) * 1000,
-                                                        double((pix.height() * 2.54) / 98) * 1000, 0, 0, pix_file_name))
+                                    pix_name = "pix%s_" % id_pix
+                                    id_pix += 1
+                                    row.opIn(AQOdsImage(pix_name, ((pix.width() * 2.54) / 98) * 1000,
+                                                        ((pix.height() * 2.54) / 98) * 1000, 0, 0, val))
                                 else:
                                     row.coveredCell()
+                        
+                            
                             else:
-                                row.opIn(str(str_))
+                                print("Pixmap inválido", val)
+                                row.coveredCell()  
+                        else:
+                            row.coveredCell()
+                        
+
+                    else:
+                        if isinstance(val, list):
+                            val = ",".join(val)
+                        
+                        if val:
+                            row.opIn(str(val))
                         else:
                             row.coveredCell()
             row.close()
