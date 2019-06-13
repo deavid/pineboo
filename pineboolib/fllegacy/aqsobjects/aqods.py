@@ -2,6 +2,8 @@
 from pineboolib import decorators
 import logging
 
+
+
 logger = logging.getLogger("AQOds")
 
 """
@@ -148,7 +150,6 @@ class AQOdsRow(object):
 
         else:
             import odf
-
             if isinstance(opt, odf.element.Element):
                 if opt.tagName in ("style:paragraph-properties", "style:table-cell-properties"):
                     import copy
@@ -163,6 +164,15 @@ class AQOdsRow(object):
             elif isinstance(opt, list):  # Si es lista , Insertamos todos los parámetros uno a uno
                 for l in opt:
                     self.opIn(l)
+                    
+            elif isinstance(opt, AQOdsImage):
+                href = self.sheet_.spread_sheet_parent_.addPictureFromFile(opt.link_)
+                cell, style = self.__newCell__()
+                #image = odf.draw.Image(href=href)
+                #self.coveredCell()
+                self.opIn(href)
+                print("FIXME:: Vacio", href)
+                
 
     """
     Nueva celda. Esta se crea al asignar el valor a la anterior
@@ -293,6 +303,21 @@ class AQOdsStyle_class(object):
     Border_right = property(borderRight, None)
     Border_left = property(borderLeft, None)
 
-
+class AQOdsImage(object):
+    name_ = None
+    width_ = None
+    height_ = None
+    x_ = None
+    y_ = None
+    link_ = None
+    def __init__(self, name, width, height, x, y, link):
+        self.name_ = name
+        self.width_ = width
+        self.height_ = height
+        self.x_ = x
+        self.Y_ = y
+        self.link_ = link
+    
+        
 AQOdsStyle = AQOdsStyle_class()
 AQOdsGenerator = AQOdsGenerator_class()
