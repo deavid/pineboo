@@ -1467,7 +1467,7 @@ class FLManager(QtCore.QObject):
         else:
             sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (
                 tableLarge, largeValue, refKey)
-            if not util.execSql(sql, "Aux"):
+            if not util.execSql(sql):
                 logger.warning("FLManager::ERROR:StoreLargeValue.Insert %s.%s", tableLarge, refKey)
                 return None
 
