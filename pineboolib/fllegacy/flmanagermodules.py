@@ -647,7 +647,7 @@ class FLManagerModules(object):
         if self.conn_.dbAux() is not None:
             idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
         
-        setting = FLSettings()
+        settings = FLSettings()
         settings.writeEntry("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
         settings.writeEntry("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)    
         settings.writeEntry("Modules/shaLocal/%s" % idDB, self.shaLocal_)      
