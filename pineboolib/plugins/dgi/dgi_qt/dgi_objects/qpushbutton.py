@@ -24,14 +24,6 @@ class QPushButton(QtWidgets.QPushButton):
     def pixmap(self):
         return self.icon()
 
-    @property
-    def enabled(self):
-        return not self.isDisabled()
-
-    @enabled.setter
-    def enabled(self, s):
-        return self.setEnabled(s)
-
     @pixmap.setter
     def pixmap(self, value):
         return self.setIcon(value)
