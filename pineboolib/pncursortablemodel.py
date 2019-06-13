@@ -340,26 +340,34 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                         pixmap = QtGui.QPixmap(filedir("../share/icons", "unlock.png"))
                     else:
                         pixmap = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
-
-                if _type == "pixmap" and self.parent_view:
-                    d = self.db().manager().fetchLargeValue(d)
-                    if d:
-                        pixmap = QtGui.QPixmap(d)
-                
-                elif _type == "unlock" or self.parent_view.showAllPixmap() or row == self.parent_view.cursor().at():
-                    if pixmap and not pixmap.isNull()and self.parent_view:
+                    
+                    if self.parent_view.showAllPixmap() or row == self.parent_view.cursor().at():
+                        if pixmap and not pixmap.isNull()and self.parent_view:
                         
-                        #print("Dibuja", self.headerData(col, QtCore.Qt.Horizontal, QtCore.Qt.DisplayRole))
-                        row_height = self.parent_view.rowHeight(row)  # Altura row
-                        row_width = self.parent_view.columnWidth(col)
-                        new_pixmap = QtGui.QPixmap(row_width, row_height)  # w , h
-                        center_width = (row_width - pixmap.width()) / 2
-                        center_height = (row_height - pixmap.height()) / 2
-                        new_pixmap.fill(QtCore.Qt.transparent)
-                        painter = Qt.QPainter(new_pixmap)
-                        painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
+                            row_height = self.parent_view.rowHeight(row)  # Altura row
+                            row_width = self.parent_view.columnWidth(col)
+                            new_pixmap = QtGui.QPixmap(row_width, row_height)  # w , h
+                            center_width = (row_width - pixmap.width()) / 2
+                            center_height = (row_height - pixmap.height()) / 2
+                            new_pixmap.fill(QtCore.Qt.transparent)
+                            painter = Qt.QPainter(new_pixmap)
+                            painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
 
-                        pixmap = new_pixmap
+                            pixmap = new_pixmap
+                    
+                    
+                    
+
+                else:
+                    if self.parent_view and self.parent_view.showAllPixmap():
+                        if not self.db().manager().isSystemTable(self._parent.table()):
+                            d = self.db().manager().fetchLargeValue(d)
+                        else:
+                            from pineboolib.utils import cacheXPM
+                            d = cacheXPM(d)
+                        if d:
+                            pixmap = QtGui.QPixmap(d)
+                    
 
             return pixmap
 
