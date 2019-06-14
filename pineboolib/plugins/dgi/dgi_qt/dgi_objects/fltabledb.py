@@ -2265,8 +2265,7 @@ class FLTableDB(QtWidgets.QWidget):
                                     
                                     pix_name = "pix%s_" % id_pix
                                     id_pix += 1
-                                    row.opIn(AQOdsImage(pix_name, ((pix.width() * 2.54) / 98) * 1000,
-                                                        ((pix.height() * 2.54) / 98) * 1000, 0, 0, val))
+                                    row.opIn(AQOdsImage(pix_name, round((pix.width() * 2.54) / 98, 2) * 20, round((pix.height() * 2.54) / 98, 2) * 20, 0, 0, val))
                                 else:
                                     row.coveredCell()
                         

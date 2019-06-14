@@ -166,12 +166,20 @@ class AQOdsRow(object):
                     self.opIn(l)
                     
             elif isinstance(opt, AQOdsImage):
+                from odf.text import P
+                from odf.draw import Frame, Image
                 href = self.sheet_.spread_sheet_parent_.addPictureFromFile(opt.link_)
                 cell, style = self.__newCell__()
-                #image = odf.draw.Image(href=href)
+                
+                #p = P()
+                frame = Frame(width="%spt" % opt.width_, height="%spt" % opt.height_, x="%spt" % opt.x_, y="%spt" % opt.y_)
+                frame.addElement(Image(href=href))
+                #p.addElement(frame)
+                cell.addElement(frame)
+                self.cells_list_.append(cell)
                 #self.coveredCell()
-                self.opIn(href)
-                print("FIXME:: Vacio", href)
+                #self.opIn(href)
+                #print("FIXME:: Vacio", href)
                 
 
     """
@@ -315,7 +323,7 @@ class AQOdsImage(object):
         self.width_ = width
         self.height_ = height
         self.x_ = x
-        self.Y_ = y
+        self.y_ = y
         self.link_ = link
     
         
