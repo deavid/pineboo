@@ -2252,7 +2252,7 @@ class FLTableDB(QtWidgets.QWidget):
                         
                             
 
-                    elif field.type() in ["bool", "unlock"]:
+                    elif field.type() in ("bool", "unlock"):
                         str_ = self.tr("Sí") if val == True else self.tr("No")
                         row.opIn(italic)
                         row.opIn(str_)
@@ -2342,7 +2342,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         msec_refresh = 400
         column = self.tableRecords_.header().logicalIndex(self.sortColumn_)
-        field = self.cursor_.model().metadata().indexFieldObject(column)
+        
+        field = self.cursor().model().metadata().indexFieldObject(self.tableRecords_.visual_index_to_column_index(column))   
         bFilter = self.cursor_.db().manager().formatAssignValueLike(field, p, True)
 
         idMod = self.cursor_.db().managerModules().idModuleOfFile(self.cursor_.metadata().name() + ".mtd")
