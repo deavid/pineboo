@@ -1321,14 +1321,11 @@ class FLTableDB(QtWidgets.QWidget):
                 if condType == self.FromTo:
                     editorOp1 = self.tdbFilter.cellWidget(i, 3)
                     editorOp2 = self.tdbFilter.cellWidget(i, 4)
-                    arg2 = self.cursor_.db().manager().formatValue(
-                        type, util.dateDMAtoAMD(editorOp1.date))
-                    arg4 = self.cursor_.db().manager().formatValue(
-                        type, util.dateDMAtoAMD(editorOp2.date))
+                    arg2 = self.cursor_.db().manager().formatValue(type, util.dateDMAtoAMD(str(editorOp1.text())))
+                    arg4 = self.cursor_.db().manager().formatValue(type, util.dateDMAtoAMD(str(editorOp2.text())))
                 else:
                     editorOp1 = self.tdbFilter.cellWidget(i, 2)
-                    arg2 = self.cursor_.db().manager().formatValue(
-                        type, util.dateDMAtoAMD(editorOp1.date))
+                    arg2 = self.cursor_.db().manager().formatValue(type, util.dateDMAtoAMD(str(editorOp1.text())))
 
             if type == "time":
                 if condType == self.FromTo:
