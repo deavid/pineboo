@@ -173,18 +173,18 @@ class FLMYSQL_MYISAM2(object):
 
         elif type_ == "date":
             util = FLUtil()
-            res = "LIKE '%%" + util.dateDMAtoAMD(str(v)) + "'"
+            res = " LIKE '%" + util.dateDMAtoAMD(str(v)) + "'"
 
         elif type_ == "time":
             t = v.toTime()
-            res = "LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
+            res = " LIKE '" + t.toString(QtCore.Qt.ISODate) + "%'"
 
         else:
             res = str(v)
             if upper:
-                res = "%s" % res.upper()
+                res = res.upper()
 
-            res = "LIKE '" + res + "%%'"
+            res = " LIKE '" + res + "%'"
 
         return res
 
