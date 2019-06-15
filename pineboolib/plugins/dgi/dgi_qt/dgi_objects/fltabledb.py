@@ -291,8 +291,7 @@ class FLTableDB(QtWidgets.QWidget):
                     loger.warning("FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )" , 
                         self.fieldRelation_, self.tableName_)
 
-        self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor().db(
-        ).connectionName(), self.cursorAux, rMD, self)
+        self.cursor_ = FLSqlCursor(self.tableName_, True, self.cursor().db().connectionName(), self.cursorAux, rMD, self)
         if not self.cursor():
             self.cursor_ = self.cursorAux
             self.cursorAux = None
