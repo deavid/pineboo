@@ -1238,29 +1238,24 @@ class FLTableDB(QtWidgets.QWidget):
         arg4 = None
 
         ol = None
-        i = 0
 
-        while i < rCount:
+        for i in range (rCount):
             fieldName = tMD.fieldAliasToName(self.tdbFilter.text(i, 0))
             field = tMD.field(fieldName)
             if field is None:
-                i = i + 1
                 continue
 
             cond = self.tdbFilter.cellWidget(i, 1)
 
             if not cond:
-                i = i + 1
                 continue
 
             condType = self.decodeCondType(cond.currentText())
             if condType == self.All:
-                i = i + 1
                 continue
 
             if (tMD.isQuery()):
-                qry = self.cursor_.db().manager().query(
-                    self.cursor_.metadata().query(), self.cursor_)
+                qry = self.cursor_.db().manager().query(self.cursor_.metadata().query(), self.cursor_)
 
                 if qry:
                     list = qry.fieldList()
@@ -1375,7 +1370,6 @@ class FLTableDB(QtWidgets.QWidget):
 
             where += condValue
 
-            i = i + 1
 
         print("where-devuelto", where)
         return where
@@ -2167,7 +2161,9 @@ class FLTableDB(QtWidgets.QWidget):
             return
         
         cursor = FLSqlCursor(self.cursor_.curName())
-        cursor.select(self.cursor_.filter())
+        filter_ = self.cursor().curFilter()
+        
+        cursor.select(filter_)
 
         from pineboolib.pncontrolsfactory import aqApp, QMessageBox
         settings = FLSettings()
