@@ -2161,9 +2161,11 @@ class FLTableDB(QtWidgets.QWidget):
         
         cursor = FLSqlCursor(self.cursor().curName())
         filter_ = self.cursor().curFilter()
-        
+        if not filter_:
+            filter_ = "1 = 1"
+        if self.cursor().sort():
+            filter_ += " ORDER BY %s" % self.cursor().sort()
         cursor.select(filter_)
-
         from pineboolib.pncontrolsfactory import aqApp, QMessageBox
         settings = FLSettings()
         if settings.readBoolEntry("ebcomportamiento/FLTableExport2Calc", False):
