@@ -596,6 +596,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if wfilter is None:
                 continue
             wfilter = wfilter.strip()
+            
             if not wfilter:
                 continue
             if not where_filter:
@@ -604,7 +605,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 where_filter += " AND " + wfilter
         if not where_filter:
             where_filter = "1 = 1"
-
+        
         self.where_filter = where_filter
         # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
         if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():
@@ -1040,20 +1041,21 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     @return lineas seleccionadas
     """
     def size(self):
-        if self._size is None: #Cada vez que hacemos refresh se limpia
-            util = FLUtil()
-            if self.metadata():
-                from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()  
-                where_ = self.where_filter[:self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
+        return self.cursorDB().rowcount
+        #if self._size is None: #Cada vez que hacemos refresh se limpia
+        #    util = FLUtil()
+        #    if self.metadata():
+        #        from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()  
+        #        where_ = self.where_filter[:self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
                 #where_ = self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" %  self.metadata().primaryKey()) if self.where_filter.find("ORDER BY") > -1 else " %s GROUP BY %s" %  (self.where_filter, self.metadata().primaryKey())
-                self._size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
-            else:
-                self._size = util.sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
+        #        self._size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
+        #    else:
+        #        self._size = util.sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
             
-            if isinstance(self._size, bool):
-                self._size = 0
+        #    if isinstance(self._size, bool):
+        #        self._size = 0
         
-        return self._size
+        #return self._size
             
 
     """
