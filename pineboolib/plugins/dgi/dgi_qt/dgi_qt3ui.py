@@ -8,7 +8,7 @@ from binascii import unhexlify
 import pineboolib
 import logging
 import zlib
-from PyQt5.QtWidgets import QButtonGroup, QGridLayout
+from PyQt5.QtWidgets import QButtonGroup
 from PyQt5.QtCore import QObject
 
 
@@ -303,7 +303,6 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         if pname in translate_properties:
             pname = translate_properties[pname]
         setpname = "set" + pname[0].upper() + pname[1:]
-        
         if pname == "layoutSpacing":
             set_fn = widget.layout.setSpacing
         elif pname == "margin":
