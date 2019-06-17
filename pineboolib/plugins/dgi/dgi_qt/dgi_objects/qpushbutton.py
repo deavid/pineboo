@@ -50,21 +50,25 @@ class QPushButton(QtWidgets.QPushButton):
         if self.maximumWidth() < 33 and len(val) > 4:
             val = ""
         super(QPushButton, self).setText(val)
-    
-    def setMaximumSize(self, w, h=None):
-        if not isinstance(w, int):
-            if w.height() == 32767:
-                w.setHeight(22)
+        
+    def setMaximumSize(self, *args):
+        w = 30
+        h = 30
+        
+        if len(args) == 1:
+            w = args[0].width()
+            h = args[0].height()
+            super().setMaximumSize(w, h)
             
-            super().setMaximumSize(w)
-        else:
-            if h == 32767:
-                h = w
-            super().setMaximumSize(w, h) 
+        else:            
+            super().setMaximumSize(args[0], args[1])
+
 
     toggleButton = property(getToggleButton, setToggleButton)
     on = property(getOn, setOn)
     text = property(getText, setText)
+
+    
     
     @decorators.NotImplementedWarn
     def __getattr__(self, name):
