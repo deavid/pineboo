@@ -16,20 +16,26 @@ class QGroupBox(QtWidgets.QGroupBox):
         settings = FLSettings()
         self._line_width = 0
         self._do_style()
-        
+        self.setFlat(True)
         if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
             self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
 
     def setLineWidth(self, width):
         self._line_width = width
-        self._do_style()    
+        self._do_style()
+    
+    def setTitle(self, t):
+        super().setTitle(t)
+        self._do_style()
     
     def _do_style(self):
         self.style_str = "QGroupBox { font-weight: bold; background-color: transparent;"
-        self.style_str += " border-width: %spx transarent" % self._line_width
+        if self._line_width == 0 and not self.title():
+            self.style_str += " border: none;"
+        else:
+            self.style_str += " border-width: %spx transarent" % self._line_width
         self.style_str += " }"
         self.setStyleSheet(self.style_str)
-        
 
     @property
     def selectedId(self):
