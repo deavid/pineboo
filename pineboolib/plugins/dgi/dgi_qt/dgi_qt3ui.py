@@ -8,7 +8,7 @@ from binascii import unhexlify
 import pineboolib
 import logging
 import zlib
-from PyQt5.QtWidgets import QButtonGroup
+from PyQt5.QtWidgets import QButtonGroup, QGridLayout
 from PyQt5.QtCore import QObject
 
 
@@ -465,8 +465,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 #                                                  1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
                 new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
                 if row is not None or col is not None and mode == "grid":
-                    logger.warning("FIXME: QGridLayout.addItem con col y row cuando esté disponible en pyqt5")
-                widget.layout.addItem(new_spacer)
+                    widget.layout.addItem(new_spacer, row, col, rowSpan, colSpan)
+                else:
+                    widget.layout.addItem(new_spacer)
                 #print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
             else:
                 logger.warning("qt3ui: Unknown layout xml tag", repr(c.tag))
