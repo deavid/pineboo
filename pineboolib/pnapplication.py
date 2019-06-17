@@ -994,8 +994,7 @@ class XMLAction(XMLStruct):
                 self.mainform_widget.widget.doCleanUp()
             self.logger.debug("Loading action %s . . . ", self.name)
             if pineboolib.project._DGI.useDesktop() and hasattr(pineboolib.project.main_window, "w_"):
-                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(
-                    self, None, pineboolib.project.main_window.w_, None)
+                self.mainform_widget = pineboolib.project.conn.managerModules().createForm(self, None, pineboolib.project.main_window.w_, None)
             else:
                 self.scriptform = getattr(self, "scriptform", None)
                 self.load_script(self.scriptform, None)
