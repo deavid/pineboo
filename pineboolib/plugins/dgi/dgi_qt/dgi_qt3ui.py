@@ -266,7 +266,8 @@ def createWidget(classname, parent=None):
     
     cls = getattr(pncontrolsfactory, classname, None) or \
         getattr(QtWidgets, classname, None)
-
+    
+    
     if cls is None:
         logger.warning("WARN: Class name not found in QtWidgets:", classname)
         widgt = QtWidgets.QWidget(parent)
@@ -391,8 +392,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
     def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:
             try:
-                row = int(c.get("row"))
-                col = int(c.get("column"))
+                row = int(c.get("row")) or 0
+                col = int(c.get("column")) or 0
             except Exception:
                 row = col = None
             
@@ -463,6 +464,8 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 # print("Nuevo spacer %s (%s,%s,(%s,%s), %s, %s" % (spacer_name, "Horizontal" if orient_ ==
                 #                                                  1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
                 new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
+                if row is not None or col is not None and mode == "grid":
+                    logger.warning("FIXME: QGridLayout.addItem con col y row cuando esté disponible en pyqt5")
                 widget.layout.addItem(new_spacer)
                 #print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
             else:
@@ -545,7 +548,6 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             widget.layout.setSpacing(lay_spacing)
 
             lay_type = "grid" if c.tag == "grid" else "box"
-            
             layouts_pending_process += [(c, lay_type)]
             has_layout_defined = True
             continue
