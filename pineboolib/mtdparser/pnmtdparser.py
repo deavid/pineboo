@@ -14,7 +14,7 @@ def mtd_parse(fileobj):
     from pineboolib.pncontrolsfactory import aqApp
     mtd = aqApp.db().manager().metadata(metadata_name)
     
-    lines = generate_model(dest_file, mtd)
+    lines = generate_model(dest_file, mtd) if not mtd.isQuery() else []
     
     if lines:
         f = open(dest_file, "w")
@@ -169,11 +169,9 @@ def generate_model( dest_file, mtd_table):
     
     #data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
     #data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
-    if mtd_table.isQuery():
-        data = []
     
     
-    elif not pk_found:
+    if not pk_found:
         logger.warning("La tabla %s no tiene definida una clave primaria. No se generará el model %s\n" % (mtd_table.name(), mtd_table.primaryKey()))
         data = []
     
