@@ -368,7 +368,7 @@ def connect(sender, signal, receiver, slot, caller=None):
     conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
     new_signal, new_slot = signal_slot
 
-    if sender.receivers(new_signal) > 0:
+    if sender.receivers(new_signal) > 0: #Si ya existe la conexión , no la volvemos a hacer
         return False
 
     try:
