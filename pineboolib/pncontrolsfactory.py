@@ -357,6 +357,11 @@ def slot_done(fn, signal, sender, caller):
 
 
 def connect(sender, signal, receiver, slot, caller=None):
+    
+    if [sender, signal, receiver, slot] in connections_cache:
+        return False
+    
+    
     if caller is not None:
         logger.debug("* * * Connect:: %s %s %s %s %s", caller, sender, signal, receiver, slot)
     else:
@@ -376,6 +381,10 @@ def connect(sender, signal, receiver, slot, caller=None):
     except Exception:
         # logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return False
+    
+    
+    
+    connections_cache.append([sender, signal, receiver, slot])
 
     signal_slot = new_signal, slot_done_fn
     return signal_slot
@@ -389,6 +398,8 @@ def disconnect(sender, signal, receiver, slot, caller=None):
         signal.disconnect(slot)
     except Exception:
         pass
+    
+    connections_cache.delete([sender, signal, receiver, slot])
 
     return signal_slot
 
@@ -507,3 +518,6 @@ class QEventLoop(QtCore.QEventLoop):
 def print_stack(maxsize=1):
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
+    
+
+connections_cache = []
