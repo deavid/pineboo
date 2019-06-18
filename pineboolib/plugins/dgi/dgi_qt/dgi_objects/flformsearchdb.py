@@ -97,7 +97,7 @@ class FLFormSearchDB(FLFormDB):
     """
 
     def loadControls(self):
-
+        from pineboolib.pncontrolsfactory import QToolButton
         self.bottomToolbar = QtWidgets.QFrame()
         self.bottomToolbar.setMaximumHeight(64)
         self.bottomToolbar.setMinimumHeight(16)
@@ -117,7 +117,7 @@ class FLFormSearchDB(FLFormDB):
         settings = FLSettings()
         if settings.readBoolEntry("application/isDebuggerMode", False):
             
-            pushButtonExport = QtWidgets.QToolButton()
+            pushButtonExport = QToolButton(self)
             pushButtonExport.setObjectName("pushButtonExport")
             pushButtonExport.setSizePolicy(sizePolicy)
             pushButtonExport.setMinimumSize(pbSize)
@@ -131,7 +131,7 @@ class FLFormSearchDB(FLFormDB):
             pushButtonExport.clicked.connect(self.exportToXml)
             
             if settings.readBoolEntry("ebcomportamiento/show_snaptshop_button", False):
-                push_button_snapshot = QtWidgets.QToolButton()
+                push_button_snapshot = QToolButton(self)
                 push_button_snapshot.setObjectName("pushButtonSnapshot")
                 push_button_snapshot.setSizePolicy(sizePolicy)
                 push_button_snapshot.setMinimumSize(pbSize)
@@ -150,7 +150,7 @@ class FLFormSearchDB(FLFormDB):
         
 
         if not self.pushButtonAccept:
-            self.pushButtonAccept = QtWidgets.QToolButton()
+            self.pushButtonAccept = QToolButton(self)
             self.pushButtonAccept.setObjectName("pushButtonAccept")
             self.pushButtonAccept.clicked.connect(self.accept)
 
@@ -170,7 +170,7 @@ class FLFormSearchDB(FLFormDB):
         self.pushButtonAccept.show()
 
         if not self.pushButtonCancel:
-            self.pushButtonCancel = QtWidgets.QToolButton()
+            self.pushButtonCancel = QToolButton(self)
             self.pushButtonCancel.setObjectName("pushButtonCancel")
             self.pushButtonCancel.clicked.connect(self.reject)
 
