@@ -42,6 +42,7 @@ class FormDBWidget(QtWidgets.QWidget):
         signal_slot = connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
+        
         self._formconnections.add(signal_slot)
 
     def _disconnect(self, sender, signal, receiver, slot):
@@ -51,10 +52,13 @@ class FormDBWidget(QtWidgets.QWidget):
         if not signal_slot:
             return False
         
-        if signal_slot in self._formconnections:
-            self._formconnections.remove(signal_slot)
-        #else:
-        #    self.logger.warning("Error al eliminar una señal que no se encuentra")
+        for sl in self._formconnections:
+            if sl[0].signal == signal_slot[0].signal and sl[1].__name__ == signal_slot[1].__name__:
+                self._formconnections.remove(sl)
+                break
+        
+        else:
+            self.logger.warning("Error al eliminar una señal que no se encuentra")
 
     def obj(self):
         return self
