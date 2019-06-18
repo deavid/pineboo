@@ -362,14 +362,21 @@ def connect(sender, signal, receiver, slot, caller=None):
     else:
         logger.debug("? ? ? Connect:: %s %s %s %s", sender, signal, receiver, slot)
     signal_slot = solve_connection(sender, signal, receiver, slot)
+
     if not signal_slot:
         return False
     # http://pyqt.sourceforge.net/Docs/PyQt4/qt.html#ConnectionType-enum
     conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
     new_signal, new_slot = signal_slot
 
-    if sender.receivers(new_signal) > 0: #Si ya existe la conexión , no la volvemos a hacer
-        return False
+
+    try:
+        if sender.receivers(new_signal) > 0: #Si ya existe la conexión , no la volvemos a hacer
+            return False
+    except Exception:
+        if sender.parent() and sender.parent().receivers(new_signal) > 0: #Si ya existe la conexión , no la volvemos a hacer
+            return False
+        
 
     try:
         slot_done_fn = slot_done(new_slot, new_signal, sender, caller)
@@ -380,7 +387,7 @@ def connect(sender, signal, receiver, slot, caller=None):
         # logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return False
 
-    signal_slot = new_signal, slot_done_fn
+    #signal_slot = new_signal, slot_done_fn
     return signal_slot
 
 def disconnect(sender, signal, receiver, slot, caller=None):
