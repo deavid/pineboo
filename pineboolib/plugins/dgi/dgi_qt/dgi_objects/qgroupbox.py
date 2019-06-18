@@ -3,6 +3,9 @@ from PyQt5 import QtWidgets
 from pineboolib import decorators
 from PyQt5.QtWidgets import QFrame
 from PyQt5 import Qt
+import logging
+
+logger = logging.getLogger("QGroupBox")
 
 class QGroupBox(QtWidgets.QGroupBox):
     
@@ -15,7 +18,7 @@ class QGroupBox(QtWidgets.QGroupBox):
         from pineboolib.fllegacy.flsettings import FLSettings
         settings = FLSettings()
         self._line_width = 0
-        self._do_style()
+        #self._do_style()
         self.setFlat(True)
         if not settings.readBoolEntry("ebcomportamiento/spacerLegacy", False):
             self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Preferred)
@@ -33,6 +36,7 @@ class QGroupBox(QtWidgets.QGroupBox):
         if self._line_width == 0 and not self.title():
             self.style_str += " border: none;"
         else:
+            logger.warning("FIXME:: QGroupBox.do_style(). Mejorar cuando title")
             self.style_str += " border-width: %spx transarent" % self._line_width
         self.style_str += " }"
         self.setStyleSheet(self.style_str)
