@@ -408,6 +408,10 @@ def solve_connection(sender, signal, receiver, slot):
     if isinstance(sender, QDateEdit):
         if "valueChanged" in signal:
             signal = signal.replace("valueChanged", "dateChanged")
+    
+    if isinstance(sender, QTable):
+        if "currentChanged" in signal:
+            signal = signal.replace("currentChanged", "CurrentChanged")
 
     #if receiver.__class__.__name__ == "FormInternalObj" and slot == "accept":
     #    receiver = receiver.parent()

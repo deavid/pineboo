@@ -7,7 +7,7 @@ from pineboolib.utils import format_double
 class QTable(QtWidgets.QTableWidget):
 
     lineaActual = None
-    currentChanged = QtCore.pyqtSignal(int, int)
+    CurrentChanged = QtCore.pyqtSignal(int, int)
     doubleClicked = QtCore.pyqtSignal(int, int)
     valueChanged = QtCore.pyqtSignal(int , int)
     read_only_cols = None
@@ -41,9 +41,8 @@ class QTable(QtWidgets.QTableWidget):
         self.sort_column_ = None
     
     def currentChanged_(self, current_row, current_column, previous_row, previous_column):
-        # FIXME: esto produce un TypeError: native Qt signal is not callable, porque existe una función virtual llamada currentChanged
         if (current_row > -1 and current_column > -1):
-            self.currentChanged.emit(current_row, current_column)
+            self.CurrentChanged.emit(current_row, current_column)
             pass
 
     def doubleClicked_(self, f, c):
