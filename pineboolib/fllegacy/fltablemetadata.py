@@ -261,8 +261,10 @@ class FLTableMetaData(object):
         
         ret_ = None
         if type_ is not None:
-            if type_ in ("string","counter","stringlist"):
+            if type_ in ("string","counter"):
                 ret_ = 3
+            elif type_ == "stringlist":
+                ret_ = 4
             elif type_ == "uint":
                 ret_ = 17
             elif type_ == "bool":
