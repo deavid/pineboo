@@ -101,6 +101,9 @@ class FormDBWidget(QtWidgets.QWidget):
 
     def child(self, child_name):
         ret = self.findChild(QtWidgets.QWidget, child_name, QtCore.Qt.FindChildrenRecursively)
+        if ret is None and self.parent():
+            ret = getattr(self.parent(), child_name, None)
+            
         
         if ret is not None: 
             if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
