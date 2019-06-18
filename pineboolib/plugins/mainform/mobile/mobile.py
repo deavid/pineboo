@@ -658,7 +658,8 @@ class MainForm(QtWidgets.QMainWindow):
         doc = QDomDocument()
         cc = mng.contentCached(ui_file)
         if not cc or not doc.setContent(cc):
-            logger.warning("No se ha podido cargar %s" % (ui_file))
+            if cc:
+                logger.warning("No se ha podido cargar %s" % (ui_file))
             return None
 
         w = mng.createUI(ui_file)
