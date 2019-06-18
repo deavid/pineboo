@@ -127,6 +127,10 @@ def loadUi(form_path, widget, parent=None):
 
         if receiver is None:
             receiver = widget.findChild(QObject, receiv_name, QtCore.Qt.FindChildrenRecursively)
+            
+        if receiver is None:
+            from pineboolib import qsa
+            receiver = getattr(qsa, receiv_name, None)
 
         if receiver is None:
             logger.warning("Connection receiver not found:%s", receiv_name)
