@@ -847,8 +847,8 @@ class FLTableMetaDataPrivate():
     @param  f   Campo objeto cuyo alias se desea formatear
     """
 
-    def formatAlias(self, f):
-        if not f:
+    def formatAlias(self, f = None):
+        if f is None:
             return
 
         alias = f.alias()
