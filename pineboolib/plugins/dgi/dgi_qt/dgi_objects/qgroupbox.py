@@ -36,7 +36,6 @@ class QGroupBox(QtWidgets.QGroupBox):
         if self._line_width == 0 and not self.title():
             self.style_str += " border: none;"
         else:
-            logger.warning("FIXME:: QGroupBox.do_style(). Mejorar cuando title")
             self.style_str += " border-width: %spx transarent" % self._line_width
         self.style_str += " }"
         self.setStyleSheet(self.style_str)
