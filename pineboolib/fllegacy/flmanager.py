@@ -346,7 +346,8 @@ class FLManager(QtCore.QObject):
                 elif tmd.field(it) is None:
                     continue
                 
-                tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
+                if tmd.field(aWith) is not None:
+                    tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
                 aWith = None
                 aBy = None
 
@@ -377,29 +378,29 @@ class FLManager(QtCore.QObject):
                             continue
 
                         mtdAux = self.metadata(table, True)
-                        if mtdAux:
+                        if mtdAux is not None:
                             fmtdAux = mtdAux.field(field)
-                            if fmtdAux:
+                            if fmtdAux is not None:
                                 isForeignKey = False
                                 if fmtdAux.isPrimaryKey() and not table == name:
                                     fmtdAux = FLFieldMetaData(fmtdAux)
                                     fmtdAux.setIsPrimaryKey(False)
                                     fmtdAux.setEditable(False)
 
-                                # newRef = (not isForeignKey)
+                                newRef = not isForeignKey
                                 fmtdAuxName = fmtdAux.name().lower()
                                 if fmtdAuxName.find(".") == -1:
                                     # fieldsAux = tmd.fieldsNames().split(",")
                                     fieldsAux = tmd.fieldsNames()
-                                    # if not fieldsAux.find(fmtdAuxName) == fieldsAux.end():
                                     if fmtdAuxName not in fieldsAux:
                                         if not isForeignKey:
-                                            FLFieldMetaData(fmtdAux)
+                                            fmtdAux = FLFieldMetaData(fmtdAux)
 
-                                        # fmtdAux.setName("%s.%s" % (table, field))
+                                        fmtdAux.setName("%s.%s" % (table, field))
+                                        newRef = False
 
-                                # if newRef:
-                                #    fmtdAux.ref()
+                                if newRef:
+                                    fmtdAux.ref()
 
                                 tmd.addFieldMD(fmtdAux)
 
@@ -966,7 +967,7 @@ class FLManager(QtCore.QObject):
         so = None
 
         aN = True
-        iPK = True
+        iPK = False
         c = False
         iNX = False
         uNI = False
