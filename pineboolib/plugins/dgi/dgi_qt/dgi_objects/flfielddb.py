@@ -673,7 +673,7 @@ class FLFieldDB(QtWidgets.QWidget):
         if field.hasOptionsList():
             idxItem = -1
             if type_ == "string":
-                idxItem = field.optionsList().findIndex(v)
+                idxItem = field.optionsList().index(v)
             if idxItem == -1:
                 self.editor_.setCurrentItem(v)
             self.updateValue(self.editor_.currentText())
