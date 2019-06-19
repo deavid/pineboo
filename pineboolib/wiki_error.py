@@ -40,7 +40,10 @@ def process_error(error_str):
         ret += sys.translate("scripts", "Estas llamando a un objeto %s .Los parentesis finales hay que quitarlos." % var)
     elif "unsupported operand type(s) for" in error_str:
         error = "unsupported operand type(s) for"
-        ret += sys.translate("scripts", "No puedes hacer operaciones entre dos \'Nones\' o dos tipos diferentes. Revisa el script y controla esto.")    
+        ret += sys.translate("scripts", "No puedes hacer operaciones entre dos \'Nones\' o dos tipos diferentes. Revisa el script y controla esto.")
+    elif "'QDomElement' object has no attribute 'toString'" in error_str:
+        error = "'QDomElement' object has no attribute 'toString'"
+        ret += sys.translate("scripts", "toString() ya no está disponible , usa otro método")        
     
     else:
         ret += sys.translate("scripts", "Información no disponible.")
