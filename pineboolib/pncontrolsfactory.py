@@ -106,7 +106,7 @@ QPainter = resolveObject("QPainter")
 QBrush = resolveObject("QBrush")
 QProgressDialog = resolveObject("QProgressDialog")
 QFileDialog = resolveObject("QFileDialog")
-QFile = resolveObject("QFile")
+
 """
 QIconSet = resolveObject("QIconSet")
 """
@@ -136,6 +136,7 @@ FLUIntValidator = resolveObject("FLUIntValidator")
 FLCodBar = resolveObject("FLCodBar")
 FLWidget = resolveObject("FLWidget")
 FLWorkSpace = resolveObject("FLWorkSpace")
+
 
 FormDBWidget = resolveObject("FormDBWidget")
 # Clases QSA
