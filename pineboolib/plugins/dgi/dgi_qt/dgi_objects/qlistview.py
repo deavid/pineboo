@@ -19,6 +19,8 @@ class QListView(QtWidgets.QWidget):
     
     doubleClicked = pyqtSignal(object)
     selectionChanged = pyqtSignal(object)
+    expanded = pyqtSignal(object)
+    collapsed = pyqtSignal(object)
     
     def __init__(self, parent = None):
         super().__init__(parent = None)
@@ -37,9 +39,11 @@ class QListView(QtWidgets.QWidget):
      
     def singleClickedEmit(self, index):
         if index.column() != 0:
-            index = index.sibling(index.row(), 0)  
+            index = index.sibling(index.row(), 0)
+        else:
+            index = index.sibling(index.row(), index.column())
         item = index.model().itemFromIndex(index)  
-         
+        
         self.selectionChanged.emit(item)
             
     
