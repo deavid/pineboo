@@ -770,6 +770,12 @@ class File(QtCore.QFile):
             file.write(byte_)
 
         file.close()
+    
+    def writeBlock(self, byte_array):
+        with open(self.fichero, 'wb') as file:
+            file.write(byte_array)
+        
+        file.close()
 
     def exists(name):
         """
@@ -873,6 +879,7 @@ class File(QtCore.QFile):
     
     name = property(getName)
 
+QFile = File
 
 def startTimer(time, fun):
     timer = QtCore.QTimer()
