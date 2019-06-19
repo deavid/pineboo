@@ -106,7 +106,7 @@ QPainter = resolveObject("QPainter")
 QBrush = resolveObject("QBrush")
 QProgressDialog = resolveObject("QProgressDialog")
 QFileDialog = resolveObject("QFileDialog")
-
+QFile = resolveObject("QFile")
 """
 QIconSet = resolveObject("QIconSet")
 """
@@ -170,18 +170,18 @@ class SysType(object):
 
     def nameUser(self):
         ret_ = None
-        if pineboolib.project._DGI.use_alternative_credentials():
-            ret_ = pineboolib.project._DGI.get_nameuser()
+        if aqApp.DGI().use_alternative_credentials():
+            ret_ = aqApp.DGI().get_nameuser()
         else:
-            ret_ = pineboolib.project.conn.user()
+            ret_ = aqApp.db().user()
         
         return ret_
 
     def interactiveGUI(self):
-        return pineboolib.project._DGI.interactiveGUI()
+        return aqApp.DGI().interactiveGUI()
 
     def isLoadedModule(self, modulename):
-        return modulename in pineboolib.project.conn.managerModules().listAllIdModules()
+        return modulename in aqApp.db().managerModules().listAllIdModules()
 
     def translate(self, *args):
         util = FLUtil()
@@ -196,7 +196,7 @@ class SysType(object):
         return util.getOS()
 
     def nameBD(self):
-        return pineboolib.project.conn.DBName()
+        return aqApp.db().DBName()
 
     def toUnicode(self, val, format):        
         return val.encode(format).decode("utf-8",'replace')
@@ -205,7 +205,7 @@ class SysType(object):
         return val.encode("utf-8").decode(format, 'replace')
 
     def Mr_Proper(self):
-        pineboolib.project.conn.Mr_Proper()
+        aqApp.db().Mr_Proper()
 
     def installPrefix(self):
         from pineboolib.utils import filedir
@@ -225,7 +225,7 @@ class SysType(object):
         return str(pineboolib.project.version)
 
     def processEvents(self):
-        return pineboolib.project._DGI.processEvents()
+        return aqApp.DGI().processEvents()
 
     def write(self, encode_, dir_, contenido):
         import codecs
@@ -235,7 +235,7 @@ class SysType(object):
         f.close()
 
     def cleanupMetaData(self, connName="default"):
-        pineboolib.project.conn.database(connName).manager().cleanupMetaData()
+        aqApp.db().useConn(connName).manager().cleanupMetaData()
 
     def updateAreas(self):
         aqApp.initToolBox()
@@ -256,13 +256,28 @@ class SysType(object):
         return True
 
     def nameDriver(self, connName="default"):
-        return pineboolib.project.conn.database(connName).driverName()
-
-    def addDatabase(self, connName="default"):
-        return pineboolib.project.conn.useConn(connName)
+        return aqApp.db().useConn(connName).driverName()
+    
+    def nameHost(self, connName = "default"):
+        return aqApp.db().useConn(connName).host()
+    
+    def addDatabase(self, driver_name = None, db_name = None, db_user_name = None, db_password = None, db_host = None, db_port = None, connName="default"):
+        conn_db = aqApp.db().useConn(connName)
+        if not conn_db.isOpen():
+            conn_db.driverName_ = conn_db.driverSql.aliasToName(driver_name)
+            if (conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_)):
+                conn_db.conn = conn_db.conectar(db_name, db_host, db_port, db_user_name, db_password)
+            if self.conn is False:
+                return False
+            
+            conn_db.driver().db_ = conn_db
+            conn_db._isOpen = True
+            conn_db._dbAux = conn_db
+        
+        return True
 
     def removeDatabase(self, connName="default"):
-        return pineboolib.project.conn.removeConn(connName)
+        return aqApp.db().useConn(connName).removeConn(connName)
     
     def idSession(self):
         return aqApp.timeUser().toString(QtCore.Qt.ISODate)
@@ -337,10 +352,10 @@ def slot_done(fn, signal, sender, caller):
         if signal.signal == "2clicked(bool)":
             args = []
         
-        args_num = get_expected_args_num(fn)
+        #args_num = get_expected_args_num(fn)
         try:
-            res = fn(*args[0:args_num], **kwargs)
-                
+        #    res = fn(*args[0:args_num], **kwargs)
+            res = fn(*args, **kwargs)       
         except Exception:
             script_name = caller.__module__ if caller is not None else "????"
             aqApp.msgBoxWarning(wiki_error(traceback.format_exc()),pineboolib.project._DGI)
@@ -369,13 +384,11 @@ def connect(sender, signal, receiver, slot, caller=None):
     conntype = QtCore.Qt.QueuedConnection | QtCore.Qt.UniqueConnection
     new_signal, new_slot = signal_slot
 
+    #if caller:
+    #    for sl in caller._formconnections:
+    #        if sl[0].signal == signal_slot[0].signal and sl[1].__name__ == signal_slot[1].__name__:
+    #            return False
 
-    try:
-        if sender.receivers(new_signal) > 0: #Si ya existe la conexión , no la volvemos a hacer
-            return False
-    except Exception:
-        if sender.parent() and sender.parent().receivers(new_signal) > 0: #Si ya existe la conexión , no la volvemos a hacer
-            return False
         
 
     try:
