@@ -9,7 +9,7 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib import decorators
 from pineboolib.pncontrolsfactory import aqApp
-
+from pineboolib.pnsqldrivers import PNSqlDrivers
 
 
 import logging
@@ -34,33 +34,35 @@ class PNConnection(QtCore.QObject):
     interactiveGUI_ = None
     _dbAux = None
     name = None
+    _isOpen = False
 
     def __init__(self, db_name, db_host, db_port, db_userName, db_password, driverAlias, name=None):
         super(PNConnection, self).__init__()
-        from pineboolib.pnsqldrivers import PNSqlDrivers
         
-        self.connAux = {}
-        self.name = name
-        self.db_name = db_name
-        self.db_host = db_host
-        self.db_port = db_port
-        self.db_userName = db_userName
-        self.db_password = db_password
         self.driverSql = PNSqlDrivers()
-
+        
+        if name:
+            self._isOpen = False
+            self._name = name
+            return
+        
+        
+        
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
 
         if (self.driverName_ and self.driverSql.loadDriver(self.driverName_)):
-            self.conn = self.conectar(
-                self.db_name, self.db_host, self.db_port, self.db_userName, self.db_password)
+            
+            self.conn = self.conectar(db_name, db_host, db_port, db_userName, db_password)
             if self.conn is False:
                 return
-
+            
+            
+            
+            self._isOpen = True
             self._dbAux = self
 
         else:
-            logger.error(
-                "PNConnection.ERROR: No se encontro el driver '%s'", driverAlias)
+            logger.error("PNConnection.ERROR: No se encontro el driver '%s'", driverAlias)
             import sys
             sys.exit(0)
 
@@ -100,7 +102,6 @@ class PNConnection(QtCore.QObject):
 
         self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
                                           self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
-
         return self.connAux[name]
 
     def removeConn(self, name="default"):
@@ -114,7 +115,7 @@ class PNConnection(QtCore.QObject):
         return True
 
     def isOpen(self):
-        return self.driver().isOpen()
+        return self._isOpen
 
     def tables(self):
         return self.driver().tables()
@@ -148,6 +149,16 @@ class PNConnection(QtCore.QObject):
         return self.conn.cursor()
 
     def conectar(self, db_name, db_host, db_port, db_userName, db_password):
+
+        self.connAux = {}
+        self.db_name = db_name
+        self.db_host = db_host
+        self.db_port = db_port
+        self.db_userName = db_userName
+        self.db_password = db_password
+        
+        
+        
         return self.driver().connect(db_name, db_host, db_port, db_userName, db_password)
 
     def driverName(self):
@@ -157,7 +168,7 @@ class PNConnection(QtCore.QObject):
         return self.driver().alias_
 
     def driverNameToDriverAlias(self, name):
-        return self.driverSql.nameToAlias(name)
+        return self.driver().nameToAlias(name)
 
     def lastError(self):
         return self.driver().lastError()
@@ -203,16 +214,16 @@ class PNConnection(QtCore.QObject):
         return self._dbAux
 
     def formatValue(self, t, v, upper):
-        return self.driverSql.formatValue(t, v, upper)
+        return self.driver().formatValue(t, v, upper)
 
     def formatValueLike(self, t, v, upper):
-        return self.driverSql.formatValueLike(t, v, upper)
+        return self.driver().formatValueLike(t, v, upper)
 
     def canSavePoint(self):
-        return self.driverSql.canSavePoint()
+        return self.driver().canSavePoint()
     
     def canTransaction(self):
-        return self.driverSql.canTransaction()
+        return self.driver().canTransaction()
 
     def doTransaction(self, cursor):
         if not cursor or not self.db():
