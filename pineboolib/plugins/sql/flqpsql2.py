@@ -15,7 +15,7 @@ class FLQPSQL2(FLQPSQL):
     def __init__(self):
         super().__init__()
         self.name_ = "FLQPSQL2"
-        self.alias_ = "PostgreSQL (PG8000)"
+        self.alias_ = "PostgreSQL"
         self.mobile_ = True
         self.pure_python_ = True
 
@@ -43,7 +43,7 @@ class FLQPSQL2(FLQPSQL):
         try:
             self.conn_ = pg8000.connect(user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5)
             self.engine_ = create_engine('postgresql+pg8000://%s:%s@%s:%s/%s' % (db_userName, db_password, db_host, db_port, db_name))
-        except Exception:
+        except Exception as e:
             import pineboolib
             if not pineboolib.project._DGI.localDesktop():
                 if repr(traceback.format_exc()).find("the database system is starting up") > -1:
