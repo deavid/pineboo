@@ -951,6 +951,7 @@ class Member(ASTPython):
             "attributeValue",
             "match",
             "replace",
+            "search",
         ]
         for member in replace_members:
             for idx, arg in enumerate(arguments):
@@ -1013,6 +1014,10 @@ class Member(ASTPython):
                         value = value[:len(value) - 1]
                         arguments = ["%s[%s]" %
                                      (".".join(part1), value)] + part2
+                    elif member == "search":
+                        value = arg[7:]
+                        value = value[:len(value) - 1]
+                        arguments = ["%s.find('%s')" % (".".join(part1), value)] + part2
                     elif member == "charCodeAt":
                         value = arg[11:]
                         value = value[:len(value) - 1]
