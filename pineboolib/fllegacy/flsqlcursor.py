@@ -121,7 +121,6 @@ class PNBuffer(object):
             # if val == "None":
             #    val = None
             # self.setValue(field.name, val)
-            
             field.originalValue = copy.copy(field.value)
             # self.cursor().bufferChanged.emit(field.name)
 
@@ -826,10 +825,15 @@ class FLSqlCursor(QtCore.QObject):
     
 
     def __init__(self, name=None, autopopulate=True, connectionName_or_db=None, cR=None, r=None, parent=None):
+
         super(FLSqlCursor, self).__init__()
         if name is None:
             logger.warning("Se está iniciando un cursor Huerfano (%s). Posiblemente sea una declaración en un qsa parseado", self)
             return
+
+        if isinstance(autopopulate, str):
+            connectionName_or_db = autopopulate
+            autopopulate = True
 
         self._meta_model = None
         name_action = None
@@ -865,6 +869,7 @@ class FLSqlCursor(QtCore.QObject):
         # elif isinstance(connectionName_or_db, QString) or
         # isinstance(connectionName_or_db, str):
         elif isinstance(connectionName_or_db, str):
+            print("**")
             self.d.db_ = pineboolib.project.conn.useConn(connectionName_or_db)
         else:
             self.d.db_ = connectionName_or_db
