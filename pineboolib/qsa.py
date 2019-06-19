@@ -363,7 +363,10 @@ def qsa_length(obj):
             return obj.length()
     
     else:
-        return len(obj)
+        if isinstance(obj, dict) and "result" in obj.keys():
+            return len(obj) - 1
+        else:
+            return len(obj)
 
 
 def qsa_text(obj):
