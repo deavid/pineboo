@@ -261,18 +261,33 @@ class SysType(object):
     def nameHost(self, connName = "default"):
         return aqApp.db().useConn(connName).host()
     
-    def addDatabase(self, driver_name = None, db_name = None, db_user_name = None, db_password = None, db_host = None, db_port = None, connName="default"):
-        conn_db = aqApp.db().useConn(connName)
-        if not conn_db.isOpen():
-            conn_db.driverName_ = conn_db.driverSql.aliasToName(driver_name)
-            if (conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_)):
-                conn_db.conn = conn_db.conectar(db_name, db_host, db_port, db_user_name, db_password)
-            if self.conn is False:
-                return False
+    def addDatabase(self , *args):
+    #def addDatabase(self, driver_name = None, db_name = None, db_user_name = None, db_password = None, db_host = None, db_port = None, connName="default"):
+        if len(args) == 1:
+            conn_db = aqApp.db().useConn(args[0])
+            if not conn_db.isOpen():
+                conn_db.driverName_ = aqApp.db().driverName_
+                conn_db.driverSql = aqApp.db().driverSql
+                conn_db.conn = conn_db.conectar(aqApp.db().db_name, aqApp.db().db_host, aqApp.db().db_port, aqApp.db().db_userName, aqApp.db().db_password)
+                if conn_db.conn is False:
+                    return False
+                
+                conn_db._isOpen = True
+                 
+        
+        else:
+            conn_db = aqApp.db().useConn(args[6])
+            if not conn_db.isOpen():
+                conn_db.driverName_ = conn_db.driverSql.aliasToName(args[0])
+                if (conn_db.driverName_ and conn_db.driverSql.loadDriver(conn_db.driverName_)):
+                    conn_db.conn = conn_db.conectar(args[1], args[4], args[5], args[2], args[3])
             
-            conn_db.driver().db_ = conn_db
-            conn_db._isOpen = True
-            conn_db._dbAux = conn_db
+                if conn_db.conn is False:
+                    return False
+            
+                conn_db.driver().db_ = conn_db
+                conn_db._isOpen = True
+                conn_db._dbAux = conn_db
         
         return True
 
@@ -319,6 +334,9 @@ def get_expected_args_num(inspected_function):
 
     return args_num
 
+def get_expected_kwargs(inspected_function):
+    expected_kwargs = inspect.getargspec(inspected_function)[2]
+    return True if expected_kwargs else False
 
 def proxy_fn(wf, wr, slot):
     def fn(*args, **kwargs):
@@ -352,10 +370,13 @@ def slot_done(fn, signal, sender, caller):
         if signal.signal == "2clicked(bool)":
             args = []
         
-        #args_num = get_expected_args_num(fn)
+        
+        args_num = get_expected_args_num(fn)
         try:
-        #    res = fn(*args[0:args_num], **kwargs)
-            res = fn(*args, **kwargs)       
+            if get_expected_kwargs(fn):
+                res = fn(*args[0:args_num], **kwargs)   
+            else:
+                res = fn(*args[0:args_num])
         except Exception:
             script_name = caller.__module__ if caller is not None else "????"
             aqApp.msgBoxWarning(wiki_error(traceback.format_exc()),pineboolib.project._DGI)
