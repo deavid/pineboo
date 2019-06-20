@@ -17,6 +17,7 @@ class FLListViewItem(Qt.QStandardItem):
     def __init__(self, parent = None):
         super().__init__()
         self._root = False
+        self.setExpandable(False)
         self._parent = None
         self.setKey("")
         self.setEditable(False)
@@ -58,8 +59,8 @@ class FLListViewItem(Qt.QStandardItem):
         return item
     
     def isExpandable(self):
-        
-        return True if self.child(0) is not None or not self.parent() else False   
+        return self._expandable
+        #return True if self.child(0) is not None or not self.parent() else False   
     
 
     def setText(self, *args):
