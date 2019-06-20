@@ -97,26 +97,28 @@ class PNBuffer(object):
 
         if row is None  or row < 0:
             row = self.cursor().currentRegister()
-        for field in self.fieldsList():
-
-            if field.type_ in ("unlock", "bool"):
-                field.value = (self.cursor().model().value( row, field.name) in ("True", True, 1, "1"))
-                
-                #    field.value = True
-                # else:
-                #    field.value = False
-
-            elif self.cursor().model().value(row, field.name) in ("None", None):
-                field.value = None
-
-            else:
-                field.value = self.cursor().model().value(row, field.name)
             
-            if field.type_ == "date":
-                if isinstance(field.value, str):
-                    date_ = field.value.split("-")
+            
+        for field in self.fieldsList():
+            value = self.cursor().model().value(row, field.name)
+            
+            if value in ("None", None):
+                value = None
+            
+            if field.type_ in ("unlock", "bool"):
+                value = (value in ("True", True, 1, "1"))
+            
+            elif field.type_ == "date":
+                if isinstance(value, str):
+                    date_ = value.split("-")
                     if len(date_[2]) == 4:
-                        field.value = date_[2] + "-" + date_[1] + "-" + date_[0]
+                        value = date_[2] + "-" + date_[1] + "-" + date_[0]
+                
+            
+            elif field.type_ == "bytearray":
+                value = bytearray() if value is None else bytearray(value) 
+            
+            field.value = value
             # val = self.cursor().model().value(row , field.name)
             # if val == "None":
             #    val = None
@@ -262,7 +264,7 @@ class PNBuffer(object):
     """
 
     def setValue(self, name, value, mark_=True):
-        if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date)):
+        if value is not None and not isinstance(value, (int, float, str, datetime.time, datetime.date, bool, pineboolib.qsa.Date, bytearray)):
             raise ValueError("No se admite el tipo %r , en setValue(%s,%r)" % (type(value), name, value))
 
         field = self.field(name)

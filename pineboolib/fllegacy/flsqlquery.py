@@ -520,6 +520,8 @@ class FLSqlQuery(object):
                     retorno = 0
                 elif mtd_field.type() == "string":
                     retorno = ""
+                elif mtd_field.type() == "bytearray":
+                    retorno = bytearray()
         else:
 
             if isinstance(retorno, str):  #str
@@ -548,9 +550,11 @@ class FLSqlQuery(object):
                 
             elif isinstance(retorno, (datetime.time, datetime.timedelta)): #time
                 retorno = str(retorno)[:8]
-                
+            #elif isinstance(retorno, memoryview):
+            #    retorno = bytearray(retorno)            
             elif not isinstance(retorno, (str, int, bool, float, pineboolib.qsa.Date)):
                 retorno = float(retorno)
+            
 
             return retorno
 
