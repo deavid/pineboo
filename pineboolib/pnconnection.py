@@ -43,7 +43,7 @@ class PNConnection(QtCore.QObject):
         
         if name:
             self._isOpen = False
-            self._name = name
+            self.name = name
             return
         
         
