@@ -870,7 +870,6 @@ class FLSqlCursor(QtCore.QObject):
         # elif isinstance(connectionName_or_db, QString) or
         # isinstance(connectionName_or_db, str):
         elif isinstance(connectionName_or_db, str):
-            print("**")
             self.d.db_ = pineboolib.project.conn.useConn(connectionName_or_db)
         else:
             self.d.db_ = connectionName_or_db
@@ -1261,7 +1260,7 @@ class FLSqlCursor(QtCore.QObject):
 
             if pK:
                 pKV = self.buffer().value(pK)
-                q = FLSqlQuery(None, "Aux")
+                q = FLSqlQuery(None, "dbAux")
                 q.exec_("UPDATE %s SET %s = %s WHERE %s;" % (self.metadata().name(), fN, self.db().manager(
                 ).formatValue(type_, vv), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV)))
             else:
@@ -1329,7 +1328,7 @@ class FLSqlCursor(QtCore.QObject):
             if pK:
                 pKV = self.buffer().value(pK)
                 # q = FLSqlQuery()
-                q = FLSqlQuery(None, "Aux")
+                q = FLSqlQuery(None, "dbAux")
                 sql_query = "SELECT %s FROM %s WHERE %s" % (fN, self.metadata().name(
                 ), self.db().manager().formatAssignValue(self.metadata().field(pK), pKV))
                 # q.exec_(self.db().dbAux(), sql_query)

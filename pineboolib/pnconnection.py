@@ -45,7 +45,8 @@ class PNConnection(QtCore.QObject):
             self._isOpen = False
             self.name = name
             return
-        
+        else:
+            self.name = "default"
         
         
         self.driverName_ = self.driverSql.aliasToName(driverAlias)
@@ -59,7 +60,6 @@ class PNConnection(QtCore.QObject):
             
             
             self._isOpen = True
-            self._dbAux = self
 
         else:
             logger.error("PNConnection.ERROR: No se encontro el driver '%s'", driverAlias)
@@ -94,14 +94,15 @@ class PNConnection(QtCore.QObject):
         
         
         
-        
         if name in self.connAux.keys():
             return self.connAux[name]
-
-        logger.warning("PNConnection::Creando nueva conexión %s", name)
+        
+        name_conn = name
+        if name == "dbAux":
+            name_conn = None
 
         self.connAux[name] = PNConnection(self.db_name, self.db_host, self.db_port, self.db_userName,
-                                          self.db_password, self.driverSql.nameToAlias(self.driverName()), name)
+                                          self.db_password, self.driverSql.nameToAlias(self.driverName()), name_conn)
         return self.connAux[name]
 
     def removeConn(self, name="default"):
@@ -211,7 +212,7 @@ class PNConnection(QtCore.QObject):
         return self.conn
 
     def dbAux(self):
-        return self._dbAux
+        return self.useConn("dbAux")
 
     def formatValue(self, t, v, upper):
         return self.driver().formatValue(t, v, upper)
