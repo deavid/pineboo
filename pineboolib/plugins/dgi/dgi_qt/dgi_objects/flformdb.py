@@ -769,7 +769,6 @@ class FLFormDB(QtWidgets.QDialog):
     """
 
     def closeEvent(self, e):
-                
         self.frameGeometry()
 
         self.saveGeometry()
@@ -790,10 +789,14 @@ class FLFormDB(QtWidgets.QDialog):
             #    print("Borrando self.script.form", self.script.form)
             #    self.script.form = None
             
-            #print("Borrando self.iface", self.iface)
-            if self.widget:
-                self.widget.clear_connections()
-            self.iface = None
+
+            if self.widget is not None:
+                self.widget.close()
+                self.widget = None
+                del self.widget
+                
+            #self.iface = None
+            #del self.iface
             #if hasattr(self, "widget"):
             #    print("Borrando self.widget", self.widget)
             #    self.widget.close()
