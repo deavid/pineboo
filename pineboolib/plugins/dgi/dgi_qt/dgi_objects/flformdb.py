@@ -793,7 +793,7 @@ class FLFormDB(QtWidgets.QDialog):
             if self.widget is not None:
                 self.widget.close()
                 self.widget = None
-                del self.widget
+                #del self.widget
                 
             #self.iface = None
             #del self.iface
