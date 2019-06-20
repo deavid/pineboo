@@ -383,10 +383,13 @@ def slot_done(fn, signal, sender, caller):
         
         if caller is not None:
             
-            if signal.signal != caller.signal_test.signal:
-                signal_name = signal.signal[1:signal.signal.find("(")] #Quitamos el caracter "2" inicial y parámetros
-                logger.debug("Emitir evento test: %s, args:%s kwargs:%s", signal_name, args if args else "", kwargs if kwargs else "")
-                caller.signal_test.emit(signal_name, sender)
+            try:
+                if signal.signal != caller.signal_test.signal:
+                    signal_name = signal.signal[1:signal.signal.find("(")] #Quitamos el caracter "2" inicial y parámetros
+                    logger.debug("Emitir evento test: %s, args:%s kwargs:%s", signal_name, args if args else "", kwargs if kwargs else "")
+                    caller.signal_test.emit(signal_name, sender)
+            except Exception:
+                pass
             
         return res
     return new_fn
@@ -421,7 +424,7 @@ def connect(sender, signal, receiver, slot, caller=None):
         # logger.exception("ERROR Connecting: %s %s %s %s", sender, signal, receiver, slot)
         return False
 
-    #signal_slot = new_signal, slot_done_fn
+    signal_slot = new_signal, slot_done_fn
     return signal_slot
 
 def disconnect(sender, signal, receiver, slot, caller=None):
