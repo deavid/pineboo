@@ -9,16 +9,12 @@ class FileDialog(object):
         return obj[0] if obj is not None else None
     
     
-    def getSaveFileName(filter=None):
-        ret = QtWidgets.QFileDialog.getSaveFileName(None, 'Pineboo', os.getenv('HOME'), 'CSV(*.csv)')
+    def getSaveFileName(filter=None, title = "Pineboo"):
+        ret = QtWidgets.QFileDialog.getSaveFileName(None, title, os.getenv('HOME'), filter)
         return ret[0] if ret else None
         
 
-    def getExistingDirectory(basedir=None, caption=None):
-        if basedir and os.path.exists(basedir):
-            dir_ = basedir
-        else:
-            dir_ =  "%s/" % os.getenv('HOME') 
-        
-        ret = QtWidgets.QFileDialog.getExistingDirectory(None, caption, dir_, QtWidgets.QFileDialog.ShowDirsOnly)
+    def getExistingDirectory(basedir=None, title="Pineboo"):
+        dir_ = basedir if basedir and os.path.exists(basedir) else "%s/" % os.getenv('HOME') 
+        ret = QtWidgets.QFileDialog.getExistingDirectory(None, title, dir_, QtWidgets.QFileDialog.ShowDirsOnly)
         return "%s/" % ret if ret else ret
