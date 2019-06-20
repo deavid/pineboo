@@ -94,14 +94,13 @@ class PNBuffer(object):
         self.inicialized_ = True
 
     def primeUpdate(self, row=None):
-
+        
         if row is None  or row < 0:
             row = self.cursor().currentRegister()
             
             
         for field in self.fieldsList():
             value = self.cursor().model().value(row, field.name)
-            
             if value in ("None", None):
                 value = None
             
@@ -1069,8 +1068,9 @@ class FLSqlCursor(QtCore.QObject):
         if not self._action:
             self._action = action
         else:
-            if self.action() == action.name(): #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
-                #logger.warning("Se hace setAction sobre un cursor con el mismo action ya aplicado")
+
+            if self._action.table() == action.table(): #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
+                logger.warning("Se hace setAction sobre un cursor con la misma table")
                 return
         
             if self.action() is not None:
@@ -2516,6 +2516,7 @@ class FLSqlCursor(QtCore.QObject):
 
         if row < 0:
             return -1
+        
         if row >= self.model().rows:
             return -2
         # logger.debug("%s.Row %s ----> %s" % (self.curName(), row, self))
