@@ -104,19 +104,21 @@ class FormDBWidget(QtWidgets.QWidget):
         
 
     def child(self, child_name):
-        ret = self.findChild(QtWidgets.QWidget, child_name, QtCore.Qt.FindChildrenRecursively)
-        if ret is None and self.parent():
-            ret = getattr(self.parent(), child_name, None)
+        try:
+            ret = self.findChild(QtWidgets.QWidget, child_name, QtCore.Qt.FindChildrenRecursively)
+            if ret is None and self.parent():
+                ret = getattr(self.parent(), child_name, None)
             
         
-        if ret is not None: 
-            if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
-                if ret._loaded is False:
-                    ret.load()
-        else:
-            self.logger.warning("WARN: No se encontro el control %s", child_name)
-        return ret
-
+            if ret is not None: 
+                if isinstance(ret, (FLFieldDB, FLTableDB)) and hasattr(ret, "_loaded"):
+                    if ret._loaded is False:
+                        ret.load()
+            else:
+                self.logger.warning("WARN: No se encontro el control %s", child_name)
+            return ret
+        except Exception as e:
+            return None
 
     def cursor(self):
         # if self.cursor_:
