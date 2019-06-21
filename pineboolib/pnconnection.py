@@ -169,7 +169,7 @@ class PNConnection(QtCore.QObject):
         return self.driver().alias_
 
     def driverNameToDriverAlias(self, name):
-        return self.driver().nameToAlias(name)
+        return self.driverSql.nameToAlias(name)
 
     def lastError(self):
         return self.driver().lastError()
