@@ -853,6 +853,9 @@ class FLApplication(QtCore.QObject):
             about_dlg = about_pineboo()
         
     def statusHelpMsg(self, text):
+        if FLSettings().readBoolEntry("application/isDebuggerMode"):
+            logger.warning("StatusHelpMsg: %s", text)
+        
         if not self.main_widget_:
             return
         
