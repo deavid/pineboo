@@ -839,9 +839,11 @@ class ModuleActions(object):
         action.table = None
         action.scriptform = self.mod.name
         pineboolib.project.actions[action.name] = action
+        settings = FLSettings()
         if hasattr(qsa_dict_modules, action.name):
             if action.name != "sys":
-                self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
+                if settings.readBoolEntry("application/isDebuggerMode", False):
+                    self.logger.warning("No se sobreescribe variable de entorno %s", action.name)
         else:  # Se crea la action del módulo
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(
                 action.load, name="QSA.Module.%s" % action.name))
@@ -852,7 +854,8 @@ class ModuleActions(object):
             name = action_xml.name
             if name != "unnamed":
                 if hasattr(qsa_dict_modules, "form%s" % name):
-                    self.logger.warning("No se sobreescribe variable de entorno %s. Hay una definición previa en %s", "%s.form%s" %(self.module_name, name), pineboolib.project.actions[name].mod.module_name)
+                    if settings.readBoolEntry("application/isDebuggerMode", False):
+                        self.logger.warning("No se sobreescribe variable de entorno %s. Hay una definición previa en %s", "%s.form%s" %(self.module_name, name), pineboolib.project.actions[name].mod.module_name)
                 else:  # Se crea la action del form
                     pineboolib.project.actions[name] = action_xml
                     delayed_action = DelayedObjectProxyLoader(

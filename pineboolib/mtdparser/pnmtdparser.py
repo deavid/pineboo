@@ -172,7 +172,10 @@ def generate_model( dest_file, mtd_table):
     
     
     if not pk_found:
-        logger.warning("La tabla %s no tiene definida una clave primaria. No se generará el model %s\n" % (mtd_table.name(), mtd_table.primaryKey()))
+        from pineboolib.fllegacy.flsettings import FLSettings
+        settings = FLSettings()
+        if settings.readBoolEntry("application/isDebuggerMode", False):
+            logger.warning("La tabla %s no tiene definida una clave primaria. No se generará el model %s\n" % (mtd_table.name(), mtd_table.primaryKey()))
         data = []
     
 

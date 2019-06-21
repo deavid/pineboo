@@ -1069,7 +1069,10 @@ class FLSqlCursor(QtCore.QObject):
         else:
 
             if self._action.table() == action.table(): #Esto es para evitar que se setee en un FLTableDB con metadata inválido un action sobre un cursor del parentWidget.
-                logger.warning("Se hace setAction sobre un cursor con la misma table")
+                from pineboolib.fllegacy.flsettings import FLSettings
+                settings = FLSettings()
+                if settings.readBoolEntry("application/isDebuggerMode", False):
+                    logger.warning("Se hace setAction sobre un cursor con la misma table %s", action.table())
                 return
         
             if self.action() is not None:
