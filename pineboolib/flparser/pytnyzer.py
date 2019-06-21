@@ -1001,8 +1001,8 @@ class Member(ASTPython):
                         else:
                             i = 0
                             l = value
-                                
-                        value = "%s:%s + %s" % (i, i, l)
+                        
+                        value = "%s + %s:" % (i, l)
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
     
                     elif member == "length":
