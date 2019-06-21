@@ -400,7 +400,7 @@ class Project(object):
         aqApp.loadTranslations()
        
         self.acl_ = FLAccessControlLists()
-        self.acl_.init_()
+        self.acl_.init()
         
         return True
 

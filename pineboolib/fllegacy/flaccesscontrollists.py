@@ -54,7 +54,7 @@ class FLAccessControlLists(object):
         """
         return self.name_
 
-    def init_(self, aclXml=None):
+    def init(self, aclXml=None):
         """
         Lee el fichero "acl.xml" y establece una nueva lista de control de acceso.
 
