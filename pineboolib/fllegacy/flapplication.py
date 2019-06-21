@@ -497,6 +497,8 @@ class FLApplication(QtCore.QObject):
         from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS, QSize
         from PyQt5.QtWidgets import QToolButton
         
+        
+        
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
         self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
         
@@ -1024,11 +1026,8 @@ class FLApplication(QtCore.QObject):
         self.clearProject()
         project = pineboolib.project
 
-        # if project._DGI.useDesktop():
-        #    import importlib
-        #    project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
-        # project.main_form_name, project.main_form_name)) if
-        # project._DGI.localDesktop() else project._DGI.mainForm()
+        if self.main_widget_ is None:
+            self.main_widget_ = pineboolib.project.main_form.mainWindow
 
         project.main_window.initialized_mods_ = []
 
@@ -1061,7 +1060,7 @@ class FLApplication(QtCore.QObject):
         if self.container_:
             
             self.container_.installEventFilter(self)
-            self.container_.setDisable(False)
+            #self.container_.setDisable(False)
 
         self.callScriptEntryFunction()
 
