@@ -1476,30 +1476,29 @@ class FLApplication(QtCore.QObject):
             active_id_module = self.db().managerModules().activeIdModule()
 
             windows_opened = settings.readListEntry("windowsOpened/Main")
-            if windows_opened:
 
-                for it in windows_opened:
-                    if it in self.db().managerModules().listAllIdModules():
-                        w = None
-                        if it in self.dict_main_widgets_.keys():
-                            w = self.dict_main_widgets_[it]
-                        if not w:
-                            act = self.container_.findChild(QtWidgets.QAction, it)
-                            if not act or not act.isVisible():
-                                continue
+            for it in windows_opened:
+                if it in self.db().managerModules().listAllIdModules():
+                    w = None
+                    if it in self.dict_main_widgets_.keys():
+                        w = self.dict_main_widgets_[it]
+                    if w is None:
+                        act = self.container_.findChild(QtWidgets.QAction, it)
+                        if not act or not act.isVisible():
+                            continue
 
-                            w = self.db().managerModules().createUI("%s.ui" % it, self, None, it)
-                            self.dict_main_widgets_[it] = w
-                            w.setObjectName(it)
-                            if self.acl_:
-                                self.acl_.process(w)
+                        w = self.db().managerModules().createUI("%s.ui" % it, self, None, it)
+                        self.dict_main_widgets_[it] = w
+                        w.setObjectName(it)
+                        if self.acl_:
+                            self.acl_.process(w)
                             
-                            self.setCaptionMainWidget(None)
-                            self.setMainWidget(w)
-                            self.call("%s.init()" % it, [])
-                            self.db().managerModules().setActiveIdModule(it)
-                            self.setMainWidget(w)
-                            self.initMainWidget()
+                        self.setCaptionMainWidget(None)
+                        self.setMainWidget(w)
+                        self.call("%s.init()" % it, [])
+                        self.db().managerModules().setActiveIdModule(it)
+                        self.setMainWidget(w)
+                        self.initMainWidget()
 
             for k in self.dict_main_widgets_.keys():
                 w = self.dict_main_widgets_[k]
@@ -1532,7 +1531,9 @@ class FLApplication(QtCore.QObject):
         if self.main_widget_ is None or self.main_widget_.objectName() != idm:
             return
         
-        windows_opened = FLSettings().readListEntry("windowsOpened/%s" % idm)
+        settings = FLSettings()
+        
+        windows_opened = settings.readListEntry("windowsOpened/%s" % idm)
         if windows_opened:
             for it in windows_opened:
                 act = self.main_widget_.findChild(QAction, it)
@@ -1542,12 +1543,11 @@ class FLApplication(QtCore.QObject):
         
         r = QRect(self.main_widget_.pos(), self.main_widget_.size())
         k = "Geometry/%s" % idm
-        
-        if not FLSettings().readBoolEntry("%s/Maximized" % k, False):
-            r.setX(FLSettings().readNumEntry("%s/X" % k, r.x()))
-            r.setY(FLSettings().readNumEntry("%s/Y" % k, r.y()))
-            r.setWidth(FLSettings().readNumEntry("%s/Width" % k, r.width()))
-            r.setWidth(FLSettings().readNumEntry("%s/Height" % k, r.height()))
+        if not settings.readBoolEntry("%s/Maximized" % k, False):
+            r.setX(settings.readNumEntry("%s/X" % k, r.x()))
+            r.setY(settings.readNumEntry("%s/Y" % k, r.y()))
+            r.setWidth(settings.readNumEntry("%s/Width" % k, r.width()))
+            r.setHeight(settings.readNumEntry("%s/Height" % k, r.height()))
             desk = QApplication.desktop().availableGeometry(self.main_widget_)
             inter = desk.intersected(r)
             self.main_widget_.resize(r.size())
