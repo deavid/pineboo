@@ -31,6 +31,7 @@ class FLApplication(QtCore.QObject):
     tool_box_ = None
     toogle_bars_ = None
     project_ = None
+    mdi_toolbuttons = None
     wb_ = None
     form_alone_ = None
     acl_ = None
@@ -67,6 +68,7 @@ class FLApplication(QtCore.QObject):
         self.form_alone_ = False
         self.not_exit_ = False
         self.acl_ = None
+        self.mdi_toolbuttons = []
         self.popup_warn_ = None
         self.mng_loader_ = None
         self.sys_tr_ = None
@@ -228,6 +230,12 @@ class FLApplication(QtCore.QObject):
                     return False
             else:
                 return False
+        
+        elif evt == QEvent.Resize and isinstance(obj, pineboolib.project.main_form.MainForm):
+            for bt in self.mdi_toolbuttons:
+                bt.setMinimumWidth(obj.width() - 10)
+            
+            return True
         
         
         return super().eventFilter(obj, ev)
@@ -513,6 +521,12 @@ class FLApplication(QtCore.QObject):
             self.tool_box_.removeItem(item)
             del item
         
+        for tb in self.mdi_toolbuttons:
+            self.mdi_toolbuttons.remove(tb)
+        
+        del self.mdi_toolbuttons
+        self.mdi_toolbuttons = []
+        
         c = 65
         
         for it in self.db().managerModules().listIdAreas():
@@ -589,7 +603,7 @@ class FLApplication(QtCore.QObject):
             lay = new_area_bar.layout()
             for child in new_area_bar.children():
                 if isinstance(child, QToolButton):
-                    child.setMinimumWidth(self.container_.width())
+                    self.mdi_toolbuttons.append(child)
                     lay.setAlignment(child, QtCore.Qt.AlignCenter)
 
             
@@ -672,7 +686,7 @@ class FLApplication(QtCore.QObject):
         lay = config_tool_bar.layout()
         for child in config_tool_bar.children():
             if isinstance(child, QToolButton):
-                    child.setMinimumWidth(self.container_.width())
+                    self.mdi_toolbuttons.append(child)
                     lay.setAlignment(child, QtCore.Qt.AlignCenter)
         
         
