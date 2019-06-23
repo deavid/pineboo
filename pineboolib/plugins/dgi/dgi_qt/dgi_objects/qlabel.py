@@ -31,7 +31,7 @@ class QLabel(QtWidgets.QLabel):
         self.setVisible(b)
     
     def getAlign(self):
-        return self.alignment()
+        return super().alignment()
     
     def setAlign(self, alignment_):
         self.setAlignment(alignment_)

@@ -44,12 +44,12 @@ class QPushButton(QtWidgets.QPushButton):
         self.setChecked(value)
     
     def getText(self):
-        return self.text()
+        return super().text()
     
     def setText(self, val):
         if self.maximumWidth() < 33 and len(val) > 4:
             val = ""
-        super(QPushButton, self).setText(val)
+        super().setText(val)
         
     def setMaximumSize(self, *args):
         w = 30
