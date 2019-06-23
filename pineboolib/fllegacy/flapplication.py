@@ -1379,7 +1379,6 @@ class FLApplication(QtCore.QObject):
         return ret == QMessageBox.Yes
 
     def writeState(self):
-
         from pineboolib.pncontrolsfactory import QApplication
 
         settings = FLSettings()
@@ -1404,7 +1403,7 @@ class FLApplication(QtCore.QObject):
                 for it in _list:
                     if it != self.container_ and it.isVisible() and it.objectName() in self.dict_main_widgets_.keys():
                         windows_opened.append(it.objectName())
-
+            
             settings.writeEntryList("windowsOpened/Main", windows_opened)
             settings.writeEntry("Geometry/MainWindowMaximized", self.container_.isMaximized())
             if not self.container_.isMaximized():
@@ -1522,7 +1521,7 @@ class FLApplication(QtCore.QObject):
 
     def readStateModule(self):
         
-        from pineboolib.pncontrolsfactory import QAction, QApplication
+        from pineboolib.pncontrolsfactory import QApplication
         
         idm = self.db().managerModules().activeIdModule()
         if not idm:
@@ -1536,10 +1535,10 @@ class FLApplication(QtCore.QObject):
         windows_opened = settings.readListEntry("windowsOpened/%s" % idm)
         if windows_opened:
             for it in windows_opened:
-                act = self.main_widget_.findChild(QAction, it)
+                act = self.main_widget_.findChild(QObject, it)
                 if act and act.isVisible():
                     self.openMasterForm(it, act.icon())
-        
+                    
         
         r = QRect(self.main_widget_.pos(), self.main_widget_.size())
         k = "Geometry/%s" % idm
@@ -1554,7 +1553,10 @@ class FLApplication(QtCore.QObject):
             if (inter.width() * inter.height()) > (r.width() * r.height() / 20):
                 self.main_widget_.move(r.topLeft())
             else:
-                self.main_widget_.resize(QApplication.desktop().availableGeometry(self.main_widget_).size()) 
+                self.main_widget_.resize(QApplication.desktop().availableGeometry(self.main_widget_).size())
+            
+        
+            
 
     def loadScripts(self):
         from pineboolib.pncontrolsfactory import QApplication
