@@ -13,6 +13,8 @@ import re
 import os
 import traceback
 
+from typing import Any, Callable
+
 logger = logging.getLogger("PNControlsFactory")
 
 """
@@ -26,7 +28,10 @@ Devuelve un objecto a partir de su nombre
 """
 
 
-def resolveObject(name):
+def resolveObject(name: str) -> Any:
+    if pineboolib.project is None:
+        logger.warning("Project not initialized")
+        return None
     obj_ = getattr(pineboolib.project._DGI, name, None)
     if obj_:
         return obj_
@@ -153,11 +158,11 @@ auth = resolveObject("auth")
 
 
 class SysType(object):
-    def __init__(self):
+    def __init__(self) -> None:
         self._name_user = None
         self.sys_widget = None
 
-    def nameUser(self):
+    def nameUser(self) -> str:
         ret_ = None
         if aqApp.DGI().use_alternative_credentials():
             ret_ = aqApp.DGI().get_nameuser()
@@ -169,10 +174,10 @@ class SysType(object):
     def interactiveGUI(self):
         return aqApp.DGI().interactiveGUI()
 
-    def isLoadedModule(self, modulename):
+    def isLoadedModule(self, modulename: str) -> bool:
         return modulename in aqApp.db().managerModules().listAllIdModules()
 
-    def translate(self, *args):
+    def translate(self, *args) -> str:
         util = FLUtil()
 
         group = args[0] if len(args) == 2 else "scripts"
@@ -180,14 +185,14 @@ class SysType(object):
 
         return util.translate(group, text)
 
-    def osName(self):
+    def osName(self) -> str:
         util = FLUtil()
         return util.getOS()
 
     def nameBD(self):
         return aqApp.db().DBName()
 
-    def toUnicode(self, val, format):
+    def toUnicode(self, val: str, format: str) -> str:
         return val.encode(format).decode("utf-8", "replace")
 
     def fromUnicode(self, val, format):
@@ -201,7 +206,7 @@ class SysType(object):
 
         return filedir("..")
 
-    def __getattr__(self, fun_):
+    def __getattr__(self, fun_: str) -> Callable:
         if self.sys_widget is None:
             self.sys_widget = pineboolib.project.actions["sys"].load().widget
         return getattr(self.sys_widget, fun_)
@@ -211,10 +216,10 @@ class SysType(object):
         if acl_:
             acl_.installACL(idacl)
 
-    def version(self):
+    def version(self) -> str:
         return str(pineboolib.project.version)
 
-    def processEvents(self):
+    def processEvents(self) -> None:
         return aqApp.DGI().processEvents()
 
     def write(self, encode_, dir_, contenido):
@@ -231,7 +236,7 @@ class SysType(object):
     def updateAreas(self):
         aqApp.initToolBox()
 
-    def isDebuggerMode(self):
+    def isDebuggerMode(self) -> bool:
         from pineboolib.fllegacy.flsettings import FLSettings
 
         return FLSettings().readBoolEntry("application/isDebuggerMode")
@@ -242,7 +247,7 @@ class SysType(object):
     def setCaptionMainWidget(self, t):
         aqApp.setCaptionMainWidget(t)
 
-    def isDebuggerEnabled(self):
+    def isDebuggerEnabled(self) -> bool:
         return True
 
     def nameDriver(self, connName="default"):

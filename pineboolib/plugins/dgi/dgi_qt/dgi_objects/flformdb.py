@@ -8,7 +8,6 @@ from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 import pineboolib
 import traceback
-from pineboolib.pncontrolsfactory import QMdiArea, QMdiSubWindow
 
 
 """
@@ -819,6 +818,8 @@ class FLFormDB(QtWidgets.QDialog):
 
             self.logger.error("El FLFormDB %s no se cerró correctamente:\n%s", self.formName(), traceback.format_exc())
 
+        from pineboolib.pncontrolsfactory import QMdiSubWindow
+
         if isinstance(self.parent(), QMdiSubWindow):
             self.parent().close()
 
@@ -851,6 +852,7 @@ class FLFormDB(QtWidgets.QDialog):
         size = loadGeometryForm(self.geoName())
         if size:
             self.resize(size)
+            from pineboolib.pncontrolsfactory import QMdiSubWindow
 
             if self.parent() and isinstance(self.parent(), QMdiSubWindow):
                 self.parent().resize(size)
@@ -906,6 +908,8 @@ class FLFormDB(QtWidgets.QDialog):
             if module_name in aqApp.dict_main_widgets_.keys():
                 module_window = aqApp.dict_main_widgets_[module_name]
                 mdi_area = module_window.centralWidget()
+                from pineboolib.pncontrolsfactory import QMdiArea, QMdiSubWindow
+
                 if isinstance(mdi_area, QMdiArea) and type(self).__name__ == "FLFormDB":
                     if not isinstance(self.parent(), QMdiSubWindow):
                         # size = self.size()

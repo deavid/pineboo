@@ -6,6 +6,7 @@ import logging
 """
 Esta libreria se usa para especificar estados de una función que no son final
 """
+from typing import Callable
 
 logger = logging.getLogger(__name__)
 MSG_EMITTED = {}
@@ -13,9 +14,8 @@ CLEAN_REGEX = re.compile(r"\s*object\s+at\s+0x[0-9a-zA-Z]{6,38}", re.VERBOSE)
 MINIMUM_TIME_FOR_REPRINT = 300
 
 
-def clean_repr(x):
-    x = repr(x)
-    return CLEAN_REGEX.sub("", x)
+def clean_repr(x) -> str:
+    return CLEAN_REGEX.sub("", repr(x))
 
 
 """
@@ -23,7 +23,7 @@ Aviso no implementado
 """
 
 
-def NotImplementedWarn(fn):
+def NotImplementedWarn(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -44,7 +44,7 @@ Aviso no implementado. Igual que la anterior, pero solo informa en caso de debug
 """
 
 
-def NotImplementedDebug(fn):
+def NotImplementedDebug(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -64,7 +64,7 @@ Avisa que hay otro desarollador trabajando en una función
 """
 
 
-def WorkingOnThis(fn):
+def WorkingOnThis(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -84,7 +84,7 @@ Aviso de implementación de una función en pruebas
 """
 
 
-def BetaImplementation(fn):
+def BetaImplementation(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -104,7 +104,7 @@ Similar a NotImplemented, pero sin traceback. Para funciones que de momento no n
 """
 
 
-def Empty(fn):
+def Empty(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -124,7 +124,7 @@ Avisa de que la funcionalidad está incompleta de desarrollo
 """
 
 
-def Incomplete(fn):
+def Incomplete(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -144,7 +144,7 @@ Avisa de que la funcionalidad tiene que ser revisada
 """
 
 
-def needRevision(fn):
+def needRevision(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)
@@ -164,7 +164,7 @@ Avisa de que la funcionalidad está dejando de ser usada, en pro de otra
 """
 
 
-def Deprecated(fn):
+def Deprecated(fn: Callable) -> Callable:
     def newfn(*args, **kwargs):
         global MSG_EMITTED
         ret = fn(*args, **kwargs)

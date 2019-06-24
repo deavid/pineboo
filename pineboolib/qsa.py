@@ -14,6 +14,8 @@ from pineboolib.pncontrolsfactory import FLUtil, SysType, aqApp, QInputDialog, Q
 from . import decorators
 from functools import total_ordering
 
+from pineboolib.utils import StructMyDict
+
 logger = logging.getLogger(__name__)
 
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
@@ -71,7 +73,7 @@ function anon(%s) {
     return mod.FormInternalObj().anon
 
 
-def Object(x=None):
+def Object(x: None = None) -> StructMyDict:
     """
     Objeto tipo object
     """
@@ -102,7 +104,7 @@ class Array(object):
     names_ = None
     pos_iter = None
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         import collections
 
         self.dict_ = collections.OrderedDict()

@@ -12,32 +12,37 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.mtdparser.pnmtdparser import mtd_parse
 
-"""
-Almacena los datos del serividor de la BD principal
-"""
+# Solo para tipos de dato
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
+from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformrecorddb import FLFormRecordDB
+from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
+from pineboolib.plugins.dgi.dgi_qt.dgi_qt import dgi_qt
+from typing import Callable, List, Optional, Union
 
 
 class DBServer(XMLStruct):
+    """
+    Almacena los datos del serividor de la BD principal
+    """
+
     host = None
     port = None
 
 
-"""
-Almacena los datos de autenticación de la BD principal
-"""
-
-
 class DBAuth(XMLStruct):
+    """
+    Almacena los datos de autenticación de la BD principal
+    """
+
     username = None
     password = None
 
 
-"""
-Esta es la clase principal del projecto. Se puede acceder a esta con pineboolib.project desde cualquier parte del projecto
-"""
-
-
 class Project(object):
+    """
+    Esta es la clase principal del proyecto. Se puede acceder a esta con pineboolib.project desde cualquier parte del projecto
+    """
+
     logger = logging.getLogger("main.Project")
     conn = None  # Almacena la conexión principal a la base de datos
     debugLevel = 100
@@ -56,7 +61,7 @@ class Project(object):
     Constructor
     """
 
-    def __init__(self, DGI):
+    def __init__(self, DGI: dgi_qt) -> None:
 
         from pineboolib.plugins.kugar.pnkugarplugins import PNKugarPlugins
 
@@ -104,11 +109,11 @@ class Project(object):
     @param q Número con el nimvel espeficicado
     """
 
-    def setDebugLevel(self, q):
+    def setDebugLevel(self, q: int) -> None:
         Project.debugLevel = q
         # self._DGI.pnqt3ui.Options.DEBUG_LEVEL = q
 
-    def init_time(self):
+    def init_time(self) -> None:
         self.time_ = time.time()
 
     def show_time(self, text="", stack=False):
@@ -120,7 +125,7 @@ class Project(object):
     @return Objeto acl_
     """
 
-    def acl(self):
+    def acl(self) -> Optional[FLAccessControlLists]:
         return self.acl_
 
     """
@@ -145,7 +150,7 @@ class Project(object):
         self.actions = {}
         self.tables = {}
 
-    def load(self, file_name):
+    def load(self, file_name: str) -> bool:
         from xml.etree import ElementTree as ET
         import hashlib
 
@@ -201,7 +206,7 @@ class Project(object):
     Arranca el projecto. Conecta a la BD y carga los datos
     """
 
-    def run(self):
+    def run(self) -> bool:
 
         if not self.conn:
             from pineboolib.pnconnection import PNConnection
@@ -402,7 +407,7 @@ class Project(object):
     @return Boolean con el resultado.
     """
 
-    def call(self, function, aList, object_context=None, showException=True):
+    def call(self, function: str, aList: List[Union[List[str], str, bool]], object_context: None = None, showException: bool = True) -> Optional[bool]:
         # FIXME: No deberíamos usar este método. En Python hay formas mejores
         # de hacer esto.
         self.logger.trace("JS.CALL: fn:%s args:%s ctx:%s", function, aList, object_context, stack_info=True)
@@ -503,7 +508,7 @@ class Project(object):
     @param scriptname, Nombre del script a convertir
     """
 
-    def parseScript(self, scriptname, txt_=""):
+    def parseScript(self, scriptname: str, txt_: str = "") -> None:
 
         # Intentar convertirlo a Python primero con flscriptparser2
         if not os.path.isfile(scriptname):
@@ -592,16 +597,60 @@ class Project(object):
     @return ruta a la carpeta temporal
     """
 
-    def get_temp_dir(self):
+    def get_temp_dir(self) -> str:
         return self.tmpdir
 
 
-"""
-Esta clase almacena la información de los módulos cargados
-"""
+class File(object):
+    """
+    Clase que gestiona cada uno de los ficheros de un módulo
+    """
+
+    """
+    Constructor
+    @param module. Identificador del módulo propietario
+    @param filename. Nombre del fichero
+    @param sha. Código sha1 del contenido del fichero
+    @param basedir. Ruta al fichero en cache
+    """
+
+    def __init__(self, module: str, filename: str, sha: Optional[str] = None, basedir: Optional[str] = None) -> None:
+        self.module = module
+        self.filename = filename
+        self.sha = sha
+        if filename.endswith(".qs.py"):
+            self.ext = ".qs.py"
+            self.name = os.path.splitext(os.path.splitext(filename)[0])[0]
+        else:
+            self.name, self.ext = os.path.splitext(filename)
+
+        db_name = pineboolib.project.conn.DBName()
+
+        if self.sha:
+            self.filekey = "%s/%s/file%s/%s/%s%s" % (db_name, module, self.ext, self.name, sha, self.ext)
+        else:
+            self.filekey = filename
+        self.basedir = basedir
+
+    """
+    Devuelve la ruta absoluta del fichero
+    @return Ruta absoluta del fichero
+    """
+
+    def path(self) -> str:
+        if self.basedir:
+            # Probablemente porque es local . . .
+            return _dir(self.basedir, self.filename)
+        else:
+            # Probablemente es remoto (DB) y es una caché . . .
+            return _dir("cache", *(self.filekey.split("/")))
 
 
 class Module(object):
+    """
+    Esta clase almacena la información de los módulos cargados
+    """
+
     """
     Constructor
     @param areaid. Identificador de area.
@@ -610,7 +659,7 @@ class Module(object):
     @param icon. Icono del módulo
     """
 
-    def __init__(self, areaid, name, description, icon):
+    def __init__(self, areaid: str, name: str, description: str, icon: str) -> None:
         self.areaid = areaid
         self.name = name
         self.description = description  # En python2 era .decode(UTF-8)
@@ -626,7 +675,7 @@ class Module(object):
     @param fileobj. Objeto File con información del fichero
     """
 
-    def add_project_file(self, fileobj):
+    def add_project_file(self, fileobj: File) -> None:
         self.files[fileobj.filename] = fileobj
 
     """
@@ -634,7 +683,7 @@ class Module(object):
     @return Boolean. True si ok, False si hay problemas
     """
 
-    def load(self):
+    def load(self) -> bool:
         pathxml = _path("%s.xml" % self.name)
         # pathui = _path("%s.ui" % self.name)
         if pathxml is None:
@@ -684,52 +733,6 @@ class Module(object):
 
 
 """
-Clase que gestiona cada uno de los ficheros de un módulo
-"""
-
-
-class File(object):
-    """
-    Constructor
-    @param module. Identificador del módulo propietario
-    @param filename. Nombre del fichero
-    @param sha. Código sha1 del contenido del fichero
-    @param basedir. Ruta al fichero en cache
-    """
-
-    def __init__(self, module, filename, sha=None, basedir=None):
-        self.module = module
-        self.filename = filename
-        self.sha = sha
-        if filename.endswith(".qs.py"):
-            self.ext = ".qs.py"
-            self.name = os.path.splitext(os.path.splitext(filename)[0])[0]
-        else:
-            self.name, self.ext = os.path.splitext(filename)
-
-        db_name = pineboolib.project.conn.DBName()
-
-        if self.sha:
-            self.filekey = "%s/%s/file%s/%s/%s%s" % (db_name, module, self.ext, self.name, sha, self.ext)
-        else:
-            self.filekey = filename
-        self.basedir = basedir
-
-    """
-    Devuelve la ruta absoluta del fichero
-    @return Ruta absoluta del fichero
-    """
-
-    def path(self):
-        if self.basedir:
-            # Probablemente porque es local . . .
-            return _dir(self.basedir, self.filename)
-        else:
-            # Probablemente es remoto (DB) y es una caché . . .
-            return _dir("cache", *(self.filekey.split("/")))
-
-
-"""
 Clase encargada de gestionar los diferentes módulos de inteligencia lógica del projecto
 """
 
@@ -740,7 +743,7 @@ class DelayedObjectProxyLoader(object):
     Constructor
     """
 
-    def __init__(self, obj, *args, **kwargs):
+    def __init__(self, obj: Callable, *args, **kwargs) -> None:
         self._name = "unnamed-loader"
         if "name" in kwargs:
             self._name = kwargs["name"]
@@ -788,7 +791,7 @@ class ModuleActions(object):
     @param modulename. Nombre del módulo
     """
 
-    def __init__(self, module, path, modulename):
+    def __init__(self, module: Module, path: str, modulename: str) -> None:
         self.mod = module
         self.path = path
         self.module_name = modulename
@@ -800,7 +803,7 @@ class ModuleActions(object):
     Carga las actions del módulo en el projecto
     """
 
-    def load(self):
+    def load(self) -> None:
         # Ojo: Almacena un arbol con los módulos cargados
         from pineboolib import qsa as qsa_dict_modules
 
@@ -914,7 +917,7 @@ class XMLAction(XMLStruct):
     Constructor
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(XMLAction, self).__init__(*args, **kwargs)
         self.form = self._v("form")
         self.name = self._v("name")
@@ -933,7 +936,7 @@ class XMLAction(XMLStruct):
     @return widget con form inicializado
     """
 
-    def loadRecord(self, cursor):
+    def loadRecord(self, cursor: None) -> FLFormRecordDB:
         self._loaded = getattr(self.formrecord_widget, "_loaded", False)
         if not self._loaded:
             if getattr(self.formrecord_widget, "widget", None):
@@ -965,7 +968,7 @@ class XMLAction(XMLStruct):
 
         return self.formrecord_widget
 
-    def load(self):
+    def load(self) -> FLFormDB:
         self._loaded = getattr(self.mainform_widget, "_loaded", False)
         if not self._loaded:
             if getattr(self.mainform_widget, "widget", None):
@@ -1006,7 +1009,7 @@ class XMLAction(XMLStruct):
     @return wigdet del formRecord.
     """
 
-    def formRecordWidget(self):
+    def formRecordWidget(self) -> FLFormRecordDB:
         if not getattr(self.formrecord_widget, "_loaded", None):
             self.loadRecord(None)
 
@@ -1054,7 +1057,7 @@ class XMLAction(XMLStruct):
     @param parent. Objecto al que carga el script, si no se especifica es a self.script
     """
 
-    def load_script(self, scriptname, parent=None):
+    def load_script(self, scriptname: str, parent: Optional[Union[FLFormDB, FLFormRecordDB]] = None) -> None:
         from importlib import machinery
 
         if scriptname:
