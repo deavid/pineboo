@@ -372,11 +372,17 @@ class DlgConnect(QtWidgets.QWidget):
         except Exception:
             QMessageBox.warning(self.ui,"Pineboo", "El perfil %s no parece válido" % self.ui.cbProfiles.currentText() ,QtWidgets.QMessageBox.Ok)
             return
+        
+        version = root.get("Version")
+        if version is None:
+            version = 1.0
+        else:
+            version = float(version)
 
         for profile in root.findall("profile-data"):
             password = profile.find("password")
 
-        if password is None or password.text == hashlib.sha256("".encode()).hexdigest():
+        if password is None or (version > 1.0 and password.text == hashlib.sha256("".encode()).hexdigest()):
             self.ui.lePassword.setEnabled(False)
         else:
             self.ui.lePassword.setEnabled(True)
