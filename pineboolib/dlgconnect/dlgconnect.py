@@ -376,7 +376,7 @@ class DlgConnect(QtWidgets.QWidget):
         for profile in root.findall("profile-data"):
             password = profile.find("password")
 
-        if password is None:
+        if password is None or password.text == hashlib.sha256("".encode()).hexdigest():
             self.ui.lePassword.setEnabled(False)
         else:
             self.ui.lePassword.setEnabled(True)
