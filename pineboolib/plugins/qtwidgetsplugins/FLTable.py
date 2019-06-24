@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-pluginType = MODULE  # noqa  # FIXME: Esto no es Python.
+pluginType = MODULE  # noqa  
 
 
 def moduleInformation():
