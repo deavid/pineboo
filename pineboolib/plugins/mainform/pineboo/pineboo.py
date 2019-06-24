@@ -3,7 +3,6 @@
 import sys
 import pineboolib
 import logging
-from binascii import unhexlify
 
 from pineboolib.utils import filedir, Struct
 from pineboolib.fllegacy.FLSettings import FLSettings
@@ -15,8 +14,6 @@ from PyQt5.QtWidgets import (
     QToolBox,
     QLayout,
     QVBoxLayout,
-    QAction,
-    QTextEdit,
     QMessageBox,
     QWidget,
     QMainWindow,
@@ -26,7 +23,7 @@ from PyQt5.QtWidgets import (
     QDockWidget,
 )
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import Qt, QObject
+from PyQt5.QtCore import Qt
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +153,7 @@ class MainForm(QMainWindow):
 
         statusText = ""
 
-        if verticalName != None:
+        if verticalName is not None:
             statusText = verticalName
 
         if cbPosInfo == "True":
@@ -333,8 +330,8 @@ class MainForm(QMainWindow):
 
     def loadState(self):
         sett_ = FLSettings()
-        viewFavorites_ = sett_.readBoolEntry("application/mainForm/viewFavorites", True)
-        viewAreas_ = sett_.readBoolEntry("application/mainForm/viewAreas", True)
+        # viewFavorites_ = sett_.readBoolEntry("application/mainForm/viewFavorites", True)
+        # viewAreas_ = sett_.readBoolEntry("application/mainForm/viewAreas", True)
         sizeF_ = sett_.readEntry("application/mainForm/FavoritesSize", None)
         sizeA_ = sett_.readEntry("application/mainForm/AreasSize", None)
         sizeMF_ = sett_.readEntry("application/mainForm/mainFormSize", None)

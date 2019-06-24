@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-import time
 import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import qWarning, QKeySequence
+from PyQt5.Qt import QKeySequence
 
-from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm, convertFLAction
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
+from pineboolib.utils import filedir, loadGeometryForm, saveGeometryForm
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
 import pineboolib
@@ -238,8 +236,6 @@ class FLFormDB(QtWidgets.QDialog):
 
     @QtCore.pyqtSlot()
     def initScript(self):
-        from threading import Thread
-
         if self._loaded:
             if not getattr(self.widget, "iface", None):
                 self.iface = self.widget  # Es posible que no tenga ifaceCtx, así hacemos que sea polivalente
@@ -251,7 +247,7 @@ class FLFormDB(QtWidgets.QDialog):
                 try:
                     self.iface.init()
                 except Exception:
-                    script_name = self.iface.__module__
+                    # script_name = self.iface.__module__
                     from pineboolib.pncontrolsfactory import aqApp, wiki_error
 
                     aqApp.msgBoxWarning(wiki_error(traceback.format_exc()), pineboolib.project._DGI)
@@ -871,7 +867,7 @@ class FLFormDB(QtWidgets.QDialog):
 
     """
     Captura evento ocultar
-    
+
 
     def hideEvent(self, h):
         pW = self.parentWidget()
@@ -912,7 +908,7 @@ class FLFormDB(QtWidgets.QDialog):
                 mdi_area = module_window.centralWidget()
                 if isinstance(mdi_area, QMdiArea) and type(self).__name__ == "FLFormDB":
                     if not isinstance(self.parent(), QMdiSubWindow):
-                        size = self.size()
+                        # size = self.size()
                         mdi_area.addSubWindow(self)
 
         if self.initFocusWidget_ is None:
@@ -925,7 +921,7 @@ class FLFormDB(QtWidgets.QDialog):
         #    self.tiempo_ini = time.time()
         super(FLFormDB, self).show()
         # tiempo_fin = time.time()
-        settings = FLSettings()
+        # settings = FLSettings()
 
         if self.parent().parent() is None:
             from PyQt5.QtWidgets import QDesktopWidget  # Centrado

@@ -1,19 +1,17 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
+import logging
+import os
+import sys
+import pineboolib
+
 from importlib import import_module
 
+from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
+from PyQt5.QtWidgets import qApp
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import filedir, load2xml, _path
 from pineboolib.fllegacy.flsettings import FLSettings
-import pineboolib
-import logging
-import os
-import weakref
-import sys
-import traceback
-from PyQt5.Qt import QMessageBox
-from PyQt5.QtWidgets import qApp
 
 
 logger = logging.getLogger(__name__)
@@ -97,7 +95,7 @@ class dgi_qt(dgi_schema):
             from PyQt5 import uic
 
             qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
-            if not qtWidgetPlugings in uic.widgetPluginPath:
+            if qtWidgetPlugings not in uic.widgetPluginPath:
                 logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
                 uic.widgetPluginPath.append(qtWidgetPlugings)
             uic.loadUi(form_path, w_)

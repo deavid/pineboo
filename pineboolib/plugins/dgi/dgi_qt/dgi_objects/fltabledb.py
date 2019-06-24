@@ -25,9 +25,6 @@ import logging
 from PyQt5.QtGui import QPixmap
 
 logger = logging.getLogger(__name__)
-
-import time
-
 DEBUG = False
 
 
@@ -280,11 +277,11 @@ class FLTableDB(QtWidgets.QWidget):
                 rMD = FLRelationMetaData(curName, self.foreignField_, FLRelationMetaData.RELATION_1M, False, False, False)
                 fMD.addRelationMD(rMD)
                 if DEBUG:
-                    loger.warning("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
+                    logger.warning("FLTableDB : Creando automáticamente %s.%s --1M--> %s.%s", self.tableName_, self.fieldRelation_, curName, self.foreignField_)
 
             else:
                 if DEBUG:
-                    loger.warning(
+                    logger.warning(
                         "FLTableDB : El campo ( %s ) indicado en la propiedad fieldRelation no se encuentra en la tabla ( %s )",
                         self.fieldRelation_,
                         self.tableName_,
@@ -763,9 +760,8 @@ class FLTableDB(QtWidgets.QWidget):
 
         self.showed = True
 
-        own_tmd = False
+        # own_tmd = bool(self.tableName_)
         if self.tableName_:
-            own_tmd = True
             if not self.cursor().db().manager().existsTable(self.tableName_):
                 tmd = self.cursor().db().manager().createTable(self.tableName_)
             else:
@@ -981,8 +977,8 @@ class FLTableDB(QtWidgets.QWidget):
         if self.checkColumnEnabled_:
             try:
                 self.tableRecords_.clicked.disconnect(self.tableRecords_.setChecked)
-            except:
-                pass
+            except Exception:
+                logger.exception("setTableRecordsCursor: Error disconnecting setChecked signal")
             self.tableRecords_.clicked.connect(self.tableRecords_.setChecked)
 
         t_cursor = self.tableRecords_.cursor()
@@ -1379,12 +1375,12 @@ class FLTableDB(QtWidgets.QWidget):
     @decorators.BetaImplementation
     def initFakeEditor(self):
         if not self.fakeEditor_:
-            self.fakeEditor_ = QTextEdit(self.tabData)
+            self.fakeEditor_ = QtWidgets.QTextEdit(self.tabData)
 
-            sizePolizy = QtWidgets.QSizePolicy(7, QtWidgets.QSizePolicy.Expanding)
+            sizePolicy = QtWidgets.QSizePolicy(7, QtWidgets.QSizePolicy.Expanding)
             sizePolicy.setHeightForWidth(True)
 
-            self.fakeEditor_.setSizePolicy(sizePolizy)
+            self.fakeEditor_.setSizePolicy(sizePolicy)
             self.fakeEditor_.setTabChangesFocus(True)
             self.fakeEditor_.setFocusPolicy(QtCore.Qt.StrongFocus)
             self.setFocusProxy(self.fakeEditor_)
@@ -1715,7 +1711,7 @@ class FLTableDB(QtWidgets.QWidget):
             model = self.cursor().model()
             for column in range(model.columnCount()):
                 field = model.metadata().indexFieldObject(column)
-                if not field.visibleGrid() or (field.type() is "check" and not self.checkColumnEnabled_):
+                if not field.visibleGrid() or (field.type() == "check" and not self.checkColumnEnabled_):
                     self.tableRecords_.setColumnHidden(column, True)
                 else:
                     self.tableRecords_.setColumnHidden(column, False)
@@ -1770,8 +1766,8 @@ class FLTableDB(QtWidgets.QWidget):
                 self.comboBoxFieldToSearch.clear()
                 self.comboBoxFieldToSearch2.clear()
 
-                cb1 = None
-                cb2 = None
+                # cb1 = None
+                # cb2 = None
                 for column in range(model.columnCount()):
                     visual_column = self.tableRecords_.header().logicalIndex(column)
                     if visual_column is not None:
@@ -2215,7 +2211,7 @@ class FLTableDB(QtWidgets.QWidget):
 
         from pineboolib.pncontrolsfactory import AQOdsGenerator, AQOdsSpreadSheet, AQOdsSheet, AQOdsRow, AQOdsColor, AQOdsStyle, AQOdsImage
 
-        hor_header = tdb.horizontalHeader()
+        # hor_header = tdb.horizontalHeader()
         title_style = [AQOdsStyle.Align_center, AQOdsStyle.Text_bold]
         border_bot = AQOdsStyle.Border_bottom
         border_right = AQOdsStyle.Border_right
@@ -2277,7 +2273,7 @@ class FLTableDB(QtWidgets.QWidget):
                             row.coveredCell()
 
                     elif field.type() in ("bool", "unlock"):
-                        str_ = self.tr("Sí") if val == True else self.tr("No")
+                        str_ = self.tr("Sí") if val else self.tr("No")
                         row.opIn(italic)
                         row.opIn(str_)
 

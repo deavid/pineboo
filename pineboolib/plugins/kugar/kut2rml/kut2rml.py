@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from xml import etree
-from xml.etree.ElementTree import Element, SubElement, Comment, tostring
+from xml.etree.ElementTree import Element, SubElement
 from PyQt5.QtGui import QColor
 from pineboolib.utils import filedir
 import pineboolib
 import logging
 import traceback
-import os
-import sys
 import datetime
 
 canvas_ = None
@@ -132,8 +130,8 @@ class kut2rml(object):
 
     def drawLine(self, xml, parent):
 
-        color = self.getColor(xml.get("Color")).name()
-        style = int(xml.get("Style"))
+        # color = self.getColor(xml.get("Color")).name()
+        # style = int(xml.get("Style"))
         width = int(xml.get("Width"))
         X1 = int(xml.get("X1"))
         X2 = int(xml.get("X2"))
@@ -150,8 +148,8 @@ class kut2rml(object):
     def processText(self, xml, parent, data=None):
         isImage = False
         text = xml.get("Text")
-        BorderWidth = int(self.getOption(xml, "BorderWidth"))
-        borderColor = self.getColor(xml.get("BorderColor")).name()
+        # BorderWidth = int(self.getOption(xml, "BorderWidth"))
+        # borderColor = self.getColor(xml.get("BorderColor")).name()
         font = xml.get("FontFamily")
         fontSize = int(xml.get("FontSize"))
         fontW = int(self.getOption(xml, "FontWeight"))
@@ -196,12 +194,12 @@ class kut2rml(object):
             if text.startswith(filedir("../tempdata")):
                 isImage = True
 
-        precision = xml.get("Precision")
-        negValueColor = xml.get("NegValueColor")
-        Currency = xml.get("Currency")
-        dataType = xml.get("Datatype")
-        commaSeparator = xml.get("CommaSeparator")
-        dateFormat = xml.get("DateFormat")
+        # precision = xml.get("Precision")
+        # negValueColor = xml.get("NegValueColor")
+        # Currency = xml.get("Currency")
+        # dataType = xml.get("Datatype")
+        # commaSeparator = xml.get("CommaSeparator")
+        # dateFormat = xml.get("DateFormat")
         """
             if precision:
                 print("Fix Field.precision", precision)
@@ -243,7 +241,7 @@ class kut2rml(object):
 
             rF = SubElement(self.docInitSubElemet_, "registerTTFont")
             rF.set("faceName", font)
-            rF.set("fileName", fileF)
+            # rF.set("fileName", fileF)
 
         if self.getOption(xml, "BorderStyle") == "1":
             self.drawRec(xml, parent)
@@ -256,7 +254,7 @@ class kut2rml(object):
 
     def drawRec(self, xml, parent):
         # Rectangulo
-        bgColor = self.getColor(xml.get("BackgroundColor")).name()
+        # bgColor = self.getColor(xml.get("BackgroundColor")).name()
         fgColor = self.getColor(xml.get("ForegroundColor")).name()
 
         sE = SubElement(parent, "stroke")
@@ -287,7 +285,7 @@ class kut2rml(object):
         W = int(xml.get("Width"))
         H = int(xml.get("Height"))
         x = xml.get("X")
-        y = xml.get("Y")
+        # y = xml.get("Y")
 
         # if W > self.pageSize_["W"]:
         #    W = self.pageSize_["W"] - self.pageSize_["RM"]
@@ -312,7 +310,7 @@ class kut2rml(object):
         # Calculamos la posicion real contando con el tamaño
         if xml.tag in ("Label", "Field", "Special", "CalculatedField"):
             if xml.get("Text") and obj.tag == "drawString":
-                Ancho_ = int(xml.get("FontSize")) * len(xml.get("Text"))
+                # Ancho_ = int(xml.get("FontSize")) * len(xml.get("Text"))
                 Alto_ = int(xml.get("FontSize"))
                 # x = x + (W / 2) - Ancho_
                 y = y - Alto_
@@ -373,15 +371,15 @@ class kut2rml(object):
         fontE.set("size", str(size))
 
     """
-    Calcula la coordenada en el nuevo report , segun los tramos ya añadidos 
+    Calcula la coordenada en el nuevo report , segun los tramos ya añadidos
     """
 
     def getCord(self, t, val):
         ret = None
-        if t is "X":  # Horizontal
+        if t == "X":  # Horizontal
             ret = int(self.pageSize_["LM"]) + int(val) * self.correccionAncho_
             # ret = val
-        elif t is "Y":  # Vertical
+        elif t == "Y":  # Vertical
             # ret = int(self.pageSize_["H"]) - int(val) - int(self.pageSize_["TM"] - self.pageSize_["BM"] + self.actualVSize[str(self.pagina)])
             # ret = int(self.pageSize_["H"]) - int(val) - int(self.actualVSize[str(self.pagina)] * self.correcionAltura_)
             ret = int(self.pageSize_["H"]) - int(val) - self._parser_tools.heightCorrection(self.actualVSize[str(self.pagina)])
@@ -452,7 +450,7 @@ class kut2rml(object):
         listDF = xml.findall(name)
         for dF in listDF:
             if dF.get("Level") == str(level):
-                if name is "Detail" and (dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None):
+                if name == "Detail" and (dF.get("DrawIf") is None or data.get(dF.get("DrawIf")) is not None):
                     heightCalculated = self._parser_tools.getHeight(dF) + self.actualVSize[str(self.pagina)]
                     # Buscamos si existe DetailFooter y PageFooter y miramos si
                     # no excede tamaño
@@ -505,7 +503,7 @@ class parsePDF(object):
     def parse(self, xml, filename):
         print(pineboolib.project._DGI.isDeployed())
         if not pineboolib.project._DGI.isDeployed():
-            from z3c.rml import document, rml2pdf
+            from z3c.rml import rml2pdf
         else:
             return
 

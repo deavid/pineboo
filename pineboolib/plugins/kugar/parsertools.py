@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtGui import QPixmap
-from pineboolib.utils import filedir, cacheXPM, load2xml
+from pineboolib.utils import cacheXPM, load2xml
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
-import pineboolib
 import os
 import sys
 import logging
 import datetime
 import fnmatch
-from xml import etree
 
 
 """
@@ -57,7 +54,7 @@ class parsertools(object):
     def convertToNode(self, data):
 
         # node = Node()
-        from pineboolib.pncontrolsfactory import FLDomElement, FLDomNode, FLDomDocument
+        from pineboolib.pncontrolsfactory import FLDomDocument
 
         doc = FLDomDocument()
         ele = doc.createElement("element")
@@ -199,7 +196,6 @@ class parsertools(object):
     """
 
     def converPageSize(self, size, orientation, Custom=None):
-        result_ = None
         r = None
         if size == 0:
             r = [595, 842]  # "A4"
@@ -269,7 +265,7 @@ class parsertools(object):
     """
     Busca y retorna el path de un tipo de letra dado
     @param font_name. Nombre del tipo de letra
-    @return Path del fichero ".ttf" o None 
+    @return Path del fichero ".ttf" o None
     """
 
     def find_font(self, font_name, font_style):

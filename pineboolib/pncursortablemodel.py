@@ -1,20 +1,17 @@
 # # -*- coding: utf-8 -*-
 import math
-import traceback
 import threading
 import logging
 import time
 import itertools
+import locale
 from datetime import date
 
-from pineboolib.utils import filedir, format_double, format_int
-import pineboolib
-
-
-from pineboolib.fllegacy.flutil import FLUtil
-
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-import locale
+
+import pineboolib
+from pineboolib.utils import filedir
+from pineboolib.fllegacy.flutil import FLUtil
 
 DEBUG = False
 
@@ -144,7 +141,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     """
     Indica el tipo de orden a usar y sobre que columna
-    @param col. Columna usada 
+    @param col. Columna usada
     @param order. 0 ASC, 1 DESC
     """
 
@@ -221,13 +218,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         _type = field.type()
         res_color_function = []
 
-        if _type is not "check":
+        if _type != "check":
             r = [x for x in self._data[row]]
             self._data[row] = r
             d = r[col]
         else:
             pK = str(self.value(row, self.metadata().primaryKey()))
-            if not pK in self._checkColumn.keys():
+            if pK not in self._checkColumn.keys():
                 d = QtWidgets.QCheckBox()
                 self._checkColumn[pK] = d
 
@@ -277,7 +274,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         elif role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             # r = self._vdata[row]
-            if _type is "bool":
+            if _type == "bool":
                 if d in (True, "1"):
                     d = "Sí"
                 else:
@@ -290,10 +287,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             elif _type in ("string", "stringlist") and not d:
                 d = ""
 
-            elif _type is "time" and d:
+            elif _type == "time" and d:
                 d = str(d)
 
-            elif _type is "date":
+            elif _type == "date":
                 # Si es str lo paso a datetime.date
                 if isinstance(d, str):
                     if len(d.split("-")[0]) == 4:
@@ -315,10 +312,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
                         self.logger.warning("locale specific date format is not yet implemented for %s", platform.system())
 
-            elif _type is "check":
+            elif _type == "check":
                 return
 
-            elif _type is "double":
+            elif _type == "double":
                 if d is not None:
                     from pineboolib.pncontrolsfactory import aqApp
 
@@ -735,7 +732,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         type_ = self.metadata().field(fieldName).type()
 
-        if type_ is "check":
+        if type_ == "check":
             return
 
         campo = self._data[row][col]
@@ -795,7 +792,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # print("MODIFYING SQL :: ", sql)
         try:
             self.db().execute_query(sql)
-        except Exception as e:
+        except Exception:
             self.logger.exception("ERROR: CursorTableModel.Update %s:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
             return
@@ -844,8 +841,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 self.logger.warning("CursorTableModel.setValuesDict:: columns not found: %r", colsnotfound)
             self.indexUpdateRow(row)
 
-        except Exception as e:
-
+        except Exception:
             self.logger.exception("CursorTableModel.setValuesDict(row %s) = %r :: ERROR:", row, update_dict)
 
     """
@@ -900,7 +896,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     fl_cursor.move(self.findPKRow((pKValue,)))
 
                 self.need_update = True
-            except Exception as e:
+            except Exception:
                 self.logger.exception("CursorTableModel.%s.Insert() :: SQL: %s", self.metadata().name(), sql)
                 # self._cursor.execute("ROLLBACK")
                 return False
@@ -924,7 +920,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         try:
             self.db().execute_query(sql)
             self.need_update = True
-        except Exception as e:
+        except Exception:
             self.logger.exception("CursorTableModel.%s.Delete() :: ERROR:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
             return
@@ -1040,7 +1036,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             if self.metadata():
                 from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()
                 where_ = self.where_filter[: self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
-                # where_ = self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" %  self.metadata().primaryKey()) if self.where_filter.find("ORDER BY") > -1 else " %s GROUP BY %s" %  (self.where_filter, self.metadata().primaryKey())
+                # where_ = (
+                #     self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" % self.metadata().primaryKey())
+                #     if self.where_filter.find("ORDER BY") > -1
+                #     else " %s GROUP BY %s" % (self.where_filter, self.metadata().primaryKey())
+                # )
                 size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
             else:
                 size = util.sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")

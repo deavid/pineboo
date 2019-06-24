@@ -212,7 +212,8 @@ class Project(object):
             return False
 
         from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
-        from pineboolib.pncontrolsfactory import load_models, aqApp
+        from pineboolib.pnobjectsfactory import load_models
+        from pineboolib.pncontrolsfactory import aqApp
 
         # TODO: Refactorizar esta función en otras más sencillas
         # Preparar temporal

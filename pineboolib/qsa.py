@@ -2,23 +2,16 @@
 
 import os
 import re
-import traceback
 import math
 
 from PyQt5 import QtCore
 import logging
 
 # FLObjects
-from pineboolib.fllegacy.flposprinter import FLPosPrinter
-from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.fllegacy.flnetwork import FLNetwork
-from pineboolib.fllegacy.flreportviewer import FLReportViewer
-from pineboolib.fllegacy.flvar import FLVar
+from pineboolib.utils import ustr, filedir
+from pineboolib.pncontrolsfactory import FLUtil, SysType, aqApp, QInputDialog, QLineEdit
 
-from pineboolib.utils import ustr, ustr1, filedir
-
-from pineboolib.pncontrolsfactory import *
+from . import decorators
 from functools import total_ordering
 
 logger = logging.getLogger(__name__)
@@ -43,8 +36,8 @@ def Function(*args):
     arguments = args[: len(args) - 1]
     source = args[len(args) - 1]
     qs_source = """
-    
-function anon(%s) {   
+
+function anon(%s) {
     %s
 } """ % (
         ", ".join(arguments),
@@ -55,7 +48,6 @@ function anon(%s) {
     from pineboolib.flparser import flscriptparse
     from pineboolib.flparser import postparse
     from pineboolib.flparser.pytnyzer import write_python_file
-    import io
 
     prog = flscriptparse.parse(qs_source)
     tree_data = flscriptparse.calctree(prog, alias_mode=0)
@@ -710,7 +702,7 @@ class Dir(object):
             name = self.path_
         try:
             os.stat(name)
-        except:
+        except Exception:
             os.mkdir(name)
 
 
@@ -932,3 +924,14 @@ def debug(txt):
     @param txt. Mensaje.
     """
     logger.warning("---> " + ustr(txt))
+
+
+# Usadas solo por import *
+from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa
+from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa
+from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa
+from pineboolib.fllegacy.flvar import FLVar  # noqa
+from pineboolib.utils import ustr, ustr1, filedir  # noqa
+from pineboolib.pncontrolsfactory import *  # noqa

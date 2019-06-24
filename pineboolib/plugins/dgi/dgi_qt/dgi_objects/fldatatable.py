@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+from PyQt5 import QtCore, QtWidgets, Qt
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
-from PyQt5.QtWidgets import QApplication, QCheckBox
+from PyQt5.QtWidgets import QCheckBox
 import pineboolib
 
 
@@ -518,7 +517,7 @@ class FLDataTable(QtWidgets.QTableView):
                 dt.setFilter(filter)
                 dt.refresh()
 
-                horiz_header = dt.header()
+                # horiz_header = dt.header()
                 for i in range(dt.numCols()):
                     field = mtd.indexFieldObject(i)
                     if not field:
@@ -548,7 +547,7 @@ class FLDataTable(QtWidgets.QTableView):
         field = self.cursor_.metadata().indexFieldObject(col)
         _type = field.type()
 
-        if _type is not "check":
+        if _type != "check":
             return
 
         pK = str(self.cursor().model().value(row, self.cursor().metadata().primaryKey()))

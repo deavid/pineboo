@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-
-from PyQt5.QtWidgets import QMessageBox, QApplication, QDesktopWidget
-from PyQt5.QtCore import QPoint
+from PyQt5.QtWidgets import QMessageBox, QApplication
 import pineboolib
 import logging
 
@@ -18,7 +16,7 @@ class MessageBox(QMessageBox):
         parent = pineboolib.project.main_window
 
         if not isinstance(text, str):
-            temp = text
+            # temp = text
             text = button1
             button1 = title
             title = button0

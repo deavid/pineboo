@@ -13,7 +13,7 @@ class FLUIntValidator(QtGui.QIntValidator):
 
     def validate(self, input_, pos_cursor):
 
-        if not input_ or self._formatting == True:
+        if not input_ or self._formatting:
             return (self.Acceptable, input_, pos_cursor)
 
         i_v = QtGui.QIntValidator(0, 1000000000, self)

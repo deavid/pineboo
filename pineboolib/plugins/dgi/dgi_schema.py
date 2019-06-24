@@ -3,8 +3,6 @@
 from importlib import import_module
 
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
-import pineboolib
-import re
 import logging
 
 logger = logging.getLogger(__name__)
@@ -32,7 +30,7 @@ class dgi_schema(object):
         self._show_object_not_found_warnings = True
         self.loadReferences()
         try:
-            import PyQt5.QtAndroidExtras
+            import PyQt5.QtAndroidExtras  # noqa   # FIXME
 
             self._mobile = True
         except ImportError:

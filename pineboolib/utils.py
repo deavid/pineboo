@@ -5,10 +5,13 @@ import logging
 import sys
 import traceback
 from io import StringIO
+
 from xml import etree
+from PyQt5 import QtCore
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 
 import pineboolib
-
 from pineboolib.fllegacy.flsettings import FLSettings
 
 logger = logging.getLogger(__name__)
@@ -30,7 +33,7 @@ def auto_qt_translate_text(text):
 aqtt = auto_qt_translate_text
 
 
-"""  
+"""
 filedir(path1[, path2, path3 , ...])
 @param array de carpetas de la ruta
 @return devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
@@ -218,11 +221,6 @@ def trace_function(f):
     return wrapper
 
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QByteArray, QDir
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
-
-
 class downloadManager(QObject):
     manager = None
     currentDownload = None
@@ -300,9 +298,6 @@ class downloadManager(QObject):
 
 
 def download_files():
-    import sysconfig
-    from PyQt5.QtWidgets import QApplication, QLabel, QTreeView, QVBoxLayout, QWidget
-
     dir_ = filedir("forms")
     if os.path.exists(dir_):
         return
@@ -415,7 +410,7 @@ def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
     try:
         # tree = etree.parse(file_alike, parser)
         tree = etree.ElementTree.parse(file_alike)
-    except Exception as e:
+    except Exception:
         print("Error al procesar tabla:", nombre)
         print(traceback.format_exc())
         return None
@@ -514,7 +509,7 @@ def ustr1(t):
             t = ""
 
         return "%s" % t
-    except Exception as e:
+    except Exception:
         logger.exception("ERROR Coercing to string: %s", repr(t))
         return None
 
@@ -544,7 +539,7 @@ def checkDependencies(dict_, exit=True):
     for key in dict_.keys():
 
         try:
-            if key is not "Python":
+            if key != "Python":
                 mod_ = import_module(key)
             if key == "ply":
                 version_check(key, mod_.__version__, "3.9")
@@ -566,7 +561,7 @@ def checkDependencies(dict_, exit=True):
             if mod_ver is None:
                 mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
 
-            settings = FLSettings()
+            # settings = FLSettings()
             # if settings.readBoolEntry("application/isDebuggerMode", False):
             # if not key in DEPENDENCIES_CHECKED.keys():
             #    logger.warning("Versión de %s: %s", key, mod_ver)
@@ -576,7 +571,7 @@ def checkDependencies(dict_, exit=True):
             error.append(traceback.format_exc())
 
     msg = ""
-    if len(dependences) > 0 and not key in DEPENDENCIES_CHECKED.keys():
+    if len(dependences) > 0 and key not in DEPENDENCIES_CHECKED.keys():
         logger.warning("HINT: Dependencias incumplidas:")
         for dep in dependences:
             logger.warning("HINT: Instale el paquete %s" % dep)
@@ -589,15 +584,12 @@ def checkDependencies(dict_, exit=True):
                 if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
                     from pineboolib.pncontrolsfactory import QMessageBox
 
-                    try:
-                        ret = QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
-                    except Exception:
-                        logger.error("No se puede mostrar el diálogo de dependecias incumplidas")
+                    QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
 
             if not getattr(sys, "frozen", False):
                 sys.exit(32)
 
-    if not key in DEPENDENCIES_CHECKED.keys():
+    if key not in DEPENDENCIES_CHECKED.keys():
         DEPENDENCIES_CHECKED[key] = mod_ver
 
     return len(dependences) == 0
@@ -694,7 +686,7 @@ def parse_for_duplicates(text):
 
             c = a.count("=")
             if c > 1:
-                part_ = ""
+                # part_ = ""
                 text_to_process = a
                 for m in range(c):
                     pos_ini = text_to_process.find('"')
@@ -725,7 +717,7 @@ def parse_for_duplicates(text):
                 if attr_name not in attr_list:
                     attr_list.append(attr_name)
                 else:
-                    if attr_name is not "":
+                    if attr_name != "":
                         # print("Eliminado attributo duplicado", attr_name)
                         duplicate_ = True
 
@@ -775,10 +767,9 @@ def indent(elem, level=0):
 
 
 def format_double(d, part_integer, part_decimal):
-    from PyQt5 import QtCore
     from pineboolib.pncontrolsfactory import aqApp
 
-    if d is "":
+    if d == "":
         return d
     # import locale
     # p_int = field_meta.partInteger()
@@ -865,7 +856,7 @@ def unformat_number(new_str, old_str, type_):
 """
 Convierte diferentes formatos de fecha a QDate
 @param date: Fecha a convertir
-@return QDate con el valor de la fecha dada 
+@return QDate con el valor de la fecha dada
 """
 
 
@@ -906,7 +897,7 @@ def resolve_pagination(query):
                 #    page = int(query[k])
 
     ret = (None, "50")
-    if limit is not 0:
+    if limit != 0:
         # init = page * limit
         ret = (init, limit)
 
@@ -914,8 +905,6 @@ def resolve_pagination(query):
 
 
 def resolve_query(table_name, params):
-    from collections import OrderedDict
-
     or_where = ""
     and_where = ""
     where = ""
@@ -1018,7 +1007,7 @@ def resolve_where_params(key, valor, mtd_table):
 
 def get_tipo_aqnext(tipo):
     tipo_ = 3
-    subtipo_ = None
+    # subtipo_ = None
 
     if tipo in ["int", "uint", "serial"]:
         tipo_ = 16

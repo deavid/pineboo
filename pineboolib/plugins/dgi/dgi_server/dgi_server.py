@@ -1,28 +1,18 @@
 # # -*- coding: utf-8 -*-
-
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib import decorators
-import pineboolib
+import traceback
+import logging
+import sys
+import inspect
+import datetime
 
 from PyQt5 import QtCore
-
-
-from xmljson import yahoo as xml2json
-from xml.etree.ElementTree import fromstring
-from json import dumps
-from xml import etree
-
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-import traceback
-import logging
-import sys
-import inspect
-import datetime
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +86,7 @@ class parser(object):
 
         if fun_name == "hello":
             aqApp.db().removeConn("%s_remote_client" % id_conn)
-            list_to_delete = []
+            # list_to_delete = []
             for k in list(cursor_dict.keys()):
                 if k.startswith(id_conn):
                     cursor_dict[k] = None
@@ -118,7 +108,7 @@ class parser(object):
             #    for data in cursor_dict[dict_["arguments"]["cursor_id"]]:
             #        res.append(data)
 
-            except:
+            except Exception:
                 print("Error %s  %s %s" % (dict_["arguments"]["cursor_id"], dict_["arguments"]["sql"], fun_name), traceback.format_exc())
 
         elif fun_name == "fetchone":
@@ -126,7 +116,7 @@ class parser(object):
 
             try:
                 ret = cursor.fetchone()
-            except:
+            except Exception:
                 print("Error %s" % fun_name, traceback.format_exc())
             return normalize_data(ret)
 
@@ -142,7 +132,7 @@ class parser(object):
                     cursor,
                     aqApp.db().driver().conn_,
                 )
-            except:
+            except Exception:
                 print("Error refreshQuery", traceback.format_exc())
 
         elif fun_name == "refreshFetch":
@@ -157,7 +147,7 @@ class parser(object):
                     dict_["arguments"]["fields"],
                     dict_["arguments"]["where_filter"],
                 )
-            except:
+            except Exception:
                 print("Error refreshFetch", traceback.format_exc())
 
         elif fun_name == "fetchAll":
@@ -168,14 +158,14 @@ class parser(object):
                     cursor, dict_["arguments"]["tablename"], dict_["arguments"]["where_filter"], dict_["arguments"]["fields"], dict_["arguments"]["curname"]
                 )
                 return normalize_data(ret)
-            except:
+            except Exception:
                 print("Error fetchAll", traceback.format_exc())
 
         elif fun_name == "fetchall":
             try:
                 ret_ = cursor.fetchall()
                 return normalize_data(ret_)
-            except:
+            except Exception:
                 print("Error fetchall", traceback.format_exc())
 
         elif fun_name == "close":
@@ -184,7 +174,7 @@ class parser(object):
                 del cursor
                 del cursor_dict["%s_%s" % (id_conn, dict_["arguments"]["cursor_id"])]
                 # print("3 close", dict_["arguments"]["cursor_id"])
-            except:
+            except Exception:
                 print("Error %s" % fun_name, traceback.format_exc())
 
         else:

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtCore
 import logging
 import os
+from PyQt5 import QtCore
+from pineboolib.pncontrolsfactory import FLRelationMetaData, FLSqlCursor as FLSqlCursor_legacy
+from pineboolib.pncontrolsfactory import aqApp
 
 logger = logging.getLogger(__name__)
-from pineboolib.pncontrolsfactory import FLRelationMetaData, aqApp, FLSqlCursor as FLSqlCursor_legacy
 
 
 class DelayedObjectProxyLoader(object):
@@ -54,7 +55,7 @@ class DelayedObjectProxyLoader(object):
             key_ = "%s_%s" % (relation_table_name, relation_field_name)
 
             if key_ not in self.cursor_tree_dict.keys():
-                rel_mtd = aqApp.db().manager().metadata(relation_table_name)
+                # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
                 relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
                 relation_mtd.setField(relation_field_name)
@@ -142,7 +143,7 @@ class FLSqlCursor(QtCore.QObject):
         self.show_debug = False
 
         if stabla is not None:
-            from pineboolib.pncontrolsfactory import aqApp
+            # from pineboolib.pncontrolsfactory import aqApp
 
             module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % stabla)
             model_file = "models.%s.%s" % (module_name, stabla)
@@ -243,7 +244,7 @@ class FLSqlCursor(QtCore.QObject):
         import pineboolib
 
         cursor = self.parent_cursor
-        mtd = cursor.metadata()
+        # mtd = cursor.metadata()
         if module_name is None:
             module_name = cursor.curName()
         model = meta_model(pineboolib.project._DGI.load_meta_model(module_name), cursor)
@@ -279,7 +280,7 @@ class meta_model(object):
         field = self._cursor.metadata().field(name)
         if field is not None:
             field_relation = field.relationM1()
-            value = self._cursor.valueBuffer(field.name())
+            # value = self._cursor.valueBuffer(field.name())
 
             if isinstance(field_relation, FLRelationMetaData):
                 relation_table_name = field_relation.foreignTable()
@@ -288,7 +289,7 @@ class meta_model(object):
                 key_ = "%s_%s" % (relation_table_name, relation_field_name)
 
                 if key_ not in self.cursor_tree_dict.keys():
-                    rel_mtd = aqApp.db().manager().metadata(relation_table_name)
+                    # rel_mtd = aqApp.db().manager().metadata(relation_table_name)
 
                     relation_mtd = FLRelationMetaData(relation_table_name, field_relation.field(), FLRelationMetaData.RELATION_1M, False, False, True)
                     relation_mtd.setField(relation_field_name)

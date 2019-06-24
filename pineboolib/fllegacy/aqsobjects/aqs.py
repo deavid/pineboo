@@ -121,21 +121,27 @@ class AQS(object):
     @return QPixmap
     """
 
-    def Pixmap_fromMineSource(self, name):
+    @classmethod
+    def pixmap_fromMimeSource(self, name):
         import os
 
         file_name = filedir("../share/icons", name)
         return QPixmap(file_name) if os.path.exists(file_name) else None
 
+    Pixmap_fromMineSource = pixmap_fromMimeSource
+
+    @classmethod
     def sha1(self, byte_array):
         from pineboolib.pncontrolsfacory import QByteArray
 
         ba = QByteArray(byte_array)
         return ba.sha1()
 
+    @classmethod
     def Application_setOverrideCursor(self, shape, replace=False):
         QApplication.setOverrideCursor(shape)
 
+    @classmethod
     def Application_restoreOverrideCursor(self):
         QApplication.restoreOverrideCursor()
 

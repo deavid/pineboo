@@ -1,21 +1,15 @@
 # # -*- coding: utf-8 -*-
-
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib import decorators
-import pineboolib
-from pineboolib.utils import resolve_query
-
-
-from importlib import import_module
-from PyQt5 import QtCore
-import json
 import collections
 import traceback
-import collections
 import inspect
 import logging
 import sys
 import os
+
+from PyQt5 import QtCore
+
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+import pineboolib
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +42,7 @@ class dgi_aqnext(dgi_schema):
 
     def mainForm(self):
         if not self._mainForm:
-            self._mainForm = mainForm()
+            self._mainForm = mainForm()  # FIXME
         return self._mainForm
 
     def __getattr__(self, name):
@@ -70,7 +64,7 @@ class dgi_aqnext(dgi_schema):
         return "Django"
 
     def authenticate(self, **kwargs):
-        user = kwargs["username"]
+        user = kwargs["username"]  # FIXME
         password = kwargs["password"]
 
     def use_authentication(self):
@@ -108,12 +102,12 @@ class dgi_aqnext(dgi_schema):
     # def interactiveGUI(self):
     # return "Django"
 
-    """
-    def content_cached(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
+    def __content_cached__old__(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
         data = None
         utf8_ = False
         if ext_ == "qs":
             from django.conf import settings
+
             folder_ = settings.PROJECT_ROOT
             legacy_path = "%s/legacy/%s/%s.py" % (folder_, module_id, name_)
             print("**** Buscando en path", legacy_path)
@@ -123,10 +117,11 @@ class dgi_aqnext(dgi_schema):
             if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (tmp_dir, db_name, module_id, ext_, name_)):
                 if ext_ == "kut":
                     utf8_ = True
-                data = pineboolib.project.conn.managerModules().contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_)
-        
+                data = pineboolib.project.conn.managerModules().contentFS(
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_
+                )
+
         return data
-    """
 
     def alternative_script_path(self, script_name, app=None):
         from django.conf import settings
@@ -213,8 +208,7 @@ class dgi_aqnext(dgi_schema):
             # print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
 
     def load_meta_model(self, action_name, opt=None):
-        import importlib, os
-        import sys as python_sys
+        import importlib
         from pineboolib.pncontrolsfactory import aqApp
 
         module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
@@ -236,7 +230,6 @@ class dgi_aqnext(dgi_schema):
 
     def get_master_cursor(self, prefix, template="master"):
         from pineboolib import qsa as qsa_tree
-        import traceback
 
         module_name = prefix
 
@@ -266,10 +259,7 @@ class dgi_aqnext(dgi_schema):
             # print("**************************", prefix)
             try:
                 cursor.assoc_model()  # Asocia el modelo
-
-            except:
-                import traceback
-
+            except Exception:
                 logger.warning("DGI. get_master_cursor: %s", traceback.format_exc())
 
         # if template == "newRecord":
@@ -326,7 +316,7 @@ class dgi_aqnext(dgi_schema):
         pk = cursor.primaryKey()
         fields_list = cursor.metadata().fieldList()
         i = 0
-        date_fields = []
+        # date_fields = []
 
         if cursor.modeAccess() == cursor.Insert:
             size_ = 1
@@ -361,7 +351,9 @@ class dgi_aqnext(dgi_schema):
                     desc = desc_function(*new_args[: len(expected_args)])
                 dict_["desc"] = desc
             # for field in calculateFields:
-            #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
+            #     serializer._declared_fields.update(
+            #         {field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])}
+            #     )
             if size_ == 1:
                 ret_ = dict_
                 break
@@ -470,7 +462,7 @@ class dgi_aqnext(dgi_schema):
         return foreign_field_function(*new_args[: len(expected_args)])
 
     def pagination(self, data_, query):
-        return pagination_class(data_, query)
+        return pagination_class(data_, query)  # FIXME
 
     def get_queryset(self, prefix, params):
 
@@ -500,7 +492,7 @@ class dgi_aqnext(dgi_schema):
     """
     @decorators.NotImplementedWarn
     def paginate_queryset(self, query_set):
-        
+
         return query_set
     """
 
@@ -559,39 +551,39 @@ class paginated_object(object):
 
 """
 class pagination_class(object):
-    
+
     count = None
     _limit = None
     _page = None
-    
+
     def __init__(self, data_, query = {}):
         self.count = len(data_)
         self._limit = 50 if not "p_l" in query.keys() or query["p_l"] == 'true' else int(query["p_l"])
         self._page =  0 if not "p_c" in query.keys() or query["p_c"] == 'true'  else int(query["p_c"])
-    
-    
+
+
     def get_next_offset(self):
         ret_ = None
         actual = 0
-        i = 0         
+        i = 0
         while i < self._page:
             actual += self._limit
             ret_ = actual
             i += 1
-            
-        
+
+
         return ret_
-        
-    
+
+
     def get_previous_offset(self):
         ret_ = None
         i = 0
-        while i < self._page: 
+        while i < self._page:
             if ret_ is None:
                 ret_ = 0
             else:
                 ret_ += self._limit
             i += 1
-        
+
         return ret_
 """

@@ -1,7 +1,4 @@
 # # -*- coding: utf-8 -*-
-
-import sys
-import traceback
 import logging
 from flup.server.fcgi import WSGIServer
 
@@ -63,7 +60,6 @@ class parser(object):
 
     def call(self, environ, start_response):
         start_response("200 OK", [("Content-Type", "text/html")])
-        fn = None
         aList = environ["QUERY_STRING"]
         try:
             retorno_ = pineboolib.project.call(self._callScript, aList)

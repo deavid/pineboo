@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
 from pineboolib import decorators
-from PyQt5.QtWidgets import QFrame
 from PyQt5 import Qt
 import logging
 

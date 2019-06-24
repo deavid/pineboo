@@ -38,7 +38,7 @@ class QTranslator(QtCore.QObject):
             if s.__hash__() == 0:
                 break
 
-            self.d.messages.append(m)
+            self.d.messages.append(m)  # noqa: FIXME: undefined m
 
     def elfHash(self, name):
 
@@ -83,7 +83,7 @@ class QTranslator(QtCore.QObject):
 
         for m in self.d.messages:
 
-            if m.type_() > 0 and m.sourceText() is not "":  # Si Terminada
+            if m.type_() > 0 and m.sourceText() != "":  # Si Terminada
                 # print("mensaje", m.context(), m.sourceText(), m.translation(), len(m.sourceText()), m.sourceText() == "", m.type_())
                 messages.append(m)  # Añado mensaje
 
@@ -101,8 +101,8 @@ class QTranslator(QtCore.QObject):
             ds.writeUInt32(offsets[key].h)  # Marca
             ds.writeUInt32(offsets[key].o)  # Incremental!!
 
-        # | Init |  len source(32)| sourceText (16 *char)         | len context 1 (32) | context              | espacio | suma flag | value offset_context 32 bits | fin |
-        # | 03   | 00 00 00 10    | 00 01 00 02 00 03 00 04 00 05 | 00 00 00 08        | 51 44 69 61 6C 6F 67 | 00      | 05        | 00 00 00 00                  | 01  |
+        # | Init| len source  | sourceText (16 *char)         | len ctx (32) | context              | espacio | suma flag | value offset_context 32 bits | fin |
+        # | 03  | 00 00 00 10 | 00 01 00 02 00 03 00 04 00 05 | 00 00 00 08  | 51 44 69 61 6C 6F 67 | 00      | 05        | 00 00 00 00                  | 01  |
 
         # Aquí creamos msg
         for msg in messages:
@@ -194,7 +194,7 @@ class QTranslator(QtCore.QObject):
 
             if self.d.messageArray is not None:
                 tag = QTranslatorPrivate.Messages  # 69
-                mas = self.d.messageArray.size()
+                # mas = self.d.messageArray.size()
                 s.writeUInt8(tag)
                 # s.writeUInt32(mas)
                 if self.d.messageArray.size() > 0:
@@ -202,7 +202,7 @@ class QTranslator(QtCore.QObject):
 
             if self.d.contextArray is not None:
                 tag = QTranslatorPrivate.Contexts  # 2f
-                cas = self.d.contextArray.size()
+                # cas = self.d.contextArray.size()
                 s.writeUInt8(tag)
                 # s.writeUInt32(cas)
                 if self.d.contextArray.size() > 0:
@@ -215,33 +215,33 @@ class QTranslator(QtCore.QObject):
 
     """
     def findMessage(self, context, source_text, comment):
-        
+
         if context == 0:
             context = ""
         if source_text == 0:
             source_text = ""
         if comment == 0:
             comment = ""
-        
+
         if self.d.messages:
-            
+
             it = self.d.messages.find([context, source_text, comment])
-            
+
             if it != self.d.messages[len(self.d.messages) -1 ]:
                 return it.key()
-            
+
             if (comment[0]):
                 it = self.d.messages.find([context, source_text, comment])
-                
+
                 if it != self.d.messages[len(self.d.messages) -1]:
                     return it.key()
-            
+
             return None
-        
+
         if not self.d.offsetArray:
             return None
-        
-        
+
+
         if self.d.contextArray:
             h_table_size = 0
             t = QtCore.QDataStream(self.d.contextArray, QtCore.QIODevice.ReadOnly)
@@ -252,9 +252,9 @@ class QTranslator(QtCore.QObject):
             t >> off
             if off == 0:
                 return None
-            
+
             t.device().at(2 + (h_table_size << 1 ) + (off << 1))
-            
+
             len = None
             con = []
             while True:
@@ -265,50 +265,50 @@ class QTranslator(QtCore.QObject):
                 con[len] = "\0"
                 if con == context:
                     break
-            
+
         number_items = len(self.d.offsetArray) / (2 * sizeof(Q_UINT32))
         if not number_items:
             return None
-        
+
         if systemWordSize == 0:
             qSysInfo( systemWordSize, systemBigEndian )
 
-            
+
         while True:
             h = elfHash(source_text + comment)
-        
+
             r = bsearch(h, self.d.offsetArray.data(), numItems, 2 * sizeof(Q_UINT32), cmp_uint32_big if systemBigEndian else cmp_uint32_lite)
-        
+
             if r != 0:
                 while r != self.d.offsetArray.data() and cmp_uint32_big(r -8, r) == 0:
                     r -= 8
-                
-            
+
+
                 s = QtCore.QDataStream(self.d.offsetArray, QtCore.QIODevice.ReadOnly)
                 s.device().at(r - self.d.offsetArray.data())
-            
+
                 rh = None
                 ro = None
-            
+
                 s >> rh >> ro
-            
+
                 ms = QtCore.QDataStream(self.d.messageArray, QtCore.QIODevice.ReadOnly)
                 while rh == h:
                     ms.device().at(ro)
                     m = ms
                     if m.context() == context and m.sourceText() == source_text and m.comment() == comment:
                         return m
-                
+
                     if s.atEnd():
                         break
-                
+
                     s >> rh >> ro
-        
+
             if not comment[0]:
                 break
-            
+
             comment = ""
-        
+
         return None
     """
 
@@ -343,6 +343,8 @@ class QTranslatorPrivate(QtCore.QObject):
         if len(args) == 2:
             h = args[0].hash()
             o = args[1]
+
+        return h, o  # FIXME: Cual es el proposito y firma de esta función?
 
 
 class obj_(object):

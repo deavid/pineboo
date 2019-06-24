@@ -3,12 +3,10 @@ from pineboolib.utils import checkDependencies, filedir, load2xml
 import pineboolib
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
-from xml import etree
 import logging
 import datetime
 import re
 import os
-from concurrent.futures import process
 from pineboolib.pncontrolsfactory import aqApp
 
 """
@@ -293,7 +291,7 @@ class kut2fpdf(object):
     def processData(self, section_name, data, data_level):
         self.actual_data_level = data_level
         listDF = self._xml.findall(section_name)
-        data_size = len(listDF)
+        # data_size = len(listDF)
 
         for dF in listDF:
             draw_if = dF.get("DrawIf")
@@ -306,7 +304,7 @@ class kut2fpdf(object):
                 if section_name in ("DetailHeader", "Detail"):
                     heightCalculated = self._parser_tools.getHeight(dF) + self.topSection()
 
-                    if section_name is "DetailHeader":
+                    if section_name == "DetailHeader":
                         for detail in self._xml.findall("Detail"):
                             if detail.get("Level") == str(data_level):
                                 heightCalculated += self._parser_tools.getHeight(detail)
@@ -504,7 +502,7 @@ class kut2fpdf(object):
         is_image = False
         is_barcode = False
         text = xml.get("Text")
-        borderColor = xml.get("BorderColor")
+        # borderColor = xml.get("BorderColor")
         field_name = xml.get("Field")
 
         # x,y,W,H se calcula y corrigen aquí para luego estar correctos en los diferentes destinos posibles
@@ -574,11 +572,11 @@ class kut2fpdf(object):
         if text is not None and text.startswith(filedir("../tempdata")):
             is_image = True
 
-        negValueColor = xml.get("NegValueColor")
-        Currency = xml.get("Currency")
-
-        commaSeparator = xml.get("CommaSeparator")
-        dateFormat = xml.get("DateFormat")
+        # negValueColor = xml.get("NegValueColor")
+        # Currency = xml.get("Currency")
+        #
+        # commaSeparator = xml.get("CommaSeparator")
+        # dateFormat = xml.get("DateFormat")
 
         if is_image:
             self.draw_image(x, y, W, H, xml, text)
@@ -629,7 +627,7 @@ class kut2fpdf(object):
         if xml.get("ChangeHeight") == "1":
             resizeable = True
 
-        height_resized = False
+        # height_resized = False
         orig_x = x
         orig_y = y
         orig_W = W
@@ -664,7 +662,7 @@ class kut2fpdf(object):
         fontI = xml.get("FontItalic")
         fontU = xml.get("FontUnderlined")  # FIXME: hay que ver si es así
 
-        background_color = self.get_color(xml.get("BackgroundColor"))
+        # background_color = self.get_color(xml.get("BackgroundColor"))
         # if background_color != [255,255,255]: #Los textos que llevan fondo no blanco van en negrita
         #    font_style += "B"
 
@@ -704,7 +702,7 @@ class kut2fpdf(object):
         VAlignment = xml.get("VAlignment")  # 0 izquierda, 1 centrado,2 derecha
         HAlignment = xml.get("HAlignment")
 
-        layout_direction = xml.get("layoutDirection")
+        # layout_direction = xml.get("layoutDirection")
 
         start_section_size = self._actual_section_size
         result_section_size = 0
@@ -728,7 +726,7 @@ class kut2fpdf(object):
                     tl = tl[1:]
             str_width = self._document.get_string_width(tl)
             if str_width > W + 2 and xml.tag != "Label" and resizeable:  # Una linea es mas larga que el ancho del campo(Dejando 2 de juego)
-                height_resized = True
+                # height_resized = True
                 array_text = self.split_text(tl, W)
             else:
 
@@ -870,7 +868,7 @@ class kut2fpdf(object):
             style_ = "D"
             self._document.set_draw_color(0, 0, 0)
 
-        if style_ is not "":
+        if style_ != "":
             self._document.set_line_width(border_width)
 
             self._document.rect(x, y, W, H, style_)
@@ -893,15 +891,15 @@ class kut2fpdf(object):
         current_font_family = self._document.font_family
         current_font_size = self._document.font_size_pt
         current_font_style = self._document.font_style
-        if color is "red":
+        if color == "red":
             r = 255
             g = 0
             b = 0
-        elif color is "green":
+        elif color == "green":
             r = 0
             g = 255
             b = 0
-        elif color is "blue":
+        elif color == "blue":
             r = 0
             g = 0
             b = 255

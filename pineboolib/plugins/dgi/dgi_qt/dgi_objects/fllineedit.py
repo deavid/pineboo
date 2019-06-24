@@ -30,7 +30,7 @@ class FLLineEdit(QtWidgets.QLineEdit):
 
             self._parent = parent
 
-            if self._tipo is "string":
+            if self._tipo == "string":
                 self._longitudMax = parent.cursor_.metadata().field(self._fieldName).length()
                 self.setMaxLength(self._longitudMax)
 
@@ -145,8 +145,8 @@ class FLLineEdit(QtWidgets.QLineEdit):
         if self._tipo in ("double", "int", "uint"):
             self.blockSignals(True)
             s = self.text()
-            if self._tipo is ("double"):
-                if s is not "":
+            if self._tipo == "double":
+                if s != "":
                     s = aqApp.localeSystem().toString(float(s), "f", self.partDecimal)
                 if aqApp.commaSeparator() == ",":
                     s = s.replace(".", "")

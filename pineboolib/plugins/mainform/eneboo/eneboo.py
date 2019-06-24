@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
-from pineboolib import decorators
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QTreeWidgetItem
+from pineboolib.fllegacy.aqsobjects.aqs import AQS
 import logging
 
 
@@ -51,7 +51,7 @@ class MainForm(QtWidgets.QMainWindow):
             if isinstance(o, MainForm):
                 self.w_.setDisabled(True)
                 ret = self.exit()
-                if ret == False:
+                if not ret:
                     self.w_.setDisabled(False)
                     e.ignore()
 
@@ -198,7 +198,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.w_.statusBar().hide()
         self.main_widgets_ = []
         self.initialized_mods_ = []
-        self.act_sig_map_ = QSignalMapper(self.w_)
+        self.act_sig_map_ = QtCore.QSignalMapper(self.w_)
         self.act_sig_map_.setObjectName("pinebooActSignalMap")
         self.act_sig_map_.mapped[str].connect(self.triggerAction)
         self.initTabWidget()
@@ -212,7 +212,7 @@ class MainForm(QtWidgets.QMainWindow):
         self.w_ = w
         self.main_widgets_ = []
         self.initialized_mods_ = []
-        self.act_sig_map_ = QSignalMapper(self.w_)
+        self.act_sig_map_ = QtCore.QSignalMapper(self.w_)
         self.act_sig_map_.setObjectName("pinebooActSignalMap")
         self.tw_ = w.findChild(QtWidgets.QTabWidget, "tabWidget")
         self.agMenu_ = w.child("pinebooActionGroup", "QActionGroup")
@@ -285,7 +285,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         fm = AQFormDB(action_name, tw, None)
         fm.setMainWidget()
-        if fm.mainWidget() == None:
+        if not fm.mainWidget():
             return
 
         tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.windowTitle())
@@ -362,7 +362,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         popMenu = QMenu()
         popMenu.move(pos)
-        ac_menu = popMenu.addAction(sys.translate("Añadir Marcadores"))
+        popMenu.addAction(sys.translate("Añadir Marcadores"))
         res = popMenu.exec_()
         if res:
             ac = self.ag_menu_.findChild(QtWidgets.QAction, item.text(1))
@@ -380,7 +380,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         popMenu = QMenu()
         popMenu.move(pos)
-        ac_menu = popMenu.addAction(sys.translate("Eliminar Marcador"))
+        popMenu.addAction(sys.translate("Eliminar Marcador"))
         res = popMenu.exec_()
         if res:
             ac = self.ag_mar_.findChild(QtWidgets.QAction, item.text(1))
@@ -425,7 +425,7 @@ class MainForm(QtWidgets.QMainWindow):
             a_.setObjectName(o_name)
 
     def updateMenuAndDocks(self):
-
+        # FIXME: Duplicated piece of code
         self.updateActionGroup()
         pinebooMenu = self.w_.findChild(QtWidgets.QMenu, "menuPineboo")
         pinebooMenu.clear()
@@ -438,8 +438,8 @@ class MainForm(QtWidgets.QMainWindow):
         try:
             self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.disconnect(aqApp.aboutQt)
             self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.disconnect(aqApp.aboutPineboo)
-        except:
-            pass
+        except Exception:
+            logger.exception("Unexpected exception on updateMenuAndDocks")
         self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
         self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
         self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(aqApp.chooseFont)
@@ -577,6 +577,7 @@ class MainForm(QtWidgets.QMainWindow):
         # style.triggered.connect(aqApp.showStyles)
 
     def initTextLabels(self):
+
         tL = self.w_.findChild(QtWidgets.QLabel, "tLabel")
         tL2 = self.w_.findChild(QtWidgets.QLabel, "tLabel2")
         texto = AQUtil.sqlSelect("flsettings", "valor", "flkey='verticalName'")
@@ -746,14 +747,14 @@ class MainForm(QtWidgets.QMainWindow):
         return ag
 
     def iconSet16x16(self, pix):
-        p_ = QPixmap(pix)
+        p_ = QtGui.QPixmap(pix)
         # img_ = p_.convertToImage()
         # img_.smoothScale(16, 16)
         # ret = QIconSet(QPixmap(img_))
-        img_ = QImage(p_)
+        img_ = QtGui.QImage(p_)
         if not img_.isNull():
             img_ = img_.scaled(16, 16)
-        ret = QIcon(QPixmap(img_))
+        ret = QtGui.QIcon(QtGui.QPixmap(img_))
         return ret
 
     def show(self):
@@ -793,7 +794,7 @@ class MainForm(QtWidgets.QMainWindow):
     def triggerAction(self, signature):
         mw = mainWindow
         sgt = signature.split(":")
-        ok = True
+        # ok = True
         ac = mw.ag_menu_.findChild(QtWidgets.QAction, sgt[2])
         if ac is None:
             debug("triggerAction: Action not Found: %s" % signature)
@@ -935,7 +936,7 @@ class DockListView(QtCore.QObject):
         #                 settings.readNumEntry("%sy" % key, self.w_.y()))
 
         # self.w_.offset = settings.readNumEntry("%soffset" % key, self.offset)
-        index = settings.readNumEntry("%sindex" % key, None)
+        # index = settings.readNumEntry("%sindex" % key, None)
         # FIXME
         # if index is not None:
         #    area = w.area()
@@ -961,7 +962,7 @@ class DockListView(QtCore.QObject):
         self.lw_.doubleClicked.connect(self.activateAction)
 
     def change_state(self, s):
-        if s == True:
+        if s:
             self.w_.show()
         else:
             self.w_.close()
@@ -1043,3 +1044,15 @@ class DockListView(QtCore.QObject):
 
 
 mainWindow = MainForm()
+
+
+# Definiciones usadas solo externamente::
+from pineboolib.fllegacy.flposprinter import FLPosPrinter  # noqa
+from pineboolib.fllegacy.flsqlquery import FLSqlQuery  # noqa
+from pineboolib.fllegacy.flsqlcursor import FLSqlCursor  # noqa
+from pineboolib.fllegacy.flnetwork import FLNetwork  # noqa
+from pineboolib.fllegacy.flreportviewer import FLReportViewer  # noqa
+from pineboolib.fllegacy.flvar import FLVar  # noqa
+
+from pineboolib.utils import ustr, ustr1  # noqa
+from pineboolib.pncontrolsfactory import *  # noqa

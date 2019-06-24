@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import QObject, Qt
-
-from pineboolib import decorators
-
 from pineboolib.fllegacy.flapplication import FLApplication
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
-from pineboolib.packager.aqunpacker import AQUnpacker
-from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *
-from pineboolib.pnobjectsfactory import load_model, load_models, Calculated, orm, event, relationship
 from pineboolib.wiki_error import wiki_error
 
 import inspect
@@ -19,7 +11,6 @@ import logging
 import weakref
 import re
 import os
-import sys
 import traceback
 
 logger = logging.getLogger("PNControlsFactory")
@@ -261,7 +252,8 @@ class SysType(object):
         return aqApp.db().useConn(connName).host()
 
     def addDatabase(self, *args):
-        # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None, db_password = None, db_host = None, db_port = None, connName="default"):
+        # def addDatabase(self, driver_name = None, db_name = None, db_user_name = None,
+        #                 db_password = None, db_host = None, db_port = None, connName="default"):
         if len(args) == 1:
             conn_db = aqApp.db().useConn(args[0])
             if not conn_db.isOpen():
@@ -365,7 +357,8 @@ def slot_done(fn, signal, sender, caller):
 
         res = False
 
-        # Este parche es para evitar que las conexiones de un clicked de error de cantidad de argumentos. En Eneboo se esperaba que signal no contenga argumentos
+        # Este parche es para evitar que las conexiones de un clicked de error de cantidad de argumentos.
+        # En Eneboo se esperaba que signal no contenga argumentos
         if signal.signal == "2clicked(bool)":
             args = []
 
@@ -376,11 +369,10 @@ def slot_done(fn, signal, sender, caller):
             else:
                 res = fn(*args[0:args_num])
         except Exception:
-            script_name = caller.__module__ if caller is not None else "????"
+            # script_name = caller.__module__ if caller is not None else "????"
             aqApp.msgBoxWarning(wiki_error(traceback.format_exc()), pineboolib.project._DGI)
 
         if caller is not None:
-
             try:
                 if signal.signal != caller.signal_test.signal:
                     signal_name = signal.signal[1 : signal.signal.find("(")]  # Quitamos el caracter "2" inicial y parámetros
@@ -460,7 +452,7 @@ def solve_connection(sender, signal, receiver, slot):
 
     remote_fn = getattr(receiver, slot, None)
 
-    sg_name = re.sub(" *\(.*\)", "", signal)
+    sg_name = re.sub(r" *\(.*\)", "", signal)
     oSignal = getattr(sender, sg_name, None)
     # if not oSignal and sender.__class__.__name__ == "FormInternalObj":
     #    oSignal = getattr(sender.parent(), sg_name, None)
@@ -552,3 +544,14 @@ class QEventLoop(QtCore.QEventLoop):
 def print_stack(maxsize=1):
     for tb in traceback.format_list(traceback.extract_stack())[1:-2][-maxsize:]:
         print(tb.rstrip())
+
+
+# Usadas solo por import *
+# FIXME: No se debe usar import * !!!
+from pineboolib.packager.aqunpacker import AQUnpacker  # noqa:
+from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData  # noqa:
+from pineboolib.fllegacy.aqsobjects.aqsobjectfactory import *  # noqa:
+from pineboolib.pnobjectsfactory import load_model, load_models, Calculated  # noqa:
+from pineboolib.utils import _path, _dir  # Noqa:
+from sqlalchemy import String, orm, event  # Noqa:
+from sqlalchemy.orm import relationship  # Noqa:

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-
 from PyQt5 import QtWidgets
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class QTabWidget(QtWidgets.QTabWidget):

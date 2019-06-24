@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pineboolib
-
-
-pluginType = MODULE
+pluginType = MODULE  # noqa  # FIXME: Esto no es Python.
 
 
 def moduleInformation():

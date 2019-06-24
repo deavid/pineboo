@@ -2,11 +2,11 @@
 from PyQt5 import QtCore, Qt
 from PyQt5.Qt import QRectF
 from PyQt5.QtGui import QPixmap, QColor
-from pineboolib import decorators
 from pineboolib.utils import load2xml
+from PyQt5.QtSvg import QSvgRenderer
 
 import logging
-
+import barcode
 
 logger = logging.getLogger(__name__)
 
@@ -289,10 +289,6 @@ class FLCodBar(object):
             render_options["text"] = value_
         else:
             render_options["text"] = " "
-
-        import barcode
-        from barcode.writer import ImageWriter
-        from PyQt5.QtSvg import QSvgRenderer
 
         barC = barcode.get_barcode_class(type_.lower())
         try:

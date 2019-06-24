@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from pineboolib.qsa import *
-from pineboolib import decorators
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QTreeWidgetItem
 import logging
-
 
 logger = logging.getLogger("mainForm_%s" % __name__)
 
@@ -52,7 +50,7 @@ class MainForm(QtWidgets.QMainWindow):
             if isinstance(o, MainForm):
                 self.w_.setDisabled(True)
                 ret = self.exit()
-                if ret == False:
+                if not ret:
                     self.w_.setDisabled(False)
                     e.ignore()
 
@@ -285,7 +283,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         fm = AQFormDB(action_name, tw, None)
         fm.setMainWidget()
-        if fm.mainWidget() == None:
+        if fm.mainWidget() is None:
             return
 
         tw.addTab(fm, self.ag_menu_.findChild(QtWidgets.QAction, action_name).icon(), fm.windowTitle())
@@ -363,7 +361,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         popMenu = QMenu()
         popMenu.move(pos)
-        ac_menu = popMenu.addAction(sys.translate("Añadir Marcadores"))
+        popMenu.addAction(sys.translate("Añadir Marcadores"))
         res = popMenu.exec_()
         if res:
             ac = self.ag_menu_.findChild(QtWidgets.QAction, item.text(1))
@@ -381,7 +379,7 @@ class MainForm(QtWidgets.QMainWindow):
 
         popMenu = QMenu()
         popMenu.move(pos)
-        ac_menu = popMenu.addAction(sys.translate("Eliminar Marcador"))
+        popMenu.addAction(sys.translate("Eliminar Marcador"))
         res = popMenu.exec_()
         if res:
             ac = self.ag_mar_.findChild(QtWidgets.QAction, item.text(1))
@@ -439,8 +437,8 @@ class MainForm(QtWidgets.QMainWindow):
         try:
             self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.disconnect(aqApp.aboutQt)
             self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.disconnect(aqApp.aboutPineboo)
-        except:
-            pass
+        except Exception:
+            logger.exception("Unexpected exception while on UpdateMenuAndDocks")
         self.w_.findChild(QtWidgets.QAction, "aboutQtAction").triggered.connect(aqApp.aboutQt)
         self.w_.findChild(QtWidgets.QAction, "aboutPinebooAction").triggered.connect(aqApp.aboutPineboo)
         self.w_.findChild(QtWidgets.QAction, "fontAction").triggered.connect(aqApp.chooseFont)
@@ -793,7 +791,7 @@ class MainForm(QtWidgets.QMainWindow):
     def triggerAction(self, signature):
         mw = mainWindow
         sgt = signature.split(":")
-        ok = True
+        # ok = True
         ac = mw.ag_menu_.findChild(QtWidgets.QAction, sgt[2])
         if ac is None:
             debug("triggerAction: Action not Found: %s" % signature)
@@ -934,7 +932,7 @@ class DockListView(QtCore.QObject):
         #                 settings.readNumEntry("%sy" % key, self.w_.y()))
 
         # self.w_.offset = settings.readNumEntry("%soffset" % key, self.offset)
-        index = settings.readNumEntry("%sindex" % key, None)
+        # index = settings.readNumEntry("%sindex" % key, None)
         # FIXME
         # if index is not None:
         #    area = w.area()
@@ -945,7 +943,7 @@ class DockListView(QtCore.QObject):
         height = settings.readNumEntry("%sheight" % key, self.w_.height())
         self.lw_.resize(width, height)
         # self.w_.resize(width, height)
-        visible = settings.readBoolEntry("%svisible" % key, True)
+        # visible = settings.readBoolEntry("%svisible" % key, True)
         # if visible:
         #    self.w_.show()
 
@@ -961,7 +959,7 @@ class DockListView(QtCore.QObject):
         self.lw_.doubleClicked.connect(self.activateAction)
 
     def change_state(self, s):
-        if s == True:
+        if s:
             self.w_.show()
         else:
             self.w_.close()

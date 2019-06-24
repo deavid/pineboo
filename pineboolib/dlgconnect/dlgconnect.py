@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore, uic
-from PyQt5.QtWidgets import QTableWidgetItem, QFrame, QMessageBox, QFileDialog
-from PyQt5.QtCore import QFileInfo, QSize
-from PyQt5.Qt import QWidget
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QSize
+
 
 from pineboolib.utils import filedir, indent
 from pineboolib.fllegacy.flsettings import FLSettings
 
 import os
-import sys
-import traceback
-import logging
 import base64
 import hashlib
 from xml.etree import ElementTree as ET
@@ -214,7 +211,7 @@ class DlgConnect(QtWidgets.QWidget):
         profile.set("Version", "1.1")
         description = self.ui.leDescription.text()
 
-        if description is "":
+        if description == "":
             QMessageBox.information(self.ui, "Pineboo", "La descripción no se puede dejar en blanco")
             self.ui.leDescription.setFocus()
             return

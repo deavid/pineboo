@@ -11,7 +11,7 @@ class FLIntValidator(QtGui.QIntValidator):
 
     def validate(self, input_, pos_cursor):
 
-        if not input_ or self._formatting == True:
+        if not input_ or self._formatting:
             return (self.Acceptable, input_, pos_cursor)
 
         state = super().validate(input_, pos_cursor)

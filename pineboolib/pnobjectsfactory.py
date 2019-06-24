@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 import pineboolib
-from pineboolib.utils import _path, _dir, filedir
+from pineboolib.utils import _path, filedir
 from importlib import machinery
 
-from sqlalchemy import String, orm, event
-from sqlalchemy.orm import relationship
+from sqlalchemy import String
 
 import importlib
 import traceback
@@ -42,11 +41,8 @@ def load_model(nombre):
 
     # processed_.append(nombre)
 
-    from pineboolib import qsa as qsa_dict_modules
-
-    nombre_qsa = nombre.replace("_model", "")
-    model_name = nombre_qsa[0].upper() + nombre_qsa[1:]
-
+    # nombre_qsa = nombre.replace("_model", "")
+    # model_name = nombre_qsa[0].upper() + nombre_qsa[1:]
     # mod = getattr(qsa_dict_modules, model_name, None)
     # if mod is None:
     #    mod = base_model(nombre)
@@ -102,7 +98,7 @@ def load_models():
     from pineboolib.pncontrolsfactory import aqApp
     from pineboolib import qsa as qsa_dict_modules
 
-    Base = aqApp.db().declarative_base()
+    # Base = aqApp.db().declarative_base()
 
     setattr(qsa_dict_modules, "Base", aqApp.db().declarative_base())
     setattr(qsa_dict_modules, "session", aqApp.db().session())
@@ -146,8 +142,8 @@ def before_commit(s):
     for o in s.dirty:
         o.beforeCommit()
     for o in s.deleted:
-        o.beforeCommit()   
-        
+        o.beforeCommit()
+
 
 def after_commit(s):
     for o in s.new:
@@ -155,9 +151,9 @@ def after_commit(s):
     for o in s.dirty:
         o.afterCommit()
     for o in s.deleted:
-        o.afterCommit()   
+        o.afterCommit()
 
 def after_flush(*args):
     print("****", args)
-    
+
 """

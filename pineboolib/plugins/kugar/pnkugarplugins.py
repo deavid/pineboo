@@ -48,12 +48,12 @@ class PNKugarPlugins(object):
         return self.defaultParser_
 
     """
-    Carga un parser determinado 
+    Carga un parser determinado
     @param name. Nombre del parser para usar por defecto
     """
 
     def loadParser(self, name):
-        if not name in self.avalibleParsers_:
+        if name not in self.avalibleParsers_:
             logger.warning("No se encuentra el plugin %s", name)
             return None
         else:

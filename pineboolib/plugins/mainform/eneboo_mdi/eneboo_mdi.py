@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
-from pineboolib import decorators
-from pineboolib.pncontrolsfactory import aqApp, AQS, QMainWindow
-from pineboolib.fllegacy.flaccesscontrollists import FLAccessControlLists
-
-
 import logging
-
+from pineboolib.pncontrolsfactory import aqApp, QMainWindow
 
 logger = logging.getLogger("mainForm_%s" % __name__)
 

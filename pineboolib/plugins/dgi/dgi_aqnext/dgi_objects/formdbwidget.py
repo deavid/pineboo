@@ -127,7 +127,7 @@ class FormDBWidget(QtCore.QObject):
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
             print("ERROR: Al buscar el control %r encontramos el error %r" %
                   (child_name, rte))
-            
+
             from pineboolib.pncontrolsfactory import print_stack
             print_stack(8)
             import gc

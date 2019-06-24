@@ -116,7 +116,7 @@ class FormDBWidget(QtWidgets.QWidget):
             else:
                 self.logger.warning("WARN: No se encontro el control %s", child_name)
             return ret
-        except Exception as e:
+        except Exception:
             return None
 
     def cursor(self):

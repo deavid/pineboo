@@ -18,7 +18,7 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
     def validate(self, input_, pos_cursor):
         value_in = input_
 
-        if value_in is None or self._formatting == True:
+        if value_in is None or self._formatting:
             return (self.Acceptable, value_in, pos_cursor)
 
         from pineboolib.pncontrolsfactory import aqApp

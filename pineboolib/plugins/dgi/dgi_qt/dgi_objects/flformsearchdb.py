@@ -252,7 +252,7 @@ class FLFormSearchDB(FLFormDB):
             return
         previousF = self.cursor_.mainFilter()
         newF = None
-        if previousF is "":
+        if previousF == "":
             newF = f
         elif f is None or previousF.find(f) > -1:
             return

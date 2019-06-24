@@ -1,7 +1,6 @@
-from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate, QRegExp, QApplication
-from PyQt5.QtCore import QTime, QTimer
-from pineboolib import decorators
-from pineboolib.utils import auto_qt_translate_text, checkDependencies, filedir
+from PyQt5.Qt import QDomDocument, QDateTime, QProgressDialog, QDate, QRegExp, QApplication
+from PyQt5.QtCore import QTime, Qt
+from pineboolib.utils import auto_qt_translate_text, checkDependencies
 
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -11,7 +10,6 @@ from sqlalchemy import create_engine
 
 import traceback
 import os
-import sys
 import logging
 
 
@@ -166,7 +164,7 @@ class FLSQLITE(object):
 
         elif type_ == "time":
             t = v.toTime()
-            res = "LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
+            res = "LIKE '" + t.toString(Qt.ISODate) + "%%'"
 
         else:
             res = str(v)

@@ -25,6 +25,7 @@ def mtd_parse(fileobj):
 
 
 def generate_model(dest_file, mtd_table):
+    # FIXME: ¿Porqué parece que estamos programando un fichero Python desde Python? ELIMINA ESTO PRONTO!
     from pineboolib.pncontrolsfactory import aqApp
 
     data = []
@@ -103,8 +104,8 @@ def generate_model(dest_file, mtd_table):
     data.append("")
     data.append("# --- Relations M:1 ---> ")
     data.append("")
-    
-    
+
+
     for field in mtd_table.fieldList(): #Creamos relaciones M1
         rel = field.relationM1()
         if rel:
@@ -114,11 +115,11 @@ def generate_model(dest_file, mtd_table):
                 relation_ = "    %s_%s = relationship('%s'" % (rel.foreignTable(), rel.foreignField(), foreign_object)
                 relation_ += ", foreign_keys='%s.%s'" % (foreign_object, rel.foreignField())
                 relation_ += ")"
-            
-                data.append(relation_) 
-    
-    
-    
+
+                data.append(relation_)
+
+
+
     data.append("")
     data.append("# <--- Relations M:1 --- ")
     data.append("")
@@ -150,16 +151,19 @@ def generate_model(dest_file, mtd_table):
     data.append("        if not self.afterCommit():")
     data.append("            return False")
 
-    # for field in mtd_table.fieldList(): #Relaciones M:1
-    #    if field.relationList():
-    #        rel_data = []
-    #        for r in field.relationList():
-    #            if r.cardinality() == r.RELATION_1M:
-    #                obj_name = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
-    #                rel_data.append("    %s = relationship('%s', backref='parent'%s)\n" % (r.foreignTable(), obj_name, ", cascade ='all, delete'" if r.deleteCascade() else ""))
-
-    #        data.append("".join(rel_data))
-
+    # for field in mtd_table.fieldList():  # Relaciones M:1
+    #     if field.relationList():
+    #         rel_data = []
+    #         for r in field.relationList():
+    #             if r.cardinality() == r.RELATION_1M:
+    #                 obj_name = "%s%s" % (r.foreignTable()[0].upper(), r.foreignTable()[1:])
+    #                 rel_data.append(
+    #                     "    %s = relationship('%s', backref='parent'%s)\n"
+    #                     % (r.foreignTable(), obj_name, ", cascade ='all, delete'" if r.deleteCascade() else "")
+    #                 )
+    #
+    #         data.append("".join(rel_data))
+    #
     # data.append("if not engine.dialect.has_table(engine.connect(),'%s'):" % mtd_table.name())
     # data.append("    %s%s.__table__.create(engine)" % (mtd_table.name()[0].upper(), mtd_table.name()[1:]))
 

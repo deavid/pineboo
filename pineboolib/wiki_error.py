@@ -5,6 +5,7 @@ logger = logging.getLogger(__name__)
 
 
 def wiki_error(e):
+    # FIXME: No hay un nombre mejor? Crea entradas de la wikipedia?
     from pineboolib.pncontrolsfactory import SysType as sys
 
     text = sys.translate("scripts", "Error ejecutando un script")

@@ -556,7 +556,7 @@ class PNConnection(QtCore.QObject):
         for singleSql in sql.split(";"):
             try:
                 self.driver().execute_query(singleSql)
-            except Exception as e:
+            except Exception:
                 logger.exception("createTable: Error happened executing sql: %s...", singleSql[:80])
                 self.rollbackTransaction()
                 return False

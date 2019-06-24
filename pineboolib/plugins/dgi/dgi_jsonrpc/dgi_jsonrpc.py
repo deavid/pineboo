@@ -1,9 +1,8 @@
 # # -*- coding: utf-8 -*-
-
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib.utils import Struct
-from pineboolib import decorators
-import pineboolib
+import traceback
+import logging
+import sys
+import re
 
 from PyQt5 import QtCore
 
@@ -12,18 +11,14 @@ from xml.etree.ElementTree import fromstring
 from json import dumps
 from xml import etree
 
-
-from importlib import import_module
-
-
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-import traceback
-import logging
-import sys
+import pineboolib
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib import decorators
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +76,7 @@ class parser(object):
 
         fun_ = args[0]
         param_ = None
-        fn = None
+        # fn = None
         if len(args) > 1:
             param_ = ",".join(args[1:])
         else:
@@ -130,7 +125,7 @@ class parser(object):
             cr = ac.child(control)
             if cr:
                 em = getattr(cr, emite, None)
-                if isinstance(cr, FLFieldDB):
+                if isinstance(cr, FLFieldDB):  # FIXME: import FLFieldDB
                     if emite == "setText":
                         cr.editor_.setText(arguments[3])
                         return True
@@ -138,7 +133,7 @@ class parser(object):
                         print("Función desconocida", emite)
                         return False
 
-                elif isinstance(cr, FLTableDB):
+                elif isinstance(cr, FLTableDB):  # FIXME: import FLFieldDB
                     if emite == "data":
                         print("Recoge data!!!")
 
@@ -272,7 +267,7 @@ class parserJson:
 
     def parse(self, name):
         inputFile = name
-        outputFile = re.search("\w+.ui", inputFile)
+        outputFile = re.search(r"\w+.ui", inputFile)
 
         if outputFile is None:
             print("Error. El fichero debe tener extension .ui")

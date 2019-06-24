@@ -139,7 +139,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
                         value = value[1:]
 
                     n = int(base)
-                    if n is not 0:
+                    if n != 0:
                         self.accum += str(n)
 
         elif qname == "context":
@@ -177,6 +177,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
         return True
 
     def endElement(self, name_space_uri, local_name, qname):
+        context_comment = None  # FIXME: De donde sale esta variable?
         if qname in ("codec", "defaultcodec"):
             self.tor.setCodec(self.accum)
         elif qname == "name":
@@ -239,9 +240,9 @@ class MetaTranslatorMessage(QtCore.QObject):
         super(MetaTranslatorMessage, self).__init__()
 
         if isinstance(context, metaTranslator):
-            self.mm = m.mm
-            self.codec_name = tor.codec_name
-            self.codec = tor.codec
+            self.mm = context.m.mm
+            self.codec_name = context.tor.codec_name
+            self.codec = context.tor.codec
             return
 
         self.context_ = context
@@ -285,7 +286,7 @@ class MetaTranslatorMessage(QtCore.QObject):
         return self
 
     def operator_isequal(self, m):
-        return context() == m.context() and self.source_text() == m.source_text() and self.comment() == m.comment()
+        return self.context() == m.context() and self.source_text() == m.source_text() and self.comment() == m.comment()
 
     def operator_minus(self, m):
         delta = self.context() == m.context()

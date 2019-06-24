@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QSpacerItem, QWidget, QVBoxLayout, QStyle, QFrame
 from PyQt5.QtCore import Qt, QDateTime
 
 from pineboolib import decorators
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
-from pineboolib.utils import filedir, aqtt, format_double
+from pineboolib.utils import filedir, aqtt
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.fltablemetadata import FLTableMetaData
 from pineboolib.fllegacy.flrelationmetadata import FLRelationMetaData
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
-from pineboolib.fllegacy.flmanager import FLManager
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformsearchdb import FLFormSearchDB
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.flformdb import FLFormDB
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fluintvalidator import FLUIntValidator
@@ -22,7 +20,8 @@ from pineboolib.plugins.dgi.dgi_qt.dgi_objects.fldoublevalidator import FLDouble
 import datetime
 import pineboolib
 import logging
-from PyQt5.QtGui import QColor
+
+logger = logging.getLogger(__name__)
 
 
 class FLFieldDB(QtWidgets.QWidget):
@@ -97,7 +96,6 @@ class FLFieldDB(QtWidgets.QWidget):
         super(FLFieldDB, self).__init__(parent)
 
         self.DEBUG = False  # FIXME: debe recoger DEBUG de pineboolib.project
-        logger = logging.getLogger(__name__)
 
         self.maxPixImages_ = FLSettings().readEntry("ebcomportamiento/maxPixImages", None)
         self.autoCompMode_ = FLSettings().readEntry("ebcomportamiento/autoComp", "OnDemandF4")
@@ -1358,8 +1356,6 @@ class FLFieldDB(QtWidgets.QWidget):
         if not fN or not fN == self.fieldName_ or not self.cursor_:
             return
 
-        from pineboolib.pncontrolsfactory import aqApp
-
         tMD = self.cursor_.metadata()
         field = tMD.field(self.fieldName_)
 
@@ -1383,7 +1379,7 @@ class FLFieldDB(QtWidgets.QWidget):
 
         if type_ == "double":
 
-            part_decimal = self._partDecimal if self._partDecimal > -1 else field.partDecimal()
+            # part_decimal = self._partDecimal if self._partDecimal > -1 else field.partDecimal()
 
             e_text = self.editor_.text() if self.editor_.text() != "" else 0.0
             if float(e_text) == float(v):
@@ -2270,9 +2266,9 @@ class FLFieldDB(QtWidgets.QWidget):
                     # "Variant", None, True) #qvariant,0,true
 
                     if self.autoComFieldRelation_ is not None and self.topWidget_:
-                        l = self.topWidget_.queryList("FLFieldDB")
+                        list1 = self.topWidget_.queryList("FLFieldDB")
                         fdb = None
-                        for itf in l:
+                        for itf in list1:
                             if itf.fieldName() == self.autoComFieldRelation_:
                                 fdb = itf
                                 break

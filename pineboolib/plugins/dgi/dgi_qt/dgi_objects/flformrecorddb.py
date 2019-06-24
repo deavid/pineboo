@@ -175,7 +175,7 @@ class FLFormRecordDB(FLFormDB):
 
     def initForm(self):
         if self.cursor() and self.cursor().metadata():
-            caption = None
+            # caption = None
             if self._action:
                 self.cursor().setAction(self._action)
                 if self._action.description():
@@ -536,7 +536,7 @@ class FLFormRecordDB(FLFormDB):
                 try:
                     ret_ = fun_()
                 except Exception:
-                    script_name = self.iface.__module__
+                    # script_name = self.iface.__module__
                     from pineboolib.pncontrolsfactory import aqApp, wiki_error
 
                     aqApp.msgBoxWarning(wiki_error(traceback.format_exc()), pineboolib.project._DGI)
@@ -811,7 +811,8 @@ class FLFormRecordDB(FLFormDB):
             QtWidgets.QMessageBox.information(
                 QtWidgets.QApplication.activeWindow(),
                 "Aviso",
-                "Ya hay abierto un formulario de edición de resgistro para esta tabla.\nNo se abrirán mas para evitar ciclos repetitivos de edición de registros.",
+                "Ya hay abierto un formulario de edición de resgistro para esta tabla.\n"
+                "No se abrirán mas para evitar ciclos repetitivos de edición de registros.",
                 QtWidgets.QMessageBox.Yes,
             )
             return
