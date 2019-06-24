@@ -70,6 +70,7 @@ class FLUtil(QtCore.QObject):
         @return La parte decimal del número, que puede ser cero
         """
         i, d = divmod(n, 1)
+        d = round(d, 2)
         d = d * 100
         return int(d)
 
@@ -124,12 +125,12 @@ class FLUtil(QtCore.QObject):
         if n < 0:
             raise ValueError("Param n must be positive integer")
         if n < 30:
-            buffer = self.unidades(n)
+            buffer = self.unidades(int(n))
         else:
             buffer = self.vecDecenas[self.partInteger(n / 10)]
             if n % 10:
                 buffer = buffer + " y "
-                buffer = buffer + self.unidades(n % 10)
+                buffer = buffer + self.unidades(int(n % 10))
 
         return buffer
 
@@ -146,11 +147,11 @@ class FLUtil(QtCore.QObject):
             buffer = "cien"
 
         elif n < 100:
-            buffer = self.decenas(n)
+            buffer = self.decenas(int(n))
         else:
             buffer = buffer + self.vecCentenas[self.partInteger(n / 100)]
             buffer = buffer + " "
-            buffer = buffer + self.decenas(n % 100)
+            buffer = buffer + self.decenas(int(n % 100))
 
         return buffer
 
@@ -168,10 +169,10 @@ class FLUtil(QtCore.QObject):
             buffer = "mil "
 
         if n / 1000 > 1:
-            buffer = self.unidades(n / 1000)
+            buffer = self.unidades(int(n / 1000))
             buffer = buffer + " mil "
 
-        buffer = buffer + self.centenas(n % 1000)
+        buffer = buffer + self.centenas(int(n % 1000))
 
         return buffer
 
@@ -188,7 +189,7 @@ class FLUtil(QtCore.QObject):
 
         buffer = self.decenas(n / 1000)
         buffer = buffer + " mil "
-        buffer = buffer + self.centenas(n % 10000)
+        buffer = buffer + self.centenas(int(n % 10000))
         return buffer
 
     def enLetra(self, n):
@@ -208,16 +209,16 @@ class FLUtil(QtCore.QObject):
             return buffer
 
         if n < 1000000:
-            buffer = self.centenamillar(n)
+            buffer = self.centenamillar(int(n))
             return buffer
         else:
             if n / 1000000 == 1:
                 buffer = "un millon"
             else:
-                buffer = self.centenas(n / 1000000)
+                buffer = self.centenas(int(n / 1000000))
                 buffer = buffer + " millones "
 
-        buffer = buffer + self.centenamillar(n % 1000000)
+        buffer = buffer + self.centenamillar(int(n % 1000000))
         return buffer.upper()
 
     @decorators.BetaImplementation
@@ -966,7 +967,7 @@ class FLUtil(QtCore.QObject):
             sql = "select " + s + " from " + f
         else:
             sql = "select " + s + " from " + f + " where " + w
-
+        
         q = FLSqlQuery(None, connName)
         if not q.exec_(sql):
             return False

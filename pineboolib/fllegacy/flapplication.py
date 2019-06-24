@@ -31,6 +31,7 @@ class FLApplication(QtCore.QObject):
     tool_box_ = None
     toogle_bars_ = None
     project_ = None
+    mdi_toolbuttons = None
     wb_ = None
     form_alone_ = None
     acl_ = None
@@ -67,6 +68,7 @@ class FLApplication(QtCore.QObject):
         self.form_alone_ = False
         self.not_exit_ = False
         self.acl_ = None
+        self.mdi_toolbuttons = []
         self.popup_warn_ = None
         self.mng_loader_ = None
         self.sys_tr_ = None
@@ -228,6 +230,12 @@ class FLApplication(QtCore.QObject):
                     return False
             else:
                 return False
+        
+        elif evt == QEvent.Resize and isinstance(obj, pineboolib.project.main_form.MainForm):
+            for bt in self.mdi_toolbuttons:
+                bt.setMinimumWidth(obj.width() - 10)
+            
+            return True
         
         
         return super().eventFilter(obj, ev)
@@ -497,6 +505,8 @@ class FLApplication(QtCore.QObject):
         from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS, QSize
         from PyQt5.QtWidgets import QToolButton
         
+        
+        
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
         self.modules_menu = self.main_widget_.findChild(QMenu, "modulesMenu")
         
@@ -510,6 +520,12 @@ class FLApplication(QtCore.QObject):
             
             self.tool_box_.removeItem(item)
             del item
+        
+        for tb in self.mdi_toolbuttons:
+            self.mdi_toolbuttons.remove(tb)
+        
+        del self.mdi_toolbuttons
+        self.mdi_toolbuttons = []
         
         c = 65
         
@@ -587,7 +603,7 @@ class FLApplication(QtCore.QObject):
             lay = new_area_bar.layout()
             for child in new_area_bar.children():
                 if isinstance(child, QToolButton):
-                    child.setMinimumWidth(self.container_.width())
+                    self.mdi_toolbuttons.append(child)
                     lay.setAlignment(child, QtCore.Qt.AlignCenter)
 
             
@@ -670,7 +686,7 @@ class FLApplication(QtCore.QObject):
         lay = config_tool_bar.layout()
         for child in config_tool_bar.children():
             if isinstance(child, QToolButton):
-                    child.setMinimumWidth(self.container_.width())
+                    self.mdi_toolbuttons.append(child)
                     lay.setAlignment(child, QtCore.Qt.AlignCenter)
         
         
@@ -853,6 +869,9 @@ class FLApplication(QtCore.QObject):
             about_dlg = about_pineboo()
         
     def statusHelpMsg(self, text):
+        if FLSettings().readBoolEntry("application/isDebuggerMode"):
+            logger.warning("StatusHelpMsg: %s", text)
+        
         if not self.main_widget_:
             return
         
@@ -1021,11 +1040,8 @@ class FLApplication(QtCore.QObject):
         self.clearProject()
         project = pineboolib.project
 
-        # if project._DGI.useDesktop():
-        #    import importlib
-        #    project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
-        # project.main_form_name, project.main_form_name)) if
-        # project._DGI.localDesktop() else project._DGI.mainForm()
+        if self.main_widget_ is None:
+            self.main_widget_ = pineboolib.project.main_form.mainWindow
 
         project.main_window.initialized_mods_ = []
 
@@ -1058,7 +1074,7 @@ class FLApplication(QtCore.QObject):
         if self.container_:
             
             self.container_.installEventFilter(self)
-            self.container_.setDisable(False)
+            #self.container_.setDisable(False)
 
         self.callScriptEntryFunction()
 
@@ -1363,7 +1379,6 @@ class FLApplication(QtCore.QObject):
         return ret == QMessageBox.Yes
 
     def writeState(self):
-
         from pineboolib.pncontrolsfactory import QApplication
 
         settings = FLSettings()
@@ -1388,7 +1403,7 @@ class FLApplication(QtCore.QObject):
                 for it in _list:
                     if it != self.container_ and it.isVisible() and it.objectName() in self.dict_main_widgets_.keys():
                         windows_opened.append(it.objectName())
-
+            
             settings.writeEntryList("windowsOpened/Main", windows_opened)
             settings.writeEntry("Geometry/MainWindowMaximized", self.container_.isMaximized())
             if not self.container_.isMaximized():
@@ -1460,30 +1475,29 @@ class FLApplication(QtCore.QObject):
             active_id_module = self.db().managerModules().activeIdModule()
 
             windows_opened = settings.readListEntry("windowsOpened/Main")
-            if windows_opened:
 
-                for it in windows_opened:
-                    if it in self.db().managerModules().listAllIdModules():
-                        w = None
-                        if it in self.dict_main_widgets_.keys():
-                            w = self.dict_main_widgets_[it]
-                        if not w:
-                            act = self.container_.findChild(QtWidgets.QAction, it)
-                            if not act or not act.isVisible():
-                                continue
+            for it in windows_opened:
+                if it in self.db().managerModules().listAllIdModules():
+                    w = None
+                    if it in self.dict_main_widgets_.keys():
+                        w = self.dict_main_widgets_[it]
+                    if w is None:
+                        act = self.container_.findChild(QtWidgets.QAction, it)
+                        if not act or not act.isVisible():
+                            continue
 
-                            w = self.db().managerModules().createUI("%s.ui" % it, self, None, it)
-                            self.dict_main_widgets_[it] = w
-                            w.setObjectName(it)
-                            if self.acl_:
-                                self.acl_.process(w)
+                        w = self.db().managerModules().createUI("%s.ui" % it, self, None, it)
+                        self.dict_main_widgets_[it] = w
+                        w.setObjectName(it)
+                        if self.acl_:
+                            self.acl_.process(w)
                             
-                            self.setCaptionMainWidget(None)
-                            self.setMainWidget(w)
-                            self.call("%s.init()" % it, [])
-                            self.db().managerModules().setActiveIdModule(it)
-                            self.setMainWidget(w)
-                            self.initMainWidget()
+                        self.setCaptionMainWidget(None)
+                        self.setMainWidget(w)
+                        self.call("%s.init()" % it, [])
+                        self.db().managerModules().setActiveIdModule(it)
+                        self.setMainWidget(w)
+                        self.initMainWidget()
 
             for k in self.dict_main_widgets_.keys():
                 w = self.dict_main_widgets_[k]
@@ -1507,7 +1521,7 @@ class FLApplication(QtCore.QObject):
 
     def readStateModule(self):
         
-        from pineboolib.pncontrolsfactory import QAction, QApplication
+        from pineboolib.pncontrolsfactory import QApplication
         
         idm = self.db().managerModules().activeIdModule()
         if not idm:
@@ -1516,29 +1530,33 @@ class FLApplication(QtCore.QObject):
         if self.main_widget_ is None or self.main_widget_.objectName() != idm:
             return
         
-        windows_opened = FLSettings().readListEntry("windowsOpened/%s" % idm)
+        settings = FLSettings()
+        
+        windows_opened = settings.readListEntry("windowsOpened/%s" % idm)
         if windows_opened:
             for it in windows_opened:
-                act = self.main_widget_.findChild(QAction, it)
+                act = self.main_widget_.findChild(QObject, it)
                 if act and act.isVisible():
                     self.openMasterForm(it, act.icon())
-        
+                    
         
         r = QRect(self.main_widget_.pos(), self.main_widget_.size())
         k = "Geometry/%s" % idm
-        
-        if not FLSettings().readBoolEntry("%s/Maximized" % k, False):
-            r.setX(FLSettings().readNumEntry("%s/X" % k, r.x()))
-            r.setY(FLSettings().readNumEntry("%s/Y" % k, r.y()))
-            r.setWidth(FLSettings().readNumEntry("%s/Width" % k, r.width()))
-            r.setWidth(FLSettings().readNumEntry("%s/Height" % k, r.height()))
+        if not settings.readBoolEntry("%s/Maximized" % k, False):
+            r.setX(settings.readNumEntry("%s/X" % k, r.x()))
+            r.setY(settings.readNumEntry("%s/Y" % k, r.y()))
+            r.setWidth(settings.readNumEntry("%s/Width" % k, r.width()))
+            r.setHeight(settings.readNumEntry("%s/Height" % k, r.height()))
             desk = QApplication.desktop().availableGeometry(self.main_widget_)
             inter = desk.intersected(r)
             self.main_widget_.resize(r.size())
             if (inter.width() * inter.height()) > (r.width() * r.height() / 20):
                 self.main_widget_.move(r.topLeft())
             else:
-                self.main_widget_.resize(QApplication.desktop().availableGeometry(self.main_widget_).size()) 
+                self.main_widget_.resize(QApplication.desktop().availableGeometry(self.main_widget_).size())
+            
+        
+            
 
     def loadScripts(self):
         from pineboolib.pncontrolsfactory import QApplication

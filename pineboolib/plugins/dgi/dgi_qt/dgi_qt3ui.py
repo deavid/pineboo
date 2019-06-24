@@ -390,7 +390,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
             process_property(p, action)
         toolBar.addAction(action)
-        origWidget.ui_[action.objectName()] = action
+        #origWidget.ui_[action.objectName()] = action
 
     def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:

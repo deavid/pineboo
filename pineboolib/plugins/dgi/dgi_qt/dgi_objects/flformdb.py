@@ -848,6 +848,10 @@ class FLFormDB(QtWidgets.QDialog):
         size = loadGeometryForm(self.geoName())
         if size:
             self.resize(size)
+        
+            if self.parent() and isinstance(self.parent(), QMdiSubWindow):
+                self.parent().resize(size)
+                self.parent().repaint()
             
 
     def cursorDestroyed(self, obj_ = None):
@@ -902,7 +906,9 @@ class FLFormDB(QtWidgets.QDialog):
                 mdi_area = module_window.centralWidget()
                 if isinstance(mdi_area, QMdiArea) and type(self).__name__ == "FLFormDB":
                     if not isinstance(self.parent(), QMdiSubWindow):
+                        size = self.size()
                         mdi_area.addSubWindow(self)
+                        
         
         
         
