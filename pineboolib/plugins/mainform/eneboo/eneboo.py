@@ -58,8 +58,11 @@ class MainForm(QtWidgets.QMainWindow):
 
                 return True
 
-            if isinstance(o, pineboolib.pncontrolsfactory.FLFormDB):
+            elif isinstance(o, pineboolib.pncontrolsfactory.FLFormDB):
                 self.formClosed()
+            
+            elif isinstance(o, pineboolib.pncontrolsfactory.QDockWidget):
+                o.topLevelChanged.emit(False)
 
         elif isinstance(e, AQS.WindowStateChange):
             if sys.isNebulaBuild() and o == self.w_:
@@ -612,6 +615,7 @@ class MainForm(QtWidgets.QMainWindow):
             # ac.setChecked(dock.w_.isVisible())
             dock.set_visible.connect(ac.setChecked)
             ac.triggered.connect(dock.change_state)
+            dock.w_.topLevelChanged.connect(ac.setChecked)
             # dock.w_.Close.connect(ac.setChecked)
 
     def cloneAction(self, act, parent):
@@ -873,7 +877,8 @@ class DockListView(QtCore.QObject):
     ag_ = None
     _name = None
     set_visible = QtCore.pyqtSignal(bool)
-
+    Close = QtCore.pyqtSignal(bool)
+    
     def __init__(self, parent, name, title):
         if parent is None:
             return
