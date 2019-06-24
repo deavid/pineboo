@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 util = FLUtil()  # <- para cuando QS erróneo usa util sin definirla
 sys = SysType()
+print_ = print
 
 undefined = None
 LogText = 0
