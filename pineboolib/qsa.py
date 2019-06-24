@@ -10,6 +10,7 @@ import logging
 # FLObjects
 from pineboolib.utils import ustr, filedir
 from pineboolib.pncontrolsfactory import FLUtil, SysType, aqApp, QInputDialog, QLineEdit
+from pineboolib.pnobjectsfactory import load_model, Calculated
 
 from . import decorators
 from functools import total_ordering
