@@ -11,21 +11,17 @@ class AQGlobalFunctions(object):
     mappers_ = Array()
     count_ = 0
 
-    
     def set(self, functionName=None, globalFunction=None):
         functions_[functionName] = globalFunction
 
-    
     def get(self, functionName=None):
         return functions_[functionName]
 
-    
     def exec_(self, functionName=None):
         fn = functions_[functionName]
-        if fn != None:
+        if fn is not None:
             fn()
 
-    
     def mapConnect(self, obj=None, signal=None, functionName=None):
         c = self.count_ % 100
         sigMap = AQSignalMapper(obj)
@@ -37,7 +33,7 @@ class AQGlobalFunctions(object):
         connect(sigMap, u"mapped(QString)", sys.AQGlobalFunctions, u"exec()")
         sigMap.setMapping(obj, functionName)
         connect(obj, signal, sigMap, u"map()")
-        count_ += 1
+        # count_ += 1
 
 
 class AQTimer(QtCore.QTimer):
@@ -64,34 +60,30 @@ class AbanQUpdater(object):
         self.prBar_.setTotalSteps(100)
         lay.addWidget(self.prBar_)
         self.data_ = u""
-        self.urlOp_ = QUrlOperator(sys.decryptFromBase64(
-            u"lKvF+hkDxk2dS6hrf0jVURL4EceyJIFPeigGw6lZAU/3ovk/v0iZfhklru4Q6t6M"))
+        self.urlOp_ = QUrlOperator(sys.decryptFromBase64(u"lKvF+hkDxk2dS6hrf0jVURL4EceyJIFPeigGw6lZAU/3ovk/v0iZfhklru4Q6t6M"))
         connect(self.urlOp_, u"finished(QNetworkOperation*)", self, u"transferFinished()")
         connect(self.urlOp_, u"dataTransferProgress(int,int,QNetworkOperation*)", self, u"transferProgress()")
         connect(self.urlOp_, u"data(const QByteArray&,QNetworkOperation*)", self, u"transferData()")
         self.urlOp_.get(sys.decryptFromBase64(u"wYZ6GifNhk4W+qnjzToiKooKL24mrW5bt0+RS6hQzW0="))
 
-    
     def transferFinished(self, netOp=None):
         self.state_ = netOp.state()
         self.w_.close()
         if self.state_ == AQS.StFailed:
             self.errorMsgBox(netOp.protocolDetail())
 
-    
     def transferProgress(self, bytesDone=None, bytesTotal=None, netOp=None):
         if bytesTotal > 0:
             self.prBar_.setTotalSteps(bytesTotal)
         self.prBar_.setProgress(bytesDone)
 
-    
     def transferData(self, data=None, netOp=None):
         dat = QByteArray(data)
         self.data_ += dat.toVariant
 
 
 class AbanQDbDumper(object):
-    SEP_CSV = u'\u00b6'
+    SEP_CSV = u"\u00b6"
     db_ = None
     showGui_ = None
     dirBase_ = None
@@ -106,12 +98,13 @@ class AbanQDbDumper(object):
     proc_ = None
 
     def __init__(self, db=None, dirBase=None, showGui=None, funLog=None):
-        self.db_ = ((aqApp.db() if (db == None) else db))
-        self.showGui_ = (True if (showGui == None) else showGui)
-        self.dirBase_ = (Dir.home if (dirBase == None) else dirBase)
-        self.funLog_ = (self.addLog if (funLog == None) else funLog)
+        self.db_ = aqApp.db() if db is None else db
+        self.showGui_ = True if showGui is None else showGui
+        self.dirBase_ = Dir.home if dirBase is None else dirBase
+        self.funLog_ = self.addLog if funLog is None else funLog
         self.fileName_ = self.genFileName()
         import sys
+
         self.encoding = sys.getfilesystemencoding()
 
     def init(self):
@@ -124,13 +117,13 @@ class AbanQDbDumper(object):
         self.w_.caption = sys.translate(u"Copias de seguridad")
         self.w_.modal = True
         self.w_.resize(800, 600)
-        #lay = QVBoxLayout(self.w_, 6, 6)
+        # lay = QVBoxLayout(self.w_, 6, 6)
         lay = QVBoxLayout(self.w_)
         frm = QFrame(self.w_)
         frm.frameShape = AQS.Box
         frm.lineWidth = 1
         frm.frameShadow = AQS.Plain
-        #layFrm = QVBoxLayout(frm, 6, 6)
+        # layFrm = QVBoxLayout(frm, 6, 6)
         layFrm = QVBoxLayout(frm)
         lbl = QLabel(frm)
         lbl.text = sys.translate(u"Driver: %s") % (str(self.db_.driverNameToDriverAlias(self.db_.driverName())))
@@ -175,7 +168,7 @@ class AbanQDbDumper(object):
         lay.addWidget(self.tedLog_)
 
     def initDump(self):
-        gui = self.showGui_ and self.w_ != None
+        gui = self.showGui_ and self.w_ is not None
         if gui:
             self.w_.enabled = False
         self.dumpDatabase()
@@ -193,7 +186,7 @@ class AbanQDbDumper(object):
         now = Date()
         timeStamp = parseString(now)
         regExp = ["-", ":"]
-        #regExp.global_ = True
+        # regExp.global_ = True
         for rE in regExp:
             timeStamp = timeStamp.replace(rE, u"")
 
@@ -209,12 +202,12 @@ class AbanQDbDumper(object):
             if not dirBasePath:
                 return
         self.dirBase_ = dirBasePath
-        if self.showGui_ and self.lblDirBase_ != None:
+        if self.showGui_ and self.lblDirBase_ is not None:
             self.lblDirBase_.text = sys.translate(u"Directorio Destino: %s") % (str(self.dirBase_))
         self.fileName_ = self.genFileName()
 
     def addLog(self, msg=None):
-        if self.showGui_ and self.tedLog_ != None:
+        if self.showGui_ and self.tedLog_ is not None:
             self.tedLog_.append(msg)
         else:
             debug(msg)
@@ -237,7 +230,7 @@ class AbanQDbDumper(object):
 
         while self.proc_.running:
             sys.processEvents()
-        
+
         return self.proc_.exitcode() == self.proc_.normalExit
 
     def readFromStdout(self):
@@ -258,16 +251,16 @@ class AbanQDbDumper(object):
         else:
             if driver.startswith(u"FLQMYSQL"):
                 typeBd = 2
-        
+
         if typeBd == 0:
             self.setState(False, sys.translate(u"Este tipo de base de datos no soporta el volcado a disco."))
             self.funLog_(self.state_.msg)
             self.dumpAllTablesToCsv()
             return False
-        file = File(self.fileName_)
+        file = File(self.fileName_)  # noqa
         try:
             if not os.path.exists(self.fileName_):
-                dir_ = Dir(self.fileName_)
+                dir_ = Dir(self.fileName_)  # noqa
 
         except Exception as e:
             e = traceback.format_exc()
@@ -288,10 +281,9 @@ class AbanQDbDumper(object):
             self.setState(False, sys.translate(u"No se ha podido realizar la copia de seguridad."))
             self.funLog_(self.state_.msg)
         else:
-            self.setState(True, sys.translate(u"Copia de seguridad realizada con éxito en:\n%s") %
-                          (str(self.fileName_)))
+            self.setState(True, sys.translate(u"Copia de seguridad realizada con éxito en:\n%s") % (str(self.fileName_)))
             self.funLog_(self.state_.msg)
-        
+
         return ok
 
     def dumpPostgreSQL(self):
@@ -305,12 +297,15 @@ class AbanQDbDumper(object):
             command = [pgDump, u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U", db.user(), db.database()]
         else:
             System.setenv(u"PGPASSWORD", db.password())
-            command = [pgDump, u"-v", u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U",
-                       db.user(), db.database()]
-        
+            command = [pgDump, u"-v", u"-f", fileName, u"-h", db.host(), u"-p", db.port(), u"-U", db.user(), db.database()]
+
         if not self.launchProc(command):
-            self.setState(False, sys.translate(u"No se ha podido volcar la base de datos a disco.\n") +
-                          sys.translate(u"Es posible que no tenga instalada la herramienta ") + pgDump)
+            self.setState(
+                False,
+                sys.translate(u"No se ha podido volcar la base de datos a disco.\n")
+                + sys.translate(u"Es posible que no tenga instalada la herramienta ")
+                + pgDump,
+            )
             self.funLog_(self.state_["msg"])
             return False
         self.setState(True, u"")
@@ -323,15 +318,35 @@ class AbanQDbDumper(object):
         db = self.db_
         if sys.osName() == u"WIN32":
             myDump += u".exe"
-            command = [myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                                                                                                           db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
+            command = [
+                myDump,
+                u"-v",
+                ustr(u"--result-file=", fileName),
+                ustr(u"--host=", db.host()),
+                ustr(u"--port=", db.port()),
+                ustr(u"--password=", db.password()),
+                ustr(u"--user=", db.user()),
+                db.database(),
+            ]
         else:
-            command = [myDump, u"-v", ustr(u"--result-file=", fileName), ustr(u"--host=", db.host()), ustr(u"--port=",
-                                                                                                           db.port()), ustr(u"--password=", db.password()), ustr(u"--user=", db.user()), db.database()]
+            command = [
+                myDump,
+                u"-v",
+                ustr(u"--result-file=", fileName),
+                ustr(u"--host=", db.host()),
+                ustr(u"--port=", db.port()),
+                ustr(u"--password=", db.password()),
+                ustr(u"--user=", db.user()),
+                db.database(),
+            ]
 
         if not self.launchProc(command):
-            self.setState(False, sys.translate(u"No se ha podido volcar la base de datos a disco.\n") +
-                          sys.translate(u"Es posible que no tenga instalada la herramienta ") + myDump)
+            self.setState(
+                False,
+                sys.translate(u"No se ha podido volcar la base de datos a disco.\n")
+                + sys.translate(u"Es posible que no tenga instalada la herramienta ")
+                + myDump,
+            )
             self.funLog_(self.state_.msg)
             return False
         self.setState(True, u"")
@@ -407,8 +422,8 @@ class AbanQDbDumper(object):
         dir_ = Dir(fileName)
         dir_.mkdir()
         dirBase = Dir.convertSeparators(ustr(fileName, u"/"))
-        i = 0
-        while_pass = True
+        # i = 0
+        # while_pass = True
         for table_ in tables:
             self.dumpTableToCsv(table_, dirBase)
         return True
@@ -422,37 +437,44 @@ class FormInternalObj(FormDBWidget):
     def init(self):
         settings = AQSettings()
         if sys.isLoadedModule(u"flfactppal"):
-            util = FLUtil()
-            codEjercicio = flfactppal.iface.pub_ejercicioActual()
-            nombreEjercicio = util.sqlSelect(u"ejercicios", u"nombre", ustr(u"codejercicio='", codEjercicio, u"'"))
-            if AQUtil.sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == "True":
-                texto = ""
-                if nombreEjercicio:
-                    texto = ustr(u"[ ", nombreEjercicio, u" ]")
-                texto = ustr(texto, u" [ ", aqApp.db().driverNameToDriverAlias(aqApp.db().driverName()),
-                             u" ] * [ ", sys.nameBD(), u" ] * [ ", sys.nameUser(), u" ] ")
-                aqApp.setCaptionMainWidget(texto)
+            try:
+                codEjercicio = flfactppal.iface.pub_ejercicioActual()
+            except Exception as e:
+                logger.error("Module flfactppal was loaded but not able to execute <flfactppal.iface.pub_ejercicioActual()>")
+                logger.error("... this usually means that flfactppal has failed translation to python")
+                logger.exception(e)
+                codEjercicio = None
+            if codEjercicio:
+                util = FLUtil()
+                nombreEjercicio = util.sqlSelect(u"ejercicios", u"nombre", ustr(u"codejercicio='", codEjercicio, u"'"))
+                if AQUtil.sqlSelect(u"flsettings", u"valor", u"flkey='PosInfo'") == "True":
+                    texto = ""
+                    if nombreEjercicio:
+                        texto = ustr(u"[ ", nombreEjercicio, u" ]")
+                    texto = ustr(
+                        texto, u" [ ", aqApp.db().driverNameToDriverAlias(aqApp.db().driverName()), u" ] * [ ", sys.nameBD(), u" ] * [ ", sys.nameUser(), u" ] "
+                    )
+                    aqApp.setCaptionMainWidget(texto)
 
-            else:
-                if nombreEjercicio:
-                    aqApp.setCaptionMainWidget(nombreEjercicio)
+                else:
+                    if nombreEjercicio:
+                        aqApp.setCaptionMainWidget(nombreEjercicio)
 
-            
-            oldApi = settings.readBoolEntry(u"application/oldApi")
-            if not oldApi:
-                valor = util.readSettingEntry(u"ebcomportamiento/ebCallFunction")
-                if valor:
-                    funcion = Function(valor)
-                    try:
-                        funcion()
-                    except Exception as e:
-                        e = traceback.format_exc()
-                        debug(e)
-        
+                oldApi = settings.readBoolEntry(u"application/oldApi")
+                if not oldApi:
+                    valor = util.readSettingEntry(u"ebcomportamiento/ebCallFunction")
+                    if valor:
+                        funcion = Function(valor)
+                        try:
+                            funcion()
+                        except Exception as e:
+                            e = traceback.format_exc()
+                            debug(e)
+
         if settings.readBoolEntry("ebcomportamiento/git_updates_enabled", False):
             sys.AQTimer.singleShot(2000, sys.search_git_updates)
 
-    
+
 def afterCommit_flfiles(curFiles=None):
     if curFiles.modeAccess() != curFiles.Browse:
         qry = FLSqlQuery()
@@ -492,22 +514,21 @@ def afterCommit_flfiles(curFiles=None):
 
     return True
 
-    
+
 def statusDbLocksDialog(locks=None):
     util = FLUtil()
     diag = Dialog()
     txtEdit = TextEdit()
     diag.caption = util.translate(u"scripts", u"Bloqueos de la base de datos")
     diag.width = 500
-    html = u"<html><table border=\"1\">"
-    if locks != None and len(locks):
-        i = 0
+    html = u'<html><table border="1">'
+    if locks is not None and len(locks):
         j = 0
         item = u""
         fields = locks[0].split(u"@")
         closeInfo = False
         closeRecord = False
-        headInfo = u"<table border=\"1\"><tr>"
+        headInfo = u'<table border="1"><tr>'
         i = 0
         while_pass = True
         while i < len(fields):
@@ -525,7 +546,7 @@ def statusDbLocksDialog(locks=None):
                 break
 
         headInfo += u"</tr>"
-        headRecord = ustr(u"<table border=\"1\"><tr><td><b>", util.translate(u"scripts", u"Registro bloqueado"), u"</b></td></tr>")
+        headRecord = ustr(u'<table border="1"><tr><td><b>', util.translate(u"scripts", u"Registro bloqueado"), u"</b></td></tr>")
         i = 1
         while_pass = True
         while i < len(locks):
@@ -540,7 +561,7 @@ def statusDbLocksDialog(locks=None):
                     html += u"</table>"
                 if not closeRecord:
                     html += headRecord
-                html += ustr(u"<tr><td>", item[(len(item) - (len(item) - 2)):], u"</td></tr>")
+                html += ustr(u"<tr><td>", item[(len(item) - (len(item) - 2)) :], u"</td></tr>")
                 closeRecord = True
                 closeInfo = False
 
@@ -583,12 +604,12 @@ def statusDbLocksDialog(locks=None):
     diag.add(txtEdit)
     diag.exec_()
 
-    
+
 def terminateChecksLocks(sqlCursor=None):
-    if sqlCursor != None:
+    if sqlCursor is not None:
         sqlCursor.checkRisksLocks(True)
 
-    
+
 def execQSA(fileQSA=None, args=None):
     file = File(fileQSA)
     try:
@@ -601,7 +622,7 @@ def execQSA(fileQSA=None, args=None):
     fn = Function(file.read())
     fn(args)
 
-    
+
 def mvProjectXml():
     docRet = QDomDocument()
     strXml = AQUtil.sqlSelect(u"flupdates", u"modulesdef", u"actual='true'")
@@ -623,7 +644,7 @@ def mvProjectXml():
         it = nodes.item(i)
         if it.isComment():
             data = it.toComment().data()
-            if not data == '' and data.startswith(u"<mvproject "):
+            if not data == "" and data.startswith(u"<mvproject "):
                 strXml = data
                 break
 
@@ -634,12 +655,12 @@ def mvProjectXml():
         except Exception:
             break
 
-    if strXml == '':
+    if strXml == "":
         return docRet
     docRet.setContent(strXml)
     return docRet
 
-    
+
 def mvProjectModules():
     ret = Array()
     doc = mvProjectXml()
@@ -653,7 +674,7 @@ def mvProjectModules():
             continue
         while_pass = False
         it = mods.item(i).toElement()
-        mod = {name: (it.attribute(u"name")), version: (it.attribute(u"version")), }
+        mod = {name: (it.attribute(u"name")), version: (it.attribute(u"version"))}
         if len(mod.name) == 0:
             continue
         ret[mod.name] = mod
@@ -666,7 +687,7 @@ def mvProjectModules():
 
     return ret
 
-    
+
 def mvProjectExtensions():
     ret = Array()
     doc = mvProjectXml()
@@ -680,7 +701,7 @@ def mvProjectExtensions():
             continue
         while_pass = False
         it = exts.item(i).toElement()
-        ext = {name: (it.attribute(u"name")), version: (it.attribute(u"version")), }
+        ext = {name: (it.attribute(u"name")), version: (it.attribute(u"version"))}
         if len(ext.name) == 0:
             continue
         ret[ext.name] = ext
@@ -693,7 +714,7 @@ def mvProjectExtensions():
 
     return ret
 
-    
+
 def calculateShaGlobal():
     v = u""
     qry = AQSqlQuery()
@@ -705,7 +726,7 @@ def calculateShaGlobal():
             v = AQUtil.sha1(v + parseString(qry.value(0)))
     return v
 
-    
+
 def registerUpdate(input_=None):
     if not input_:
         return
@@ -743,11 +764,15 @@ def registerUpdate(input_=None):
     filesDef = sys.toUnicode(unpacker.getText(), u"utf8")
     shaGlobal = calculateShaGlobal()
     AQSql.update(u"flupdates", Array([u"actual"]), Array([False]))
-    AQSql.insert(u"flupdates", Array([u"fecha", u"hora", u"nombre", u"modulesdef", u"filesdef", u"shaglobal"]), Array([now, parseString(now)[(len(parseString(now)) - (8)):], fileName, modulesDef, filesDef, shaGlobal]))
+    AQSql.insert(
+        u"flupdates",
+        Array([u"fecha", u"hora", u"nombre", u"modulesdef", u"filesdef", u"shaglobal"]),
+        Array([now, parseString(now)[(len(parseString(now)) - (8)) :], fileName, modulesDef, filesDef, shaGlobal]),
+    )
 
-    
+
 def warnLocalChanges(changes=None):
-    if changes == None:
+    if changes is None:
         changes = localChanges()
     if changes["size"] == 0:
         return True
@@ -790,16 +815,16 @@ def warnLocalChanges(changes=None):
     lay2.addWidget(pbAccept)
     connect(pbAccept, "clicked()", diag, "accept()")
     connect(pbCancel, "clicked()", diag, "reject()")
-    return (False if (diag.exec_() == 0) else True)
+    return False if (diag.exec_() == 0) else True
 
-    
+
 def reportChanges(changes=None):
     ret = u""
     # DEBUG:: FOR-IN: ['key', 'changes']
     for key in changes:
         if key == u"size":
             continue
-        chg = changes[key].split('@')
+        chg = changes[key].split("@")
         ret += "Nombre: %s \n" % chg[0]
         ret += "Estado: %s \n" % chg[1]
         ret += "ShaOldTxt: %s \n" % chg[2]
@@ -808,10 +833,7 @@ def reportChanges(changes=None):
 
     return ret
 
-    
 
-
-    
 def diffXmlFilesDef(xmlOld=None, xmlNew=None):
     arrOld = filesDefToArray(xmlOld)
     arrNew = filesDefToArray(xmlNew)
@@ -819,28 +841,27 @@ def diffXmlFilesDef(xmlOld=None, xmlNew=None):
     size = 0
     # DEBUG:: FOR-IN: ['key', 'arrOld']
     for key in arrOld:
-        if not (key in arrNew):
+        if key not in arrNew:
             info = [key, "del", arrOld[key]["shatext"], arrOld[key]["shabinary"], "", ""]
-            ret[key] = '@'.join(info)
+            ret[key] = "@".join(info)
             size += 1
     # DEBUG:: FOR-IN: ['key', 'arrNew']
 
     for key in arrNew:
-        if not key in arrOld:
+        if key not in arrOld:
             info = [key, "new", "", "", arrNew[key]["shatext"], arrNew[key]["shabinary"]]
-            ret[key] = '@'.join(info)
+            ret[key] = "@".join(info)
             size += 1
         else:
             if arrNew[key]["shatext"] != arrOld[key]["shatext"] or arrNew[key]["shabinary"] != arrOld[key]["shabinary"]:
-                info = [key, "mod", arrOld[key]["shatext"], arrOld[key]["shabinary"],
-                                arrNew[key]["shatext"], arrNew[key]["shabinary"]]
-                ret[key] = '@'.join(info)
+                info = [key, "mod", arrOld[key]["shatext"], arrOld[key]["shabinary"], arrNew[key]["shatext"], arrNew[key]["shabinary"]]
+                ret[key] = "@".join(info)
                 size += 1
 
     ret["size"] = size
     return ret
 
-    
+
 def filesDefToArray(xml=None):
     root = xml.firstChild()
     files = root.childNodes()
@@ -854,13 +875,14 @@ def filesDefToArray(xml=None):
             continue
         while_pass = False
         it = files.item(i)
-        fil = {"id": it.namedItem(u"name").toElement().text(),
-               "module": it.namedItem(u"module").toElement().text(),
-               "text": it.namedItem(u"text").toElement().text(),
-               "shatext": it.namedItem(u"shatext").toElement().text(),
-               "binary": it.namedItem(u"binary").toElement().text(),
-               "shabinary": it.namedItem(u"shabinary").toElement().text()
-               }
+        fil = {
+            "id": it.namedItem(u"name").toElement().text(),
+            "module": it.namedItem(u"module").toElement().text(),
+            "text": it.namedItem(u"text").toElement().text(),
+            "shatext": it.namedItem(u"shatext").toElement().text(),
+            "binary": it.namedItem(u"binary").toElement().text(),
+            "shabinary": it.namedItem(u"shabinary").toElement().text(),
+        }
         if len(fil["id"]) == 0:
             continue
         ret[fil["id"]] = fil
@@ -873,7 +895,7 @@ def filesDefToArray(xml=None):
 
     return ret
 
-    
+
 def xmlFilesDefBd():
     doc = QDomDocument(u"files_def")
     root = doc.createElement(u"files")
@@ -940,6 +962,7 @@ def xmlFilesDefBd():
 
         except Exception:
             e = traceback.format_exc()
+            logger.error(e)
 
     qry = AQSqlQuery()
     qry.setSelect(u"idmodulo,icono")
@@ -990,22 +1013,34 @@ def xmlFilesDefBd():
     root.appendChild(ns)
     return doc
 
-    
-def textPacking(ext=None):
-    return ext.endswith(u".ui") or ext.endswith(u".qry") or ext.endswith(u".kut") or ext.endswith(u".jrxml") or ext.endswith(u".ar") or ext.endswith(u".mtd") or ext.endswith(u".ts") or ext.endswith(u".qs") or ext.endswith(".qs.py") or ext.endswith(u".xml") or ext.endswith(u".xpm") or ext.endswith(u".svg")
 
-    
+def textPacking(ext=None):
+    return (
+        ext.endswith(u".ui")
+        or ext.endswith(u".qry")
+        or ext.endswith(u".kut")
+        or ext.endswith(u".jrxml")
+        or ext.endswith(u".ar")
+        or ext.endswith(u".mtd")
+        or ext.endswith(u".ts")
+        or ext.endswith(u".qs")
+        or ext.endswith(".qs.py")
+        or ext.endswith(u".xml")
+        or ext.endswith(u".xpm")
+        or ext.endswith(u".svg")
+    )
+
+
 def binaryPacking(ext=None):
     return ext.endswith(u".qs")
 
-    
+
 def loadModules(input_=None, warnBackup=None):
-    if input_ == None:
+    if input_ is None:
         dir_ = Dir(ustr(sys.installPrefix(), u"/share/eneboo/packages"))
         dir_.setCurrent()
-        input_ = FileDialog.getOpenFileName(u"Eneboo/AbanQ Packages",
-                                                AQUtil.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg")
-    if warnBackup == None:
+        input_ = FileDialog.getOpenFileName(u"Eneboo/AbanQ Packages", AQUtil.translate(u"scripts", u"Seleccionar Fichero"), "*.eneboopkg")
+    if warnBackup is None:
         warnBackup = True
     if input_:
         try:
@@ -1013,7 +1048,7 @@ def loadModules(input_=None, warnBackup=None):
         except Exception:
             logger.warn("*******", traceback.format_exc())
 
-    
+
 def loadAbanQPackage(input_=None, warnBackup=None):
     if warnBackup and interactiveGUI():
         txt = u""
@@ -1073,7 +1108,7 @@ def loadAbanQPackage(input_=None, warnBackup=None):
             tmpVar = FLVar()
             tmpVar.set(u"mrproper", u"dirty")
 
-    
+
 def loadFilesDef(un=None):
     filesDef = sys.toUnicode(un.getText(), u"utf8")
     doc = QDomDocument()
@@ -1093,7 +1128,15 @@ def loadFilesDef(un=None):
             continue
         while_pass = False
         it = files.item(i)
-        fil = {"id": it.namedItem(u"name").toElement().text(), "skip": it.namedItem(u"skip").toElement().text(), "module": it.namedItem(u"module").toElement().text(), "text": it.namedItem(u"text").toElement().text(), "shatext": it.namedItem(u"shatext").toElement().text(), "binary": it.namedItem(u"binary").toElement().text(), "shabinary": it.namedItem(u"shabinary").toElement().text()}
+        fil = {
+            "id": it.namedItem(u"name").toElement().text(),
+            "skip": it.namedItem(u"skip").toElement().text(),
+            "module": it.namedItem(u"module").toElement().text(),
+            "text": it.namedItem(u"text").toElement().text(),
+            "shatext": it.namedItem(u"shatext").toElement().text(),
+            "binary": it.namedItem(u"binary").toElement().text(),
+            "shabinary": it.namedItem(u"shabinary").toElement().text(),
+        }
         AQUtil.setProgress(i)
         AQUtil.setLabelText(ustr(sys.translate(u"Registrando fichero"), u" ", fil["id"]))
         if len(fil["id"]) == 0 or fil["skip"] == u"true":
@@ -1112,7 +1155,7 @@ def loadFilesDef(un=None):
     AQUtil.destroyProgressDialog()
     return ok
 
-    
+
 def registerFile(fil=None, un=None):
     if fil["id"].endswith(u".xpm"):
         cur = AQSqlCursor(u"flmodules")
@@ -1143,16 +1186,16 @@ def registerFile(fil=None, un=None):
         un.getBinary()
     return cur.commitBuffer()
 
-    
+
 def checkProjectName(proName=None):
-    if not proName or proName == None:
+    if not proName or proName is None:
         proName = u""
     dbProName = AQUtil.readDBSettingEntry(u"projectname")
     if not dbProName:
         dbProName = u""
     if proName == dbProName:
         return True
-    if not proName == '' and dbProName == '':
+    if not proName == "" and dbProName == "":
         return AQUtil.writeDBSettingEntry(u"projectname", proName)
     txt = u""
     txt += sys.translate(u"¡¡ CUIDADO !! POSIBLE INCOHERENCIA EN LOS MÓDULOS\n\n")
@@ -1168,9 +1211,9 @@ def checkProjectName(proName=None):
         debug(txt)
         return False
     txt += sys.translate(u"¿Desea continuar?")
-    return (MessageBox.Yes == MessageBox.warning(txt, MessageBox.No, MessageBox.Yes, MessageBox.NoButton, u"AbanQ"))
+    return MessageBox.Yes == MessageBox.warning(txt, MessageBox.No, MessageBox.Yes, MessageBox.NoButton, u"AbanQ")
 
-    
+
 def loadModulesDef(un=None):
     modulesDef = sys.toUnicode(un.getText(), u"utf8")
     doc = QDomDocument()
@@ -1192,7 +1235,13 @@ def loadModulesDef(un=None):
             continue
         while_pass = False
         it = modules.item(i)
-        mod = {"id": it.namedItem(u"name").toElement().text(), "alias": trTagText(it.namedItem(u"alias").toElement().text()), "area": it.namedItem(u"area").toElement().text(), "areaname": trTagText(it.namedItem(u"areaname").toElement().text()), "version": it.namedItem(u"version").toElement().text() }
+        mod = {
+            "id": it.namedItem(u"name").toElement().text(),
+            "alias": trTagText(it.namedItem(u"alias").toElement().text()),
+            "area": it.namedItem(u"area").toElement().text(),
+            "areaname": trTagText(it.namedItem(u"areaname").toElement().text()),
+            "version": it.namedItem(u"version").toElement().text(),
+        }
         AQUtil.setProgress(i)
         AQUtil.setLabelText(ustr(sys.translate(u"Registrando módulo"), u" ", mod["id"]))
         if not registerArea(mod) or not registerModule(mod):
@@ -1209,7 +1258,7 @@ def loadModulesDef(un=None):
     AQUtil.destroyProgressDialog()
     return ok
 
-    
+
 def registerArea(mod=None):
     cur = AQSqlCursor(u"flareas")
     if not cur.select(ustr(u"idarea='", mod["area"], u"'")):
@@ -1220,7 +1269,7 @@ def registerArea(mod=None):
     cur.setValueBuffer(u"descripcion", mod["areaname"])
     return cur.commitBuffer()
 
-    
+
 def registerModule(mod=None):
     cur = AQSqlCursor(u"flmodules")
     if not cur.select(ustr(u"idmodulo='", mod["id"], u"'")):
@@ -1233,6 +1282,7 @@ def registerModule(mod=None):
     cur.setValueBuffer(u"version", mod["version"])
     return cur.commitBuffer()
 
+
 def infoMsgBox(msg=None):
     if not isinstance(msg, str):
         return
@@ -1241,6 +1291,7 @@ def infoMsgBox(msg=None):
         MessageBox.information(msg, MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
     else:
         debug(ustr(u"INFO: ", msg))
+
 
 def warnMsgBox(msg=None):
     if not isinstance(msg, str):
@@ -1251,6 +1302,7 @@ def warnMsgBox(msg=None):
     else:
         debug(ustr(u"WARN: ", msg))
 
+
 def errorMsgBox(msg=None):
     if not isinstance(msg, str):
         return
@@ -1260,15 +1312,16 @@ def errorMsgBox(msg=None):
     else:
         debug(ustr(u"ERROR: ", msg))
 
+
 def infoPopup(msg=None):
     if not isinstance(msg, str):
         return
     caption = sys.translate(u"AbanQ Información")
     regExp = RegExp(u"\n")
     regExp.global_ = True
-    msgHtml = ustr(u"<img source=\"about.png\" align=\"right\">", u"<b><u>", caption,
-                    u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+    msgHtml = ustr(u'<img source="about.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
     sys.popupWarn(msgHtml, [])
+
 
 def warnPopup(msg=None):
     if not isinstance(msg, str):
@@ -1276,9 +1329,9 @@ def warnPopup(msg=None):
     caption = sys.translate(u"AbanQ Aviso")
     regExp = RegExp(u"\n")
     regExp.global_ = True
-    msgHtml = ustr(u"<img source=\"bug.png\" align=\"right\">", u"<b><u>", caption,
-                    u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+    msgHtml = ustr(u'<img source="bug.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
     sys.popupWarn(msgHtml, [])
+
 
 def errorPopup(msg=None):
     if not isinstance(msg, str):
@@ -1286,17 +1339,18 @@ def errorPopup(msg=None):
     caption = sys.translate(u"AbanQ Error")
     regExp = RegExp(u"\n")
     regExp.global_ = True
-    msgHtml = ustr(u"<img source=\"remove.png\" align=\"right\">", u"<b><u>", caption,
-                    u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
+    msgHtml = ustr(u'<img source="remove.png" align="right">', u"<b><u>", caption, u"</u></b><br><br>", msg.replace(regExp, u"<br>"), u"<br>")
     sys.popupWarn(msgHtml, [])
+
 
 def trTagText(tagText=None):
     if not tagText.startswith(u"QT_TRANSLATE_NOOP"):
         return tagText
-    txt = tagText[len("QT_TRANSLATE_NOOP") + 1:]
-    txt = "[%s]" % txt[0: len(txt) - 1]
+    txt = tagText[len("QT_TRANSLATE_NOOP") + 1 :]
+    txt = "[%s]" % txt[0 : len(txt) - 1]
     arr = ast.literal_eval(txt)
     return sys.translate(arr[0], arr[1])
+
 
 def questionMsgBox(msg=None, keyRemember=None, txtRemember=None, forceShow=None, txtCaption=None, txtYes=None, txtNo=None):
     settings = AQSettings()
@@ -1309,7 +1363,7 @@ def questionMsgBox(msg=None, keyRemember=None, txtRemember=None, forceShow=None,
     if not interactiveGUI():
         return True
     diag = QDialog()
-    diag.caption = (txtCaption if txtCaption else u"Eneboo")
+    diag.caption = txtCaption if txtCaption else u"Eneboo"
     diag.modal = True
     lay = QVBoxLayout(diag)
     lay.margin = 6
@@ -1329,9 +1383,9 @@ def questionMsgBox(msg=None, keyRemember=None, txtRemember=None, forceShow=None,
     lay3.margin = 6
     lay3.spacing = 6
     pbYes = QPushButton(diag)
-    pbYes.text = (txtYes if txtYes else sys.translate(u"Sí"))
+    pbYes.text = txtYes if txtYes else sys.translate(u"Sí")
     pbNo = QPushButton(diag)
-    pbNo.text = (txtNo if txtNo else sys.translate(u"No"))
+    pbNo.text = txtNo if txtNo else sys.translate(u"No")
     lay3.addWidget(pbYes)
     lay3.addWidget(pbNo)
     connect(pbYes, u"clicked()", diag, u"accept()")
@@ -1341,31 +1395,29 @@ def questionMsgBox(msg=None, keyRemember=None, txtRemember=None, forceShow=None,
         chkRemember = QCheckBox(txtRemember, diag)
         chkRemember.checked = valRemember
         lay.addWidget(chkRemember)
-    ret = (MessageBox.No if (diag.exec_() == 0) else MessageBox.Yes)
-    if chkRemember != None:
+    ret = MessageBox.No if (diag.exec_() == 0) else MessageBox.Yes
+    if chkRemember is not None:
         settings.writeEntry(key + keyRemember, chkRemember.checked)
     return ret
 
-    
+
 def decryptFromBase64(str_=None):
     ba = QByteArray()
     ba.string = str_
     return parseString(AQS.decryptInternal(AQS.fromBase64(ba)))
 
-    
+
 def updatePineboo():
-    MessageBox.warning(sys.translate(u"Funcionalidad no soportada aún en Pineboo."),
-                        MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Pineboo")
+    MessageBox.warning(sys.translate(u"Funcionalidad no soportada aún en Pineboo."), MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Pineboo")
     return
 
-    
+
 def exportModules():
     dirBasePath = FileDialog.getExistingDirectory(Dir.home)
     if not dirBasePath:
         return
     dataBaseName = aqApp.db().database()
-    dirBasePath = Dir.cleanDirPath(ustr(dirBasePath, u"/modulos_exportados_",
-                                        QString(dataBaseName).mid(dataBaseName.rfind(u"/") + 1)))
+    dirBasePath = Dir.cleanDirPath(ustr(dirBasePath, u"/modulos_exportados_", QString(dataBaseName).mid(dataBaseName.rfind(u"/") + 1)))
     dir = Dir()
     if not dir.fileExists(dirBasePath):
         try:
@@ -1404,7 +1456,7 @@ def exportModules():
     dbProName = AQUtil.readDBSettingEntry(u"projectname")
     if not dbProName:
         dbProName = u""
-    if not dbProName == '':
+    if not dbProName == "":
         doc = QDomDocument()
         tag = doc.createElement(u"mvproject")
         tag.toElement().setAttribute(u"name", dbProName)
@@ -1420,7 +1472,7 @@ def exportModules():
     AQUtil.destroyProgressDialog()
     self.infoMsgBox(sys.translate(u"Módulos exportados en:\n") + dirBasePath)
 
-    
+
 def xmlModule(idMod=None):
     qry = AQSqlQuery()
     qry.setSelect(u"descripcion,idarea,version")
@@ -1434,7 +1486,7 @@ def xmlModule(idMod=None):
     tag = doc.createElement(u"name")
     tag.appendChild(doc.createTextNode(idMod))
     tagMod.appendChild(tag)
-    trNoop = u"QT_TRANSLATE_NOOP(\"Eneboo\",\"%1\")"
+    trNoop = u'QT_TRANSLATE_NOOP("Eneboo","%1")'
     tag = doc.createElement(u"alias")
     tag.appendChild(doc.createTextNode(trNoop.argStr(qry.value(0))))
     tagMod.appendChild(tag)
@@ -1457,7 +1509,7 @@ def xmlModule(idMod=None):
     tagMod.appendChild(tag)
     return doc
 
-    
+
 def fileWriteIso(fileName=None, content=None):
     fileISO = QFile(fileName)
     if not fileISO.open(File.WriteOnly):
@@ -1468,7 +1520,7 @@ def fileWriteIso(fileName=None, content=None):
     tsISO.opIn(content)
     fileISO.close()
 
-    
+
 def fileWriteUtf8(fileName=None, content=None):
     fileUTF = QFile(fileName)
     if not fileUTF.open(File.WriteOnly):
@@ -1479,7 +1531,7 @@ def fileWriteUtf8(fileName=None, content=None):
     tsUTF.opIn(content)
     fileUTF.close()
 
-    
+
 def exportModule(idMod=None, dirBasePath=None):
     dir = Dir()
     dirPath = Dir.cleanDirPath(ustr(dirBasePath, u"/", idMod))
@@ -1510,8 +1562,8 @@ def exportModule(idMod=None, dirBasePath=None):
     while qry.next():
         name = qry.value(0)
         content = qry.value(1)
-        type = name[(len(name) - (len(name) - name.rfind(u"."))):]
-        if content == '':
+        type = name[(len(name) - (len(name) - name.rfind(u"."))) :]
+        if content == "":
             continue
         s02_when = type
         s02_do_work, s02_work_done = False, False
@@ -1558,14 +1610,14 @@ def exportModule(idMod=None, dirBasePath=None):
             sys.fileWriteIso(ustr(dirPath, u"/reports/", name), content)
             s02_do_work = False  # BREAK
         if s02_when == u".ts":
-            s02_do_work, s02_work_done = True, True
+            s02_do_work, s02_work_done = True, True  # noqa
         if s02_do_work:
             sys.fileWriteIso(ustr(dirPath, u"/translations/", name), content)
             s02_do_work = False  # BREAK
 
-    
+
 def importModules(warnBackup=None):
-    if warnBackup == None:
+    if warnBackup is None:
         warnBackup = True
     if warnBackup and interactiveGUI():
         txt = u""
@@ -1581,8 +1633,7 @@ def importModules(warnBackup=None):
 
     key = ustr(u"scripts/sys/modLastDirModules_", sys.nameBD())
     dirAnt = AQUtil.readSettingEntry(key)
-    dirMods = FileDialog.getExistingDirectory(
-        (dirAnt if dirAnt else False), sys.translate(u"Directorio de Módulos"))
+    dirMods = FileDialog.getExistingDirectory((dirAnt if dirAnt else False), sys.translate(u"Directorio de Módulos"))
     if not dirMods:
         return
     dirMods = Dir.cleanDirPath(dirMods)
@@ -1616,7 +1667,7 @@ def importModules(warnBackup=None):
     self.infoMsgBox(sys.translate(u"Importación de módulos finalizada."))
     sys.AQTimer.singleShot(0, sys.reinit)
 
-    
+
 def selectModsDialog(listFilesMod=None):
     dialog = Dialog()
     dialog.okButtonText = sys.translate(u"Aceptar")
@@ -1655,7 +1706,7 @@ def selectModsDialog(listFilesMod=None):
                 while_pass = True
                 continue
             while_pass = False
-            if cB[i].checked == True:
+            if cB[i].checked:
                 res[idx] = listFilesMod[i]
                 idx += 1
             i += 1
@@ -1667,7 +1718,7 @@ def selectModsDialog(listFilesMod=None):
 
     return res
 
-    
+
 def importModule(modPath=None):
     fileMod = File(modPath)
     contentMod = u""
@@ -1686,8 +1737,13 @@ def importModule(modPath=None):
         if not nodeMod:
             self.errorMsgBox(sys.translate(u"Error en la carga del fichero xml .mod"))
             return False
-        mod = {id: (nodeMod.namedItem(u"name").toElement().text()), alias: (trTagText(nodeMod.namedItem(u"alias").toElement().text())), area: (nodeMod.namedItem(
-            u"area").toElement().text()), areaname: (trTagText(nodeMod.namedItem(u"areaname").toElement().text())), version: (nodeMod.namedItem(u"version").toElement().text()), }
+        mod = {
+            id: (nodeMod.namedItem(u"name").toElement().text()),
+            alias: (trTagText(nodeMod.namedItem(u"alias").toElement().text())),
+            area: (nodeMod.namedItem(u"area").toElement().text()),
+            areaname: (trTagText(nodeMod.namedItem(u"areaname").toElement().text())),
+            version: (nodeMod.namedItem(u"version").toElement().text()),
+        }
         if not registerArea(mod) or not registerModule(mod):
             self.errorMsgBox(ustr(sys.translate(u"Error registrando el módulo"), u" ", mod.id))
             return False
@@ -1718,7 +1774,7 @@ def importModule(modPath=None):
 
     return True
 
-    
+
 def importFiles(dirPath=None, ext=None, idMod=None):
     ok = True
     listFiles = AQUtil.findFiles(Array([dirPath]), ext, False)
@@ -1748,7 +1804,7 @@ def importFiles(dirPath=None, ext=None, idMod=None):
     AQUtil.destroyProgressDialog()
     return ok
 
-    
+
 def importFile(filePath=None, idMod=None):
     file = File(filePath)
     content = u""
@@ -1762,7 +1818,9 @@ def importFile(filePath=None, idMod=None):
 
     ok = True
     name = file.name
-    if (not AQUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")) or name.endswith(u"untranslated.ts"):
+    if (not AQUtil.isFLDefFile(content) and not name.endswith(u".qs") and not name.endswith(u".ar") and not name.endswith(u".svg")) or name.endswith(
+        u"untranslated.ts"
+    ):
         return ok
     cur = AQSqlCursor(u"flfiles")
     cur.select(ustr(u"nombre = '", name, u"'"))
@@ -1809,7 +1867,7 @@ def importFile(filePath=None, idMod=None):
 
     return ok
 
-    
+
 def importReportAr(filePath=None, idMod=None, content=None):
     if not sys.isLoadedModule(u"flar2kut"):
         return False
@@ -1817,7 +1875,7 @@ def importReportAr(filePath=None, idMod=None, content=None):
         return False
     content = sys.toUnicode(content, u"UTF-8")
     content = flar2kut.iface.pub_ar2kut(content)
-    filePath = ustr(filePath[0:len(filePath) - 3], u".kut")
+    filePath = ustr(filePath[0 : len(filePath) - 3], u".kut")
     if content:
         localEnc = util.readSettingEntry(u"scripts/sys/conversionArENC")
         if not localEnc:
@@ -1834,17 +1892,17 @@ def importReportAr(filePath=None, idMod=None, content=None):
 
     return False
 
-    
+
 def dumpDatabase():
     aqDumper = AbanQDbDumper()
     aqDumper.init()
 
-    
-def setObjText( container=None, component=None, value=None):
+
+def setObjText(container=None, component=None, value=None):
     c = testObj(container, component)
     if not c:
         return False
-    clase = (u"FLFieldDB" if hasattr(c,"editor_") else c.__class__.__name__)
+    clase = u"FLFieldDB" if hasattr(c, "editor_") else c.__class__.__name__
     s03_when = clase
     s03_do_work, s03_work_done = False, False
     if s03_when == u"QPushButton":
@@ -1871,27 +1929,29 @@ def setObjText( container=None, component=None, value=None):
         return False
     return True
 
-    
+
 def disableObj(container=None, component=None):
     c = testObj(container, component)
     if not c:
         return False
-    clase = "FLFieldDB" if isinstance(c, pineboolib.project._DGI.FLFieldDB) else "FLTableDB" if isinstance(c, pineboolib.project._DGI.FLTableDB) else c.className()
+    clase = (
+        "FLFieldDB" if isinstance(c, pineboolib.project._DGI.FLFieldDB) else "FLTableDB" if isinstance(c, pineboolib.project._DGI.FLTableDB) else c.className()
+    )
     if clase in ["QToolButton", "QPushButton"]:
         runObjMethod(container, component, u"setEnabled", False)
     elif clase == u"FLFieldDB":
         runObjMethod(container, component, u"setDisabled", True)
     else:
         return False
-    
+
     return True
 
-    
+
 def enableObj(container=None, component=None):
     c = testObj(container, component)
     if not c:
         return False
-    clase = (u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className())))
+    clase = u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
     s05_when = clase
     s05_do_work, s05_work_done = False, False
     if s05_when == u"QPushButton":
@@ -1914,18 +1974,18 @@ def enableObj(container=None, component=None):
         return False
     return True
 
-    
+
 def filterObj(container=None, component=None, filter=None):
     c = testObj(container, component)
     if not c:
         return False
-    clase = (u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className())))
+    clase = u"FLFieldDB" if (u"editor" in c) else ((u"FLTableDB" if (u"tableName" in c) else c.className()))
     s06_when = clase
     s06_do_work, s06_work_done = False, False
     if s06_when == u"FLTableDB":
         s06_do_work, s06_work_done = True, True
     if s06_do_work:
-           pass
+        pass
     if s06_when == u"FLFieldDB":
         s06_do_work, s06_work_done = True, True
     if s06_do_work:
@@ -1937,9 +1997,9 @@ def filterObj(container=None, component=None, filter=None):
         return False
     return True
 
-    
+
 def testObj(container=None, component=None):
-    if not container or container == None:
+    if not container or container is None:
         return False
     c = container.child(component)
     if not c:
@@ -1947,7 +2007,7 @@ def testObj(container=None, component=None):
         return False
     return c
 
-    
+
 def testAndRun(container=None, component=None, method=None, param=None):
     c = testObj(container, component)
     if not c:
@@ -1956,9 +2016,10 @@ def testAndRun(container=None, component=None, method=None, param=None):
         return False
     return True
 
-    
+
 def runObjMethod(container=None, component=None, method=None, param=None):
-    import pineboolib
+    # import pineboolib
+
     c = container.child(component)
     m = getattr(c, method, None)
     if m is not None:
@@ -1968,12 +2029,13 @@ def runObjMethod(container=None, component=None, method=None, param=None):
 
     return True
 
-    
+
 def connectSS(ssSender=None, ssSignal=None, ssReceiver=None, ssSlot=None):
     if not ssSender:
         return False
     connect(ssSender, ssSignal, ssReceiver, ssSlot)
     return True
+
 
 @decorators.WorkingOnThis
 def runTransaction(f=None, oParam=None):
@@ -1987,7 +2049,7 @@ def runTransaction(f=None, oParam=None):
             AQS.Application_setOverrideCursor(AQS.WaitCursor)
         except Exception:
             e = traceback.format_exc()
-            
+
     try:
         valor = f(oParam)
         if "errorMsg" in oParam:
@@ -2031,10 +2093,11 @@ def runTransaction(f=None, oParam=None):
             AQS.Application_restoreOverrideCursor()
         except Exception as e:
             e = traceback.format_exc()
+            logger.error(e)
 
     return valor
 
-    
+
 def openUrl(url=None):
     if not url:
         return False
@@ -2072,69 +2135,73 @@ def openUrl(url=None):
         s07_do_work = False  # BREAK
 
     if s07_when == u"MACX":
-        s07_do_work, s07_work_done = True, True
+        s07_do_work, s07_work_done = True, True  # noqa
     if s07_do_work:
         return launchCommand([u"open", url])
         s07_do_work = False  # BREAK
     return False
 
-    
+
 def launchCommand(comando):
     try:
         Process.execute(comando)
         return True
     except Exception as e:
         e = traceback.format_exc()
+        logger.error(e)
         return False
 
-def search_git_updates(url = None):
-    
+
+def search_git_updates(url=None):
+
     if not os.path.exists(filedir("../.git")):
         return
-    
-    
+
     settings = AQSettings()
     if not url:
-        url = settings.readEntry("ebcomportamiento/git_updates_repo", 'https://github.com/Aulla/pineboo.git')
-    
+        url = settings.readEntry("ebcomportamiento/git_updates_repo", "https://github.com/Aulla/pineboo.git")
+
     command = "git status %s" % url
 
     pro = Process
     pro.execute(command)
-    
-    #print("***", pro.stdout)  
-    
+
+    # print("***", pro.stdout)
+
     if pro.stdout.find("git pull") > -1:
         if MessageBox.Yes != MessageBox.warning("Hay nuevas actualizaciones disponibles para Pineboo. ¿Desea actualizar?", MessageBox.No, MessageBox.Yes):
             return
-        
-        pro.execute("git pull %s" % url)
-        
-        MessageBox.information("Pineboo se va a reiniciar ahora", MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
-        os.execl(sys.executable, os.path.abspath(__file__), *sys.argv) 
-    
-    
-def isUserBuild():
-    return sys.version().upper().find("USER") > - 1
 
-    
+        pro.execute("git pull %s" % url)
+
+        MessageBox.information("Pineboo se va a reiniciar ahora", MessageBox.Ok, MessageBox.NoButton, MessageBox.NoButton, u"Eneboo")
+        os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+
+
+def isUserBuild():
+    return sys.version().upper().find("USER") > -1
+
+
 def isDeveloperBuild():
-    return sys.version().upper().find("DEVELOPER") > - 1
+    return sys.version().upper().find("DEVELOPER") > -1
+
 
 def isNebulaBuild():
-    return sys.version().upper().find("NEBULA") > - 1  
+    return sys.version().upper().find("NEBULA") > -1
+
 
 def isQuickBuild():
     return False
 
+
 def isCloudMode():
     return False
 
-    
+
 def qsaExceptions():
     return aqApp.db().qsaExceptions()
 
-    
+
 def serverTime():
     db = aqApp.db().db()
     sql = u"select current_time"
@@ -2143,6 +2210,7 @@ def serverTime():
     if q.isActive() and q.next():
         ahora = q.value(0)
     return ahora
+
 
 def localChanges():
     ret = {}
@@ -2158,7 +2226,9 @@ def localChanges():
     ret = diffXmlFilesDef(docBd, docUpt)
     return ret
 
+
 def interactiveGUI():
     return aqApp.db().interactiveGUI()
+
 
 form = None
