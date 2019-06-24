@@ -23,18 +23,18 @@ class PNSqlDrivers(object):
         from pineboolib.utils import filedir
         import os
         import sys
-        
-        self.only_pure_python_ = getattr(sys, 'frozen', False)
+
+        self.only_pure_python_ = getattr(sys, "frozen", False)
 
         self.driversdict = {}
         self.driversDefaultPort = {}
         self.desktopFile = {}
-        
+
         dir_list = [file for file in os.listdir(filedir("plugins/sql")) if not file[0] == "_" and file.find(".py") > -1]
         for item in dir_list:
-            file_name = item[:item.find(".py")]
+            file_name = item[: item.find(".py")]
             mod_ = importlib.import_module("pineboolib.plugins.sql.%s" % file_name)
-            
+
             driver_ = getattr(mod_, file_name.upper())()
             if driver_.pure_python() or driver_.safe_load():
                 self.driversdict[file_name] = driver_.alias_
@@ -54,8 +54,7 @@ class PNSqlDrivers(object):
             logger.info("Seleccionado driver por defecto %s", self.defaultDriverName)
             driver_name = self.defaultDriverName
 
-        module_ = importlib.import_module(
-            "pineboolib.plugins.sql.%s" % driver_name.lower())
+        module_ = importlib.import_module("pineboolib.plugins.sql.%s" % driver_name.lower())
         self.driver_ = getattr(module_, driver_name.upper())()
 
         if self.driver():

@@ -32,7 +32,7 @@ class FLTranslations(object):
     """
 
     def loadTsFile(self, tor, ts_file_name, verbose):
-        qm_file_name = "%s.qm" % ts_file_name[:-3]
+        # qm_file_name = "%s.qm" % ts_file_name[:-3]
         ok = False
         if os.path.exists(ts_file_name):
             ok = tor.load(ts_file_name)
@@ -51,9 +51,10 @@ class FLTranslations(object):
 
     def releaseMetaTranslator(self, tor, qm_file_name, verbose, stripped):
         from pineboolib.fllegacy.flsettings import FLSettings
+
         if verbose:
             self.logger.debug("Updating '%s'...", qm_file_name)
-        
+
         settings = FLSettings()
         if settings.readBoolEntry("ebcomportamiento/translations_from_qm", False):
             print("*** FAKE :: ", qm_file_name)
@@ -84,6 +85,7 @@ class FLTranslations(object):
 
     def lrelease(self, ts_input_file, qm_output_file, stripped=True):
         from pineboolib.translator.metatranslator import metaTranslator
+
         verbose = False
         metTranslations = False
         tor = metaTranslator()

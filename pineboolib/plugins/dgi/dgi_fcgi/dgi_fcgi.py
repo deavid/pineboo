@@ -1,7 +1,4 @@
 # # -*- coding: utf-8 -*-
-
-import sys
-import traceback
 import logging
 from flup.server.fcgi import WSGIServer
 
@@ -62,15 +59,16 @@ class parser(object):
         self._callScript = callScript
 
     def call(self, environ, start_response):
-        start_response('200 OK', [('Content-Type', 'text/html')])
-        fn = None
+        start_response("200 OK", [("Content-Type", "text/html")])
         aList = environ["QUERY_STRING"]
         try:
             retorno_ = pineboolib.project.call(self._callScript, aList)
         except Exception:
             logger.info(self._callScript, environ["QUERY_STRING"])
-            retorno_ = ('''<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>''' %
-                        (SysType().version(), self._callScript))
+            retorno_ = """<html><head><title>Pineboo %s - FastCGI - </title></head><body><h1>Function %s not found!</h1></body></html>""" % (
+                SysType().version(),
+                self._callScript,
+            )
             pass
         logger.info("FCGI:INFO: Processing '%s' ...", environ["QUERY_STRING"])
 

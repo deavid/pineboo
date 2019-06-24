@@ -8,20 +8,22 @@ logger = logging.getLogger(__name__)
 """
 Provee consultas a DB
 """
+
+
 class AQSql(object):
-    
+
     Insert = 0
     Edit = 1
     Del = 2
     Browse = 3
-    
-    
+
     """
     Obtiene la base de datos de una conexion.
 
     @param connectionNmae Nombre de la conexion
     @return La base de datos correspondiente al nombre de conexion indicado
     """
+
     def database(connection_name="default"):
         return pineboolib.project.conn.useConn(connection_name)
 
@@ -42,6 +44,7 @@ class AQSql(object):
       sys.errorMsgBox("Error SQL: " + e);
     }
     """
+
     def update(table_or_cursor, fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
@@ -97,6 +100,7 @@ class AQSql(object):
             sys.errorMsgBox("Error SQL: " + e);
             }
     """
+
     def insert(table_or_cursor, fields, values, where="", conn=None):
 
         if isinstance(table_or_cursor, str):
@@ -130,10 +134,7 @@ class AQSql(object):
         cur.setActivatedCheckIntegrity(actCheck)
 
         return ok
-    
-    
-    
-    
+
     """
     Elimina un conjunto de registros de un cursor
 
@@ -148,55 +149,49 @@ class AQSql(object):
         sys.errorMsgBox("Error SQL: " + e);
         }
     """
-    
-    
-    def del_(self, cur_or_table, where = "", conn_name = "default"):
-        
+
+    def del_(self, cur_or_table, where="", conn_name="default"):
+
         if not isinstance(cur_or_table, str):
-        
+            cur = cur_or_table
             if not cur:
                 return False
-        
+
             if not cur.metadata():
                 from pineboolib.fllegacy.flutil import FLUtil
+
                 util = FLUtil()
                 logger.warning(util.translate("No hay metadatos para '%s%s'"), cur.curName(), cur.db())
                 return False
-        
+
             if not cur.select(where):
                 return False
-        
+
             ok = True
             msg_check = ""
             act_check = cur.activatedCheckIntegrity()
-        
-            while(ok and cur.next()):
+
+            while ok and cur.next():
                 cur.setModeAccess(self.Del)
                 if not cur.refreshBuffer():
                     ok = False
                     break
-            
+
                 msg_check = cur.msgCheckIntegrity()
                 if msg_check is None:
                     ok = False
                     logger.warning(msg_check, cur.db())
                     break
-            
+
                 cur.setActivatedCheckIntegrity(False)
                 ok = cur.commitBuffer()
                 cur.setActivatedCheckIntegrity(act_check)
-        
+
             return ok
         else:
-            cur = AQSqlCursor(cur_or_table, True, conn_name);
-            cur.setForwardOnly(true);
+            cur = AQSqlCursor(cur_or_table, True, conn_name)  # FIXME: Import needed
+            cur.setForwardOnly(True)
             return cur.del_(where)
-
-    
-    
-    
-    
-    
 
 
 """

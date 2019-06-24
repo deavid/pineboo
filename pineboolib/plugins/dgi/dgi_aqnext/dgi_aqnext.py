@@ -1,30 +1,20 @@
 # # -*- coding: utf-8 -*-
-
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib import decorators
-import pineboolib
-from pineboolib.utils import resolve_query
-
-
-from importlib import import_module
-from PyQt5 import QtCore
-import json
 import collections
 import traceback
-import collections
 import inspect
 import logging
 import sys
 import os
 
+from PyQt5 import QtCore
+
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+import pineboolib
+
 logger = logging.getLogger(__name__)
 
 
-
 class dgi_aqnext(dgi_schema):
-    
-
-
     def __init__(self):
         # desktopEnabled y mlDefault a True
         super().__init__()
@@ -34,16 +24,15 @@ class dgi_aqnext(dgi_schema):
         self.setUseMLDefault(True)
         self.setLocalDesktop(False)
         self._mainForm = None
-        self._use_authentication = False # True La autenticación la realiza pineboolib
+        self._use_authentication = False  # True La autenticación la realiza pineboolib
         self.showInitBanner()
         self._show_object_not_found_warnings = False
         self.qApp = QtCore.QCoreApplication
         self._alternative_content_cached = False
-        
 
     def extraProjectInit(self):
         pass
-    
+
     def create_app(self):
         app = QtCore.QCoreApplication(sys.argv)
         return app
@@ -53,72 +42,72 @@ class dgi_aqnext(dgi_schema):
 
     def mainForm(self):
         if not self._mainForm:
-            self._mainForm = mainForm()
+            self._mainForm = mainForm()  # FIXME
         return self._mainForm
 
     def __getattr__(self, name):
         return super().resolveObject(self._name, name)
-    
+
     def exec_(self):
         from pineboolib.pncontrolsfactory import SysType, aqApp
+
         sys = SysType()
         logger.warning("DGI_%s se ha inicializado correctamente" % self._alias)
         logger.warning("Driver  DB: %s", aqApp.db().driverAlias())
         logger.warning("Usuario DB: %s", sys.nameUser())
         logger.warning("Nombre  DB: %s", sys.nameBD())
-    
+
     def processEvents(self):
         return QtCore.QCoreApplication.processEvents()
-    
+
     def interactiveGUI(self):
         return "Django"
-    
 
     def authenticate(self, **kwargs):
-        user = kwargs["username"]
+        user = kwargs["username"]  # FIXME
         password = kwargs["password"]
-    
-    
+
     def use_authentication(self):
         return self._use_authentication
-    
+
     def use_model(self):
         return True
-    
+
     def alternative_content_cached(self):
         return True
-    
-    
+
     def content_cached(self, tmp_folder, db_name, module_id, file_ext, file_name, sha_key):
         from pineboolib.utils import filedir
         from pineboolib.pncontrolsfactory import aqApp
+
         data_ = None
         if module_id == "sys" and file_name in self.sys_mtds():
             path_ = filedir("./plugins/dgi/dgi_aqnext/system_files/%s/%s.%s" % (file_ext, file_name, file_ext))
             if os.path.exists(path_):
                 data_ = aqApp.db().managerModules().contentFS(path_, False)
-        
-        return data_ 
-    
+
+        return data_
+
     def use_alternative_credentials(self):
         return True
-    
+
     def get_nameuser(self):
         from YBUTILS.viewREST.cacheController import getUser
+
         return str(getUser())
-    
+
     def sys_mtds(self):
-        return ['sis_acl','sis_user_notifications','sis_gridfilter']
-    
-    #def interactiveGUI(self):       
-        #return "Django"
-    
-    """
-    def content_cached(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
+        return ["sis_acl", "sis_user_notifications", "sis_gridfilter"]
+
+    # def interactiveGUI(self):
+    # return "Django"
+
+    def __content_cached__old__(self, tmp_dir, db_name, module_id, ext_, name_, sha_key):
         data = None
         utf8_ = False
         if ext_ == "qs":
             from django.conf import settings
+
             folder_ = settings.PROJECT_ROOT
             legacy_path = "%s/legacy/%s/%s.py" % (folder_, module_id, name_)
             print("**** Buscando en path", legacy_path)
@@ -128,138 +117,131 @@ class dgi_aqnext(dgi_schema):
             if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (tmp_dir, db_name, module_id, ext_, name_)):
                 if ext_ == "kut":
                     utf8_ = True
-                data = pineboolib.project.conn.managerModules().contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_)
-        
+                data = pineboolib.project.conn.managerModules().contentFS(
+                    "%s/cache/%s/%s/file.%s/%s/%s.%s" % (tmp_dir, db_name, module_id, ext_, name_, sha_key, ext_), utf8_
+                )
+
         return data
-    """
-    def alternative_script_path(self, script_name, app = None):
+
+    def alternative_script_path(self, script_name, app=None):
         from django.conf import settings
         import glob
-        
+
         ret_ = None
-        
+
         folder_ = settings.PROJECT_ROOT
         if app is None:
             app = "**"
-        
-        
-        
+
         for file_name in glob.iglob("%s/legacy/%s/%s" % (folder_, app, script_name), recursive=True):
             if file_name.endswith(script_name):
                 ret_ = file_name
                 break
-            
+
         return ret_
-    
+
     def register_script(self, app, module_name, script_name, prefix):
 
-        
         ret_ = self.alternative_script_path("%s.py" % script_name, app)
         if ret_ is None:
             raise ImportError
-        
-        
 
         from pineboolib import qsa as qsa_dict_modules
         from pineboolib.pnapplication import DelayedObjectProxyLoader, XMLAction
-            
+
         action = XMLAction()
         action.name = module_name
         action.alias = module_name
         action.form = None
         action.table = None
         action.scriptform = module_name
-        
-        #Carganmos módulo
+
+        # Carganmos módulo
         if module_name == script_name:
-            #Estamos aquí porque script_name existe en model. Hay que ver si existe el legacy
+            # Estamos aquí porque script_name existe en model. Hay que ver si existe el legacy
             if hasattr(qsa_dict_modules, action.name):
-                #Lo convertimos en legacy
+                # Lo convertimos en legacy
                 legacy = getattr(qsa_dict_modules, action.name)
                 setattr(qsa_dict_modules, "%s_legacy" % action.name, legacy)
-                delattr(qsa_dict_modules, action.name) #Borramos el script del arbol
-            
-            #Se crea el script
+                delattr(qsa_dict_modules, action.name)  # Borramos el script del arbol
+
+            # Se crea el script
             setattr(qsa_dict_modules, action.name, DelayedObjectProxyLoader(action.load, name="QSA.Module.%s" % app))
             pineboolib.project.actions[action.name] = action
             if prefix == "":
                 return
-        
-        
+
         action_xml = XMLAction()
         action_xml.name = module_name
-        
+
         if "%s_legacy" in action_xml.name not in pineboolib.project.actions.keys():
             if action_xml.name in pineboolib.project.actions.keys():
                 pineboolib.project.actions["%s_legacy" % action_xml.name] = pineboolib.project.actions[action_xml.name]
                 del pineboolib.project.actions[action_xml.name]
-            
-        
+
         if prefix == "form":
             if hasattr(qsa_dict_modules, "form" + action_xml.name):
-                #Cambiamos a legacy el script existente
+                # Cambiamos a legacy el script existente
                 legacy = getattr(qsa_dict_modules, action_xml.name)
                 setattr(qsa_dict_modules, "form%s_legacy" % action_xml.name, legacy)
                 delattr(qsa_dict_modules, action_xml.name)
-                
-                
+
             action_xml.table = action_xml.name
-            action_xml.scriptform = script_name 
+            action_xml.scriptform = script_name
             pineboolib.project.actions[action_xml.name] = action_xml
             delayed_action = DelayedObjectProxyLoader(action_xml.load, name="QSA.Module.%s.Action.form%s" % (app, action_xml.name))
-            #print("Creando", "form" + module_name)
+            # print("Creando", "form" + module_name)
             setattr(qsa_dict_modules, "form" + action_xml.name, delayed_action)
 
         if prefix == "formRecord":
             if hasattr(qsa_dict_modules, "formRecord" + action_xml.name):
-                #Cambiamos a legacy el script existente
+                # Cambiamos a legacy el script existente
                 legacy = getattr(qsa_dict_modules, action_xml.name)
                 setattr(qsa_dict_modules, "formRecord%s_legacy" % action_xml.name, legacy)
                 delattr(qsa_dict_modules, action_xml.name)
-                
+
             action_xml.table = action_xml.name
-            action_xml.script = script_name 
+            action_xml.script = script_name
             pineboolib.project.actions[action_xml.name] = action_xml
-            delayed_action = DelayedObjectProxyLoader(action_xml.formRecordWidget ,name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name))
+            delayed_action = DelayedObjectProxyLoader(action_xml.formRecordWidget, name="QSA.Module.%s.Action.formRecord%s" % (app, action_xml.name))
             setattr(qsa_dict_modules, "formRecord" + action_xml.name, delayed_action)
-            #print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
-        
-    def load_meta_model(self, action_name, opt = None):
-        import importlib, os
-        import sys as python_sys
+            # print("Creando **** ", getattr(qsa_dict_modules, "formRecord" + module_name))
+
+    def load_meta_model(self, action_name, opt=None):
+        import importlib
         from pineboolib.pncontrolsfactory import aqApp
+
         module_name = aqApp.db().managerModules().idModuleOfFile("%s.mtd" % action_name)
         module = None
         ret_ = None
         model_file = "models.%s.%s" % (module_name, action_name)
         if module_name is not None:
             try:
-                module = importlib.import_module(model_file)     
+                module = importlib.import_module(model_file)
             except ImportError:
                 logger.warning("DGI: load_meta_model. No se encuentra el model de %s", action_name)
                 module = None
                 ret_ = None
-                    
-        if module is not None:           
+
+        if module is not None:
             ret_ = getattr(module, action_name, None)
-        
+
         return ret_
-    
-    def get_master_cursor(self, prefix, template = "master"):
+
+    def get_master_cursor(self, prefix, template="master"):
         from pineboolib import qsa as qsa_tree
-        import traceback
-        
+
         module_name = prefix
-        
-        #logger.warning("Cargando el prefix_master de %s", prefix)
-        
-        #if template == "master":        
+
+        # logger.warning("Cargando el prefix_master de %s", prefix)
+
+        # if template == "master":
         #    module_name = "form%s" % prefix
-        #elif template == "formRecord":
+        # elif template == "formRecord":
         #    module_name = "formRecord%s" % prefix
         if template in ["master", "formRecord", "newRecord"]:
             module_name = "form%s" % prefix
-            
+
         cursor = None
         module = getattr(qsa_tree, module_name, None)
         if module is not None:
@@ -267,87 +249,82 @@ class dgi_aqnext(dgi_schema):
         else:
             logger.warning("*** DGI.get_master_cursor creando cursor %s sin action asociada ***", prefix)
             from pineboolib.pncontrolsfactory import FLSqlCursor
+
             cursor = FLSqlCursor(prefix)
-            
+
         if cursor is None:
             logger.warning("*** DGI.get_master_cursor no encuentra cursor de %s***", prefix)
-        
+
         if cursor and not cursor.meta_model():
-            #print("**************************", prefix)
+            # print("**************************", prefix)
             try:
-                cursor.assoc_model() #Asocia el modelo
-                
-            except:
-                import traceback
+                cursor.assoc_model()  # Asocia el modelo
+            except Exception:
                 logger.warning("DGI. get_master_cursor: %s", traceback.format_exc())
-                
-        #if template == "newRecord":
+
+        # if template == "newRecord":
         #    cursor.setModeAccess(cursor.Insert)
         #    cursor.refreshBuffer()
-            
-        
+
         return cursor
-    
+
     def init_cursor(self, cursor, params, template):
         from pineboolib import qsa as qsa_tree
-        
+
         prefix = cursor.curName()
-        
+
         if template in ["formRecord", "newRecord"]:
             module_name = "form%s" % prefix
-        
+
         self.populate_with_params(cursor, params)
-            
+
         module = getattr(qsa_tree, module_name, None)
-        
+
         if template == "newRecord":
             if cursor.meta_model():
                 fun_mod = getattr(cursor.meta_model(), "iniciaValoresCursor", None)
                 if fun_mod is not None:
-                    #print("Inicializando cursor model", prefix)
+                    # print("Inicializando cursor model", prefix)
                     fun_mod(cursor)
-            
+
             fun_qsa = getattr(module.widget, "iniciaValoresCursor", None)
             if fun_qsa is not None:
-                #print("Inicializando cursor qsa", prefix)
+                # print("Inicializando cursor qsa", prefix)
                 fun_qsa(cursor)
-    
+
     def populate_with_params(self, cursor, params):
         for k in params.keys():
             if k.startswith("p_"):
                 cursor.setValueBuffer(k[2:], params[k])
             else:
                 print("FIXME:: populate_with_params", k, params[k])
-           
-    
-    def cursor2json(self, cursor, template = None):
+
+    def cursor2json(self, cursor, template=None):
         ret_ = []
         if not cursor.modeAccess() == cursor.Insert:
             if not cursor.isValid():
                 logger.warning("Cursor inválido/vacío en %s", cursor.curName())
                 return ret_
-            
+
             if cursor.first():
                 pass
-    
+
         meta_model = cursor.meta_model()
 
-        
-            
-        #pineboolib.project.init_time()
+        # pineboolib.project.init_time()
         size_ = cursor.size()
         pk = cursor.primaryKey()
         fields_list = cursor.metadata().fieldList()
         i = 0
-        date_fields = []
-        
+        # date_fields = []
+
         if cursor.modeAccess() == cursor.Insert:
-            size_ = 1 
-        #logger.warning("***** %s", size_, stack_info = True)
+            size_ = 1
+        # logger.warning("***** %s", size_, stack_info = True)
         while i < size_:
-            #dict_ = collections.OrderedDict()
+            # dict_ = collections.OrderedDict()
             dict_ = {}
-            
+
             for f in fields_list:
                 field_name = f.name() if f.name() != "pk" else pk
                 value = cursor.valueBuffer(field_name)
@@ -355,54 +332,56 @@ class dgi_aqnext(dgi_schema):
                     if hasattr(value, "toString"):
                         value = value.toString()
                     value = value[:10]
-            
+
                 if f.isPrimaryKey():
                     dict_["pk"] = value
                 dict_[f.name()] = value
-                
+
             if meta_model:
                 calculateFields = self.get_foreign_fields(meta_model, template)
                 for field in calculateFields:
                     if hasattr(meta_model, field["func"]):
                         dict_[field["verbose_name"]] = str(getattr(meta_model, field["func"])(meta_model))
-                
+
                 desc_function = getattr(meta_model, "getDesc", None)
                 desc = None
                 if desc_function:
                     expected_args = inspect.getargspec(desc_function)[0]
                     new_args = [meta_model]
-                    desc = desc_function(*new_args[:len(expected_args)])
+                    desc = desc_function(*new_args[: len(expected_args)])
                 dict_["desc"] = desc
-            #for field in calculateFields:
-            #        serializer._declared_fields.update({field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])})
+            # for field in calculateFields:
+            #     serializer._declared_fields.update(
+            #         {field["verbose_name"]: serializers.serializers.ReadOnlyField(label=field["verbose_name"], source=field["func"])}
+            #     )
             if size_ == 1:
                 ret_ = dict_
                 break
             else:
                 ret_.append(dict_)
-            
-            
+
             if cursor.next():
                 pass
             i += 1
-        #pineboolib.project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
+        # pineboolib.project.show_time("Fin cursor2json %s %s %s" % (cursor.curName(), meta_model, cursor.filter()))
         return ret_
-    
-    def getYBschema(self, cursor, template = None):
+
+    def getYBschema(self, cursor, template=None):
         """Permite obtener definicion de schema de uso interno de YEBOYEBO"""
         import pineboolib
+
         mtd = cursor.metadata()
 
         meta_model = cursor.meta_model()
-    
+
         dict = collections.OrderedDict()
         meta = collections.OrderedDict()
-        
+
         if mtd is None:
             return dict, meta
-        
+
         meta["verbose_name"] = mtd.alias()
-    
+
         dict["desc"] = collections.OrderedDict()
         dict["desc"]["verbose_name"] = "Desc"
         dict["desc"]["help_text"] = None
@@ -412,57 +391,57 @@ class dgi_aqnext(dgi_schema):
         dict["desc"]["tipo"] = 3
         dict["desc"]["visiblegrid"] = False
         fields_list = mtd.fieldsNames()
-    
+
         fields_list.append("pk")
-    
+
         for key in fields_list:
             field = mtd.field(key if key != "pk" else mtd.primaryKey())
             if field is None:
                 continue
             dict[key] = collections.OrderedDict()
-            dict[key]['verbose_name'] = field.alias() if key != "pk" else "Pk"
+            dict[key]["verbose_name"] = field.alias() if key != "pk" else "Pk"
             """ FIXME: help_text """
-            dict[key]['help_text'] = None
-            dict[key]['locked'] = True if field.name() == mtd.primaryKey() else False #FIXME: hay que ver el criterio de locked
-            dict[key]['field'] = False
-                            
-            dict[key]['visible'] = False if key in ['pk','desc'] else True 
-            dict[key]['tipo'] = pineboolib.utils.get_tipo_aqnext(field.type())
+            dict[key]["help_text"] = None
+            dict[key]["locked"] = True if field.name() == mtd.primaryKey() else False  # FIXME: hay que ver el criterio de locked
+            dict[key]["field"] = False
+
+            dict[key]["visible"] = False if key in ["pk", "desc"] else True
+            dict[key]["tipo"] = pineboolib.utils.get_tipo_aqnext(field.type())
             if field.type() == "stringlist":
-                dict[key]['subtipo'] = 6
-            
-            dict[key]['visiblegrid'] = field.visibleGrid()
+                dict[key]["subtipo"] = 6
+
+            dict[key]["visiblegrid"] = field.visibleGrid()
             if not field.allowNull():
-                dict[key]['required'] = True
+                dict[key]["required"] = True
             if field.type() == "double":
-                dict[key]['max_digits'] = field.partInteger()
-                dict[key]['decimal_places'] = field.partDecimal()
+                dict[key]["max_digits"] = field.partInteger()
+                dict[key]["decimal_places"] = field.partDecimal()
             if field.hasOptionsList():
-                dict[key]['optionslist'] = field.optionsList()
-                dict[key]['tipo'] = 5
-            
-        #dict[key]['desc'] = cursor.primaryKey()
-            relation = field.relationM1()     
+                dict[key]["optionslist"] = field.optionsList()
+                dict[key]["tipo"] = 5
+
+            # dict[key]['desc'] = cursor.primaryKey()
+            relation = field.relationM1()
             if relation is not None:
-                table_name = relation.foreignTable() #Tabla relacionada
-                dict[key]['rel'] = table_name
-                dict[key]['to_field'] = relation.foreignField() #Campo relacionado
+                table_name = relation.foreignTable()  # Tabla relacionada
+                dict[key]["rel"] = table_name
+                dict[key]["to_field"] = relation.foreignField()  # Campo relacionado
                 desc = None
-                #print("Cursor relacionado", table_name)
-                #cursor_rel = FLSqlCursor(table_name)
-                
-                rel_meta_model = getattr(meta_model,relation.field())
+                # print("Cursor relacionado", table_name)
+                # cursor_rel = FLSqlCursor(table_name)
+
+                rel_meta_model = getattr(meta_model, relation.field())
                 desc_function = getattr(rel_meta_model, "getDesc", None)
                 if desc_function:
                     expected_args = inspect.getargspec(desc_function)[0]
                     new_args = [rel_meta_model]
-                    desc = desc_function(*new_args[:len(expected_args)])
-            
+                    desc = desc_function(*new_args[: len(expected_args)])
+
                 if not desc or desc is None:
                     desc = cursor.db().manager().metadata(table_name).primaryKey()
-                
-                dict[key]['desc'] = desc
-    
+
+                dict[key]["desc"] = desc
+
         if meta_model:
             calculateFields = self.get_foreign_fields(meta_model, template)
             for field in calculateFields:
@@ -473,141 +452,138 @@ class dgi_aqnext(dgi_schema):
                 dict[field["verbose_name"]]["field"] = False
                 dict[field["verbose_name"]]["visible"] = True
                 dict[field["verbose_name"]]["tipo"] = 3
-            
+
         return dict, meta
-    
-    def get_foreign_fields(self, meta_model, template = None):
-        foreign_field_function = getattr(meta_model,"getForeignFields")
+
+    def get_foreign_fields(self, meta_model, template=None):
+        foreign_field_function = getattr(meta_model, "getForeignFields")
         expected_args = inspect.getargspec(foreign_field_function)[0]
         new_args = [meta_model, template]
-        return foreign_field_function(*new_args[:len(expected_args)])
-        
-    def pagination(self, data_, query): 
-        return pagination_class(data_, query)
+        return foreign_field_function(*new_args[: len(expected_args)])
 
+    def pagination(self, data_, query):
+        return pagination_class(data_, query)  # FIXME
 
     def get_queryset(self, prefix, params):
-        
-        #retorna una lista con objetos del modelo
+
+        # retorna una lista con objetos del modelo
         cursor_master = self.get_master_cursor(prefix)
         list_objects = []
         where, order_by = pineboolib.utils.resolve_query(prefix, params)
-        where_filter = "%s ORDER BY %s" % ( where, order_by) if len(order_by) else where 
-        
-        first_reg, limit_reg =  pineboolib.utils.resolve_pagination(params)
+        where_filter = "%s ORDER BY %s" % (where, order_by) if len(order_by) else where
+
+        first_reg, limit_reg = pineboolib.utils.resolve_pagination(params)
         if first_reg:
-            where_filter += " OFFSET %s" % first_reg 
-        
+            where_filter += " OFFSET %s" % first_reg
+
         if limit_reg:
             where_filter += " LIMIT %s" % limit_reg
-        
+
         cursor_master.select(where_filter)
         if cursor_master.first():
             while True:
                 list_objects.append(cursor_master.meta_model()())
-            
-            
+
                 if not cursor_master.next():
                     break
-        
+
         return list_objects
-    
+
     """
     @decorators.NotImplementedWarn
     def paginate_queryset(self, query_set):
-        
+
         return query_set
     """
-    def get_paginated_response(self, data, params, size = None):
-        
+
+    def get_paginated_response(self, data, params, size=None):
+
         response = paginated_object()
         response.data = {}
         data_list = self._convert_to_ordered_dict(data)
         response.data["data"] = data_list
-        
-        #pagination = pagination_class(data_list, params)
-        first_reg , limit_reg = pineboolib.utils.resolve_pagination(params)
-        
-        response.data["PAG"] = {"NO": "%s" % (int(limit_reg) + int(first_reg)) if first_reg else 0 , "PO": "%s" % (int(first_reg) - int(limit_reg)) if first_reg else 0 , "COUNT": len(data) if size is None else size}
-        
+
+        # pagination = pagination_class(data_list, params)
+        first_reg, limit_reg = pineboolib.utils.resolve_pagination(params)
+
+        response.data["PAG"] = {
+            "NO": "%s" % (int(limit_reg) + int(first_reg)) if first_reg else 0,
+            "PO": "%s" % (int(first_reg) - int(limit_reg)) if first_reg else 0,
+            "COUNT": len(data) if size is None else size,
+        }
+
         return response
-    
-    
+
     def carga_datos_custom_filter(self, table, usuario):
         from pineboolib.pncontrolsfactory import FLSqlCursor
+
         ret = {}
         cursor = FLSqlCursor("sis_gridfilter")
-        cursor.select(" prefix ='%s' AND usuario ='%s'" %  (table, usuario))
+        cursor.select(" prefix ='%s' AND usuario ='%s'" % (table, usuario))
         if cursor.first():
             ret[cursor.valueBuffer("descripcion")] = {}
             ret[cursor.valueBuffer("descripcion")]["pk"] = cursor.valueBuffer("id")
-            ret[cursor.valueBuffer("descripcion")]["filtro"] = cursor.valueBuffer("filtro").replace('\"', "\'")
+            ret[cursor.valueBuffer("descripcion")]["filtro"] = cursor.valueBuffer("filtro").replace('"', "'")
             ret[cursor.valueBuffer("descripcion")]["default"] = cursor.valueBuffer("inicial")
         return ret
-    
+
     def _convert_to_ordered_dict(self, data):
         ret_ = []
-        
+
         if isinstance(data, list):
             for t in data:
                 o = collections.OrderedDict()
-                for key in t.keys():     
-                    o[key] = t[key] 
+                for key in t.keys():
+                    o[key] = t[key]
                 ret_.append(o)
         else:
             o = collections.OrderedDict()
-            for key in data.keys(): 
-                    o[key] = data[key]
+            for key in data.keys():
+                o[key] = data[key]
             ret_.append(o)
-        
-        
+
         return ret_
 
+
 class paginated_object(object):
-    pass   
+    pass
+
 
 """
 class pagination_class(object):
-    
+
     count = None
     _limit = None
     _page = None
-    
+
     def __init__(self, data_, query = {}):
         self.count = len(data_)
         self._limit = 50 if not "p_l" in query.keys() or query["p_l"] == 'true' else int(query["p_l"])
         self._page =  0 if not "p_c" in query.keys() or query["p_c"] == 'true'  else int(query["p_c"])
-    
-    
+
+
     def get_next_offset(self):
         ret_ = None
         actual = 0
-        i = 0         
+        i = 0
         while i < self._page:
             actual += self._limit
             ret_ = actual
             i += 1
-            
-        
+
+
         return ret_
-        
-    
+
+
     def get_previous_offset(self):
         ret_ = None
         i = 0
-        while i < self._page: 
+        while i < self._page:
             if ret_ is None:
                 ret_ = 0
             else:
                 ret_ += self._limit
             i += 1
-        
+
         return ret_
-"""     
-        
-        
-    
-        
-        
-        
-        
+"""

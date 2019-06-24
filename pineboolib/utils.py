@@ -5,10 +5,13 @@ import logging
 import sys
 import traceback
 from io import StringIO
+
 from xml import etree
+from PyQt5 import QtCore
+from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QDir
+from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 
 import pineboolib
-
 from pineboolib.fllegacy.flsettings import FLSettings
 
 logger = logging.getLogger(__name__)
@@ -30,7 +33,7 @@ def auto_qt_translate_text(text):
 aqtt = auto_qt_translate_text
 
 
-"""  
+"""
 filedir(path1[, path2, path3 , ...])
 @param array de carpetas de la ruta
 @return devuelve la ruta absoluta resultado de concatenar los paths que se le pasen y aplicarlos desde la ruta del proyecto.
@@ -43,7 +46,7 @@ def filedir(*path):
     if not base_dir:
         base_dir = os.path.dirname(__file__)
 
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, "frozen", False):
             if base_dir.startswith(":"):
                 base_dir = ".%s" % base_dir[1:]
 
@@ -74,7 +77,7 @@ def coalesce_path(*filenames):
             return None
         if filename in pineboolib.project.files:
             return pineboolib.project.files[filename].path()
-    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s",repr(filenames), stack_info=False)
+    logger.error("Ninguno de los ficheros especificados ha sido encontrado en el proyecto: %s", repr(filenames), stack_info=False)
 
 
 """
@@ -135,8 +138,7 @@ class XMLStruct(Struct):
                     setattr(self, key, text)
                     self._attrs.append(key)
                 except Exception:
-                    print("utils.XMLStruct: Omitiendo",
-                          self.__name__, key, text)
+                    print("utils.XMLStruct: Omitiendo", self.__name__, key, text)
 
     def __str__(self):
         attrs = ["%s=%s" % (k, repr(getattr(self, k))) for k in self._attrs]
@@ -162,22 +164,18 @@ class DefFun:
 
     def __str__(self):
         if self.realfun:
-            logger.debug("%r: Redirigiendo Propiedad a función %r",
-                         self.parent.__class__.__name__, self.funname)
+            logger.debug("%r: Redirigiendo Propiedad a función %r", self.parent.__class__.__name__, self.funname)
             return self.realfun()
 
-        logger.debug("WARN: %r: Propiedad no implementada %r",
-                     self.parent.__class__.__name__, self.funname)
+        logger.debug("WARN: %r: Propiedad no implementada %r", self.parent.__class__.__name__, self.funname)
         return 0
 
     def __call__(self, *args):
         if self.realfun:
-            logger.debug("%r: Redirigiendo Llamada a función %s %s",
-                         self.parent.__class__.__name__, self.funname, args)
+            logger.debug("%r: Redirigiendo Llamada a función %s %s", self.parent.__class__.__name__, self.funname, args)
             return self.realfun(*args)
 
-        logger.debug("%r: Método no implementado %s %s",
-                     self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
+        logger.debug("%r: Método no implementado %s %s", self.parent.__class__.__name__, self.funname.encode("UTF-8"), args)
         return None
 
 
@@ -186,17 +184,17 @@ def traceit(frame, event, arg):
 
     This function is intended to be the callback of sys.settrace.
     """
-    
+
     # if event != "line":
     #    return traceit
     try:
         import linecache
+
         lineno = frame.f_lineno
         filename = frame.f_globals["__file__"]
         # if "pineboo" not in filename:
         #     return traceit
-        if (filename.endswith(".pyc") or
-                filename.endswith(".pyo")):
+        if filename.endswith(".pyc") or filename.endswith(".pyo"):
             filename = filename[:-1]
         name = frame.f_globals["__name__"]
         line = linecache.getline(filename, lineno)
@@ -206,7 +204,7 @@ def traceit(frame, event, arg):
     return traceit
 
 
-class TraceBlock():
+class TraceBlock:
     def __enter__(self):
         sys.settrace(traceit)
         return traceit
@@ -219,14 +217,8 @@ def trace_function(f):
     def wrapper(*args):
         with TraceBlock():
             return f(*args)
+
     return wrapper
-
-
-from PyQt5 import QtCore
-from PyQt5.QtCore import QObject, QFileInfo, QFile, QIODevice, QUrl, QByteArray,\
-    QDir
-from PyQt5.QtNetwork import QNetworkAccessManager, QNetworkReply,\
-    QNetworkRequest
 
 
 class downloadManager(QObject):
@@ -306,10 +298,6 @@ class downloadManager(QObject):
 
 
 def download_files():
-    import sysconfig
-    from PyQt5.QtWidgets import (QApplication, QLabel, QTreeView, QVBoxLayout,
-                                 QWidget)
-
     dir_ = filedir("forms")
     if os.path.exists(dir_):
         return
@@ -362,19 +350,19 @@ def copy_dir_recursive(from_dir, to_dir, replace_on_conflict=False):
 def cacheXPM(value):
     file_name = None
     if value:
-        xpm_name = value[:value.find("[]")]
-        xpm_name = xpm_name[xpm_name.rfind(" ") + 1:]
+        xpm_name = value[: value.find("[]")]
+        xpm_name = xpm_name[xpm_name.rfind(" ") + 1 :]
         from pineboolib.pncontrolsfactory import aqApp
-        
+
         cache_dir = "%s/cache/%s/cacheXPM" % (aqApp.tmp_dir(), aqApp.db().DBName())
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
-        
+
         if value.find("cacheXPM") > -1:
             file_name = value
         else:
             file_name = "%s/%s.xpm" % (cache_dir, xpm_name)
-           
+
         if not os.path.exists(file_name) or FLSettings().readBoolEntry("ebcomportamiento/no_img_cached", False):
             f = open(file_name, "w")
             f.write(value)
@@ -418,11 +406,11 @@ def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
     #    encoding=encoding,
     #    recover=False,
     #    remove_blank_text=remove_blank_text,
-    #)
+    # )
     try:
-        #tree = etree.parse(file_alike, parser)
+        # tree = etree.parse(file_alike, parser)
         tree = etree.ElementTree.parse(file_alike)
-    except Exception as e:
+    except Exception:
         print("Error al procesar tabla:", nombre)
         print(traceback.format_exc())
         return None
@@ -433,15 +421,17 @@ def parseTable(nombre, contenido, encoding="UTF-8", remove_blank_text=True):
     settings = FLSettings()
     if query is not None:
         if query.text != nombre:
-            
+
             if settings.readBoolEntry("application/isDebuggerMode", False):
-                logger.warning("WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (
-                    obj_name.text, nombre))
+                logger.warning(
+                    "WARN: Nombre de query %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de query)" % (obj_name.text, nombre)
+                )
             query.text = nombre
     elif obj_name.text != nombre:
         if settings.readBoolEntry("application/isDebuggerMode", False):
-            logger.warning("WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (
-                obj_name.text, nombre))
+            logger.warning(
+                "WARN: Nombre de tabla %s no coincide con el nombre declarado en el XML %s (se prioriza el nombre de tabla)" % (obj_name.text, nombre)
+            )
         obj_name.text = nombre
     return getTableObj(tree, root)
 
@@ -476,6 +466,7 @@ Guarda la geometría de una ventana
 
 def saveGeometryForm(name, geo):
     from pineboolib.pncontrolsfactory import aqApp
+
     name = "geo/%s/%s" % (aqApp.db().DBName(), name)
     FLSettings().writeEntry(name, geo)
 
@@ -489,6 +480,7 @@ Carga la geometría de una ventana
 
 def loadGeometryForm(name):
     from pineboolib.pncontrolsfactory import aqApp
+
     name = "geo/%s/%s" % (aqApp.db().DBName(), name)
     return FLSettings().readEntry(name, None)
 
@@ -498,8 +490,8 @@ def ustr(*t1):
     return "".join([ustr1(t) for t in t1])
 
 
-def ustr1(t):   
-    
+def ustr1(t):
+
     if isinstance(t, str):
         return t
 
@@ -515,15 +507,14 @@ def ustr1(t):
     try:
         if t is None:
             t = ""
-        
+
         return "%s" % t
-    except Exception as e:
+    except Exception:
         logger.exception("ERROR Coercing to string: %s", repr(t))
         return None
 
 
 class StructMyDict(dict):
-
     def __getattr__(self, name):
         try:
             return self[name]
@@ -540,69 +531,65 @@ DEPENDENCIES_CHECKED = {}
 def checkDependencies(dict_, exit=True):
 
     from importlib import import_module
-    
 
     dependences = []
     error = []
     mod_ver = None
     mod_ = None
     for key in dict_.keys():
-        
+
         try:
-            if key is not "Python":
+            if key != "Python":
                 mod_ = import_module(key)
             if key == "ply":
-                version_check(key, mod_.__version__, '3.9')
+                version_check(key, mod_.__version__, "3.9")
             if key == "Python":
-                version_check(key, sys.version[:sys.version.find("(")], '3.6')
-                mod_ver = sys.version[:sys.version.find("(")]
+                version_check(key, sys.version[: sys.version.find("(")], "3.6")
+                mod_ver = sys.version[: sys.version.find("(")]
             elif key == "Pillow":
-                version_check(key, mod_.__version__, '5.1.0')
+                version_check(key, mod_.__version__, "5.1.0")
             elif key == "fpdf":
                 version_check(key, mod_.__version__, "1.7.3")
             elif key == "odf":
                 from odf import namespaces
+
                 mod_ver = namespaces.__version__
             elif key == "PyQt5.QtCore":
-                version_check("PyQt5", mod_.QT_VERSION_STR, '5.11')
+                version_check("PyQt5", mod_.QT_VERSION_STR, "5.11")
                 mod_ver = mod_.QT_VERSION_STR
 
             if mod_ver is None:
                 mod_ver = getattr(mod_, "__version__", None) or getattr(mod_, "version", "???")
 
-            settings = FLSettings()
-            #if settings.readBoolEntry("application/isDebuggerMode", False):
-                #if not key in DEPENDENCIES_CHECKED.keys():
-                #    logger.warning("Versión de %s: %s", key, mod_ver)
+            # settings = FLSettings()
+            # if settings.readBoolEntry("application/isDebuggerMode", False):
+            # if not key in DEPENDENCIES_CHECKED.keys():
+            #    logger.warning("Versión de %s: %s", key, mod_ver)
         except ImportError:
             dependences.append(dict_[key])
-            #print(traceback.format_exc())
+            # print(traceback.format_exc())
             error.append(traceback.format_exc())
 
-        
-
     msg = ""
-    if len(dependences) > 0 and not key in DEPENDENCIES_CHECKED.keys():
+    if len(dependences) > 0 and key not in DEPENDENCIES_CHECKED.keys():
         logger.warning("HINT: Dependencias incumplidas:")
         for dep in dependences:
             logger.warning("HINT: Instale el paquete %s" % dep)
             msg += "Instale el paquete %s.\n%s" % (dep, error)
             if dep == "pyfpdf":
-                msg +="\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
+                msg += "\n\n\n Use pip3 install -i https://test.pypi.org/simple/ pyfpdf==1.7.3"
 
         if exit:
             if getattr(pineboolib.project, "_DGI", None):
                 if pineboolib.project._DGI.useDesktop() and pineboolib.project._DGI.localDesktop():
                     from pineboolib.pncontrolsfactory import QMessageBox
-                    try:
-                        ret = QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
-                    except Exception:
-                        logger.error("No se puede mostrar el diálogo de dependecias incumplidas")
 
-            if not getattr(sys, 'frozen', False):
+                    QMessageBox.warning(None, "Pineboo - Dependencias Incumplidas -", msg, QMessageBox.Ok)
+
+            if not getattr(sys, "frozen", False):
                 sys.exit(32)
-    
-    if not key in DEPENDENCIES_CHECKED.keys():
+
+    if key not in DEPENDENCIES_CHECKED.keys():
         DEPENDENCIES_CHECKED[key] = mod_ver
 
     return len(dependences) == 0
@@ -616,7 +603,7 @@ def version_check(mod_name, mod_ver, min_ver):
 
 def version_normalize(v):
     """Normalize version string numbers like 3.10.1 so they can be compared."""
-    return [int(x) for x in re.sub(r'(\.0+)*$', '', v).split(".")]
+    return [int(x) for x in re.sub(r"(\.0+)*$", "", v).split(".")]
 
 
 def convertFLAction(action):
@@ -634,11 +621,13 @@ def convert2FLAction(action):
         name = action.name
 
     from pineboolib.pncontrolsfactory import aqApp
+
     return aqApp.db().manager().action(name)
 
 
 def load2xml(form_path_or_str):
     from xml.etree import ElementTree as ET
+
     """
     class xml_parser(ET.TreeBuilder):
 
@@ -657,8 +646,8 @@ def load2xml(form_path_or_str):
     """
     try:
         parser = ET.XMLParser(html=0)
-        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE KugarData") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:           
-            form_path_or_str = parse_for_duplicates(form_path_or_str)    
+        if form_path_or_str.find("KugarTemplate") > -1 or form_path_or_str.find("DOCTYPE KugarData") > -1 or form_path_or_str.find("DOCTYPE svg") > -1:
+            form_path_or_str = parse_for_duplicates(form_path_or_str)
             ret = ET.fromstring(form_path_or_str, parser)
         else:
             ret = ET.parse(form_path_or_str, parser) if os.path.exists(form_path_or_str) else None
@@ -670,71 +659,68 @@ def load2xml(form_path_or_str):
                 ret = ET.fromstring(form_path_or_str, parser)
             else:
                 ret = ET.parse(form_path_or_str, parser) if os.path.exists(form_path_or_str) else None
-            #logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
+            # logger.exception("Formulario %r se cargó con codificación ISO (UTF8 falló)", form_path)
         except Exception:
             logger.exception("Error cargando UI después de intentar con UTF8 e ISO \n%s", form_path_or_str)
             ret = None
 
     return ret
 
+
 def parse_for_duplicates(text):
     ret_ = ""
-    text = text.replace("+","__PLUS__")
+    text = text.replace("+", "__PLUS__")
     text = text.replace("(", "__LPAREN__")
     text = text.replace(")", "__RPAREN__")
     text = text.replace("*", "__ASTERISK__")
-    
+
     for section_orig in text.split(">"):
-        #print("section", section)
+        # print("section", section)
         duplicate_ = False
         attr_list = []
-        
-        #print("--->", section_orig)
+
+        # print("--->", section_orig)
         ret2_ = ""
         section = ""
         for a in section_orig.split(" "):
-            
-            
-            c = a.count("=") 
+
+            c = a.count("=")
             if c > 1:
-                part_ = ""
+                # part_ = ""
                 text_to_process = a
                 for m in range(c):
-                    pos_ini = text_to_process.find("\"")
-                    pos_fin = text_to_process[pos_ini + 1:].find("\"")
-                    #print("Duplicado", m, pos_ini, pos_fin, text_to_process, "***" , text_to_process[0:pos_ini + 2 + pos_fin])
-                    ret2_ += " %s " % text_to_process[0:pos_ini + 2 + pos_fin]
-                    text_to_process = text_to_process[pos_ini + 2 + pos_fin:]
-                    
-                 
+                    pos_ini = text_to_process.find('"')
+                    pos_fin = text_to_process[pos_ini + 1 :].find('"')
+                    # print("Duplicado", m, pos_ini, pos_fin, text_to_process, "***" , text_to_process[0:pos_ini + 2 + pos_fin])
+                    ret2_ += " %s " % text_to_process[0 : pos_ini + 2 + pos_fin]
+                    text_to_process = text_to_process[pos_ini + 2 + pos_fin :]
+
             else:
-                ret2_ += "%s " % a    
-    
-        section += ret2_ 
+                ret2_ += "%s " % a
+
+        section += ret2_
         if section.endswith(" "):
-            section = section[0:len(section) -1 ]
-        
+            section = section[0 : len(section) - 1]
+
         if section_orig.endswith("/") and not section.endswith("/"):
             section += "/"
-            
-        
-        
-        #print("***", section)
-        section = section.replace(' =', '=')
-        section = section.replace('= \"', '=\"')
-        
+
+        # print("***", section)
+        section = section.replace(" =", "=")
+        section = section.replace('= "', '="')
+
         for attribute_ in section.split(" "):
-            
-            #print("attribute", attribute_)
+
+            # print("attribute", attribute_)
             if attribute_.find("=") > -1:
-                attr_name = attribute_[0:attribute_.find("=")]
+                attr_name = attribute_[0 : attribute_.find("=")]
                 if attr_name not in attr_list:
                     attr_list.append(attr_name)
                 else:
-                    if attr_name is not "":
-                        #print("Eliminado attributo duplicado", attr_name)
+                    if attr_name != "":
+                        # print("Eliminado attributo duplicado", attr_name)
                         duplicate_ = True
-            
+
             if not duplicate_:
                 if not section.endswith(attribute_):
                     ret_ += "%s " % attribute_
@@ -743,22 +729,18 @@ def parse_for_duplicates(text):
             else:
                 if attribute_.endswith("/"):
                     ret_ += "/"
-            
+
             duplicate_ = False
-            
-        
+
         if (section.find(">") == -1 and section.find("<") > -1) or section.endswith("--"):
             ret_ += ">"
-        
-    #print(ret_)
+
+    # print(ret_)
     return ret_
-        
-                    
-    
-    
+
 
 def imFrozen():
-    return getattr(sys, 'frozen', False)
+    return getattr(sys, "frozen", False)
 
 
 """
@@ -785,95 +767,96 @@ def indent(elem, level=0):
 
 
 def format_double(d, part_integer, part_decimal):
-    from PyQt5 import QtCore
     from pineboolib.pncontrolsfactory import aqApp
-    
-    if d is "":
+
+    if d == "":
         return d
-    #import locale
-    #p_int = field_meta.partInteger()
-    #p_decimal = field_meta.partDecimal()
+    # import locale
+    # p_int = field_meta.partInteger()
+    # p_decimal = field_meta.partDecimal()
     comma_ = "."
     d = str(d)
     found_comma = True if d.find(comma_) > -1 else False
-    #if aqApp.commaSeparator() == comma_:
+    # if aqApp.commaSeparator() == comma_:
     #    d = d.replace(",", "")
-    #else:
+    # else:
     #    d = d.replace(".","")
     #    d = d.replace(",",".")
 
     d = round(float(d), part_decimal)
 
     str_d = str(d)
-    str_integer = str_d[0:str_d.find(comma_)] if str_d.find(comma_) > -1 else str_d
-    str_decimal = "" if str_d.find(comma_) == -1 else str_d[str_d.find(comma_) + 1:]
+    str_integer = str_d[0 : str_d.find(comma_)] if str_d.find(comma_) > -1 else str_d
+    str_decimal = "" if str_d.find(comma_) == -1 else str_d[str_d.find(comma_) + 1 :]
 
     if part_decimal > 0:
         while part_decimal > len(str_decimal):
             str_decimal += "0"
 
-    
     str_integer = format_int(str_integer, part_integer)
-  
+
     # Fixme: Que pasa cuando la parte entera sobrepasa el limite, se coge el maximo valor o
-    ret_ = "%s%s%s" % (str_integer,aqApp.commaSeparator() if found_comma else "", str_decimal if part_decimal > 0 else "")
+    ret_ = "%s%s%s" % (str_integer, aqApp.commaSeparator() if found_comma else "", str_decimal if part_decimal > 0 else "")
     return ret_
 
 
-def format_int(value, part_intenger = None):
+def format_int(value, part_intenger=None):
     from pineboolib.pncontrolsfactory import aqApp
+
     str_integer = value
     if value is not None:
         str_integer = "{:,d}".format(int(value))
 
         if aqApp.commaSeparator() == ",":
-            str_integer = str_integer.replace(",",".")
+            str_integer = str_integer.replace(",", ".")
         else:
-            str_integer = str_integer.replace(".",",")
-    
+            str_integer = str_integer.replace(".", ",")
+
     return str_integer
+
 
 def unformat_number(new_str, old_str, type_):
     ret_ = new_str
     if old_str is not None:
-    
-        if type_ in ("int","uint"):
-            new_str = new_str.replace(",","")
+
+        if type_ in ("int", "uint"):
+            new_str = new_str.replace(",", "")
             new_str = new_str.replace(".", "")
-    
+
             ret_ = new_str
-        
+
         else:
             end_comma = False
             if new_str.endswith(",") or new_str.endswith("."):
-                #Si acaba en coma, lo guardo
+                # Si acaba en coma, lo guardo
                 end_comma = True
-                
-            ret_ = new_str.replace(",","")
+
+            ret_ = new_str.replace(",", "")
             ret_ = ret_.replace(".", "")
             if end_comma:
                 ret_ = ret_ + "."
-            #else:
+            # else:
             #    comma_pos = old_str.find(".")
-            #    if comma_pos > -1:   
-            print("Desformateando", new_str, ret_)       
- 
-        #else:
-            #pos_comma = old_str.find(".")
-    
-            #if pos_comma > -1:
-            #    if pos_comma > new_str.find("."):
-            #        new_str = new_str.replace(".", "")
-                            
-            #        ret_ = new_str[0:pos_comma] + "." + new_str[pos_comma:] 
-    
-    #print("l2", ret_)
+            #    if comma_pos > -1:
+            print("Desformateando", new_str, ret_)
+
+        # else:
+        # pos_comma = old_str.find(".")
+
+        # if pos_comma > -1:
+        #    if pos_comma > new_str.find("."):
+        #        new_str = new_str.replace(".", "")
+
+        #        ret_ = new_str[0:pos_comma] + "." + new_str[pos_comma:]
+
+    # print("l2", ret_)
     return ret_
-    
+
+
 """
 Convierte diferentes formatos de fecha a QDate
 @param date: Fecha a convertir
-@return QDate con el valor de la fecha dada 
+@return QDate con el valor de la fecha dada
 """
 
 
@@ -889,13 +872,14 @@ def convert_to_qdate(date):
 
     if isinstance(date, str):
         if "T" in date:
-            date = date[:date.find("T")]
+            date = date[: date.find("T")]
 
         util = FLUtil()
         date = util.dateAMDtoDMA(date) if len(date.split("-")[0]) == 4 else date
         date = QtCore.QDate.fromString(date, "dd-MM-yyyy")
 
     return date
+
 
 def resolve_pagination(query):
     init = 0
@@ -906,34 +890,32 @@ def resolve_pagination(query):
                 limit = query[k]
             elif k.endswith("o"):
                 init = query[k]
-                
-                #if query[k] == "true":
+
+                # if query[k] == "true":
                 #    page = 0
-                #else:
+                # else:
                 #    page = int(query[k])
-    
-    ret = (None, "50")                
-    if limit is not 0:
-        #init = page * limit
+
+    ret = (None, "50")
+    if limit != 0:
+        # init = page * limit
         ret = (init, limit)
-    
+
     return ret
-    
-    
 
 
 def resolve_query(table_name, params):
-    from collections import OrderedDict
     or_where = ""
     and_where = ""
     where = ""
     order_by = ""
     from pineboolib.pncontrolsfactory import aqApp
+
     mtd = aqApp.db().manager().metadata(table_name)
-    
+
     if hasattr(params, "_iterlists"):
         q = params
-        params = {k: q.getlist(k) if len(q.getlist(k))>1 else v for k, v in q.items()}
+        params = {k: q.getlist(k) if len(q.getlist(k)) > 1 else v for k, v in q.items()}
 
     for p in params:
         if p.startswith("q_"):
@@ -944,17 +926,16 @@ def resolve_query(table_name, params):
             and_where += resolve_where_params(p, params[p], mtd)
         elif p.startswith("o_"):
             order_by += resolve_order_params(p, params[p])
-    
+
     if and_where != "":
         where += str(and_where)
     if or_where != "":
         where += " AND (" + str(or_where) + ")" if len(where) else str(or_where)
     if order_by:
-        order_by = order_by.strip()[:-1]    
-    
-    
+        order_by = order_by.strip()[:-1]
+
     where = "1=1" if not len(where) else where
-    
+
     return where, order_by
 
 
@@ -962,8 +943,8 @@ def resolve_order_params(key, valor):
     if valor.startswith("-"):
         valor = valor[1:] + " DESC, "
     else:
-        valor +=  ", "
-    
+        valor += ", "
+
     return valor
 
 
@@ -974,24 +955,24 @@ def resolve_where_params(key, valor, mtd_table):
     where = ""
     if campo == "pk":
         return "1=1"
-    
+
     if tipo.endswith("[]"):
         tipo = tipo[:-2]
-    
+
     if valor is None:
         return "%s = ''" % campo
-    
-    field =  mtd_table.field(campo)
+
+    field = mtd_table.field(campo)
     if field is not None:
         field_type = field.type()
     else:
         logger.warning("pineboolib.utils.resolve_where_params No se encuentra el campo %s en la tabla %s.", campo, mtd_table.name())
         return ""
-    #valor = aqApp.db().manager().formatValue(field_type , valor, False)
-    
+    # valor = aqApp.db().manager().formatValue(field_type , valor, False)
+
     if field_type in ["bool", "unlock"]:
         valor = "True" if valor == "true" else "False"
-    
+
     if tipo == "contains":
         where = campo + " LIKE '%" + valor + "%'"
     elif tipo == "icontains":
@@ -1020,31 +1001,30 @@ def resolve_where_params(key, valor, mtd_table):
         where = campo + " <> '" + valor + "'"
     elif tipo == "in":
         where = campo + " IN ('" + "', '".join(valor) + "')"
-    
+
     return where
+
 
 def get_tipo_aqnext(tipo):
     tipo_ = 3
-    subtipo_ = None
-    
-    if tipo in ["int","uint","serial"]:
+    # subtipo_ = None
+
+    if tipo in ["int", "uint", "serial"]:
         tipo_ = 16
-    elif tipo in ["string", "stringlist","pixmap","counter"]:
+    elif tipo in ["string", "stringlist", "pixmap", "counter"]:
         tipo_ = 3
-    elif tipo in ["double"]: 
+    elif tipo in ["double"]:
         tipo_ = 19
-    elif tipo in ["bool","unlock"]:
+    elif tipo in ["bool", "unlock"]:
         tipo_ = 18
     elif tipo in ["date"]:
         tipo_ = 26
     elif tipo in ["time"]:
         tipo_ = 27
-    
+
     return tipo_
-    
 
-def create_dict(method, fun, id, arguments = []):
-    data = [{"function" : fun, "arguments" : arguments, "id" : id}]
-    return {"method": method, "params": data, "jsonrpc":"2.0", "id": id} 
-        
 
+def create_dict(method, fun, id, arguments=[]):
+    data = [{"function": fun, "arguments": arguments, "id": id}]
+    return {"method": method, "params": data, "jsonrpc": "2.0", "id": id}

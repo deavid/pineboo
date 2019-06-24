@@ -3,8 +3,6 @@
 from importlib import import_module
 
 from pineboolib.fllegacy.aqsobjects.aqsettings import AQSettings
-import pineboolib
-import re
 import logging
 
 logger = logging.getLogger(__name__)
@@ -32,7 +30,8 @@ class dgi_schema(object):
         self._show_object_not_found_warnings = True
         self.loadReferences()
         try:
-            import PyQt5.QtAndroidExtras
+            import PyQt5.QtAndroidExtras  # noqa   # FIXME
+
             self._mobile = True
         except ImportError:
             self._mobile = False
@@ -41,6 +40,7 @@ class dgi_schema(object):
             self._mobile = True
 
         from pineboolib.utils import imFrozen
+
         self._deployed = imFrozen()
         self.set_clean_no_python(True)
         self.set_clean_no_python_changeable(False)
@@ -54,7 +54,7 @@ class dgi_schema(object):
     # Establece un lanzador alternativo al de la aplicación
     def alternativeMain(self, options):
         pass
-    
+
     def accept_file(self, name):
         return True
 
@@ -92,14 +92,15 @@ class dgi_schema(object):
 
     def mainForm(self):
         pass
-    
+
     def interactiveGUI(self):
         return "Pineboo"
-    
+
     def processEvents(self):
         from PyQt5 import QtWidgets
+
         QtWidgets.qApp.processEvents()
-    
+
     def show_object_not_found_warnings(self):
         return self._show_object_not_found_warnings
 
@@ -114,31 +115,32 @@ class dgi_schema(object):
 
     def iconSize(self):
         from PyQt5 import QtCore
+
         size = QtCore.QSize(22, 22)
-        #if self.mobilePlatform():
+        # if self.mobilePlatform():
         #    size = QtCore.QSize(60, 60)
 
         return size
-    
+
     def clean_no_python(self):
         return self._clean_no_python
-    
+
     def set_clean_no_python(self, b):
         if self._clean_no_python_changeable:
             self._clean_no_python = b
-    
+
     def clean_no_python_changeable(self):
         return self._clean_no_python_changeable
-    
+
     def set_clean_no_python_changeable(self, b):
         self._clean_no_python_changeable = b
-    
+
     def alternative_content_cached(self):
         return self._alternative_content_cached
-    
+
     def alternative_script_path(self, script_name):
         return None
-    
+
     def use_model(self):
         return False
 
@@ -153,10 +155,9 @@ class dgi_schema(object):
         except Exception:
             pass
         return cls
-    
+
     def sys_mtds(self):
         return []
 
     def use_alternative_credentials(self):
         return False
-    

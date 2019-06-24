@@ -9,7 +9,6 @@ from pineboolib import decorators
 
 
 class FLPicture(QObject):
-
     class FLPenStyle(Enum):
         NoPen = 0
         SolidLine = 1
@@ -17,7 +16,7 @@ class FLPicture(QObject):
         DotLine = 3
         DashDotLine = 4
         DashDotDotLine = 5
-        MPenStyle = 0x0f
+        MPenStyle = 0x0F
 
     class FLBrushStyle(Enum):
         NoBrush = 0
@@ -85,7 +84,6 @@ class FLPicture(QObject):
         AlignVertical_Mask = Qt.AlignVertical_Mask
 
     class FLPicturePrivate(QtCore.QObject):
-
         @decorators.BetaImplementation
         def __init__(self, *args):
             super(FLPicture.FLPicturePrivate, self).__init__()

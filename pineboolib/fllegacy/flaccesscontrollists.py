@@ -1,9 +1,12 @@
 from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtCore
+
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
 import pineboolib
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -21,11 +24,11 @@ class FLAccessControlLists(object):
     Diccionario (lista) que mantiene los objetos de las reglas de control de acceso establecidas.
     La clave que identifica a cada objeto está formada por el siguiente literal:
 
-    \code
+    \\code
 
     FLAccessControl::type + "::" + FLAccessControl::name + "::" + FLAccessControl::user
 
-    \endcode
+    \\endcode
     """
 
     accessControlList_ = []
@@ -67,6 +70,7 @@ class FLAccessControlLists(object):
         util = FLUtil()
         if aclXml is None:
             from pineboolib.pncontrolsfactory import aqApp
+
             aclXml = aqApp.db().managerModules().content("acl.xml")
 
         doc = QDomDocument("ACL")
@@ -76,7 +80,7 @@ class FLAccessControlLists(object):
             self.accessControlList_ = []
 
         if aclXml and not util.domDocumentSetContent(doc, aclXml):
-            qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))
+            QtCore.qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))
             return
 
         self.accessControlList_ = {}
@@ -96,8 +100,7 @@ class FLAccessControlLists(object):
                 ac = FLAccessControlFactory().create(e.tagName())
                 if ac:
                     ac.set(e)
-                    self.accessControlList_["%s::%s::%s" %
-                                            (ac.type(), ac.name(), ac.user())] = ac
+                    self.accessControlList_["%s::%s::%s" % (ac.type(), ac.name(), ac.user())] = ac
                     no = no.nextSibling()
                     continue
 
@@ -118,7 +121,7 @@ class FLAccessControlLists(object):
         type = FLAccessControlFactory().type(obj)
         name = obj.objectName() if hasattr(obj, "objectName") else ""
         user = pineboolib.project.conn.user()
-        if type is "" or name is "" or user is "":
+        if type == "" or name == "" or user == "":
             return
 
         ac = self.accessControlList_["%s::%s::%s" % (type, name, user)]
@@ -155,18 +158,17 @@ class FLAccessControlLists(object):
 
         if q.exec_():
             step = 0
-            progress = util.ProgressDialog(
-                util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
+            progress = util.ProgressDialog(util.tr("Instalando control de acceso..."), None, q.size(), None, None, True)
             progress.setCaption(util.tr("Instalando ACL"))
             progress.setMinimumDuration(0)
             progress.setProgress(++step)
             while q.next():
                 self.makeRule(q, doc)
                 progress.setProgress(++step)
-            
-            from pineboolib.pnconrolsfactory import aqApp
-            aqApp.db().managerModules().setContent("acl.xml", "sys", doc.toString())
 
+            from pineboolib.pnconrolsfactory import aqApp
+
+            aqApp.db().managerModules().setContent("acl.xml", "sys", doc.toString())
 
     def makeRule(self, q, d):
         """
@@ -225,7 +227,7 @@ class FLAccessControlLists(object):
 
             del ac
 
-    def makeRuleGroup(self, q, d, idgroup = ""):
+    def makeRuleGroup(self, q, d, idgroup=""):
         """
         Crea varios nodos DOM correspondientes a un registro de la tabla "flacs" y para un grupo de usuarios determinado.
 

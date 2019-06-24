@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 from xml.etree import ElementTree as ET
 from binascii import unhexlify
 import pineboolib
 import logging
 import zlib
-from PyQt5.QtWidgets import QButtonGroup
 from PyQt5.QtCore import QObject
-
-
 
 ICONS = {}
 root = None
@@ -27,6 +23,7 @@ class Options:
 #      una variable de ésta. Para cada nuevo formulario se debería instanciar
 #      una nueva clase.
 
+
 def loadUi(form_path, widget, parent=None):
 
     global ICONS, root
@@ -34,7 +31,7 @@ def loadUi(form_path, widget, parent=None):
     #    ns_clean=True,
     #    encoding="UTF-8",
     #    remove_blank_text=True,
-    #)
+    # )
 
     tree = pineboolib.utils.load2xml(form_path)
 
@@ -47,7 +44,7 @@ def loadUi(form_path, widget, parent=None):
     if parent is None:
         parent = widget
 
-    #if pineboolib.project._DGI.localDesktop():
+    # if pineboolib.project._DGI.localDesktop():
     widget.hide()
 
     for xmlimage in root.findall("images//image"):
@@ -64,8 +61,7 @@ def loadUi(form_path, widget, parent=None):
     # Debe estar despues de loadWidget porque queremos el valor del UI de Qt3
     formname = widget.objectName()
     logger.info("form: %s", formname)
-    
-                
+
     # Cargamos actions...
     for action in root.findall("actions//action"):
         loadAction(action, widget)
@@ -75,21 +71,18 @@ def loadUi(form_path, widget, parent=None):
         signal_name = xmlconnection.find("signal").text
         receiv_name = xmlconnection.find("receiver").text
         slot_name = xmlconnection.find("slot").text
-        
-        
 
         receiver = None
         if isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow):
             if signal_name == "activated()":
-                signal_name = "triggered()"            
-        
+                signal_name = "triggered()"
+
         if sender_name == formname:
             sender = widget
         else:
             sender = widget.findChild(QObject, sender_name, QtCore.Qt.FindChildrenRecursively)
-            
 
-        #if not pineboolib.project._DGI.localDesktop():
+        # if not pineboolib.project._DGI.localDesktop():
         #    wui = hasattr(widget, "ui_") and sender_name in widget.ui_
         #    if sender is None and wui:
         #        sender = widget.ui_[sender_name]
@@ -97,18 +90,24 @@ def loadUi(form_path, widget, parent=None):
         sg_name = signal_name
 
         if signal_name.find("(") > -1:
-            sg_name = signal_name[:signal_name.find("(")]
+            sg_name = signal_name[: signal_name.find("(")]
 
         sl_name = slot_name
         if slot_name.find("(") > -1:
-            sl_name = slot_name[:slot_name.find("(")]
+            sl_name = slot_name[: slot_name.find("(")]
 
         from pineboolib import pncontrolsfactory
-                
+
         if sender is None:
             logger.warning("Connection sender not found:%s", sender_name)
         if receiv_name == formname:
-            receiver = widget if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow) else pineboolib.project.actions[sender_name] if sender_name in pineboolib.project.actions.keys() else None
+            receiver = (
+                widget
+                if not isinstance(widget, pineboolib.pncontrolsfactory.QMainWindow)
+                else pineboolib.project.actions[sender_name]
+                if sender_name in pineboolib.project.actions.keys()
+                else None
+            )
             fn_name = slot_name.rstrip("()")
             logger.debug("Conectando de UI a QS: (%r.%r -> %r.%r)", sender_name, signal_name, receiv_name, fn_name)
 
@@ -117,19 +116,20 @@ def loadUi(form_path, widget, parent=None):
             #    ifx = widget.iface
             if hasattr(ifx, fn_name):
                 try:
-                    
+
                     # getattr(sender, sg_name).connect(
                     #    getattr(ifx, fn_name))
                     pncontrolsfactory.connect(sender, signal_name, ifx, fn_name)
-                except Exception as e:
+                except Exception:
                     logger.exception("Error connecting: %s %s %s %s %s", sender, signal_name, receiver, slot_name, getattr(ifx, fn_name))
                 continue
 
         if receiver is None:
             receiver = widget.findChild(QObject, receiv_name, QtCore.Qt.FindChildrenRecursively)
-            
+
         if receiver is None:
             from pineboolib import qsa
+
             receiver = getattr(qsa, receiv_name, None)
 
         if receiver is None:
@@ -138,14 +138,14 @@ def loadUi(form_path, widget, parent=None):
             continue
         try:
             getattr(sender, sg_name).connect(getattr(receiver, sl_name))
-        except Exception as e:
+        except Exception:
             logger.exception("Error connecting:", sender, signal_name, receiver, slot_name)
 
     # Cargamos menubar ...
     xmlmenubar = root.find("menubar")
     if xmlmenubar:
-        #nameMB_ = xmlmenubar.find("./property[@name='name']/cstring").text
-        #bar = widget.menuBar()
+        # nameMB_ = xmlmenubar.find("./property[@name='name']/cstring").text
+        # bar = widget.menuBar()
         # for itemM in xmlmenubar.findall("item"):
         #    menubar = bar.addMenu(itemM.get("text"))
         #    loadWidget(itemM, menubar, parent, widget)
@@ -153,8 +153,8 @@ def loadUi(form_path, widget, parent=None):
 
     # Cargamos toolbars ...
     for xmltoolbar in root.findall("toolbars//toolbar"):
-        #nameTB_ = xmltoolbar.find("./property[@name='name']/cstring").text
-        #toolbar = widget.addToolBar(nameTB_)
+        # nameTB_ = xmltoolbar.find("./property[@name='name']/cstring").text
+        # toolbar = widget.addToolBar(nameTB_)
         loadToolBar(xmltoolbar, widget)
 
     if not pineboolib.project._DGI.localDesktop():
@@ -214,7 +214,7 @@ def loadMenuBar(xml, widget):
 def process_item(xml, parent, widget):
     name = xml.get("name")
     text = xml.get("text")
-    #accel = xml.get("accel")
+    # accel = xml.get("accel")
 
     menu_ = parent.addMenu(text)
     menu_.setObjectName(name)
@@ -267,11 +267,9 @@ def loadAction(action, widget):
 
 def createWidget(classname, parent=None):
     from pineboolib import pncontrolsfactory
-    
-    cls = getattr(pncontrolsfactory, classname, None) or \
-        getattr(QtWidgets, classname, None)
-    
-    
+
+    cls = getattr(pncontrolsfactory, classname, None) or getattr(QtWidgets, classname, None)
+
     if cls is None:
         logger.warning("WARN: Class name not found in QtWidgets:", classname)
         widgt = QtWidgets.QWidget(parent)
@@ -296,10 +294,10 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         parent = widget
     if origWidget is None:
         origWidget = widget
-    #if pineboolib.project._DGI.localDesktop():
+    # if pineboolib.project._DGI.localDesktop():
     #    if not hasattr(origWidget, "ui_"):
     #        origWidget.ui_ = {}
-    #else:
+    # else:
     #    origWidget.ui_ = {}
 
     def process_property(xmlprop, widget=widget):
@@ -345,7 +343,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             try:
                 value = int(xmlprop.get("stdset"))
                 value /= 2
-            except Exception as e:
+            except Exception:
                 value = 0
             if pname == "contentsMargins":
                 value = QtCore.QMargins(value, value, value, value)
@@ -358,23 +356,23 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             value = QtCore.QMargins(value, value, value, value)
 
         elif pname == "paletteBackgroundColor":
-            value = 'background-color:' + loadVariant(xmlprop).name()
+            value = "background-color:" + loadVariant(xmlprop).name()
 
         elif pname == "paletteForegroundColor":
-            value = 'color:' + loadVariant(xmlprop).name()
+            value = "color:" + loadVariant(xmlprop).name()
 
         elif pname in ["windowIcon", "icon"]:
             value = loadVariant(xmlprop, widget)
             if isinstance(value, str):
-                logger.warning("Icono %s.%s no encontrado." %  (widget.objectName(), value))
+                logger.warning("Icono %s.%s no encontrado." % (widget.objectName(), value))
                 return
 
         else:
             value = loadVariant(xmlprop, widget)
-        
+
         try:
             set_fn(value)
-        except Exception as e:
+        except Exception:
             logger.exception(ET.tostring(xmlprop))
             # if Options.DEBUG_LEVEL > 50:
             #    print(e, repr(value))
@@ -390,7 +388,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
             process_property(p, action)
         toolBar.addAction(action)
-        #origWidget.ui_[action.objectName()] = action
+        # origWidget.ui_[action.objectName()] = action
 
     def process_layout_box(xmllayout, widget=widget, mode="box"):
         for c in xmllayout:
@@ -399,7 +397,6 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 col = int(c.get("column")) or 0
             except Exception:
                 row = col = None
-            
 
             if c.tag == "property":  # Ya se han procesado previamente ...
                 continue
@@ -409,35 +406,37 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     if isinstance(new_widget, pineboolib.plugins.dgi.dgi_qt.dgi_objects.qtoolbutton.QToolButton):
                         widget.addButton(new_widget)
                         continue
-                    
+
                 loadWidget(c, new_widget, parent, origWidget)
-                path = c.find("./property[@name='name']/cstring").text
-                #if not pineboolib.project._DGI.localDesktop():
+                # path = c.find("./property[@name='name']/cstring").text
+                # if not pineboolib.project._DGI.localDesktop():
                 #    origWidget.ui_[path] = new_widget
-                #if pineboolib.project._DGI.localDesktop():
+                # if pineboolib.project._DGI.localDesktop():
                 #    new_widget.show()
                 if mode == "box":
                     try:
                         widget.layout.addWidget(new_widget)
                     except Exception:
                         logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget.layout)
-                            
+
                 elif mode == "grid":
                     rowSpan = c.get("rowspan") or 1
                     colSpan = c.get("colspan") or 1
                     try:
                         widget.layout.addWidget(new_widget, row, col, int(rowSpan), int(colSpan))
                     except Exception:
-                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget, stack_info= True)
-                            
+                        logger.warning("qt3ui: No se ha podido añadir %s a %s", new_widget, widget, stack_info=True)
+
             elif c.tag == "spacer":
-                sH = None
-                sV = None
+                # sH = None
+                # sV = None
                 hPolicy = QtWidgets.QSizePolicy.Fixed
                 vPolicy = QtWidgets.QSizePolicy.Fixed
                 orient_ = None
                 policy_ = None
-                policy_name = None
+                rowSpan = c.get("rowspan") or 1
+                colSpan = c.get("colspan") or 1
+                # policy_name = None
                 spacer_name = None
                 for p in c.findall("property"):
                     pname, value = loadProperty(p)
@@ -448,8 +447,9 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                         orient_ = 1 if value == 1 else 2  # 1 Horizontal, 2 Vertical
 
                     elif pname == "sizeType":
-                        #print("Convirtiendo %s a %s" % (p.find("enum").text, value))
+                        # print("Convirtiendo %s a %s" % (p.find("enum").text, value))
                         from pineboolib.fllegacy.flsettings import FLSettings
+
                         settings = FLSettings()
                         if settings.readBoolEntry("ebcomportamiento/spacerLegacy", False) or orient_ == 1:
                             policy_ = QtWidgets.QSizePolicy.Policy(value)
@@ -457,7 +457,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                             policy_ = 7  # Siempre Expanding
 
                     elif pname == "name":
-                        spacer_name = value
+                        spacer_name = value  # noqa: F841
 
                 if orient_ == 1:
                     hPolicy = policy_
@@ -468,15 +468,15 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                 #                                                  1 else "Vertical", policy_name, width, height, hPolicy, vPolicy))
                 new_spacer = QtWidgets.QSpacerItem(width, height, hPolicy, vPolicy)
                 if row is not None or col is not None and mode == "grid":
-                    widget.layout.addItem(new_spacer, row, col, rowSpan, colSpan)
+                    widget.layout.addItem(new_spacer, row, col, int(rowSpan), int(colSpan))
                 else:
                     widget.layout.addItem(new_spacer)
-                #print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
+                # print("Spacer %s.%s --> %s" % (spacer_name, new_spacer, widget.objectName()))
             else:
                 logger.warning("qt3ui: Unknown layout xml tag", repr(c.tag))
 
         widget.setLayout(widget.layout)
-        #widget.layout.setContentsMargins(1, 1, 1, 1)
+        # widget.layout.setContentsMargins(1, 1, 1, 1)
         # widget.layout.setSpacing(1)
         # widget.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
@@ -497,7 +497,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
 
     for c in xml:
         if c.tag == "layout":
-            #logger.warning("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
+            # logger.warning("Trying to replace layout. Ignoring. %s, %s", repr(c.tag), widget.layout)
             lay_ = getattr(QtWidgets, c.get("class"))()
             lay_.setObjectName(c.get("name"))
             widget.setLayout(lay_)
@@ -508,12 +508,13 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             continue
 
         if c.tag in ("vbox", "hbox", "grid"):
-            if has_layout_defined: #nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
-                #El primer layout que se define es el que se respeta
+            if has_layout_defined:  # nos saltamos una nueva definición del layout ( mezclas de ui incorrectas)
+                # El primer layout que se define es el que se respeta
                 continue
-            
-            from pineboolib.fllegacy.flsettings import FLSettings
-            settings = FLSettings()
+
+            # from pineboolib.fllegacy.flsettings import FLSettings
+
+            # settings = FLSettings()
             if c.tag.find("box") > -1:
                 layout_type = "Q%s%sLayout" % (c.tag[0:2].upper(), c.tag[2:])
             else:
@@ -527,20 +528,19 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             lay_spacing = 2
             for p in c.findall("property"):
                 p_name = p.get("name")
-                                
+
                 if p_name == "name":
-                    lay_name = p.find("cstring").text      
+                    lay_name = p.find("cstring").text
                 elif p_name == "margin":
                     lay_margin = int(p.find("number").text)
-                    
+
                     if c.tag == "hbox":
                         lay_margin_h = lay_margin
                     elif c.tag == "vbox":
                         lay_margin_v = lay_margin
                     else:
                         lay_margin_h = lay_margin_v = lay_margin
-                        
-                    
+
                 elif p_name == "spacing":
                     lay_spacing = int(p.find("number").text)
                 elif p_name == "sizePolicy":
@@ -575,8 +575,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
             if attrs is not None:
                 attrs[k] = v
             else:
-                logger.warning("qt3ui: [NOT ASSIGNED] attribute %r => %r" %
-                            (k, v), widget.__class__, repr(c.tag))
+                logger.warning("qt3ui: [NOT ASSIGNED] attribute %r => %r" % (k, v), widget.__class__, repr(c.tag))
             continue
         if c.tag == "widget":
             # Si dentro del widget hay otro significa
@@ -605,7 +604,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     widget.setLayout(lay)
 
                 if isinstance(widget, pineboolib.pncontrolsfactory.QToolBar):
-                    if isinstance(new_widget, QAction):
+                    if isinstance(new_widget, QtWidgets.QAction):
                         widget.addAction(new_widget)
                     else:
                         widget.addWidget(new_widget)
@@ -613,8 +612,7 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
                     lay.addWidget(new_widget)
             else:
                 if Options.DEBUG_LEVEL > 50:
-                    logger.warning("qt3ui: Unknown container widget xml tag",
-                                widget.__class__, repr(c.tag))
+                    logger.warning("qt3ui: Unknown container widget xml tag", widget.__class__, repr(c.tag))
             unbold_fonts.append(new_widget)
             continue
 
@@ -657,14 +655,14 @@ def loadWidget(xml, widget=None, parent=None, origWidget=None):
         f.setItalic(False)
         new_widget.setFont(f)
 
-    #if not pineboolib.project._DGI.localDesktop():
+    # if not pineboolib.project._DGI.localDesktop():
     #    if nwidget is not None and origWidget.objectName() not in origWidget.ui_:
     #        origWidget.ui_[origWidget.objectName()] = nwidget
 
 
 def loadIcon(xml):
     global ICONS
-    
+
     name = xml.get("name")
     xmldata = xml.find("data")
     img_format = xmldata.get("format")
@@ -723,7 +721,7 @@ def _loadVariant(variant, widget=None):
     if variant.tag == "string":
         return u(text)
     if variant.tag == "number":
-        if text.find('.') >= 0:
+        if text.find(".") >= 0:
             return float(text)
         return int(text)
     if variant.tag == "bool":
@@ -732,10 +730,10 @@ def _loadVariant(variant, widget=None):
         k = {}
         for c in variant:
             k[c.tag] = int(c.text.strip())
-        return QtCore.QRect(k['x'], k['y'], k['width'], k['height'])
+        return QtCore.QRect(k["x"], k["y"], k["width"], k["height"])
 
     if variant.tag == "sizepolicy":
-        
+
         p = QtWidgets.QSizePolicy()
         for c in variant:
             value = int(c.text.strip())
@@ -802,8 +800,7 @@ def _loadVariant(variant, widget=None):
 
     if variant.tag == "enum":
         v = None
-        libs = [QtCore.Qt, QtWidgets.QFrame,
-                QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
+        libs = [QtCore.Qt, QtWidgets.QFrame, QtWidgets.QSizePolicy, QtWidgets.QTabWidget]
         for lib in libs:
             v = getattr(lib, text, None)
             if v is not None:
@@ -836,14 +833,14 @@ def _loadVariant(variant, widget=None):
 
         c.setRgb(red_, green_, blue_)
         return c
-    
+
     if variant.tag == "palette":
         p = QtGui.QPalette()
         for state in variant:
             print("FIXME: Procesando palette", state.tag)
             for color in state:
                 r_ = 0
-                g_ = 0 
+                g_ = 0
                 b_ = 0
                 for c in color:
                     if c.tag == "red":
@@ -852,26 +849,27 @@ def _loadVariant(variant, widget=None):
                         g_ = int(c.text)
                     elif c.tag == "blue":
                         b_ = int(c.text)
-              
+
                 if state.tag == "active":
-                    #p.setColor(p.Active, Qt.QColor(r_, g_, b_))
+                    # p.setColor(p.Active, Qt.QColor(r_, g_, b_))
                     pass
                 elif state.tag == "disabled":
-                    #p.setColor(p.Disabled, Qt.QColor(r_, g_, b_))
+                    # p.setColor(p.Disabled, Qt.QColor(r_, g_, b_))
                     pass
                 elif state.tag == "inactive":
-                    #p.setColor(p.Inactive, Qt.QColor(r_, g_, b_))
+                    # p.setColor(p.Inactive, Qt.QColor(r_, g_, b_))
                     pass
                 elif state.tag == "normal":
-                    #p.setColor(p.Normal, Qt.QColor(r_, g_, b_))
+                    # p.setColor(p.Normal, Qt.QColor(r_, g_, b_))
                     pass
                 else:
                     logger.warning("Unknown palette state %s", state.tag)
-        
+                logger.debug("pallete color: %s %s %s", r_, g_, b_)
+
         return p
-    
+
     if variant.tag == "date":
-        
+
         y_ = None
         m_ = None
         d_ = None
@@ -882,9 +880,9 @@ def _loadVariant(variant, widget=None):
                 m_ = int(v.text)
             elif v.tag == "day":
                 d_ = int(v.text)
-        
+
         d = QtCore.QDate(y_, m_, d_)
         return d
 
     if Options.DEBUG_LEVEL > 50:
-        logger.warning("qt3ui: Unknown variant: %s --> %s ", repr(widget),  ET.tostring(variant))
+        logger.warning("qt3ui: Unknown variant: %s --> %s ", repr(widget), ET.tostring(variant))

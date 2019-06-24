@@ -3,6 +3,7 @@
 from PyQt5 import QtWidgets
 from pineboolib.plugins.dgi.dgi_qt.dgi_objects.qgroupbox import QGroupBox
 
+
 class GroupBox(QGroupBox):
     def __init__(self, *args):
         super(GroupBox, self).__init__(*args)

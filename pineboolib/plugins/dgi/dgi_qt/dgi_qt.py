@@ -1,26 +1,24 @@
 # # -*- coding: utf-8 -*-
-from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
+import logging
+import os
+import sys
+import pineboolib
+
 from importlib import import_module
 
+from PyQt5 import QtWidgets, QtCore, QtGui, Qt, QtXml
+from PyQt5.QtWidgets import qApp
 
 from pineboolib.plugins.dgi.dgi_schema import dgi_schema
 from pineboolib.utils import filedir, load2xml, _path
 from pineboolib.fllegacy.flsettings import FLSettings
-import pineboolib
-import logging
-import os
-import weakref
-import sys
-import traceback
-from PyQt5.Qt import QMessageBox
-from PyQt5.QtWidgets import qApp
 
 
 logger = logging.getLogger(__name__)
 
 
 class dgi_qt(dgi_schema):
-    
+
     pnqt3ui = None
 
     def __init__(self):
@@ -29,47 +27,48 @@ class dgi_qt(dgi_schema):
         self._alias = "Qt5"
         self.set_clean_no_python_changeable(True)
         self.set_clean_no_python(FLSettings().readBoolEntry("ebcomportamiento/clean_no_python", False))
-        
-        
+
         from pineboolib.plugins.dgi.dgi_qt import dgi_qt3ui
+
         self.pnqt3ui = dgi_qt3ui
-    
+
     def create_app(self):
         app = QtWidgets.QApplication(sys.argv)
         app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
         return app
-        
 
     def __getattr__(self, name):
-        
+
         cls = super().resolveObject(self._name, name)
         if cls is None:
             mod_ = import_module(__name__)
             cls = getattr(mod_, name, None)
-    
+
         if cls is None:
-            cls = getattr(QtWidgets, name, None) or \
-            getattr(QtXml, name, None) or \
-            getattr(QtGui, name, None) or \
-            getattr(Qt, name, None) or \
-            getattr(QtCore, name, None)                   
-             
+            cls = (
+                getattr(QtWidgets, name, None)
+                or getattr(QtXml, name, None)
+                or getattr(QtGui, name, None)
+                or getattr(Qt, name, None)
+                or getattr(QtCore, name, None)
+            )
+
         return cls
-    
+
     def msgBoxWarning(self, t):
         parent = qApp.focusWidget().parent() if hasattr(qApp.focusWidget(), "parent") else qApp.focusWidget()
         self.MessageBox.warning(t, self.MessageBox.Ok, self.MessageBox.NoButton, self.MessageBox.NoButton, "Pineboo", parent)
-    
+
     def createUI(self, n, connector=None, parent=None, name=None):
-        
+
         if ".ui" not in n:
             n += ".ui"
 
         form_path = n if os.path.exists(n) else _path(n)
 
         if form_path is None:
-            #raise AttributeError("File %r not found in project" % n)
-            #logger.warning("%s.createUI : No se encuentra el fichero %s", self.__name__, n)
+            # raise AttributeError("File %r not found in project" % n)
+            # logger.warning("%s.createUI : No se encuentra el fichero %s", self.__name__, n)
             return
 
         tree = load2xml(form_path)
@@ -94,14 +93,11 @@ class dgi_qt(dgi_schema):
             self.pnqt3ui.loadUi(form_path, w_)
         else:
             from PyQt5 import uic
+
             qtWidgetPlugings = filedir("./plugins/qtwidgetsplugins")
-            if not qtWidgetPlugings in uic.widgetPluginPath:
+            if qtWidgetPlugings not in uic.widgetPluginPath:
                 logger.info("Añadiendo path %s a uic.widgetPluginPath", qtWidgetPlugings)
                 uic.widgetPluginPath.append(qtWidgetPlugings)
             uic.loadUi(form_path, w_)
 
         return w_
-    
-
-
-

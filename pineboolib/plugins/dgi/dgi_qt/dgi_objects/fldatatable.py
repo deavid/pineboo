@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+from PyQt5 import QtCore, QtWidgets, Qt
 from pineboolib import decorators
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flsettings import FLSettings
-from PyQt5.QtWidgets import QApplication, QCheckBox
+from PyQt5.QtWidgets import QCheckBox
 import pineboolib
 
 
@@ -115,7 +114,7 @@ class FLDataTable(QtWidgets.QTableView):
 
         if not name:
             self.setName("FLDataTable")
-        
+
         self.readonly_ = False
         self.editonly_ = False
         self.insertonly_ = False
@@ -166,12 +165,11 @@ class FLDataTable(QtWidgets.QTableView):
                 self.cursor_.restoreBrowseFlag(self)
                 self.cursor_.d._current_changed.disconnect(self.ensureRowSelectedVisible)
                 self.cursor_.cursorUpdated.disconnect(self.refresh)
-                
 
                 cur_chg = True
 
             if not self.cursor_ or cur_chg:
-                self.cursor_ = c                      
+                self.cursor_ = c
                 self.setFLReadOnly(self.readonly_)
                 self.setEditOnly(self.editonly_)
                 self.setInsertOnly(self.insertonly_)
@@ -182,22 +180,23 @@ class FLDataTable(QtWidgets.QTableView):
 
                 self.setModel(self.cursor_.model())
                 self.setSelectionModel(self.cursor_.selection())
-                #self.model().sort(self.header().logicalIndex(0), 0)
+                # self.model().sort(self.header().logicalIndex(0), 0)
                 self.installEventFilter(self)
                 self.model().set_parent_view(self)
             # if self.cursor_.at() >= 0:
             #    QtCore.QTimer.singleShot(2000, self.marcaRow) #Por ahora es 3000 para que de tiempo a mostrarse FIXME
+
     """
     Establece un filtro persistente que siempre se aplica al cursor antes
     de hacer un refresh
     """
 
-    def marcaRow(self,id_pk):
+    def marcaRow(self, id_pk):
         if id_pk is not None:
-            pos = self.model().findPKRow((id_pk, ))          
+            pos = self.model().findPKRow((id_pk,))
             if pos is not None:
                 self.cursor().move(pos)
-                #self.ensureRowSelectedVisible()
+                # self.ensureRowSelectedVisible()
 
     def setPersistentFilter(self, pFilter):
         self.persistentFilter_ = pFilter
@@ -215,7 +214,7 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setSort(self, s):
         self.sort_ = s
-         
+
     """
     Devuelve el cursor
     """
@@ -231,7 +230,6 @@ class FLDataTable(QtWidgets.QTableView):
 
         if not self.cursor_ or self.cursor_.aqWasDeleted():
             return
-
 
         self.cursor_.setEdition(not mode, self)
         self.readonly_ = mode
@@ -309,7 +307,7 @@ class FLDataTable(QtWidgets.QTableView):
 
     def setShowAllPixmaps(self, s):
         self.showAllPixmaps_ = s
-    
+
     def showAllPixmap(self):
         return self.showAllPixmaps_
 
@@ -401,6 +399,7 @@ class FLDataTable(QtWidgets.QTableView):
 
             if key_event.key() == QtCore.Qt.Key_Space:
                 from pineboolib.pncontrolsfactory import FLCheckBox
+
                 chk = FLCheckBox(self.cellWidget(r, c))
                 if chk:
                     chk.animateClick()
@@ -448,6 +447,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Redefinido por conveniencia para pintar la celda
     """
+
     @decorators.NotImplementedWarn
     def paintCell(self, p, row, col, cr, selected, cg):
         pass
@@ -455,6 +455,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Redefinido por conveniencia para pintar el campo
     """
+
     @decorators.NotImplementedWarn
     def paintField(self, p, field, cr, selected):
         pass
@@ -516,7 +517,7 @@ class FLDataTable(QtWidgets.QTableView):
                 dt.setFilter(filter)
                 dt.refresh()
 
-                horiz_header = dt.header()
+                # horiz_header = dt.header()
                 for i in range(dt.numCols()):
                     field = mtd.indexFieldObject(i)
                     if not field:
@@ -546,13 +547,14 @@ class FLDataTable(QtWidgets.QTableView):
         field = self.cursor_.metadata().indexFieldObject(col)
         _type = field.type()
 
-        if _type is not "check":
+        if _type != "check":
             return
-        
+
         pK = str(self.cursor().model().value(row, self.cursor().metadata().primaryKey()))
         self.cursor().model()._checkColumn[pK].setChecked(not self.cursor().model()._checkColumn[pK].isChecked())
         self.setPrimaryKeyChecked(str(pK), self.cursor().model()._checkColumn[pK].isChecked())
         print("FIXME: falta un repaint para ver el color!!")
+
     """
     Redefinida por conveniencia
     """
@@ -571,6 +573,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Redefinida por conveniencia
     """
+
     @decorators.NotImplementedWarn
     def drawContents(self, p, cx, cy, cw, ch):
         pass
@@ -589,6 +592,7 @@ class FLDataTable(QtWidgets.QTableView):
             self.changingNumRows_ = False
 
     """ Uso interno """
+
     @decorators.NotImplementedWarn
     def getCellStyle(self, brush, pen, field, fieldTMD, row, selected, cg):
         pass
@@ -608,7 +612,7 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Redefinida por conveniencia
     """
-    
+
     def focusInEvent(self, e):
         obj = self
         refresh = True
@@ -618,13 +622,10 @@ class FLDataTable(QtWidgets.QTableView):
                 break
             else:
                 obj = obj.parent()
-        
+
         if refresh:
-            self.refresh()  
+            self.refresh()
         super().focusInEvent(e)
-    
-    
-    
 
     """
     def setFocus(self):
@@ -643,13 +644,14 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Redefinida por conveniencia
     """
-    def refresh(self, refresh_option = None):
+
+    def refresh(self, refresh_option=None):
         if self.popup_:
             self.cursor_.refresh()
         # if not self.refreshing_ and self.cursor_ and not self.cursor_.aqWasDeleted() and self.cursor_.metadata():
         if not self.refreshing_ and self.cursor():
 
-            #if self.function_get_color and self.cursor().model():
+            # if self.function_get_color and self.cursor().model():
             #    if self.cursor().model().color_function_ != self.function_get_color:
             #        self.cursor().model().setColorFunction(self.function_get_color)
 
@@ -662,16 +664,15 @@ class FLDataTable(QtWidgets.QTableView):
                         filter = "%s AND %s" % (filter, self.filter_)
                     else:
                         filter = self.filter_
-            
 
             self.cursor().setFilter(filter)
             if self.sort_:
                 self.cursor().setSort(self.sort_)
-                
+
             last_pk = None
             if self.cursor().buffer():
                 last_pk = self.cursor().buffer().value(self.cursor().buffer().pK())
- 
+
             self.cursor().refresh()
 
             self.marcaRow(last_pk)
@@ -681,20 +682,19 @@ class FLDataTable(QtWidgets.QTableView):
     """
     Hace que la fila seleccionada esté visible
     """
+
     @QtCore.pyqtSlot()
     @QtCore.pyqtSlot(int)
-    def ensureRowSelectedVisible(self, position = None):
+    def ensureRowSelectedVisible(self, position=None):
         if position is None:
             if self.cursor():
-                position =  self.cursor().at()
+                position = self.cursor().at()
             else:
                 return
-        
-        index = self.cursor().model().index(position, 0)   
+
+        index = self.cursor().model().index(position, 0)
         if index is not None:
             self.scrollTo(index)
-
-
 
     """
     Foco rápido sin refrescos para optimizar
@@ -712,26 +712,26 @@ class FLDataTable(QtWidgets.QTableView):
     """
 
     def setColumnWidth(self, field, w):
-        self.widthCols_[field] =  w
-    
+        self.widthCols_[field] = w
+
     def resize_column(self, col, str_text):
         if str_text is None:
             return str_text
-        
+
         str_text = str(str_text)
-        
+
         field = self.model().metadata().indexFieldObject(col)
         if field.name() in self.widthCols_.keys():
             if self.columnWidth(col) < self.widthCols_[field.name()]:
                 self.header().resizeSection(col, self.widthCols_[field.name()])
         else:
             wC = self.header().sectionSize(col)
-            
+
             fm = Qt.QFontMetrics(self.header().font())
             wH = fm.horizontalAdvance(field.alias() + "W")
             if wH < wC:
                 wH = wC
-            
+
             wC = fm.horizontalAdvance(str_text) + fm.maxWidth()
             if wC > wH:
                 self.header().resizeSection(col, wC)
@@ -810,9 +810,8 @@ class FLDataTable(QtWidgets.QTableView):
     def mouseDoubleClickEvent(self, e):
         if e.button() != QtCore.Qt.LeftButton:
             return
-        
-        self.recordChoosed.emit()
 
+        self.recordChoosed.emit()
 
     def visual_index_to_column_index(self, c):
         """
@@ -834,23 +833,21 @@ class FLDataTable(QtWidgets.QTableView):
                     break
 
         return ret_
-    
+
     def visual_index_to_logical_index(self, c):
         """
         Index visual a lógico
         """
         return self.header().logicalIndex(c)
-    
+
     def logical_index_to_visual_index(self, c):
         """
         Index lógico a Index Visual
         """
         return self.header().visualIndex(c)
 
-                
     def visual_index_to_field(self, pos_):
         return self.model().metadata().indexFieldObject(self.visual_index_to_logical_index(pos_))
-    
 
     def currentRow(self):
         """

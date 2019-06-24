@@ -9,7 +9,6 @@ import pineboolib
 
 
 class FLAccessControlFactory(object):
-
     def create(self, type_):
         if type_ is None:
             return False
@@ -26,9 +25,10 @@ class FLAccessControlFactory(object):
     def type(self, obj):
         if obj is None:
             print("NO OBJ")
-        
+
         ret_ = ""
         from pineboolib.pncontrolsfactory import FLFormDB, QMainWindow
+
         if isinstance(obj, QMainWindow):
             ret_ = "mainwindow"
         elif isinstance(obj, FLTableMetaData):
@@ -40,7 +40,6 @@ class FLAccessControlFactory(object):
 
 
 class FLAccessControlMainWindow(FLAccessControl):
-
     def __init__(self):
         super(FLAccessControlMainWindow, self).__init__()
 
@@ -56,9 +55,9 @@ class FLAccessControlMainWindow(FLAccessControl):
     def type(self):
         return "mainwindow"
 
-
     def processObject(self, obj):
         from pineboolib.pncontrolsfactory import QMainWindow
+
         mw = QMainWindow(obj)
         if not mw or not self.acosPerms_:
             return
@@ -86,21 +85,19 @@ class FLAccessControlMainWindow(FLAccessControl):
                 if perm in ("-w", "--"):
                     a.setVisible(False)
 
-    
     def setFromObject(self, object):
         from pineboolib.fllegacy.flutil import FLUtil
-        print("FLAccessControlMainWindow::setFromObject %s" %
-              FLUtil.translate(self, "app", "No implementado todavía."))
+
+        print("FLAccessControlMainWindow::setFromObject %s" % FLUtil.translate(self, "app", "No implementado todavía."))
 
 
 class FLAccessControlForm(FLAccessControl):
-
     def __init__(self):
         super(FLAccessControlForm, self).__init__()
         if pineboolib.project._DGI.localDesktop():
             from PyQt5.Qt import qApp
             from PyQt5 import QtGui
-            
+
             self.pal = QtGui.QPalette()
             bg = QtGui.QColor(qApp.palette().color(QtGui.QPalette.Active, QtGui.QPalette.Background))
 
@@ -109,6 +106,7 @@ class FLAccessControlForm(FLAccessControl):
             self.pal.setColor(QtGui.QPalette.ButtonText, bg)
             self.pal.setColor(QtGui.QPalette.Base, bg)
             self.pal.setColor(QtGui.QPalette.Background, bg)
+
     """
   @return El tipo del que se encarga; "form".
     """
@@ -155,6 +153,7 @@ class FLAccessControlForm(FLAccessControl):
 
         for it in self.acosPerms_.keys():
             from pineboolib.pncontrolsfactory import QWidget
+
             w = fm.findChild(QWidget, it)
             if w:
                 perm = self.acosPerms_[it]
@@ -169,16 +168,13 @@ class FLAccessControlForm(FLAccessControl):
                     w.setDisabled(True)
 
             else:
-                print(
-                    "WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
+                print("WARN: FLAccessControlFactory: No se encuentra el control %s para procesar ACLS." % it)
 
     def setFromObject(self, object):
-        print("FLAccessControlform::setFromObject %s" %
-              FLUtil.translate(self, "app", "No implementado todavía."))
+        print("FLAccessControlform::setFromObject %s" % FLUtil.translate(self, "app", "No implementado todavía."))
 
 
 class FLAccessControlTable(FLAccessControl):
-
     def __init__(self):
         super(FLAccessControlTable, self).__init__()
 
@@ -210,7 +206,7 @@ class FLAccessControlTable(FLAccessControl):
         fL = tm.fieldList()
         if not fL:
             return
-        
+
         for it in fL:
             field = it
             mask_field_perm = mask_perm
@@ -222,8 +218,7 @@ class FLAccessControlTable(FLAccessControl):
 
                 if field_perm[1] == "w":
                     mask_field_perm = mask_field_perm + 1
-                
-            
+
             if mask_field_perm == 0:
                 field.setVisible(False)
                 field.setEditable(False)
@@ -256,10 +251,10 @@ class FLAccessControlTable(FLAccessControl):
         permW = ""
         permR = ""
         for it in fL:
-            permR = '-'
-            permW = '-'
+            permR = "-"
+            permW = "-"
             if it.visible():
-                permR = 'r'
+                permR = "r"
             if it.editable():
-                permW = 'w'
+                permW = "w"
             self.acosPerms_[it.name()] = "%s%s" % (permR, permW)

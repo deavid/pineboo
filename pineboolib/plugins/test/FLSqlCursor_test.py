@@ -1,8 +1,8 @@
-
+import traceback
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
 
-class FLSqlCursor_test():
+class FLSqlCursor_test:
 
     maxValue = None
 

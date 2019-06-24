@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import pineboolib
+pluginType = MODULE  # noqa  # FIXME: Esto no es Python.
 
-
-pluginType = MODULE
 
 def moduleInformation():
-    return 'pineboolib.pncontrolsfactory', ('FLTable')
+    return "pineboolib.pncontrolsfactory", ("FLTable")

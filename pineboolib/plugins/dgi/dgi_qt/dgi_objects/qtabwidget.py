@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-
 from PyQt5 import QtWidgets
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class QTabWidget(QtWidgets.QTabWidget):
-    
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        
+
         self.Top = self.North
         self.Bottom = self.South
         self.Left = self.West
@@ -25,7 +27,6 @@ class QTabWidget(QtWidgets.QTabWidget):
         idx = self.indexByName(tab)
         if idx is None:
             return
-
 
         return QtWidgets.QTabWidget.setCurrentIndex(self, idx)
 

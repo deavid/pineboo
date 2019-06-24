@@ -17,7 +17,6 @@ import importlib
 import logging
 
 
-
 logger = logging.getLogger("pineboo.__main__")
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -26,13 +25,12 @@ def startup_check_dependencies():
     """Do a preemptive import of the libraries needed and handle errors in a user friendly way."""
     from pineboolib.utils import checkDependencies
 
-    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5","Python":"Python"}
+    dict_ = {"ply": "python3-ply", "PyQt5.QtCore": "python3-pyqt5", "Python": "Python"}
     checkDependencies(dict_)
 
     if sys.version_info[0] < 3:
         logger.error("Tienes que usar Python 3 o superior.")
         sys.exit(32)
-    
 
 
 def translate_connstring(connstring):
@@ -51,13 +49,13 @@ def translate_connstring(connstring):
     user_pass = None
     host_port = None
     try:
-        uphpstring = connstring[:connstring.rindex("/")]
+        uphpstring = connstring[: connstring.rindex("/")]
     except ValueError:
         dbname = connstring
         if not re.match(r"\w+", dbname):
             raise ValueError("base de datos no valida")
         return user, passwd, host, port, dbname
-    dbname = connstring[connstring.rindex("/") + 1:]
+    dbname = connstring[connstring.rindex("/") + 1 :]
     conn_list = [None, None] + uphpstring.split("@")
     user_pass, host_port = conn_list[-2], conn_list[-1]
 
@@ -65,8 +63,7 @@ def translate_connstring(connstring):
         user_pass = user_pass.split(":") + [None, None, None]
         user, passwd, driver_alias = user_pass[0], user_pass[1] or passwd, user_pass[2] or driver_alias
         if user_pass[3]:
-            raise ValueError(
-                "La cadena de usuario debe tener el formato user:pass:driver.")
+            raise ValueError("La cadena de usuario debe tener el formato user:pass:driver.")
 
     if host_port:
         host_port = host_port.split(":") + [None]
@@ -80,52 +77,37 @@ def translate_connstring(connstring):
         raise ValueError("base de datos no valida")
     if not re.match(r"\d+", port):
         raise ValueError("puerto no valido")
-    logger.debug("user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s",
-                 user, "*" * len(passwd), driver_alias, host, port, dbname)
+    logger.debug("user:%s, passwd:%s, driver_alias:%s, host:%s, port:%s, dbname:%s", user, "*" * len(passwd), driver_alias, host, port, dbname)
     return user, passwd, driver_alias, host, port, dbname
 
 
 def parse_options():
     """Load and parse options."""
     parser = OptionParser()
-    parser.add_option("-l", "--load", dest="project",
-                      help="load projects/PROJECT.xml and run it", metavar="PROJECT")
-    parser.add_option("-c", "--connect", dest="connection",
-                      help="connect to database with user and password.", metavar="user:passwd:driver_alias@host:port/database")
-    parser.add_option('-v', '--verbose', action='count', default=0,
-                      help="increase verbosity level")  # default a 2 para ver los logger.info, 1 no los muestra
-    parser.add_option("-q", "--quiet",
-                      action='count', default=0,
-                      help="decrease verbosity level")
-    parser.add_option("--trace-debug",
-                      action="store_true", dest="trace_debug", default=False,
-                      help="Write lots of trace information to stdout")
-    parser.add_option("--log-time",
-                      action="store_true", dest="log_time", default=False,
-                      help="Add timestamp to logs")
-    parser.add_option("--trace-signals",
-                      action="store_true", dest="trace_signals", default=False,
-                      help="Wrap up every signal, connect and emit, and give useful tracebacks")
-    parser.add_option("-a", "--action", dest="action",
-                      help="load action", metavar="ACTION")
-    parser.add_option("--no-python-cache",
-                      action="store_true", dest="no_python_cache", default=False,
-                      help="Always translate QS to Python")
-    parser.add_option("--preload",
-                      action="store_true", dest="preload", default=False,
-                      help="Load everything. Then exit. (Populates Pineboo cache)")
-    parser.add_option("--force-load",
-                      dest="forceload", default=None, metavar="ACTION",
-                      help="Preload actions containing string ACTION without caching. Useful to debug pythonyzer")
-    parser.add_option("--dgi",
-                      dest="dgi", default="qt",
-                      help="Change the gdi mode by default", metavar="DGI")
-    parser.add_option("--dgi_parameter",
-                      dest="dgi_parameter",
-                      help="Change the gdi mode by default", metavar="DGIPARAMETER")
-    parser.add_option("--test",
-                      action="store_true", dest="test", default=False,
-                      help="Launch all test")
+    parser.add_option("-l", "--load", dest="project", help="load projects/PROJECT.xml and run it", metavar="PROJECT")
+    parser.add_option(
+        "-c", "--connect", dest="connection", help="connect to database with user and password.", metavar="user:passwd:driver_alias@host:port/database"
+    )
+    parser.add_option("-v", "--verbose", action="count", default=0, help="increase verbosity level")  # default a 2 para ver los logger.info, 1 no los muestra
+    parser.add_option("-q", "--quiet", action="count", default=0, help="decrease verbosity level")
+    parser.add_option("--trace-debug", action="store_true", dest="trace_debug", default=False, help="Write lots of trace information to stdout")
+    parser.add_option("--log-time", action="store_true", dest="log_time", default=False, help="Add timestamp to logs")
+    parser.add_option(
+        "--trace-signals", action="store_true", dest="trace_signals", default=False, help="Wrap up every signal, connect and emit, and give useful tracebacks"
+    )
+    parser.add_option("-a", "--action", dest="action", help="load action", metavar="ACTION")
+    parser.add_option("--no-python-cache", action="store_true", dest="no_python_cache", default=False, help="Always translate QS to Python")
+    parser.add_option("--preload", action="store_true", dest="preload", default=False, help="Load everything. Then exit. (Populates Pineboo cache)")
+    parser.add_option(
+        "--force-load",
+        dest="forceload",
+        default=None,
+        metavar="ACTION",
+        help="Preload actions containing string ACTION without caching. Useful to debug pythonyzer",
+    )
+    parser.add_option("--dgi", dest="dgi", default="qt", help="Change the gdi mode by default", metavar="DGI")
+    parser.add_option("--dgi_parameter", dest="dgi_parameter", help="Change the gdi mode by default", metavar="DGIPARAMETER")
+    parser.add_option("--test", action="store_true", dest="test", default=False, help="Launch all test")
 
     (options, args) = parser.parse_args()
 
@@ -139,25 +121,22 @@ def parse_options():
 
     # ---- LOGGING -----
     if options.loglevel > 30:
-        log_format = '%(name)s:%(levelname)s: %(message)s'
+        log_format = "%(name)s:%(levelname)s: %(message)s"
     else:
-        log_format = '%(levelname)s: %(message)s'
+        log_format = "%(levelname)s: %(message)s"
 
     if options.log_time:
-        log_format = '%(asctime)s - %(name)s:%(levelname)s: %(message)s'
+        log_format = "%(asctime)s - %(name)s:%(levelname)s: %(message)s"
 
-    addLoggingLevel('TRACE', logging.DEBUG - 5)
-    addLoggingLevel('NOTICE', logging.INFO - 5)
-    addLoggingLevel('HINT', logging.INFO - 2)
-    addLoggingLevel('MESSAGE', logging.WARN - 5)
+    addLoggingLevel("TRACE", logging.DEBUG - 5)
+    addLoggingLevel("NOTICE", logging.INFO - 5)
+    addLoggingLevel("HINT", logging.INFO - 2)
+    addLoggingLevel("MESSAGE", logging.WARN - 5)
 
     logging.basicConfig(format=log_format, level=options.loglevel)
-    logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s",
-                 options.loglevel, options.debug_level)
+    logger.debug("LOG LEVEL: %s  DEBUG LEVEL: %s", options.loglevel, options.debug_level)
 
-    disable_loggers = [
-        "PyQt5.uic.uiparser",
-        "PyQt5.uic.properties"]
+    disable_loggers = ["PyQt5.uic.uiparser", "PyQt5.uic.properties"]
     for loggername in disable_loggers:
         modlogger = logging.getLogger(loggername)
         modlogger.setLevel(logging.WARN)
@@ -167,7 +146,7 @@ def parse_options():
 
 def load_dgi(name):
     """Load a DGI module dynamically."""
-    
+
     modname = "dgi_%s" % name
     modpath = "pineboolib.plugins.dgi.%s.%s" % (modname, modname)
     try:
@@ -175,8 +154,7 @@ def load_dgi(name):
     except Exception:
         print("Cargando como invitado")
         modpath = "pineboo.%s" % modpath
-    
-    
+
     try:
         dgi_pymodule = importlib.import_module(modpath)
     except ImportError:
@@ -184,14 +162,12 @@ def load_dgi(name):
 
     dgi_entrypoint = getattr(dgi_pymodule, modname, None)
     if dgi_entrypoint is None:
-        raise ImportError(
-            "Fallo al cargar el punto de entrada al módulo DGI %s" % modpath)
+        raise ImportError("Fallo al cargar el punto de entrada al módulo DGI %s" % modpath)
 
     try:
         dgi = dgi_entrypoint()  # FIXME: Necesitamos ejecutar código dinámico tan pronto?
     except Exception:
-        logger.exception(
-            "Error inesperado al cargar el módulo DGI %s" % modpath)
+        logger.exception("Error inesperado al cargar el módulo DGI %s" % modpath)
         sys.exit(32)
 
     logger.info("DGI loaded: %s", name)
@@ -204,22 +180,19 @@ def create_app(DGI):
     from PyQt5 import QtGui, QtWidgets, QtCore
     from pineboolib.utils import filedir
     import pineboolib
+
     app = DGI.create_app()
     pineboolib.base_dir = filedir(".")  # Almacena base_dir para luego usarlo sobre filedir
     pineboolib._DGI = DGI  # Almacenamos de DGI seleccionado para futuros usos
 
     if DGI.localDesktop():
 
-        noto_fonts = [
-            "NotoSans-BoldItalic.ttf",
-            "NotoSans-Bold.ttf",
-            "NotoSans-Italic.ttf",
-            "NotoSans-Regular.ttf"]
+        noto_fonts = ["NotoSans-BoldItalic.ttf", "NotoSans-Bold.ttf", "NotoSans-Italic.ttf", "NotoSans-Regular.ttf"]
         for fontfile in noto_fonts:
-            QtGui.QFontDatabase.addApplicationFont(
-                filedir("../share/fonts/Noto_Sans", fontfile))
+            QtGui.QFontDatabase.addApplicationFont(filedir("../share/fonts/Noto_Sans", fontfile))
 
         from pineboolib.fllegacy.flsettings import FLSettings
+
         sett_ = FLSettings()
 
         styleA = sett_.readEntry("application/style", None)
@@ -231,9 +204,9 @@ def create_app(DGI):
         fontA = sett_.readEntry("application/font", None)
         if fontA is None:
             if DGI.mobilePlatform():
-                font = QtGui.QFont('Noto Sans', 14)
+                font = QtGui.QFont("Noto Sans", 14)
             else:
-                font = QtGui.QFont('Noto Sans', 9)
+                font = QtGui.QFont("Noto Sans", 9)
             font.setBold(False)
             font.setItalic(False)
         else:
@@ -246,6 +219,7 @@ def create_app(DGI):
 def show_connection_dialog(project, app):
     """Show the connection dialog, and configure the project accordingly."""
     from pineboolib.dlgconnect import dlgconnect
+
     connection_window = dlgconnect.DlgConnect(project._DGI)
     connection_window.load()
     connection_window.show()
@@ -259,10 +233,17 @@ def show_connection_dialog(project, app):
         if getattr(connection_window, "database", None):
             logger.info("Cargando credenciales")
             from pineboolib.fllegacy.flsettings import FLSettings
+
             project.deleteCache = FLSettings().readBoolEntry("ebcomportamiento/deleteCache", False)
             project.parseProject = FLSettings().readBoolEntry("ebcomportamiento/parseProject", False)
-            project.load_db(connection_window.database, connection_window.hostname, connection_window.portnumber,
-                            connection_window.username, connection_window.password, connection_window.driveralias)
+            project.load_db(
+                connection_window.database,
+                connection_window.hostname,
+                connection_window.portnumber,
+                connection_window.username,
+                connection_window.password,
+                connection_window.driveralias,
+            )
         else:
             sys.exit(ret)
 
@@ -271,7 +252,7 @@ def show_splashscreen(project):
     """Show a splashscreen to inform keep the user busy while Pineboo is warming up."""
     from PyQt5 import QtGui, QtCore, QtWidgets
     from pineboolib.utils import filedir
-    
+
     splash_path = filedir("../share/splashscreen/splash_%s.png" % project.dbname)
     if not os.path.exists(splash_path):
         splash_path = filedir("../share/splashscreen/splash.png")
@@ -286,7 +267,7 @@ def show_splashscreen(project):
     frameGm.moveCenter(centerPoint)
     splash.move(frameGm.topLeft())
     splash.show()
-    
+
     return splash
 
 
@@ -316,6 +297,7 @@ def main():
 
     if options.trace_debug:
         from pineboolib.utils import traceit
+
         sys.settrace(traceit)
     if options.trace_signals:
         monkey_patch_connect()
@@ -324,7 +306,7 @@ def main():
         _DGI.setParameter(options.dgi_parameter)
 
     project = pineboolib.pnapplication.Project(_DGI)
-    
+
     if options.test:
         project.test()
         return
@@ -333,14 +315,14 @@ def main():
         app = _DGI.alternativeMain(options)
     else:
         app = create_app(_DGI)
- 
-    
 
     if _DGI.useDesktop():
-        project.main_form = importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (
-            project.main_form_name, project.main_form_name)) if _DGI.localDesktop() else _DGI.mainForm()
+        project.main_form = (
+            importlib.import_module("pineboolib.plugins.mainform.%s.%s" % (project.main_form_name, project.main_form_name))
+            if _DGI.localDesktop()
+            else _DGI.mainForm()
+        )
         project.main_window = project.main_form.mainWindow
-    
 
     project.sql_drivers_manager = PNSqlDrivers()
     project.setDebugLevel(options.debug_level)
@@ -357,15 +339,13 @@ def main():
             if not project.load(prjpath):
                 return
     elif options.connection:
-        user, passwd, driver_alias, host, port, dbname = translate_connstring(
-            options.connection)
+        user, passwd, driver_alias, host, port, dbname = translate_connstring(options.connection)
         project.load_db(dbname, host, port, user, passwd, driver_alias)
     elif _DGI.useDesktop() and _DGI.localDesktop():
         if not _DGI.mobilePlatform():
             show_connection_dialog(project, app)
         else:
             project.load_db("pineboo.sqlite3", None, None, None, None, "SQLite3 (SQLITE3)")
-
 
     # Cargando spashscreen
     # Create and display the splash screen
@@ -374,7 +354,6 @@ def main():
         _DGI.processEvents()
     else:
         splash = None
-
 
     project._splash = splash
     project.run()
@@ -408,8 +387,8 @@ def preload_actions(project, forceload=None):
 
 def init_project(DGI, splash, options, project, mainForm, app):
     """Initialize the project and start it."""
-    from PyQt5 import QtCore   
-    
+    from PyQt5 import QtCore
+
     if DGI.useDesktop() and DGI.localDesktop() and splash:
         splash.showMessage("Iniciando proyecto ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
         DGI.processEvents()
@@ -427,9 +406,9 @@ def init_project(DGI, splash, options, project, mainForm, app):
     if options.action:
         list = options.action.split(":")
         action_name = list[0].split(".")[0]
-        #objaction = project.conn.manager(options.action)
+        # objaction = project.conn.manager(options.action)
         if action_name in project.actions.keys():
-            
+
             ret = project.call(list[0], list[1:] if len(list) > 1 else [])
             return ret
         else:
@@ -448,12 +427,11 @@ def init_project(DGI, splash, options, project, mainForm, app):
     if options.preload:
         preload_actions(project, options.forceload)
 
-    
     if mainForm is not None:
         if DGI.localDesktop():
             splash.showMessage("Abriendo interfaz ...", QtCore.Qt.AlignLeft, QtCore.Qt.white)
             DGI.processEvents()
-    
+
         logger.info("Abriendo interfaz ...")
         main_window.show()
         if DGI.localDesktop():
@@ -483,12 +461,11 @@ def monkey_patch_connect():
     This is not stable and should be used with care
     """
     from PyQt5 import QtCore
-    logger.warning(
-        "--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
-    logger.warning(
-        "... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
 
-    class BoundSignal():
+    logger.warning("--trace-signals es experimental. Tiene problemas de memoria y falla en llamadas con un argumento (False)")
+    logger.warning("... se desaconseja su uso excepto para depurar. Puede cambiar el comportamiento del programa.")
+
+    class BoundSignal:
         _CONNECT = QtCore.pyqtBoundSignal.connect
         _EMIT = QtCore.pyqtBoundSignal.emit
         _LAST_EMITTED_SIGNAL = {}
@@ -504,19 +481,17 @@ def monkey_patch_connect():
                     # print("Calling slot: %r %r" % (slot, args))
                     ret = slot(*args)
                 except Exception:
-                    print("Unhandled exception in slot %r (%r): %r" %
-                          (slot, self, args))
+                    print("Unhandled exception in slot %r (%r): %r" % (slot, self, args))
                     print("-- Connection --")
                     print(traceback.format_list(connect_stack)[-2].rstrip())
-                    last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(
-                        selfid, None)
+                    last_emit_stack = BoundSignal._LAST_EMITTED_SIGNAL.get(selfid, None)
                     if last_emit_stack:
                         print("-- Last signal emmitted --")
-                        print(traceback.format_list(
-                            last_emit_stack)[-2].rstrip())
+                        print(traceback.format_list(last_emit_stack)[-2].rstrip())
                     print("-- Slot traceback --")
                     print(traceback.format_exc())
                 return ret
+
             return decorated_slot
 
         def connect(self, slot, type_=0, no_receiver_check=False):
@@ -530,8 +505,7 @@ def monkey_patch_connect():
             no_receiver_check is True to disable the check that the receiver's C++
             instance still exists when the signal is emitted.
             """
-            clname = getattr(getattr(slot, "__class__", {}),
-                             "__name__", "not a class")
+            clname = getattr(getattr(slot, "__class__", {}), "__name__", "not a class")
             # print("Connect: %s -> %s" % (type(self), slot))
             if clname == "method":
                 stack = traceback.extract_stack()
@@ -547,6 +521,7 @@ def monkey_patch_connect():
             # print(traceback.format_list(stack)[-2].rstrip())
             BoundSignal._LAST_EMITTED_SIGNAL[repr(self)] = stack
             return BoundSignal._EMIT(self, *args)
+
     QtCore.pyqtBoundSignal.connect = BoundSignal.connect
     QtCore.pyqtBoundSignal.emit = BoundSignal.emit
 
@@ -580,14 +555,11 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
         methodName = levelName.lower()
 
     if hasattr(logging, levelName):
-        raise AttributeError(
-            '{} already defined in logging module'.format(levelName))
+        raise AttributeError("{} already defined in logging module".format(levelName))
     if hasattr(logging, methodName):
-        raise AttributeError(
-            '{} already defined in logging module'.format(methodName))
+        raise AttributeError("{} already defined in logging module".format(methodName))
     if hasattr(logging.getLoggerClass(), methodName):
-        raise AttributeError(
-            '{} already defined in logger class'.format(methodName))
+        raise AttributeError("{} already defined in logger class".format(methodName))
 
     # This method was inspired by the answers to Stack Overflow post
     # http://stackoverflow.com/q/2183233/2988730, especially

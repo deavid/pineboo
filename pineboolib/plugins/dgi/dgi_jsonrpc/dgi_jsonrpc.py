@@ -1,9 +1,8 @@
 # # -*- coding: utf-8 -*-
-
-from pineboolib.plugins.dgi.dgi_schema import dgi_schema
-from pineboolib.utils import Struct
-from pineboolib import decorators
-import pineboolib
+import traceback
+import logging
+import sys
+import re
 
 from PyQt5 import QtCore
 
@@ -12,19 +11,14 @@ from xml.etree.ElementTree import fromstring
 from json import dumps
 from xml import etree
 
-
-from importlib import import_module
-
-
-
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
 
-import traceback
-import logging
-import sys
+import pineboolib
+from pineboolib.plugins.dgi.dgi_schema import dgi_schema
+from pineboolib import decorators
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +37,11 @@ class parser(object):
     def receive(self, request):
         response = None
         try:
-            response = JSONRPCResponseManager.handle(
-                request.data, dispatcher)
+            response = JSONRPCResponseManager.handle(request.data, dispatcher)
         except Exception:
             response = "Not Found"
 
-        return Response(response.json, mimetype='application/json')
+        return Response(response.json, mimetype="application/json")
 
     @dispatcher.add_method
     def mainWindow(*args):
@@ -56,8 +49,7 @@ class parser(object):
             return "queqePending"
         if not args:
             return "needArguments"
-        obj_ = getattr(pineboolib.project.main_window,
-                       "json_%s" % args[0], None)
+        obj_ = getattr(pineboolib.project.main_window, "json_%s" % args[0], None)
         if obj_:
             return obj_(args)
         else:
@@ -84,7 +76,7 @@ class parser(object):
 
         fun_ = args[0]
         param_ = None
-        fn = None
+        # fn = None
         if len(args) > 1:
             param_ = ",".join(args[1:])
         else:
@@ -133,7 +125,7 @@ class parser(object):
             cr = ac.child(control)
             if cr:
                 em = getattr(cr, emite, None)
-                if isinstance(cr, FLFieldDB):
+                if isinstance(cr, FLFieldDB):  # FIXME: import FLFieldDB
                     if emite == "setText":
                         cr.editor_.setText(arguments[3])
                         return True
@@ -141,7 +133,7 @@ class parser(object):
                         print("Función desconocida", emite)
                         return False
 
-                elif isinstance(cr, FLTableDB):
+                elif isinstance(cr, FLTableDB):  # FIXME: import FLFieldDB
                     if emite == "data":
                         print("Recoge data!!!")
 
@@ -152,9 +144,6 @@ class parser(object):
             return False
 
         return "notFound"
-
-
-
 
 
 class dgi_jsonrpc(dgi_schema):
@@ -176,7 +165,7 @@ class dgi_jsonrpc(dgi_schema):
 
     def extraProjectInit(self):
         pass
-    
+
     def create_app(self):
         app = QtCore.QCoreApplication(sys.argv)
         return app
@@ -194,7 +183,7 @@ class dgi_jsonrpc(dgi_schema):
         self.launchServer()
 
     def launchServer(self):
-        run_simple('localhost', 4000, self._par.receive)
+        run_simple("localhost", 4000, self._par.receive)
         # print("JSON-RPC:INFO: Listening socket", self._listenSocket)
         # WSGIServer(self._par.query, bindAddress=self._listenSocket).run()
 
@@ -204,8 +193,7 @@ class dgi_jsonrpc(dgi_schema):
         self._W[widget.__class__.__module__] = widget
 
     def showWidget(self, widget):
-        self._par.addQueque(
-            "%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
+        self._par.addQueque("%s_showWidget" % widget.__class__.__module__, self._WJS[widget.__class__.__module__])
 
     def __getattr__(self, name):
         return super().resolveObject(self._name, name)
@@ -216,14 +204,30 @@ Exportador UI a JSON
 """
 
 
-class parserJson():
-
+class parserJson:
     def __init__(self):
         # TODO: se puede ampliar con propiedades y objetos de qt4
-        self.aPropsForbidden = ['images', 'includehints', 'layoutdefaults',
-                                'slots', 'stdsetdef', 'stdset', 'version', 'spacer', 'connections']
-        self.aObjsForbidden = ['geometry', 'sizePolicy', 'margin', 'spacing', 'frameShadow',
-                               'frameShape', 'maximumSize', 'minimumSize', 'font', 'focusPolicy', 'iconSet', 'author', 'comment', 'forwards', 'includes', 'sizepolicy', 'horstretch', 'verstretch']
+        self.aPropsForbidden = ["images", "includehints", "layoutdefaults", "slots", "stdsetdef", "stdset", "version", "spacer", "connections"]
+        self.aObjsForbidden = [
+            "geometry",
+            "sizePolicy",
+            "margin",
+            "spacing",
+            "frameShadow",
+            "frameShape",
+            "maximumSize",
+            "minimumSize",
+            "font",
+            "focusPolicy",
+            "iconSet",
+            "author",
+            "comment",
+            "forwards",
+            "includes",
+            "sizepolicy",
+            "horstretch",
+            "verstretch",
+        ]
 
     def isInDgi(self, property, type):
         if type == "prop":
@@ -263,7 +267,7 @@ class parserJson():
 
     def parse(self, name):
         inputFile = name
-        outputFile = re.search("\w+.ui", inputFile)
+        outputFile = re.search(r"\w+.ui", inputFile)
 
         if outputFile is None:
             print("Error. El fichero debe tener extension .ui")
@@ -274,7 +278,7 @@ class parserJson():
         outputFile = re.sub(".ui", ".dgi", inputFile)
 
         try:
-            ui = open(inputFile, 'r')
+            ui = open(inputFile, "r")
             xml = ui.read()
 
         except Exception:
@@ -388,6 +392,7 @@ class json_mainWindow(object):
             action = module.mainform.actions[key]
             self._actionsConnects[action.name] = action
     """
+
     def show(self):
         pass
 
@@ -401,8 +406,7 @@ class json_mainWindow(object):
         self._toolBarActions.append(name)
 
     def addToJson(self, xml):
-        _json = xml2json.data(fromstring(
-            etree.tostring(xml, pretty_print=True)))
+        _json = xml2json.data(fromstring(etree.tostring(xml, pretty_print=True)))
         _jsonStr = dumps(_json, sort_keys=True, indent=2)
         return _jsonStr
 
@@ -455,19 +459,19 @@ class json_mainWindow(object):
             if name[1] == self._actions[_ac].iconSet:
                 return str(self._actions[_ac].icon)
         return False
-    
+
     def initScript(self):
         self.initModule("sys")
-    
+
     def initModule(self, module):
         if module not in self.initialized_mods_:
             self.initialized_mods_.append(module)
             from pineboolib.pncontrolsfactory import aqApp
+
             aqApp.call("%s.iface.init" % module, [], None, False)
 
         mng = aqApp.db().managerModules()
         mng.setActiveIdModule(module)
-        
 
 
 class json_MainForm(object):

@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtGui
 
+
 class FLIntValidator(QtGui.QIntValidator):
     _formatting = None
+
     def __init__(self, *args, **kwargs):
         super().__init__(args[0], args[1], args[2])
         self._formatting = False
-        
+
     def validate(self, input_, pos_cursor):
 
-        if not input_ or self._formatting == True:
+        if not input_ or self._formatting:
             return (self.Acceptable, input_, pos_cursor)
 
         state = super().validate(input_, pos_cursor)
@@ -27,6 +29,5 @@ class FLIntValidator(QtGui.QIntValidator):
         else:
             ret_0 = self.Acceptable
 
-        #FIXME:Salir formateado
+        # FIXME:Salir formateado
         return (ret_0, ret_1, ret_2)
-

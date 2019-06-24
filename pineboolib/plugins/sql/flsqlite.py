@@ -1,8 +1,6 @@
-from PyQt5.Qt import QDomDocument, qApp, QDateTime, QProgressDialog, QDate, QRegExp,\
-    QApplication
-from PyQt5.QtCore import QTime, QTimer
-from pineboolib import decorators
-from pineboolib.utils import auto_qt_translate_text, checkDependencies, filedir
+from PyQt5.Qt import QDomDocument, QDateTime, QProgressDialog, QDate, QRegExp, QApplication
+from PyQt5.QtCore import QTime, Qt
+from pineboolib.utils import auto_qt_translate_text, checkDependencies
 
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -12,8 +10,8 @@ from sqlalchemy import create_engine
 
 import traceback
 import os
-import sys
 import logging
+
 
 class FLSQLITE(object):
 
@@ -74,7 +72,7 @@ class FLSQLITE(object):
         return self.name_
 
     def safe_load(self):
-        return checkDependencies({"sqlite3": "sqlite3", "sqlalchemy":"sqlAlchemy"}, False)
+        return checkDependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"}, False)
 
     def isOpen(self):
         return self.open_
@@ -82,10 +80,9 @@ class FLSQLITE(object):
     def cursor(self):
         if not self.cursor_:
             self.cursor_ = self.conn_.cursor()
-            #self.cursor_.execute("PRAGMA journal_mode = WAL")
-            #self.cursor_.execute("PRAGMA synchronous = NORMAL")
+            # self.cursor_.execute("PRAGMA journal_mode = WAL")
+            # self.cursor_.execute("PRAGMA synchronous = NORMAL")
         return self.cursor_
-    
 
     def useThreads(self):
         return False
@@ -104,18 +101,18 @@ class FLSQLITE(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         import pineboolib
-        checkDependencies({"sqlite3": "sqlite3", "sqlalchemy":"sqlAlchemy"})
+
+        checkDependencies({"sqlite3": "sqlite3", "sqlalchemy": "sqlAlchemy"})
         self.db_filename = db_name
         db_is_new = not os.path.exists("%s" % self.db_filename)
 
         import sqlite3
 
-        
         if self.db_filename == getattr(pineboolib.project.conn, "db_name", None):
             self.conn_ = pineboolib.project.conn.conn
         else:
             self.conn_ = sqlite3.connect("%s" % self.db_filename)
-            self.engine_ = create_engine('sqlite:///%s' % self.db_filename)
+            self.engine_ = create_engine("sqlite:///%s" % self.db_filename)
             self.conn_.isolation_level = None
 
             if db_is_new:
@@ -125,30 +122,31 @@ class FLSQLITE(object):
             self.open_ = True
 
         if self.parseFromLatin:
-            self.conn_.text_factory = lambda x: str(x, 'latin1')
+            self.conn_.text_factory = lambda x: str(x, "latin1")
 
         return self.conn_
-    
+
     def engine(self):
         return self.engine_
-    
+
     def session(self):
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
-            #from sqlalchemy import event
-            #from pineboolib.pnobjectsfactory import before_commit, after_commit
+
+            # from sqlalchemy import event
+            # from pineboolib.pnobjectsfactory import before_commit, after_commit
             Session = sessionmaker(bind=self.engine())
             self.session_ = Session()
-            #event.listen(Session, 'before_commit', before_commit, self.session_)
-            #event.listen(Session, 'after_commit', after_commit, self.session_)
-    
+            # event.listen(Session, 'before_commit', before_commit, self.session_)
+            # event.listen(Session, 'after_commit', after_commit, self.session_)
+
     def declarative_base(self):
         if self.declarative_base_ is None:
             from sqlalchemy.ext.declarative import declarative_base
-            self.declarative_base_ = declarative_base()
-        
-        return self.declarative_base_
 
+            self.declarative_base_ = declarative_base()
+
+        return self.declarative_base_
 
     def formatValueLike(self, type_, v, upper):
         res = "IS NULL"
@@ -166,7 +164,7 @@ class FLSQLITE(object):
 
         elif type_ == "time":
             t = v.toTime()
-            res = "LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
+            res = "LIKE '" + t.toString(Qt.ISODate) + "%%'"
 
         else:
             res = str(v)
@@ -223,7 +221,7 @@ class FLSQLITE(object):
         return s
 
     def DBName(self):
-        return self.db_filename[self.db_filename.rfind("/") + 1:-8]
+        return self.db_filename[self.db_filename.rfind("/") + 1 : -8]
 
     def canOverPartition(self):
         return True
@@ -254,23 +252,22 @@ class FLSQLITE(object):
             self.logger.debug("Creando savepoint sv_%s" % n)
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            self.logger.error("%s:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s", __name__,  n)
+            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
+            self.logger.error("%s:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s", __name__, n)
             return False
 
         return True
 
     def canSavePoint(self):
         return True
-    
+
     def canTransaction(self):
         return True
 
     def rollbackSavePoint(self, n):
         if n == 0:
             return True
-        
+
         if not self.isOpen():
             self.logger.warning("%s::rollbackSavePoint: Database not open", __name__)
             return False
@@ -279,8 +276,7 @@ class FLSQLITE(object):
         try:
             cursor.execute("ROLLBACK TRANSACTION TO SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
             self.logger.error("%s:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s", __name__, n)
             return False
 
@@ -308,12 +304,10 @@ class FLSQLITE(object):
 
     def inTransaction(self):
         return self.conn_.in_transaction
-    
-    
+
     def fix_query(self, query):
-        #ret_ = query.replace(";", "")
+        # ret_ = query.replace(";", "")
         return query
-    
 
     def execute_query(self, q):
         if not self.isOpen():
@@ -325,8 +319,8 @@ class FLSQLITE(object):
             cursor.execute(q)
         except Exception:
             self.logger.error("SQL3Driver:: No se pudo ejecutar la query %s", q)
-            self.setLastError("%s::No se pudo ejecutar la query.\n%s" % ( __name__, q), q)
-        
+            self.setLastError("%s::No se pudo ejecutar la query.\n%s" % (__name__, q), q)
+
         return cursor
 
     def rollbackTransaction(self):
@@ -368,7 +362,7 @@ class FLSQLITE(object):
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
             self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            self.logger.error("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s",n)
+            self.logger.error("SQL3Driver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s", n)
             return False
 
         return True
@@ -395,7 +389,7 @@ class FLSQLITE(object):
     def fetchAll(self, cursor, tablename, where_filter, fields, curname):
         if curname not in self.rowsFetched.keys():
             self.rowsFetched[curname] = 0
-        
+
         rowsF = []
         try:
             cursor.execute(self.sql)
@@ -408,10 +402,10 @@ class FLSQLITE(object):
                         rowsF.append(row)
 
                 self.rowsFetched[curname] = i
-            
+
         except Exception:
             self.logger.error("SQL3Driver:: fetchAll", traceback.format_exc())
-        
+
         return rowsF
 
     def existsTable(self, name):
@@ -423,7 +417,7 @@ class FLSQLITE(object):
         ok = t.exec_("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % name)
         if ok:
             ok = t.next()
-            
+
         return ok
 
     def sqlCreateTable(self, tmd):
@@ -481,9 +475,18 @@ class FLSQLITE(object):
                 if primaryKey is None:
                     sql = sql + " PRIMARY KEY"
                 else:
-                    self.logger.debug(QApplication.tr("FLManager : Tabla-> ") + tmd.name() + QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ") +
-                          field.name() + QApplication.tr(" , pero el campo ") + primaryKey + QApplication.tr(" ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
-                                          "use FLCompoundKey para crear claves compuestas."))
+                    self.logger.debug(
+                        QApplication.tr("FLManager : Tabla-> ")
+                        + tmd.name()
+                        + QApplication.tr(" . Se ha intentado poner una segunda clave primaria para el campo ")
+                        + field.name()
+                        + QApplication.tr(" , pero el campo ")
+                        + primaryKey
+                        + QApplication.tr(
+                            " ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
+                            "use FLCompoundKey para crear claves compuestas."
+                        )
+                    )
                     return None
             else:
                 if field.isUnique():
@@ -499,10 +502,9 @@ class FLSQLITE(object):
 
         sql = sql + ");"
 
-        createIndex = "CREATE INDEX %s_pkey ON %s (%s)" % (
-            tmd.name(), tmd.name(), tmd.primaryKey())
+        createIndex = "CREATE INDEX %s_pkey ON %s (%s)" % (tmd.name(), tmd.name(), tmd.primaryKey())
 
-        #q = FLSqlQuery()
+        # q = FLSqlQuery()
         # q.setForwardOnly(True)
         # q.exec_(createIndex)
         sql += createIndex
@@ -533,16 +535,15 @@ class FLSQLITE(object):
                             found = True
                             if self.notEqualsFields(field, fieldMtd):
                                 mismatch = True
-                            
+
                             recBd.remove(field)
                             break
-                            
 
                     if not found:
                         if fieldMtd[0] not in processed_fields:
                             mismatch = True
                             break
-                        
+
                 if len(recBd) > 0:
                     mismatch = True
 
@@ -575,9 +576,9 @@ class FLSQLITE(object):
                 ret = True
             elif field1[1] == "double" and not field2[1] == "double":
                 ret = True
-                
+
         except Exception:
-            self.logger.error("notEqualsFields %s %s", field1, field2 )
+            self.logger.error("notEqualsFields %s %s", field1, field2)
         return ret
 
     def recordInfo2(self, tablename):
@@ -618,8 +619,9 @@ class FLSQLITE(object):
 
             for f in mtd.fieldsNames():
                 field = mtd.field(f)
-                info.append([field.name(), field.type(), not field.allowNull(), field.length(
-                ), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()])
+                info.append(
+                    [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
+                )
 
             del mtd
             return info
@@ -629,12 +631,11 @@ class FLSQLITE(object):
                 fName = columns[1]
                 fType = columns[2]
                 fSize = 0
-                fAllowNull = (columns[3] == 0)
+                fAllowNull = columns[3] == 0
                 if fType.find("VARCHAR(") > -1:
-                    fSize = int(fType[fType.find("(") + 1: len(fType) - 1])
+                    fSize = int(fType[fType.find("(") + 1 : len(fType) - 1])
 
-                info.append([fName, self.decodeSqlType(
-                    fType), not fAllowNull, fSize])
+                info.append([fName, self.decodeSqlType(fType), not fAllowNull, fSize])
 
             return info
 
@@ -653,7 +654,7 @@ class FLSQLITE(object):
 
         return ret
 
-    def alterTable(self, mtd1, mtd2, key, force = False):
+    def alterTable(self, mtd1, mtd2, key, force=False):
         util = FLUtil()
 
         oldMTD = None
@@ -823,7 +824,9 @@ class FLSQLITE(object):
                             v = defVal
 
                     if not newBuffer.field(newField.name()).type() == newField.type():
-                        self.logger.warning("FLManager::alterTable : " + util.tr("Los tipos del campo %s no son compatibles. Se introducirá un valor nulo." % newField.name()))
+                        self.logger.warning(
+                            "FLManager::alterTable : " + util.tr("Los tipos del campo %s no son compatibles. Se introducirá un valor nulo." % newField.name())
+                        )
 
                 if not oldField.allowNull() or not newField.allowNull() and v is not None:
                     if oldField.type() in ("int", "serial", "uint", "bool", "unlock"):
@@ -835,7 +838,7 @@ class FLSQLITE(object):
                     elif oldField.type() == "date":
                         v = QDate().currentDate()
                     else:
-                        v = "NULL"[0:newField.length()]
+                        v = "NULL"[0 : newField.length()]
 
                 newBuffer.setValue(newField.name(), v)
 
@@ -903,15 +906,14 @@ class FLSQLITE(object):
         item = ""
 
         rx3 = QRegExp("^.*\\d{6,9}$")
-        #listOldBks = self.tables("").grep(rx3)
+        # listOldBks = self.tables("").grep(rx3)
         listOldBks_prev = self.tables("")
-        
+
         listOldBks = []
-        
-        for l in listOldBks_prev:            
+
+        for l in listOldBks_prev:
             if rx3.indexIn(l) > -1:
                 listOldBks.append(l)
-        
 
         qry.exec_("select nombre from flfiles")
         util.createProgressDialog(util.tr("Borrando backups"), len(listOldBks) + qry.size() + 5)

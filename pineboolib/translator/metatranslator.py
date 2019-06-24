@@ -11,6 +11,7 @@ class metaTranslator(object):
     def __init__(self):
         self.mm = {}
         self.logger = logging.getLogger("FLTranslations.metaTranslator")
+
     # TODO: Esto en producción seria necesario hacerlo desde el programa.
     """
     Conversor
@@ -22,7 +23,7 @@ class metaTranslator(object):
         if not f.open(QtCore.QIODevice.ReadOnly):
             return False
 
-        #t = Qt.QTextStream(f)
+        # t = Qt.QTextStream(f)
         in_ = QtXml.QXmlInputSource(f)
         reader = QtXml.QXmlSimpleReader()
         reader.setFeature("http://xml.org/sax/features/namespaces", False)
@@ -40,6 +41,7 @@ class metaTranslator(object):
 
     def release(self, file_name, verbose, mode):
         from pineboolib.translator.qtranslator import QTranslator
+
         tor = QTranslator(None)
         finished = 0
         unfinished = 0
@@ -69,8 +71,7 @@ class metaTranslator(object):
 
         saved = tor.save_qm(file_name, mode)
         if saved and verbose:
-            self.logger.warning("%d finished, %d unfinished and %d untranslated messages" %
-                             finished, unfinished, untranslated)
+            self.logger.warning("%d finished, %d unfinished and %d untranslated messages" % finished, unfinished, untranslated)
 
         return saved
 
@@ -138,7 +139,7 @@ class tsHandler(QtXml.QXmlDefaultHandler):
                         value = value[1:]
 
                     n = int(base)
-                    if n is not 0:
+                    if n != 0:
                         self.accum += str(n)
 
         elif qname == "context":
@@ -146,10 +147,10 @@ class tsHandler(QtXml.QXmlDefaultHandler):
             self.source = ""
             self.comment = ""
             self.translation = ""
-            #context.truncate( 0 );
-            #source.truncate( 0 );
-            #comment.truncate( 0 );
-            #translation.truncate( 0 );
+            # context.truncate( 0 );
+            # source.truncate( 0 );
+            # comment.truncate( 0 );
+            # translation.truncate( 0 );
             self.context_is_utf8 = encoding_is_utf8(atts)
         elif qname == "message":
             self.in_message = True
@@ -157,9 +158,9 @@ class tsHandler(QtXml.QXmlDefaultHandler):
             self.source = ""
             self.comment = ""
             self.translation = ""
-            #source.truncate( 0 );
-            #comment.truncate( 0 );
-            #translation.truncate( 0 );
+            # source.truncate( 0 );
+            # comment.truncate( 0 );
+            # translation.truncate( 0 );
             self.message_is_utf8 = encoding_is_utf8(atts)
         elif qname == "translation":
             for i in range(atts.length()):
@@ -171,11 +172,12 @@ class tsHandler(QtXml.QXmlDefaultHandler):
                     else:
                         self.type_ = MetaTranslatorMessage.Finished
 
-        #accum.truncate( 0 )
+        # accum.truncate( 0 )
         self.accum = ""
         return True
 
     def endElement(self, name_space_uri, local_name, qname):
+        context_comment = None  # FIXME: De donde sale esta variable?
         if qname in ("codec", "defaultcodec"):
             self.tor.setCodec(self.accum)
         elif qname == "name":
@@ -187,21 +189,25 @@ class tsHandler(QtXml.QXmlDefaultHandler):
                 self.comment = self.accum
             else:
                 if self.context_is_utf8:
-                    self.tor.insert(MetaTranslatorMessage(self.context.decode("utf-8"), context_comment,
-                                                          self.accum.encode("UTF-8"), None, True, MetaTranslatorMessage.Unfinished))
+                    self.tor.insert(
+                        MetaTranslatorMessage(
+                            self.context.decode("utf-8"), context_comment, self.accum.encode("UTF-8"), None, True, MetaTranslatorMessage.Unfinished
+                        )
+                    )
                 else:
-                    self.tor.insert(MetaTranslatorMessage(self.context, context_comment,
-                                                          self.accum, None, True, MetaTranslatorMessage.Unfinished))
+                    self.tor.insert(MetaTranslatorMessage(self.context, context_comment, self.accum, None, True, MetaTranslatorMessage.Unfinished))
 
         elif qname == "translation":
             self.translation = self.accum
         elif qname == "message":
             if self.message_is_utf8:
-                self.tor.insert(MetaTranslatorMessage(self.context.encode("UTF-8"), self.source.encode("UTF-8"),
-                                                      self.comment.encode("UTF-8"), self.translation, True, self.type_))
+                self.tor.insert(
+                    MetaTranslatorMessage(
+                        self.context.encode("UTF-8"), self.source.encode("UTF-8"), self.comment.encode("UTF-8"), self.translation, True, self.type_
+                    )
+                )
             else:
-                self.tor.insert(MetaTranslatorMessage(self.context, self.source,
-                                                      self.comment, self.translation, True, self.type_))
+                self.tor.insert(MetaTranslatorMessage(self.context, self.source, self.comment, self.translation, True, self.type_))
 
             self.in_message = False
 
@@ -234,9 +240,9 @@ class MetaTranslatorMessage(QtCore.QObject):
         super(MetaTranslatorMessage, self).__init__()
 
         if isinstance(context, metaTranslator):
-            self.mm = m.mm
-            self.codec_name = tor.codec_name
-            self.codec = tor.codec
+            self.mm = context.m.mm
+            self.codec_name = context.tor.codec_name
+            self.codec = context.tor.codec
             return
 
         self.context_ = context
@@ -280,7 +286,7 @@ class MetaTranslatorMessage(QtCore.QObject):
         return self
 
     def operator_isequal(self, m):
-        return context() == m.context() and self.source_text() == m.source_text() and self.comment() == m.comment()
+        return self.context() == m.context() and self.source_text() == m.source_text() and self.comment() == m.comment()
 
     def operator_minus(self, m):
         delta = self.context() == m.context()

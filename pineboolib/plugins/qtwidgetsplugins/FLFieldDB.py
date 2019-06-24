@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import pineboolib
+pluginType = MODULE  # noqa  # FIXME: Esto no es Python.
 
-
-pluginType = MODULE
 
 def moduleInformation():
-    return 'pineboolib.plugins.dgi.dgi_qt.dgi_objects.flfielddb', ('FLFieldDB')
+    return "pineboolib.plugins.dgi.dgi_qt.dgi_objects.flfielddb", ("FLFieldDB")

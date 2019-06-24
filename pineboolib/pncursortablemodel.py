@@ -1,20 +1,17 @@
 # # -*- coding: utf-8 -*-
 import math
-import traceback
 import threading
 import logging
 import time
 import itertools
+import locale
 from datetime import date
 
-from pineboolib.utils import filedir, format_double, format_int
-import pineboolib
-
-
-from pineboolib.fllegacy.flutil import FLUtil
-
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-import locale
+
+import pineboolib
+from pineboolib.utils import filedir
+from pineboolib.fllegacy.flutil import FLUtil
 
 DEBUG = False
 
@@ -59,8 +56,8 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         self._cursorConn = conn
         self._parent = parent
-        
-        #self._metadata = self._parent.metadata()
+
+        # self._metadata = self._parent.metadata()
         if not self.metadata():
             return
 
@@ -109,7 +106,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.where_filters["main-filter"] = ""
         self.where_filters["filter"] = ""
         self.sql_str = None
-        
+
         if self.USE_THREADS:
             self.fetchLock = threading.Lock()
             self.threadFetcher = threading.Thread(target=self.threadFetch)
@@ -144,7 +141,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     """
     Indica el tipo de orden a usar y sobre que columna
-    @param col. Columna usada 
+    @param col. Columna usada
     @param order. 0 ASC, 1 DESC
     """
 
@@ -153,14 +150,13 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         ord = "ASC"
         if order == 1:
             ord = "DESC"
-        
+
         field_mtd = self.metadata().indexFieldObject(col)
         if field_mtd.type() == "check":
             return
-        
+
         col_name = field_mtd.name()
-        
-        
+
         order_list = []
         found_ = False
         if self._sortOrder:
@@ -172,8 +168,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     order_list.append(column)
 
             if not found_:
-                self.logger.debug("%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). El order by previo se perderá" % (
-                    __name__, col_name, self._sortOrder))
+                self.logger.debug(
+                    "%s. Se intenta ordernar por una columna (%s) que no está definida en el order by previo (%s). El order by previo se perderá"
+                    % (__name__, col_name, self._sortOrder)
+                )
             else:
                 self._sortOrder = ",".join(order_list)
 
@@ -201,10 +199,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         else:
             self._sortOrder = sort_order
 
-    #def setColorFunction(self, f):
+    # def setColorFunction(self, f):
     #    self.color_function_ = f
 
-    #def dict_color_function(self):
+    # def dict_color_function(self):
     #    return self.color_function_
     """
     Retorna información de un registro. Puede ser desde Alineación, color de fondo, valor ... dependiendo del rol
@@ -220,20 +218,20 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         _type = field.type()
         res_color_function = []
 
-        if _type is not "check":
+        if _type != "check":
             r = [x for x in self._data[row]]
             self._data[row] = r
             d = r[col]
         else:
             pK = str(self.value(row, self.metadata().primaryKey()))
-            if not pK in self._checkColumn.keys():
+            if pK not in self._checkColumn.keys():
                 d = QtWidgets.QCheckBox()
                 self._checkColumn[pK] = d
 
         if self.parent_view and role in [QtCore.Qt.BackgroundRole, QtCore.Qt.ForegroundRole]:
-            fun_get_color = self.parent_view.functionGetColor() 
-            if fun_get_color is not None: 
-                list_ = fun_get_color.split(".") 
+            fun_get_color = self.parent_view.functionGetColor()
+            if fun_get_color is not None:
+                list_ = fun_get_color.split(".")
                 context_ = getattr(pineboolib.qsa, list_[0], None).iface
                 function_color = getattr(context_, "%s" % (list_[1]))
                 if function_color is not None:
@@ -264,19 +262,19 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             return QtCore.Qt.Unchecked
 
         elif role == QtCore.Qt.TextAlignmentRole:
-            d =  QtCore.Qt.AlignVCenter
+            d = QtCore.Qt.AlignVCenter
             if _type in ("int", "double", "uint"):
-                d = d | QtCore.Qt.AlignRight 
+                d = d | QtCore.Qt.AlignRight
             elif _type in ("bool", "date", "time"):
                 d = d | QtCore.Qt.AlignCenter
             elif _type in ("unlock", "pixmap"):
                 d = d | QtCore.Qt.AlignHCenter
-                
+
             return d
 
         elif role in (QtCore.Qt.DisplayRole, QtCore.Qt.EditRole):
             # r = self._vdata[row]
-            if _type is "bool":
+            if _type == "bool":
                 if d in (True, "1"):
                     d = "Sí"
                 else:
@@ -289,45 +287,47 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             elif _type in ("string", "stringlist") and not d:
                 d = ""
 
-            elif _type is "time" and d:
+            elif _type == "time" and d:
                 d = str(d)
-            
-            elif _type is "date":
-                 # Si es str lo paso a datetime.date
+
+            elif _type == "date":
+                # Si es str lo paso a datetime.date
                 if isinstance(d, str):
                     if len(d.split("-")[0]) == 4:
                         d = FLUtil().dateAMDtoDMA(d)
-                    
+
                     list_ = d.split("-")
                     d = date(int(list_[2]), int(list_[1]), int(list_[0]))
-                
+
                 if d:
-                    #Cogemos el locale para presentar lo mejor posible la fecha
+                    # Cogemos el locale para presentar lo mejor posible la fecha
                     try:
-                        locale.setlocale(locale.LC_TIME, '')
+                        locale.setlocale(locale.LC_TIME, "")
                         date_format = locale.nl_langinfo(locale.D_FMT)
-                        date_format = date_format.replace("y", "Y") #Año con 4 dígitos
-                        date_format = date_format.replace("/","-") #Separadores
+                        date_format = date_format.replace("y", "Y")  # Año con 4 dígitos
+                        date_format = date_format.replace("/", "-")  # Separadores
                         d = d.strftime(date_format)
                     except AttributeError:
                         import platform
+
                         self.logger.warning("locale specific date format is not yet implemented for %s", platform.system())
 
-            elif _type is "check":
+            elif _type == "check":
                 return
 
-            elif _type is "double":
+            elif _type == "double":
                 if d is not None:
                     from pineboolib.pncontrolsfactory import aqApp
-                    d = aqApp.localeSystem().toString(float(d),'f',field.partDecimal())
+
+                    d = aqApp.localeSystem().toString(float(d), "f", field.partDecimal())
             elif _type in ("int", "uint"):
                 if d is not None:
                     from pineboolib.pncontrolsfactory import aqApp
+
                     d = aqApp.localeSystem().toString(int(d))
-            
-        
+
             self.parent_view.resize_column(col, d)
-                        
+
             return d
 
         elif role == QtCore.Qt.DecorationRole:
@@ -339,10 +339,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                         pixmap = QtGui.QPixmap(filedir("../share/icons", "unlock.png"))
                     else:
                         pixmap = QtGui.QPixmap(filedir("../share/icons", "lock.png"))
-                    
+
                     if self.parent_view.showAllPixmap() or row == self.parent_view.cursor().at():
-                        if pixmap and not pixmap.isNull()and self.parent_view:
-                        
+                        if pixmap and not pixmap.isNull() and self.parent_view:
+
                             row_height = self.parent_view.rowHeight(row)  # Altura row
                             row_width = self.parent_view.columnWidth(col)
                             new_pixmap = QtGui.QPixmap(row_width, row_height)  # w , h
@@ -353,9 +353,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                             painter.drawPixmap(center_width, center_height, pixmap.width(), pixmap.height(), pixmap)
 
                             pixmap = new_pixmap
-                    
-                    
-                    
 
                 else:
                     if self.parent_view and self.parent_view.showAllPixmap():
@@ -363,10 +360,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                             d = self.db().manager().fetchLargeValue(d)
                         else:
                             from pineboolib.utils import cacheXPM
+
                             d = cacheXPM(d)
                         if d:
                             pixmap = QtGui.QPixmap(d)
-                    
 
             return pixmap
 
@@ -392,7 +389,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                     d.setStyle(style_)
                 else:
                     d = None
-                
+
             return d
 
         elif role == QtCore.Qt.ForegroundRole:
@@ -464,7 +461,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def fetchMore(self, index, tablename=None, where_filter=None):
         if not self.sql_str:
             return
-        
+
         tiempo_inicial = time.time()
         # ROW_BATCH_COUNT = min(200 + self.rowsLoaded // 10, 1000)
         ROW_BATCH_COUNT = 1000
@@ -538,8 +535,9 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         #    self.threadFetcher.start()
 
         if tiempo_final - tiempo_inicial > 0.2:
-            self.logger.info("fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)", self.metadata().name(),
-                             self.rows, (fromrow, torow), tiempo_final - tiempo_inicial)
+            self.logger.info(
+                "fin refresco tabla '%s'  :: rows: %d %r  ::  (%.3fs)", self.metadata().name(), self.rows, (fromrow, torow), tiempo_final - tiempo_inicial
+            )
 
     """
     Comprueba que los campos referidos en una Query existen. Si algun campo no existe lo marca como a omitir
@@ -567,8 +565,12 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 # Omito los campos que aparentemente no existen
                 if not found and not field.name() in self.sql_fields_omited:
                     if pineboolib.project.debugLevel > 50:
-                        self.logger.info("CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
-                                         field.name(), self.metadata().name(), qry.tablesList())
+                        self.logger.info(
+                            "CursorTableModel.refresh(): Omitiendo campo '%s' referenciado en query %s. El campo no existe en %s ",
+                            field.name(),
+                            self.metadata().name(),
+                            qry.tablesList(),
+                        )
                     self.sql_fields_omited.append(field.name())
 
             else:
@@ -588,14 +590,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if not self.metadata():
             self.logger.warning("ERROR: CursorTableModel :: No hay tabla %s", self.metadata().name())
             return
-        
+
         """ FILTRO WHERE """
         where_filter = None
         for k, wfilter in sorted(self.where_filters.items()):
             if wfilter is None:
                 continue
             wfilter = wfilter.strip()
-            
+
             if not wfilter:
                 continue
             if not where_filter:
@@ -604,7 +606,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 where_filter += " AND " + wfilter
         if not where_filter:
             where_filter = "1 = 1"
-        
+
         self.where_filter = where_filter
         # Si no existe un orderBy y se ha definido uno desde FLTableDB ...
         if self.where_filter.find("ORDER BY") == -1 and self.getSortOrder():
@@ -613,9 +615,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             else:
                 self.where_filter = "%s ORDER BY %s" % (self.where_filter, self.getSortOrder())
         """ FIN """
-        
-        
-        
 
         parent = QtCore.QModelIndex()
         oldrows = self.rowsLoaded
@@ -636,7 +635,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         self.endRemoveRows()
         if oldrows > 0:
             self.rowsRemoved.emit(parent, 0, oldrows - 1)
-        
+
         if self.metadata().isQuery():
             qry = self.db().manager().query(self.metadata().query())
             from_ = qry.from_()
@@ -676,8 +675,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def refreshFetch(self, n):
-        self.driver_sql().refreshFetch(n, self._curname, self.metadata().name(), self.cursorDB(),
-                                        self.sql_str, self.where_filter)
+        self.driver_sql().refreshFetch(n, self._curname, self.metadata().name(), self.cursorDB(), self.sql_str, self.where_filter)
 
     """
     Actualiza el index de la fila, que se usa para localizar registros virtuales del TableModel
@@ -699,7 +697,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     """
 
     def indexUpdateRowRange(self, rowrange):
-        rows = self._data[rowrange[0]:rowrange[1]]
+        rows = self._data[rowrange[0] : rowrange[1]]
         if self.pkpos:
             for n, row in enumerate(rows):
                 key = tuple([row[x] for x in self.pkpos])
@@ -725,7 +723,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         else:
             # Comparo con los campos de la qry, por si hay algun hueco que no se detectaria con indexPos
             for x, fQ in enumerate(self.sql_fields):
-                if fieldName == fQ[fQ.find(".") + 1:]:
+                if fieldName == fQ[fQ.find(".") + 1 :]:
                     col = x
                     break
 
@@ -734,7 +732,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         type_ = self.metadata().field(fieldName).type()
 
-        if type_ is "check":
+        if type_ == "check":
             return
 
         campo = self._data[row][col]
@@ -755,15 +753,14 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def updateValuesDB(self, pKValue, dict_update):
         row = self.findPKRow([pKValue])
-        #if row is None:
+        # if row is None:
         #    raise AssertionError(
         #        "Los indices del CursorTableModel no devolvieron un registro (%r)" % (pKValue))
         if row is None:
             return
 
         if self.value(row, self.pK()) != pKValue:
-            raise AssertionError("Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (
-                self.value(row, self.pK()), pKValue))
+            raise AssertionError("Los indices del CursorTableModel devolvieron un registro erroneo: %r != %r" % (self.value(row, self.pK()), pKValue))
 
         self.setValuesDict(row, dict_update)
         pkey_name = self.metadata().primaryKey()
@@ -795,11 +792,11 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         # print("MODIFYING SQL :: ", sql)
         try:
             self.db().execute_query(sql)
-        except Exception as e:
+        except Exception:
             self.logger.exception("ERROR: CursorTableModel.Update %s:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
             return
-        
+
         try:
             if self.cursorDB().description:
                 returning_fields = [x[0] for x in self.cursorDB().description]
@@ -810,7 +807,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
         except Exception:
             self.logger.exception("updateValuesDB: Error al assignar los valores de vuelta al buffer")
-        
+
         self.need_update = True
 
     """
@@ -844,8 +841,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 self.logger.warning("CursorTableModel.setValuesDict:: columns not found: %r", colsnotfound)
             self.indexUpdateRow(row)
 
-        except Exception as e:
-
+        except Exception:
             self.logger.exception("CursorTableModel.setValuesDict(row %s) = %r :: ERROR:", row, update_dict)
 
     """
@@ -897,10 +893,10 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
                 self.db().execute_query(sql)
                 # self.refresh()
                 if pKValue is not None:
-                    fl_cursor.move(self.findPKRow((pKValue, )))
-                
+                    fl_cursor.move(self.findPKRow((pKValue,)))
+
                 self.need_update = True
-            except Exception as e:
+            except Exception:
                 self.logger.exception("CursorTableModel.%s.Insert() :: SQL: %s", self.metadata().name(), sql)
                 # self._cursor.execute("ROLLBACK")
                 return False
@@ -908,8 +904,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             # conn.commit()
 
             return True
-        
-        
 
     """
     Borra una linea en el tableModel
@@ -926,7 +920,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         try:
             self.db().execute_query(sql)
             self.need_update = True
-        except Exception as e:
+        except Exception:
             self.logger.exception("CursorTableModel.%s.Delete() :: ERROR:", self.metadata().name())
             # self._cursor.execute("ROLLBACK")
             return
@@ -941,8 +935,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def findPKRow(self, pklist):
         if not isinstance(pklist, (tuple, list)):
-            raise ValueError(
-                "findPKRow expects a list as first argument. Enclose PK inside brackets [self.pkvalue]")
+            raise ValueError("findPKRow expects a list as first argument. Enclose PK inside brackets [self.pkvalue]")
         if not self.indexes_valid:
             for n in range(self.rows):
                 self.indexUpdateRow(n)
@@ -951,8 +944,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         pklist = tuple(pklist)
 
         if pklist not in self.pkidx:
-            self.logger.info(
-                "CursorTableModel.%s.findPKRow:: PK not found: %r", self.metadata().name(), pklist)
+            self.logger.info("CursorTableModel.%s.findPKRow:: PK not found: %r", self.metadata().name(), pklist)
             return None
         return self.pkidx[pklist]
 
@@ -971,8 +963,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
             self.indexes_valid = True
         cklist = tuple(cklist)
         if cklist not in self.ckidx:
-            self.logger.warning(
-                "CursorTableModel.%s.findCKRow:: CK not found: %r ", self.metadata().name(), cklist)
+            self.logger.warning("CursorTableModel.%s.findCKRow:: CK not found: %r ", self.metadata().name(), cklist)
             return None
         return self.ckidx[cklist]
 
@@ -1033,28 +1024,31 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def rowCount(self, parent=None):
         return self.rowsLoaded
 
-
     """
     Devuelve el tamaño de registros seleccionados con el cursor
     @return lineas seleccionadas
     """
+
     def size(self):
-        size =  self.cursorDB().rowcount
-        if size == 0: #Cada vez que hacemos refresh se limpia
+        size = self.cursorDB().rowcount
+        if size == 0:  # Cada vez que hacemos refresh se limpia
             util = FLUtil()
             if self.metadata():
-                from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()  
-                where_ = self.where_filter[:self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
-                #where_ = self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" %  self.metadata().primaryKey()) if self.where_filter.find("ORDER BY") > -1 else " %s GROUP BY %s" %  (self.where_filter, self.metadata().primaryKey())
+                from_ = self.db().manager().query(self.metadata().query()).from_() if self.metadata().isQuery() else self.metadata().name()
+                where_ = self.where_filter[: self.where_filter.find("ORDER BY")] if self.where_filter.find("ORDER BY") > -1 else self.where_filter
+                # where_ = (
+                #     self.where_filter.replace("ORDER BY", "GROUP BY %s ORDER BY" % self.metadata().primaryKey())
+                #     if self.where_filter.find("ORDER BY") > -1
+                #     else " %s GROUP BY %s" % (self.where_filter, self.metadata().primaryKey())
+                # )
                 size = util.sqlSelect(from_, "COUNT(%s)" % self.metadata().primaryKey(), where_)
             else:
                 size = util.sqlSelect(self._parent.curName(), "COUNT(*)", "1=1")
-            
+
             if isinstance(self._size, bool):
                 size = 0
-        
+
         return size
-            
 
     """
     Devuelve datos de la cebecera
@@ -1068,7 +1062,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
         if role == QtCore.Qt.DisplayRole:
             if orientation == QtCore.Qt.Horizontal:
                 if not self.col_aliases:
-                    self.loadColAliases()      
+                    self.loadColAliases()
                 return self.col_aliases[section]
             elif orientation == QtCore.Qt.Vertical:
                 return section + 1
@@ -1080,7 +1074,7 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
 
     def loadColAliases(self):
         self.col_aliases = [str(self.metadata().indexFieldObject(i).alias()) for i in range(self.cols)]
-        
+
     """
     Devuelve el FLFieldMetadata de un campo
     @param fieldName. Nombre del campo
@@ -1098,7 +1092,6 @@ class PNCursorTableModel(QtCore.QAbstractTableModel):
     def metadata(self):
         return self._parent.metadata()
 
-    
     def driver_sql(self):
         return self._driver_sql
 

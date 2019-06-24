@@ -3,6 +3,7 @@
 from pineboolib.pncontrolsfactory import QTable
 from pineboolib import decorators
 
+
 class FLTable(QTable):
     AlwaysOff = None
 

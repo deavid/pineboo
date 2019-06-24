@@ -5,10 +5,10 @@ import logging
 
 from pineboolib.plugins.kugar.kut2fpdf.kut2fpdf import kut2fpdf
 
+
 class kut2fpdf2(kut2fpdf):
-    
     def __init__(self):
         super().__init__()
-        
+
         self.logger = logging.getLogger("kut2fpdf2")
         checkDependencies({"fpdf": "fpdf2"})

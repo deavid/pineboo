@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtGui
 
+
 class FLDoubleValidator(QtGui.QDoubleValidator):
     _formatting = None
+
     def __init__(self, *args):
         if len(args) == 4:
             super().__init__(args[0], args[1], args[2], args[3])
@@ -15,14 +17,13 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
 
     def validate(self, input_, pos_cursor):
         value_in = input_
-        
-        if value_in is None or self._formatting == True:
+
+        if value_in is None or self._formatting:
             return (self.Acceptable, value_in, pos_cursor)
-        
+
         from pineboolib.pncontrolsfactory import aqApp
-        
-            
-        #pos_cursor= len(value_in)
+
+        # pos_cursor= len(value_in)
         state = super().validate(value_in, pos_cursor)
         # 0 Invalid
         # 1 Intermediate
@@ -38,15 +39,15 @@ class FLDoubleValidator(QtGui.QDoubleValidator):
                 ret_0 = self.Invalid
         else:
             ret_0 = self.Acceptable
-        
+
         ret_1 = state[1]
-        
+
         if aqApp.commaSeparator() == "," and ret_1.endswith("."):
-            ret_1 = ret_1[0:len(ret_1) - 1] + ","
-        
-        if len(ret_1) == 1 and ret_1 not in ("0","1","2","3","4","5","6", "7","8","9",",","."):
+            ret_1 = ret_1[0 : len(ret_1) - 1] + ","
+
+        if len(ret_1) == 1 and ret_1 not in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "."):
             ret_0 = 0
             ret_1 = ""
             ret_2 = 0
-            
+
         return (ret_0, ret_1, ret_2)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets
 
+
 class QToolBar(QtWidgets.QToolBar):
     _label = None
 

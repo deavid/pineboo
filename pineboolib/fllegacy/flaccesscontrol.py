@@ -7,13 +7,13 @@ Una regla de control de acceso se aplica a un usuario y a un objeto de alto nive
 La regla está definida por la siguiente información como cabecera de la misma, que la identifica
 unívocamente:
 
-\code
+\\code
 
          tipo           ;         nombre         ;      usuario           ;      permiso
 --------------------------------------------------------------------------------------------------
 FLAccessControl::type ; FLAccessControl::name ; FLAccessControl::user ; FLAccessControl::perm
 
-\endcode
+\\endcode
 
 El tipo será el del objeto de alto nivel, el nombre será el del objeto, el usuario corresponderá al
 nombre del usuario en la base de datos al que se le aplica la regla y permiso será un identificador
@@ -33,7 +33,7 @@ FLAccessControl::set . De forma recíproca se podrá obtener un nodo DOM con el 
 a insertar en un documento DOM/XML, mediante FLAccessControl::get . La estructura general en XML del nodo DOM
 que representa una regla de control de acceso es la siguiente:
 
-\code
+\\code
 
  <[mainwindow,table,etc..] perm="XXX">
   <name>XXX</name>
@@ -43,7 +43,7 @@ que representa una regla de control de acceso es la siguiente:
   <aco perm="XXX">XXX</aco>
  </[mainwindow,table,etc..]>
 
-\endcode
+\\endcode
 
 Por comodidad, también se proporciona el método FLAccessControl::setAcos, que permite establecer la lista de
 ACOs de una regla directamente a partir de una lista de cadenas de texto.
@@ -62,6 +62,7 @@ class FLAccessControl(object):
     """
     Almacena el nombre del objeto de alto nivel.
     """
+
     name_ = None
     """
     Almacena el nombre del usuario de la base de datos.
@@ -268,11 +269,12 @@ class FLAccessControl(object):
 
         self.acosPerms_ = {}
 
-        nameAcos = None
+        # nameAcos = None
         i = 0
         while i < len(acos):
-            self.acosPerms_[acos[i]] = acos[i +1]
+            self.acosPerms_[acos[i]] = acos[i + 1]
             i += 2
+
     """
     Obtiene una lista de cadenas de texto correspondiente a la lista de ACOs establecida
 

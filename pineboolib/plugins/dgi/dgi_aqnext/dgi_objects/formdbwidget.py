@@ -5,47 +5,47 @@ import weakref
 
 import YBUTILS
 
+
 class FormDBWidget(QtCore.QObject):
     """description of class"""
+
     closed = QtCore.pyqtSignal()
     cursor_ = None
     parent_ = None
     iface = None
     signal_test = QtCore.pyqtSignal(str, QtCore.QObject)
     _loaded = None
-    
+
     _cursors = {}
-    
+
     def __init__(self, action=None, project=None, parent=None):
-        if project is not None:          
-            
+        if project is not None:
 
             parent = QtCore.QObject()
-            
+
             super().__init__(parent)
-            
+
             self._module = sys.modules[self.__module__]
             self._module.connect = self._connect
             self._module.disconnect = self._disconnect
             self._action = action
             self.cursor_ = None
             self._loaded = None
-            
+
             self.parent_ = parent
             self._cursors = {}
-        
-            #import pineboolib
-            #if isinstance(self.parent(), pineboolib.pncontrolsfactory.FLFormDB):
+
+            # import pineboolib
+            # if isinstance(self.parent(), pineboolib.pncontrolsfactory.FLFormDB):
             #    self.form = self.parent()
 
             self._formconnections = set([])
         self._class_init()
-        
-    
-    
+
     def _connect(self, sender, signal, receiver, slot):
         # print(" > > > connect:", sender, " signal ", str(signal))
         from pineboolib.pncontrolsfactory import connect
+
         signal_slot = connect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
@@ -54,10 +54,11 @@ class FormDBWidget(QtCore.QObject):
     def _disconnect(self, sender, signal, receiver, slot):
         # print(" > > > disconnect:", self)
         from pineboolib.pncontrolsfactory import disconnect
+
         signal_slot = disconnect(sender, signal, receiver, slot, caller=self)
         if not signal_slot:
             return False
-        
+
         if signal_slot in self._formconnections:
             self._formconnections.remove(signal_slot)
         else:
@@ -87,13 +88,14 @@ class FormDBWidget(QtCore.QObject):
 
     def doCleanUp(self):
         self.clear_connections()
-        if getattr(self, 'iface', None) is not None:
+        if getattr(self, "iface", None) is not None:
             from pineboolib.pncontrolsfactory import check_gc_referrers
+
             check_gc_referrers("FormDBWidget.iface:" + self.iface.__class__.__name__, weakref.ref(self.iface), self._action.name)
             del self.iface.ctx
             del self.iface
             self._action.formrecord_widget = None
-    
+
     def clear_connections(self):
         # Limpiar todas las conexiones hechas en el script
         for signal, slot in self._formconnections:
@@ -101,10 +103,9 @@ class FormDBWidget(QtCore.QObject):
                 signal.disconnect(slot)
                 self.logger.debug("Señal desconectada al limpiar: %s %s" % (signal, slot))
             except Exception:
-                #self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
+                # self.logger.exception("Error al limpiar una señal: %s %s" % (signal, slot))
                 pass
         self._formconnections.clear()
-        
 
     def child(self, child_name):
         pass
@@ -126,7 +127,7 @@ class FormDBWidget(QtCore.QObject):
             # ... por lo que parece, al hacer el close del formulario no se desconectan sus señales.
             print("ERROR: Al buscar el control %r encontramos el error %r" %
                   (child_name, rte))
-            
+
             from pineboolib.pncontrolsfactory import print_stack
             print_stack(8)
             import gc
@@ -144,42 +145,44 @@ class FormDBWidget(QtCore.QObject):
         """
 
     def cursor(self):
-        
+
         # if self.cursor_:
         #    return self.cursor_
         cursor = None
-        #parent = self
+        # parent = self
 
-        #while cursor is None and parent:
+        # while cursor is None and parent:
         #    if hasattr(parent, "parentWidget"):
         #        parent = parent.parentWidget()
         #        cursor = getattr(parent, "cursor_", None)
         #    else:
         #        parent = None
-         
-        #if cursor:
+
+        # if cursor:
         #    self.cursor_ = cursor
-        #else:
+        # else:
         remote_user = YBUTILS.viewREST.cacheController.getUser()
 
         if remote_user in self._cursors.keys():
             cursor = self._cursors[remote_user]
         else:
             from pineboolib.pncontrolsfactory import FLSqlCursor
-            cursor = FLSqlCursor(self._action.table)           
+
+            cursor = FLSqlCursor(self._action.table)
             self._cursors[remote_user] = cursor
 
         return cursor
-    
+
     def parentWidget(self):
         return self.parent_
 
     def __getattr__(self, name):
         from pineboolib.pncontrolsfactory import aqApp
+
         ret_ = getattr(self.cursor_, name, None) or getattr(aqApp, name, None) or getattr(self.parent(), name, None) or getattr(self._action.script, name, None)
         if ret_:
             return ret_
-        #else:
+        # else:
         #    return getattr(self.iface, name, None)
 
     def __iter__(self):
@@ -194,12 +197,14 @@ class FormDBWidget(QtCore.QObject):
             raise StopIteration
 
         return list_[self._iter_current]
-    
+
     def legacy(self):
         from pineboolib import qsa as qsa_dict_modules
+
         ret_ = getattr(qsa_dict_modules, "%s_legacy" % self._action.name, None)
         if ret_ is None:
             return
+
     """
     def debug(*args):
         try:

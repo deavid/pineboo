@@ -104,8 +104,7 @@ class cBaseList(cBase):
         try:
             ctype, csubtype = child.type
         except Exception:
-            raise NameError(
-                "Base Class doesn't have `type` atribute or is incorrect.")
+            raise NameError("Base Class doesn't have `type` atribute or is incorrect.")
         if not hasattr(self.byType, ctype):
             self.byType[ctype] = []
 
@@ -119,12 +118,10 @@ class cBaseList(cBase):
             try:
                 cname = child.name
             except Exception:
-                raise NameError(
-                    "Declaration Class doesn't have `name` atribute.")
+                raise NameError("Declaration Class doesn't have `name` atribute.")
 
             if cname in self.byDefName:
-                print(
-                    "#WARNING# Variable %s found, but previously defined in this block" % cname)
+                print("#WARNING# Variable %s found, but previously defined in this block" % cname)
                 # self.byDefName[cname]=None
             else:
                 self.byDefName[cname] = child
@@ -188,8 +185,7 @@ class cBaseList(cBase):
             for c in sslice:
                 t1, t2 = c.type
                 n += 1
-                txt += "%-17s:%d" % ("%-8s/%-8s" %
-                                     (t1[:8], t2[:8]), n) + ">" + ". " * c.codedepth + str(c)
+                txt += "%-17s:%d" % ("%-8s/%-8s" % (t1[:8], t2[:8]), n) + ">" + ". " * c.codedepth + str(c)
                 txt += "\t<%d:\n" % n
             return txt
 
@@ -246,7 +242,7 @@ class cBaseListInline(cBaseList):
         if len(self.separator) == 0:
             return txt
         else:
-            return txt[:-len(self.separator)]
+            return txt[: -len(self.separator)]
 
 
 class cStatementList(cBaseList):
@@ -288,17 +284,18 @@ class cFuncDecl(cBaseDecl):
         except Exception:
             import traceback
             import sys
+
             print("Exception in user code:")
-            print('-' * 60)
+            print("-" * 60)
             traceback.print_exc(file=sys.stdout)
-            print('-' * 60)
+            print("-" * 60)
 
     def __str__(self):
         if self.rettype:
             ret = " : " + self.rettype
         else:
             ret = ""
-        return 'function %s(%s)%s {%s}' % (self.name, self.arglist, ret, self.source)
+        return "function %s(%s)%s {%s}" % (self.name, self.arglist, ret, self.source)
 
 
 class cClassDecl(cBaseDecl):
@@ -324,10 +321,11 @@ class cClassDecl(cBaseDecl):
         except Exception:
             import traceback
             import sys
+
             print("Exception in user code:")
-            print('-' * 60)
+            print("-" * 60)
             traceback.print_exc(file=sys.stdout)
-            print('-' * 60)
+            print("-" * 60)
 
     def __str__(self):
         if self.extends:
@@ -335,4 +333,4 @@ class cClassDecl(cBaseDecl):
         else:
             ext = ""
 
-        return 'class %s%s {%s}' % (self.name, ext, self.source)
+        return "class %s%s {%s}" % (self.name, ext, self.source)

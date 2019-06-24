@@ -7,6 +7,7 @@ from PyQt5 import QtCore
 
 settings = AQSettings()
 
+
 class FormInternalObj(FormDBWidget):
     def _class_init(self):
         pass
@@ -40,8 +41,8 @@ class FormInternalObj(FormDBWidget):
         w.child(u"leCallFunction").text = self.leerValorLocal("ebCallFunction")
         w.child(u"leMaxPixImages").text = self.leerValorLocal("maxPixImages")
         w.child(u"leNombreVertical").text = self.leerValorGlobal("verticalName")
-        w.child(u"cbFLLarge").checked = (self.leerValorGlobal("FLLargeMode") == 'True')
-        w.child(u"cbPosInfo").checked = (self.leerValorGlobal("PosInfo") == 'True')
+        w.child(u"cbFLLarge").checked = self.leerValorGlobal("FLLargeMode") == "True"
+        w.child(u"cbPosInfo").checked = self.leerValorGlobal("PosInfo") == "True"
         w.child(u"cbMobile").checked = self.leerValorLocal("mobileMode")
         w.child(u"cbDeleteCache").checked = self.leerValorLocal("deleteCache")
         w.child(u"cbParseProject").checked = self.leerValorLocal("parseProject")
@@ -72,25 +73,22 @@ class FormInternalObj(FormDBWidget):
         if self.colorActual_ is "":
             self.colorActual_ = "#FFE9AD"
 
-        w.child(u"leCO").setStyleSheet('background-color:' + self.colorActual_)
-        
-        #Actualizaciones.
-        
+        w.child(u"leCO").setStyleSheet("background-color:" + self.colorActual_)
+
+        # Actualizaciones.
+
         if os.path.exists(filedir("../.git")):
             w.child("cb_git_activar").checked = self.leerValorLocal("git_updates_enabled")
             ruta = self.leerValorLocal("git_updates_repo")
             if ruta is False:
-                ruta = 'https://github.com/Aulla/pineboo.git'
+                ruta = "https://github.com/Aulla/pineboo.git"
             w.child("le_git_ruta").text = ruta
             connect(w.child("pb_git_test"), u"clicked()", self, "search_git_updates")
         else:
             w.child("tbwLocales").setTabEnabled("tab_updates", False)
-               
-        
-        
-        
+
         w.child(u"leCO").show()
-    
+
     def search_git_updates(self):
         url = self.w_.child("le_git_ruta").text
         sys.search_git_updates(url)
@@ -116,18 +114,19 @@ class FormInternalObj(FormDBWidget):
         if valor_name == u"isDebuggerMode":
             valor = settings.readBoolEntry("application/%s" % valor_name)
         else:
-            if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio","kugar_temp_dir", "git_updates_repo"):
+            if valor_name in ("ebCallFunction", "maxPixImages", "kugarParser", "colorObligatorio", "kugar_temp_dir", "git_updates_repo"):
                 valor = util.readSettingEntry("ebcomportamiento/%s" % valor_name, u"")
                 if valor_name is "kugar_temp_dir" and valor is "":
                     from pineboolib.pncontrolsfactory import aqApp
+
                     valor = aqApp.tmp_dir()
-                
+
             else:
                 valor = settings.readBoolEntry("ebcomportamiento/%s" % valor_name, False)
         return valor
 
     def grabarValorLocal(self, valor_name=None, value=None):
-        
+
         if valor_name == "isDebuggerMode":
             settings.writeEntry("application/%s" % valor_name, value)
         else:
@@ -149,7 +148,7 @@ class FormInternalObj(FormDBWidget):
         self.w_.close()
 
     def guardar_clicked(self):
-        w = self.w_       
+        w = self.w_
         self.grabarValorGlobal("verticalName", w.child(u"leNombreVertical").text)
         self.grabarValorLocal("FLTableDoubleClick", w.child(u"cbFLTableDC").checked)
         self.grabarValorLocal("FLTableShortCut", w.child(u"cbFLTableSC").checked)
@@ -169,17 +168,17 @@ class FormInternalObj(FormDBWidget):
         self.grabarValorLocal("kugarParser", w.child(u"cbKugarParser").currentText())
         self.grabarValorLocal("spacerLegacy", w.child(u"cbSpacerLegacy").checked)
         self.grabarValorLocal("parseModulesOnLoad", w.child(u"cbParseModulesOnLoad").checked)
-        self.grabarValorLocal("translations_from_qm",  w.child(u"cb_traducciones").checked)
+        self.grabarValorLocal("translations_from_qm", w.child(u"cb_traducciones").checked)
         self.grabarValorLocal("kugar_temp_dir", w.child("le_kut_temporales").text)
         self.grabarValorLocal("kugar_debug_mode", w.child("cb_kut_debug").checked)
         self.grabarValorLocal("keep_general_cache", w.child("cb_no_borrar_cache").checked)
         self.grabarValorLocal("clean_no_python", w.child("cb_clean_no_python").checked)
         self.grabarValorLocal("git_updates_enabled", w.child("cb_git_activar").checked)
         self.grabarValorLocal("git_updates_repo", w.child("le_git_ruta").text)
-        self.grabarValorLocal("show_snaptshop_button",w.child("cb_snapshot").checked)
-        self.grabarValorLocal("mdi_mode",w.child("cb_mdi").checked)
-        self.grabarValorLocal("no_img_cached",w.child("cb_imagenes").checked)
-        
+        self.grabarValorLocal("show_snaptshop_button", w.child("cb_snapshot").checked)
+        self.grabarValorLocal("mdi_mode", w.child("cb_mdi").checked)
+        self.grabarValorLocal("no_img_cached", w.child("cb_imagenes").checked)
+
         autoComp = w.child(u"cbAutoComp").currentText()
         if autoComp == "Nunca":
             autoComp = "NeverAuto"
@@ -192,8 +191,8 @@ class FormInternalObj(FormDBWidget):
 
     def seleccionarColor_clicked(self):
         self.colorActual_ = AQS.ColorDialog_getColor(self.colorActual_, self.w_).name()
-        self.w_.child(u"leCO").setStyleSheet('background-color:' + self.colorActual_)
-    
+        self.w_.child(u"leCO").setStyleSheet("background-color:" + self.colorActual_)
+
     def cambiar_kugar_clicked(self):
         old_dir = self.w_.child("le_kut_temporales").text
         old_dir = self.fixPath(old_dir)
@@ -201,7 +200,7 @@ class FormInternalObj(FormDBWidget):
         if new_dir and new_dir is not old_dir:
             self.w_.child("le_kut_temporales").text = new_dir
             pineboolib.project.tmpdir = new_dir
-            
+
     def fixPath(self, ruta=None):
         rutaFixed = ""
         if sys.osName() == u"WIN32":

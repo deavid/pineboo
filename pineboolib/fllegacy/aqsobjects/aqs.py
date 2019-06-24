@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QColor, QPixmap
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -14,13 +14,14 @@ logger = logging.getLogger("AQS")
 """
 Clase AQS
 """
+
+
 class AQS(object):
 
     Box = None
     Plain = None
     translate = ["DockLeft", "ContextMenu"]
     InDock = None
-     
 
     def __init__(self):
         self.InDock = "InDock"
@@ -36,8 +37,6 @@ class AQS(object):
         self.SmtpAttachError = 15
         self.SmtpServerError = 16
         self.SmtpClientError = 17
-        
-        
 
     """
     Muestra el dialog de selección de color
@@ -45,6 +44,7 @@ class AQS(object):
     @param parent. Parent
     @param name. deprecated. Paramametro usado para compatibilidad
     """
+
     def ColorDialog_getColor(self, color=None, parent=None, name=None):
         from PyQt5.QtWidgets import QColorDialog
         from PyQt5.QtGui import QColor
@@ -65,6 +65,7 @@ class AQS(object):
     @param include_complex_types. Incluir hijos complejos
     @return xml del objeto dado
     """
+
     def toXml(self, obj_, include_children=True, include_complex_types=False):
         xml_ = QDomDocument()
 
@@ -78,19 +79,19 @@ class AQS(object):
         _meta = obj_.metaObject()
 
         i = 0
-        #_p_properties = []
+        # _p_properties = []
         for i in range(_meta.propertyCount()):
             mp = _meta.property(i)
-            #if mp.name() in _p_properties:
+            # if mp.name() in _p_properties:
             #    i += 1
             #    continue
 
-            #_p_properties.append(mp.name())
+            # _p_properties.append(mp.name())
 
             val = getattr(obj_, mp.name(), None)
             try:
                 val = val()
-            except:
+            except Exception:
                 pass
 
             if val is None:
@@ -106,7 +107,7 @@ class AQS(object):
 
             i += 1
 
-        if include_children == True:
+        if include_children:
 
             for child in obj_.children():
 
@@ -115,43 +116,49 @@ class AQS(object):
         return xml_
 
     """
-    Obtiene un QPixmap de un nombre de ficehro dado
+    Obtiene un QPixmap de un nombre de fichero dado
     @param name. Nombre del fichero
     @return QPixmap
     """
-    def Pixmap_fromMineSource(self, name):
+
+    @classmethod
+    def pixmap_fromMimeSource(self, name):
         import os
+
         file_name = filedir("../share/icons", name)
         return QPixmap(file_name) if os.path.exists(file_name) else None
-    
+
+    Pixmap_fromMineSource = pixmap_fromMimeSource
+
+    @classmethod
     def sha1(self, byte_array):
         from pineboolib.pncontrolsfacory import QByteArray
+
         ba = QByteArray(byte_array)
         return ba.sha1()
-    
-    def Application_setOverrideCursor(self, shape, replace = False):
+
+    @classmethod
+    def Application_setOverrideCursor(self, shape, replace=False):
         QApplication.setOverrideCursor(shape)
-    
+
+    @classmethod
     def Application_restoreOverrideCursor(self):
         QApplication.restoreOverrideCursor()
-        
-    
 
-    def __getattr__(self, name):        
+    def __getattr__(self, name):
         if name in self.translate:
             if name == "DockLeft":
                 name = "LeftDockWidgetArea"
-        
+
         ret_ = getattr(QtGui, "Q%sEvent" % name, None)
-        
+
         if ret_ is None:
             for lib in [QFrame, QLabel, QSizePolicy, QtCore.Qt]:
                 ret_ = getattr(lib, name, None)
                 if ret_ is not None:
                     break
-                
+
         if ret_ is not None:
             return ret_
 
         logger.warning("AQS: No se encuentra el atributo %s", name)
-        

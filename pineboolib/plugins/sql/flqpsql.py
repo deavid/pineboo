@@ -1,10 +1,8 @@
-
-from PyQt5.QtCore import QTime, QDate, QDateTime
+from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
 from PyQt5.Qt import qWarning, QDomDocument, QRegExp
-from PyQt5.QtWidgets import QMessageBox, QProgressDialog 
+from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
 from pineboolib.utils import text2bool, auto_qt_translate_text, checkDependencies
-from pineboolib import decorators
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -14,7 +12,6 @@ from sqlalchemy import create_engine
 
 import traceback
 import pineboolib
-import sys
 import logging
 
 
@@ -51,7 +48,7 @@ class FLQPSQL(object):
         self.engine_ = None
         self.session_ = None
         self.declarative_base_ = None
-    
+
     def useThreads(self):
         return True
 
@@ -71,7 +68,7 @@ class FLQPSQL(object):
         return self.pure_python_
 
     def safe_load(self):
-        return checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy":"sqlAlchemy"}, False)
+        return checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"}, False)
 
     def mobile(self):
         return self.mobile_
@@ -81,45 +78,37 @@ class FLQPSQL(object):
 
     def connect(self, db_name, db_host, db_port, db_userName, db_password):
         self._dbname = db_name
-        checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy":"sqlAlchemy"})
+        checkDependencies({"psycopg2": "python3-psycopg2", "sqlalchemy": "sqlAlchemy"})
         import psycopg2
 
-        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (
-            db_name, db_host, db_port,
-            db_userName, db_password)
+        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (db_name, db_host, db_port, db_userName, db_password)
 
         try:
             self.conn_ = psycopg2.connect(conninfostr)
-            self.engine_ = create_engine('postgresql+psycopg2://%s:%s@%s:%s/%s' % (db_userName, db_password, db_host, db_port, db_name))
+            self.engine_ = create_engine("postgresql+psycopg2://%s:%s@%s:%s/%s" % (db_userName, db_password, db_host, db_port, db_name))
         except psycopg2.OperationalError as e:
             if pineboolib.project._splash:
                 pineboolib.project._splash.hide()
-            
+
             if not pineboolib.project._DGI.localDesktop():
                 return False
-            
+
             if "does not exist" in str(e) or "no existe" in str(e):
-                ret = QMessageBox.warning(None, "Pineboo",
-                                          "La base de datos %s no existe.\n¿Desea crearla?" % db_name,
-                                          QMessageBox.Ok | QMessageBox.No)
+                ret = QMessageBox.warning(None, "Pineboo", "La base de datos %s no existe.\n¿Desea crearla?" % db_name, QMessageBox.Ok | QMessageBox.No)
                 if ret == QMessageBox.No:
                     return False
                 else:
-                    conninfostr2 = "dbname=postgres host=%s port=%s user=%s password=%s connect_timeout=5" % (
-                        db_host, db_port,
-                        db_userName, db_password)
+                    conninfostr2 = "dbname=postgres host=%s port=%s user=%s password=%s connect_timeout=5" % (db_host, db_port, db_userName, db_password)
                     try:
                         tmpConn = psycopg2.connect(conninfostr2)
-                        
-                        tmpConn.set_isolation_level(
-                            psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
+                        tmpConn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
                         cursor = tmpConn.cursor()
                         try:
                             cursor.execute("CREATE DATABASE %s" % db_name)
                         except Exception:
-                            print("ERROR: FLPSQL.connect",
-                                  traceback.format_exc())
+                            print("ERROR: FLPSQL.connect", traceback.format_exc())
                             cursor.execute("ROLLBACK")
                             cursor.close()
                             return False
@@ -127,20 +116,16 @@ class FLQPSQL(object):
                         return self.connect(db_name, db_host, db_port, db_userName, db_password)
                     except Exception:
                         qWarning(traceback.format_exc())
-                        QMessageBox.information(
-                            None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
-                        print(
-                            "ERROR: No se ha podido crear la Base de Datos %s" % db_name)
+                        QMessageBox.information(None, "Pineboo", "ERROR: No se ha podido crear la Base de Datos %s" % db_name, QMessageBox.Ok)
+                        print("ERROR: No se ha podido crear la Base de Datos %s" % db_name)
                         return False
             else:
-                QMessageBox.information(
-                    None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
+                QMessageBox.information(None, "Pineboo", "Error de conexión\n%s" % str(e), QMessageBox.Ok)
                 return False
 
         # self.conn_.autocommit = True #Posiblemente tengamos que ponerlo a
         # false para que las transacciones funcionen
-        self.conn_.set_isolation_level(
-            psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        self.conn_.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
 
         if self.conn_:
             self.open_ = True
@@ -151,28 +136,30 @@ class FLQPSQL(object):
             qWarning(traceback.format_exc())
 
         return self.conn_
-    
+
     def engine(self):
         return self.engine_
-    
+
     def session(self):
         if self.session_ is None:
             from sqlalchemy.orm import sessionmaker
-            #from sqlalchemy import event
-            #from pineboolib.pnobjectsfactory import before_commit, after_commit, after_flush
+
+            # from sqlalchemy import event
+            # from pineboolib.pnobjectsfactory import before_commit, after_commit, after_flush
             Session = sessionmaker(bind=self.engine())
             self.session_ = Session()
-            #event.listen(Session, 'before_commit', before_commit, self.session_)
-            #event.listen(Session, 'after_commit', after_commit, self.session_)
-            #event.listen(Session, 'after_flush', after_flush)
-        
-        return self.session_ 
-    
+            # event.listen(Session, 'before_commit', before_commit, self.session_)
+            # event.listen(Session, 'after_commit', after_commit, self.session_)
+            # event.listen(Session, 'after_flush', after_flush)
+
+        return self.session_
+
     def declarative_base(self):
         if self.declarative_base_ is None:
             from sqlalchemy.ext.declarative import declarative_base
+
             self.declarative_base_ = declarative_base()
-        
+
         return self.declarative_base_
 
     def formatValueLike(self, type_, v, upper):
@@ -191,7 +178,7 @@ class FLQPSQL(object):
 
         elif type_ == "time":
             t = v.toTime()
-            res = "::text LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
+            res = "::text LIKE '" + t.toString(Qt.ISODate) + "%%'"
 
         else:
             res = str(v)
@@ -224,7 +211,7 @@ class FLQPSQL(object):
                     val = util.dateDMAtoAMD(v)
                 else:
                     val = v
-            
+
                 s = "'%s'" % val
 
         elif type_ == "time":
@@ -250,7 +237,7 @@ class FLQPSQL(object):
         elif type_ == "pixmap":
             if s is None:
                 s = v
-                
+
             if s.find("'") > -1:
                 s = self.normalizeValue(s)
             s = "'%s'" % s
@@ -285,17 +272,15 @@ class FLQPSQL(object):
         try:
             cursor.execute("SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s " % (
-                n, traceback.format_exc()))
+            self.setLastError("No se pudo crear punto de salvaguarda", "SAVEPOINT sv_%s" % n)
+            qWarning("PSQLDriver:: No se pudo crear punto de salvaguarda SAVEPOINT sv_%s \n %s " % (n, traceback.format_exc()))
             return False
 
         return True
 
     def canSavePoint(self):
         return True
-    
+
     def canTransaction(self):
         return True
 
@@ -308,10 +293,8 @@ class FLQPSQL(object):
         try:
             cursor.execute("ROLLBACK TO SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s" % (
-                n, traceback.format_exc()))
+            self.setLastError("No se pudo rollback a punto de salvaguarda", "ROLLBACK TO SAVEPOINTt sv_%s" % n)
+            qWarning("PSQLDriver:: No se pudo rollback a punto de salvaguarda ROLLBACK TO SAVEPOINT sv_%s\n %s" % (n, traceback.format_exc()))
             return False
 
         return True
@@ -331,8 +314,7 @@ class FLQPSQL(object):
             cursor.execute("COMMIT TRANSACTION")
         except Exception:
             self.setLastError("No se pudo aceptar la transacción", "COMMIT")
-            qWarning("PSQLDriver:: No se pudo aceptar la transacción COMMIT\n %s" %
-                     traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo aceptar la transacción COMMIT\n %s" % traceback.format_exc())
             return False
 
         return True
@@ -346,8 +328,7 @@ class FLQPSQL(object):
             cursor.execute("ROLLBACK TRANSACTION")
         except Exception:
             self.setLastError("No se pudo deshacer la transacción", "ROLLBACK")
-            qWarning("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK\n %s" %
-                     traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo deshacer la transacción ROLLBACK\n %s" % traceback.format_exc())
             return False
 
         return True
@@ -361,8 +342,7 @@ class FLQPSQL(object):
             cursor.execute("BEGIN TRANSACTION")
         except Exception:
             self.setLastError("No se pudo crear la transacción", "BEGIN")
-            qWarning("PSQLDriver:: No se pudo crear la transacción BEGIN\n %s" %
-                     traceback.format_exc())
+            qWarning("PSQLDriver:: No se pudo crear la transacción BEGIN\n %s" % traceback.format_exc())
             return False
 
         return True
@@ -377,10 +357,8 @@ class FLQPSQL(object):
         try:
             cursor.execute("RELEASE SAVEPOINT sv_%s" % n)
         except Exception:
-            self.setLastError(
-                "No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
-            qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (
-                n, traceback.format_exc()))
+            self.setLastError("No se pudo release a punto de salvaguarda", "RELEASE SAVEPOINT sv_%s" % n)
+            qWarning("PSQLDriver:: No se pudo release a punto de salvaguarda RELEASE SAVEPOINT sv_%s\n %s" % (n, traceback.format_exc()))
 
             return False
 
@@ -393,8 +371,7 @@ class FLQPSQL(object):
             return "::%s" % type_
 
     def refreshQuery(self, curname, fields, table, where, cursor, conn):
-        sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (
-            curname, fields, table, where)
+        sql = "DECLARE %s NO SCROLL CURSOR WITH HOLD FOR SELECT %s FROM %s WHERE %s " % (curname, fields, table, where)
         try:
             cursor.execute(sql)
         except Exception:
@@ -424,8 +401,7 @@ class FLQPSQL(object):
 
         t = FLSqlQuery()
         t.setForwardOnly(True)
-        ok = t.exec_(
-            "select relname from pg_class where relname = '%s'" % name)
+        ok = t.exec_("select relname from pg_class where relname = '%s'" % name)
         if ok:
             ok = t.next()
 
@@ -450,8 +426,7 @@ class FLQPSQL(object):
 
         if unlocks > 1:
             qWarning(u"FLManager : No se ha podido crear la tabla " + tmd.name())
-            qWarning(
-                u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
+            qWarning(u"FLManager : Hay mas de un campo tipo unlock. Solo puede haber uno.")
             return None
 
         i = 1
@@ -488,8 +463,7 @@ class FLQPSQL(object):
                     try:
                         cursor.execute("CREATE SEQUENCE %s" % seq)
                     except Exception:
-                        print("FLQPSQL::sqlCreateTable:\n",
-                              traceback.format_exc())
+                        print("FLQPSQL::sqlCreateTable:\n", traceback.format_exc())
                     # self.commitTransaction()
 
                 sql = sql + " INT4 DEFAULT NEXTVAL('%s')" % seq
@@ -503,11 +477,19 @@ class FLQPSQL(object):
                 if primaryKey is None:
                     sql = sql + " PRIMARY KEY"
                 else:
-                    qWarning(util.translate("application", "FLManager : Tabla-> ") + tmd.name() +
-                             util.translate("application", " . Se ha intentado poner una segunda clave primaria para el campo ") +
-                             field.name() + util.translate("application", " , pero el campo ") + primaryKey +
-                             util.translate("application", " ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
-                                             "use FLCompoundKey para crear claves compuestas."))
+                    qWarning(
+                        util.translate("application", "FLManager : Tabla-> ")
+                        + tmd.name()
+                        + util.translate("application", " . Se ha intentado poner una segunda clave primaria para el campo ")
+                        + field.name()
+                        + util.translate("application", " , pero el campo ")
+                        + primaryKey
+                        + util.translate(
+                            "application",
+                            " ya es clave primaria. Sólo puede existir una clave primaria en FLTableMetaData, "
+                            "use FLCompoundKey para crear claves compuestas.",
+                        )
+                    )
                     return None
             else:
                 if field.isUnique():
@@ -549,19 +531,17 @@ class FLQPSQL(object):
                             found = True
                             if self.notEqualsFields(field, fieldMtd):
                                 mismatch = True
-                            
+
                             recBd.remove(field)
                             break
-                            
 
                     if not found:
                         if fieldMtd[0] not in processed_fields:
                             mismatch = True
                             break
-                
+
                 if len(recBd) > 0:
                     mismatch = True
-                    
 
             except Exception:
                 print(traceback.format_exc())
@@ -580,7 +560,8 @@ class FLQPSQL(object):
             "pg_attrdef.adsrc from pg_class, pg_attribute "
             "left join pg_attrdef on (pg_attrdef.adrelid = pg_attribute.attrelid and pg_attrdef.adnum = pg_attribute.attnum)"
             " where lower(pg_class.relname) = '%s' and pg_attribute.attnum > 0 and pg_attribute.attrelid = pg_class.oid "
-            "and pg_attribute.attisdropped = false order by pg_attribute.attnum" % tablename.lower())
+            "and pg_attribute.attisdropped = false order by pg_attribute.attnum" % tablename.lower()
+        )
         cursor = self.conn_.cursor()
         cursor.execute(stmt)
         rows = cursor.fetchall()
@@ -603,9 +584,9 @@ class FLQPSQL(object):
                 precision = 0
 
             if defVal and defVal[0] == "'":
-                defVal = defVal[1:len(defVal) - 2]
+                defVal = defVal[1 : len(defVal) - 2]
 
-            info.append([name, self.decodeSqlType(type_),allowNull, len_, precision, defVal, int(type_)])
+            info.append([name, self.decodeSqlType(type_), allowNull, len_, precision, defVal, int(type_)])
 
         return info
 
@@ -646,7 +627,7 @@ class FLQPSQL(object):
 
                 return self.recordInfo2(tablename)
 
-            #docElem = doc.documentElement()
+            # docElem = doc.documentElement()
             mtd = self.db_.manager().metadata(tablename, True)
             if not mtd:
                 return self.recordInfo2(tablename)
@@ -657,7 +638,9 @@ class FLQPSQL(object):
 
             for f in mtd.fieldsNames():
                 field = mtd.field(f)
-                info.append([field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()])
+                info.append(
+                    [field.name(), field.type(), not field.allowNull(), field.length(), field.partDecimal(), field.defaultValue(), field.isPrimaryKey()]
+                )
 
             del mtd
 
@@ -695,19 +678,16 @@ class FLQPSQL(object):
         t.setForwardOnly(True)
 
         if not typeName or typeName == "Tables":
-            t.exec_(
-                "select relname from pg_class where ( relkind = 'r' ) AND ( relname !~ '^Inv' ) AND ( relname !~ '^pg_' ) ")
+            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND ( relname !~ '^Inv' ) AND ( relname !~ '^pg_' ) ")
             while t.next():
                 tl.append(str(t.value(0)))
 
         if not typeName or typeName == "Views":
-            t.exec_(
-                "select relname from pg_class where ( relkind = 'v' ) AND ( relname !~ '^Inv' ) AND ( relname !~ '^pg_' ) ")
+            t.exec_("select relname from pg_class where ( relkind = 'v' ) AND ( relname !~ '^Inv' ) AND ( relname !~ '^pg_' ) ")
             while t.next():
                 tl.append(str(t.value(0)))
         if not typeName or typeName == "SystemTables":
-            t.exec_(
-                "select relname from pg_class where ( relkind = 'r' ) AND ( relname like 'pg_%' ) ")
+            t.exec_("select relname from pg_class where ( relkind = 'r' ) AND ( relname like 'pg_%' ) ")
             while t.next():
                 tl.append(str(t.value(0)))
 
@@ -733,12 +713,12 @@ class FLQPSQL(object):
 
         q = FLSqlQuery(None, self.db_.dbAux())
 
-        return (q.exec_(sql) and q.size() > 0)
+        return q.exec_(sql) and q.size() > 0
 
     def queryUpdate(self, name, update, filter):
         return """UPDATE %s SET %s WHERE %s RETURNING *""" % (name, update, filter)
 
-    def alterTable(self, mtd1, mtd2=None, key=None, force = False):
+    def alterTable(self, mtd1, mtd2=None, key=None, force=False):
 
         if mtd2 is None:
             return self.alterTable3(mtd1)
@@ -748,14 +728,13 @@ class FLQPSQL(object):
     def alterTable3(self, newMTD):
         if self.hasCheckColumn(newMTD):
             return False
-        
+
         util = FLUtil()
 
         oldMTD = newMTD
         fieldList = oldMTD.fieldList()
 
-        renameOld = "%salteredtable%s" % (
-            oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
+        renameOld = "%salteredtable%s" % (oldMTD.name()[0:5], QDateTime().currentDateTime().toString("ddhhssz"))
 
         self.db_.dbAux().transaction()
 
@@ -796,8 +775,9 @@ class FLQPSQL(object):
 
         oldCursor.select()
         totalSteps = oldCursor.size()
-        progress = QProgressDialog(util.translate("application", "Reestructurando registros para %1...").arg(
-            newMTD.alias()), util.translate("application", "Cancelar"), 0, totalSteps)
+        progress = QProgressDialog(
+            util.translate("application", "Reestructurando registros para %1...").arg(newMTD.alias()), util.translate("application", "Cancelar"), 0, totalSteps
+        )
         progress.setLabelText(util.translate("application", "Tabla modificada"))
 
         step = 0
@@ -841,16 +821,17 @@ class FLQPSQL(object):
                             v = defVal
 
                     if v is not None and not newBuffer.field(newField.name()).type() == newField.type():
-                        print("FLManager::alterTable : " + util.translate("application", 
-                            "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name()))
+                        print(
+                            "FLManager::alterTable : "
+                            + util.translate("application", "Los tipos del campo %1 no son compatibles. Se introducirá un valor nulo.").arg(newField.name())
+                        )
 
                     if v is not None and newField.type() == "string" and newField.length() > 0:
-                        v = str(v)[0:newField.length()]
+                        v = str(v)[0 : newField.length()]
 
                     if (not oldField.allowNull() or not newField.allowNull()) and v is None:
                         if oldField.type() == "serial":
-                            v = int(self.nextSerialVal(
-                                newMTD.name(), newField.name()))
+                            v = int(self.nextSerialVal(newMTD.name(), newField.name()))
                         elif oldField.type() in ("int", "uint", "bool", "unlock"):
                             v = 0
                         elif oldField.type() == "double":
@@ -860,7 +841,7 @@ class FLQPSQL(object):
                         elif oldField.type() == "date":
                             v = QDate().currentDate()
                         else:
-                            v = "NULL"[0:newField.length()]
+                            v = "NULL"[0 : newField.length()]
 
                     newBuffer.setValue(newField.name(), v)
 
@@ -890,14 +871,13 @@ class FLQPSQL(object):
         return True
 
     def alterTable2(self, mtd1, mtd2, key, force=False):
-        #logger.warning("alterTable2 FIXME::Me quedo colgado al hacer createTable --> existTable")
+        # logger.warning("alterTable2 FIXME::Me quedo colgado al hacer createTable --> existTable")
         util = FLUtil()
 
         oldMTD = None
         newMTD = None
         doc = QDomDocument("doc")
         docElem = None
-        
 
         if not util.domDocumentSetContent(doc, mtd1):
             logger.warning("FLManager::alterTable : " + util.translate("application", "Error al cargar los metadatos."))
@@ -948,7 +928,9 @@ class FLQPSQL(object):
             return True
 
         if not self.db_.manager().existsTable(oldMTD.name()):
-            logger.warning("FLManager::alterTable : " + util.translate("application", "La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name()))
+            logger.warning(
+                "FLManager::alterTable : " + util.translate("application", "La tabla %1 antigua de donde importar los registros no existe.").arg(oldMTD.name())
+            )
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
             if newMTD:
@@ -996,7 +978,10 @@ class FLQPSQL(object):
         constraintName = "%s_pkey" % oldMTD.name()
 
         if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
-            logger.warning("FLManager : " + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(oldMTD.name()))
+            logger.warning(
+                "FLManager : "
+                + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_pkey de la tabla antigua.").arg(oldMTD.name())
+            )
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
                 del oldMTD
@@ -1013,8 +998,12 @@ class FLQPSQL(object):
             if it.isUnique():
                 constraintName = "%s_%s_key" % (oldMTD.name(), it.name())
                 if self.constraintExists(constraintName) and not q.exec_("ALTER TABLE %s DROP CONSTRAINT %s" % (oldMTD.name(), constraintName)):
-                    logger.warning("FLManager : " + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.")
-                          .arg(oldMTD.name(), oldField.name()))
+                    logger.warning(
+                        "FLManager : "
+                        + util.translate("application", "En método alterTable, no se ha podido borrar el índice %1_%2_key de la tabla antigua.").arg(
+                            oldMTD.name(), oldField.name()
+                        )
+                    )
                     self.db_.dbAux().rollback()
                     if oldMTD and not oldMTD == newMTD:
                         del oldMTD
@@ -1022,10 +1011,9 @@ class FLQPSQL(object):
                         del newMTD
 
                     return False
-                
+
         if not q.exec_("ALTER TABLE %s RENAME TO %s" % (oldMTD.name(), renameOld)):
-            logger.warning("FLManager::alterTable : " +
-                  util.translate("application", "No se ha podido renombrar la tabla antigua."))
+            logger.warning("FLManager::alterTable : " + util.translate("application", "No se ha podido renombrar la tabla antigua."))
 
             self.db_.dbAux().rollback()
             if oldMTD and not oldMTD == newMTD:
@@ -1055,13 +1043,13 @@ class FLQPSQL(object):
                 del newMTD
 
             return self.alterTable2(mtd1, mtd2, key, True)
-        
+
         if not ok:
             oldCursor = self.db_.dbAux().cursor()
             oldCursor.execute("SELECT %s FROM %s WHERE 1 = 1" % (", ".join(fieldsNamesOld), renameOld))
             result_set = oldCursor.fetchall()
             totalSteps = len(result_set)
-            util.createProgressDialog(util.tr("application", "Reestructurando registros para %s..." % newMTD.alias()) , totalSteps)
+            util.createProgressDialog(util.tr("application", "Reestructurando registros para %s..." % newMTD.alias()), totalSteps)
             util.setLabelText(util.tr("application", "Tabla modificada"))
 
             step = 0
@@ -1072,10 +1060,10 @@ class FLQPSQL(object):
             vector_fields = {}
             default_values = {}
             v = None
-                
+
             for it2 in fieldList:
                 oldField = oldMTD.field(it2.name())
-                
+
                 if oldField is None or not result_set:
                     if oldField is None:
                         oldField = it2
@@ -1083,20 +1071,19 @@ class FLQPSQL(object):
                         v = it2.defaultValue()
                         step += 1
                         default_values[str(step)] = v
-                
+
                 step += 1
                 vector_fields[str(step)] = it2
                 step += 1
                 vector_fields[str(step)] = oldField
-            
 
-            step2 = 0
+            # step2 = 0
             ok = True
             x = 0
-            for row in result_set: 
+            for row in result_set:
                 x += 1
                 newBuffer = newBufferInfo
-                
+
                 i = 0
 
                 while i < step:
@@ -1108,7 +1095,7 @@ class FLQPSQL(object):
                         newField = vector_fields[str(i)]
                         i += 1
                         oldField = vector_fields[str(i)]
-                        
+
                     else:
                         i += 1
                         newField = vector_fields[str(i)]
@@ -1120,15 +1107,15 @@ class FLQPSQL(object):
                                 v = row[pos]
                                 break
                             pos += 1
-                            
+
                         if (not oldField.allowNull() or not newField.allowNull()) and (v is None) and newField.type() != FLFieldMetaData.Serial:
                             defVal = newField.defaultValue()
                             if defVal is not None:
                                 v = defVal
-                    
+
                     if v is not None and newField.type() == "string" and newField.length() > 0:
-                        v = v[:newField.length()]
-                    
+                        v = v[: newField.length()]
+
                     if (not oldField.allowNull() or not newField.allowNull()) and v in (None, "None"):
                         if oldField.type() == FLFieldMetaData.Serial:
                             v = int(self.nextSerialVal(newMTD.name(), newField.name()))
@@ -1143,9 +1130,9 @@ class FLQPSQL(object):
                         elif oldField.type() == "date":
                             v = QDate.currentDate()
                         else:
-                            v = "NULL"[:newField.length()]
-                    
-                    new_b = []
+                            v = "NULL"[: newField.length()]
+
+                    # new_b = []
                     for buffer in newBuffer:
                         if buffer[0] == newField.name():
                             new_buffer = []
@@ -1158,48 +1145,45 @@ class FLQPSQL(object):
                             new_buffer.append(buffer[6])
                             listRecords.append(new_buffer)
                             break
-                    #newBuffer.setValue(newField.name(), v)
-                
-                    
+                    # newBuffer.setValue(newField.name(), v)
+
                 if listRecords:
                     if not self.insertMulti(newMTD.name(), listRecords):
                         ok = False
                     listRecords = []
-                
+
             util.setProgress(totalSteps)
-                
-                
-        
-        util.destroyProgressDialog()      
+
+        util.destroyProgressDialog()
         if ok:
             self.db_.dbAux().commit()
-            
+
             if force:
                 q.exec_("DROP TABLE %s CASCADE" % renameOld)
         else:
             self.db_.dbAux().rollbackTransaction()
-                
+
             q.exec_("DROP TABLE %s CASCADE" % oldMTD.name())
             q.exec_("ALTER TABLE %s RENAME TO %s" % (renameOld, oldMTD.name()))
-                
+
             if oldMTD and oldMTD != newMTD:
-                del oldMTD 
+                del oldMTD
             if newMTD:
-                del newMTD 
+                del newMTD
             return False
-        
+
         if oldMTD and oldMTD != newMTD:
-            del oldMTD    
+            del oldMTD
         if newMTD:
             del newMTD
-                
+
         return True
 
     def insertMulti(self, table_name, records):
 
         if not records:
             return False
-            
+
         mtd = self.db_.manager().metadata(table_name)
         fList = []
         vList = []
@@ -1213,23 +1197,20 @@ class FLQPSQL(object):
                 if field.type() in ("string", "stringlist") and value == "Null":
                     value = ""
                 #    value = self.db_.normalizeValue(value)
-                
-                vList.append(value)
-        
 
-        sql = """INSERT INTO %s(%s) values (%s)""" % (table_name, ", ".join(fList), ", ".join(map(str, vList)))      
-                
+                vList.append(value)
+
+        sql = """INSERT INTO %s(%s) values (%s)""" % (table_name, ", ".join(fList), ", ".join(map(str, vList)))
+
         if not fList:
             return False
-        
-            
+
         try:
             cursor_.execute(sql)
         except Exception as exc:
-            print(sql,"\n",exc)
+            print(sql, "\n", exc)
             return False
 
-        
         return True
 
     def Mr_Proper(self):
@@ -1249,12 +1230,13 @@ class FLQPSQL(object):
         else:
             listOldBks = []
 
-        qry.exec_("select nombre from flfiles where nombre similar to"
-                  "'%[[:digit:]][[:digit:]][[:digit:]][[:digit:]]-[[:digit:]][[:digit:]]%:[[:digit:]][[:digit:]]%' or nombre similar to"
-                  "'%alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]]%' or (bloqueo='f' and nombre like '%.mtd')")
+        qry.exec_(
+            "select nombre from flfiles where nombre similar to"
+            "'%[[:digit:]][[:digit:]][[:digit:]][[:digit:]]-[[:digit:]][[:digit:]]%:[[:digit:]][[:digit:]]%' or nombre similar to"
+            "'%alteredtable[[:digit:]][[:digit:]][[:digit:]][[:digit:]]%' or (bloqueo='f' and nombre like '%.mtd')"
+        )
 
-        util.createProgressDialog(
-            util.translate("application", "Borrando backups"), len(listOldBks) + qry.size() + 2)
+        util.createProgressDialog(util.translate("application", "Borrando backups"), len(listOldBks) + qry.size() + 2)
 
         while qry.next():
             item = qry.value(0)
@@ -1263,8 +1245,7 @@ class FLQPSQL(object):
             if item.find("alteredtable") > -1:
                 if self.existsTable(item.replace(".mtd", "")):
                     util.setLabelText(util.translate("application", "Borrando tabla %s" % item))
-                    qry2.exec_("DROP TABLE %s CASCADE" %
-                               item.replace(".mtd", ""))
+                    qry2.exec_("DROP TABLE %s CASCADE" % item.replace(".mtd", ""))
 
             steps = steps + 1
             util.setProgress(steps)
@@ -1288,8 +1269,7 @@ class FLQPSQL(object):
 
         steps = 0
         qry3.exec_("select tablename from pg_tables where schemaname='public'")
-        util.createProgressDialog(
-            util.translate("application", "Comprobando base de datos"), qry3.size())
+        util.createProgressDialog(util.translate("application", "Comprobando base de datos"), qry3.size())
         while qry3.next():
             item = qry3.value(0)
             util.setLabelText(util.translate("application", "Comprobando tabla %s" % item))
@@ -1297,9 +1277,12 @@ class FLQPSQL(object):
             if mustAlter:
                 conte = self.db_.managerModules().content("%s.mtd" % item)
                 if conte:
-                    msg = util.translate("application", "La estructura de los metadatos de la tabla '%s' y su "
-                                  "estructura interna en la base de datos no coinciden. "
-                                  "Intentando regenerarla." % item)
+                    msg = util.translate(
+                        "application",
+                        "La estructura de los metadatos de la tabla '%s' y su "
+                        "estructura interna en la base de datos no coinciden. "
+                        "Intentando regenerarla." % item,
+                    )
 
                     logger.warning(msg)
                     self.alterTable2(conte, conte, None, True)
@@ -1309,10 +1292,11 @@ class FLQPSQL(object):
 
         self.db_.dbAux().driver().transaction()
         steps = 0
-        #sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
+        # sqlCursor = FLSqlCursor(None, True, self.db_.dbAux())
         sqlQuery = FLSqlQuery(None, self.db_.dbAux())
-        if sqlQuery.exec_("select relname from pg_class where ( relkind = 'r' ) "
-                          "and ( relname !~ '^Inv' ) " "and ( relname !~ '^pg_' ) and ( relname !~ '^sql_' )"):
+        if sqlQuery.exec_(
+            "select relname from pg_class where ( relkind = 'r' ) " "and ( relname !~ '^Inv' ) " "and ( relname !~ '^pg_' ) and ( relname !~ '^sql_' )"
+        ):
 
             util.setTotalSteps(sqlQuery.size())
             while sqlQuery.next():
@@ -1342,14 +1326,13 @@ class FLQPSQL(object):
                             buf.setValue(it.name(), v)
                             cur.update(False)
 
-                #sqlCursor.setName(item, True)
+                # sqlCursor.setName(item, True)
 
         # self.db_.dbAux().driver().commit()
 
         steps = 0
         qry4.exec_("select tablename from pg_tables where schemaname='public'")
-        util.createProgressDialog(
-            util.translate("application", "Analizando base de datos"), qry4.size())
+        util.createProgressDialog(util.translate("application", "Analizando base de datos"), qry4.size())
         while qry4.next():
             item = qry4.value(0)
             util.setLabelText(util.translate("application", "Analizando tabla %s" % item))
@@ -1364,9 +1347,9 @@ class FLQPSQL(object):
 
     def canDetectLocks(self):
         return True
-    
+
     def fix_query(self, query):
-        #ret_ = query.replace(";", "")
+        # ret_ = query.replace(";", "")
         return query
 
     def desktopFile(self):
@@ -1385,5 +1368,5 @@ class FLQPSQL(object):
         except Exception:
             self.setLastError("No se puedo ejecutar la siguiente query", q)
             qWarning("PSQLDriver:: No se puedo ejecutar la siguiente query %s % q\n %s" % (q, traceback.format_exc()))
-        
+
         return cursor

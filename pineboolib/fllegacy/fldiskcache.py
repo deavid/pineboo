@@ -21,7 +21,7 @@ class FLDiskCache(QtCore.QObject):
     @decorators.BetaImplementation
     def find(self, key, d):
         if isinstance(d, str):
-            fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key
+            fileCache = self.AQ_DISKCACHE_DIRPATH + "/" + key
             fi = QtCore.QFile(fileCache)
             if not fi.open(Qt.IO_ReadOnly):
                 return False
@@ -30,7 +30,7 @@ class FLDiskCache(QtCore.QObject):
             fi.close()
             return d
         else:
-            fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key + "-BIN"
+            fileCache = self.AQ_DISKCACHE_DIRPATH + "/" + key + "-BIN"
             fi = QtCore.QFile(fileCache)
             if not fi.open(Qt.IO_ReadOnly):
                 return False
@@ -42,7 +42,7 @@ class FLDiskCache(QtCore.QObject):
     @decorators.BetaImplementation
     def insert(self, key, d):
         if isinstance(d, str):
-            fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key
+            fileCache = self.AQ_DISKCACHE_DIRPATH + "/" + key
             fi = QtCore.QFile(fileCache)
             drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
             if not drc.exists():
@@ -57,7 +57,7 @@ class FLDiskCache(QtCore.QObject):
                     return True
             return False
         else:
-            fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key + "-BIN"
+            fileCache = self.AQ_DISKCACHE_DIRPATH + "/" + key + "-BIN"
             fi = QtCore.QFile(fileCache)
             drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
             if not drc.exists():
@@ -78,11 +78,11 @@ class FLDiskCache(QtCore.QObject):
         if drc.exists():
             lst = drc.entryList("*; *.*")
             for it in lst:
-                drc.remove(self.AQ_DISKCACHE_DIRPATH + '/' + it)
+                drc.remove(self.AQ_DISKCACHE_DIRPATH + "/" + it)
 
     @decorators.BetaImplementation
     def absoluteFilePath(self, key):
-        fileCache = self.AQ_DISKCACHE_DIRPATH + '/' + key
+        fileCache = self.AQ_DISKCACHE_DIRPATH + "/" + key
         if not QtCore.QFile.exists(fileCache):
             return ""
         return fileCache
@@ -99,24 +99,22 @@ class FLDiskCache(QtCore.QObject):
         codec = QtCore.QTextCodec.codecForLocale()
         localEncode = codec.mimeName() if codec else ""
         if not app:
-            self.aqSetAndCreateDirPath(AQ_USRHOME + '/.aqcache')
+            self.aqSetAndCreateDirPath(AQ_USRHOME + "/.aqcache")
             if localEncode and localEncode != "":
-                self.aqSetAndCreateDirPath(
-                    self.AQ_DISKCACHE_DIRPATH + '/' + localEncode)
+                self.aqSetAndCreateDirPath(self.AQ_DISKCACHE_DIRPATH + "/" + localEncode)
         else:
             dbName = app.db().database()
             if app.db().driverName() == "FLsqlite":
                 dbName.replace(self.AQ_DISKCACHE_DIRPATH, "")
-            self.aqSetAndCreateDirPath(AQ_USRHOME + '/.aqcache/' + dbName)
+            self.aqSetAndCreateDirPath(AQ_USRHOME + "/.aqcache/" + dbName)
             if localEncode and localEncode != "":
-                self.aqSetAndCreateDirPath(
-                    self.AQ_DISKCACHE_DIRPATH + '/' + localEncode)
+                self.aqSetAndCreateDirPath(self.AQ_DISKCACHE_DIRPATH + "/" + localEncode)
 
             drc = QtCore.QDir(self.AQ_DISKCACHE_DIRPATH)
             if drc.exists():
                 lst = drc.entryList("*.*", QtCore.QDir.Files)
                 for it in lst:
-                    drc.remove(self.AQ_DISKCACHE_DIRPATH + '/' + str(it))
+                    drc.remove(self.AQ_DISKCACHE_DIRPATH + "/" + str(it))
 
     AQ_DISKCACHE_INS = insert
     AQ_DISKCACHE_FIND = find

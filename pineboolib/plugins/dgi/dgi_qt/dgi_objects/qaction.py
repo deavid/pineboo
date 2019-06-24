@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from PyQt5 import QtCore, QtWidgets
 
+
 class QAction(QtWidgets.QAction):
 
     activated = QtCore.pyqtSignal()

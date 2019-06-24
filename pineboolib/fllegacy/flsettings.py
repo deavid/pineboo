@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from PyQt5.QtCore import QSettings
 
+
 class FLSettings(object):
     s = None
+
     def __init__(self):
-        self.s = QSettings(QSettings.NativeFormat,QSettings.UserScope, "Eneboo", "Pineboo")
+        self.s = QSettings(QSettings.NativeFormat, QSettings.UserScope, "Eneboo", "Pineboo")
 
     def readListEntry(self, key):
         ret = self.s.value(key)
@@ -27,7 +29,7 @@ class FLSettings(object):
             if ret in ["", None]:
                 ret = _def
 
-        #print("Retornando %s ---> %s (%s)" % (_key, ret, type(ret)))
+        # print("Retornando %s ---> %s (%s)" % (_key, ret, type(ret)))
         return ret
 
     def readNumEntry(self, key, _def=0):
@@ -56,7 +58,7 @@ class FLSettings(object):
         self.s.setValue(key, value)
 
     def writeEntryList(self, key, value):
-        
+
         if len(value) == 1:
             val = value[0]
         elif len(value) == 0:

@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
-import traceback
 import logging
 
 import pineboolib
 from pineboolib import decorators
-from pineboolib.utils import filedir, _path, cacheXPM
+from pineboolib.utils import filedir, cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
 from pineboolib.pncontrolsfactory import aqApp
-
-from PyQt5 import QtCore
-
 
 """
 Gestor de módulos.
@@ -52,6 +48,7 @@ class FLManagerModules(object):
     """
     Mantiene el identificador del area a la que pertenece el módulo activo.
     """
+
     activeIdArea_ = None
 
     """
@@ -121,10 +118,10 @@ class FLManagerModules(object):
 
         self.filesCached_ = {}
 
-    #"""
+    # """
     # Acciones de inicialización del sistema de módulos.
-    #"""
-    #@decorators.NotImplementedWarn
+    # """
+    # @decorators.NotImplementedWarn
     # def init(self):
     #    pass
 
@@ -173,10 +170,10 @@ class FLManagerModules(object):
 
     def content(self, n):
         cursor = self.conn_.execute_query("SELECT contenido FROM flfiles WHERE nombre='%s' AND NOT sha = ''" % n)
-        
+
         for contenido in cursor:
             return contenido[0]
-        
+
         return None
 
     """
@@ -187,6 +184,7 @@ class FLManagerModules(object):
     @param n Nombre del fichero.
     @return QString con el contenido del fichero o vacía en caso de error.
     """
+
     @decorators.NotImplementedWarn
     def byteCodeToStr(self, n):
         return None
@@ -204,7 +202,7 @@ class FLManagerModules(object):
 
     def contentFS(self, pN, utf8=False):
         encode_ = "UTF-8" if utf8 else "ISO-8859-15"
-        
+
         try:
             return str(open(pN, "rb").read(), encode_)
         except Exception:
@@ -222,7 +220,7 @@ class FLManagerModules(object):
 
     def contentCached(self, n, shaKey=None):
 
-        not_sys_table = (self.conn_.dbAux() and n[0:3] is not "sys" and not self.conn_.manager().isSystemTable(n))
+        not_sys_table = self.conn_.dbAux() and n[0:3] != "sys" and not self.conn_.manager().isSystemTable(n)
         if not_sys_table and self.staticBdInfo_ and self.staticBdInfo_.enabled_:
             str_ret = self.contentStatic(n)
             if str_ret:
@@ -233,8 +231,8 @@ class FLManagerModules(object):
 
         data = None
         modId = None
-        name_ = n[:n.index(".")]
-        ext_ = n[n.index(".") + 1:]
+        name_ = n[: n.index(".")]
+        ext_ = n[n.index(".") + 1 :]
         type_ = None
         if ext_ == "kut":
             type_ = "reports/"
@@ -252,9 +250,9 @@ class FLManagerModules(object):
             type_ = ""
 
         if not shaKey and not self.conn_.manager().isSystemTable(name_):
-            
+
             cursor = self.conn_.execute_query("SELECT sha FROM flfiles WHERE nombre='%s'" % n)
-            
+
             for contenido in cursor:
                 shaKey = contenido[0]
 
@@ -262,18 +260,18 @@ class FLManagerModules(object):
             modId = "sys"
         else:
             modId = self.conn_.managerModules().idModuleOfFile(n)
-        
+
         if aqApp.DGI().alternative_content_cached():
             data = aqApp.DGI().content_cached(aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey)
             if data is not None:
                 return data
-            
+
         if data is None:
             """Ruta por defecto"""
             if os.path.exists("%s/cache/%s/%s/file.%s/%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_)):
                 utf8_ = True if ext_ == "kut" else False
                 data = self.contentFS("%s/cache/%s/%s/file.%s/%s/%s.%s" % (aqApp.tmp_dir(), self.conn_.DBName(), modId, ext_, name_, shaKey, ext_), utf8_)
-        
+
         if data is None:
             if os.path.exists(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_))):
                 data = self.contentFS(filedir("../share/pineboo/%s%s.%s" % (type_, name_, ext_)))
@@ -291,6 +289,7 @@ class FLManagerModules(object):
     @param idM Identificador del módulo al que se asociará el fichero
     @param content Contenido del fichero.
     """
+
     @decorators.NotImplementedWarn
     def setContent(self, n, idM, content):
         pass
@@ -319,6 +318,7 @@ class FLManagerModules(object):
 
     def createForm(self, a, connector=None, parent=None, name=None):
         from pineboolib.pncontrolsfactory import FLFormDB
+
         if not isinstance(a, FLAction):
             a = pineboolib.utils.convert2FLAction(a)
 
@@ -335,6 +335,7 @@ class FLManagerModules(object):
 
     def createFormRecord(self, a, connector=None, parent_or_cursor=None, name=None):
         from pineboolib.pncontrolsfactory import FLFormRecordDB
+
         # Falta implementar conector y name
         if not isinstance(a, FLAction):
             a = pineboolib.utils.convert2FLAction(a)
@@ -343,6 +344,7 @@ class FLManagerModules(object):
             return None
 
         return FLFormRecordDB(parent_or_cursor, a, load=False)
+
     """
     Para establecer el módulo activo.
 
@@ -421,8 +423,8 @@ class FLManagerModules(object):
     @return Texto de descripción del área, si lo encuentra o idA si no lo encuentra.
     """
 
-    def idAreaToDescription(self, idA = None):
-        
+    def idAreaToDescription(self, idA=None):
+
         if idA:
             for area in self.dictInfoMods.keys():
                 if self.dictInfoMods[area].idArea.upper() == idA.upper():
@@ -454,6 +456,7 @@ class FLManagerModules(object):
 
     def iconModule(self, idM):
         from pineboolib.pncontrolsfactory import QPixmap
+
         pix = None
         if idM.upper() in self.dictInfoMods.keys():
             icono = cacheXPM(self.dictInfoMods[idM.upper()].icono)
@@ -471,9 +474,9 @@ class FLManagerModules(object):
     def versionModule(self, idM):
         if not self.dictInfoMods:
             return idM
-        
+
         im = idM.upper()
-        
+
         return im.version if im else idM
 
     """
@@ -481,6 +484,7 @@ class FLManagerModules(object):
 
     @return Clave sha de la versión de los módulos cargados localmente
     """
+
     def shaLocal(self):
         return self.shaLocal_
 
@@ -489,25 +493,26 @@ class FLManagerModules(object):
 
     @return Clave sha de la versión de los módulos cargados globalmente
     """
+
     def shaGlobal(self):
         if not self.conn_.dbAux():
             return ""
-        
+
         q = FLSqlQuery(None, self.conn_.dbAux())
         q.setForwardOnly(True)
         q.exec_("SELECT sha FROM flserial")
         if q.lastError is None:
             return "error"
-        
+
         if q.next():
             return str(q.value(0))
         else:
             return ""
-            
 
     """
     Establece el valor de la clave sha local con el del global.
     """
+
     def setShaLocalFromGlobal(self):
         self.shaLocal_ = self.shaGlobal()
 
@@ -590,8 +595,7 @@ class FLManagerModules(object):
             infoMod.idArea = "sys"
             infoMod.descripcion = "Administracion"
             infoMod.version = "0.0"
-            infoMod.icono = self.contentFS(
-                "%s/%s" % (filedir("../share/pineboo"), "/sys.xpm"))
+            infoMod.icono = self.contentFS("%s/%s" % (filedir("../share/pineboo"), "/sys.xpm"))
             infoMod.areaDescripcion = "Sistema"
             self.dictInfoMods[infoMod.idModulo.upper()] = infoMod
 
@@ -610,12 +614,13 @@ class FLManagerModules(object):
         while q.next():
             self.listIdAreas_.append(str(q.value(0)))
 
-        if not "sys" in self.listIdAreas_:
+        if "sys" not in self.listIdAreas_:
             self.listIdAreas_.append("sys")
 
     """
     Comprueba las firmas para un modulo dado
     """
+
     @decorators.NotImplementedWarn
     def checkSignatures(self):
         pass
@@ -630,27 +635,29 @@ class FLManagerModules(object):
     def idModuleOfFile(self, n):
         if not isinstance(n, str):
             n = n.toString()
-        
+
         if n.endswith(".mtd"):
-            if n[:n.find(".mtd")] in aqApp.DGI().sys_mtds() or n == "flfiles.mtd":
-                return "sys"    
+            if n[: n.find(".mtd")] in aqApp.DGI().sys_mtds() or n == "flfiles.mtd":
+                return "sys"
 
         cursor = self.conn_.execute_query("SELECT idmodulo FROM flfiles WHERE nombre='%s'" % n)
 
         for idmodulo in cursor:
             return idmodulo[0]
+
     """
     Guarda el estado del sistema de módulos
     """
+
     def writeState(self):
         idDB = "noDB"
         if self.conn_.dbAux() is not None:
             idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
-        
+
         settings = FLSettings()
         settings.writeEntry("Modules/activeIdModule/%s" % idDB, self.activeIdModule_)
-        settings.writeEntry("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)    
-        settings.writeEntry("Modules/shaLocal/%s" % idDB, self.shaLocal_)      
+        settings.writeEntry("Modules/activeIdArea/%s" % idDB, self.activeIdArea_)
+        settings.writeEntry("Modules/shaLocal/%s" % idDB, self.shaLocal_)
 
     """
     Lee el estado del sistema de módulos
@@ -660,12 +667,12 @@ class FLManagerModules(object):
         idDB = "noDB"
         if self.conn_.dbAux() is not None:
             idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
-        
-        setting = FLSettings()
+
+        settings = FLSettings()
         self.activeIdModule_ = settings.readEntry("Modules/activeIdModule/%s" % idDB, None)
         self.activeIdArea_ = settings.readEntry("Modules/activeIdArea/%s" % idDB, None)
         self.shaLocal_ = settings.readEntry("Modules/shaLocal/%s" % idDB, None)
-        
+
         if self.activeIdModule_ is None or self.activeIdModule_ not in self.listAllIdModules():
             self.setActiveIdModule(None)
 
@@ -682,6 +689,7 @@ class FLManagerModules(object):
         str_ret = FLStaticLoader.content(n, self.staticBdInfo_)
         if str_ret:
             from pineboolib.fllegacy.FLUtil import FLUtil
+
             util = FLUtil()
             sha = util.sha1(str_ret)
             if n in self.dictKeyFiles.keys():
@@ -694,6 +702,7 @@ class FLManagerModules(object):
 
                 if n.endswith(".mtd"):
                     from PyQt5.QtXml import QDomDocument
+
                     doc = QDomDocument(n)
                     if util.domDocumentSetContent(doc, str_ret):
                         mng = self.conn_.manager()
@@ -705,7 +714,7 @@ class FLManagerModules(object):
 
                         if not mng.existTable(mtd.name()):
                             mng.createTable(mng)
-                        elif (self.conn_.canRegenTables()):
+                        elif self.conn_.canRegenTables():
                             self.conn_.regenTable(mtd.name(), mtd)
 
         return str_ret

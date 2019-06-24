@@ -2,9 +2,8 @@
 
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-class QLabel(QtWidgets.QLabel):
-        
 
+class QLabel(QtWidgets.QLabel):
     @QtCore.pyqtProperty(str)
     def text(self):
         return super().text()
@@ -29,20 +28,20 @@ class QLabel(QtWidgets.QLabel):
     @QtCore.pyqtSlot(bool)
     def setShown(self, b):
         self.setVisible(b)
-    
+
     def getAlign(self):
         return super().alignment()
-    
+
     def setAlign(self, alignment_):
         self.setAlignment(alignment_)
-    
+
     def get_palette_fore_ground(self):
         return self.palette().text().color()
-    
+
     def set_palette_fore_ground(self, color):
         pal = self.palette()
         pal.setColor(pal.WindowText, color)
         self.setPalette(pal)
-        
+
     alignment = property(getAlign, setAlign)
     paletteForegroundColor = property(get_palette_fore_ground, set_palette_fore_ground)

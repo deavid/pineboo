@@ -16,23 +16,17 @@ from optparse import OptionParser
 
 def printr(*args):
     return
-    print(args[0], end=' ')
+    print(args[0], end=" ")
     for arg in args[1:]:
         if type(arg) is str:
             arg = arg.encode("utf-8")
-        print(repr(arg), end=' ')
+        print(repr(arg), end=" ")
     print()
 
 
 def entity_rep(txt, entities=""):
     entity_list = list("&'\"<>")
-    entity_dict = {
-        '"': "&quot;",
-        "'": "&apos;",
-        '<': "&lt;",
-        '>': "&gt;",
-        "&": "&amp;",
-    }
+    entity_dict = {'"': "&quot;", "'": "&apos;", "<": "&lt;", ">": "&gt;", "&": "&amp;"}
     if entities == "":
         entities = entity_list
     entities = list(entities)
@@ -110,8 +104,7 @@ class xmlElement(object):
         if self.tagname == "#comment":
             output += u"%s<!-- %s -->\n" % (depthpad, self.tdata)
         elif self.tagname[0] == "!":
-            output += u"%s<!DOCTYPE %s%s>\n" % (depthpad,
-                                                self.tagname[1:], txtattrs)
+            output += u"%s<!DOCTYPE %s%s>\n" % (depthpad, self.tagname[1:], txtattrs)
         elif self.children:
             output += u"%s<%s%s>\n" % (depthpad, self.tagname, txtattrs)
             for child in self.children:
@@ -132,8 +125,7 @@ class xmlElement(object):
                 else:
                     tdata = entity_rep(self.tdata)
 
-                output += u"%s<%s%s>%s</%s>\n" % (depthpad,
-                                                  self.tagname, txtattrs, tdata, self.tagname)
+                output += u"%s<%s%s>%s</%s>\n" % (depthpad, self.tagname, txtattrs, tdata, self.tagname)
 
         return output
 
@@ -163,8 +155,7 @@ class JSON_Reverter(JSON_Base):
             if self.encoding != "auto":
                 self.encoding = self.encoding.upper()
                 if val.upper() != self.encoding:
-                    print(" ignoring %s=%s , using specified value '%s' instead" % (
-                        key, val, self.encoding))
+                    print(" ignoring %s=%s , using specified value '%s' instead" % (key, val, self.encoding))
                 return
             self.encoding = val.upper()
             return
@@ -215,9 +206,9 @@ class JSON_Reverter(JSON_Base):
                     return
                 ftype = field[:tpos]
                 try:
-                    fvalue = json_loads(field[tpos + 1:])
+                    fvalue = json_loads(field[tpos + 1 :])
                 except ValueError:
-                    print("ValueError:", field[tpos + 1:])
+                    print("ValueError:", field[tpos + 1 :])
 
                 # if type(fvalue) is unicode:
                 #    self.foutput.write("%s = %s\n" % (ftype, fvalue.encode(self.encoding)))
@@ -246,10 +237,10 @@ class JSON_Reverter(JSON_Base):
 
     depth: 0,1,2,3,4...N
 
-    tagname: \w+ -> ElementTag
-    tagname: !\w+ -> DoctypeTag
-    tagname: ?\w+ -> XmlDeclTag (always: xml) (attrs = version, encoding?, standalone?)
-    tagname: #\w+ -> CommentTag (always: comment) (attrs = []) (tdata = comment)
+    tagname: \\w+ -> ElementTag
+    tagname: !\\w+ -> DoctypeTag
+    tagname: ?\\w+ -> XmlDeclTag (always: xml) (attrs = version, encoding?, standalone?)
+    tagname: #\\w+ -> CommentTag (always: comment) (attrs = []) (tdata = comment)
 
     attrs: dict { attr : val , attr2 : val2 }
 
@@ -382,7 +373,6 @@ class JSON_Reverter(JSON_Base):
 
 
 class JSON_Converter(JSON_Base):
-
     def init_vars(self):
         self.real_encoding = self.getRealEncoding()
         self.xmltag = None
@@ -437,8 +427,7 @@ class JSON_Converter(JSON_Base):
 
     def process(self):
         self.p.ParseFile(self.finput)
-        self.foutput.write(
-            b"!encoding: " + bytes(self.real_encoding, "UTF-8") + b"\n")
+        self.foutput.write(b"!encoding: " + bytes(self.real_encoding, "UTF-8") + b"\n")
         for tag in self.taglist:
             self.foutput.write(tag.export(self.real_encoding) + b"\n")
 
@@ -468,11 +457,11 @@ class JSON_Converter(JSON_Base):
     def XmlDeclHandler(self, version, encoding, standalone):
         printr("XmlDeclHandler:", version, encoding, standalone)
         # tagname: ?\w+ -> XmlDeclTag (always: xml) (attrs = version, encoding?, standalone?)
-        attrs = {'version': version}
+        attrs = {"version": version}
         if encoding:
-            attrs['encoding'] = encoding
+            attrs["encoding"] = encoding
         if standalone:
-            attrs['standalone'] = standalone
+            attrs["standalone"] = standalone
 
         self.startTag("?xml", attrs)
 
@@ -494,16 +483,15 @@ class JSON_Converter(JSON_Base):
         # se descarta el cierre...
 
     def StartDoctypeDeclHandler(self, doctypeName, systemId, publicId, has_internal_subset):
-        printr("StartDoctypeDeclHandler:", doctypeName,
-               systemId, publicId, has_internal_subset)
+        printr("StartDoctypeDeclHandler:", doctypeName, systemId, publicId, has_internal_subset)
         # tagname: !\w+ -> DoctypeTag
         attrs = {}
         if systemId:
-            attrs['systemId'] = systemId
+            attrs["systemId"] = systemId
         if publicId:
-            attrs['publicId'] = publicId
+            attrs["publicId"] = publicId
         if has_internal_subset:
-            attrs['has_internal_subset'] = has_internal_subset
+            attrs["has_internal_subset"] = has_internal_subset
 
         self.startTag("!" + doctypeName, attrs)
 
@@ -521,8 +509,7 @@ class JSON_Converter(JSON_Base):
         printr("ProcessingInstructionHandler:", target, data)
 
     def EntityDeclHandler(self, entityName, is_parameter_entity, value, base, systemId, publicId, notationName):
-        printr("EntityDeclHandler:", entityName, is_parameter_entity,
-               value, base, systemId, publicId, notationName)
+        printr("EntityDeclHandler:", entityName, is_parameter_entity, value, base, systemId, publicId, notationName)
 
     def NotationDeclHandler(self, notationName, base, systemId, publicId):
         printr("NotationDeclHandler:", notationName, base, systemId, publicId)
@@ -569,6 +556,7 @@ def autodetectXmlEncoding(rawtext):
 
     try:
         import chardet
+
         dictEncoding = chardet.detect(rawtext)
         encoding = dictEncoding["encoding"]
         return encoding
@@ -582,20 +570,13 @@ def main():
     parser = OptionParser()
     # parser.add_option("-f", "--file", dest="filename",
     #                  help="write report to FILE", metavar="FILE")
-    parser.add_option("-q", "--quiet",
-                      action="store_false", dest="verbose", default=True,
-                      help="don't print status messages to stdout")
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 
-    parser.add_option("--optdebug",
-                      action="store_true", dest="optdebug", default=False,
-                      help="debug optparse module")
+    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
 
-    parser.add_option("--debug",
-                      action="store_true", dest="debug", default=False,
-                      help="prints lots of useless messages")
+    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
-    parser.add_option("-E", "--encoding", dest="encoding", default="auto",
-                      help="Set encoding=ENC: auto,utf-8,iso-8859-15", metavar="ENC")
+    parser.add_option("-E", "--encoding", dest="encoding", default="auto", help="Set encoding=ENC: auto,utf-8,iso-8859-15", metavar="ENC")
 
     (options, args) = parser.parse_args()
     if options.optdebug:

@@ -1,13 +1,12 @@
-
 def do_test(code):
     print("Starting iface Class test . . .")
     print()
-    print("Is iface declared?", end=' ')
+    print("Is iface declared?", end=" ")
     if "iface" in code.byDefName:
         classname = None
         iface = code.byDefName["iface"]
         print("yes.")
-        print("iface type is %s/%s . . ." % iface.type, end=' ')
+        print("iface type is %s/%s . . ." % iface.type, end=" ")
         if iface.type != ("Declaration", "Variable"):
             print(" which differs from desired value!")
             return False
@@ -49,7 +48,7 @@ def analyzeClass(code, classname, parentlist=[]):
     #     begin = True
 
     print("Analyzing classname", classname, " . . .")
-    print("Is %s declared?" % classname, end=' ')
+    print("Is %s declared?" % classname, end=" ")
     if classname not in code.byDefName:
         print("No. Can't find the class declaration in the source. Aborting.")
         return False
