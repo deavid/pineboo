@@ -237,10 +237,10 @@ class JSON_Reverter(JSON_Base):
 
     depth: 0,1,2,3,4...N
 
-    tagname: \w+ -> ElementTag
-    tagname: !\w+ -> DoctypeTag
-    tagname: ?\w+ -> XmlDeclTag (always: xml) (attrs = version, encoding?, standalone?)
-    tagname: #\w+ -> CommentTag (always: comment) (attrs = []) (tdata = comment)
+    tagname: \\w+ -> ElementTag
+    tagname: !\\w+ -> DoctypeTag
+    tagname: ?\\w+ -> XmlDeclTag (always: xml) (attrs = version, encoding?, standalone?)
+    tagname: #\\w+ -> CommentTag (always: comment) (attrs = []) (tdata = comment)
 
     attrs: dict { attr : val , attr2 : val2 }
 

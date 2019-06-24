@@ -3,15 +3,13 @@
 # from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
 from pineboolib.utils import checkDependencies
-from pineboolib import decorators
 
+# from pineboolib import decorators
 # from pineboolib.fllegacy.flutil import FLUtil
 # from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 # from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 
-import traceback
 import pineboolib
-import sys
 import logging
 import json
 

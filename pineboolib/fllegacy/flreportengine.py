@@ -1,20 +1,11 @@
-from PyQt5 import QtGui
-from PyQt5 import QtCore
 from PyQt5 import QtXml
 
 from pineboolib import decorators
-from pineboolib.utils import filedir
-
-
-from pineboolib.fllegacy.fldiskcache import FLDiskCache
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib.fllegacy.flutil import FLUtil
 from PyQt5.QtXml import QDomNode as FLDomNodeInterface  # FIXME
 import pineboolib
 
-
 import logging
-import os
 
 
 class FLReportEngine(object):

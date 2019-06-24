@@ -13,16 +13,13 @@ from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlsavepoint import FLSqlSavePoint
 from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
-from pineboolib.fllegacy.flaction import FLAction
 
 
 import weakref
 import copy
 import datetime
 import logging
-import traceback
 import importlib
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -267,7 +264,7 @@ class PNBuffer(object):
         if field is None:
             return False
 
-        elif field.type_ is "double" and value not in ("", "-", None):
+        elif field.type_ == "double" and value not in ("", "-", None):
             if isinstance(value, str) and value.find(":") > -1:
                 # Convertimos a horas
                 list_ = value.split(":")
@@ -284,7 +281,7 @@ class PNBuffer(object):
         elif field.type_ in ("string", "stringlist") and not isinstance(value, str) and value is not None:
             value = str(value)
 
-        elif field.type_ is "time":
+        elif field.type_ == "time":
             if value is not None:
                 if isinstance(value, pineboolib.qsa.Date):
                     value = value.toString()
@@ -293,7 +290,7 @@ class PNBuffer(object):
             if isinstance(value, str) and value.find("T") > -1:
                 value = value[value.find("T") + 1 :]
 
-        elif field.type_ is "date":
+        elif field.type_ == "date":
             if isinstance(value, pineboolib.qsa.Date):
                 value = value.toString()
 
@@ -1194,7 +1191,7 @@ class FLSqlCursor(QtCore.QObject):
         if self.activatedBufferChanged():
             if pineboolib.project._DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
-                if bch_model and mch_model(fN, self) is False:
+                if bch_model and bch_model(fN, self) is False:
                     return
 
                 script = getattr(pineboolib.qsa, "formRecord%s" % self.action(), None)
@@ -1276,7 +1273,7 @@ class FLSqlCursor(QtCore.QObject):
         if self.activatedBufferChanged():
             if pineboolib.project._DGI.use_model() and self.meta_model():
                 bch_model = getattr(self.meta_model(), "bChCursor", None)
-                if bch_model and mch_model(fN, self) is False:
+                if bch_model and bch_model(fN, self) is False:
                     return
 
                 script = getattr(pineboolib.qsa, "formRecord%s" % self.action(), None)
@@ -2242,7 +2239,7 @@ class FLSqlCursor(QtCore.QObject):
 
             sqlPriKey = None
             sqlFrom = None
-            sqlWhere = None
+            # sqlWhere = None
             sqlPriKeyValue = None
             sqlOrderBy = None
 
@@ -3296,7 +3293,7 @@ class FLSqlCursor(QtCore.QObject):
         if not self.activatedBufferCommited():
             return True
 
-        from pineboolib.pncontrolsfactory import QMessageBox, QApplication, aqApp
+        from pineboolib.pncontrolsfactory import QMessageBox, aqApp
 
         if self.db().interactiveGUI() and self.db().canDetectLocks() and (checkLocks or self.metadata().detectLocks()):
             self.checkRisksLocks()
@@ -3348,8 +3345,8 @@ class FLSqlCursor(QtCore.QObject):
             model_name = "models.%s.%s_def" % (idMod, idMod)
             try:
                 model_module = importlib.import_module(model_name)
-            except:
-                pass
+            except Exception:
+                logger.exception("Error trying to import module %s", model_name)
 
         if not self.modeAccess() == FLSqlCursor.Browse and self.activatedCommitActions():
 

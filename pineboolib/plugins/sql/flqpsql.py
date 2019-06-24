@@ -1,9 +1,8 @@
-from PyQt5.QtCore import QTime, QDate, QDateTime
+from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
 from PyQt5.Qt import qWarning, QDomDocument, QRegExp
 from PyQt5.QtWidgets import QMessageBox, QProgressDialog
 
 from pineboolib.utils import text2bool, auto_qt_translate_text, checkDependencies
-from pineboolib import decorators
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -13,7 +12,6 @@ from sqlalchemy import create_engine
 
 import traceback
 import pineboolib
-import sys
 import logging
 
 
@@ -180,7 +178,7 @@ class FLQPSQL(object):
 
         elif type_ == "time":
             t = v.toTime()
-            res = "::text LIKE '" + t.toString(QtCore.Qt.ISODate) + "%%'"
+            res = "::text LIKE '" + t.toString(Qt.ISODate) + "%%'"
 
         else:
             res = str(v)
@@ -1079,7 +1077,7 @@ class FLQPSQL(object):
                 step += 1
                 vector_fields[str(step)] = oldField
 
-            step2 = 0
+            # step2 = 0
             ok = True
             x = 0
             for row in result_set:
@@ -1134,7 +1132,7 @@ class FLQPSQL(object):
                         else:
                             v = "NULL"[: newField.length()]
 
-                    new_b = []
+                    # new_b = []
                     for buffer in newBuffer:
                         if buffer[0] == newField.name():
                             new_buffer = []

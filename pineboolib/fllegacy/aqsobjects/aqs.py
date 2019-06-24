@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from PyQt5.QtGui import QColor, QPixmap
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFrame, QLabel, QSizePolicy, QApplication
 from PyQt5 import QtCore
 from PyQt5 import QtGui
@@ -91,7 +91,7 @@ class AQS(object):
             val = getattr(obj_, mp.name(), None)
             try:
                 val = val()
-            except:
+            except Exception:
                 pass
 
             if val is None:
@@ -107,7 +107,7 @@ class AQS(object):
 
             i += 1
 
-        if include_children == True:
+        if include_children:
 
             for child in obj_.children():
 
@@ -116,7 +116,7 @@ class AQS(object):
         return xml_
 
     """
-    Obtiene un QPixmap de un nombre de ficehro dado
+    Obtiene un QPixmap de un nombre de fichero dado
     @param name. Nombre del fichero
     @return QPixmap
     """

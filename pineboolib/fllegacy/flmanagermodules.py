@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
-import traceback
 import logging
 
 import pineboolib
 from pineboolib import decorators
-from pineboolib.utils import filedir, _path, cacheXPM
+from pineboolib.utils import filedir, cacheXPM
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaction import FLAction
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flmodulesstaticloader import FLStaticLoader, AQStaticBdInfo
 from pineboolib.pncontrolsfactory import aqApp
-
-from PyQt5 import QtCore
-
 
 """
 Gestor de módulos.
@@ -224,7 +220,7 @@ class FLManagerModules(object):
 
     def contentCached(self, n, shaKey=None):
 
-        not_sys_table = self.conn_.dbAux() and n[0:3] is not "sys" and not self.conn_.manager().isSystemTable(n)
+        not_sys_table = self.conn_.dbAux() and n[0:3] != "sys" and not self.conn_.manager().isSystemTable(n)
         if not_sys_table and self.staticBdInfo_ and self.staticBdInfo_.enabled_:
             str_ret = self.contentStatic(n)
             if str_ret:
@@ -618,7 +614,7 @@ class FLManagerModules(object):
         while q.next():
             self.listIdAreas_.append(str(q.value(0)))
 
-        if not "sys" in self.listIdAreas_:
+        if "sys" not in self.listIdAreas_:
             self.listIdAreas_.append("sys")
 
     """
@@ -672,7 +668,7 @@ class FLManagerModules(object):
         if self.conn_.dbAux() is not None:
             idDB = "%s%s%s%s%s" % (self.conn_.database(), self.conn_.host(), self.conn_.user(), self.conn_.driverName(), self.conn_.port())
 
-        setting = FLSettings()
+        settings = FLSettings()
         self.activeIdModule_ = settings.readEntry("Modules/activeIdModule/%s" % idDB, None)
         self.activeIdArea_ = settings.readEntry("Modules/activeIdArea/%s" % idDB, None)
         self.shaLocal_ = settings.readEntry("Modules/shaLocal/%s" % idDB, None)

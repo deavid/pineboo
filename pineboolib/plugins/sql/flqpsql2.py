@@ -1,13 +1,13 @@
-from pineboolib.utils import checkDependencies
 import logging
+from pineboolib.utils import checkDependencies
 from sqlalchemy import create_engine
 
 from PyQt5.Qt import qWarning
 from PyQt5.QtWidgets import QMessageBox
 
-logger = logging.getLogger(__name__)
-
 from pineboolib.plugins.sql.flqpsql import FLQPSQL
+
+logger = logging.getLogger(__name__)
 
 
 class FLQPSQL2(FLQPSQL):
@@ -33,7 +33,7 @@ class FLQPSQL2(FLQPSQL):
         import pg8000
         import traceback
 
-        conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (db_name, db_host, db_port, db_userName, db_password)
+        # conninfostr = "dbname=%s host=%s port=%s user=%s password=%s connect_timeout=5" % (db_name, db_host, db_port, db_userName, db_password)
 
         try:
             self.conn_ = pg8000.connect(user=db_userName, host=db_host, port=int(db_port), database=db_name, password=db_password, timeout=5)

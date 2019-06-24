@@ -2,10 +2,9 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 from PyQt5 import QtXml
 from PyQt5.QtCore import Qt, QObject
-from PyQt5.Qt import QFileDialog, QMessageBox, QWidget
+from PyQt5.Qt import QFileDialog, QMessageBox
 
 from pineboolib import decorators
-from pineboolib.utils import filedir
 import pineboolib
 
 
@@ -14,7 +13,6 @@ from pineboolib.fllegacy.flpicture import FLPicture
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
 from pineboolib.fllegacy.flstylepainter import FLStylePainter
-from pineboolib.fllegacy.flsmtpclient import FLSmtpClient
 from pineboolib.fllegacy.flreportengine import FLReportEngine
 import logging
 
@@ -83,7 +81,7 @@ class FLReportViewer(QObject):
         # self.setFont(QtWidgets.QApplication.font())
         # self.setFocusPolicy(Qt.StrongFocus)
 
-        util = FLUtil()
+        # util = FLUtil()
 
         # self.ui_["lePara"].setText(str(util.readSettingEntry("email/to")))
         # self.ui_["leDe"].setText(str(util.readSettingEntry("email/from")))
@@ -226,7 +224,7 @@ class FLReportViewer(QObject):
 
         ret = self.rptViewer_.renderReport(init_row, init_col, flags)
         self.report_ = self.rptViewer_.reportPages()
-        return True
+        return ret
 
     @decorators.BetaImplementation
     def slotFirstPage(self):

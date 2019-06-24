@@ -801,7 +801,7 @@ class FLUtil(QtCore.QObject):
         if isinstance(d1, str):
             d1 = d1[:10]
 
-        if not isinstance(d1, str) or d1 is "":
+        if not isinstance(d1, str) or d1 == "":
             if d1 not in (None, ""):
                 logger.error("daysTo: No reconozco el tipo de dato %s", type(d1))
             return None
@@ -815,7 +815,7 @@ class FLUtil(QtCore.QObject):
         if isinstance(d2, str):
             d2 = d2[:10]
 
-        if not isinstance(d2, str) or d2 is "":
+        if not isinstance(d2, str) or d2 == "":
             if d2 not in (None, ""):
                 logger.error("daysTo: No reconozco el tipo de dato %s", type(d2))
             return None
@@ -841,7 +841,7 @@ class FLUtil(QtCore.QObject):
             v += "1"
 
         ret = round(float(v)) if partDecimal == 0 else round(float(v), partDecimal)
-        """    
+        """
         d = float(v) * 10**partDecimal
         d = round(d)
         d = d / 10**partDecimal

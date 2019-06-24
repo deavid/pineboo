@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib.fllegacy.flutil import FLUtil
-from pineboolib import decorators
+from pineboolib.pncontrolsfactory import aqApp
 
 from PyQt5 import QtWidgets, Qt, QtCore
 
@@ -250,7 +250,7 @@ class FLStaticLoader(QtCore.QObject):
 
                 msg = "%s -> ...%s" % (n, info.path_[0:40])
 
-                if not msg in warn_.warns_:
+                if msg not in warn_.warns_:
                     warn_.warns_.append(msg)
                     warn_.paths_.append("%s:%s" % (n, info.path_))
                     if settings.readBoolEntry("ebcomportamiento/SLConsola", False):
@@ -296,7 +296,7 @@ class FLStaticLoaderWarning(QtCore.QObject):
         scripts = aqApp.project().scripts()
         for it in scripts:
             if it.baseFileName() == name:
-                return src
+                return it
 
         return None
 

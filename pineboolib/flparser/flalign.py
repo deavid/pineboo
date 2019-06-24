@@ -59,16 +59,16 @@ class LineNumber(object):
         self.lines = lines
 
     def line(self):
-        l = self.lines[self.nl]
+        lin = self.lines[self.nl]
         if self.diffFrom:
-            return l[2:]
+            return lin[2:]
         else:
-            return l[:]
+            return lin[:]
 
     def symbol(self):
-        l = self.lines[self.nl]
+        lin = self.lines[self.nl]
         if self.diffFrom:
-            return l[0]
+            return lin[0]
         else:
             return " "
 
@@ -422,7 +422,7 @@ def writeAlignedFile(C, A, B, prefer="C", debug=False, quiet=False, swap=False):
             thisclass = sline[1]
             classlist.append(thisclass)
             if lastclass:
-                rs1 = re.search("class (\w+) extends (\w+)", text)
+                rs1 = re.search(r"class (\w+) extends (\w+)", text)
                 if rs1:
                     if lastclass != rs1.group(2):
                         # print "INFO: Changing >> class", thisclass, "extends",rs1.group(2), "--> extends", lastclass

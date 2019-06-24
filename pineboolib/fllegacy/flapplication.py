@@ -6,12 +6,21 @@ from PyQt5 import QtCore, QtWidgets
 from pineboolib.fllegacy.fltranslator import FLTranslator
 from pineboolib.fllegacy.flsettings import FLSettings
 from pineboolib import decorators
+
 import pineboolib
 
-from PyQt5.QtCore import QTimer, pyqtSignal, QPoint, QEvent, QRect, QObject
+from PyQt5.QtCore import QTimer, QEvent, QRect, QObject
 
 
 logger = logging.getLogger("FLApplication")
+
+
+class QCursor:
+    "FIXME!!!"
+
+
+class FLPopupWarn:
+    "FIXME!!!"
 
 
 class FLApplication(QtCore.QObject):
@@ -201,7 +210,7 @@ class FLApplication(QtCore.QObject):
         elif evt == QEvent.Close:
             if obj == self.container_:
                 ret = self.generalExit()
-                if ret == False:
+                if not ret:
                     obj.setDisabled(False)
                     ev.ignore()
                 return True
@@ -424,7 +433,7 @@ class FLApplication(QtCore.QObject):
         if not self.container_:
             return
 
-        from pineboolib.pncontrolsfactory import QApplication, QMainWindow, QAction, QActionGroup, QToolBar, QWidget
+        from pineboolib.pncontrolsfactory import QApplication, QToolBar
 
         if w == self.container_ or not w:
             QApplication.setActiveWindow(self.container_)
@@ -482,7 +491,7 @@ class FLApplication(QtCore.QObject):
         pass
 
     def initToolBox(self):
-        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS, QSize
+        from pineboolib.pncontrolsfactory import QToolBox, QMenu, QToolBar, QActionGroup, QAction, QIcon, AQS
         from PyQt5.QtWidgets import QToolButton
 
         self.tool_box_ = self.main_widget_.findChild(QToolBox, "toolBox")
@@ -576,7 +585,7 @@ class FLApplication(QtCore.QObject):
                 ag.addAction(new_module_action)
                 c += 1
 
-            sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+            # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
             lay = new_area_bar.layout()
             for child in new_area_bar.children():
@@ -824,7 +833,7 @@ class FLApplication(QtCore.QObject):
         if pineboolib.project._DGI.localDesktop():
             from pineboolib.dlgabout.about_pineboo import about_pineboo
 
-            about_dlg = about_pineboo()
+            about_pineboo()
 
     def statusHelpMsg(self, text):
         if FLSettings().readBoolEntry("application/isDebuggerMode"):
@@ -876,7 +885,7 @@ class FLApplication(QtCore.QObject):
             return False
 
         for window in self.subWindowList():
-            s = w.findChild(pineboolib.pncontrolsfactory.FLFormDB)
+            s = window.findChild(pineboolib.pncontrolsfactory.FLFormDB)
             if s.idMDI() == id:
                 window.showNormal()
                 window.setFocus()
@@ -1052,7 +1061,7 @@ class FLApplication(QtCore.QObject):
         if not self.main_widget_:
             mwi = self.mainWidget()
             if mwi:
-                db = self.db().driverNameToDriverAlias(self.db().driverName())
+                # db = self.db().driverNameToDriverAlias(self.db().driverName())
                 self.mainWidget().setWindowTitle("Pineboo v%s - %s" % (pineboolib.project.version, self.last_text_caption_))
 
             return
@@ -1089,7 +1098,7 @@ class FLApplication(QtCore.QObject):
     def popupWarn(self, msg_warn, script_calls=[]):
         mw = self.container_ or self.main_widget_
 
-        from pineboolib.pnconotrlsfactory import QWhatsThis, QMainWindow, QApplication
+        from pineboolib.pnconotrlsfactory import QWhatsThis, QMainWindow, QApplication, aqApp
 
         wi = QWhatsThis
 
@@ -1111,7 +1120,7 @@ class FLApplication(QtCore.QObject):
         if not mw.isHidden():
             wi.showText(self.mainWidget().mapToGlobal(QtCore.QPoint(mw.width() * 2, 0)), msg_warn, mw)
             QtCore.QTimer().singleShot(4000, wi.hideText)
-            qApp.processEvents()
+            aqApp.processEvents()
 
     @decorators.NotImplementedWarn
     def checkDatabaseLocks(self, timer_):
@@ -1267,6 +1276,8 @@ class FLApplication(QtCore.QObject):
 
     @decorators.NotImplementedWarn
     def classType(self, n):
+        from pineboolib.pncontrolsfactory import resolveObject
+
         return type(resolveObject(n)())
 
     # def __getattr__(self, name):
@@ -1546,7 +1557,7 @@ class FLApplication(QtCore.QObject):
     Busca la traducción de un texto a un Idioma dado
     @param s, Cadena de texto
     @param l, Idioma.
-    @return Cadena de texto traducida. 
+    @return Cadena de texto traducida.
     """
 
     @decorators.BetaImplementation

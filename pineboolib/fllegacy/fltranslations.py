@@ -32,7 +32,7 @@ class FLTranslations(object):
     """
 
     def loadTsFile(self, tor, ts_file_name, verbose):
-        qm_file_name = "%s.qm" % ts_file_name[:-3]
+        # qm_file_name = "%s.qm" % ts_file_name[:-3]
         ok = False
         if os.path.exists(ts_file_name):
             ok = tor.load(ts_file_name)

@@ -1,4 +1,6 @@
 from PyQt5.QtXml import QDomDocument
+from PyQt5 import QtCore
+
 from pineboolib.fllegacy.flutil import FLUtil
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flaccesscontrolfactory import FLAccessControlFactory
@@ -22,11 +24,11 @@ class FLAccessControlLists(object):
     Diccionario (lista) que mantiene los objetos de las reglas de control de acceso establecidas.
     La clave que identifica a cada objeto está formada por el siguiente literal:
 
-    \code
+    \\code
 
     FLAccessControl::type + "::" + FLAccessControl::name + "::" + FLAccessControl::user
 
-    \endcode
+    \\endcode
     """
 
     accessControlList_ = []
@@ -78,7 +80,7 @@ class FLAccessControlLists(object):
             self.accessControlList_ = []
 
         if aclXml and not util.domDocumentSetContent(doc, aclXml):
-            qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))
+            QtCore.qWarning("FLAccessControlList : " + FLUtil().tr("Lista de control de acceso errónea"))
             return
 
         self.accessControlList_ = {}
@@ -119,7 +121,7 @@ class FLAccessControlLists(object):
         type = FLAccessControlFactory().type(obj)
         name = obj.objectName() if hasattr(obj, "objectName") else ""
         user = pineboolib.project.conn.user()
-        if type is "" or name is "" or user is "":
+        if type == "" or name == "" or user == "":
             return
 
         ac = self.accessControlList_["%s::%s::%s" % (type, name, user)]

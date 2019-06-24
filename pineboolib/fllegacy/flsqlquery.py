@@ -415,15 +415,15 @@ class FLSqlQuery(object):
         else:
             logger.warning("**No hay niveles de agrupamiento")
 
-        logger.warning("DEBUG : Parámetros : ")
-        if self.d.parameterDict_:
-            if par in self.d.parameterDict_:
-                logger.warning("**Nombre : %s", par.name())
-                logger.warning("Alias : %s", par.alias())
-                logger.warning("Tipo : %s", par.type())
-                logger.warning("Valor : %s", par.value())
-        else:
-            logger.warning("**No hay parametros")
+        # logger.warning("DEBUG : Parámetros : ")
+        # if self.d.parameterDict_:
+        #     if par in self.d.parameterDict_:
+        #         logger.warning("**Nombre : %s", par.name())
+        #         logger.warning("Alias : %s", par.alias())
+        #         logger.warning("Tipo : %s", par.type())
+        #         logger.warning("Valor : %s", par.value())
+        # else:
+        #     logger.warning("**No hay parametros")
 
         logger.warning("DEBUG : Sentencia SQL")
         logger.warning("%s", self.sql())
@@ -464,7 +464,7 @@ class FLSqlQuery(object):
         name = None
         table_name = None
         field_name = None
-        field = None
+        # field = None
         mtd_field = None
         retorno = None
 

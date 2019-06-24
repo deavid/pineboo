@@ -82,8 +82,9 @@ class FLPosPrinter:
             ret = 80
         elif self.paperWidth_ is P69_5MM:
             ret = 65
-        elif self.paperWidth_ is P57MM_5MM:
+        elif self.paperWidth_ is P57_5MM:
             ret = 55
+        return ret
 
     @decorators.NotImplementedWarn
     def initFile(self):

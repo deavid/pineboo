@@ -1,9 +1,9 @@
-from PyQt5.Qt import qWarning, QApplication, QRegExp
+from PyQt5.Qt import qWarning, QApplication, QRegExp, qApp
+from PyQt5.QtCore import QTime, QDate, QDateTime, Qt
 from PyQt5.QtXml import QDomDocument
-from PyQt5.QtWidgets import QMessageBox, QProgressDialog
+from PyQt5.QtWidgets import QMessageBox
 
 from pineboolib.utils import auto_qt_translate_text, checkDependencies
-from pineboolib import decorators
 from pineboolib.utils import text2bool
 from pineboolib.fllegacy.flsqlquery import FLSqlQuery
 from pineboolib.fllegacy.flsqlcursor import FLSqlCursor
@@ -11,12 +11,8 @@ from pineboolib.fllegacy.flfieldmetadata import FLFieldMetaData
 
 from pineboolib.fllegacy.flutil import FLUtil
 import pineboolib
-
-import sys
 import traceback
-
 import logging
-from PyQt5.QtCore import QTime, QDate, QDateTime
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +167,7 @@ class FLMYSQL_MYISAM(object):
 
         elif type_ == "time":
             t = v.toTime()
-            res = " LIKE '" + t.toString(QtCore.Qt.ISODate) + "%'"
+            res = " LIKE '" + t.toString(Qt.ISODate) + "%'"
 
         else:
             res = str(v)
@@ -184,7 +180,7 @@ class FLMYSQL_MYISAM(object):
 
     def formatValue(self, type_, v, upper):
 
-        util = FLUtil()
+        # util = FLUtil()
 
         s = None
 
@@ -262,8 +258,8 @@ class FLMYSQL_MYISAM(object):
         #    self.setLastError("No se puede iniciar la transacción", "BEGIN WORK")
         #    return None
 
-        res = None
-        row = None
+        # res = None
+        # row = None
         max = 0
         cur_max = 0
         updateQry = False
@@ -303,11 +299,9 @@ class FLMYSQL_MYISAM(object):
         else:
             strQry = "INSERT INTO flseqs (tabla,campo,seq) VALUES('%s','%s',%s)" % (table, field, ret)
 
-        result = None
-
         if strQry is not None:
             try:
-                result = cursor.execute(strQry)
+                cursor.execute(strQry)
             except Exception:
                 logger.warning("%s:: La consulta a la base de datos ha fallado\n %s", self.name_, traceback.format_exc())
                 self.rollbackTransaction()
@@ -509,7 +503,7 @@ class FLMYSQL_MYISAM(object):
 
         primaryKey = None
         sql = "CREATE TABLE %s (" % tmd.name()
-        seq = None
+        # seq = None
 
         fieldList = tmd.fieldList()
 
@@ -600,8 +594,8 @@ class FLMYSQL_MYISAM(object):
         qry = FLSqlQuery(None, "dbAux")
         qry2 = FLSqlQuery(None, "dbAux")
         qry3 = FLSqlQuery(None, "dbAux")
-        qry4 = FLSqlQuery(None, "dbAux")
-        qry5 = FLSqlQuery(None, "dbAux")
+        # qry4 = FLSqlQuery(None, "dbAux")
+        # qry5 = FLSqlQuery(None, "dbAux")
         steps = 0
         self.active_create_index = False
 
@@ -888,7 +882,7 @@ class FLMYSQL_MYISAM(object):
         self.db_.dbAux().transaction()
 
         if not force and key and len(key) == 40:
-            c = FLSqlCursor("flfiles", True, sel.db_.dbAux())
+            c = FLSqlCursor("flfiles", True, self.db_.dbAux())
             # oldCursor.setModeAccess(oldCursor.Browse)
             c.setForwardOnly(True)
             c.setFilter("nombre='%s.mtd'" % renameOld)
@@ -965,7 +959,7 @@ class FLMYSQL_MYISAM(object):
                 step += 1
                 vector_fields[str(step)] = oldField
 
-            step2 = 0
+            # step2 = 0
             ok = True
             x = 0
             for row in result_set:
@@ -1012,7 +1006,7 @@ class FLMYSQL_MYISAM(object):
                         else:
                             v = "NULL"[: newField.length()]
 
-                    new_b = []
+                    # new_b = []
                     for buffer in newBuffer:
                         if buffer[0] == newField.name():
                             new_buffer = []
@@ -1308,7 +1302,7 @@ class FLMYSQL_MYISAM(object):
         try:
             q = self.fix_query(q)
             cursor.execute(q)
-        except Exception as exc:
+        except Exception:
             self.setLastError("No se puedo ejecutar la siguiente query %s" % q, q)
             logger.warning("MySQLDriver:: No se puedo ejecutar la siguiente query %s\n %s", q, traceback.format_exc())
 

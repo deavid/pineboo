@@ -749,9 +749,9 @@ class Variable(ASTPython):
             elif dtype == "Number":
                 yield "expr", "0"
             else:
-                parent1 = self.elem.get("parent_")
-                parent2 = parent1.get("parent_")
-                parent3 = parent2.get("parent_")
+                # parent1 = self.elem.get("parent_")
+                # parent2 = parent1.get("parent_")
+                # parent3 = parent2.get("parent_")
                 # print("**", parent2.tag, parent3.tag)
                 # if parent2.tag == "Source" and parent3.tag == "Class":
                 #    yield "expr", "None"
@@ -1032,7 +1032,7 @@ class Member(ASTPython):
                         value = value[: len(value) - 1]
                         if value.find(",") > -1:
                             if (value.find("(") < value.find(",")) and value.find(")") < value.find(","):
-                                i, l = value.split(",")
+                                i, k = value.split(",")
                             # if (len(value.split(",")) == 2 and value.find("(") == -1) or value.find("(") < value.find(","):
                             #    i, l = value.split(",")
                             #    if i.find("(") > -1 and i.find(")") == -1:
@@ -1040,13 +1040,13 @@ class Member(ASTPython):
                             #        l = l.repalce(")", "")
                             else:
                                 i = 0
-                                l = value
+                                k = value
 
                         else:
                             i = 0
-                            l = value
+                            k = value
 
-                        value = "%s + %s:" % (i, l)
+                        value = "%s + %s:" % (i, k)
                         arguments = ["%s[%s]" % (".".join(part1), value)] + part2
 
                     elif member == "length":
@@ -1308,12 +1308,12 @@ class New(ASTPython):
                 ident = data[: data.find("(")]
                 if ident.find(".") == -1:
                     parentClass_ = self.elem.get("parent_")
-                    classIdent_ = False
+                    # classIdent_ = False
                     while parentClass_:
                         if parentClass_.tag == "Source":
                             for m in parentClass_.findall("Class"):
                                 if m.get("name") == ident:
-                                    classIdent_ = True
+                                    # classIdent_ = True
                                     break
                         parentClass_ = parentClass_.get("parent_")
 
@@ -1382,7 +1382,7 @@ class Identifier(ASTPython):
 class regex(ASTPython):
     def generate(self, **kwargs):
         child = self.elem.find("regexbody")
-        args_ = self.elem.items()
+        # args_ = self.elem.items()
         if not child:
             return
 

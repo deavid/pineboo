@@ -56,7 +56,7 @@ class FLFieldMetaData(object):
         aN,
         isPrimaryKey,
         t,
-        l=0,
+        length_=0,
         c=False,
         v=True,
         ed=True,
@@ -72,7 +72,7 @@ class FLFieldMetaData(object):
         gen=True,
         iCK=False,
     ):
-        self.d = FLFieldMetaDataPrivate(n, a, aN, isPrimaryKey, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK)
+        self.d = FLFieldMetaDataPrivate(n, a, aN, isPrimaryKey, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK)
 
     """
     desctructor
@@ -897,7 +897,7 @@ class FLFieldMetaDataPrivate(object):
         self.associatedFieldName_ = None
         self.mtd_ = None
 
-    def inicialize(self, n, a, aN, iPK, t, l, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
+    def inicialize(self, n, a, aN, iPK, t, length_, c, v, ed, pI, pD, iNX, uNI, coun, defValue, oT, rX, vG, gen, iCK):
         self.fieldName_ = n.lower()
         self.alias_ = a
         if c:
@@ -906,7 +906,7 @@ class FLFieldMetaDataPrivate(object):
             self.allowNull_ = aN
         self.isPrimaryKey_ = iPK
         self.type_ = t
-        self.length_ = l
+        self.length_ = length_
         self.calculated_ = c
         self.visible_ = v
         self.editable_ = ed
@@ -939,7 +939,7 @@ class FLFieldMetaDataPrivate(object):
                 self.type_ = "uint"
             logger.debug("%s:: El campo %s no tiene especificado tipo y se especifica tipo %s", __name__, self.fieldName_, self.type_)
 
-        if int(l) < 0:
+        if int(length_) < 0:
             self.length_ = 0
 
         if int(pI) < 0:
@@ -948,7 +948,7 @@ class FLFieldMetaDataPrivate(object):
             self.partDecimal_ = 0
         # print("Tipo ", t)
 
-        if not t == "string" and not int(l) == 0:
+        if not t == "string" and not int(length_) == 0:
             self.length_ = 0
 
         # if not t == "int" and not t == "uint" and t == "double" and not int(pI) == 0:

@@ -4,9 +4,7 @@ import os
 from pineboolib.utils import filedir
 from pineboolib.fllegacy.fltranslations import FLTranslations
 from pineboolib.fllegacy.flsettings import FLSettings
-from pineboolib import decorators
 
-from PyQt5 import QtCore
 from PyQt5.Qt import QTranslator
 import logging
 
@@ -99,10 +97,10 @@ class FLTranslator(QTranslator):
             root_ = load2xml(file_name)
             for context in root_.findall("context"):
                 context_dict_key = context.find("name").text
-                if not context_dict_key in self.ts_translation_contexts.keys():
+                if context_dict_key not in self.ts_translation_contexts.keys():
                     self.ts_translation_contexts[context_dict_key] = {}
                 for message in context.findall("message"):
-                    translation = getattr(message, "translation", None)
+                    # translation = getattr(message, "translation", None)
                     translation_text = message.find("translation").text
                     if translation_text is not None:
                         source_text = message.find("source").text

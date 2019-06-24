@@ -36,25 +36,25 @@ class FLNetwork(QtCore.QObject):
         try:
             self.reply.uploadProgress.disconnect(self._slotNetworkProgress)
             self.reply.downloadProgress.disconnect(self._slotNetworkProgress)
-        except:
+        except Exception:
             pass
 
         self.reply.downloadProgress.connect(self._slotNetworkProgress)
 
     @decorators.BetaImplementation
     def put(self, data, location):
-        self.request.setUrl(QtCore.QUrl("%s%s" % (self.url, localtion)))
+        self.request.setUrl(QtCore.QUrl("%s%s" % (self.url, location)))
         self.reply = self.manager.put(data, self.request)
         try:
             self.reply.uploadProgress.disconnect(self._slotNetworkProgress)
             self.reply.downloadProgress.disconnect(self._slotNetworkProgress)
-        except:
+        except Exception:
             pass
         self.uploadProgress.connect(self.slotNetworkProgress)
 
     @decorators.BetaImplementation
     def copy(self, fromLocation, toLocation):
-        self.request.setUrl("%s%s" % (self.url, fromLocaltion))
+        self.request.setUrl("%s%s" % (self.url, fromLocation))
         data = self.manager.get(self.request)
         self.put(data.readAll(), toLocation)
 
@@ -77,7 +77,7 @@ class FLNetwork(QtCore.QObject):
         reply_ = self.reply.readAll().data()
         try:
             data_ = str(reply_, encoding="iso-8859-15")
-        except:
+        except Exception:
             data_ = str(reply_, encoding="utf-8")
 
         self.data.emit(data_)

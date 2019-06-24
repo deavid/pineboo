@@ -153,7 +153,7 @@ class AQSql(object):
     def del_(self, cur_or_table, where="", conn_name="default"):
 
         if not isinstance(cur_or_table, str):
-
+            cur = cur_or_table
             if not cur:
                 return False
 
@@ -189,8 +189,8 @@ class AQSql(object):
 
             return ok
         else:
-            cur = AQSqlCursor(cur_or_table, True, conn_name)
-            cur.setForwardOnly(true)
+            cur = AQSqlCursor(cur_or_table, True, conn_name)  # FIXME: Import needed
+            cur.setForwardOnly(True)
             return cur.del_(where)
 
 

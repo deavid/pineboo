@@ -82,7 +82,7 @@ class opInfo:
     indicando el nombre de la clave primaria y el cursor al que pertenece.
 
     Ejemplo:
-      \code
+      \\code
       FLSqlCursor cur( "articulos" );
       FLSqlSavePoint savePoint();
 
@@ -105,7 +105,7 @@ class opInfo:
       cur.del();
 
       savePoint.undo(); // Deshace todas las operaciones anteriores
-      \endcode
+      \\endcode
 
     @author InfoSiAL S.L.
     """
