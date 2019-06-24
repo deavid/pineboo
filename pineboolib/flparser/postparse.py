@@ -7,7 +7,7 @@ import os.path
 import sys
 import imp
 import traceback
-from xml import etree
+from xml.etree import ElementTree
 from xml.dom import minidom
 
 
@@ -29,6 +29,7 @@ def parse_for(*tagnames):
         for n in tagnames:
             KNOWN_PARSERS[n] = fn
         return fn
+
     return decorator
 
 
@@ -70,7 +71,7 @@ class TagObject(object, metaclass=TagObjectFactory):
     name_is_first_id = False
     debug_other = True
     adopt_childs_tags = []
-    omit_tags = ['empty']
+    omit_tags = ["empty"]
     callback_subelem = {}
     promote_child_if_alone = False
 
@@ -84,7 +85,7 @@ class TagObject(object, metaclass=TagObjectFactory):
 
     def __init__(self, tagname):
         self.astname = tagname
-        self.xml = etree.ElementTree.Element(self.tagname(tagname))
+        self.xml = ElementTree.Element(self.tagname(tagname))
         self.xmlname = None
         self.subelems = []
         self.values = []
@@ -96,8 +97,8 @@ class TagObject(object, metaclass=TagObjectFactory):
             if self.set_child_argn:
                 child.set("argn", str(argn))
             else:
-                if 'argn' in child.attrib:
-                    del child.attrib['argn']
+                if "argn" in child.attrib:
+                    del child.attrib["argn"]
             self.xml.append(child)
 
     def omit_subelem(self, argn, subelem):
@@ -172,10 +173,8 @@ class TypedObject(ListObject):
 
 
 class Source(ListObject):
-    tags = ["source", "basicsource", "classdeclarationsource",
-            "statement_list", "statement_block"]
-    adopt_childs_tags = ['source_element',
-                         'statement_list', 'statement', "statement_block"]
+    tags = ["source", "basicsource", "classdeclarationsource", "statement_list", "statement_block"]
+    adopt_childs_tags = ["source_element", "statement_list", "statement", "statement_block"]
 
 
 class Identifier(NamedObject):
@@ -189,7 +188,7 @@ class Identifier(NamedObject):
 
 class Arguments(ListObject):
     tags = ["arglist"]
-    adopt_childs_tags = ['vardecl_list']
+    adopt_childs_tags = ["vardecl_list"]
 
 
 class VariableType(NamedObject):
@@ -238,7 +237,7 @@ class Variable(NamedObject):
 
 class DeclarationBlock(ListObject):
     tags = ["vardeclaration"]
-    adopt_childs_tags = ['vardecl_list']
+    adopt_childs_tags = ["vardecl_list"]
 
     def add_other(self, argn, vtype, value):
         if argn == 0:
@@ -264,14 +263,14 @@ class Member(TagObject):
     debug_other = False
     set_child_argn = False
     tags = ["member_var", "member_call"]
-    adopt_childs_tags = ['varmemcall', "member_var", "member_call"]
+    adopt_childs_tags = ["varmemcall", "member_var", "member_call"]
 
 
 class ArrayMember(TagObject):
     debug_other = False
     set_child_argn = False
     tags = ["array_member"]
-    adopt_childs_tags = ['variable_1', "func_call"]
+    adopt_childs_tags = ["variable_1", "func_call"]
 
 
 class InstructionCall(TagObject):
@@ -369,7 +368,7 @@ class Else(ListObject):
 
 class DictObject(ListObject):
     tags = ["dictobject_value_elemlist", "dictobject_value"]
-    adopt_childs_tags = ['dictobject_value_elemlist', "dictobject_value"]
+    adopt_childs_tags = ["dictobject_value_elemlist", "dictobject_value"]
 
 
 class DictElem(ListObject):
@@ -398,12 +397,12 @@ class InstructionUpdate(ListObject):
 
 class Switch(ListObject):
     tags = ["switch"]
-    adopt_childs_tags = ['case_cblock_list', 'case_block_list']
+    adopt_childs_tags = ["case_cblock_list", "case_block_list"]
 
 
 class CaseList(ListObject):
     tags = ["case_block_list"]
-    adopt_childs_tags = ['case_cblock_list', 'case_block_list']
+    adopt_childs_tags = ["case_cblock_list", "case_block_list"]
 
 
 class Case(ListObject):
@@ -460,7 +459,7 @@ class Delete(ListObject):
 
 class Parentheses(ListObject):
     tags = ["parentheses"]
-    adopt_childs_tags = ['base_expression']
+    adopt_childs_tags = ["base_expression"]
 
 
 class OpUnary(TypedObject):
@@ -487,6 +486,8 @@ class Unknown(TagObject):
     @classmethod
     def can_process_tag(self, tagname):
         return True
+
+
 # -----------------
 
 
@@ -504,7 +505,7 @@ def create_xml(tagname):
 def parse_unknown(tagname, treedata):
     xmlelem = create_xml(tagname)
     i = 0
-    for k, v in treedata['content']:
+    for k, v in treedata["content"]:
         if type(v) is dict:
             instruction = parse(k, v)
             xmlelem.add_subelem(i, instruction)
@@ -531,18 +532,18 @@ class Module(object):
     def loadModule(self):
         fp = None
         try:
-            description = ('.py', 'U', imp.PY_SOURCE)
+            description = (".py", "U", imp.PY_SOURCE)
             # description = ('.pyc', 'U', PY_COMPILED)
             pathname = os.path.join(self.path, self.name)
             fp = open(pathname)
-            name = self.name[:self.name.find(".")]
+            name = self.name[: self.name.find(".")]
             # fp, pathname, description = imp.find_module(self.name,[self.path])
             self.module = imp.load_module(name, fp, pathname, description)
             result = True
         except FileNotFoundError:
             print("Fichero %r no encontrado" % self.name)
             result = False
-        except Exception as e:
+        except Exception:
             print(traceback.format_exc())
             result = False
         if fp:
@@ -552,41 +553,23 @@ class Module(object):
 
 def parseArgs(argv):
     parser = OptionParser()
-    parser.add_option("-q", "--quiet",
-                      action="store_false", dest="verbose", default=True,
-                      help="don't print status messages to stdout")
+    parser.add_option("-q", "--quiet", action="store_false", dest="verbose", default=True, help="don't print status messages to stdout")
 
-    parser.add_option("--optdebug",
-                      action="store_true", dest="optdebug", default=False,
-                      help="debug optparse module")
+    parser.add_option("--optdebug", action="store_true", dest="optdebug", default=False, help="debug optparse module")
 
-    parser.add_option("--debug",
-                      action="store_true", dest="debug", default=False,
-                      help="prints lots of useless messages")
+    parser.add_option("--debug", action="store_true", dest="debug", default=False, help="prints lots of useless messages")
 
-    parser.add_option("--path",
-                      dest="storepath", default=None,
-                      help="store XML results in PATH")
+    parser.add_option("--path", dest="storepath", default=None, help="store XML results in PATH")
 
-    parser.add_option("--topython",
-                      action="store_true", dest="topython", default=False,
-                      help="write python file from xml")
+    parser.add_option("--topython", action="store_true", dest="topython", default=False, help="write python file from xml")
 
-    parser.add_option("--exec-py",
-                      action="store_true", dest="exec_python", default=False,
-                      help="try to execute python file")
+    parser.add_option("--exec-py", action="store_true", dest="exec_python", default=False, help="try to execute python file")
 
-    parser.add_option("--toxml",
-                      action="store_true", dest="toxml", default=False,
-                      help="write xml file from qs")
+    parser.add_option("--toxml", action="store_true", dest="toxml", default=False, help="write xml file from qs")
 
-    parser.add_option("--full",
-                      action="store_true", dest="full", default=False,
-                      help="write xml file from qs")
+    parser.add_option("--full", action="store_true", dest="full", default=False, help="write xml file from qs")
 
-    parser.add_option("--cache",
-                      action="store_true", dest="cache", default=False,
-                      help="If dest file exists, don't regenerate it")
+    parser.add_option("--cache", action="store_true", dest="cache", default=False, help="If dest file exists, don't regenerate it")
 
     (options, args) = parser.parse_args(argv)
     return (options, args)
@@ -597,7 +580,7 @@ def main():
     execute(options, args)
 
 
-def pythonify(filelist, verbose=False, clean_no_python = True):
+def pythonify(filelist, verbose=False, clean_no_python=True):
     options, args = parseArgs([])
     options.full = True
     options.clean_no_python = clean_no_python
@@ -614,10 +597,10 @@ def execute(options, args):
     if options.optdebug:
         if options.verbose:
             print(options, args)
-    
+
     if not hasattr(options, "clean_no_python"):
         options.clean_no_python = True
-        
+
     if options.full:
         execpython = options.exec_python
         options.exec_python = False
@@ -647,8 +630,7 @@ def execute(options, args):
                 print("Pass 3 - Test PY file load . . .")
             options.topython = False
             try:
-                execute(
-                    options, [(arg + ".xml.py").replace(".qs.xml.py", ".qs.py") for arg in args])
+                execute(options, [(arg + ".xml.py").replace(".qs.xml.py", ".qs.py") for arg in args])
             except Exception:
                 print("Error al ejecutar Python:")
                 print(traceback.format_exc())
@@ -672,9 +654,14 @@ def execute(options, args):
     elif options.topython:
         from .pytnyzer import pythonize
         import io
+
         if options.cache:
-            args = [x for x in args if not os.path.exists((x + ".py").replace(".qs.xml.py", ".qs.py")) or
-                    os.path.getmtime(x) > os.path.getctime((x + ".py").replace(".qs.xml.py", ".qs.py"))]
+            args = [
+                x
+                for x in args
+                if not os.path.exists((x + ".py").replace(".qs.xml.py", ".qs.py"))
+                or os.path.getmtime(x) > os.path.getctime((x + ".py").replace(".qs.xml.py", ".qs.py"))
+            ]
 
         nfs = len(args)
         for nf, filename in enumerate(args):
@@ -688,8 +675,7 @@ def execute(options, args):
                 print("Fichero %r no encontrado" % filename)
                 continue
             if options.verbose:
-                sys.stdout.write(
-                    "Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname, 100.0 * (nf + 1.0) / nfs))
+                sys.stdout.write("Pythonizing File: %-35s . . . .        (%.1f%%)        \r" % (bname, 100.0 * (nf + 1.0) / nfs))
             if options.verbose and hasattr(sys.stdout, "flush"):
                 sys.stdout.flush()
             old_stderr = sys.stdout
@@ -703,19 +689,16 @@ def execute(options, args):
             sys.stdout = old_stderr
             text = stream.getvalue()
             if len(text) > 2:
-                print("%s: " % bname + ("\n%s: " %
-                                        bname).join(text.splitlines()))
+                print("%s: " % bname + ("\n%s: " % bname).join(text.splitlines()))
 
     else:
         if options.cache:
-            args = [x for x in args if not os.path.exists(x + ".xml") or
-                    os.path.getmtime(x) > os.path.getctime(x + ".xml")]
+            args = [x for x in args if not os.path.exists(x + ".xml") or os.path.getmtime(x) > os.path.getctime(x + ".xml")]
         nfs = len(args)
         for nf, filename in enumerate(args):
             bname = os.path.basename(filename)
             if options.verbose:
-                sys.stdout.write(
-                    "Parsing File: %-35s . . . .        (%.1f%%)    " % (bname, 100.0 * (nf + 1.0) / nfs))
+                sys.stdout.write("Parsing File: %-35s . . . .        (%.1f%%)    " % (bname, 100.0 * (nf + 1.0) / nfs))
             if options.verbose and hasattr(sys.stdout, "flush"):
                 sys.stdout.flush()
             try:
@@ -724,19 +707,16 @@ def execute(options, args):
                 if options.clean_no_python:
                     filecontent = flscriptparse.cleanNoPython(filecontent)
             except Exception as e:
-                print("Error: No se pudo abrir fichero %-35s          \n" %
-                      (repr(filename)), e)
+                print("Error: No se pudo abrir fichero %-35s          \n" % (repr(filename)), e)
                 continue
             prog = flscriptparse.parse(filecontent)
             if options.verbose:
                 sys.stdout.write("\r")
             if not prog:
-                print("Error: No se pudo abrir %-35s          \n" %
-                      (repr(filename)))
+                print("Error: No se pudo abrir %-35s          \n" % (repr(filename)))
                 continue
             if prog["error_count"] > 0:
-                print("Encontramos %d errores parseando: %-35s          \n" %
-                      (prog["error_count"], repr(filename)))
+                print("Encontramos %d errores parseando: %-35s          \n" % (prog["error_count"], repr(filename)))
                 continue
             if not options.toxml:
                 # Si no se quiere guardar resultado, no hace falta calcular mas
@@ -750,23 +730,20 @@ def execute(options, args):
                 print("\n".join(traceback.format_exc().splitlines()[-7:]))
 
             if not tree_data:
-                print("No se pudo parsear %-35s          \n" %
-                      (repr(filename)))
+                print("No se pudo parsear %-35s          \n" % (repr(filename)))
                 continue
             ast = post_parse(tree_data)
             if ast is None:
-                print("No se pudo analizar %-35s          \n" %
-                      (repr(filename)))
+                print("No se pudo analizar %-35s          \n" % (repr(filename)))
                 continue
             if options.storepath:
                 destname = os.path.join(options.storepath, bname + ".xml")
             else:
                 destname = filename + ".xml"
-            
-            xml_str = minidom.parseString(etree.ElementTree.tostring(ast)).toprettyxml(indent="   ")
+
+            xml_str = minidom.parseString(ElementTree.tostring(ast)).toprettyxml(indent="   ")
             with open(destname, "w", encoding="UTF-8") as f:
                 f.write(xml_str)
-            
 
 
 if __name__ == "__main__":

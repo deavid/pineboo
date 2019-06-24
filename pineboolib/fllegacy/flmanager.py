@@ -19,6 +19,7 @@ import pineboolib
 
 from xml import etree
 import logging
+
 # import os
 logger = logging.getLogger(__name__)
 
@@ -72,7 +73,7 @@ class FLManager(QtCore.QObject):
         if not self.db_.dbAux():
             return
 
-        #q = FLSqlQuery(None, self.db_.dbAux())
+        # q = FLSqlQuery(None, self.db_.dbAux())
         # q.setForwardOnly(True)
 
         self.createSystemTable("flsettings")
@@ -130,7 +131,7 @@ class FLManager(QtCore.QObject):
 
         del self
 
-    def metadata(self, n, quick=False):
+    def metadata(self, n, quick=True):
         """
         Para obtener definicion de una tabla de la base de datos, a partir de un fichero XML.
 
@@ -150,7 +151,7 @@ class FLManager(QtCore.QObject):
         @param quick Si TRUE no realiza chequeos, usar con cuidado
         @return Un objeto FLTableMetaData con los metadatos de la tabla solicitada
         """
-        
+
         util = FLUtil()
 
         if not n:
@@ -164,27 +165,21 @@ class FLManager(QtCore.QObject):
             acl = False
             key = n.strip()
             stream = None
-            isSysTable = (n[0:3] == "sys" or self.isSystemTable(n))
-            
+            isSysTable = n[0:3] == "sys" or self.isSystemTable(n)
+
             if n in self.metadataCachedFails:
                 return None
-            
+
             elif isSysTable:
                 if key in self.cacheMetaDataSys_.keys():
                     ret = self.cacheMetaDataSys_[key]
             else:
                 if key in self.cacheMetaData_.keys():
                     ret = self.cacheMetaData_[key]
-            
-            
-            
-            
-            
-            
+
             if not ret:
                 stream = self.db_.managerModules().contentCached("%s.mtd" % n)
-                
-                
+
                 if not stream:
                     if n.find("alteredtable") == -1:
                         logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
@@ -192,7 +187,7 @@ class FLManager(QtCore.QObject):
                     return None
 
                 doc = QDomDocument(n)
-                
+
                 if not util.domDocumentSetContent(doc, stream):
                     logger.warning("FLManager : " + util.tr("Error al cargar los metadatos para la tabla %s" % n))
                     self.metadataCachedFails.append(n)
@@ -203,41 +198,37 @@ class FLManager(QtCore.QObject):
                 if ret is None:
                     return None
 
-
                 if not ret.isQuery() and not self.existsTable(n):
-                    self.createTable(ret)                
+                    self.createTable(ret)
 
                 acl = pineboolib.project.acl()
 
-            # if ret.fieldsNamesUnlock():
-            #    ret = FLTableMetaData(ret)
+                # if ret.fieldsNamesUnlock():
+                #    ret = FLTableMetaData(ret)
 
                 if acl:
                     acl.process(ret)
-                
-                if quick: #Si al cachear es quick , no temina de cachear y devuelve ret.Esto obliga a cachear correctamente cuando quick sea False
-                    return ret
-                
+
                 if not isSysTable:
                     self.cacheMetaData_[key] = ret
                 else:
                     self.cacheMetaDataSys_[key] = ret
-            
 
-                if not isSysTable and not ret.isQuery() and self.db_.mismatchedTable(n, ret) and self.existsTable(n):
+                if not quick and not isSysTable and not ret.isQuery() and self.db_.mismatchedTable(n, ret) and self.existsTable(n):
                     msg = util.translate(
                         "application",
                         "La estructura de los metadatos de la tabla '%1' y su estructura interna en la base de datos no coinciden.\n"
-                        "Regenerando la base de datos.").replace("%1", n)
+                        "Regenerando la base de datos.",
+                    ).replace("%1", n)
                     logger.warning(msg)
-                    
+
                     must_alter = self.db_.mismatchedTable(n, ret)
                     if must_alter:
                         if not self.alterTable(stream, stream, None, True):
                             logger.warning("La regeneración de la tabla %s ha fallado", n)
-                        
+
                 # throwMsgWarning(self.db_, msg)
-                
+
             return ret
 
         else:
@@ -275,30 +266,30 @@ class FLManager(QtCore.QObject):
                         continue
 
                     elif e.tagName() == "visible":
-                        v = (e.text() == "true")
+                        v = e.text() == "true"
                         no = no.nextSibling()
                         continue
 
                     elif e.tagName() == "editable":
-                        ed = (e.text() == "true")
+                        ed = e.text() == "true"
                         no = no.nextSibling()
                         continue
 
                     elif e.tagName() == "concurWarn":
-                        cw = (e.text() == "true")
+                        cw = e.text() == "true"
                         no = no.nextSibling()
                         continue
 
                     elif e.tagName() == "detectLocks":
-                        dl = (e.text() == "true")
+                        dl = e.text() == "true"
                         no = no.nextSibling()
                         continue
 
                     elif e.tagName() == "FTSFunction":
-                        ftsfun = (e.text() == "true")
+                        ftsfun = e.text() == "true"
                         no = no.nextSibling()
                         continue
-                
+
                 no = no.nextSibling()
             tmd = FLTableMetaData(name, a, q)
             cK = None
@@ -345,7 +336,7 @@ class FLManager(QtCore.QObject):
 
                 elif tmd.field(it) is None:
                     continue
-                
+
                 if tmd.field(aWith) is not None:
                     tmd.field(it).setAssociatedField(tmd.field(aWith), aBy)
                 aWith = None
@@ -360,13 +351,13 @@ class FLManager(QtCore.QObject):
                     field = None
                     fields = tmd.fieldsNames()
                     # .split(",")
-                    fieldsEmpty = (not fields)
+                    fieldsEmpty = not fields
 
                     for it in fL:
                         pos = it.find(".")
                         if pos > -1:
                             table = it[:pos]
-                            field = it[pos + 1:]
+                            field = it[pos + 1 :]
                         else:
                             field = it
 
@@ -438,22 +429,22 @@ class FLManager(QtCore.QObject):
         #    ns_clean=True,
         #    encoding="UTF-8",
         #    remove_blank_text=True,
-        #)
+        # )
 
         q = FLSqlQuery(parent, self.db_.connectionName())
 
         root_ = etree.ElementTree.fromstring(qry_)
         q.setSelect(root_.find("select").text.replace(" ", "").replace("\n", "").replace("\t", "").replace("\r", ""))
-        q.setFrom(root_.find("from").text.strip(' \t\n\r'))
+        q.setFrom(root_.find("from").text.strip(" \t\n\r"))
 
         for where in root_.iter("where"):
-            q.setWhere(where.text.strip(' \t\n\r'))
+            q.setWhere(where.text.strip(" \t\n\r"))
 
-        q.setTablesList(root_.find("tables").text.strip(' \t\n\r'))
+        q.setTablesList(root_.find("tables").text.strip(" \t\n\r"))
 
         orderBy_ = None
         try:
-            orderBy_ = root_.find("order").text.strip(' \t\n\r')
+            orderBy_ = root_.find("order").text.strip(" \t\n\r")
             q.setOrderBy(orderBy_)
         except Exception:
             pass
@@ -466,9 +457,9 @@ class FLManager(QtCore.QObject):
         i = 0
         while i < len(groupXml_):
             gr = groupXml_[i]
-            if float(gr.find("level").text.strip(' \t\n\r')) == i:
+            if float(gr.find("level").text.strip(" \t\n\r")) == i:
                 # print("LEVEL %s -> %s" % (i,gr.xpath("field/text()")[0].strip(' \t\n\r')))
-                q.addGroup(FLGroupByQuery(i, gr.find("field").text.strip(' \t\n\r')))
+                q.addGroup(FLGroupByQuery(i, gr.find("field").text.strip(" \t\n\r")))
                 i = i + 1
 
         return q
@@ -505,7 +496,7 @@ class FLManager(QtCore.QObject):
             if content_actions.find("<name>%s</name>" % n) > -1:
                 break
 
-        if not n in list_modules:
+        if n not in list_modules:
             if not util.domDocumentSetContent(doc, content_actions) and n.find("alteredtable") == -1:
                 logger.warning("FLManager : " + FLUtil().translate("application", "Error al cargar la accion ") + n)
 
@@ -539,7 +530,7 @@ class FLManager(QtCore.QObject):
                         e2 = no2.toElement()
                         if not e2.isNull():
                             if e2.tagName() == "name":
-                                is_valid_name = (e2.text() == n)
+                                is_valid_name = e2.text() == n
                                 break
                         no2 = no2.nextSibling()
 
@@ -548,8 +539,7 @@ class FLManager(QtCore.QObject):
                     if is_valid_name:
                         if not e2.isNull():
                             if e2.tagName() != "name":
-                                logger.debug(
-                                    "WARN: El primer tag de la acción '%s' no es name, se encontró '%s'." % (n, e2.tagName()))
+                                logger.debug("WARN: El primer tag de la acción '%s' no es name, se encontró '%s'." % (n, e2.tagName()))
                         else:
                             self.logger.debug("WARN: Se encontró una acción vacia para '%s'." % n)
 
@@ -624,7 +614,7 @@ class FLManager(QtCore.QObject):
         """
         if not self.db_ or not self.db_.dbAux() or n is None:
             return False
-        
+
         if cache and n in self.listTables_:
             return True
         else:
@@ -646,56 +636,53 @@ class FLManager(QtCore.QObject):
         else:
             if not mtd1 or not mtd2:
                 return mtd1 == mtd2
-            
+
             field_list = mtd1.fieldList()
-            
+
             for field1 in field_list:
                 if field1.isCheck():
                     continue
-                
+
                 field2 = mtd2.field(field1.name())
                 if field2 is None:
                     return False
-                
+
                 if field2.isCheck():
                     continue
-                
+
                 if field1.type() != field2.type() or field1.allowNull() != field2.allowNull():
                     return False
-                
+
                 if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
                     return False
-                
+
                 if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
                     return False
-                
-                
-            
+
             field_list = mtd2.fieldList()
             for field1 in field_list:
                 if field1.isCheck():
                     continue
-                
+
                 field2 = mtd1.field(field1.name())
                 if field2 is None:
                     return False
-                
+
                 if field2.isCheck():
                     continue
-                
+
                 if field1.type() != field2.type() or field1.allowNull() != field2.allowNull():
                     return False
-                
+
                 if field1.isUnique() != field2.isUnique() or field1.isIndex() != field2.isIndex():
                     return False
-                
+
                 if field1.length() != field2.length() or field1.partDecimal() != field2.partDecimal() or field1.partInteger() != field2.partInteger():
                     return False
-            
-            return True
-                
 
-    def alterTable(self, mtd1=None, mtd2=None, key=None, force= False):
+            return True
+
+    def alterTable(self, mtd1=None, mtd2=None, key=None, force=False):
         """
         Modifica la estructura o metadatos de una tabla, preservando los posibles datos
         que pueda contener.
@@ -806,7 +793,7 @@ class FLManager(QtCore.QObject):
 
                 for it in fL:
                     if it.find(".") > -1:
-                        itFieldName = it[it.find(".") + 1:]
+                        itFieldName = it[it.find(".") + 1 :]
                     else:
                         itFieldName = it
 
@@ -814,7 +801,7 @@ class FLManager(QtCore.QObject):
                         break
 
                 qry.deleteLater()
-            
+
             return self.formatAssignValueLike("%s.%s" % (prefixTable, fieldName), args[0].type(), args[1], args[2])
 
         elif isinstance(args[1], FLFieldMetaData):
@@ -826,10 +813,10 @@ class FLManager(QtCore.QObject):
 
         else:
             # tipo 3
-            #args[0] = fieldName
-            #args[1] = type
-            #args[2] = valor
-            #args[3] = upper
+            # args[0] = fieldName
+            # args[1] = type
+            # args[2] = valor
+            # args[3] = upper
 
             if args[0] is None or not args[1]:
                 return "1 = 1"
@@ -839,13 +826,12 @@ class FLManager(QtCore.QObject):
 
             if not format_value:
                 return "1 = 1"
-            
-            
+
             field_name = args[0]
             if is_text:
                 if args[3]:
                     field_name = "upper(%s)" % args[0]
-            
+
             return "%s%s" % (field_name, format_value)
 
     def formatValue(self, fMD_or_type, v, upper=False):
@@ -891,7 +877,7 @@ class FLManager(QtCore.QObject):
                         pos = f.find(".")
                         if pos > -1:
                             prefixTable = f[:pos]
-                            fieldSection = f[pos + 1:]
+                            fieldSection = f[pos + 1 :]
                         else:
                             fieldSection = f
 
@@ -1004,12 +990,12 @@ class FLManager(QtCore.QObject):
                     continue
 
                 elif e.tagName() == "null":
-                    aN = (e.text() == "true")
+                    aN = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "pk":
-                    iPK = (e.text() == "true")
+                    iPK = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
@@ -1061,42 +1047,42 @@ class FLManager(QtCore.QObject):
                     continue
 
                 elif e.tagName() == "outtransaction":
-                    oT = (e.text() == "true")
+                    oT = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "counter":
-                    coun = (e.text() == "true")
+                    coun = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "calculated":
-                    c = (e.text() == "true")
+                    c = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "fullycalculated":
-                    fullCalc = (e.text() == "true")
+                    fullCalc = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "trimmed":
-                    trimm = (e.text() == "true")
+                    trimm = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "visible":
-                    v = (e.text() == "true")
+                    v = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "visiblegrid":
-                    vG = (e.text() == "true")
+                    vG = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "editable":
-                    ed = (e.text() == "true")
+                    ed = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
@@ -1111,17 +1097,17 @@ class FLManager(QtCore.QObject):
                     continue
 
                 elif e.tagName() == "index":
-                    iNX = (e.text() == "true")
+                    iNX = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "unique":
-                    uNI = (e.text() == "true")
+                    uNI = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "ck":
-                    ck = (e.text() == "true")
+                    ck = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
@@ -1137,8 +1123,7 @@ class FLManager(QtCore.QObject):
 
             no = no.nextSibling()
 
-        f = FLFieldMetaData(n, util.translate("Metadata", a), aN, iPK, t,
-                            length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
+        f = FLFieldMetaData(n, util.translate("Metadata", a), aN, iPK, t, length, c, v, ed, pI, pD, iNX, uNI, coun, dV, oT, rX, vG, True, ck)
         f.setFullyCalculated(fullCalc)
         f.setTrimed(trimm)
 
@@ -1230,17 +1215,17 @@ class FLManager(QtCore.QObject):
                     continue
 
                 elif e.tagName() == "delC":
-                    dC = (e.text() == "true")
+                    dC = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "updC":
-                    uC = (e.text() == "true")
+                    uC = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
                 elif e.tagName() == "checkIn":
-                    cI = (e.text() == "true")
+                    cI = e.text() == "true"
                     no = no.nextSibling()
                     continue
 
@@ -1294,6 +1279,7 @@ class FLManager(QtCore.QObject):
             doc = QDomDocument()
             _path = filedir("..", "share", "pineboo", "tables")
             from pineboolib import qsa
+
             dir = qsa.Dir(_path)
             _tables = dir.entryList("%s.mtd" % n)
 
@@ -1304,8 +1290,7 @@ class FLManager(QtCore.QObject):
                 _in = QtCore.QTextStream(_file)
                 _data = _in.readAll()
                 if not util.domDocumentSetContent(doc, _data):
-                    logger.warning("FLManager::createSystemTable: %s", util.tr(
-                        "Error al cargar los metadatos para la tabla %1").arg(n))
+                    logger.warning("FLManager::createSystemTable: %s", util.tr("Error al cargar los metadatos para la tabla %1").arg(n))
                     return False
                 else:
                     docElem = doc.documentElement()
@@ -1372,7 +1357,9 @@ class FLManager(QtCore.QObject):
             if not self.existsTable(table):
                 self.createTable(table)
             if not tmd:
-                logger.warning("FLManager::cleanupMetaData %s", FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table)
+                logger.warning(
+                    "FLManager::cleanupMetaData %s", FLUtil().translate("application", "No se ha podido crear los metadatatos para la tabla %s") % table
+                )
 
             c.select("tabla='%s'" % table)
             if c.next():
@@ -1388,7 +1375,7 @@ class FLManager(QtCore.QObject):
         @param n Nombre de la tabla.
         @return TRUE si es una tabla de sistema
         """
-        
+
         if n in pineboolib.project._DGI.sys_mtds():
             return True
 
@@ -1430,20 +1417,18 @@ class FLManager(QtCore.QObject):
 
         tableLarge = None
         from pineboolib.pncontrolsfactory import aqApp
+
         if aqApp.singleFLLarge():
             tableLarge = "fllarge"
         else:
             tableLarge = "fllarge_%s" % tableName
             if not self.existsTable(tableLarge):
                 mtdLarge = FLTableMetaData(tableLarge, tableLarge)
-                fieldLarge = FLFieldMetaData(
-                    "refkey", "refkey", False, True, "string", 100)
+                fieldLarge = FLFieldMetaData("refkey", "refkey", False, True, "string", 100)
                 mtdLarge.addFieldMD(fieldLarge)
-                fieldLarge2 = FLFieldMetaData(
-                    "sha", "sha", True, False, "string", 50)
+                fieldLarge2 = FLFieldMetaData("sha", "sha", True, False, "string", 50)
                 mtdLarge.addFieldMD(fieldLarge2)
-                fieldLarge3 = FLFieldMetaData(
-                    "contenido", "contenido", True, False, "stringlist")
+                fieldLarge3 = FLFieldMetaData("contenido", "contenido", True, False, "stringlist")
                 mtdLarge.addFieldMD(fieldLarge3)
                 mtdAux = self.createTable(mtdLarge)
                 mtd.insertChild(mtdLarge)
@@ -1452,7 +1437,7 @@ class FLManager(QtCore.QObject):
 
         util = FLUtil()
         sha = str(util.sha1(largeValue))
-        #print("-->", tableName, sha)
+        # print("-->", tableName, sha)
         refKey = "RK@%s@%s" % (tableName, sha)
         q = FLSqlQuery()
         q.setSelect("refkey")
@@ -1460,14 +1445,12 @@ class FLManager(QtCore.QObject):
         q.setWhere(" refkey = '%s'" % refKey)
         if q.exec_() and q.first():
             if not q.value(0) == sha:
-                sql = "UPDATE %s SET contenido = '%s' WHERE refkey ='%s'" % (
-                    tableLarge, largeValue, refKey)
+                sql = "UPDATE %s SET contenido = '%s' WHERE refkey ='%s'" % (tableLarge, largeValue, refKey)
                 if not util.execSql(sql, "Aux"):
                     logger.warning("FLManager::ERROR:StoreLargeValue.Update %s.%s", tableLarge, refKey)
                     return None
         else:
-            sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (
-                tableLarge, largeValue, refKey)
+            sql = "INSERT INTO %s (contenido,refkey) VALUES ('%s','%s')" % (tableLarge, largeValue, refKey)
             if not util.execSql(sql):
                 logger.warning("FLManager::ERROR:StoreLargeValue.Insert %s.%s", tableLarge, refKey)
                 return None
@@ -1485,7 +1468,7 @@ class FLManager(QtCore.QObject):
             return None
         if not refKey[0:3] == "RK@":
             return None
-        
+
         from pineboolib.pncontrolsfactory import aqApp
 
         tableName = "fllarge" if aqApp.singleFLLarge() else "fllarge_" + refKey.split("@")[1]

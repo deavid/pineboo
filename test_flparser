@@ -76,20 +76,6 @@ except ImportError:
     print()
     sys.exit(32)
 
-try:
-    from PyQt5 import sip
-    # switch on QVariant in Python3
-    sip.setapi('QVariant', 1)
-    sip.setapi('QString', 1)
-
-    from PyQt5 import QtGui, QtCore, uic  # noqa: F401
-except ImportError:
-    print(traceback.format_exc())
-    print()
-    print("HINT: Instale el paquete python3-pyqt4 e intente de nuevo")
-    print()
-    sys.exit(32)
-
 
 # import pineboolib.emptyscript
 import pineboolib.flparser.postparse
